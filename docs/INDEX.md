@@ -21,9 +21,9 @@
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟡 DRAFT | Sessione 2 | Specifiche dei singoli adapter (TEMPLATE + Spotify) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 4 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟡 DRAFT | Sessione 0 | Architettura tecnica generale |
-| 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🔴 TODO | — | Flussi UX e stati per schermata |
+| 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 5 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🔴 TODO | — | Tutte le stringhe UI con chiavi i18n |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 5 | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🔴 TODO | — | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟡 DRAFT | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟡 DRAFT | Sessione 3 | Backlog strutturato (epic → story → task) |
@@ -62,7 +62,7 @@
 | 2 | 🔌 Primo adapter (Spotify) | ✅ **COMPLETATA** |
 | 3 | 📋 Governo (backlog + testing + AGENTS finale) | ✅ **COMPLETATA** |
 | 4 | 🧠 Analisi algoritmica | ✅ **COMPLETATA** |
-| 5 | 🧭 UX completa + i18n | 🔴 |
+| 5 | 🧭 UX completa + i18n | ✅ **COMPLETATA** |
 | 6 | 🔐 Privacy & legale | 🔴 |
 | 7 | 🎨 UI eseguibile + tokens | 🔴 |
 | 8 | ⚙️ DevOps | 🔴 |

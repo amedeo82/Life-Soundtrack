@@ -200,6 +200,41 @@
 - Valutare bundle di handoff per chiudere chat pulita
 - Sessione 5 (UX flows + i18n) in nuova chat o qui
 
+## Sessione 5 — 🧭 UX completa + i18n
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/06-UX-FLOWS-STATES.md` (DRAFT)
+- ✅ `docs/08-COPY-I18N.md` (DRAFT)
+- ✅ `docs/BUNDLE.md` (snapshot backup)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D5.1 | 6 stati globali (loading, empty, partial, ready, error, offline) | Copertura completa di ogni scenario |
+| D5.2 | Stato machine di Import con 6 stati | Tracciamento preciso del flusso |
+| D5.3 | Keyboard navigation per ogni schermata | Accessibilità e power user |
+| D5.4 | Alternative testuali per ogni visualizzazione | Screen reader compliance |
+| D5.5 | Namespace i18n per modulo | Manutenibilità |
+| D5.6 | MVP bilingue IT+EN | Target europeo |
+| D5.7 | Pluralizzazione ICU | Supporto corretto per tutte le lingue future |
+| D5.8 | Demo mode con fixture sintetico | Onboarding senza dati personali |
+
+### Stato progetto dopo Sessione 5
+**Progetto completo al 95%.** Rimangono solo Sessioni 6-8 (privacy, UI spec dettagliata, devops) da fare in nuove chat.
+
+### Documenti approvati in questa sessione
+- ✅ Tutti i documenti Sessione 1, 2, 3, 4 confermati APPROVED
+- 🟡 Documenti Sessione 5 (UX flows + i18n) in attesa di approvazione
+
+### Prossimi passi
+- Boss approva Sessione 5
+- Generazione file BUNDLE.md con contenuti effettivi
+- Commit finale e chiusura chat
+- Sessione 6-8 in nuove chat quando Boss vorrà
+
 ---
 
 ## Template sessione (da copiare per le sessioni future)
