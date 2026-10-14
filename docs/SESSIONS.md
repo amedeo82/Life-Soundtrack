@@ -78,6 +78,36 @@
 
 ---
 
+## Sessione 1 — 🗄️ Fondamenta dati
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/02-DATA-SCHEMA.md` (DRAFT)
+- ✅ `docs/14-GLOSSARY.md` (DRAFT)
+- ✅ `docs/13-ADR/0001-pwa-first.md` (DRAFT)
+- ✅ `docs/13-ADR/0002-local-first.md` (DRAFT)
+- ✅ `docs/13-ADR/0003-adapter-pattern.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D1.1 | `timestamp` = fine ascolto, `startedAt` = inizio; tabella semantica per piattaforma | Coerenza temporale cross-platform |
+| D1.2 | Idempotenza import via `eventKey` unico | Re-import sicuri senza duplicati |
+| D1.3 | Dedup tracce: ISRC → MBID → fuzzy hash (DEDUP-1..3) | Bilancia precisione e copertura |
+| D1.4 | IP non persistito: solo `country` derivato | Privacy-by-design |
+| D1.5 | Derivati versionati (`derivedVersion`) e ricalcolabili | Coerenza analisi nel tempo |
+| D1.6 | Contatori denormalizzati ricalcolabili (`recount()`) | Performance senza perdere verità |
+
+### Aperti
+- Approvazione Boss su 00-VISION e ADR 0001-0003 (passaggio a 🟢 APPROVED)
+
+### Prossimi passi
+- Sessione 2: SPEC-TEMPLATE adapter + adapter Spotify + fixture sintetici
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
