@@ -25,20 +25,27 @@ $files = @(
     "fixtures/synthetic-history/spotify-sample.json"
 )
 
-$bundle = "# BUNDLE CONTENUTO`n`n"
-$bundle += "> Generato automaticamente da scripts/generate-bundle.ps1`n"
-$bundle += "> Data: $(Get-Date -Format 'yyyy-MM-dd HH:mm')`n`n"
+$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm'
+$fileCount = $files.Count
+
+$header = "# BUNDLE CONTENUTO`n`n"
+$header += "> Generato automaticamente da scripts/generate-bundle.ps1`n"
+$header += "> Data: $timestamp`n"
+$header += "> Totale file: $fileCount`n"
+
+$bundle = $header
 
 foreach ($file in $files) {
     if (Test-Path $file) {
-        $content = Get-Content $file -Raw
-        $bundle += "===== FILE: $file =====`n`n"
+        $content = Get-Content $file -Raw -Encoding UTF8
+        $bundle += "`n`n===== FILE: $file =====`n`n"
         $bundle += $content
-        $bundle += "`n`n"
+        $bundle += "`n"
+        Write-Host "[OK] $file" -ForegroundColor Green
     } else {
-        Write-Host "File mancante: $file" -ForegroundColor Yellow
+        Write-Host "[MISSING] $file" -ForegroundColor Yellow
     }
 }
 
 $bundle | Out-File -FilePath $outputFile -Encoding utf8
-Write-Host "Bundle generato in $outputFile" -ForegroundColor Green
+Write-Host "Bundle generato in $outputFile" -ForegroundColor Cyan

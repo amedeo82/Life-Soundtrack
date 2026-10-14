@@ -1,35 +1,37 @@
 ﻿# BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-14 14:55
+> Data: 2026-10-14 15:16
+> Totale file: 21
+
 
 ===== FILE: AGENTS.md =====
 
-# ðŸ¤– AGENTS.md â€” Protocollo per Agenti di Sviluppo
+# 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
-> **Questo Ã¨ il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.0 â€” Sessione 3 (stabile)
+> **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
+> Versione 1.0 — Sessione 3 (stabile)
 
 ---
 
-## ðŸ“š Ordine obbligatorio di lettura
+## 📚 Ordine obbligatorio di lettura
 
 Quando ricevi un task su questo repository, segui questo ordine:
 
-1. **Questo file** (`AGENTS.md`) â€” il protocollo
-2. **[`docs/INDEX.md`](docs/INDEX.md)** â€” stato del progetto
-3. **[`docs/00-VISION.md`](docs/00-VISION.md)** â€” il "perchÃ©"
-4. **[`docs/05-ARCHITECTURE.md`](docs/05-ARCHITECTURE.md)** â€” architettura
-5. **[`docs/14-GLOSSARY.md`](docs/14-GLOSSARY.md)** â€” linguaggio comune
-6. **[`docs/11-BACKLOG.md`](docs/11-BACKLOG.md)** â€” il lavoro da fare
-7. **[`docs/10-TESTING.md`](docs/10-TESTING.md)`** â€” come testare
+1. **Questo file** (`AGENTS.md`) — il protocollo
+2. **[`docs/INDEX.md`](docs/INDEX.md)** — stato del progetto
+3. **[`docs/00-VISION.md`](docs/00-VISION.md)** — il "perché"
+4. **[`docs/05-ARCHITECTURE.md`](docs/05-ARCHITECTURE.md)** — architettura
+5. **[`docs/14-GLOSSARY.md`](docs/14-GLOSSARY.md)** — linguaggio comune
+6. **[`docs/11-BACKLOG.md`](docs/11-BACKLOG.md)** — il lavoro da fare
+7. **[`docs/10-TESTING.md`](docs/10-TESTING.md)** — come testare
 8. **La specifica del task** (linkata nell'issue)
 
-**Non saltare questi passi.** Il contesto Ã¨ essenziale.
+**Non saltare questi passi.** Il contesto è essenziale.
 
-## ðŸ”„ Handoff tra conversazioni AI
+## 🔄 Handoff tra conversazioni AI
 
-Questo progetto Ã¨ progettato per funzionare attraverso conversazioni multiple con l'AI. Quando una conversazione diventa lunga o devi riprendere dopo un'interruzione:
+Questo progetto è progettato per funzionare attraverso conversazioni multiple con l'AI. Quando una conversazione diventa lunga o devi riprendere dopo un'interruzione:
 
 1. Verifica che tutto sia pushato su GitHub: `git status` deve essere pulito
 2. Apri una nuova conversazione con l'AI
@@ -45,61 +47,62 @@ Questo progetto Ã¨ progettato per funzionare attraverso conversazioni multiple
        Dimmi cosa serve fare nella prossima sessione e proponimi i documenti
        da scrivere, aspettando la mia approvazione prima di procedere.
 
-4. L'AI userÃ  i suoi tool web (se il repo Ã¨ pubblico) o i file incollati per continuare
+4. L'AI userà i suoi tool web per leggere il repo e continuerà esattamente da dove eri rimasto
 
-**Il PAT va dato agli agenti di sviluppo** (Claude Code, Cursor, Copilot) con scope `contents: read/write` sul repo solo. L'AI di review (come Claude in chat) non ha bisogno di PAT.
+**Il PAT va dato agli agenti di sviluppo** (Claude Code, Cursor, Copilot) con scope `contents: read/write` sul repo solo. L'AI di review non ha bisogno di PAT.
 
-## âœ… Cosa puoi fare autonomamente
+## ✅ Cosa puoi fare autonomamente
 
 - Scrivere codice in TypeScript/React secondo lo stack definito
 - Creare test unitari e di integrazione
 - Aprire PR con checklist di auto-revisione
-- Segnalare ambiguitÃ  nelle specifiche tramite issue con label `needs-spec`
+- Segnalare ambiguità nelle specifiche tramite issue con label `needs-spec`
 - Usare i fixture in `fixtures/` per i test
 
-## ðŸš« Cosa NON puoi decidere autonomamente
+## 🚫 Cosa NON puoi decidere autonomamente
 
-Queste decisioni sono giÃ  prese e **vincolanti** (status ðŸŸ¢ APPROVED):
+Queste decisioni sono già prese e **vincolanti** (status 🟢 APPROVED):
 
 - Architettura: PWA-first, local-first, adapter pattern (ADR 0001, 0002, 0003)
-- Schema dati: `02-DATA-SCHEMA.md` (quando approvato)
-- Formato adapter: `03-ADAPTERS/SPEC-TEMPLATE.md`
-- Algoritmi: `04-ANALYSIS-ALGORITHMS.md` (quando scritto)
-- Design system: `15-DESIGN-SYSTEM.md`
-- Copy e i18n: `08-COPY-I18N.md` (quando scritto)
-- Privacy: `09-PRIVACY-SECURITY.md` (quando scritto)
-- Test strategy: `10-TESTING.md`
+- Schema dati: `docs/02-DATA-SCHEMA.md`
+- Formato adapter: `docs/03-ADAPTERS/SPEC-TEMPLATE.md`
+- Algoritmi: `docs/04-ANALYSIS-ALGORITHMS.md` (quando approvato)
+- Design system: `docs/15-DESIGN-SYSTEM.md`
+- Copy e i18n: `docs/08-COPY-I18N.md`
+- Privacy: `docs/09-PRIVACY-SECURITY.md` (quando scritto)
+- Test strategy: `docs/10-TESTING.md`
+- Backlog: `docs/11-BACKLOG.md`
 
-**Regola d'oro**: se una decisione Ã¨ documentata e ðŸŸ¢ APPROVED, Ã¨ vincolante. Se Ã¨ ðŸŸ¡ DRAFT, puoi proporre modifiche aprendo una issue. Se non esiste, **apri una issue `needs-spec` invece di inventare**.
+**Regola d'oro**: se una decisione è documentata e 🟢 APPROVED, è vincolante. Se è 🟡 DRAFT, puoi proporre modifiche aprendo una issue. Se non esiste, **apri una issue `needs-spec` invece di inventare**.
 
-## ðŸ”– Sistema di issue e label
+## 🔖 Sistema di issue e label
 
 ### Label obbligatorie per agent-ready
 
-Una issue puÃ² essere lavorata da un agente **solo se**:
+Una issue può essere lavorata da un agente **solo se**:
 
 - [ ] Ha label `agent-ready`
-- [ ] Contiene link a una specifica ðŸŸ¢ APPROVED nel repo
+- [ ] Contiene link a una specifica 🟢 APPROVED nel repo
 - [ ] Ha acceptance criteria verificabili
 
 ### Label disponibili
 
 | Categoria | Label | Significato |
 |-----------|-------|-------------|
-| Fase | `phase-0` â€¦ `phase-6` | Fase della roadmap |
+| Fase | `phase-0` … `phase-6` | Fase della roadmap |
 | Area | `area:adapter`, `area:analysis`, `area:ui`, `area:ux`, `area:db`, `area:enrichment`, `area:privacy`, `area:devops` | Modulo coinvolto |
-| PrioritÃ  | `priority:blocker`, `priority:important`, `priority:later` | Ordine di lavoro |
+| Priorità | `priority:blocker`, `priority:important`, `priority:later` | Ordine di lavoro |
 | Size | `size:S`, `size:M`, `size:L`, `size:XL` | Stima relativa |
-| Gate | `agent-ready`, `needs-spec`, `blocked` | Stato lavorabilitÃ  |
+| Gate | `agent-ready`, `needs-spec`, `blocked` | Stato lavorabilità |
 | Tipo | `bug`, `enhancement`, `refactor`, `docs` | Classificazione |
 
 ### Template issue
 
     ## Descrizione
-    Cosa deve essere fatto e perchÃ©.
+    Cosa deve essere fatto e perché.
 
     ## Specifica di riferimento
-    - [ ] `docs/XX-NOME.md` (status: ðŸŸ¢ APPROVED)
+    - [ ] `docs/XX-NOME.md` (status: 🟢 APPROVED)
 
     ## Acceptance criteria
     - [ ] criterio 1 verificabile
@@ -111,7 +114,7 @@ Una issue puÃ² essere lavorata da un agente **solo se**:
     ## Note
     Eventuali edge case o vincoli.
 
-## ðŸŒ³ Git workflow
+## 🌳 Git workflow
 
 - Branch: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
 - Commit: **Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
@@ -127,7 +130,7 @@ Una issue puÃ² essere lavorata da un agente **solo se**:
 
     Ref: #<issue-number>
 
-## ðŸ“ Checklist di auto-revisione PR
+## 📝 Checklist di auto-revisione PR
 
 Prima di aprire una PR, verifica:
 
@@ -139,10 +142,10 @@ Prima di aprire una PR, verifica:
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
-- [ ] Coverage del modulo â‰¥ target in `10-TESTING.md` Â§2
-- [ ] Ho aggiornato `docs/11-BACKLOG.md` se la story Ã¨ completata
+- [ ] Coverage del modulo ≥ target in `10-TESTING.md` §2
+- [ ] Ho aggiornato `docs/11-BACKLOG.md` se la story è completata
 
-## ðŸ’¬ Come segnalare problemi
+## 💬 Come segnalare problemi
 
 ### Discrepanza tra specifiche
 
@@ -161,76 +164,78 @@ Prima di aprire una PR, verifica:
 - Comportamento atteso vs osservato
 - Eventuale test di regressione da aggiungere
 
-## ðŸ“œ Registro delle decisioni
+## 📜 Registro delle decisioni
 
-Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di proporre modifiche architetturali, verifica che non ci sia giÃ  un ADR. Se vuoi proporre un nuovo ADR, apri issue con label `area:devops` e proponi il testo.
+Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di proporre modifiche architetturali, verifica che non ci sia già un ADR. Se vuoi proporre un nuovo ADR, apri issue con label `area:devops` e proponi il testo.
 
-## ðŸ—ºï¸ Struttura del repository
+## 🗺️ Struttura del repository
 
     Life-Soundtrack/
-    â”œâ”€â”€ AGENTS.md                â† questo file
-    â”œâ”€â”€ README.md
-    â”œâ”€â”€ docs/                    â† specifica completa
-    â”‚   â”œâ”€â”€ INDEX.md             â† stato master
-    â”‚   â”œâ”€â”€ SESSIONS.md          â† log sessioni
-    â”‚   â”œâ”€â”€ 00-VISION.md
-    â”‚   â”œâ”€â”€ 01-PLATFORMS.md
-    â”‚   â”œâ”€â”€ 02-DATA-SCHEMA.md
-    â”‚   â”œâ”€â”€ 03-ADAPTERS/         â† spec di ogni adapter
-    â”‚   â”œâ”€â”€ 04-ANALYSIS-ALGORITHMS.md
-    â”‚   â”œâ”€â”€ 05-ARCHITECTURE.md
-    â”‚   â”œâ”€â”€ 10-TESTING.md
-    â”‚   â”œâ”€â”€ 11-BACKLOG.md
-    â”‚   â”œâ”€â”€ 13-ADR/              â† decisioni architetturali
-    â”‚   â”œâ”€â”€ 14-GLOSSARY.md
-    â”‚   â””â”€â”€ 15-DESIGN-SYSTEM.md
-    â”œâ”€â”€ design/                  â† mockup, token, asset
-    â”œâ”€â”€ fixtures/                â† dataset di test
-    â”‚   â”œâ”€â”€ synthetic-history/   â† fixture per adapter
-    â”‚   â”œâ”€â”€ db-seed/             â† seed per DB
-    â”‚   â”œâ”€â”€ scenarios/           â† scenari di vita
-    â”‚   â””â”€â”€ api-mocks/           â† mock API esterne
-    â”œâ”€â”€ apps/
-    â”‚   â”œâ”€â”€ web/                 â† PWA principale
-    â”‚   â””â”€â”€ desktop/             â† Tauri (Fase 2)
-    â”œâ”€â”€ packages/
-    â”‚   â”œâ”€â”€ core/                â† logica condivisa
-    â”‚   â””â”€â”€ ui/                  â† design system
-    â””â”€â”€ scripts/                 â† utility
+    ├── AGENTS.md                ← questo file
+    ├── README.md
+    ├── docs/                    ← specifica completa
+    │   ├── INDEX.md             ← stato master
+    │   ├── SESSIONS.md          ← log sessioni
+    │   ├── BUNDLE.md            ← snapshot completo
+    │   ├── 00-VISION.md
+    │   ├── 01-PLATFORMS.md
+    │   ├── 02-DATA-SCHEMA.md
+    │   ├── 03-ADAPTERS/         ← spec di ogni adapter
+    │   ├── 04-ANALYSIS-ALGORITHMS.md
+    │   ├── 05-ARCHITECTURE.md
+    │   ├── 10-TESTING.md
+    │   ├── 11-BACKLOG.md
+    │   ├── 13-ADR/              ← decisioni architetturali
+    │   ├── 14-GLOSSARY.md
+    │   └── 15-DESIGN-SYSTEM.md
+    ├── design/                  ← mockup, token, asset
+    ├── fixtures/                ← dataset di test
+    │   ├── synthetic-history/   ← fixture per adapter
+    │   ├── db-seed/             ← seed per DB
+    │   ├── scenarios/           ← scenari di vita
+    │   └── api-mocks/           ← mock API esterne
+    ├── apps/
+    │   ├── web/                 ← PWA principale
+    │   └── desktop/             ← Tauri (Fase 2)
+    ├── packages/
+    │   ├── core/                ← logica condivisa
+    │   └── ui/                  ← design system
+    └── scripts/                 ← utility
 
-## ðŸš€ Primo task di un agente
+## 🚀 Primo task di un agente
 
 Se sei un agente e ti hanno chiesto di iniziare a lavorare senza un task specifico:
 
 1. Leggi questo file
 2. Leggi `docs/INDEX.md` e `docs/11-BACKLOG.md`
-3. Cerca la prima story â¬š TODO con label `agent-ready` nella fase piÃ¹ bassa disponibile
+3. Cerca la prima story ⬚ TODO con label `agent-ready` nella fase più bassa disponibile
 4. Clona il repo, crea branch `feat/<issue>-<descrizione>`
 5. Implementa con test
 6. Apri PR
 
 Se non ci sono issue `agent-ready`, segnalalo al project owner aprendo una issue con label `needs-spec`.
 
-## ðŸ“ž Contatti
+## 📞 Contatti
 
 - Project owner: `@amedeo82`
 - Per decisioni strategiche: aspetta review sulla PR
 - Per questioni tecniche: usa le issue
-- Per ambiguitÃ  di specifica: issue `needs-spec`
+- Per ambiguità di specifica: issue `needs-spec`
 
 ---
 
-*Ultimo aggiornamento: Sessione 3 â€” Versione stabile 1.0*
+*Ultimo aggiornamento: Sessione 5 (Parte 2) — Review repo + fix*
+
 
 ===== FILE: README.md =====
 
-# ðŸŽµ Life Soundtrack
+# 🎵 Life Soundtrack
 
 > *La colonna sonora della tua vita, finalmente leggibile.*
 
-Life Soundtrack Ã¨ un'applicazione web (PWA) che trasforma i metadati grezzi delle piattaforme di streaming musicale in un **diario di vita personale**: una timeline emotiva, contestuale e narrativa che racconta la storia dell'utente attraverso la musica che ha ascoltato.
+Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi delle piattaforme di streaming musicale in un **diario di vita personale**: una timeline emotiva, contestuale e narrativa che racconta la storia dell'utente attraverso la musica che ha ascoltato.
 
-## âœ¨ Cosa fa
+## ✨ Cosa fa
 
 - Importa la cronologia di ascolto da Spotify, YouTube Music, Apple Music, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz
 - Arricchisce i dati con audio features (valence, energy, danceability, BPM)
@@ -238,7 +243,7 @@ Life Soundtrack Ã¨ un'applicazione web (PWA) che trasforma i metadati grezzi d
 - Ti permette di rivivere i periodi della tua vita attraverso la loro colonna sonora
 - **Tutto resta sul tuo dispositivo**: elaborazione locale, privacy-first, GDPR-compliant
 
-## ðŸ—ï¸ Stato del progetto
+## 🏗️ Stato del progetto
 
 Attualmente in **fase di progettazione** (docs/). Nessuna riga di codice ancora scritta.
 
@@ -246,22 +251,23 @@ Attualmente in **fase di progettazione** (docs/). Nessuna riga di codice ancora 
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)
 - Visione: [`docs/00-VISION.md`](docs/00-VISION.md)
 
-## ðŸ¤ Come contribuire
+## 🤝 Come contribuire
 
-Questo progetto Ã¨ attualmente gestito da un team umano + AI. Per iniziare a lavorare sul codice, leggi **`AGENTS.md`** come primo file.
+Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lavorare sul codice, leggi **`AGENTS.md`** come primo file.
 
-## ðŸ“œ Licenza
+## 📜 Licenza
 
 Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti riservati.
 
 ---
 
-*Questo README Ã¨ mantenuto aggiornato dal log delle sessioni in [`docs/SESSIONS.md`](docs/SESSIONS.md).*
+*Questo README è mantenuto aggiornato dal log delle sessioni in [`docs/SESSIONS.md`](docs/SESSIONS.md).*
+
 
 
 ===== FILE: docs/INDEX.md =====
 
-# ðŸ“š Indice della Documentazione
+# 📚 Indice della Documentazione
 
 > Stato master del progetto. Aggiornato ad ogni sessione di progettazione.
 > **Leggi questo file prima di qualsiasi altro per avere una panoramica.**
@@ -270,37 +276,38 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 
 | Status | Significato |
 |--------|-------------|
-| ðŸŸ¢ APPROVED | Documento approvato da Boss, vincolante per gli agenti |
-| ðŸŸ¡ DRAFT | Bozza in discussione, non ancora approvata |
-| ðŸ”´ TODO | Documento da scrivere |
+| 🟢 APPROVED | Documento approvato da Boss, vincolante per gli agenti |
+| 🟡 DRAFT | Bozza in discussione, non ancora approvata |
+| 🔴 TODO | Documento da scrivere |
 
 ## Documenti fondamentali
 
 | # | File | Stato | Ultima modifica | Descrizione |
 |---|------|-------|-----------------|-------------|
-| 00 | [`00-VISION.md`](00-VISION.md) | ðŸŸ¡ DRAFT | Sessione 0 | Visione, missione, target, principi |
-| 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | ðŸŸ¡ DRAFT | Sessione 0 | Matrice piattaforme europee + campi dati |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | ðŸŸ¡ DRAFT | Sessione 1 | Schema dati unificato (TypeScript + Dexie) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | ðŸŸ¡ DRAFT | Sessione 2 | Specifiche dei singoli adapter (TEMPLATE + Spotify) |
-| 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | ðŸŸ¡ DRAFT | Sessione 4 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
-| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | ðŸŸ¡ DRAFT | Sessione 0 | Architettura tecnica generale |
-| 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | ðŸŸ¡ DRAFT | Sessione 5 | Flussi UX e stati per schermata |
-| 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | ðŸ”´ TODO | â€” | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | ðŸŸ¡ DRAFT | Sessione 5 | Tutte le stringhe UI con chiavi i18n |
-| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | ðŸ”´ TODO | â€” | Privacy spec, data flow, security |
-| 10 | [`10-TESTING.md`](10-TESTING.md) | ðŸŸ¡ DRAFT | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | ðŸŸ¡ DRAFT | Sessione 3 | Backlog strutturato (epic â†’ story â†’ task) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | ðŸ”´ TODO | â€” | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | ðŸŸ¡ DRAFT | Sessione 1 | Architecture Decision Records (0001-0003) |
-| 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | ðŸŸ¡ DRAFT | Sessione 1 | Glossario di dominio |
-| 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | ðŸŸ¡ DRAFT | Sessione 0 | Design system completo |
+| 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 0 | Visione, missione, target, principi |
+| 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 0 | Matrice piattaforme europee + campi dati |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 1 | Schema dati unificato (TypeScript + Dexie) |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 2 | SPEC-TEMPLATE + Spotify (altri TBD) |
+| 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 4 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
+| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟡 DRAFT | Sessione 0 | Architettura tecnica generale |
+| 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 5 | Flussi UX e stati per schermata |
+| 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 5 | Tutte le stringhe UI con chiavi i18n |
+| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🔴 TODO | — | Privacy spec, data flow, security |
+| 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 3 | Backlog strutturato (epic → story → task) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 1 | Architecture Decision Records (0001-0003) |
+| 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
+| 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 0 | Design system completo |
 
 ## Documenti di supporto
 
 | File | Stato | Descrizione |
 |------|-------|-------------|
-| [`SESSIONS.md`](SESSIONS.md) | ðŸŸ¡ LIVE | Log di tutte le sessioni di progettazione |
-| [`../AGENTS.md`](../AGENTS.md) | ðŸŸ¡ DRAFT | Protocollo per agenti |
+| [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni di progettazione |
+| [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Backup completo del progetto |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.0 | Protocollo per agenti |
 
 ## Design & mockup
 
@@ -315,38 +322,48 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | Cartella | Contenuto |
 |----------|-----------|
 | [`../fixtures/synthetic-history/`](../fixtures/synthetic-history/) | Dataset di test sintetici per ogni adapter |
+| [`../fixtures/db-seed/`](../fixtures/db-seed/) | (futuro) Seed per test DB |
+| [`../fixtures/scenarios/`](../fixtures/scenarios/) | (futuro) Scenari di vita pre-costruiti |
 
 ## Roadmap Sessioni di Progettazione
 
 | Sessione | Nome | Stato |
 |----------|------|-------|
-| 0 | ðŸ”’ Consolidamento + Bootstrap | âœ… **COMPLETATA** |
-| 1 | ðŸ—„ï¸ Fondamenta dati | âœ… **COMPLETATA** |
-| 2 | ðŸ”Œ Primo adapter (Spotify) | âœ… **COMPLETATA** |
-| 3 | ðŸ“‹ Governo (backlog + testing + AGENTS finale) | âœ… **COMPLETATA** |
-| 4 | ðŸ§  Analisi algoritmica | âœ… **COMPLETATA** |
-| 5 | ðŸ§­ UX completa + i18n | âœ… **COMPLETATA** |
-| 6 | ðŸ” Privacy & legale | ðŸ”´ |
-| 7 | ðŸŽ¨ UI eseguibile + tokens | ðŸ”´ |
-| 8 | âš™ï¸ DevOps | ðŸ”´ |
+| 0 | 🔒 Consolidamento + Bootstrap | ✅ COMPLETATA |
+| 1 | 🗄️ Fondamenta dati | ✅ COMPLETATA (APPROVED) |
+| 2 | 🔌 Primo adapter (Spotify) | ✅ COMPLETATA (APPROVED) |
+| 3 | 📋 Governo (backlog + testing + AGENTS) | ✅ COMPLETATA (APPROVED) |
+| 4 | 🧠 Analisi algoritmica | ✅ COMPLETATA |
+| 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
+| 6 | 🔐 Privacy & legale | 🔴 PROSSIMA |
+| 7 | 🎨 UI eseguibile + tokens | 🔴 |
+| 8 | ⚙️ DevOps | 🔴 |
+
+## Stato del progetto
+
+- **Documenti APPROVED**: 9 (02, 03, 10, 11, 13-ADR×3, 14, AGENTS)
+- **Documenti DRAFT**: 7 (00, 01, 04, 05, 06, 08, 15)
+- **Documenti TODO**: 3 (07, 09, 12)
+- **Completamento progettazione**: ~95%
 
 ---
 
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
 
+
 ===== FILE: docs/SESSIONS.md =====
 
-# ðŸ“ Log delle Sessioni di Progettazione
+# 📝 Log delle Sessioni di Progettazione
 
 > Memoria cronologica di tutte le sessioni di lavoro sul progetto.
-> **Questo file Ã¨ la nostra memoria condivisa** tra Boss, AI progettista e futuri agenti.
+> **Questo file è la nostra memoria condivisa** tra Boss, AI progettista e futuri agenti.
 
 ---
 
-## Sessione 0 â€” ðŸ”’ Consolidamento + Bootstrap
+## Sessione 0 — 🔒 Consolidamento + Bootstrap
 
 **Data**: ottobre 2026
-**Stato**: ðŸŸ¡ In corso
+**Stato**: 🟡 In corso
 
 ### Obiettivi
 
@@ -357,11 +374,11 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 
 ### Documenti prodotti
 
-- âœ… `README.md`
-- âœ… `AGENTS.md` (scheletro â€” da raffinare in Sessione 3)
-- âœ… `docs/INDEX.md`
-- âœ… `docs/SESSIONS.md` (questo file)
-- âœ… `docs/00-VISION.md` (DRAFT)
+- ✅ `README.md`
+- ✅ `AGENTS.md` (scheletro — da raffinare in Sessione 3)
+- ✅ `docs/INDEX.md`
+- ✅ `docs/SESSIONS.md` (questo file)
+- ✅ `docs/00-VISION.md` (DRAFT)
 
 ### Decisioni prese
 
@@ -370,16 +387,16 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | D0.1 | Repo privato su account `amedeo82`, nome `Life-Soundtrack` | Scelta del project owner |
 | D0.2 | Struttura cartelle: `docs/`, `design/`, `fixtures/`, `scripts/` | Separazione chiara tra specifica, asset, test e tooling |
 | D0.3 | Branch model: `main` protetto + branch temporanei feat/fix | Semplice e sicuro |
-| D0.4 | Commit convention: Conventional Commits | LeggibilitÃ  della storia |
+| D0.4 | Commit convention: Conventional Commits | Leggibilità della storia |
 | D0.5 | Label GitHub con `agent-ready` come gate per gli agenti | Gli agenti lavorano solo su specifiche approvate |
 | D0.6 | 8 sessioni di progettazione pianificate (vedi INDEX.md) | Copertura completa prima dell'handoff agli agenti |
 | D0.7 | Pilastri non negoziabili: local-first e privacy-first | Differenziazione e compliance GDPR |
 
-### Materiale pregresso da consolidare (Sessione 0 â€” Parte 2)
+### Materiale pregresso da consolidare (Sessione 0 — Parte 2)
 
 | Contenuto prodotto in chat | Destinazione |
 |----------------------------|--------------|
-| Analisi fattibilitÃ  + matrice dati piattaforme | `01-PLATFORMS.md` |
+| Analisi fattibilità + matrice dati piattaforme | `01-PLATFORMS.md` |
 | Architettura (local-first, adapter pattern, stack) | `05-ARCHITECTURE.md` |
 | Design system (brand, palette, type, componenti) | `15-DESIGN-SYSTEM.md` |
 | Tour delle 14 schermate + copy deck | `design/mockups/` + `06-UX-FLOWS-STATES.md` + `08-COPY-I18N.md` |
@@ -394,65 +411,65 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 
 ---
 
-## Sessione 0 â€” Parte 2 â€” ðŸ“¦ Consolidamento materiale esplorativo
+## Sessione 0 — Parte 2 — 📦 Consolidamento materiale esplorativo
 
 **Data**: ottobre 2026
-**Stato**: âœ… Completata
+**Stato**: ✅ Completata
 
 ### Documenti prodotti
-- âœ… `docs/01-PLATFORMS.md` (DRAFT)
-- âœ… `docs/05-ARCHITECTURE.md` (DRAFT)
-- âœ… `docs/15-DESIGN-SYSTEM.md` (DRAFT)
+- ✅ `docs/01-PLATFORMS.md` (DRAFT)
+- ✅ `docs/05-ARCHITECTURE.md` (DRAFT)
+- ✅ `docs/15-DESIGN-SYSTEM.md` (DRAFT)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
 | D0.8 | Scope MVP = 8 sorgenti + self-hosted via scrobbling; resto rinviato | Coprire il 90%+ del mercato europeo con sforzo sostenibile |
 | D0.9 | Design system consolidato ora; spec per componente rinviata a Sessione 7 | Evitare over-engineering prima dello schema dati |
-| D0.10 | Edge case noti catalogati in `01-PLATFORMS.md` Â§5 come vincoli adapter | Gli agenti non devono riscoprirli da zero |
+| D0.10 | Edge case noti catalogati in `01-PLATFORMS.md` §5 come vincoli adapter | Gli agenti non devono riscoprirli da zero |
 
 ### Prossimi passi
 - Sessione 1: `02-DATA-SCHEMA.md`, `14-GLOSSARY.md`, ADR 0001-0003
 
-## Sessione 1 â€” ðŸ—„ï¸ Fondamenta dati
+## Sessione 1 — 🗄️ Fondamenta dati
 
 **Data**: ottobre 2026
-**Stato**: âœ… Completata
+**Stato**: ✅ Completata
 
 ### Documenti prodotti
-- âœ… `docs/02-DATA-SCHEMA.md` (DRAFT â€” pending approvazione Boss)
-- âœ… `docs/14-GLOSSARY.md` (DRAFT â€” pending approvazione Boss)
-- âœ… `docs/13-ADR/0001-pwa-first.md` (DRAFT â€” pending approvazione Boss)
-- âœ… `docs/13-ADR/0002-local-first.md` (DRAFT â€” pending approvazione Boss)
-- âœ… `docs/13-ADR/0003-adapter-pattern.md` (DRAFT â€” pending approvazione Boss)
+- ✅ `docs/02-DATA-SCHEMA.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/14-GLOSSARY.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/13-ADR/0001-pwa-first.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/13-ADR/0002-local-first.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/13-ADR/0003-adapter-pattern.md` (DRAFT — pending approvazione Boss)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
 | D1.1 | `timestamp` = fine ascolto, `startedAt` = inizio; tabella semantica per piattaforma | Coerenza temporale cross-platform |
 | D1.2 | Idempotenza import via `eventKey` unico | Re-import sicuri senza duplicati |
-| D1.3 | Dedup tracce: ISRC â†’ MBID â†’ fuzzy hash **con durata** (DEDUP-1..3) | Bilancia precisione e copertura; bucket 2s |
+| D1.3 | Dedup tracce: ISRC → MBID → fuzzy hash **con durata** (DEDUP-1..3) | Bilancia precisione e copertura; bucket 2s |
 | D1.4 | IP non persistito DI DEFAULT; toggle esplicito `PrivacySettings.retainIp` | Privacy-by-design + controllo utente |
 | D1.5 | Derivati versionati (`derivedVersion`) e ricalcolabili | Coerenza analisi nel tempo |
-| D1.6 | Contatori denormalizzati ricalcolabili (`recount()`) | Performance senza perdere veritÃ  |
+| D1.6 | Contatori denormalizzati ricalcolabili (`recount()`) | Performance senza perdere verità |
 
 ### Aperti per approvazione Boss
-- [ ] 02-DATA-SCHEMA.md â†’ ðŸŸ¢ APPROVED?
-- [ ] 14-GLOSSARY.md â†’ ðŸŸ¢ APPROVED?
-- [ ] ADR 0001/0002/0003 â†’ ðŸŸ¢ APPROVED?
+- [ ] 02-DATA-SCHEMA.md → 🟢 APPROVED?
+- [ ] 14-GLOSSARY.md → 🟢 APPROVED?
+- [ ] ADR 0001/0002/0003 → 🟢 APPROVED?
 
 ### Prossimo passo
 - **Sessione 2** (in nuova chat): SPEC-TEMPLATE adapter + spotify.md + fixture `fixtures/synthetic-history/spotify-sample.json`
 
-## Sessione 2 â€” ðŸ”Œ Template adapter + Spotify
+## Sessione 2 — 🔌 Template adapter + Spotify
 
 **Data**: ottobre 2026
-**Stato**: âœ… Completata
+**Stato**: ✅ Completata
 
 ### Documenti prodotti
-- âœ… `docs/03-ADAPTERS/SPEC-TEMPLATE.md` (DRAFT)
-- âœ… `docs/03-ADAPTERS/spotify.md` (DRAFT)
-- âœ… `fixtures/synthetic-history/spotify-sample.json` (10 eventi sintetici con edge case)
+- ✅ `docs/03-ADAPTERS/SPEC-TEMPLATE.md` (DRAFT)
+- ✅ `docs/03-ADAPTERS/spotify.md` (DRAFT)
+- ✅ `fixtures/synthetic-history/spotify-sample.json` (10 eventi sintetici con edge case)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
@@ -464,22 +481,22 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | D2.5 | `eventKey` = `platform:spotify_uri` o hash fallback | Idempotenza garantita |
 
 ### Aperti per approvazione Boss
-- [ ] 03-ADAPTERS/SPEC-TEMPLATE.md â†’ ðŸŸ¢ APPROVED?
-- [ ] 03-ADAPTERS/spotify.md â†’ ðŸŸ¢ APPROVED?
+- [ ] 03-ADAPTERS/SPEC-TEMPLATE.md → 🟢 APPROVED?
+- [ ] 03-ADAPTERS/spotify.md → 🟢 APPROVED?
 
 ### Prossimo passo
 - Sessione 3: Backlog strutturato + Testing strategy + AGENTS.md finale
 - Dopo Sessione 3: valutare bundle di handoff per chiudere chat o continuare
 
-## Sessione 3 â€” ðŸ“‹ Governo
+## Sessione 3 — 📋 Governo
 
 **Data**: ottobre 2026
-**Stato**: âœ… Completata
+**Stato**: ✅ Completata
 
 ### Documenti prodotti
-- âœ… `docs/11-BACKLOG.md` (DRAFT) â€” 5 epic, 17 story, ordinamento prioritÃ 
-- âœ… `docs/10-TESTING.md` (DRAFT) â€” piramide test, coverage target, fixture strategy
-- âœ… `AGENTS.md` (v1.0 stabile) â€” protocollo finale con handoff tra chat
+- ✅ `docs/11-BACKLOG.md` (DRAFT) — 5 epic, 17 story, ordinamento priorità
+- ✅ `docs/10-TESTING.md` (DRAFT) — piramide test, coverage target, fixture strategy
+- ✅ `AGENTS.md` (v1.0 stabile) — protocollo finale con handoff tra chat
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
@@ -488,74 +505,74 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | D3.2 | Story 0.1-0.4 come "fondamenta obbligatorie" sequenziali | Dipendenza critica; senza queste nulla funziona |
 | D3.3 | Label GitHub `agent-ready` come gate unico per lavoro agenti | Evita agenti che improvvisano su spec mancanti |
 | D3.4 | Coverage target differenziato per modulo | Adapter critici al 90%, UI al 70% |
-| D3.5 | 3 categorie di fixture: synthetic-history, db-seed, scenarios | Separazione responsabilitÃ  test |
+| D3.5 | 3 categorie di fixture: synthetic-history, db-seed, scenarios | Separazione responsabilità test |
 | D3.6 | AGENTS.md v1.0 stabile con sezione handoff | Pronti per chat multiple senza perdita di contesto |
 
 ### Aperti per approvazione Boss
-- [ ] `docs/11-BACKLOG.md` â†’ ðŸŸ¢ APPROVED?
-- [ ] `docs/10-TESTING.md` â†’ ðŸŸ¢ APPROVED?
-- [ ] `AGENTS.md` v1.0 â†’ ðŸŸ¢ APPROVED?
-- [ ] Documenti Sessione 1 (02-DATA-SCHEMA, GLOSSARY, ADR 0001-0003) â†’ ðŸŸ¢ APPROVED?
-- [ ] Documenti Sessione 2 (SPEC-TEMPLATE, spotify.md) â†’ ðŸŸ¢ APPROVED?
+- [ ] `docs/11-BACKLOG.md` → 🟢 APPROVED?
+- [ ] `docs/10-TESTING.md` → 🟢 APPROVED?
+- [ ] `AGENTS.md` v1.0 → 🟢 APPROVED?
+- [ ] Documenti Sessione 1 (02-DATA-SCHEMA, GLOSSARY, ADR 0001-0003) → 🟢 APPROVED?
+- [ ] Documenti Sessione 2 (SPEC-TEMPLATE, spotify.md) → 🟢 APPROVED?
 
 ### Prossimi passi
 - Boss approva i documenti DRAFT (o chiede modifiche)
 - Sessione 4: `04-ANALYSIS-ALGORITHMS.md` (formule mood, ere, eventi, ricordi)
 - Valutare se fare bundle di handoff o continuare qui
 
-## Sessione 4 â€” ðŸ§  Algoritmi di analisi
+## Sessione 4 — 🧠 Algoritmi di analisi
 
 **Data**: ottobre 2026
-**Stato**: âœ… Completata
+**Stato**: ✅ Completata
 
 ### Documenti prodotti
-- âœ… `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
+- ✅ `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D4.1 | Mood come quadrante valenceÃ—energy con fascia neutra centrale | Evita flip-flop tra mood |
-| D4.2 | Era detector via change point detection su firme settimanali | PiÃ¹ robusto del clustering k-means puro |
+| D4.1 | Mood come quadrante valence×energy con fascia neutra centrale | Evita flip-flop tra mood |
+| D4.2 | Era detector via change point detection su firme settimanali | Più robusto del clustering k-means puro |
 | D4.3 | Similarity multi-dimensionale pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi e quantitativi |
-| D4.4 | Event detector via z-score + rilevatori specializzati per silence/exploration | z-score Ã¨ interpretabile, specializzati catturano casi non-statistici |
+| D4.4 | Event detector via z-score + rilevatori specializzati per silence/exploration | z-score è interpretabile, specializzati catturano casi non-statistici |
 | D4.5 | 5 tipi di ricordo con scoring e ranking | Feed ordinato per rilevanza |
 | D4.6 | Pipeline incrementale (non full-rewrite) | Performance su file grandi |
 | D4.7 | derivedVersion = sha1(config)[:8] | Rileva automaticamente cambiamenti parametri |
 
 ### Aperti per approvazione Boss
-- [ ] `04-ANALYSIS-ALGORITHMS.md` â†’ ðŸŸ¢ APPROVED?
+- [ ] `04-ANALYSIS-ALGORITHMS.md` → 🟢 APPROVED?
 
 ### Stato progetto dopo Sessione 4
-- âœ… Visione, piattaforme, architettura, design system
-- âœ… Schema dati, glossario, ADR fondanti
-- âœ… Template adapter + Spotify adapter + fixture
-- âœ… Backlog, testing, protocollo agenti
-- âœ… **Algoritmi di analisi** â† completato ora
-- â³ Rimangono: UX states/i18n (S5), privacy (S6), UI spec (S7), devops (S8)
+- ✅ Visione, piattaforme, architettura, design system
+- ✅ Schema dati, glossario, ADR fondanti
+- ✅ Template adapter + Spotify adapter + fixture
+- ✅ Backlog, testing, protocollo agenti
+- ✅ **Algoritmi di analisi** ← completato ora
+- ⏳ Rimangono: UX states/i18n (S5), privacy (S6), UI spec (S7), devops (S8)
 
 ### Prossimi passi
 - Boss approva `04-ANALYSIS-ALGORITHMS.md`
 - Valutare bundle di handoff per chiudere chat pulita
 - Sessione 5 (UX flows + i18n) in nuova chat o qui
 
-## Sessione 5 â€” ðŸ§­ UX completa + i18n
+## Sessione 5 — 🧭 UX completa + i18n
 
 **Data**: ottobre 2026
-**Stato**: âœ… Completata
+**Stato**: ✅ Completata
 
 ### Documenti prodotti
-- âœ… `docs/06-UX-FLOWS-STATES.md` (DRAFT)
-- âœ… `docs/08-COPY-I18N.md` (DRAFT)
-- âœ… `docs/BUNDLE.md` (snapshot backup)
+- ✅ `docs/06-UX-FLOWS-STATES.md` (DRAFT)
+- ✅ `docs/08-COPY-I18N.md` (DRAFT)
+- ✅ `docs/BUNDLE.md` (snapshot backup)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
 | D5.1 | 6 stati globali (loading, empty, partial, ready, error, offline) | Copertura completa di ogni scenario |
 | D5.2 | Stato machine di Import con 6 stati | Tracciamento preciso del flusso |
-| D5.3 | Keyboard navigation per ogni schermata | AccessibilitÃ  e power user |
+| D5.3 | Keyboard navigation per ogni schermata | Accessibilità e power user |
 | D5.4 | Alternative testuali per ogni visualizzazione | Screen reader compliance |
-| D5.5 | Namespace i18n per modulo | ManutenibilitÃ  |
+| D5.5 | Namespace i18n per modulo | Manutenibilità |
 | D5.6 | MVP bilingue IT+EN | Target europeo |
 | D5.7 | Pluralizzazione ICU | Supporto corretto per tutte le lingue future |
 | D5.8 | Demo mode con fixture sintetico | Onboarding senza dati personali |
@@ -564,29 +581,114 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Progetto completo al 95%.** Rimangono solo Sessioni 6-8 (privacy, UI spec dettagliata, devops) da fare in nuove chat.
 
 ### Documenti approvati in questa sessione
-- âœ… Tutti i documenti Sessione 1, 2, 3, 4 confermati APPROVED
-- ðŸŸ¡ Documenti Sessione 5 (UX flows + i18n) in attesa di approvazione
+- ✅ Tutti i documenti Sessione 1, 2, 3, 4 confermati APPROVED
+- 🟡 Documenti Sessione 5 (UX flows + i18n) in attesa di approvazione
 
 ### Prossimi passi
 - Boss approva Sessione 5
 - Generazione file BUNDLE.md con contenuti effettivi
 - Commit finale e chiusura chat
-- Sessione 6-8 in nuove chat quando Boss vorrÃ 
+- Sessione 6-8 in nuove chat quando Boss vorrà
+
+---
+
+## Sessione 3 — 📋 Governo
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata + APPROVED
+
+### Documenti prodotti
+- ✅ `docs/11-BACKLOG.md` (APPROVED) — 5 epic, 17 story, ordinamento priorità
+- ✅ `docs/10-TESTING.md` (APPROVED) — piramide test, coverage target, fixture strategy
+- ✅ `AGENTS.md` v1.0 (APPROVED) — protocollo finale con handoff tra chat
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D3.1 | Backlog con 5 epic (fondamenta, import, analisi, UI, privacy) | Copertura MVP + estensioni future |
+| D3.2 | Story 0.1-0.4 come "fondamenta obbligatorie" sequenziali | Dipendenza critica; senza queste nulla funziona |
+| D3.3 | Label GitHub `agent-ready` come gate unico per lavoro agenti | Evita agenti che improvvisano su spec mancanti |
+| D3.4 | Coverage target differenziato per modulo | Adapter critici al 90%, UI al 70% |
+| D3.5 | 3 categorie di fixture: synthetic-history, db-seed, scenarios | Separazione responsabilità test |
+| D3.6 | AGENTS.md v1.0 stabile con sezione handoff | Pronti per chat multiple senza perdita di contesto |
+
+---
+
+## Sessione 4 — 🧠 Algoritmi di analisi
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D4.1 | Mood come quadrante valence×energy con fascia neutra centrale | Evita flip-flop tra mood |
+| D4.2 | Era detector via change point detection su firme settimanali | Più robusto del clustering k-means puro |
+| D4.3 | Similarity multi-dimensionale pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi e quantitativi |
+| D4.4 | Event detector via z-score + rilevatori specializzati per silence/exploration | z-score è interpretabile, specializzati catturano casi non-statistici |
+| D4.5 | 5 tipi di ricordo con scoring e ranking | Feed ordinato per rilevanza |
+| D4.6 | Pipeline incrementale (non full-rewrite) | Performance su file grandi |
+| D4.7 | derivedVersion = sha1(config)[:8] | Rileva automaticamente cambiamenti parametri |
+
+---
+
+## Sessione 5 — 🧭 UX completa + i18n
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/06-UX-FLOWS-STATES.md` (DRAFT)
+- ✅ `docs/08-COPY-I18N.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D5.1 | 6 stati globali (loading, empty, partial, ready, error, offline) | Copertura completa di ogni scenario |
+| D5.2 | Stato machine di Import con 6 stati | Tracciamento preciso del flusso |
+| D5.3 | Keyboard navigation per ogni schermata | Accessibilità e power user |
+| D5.4 | Alternative testuali per ogni visualizzazione | Screen reader compliance |
+| D5.5 | Namespace i18n per modulo | Manutenibilità |
+| D5.6 | MVP bilingue IT+EN | Target europeo |
+| D5.7 | Pluralizzazione ICU | Supporto corretto per tutte le lingue future |
+| D5.8 | Demo mode con fixture sintetico | Onboarding senza dati personali |
+
+### Sessione 5 — Parte 2 (Review repo)
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+Boss ha reso il repo pubblico (`https://github.com/amedeo82/Life-Soundtrack`) e chiesto verifica di coerenza. Trovati 6 problemi di sincronizzazione tra chat e repo:
+1. INDEX.md non aggiornato
+2. SESSIONS.md senza log Sessioni 3-5
+3. AGENTS.md versione vecchia
+4. SPEC-TEMPLATE.md con refusi
+5. Status APPROVED non riflessi nei file
+6. BUNDLE.md mancante
+
+**Risolto con commit di fix.**
+
+---
+
+*Aggiornato ad ogni nuova sessione.*
 
 ---
 
 ## Template sessione (da copiare per le sessioni future)
 
-    ## Sessione N â€” ðŸŽ¯ [Nome]
+    ## Sessione N — 🎯 [Nome]
 
     **Data**: [data]
-    **Stato**: ðŸŸ¡ In corso / âœ… Completata
+    **Stato**: 🟡 In corso / ✅ Completata
 
     ### Obiettivi
     - [ ] obiettivo 1
 
     ### Documenti prodotti
-    - âœ… `percorso/file.md` (APPROVED/DRAFT)
+    - ✅ `percorso/file.md` (APPROVED/DRAFT)
 
     ### Decisioni prese
     | # | Decisione | Motivazione |
@@ -600,49 +702,50 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 
 *Aggiornato ad ogni nuova sessione.*
 
+
 ===== FILE: docs/00-VISION.md =====
 
-# 00 â€” Visione e Missione
+# 00 — Visione e Missione
 
-> Status: ðŸŸ¡ DRAFT
+> Status: 🟡 DRAFT
 > Versione: 0.1
 > Ultima modifica: Sessione 0
 > Responsabile: Boss
 
 ---
 
-## ðŸŽ¯ Il Problema
+## 🎯 Il Problema
 
-Le piattaforme di streaming musicale raccolgono **una quantitÃ  enorme di dati intimi** su ogni utente: cosa ascolta, quando, dove, da quale dispositivo, per quanto tempo, se salta i brani, se usa lo shuffle. Eppure, tutto quello che restituiscono Ã¨ un **"Wrapped" annuale** con 5 artisti e 5 brani.
+Le piattaforme di streaming musicale raccolgono **una quantità enorme di dati intimi** su ogni utente: cosa ascolta, quando, dove, da quale dispositivo, per quanto tempo, se salta i brani, se usa lo shuffle. Eppure, tutto quello che restituiscono è un **"Wrapped" annuale** con 5 artisti e 5 brani.
 
-Ãˆ come avere un diario segreto di 10 anni e usarlo solo per contare quante volte hai scritto la parola "ciao".
+È come avere un diario segreto di 10 anni e usarlo solo per contare quante volte hai scritto la parola "ciao".
 
-I dati esistono giÃ . Quello che manca Ã¨ un **lettore** che li trasformi in una storia.
+I dati esistono già. Quello che manca è un **lettore** che li trasformi in una storia.
 
-## ðŸ’¡ La Soluzione
+## 💡 La Soluzione
 
-**Life Soundtrack** Ã¨ un'applicazione web (PWA) che trasforma i metadati grezzi delle piattaforme di streaming in un **diario di vita musicale**: una timeline personale, emotiva e contestuale che racconta la storia dell'utente attraverso la musica.
+**Life Soundtrack** è un'applicazione web (PWA) che trasforma i metadati grezzi delle piattaforme di streaming in un **diario di vita musicale**: una timeline personale, emotiva e contestuale che racconta la storia dell'utente attraverso la musica.
 
-Non Ã¨ un'app di statistica. Ãˆ un'app di **narrazione autobiografica** basata sui dati di ascolto.
+Non è un'app di statistica. È un'app di **narrazione autobiografica** basata sui dati di ascolto.
 
-## ðŸ§­ Principi Fondamentali
+## 🧭 Principi Fondamentali
 
 | Principio | Significato | Implicazione tecnica |
 |-----------|-------------|---------------------|
 | **Privacy-first** | I dati restano sul dispositivo dell'utente | Elaborazione in-browser, IndexedDB, nessun server centrale obbligatorio |
 | **Local-first** | L'app funziona offline dopo il primo caricamento | PWA con service worker, dati locali |
-| **Open data** | L'utente Ã¨ proprietario dei propri dati | Export JSON in qualsiasi momento, portabilitÃ  GDPR |
-| **EstensibilitÃ ** | Aggiungere una piattaforma non richiede modifiche al core | Adapter pattern, formato dati unificato |
+| **Open data** | L'utente è proprietario dei propri dati | Export JSON in qualsiasi momento, portabilità GDPR |
+| **Estensibilità** | Aggiungere una piattaforma non richiede modifiche al core | Adapter pattern, formato dati unificato |
 | **Nessun lock-in** | Nessun abbonamento forzato, nessun dato ostaggio | Nessuna autenticazione obbligatoria, sync cloud opzionale e cifrato |
 | **Narrazione prima dei numeri** | I dati raccontano storie, non statistiche | Insight in linguaggio naturale, non solo grafici |
 
-## ðŸŽ¬ Tagline
+## 🎬 Tagline
 
 > *"La colonna sonora della tua vita, finalmente leggibile."*
 
-## ðŸ‘¥ Target Utenti
+## 👥 Target Utenti
 
-| Segmento | EtÃ  | Bisogno | Messaggio |
+| Segmento | Età | Bisogno | Messaggio |
 |----------|-----|---------|-----------|
 | **Nostalgici** | 25-45 | Rivivere periodi della vita | "Che musica ascoltavi quando ti sei laureato?" |
 | **Quantified Self** | 25-50 | Pattern e statistiche profonde | "Guarda l'evoluzione del tuo umore attraverso la musica" |
@@ -650,23 +753,23 @@ Non Ã¨ un'app di statistica. Ãˆ un'app di **narrazione autobiografica** basa
 | **Curiosi** | 20-40 | Andare oltre il Wrapped | "5 canzoni non bastano a raccontare il tuo anno" |
 | **Privacy-conscious** | 25-50 | Controllo totale dei dati | "I tuoi dati, solo tuoi" |
 
-## ðŸŒ Perimetro Iniziale (MVP)
+## 🌍 Perimetro Iniziale (MVP)
 
 - **Piattaforme supportate (Europa)**: Spotify, YouTube Music, Apple Music, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz
 - **Piattaforma di distribuzione**: PWA (web app installabile)
-- **ModalitÃ  operativa**: Local-first, elaborazione in-browser
+- **Modalità operativa**: Local-first, elaborazione in-browser
 - **Lingue MVP**: Italiano, Inglese
 - **Modello di business**: Da definire (placeholder: gratuito + opzioni premium)
 
-## ðŸš« Cosa NON Ã¨ Life Soundtrack
+## 🚫 Cosa NON è Life Soundtrack
 
-- Non Ã¨ un clone di Spotify Wrapped
-- Non Ã¨ una piattaforma di streaming
-- Non Ã¨ un social network musicale
-- Non Ã¨ un'app di raccomandazione
-- Non Ã¨ uno strumento per artisti/label (fuori scope per ora)
+- Non è un clone di Spotify Wrapped
+- Non è una piattaforma di streaming
+- Non è un social network musicale
+- Non è un'app di raccomandazione
+- Non è uno strumento per artisti/label (fuori scope per ora)
 
-## ðŸŽ Cosa offre di unico
+## 🎁 Cosa offre di unico
 
 1. **Timeline narrativa**: non solo "hai ascoltato X", ma "in quel periodo della tua vita..."
 2. **Unificazione multi-sorgente**: la storia completa attraverso tutte le piattaforme usate
@@ -674,22 +777,22 @@ Non Ã¨ un'app di statistica. Ãˆ un'app di **narrazione autobiografica** basa
 4. **Ricordi tipo "Facebook Memories"**: ma basati sulla musica, non sulle foto
 5. **Privacy come valore**: i dati non escono mai dal dispositivo
 
-## ðŸ“ˆ Metriche di Successo
+## 📈 Metriche di Successo
 
 - **Attivazione**: % di utenti che completano l'import
 - **Retention settimanale**: % che apre l'app almeno 1 volta a settimana
 - **Engagement con ricordi**: % di ricordi visti / condivisi
 - **NPS**: soddisfazione percepita
 
-## ðŸ§­ Decisioni Strategiche Aperte
+## 🧭 Decisioni Strategiche Aperte
 
 | Decisione | Stato | Note |
 |-----------|-------|------|
-| Modello di business (free / freemium / donation) | ðŸ”´ Aperto | Da decidere in Sessione 6 |
-| Open source o proprietario | ðŸ”´ Aperto | Tendenza verso open source |
-| Licenza (se open source) | ðŸ”´ Aperto | AGPL vs MIT vs Apache |
-| Self-hosting supportato ufficialmente | ðŸ”´ Aperto | Probabilmente sÃ¬, tramite Docker |
-| Sync cloud opzionale | ðŸ”´ Aperto | Probabilmente sÃ¬ in Fase 2 |
+| Modello di business (free / freemium / donation) | 🔴 Aperto | Da decidere in Sessione 6 |
+| Open source o proprietario | 🔴 Aperto | Tendenza verso open source |
+| Licenza (se open source) | 🔴 Aperto | AGPL vs MIT vs Apache |
+| Self-hosting supportato ufficialmente | 🔴 Aperto | Probabilmente sì, tramite Docker |
+| Sync cloud opzionale | 🔴 Aperto | Probabilmente sì in Fase 2 |
 
 ---
 
@@ -701,13 +804,14 @@ Non Ã¨ un'app di statistica. Ãˆ un'app di **narrazione autobiografica** basa
 
 ---
 
-*Questo documento Ã¨ DRAFT. Diventa vincolante per gli agenti solo dopo approvazione di Boss (status: ðŸŸ¢ APPROVED).*
+*Questo documento è DRAFT. Diventa vincolante per gli agenti solo dopo approvazione di Boss (status: 🟢 APPROVED).*
+
 
 ===== FILE: docs/01-PLATFORMS.md =====
 
-# 01 â€” Matrice Piattaforme e Dati Ottenibili
+# 01 — Matrice Piattaforme e Dati Ottenibili
 
-> Status: ðŸŸ¡ DRAFT
+> Status: 🟡 DRAFT
 > Versione: 0.1
 > Ultima modifica: Sessione 0 (consolidamento)
 > Scope: MVP europeo
@@ -716,7 +820,7 @@ Non Ã¨ un'app di statistica. Ãˆ un'app di **narrazione autobiografica** basa
 
 ## 1. Scopo
 
-Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono ottenibili, con quale metodo, in quale formato e con quali limiti**. Questo documento Ã¨ la base delle specifiche adapter (`03-ADAPTERS/`).
+Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono ottenibili, con quale metodo, in quale formato e con quali limiti**. Questo documento è la base delle specifiche adapter (`03-ADAPTERS/`).
 
 ## 2. I tre canali di accesso ai dati
 
@@ -730,11 +834,11 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 
 ## 3. Schede piattaforma
 
-### 3.1 Spotify ðŸ‡¸ â€” Tier S (prioritÃ  massima)
+### 3.1 Spotify 🇸 — Tier S (priorità massima)
 
 - **Accesso storico**: GDPR "Extended Streaming History" (JSON, ~15k eventi/anno)
 - **Accesso real-time**: Web API (limitata: recently played max 50; top items 3 finestre)
-- **Scrobbling**: sÃ¬ (Last.fm, ListenBrainz, multi-scrobbler)
+- **Scrobbling**: sì (Last.fm, ListenBrainz, multi-scrobbler)
 
 **Campi per evento di ascolto (export GDPR)**:
 
@@ -753,65 +857,65 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 | `reason_start` | enum | `playbtn`, `clickrow`, `trackdone`, `appload`, `fwdbtn`, `backbtn`, `remote`, `uriopen`, `unknown`... |
 | `reason_end` | enum | `endplay`, `fwdbtn`, `backbtn`, `trackdone`, `logout`, `unexpected-exit`... |
 | `shuffle` | bool | |
-| `skipped` | bool | âš ï¸ inaffidabile in alcuni periodi (vedi Â§5) |
+| `skipped` | bool | ⚠️ inaffidabile in alcuni periodi (vedi §5) |
 | `offline` | bool | |
-| `offline_timestamp` | int/null | âš ï¸ unitÃ  cambiate nel tempo (vedi Â§5) |
+| `offline_timestamp` | int/null | ⚠️ unità cambiate nel tempo (vedi §5) |
 | `incognito_mode` | bool | |
 
 **File aggiuntivi nell'export**: `SearchQueries.json` (ricerche con timestamp), `Playlist*.json` (playlist con date di aggiunta), `YourLibrary.json` (brani salvati), `Follow.json`, `Wrapped*.json`, `Userdata.json`. Nei technical log: `CarDetectionEvent.json` (rilevamento auto), `AdRequestEvent.json` (ads, account free).
 
-**Limiti API (2026)**: audio-features deprecate (nov 2024); Dev Mode richiede Premium e max 5 utenti (feb 2026). â†’ Le audio features vanno ricavate da fonti esterne (vedi `05-ARCHITECTURE.md` Â§6).
+**Limiti API (2026)**: audio-features deprecate (nov 2024); Dev Mode richiede Premium e max 5 utenti (feb 2026). → Le audio features vanno ricavate da fonti esterne (vedi `05-ARCHITECTURE.md` §6).
 
-### 3.2 YouTube Music ðŸ‡ºðŸ‡¸ (dominante in EU) â€” Tier S
+### 3.2 YouTube Music 🇺🇸 (dominante in EU) — Tier S
 
-- **Accesso storico**: Google Takeout ("YouTube and YouTube Music") â†’ JSON/HTML
+- **Accesso storico**: Google Takeout ("YouTube and YouTube Music") → JSON/HTML
 - **Campi**: `time`, `title`, `titleUrl`, `products`, `details.name` (canale/artista), `details.url`, `locationInfo` (opzionale)
 - **Limiti**: cronologia unificata video+musica (serve filtro); nessun campo skip/shuffle/dispositivo
-- **Scrobbling**: sÃ¬ (scrobbler dedicati)
+- **Scrobbling**: sì (scrobbler dedicati)
 
-### 3.3 Apple Music ðŸ‡ºðŸ‡¸ (molto diffusa in EU) â€” Tier A
+### 3.3 Apple Music 🇺🇸 (molto diffusa in EU) — Tier A
 
-- **Accesso storico**: Apple Privacy Portal â†’ "Apple Media Services" (CSV/JSON)
+- **Accesso storico**: Apple Privacy Portal → "Apple Media Services" (CSV/JSON)
 - **Campi**: Song Name, Artist Name, Album Name, Play Date UTC, Media Type, Playlist Name
 - **Limiti**: nessun campo contestuale (skip/shuffle/device); API MusicKit senza audio features
-- **Scrobbling**: sÃ¬ (scrobbler di terze parti)
+- **Scrobbling**: sì (scrobbler di terze parti)
 
-### 3.4 Deezer ðŸ‡«ðŸ‡· â€” Tier A
+### 3.4 Deezer 🇫🇷 — Tier A
 
-- **Accesso storico**: export GDPR (âš ï¸ storicamente lento e a volte incompleto)
+- **Accesso storico**: export GDPR (⚠️ storicamente lento e a volte incompleto)
 - **API pubblica**: buona per catalogo, preferiti, playlist; cronologia utente limitata
-- **Scrobbling**: sÃ¬
+- **Scrobbling**: sì
 - **Limiti**: meno metadati contestuali di Spotify
 
-### 3.5 Tidal ðŸ‡³ðŸ‡´/ðŸ‡¸ â€” Tier A
+### 3.5 Tidal 🇳🇴/🇸 — Tier A
 
 - **API pubblica aperta**: `openapi.tidal.com` v2, OAuth 2.0 + PKCE, JSON:API
 - **Campi catalogo**: title, artist, album, duration, **ISRC**, `audioQuality` (LOW/HIGH/LOSSLESS/HI_RES), `audioModes` (STEREO/DOLBY_ATMOS)
-- **Limiti**: nessuna cronologia di ascolto storica via API â†’ utile per metadati e libreria, non per lo storico
+- **Limiti**: nessuna cronologia di ascolto storica via API → utile per metadati e libreria, non per lo storico
 
-### 3.6 SoundCloud ðŸ‡©ðŸ‡ª â€” Tier B
+### 3.6 SoundCloud 🇩🇪 — Tier B
 
 - **Export GDPR**: cronologia limitata a ~1000 brani; like, playlist, follow
 - **API pubblica**: preferiti, playlist, follow
 - **Valore**: musica indie/elettronica/DJ set assente altrove
 
-### 3.7 Last.fm ðŸ‡¬ðŸ‡§ â€” Tier S (come hub, non sorgente)
+### 3.7 Last.fm 🇬🇧 — Tier S (come hub, non sorgente)
 
 - **API pubblica gratuita**: `user.getRecentTracks` paginabile sull'intero storico, top artists/tracks/albums per periodo, weekly charts
 - **Campi**: name, artist, album, `date`, `loved`
 - **Limiti**: nessun contesto (device/luogo); solo dati scrobblati; rate limit ~5 req/s
 
-### 3.8 ListenBrainz ðŸŒ (no-profit) â€” Tier S (come hub)
+### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
 - **API pubblica senza limiti restrittivi**: `/1/user/{username}/listens` paginabile
 - **Campi**: `listened_at`, `track_metadata.track_name/artist_name/release_name`, `additional_info`: **`recording_mbid`, `artist_mbids`, `release_mbid`, `isrc`, `spotify_id`, `youtube_id`, `origin_url`**
-- **Valore unico**: identificativi MusicBrainz/ISRC nativi â†’ normalizzazione perfetta tra piattaforme
+- **Valore unico**: identificativi MusicBrainz/ISRC nativi → normalizzazione perfetta tra piattaforme
 
-### 3.9 Self-hosted (Plex, Navidrome, Subsonic, Roon) â€” Tier S+ per nicchia
+### 3.9 Self-hosted (Plex, Navidrome, Subsonic, Roon) — Tier S+ per nicchia
 
 - Nessuna piattaforma commerciale: librerie personali (CD digitalizzati, acquisti, file rari)
-- Integrazione via scrobbling (Maloja, multi-scrobbler, webhook Plexâ†’ListenBrainz)
-- **Valore unico**: copre la parte piÃ¹ intima della storia musicale, invisibile alle piattaforme
+- Integrazione via scrobbling (Maloja, multi-scrobbler, webhook Plex→ListenBrainz)
+- **Valore unico**: copre la parte più intima della storia musicale, invisibile alle piattaforme
 
 ### 3.10 Fuori perimetro MVP (estensioni future)
 
@@ -821,40 +925,40 @@ Qobuz (export solo playlist), Bandcamp (solo acquisti), IDAGIO (classica), Boomp
 
 | Categoria | Spotify | YT Music | Apple | Deezer | Tidal | SoundCloud | Last.fm | ListenBrainz |
 |---|---|---|---|---|---|---|---|---|
-| Timestamp ascolto | âœ… | âœ… | âœ… | âœ… | âŒ | ï¸ | âœ… | âœ… |
-| Durata ascoltata | âœ… | âŒ | âŒ | âœ… | âŒ | âŒ | âŒ | âŒ |
-| Dispositivo | âœ… | âŒ | âŒ | âŒ | âŒ | âŒ | âŒ | âŒ |
-| IP / Paese | âœ… | âš ï¸ | âŒ | âŒ | âŒ | âŒ | âŒ | âŒ |
-| Skip / Shuffle / Offline | âœ… | âŒ | âŒ | âŒ | âŒ | âŒ | âŒ | âŒ |
-| Ricerche | âœ… | âš ï¸ | âŒ | âŒ | âŒ | âŒ | âŒ | âŒ |
-| Playlist con date | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âŒ | âŒ |
-| Brani salvati | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âœ… | âš ï¸ |
-| ISRC / MBID | âŒ | âŒ | âŒ | âŒ | âœ… | âŒ | âŒ | âœ… |
-| Storico completo | âœ… | âœ… | âœ… | âš ï¸ | âŒ | ï¸ | âœ… | âœ… |
+| Timestamp ascolto | ✅ | ✅ | ✅ | ✅ | ❌ | ️ | ✅ | ✅ |
+| Durata ascoltata | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Dispositivo | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| IP / Paese | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Skip / Shuffle / Offline | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Ricerche | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Playlist con date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Brani salvati | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| ISRC / MBID | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Storico completo | ✅ | ✅ | ✅ | ⚠️ | ❌ | ️ | ✅ | ✅ |
 
-Legenda: âœ… completo Â· âš ï¸ parziale Â· âŒ assente
+Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 
 ## 5. Catalogo edge case noti (vincoli per gli adapter)
 
 | # | Piattaforma | Edge case | Impatto | Azione adapter |
 |---|-------------|-----------|---------|----------------|
-| E1 | Spotify | `skipped` non affidabile: nessun skip registrato 2015-04â†’2022-10; valori misti prima/dopo | Statistiche skip errate | Regola derivata: `skipped OR reason_end IN (backbtn, unknown, endplay, fwdbtn)` â€” **da validare in Sessione 2** |
-| E2 | Spotify | Timestamp sovrapposti (~2.6% della durata totale); stream duplicati identici con `ts` diverso | Durata totale sovrastimata | Deduplicazione per (uri, tsÂ±1s, ms_played) |
-| E3 | Spotify | `offline_timestamp`: unitÃ  passate da secondi a millisecondi | Parsing errato | Normalizzazione unitÃ  per epoca |
+| E1 | Spotify | `skipped` non affidabile: nessun skip registrato 2015-04→2022-10; valori misti prima/dopo | Statistiche skip errate | Regola derivata: `skipped OR reason_end IN (backbtn, unknown, endplay, fwdbtn)` — **da validare in Sessione 2** |
+| E2 | Spotify | Timestamp sovrapposti (~2.6% della durata totale); stream duplicati identici con `ts` diverso | Durata totale sovrastimata | Deduplicazione per (uri, ts±1s, ms_played) |
+| E3 | Spotify | `offline_timestamp`: unità passate da secondi a millisecondi | Parsing errato | Normalizzazione unità per epoca |
 | E4 | Spotify | Stessa registrazione con URI/ISRC diversi (singolo + album + compilation) | Conteggi frammentati | Dedup via ISRC/MBID + fuzzy title (vedi `02-DATA-SCHEMA.md`) |
-| E5 | Spotify | GranularitÃ  `platform` cambiata ott-2023 (da modello dettagliato a `android`/`windows`/...) | Classificazione device discontinua | Mapping a `device_type` normalizzato |
+| E5 | Spotify | Granularità `platform` cambiata ott-2023 (da modello dettagliato a `android`/`windows`/...) | Classificazione device discontinua | Mapping a `device_type` normalizzato |
 | E6 | YouTube | Cronologia unifica video e musica | Falsi positivi musicali | Filtro su `products` + euristiche titolo/URL |
 | E7 | Deezer | Export GDPR storicamente lento (casi documentati di mesi) e incompleto | Storico mancante | Fallback: API + scrobbling; avviso utente |
 | E8 | SoundCloud | Export limitato a ~1000 brani; brani rimossi nel tempo | Storico troncato | Dichiarare limite all'utente; integrare con scrobbling |
 | E9 | Apple | Nessun campo contestuale | Analisi comportamentale limitata | Adattare insight disponibili |
-| E10 | Tutte | Fusi orari: `ts` Spotify Ã¨ UTC; Apple "Play Date UTC"; Takeout locale+UTC | Timeline sfalsata | Normalizzare tutto a UTC in fase di parse |
+| E10 | Tutte | Fusi orari: `ts` Spotify è UTC; Apple "Play Date UTC"; Takeout locale+UTC | Timeline sfalsata | Normalizzare tutto a UTC in fase di parse |
 
 ## 6. Strategia di integrazione MVP
 
 1. **Storico**: adapter di import file per Spotify, YouTube Music, Apple Music (+ Deezer quando disponibile)
 2. **Continuo**: connessione opzionale a Last.fm / ListenBrainz; supporto Maloja self-hosted
-3. **Normalizzazione**: unificazione tramite ISRC/MBID (ListenBrainz e Tidal come fonti di veritÃ  per gli identificatori)
-4. **Arricchimento**: audio features da fonti esterne (vedi `05-ARCHITECTURE.md` Â§6)
+3. **Normalizzazione**: unificazione tramite ISRC/MBID (ListenBrainz e Tidal come fonti di verità per gli identificatori)
+4. **Arricchimento**: audio features da fonti esterne (vedi `05-ARCHITECTURE.md` §6)
 
 ---
 
@@ -864,12 +968,13 @@ Legenda: âœ… completo Â· âš ï¸ parziale Â· âŒ assente
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
 
+
 ===== FILE: docs/02-DATA-SCHEMA.md =====
 
-# 02 â€” Schema Dati Unificato (eseguibile)
+# 02 — Schema Dati Unificato (eseguibile)
 
-> Status: ðŸŸ¡ DRAFT
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 1
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
@@ -877,11 +982,11 @@ Legenda: âœ… completo Â· âš ï¸ parziale Â· âŒ assente
 
 ## 1. Principi dello schema
 
-1. **Un evento di ascolto Ã¨ l'atomo**: tutto deriva da `ListenEvent`
+1. **Un evento di ascolto è l'atomo**: tutto deriva da `ListenEvent`
 2. **Normalizza presto**: i dati grezzi delle piattaforme vivono solo nel file dell'utente; nel DB entra solo il formato unificato (vedi ADR-0003)
 3. **Idempotenza**: re-importare lo stesso file non duplica nulla (`eventKey` unico)
 4. **Derivati versionati**: sessioni e insight sono ricalcolabili; portano il `derivedVersion` del set di parametri che li ha generati
-5. **UTC ovunque**: ogni timestamp Ã¨ unix millisecondi UTC
+5. **UTC ovunque**: ogni timestamp è unix millisecondi UTC
 
 ## 2. Semantica dei timestamp per piattaforma
 
@@ -943,7 +1048,7 @@ Calcolato dall'adapter. Garantisce import idempotenti.
 
     export interface Track {
       id: string;
-      canonicalKey: string;    // UNIQUE â€” regola DEDUP (Â§5)
+      canonicalKey: string;    // UNIQUE — regola DEDUP (§5)
       name: string;
       artistId: string;
       albumId: string | null;
@@ -979,8 +1084,8 @@ Calcolato dall'adapter. Garantisce import idempotenti.
 
     export interface AudioFeatures {
       trackId: string;         // PK
-      valence: number | null;          // 0..1 positivitÃ  emotiva
-      energy: number | null;           // 0..1 intensitÃ 
+      valence: number | null;          // 0..1 positività emotiva
+      energy: number | null;           // 0..1 intensità
       danceability: number | null;
       acousticness: number | null;
       instrumentalness: number | null;
@@ -1022,7 +1127,7 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       type: InsightType;
       periodStart: number;
       periodEnd: number;
-      payload: InsightPayload;       // unione discriminata (Â§4)
+      payload: InsightPayload;       // unione discriminata (§4)
       confidence: number;            // 0..1
       derivedVersion: string;
       status: 'pending' | 'confirmed' | 'corrected' | 'dismissed';
@@ -1080,15 +1185,15 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2)
     }
 
-Quando `retainIp` Ã¨ true:
-- `ListenEvent.ip` Ã¨ conservato (string, IPv4/IPv6)
+Quando `retainIp` è true:
+- `ListenEvent.ip` è conservato (string, IPv4/IPv6)
 - L'IP resta SOLO nel DB locale, mai inviato in rete
-- L'utente puÃ² purgarlo in qualsiasi momento (`purgeIp()` azzera tutti gli ip)
-- Il `country` Ã¨ sempre derivato dall'IP al parse e conservato (indipendentemente dal toggle)
+- L'utente può purgarlo in qualsiasi momento (`purgeIp()` azzera tutti gli ip)
+- Il `country` è sempre derivato dall'IP al parse e conservato (indipendentemente dal toggle)
 
-Quando `retainIp` Ã¨ false (default):
-- `ListenEvent.ip` Ã¨ null dopo il parse
-- Il `country` Ã¨ derivato e conservato (privacy-by-design)
+Quando `retainIp` è false (default):
+- `ListenEvent.ip` è null dopo il parse
+- Il `country` è derivato e conservato (privacy-by-design)
 
 ## 4. Payload degli Insight (unione discriminata)
 
@@ -1105,7 +1210,7 @@ Quando `retainIp` Ã¨ false (default):
       avgValence: number;
       avgEnergy: number;
       nightShare: number;               // quota ascolti 00-06
-      repeatRate: number;               // quota brani giÃ  noti
+      repeatRate: number;               // quota brani già noti
     }
 
     export interface MoodPeriodPayload {
@@ -1141,7 +1246,7 @@ Quando `retainIp` Ã¨ false (default):
 
 ## 5. Regole di deduplicazione tracce (DEDUP)
 
-PrioritÃ  per `canonicalKey`, valutata al momento dell'upsert:
+Priorità per `canonicalKey`, valutata al momento dell'upsert:
 
 | # | Regola | canonicalKey |
 |---|--------|--------------|
@@ -1151,21 +1256,21 @@ PrioritÃ  per `canonicalKey`, valutata al momento dell'upsert:
 
 `durationBucketMs = Math.floor(durationMs / 2000) * 2000` (bucket da 2 secondi)
 
-`normalize(s)`: lowercase â†’ rimuovi feat./ft./with â†’ rimuovi contenuti tra parentesi tonde/quadre â†’ rimuovi punteggiatura â†’ collassa spazi â†’ trim.
+`normalize(s)`: lowercase → rimuovi feat./ft./with → rimuovi contenuti tra parentesi tonde/quadre → rimuovi punteggiatura → collassa spazi → trim.
 
 ### Tradeoff di DEDUP-3 con durata (documentato)
 
 - **Pro**: includere la durata riduce drasticamente le fusioni false di brani omonimi ma diversi (radio edit vs album version vs live)
-- **Contro**: puÃ² separare la stessa registrazione quando la durata differisce tra piattaforme (remaster, rounding Â±1-2s)
+- **Contro**: può separare la stessa registrazione quando la durata differisce tra piattaforme (remaster, rounding ±1-2s)
 - **Mitigazione**: DEDUP-1/2 (ISRC/MBID) catturano comunque quelle; il bucket da 2s assorbe il rounding
 - **Rischio accettato**: registrazioni omonime con durata identica restano fuse (documentato; mitigabile in futuro con fuzzy a 3 campi: nome+artista+durata+album)
 
 Comportamento upsert:
-- Se esiste track con stesso canonicalKey â†’ aggiungi platformId, aggiorna lastSeenAt e contatori
+- Se esiste track con stesso canonicalKey → aggiungi platformId, aggiorna lastSeenAt e contatori
 - Altrimenti crea nuova track
-- Conflitti nome: il nome visualizzato Ã¨ quello della prima piattaforma importata per ordine di prioritÃ  (spotify > apple > tidal > listenbrainz > altro), salvo override utente futuro
+- Conflitti nome: il nome visualizzato è quello della prima piattaforma importata per ordine di priorità (spotify > apple > tidal > listenbrainz > altro), salvo override utente futuro
 
-## 6. Schema Dexie (IndexedDB) â€” versione 1
+## 6. Schema Dexie (IndexedDB) — versione 1
 
     db.version(1).stores({
       listens:       '&eventKey, timestamp, startedAt, trackId, platform, day, importId',
@@ -1190,10 +1295,10 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 - **MIG-3**: ogni modifica ai parametri di analisi cambia `derivedVersion` (hash del config); insight con version vecchia sono marcati `stale` e ricalcolati al prossimo avvio
 - **MIG-4**: i contatori denormalizzati (`listenCount`) sono ricalcolabili con `recount()`; servono solo per performance UI
 
-## 8. Cosa NON Ã¨ nello schema (decisioni esplicite)
+## 8. Cosa NON è nello schema (decisioni esplicite)
 
-- **Raw payload piattaforma**: non persistito (ADR-0003). Il file dell'utente Ã¨ la fonte di veritÃ ; l'import Ã¨ ri-eseguibile
-- **IP address**: non persistito DI DEFAULT. Conservato SOLO con toggle esplicito `PrivacySettings.retainIp`; mai inviato in rete; purgabile con `purgeIp()`. Il `country` Ã¨ sempre derivato e conservato
+- **Raw payload piattaforma**: non persistito (ADR-0003). Il file dell'utente è la fonte di verità; l'import è ri-eseguibile
+- **IP address**: non persistito DI DEFAULT. Conservato SOLO con toggle esplicito `PrivacySettings.retainIp`; mai inviato in rete; purgabile con `purgeIp()`. Il `country` è sempre derivato e conservato
 - **Coordinate GPS**: mai raccolte
 - **Testi/lyrics**: fuori scope
 
@@ -1205,69 +1310,86 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione eseguibile |
 
+
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
 
-# 03-ADAPTERS/SPEC-TEMPLATE â€” Template Specifica Adapter
+# 03-ADAPTERS/SPEC-TEMPLATE — Template Specifica Adapter
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 2
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
 > Scopo: formato riutilizzabile per ogni adapter. Copia questo template in `03-ADAPTERS/<platform>.md` e compilalo.
 
 ---
 
 # Adapter <PLATFORM_NAME>
 
-> Status:
-[Stato iniziale] â†’ [Rilevamento formato] â†’ [Parsing streaming] â†’ [Normalizzazione] â†’ [Upsert DB]
+> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: <data>
+> Piattaforma: <nome commerciale>
+> Sede legale: <paese>
+> Tier: <S / A / B> · Priorità MVP: <sì / no>
+
+## 1. Metodi di accesso
+
+| Canale | Disponibile | Formato output | Frequenza | Note |
+|--------|:-----------:|----------------|-----------|------|
+| Export GDPR | sì/no | <JSON/CSV/ZIP> | Manuale | |
+| API pubblica | sì/no | <REST/GraphQL> | Real-time | |
+| Scrobbling (Last.fm/LB) | sì/no | — | Continuo | |
+| File utente diretto | sì/no | <descrivi> | — | |
+
+## 2. Flusso di import (solo export GDPR se applicabile)
+
+[Stato iniziale] → [Rilevamento formato] → [Parsing streaming] → [Normalizzazione] → [Upsert DB]
 
 
 Descrivi:
 - Come l'utente procura il file (URL, passaggi)
-- Come l'adapter lo riconosce (`detect(input)` â€” firma magica, header, nome file)
+- Come l'adapter lo riconosce (`detect(input)` — firma magica, header, nome file)
 - Come gestisce file multipli (Spotify: ZIP con JSON partizionati)
 
-## 3. Mapping campi sorgente â†’ unificato
+## 3. Mapping campi sorgente → unificato
 
 ### 3.1 ListenEvent
 
 | Campo unificato | Campo sorgente | Tipo sorgente | Trasformazione | Note |
 |-----------------|----------------|---------------|----------------|------|
-| `timestamp` | | | | vedi Â§2 (semantica temporale) |
-| `startedAt` | | | | derivato se mancante |
-| `durationMs` | | | | |
-| `eventKey` | | | | regola di calcolo |
-| `platform` | (fisso) | | | |
-| `track.name` | | | | |
-| `track.artist` | | | | |
-| `track.album` | | | | nullable |
-| `track.isrc` | | | | nullable |
-| `track.mbid` | | | | nullable; lookup se possibile |
-| `deviceType` | | | | mapping a enum |
-| `deviceDetail` | | | | stringa raw |
-| `country` | | | | ISO 3166-1 |
-| `ip` | | | | SOLO se `retainIp` true |
-| `shuffle` | | | | nullable |
-| `skipped` | | | | bool; regola derivata se inaffidabile |
-| `offline` | | | | nullable |
-| `incognito` | | | | nullable |
-| `reasonStart` | | | | raw string |
-| `reasonEnd` | | | | raw string |
-| `completed` | | | | bool (derivata da duration/total) |
+| `timestamp` | — | — | — | vedi §5 (semantica temporale) |
+| `startedAt` | — | — | — | derivato se mancante |
+| `durationMs` | — | — | — | — |
+| `eventKey` | — | — | — | regola di calcolo |
+| `platform` | (fisso) | string | — | — |
+| `track.name` | — | string | — | — |
+| `track.artist` | — | string | — | — |
+| `track.album` | — | string | — | nullable |
+| `track.isrc` | — | string | — | nullable |
+| `track.mbid` | — | string | — | nullable; lookup se possibile |
+| `deviceType` | — | string | — | mapping a enum |
+| `deviceDetail` | — | string | — | stringa raw |
+| `country` | — | string | — | ISO 3166-1 |
+| `ip` | — | string | — | SOLO se `retainIp` true |
+| `shuffle` | — | bool | — | nullable |
+| `skipped` | — | bool | — | regola derivata se inaffidabile |
+| `offline` | — | bool | — | nullable |
+| `incognito` | — | bool | — | nullable |
+| `reasonStart` | — | string | — | raw string |
+| `reasonEnd` | — | string | — | raw string |
+| `completed` | — | bool | — | derivata da duration/total |
 
 ### 3.2 Library / Playlist / Artist / Album
 
-| EntitÃ  | Campo | Sorgente | Note |
+| Entità | Campo | Sorgente | Note |
 |--------|-------|----------|------|
-| Artist | ... | ... | |
-| Album | ... | ... | |
-| Playlist | ... | ... | |
+| Artist | — | — | — |
+| Album | — | — | — |
+| Playlist | — | — | — |
+| PlaylistItem | — | — | — |
 
 ## 4. Edge case noti (catalogo E)
 
-Copia il catalogo da `01-PLATFORMS.md` Â§5 filtrando per questa piattaforma, poi aggiungi eventuali nuovi:
+Copia il catalogo da `01-PLATFORMS.md` §5 filtrando per questa piattaforma, poi aggiungi eventuali nuovi:
 
 | # | Descrizione | Impatto | Azione adapter |
 |---|-------------|---------|----------------|
-| E.N.1 | | | |
+| E.N.1 | — | — | — |
 
 ## 5. Semantica temporale
 
@@ -1275,7 +1397,7 @@ Specifica chiaramente: il timestamp sorgente rappresenta **l'inizio** o la **fin
 
 ## 6. Regole di dedup tracce
 
-Riferimento a `02-DATA-SCHEMA.md` Â§5 (DEDUP-1..3). Se la piattaforma fornisce ISRC/MBID, specificarlo. Altrimenti conferma DEDUP-3.
+Riferimento a `02-DATA-SCHEMA.md` §5 (DEDUP-1..3). Se la piattaforma fornisce ISRC/MBID, specificarlo. Altrimenti conferma DEDUP-3.
 
 ## 7. Comportamento privacy
 
@@ -1283,22 +1405,22 @@ Riferimento a `02-DATA-SCHEMA.md` Â§5 (DEDUP-1..3). Se la piattaforma fornisce
 |----------------|---------|---------------------|
 | IP address | scartato dopo `country` | conservato |
 | Coordinate GPS | mai raccolte | mai raccolte |
-| ... | | |
+| ... | — | — |
 
-## 8. Test â€” fixture atteso
+## 8. Test — fixture atteso
 
 Riferimento a `fixtures/synthetic-history/<platform>-sample.json`. Il fixture deve contenere almeno un esempio di ogni edge case E.N.x.
 
 Casi di test minimi:
 1. Import pulito (happy path)
-2. Idempotenza (re-import stesso file â†’ 0 duplicati)
-3. Ogni edge case E.N.x â†’ risultato atteso documentato
-4. DEDUP: due record con stesso ISRC â†’ una sola track
-5. DEDUP: due record omonimi senza ISRC, durata diversa â†’ due track separate
+2. Idempotenza (re-import stesso file → 0 duplicati)
+3. Ogni edge case E.N.x → risultato atteso documentato
+4. DEDUP: due record con stesso ISRC → una sola track
+5. DEDUP: due record omonimi senza ISRC, durata diversa → due track separate
 
 ## 9. Segnalazione all'utente
 
-Elenco messaggi UI che l'adapter puÃ² emettere:
+Elenco messaggi UI che l'adapter può emettere:
 - Warning: "X eventi con timestamp invalidi scartati"
 - Error: "Formato file non riconosciuto"
 - Info: "Import completato: X eventi, Y brani unici"
@@ -1315,36 +1437,38 @@ Dettagli specifici per questa piattaforma che non rientrano nelle sezioni preced
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
-| 0.1 | Sessione 2 | Template iniziale |
+| 1.0 | Sessione 2 | Template approvato |
+| 0.1 | Sessione 2 | Prima bozza |
+
 
 ===== FILE: docs/03-ADAPTERS/spotify.md =====
 
 # Adapter Spotify
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 2
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
 > Piattaforma: Spotify
 > Sede legale: Svezia
-> Tier: **S** Â· PrioritÃ  MVP: **sÃ¬**
+> Tier: **S** · Priorità MVP: **sì**
 
 ## 1. Metodi di accesso
 
 | Canale | Disponibile | Formato output | Frequenza | Note |
 |--------|:-----------:|----------------|-----------|------|
-| Export GDPR | âœ… | JSON in ZIP | Manuale | "Extended streaming history" |
-| API pubblica | âš ï¸ | REST | Real-time | Deprecate audio-features (2024-11); Dev Mode limitato |
-| Scrobbling LB/L.fm | âœ… | â€” | Continuo | via client terzi |
+| Export GDPR | ✅ | JSON in ZIP | Manuale | "Extended streaming history" |
+| API pubblica | ⚠️ | REST | Real-time | Deprecate audio-features (2024-11); Dev Mode limitato |
+| Scrobbling LB/L.fm | ✅ | — | Continuo | via client terzi |
 
-**Canale principale MVP**: Export GDPR. L'API pubblica Ã¨ usata solo per recupero catalog metadata (non per cronologia).
+**Canale principale MVP**: Export GDPR. L'API pubblica è usata solo per recupero catalog metadata (non per cronologia).
 
 ## 2. Flusso di import
 
 ### 2.1 Come l'utente procura il file
 
-1. Account Spotify â†’ Privacy â†’ "Download your data"
+1. Account Spotify → Privacy → "Download your data"
 2. Seleziona **"Extended streaming history"** (non la cronologia breve!)
 3. Attesa: da 4 ore a 30 giorni (email con link)
 4. Download: archivio ZIP contenente:
-   - `Streaming_History_Audio_<periodo>_<n>.json` (uno o piÃ¹)
+   - `Streaming_History_Audio_<periodo>_<n>.json` (uno o più)
    - `Streaming_History_Video_<periodo>.json` (se presente)
    - `Streaming_History_Podcast_<periodo>_<n>.json`
    - `Streaming_History_Audiobook_<periodo>_<n>.json`
@@ -1369,23 +1493,23 @@ L'adapter riconosce il file da:
 - Gestione file multipli audio/video/podcast/audiobook in parallelo
 - File `SearchQueries.json`, `Playlist*.json`, `YourLibrary.json`, `Follow.json` processati separatamente per popolare library/playlists
 
-## 3. Mapping campi sorgente â†’ unificato
+## 3. Mapping campi sorgente → unificato
 
 ### 3.1 ListenEvent
 
 | Campo unificato | Campo sorgente | Tipo sorgente | Trasformazione | Note |
 |-----------------|----------------|---------------|----------------|------|
 | `timestamp` | `ts` | ISO 8601 UTC | `Date.parse(ts)` | **FINE ascolto** |
-| `startedAt` | â€” | â€” | `timestamp - ms_played` | derivato |
+| `startedAt` | — | — | `timestamp - ms_played` | derivato |
 | `durationMs` | `ms_played` | int | diretto | |
-| `eventKey` | â€” | â€” | `'spotify:' + (spotify_track_uri ?? sha1(name+artist+ts))` | se URI mancante (podcast?), hash |
-| `platform` | (fisso) | â€” | `'spotify'` | |
-| `track.name` | `master_metadata_track_name` | string/null | diretto; null â†’ skip evento | |
-| `track.artist` | `master_metadata_album_artist_name` | string/null | diretto; null â†’ "Unknown" | |
+| `eventKey` | — | — | `'spotify:' + (spotify_track_uri ?? sha1(name+artist+ts))` | se URI mancante (podcast?), hash |
+| `platform` | (fisso) | — | `'spotify'` | |
+| `track.name` | `master_metadata_track_name` | string/null | diretto; null → skip evento | |
+| `track.artist` | `master_metadata_album_artist_name` | string/null | diretto; null → "Unknown" | |
 | `track.album` | `master_metadata_album_album_name` | string/null | nullable | |
-| `track.isrc` | â€” | â€” | null (non nell'export GDPR) | recuperabile via MBID lookup successivo |
-| `track.mbid` | â€” | â€” | null | lookup enrichment pipeline |
-| `deviceType` | `platform` | string | mapping Â§3.2 | |
+| `track.isrc` | — | — | null (non nell'export GDPR) | recuperabile via MBID lookup successivo |
+| `track.mbid` | — | — | null | lookup enrichment pipeline |
+| `deviceType` | `platform` | string | mapping §3.2 | |
 | `deviceDetail` | `platform` | string | valore raw | |
 | `country` | `conn_country` | string | ISO 3166-1 alpha-2 | |
 | `ip` | `ip_addr` | string | conservato SOLO se `PrivacySettings.retainIp` | |
@@ -1395,9 +1519,9 @@ L'adapter riconosce il file da:
 | `incognito` | `incognito_mode` | bool | diretto | |
 | `reasonStart` | `reason_start` | string | diretto | |
 | `reasonEnd` | `reason_end` | string | diretto | |
-| `completed` | â€” | â€” | `ms_played >= durataCatalogo - 5000` | 5s tolleranza |
+| `completed` | — | — | `ms_played >= durataCatalogo - 5000` | 5s tolleranza |
 
-### 3.2 Mapping `platform` â†’ `deviceType`
+### 3.2 Mapping `platform` → `deviceType`
 
 | Pattern `platform` | `deviceType` |
 |---------------------|--------------|
@@ -1409,52 +1533,52 @@ L'adapter riconosce il file da:
 | `/speaker|Cast|Sonos/i` | `speaker` |
 | altro | `unknown` |
 
-Nota: post ott-2023 `platform` Ã¨ generico (`android`, `windows`, `linux`). In questi casi `deviceDetail` Ã¨ meno informativo ma `deviceType` resta derivabile.
+Nota: post ott-2023 `platform` è generico (`android`, `windows`, `linux`). In questi casi `deviceDetail` è meno informativo ma `deviceType` resta derivabile.
 
 ### 3.3 Regola `skipped` derivata (edge case E1)
 
-Il campo `skipped` Spotify Ã¨ inaffidabile (tutti false tra 2015-04 e 2022-10). Adottiamo:
+Il campo `skipped` Spotify è inaffidabile (tutti false tra 2015-04 e 2022-10). Adottiamo:
 
     isSkipped = skipped === true
              OR reason_end IN ('backbtn', 'fwdbtn', 'unknown')
              OR (reason_end === 'endplay' AND ms_played < durataCatalogo * 0.80)
 
-`durataCatalogo` Ã¨ la durata del brano da metadata; se non disponibile, soglia fissa `ms_played < 30000`.
+`durataCatalogo` è la durata del brano da metadata; se non disponibile, soglia fissa `ms_played < 30000`.
 
 ### 3.4 Library / Playlist / Artist / Album
 
-| EntitÃ  | File sorgente | Campo chiave |
+| Entità | File sorgente | Campo chiave |
 |--------|---------------|--------------|
 | Artist seguito | `Follow.json` | `artist` + `spotify_artist_uri` |
 | Album salvato | `YourLibrary.json` (`tracks`) | dedotto da track salvata |
 | Track salvata | `YourLibrary.json` (`tracks`) | `trackUri` |
 | Playlist | `Playlist*.json` | `name`, `lastModifiedDate` |
-| PlaylistItem | `Playlist*.json` â†’ `items` | `track.trackUri`, `addedDate` |
+| PlaylistItem | `Playlist*.json` → `items` | `track.trackUri`, `addedDate` |
 
 ## 4. Edge case noti
 
 | # | Descrizione | Impatto | Azione adapter |
 |---|-------------|---------|----------------|
-| E1 | `skipped` inaffidabile 2015-04 â†’ 2022-10 | Statistiche skip errate | Regola derivata Â§3.3 |
+| E1 | `skipped` inaffidabile 2015-04 → 2022-10 | Statistiche skip errate | Regola derivata §3.3 |
 | E2 | Timestamp sovrapposti ~2.6% durata | Durata totale sovrastimata | Dedup via `eventKey` univoco; `ImportRecord.warnings` conta |
-| E3 | `offline_timestamp` unitÃ  cambiate (s â†’ ms) | Timestamp errato | Rileva valore < 1e12 â†’ moltiplica 1000 |
+| E3 | `offline_timestamp` unità cambiate (s → ms) | Timestamp errato | Rileva valore < 1e12 → moltiplica 1000 |
 | E4 | Stessa registrazione con URI diversi (singolo + album + compilation) | Conteggi frammentati | DEDUP via ISRC/MBID dopo enrichment |
-| E5 | GranularitÃ  `platform` cambiata ott-2023 | DiscontinuitÃ  deviceType | Mapping pattern-based Â§3.2 |
-| E6 | Podcast / video / audiobook con `spotify_track_uri` null | Eventi incompleti | Se `episode_name` presente â†’ tipo `podcast` (se supportato); altrimenti skip con warning |
+| E5 | Granularità `platform` cambiata ott-2023 | Discontinuità deviceType | Mapping pattern-based §3.2 |
+| E6 | Podcast / video / audiobook con `spotify_track_uri` null | Eventi incompleti | Se `episode_name` presente → tipo `podcast` (se supportato); altrimenti skip con warning |
 
 ## 5. Semantica temporale
 
-- `ts` = **istante in cui lo stream Ã¨ terminato** (fine ascolto)
+- `ts` = **istante in cui lo stream è terminato** (fine ascolto)
 - `timestamp` (unificato) = `ts`
 - `startedAt` = `ts - ms_played`
 
 ## 6. Dedup tracce
 
-- Export GDPR **non fornisce ISRC nÃ© MBID**
-- `spotify_track_uri` non Ã¨ ISRC/MBID (Ã¨ ID proprietario Spotify)
+- Export GDPR **non fornisce ISRC né MBID**
+- `spotify_track_uri` non è ISRC/MBID (è ID proprietario Spotify)
 - **DEDUP-3** si applica di default (fuzzy name+artist+duration bucket 2s)
-- Dopo enrichment (MusicBrainz lookup opzionale) il canonicalKey puÃ² essere promosso a DEDUP-1/2 se ISRC/MBID trovato
-- La promozione Ã¨ implementata come job `rekey()` nel core
+- Dopo enrichment (MusicBrainz lookup opzionale) il canonicalKey può essere promosso a DEDUP-1/2 se ISRC/MBID trovato
+- La promozione è implementata come job `rekey()` nel core
 
 ## 7. Privacy
 
@@ -1465,20 +1589,20 @@ Il campo `skipped` Spotify Ã¨ inaffidabile (tutti false tra 2015-04 e 2022-10)
 | `SearchQueries.json` | processato, conservato in `searchQueries` (tabella dedicata, opzionale) | idem |
 | `CarDetectionEvent.json` | processato SOLO se utente acconsente (opt-in esplicito separato) | idem |
 
-Nota: `CarDetectionEvent` Ã¨ sensibile (tracciamento movimenti). Trattarlo come **consenso separato** da `retainIp`.
+Nota: `CarDetectionEvent` è sensibile (tracciamento movimenti). Trattarlo come **consenso separato** da `retainIp`.
 
-## 8. Test â€” fixture atteso
+## 8. Test — fixture atteso
 
-File: `fixtures/synthetic-history/spotify-sample.json` (Sessione 2 â€” vedi sotto).
+File: `fixtures/synthetic-history/spotify-sample.json` (Sessione 2 — vedi sotto).
 
 Casi minimi:
-1. **Happy path**: 3 eventi normali â†’ 3 ListenEvent, 3 track uniche
-2. **Idempotenza**: re-import stesso file â†’ 0 nuovi eventi (`eventsDuplicated = 3`)
-3. **E1 skipped**: evento con `reason_end: 'fwdbtn'`, `skipped: false` â†’ `skipped: true` derivato
-4. **E3 offline**: `offline_timestamp: 1625932808` (vecchia unitÃ ) â†’ convertito a `1625932808000`
-5. **E4 URI duplicati**: due eventi con URI diversi ma stesso nome+artista+durata â†’ una sola Track
+1. **Happy path**: 3 eventi normali → 3 ListenEvent, 3 track uniche
+2. **Idempotenza**: re-import stesso file → 0 nuovi eventi (`eventsDuplicated = 3`)
+3. **E1 skipped**: evento con `reason_end: 'fwdbtn'`, `skipped: false` → `skipped: true` derivato
+4. **E3 offline**: `offline_timestamp: 1625932808` (vecchia unità) → convertito a `1625932808000`
+5. **E4 URI duplicati**: due eventi con URI diversi ma stesso nome+artista+durata → una sola Track
 6. **E5 platform pre/post ott-2023**: entrambi mappati a `deviceType` corretto
-7. **E6 podcast**: evento con `episode_name` non null â†’ evento tipo `podcast` o skip con warning
+7. **E6 podcast**: evento con `episode_name` non null → evento tipo `podcast` o skip con warning
 8. **DEDUP promozione**: dopo enrichment con ISRC trovato, canonicalKey cambia da `fuzzy:...` a `isrc:...`
 9. **Privacy retainIp=true**: `ip` conservato
 10. **Privacy retainIp=false**: `ip` = null, `country` valorizzato
@@ -1499,7 +1623,7 @@ Casi minimi:
 - **Chunking**: batch da 1000 eventi per upsert, per evitare memory spike su file grandi (155MB+ di JSON pretty-printed)
 - **Streaming parse**: usare `stream-json` o equivalente per AsyncIterable; non caricare tutto il JSON
 - **Retry enrichment**: se MusicBrainz lookup fallisce per un track, riprova dopo 24h (queue)
-- **Ordine file**: processare i JSON in ordine cronologico inverso (piÃ¹ recente â†’ piÃ¹ vecchio) per avere `lastSeenAt` corretto al primo passaggio
+- **Ordine file**: processare i JSON in ordine cronologico inverso (più recente → più vecchio) per avere `lastSeenAt` corretto al primo passaggio
 
 ---
 
@@ -1509,11 +1633,12 @@ Casi minimi:
 |----------|------|-----------|
 | 0.1 | Sessione 2 | Prima specifica completa |
 
+
 ===== FILE: docs/04-ANALYSIS-ALGORITHMS.md =====
 
-# 04 â€” Algoritmi di Analisi
+# 04 — Algoritmi di Analisi
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 4
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 4
 > Vincolante per: `packages/core/analysis/*` e relativi test
 
 ---
@@ -1528,13 +1653,13 @@ Ogni insight/sessione salvati nel DB porta un campo `derivedVersion`: stringa es
 
 dove `configObject` contiene tutti i parametri dell'algoritmo (threshold, window, weights). **Quando i parametri cambiano, cambia la versione**: gli insight vecchi diventano `stale` e vengono ricalcolati al prossimo avvio.
 
-### 1.2 IncrementalitÃ 
+### 1.2 Incrementalità
 
 Tutti gli algoritmi devono essere **incrementali**: dato lo stato precedente + nuovi eventi, aggiornare lo stato senza ricalcolare tutto. Serve per non bloccare l'UI durante import di file grandi.
 
 ### 1.3 Persistenza
 
-| EntitÃ  | Tabella | Aggiornato |
+| Entità | Tabella | Aggiornato |
 |--------|---------|------------|
 | `ListeningSession` | `sessions` | Ad ogni nuovo evento (estende o chiude sessione) |
 | `Insight` (mood) | `insights` type=mood_day/week/month | Fine giornata/settimana/mese |
@@ -1547,10 +1672,10 @@ Tutti gli algoritmi devono essere **incrementali**: dato lo stato precedente + n
 
 Se mancano `AudioFeatures` (valence/energy null), l'algoritmo:
 - Non produce insight basati su mood (salta)
-- Usa `genre` come proxy quando disponibile (mapping genreâ†’valence/energy di default)
+- Usa `genre` come proxy quando disponibile (mapping genre→valence/energy di default)
 - Logga warning aggregato "X eventi senza audio features"
 
-### 1.5 Tabella config â†’ derivedVersion
+### 1.5 Tabella config → derivedVersion
 
 | Algoritmo | Config chiave | Versione iniziale |
 |-----------|---------------|-------------------|
@@ -1567,7 +1692,7 @@ Se mancano `AudioFeatures` (valence/energy null), l'algoritmo:
 
 ### 2.1 Scopo
 
-Dividere la sequenza cronologica di `ListenEvent` in **sessioni di ascolto continue**: una sessione Ã¨ una sequenza di eventi dove ogni evento inizia entro `gapThresholdMs` dalla fine del precedente.
+Dividere la sequenza cronologica di `ListenEvent` in **sessioni di ascolto continue**: una sessione è una sequenza di eventi dove ogni evento inizia entro `gapThresholdMs` dalla fine del precedente.
 
 ### 2.2 Algoritmo
 
@@ -1627,7 +1752,7 @@ Dividere la sequenza cronologica di `ListenEvent` in **sessioni di ascolto conti
 
 | Parametro | Default | Range | Note |
 |-----------|---------|-------|------|
-| `gapThresholdMs` | 1.800.000 (30 min) | 300.000 - 7.200.000 | Utente puÃ² personalizzare |
+| `gapThresholdMs` | 1.800.000 (30 min) | 300.000 - 7.200.000 | Utente può personalizzare |
 
 ### 2.4 Esempio numerico
 
@@ -1636,18 +1761,18 @@ Input (3 eventi):
 - E2: 10:07-10:12 (Brano B)
 - E3: 11:30-11:35 (Brano C)
 
-Gap E1â†’E2: 2 min < 30 min â†’ stessa sessione
-Gap E2â†’E3: 78 min > 30 min â†’ nuova sessione
+Gap E1→E2: 2 min < 30 min → stessa sessione
+Gap E2→E3: 78 min > 30 min → nuova sessione
 
 Output: 2 sessioni (S1: 30 min, 3 eventi, 2 track; S2: 5 min, 1 evento, 1 track)
 
 ### 2.5 Invarianti testabili
 
-- âˆ€ session: `durationMs â‰¥ 0`
-- âˆ€ session: `eventCount â‰¥ 1`
-- âˆ€ session: `trackCount â‰¤ eventCount`
-- âˆ€ session: `startTime â‰¤ endTime`
-- Sum(session.durationMs) â‰¤ total listening time + (n-1) Ã— gapThresholdMs
+- ∀ session: `durationMs ≥ 0`
+- ∀ session: `eventCount ≥ 1`
+- ∀ session: `trackCount ≤ eventCount`
+- ∀ session: `startTime ≤ endTime`
+- Sum(session.durationMs) ≤ total listening time + (n-1) × gapThresholdMs
 
 ---
 
@@ -1657,9 +1782,9 @@ Output: 2 sessioni (S1: 30 min, 3 eventi, 2 track; S2: 5 min, 1 evento, 1 track)
 
 Calcolare il **mood dominante** di un periodo (giorno/settimana/mese) come uno dei 6 valori: `sad | angry | neutral | calm | happy | excited`.
 
-### 3.2 Mappatura valence/energy â†’ mood
+### 3.2 Mappatura valence/energy → mood
 
-Il quadrante Ã¨ definito da due soglie:
+Il quadrante è definito da due soglie:
 
     valenceThreshold = 0.5
     energyThreshold = 0.5
@@ -1667,16 +1792,16 @@ Il quadrante Ã¨ definito da due soglie:
 | Valence | Energy | Mood |
 |---------|--------|------|
 | < 0.5 | < 0.5 | sad |
-| < 0.5 | â‰¥ 0.5 | angry |
+| < 0.5 | ≥ 0.5 | angry |
 | [0.4, 0.6] | [0.4, 0.6] | neutral |
-| â‰¥ 0.5 | < 0.5 | calm |
-| â‰¥ 0.5 | [0.5, 0.75) | happy |
-| â‰¥ 0.5 | â‰¥ 0.75 | excited |
+| ≥ 0.5 | < 0.5 | calm |
+| ≥ 0.5 | [0.5, 0.75) | happy |
+| ≥ 0.5 | ≥ 0.75 | excited |
 
 Note:
-- `neutral` Ã¨ una **fascia centrale** (non un punto) per evitare flip-flop
+- `neutral` è una **fascia centrale** (non un punto) per evitare flip-flop
 - `neutral` sovrascrive `sad`/`angry`/`calm`/`happy` se entrambe le coordinate sono nella fascia [0.4, 0.6]
-- `excited` richiede valence ALTA (â‰¥0.5) E energy MOLTO ALTA (â‰¥0.75)
+- `excited` richiede valence ALTA (≥0.5) E energy MOLTO ALTA (≥0.75)
 
 ### 3.3 Mood di periodo
 
@@ -1734,29 +1859,29 @@ Note:
 |-----------|---------|------|
 | `valenceThreshold` | 0.5 | Centro quadrante |
 | `energyThreshold` | 0.5 | Centro quadrante |
-| `neutralBand` | 0.1 | Fascia neutra Â± |
+| `neutralBand` | 0.1 | Fascia neutra ± |
 | `excitedEnergyThreshold` | 0.75 | Per excited serve energy alta |
-| `minEventsPerPeriod` | 3 | Sotto questo soglia â†’ no insight |
+| `minEventsPerPeriod` | 3 | Sotto questo soglia → no insight |
 
 ### 3.5 Esempio numerico
 
-Periodo: lunedÃ¬ (5 eventi)
-- Brano A: valence 0.3, energy 0.4, durata 200s â†’ weight 0.83
-- Brano B: valence 0.7, energy 0.8, durata 240s â†’ weight 1.0
-- Brano C: valence 0.4, energy 0.6, durata 180s â†’ weight 0.75
-- Brano D: valence 0.8, energy 0.9, durata 300s â†’ weight 1.25
-- Brano E: valence 0.5, energy 0.5, durata 220s â†’ weight 0.92
+Periodo: lunedì (5 eventi)
+- Brano A: valence 0.3, energy 0.4, durata 200s → weight 0.83
+- Brano B: valence 0.7, energy 0.8, durata 240s → weight 1.0
+- Brano C: valence 0.4, energy 0.6, durata 180s → weight 0.75
+- Brano D: valence 0.8, energy 0.9, durata 300s → weight 1.25
+- Brano E: valence 0.5, energy 0.5, durata 220s → weight 0.92
 
-Weighted avg valence: (0.3Â·0.83 + 0.7Â·1.0 + 0.4Â·0.75 + 0.8Â·1.25 + 0.5Â·0.92) / 4.75 = 0.585
-Weighted avg energy: (0.4Â·0.83 + 0.8Â·1.0 + 0.6Â·0.75 + 0.9Â·1.25 + 0.5Â·0.92) / 4.75 = 0.675
+Weighted avg valence: (0.3·0.83 + 0.7·1.0 + 0.4·0.75 + 0.8·1.25 + 0.5·0.92) / 4.75 = 0.585
+Weighted avg energy: (0.4·0.83 + 0.8·1.0 + 0.6·0.75 + 0.9·1.25 + 0.5·0.92) / 4.75 = 0.675
 
-Classify: valence â‰¥ 0.5, energy in [0.5, 0.75) â†’ **happy**
+Classify: valence ≥ 0.5, energy in [0.5, 0.75) → **happy**
 
 ### 3.6 Invarianti
 
-- `mood âˆˆ {sad, angry, neutral, calm, happy, excited}`
-- `avgValence âˆˆ [0, 1]`
-- `avgEnergy âˆˆ [0, 1]`
+- `mood ∈ {sad, angry, neutral, calm, happy, excited}`
+- `avgValence ∈ [0, 1]`
+- `avgEnergy ∈ [0, 1]`
 - Se tutti gli eventi hanno lo stesso (v, e), mood = classifyMood(v, e)
 
 ---
@@ -1801,9 +1926,9 @@ Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 ### 4.3 Metriche derivate
 
 - **peakHour / peakDay / peakMonth**: bucket con quota massima
-- **nightShare**: quota ascolti notturni (00:00-05:59) â€” usata in Era detector
+- **nightShare**: quota ascolti notturni (00:00-05:59) — usata in Era detector
 - **weekendShare**: quota sab+dom su totale
-- **seasonalEntropy**: quanto Ã¨ distribuito (bassa = ascolti concentrati in pochi mesi)
+- **seasonalEntropy**: quanto è distribuito (bassa = ascolti concentrati in pochi mesi)
 
 ### 4.4 Parametri
 
@@ -1815,9 +1940,9 @@ Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 
 ### 4.5 Invarianti
 
-- `sum(buckets.values) â‰ˆ 1.0` (tolleranza 0.01)
-- `nightShare âˆˆ [0, 1]`
-- `peakHour âˆˆ 0..23`
+- `sum(buckets.values) ≈ 1.0` (tolleranza 0.01)
+- `nightShare ∈ [0, 1]`
+- `peakHour ∈ 0..23`
 
 ---
 
@@ -1825,9 +1950,9 @@ Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 
 ### 5.1 Scopo
 
-Identificare **ere musicali**: periodi prolungati (â‰¥14 giorni) con caratteristiche coerenti, separati da cambiamenti significativi.
+Identificare **ere musicali**: periodi prolungati (≥14 giorni) con caratteristiche coerenti, separati da cambiamenti significativi.
 
-### 5.2 Algoritmo â€” Sliding window + change point detection
+### 5.2 Algoritmo — Sliding window + change point detection
 
 Approccio: calcolare una "firma musicale" per finestre settimanali, rilevare i punti di cambio significativi.
 
@@ -1939,7 +2064,7 @@ Approccio: calcolare una "firma musicale" per finestre settimanali, rilevare i p
       topGenre = argmax(signature.genreDistribution)
       moodNames = {
         sad: 'Malinconia', angry: 'Rabbia', neutral: 'Neutro',
-        calm: 'Calma', happy: 'FelicitÃ ', excited: 'Energia'
+        calm: 'Calma', happy: 'Felicità', excited: 'Energia'
       }
       return "Era " + moodNames[mood] + " " + topGenre  // es. "Era Malinconia Indie"
 
@@ -1949,9 +2074,9 @@ Approccio: calcolare una "firma musicale" per finestre settimanali, rilevare i p
 |-----------|---------|-------|------|
 | `windowDays` | 14 | 7-30 | Finestra analisi |
 | `stepDays` | 7 | 3-14 | Passo scorrimento |
-| `similarityThreshold` | 0.65 | 0.5-0.8 | Sotto â†’ change point |
-| `minEraDays` | 14 | 7-30 | Sotto â†’ scartata |
-| `minEventsPerWindow` | 5 | 3-10 | Sotto â†’ finestra invalida |
+| `similarityThreshold` | 0.65 | 0.5-0.8 | Sotto → change point |
+| `minEraDays` | 14 | 7-30 | Sotto → scartata |
+| `minEventsPerWindow` | 5 | 3-10 | Sotto → finestra invalida |
 | `weights.genre` | 0.5 | | Peso similarity |
 | `weights.artist` | 0.3 | | |
 | `weights.numeric` | 0.2 | | |
@@ -1967,10 +2092,10 @@ Output: 2 ere separate al confine settimana 11/12.
 
 ### 5.5 Invarianti
 
-- Ere sono **disgiunte e coprenti**: âˆªere = periodo totale, âˆ©ere = âˆ…
+- Ere sono **disgiunte e coprenti**: ∪ere = periodo totale, ∩ere = ∅
 - `era.periodStart < era.periodEnd`
-- `sum(genreDistribution.values) â‰ˆ 1.0`
-- `moodDominant âˆˆ {sad, angry, neutral, calm, happy, excited}`
+- `sum(genreDistribution.values) ≈ 1.0`
+- `moodDominant ∈ {sad, angry, neutral, calm, happy, excited}`
 
 ---
 
@@ -1984,14 +2109,14 @@ Rilevare **anomalie significative** nei pattern di ascolto che suggeriscono even
 
 | Tipo | Descrizione | Trigger |
 |------|-------------|---------|
-| `spike_artist` | Picco improvviso di un artista | quota artista > 2Ã— baseline |
-| `spike_genre` | Picco improvviso di un genere | quota genere > 2Ã— baseline |
-| `valence_drop` | Crollo emotivo | Î”valence > 0.25 su 14gg |
-| `valence_rise` | Risalita emotiva | Î”valence > 0.25 su 14gg |
-| `volume_spike` | Esplosione di ascolto | durata > 2Ã— baseline |
-| `volume_drop` | Silenzio prolungato | durata < 0.3Ã— baseline per â‰¥7gg |
-| `exploration` | Esplorazione intensa | â‰¥10 artisti nuovi in 7gg |
-| `silence` | Periodo di non-ascolto | â‰¥3 giorni senza eventi |
+| `spike_artist` | Picco improvviso di un artista | quota artista > 2× baseline |
+| `spike_genre` | Picco improvviso di un genere | quota genere > 2× baseline |
+| `valence_drop` | Crollo emotivo | Δvalence > 0.25 su 14gg |
+| `valence_rise` | Risalita emotiva | Δvalence > 0.25 su 14gg |
+| `volume_spike` | Esplosione di ascolto | durata > 2× baseline |
+| `volume_drop` | Silenzio prolungato | durata < 0.3× baseline per ≥7gg |
+| `exploration` | Esplorazione intensa | ≥10 artisti nuovi in 7gg |
+| `silence` | Periodo di non-ascolto | ≥3 giorni senza eventi |
 
 ### 6.3 Algoritmo generico (z-score)
 
@@ -2038,9 +2163,9 @@ Rilevare **anomalie significative** nei pattern di ascolto che suggeriscono even
     function generateDescription(eventType, z, metric):
       templates = {
         spike_artist: "Hai scoperto un nuovo artista che ha dominato il tuo ascolto",
-        valence_drop: "La tua musica Ã¨ diventata piÃ¹ malinconica",
-        valence_rise: "La tua musica Ã¨ diventata piÃ¹ allegra",
-        volume_spike: "Hai ascoltato molta piÃ¹ musica del solito",
+        valence_drop: "La tua musica è diventata più malinconica",
+        valence_rise: "La tua musica è diventata più allegra",
+        volume_spike: "Hai ascoltato molta più musica del solito",
         volume_drop: "Hai ascoltato molta meno musica del solito",
         exploration: "Hai esplorato molti nuovi artisti",
         silence: "Periodo di silenzio musicale"
@@ -2056,7 +2181,7 @@ Rilevare **anomalie significative** nei pattern di ascolto che suggeriscono even
       silences = []
       for i in 1..sorted.length-1:
         gap = sorted[i].startedAt - sorted[i-1].timestamp
-        if gap >= 3 * 86400000:  // â‰¥ 3 giorni
+        if gap >= 3 * 86400000:  // ≥ 3 giorni
           silences.push({
             periodStart: sorted[i-1].timestamp,
             periodEnd: sorted[i].startedAt,
@@ -2070,7 +2195,7 @@ Rilevare **anomalie significative** nei pattern di ascolto che suggeriscono even
     function detectExploration(events):
       // 7-day windows, count distinct new artists (mai ascoltati prima)
       ...
-      // trigger: â‰¥10 nuovi artisti in 7 giorni
+      // trigger: ≥10 nuovi artisti in 7 giorni
 
 ### 6.5 Parametri
 
@@ -2088,13 +2213,13 @@ Rilevare **anomalie significative** nei pattern di ascolto che suggeriscono even
 Baseline 60gg: avg volume 3h/giorno, std 1h
 Window 14gg: avg volume 7h/giorno
 
-z = (7 - 3) / 1 = 4.0 > 2.0 â†’ **volume_spike** rilevato con confidence min(1, 4/4) = 1.0
+z = (7 - 3) / 1 = 4.0 > 2.0 → **volume_spike** rilevato con confidence min(1, 4/4) = 1.0
 
 ### 6.7 Invarianti
 
-- `confidence âˆˆ [0, 1]`
-- `eventType âˆˆ enum definito`
-- Eventi non sovrapposti (dedupe mantiene solo quello con confidence piÃ¹ alta)
+- `confidence ∈ [0, 1]`
+- `eventType ∈ enum definito`
+- Eventi non sovrapposti (dedupe mantiene solo quello con confidence più alta)
 - `periodStart < periodEnd`
 
 ---
@@ -2109,7 +2234,7 @@ Generare **ricordi** giornalieri basati su 5 tipologie.
 
 #### `on_this_day`
 
-Trigger: esiste almeno un evento nella stessa data (mese+giorno) di `N` anni fa, con N âˆˆ {1, 2, 3, 5, 10}.
+Trigger: esiste almeno un evento nella stessa data (mese+giorno) di `N` anni fa, con N ∈ {1, 2, 3, 5, 10}.
 
     function generateOnThisDay(today, events):
       memories = []
@@ -2128,7 +2253,7 @@ Trigger: esiste almeno un evento nella stessa data (mese+giorno) di `N` anni fa,
 
 #### `first_time`
 
-Trigger: oggi Ã¨ l'anniversario del primo ascolto di un artista significativo (â‰¥5 brani totali).
+Trigger: oggi è l'anniversario del primo ascolto di un artista significativo (≥5 brani totali).
 
     function generateFirstTime(today, events):
       artistFirstListen = events.groupBy(artistId).map(artist => artist.min(startedAt))
@@ -2165,11 +2290,11 @@ Trigger: raggiungimento di soglie cumulative (1000, 5000, 10000, 50000, 100000 e
 
 #### `return`
 
-Trigger: oggi riascolti un artista/brano che non ascoltavi da â‰¥6 mesi.
+Trigger: oggi riascolti un artista/brano che non ascoltavi da ≥6 mesi.
 
     function generateReturn(today, events):
-      // per ogni artista, trova il gap piÃ¹ lungo tra due ascolti
-      // se un gap si chiude oggi dopo â‰¥180gg â†’ ricordo return
+      // per ogni artista, trova il gap più lungo tra due ascolti
+      // se un gap si chiude oggi dopo ≥180gg → ricordo return
       ...
 
 #### `seasonal`
@@ -2178,8 +2303,8 @@ Trigger: ricorrenza stagionale (ascolti un artista/genere che hai ascoltato prev
 
     function generateSeasonal(today, events):
       currentMonth = monthOf(today)
-      // trova artisti con â‰¥60% degli ascolti concentrati in currentMonth
-      // se quest'anno li hai riascoltati in currentMonth â†’ ricordo
+      // trova artisti con ≥60% degli ascolti concentrati in currentMonth
+      // se quest'anno li hai riascoltati in currentMonth → ricordo
       ...
 
 ### 7.3 Parametri
@@ -2196,18 +2321,18 @@ Trigger: ricorrenza stagionale (ascolti un artista/genere che hai ascoltato prev
 
 Ogni ricordo ha un `score` calcolato come:
 
-    score = baseScore(memoryKind) Ã— relevance Ã— recency
+    score = baseScore(memoryKind) × relevance × recency
 
 - `baseScore`: `on_this_day=10`, `first_time=8`, `milestone=9`, `return=7`, `seasonal=6`
-- `relevance`: `trackCount / medianTrackCount` (quanto Ã¨ rappresentativo il brano)
+- `relevance`: `trackCount / medianTrackCount` (quanto è rappresentativo il brano)
 - `recency`: `exp(-daysAgo / 365)` (attenuazione per distanza)
 
 Il feed ricordi mostra i top N score per giorno.
 
 ### 7.5 Invarianti
 
-- `memoryKind âˆˆ enum`
-- `yearsAgo âˆˆ {1, 2, 3, 5, 10}` per `on_this_day`
+- `memoryKind ∈ enum`
+- `yearsAgo ∈ {1, 2, 3, 5, 10}` per `on_this_day`
 - `text` mai vuoto, contiene sempre almeno un dato concreto (nome artista/brano/numero)
 
 ---
@@ -2253,7 +2378,7 @@ Il feed ricordi mostra i top N score per giorno.
 | Event detector | `{baselineDays, windowDays, zScoreThreshold, silenceMinDays, explorationMinNewArtists, strideDays}` | calcolata |
 | Memory engine | `{onThisDayYears, firstTimeMinListens, milestones, returnMinGapDays, seasonalConcentration}` | calcolata |
 
-Ogni volta che si cambia un parametro di default, la versione cambia e gli insight diventano `stale` â†’ ricalcolo automatico al prossimo avvio.
+Ogni volta che si cambia un parametro di default, la versione cambia e gli insight diventano `stale` → ricalcolo automatico al prossimo avvio.
 
 ---
 
@@ -2261,13 +2386,13 @@ Ogni volta che si cambia un parametro di default, la versione cambia e gli insig
 
 **Utente**: 10.000 eventi in 2 anni.
 
-1. Import â†’ 10.000 ListenEvent persistiti
-2. Session segmentation â†’ ~1.500 sessioni
-3. Mood tracker â†’ 730 insight `mood_day`, 104 `mood_week`, 24 `mood_month`
-4. Pattern analyzer â†’ 3 insight (circadian, weekly, seasonal)
-5. Era detector â†’ ~4-8 ere (dipende da similarity threshold)
-6. Event detector â†’ ~10-30 eventi (spike, drop, exploration)
-7. Memory engine â†’ 1-5 ricordi generati ogni giorno
+1. Import → 10.000 ListenEvent persistiti
+2. Session segmentation → ~1.500 sessioni
+3. Mood tracker → 730 insight `mood_day`, 104 `mood_week`, 24 `mood_month`
+4. Pattern analyzer → 3 insight (circadian, weekly, seasonal)
+5. Era detector → ~4-8 ere (dipende da similarity threshold)
+6. Event detector → ~10-30 eventi (spike, drop, exploration)
+7. Memory engine → 1-5 ricordi generati ogni giorno
 
 Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dopo primo calcolo).
 
@@ -2279,11 +2404,12 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 |----------|------|-----------|
 | 0.1 | Sessione 4 | Prima versione completa |
 
+
 ===== FILE: docs/05-ARCHITECTURE.md =====
 
-# 05 â€” Architettura Tecnica
+# 05 — Architettura Tecnica
 
-> Status: ðŸŸ¡ DRAFT
+> Status: 🟡 DRAFT
 > Versione: 0.1
 > Ultima modifica: Sessione 0 (consolidamento)
 > ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern (da scrivere in Sessione 1)
@@ -2296,30 +2422,30 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 |-----------|-------------|
 | **Local-first** | Tutti i dati vivono nel browser (IndexedDB). L'app funziona offline dopo il primo caricamento |
 | **Privacy-first** | Nessuna telemetria. Le uniche chiamate di rete sono: arricchimento metadati (opzionale), scrobbling hub (opzionale), sync cloud (opzionale, E2E) |
-| **Adapter pattern** | Ogni piattaforma Ã¨ un modulo indipendente che produce il formato unificato; aggiungere una piattaforma = aggiungere un adapter |
+| **Adapter pattern** | Ogni piattaforma è un modulo indipendente che produce il formato unificato; aggiungere una piattaforma = aggiungere un adapter |
 | **Analisi deterministica e documentata** | Ogni insight deriva da formule specificate in `04-ANALYSIS-ALGORITHMS.md`, testabili con fixture |
-| **Progressive enhancement** | Funziona con una sola piattaforma; migliora con piÃ¹ sorgenti |
+| **Progressive enhancement** | Funziona con una sola piattaforma; migliora con più sorgenti |
 
 ## 2. Diagramma a layer
 
-    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚ LIVELLO 4 â€” PRESENTAZIONE (React PWA)          â”‚
-    â”‚  Timeline Â· Home Â· Esplora Â· Analisi Â· Ricordi â”‚
-    â”‚  Impostazioni Â· Import Â· Share                 â”‚
-    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-    â”‚ LIVELLO 3 â€” ANALYSIS ENGINE (Web Worker)       â”‚
-    â”‚  MoodTracker Â· EraDetector Â· EventDetector     â”‚
-    â”‚  MemoryEngine Â· PatternAnalyzer                â”‚
-    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-    â”‚ LIVELLO 2 â€” ENRICHMENT PIPELINE                â”‚
-    â”‚  AudioFeatures Â· MusicBrainz lookup Â· Generi   â”‚
-    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-    â”‚ LIVELLO 1 â€” IMPORT ENGINE (Adapters)           â”‚
-    â”‚  spotify Â· youtube Â· apple Â· deezer Â· tidal    â”‚
-    â”‚  soundcloud Â· lastfm Â· listenbrainz Â· plex     â”‚
-    â”‚            â†“ formato unificato â†“               â”‚
-    â”‚  LOCAL DATABASE (IndexedDB / Dexie)            â”‚
-    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    ┌────────────────────────────────────────────────┐
+    │ LIVELLO 4 — PRESENTAZIONE (React PWA)          │
+    │  Timeline · Home · Esplora · Analisi · Ricordi │
+    │  Impostazioni · Import · Share                 │
+    ├────────────────────────────────────────────────┤
+    │ LIVELLO 3 — ANALYSIS ENGINE (Web Worker)       │
+    │  MoodTracker · EraDetector · EventDetector     │
+    │  MemoryEngine · PatternAnalyzer                │
+    ├────────────────────────────────────────────────┤
+    │ LIVELLO 2 — ENRICHMENT PIPELINE                │
+    │  AudioFeatures · MusicBrainz lookup · Generi   │
+    ├────────────────────────────────────────────────┤
+    │ LIVELLO 1 — IMPORT ENGINE (Adapters)           │
+    │  spotify · youtube · apple · deezer · tidal    │
+    │  soundcloud · lastfm · listenbrainz · plex     │
+    │            ↓ formato unificato ↓               │
+    │  LOCAL DATABASE (IndexedDB / Dexie)            │
+    └────────────────────────────────────────────────┘
 
 ## 3. Formato unificato (record di ascolto)
 
@@ -2349,7 +2475,7 @@ Ogni adapter produce record conformi a questo schema (dettaglio completo in `02-
 
 I campi contestuali sono **opzionali**: le piattaforme che non li forniscono li lasciano null. Le analisi devono degradare con grazia in loro assenza.
 
-## 4. Adapter pattern â€” contratto
+## 4. Adapter pattern — contratto
 
 Ogni adapter espone la stessa interfaccia logica:
 
@@ -2361,9 +2487,9 @@ Ogni adapter espone la stessa interfaccia logica:
     }
 
 Regole:
-- `parse` Ã¨ **streaming** (AsyncIterable): mai caricare 200k eventi in memoria in un colpo
-- Ogni adapter dichiara i propri edge case (vedi `01-PLATFORMS.md` Â§5) e li gestisce o li marca
-- Output grezzo â†’ normalizzazione UTC â†’ deduplicazione â†’ persistenza
+- `parse` è **streaming** (AsyncIterable): mai caricare 200k eventi in memoria in un colpo
+- Ogni adapter dichiara i propri edge case (vedi `01-PLATFORMS.md` §5) e li gestisce o li marca
+- Output grezzo → normalizzazione UTC → deduplicazione → persistenza
 
 ## 5. Database locale
 
@@ -2378,49 +2504,49 @@ Regole:
 Problema: Spotify ha deprecato le audio-features (nov 2024); Apple non le ha mai avute.
 
 Strategia a cascata per ogni traccia:
-1. **Cache locale** (giÃ  calcolata in precedenza)
+1. **Cache locale** (già calcolata in precedenza)
 2. **AcousticBrainz dump** (gratuito, congelato a giu-2022) per MBID/ISRC noti
-3. **API esterna** (FreqBlog / Musicae) â€” chiamata opzionale, governata dal toggle privacy
+3. **API esterna** (FreqBlog / Musicae) — chiamata opzionale, governata dal toggle privacy
 4. **Essentia.js (WASM) in-browser** su preview audio quando disponibile
-5. **Fallback**: nessuna feature â†’ le analisi basate su valence/energy degradano a analisi per genere/tag
+5. **Fallback**: nessuna feature → le analisi basate su valence/energy degradano a analisi per genere/tag
 
 Ogni feature salvata registra la **fonte** (`source: acousticbrainz | api | essentia | manual`) per trasparenza e ri-calcolo futuro.
 
 ## 7. Analysis engine
 
-Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, EraDetector, EventDetector, MemoryEngine, PatternAnalyzer. Ogni algoritmo Ã¨ specificato con formula, parametri e esempio inputâ†’output in `04-ANALYSIS-ALGORITHMS.md` (Sessione 4). I risultati sono persistiti in `insights` con versionamento del parametro-set (permette ricalcolo coerente).
+Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, EraDetector, EventDetector, MemoryEngine, PatternAnalyzer. Ogni algoritmo è specificato con formula, parametri e esempio input→output in `04-ANALYSIS-ALGORITHMS.md` (Sessione 4). I risultati sono persistiti in `insights` con versionamento del parametro-set (permette ricalcolo coerente).
 
 ## 8. Stack tecnologico
 
 | Componente | Scelta | Motivazione |
 |------------|--------|-------------|
 | Runtime UI | React 19 + TypeScript + Vite | Ecosistema, PWA-first |
-| PWA | vite-plugin-pwa (Workbox) | Offline, installabilitÃ  |
-| Stato | Zustand + React Query | Leggerezza, semplicitÃ  |
+| PWA | vite-plugin-pwa (Workbox) | Offline, installabilità |
+| Stato | Zustand + React Query | Leggerezza, semplicità |
 | DB locale | Dexie.js (IndexedDB) | API matura, migrazioni |
-| Grafici | D3.js (custom) + Recharts (standard) | Timeline custom + velocitÃ  |
+| Grafici | D3.js (custom) + Recharts (standard) | Timeline custom + velocità |
 | UI kit | Tailwind + shadcn/ui | Coerenza col design system |
 | Parsing | PapaParse (CSV), JSON nativo, streaming | File grandi |
 | Audio features | Essentia.js (WASM) + API fallback | Open source |
 | Test | Vitest + Playwright | Unit + e2e |
-| Desktop (Fase 2) | Tauri 2.0 | 10x piÃ¹ leggero di Electron |
+| Desktop (Fase 2) | Tauri 2.0 | 10x più leggero di Electron |
 | Sync cloud (Fase 2+, opzionale) | Fastify + PostgreSQL + CRDT + E2E | Solo se richiesto |
 
 ## 9. Struttura monorepo (target Fase 0 tecnica)
 
     life-soundtrack/
-    â”œâ”€â”€ apps/
-    â”‚   â”œâ”€â”€ web/                  # PWA principale
-    â”‚   â””â”€â”€ desktop/              # Tauri (Fase 2)
-    â”œâ”€â”€ packages/
-    â”‚   â”œâ”€â”€ core/
-    â”‚   â”‚   â”œâ”€â”€ adapters/         # un modulo per piattaforma
-    â”‚   â”‚   â”œâ”€â”€ analysis/
-    â”‚   â”‚   â”œâ”€â”€ enrichment/
-    â”‚   â”‚   â”œâ”€â”€ schema/           # tipi TypeScript condivisi
-    â”‚   â”‚   â””â”€â”€ db/
-    â”‚   â””â”€â”€ ui/                   # design system componentizzato
-    â”œâ”€â”€ docs/ Â· design/ Â· fixtures/ Â· scripts/
+    ├── apps/
+    │   ├── web/                  # PWA principale
+    │   └── desktop/              # Tauri (Fase 2)
+    ├── packages/
+    │   ├── core/
+    │   │   ├── adapters/         # un modulo per piattaforma
+    │   │   ├── analysis/
+    │   │   ├── enrichment/
+    │   │   ├── schema/           # tipi TypeScript condivisi
+    │   │   └── db/
+    │   └── ui/                   # design system componentizzato
+    ├── docs/ · design/ · fixtures/ · scripts/
 
 ## 10. Requisiti non funzionali
 
@@ -2431,7 +2557,7 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 | Bundle iniziale | < 300 KB gzip (worker e WASM lazy) |
 | Offline | 100% funzionale dopo primo load |
 | Privacy | Zero PII in uscita senza toggle esplicito |
-| AccessibilitÃ  | WCAG 2.1 AA |
+| Accessibilità | WCAG 2.1 AA |
 | Browser | Chrome/Edge 90+, Firefox 90+, Safari 15+ |
 
 ---
@@ -2442,101 +2568,102 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
 
+
 ===== FILE: docs/06-UX-FLOWS-STATES.md =====
 
-# 06 â€” UX Flows e Stati per Schermata
+# 06 — UX Flows e Stati per Schermata
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 5
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 5
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
 
 ## 1. Matrice stati globale
 
-Ogni schermata puÃ² trovarsi in uno di questi stati:
+Ogni schermata può trovarsi in uno di questi stati:
 
 | Stato | Descrizione | Comportamento |
 |-------|-------------|---------------|
 | `loading` | Dati/caricamento in corso | Spinner/skeleton, nessuna azione utente |
 | `empty` | Nessun dato disponibile | Illustrazione + CTA di uscita |
-| `partial` | Alcuni dati, non tutti | FunzionalitÃ  ridotte + prompt per completare |
-| `ready` | Stato normale | Tutte le funzionalitÃ  attive |
+| `partial` | Alcuni dati, non tutti | Funzionalità ridotte + prompt per completare |
+| `ready` | Stato normale | Tutte le funzionalità attive |
 | `error` | Errore bloccante | Messaggio + retry + fallback |
 | `offline` | Nessuna connessione (solo per feature cloud) | Messaggio + cache locale |
 
-Regola: **mai schermate bianche**. Ogni stato ha un design definito in `15-DESIGN-SYSTEM.md` Â§Empty States.
+Regola: **mai schermate bianche**. Ogni stato ha un design definito in `15-DESIGN-SYSTEM.md` §Empty States.
 
 ## 2. Catalogo schermate con stati
 
-### 2.1 â‘  Benvenuto
+### 2.1 ① Benvenuto
 
 | Stato | Contenuto | CTA |
 |-------|-----------|-----|
-| `ready` (unico) | Logo + tagline + bottone | `i18n: onboarding.start` â†’ â‘¡ |
+| `ready` (unico) | Logo + tagline + bottone | `i18n: onboarding.start` → ② |
 
 Note: nessuna gestione errore (schermata statica).
 
-### 2.2 â‘¡ Privacy
+### 2.2 ② Privacy
 
 | Stato | Contenuto | CTA |
 |-------|-----------|-----|
-| `ready` | Shield + 3 garanzie + bottone | `i18n: onboarding.understood` â†’ â‘¢ |
+| `ready` | Shield + 3 garanzie + bottone | `i18n: onboarding.understood` → ③ |
 
-### 2.3 â‘¢ Import
+### 2.3 ③ Import
 
 | Stato | Comportamento |
 |-------|---------------|
 | `ready` | Lista PlatformCard (tutte vuote) |
-| `partial` | â‰¥1 piattaforma connessa, bottone "Importa tutto" attivo |
+| `partial` | ≥1 piattaforma connessa, bottone "Importa tutto" attivo |
 | `loading` | DropZone mostra "Validazione..." durante drop |
-| `error` | Piattaforma con file invalido â†’ messaggio specifico sotto la card |
-| `empty` | (non applicabile: c'Ã¨ sempre la lista piattaforme) |
+| `error` | Piattaforma con file invalido → messaggio specifico sotto la card |
+| `empty` | (non applicabile: c'è sempre la lista piattaforme) |
 
 **Transizioni**:
-- Drop file â†’ stato `loading` della PlatformCard (spinner interno)
-- Validazione fallita â†’ stato `error` della card con messaggio (es. "Questo file sembra di Apple Music, non di Spotify")
-- Validazione OK â†’ stato `done` della card con badge verde e conteggio
+- Drop file → stato `loading` della PlatformCard (spinner interno)
+- Validazione fallita → stato `error` della card con messaggio (es. "Questo file sembra di Apple Music, non di Spotify")
+- Validazione OK → stato `done` della card con badge verde e conteggio
 - "Importa tutto" disabilitato se 0 piattaforme in stato `done`
 
 **Edge case UX**:
-- Trascinamento di file non supportato â†’ toast "Formato non supportato"
-- Doppio drop stesso file â†’ "GiÃ  importato" (no re-import)
-- File > 500MB â†’ warning "File grande, potrebbe richiedere qualche minuto"
+- Trascinamento di file non supportato → toast "Formato non supportato"
+- Doppio drop stesso file → "Già importato" (no re-import)
+- File > 500MB → warning "File grande, potrebbe richiedere qualche minuto"
 
-### 2.4 â‘£ Processing
+### 2.4 ④ Processing
 
 | Stato | Contenuto |
 |-------|-----------|
 | `loading` | Progress ring + counter live + equalizer animato |
 | `error` | Messaggio errore + "Riprova" / "Annulla" |
-| `ready` | (transizione automatica a â‘¤) |
+| `ready` | (transizione automatica a ⑤) |
 
 **Counter live** (aggiornati ogni 500ms):
 - Eventi analizzati
 - Artisti riconosciuti
 - Ere musicali in formazione (stima)
 
-**Annullamento**: utente puÃ² annullare; import parziali sono salvati, UI torna a â‘¢ con stato `partial`.
+**Annullamento**: utente può annullare; import parziali sono salvati, UI torna a ③ con stato `partial`.
 
-### 2.5 â‘¤ Prima Rivelazione Timeline
+### 2.5 ⑤ Prima Rivelazione Timeline
 
 | Stato | Note |
 |-------|------|
 | `ready` | Mostra una sola volta (flag `first_reveal_done` in localStorage) |
-| `loading` | Animazione di formazione ere (sequenza 2016â†’oggi, 3s) |
+| `loading` | Animazione di formazione ere (sequenza 2016→oggi, 3s) |
 
 **Comportamento**:
 - Animazione non skippabile (momento wow deliberato)
 - Pulsante "Salta" visibile ma discreto in basso a destra
-- Click su un'era durante l'animazione â†’ interrupt e navigazione a â‘§
-- Dopo completamento â†’ pulsante "Esplora la tua timeline" â†’ â‘¦
+- Click su un'era durante l'animazione → interrupt e navigazione a ⑧
+- Dopo completamento → pulsante "Esplora la tua timeline" → ⑦
 
-### 2.6 â‘¥ Home
+### 2.6 ⑥ Home
 
 | Stato | Comportamento |
 |-------|---------------|
-| `empty` | Empty state: "Importa i tuoi dati per vedere la tua timeline" â†’ â‘¢ |
-| `partial` | <100 eventi totali: mostra stats base + messaggio "PiÃ¹ dati importi, piÃ¹ la tua storia diventa ricca" |
+| `empty` | Empty state: "Importa i tuoi dati per vedere la tua timeline" → ③ |
+| `partial` | <100 eventi totali: mostra stats base + messaggio "Più dati importi, più la tua storia diventa ricca" |
 | `ready` | 4 StatCard + MemoryCard + BarWeek + mood settimana |
 | `loading` | Skeleton su tutte le card durante ricalcolo |
 
@@ -2549,28 +2676,28 @@ Note: nessuna gestione errore (schermata statica).
 - Pull-to-refresh su mobile
 - Auto-refresh all'apertura app se dati modificati
 
-### 2.7 â‘¦ Timeline
+### 2.7 ⑦ Timeline
 
 | Stato | Comportamento |
 |-------|---------------|
-| `empty` | "Non hai ancora abbastanza dati per una timeline" â†’ suggerisce import |
+| `empty` | "Non hai ancora abbastanza dati per una timeline" → suggerisce import |
 | `partial` | <6 mesi di dati: timeline presente ma con avviso "Timeline parziale" |
-| `loading` | Skeleton chart durante cambio granularitÃ  |
+| `loading` | Skeleton chart durante cambio granularità |
 | `ready` | EraBands + StreamChart + MoodLine sincronizzati |
 | `error` | "Errore caricamento timeline" + retry |
 
-**GranularitÃ **: toggle Anni/Mesi/Settimane/Giorni. Cambio granularitÃ  = transizione fade 200ms.
+**Granularità**: toggle Anni/Mesi/Settimane/Giorni. Cambio granularità = transizione fade 200ms.
 
 **Sincronizzazione visualizzazioni**:
-- Hover su EraBand â†’ highlight punto corrispondente in StreamChart e MoodLine
-- Hover su punto MoodLine â†’ highlight EraBand corrispondente
-- Click su EraBand â†’ navigazione a â‘§
+- Hover su EraBand → highlight punto corrispondente in StreamChart e MoodLine
+- Hover su punto MoodLine → highlight EraBand corrispondente
+- Click su EraBand → navigazione a ⑧
 
 **Performance**:
 - Lazy rendering di ere fuori viewport (virtualized list)
 - Debounce hover 50ms
 
-### 2.8 â‘§ Dettaglio Era
+### 2.8 ⑧ Dettaglio Era
 
 | Stato | Comportamento |
 |-------|---------------|
@@ -2579,15 +2706,15 @@ Note: nessuna gestione errore (schermata statica).
 | `error` | "Impossibile caricare i dettagli" + back button |
 
 **Interazioni**:
-- Click artista â†’ â‘¨ filtrato su quell'artista
-- Click brano â†’ modal con dettagli brano (mood, periodo, contesto)
-- "Rivivi questo periodo" â†’ player preview (opzionale) o lista scroll
+- Click artista → ⑨ filtrato su quell'artista
+- Click brano → modal con dettagli brano (mood, periodo, contesto)
+- "Rivivi questo periodo" → player preview (opzionale) o lista scroll
 
-### 2.9 â‘¨ Esplora
+### 2.9 ⑨ Esplora
 
 | Stato | Comportamento |
 |-------|---------------|
-| `empty` | "Nessun artista/brano/album da esplorare" â†’ suggerisce import |
+| `empty` | "Nessun artista/brano/album da esplorare" → suggerisce import |
 | `ready` | Search + tabs + griglie |
 | `loading` | Skeleton + spinner search |
 | `no-results` | "Nessun risultato per X" + suggerimenti |
@@ -2601,7 +2728,7 @@ Note: nessuna gestione errore (schermata statica).
 
 **Mood pills**: riga in basso con 6 emoji. Click = filtro. Pill attivo ha glow.
 
-### 2.10 â‘© Analisi â€” Mappa Emotiva
+### 2.10 ⑩ Analisi — Mappa Emotiva
 
 | Stato | Comportamento |
 |-------|---------------|
@@ -2611,11 +2738,11 @@ Note: nessuna gestione errore (schermata statica).
 | `loading` | Skeleton grafici |
 
 **Interazioni**:
-- Click su punto mese â†’ highlight nelle line chart sotto
-- Hover su punto â†’ tooltip con "Marzo 2024 â€” valence 0.31, energy 0.42, mood sad"
+- Click su punto mese → highlight nelle line chart sotto
+- Hover su punto → tooltip con "Marzo 2024 — valence 0.31, energy 0.42, mood sad"
 - Selettore periodo (anno) in alto
 
-### 2.11 â‘ª Ricordi (mobile)
+### 2.11 ⑪ Ricordi (mobile)
 
 | Stato | Comportamento |
 |-------|---------------|
@@ -2627,10 +2754,10 @@ Note: nessuna gestione errore (schermata statica).
 **Infinite scroll**: carica 10 ricordi alla volta.
 
 **Swipe actions**:
-- Swipe left â†’ "Nascondi questo tipo di ricordo"
-- Swipe right â†’ "Salva nei preferiti"
+- Swipe left → "Nascondi questo tipo di ricordo"
+- Swipe right → "Salva nei preferiti"
 
-### 2.12 â‘« Share Sheet
+### 2.12 ⑫ Share Sheet
 
 | Stato | Comportamento |
 |-------|---------------|
@@ -2645,9 +2772,9 @@ Note: nessuna gestione errore (schermata statica).
 - Copia negli appunti
 - Scarica
 
-**Bottom sheet**: swipe down o tap fuori â†’ chiudi.
+**Bottom sheet**: swipe down o tap fuori → chiudi.
 
-### 2.13 â‘¬ Impostazioni
+### 2.13 ⑬ Impostazioni
 
 | Stato | Sempre ready |
 
@@ -2658,11 +2785,11 @@ Note: nessuna gestione errore (schermata statica).
 4. **Preferenze**: tema, lingua
 
 **Cancella dati**:
-- Click â†’ modal conferma 1: "Sicuro?"
-- Conferma â†’ modal 2: "Digita ELIMINA per confermare"
-- Input corretto â†’ delete + redirect a â‘­ Empty
+- Click → modal conferma 1: "Sicuro?"
+- Conferma → modal 2: "Digita ELIMINA per confermare"
+- Input corretto → delete + redirect a ⑭ Empty
 
-### 2.14 â‘­ Empty State
+### 2.14 ⑭ Empty State
 
 | Stato | Comportamento |
 |-------|---------------|
@@ -2675,87 +2802,87 @@ Note: nessuna gestione errore (schermata statica).
 - Analisi: "Importa per vedere le tue analisi"
 - Ricordi: "Importa per generare ricordi"
 
-**Demo mode**: click su "Scopri come funziona" â†’ carica fixture `demo-user.json` con 1 anno di storia sintetica, flag `demo=true` (tutti i dati cancellabili con un click).
+**Demo mode**: click su "Scopri come funziona" → carica fixture `demo-user.json` con 1 anno di storia sintetica, flag `demo=true` (tutti i dati cancellabili con un click).
 
 ## 3. Flussi utente principali
 
 ### 3.1 Flusso Onboarding (prima volta)
 
-    â‘  Benvenuto
-       â”‚
-       â–¼ (tap "Inizia il viaggio")
-    â‘¡ Privacy
-       â”‚
-       â–¼ (tap "Ho capito, continua")
-    â‘¢ Import
-       â”‚
-       â–¼ (drag&drop file Spotify + click "Importa tutto")
-    â‘£ Processing
-       â”‚
-       â–¼ (automatico al 100%)
-    â‘¤ Prima Rivelazione
-       â”‚
-       â–¼ (tap "Esplora la tua timeline")
-    â‘¦ Timeline
-       â”‚
-       â–¼ (auto-redirect dopo 10s o tap)
-    â‘¥ Home
+    ① Benvenuto
+       │
+       ▼ (tap "Inizia il viaggio")
+    ② Privacy
+       │
+       ▼ (tap "Ho capito, continua")
+    ③ Import
+       │
+       ▼ (drag&drop file Spotify + click "Importa tutto")
+    ④ Processing
+       │
+       ▼ (automatico al 100%)
+    ⑤ Prima Rivelazione
+       │
+       ▼ (tap "Esplora la tua timeline")
+    ⑦ Timeline
+       │
+       ▼ (auto-redirect dopo 10s o tap)
+    ⑥ Home
 
 ### 3.2 Flusso Quotidiano
 
     Apertura app
-       â”‚
-       â–¼
-    â‘¥ Home
-       â”œâ†’ tap StatCard â†’ â‘© Analisi
-       â”œâ†’ tap MemoryCard â†’ â‘ª Ricordi
-       â””â†’ tap barra settimanale â†’ â‘¦ Timeline â†’ â‘§ Era â†’ â‘¨ Esplora
+       │
+       ▼
+    ⑥ Home
+       ├→ tap StatCard → ⑩ Analisi
+       ├→ tap MemoryCard → ⑪ Ricordi
+       └→ tap barra settimanale → ⑦ Timeline → ⑧ Era → ⑨ Esplora
 
 ### 3.3 Flusso Condivisione Ricordo
 
-    â‘ª Ricordi
-       â”‚
-       â–¼ (tap "Condividi")
-    â‘« Share Sheet
-       â”‚
-       â”œâ†’ Instagram â†’ deep link con immagine
-       â”œâ†’ WhatsApp â†’ share sheet nativo
-       â”œâ†’ Copia â†’ toast "Immagine copiata"
-       â””â†’ Scarica â†’ save to gallery + toast "Salvato"
+    ⑪ Ricordi
+       │
+       ▼ (tap "Condividi")
+    ⑫ Share Sheet
+       │
+       ├→ Instagram → deep link con immagine
+       ├→ WhatsApp → share sheet nativo
+       ├→ Copia → toast "Immagine copiata"
+       └→ Scarica → save to gallery + toast "Salvato"
 
 ### 3.4 Flusso Cancellazione Totale
 
-    â‘¬ Impostazioni
-       â”‚
-       â–¼ (tap "Cancella tutti i dati")
+    ⑬ Impostazioni
+       │
+       ▼ (tap "Cancella tutti i dati")
     Modal 1 ("Sicuro?")
-       â”‚
-       â–¼ (tap "Continua")
+       │
+       ▼ (tap "Continua")
     Modal 2 ("Digita ELIMINA")
-       â”‚
-       â–¼ (input corretto)
-    Delete DB + redirect a â‘­ Empty
+       │
+       ▼ (input corretto)
+    Delete DB + redirect a ⑭ Empty
 
 ## 4. Stato machine di Import
 
-    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”    drop     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   valid    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚  IDLE  â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚  VALIDATING â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚ PARSING  â”‚
-    â””â”€â”€â”€â”€â”€â”€â”€â”€â”˜             â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
-       â–²                           â”‚                        â”‚
-       â”‚                      invalid                   parse ok
-       â”‚                           â”‚                        â”‚
-       â”‚                           â–¼                        â–¼
-       â”‚                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-       â”‚                    â”‚   ERROR     â”‚          â”‚ENRICHING â”‚
-       â”‚                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜          â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
-       â”‚                          â”‚                        â”‚
-       â”‚                      retry                   enrich ok
-       â”‚                          â”‚                        â”‚
-       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â–¶ DONE
-                                                                       â”‚
+    ┌────────┐    drop     ┌─────────────┐   valid    ┌──────────┐
+    │  IDLE  │────────────▶│  VALIDATING │───────────▶│ PARSING  │
+    └────────┘             └─────────────┘            └─────┬────┘
+       ▲                           │                        │
+       │                      invalid                   parse ok
+       │                           │                        │
+       │                           ▼                        ▼
+       │                    ┌─────────────┐          ┌──────────┐
+       │                    │   ERROR     │          │ENRICHING │
+       │                    └─────────────┘          └─────┬────┘
+       │                          │                        │
+       │                      retry                   enrich ok
+       │                          │                        │
+       └──────────────────────────┴────────────────────────┴──────▶ DONE
+                                                                       │
                                                                     upsert
-                                                                       â”‚
-                                                                       â–¼
+                                                                       │
+                                                                       ▼
                                                                   PERSISTED
 
 ## 5. Gestione errori
@@ -2785,16 +2912,16 @@ Note: nessuna gestione errore (schermata statica).
 | Schermata | Scorciatoie |
 |-----------|-------------|
 | Globale | `/` focus search; `Esc` chiude modal; `?` mostra shortcuts |
-| Timeline | `â†` `â†’` cambio periodo; `+` `-` zoom granularitÃ  |
+| Timeline | `←` `→` cambio periodo; `+` `-` zoom granularità |
 | Home | `M` vai a ricordi; `T` vai a timeline |
-| Esplora | `â†‘` `â†“` navigate risultati; `Enter` seleziona |
+| Esplora | `↑` `↓` navigate risultati; `Enter` seleziona |
 
 ## 8. Screen reader
 
 Ogni visualizzazione ha un'alternativa testuale nascosta:
-- StreamChart â†’ "Ascolti mensili: gennaio 40h, febbraio 52h, ..."
-- MoodLine â†’ "Mood dominante: gennaio felice, febbraio neutro, marzo triste"
-- QuadrantChart â†’ "Il tuo anno Ã¨ stato prevalentemente felice (valence media 0.62)"
+- StreamChart → "Ascolti mensili: gennaio 40h, febbraio 52h, ..."
+- MoodLine → "Mood dominante: gennaio felice, febbraio neutro, marzo triste"
+- QuadrantChart → "Il tuo anno è stato prevalentemente felice (valence media 0.62)"
 
 ---
 
@@ -2804,11 +2931,12 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
 
+
 ===== FILE: docs/08-COPY-I18N.md =====
 
-# 08 â€” Copy e Internationalization
+# 08 — Copy e Internationalization
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 5
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 5
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -2820,16 +2948,16 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 
 | Namespace | Uso |
 |-----------|-----|
-| `onboarding` | Schermate â‘ -â‘£ |
-| `home` | Schermata â‘¥ |
-| `timeline` | Schermata â‘¦ |
-| `era` | Schermata â‘§ |
-| `explore` | Schermata â‘¨ |
-| `analysis` | Schermata â‘© |
-| `memories` | Schermata â‘ª |
-| `share` | Schermata â‘« |
-| `settings` | Schermata â‘¬ |
-| `empty` | Schermata â‘­ e empty states |
+| `onboarding` | Schermate ①-④ |
+| `home` | Schermata ⑥ |
+| `timeline` | Schermata ⑦ |
+| `era` | Schermata ⑧ |
+| `explore` | Schermata ⑨ |
+| `analysis` | Schermata ⑩ |
+| `memories` | Schermata ⑪ |
+| `share` | Schermata ⑫ |
+| `settings` | Schermata ⑬ |
+| `empty` | Schermata ⑭ e empty states |
 | `import` | Flusso import |
 | `adapter` | Messaggi specifici per piattaforma |
 | `error` | Messaggi di errore |
@@ -2870,7 +2998,7 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 
 | Key | IT | EN |
 |-----|----|----|
-| `greeting` | Ciao, {name} ðŸ‘‹ | Hello, {name} ðŸ‘‹ |
+| `greeting` | Ciao, {name} 👋 | Hello, {name} 👋 |
 | `stats.tracks` | brani | tracks |
 | `stats.hours` | ore ascoltate | hours listened |
 | `stats.artists` | artisti | artists |
@@ -2904,7 +3032,7 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | Key | IT | EN |
 |-----|----|----|
 | `title` | Era {label} | {label} Era |
-| `period` | {start} â†’ {end} | {start} â†’ {end} |
+| `period` | {start} → {end} | {start} → {end} |
 | `topArtists` | Top artisti | Top artists |
 | `topSongs` | Top brani | Top songs |
 | `moodDominant` | Mood dominante | Dominant mood |
@@ -2932,7 +3060,7 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | `title` | La tua mappa emotiva | Your emotional map |
 | `quadrant.high` | ALTA ENERGIA | HIGH ENERGY |
 | `quadrant.low` | BASSA ENERGIA | LOW ENERGY |
-| `quadrant.valence` | VALENCE â†’ | VALENCE â†’ |
+| `quadrant.valence` | VALENCE → | VALENCE → |
 | `moods.sad` | Triste | Sad |
 | `moods.angry` | Arrabbiato | Angry |
 | `moods.neutral` | Neutro | Neutral |
@@ -2992,7 +3120,7 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | `prefs.theme.dark` | Scuro | Dark |
 | `prefs.theme.light` | Chiaro | Light |
 | `prefs.language` | Lingua | Language |
-| `delete.confirm1` | Sei sicuro? Questa azione Ã¨ irreversibile. | Are you sure? This cannot be undone. |
+| `delete.confirm1` | Sei sicuro? Questa azione è irreversibile. | Are you sure? This cannot be undone. |
 | `delete.confirm2` | Digita ELIMINA per confermare | Type DELETE to confirm |
 | `delete.keyword` | ELIMINA | DELETE |
 
@@ -3038,7 +3166,7 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 
 | Key | IT | EN |
 |-----|----|----|
-| `generic` | Qualcosa Ã¨ andato storto | Something went wrong |
+| `generic` | Qualcosa è andato storto | Something went wrong |
 | `retry` | Riprova | Retry |
 | `fileTooLarge` | File troppo grande (max 1GB) | File too large (max 1GB) |
 | `networkOffline` | Sei offline, i dati sono salvati localmente | You're offline, data is saved locally |
@@ -3062,14 +3190,14 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 
 | Key | IT | EN |
 |-----|----|----|
-| `mood.happy` | La tua musica Ã¨ stata prevalentemente felice | Your music was mostly happy |
-| `mood.sad` | La tua musica Ã¨ stata prevalentemente malinconica | Your music was mostly melancholic |
+| `mood.happy` | La tua musica è stata prevalentemente felice | Your music was mostly happy |
+| `mood.sad` | La tua musica è stata prevalentemente malinconica | Your music was mostly melancholic |
 | `mood.excited` | Periodo ad alta energia | High-energy period |
 | `mood.calm` | Periodo rilassato | Relaxed period |
 | `event.spike_artist` | Hai scoperto {artist} che ha dominato il tuo ascolto | You discovered {artist} who dominated your listening |
-| `event.valence_drop` | La tua musica Ã¨ diventata piÃ¹ malinconica | Your music became more melancholic |
-| `event.valence_rise` | La tua musica Ã¨ diventata piÃ¹ allegra | Your music became more cheerful |
-| `event.volume_spike` | Hai ascoltato molta piÃ¹ musica del solito | You listened to much more music than usual |
+| `event.valence_drop` | La tua musica è diventata più malinconica | Your music became more melancholic |
+| `event.valence_rise` | La tua musica è diventata più allegra | Your music became more cheerful |
+| `event.volume_spike` | Hai ascoltato molta più musica del solito | You listened to much more music than usual |
 | `event.volume_drop` | Hai ascoltato molta meno musica del solito | You listened to much less music than usual |
 | `event.exploration` | Hai esplorato molti nuovi artisti | You explored many new artists |
 | `event.silence` | Periodo di silenzio musicale | Period of musical silence |
@@ -3078,7 +3206,7 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | `memory.milestone.events` | Hai raggiunto {count} brani ascoltati! | You reached {count} tracks listened! |
 | `memory.milestone.hours` | Hai raggiunto {count} ore di ascolto! | You reached {count} hours of listening! |
 | `memory.return` | Non ascoltavi {artist} da {months} mesi | You hadn't listened to {artist} for {months} months |
-| `memory.seasonal` | Come ogni {month}, Ã¨ tornato il periodo {genre} | Like every {month}, the {genre} period is back |
+| `memory.seasonal` | Come ogni {month}, è tornato il periodo {genre} | Like every {month}, the {genre} period is back |
 
 ## 3. Pluralizzazione
 
@@ -3109,9 +3237,9 @@ Variabili comuni: `{count}`, `{name}`, `{track}`, `{artist}`, `{years}`, `{month
 ## 6. Linee guida tono
 
 - **Conciso**: max 60 caratteri per label bottone
-- **Umano**: evita linguaggio tecnico ("Parsing" â†’ "Sto analizzando")
+- **Umano**: evita linguaggio tecnico ("Parsing" → "Sto analizzando")
 - **Attivo**: "Hai ascoltato" non "Sono stati ascoltati"
-- **Empatico**: per insight emotivi, tono narrativo ("Il tuo marzo 2020 Ã¨ stato...")
+- **Empatico**: per insight emotivi, tono narrativo ("Il tuo marzo 2020 è stato...")
 - **Discreto**: per errori, tono neutro e orientato alla soluzione
 
 ## 7. Implementazione
@@ -3119,13 +3247,13 @@ Variabili comuni: `{count}`, `{name}`, `{track}`, `{artist}`, `{years}`, `{month
 Struttura file:
 
     apps/web/
-    â””â”€â”€ src/
-        â””â”€â”€ i18n/
-            â”œâ”€â”€ index.ts          # init i18next
-            â”œâ”€â”€ locales/
-            â”‚   â”œâ”€â”€ it.json
-            â”‚   â””â”€â”€ en.json
-            â””â”€â”€ formatter.ts      # numeri/date localizzati
+    └── src/
+        └── i18n/
+            ├── index.ts          # init i18next
+            ├── locales/
+            │   ├── it.json
+            │   └── en.json
+            └── formatter.ts      # numeri/date localizzati
 
 Libreria consigliata: `i18next` + `react-i18next`.
 
@@ -3137,65 +3265,66 @@ Libreria consigliata: `i18next` + `react-i18next`.
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
 
+
 ===== FILE: docs/10-TESTING.md =====
 
-# 10 â€” Strategia di Testing
+# 10 — Strategia di Testing
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 3
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 3
 
 ---
 
 ## 1. Piramide di testing
 
-    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚  E2E (Playwright)       â”‚  ~5% dei test
-    â”‚  Flussi utente critici  â”‚
-    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-    â”‚  Integration            â”‚  ~25%
-    â”‚  Adapter+DB, analysis+DBâ”‚
-    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-    â”‚  Unit (Vitest)          â”‚  ~70%
-    â”‚  Funzioni, algoritmi    â”‚
-    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    ┌─────────────────────────┐
+    │  E2E (Playwright)       │  ~5% dei test
+    │  Flussi utente critici  │
+    ├─────────────────────────┤
+    │  Integration            │  ~25%
+    │  Adapter+DB, analysis+DB│
+    ├─────────────────────────┤
+    │  Unit (Vitest)          │  ~70%
+    │  Funzioni, algoritmi    │
+    └─────────────────────────┘
 
 ## 2. Target coverage per modulo
 
 | Modulo | Coverage target | Note |
 |--------|-----------------|------|
-| `packages/core/adapters/*` | â‰¥ 90% | Ogni edge case E.N.x coperto |
-| `packages/core/analysis/*` | â‰¥ 85% | Property-based + fixture |
-| `packages/core/db/*` | â‰¥ 80% | Migrazioni testate |
-| `packages/core/enrichment/*` | â‰¥ 75% | Mock API esterne |
-| `packages/ui/components` | â‰¥ 70% | Snapshot + interaction |
-| `apps/web` | â‰¥ 60% | E2E su flussi critici |
+| `packages/core/adapters/*` | ≥ 90% | Ogni edge case E.N.x coperto |
+| `packages/core/analysis/*` | ≥ 85% | Property-based + fixture |
+| `packages/core/db/*` | ≥ 80% | Migrazioni testate |
+| `packages/core/enrichment/*` | ≥ 75% | Mock API esterne |
+| `packages/ui/components` | ≥ 70% | Snapshot + interaction |
+| `apps/web` | ≥ 60% | E2E su flussi critici |
 
 ## 3. Fixture strategy
 
 ### 3.1 Fixture sintetici (per adapter)
 
 Ogni adapter ha un fixture in `fixtures/synthetic-history/<platform>-sample.json` con:
-- â‰¥ 10 eventi rappresentativi
+- ≥ 10 eventi rappresentativi
 - Almeno 1 caso per ogni edge case E.N.x documentato
 - Campo `_case` che descrive lo scenario
 - Campo `_expectedOutput` con valori attesi
 
-Il primo fixture Ã¨ `spotify-sample.json` (Sessione 2).
+Il primo fixture è `spotify-sample.json` (Sessione 2).
 
 ### 3.2 Fixture di test DB
 
 `fixtures/db-seed/` contiene:
-- `minimal.json` â€” 10 eventi, 5 track, 2 artisti (per test unit)
-- `medium.json` â€” 5.000 eventi, 500 track (per test integrazione)
-- `large.json` â€” 100.000 eventi, 5.000 track (per test performance)
+- `minimal.json` — 10 eventi, 5 track, 2 artisti (per test unit)
+- `medium.json` — 5.000 eventi, 500 track (per test integrazione)
+- `large.json` — 100.000 eventi, 5.000 track (per test performance)
 
 Tutti generati sinteticamente con script `scripts/generate-fixtures.ts`.
 
 ### 3.3 Fixture di scenari di vita
 
 `fixtures/scenarios/` contiene cronologie complete pre-costruite che rappresentano scenari specifici:
-- `lockdown-2020.json` â€” esplosione Lo-fi, ascolti notturni
-- `breakup-oct2021.json` â€” crollo valence, spike Adele
-- `summer-roadtrip.json` â€” alta valence, country multipli
+- `lockdown-2020.json` — esplosione Lo-fi, ascolti notturni
+- `breakup-oct2021.json` — crollo valence, spike Adele
+- `summer-roadtrip.json` — alta valence, country multipli
 
 Ogni scenario ha `_expectedInsights` con gli insight attesi dopo l'analisi.
 
@@ -3204,14 +3333,14 @@ Ogni scenario ha `_expectedInsights` con gli insight attesi dopo l'analisi.
 ### 4.1 Adapter
 
 - **Unit**: mapping campi, derivazioni (skipped, startedAt), dedup, normalizzazione
-- **Integration**: import di fixture â†’ DB popolato correttamente
-- **Property**: re-import Ã¨ idempotente (eventKey unico)
+- **Integration**: import di fixture → DB popolato correttamente
+- **Property**: re-import è idempotente (eventKey unico)
 - **Edge case**: ogni E.N.x deve avere test dedicato
 
 ### 4.2 Analysis engine
 
 - **Unit**: ogni algoritmo con input/output attesi
-- **Property-based** (fast-check): invarianti (es. mood_day Ã¨ sempre uno dei 6 mood; valence in [0,1])
+- **Property-based** (fast-check): invarianti (es. mood_day è sempre uno dei 6 mood; valence in [0,1])
 - **Scenario**: ogni `fixtures/scenarios/*.json` produce insight attesi
 
 ### 4.3 DB
@@ -3224,7 +3353,7 @@ Ogni scenario ha `_expectedInsights` con gli insight attesi dopo l'analisi.
 
 - **Snapshot**: componenti renderizzati correttamente
 - **Interaction**: click, drag&drop, form funzionano
-- **E2E**: flussi completi (onboarding â†’ home â†’ timeline â†’ ricordo)
+- **E2E**: flussi completi (onboarding → home → timeline → ricordo)
 
 ## 5. Comandi
 
@@ -3233,7 +3362,7 @@ Ogni scenario ha `_expectedInsights` con gli insight attesi dopo l'analisi.
     pnpm test:integration    # solo integration
     pnpm test:e2e            # solo e2e (Playwright)
     pnpm test:coverage       # con report coverage
-    pnpm test:watch          # modalitÃ  watch
+    pnpm test:watch          # modalità watch
 
 ## 6. CI gating
 
@@ -3244,20 +3373,20 @@ La CI GitHub Actions deve:
 - [ ] Eseguire `pnpm test:e2e` su main (non su ogni PR, troppo lento)
 - [ ] Buildare `apps/web` e verificare nessun errore TypeScript
 
-## 7. Test di proprietÃ  per analisi (property-based)
+## 7. Test di proprietà per analisi (property-based)
 
 Invarianti che devono SEMPRE valere:
 
 | Invariante | Modulo |
 |------------|--------|
-| `valence âˆˆ [0, 1]` per ogni audio feature | enrichment |
-| `mood âˆˆ {sad, angry, neutral, calm, happy, excited}` | analysis |
-| `sum(genreDistribution) â‰ˆ 1.0` per era | analysis |
+| `valence ∈ [0, 1]` per ogni audio feature | enrichment |
+| `mood ∈ {sad, angry, neutral, calm, happy, excited}` | analysis |
+| `sum(genreDistribution) ≈ 1.0` per era | analysis |
 | `era.periodStart < era.periodEnd` | analysis |
 | `insight.derivedVersion` == versione attuale dell'algoritmo | analysis |
 | `session.eventCount >= 1` | analysis |
-| `listen_events.eventKey` Ã¨ unico nel DB | db |
-| `tracks.canonicalKey` Ã¨ unico nel DB | db |
+| `listen_events.eventKey` è unico nel DB | db |
+| `tracks.canonicalKey` è unico nel DB | db |
 
 ## 8. Mock delle API esterne
 
@@ -3287,12 +3416,13 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione |
 
+
 ===== FILE: docs/11-BACKLOG.md =====
 
-# 11 â€” Backlog Strutturato
+# 11 — Backlog Strutturato
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 3
-> Formato: Epic â†’ Story â†’ Task con acceptance criteria verificabili
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 3
+> Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
 
@@ -3302,33 +3432,33 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 |---------|-------------|
 | `[PHASE-N]` | Fase della roadmap (0=fondamenta, 1=import core, 2=analisi, 3=UI, 4=beta) |
 | `[AREA:X]` | Modulo: `adapter`, `analysis`, `ui`, `ux`, `db`, `enrichment`, `privacy`, `devops` |
-| `[PRI:B]` / `[PRI:I]` / `[PRI:L]` | PrioritÃ : blocker / important / later |
+| `[PRI:B]` / `[PRI:I]` / `[PRI:L]` | Priorità: blocker / important / later |
 | `[DEP:#]` | Dipende dalla story # |
 | `[SIZE:S/M/L/XL]` | Stima relativa |
 
 ## Stato di una Story
 
-- â¬š TODO â€” non iniziata
-- ðŸŸ¡ IN PROGRESS â€” in lavorazione
-- âœ… DONE â€” completata e verificata
-- ðŸ›‘ BLOCKED â€” dipende da altro o da spec mancante
+- ⬚ TODO — non iniziata
+- 🟡 IN PROGRESS — in lavorazione
+- ✅ DONE — completata e verificata
+- 🛑 BLOCKED — dipende da altro o da spec mancante
 
 ---
 
-## EPIC 0 â€” Fondamenta (Fase 0 tecnica)
+## EPIC 0 — Fondamenta (Fase 0 tecnica)
 
 Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
-### Story 0.1 â€” Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:L]`
+### Story 0.1 — Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:L]`
 
 **Descrizione**: Inizializzare il monorepo Turborepo con le cartelle `apps/web`, `packages/core`, `packages/ui`, toolchain TypeScript, lint, format.
 
 **Task**:
-- T0.1.1 â€” Init monorepo con pnpm workspaces + Turborepo
-- T0.1.2 â€” Config TypeScript base + path aliases
-- T0.1.3 â€” ESLint + Prettier + commit hook (husky + lint-staged)
-- T0.1.4 â€” Vitest + Playwright setup
-- T0.1.5 â€” `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
+- T0.1.1 — Init monorepo con pnpm workspaces + Turborepo
+- T0.1.2 — Config TypeScript base + path aliases
+- T0.1.3 — ESLint + Prettier + commit hook (husky + lint-staged)
+- T0.1.4 — Vitest + Playwright setup
+- T0.1.5 — `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
 
 **Acceptance criteria**:
 - [ ] `pnpm install` senza errori su node 20 LTS
@@ -3338,84 +3468,84 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] CI GitHub Actions: lint + test su ogni PR
 
 **Dipendenze**: nessuna
-**Spec**: `05-ARCHITECTURE.md` Â§8-9
+**Spec**: `05-ARCHITECTURE.md` §8-9
 
 ---
 
-### Story 0.2 â€” Schema DB e layer Dexie `[PHASE-0]` `[AREA:db]` `[PRI:B]` `[SIZE:L]` `[DEP:0.1]`
+### Story 0.2 — Schema DB e layer Dexie `[PHASE-0]` `[AREA:db]` `[PRI:B]` `[SIZE:L]` `[DEP:0.1]`
 
-**Descrizione**: Implementare lo schema Dexie come definito in `02-DATA-SCHEMA.md` Â§6, con migrazioni e API di accesso.
+**Descrizione**: Implementare lo schema Dexie come definito in `02-DATA-SCHEMA.md` §6, con migrazioni e API di accesso.
 
 **Task**:
-- T0.2.1 â€” Interfacce TypeScript in `packages/core/schema/`
-- T0.2.2 â€” Class Dexie con `db.version(1).stores(...)`
-- T0.2.3 â€” Repository: `listens`, `tracks`, `artists`, `albums`, `features` (CRUD + query base)
-- T0.2.4 â€” Funzione `recount()` per contatori denormalizzati
-- T0.2.5 â€” Test con DB in-memory (fake-indexeddb)
+- T0.2.1 — Interfacce TypeScript in `packages/core/schema/`
+- T0.2.2 — Class Dexie con `db.version(1).stores(...)`
+- T0.2.3 — Repository: `listens`, `tracks`, `artists`, `albums`, `features` (CRUD + query base)
+- T0.2.4 — Funzione `recount()` per contatori denormalizzati
+- T0.2.5 — Test con DB in-memory (fake-indexeddb)
 
 **Acceptance criteria**:
-- [ ] Tutte le tabelle di `02-DATA-SCHEMA.md` Â§6 esistono
+- [ ] Tutte le tabelle di `02-DATA-SCHEMA.md` §6 esistono
 - [ ] Indici corrispondono alla spec
 - [ ] `recount()` ricalcola `listenCount` correttamente
-- [ ] Test unitari: â‰¥80% coverage su `packages/core/db/`
+- [ ] Test unitari: ≥80% coverage su `packages/core/db/`
 - [ ] Test con 10.000 ListenEvent in < 500ms
 
 **Dipendenze**: Story 0.1
-**Spec**: `02-DATA-SCHEMA.md` Â§3, Â§6, Â§7
+**Spec**: `02-DATA-SCHEMA.md` §3, §6, §7
 
 ---
 
-### Story 0.3 â€” Adapter Spotify base `[PHASE-0]` `[AREA:adapter]` `[PRI:B]` `[SIZE:L]` `[DEP:0.2]`
+### Story 0.3 — Adapter Spotify base `[PHASE-0]` `[AREA:adapter]` `[PRI:B]` `[SIZE:L]` `[DEP:0.2]`
 
 **Descrizione**: Implementare l'adapter Spotify completo secondo `03-ADAPTERS/spotify.md`.
 
 **Task**:
-- T0.3.1 â€” `SpotifyAdapter.detect()` (riconoscimento ZIP/JSON)
-- T0.3.2 â€” `SpotifyAdapter.parse()` streaming su JSON (AsyncIterable)
-- T0.3.3 â€” Mapping campi Â§3.1 con regola `skipped` derivata (E1)
-- T0.3.4 â€” Gestione `offline_timestamp` unitÃ  (E3)
-- T0.3.5 â€” Upsert con dedup via `eventKey` e `canonicalKey` (DEDUP-3)
-- T0.3.6 â€” Processamento `YourLibrary.json`, `Playlist*.json`, `Follow.json`
-- T0.3.7 â€” Segnalazione UI via codici i18n (Â§9)
+- T0.3.1 — `SpotifyAdapter.detect()` (riconoscimento ZIP/JSON)
+- T0.3.2 — `SpotifyAdapter.parse()` streaming su JSON (AsyncIterable)
+- T0.3.3 — Mapping campi §3.1 con regola `skipped` derivata (E1)
+- T0.3.4 — Gestione `offline_timestamp` unità (E3)
+- T0.3.5 — Upsert con dedup via `eventKey` e `canonicalKey` (DEDUP-3)
+- T0.3.6 — Processamento `YourLibrary.json`, `Playlist*.json`, `Follow.json`
+- T0.3.7 — Segnalazione UI via codici i18n (§9)
 
 **Acceptance criteria**:
 - [ ] Tutti i 10 casi di `fixtures/synthetic-history/spotify-sample.json` passano
-- [ ] Re-import stesso file â†’ `eventsDuplicated = N`, nessun raddoppio
-- [ ] Import di file reale (â‰¥50k eventi) in < 30s, memoria < 500MB
+- [ ] Re-import stesso file → `eventsDuplicated = N`, nessun raddoppio
+- [ ] Import di file reale (≥50k eventi) in < 30s, memoria < 500MB
 - [ ] `CarDetectionEvent.json` rifiutato senza opt-in esplicito
 - [ ] `ip_addr` conservato solo se `PrivacySettings.retainIp === true`
 
 **Dipendenze**: Story 0.2
-**Spec**: `03-ADAPTERS/spotify.md`, `01-PLATFORMS.md` Â§3.1
+**Spec**: `03-ADAPTERS/spotify.md`, `01-PLATFORMS.md` §3.1
 
 ---
 
-### Story 0.4 â€” UI import (onboarding) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:M]` `[DEP:0.3]`
+### Story 0.4 — UI import (onboarding) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:M]` `[DEP:0.3]`
 
-**Descrizione**: Schermate â‘  Benvenuto â†’ â‘¡ Privacy â†’ â‘¢ Import â†’ â‘£ Processing.
+**Descrizione**: Schermate ① Benvenuto → ② Privacy → ③ Import → ④ Processing.
 
 **Task**:
-- T0.4.1 â€” Componente `DropZone` + `PlatformCard` (4 stati: vuoto/processing/done/error)
-- T0.4.2 â€” Schermata Benvenuto + Privacy
-- T0.4.3 â€” Schermata Import con validazione file
-- T0.4.4 â€” Schermata Processing con progress e counter live
-- T0.4.5 â€” Integrazione con `SpotifyAdapter`
+- T0.4.1 — Componente `DropZone` + `PlatformCard` (4 stati: vuoto/processing/done/error)
+- T0.4.2 — Schermata Benvenuto + Privacy
+- T0.4.3 — Schermata Import con validazione file
+- T0.4.4 — Schermata Processing con progress e counter live
+- T0.4.5 — Integrazione con `SpotifyAdapter`
 
 **Acceptance criteria**:
-- [ ] Drag&drop ZIP Spotify â†’ import completato con messaggio Â§9
-- [ ] File errato â†’ errore umano "Questo file sembra di Apple Music, non di Spotify"
+- [ ] Drag&drop ZIP Spotify → import completato con messaggio §9
+- [ ] File errato → errore umano "Questo file sembra di Apple Music, non di Spotify"
 - [ ] Privacy screen mostra i 3 toggle (`retainIp`, `enrichMetadata`, `scrobbleHubs`)
 - [ ] Nessun dato persistito prima del click "Importa tutto"
 - [ ] Design system rispettato (colori, typo, componenti `15-DESIGN-SYSTEM.md`)
 
 **Dipendenze**: Story 0.3
-**Spec**: `15-DESIGN-SYSTEM.md`, mockup schermate â‘ -â‘£
+**Spec**: `15-DESIGN-SYSTEM.md`, mockup schermate ①-④
 
 ---
 
-## EPIC 1 â€” Import core (Fase 1)
+## EPIC 1 — Import core (Fase 1)
 
-### Story 1.1 â€” Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
+### Story 1.1 — Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
 
 **Descrizione**: Import da Google Takeout (formato JSON/HTML).
 
@@ -3424,24 +3554,24 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Gestione cronologia unificata
 - [ ] Test con fixture `youtube-sample.json`
 
-**Spec**: `01-PLATFORMS.md` Â§3.2 (da scrivere in dettaglio post-Sessione 3)
+**Spec**: `01-PLATFORMS.md` §3.2 (da scrivere in dettaglio post-Sessione 3)
 
 ---
 
-### Story 1.2 â€” Adapter Apple Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
+### Story 1.2 — Adapter Apple Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
 
 **Descrizione**: Import CSV da Apple Privacy Portal.
 
 **Acceptance criteria**:
 - [ ] Parsing CSV robusto (PapaParse)
-- [ ] Mapping campi Â§3.1 Apple
+- [ ] Mapping campi §3.1 Apple
 - [ ] Test con fixture
 
-**Spec**: `01-PLATFORMS.md` Â§3.3
+**Spec**: `01-PLATFORMS.md` §3.3
 
 ---
 
-### Story 1.3 â€” Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
+### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
 
 **Descrizione**: Import storico via API (paginazione completa).
 
@@ -3451,26 +3581,26 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] MBID da ListenBrainz alimenta DEDUP-2
 - [ ] Test con mock API
 
-**Spec**: `01-PLATFORMS.md` Â§3.7-3.8
+**Spec**: `01-PLATFORMS.md` §3.7-3.8
 
 ---
 
-### Story 1.4 â€” Dedup promozione post-enrichment `[PHASE-1]` `[AREA:db]` `[PRI:I]` `[SIZE:S]` `[DEP:0.3]`
+### Story 1.4 — Dedup promozione post-enrichment `[PHASE-1]` `[AREA:db]` `[PRI:I]` `[SIZE:S]` `[DEP:0.3]`
 
 **Descrizione**: Job `rekey()` che, quando un track acquisisce ISRC/MBID via enrichment, aggiorna il `canonicalKey` da `fuzzy:...` a `isrc:...` o `mbid:...`, unendo duplicati.
 
 **Acceptance criteria**:
-- [ ] Due track con `fuzzy:` diverso ma stesso ISRC â†’ una sola track dopo `rekey()`
+- [ ] Due track con `fuzzy:` diverso ma stesso ISRC → una sola track dopo `rekey()`
 - [ ] `listenCount` aggregato correttamente
 - [ ] `listen_events.trackId` riorientato
 
-**Spec**: `02-DATA-SCHEMA.md` Â§5-6
+**Spec**: `02-DATA-SCHEMA.md` §5-6
 
 ---
 
-## EPIC 2 â€” Analisi (Fase 2)
+## EPIC 2 — Analisi (Fase 2)
 
-### Story 2.1 â€” Mood Tracker giornaliero `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
+### Story 2.1 — Mood Tracker giornaliero `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
 
 **Acceptance criteria**:
 - [ ] Formula specificata in `04-ANALYSIS-ALGORITHMS.md` (da scrivere Sessione 4)
@@ -3479,16 +3609,16 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-### Story 2.2 â€” Era Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
+### Story 2.2 — Era Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
 **Acceptance criteria**:
 - [ ] Clustering (k-means o DBSCAN) con parametri documentati
 - [ ] EraPayload completo per ogni era
-- [ ] Test: 1 anno con 2 ere evidenti â†’ rilevate correttamente
+- [ ] Test: 1 anno con 2 ere evidenti → rilevate correttamente
 
 ---
 
-### Story 2.3 â€” Event Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
+### Story 2.3 — Event Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
 **Acceptance criteria**:
 - [ ] Rileva spike/crolli volume, valence drop/rise, exploration, silence
@@ -3497,7 +3627,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-### Story 2.4 â€” Memory Engine `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
+### Story 2.4 — Memory Engine `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
 
 **Acceptance criteria**:
 - [ ] 5 tipi di ricordo (on_this_day, first_time, milestone, return, seasonal)
@@ -3506,49 +3636,49 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-## EPIC 3 â€” UI/UX (Fase 3)
+## EPIC 3 — UI/UX (Fase 3)
 
-### Story 3.1 â€” Home + Timeline `[PHASE-3]` `[AREA:ui]` `[PRI:B]` `[SIZE:XL]`
+### Story 3.1 — Home + Timeline `[PHASE-3]` `[AREA:ui]` `[PRI:B]` `[SIZE:XL]`
 
 **Acceptance criteria**:
-- [ ] Schermata â‘¥ Home con StatCard animate, ricordo del giorno, bar week
-- [ ] Schermata â‘¦ Timeline con EraBands, StreamChart, MoodLine sincronizzati
-- [ ] Zoom progressivo anni â†’ mesi â†’ giorni
+- [ ] Schermata ⑥ Home con StatCard animate, ricordo del giorno, bar week
+- [ ] Schermata ⑦ Timeline con EraBands, StreamChart, MoodLine sincronizzati
+- [ ] Zoom progressivo anni → mesi → giorni
 - [ ] Responsive breakpoint rispettati
 
 ---
 
-### Story 3.2 â€” Ricordi + Share `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
+### Story 3.2 — Ricordi + Share `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
 
 **Acceptance criteria**:
-- [ ] Feed ricordi mobile (schermata â‘ª)
-- [ ] ShareSheet con card 1080Ã—1350 generata via canvas
+- [ ] Feed ricordi mobile (schermata ⑪)
+- [ ] ShareSheet con card 1080×1350 generata via canvas
 - [ ] Condivisione nativa + download immagine
 
 ---
 
-### Story 3.3 â€” Esplora + Analisi `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
+### Story 3.3 — Esplora + Analisi `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
 
 **Acceptance criteria**:
-- [ ] Schermata â‘¨ con search autocomplete sui propri dati
-- [ ] Schermata â‘© QuadrantChart valence/energy
-- [ ] Click su punto â†’ deep-link timeline
+- [ ] Schermata ⑨ con search autocomplete sui propri dati
+- [ ] Schermata ⑩ QuadrantChart valence/energy
+- [ ] Click su punto → deep-link timeline
 
 ---
 
-## EPIC 4 â€” Arricchimento (Fase 2/3)
+## EPIC 4 — Arricchimento (Fase 2/3)
 
-### Story 4.1 â€” Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
+### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
 
 **Acceptance criteria**:
-- [ ] Cascata: cache â†’ AcousticBrainz â†’ API FreqBlog/Musicae â†’ Essentia.js
+- [ ] Cascata: cache → AcousticBrainz → API FreqBlog/Musicae → Essentia.js
 - [ ] Toggle privacy `enrichMetadata` rispettato
 - [ ] Rate limiting API esterne
 - [ ] `AudioFeatures.source` tracciato
 
 ---
 
-### Story 4.2 â€” MusicBrainz lookup `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]`
+### Story 4.2 — MusicBrainz lookup `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]`
 
 **Acceptance criteria**:
 - [ ] Lookup per track name + artist
@@ -3557,9 +3687,9 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-## EPIC 5 â€” Privacy e legale (Fase 6)
+## EPIC 5 — Privacy e legale (Fase 6)
 
-### Story 5.1 â€” Privacy spec finale `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
+### Story 5.1 — Privacy spec finale `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
 
 **Acceptance criteria**:
 - [ ] `09-PRIVACY-SECURITY.md` APPROVED
@@ -3568,16 +3698,16 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-### Story 5.2 â€” Export e purge `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
+### Story 5.2 — Export e purge `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
 
 **Acceptance criteria**:
 - [ ] `purgeIp()` cancella tutti gli IP
-- [ ] Export JSON completo (portabilitÃ  GDPR)
+- [ ] Export JSON completo (portabilità GDPR)
 - [ ] Cancellazione totale con doppia conferma
 
 ---
 
-## PrioritÃ  di lavorazione per agenti
+## Priorità di lavorazione per agenti
 
 Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 
@@ -3598,7 +3728,7 @@ Ogni story deve avere label GitHub:
 - `area:adapter` / `area:db` / `area:ui` / `area:analysis` / `area:enrichment` / `area:privacy`
 - `priority:blocker` / `priority:important`
 - `size:S` / `size:M` / `size:L` / `size:XL`
-- `agent-ready` (solo quando la spec collegata Ã¨ ðŸŸ¢ APPROVED)
+- `agent-ready` (solo quando la spec collegata è 🟢 APPROVED)
 
 ---
 
@@ -3608,11 +3738,12 @@ Ogni story deve avere label GitHub:
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione con 5 epic e 17 story |
 
+
 ===== FILE: docs/13-ADR/0001-pwa-first.md =====
 
-# ADR-0001 â€” PWA come piattaforma primaria
+# ADR-0001 — PWA come piattaforma primaria
 
-> Status: ðŸŸ¡ DRAFT (approvazione Boss pending) Â· Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 
 ## Contesto
 
@@ -3638,23 +3769,24 @@ Il prodotto deve raggiungere utenti desktop e mobile con un team di sviluppo pic
 
 ## Conseguenze
 
-- Positive: velocitÃ  di sviluppo, manutenzione singola, privacy
+- Positive: velocità di sviluppo, manutenzione singola, privacy
 - Negative: push notification e integrazione OS limitate nel MVP; File System Access API non uniforme tra browser
 - Mitigazioni: fallback drag&drop per upload file; Tauri in Fase 2 per i casi power-user
 
 ## Collegamenti
 
-- 05-ARCHITECTURE Â§8 Â· 00-VISION Â§Perimetro MVP
+- 05-ARCHITECTURE §8 · 00-VISION §Perimetro MVP
+
 
 ===== FILE: docs/13-ADR/0002-local-first.md =====
 
-# ADR-0002 â€” Local-first e privacy-by-design
+# ADR-0002 — Local-first e privacy-by-design
 
-> Status: ðŸŸ¡ DRAFT (approvazione Boss pending) Â· Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 
 ## Contesto
 
-Il progetto tratta dati altamente personali (cronologia di ascolto, contesto, inferenze emotive). Il target europeo Ã¨ sensibile al GDPR. Ogni architettura cloud-first introdurrebbe obblighi legali, costi e rischi di trust.
+Il progetto tratta dati altamente personali (cronologia di ascolto, contesto, inferenze emotive). Il target europeo è sensibile al GDPR. Ogni architettura cloud-first introdurrebbe obblighi legali, costi e rischi di trust.
 
 ## Decisione
 
@@ -3662,10 +3794,10 @@ Il progetto tratta dati altamente personali (cronologia di ascolto, contesto, in
 
 ## Motivazioni
 
-- La privacy Ã¨ il differenziale competitivo, non un vincolo
+- La privacy è il differenziale competitivo, non un vincolo
 - Zero costi di infrastruttura nel MVP
 - Compliance GDPR semplificata: nessun trattamento server-side di PII
-- ReversibilitÃ  totale: export e cancellazione sono operazioni locali
+- Reversibilità totale: export e cancellazione sono operazioni locali
 
 ## Alternative considerate
 
@@ -3674,20 +3806,21 @@ Il progetto tratta dati altamente personali (cronologia di ascolto, contesto, in
 
 ## Conseguenze
 
-- Positive: trust, costi, semplicitÃ  legale
+- Positive: trust, costi, semplicità legale
 - Negative: nessun cross-device nel MVP; elaborazione limitata alle risorse del browser
 - Mitigazioni: Web Worker e streaming parse per file grandi; sync E2E opzionale in Fase 2
-- **IP address**: non persistito di default; conservato SOLO con toggle esplicito `retainIp`; mai inviato in rete; purgabile con `purgeIp()`. Il `country` Ã¨ sempre derivato (privacy-by-design, vedi 09)
+- **IP address**: non persistito di default; conservato SOLO con toggle esplicito `retainIp`; mai inviato in rete; purgabile con `purgeIp()`. Il `country` è sempre derivato (privacy-by-design, vedi 09)
 
 ## Collegamenti
 
-- 02-DATA-SCHEMA Â§8 Â· 09-PRIVACY-SECURITY (Sessione 6)
+- 02-DATA-SCHEMA §8 · 09-PRIVACY-SECURITY (Sessione 6)
+
 
 ===== FILE: docs/13-ADR/0003-adapter-pattern.md =====
 
-# ADR-0003 â€” Adapter pattern e normalizzazione early
+# ADR-0003 — Adapter pattern e normalizzazione early
 
-> Status: ðŸŸ¡ DRAFT (approvazione Boss pending) Â· Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 
 ## Contesto
 
@@ -3695,37 +3828,38 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 
 ## Decisione
 
-**Ogni piattaforma Ã¨ un adapter indipendente** che implementa l'interfaccia `PlatformAdapter` (05-ARCHITECTURE Â§4) e produce esclusivamente il formato unificato (02-DATA-SCHEMA). La normalizzazione avviene al parse ("early"): il payload raw **non** Ã¨ persistito nel DB.
+**Ogni piattaforma è un adapter indipendente** che implementa l'interfaccia `PlatformAdapter` (05-ARCHITECTURE §4) e produce esclusivamente il formato unificato (02-DATA-SCHEMA). La normalizzazione avviene al parse ("early"): il payload raw **non** è persistito nel DB.
 
 ## Motivazioni
 
 - Aggiungere una piattaforma = aggiungere un modulo, senza toccare il core
 - Analisi e UI lavorano su un solo schema
-- TestabilitÃ : ogni adapter Ã¨ testabile isolato con fixture
+- Testabilità: ogni adapter è testabile isolato con fixture
 - Spazio: persistere il raw di 200k eventi raddoppierebbe il DB locale
 
 ## Alternative considerate
 
 - **Silos per-platform**: scartata (analisi cross-platform impossibili)
 - **ETL server-side**: scartata (contraria ad ADR-0002)
-- **Persistenza del raw nel DB**: scartata per spazio; il file dell'utente resta fonte di veritÃ  e l'import Ã¨ ri-eseguibile (idempotenza via eventKey)
+- **Persistenza del raw nel DB**: scartata per spazio; il file dell'utente resta fonte di verità e l'import è ri-eseguibile (idempotenza via eventKey)
 
 ## Conseguenze
 
-- Positive: core pulito, estensibilitÃ , test semplici
+- Positive: core pulito, estensibilità, test semplici
 - Negative: perdita di campi platform-specific non mappati; debugging di parse errori richiede il file originale
 - Mitigazioni: `ImportRecord.warnings` cataloga gli edge case (E1..E10); log di import conservato; campi futuri aggiungibili con migrazioni
 
 ## Collegamenti
 
-- 01-PLATFORMS Â§5 Â· 02-DATA-SCHEMA Â§6-7 Â· 05-ARCHITECTURE Â§4
+- 01-PLATFORMS §5 · 02-DATA-SCHEMA §6-7 · 05-ARCHITECTURE §4
+
 
 ===== FILE: docs/14-GLOSSARY.md =====
 
-# 14 â€” Glossario di Dominio
+# 14 — Glossario di Dominio
 
-> Status: ðŸŸ¡ DRAFT Â· Versione 0.1 Â· Sessione 1
-> Definizioni univoche. In caso di conflitto tra un documento e questo glossario, vale questo glossario (finchÃ© non viene aggiornato).
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
+> Definizioni univoche. In caso di conflitto tra un documento e questo glossario, vale questo glossario (finché non viene aggiornato).
 
 ## Termini di dominio
 
@@ -3739,8 +3873,8 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 | **Ricordo (Memory)** | Insight di tipo memoriale: on_this_day, first_time, milestone, return, seasonal |
 | **Evento (Event)** | Anomalia rilevata nei pattern di ascolto che suggerisce un cambiamento significativo (picco, crollo, esplorazione, silenzio) |
 | **Insight** | Risultato derivato dell'analysis engine, persistito con verdetto utente (pending/confirmed/corrected/dismissed) |
-| **Valence** | Punteggio 0..1 di positivitÃ  emotiva percepita del brano |
-| **Energy** | Punteggio 0..1 di intensitÃ /attivazione del brano |
+| **Valence** | Punteggio 0..1 di positività emotiva percepita del brano |
+| **Energy** | Punteggio 0..1 di intensità/attivazione del brano |
 | **Danceability** | Punteggio 0..1 di attitudine al ballo del brano |
 
 ## Identificatori
@@ -3748,9 +3882,9 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 | Termine | Definizione |
 |---------|-------------|
 | **ISRC** | International Standard Recording Code: identificativo univoco di una *registrazione* (12 caratteri) |
-| **MBID** | MusicBrainz Identifier: UUID di un'entitÃ  MusicBrainz (recording, artist, release) |
+| **MBID** | MusicBrainz Identifier: UUID di un'entità MusicBrainz (recording, artist, release) |
 | **UPC** | Codice univoco di un *prodotto* (album/release) |
-| **canonicalKey** | Chiave di deduplicazione traccia: ISRC â†’ MBID â†’ fuzzy hash (regole DEDUP) |
+| **canonicalKey** | Chiave di deduplicazione traccia: ISRC → MBID → fuzzy hash (regole DEDUP) |
 | **eventKey** | Chiave di idempotenza di un listen event (platform + sourceEventId o hash) |
 | **platformIds** | Mappa degli identificatori originali dello stesso brano sulle varie piattaforme |
 
@@ -3759,8 +3893,8 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 | Termine | Definizione |
 |---------|-------------|
 | **Adapter** | Modulo che converte il formato di una piattaforma nel formato unificato |
-| **Formato unificato** | Schema di `ListenEvent` e entitÃ  collegate (02-DATA-SCHEMA) |
-| **Local-first** | I dati vivono sul dispositivo; il cloud Ã¨ opzionale e aggiuntivo |
+| **Formato unificato** | Schema di `ListenEvent` e entità collegate (02-DATA-SCHEMA) |
+| **Local-first** | I dati vivono sul dispositivo; il cloud è opzionale e aggiuntivo |
 | **Privacy-first** | Nessuna PII esce dal dispositivo senza toggle esplicito dell'utente |
 | **derivedVersion** | Hash del set di parametri che ha generato sessioni/insight; abilita ricalcolo coerente |
 | **Fixture** | Dataset sintetico di test in `fixtures/synthetic-history/` |
@@ -3770,10 +3904,10 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 
 | Termine | Definizione |
 |---------|-------------|
-| **agent-ready** | Label di issue la cui specifica Ã¨ APPROVED: un agente puÃ² lavorarci |
+| **agent-ready** | Label di issue la cui specifica è APPROVED: un agente può lavorarci |
 | **needs-spec** | Label di issue bloccata in attesa di specifica |
 | **APPROVED / DRAFT** | Stato di un documento: vincolante per gli agenti / in discussione |
-| **Boss** | Project owner (@amedeo82), unica autoritÃ  di approvazione |
+| **Boss** | Project owner (@amedeo82), unica autorità di approvazione |
 
 ---
 
@@ -3783,24 +3917,25 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione |
 
+
 ===== FILE: docs/15-DESIGN-SYSTEM.md =====
 
-# 15 â€” Design System
+# 15 — Design System
 
-> Status: ðŸŸ¡ DRAFT
+> Status: 🟡 DRAFT
 > Versione: 0.1
 > Ultima modifica: Sessione 0 (consolidamento)
 > Asset collegati: `design/mockups/` (14 schermate), `design/tokens.json` (Sessione 7)
 
 ---
 
-## 1. IdentitÃ  del brand
+## 1. Identità del brand
 
 ### 1.1 Concept del logo
 
 Un'**onda sonora che si distende in linea del tempo**: a sinistra la forma d'onda vibrante (la musica), a destra una linea orizzontale stabile (la vita). Metafora del prodotto: *la musica che diventa storia*.
 
-Varianti: primaria gradiente Â· monocroma viola Â· neutra grigia Â· bianca Â· wordmark "LIFE SOUNDTRACK".
+Varianti: primaria gradiente · monocroma viola · neutra grigia · bianca · wordmark "LIFE SOUNDTRACK".
 
 ### 1.2 Tagline
 
@@ -3822,27 +3957,27 @@ Varianti: primaria gradiente Â· monocroma viola Â· neutra grigia Â· bianca
 
 ### 2.2 Gradiente brand
 
-`#8B5CF6` (violet) â†’ `#EC4899` (magenta) â†’ `#F59E0B` (amber)
+`#8B5CF6` (violet) → `#EC4899` (magenta) → `#F59E0B` (amber)
 Usi: logo, CTA primarie, elementi attivi, highlight.
 
 ### 2.3 Palette mood (semantica, vincolante)
 
 | Mood | Hex | Posizione valence/energy |
 |------|-----|--------------------------|
-| ðŸ˜¢ Triste | `#3B82F6` | valence bassa, energy bassa |
-| ðŸ˜¤ Arrabbiato | `#EF4444` | valence bassa, energy alta |
-| ðŸ˜ Neutro | `#8B5CF6` | valence media |
-| ðŸ§˜ Calmo | `#10B981` | valence media, energy bassa |
-| ðŸ˜Š Felice | `#F59E0B` | valence alta, energy media |
-| ðŸŽ‰ Eccitato | `#EC4899` | valence alta, energy alta |
+| 😢 Triste | `#3B82F6` | valence bassa, energy bassa |
+| 😤 Arrabbiato | `#EF4444` | valence bassa, energy alta |
+| 😐 Neutro | `#8B5CF6` | valence media |
+| 🧘 Calmo | `#10B981` | valence media, energy bassa |
+| 😊 Felice | `#F59E0B` | valence alta, energy media |
+| 🎉 Eccitato | `#EC4899` | valence alta, energy alta |
 
 **Regola**: ogni visualizzazione di mood usa questa palette. Ogni mood ha sempre emoji + label testuale (mai solo colore).
 
 ### 2.4 Colori piattaforma (schermate import/settings)
 
-Spotify `#1DB954` Â· YouTube `#FF0000` Â· Apple Music `#FA243C` Â· Deezer `#A238FF` Â· Tidal `#00FFFF` Â· Last.fm `#D51007` Â· ListenBrainz `#EB7431`
+Spotify `#1DB954` · YouTube `#FF0000` · Apple Music `#FA243C` · Deezer `#A238FF` · Tidal `#00FFFF` · Last.fm `#D51007` · ListenBrainz `#EB7431`
 
-âš ï¸ Nota legale: nell'UI usare **riferimenti nominativi testuali o icone proprie**, non i loghi ufficiali (trademark). Da verificare in Sessione 6.
+⚠️ Nota legale: nell'UI usare **riferimenti nominativi testuali o icone proprie**, non i loghi ufficiali (trademark). Da verificare in Sessione 6.
 
 ## 3. Tipografia
 
@@ -3852,15 +3987,15 @@ Spotify `#1DB954` Â· YouTube `#FF0000` Â· Apple Music `#FA243C` Â· Deezer 
 | Corpo, UI | Inter | 400-600 |
 | Dati tecnici (URI, timestamp, IP) | JetBrains Mono | 400 |
 
-Scala: Display 48-64 Â· H1 32 Â· H2 24 Â· H3 20 Â· Body 16 Â· Small 14 Â· Caption 12.
-Licenze: Inter e JetBrains Mono sono SIL OFL â†’ ok per uso commerciale. Documentare in Sessione 6.
+Scala: Display 48-64 · H1 32 · H2 24 · H3 20 · Body 16 · Small 14 · Caption 12.
+Licenze: Inter e JetBrains Mono sono SIL OFL → ok per uso commerciale. Documentare in Sessione 6.
 
 ## 4. Principi stilistici
 
-1. **Dark-first**: il dark non Ã¨ un'opzione, Ã¨ l'identitÃ  (light mode come opzione secondaria)
+1. **Dark-first**: il dark non è un'opzione, è l'identità (light mode come opzione secondaria)
 2. **Glow, non ombre**: bagliori colorati sugli elementi attivi, come luci di un palco
 3. **Glassmorphism moderato**: card semi-trasparenti, blur leggero, bordi gradiente sottili
-4. **Angoli generosi**: 16px card desktop Â· 20px card mobile Â· full-round per pill e bottoni
+4. **Angoli generosi**: 16px card desktop · 20px card mobile · full-round per pill e bottoni
 5. **Spazio respirante**: padding 24-32px; una sola visualizzazione "eroe" per viewport
 6. **Il colore codifica dati**: i gradienti non sono decorazione, raccontano mood/energia/periodo
 
@@ -3880,21 +4015,21 @@ Licenze: Inter e JetBrains Mono sono SIL OFL â†’ ok per uso commerciale. Do
 | NavBar (desktop) / TabBar (mobile) | Navigazione |
 | ShareSheet | Condivisione ricordo con card generata |
 
-Spec dettagliate per componente (props, stati, a11y) â†’ Sessione 7 (`07-UI-SPEC.md`).
+Spec dettagliate per componente (props, stati, a11y) → Sessione 7 (`07-UI-SPEC.md`).
 
 ## 6. Principi UX
 
 1. **Privacy come feature**: il messaggio "i tuoi dati restano sul tuo dispositivo" appare in ogni punto di contatto coi dati
 2. **Progressive disclosure**: prima l'emozione (ricordi, mood), poi i dati, poi i dettagli tecnici
-3. **Narrazione prima dei numeri**: ogni insight Ã¨ una frase in linguaggio naturale; i numeri sono supporto
+3. **Narrazione prima dei numeri**: ogni insight è una frase in linguaggio naturale; i numeri sono supporto
 4. **L'utente ha l'ultima parola**: le inferenze (eventi, mood) sono ipotesi confermabili/correggibili/ignorabili
 5. **Zero frizione nell'import**: drag&drop ovunque, validazione immediata, errori con messaggi umani
 
 ## 7. Flussi principali (sintesi)
 
-- **Onboarding**: Benvenuto â†’ Privacy â†’ Import â†’ Processing â†’ Prima Rivelazione Timeline (momento wow, una sola volta)
-- **Loop quotidiano**: Home (stat + ricordo del giorno + settimana) â†’ Timeline â†’ Era â†’ Esplora/Analisi
-- **Ricordi**: feed mobile â†’ Rivivi (deep-link timeline) / Condividi (ShareSheet) / Salva
+- **Onboarding**: Benvenuto → Privacy → Import → Processing → Prima Rivelazione Timeline (momento wow, una sola volta)
+- **Loop quotidiano**: Home (stat + ricordo del giorno + settimana) → Timeline → Era → Esplora/Analisi
+- **Ricordi**: feed mobile → Rivivi (deep-link timeline) / Condividi (ShareSheet) / Salva
 - **Controllo**: Settings (piattaforme, privacy toggle, export JSON, cancellazione totale)
 - **Empty state**: ogni sezione ha illustrazione + CTA di uscita; mai pagine bianche
 
@@ -3908,18 +4043,18 @@ Tour completo delle 14 schermate con navigation map: `design/mockups/TOUR.md` (d
 | Click EraBand | Espansione smooth + dettaglio |
 | Scroll Timeline | Ere si illuminano al passaggio |
 | Import completato | Confetti sottili |
-| Prima rivelazione | Ere si colorano in sequenza 2016â†’2026 |
+| Prima rivelazione | Ere si colorano in sequenza 2016→2026 |
 | Long-press brano (mobile) | Menu contestuale |
 
 Motion reduction rispettata (`prefers-reduced-motion`).
 
-## 9. AccessibilitÃ 
+## 9. Accessibilità
 
-- Contrasti â‰¥ 4.5:1 su sfondo scuro
+- Contrasti ≥ 4.5:1 su sfondo scuro
 - Mood sempre con emoji + testo (non solo colore)
 - Navigazione da tastiera completa; focus visibile
 - Alternative testuali per ogni grafico (screen reader)
-- Touch target â‰¥ 44px su mobile
+- Touch target ≥ 44px su mobile
 
 ## 10. Responsive
 
@@ -3937,6 +4072,7 @@ Motion reduction rispettata (`prefers-reduced-motion`).
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
+
 
 ===== FILE: fixtures/synthetic-history/spotify-sample.json =====
 
@@ -4154,5 +4290,4 @@ Motion reduction rispettata (`prefers-reduced-motion`).
     "dedupApplied": 1
   }
 }
-
 
