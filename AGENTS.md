@@ -117,10 +117,12 @@ Tutte le decisioni architetturali importanti sono tracciate come **Architecture 
     Life-Soundtrack/
     ├── AGENTS.md              ← questo file
     ├── README.md
+    ├── AGENTS.md              ← contiene i dettagli dell'idea iniziale del progetto, da consultare per capire la struttura del progetto
     ├── docs/                  ← specifica completa del progetto
     ├── design/                ← mockup, token, asset grafici
     ├── fixtures/              ← dataset di test sintetici
     ├── scripts/               ← utility
+    ├── images/                ← mockup iniziali dell'idea del progetto
     └── (src/ verrà creato nella Fase 0 tecnica)
 
 ## 📞 Contatti
