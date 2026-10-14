@@ -56,13 +56,10 @@ Queste decisioni sono già prese e **vincolanti** (status 🟢 APPROVED):
 
 - Architettura: PWA-first, local-first, adapter pattern (ADR 0001, 0002, 0003)
 - Schema dati: `docs/02-DATA-SCHEMA.md`
-- Formato adapter: `docs/03-ADAPTERS/SPEC-TEMPLATE.md`
-- Algoritmi: `docs/04-ANALYSIS-ALGORITHMS.md` (quando approvato)
-- Design system: `docs/15-DESIGN-SYSTEM.md`
-- Copy e i18n: `docs/08-COPY-I18N.md`
-- Privacy: `docs/09-PRIVACY-SECURITY.md` (quando scritto)
+- Formato adapter: `docs/03-ADAPTERS/SPEC-TEMPLATE.md` + `spotify.md`
 - Test strategy: `docs/10-TESTING.md`
 - Backlog: `docs/11-BACKLOG.md`
+- Glossario: `docs/14-GLOSSARY.md`
 
 **Regola d'oro**: se una decisione è documentata e 🟢 APPROVED, è vincolante. Se è 🟡 DRAFT, puoi proporre modifiche aprendo una issue. Se non esiste, **apri una issue `needs-spec` invece di inventare**.
 
@@ -87,24 +84,6 @@ Una issue può essere lavorata da un agente **solo se**:
 | Gate | `agent-ready`, `needs-spec`, `blocked` | Stato lavorabilità |
 | Tipo | `bug`, `enhancement`, `refactor`, `docs` | Classificazione |
 
-### Template issue
-
-    ## Descrizione
-    Cosa deve essere fatto e perché.
-
-    ## Specifica di riferimento
-    - [ ] `docs/XX-NOME.md` (status: 🟢 APPROVED)
-
-    ## Acceptance criteria
-    - [ ] criterio 1 verificabile
-    - [ ] criterio 2 verificabile
-
-    ## Fixture di test
-    - `fixtures/.../...`
-
-    ## Note
-    Eventuali edge case o vincoli.
-
 ## 🌳 Git workflow
 
 - Branch: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
@@ -113,51 +92,15 @@ Una issue può essere lavorata da un agente **solo se**:
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 
-### Template commit
-
-    <type>(<scope>): <description>
-
-    [body opzionale]
-
-    Ref: #<issue-number>
-
 ## 📝 Checklist di auto-revisione PR
-
-Prima di aprire una PR, verifica:
 
 - [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
 - [ ] Il codice rispetta lo schema dati (`02-DATA-SCHEMA.md`)
 - [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
-- [ ] Ho usato i fixture di `fixtures/synthetic-history/` e `fixtures/scenarios/`
-- [ ] Ho seguito il naming e lo stile del codebase
+- [ ] Ho usato i fixture di `fixtures/synthetic-history/`
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
-- [ ] Coverage del modulo ≥ target in `10-TESTING.md` §2
-- [ ] Ho aggiornato `docs/11-BACKLOG.md` se la story è completata
-
-## 💬 Come segnalare problemi
-
-### Discrepanza tra specifiche
-
-1. Cerca tra le issue aperte
-2. Apri issue con label `needs-spec`
-3. Riferimento ai documenti e linee specifiche
-4. Descrizione dell'incoerenza
-5. Proposta di risoluzione (opzionale)
-
-**Mai risolvere incoerenze modificando il codice senza documentarlo.**
-
-### Bug nel codice
-
-- Issue con label `bug`
-- Passi per riprodurre
-- Comportamento atteso vs osservato
-- Eventuale test di regressione da aggiungere
-
-## 📜 Registro delle decisioni
-
-Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di proporre modifiche architetturali, verifica che non ci sia già un ADR. Se vuoi proporre un nuovo ADR, apri issue con label `area:devops` e proponi il testo.
 
 ## 🗺️ Struttura del repository
 
@@ -165,46 +108,26 @@ Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di pr
     ├── AGENTS.md                ← questo file
     ├── README.md
     ├── docs/                    ← specifica completa
-    │   ├── INDEX.md             ← stato master
-    │   ├── SESSIONS.md          ← log sessioni
-    │   ├── BUNDLE.md            ← snapshot completo
-    │   ├── 00-VISION.md
-    │   ├── 01-PLATFORMS.md
-    │   ├── 02-DATA-SCHEMA.md
-    │   ├── 03-ADAPTERS/         ← spec di ogni adapter
-    │   ├── 04-ANALYSIS-ALGORITHMS.md
-    │   ├── 05-ARCHITECTURE.md
-    │   ├── 10-TESTING.md
-    │   ├── 11-BACKLOG.md
-    │   ├── 13-ADR/              ← decisioni architetturali
-    │   ├── 14-GLOSSARY.md
-    │   └── 15-DESIGN-SYSTEM.md
+    │   ├── INDEX.md, SESSIONS.md, BUNDLE.md
+    │   ├── 00-VISION.md … 15-DESIGN-SYSTEM.md
+    │   ├── 03-ADAPTERS/, 13-ADR/
+    │   └── 09-PRIVACY-SECURITY.md
     ├── design/                  ← mockup, token, asset
+    │   └── mockups/             ← PNG storiche dalle sessioni esplorative
     ├── fixtures/                ← dataset di test
-    │   ├── synthetic-history/   ← fixture per adapter
-    │   ├── db-seed/             ← seed per DB
-    │   ├── scenarios/           ← scenari di vita
-    │   └── api-mocks/           ← mock API esterne
-    ├── apps/
-    │   ├── web/                 ← PWA principale
-    │   └── desktop/             ← Tauri (Fase 2)
-    ├── packages/
-    │   ├── core/                ← logica condivisa
-    │   └── ui/                  ← design system
-    └── scripts/                 ← utility
+    │   └── synthetic-history/
+    └── scripts/                 ← utility (es. generate-bundle.ps1)
 
 ## 🚀 Primo task di un agente
 
-Se sei un agente e ti hanno chiesto di iniziare a lavorare senza un task specifico:
-
 1. Leggi questo file
 2. Leggi `docs/INDEX.md` e `docs/11-BACKLOG.md`
-3. Cerca la prima story ⬚ TODO con label `agent-ready` nella fase più bassa disponibile
+3. Cerca la prima story ⬚ TODO con label `agent-ready`
 4. Clona il repo, crea branch `feat/<issue>-<descrizione>`
 5. Implementa con test
 6. Apri PR
 
-Se non ci sono issue `agent-ready`, segnalalo al project owner aprendo una issue con label `needs-spec`.
+Se non ci sono issue `agent-ready`, apri issue con label `needs-spec`.
 
 ## 📞 Contatti
 
@@ -215,4 +138,4 @@ Se non ci sono issue `agent-ready`, segnalalo al project owner aprendo una issue
 
 ---
 
-*Ultimo aggiornamento: Sessione 5 (Parte 2) — Review repo + fix*
+*Ultimo aggiornamento: Sessione 6 — fix sincronizzazione*

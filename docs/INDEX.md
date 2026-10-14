@@ -44,9 +44,9 @@
 
 | Cartella | Contenuto |
 |----------|-----------|
-| [`../design/mockups/`](../design/mockups/) | Le 14 schermate generate + tour logico |
+| [`../design/mockups/`](../design/mockups/) | Mockup schermate (PNG storiche dalle sessioni esplorative) |
 | [`../design/tokens.json`](../design/tokens.json) | (futuro) Design tokens per il codice |
-| [`../design/assets/`](../design/assets/) | (futuro) Logo, icone, illustrazioni |
+| [`../design/assets/`](../design/assets/) | (futuro) Logo, icone, illustrazioni vettoriali |
 
 ## Fixture di test
 
@@ -66,16 +66,16 @@
 | 3 | 📋 Governo (backlog + testing + AGENTS) | ✅ COMPLETATA (APPROVED) |
 | 4 | 🧠 Analisi algoritmica | ✅ COMPLETATA |
 | 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
-| 6 | 🔐 Privacy & legale | ✅ **COMPLETATA** |
-| 7 | 🎨 UI eseguibile + tokens | 🔴 |
+| 6 | 🔐 Privacy & legale | ✅ COMPLETATA |
+| 7 | 🎨 UI eseguibile + tokens | 🔴 PROSSIMA |
 | 8 | ⚙️ DevOps | 🔴 |
 
 ## Stato del progetto
 
 - **Documenti APPROVED**: 9 (02, 03, 10, 11, 13-ADR×3, 14, AGENTS)
-- **Documenti DRAFT**: 7 (00, 01, 04, 05, 06, 08, 15)
-- **Documenti TODO**: 3 (07, 09, 12)
-- **Completamento progettazione**: ~95%
+- **Documenti DRAFT**: 7 (00, 01, 04, 05, 06, 08, 09, 15)
+- **Documenti TODO**: 2 (07, 12)
+- **Completamento progettazione**: ~97%
 
 ---
 

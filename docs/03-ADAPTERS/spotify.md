@@ -1,8 +1,6 @@
 # Adapter Spotify
 
 > Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
-> Piattaforma: Spotify
-> Sede legale: Svezia
 > Tier: **S** · Priorità MVP: **sì**
 
 ## 1. Metodi di accesso

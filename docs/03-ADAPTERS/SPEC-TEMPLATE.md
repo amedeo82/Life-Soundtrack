@@ -21,15 +21,15 @@
 | Scrobbling (Last.fm/LB) | sì/no | — | Continuo | |
 | File utente diretto | sì/no | <descrivi> | — | |
 
-## 2. Flusso di import (solo export GDPR se applicabile)
+## 2. Flusso di import
 
 [Stato iniziale] → [Rilevamento formato] → [Parsing streaming] → [Normalizzazione] → [Upsert DB]
 
 
 Descrivi:
 - Come l'utente procura il file (URL, passaggi)
-- Come l'adapter lo riconosce (`detect(input)` — firma magica, header, nome file)
-- Come gestisce file multipli (Spotify: ZIP con JSON partizionati)
+- Come l'adapter lo riconosce (`detect(input)`)
+- Come gestisce file multipli
 
 ## 3. Mapping campi sorgente → unificato
 
@@ -70,7 +70,7 @@ Descrivi:
 
 ## 4. Edge case noti (catalogo E)
 
-Copia il catalogo da `01-PLATFORMS.md` §5 filtrando per questa piattaforma, poi aggiungi eventuali nuovi:
+Copia da `01-PLATFORMS.md` §5 filtrando per piattaforma.
 
 | # | Descrizione | Impatto | Azione adapter |
 |---|-------------|---------|----------------|
@@ -78,11 +78,11 @@ Copia il catalogo da `01-PLATFORMS.md` §5 filtrando per questa piattaforma, poi
 
 ## 5. Semantica temporale
 
-Specifica chiaramente: il timestamp sorgente rappresenta **l'inizio** o la **fine** dell'ascolto? Come si derivano `timestamp` (fine) e `startedAt` (inizio)?
+Specifica se il timestamp sorgente è inizio o fine ascolto. Come si derivano `timestamp` (fine) e `startedAt` (inizio)?
 
 ## 6. Regole di dedup tracce
 
-Riferimento a `02-DATA-SCHEMA.md` §5 (DEDUP-1..3). Se la piattaforma fornisce ISRC/MBID, specificarlo. Altrimenti conferma DEDUP-3.
+Riferimento a `02-DATA-SCHEMA.md` §5 (DEDUP-1..3).
 
 ## 7. Comportamento privacy
 
@@ -90,31 +90,25 @@ Riferimento a `02-DATA-SCHEMA.md` §5 (DEDUP-1..3). Se la piattaforma fornisce I
 |----------------|---------|---------------------|
 | IP address | scartato dopo `country` | conservato |
 | Coordinate GPS | mai raccolte | mai raccolte |
-| ... | — | — |
 
 ## 8. Test — fixture atteso
 
-Riferimento a `fixtures/synthetic-history/<platform>-sample.json`. Il fixture deve contenere almeno un esempio di ogni edge case E.N.x.
+Riferimento a `fixtures/synthetic-history/<platform>-sample.json`.
 
 Casi di test minimi:
 1. Import pulito (happy path)
-2. Idempotenza (re-import stesso file → 0 duplicati)
-3. Ogni edge case E.N.x → risultato atteso documentato
-4. DEDUP: due record con stesso ISRC → una sola track
-5. DEDUP: due record omonimi senza ISRC, durata diversa → due track separate
+2. Idempotenza (re-import → 0 duplicati)
+3. Ogni edge case E.N.x → risultato atteso
+4. DEDUP: due record stesso ISRC → una sola track
+5. DEDUP: due record omonimi, durata diversa → due track
 
 ## 9. Segnalazione all'utente
 
-Elenco messaggi UI che l'adapter può emettere:
-- Warning: "X eventi con timestamp invalidi scartati"
-- Error: "Formato file non riconosciuto"
-- Info: "Import completato: X eventi, Y brani unici"
-
-Codici di warning/errori definiti in `08-COPY-I18N.md`.
+Elenco codici i18n (`08-COPY-I18N.md`) usati dall'adapter.
 
 ## 10. Note di implementazione
 
-Dettagli specifici per questa piattaforma che non rientrano nelle sezioni precedenti. Esempio: limiti di rate API, chunking consigliato, formati di compressione.
+Dettagli specifici (rate limit API, chunking, formati compressione).
 
 ---
 
@@ -123,4 +117,3 @@ Dettagli specifici per questa piattaforma che non rientrano nelle sezioni preced
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | Sessione 2 | Template approvato |
-| 0.1 | Sessione 2 | Prima bozza |
