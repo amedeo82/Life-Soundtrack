@@ -18,7 +18,7 @@
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 0 | Visione, missione, target, principi |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 0 | Matrice piattaforme europee + campi dati |
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟡 DRAFT | Sessione 1 | Schema dati unificato (TypeScript + Dexie) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🔴 TODO | — | Specifiche dei singoli adapter |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟡 DRAFT | Sessione 2 | Specifiche dei singoli adapter (TEMPLATE + Spotify) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🔴 TODO | — | Algoritmi di analisi (mood, ere, eventi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟡 DRAFT | Sessione 0 | Architettura tecnica generale |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🔴 TODO | — | Flussi UX e stati per schermata |
@@ -59,7 +59,7 @@
 |----------|------|-------|
 | 0 | 🔒 Consolidamento + Bootstrap | ✅ **COMPLETATA** |
 | 1 | 🗄️ Fondamenta dati | ✅ **COMPLETATA** |
-| 2 | 🔌 Primo adapter (Spotify) | 🔴 |
+| 2 | 🔌 Primo adapter (Spotify) | ✅ **COMPLETATA** |
 | 3 | 📋 Governo (backlog + testing + AGENTS finale) | 🔴 |
 | 4 | 🧠 Analisi algoritmica | 🔴 |
 | 5 | 🧭 UX completa + i18n | 🔴 |

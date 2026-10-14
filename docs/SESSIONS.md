@@ -76,8 +76,6 @@
 ### Prossimi passi
 - Sessione 1: `02-DATA-SCHEMA.md`, `14-GLOSSARY.md`, ADR 0001-0003
 
----
-
 ## Sessione 1 — 🗄️ Fondamenta dati
 
 **Data**: ottobre 2026
@@ -107,6 +105,33 @@
 
 ### Prossimo passo
 - **Sessione 2** (in nuova chat): SPEC-TEMPLATE adapter + spotify.md + fixture `fixtures/synthetic-history/spotify-sample.json`
+
+## Sessione 2 — 🔌 Template adapter + Spotify
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/03-ADAPTERS/SPEC-TEMPLATE.md` (DRAFT)
+- ✅ `docs/03-ADAPTERS/spotify.md` (DRAFT)
+- ✅ `fixtures/synthetic-history/spotify-sample.json` (10 eventi sintetici con edge case)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D2.1 | SPEC-TEMPLATE come formato fisso per ogni adapter | Coerenza, reviewability |
+| D2.2 | Regola `skipped` derivata (E1) documentata in spotify.md | Risolve bug storico Spotify |
+| D2.3 | `CarDetectionEvent.json` richiede consenso separato da `retainIp` | Tracciamento movimenti = dato particolarmente sensibile |
+| D2.4 | Fixture sintetico con 10 eventi rappresentativi | Base test per tutti gli adapter |
+| D2.5 | `eventKey` = `platform:spotify_uri` o hash fallback | Idempotenza garantita |
+
+### Aperti per approvazione Boss
+- [ ] 03-ADAPTERS/SPEC-TEMPLATE.md → 🟢 APPROVED?
+- [ ] 03-ADAPTERS/spotify.md → 🟢 APPROVED?
+
+### Prossimo passo
+- Sessione 3: Backlog strutturato + Testing strategy + AGENTS.md finale
+- Dopo Sessione 3: valutare bundle di handoff per chiudere chat o continuare
 
 ---
 
