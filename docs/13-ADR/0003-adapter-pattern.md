@@ -1,6 +1,6 @@
 # ADR-0003 — Adapter pattern e normalizzazione early
 
-> Status: 🟡 DRAFT (approvazione Boss pending) · Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 
 ## Contesto
 

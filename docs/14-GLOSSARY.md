@@ -1,6 +1,6 @@
 # 14 — Glossario di Dominio
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 > Definizioni univoche. In caso di conflitto tra un documento e questo glossario, vale questo glossario (finché non viene aggiornato).
 
 ## Termini di dominio

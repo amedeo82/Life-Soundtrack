@@ -1,6 +1,6 @@
 # Adapter Spotify
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 2
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
 > Piattaforma: Spotify
 > Sede legale: Svezia
 > Tier: **S** · Priorità MVP: **sì**

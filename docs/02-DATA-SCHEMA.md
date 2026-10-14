@@ -1,7 +1,7 @@
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟡 DRAFT
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 1
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 

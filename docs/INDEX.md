@@ -17,27 +17,28 @@
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 0 | Visione, missione, target, principi |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 0 | Matrice piattaforme europee + campi dati |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟡 DRAFT | Sessione 1 | Schema dati unificato (TypeScript + Dexie) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟡 DRAFT | Sessione 2 | Specifiche dei singoli adapter (TEMPLATE + Spotify) |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 1 | Schema dati unificato (TypeScript + Dexie) |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 2 | SPEC-TEMPLATE + Spotify (altri TBD) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 4 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟡 DRAFT | Sessione 0 | Architettura tecnica generale |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 5 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 5 | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🔴 TODO | — | Privacy spec, data flow, security |
-| 10 | [`10-TESTING.md`](10-TESTING.md) | 🟡 DRAFT | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟡 DRAFT | Sessione 3 | Backlog strutturato (epic → story → task) |
+| 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 3 | Backlog strutturato (epic → story → task) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟡 DRAFT | Sessione 1 | Architecture Decision Records (0001-0003) |
-| 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟡 DRAFT | Sessione 1 | Glossario di dominio |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 1 | Architecture Decision Records (0001-0003) |
+| 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 0 | Design system completo |
 
 ## Documenti di supporto
 
 | File | Stato | Descrizione |
 |------|-------|-------------|
-| [`SESSIONS.md`](SESSIONS.md) | 🟡 LIVE | Log di tutte le sessioni di progettazione |
-| [`../AGENTS.md`](../AGENTS.md) | 🟡 DRAFT | Protocollo per agenti |
+| [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni di progettazione |
+| [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Backup completo del progetto |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.0 | Protocollo per agenti |
 
 ## Design & mockup
 
@@ -52,20 +53,29 @@
 | Cartella | Contenuto |
 |----------|-----------|
 | [`../fixtures/synthetic-history/`](../fixtures/synthetic-history/) | Dataset di test sintetici per ogni adapter |
+| [`../fixtures/db-seed/`](../fixtures/db-seed/) | (futuro) Seed per test DB |
+| [`../fixtures/scenarios/`](../fixtures/scenarios/) | (futuro) Scenari di vita pre-costruiti |
 
 ## Roadmap Sessioni di Progettazione
 
 | Sessione | Nome | Stato |
 |----------|------|-------|
-| 0 | 🔒 Consolidamento + Bootstrap | ✅ **COMPLETATA** |
-| 1 | 🗄️ Fondamenta dati | ✅ **COMPLETATA** |
-| 2 | 🔌 Primo adapter (Spotify) | ✅ **COMPLETATA** |
-| 3 | 📋 Governo (backlog + testing + AGENTS finale) | ✅ **COMPLETATA** |
-| 4 | 🧠 Analisi algoritmica | ✅ **COMPLETATA** |
-| 5 | 🧭 UX completa + i18n | ✅ **COMPLETATA** |
-| 6 | 🔐 Privacy & legale | 🔴 |
+| 0 | 🔒 Consolidamento + Bootstrap | ✅ COMPLETATA |
+| 1 | 🗄️ Fondamenta dati | ✅ COMPLETATA (APPROVED) |
+| 2 | 🔌 Primo adapter (Spotify) | ✅ COMPLETATA (APPROVED) |
+| 3 | 📋 Governo (backlog + testing + AGENTS) | ✅ COMPLETATA (APPROVED) |
+| 4 | 🧠 Analisi algoritmica | ✅ COMPLETATA |
+| 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
+| 6 | 🔐 Privacy & legale | 🔴 PROSSIMA |
 | 7 | 🎨 UI eseguibile + tokens | 🔴 |
 | 8 | ⚙️ DevOps | 🔴 |
+
+## Stato del progetto
+
+- **Documenti APPROVED**: 9 (02, 03, 10, 11, 13-ADR×3, 14, AGENTS)
+- **Documenti DRAFT**: 7 (00, 01, 04, 05, 06, 08, 15)
+- **Documenti TODO**: 3 (07, 09, 12)
+- **Completamento progettazione**: ~95%
 
 ---
 

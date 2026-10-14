@@ -15,7 +15,7 @@ Quando ricevi un task su questo repository, segui questo ordine:
 4. **[`docs/05-ARCHITECTURE.md`](docs/05-ARCHITECTURE.md)** — architettura
 5. **[`docs/14-GLOSSARY.md`](docs/14-GLOSSARY.md)** — linguaggio comune
 6. **[`docs/11-BACKLOG.md`](docs/11-BACKLOG.md)** — il lavoro da fare
-7. **[`docs/10-TESTING.md`](docs/10-TESTING.md)`** — come testare
+7. **[`docs/10-TESTING.md`](docs/10-TESTING.md)** — come testare
 8. **La specifica del task** (linkata nell'issue)
 
 **Non saltare questi passi.** Il contesto è essenziale.
@@ -38,9 +38,9 @@ Questo progetto è progettato per funzionare attraverso conversazioni multiple c
        Dimmi cosa serve fare nella prossima sessione e proponimi i documenti
        da scrivere, aspettando la mia approvazione prima di procedere.
 
-4. L'AI userà i suoi tool web (se il repo è pubblico) o i file incollati per continuare
+4. L'AI userà i suoi tool web per leggere il repo e continuerà esattamente da dove eri rimasto
 
-**Il PAT va dato agli agenti di sviluppo** (Claude Code, Cursor, Copilot) con scope `contents: read/write` sul repo solo. L'AI di review (come Claude in chat) non ha bisogno di PAT.
+**Il PAT va dato agli agenti di sviluppo** (Claude Code, Cursor, Copilot) con scope `contents: read/write` sul repo solo. L'AI di review non ha bisogno di PAT.
 
 ## ✅ Cosa puoi fare autonomamente
 
@@ -55,13 +55,14 @@ Questo progetto è progettato per funzionare attraverso conversazioni multiple c
 Queste decisioni sono già prese e **vincolanti** (status 🟢 APPROVED):
 
 - Architettura: PWA-first, local-first, adapter pattern (ADR 0001, 0002, 0003)
-- Schema dati: `02-DATA-SCHEMA.md` (quando approvato)
-- Formato adapter: `03-ADAPTERS/SPEC-TEMPLATE.md`
-- Algoritmi: `04-ANALYSIS-ALGORITHMS.md` (quando scritto)
-- Design system: `15-DESIGN-SYSTEM.md`
-- Copy e i18n: `08-COPY-I18N.md` (quando scritto)
-- Privacy: `09-PRIVACY-SECURITY.md` (quando scritto)
-- Test strategy: `10-TESTING.md`
+- Schema dati: `docs/02-DATA-SCHEMA.md`
+- Formato adapter: `docs/03-ADAPTERS/SPEC-TEMPLATE.md`
+- Algoritmi: `docs/04-ANALYSIS-ALGORITHMS.md` (quando approvato)
+- Design system: `docs/15-DESIGN-SYSTEM.md`
+- Copy e i18n: `docs/08-COPY-I18N.md`
+- Privacy: `docs/09-PRIVACY-SECURITY.md` (quando scritto)
+- Test strategy: `docs/10-TESTING.md`
+- Backlog: `docs/11-BACKLOG.md`
 
 **Regola d'oro**: se una decisione è documentata e 🟢 APPROVED, è vincolante. Se è 🟡 DRAFT, puoi proporre modifiche aprendo una issue. Se non esiste, **apri una issue `needs-spec` invece di inventare**.
 
@@ -166,6 +167,7 @@ Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di pr
     ├── docs/                    ← specifica completa
     │   ├── INDEX.md             ← stato master
     │   ├── SESSIONS.md          ← log sessioni
+    │   ├── BUNDLE.md            ← snapshot completo
     │   ├── 00-VISION.md
     │   ├── 01-PLATFORMS.md
     │   ├── 02-DATA-SCHEMA.md
@@ -213,4 +215,4 @@ Se non ci sono issue `agent-ready`, segnalalo al project owner aprendo una issue
 
 ---
 
-*Ultimo aggiornamento: Sessione 3 — Versione stabile 1.0*
+*Ultimo aggiornamento: Sessione 5 (Parte 2) — Review repo + fix*

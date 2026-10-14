@@ -1,6 +1,6 @@
 # ADR-0002 — Local-first e privacy-by-design
 
-> Status: 🟡 DRAFT (approvazione Boss pending) · Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 
 ## Contesto
 

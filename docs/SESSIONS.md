@@ -237,6 +237,91 @@
 
 ---
 
+## Sessione 3 — 📋 Governo
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata + APPROVED
+
+### Documenti prodotti
+- ✅ `docs/11-BACKLOG.md` (APPROVED) — 5 epic, 17 story, ordinamento priorità
+- ✅ `docs/10-TESTING.md` (APPROVED) — piramide test, coverage target, fixture strategy
+- ✅ `AGENTS.md` v1.0 (APPROVED) — protocollo finale con handoff tra chat
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D3.1 | Backlog con 5 epic (fondamenta, import, analisi, UI, privacy) | Copertura MVP + estensioni future |
+| D3.2 | Story 0.1-0.4 come "fondamenta obbligatorie" sequenziali | Dipendenza critica; senza queste nulla funziona |
+| D3.3 | Label GitHub `agent-ready` come gate unico per lavoro agenti | Evita agenti che improvvisano su spec mancanti |
+| D3.4 | Coverage target differenziato per modulo | Adapter critici al 90%, UI al 70% |
+| D3.5 | 3 categorie di fixture: synthetic-history, db-seed, scenarios | Separazione responsabilità test |
+| D3.6 | AGENTS.md v1.0 stabile con sezione handoff | Pronti per chat multiple senza perdita di contesto |
+
+---
+
+## Sessione 4 — 🧠 Algoritmi di analisi
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D4.1 | Mood come quadrante valence×energy con fascia neutra centrale | Evita flip-flop tra mood |
+| D4.2 | Era detector via change point detection su firme settimanali | Più robusto del clustering k-means puro |
+| D4.3 | Similarity multi-dimensionale pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi e quantitativi |
+| D4.4 | Event detector via z-score + rilevatori specializzati per silence/exploration | z-score è interpretabile, specializzati catturano casi non-statistici |
+| D4.5 | 5 tipi di ricordo con scoring e ranking | Feed ordinato per rilevanza |
+| D4.6 | Pipeline incrementale (non full-rewrite) | Performance su file grandi |
+| D4.7 | derivedVersion = sha1(config)[:8] | Rileva automaticamente cambiamenti parametri |
+
+---
+
+## Sessione 5 — 🧭 UX completa + i18n
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/06-UX-FLOWS-STATES.md` (DRAFT)
+- ✅ `docs/08-COPY-I18N.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D5.1 | 6 stati globali (loading, empty, partial, ready, error, offline) | Copertura completa di ogni scenario |
+| D5.2 | Stato machine di Import con 6 stati | Tracciamento preciso del flusso |
+| D5.3 | Keyboard navigation per ogni schermata | Accessibilità e power user |
+| D5.4 | Alternative testuali per ogni visualizzazione | Screen reader compliance |
+| D5.5 | Namespace i18n per modulo | Manutenibilità |
+| D5.6 | MVP bilingue IT+EN | Target europeo |
+| D5.7 | Pluralizzazione ICU | Supporto corretto per tutte le lingue future |
+| D5.8 | Demo mode con fixture sintetico | Onboarding senza dati personali |
+
+### Sessione 5 — Parte 2 (Review repo)
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+Boss ha reso il repo pubblico (`https://github.com/amedeo82/Life-Soundtrack`) e chiesto verifica di coerenza. Trovati 6 problemi di sincronizzazione tra chat e repo:
+1. INDEX.md non aggiornato
+2. SESSIONS.md senza log Sessioni 3-5
+3. AGENTS.md versione vecchia
+4. SPEC-TEMPLATE.md con refusi
+5. Status APPROVED non riflessi nei file
+6. BUNDLE.md mancante
+
+**Risolto con commit di fix.**
+
+---
+
+*Aggiornato ad ogni nuova sessione.*
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]

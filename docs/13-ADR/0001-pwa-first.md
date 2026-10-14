@@ -1,6 +1,6 @@
 # ADR-0001 — PWA come piattaforma primaria
 
-> Status: 🟡 DRAFT (approvazione Boss pending) · Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 
 ## Contesto
 

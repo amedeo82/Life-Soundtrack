@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 3
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 3
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
