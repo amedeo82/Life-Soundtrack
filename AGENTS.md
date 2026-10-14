@@ -129,4 +129,14 @@ Il project owner è `@amedeo82`. Per decisioni non tecniche o dubbi strategici, 
 
 ---
 
+## 🔄 Handoff tra conversazioni (per umani)
+
+Questo progetto è progettato per funzionare attraverso **conversazioni multiple** con l'AI (Claude o altri). Quando la conversazione diventa troppo lunga o devi riprendere dopo un'interruzione:
+
+1. **Verifica che tutto sia pushato su GitHub**: `git status` deve essere pulito
+2. **Apri una nuova conversazione** con l'AI
+3. **Dai il prompt di riattivazione** (copialo sotto):
+
+---
+
 *Ultimo aggiornamento: Sessione 0 — Bootstrap repository*

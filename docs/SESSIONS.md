@@ -84,33 +84,29 @@
 **Stato**: ✅ Completata
 
 ### Documenti prodotti
-- ✅ `docs/02-DATA-SCHEMA.md` (DRAFT)
-- ✅ `docs/14-GLOSSARY.md` (DRAFT)
-- ✅ `docs/13-ADR/0001-pwa-first.md` (DRAFT)
-- ✅ `docs/13-ADR/0002-local-first.md` (DRAFT)
-- ✅ `docs/13-ADR/0003-adapter-pattern.md` (DRAFT)
+- ✅ `docs/02-DATA-SCHEMA.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/14-GLOSSARY.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/13-ADR/0001-pwa-first.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/13-ADR/0002-local-first.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/13-ADR/0003-adapter-pattern.md` (DRAFT — pending approvazione Boss)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
 | D1.1 | `timestamp` = fine ascolto, `startedAt` = inizio; tabella semantica per piattaforma | Coerenza temporale cross-platform |
 | D1.2 | Idempotenza import via `eventKey` unico | Re-import sicuri senza duplicati |
-| D1.3 | Dedup tracce: ISRC → MBID → fuzzy hash (DEDUP-1..3) | Bilancia precisione e copertura |
-| D1.4 | IP non persistito: solo `country` derivato | Privacy-by-design |
+| D1.3 | Dedup tracce: ISRC → MBID → fuzzy hash **con durata** (DEDUP-1..3) | Bilancia precisione e copertura; bucket 2s |
+| D1.4 | IP non persistito DI DEFAULT; toggle esplicito `PrivacySettings.retainIp` | Privacy-by-design + controllo utente |
 | D1.5 | Derivati versionati (`derivedVersion`) e ricalcolabili | Coerenza analisi nel tempo |
 | D1.6 | Contatori denormalizzati ricalcolabili (`recount()`) | Performance senza perdere verità |
 
-### Aggiornamenti post-review (Boss)
-| # | Modifica | Motivazione |
-|---|----------|-------------|
-| D1.7 | DEDUP-3 include durata nel fuzzy hash (bucket 2s) | Riduce fusioni false di brani omonimi diversi |
-| D1.8 | Toggle esplicito `PrivacySettings.retainIp` (default off) | Conserva IP solo se utente lo vuole; mai in rete; purgabile |
+### Aperti per approvazione Boss
+- [ ] 02-DATA-SCHEMA.md → 🟢 APPROVED?
+- [ ] 14-GLOSSARY.md → 🟢 APPROVED?
+- [ ] ADR 0001/0002/0003 → 🟢 APPROVED?
 
-### Aperti
-- Approvazione Boss su 00-VISION e ADR 0001-0003 (passaggio a 🟢 APPROVED)
-
-### Prossimi passi
-- Sessione 2: SPEC-TEMPLATE adapter + adapter Spotify + fixture sintetici
+### Prossimo passo
+- **Sessione 2** (in nuova chat): SPEC-TEMPLATE adapter + spotify.md + fixture `fixtures/synthetic-history/spotify-sample.json`
 
 ---
 
