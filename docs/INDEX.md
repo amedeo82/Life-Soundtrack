@@ -16,11 +16,11 @@
 | # | File | Stato | Ultima modifica | Descrizione |
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 0 | Visione, missione, target, principi |
-| 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🔴 TODO | — | Matrice piattaforme europee + campi dati |
+| 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 0 | Matrice piattaforme europee + campi dati |
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🔴 TODO | — | Schema dati unificato (TypeScript + Dexie) |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🔴 TODO | — | Specifiche dei singoli adapter |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🔴 TODO | — | Algoritmi di analisi (mood, ere, eventi) |
-| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🔴 TODO | — | Architettura tecnica generale |
+| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟡 DRAFT | Sessione 0 | Architettura tecnica generale |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🔴 TODO | — | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🔴 TODO | — | Tutte le stringhe UI con chiavi i18n |
@@ -30,7 +30,7 @@
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🔴 TODO | — | Architecture Decision Records |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🔴 TODO | — | Glossario di dominio |
-| 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🔴 TODO | — | Design system completo |
+| 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 0 | Design system completo |
 
 ## Documenti di supporto
 
@@ -57,7 +57,7 @@
 
 | Sessione | Nome | Stato |
 |----------|------|-------|
-| 0 | 🔒 Consolidamento + Bootstrap | 🟢 **IN CORSO** |
+| 0 | 🔒 Consolidamento + Bootstrap | ✅ **COMPLETATA** |
 | 1 | 🗄️ Fondamenta dati | 🔴 Prossima |
 | 2 | 🔌 Primo adapter (Spotify) | 🔴 |
 | 3 | 📋 Governo (backlog + testing + AGENTS finale) | 🔴 |

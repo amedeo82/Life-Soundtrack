@@ -56,6 +56,28 @@
 
 ---
 
+## Sessione 0 — Parte 2 — 📦 Consolidamento materiale esplorativo
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/01-PLATFORMS.md` (DRAFT)
+- ✅ `docs/05-ARCHITECTURE.md` (DRAFT)
+- ✅ `docs/15-DESIGN-SYSTEM.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D0.8 | Scope MVP = 8 sorgenti + self-hosted via scrobbling; resto rinviato | Coprire il 90%+ del mercato europeo con sforzo sostenibile |
+| D0.9 | Design system consolidato ora; spec per componente rinviata a Sessione 7 | Evitare over-engineering prima dello schema dati |
+| D0.10 | Edge case noti catalogati in `01-PLATFORMS.md` §5 come vincoli adapter | Gli agenti non devono riscoprirli da zero |
+
+### Prossimi passi
+- Sessione 1: `02-DATA-SCHEMA.md`, `14-GLOSSARY.md`, ADR 0001-0003
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
