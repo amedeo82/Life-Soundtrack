@@ -1,7 +1,7 @@
 ﻿# BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-14 15:16
+> Data: 2026-10-14 15:55
 > Totale file: 21
 
 
@@ -65,13 +65,10 @@ Queste decisioni sono già prese e **vincolanti** (status 🟢 APPROVED):
 
 - Architettura: PWA-first, local-first, adapter pattern (ADR 0001, 0002, 0003)
 - Schema dati: `docs/02-DATA-SCHEMA.md`
-- Formato adapter: `docs/03-ADAPTERS/SPEC-TEMPLATE.md`
-- Algoritmi: `docs/04-ANALYSIS-ALGORITHMS.md` (quando approvato)
-- Design system: `docs/15-DESIGN-SYSTEM.md`
-- Copy e i18n: `docs/08-COPY-I18N.md`
-- Privacy: `docs/09-PRIVACY-SECURITY.md` (quando scritto)
+- Formato adapter: `docs/03-ADAPTERS/SPEC-TEMPLATE.md` + `spotify.md`
 - Test strategy: `docs/10-TESTING.md`
 - Backlog: `docs/11-BACKLOG.md`
+- Glossario: `docs/14-GLOSSARY.md`
 
 **Regola d'oro**: se una decisione è documentata e 🟢 APPROVED, è vincolante. Se è 🟡 DRAFT, puoi proporre modifiche aprendo una issue. Se non esiste, **apri una issue `needs-spec` invece di inventare**.
 
@@ -96,24 +93,6 @@ Una issue può essere lavorata da un agente **solo se**:
 | Gate | `agent-ready`, `needs-spec`, `blocked` | Stato lavorabilità |
 | Tipo | `bug`, `enhancement`, `refactor`, `docs` | Classificazione |
 
-### Template issue
-
-    ## Descrizione
-    Cosa deve essere fatto e perché.
-
-    ## Specifica di riferimento
-    - [ ] `docs/XX-NOME.md` (status: 🟢 APPROVED)
-
-    ## Acceptance criteria
-    - [ ] criterio 1 verificabile
-    - [ ] criterio 2 verificabile
-
-    ## Fixture di test
-    - `fixtures/.../...`
-
-    ## Note
-    Eventuali edge case o vincoli.
-
 ## 🌳 Git workflow
 
 - Branch: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
@@ -122,51 +101,15 @@ Una issue può essere lavorata da un agente **solo se**:
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 
-### Template commit
-
-    <type>(<scope>): <description>
-
-    [body opzionale]
-
-    Ref: #<issue-number>
-
 ## 📝 Checklist di auto-revisione PR
-
-Prima di aprire una PR, verifica:
 
 - [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
 - [ ] Il codice rispetta lo schema dati (`02-DATA-SCHEMA.md`)
 - [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
-- [ ] Ho usato i fixture di `fixtures/synthetic-history/` e `fixtures/scenarios/`
-- [ ] Ho seguito il naming e lo stile del codebase
+- [ ] Ho usato i fixture di `fixtures/synthetic-history/`
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
-- [ ] Coverage del modulo ≥ target in `10-TESTING.md` §2
-- [ ] Ho aggiornato `docs/11-BACKLOG.md` se la story è completata
-
-## 💬 Come segnalare problemi
-
-### Discrepanza tra specifiche
-
-1. Cerca tra le issue aperte
-2. Apri issue con label `needs-spec`
-3. Riferimento ai documenti e linee specifiche
-4. Descrizione dell'incoerenza
-5. Proposta di risoluzione (opzionale)
-
-**Mai risolvere incoerenze modificando il codice senza documentarlo.**
-
-### Bug nel codice
-
-- Issue con label `bug`
-- Passi per riprodurre
-- Comportamento atteso vs osservato
-- Eventuale test di regressione da aggiungere
-
-## 📜 Registro delle decisioni
-
-Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di proporre modifiche architetturali, verifica che non ci sia già un ADR. Se vuoi proporre un nuovo ADR, apri issue con label `area:devops` e proponi il testo.
 
 ## 🗺️ Struttura del repository
 
@@ -174,46 +117,26 @@ Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di pr
     ├── AGENTS.md                ← questo file
     ├── README.md
     ├── docs/                    ← specifica completa
-    │   ├── INDEX.md             ← stato master
-    │   ├── SESSIONS.md          ← log sessioni
-    │   ├── BUNDLE.md            ← snapshot completo
-    │   ├── 00-VISION.md
-    │   ├── 01-PLATFORMS.md
-    │   ├── 02-DATA-SCHEMA.md
-    │   ├── 03-ADAPTERS/         ← spec di ogni adapter
-    │   ├── 04-ANALYSIS-ALGORITHMS.md
-    │   ├── 05-ARCHITECTURE.md
-    │   ├── 10-TESTING.md
-    │   ├── 11-BACKLOG.md
-    │   ├── 13-ADR/              ← decisioni architetturali
-    │   ├── 14-GLOSSARY.md
-    │   └── 15-DESIGN-SYSTEM.md
+    │   ├── INDEX.md, SESSIONS.md, BUNDLE.md
+    │   ├── 00-VISION.md … 15-DESIGN-SYSTEM.md
+    │   ├── 03-ADAPTERS/, 13-ADR/
+    │   └── 09-PRIVACY-SECURITY.md
     ├── design/                  ← mockup, token, asset
+    │   └── mockups/             ← PNG storiche dalle sessioni esplorative
     ├── fixtures/                ← dataset di test
-    │   ├── synthetic-history/   ← fixture per adapter
-    │   ├── db-seed/             ← seed per DB
-    │   ├── scenarios/           ← scenari di vita
-    │   └── api-mocks/           ← mock API esterne
-    ├── apps/
-    │   ├── web/                 ← PWA principale
-    │   └── desktop/             ← Tauri (Fase 2)
-    ├── packages/
-    │   ├── core/                ← logica condivisa
-    │   └── ui/                  ← design system
-    └── scripts/                 ← utility
+    │   └── synthetic-history/
+    └── scripts/                 ← utility (es. generate-bundle.ps1)
 
 ## 🚀 Primo task di un agente
 
-Se sei un agente e ti hanno chiesto di iniziare a lavorare senza un task specifico:
-
 1. Leggi questo file
 2. Leggi `docs/INDEX.md` e `docs/11-BACKLOG.md`
-3. Cerca la prima story ⬚ TODO con label `agent-ready` nella fase più bassa disponibile
+3. Cerca la prima story ⬚ TODO con label `agent-ready`
 4. Clona il repo, crea branch `feat/<issue>-<descrizione>`
 5. Implementa con test
 6. Apri PR
 
-Se non ci sono issue `agent-ready`, segnalalo al project owner aprendo una issue con label `needs-spec`.
+Se non ci sono issue `agent-ready`, apri issue con label `needs-spec`.
 
 ## 📞 Contatti
 
@@ -224,7 +147,7 @@ Se non ci sono issue `agent-ready`, segnalalo al project owner aprendo una issue
 
 ---
 
-*Ultimo aggiornamento: Sessione 5 (Parte 2) — Review repo + fix*
+*Ultimo aggiornamento: Sessione 6 — fix sincronizzazione*
 
 
 ===== FILE: README.md =====
@@ -293,7 +216,7 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 5 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 5 | Tutte le stringhe UI con chiavi i18n |
-| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🔴 TODO | — | Privacy spec, data flow, security |
+| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 3 | Backlog strutturato (epic → story → task) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
@@ -313,9 +236,9 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 
 | Cartella | Contenuto |
 |----------|-----------|
-| [`../design/mockups/`](../design/mockups/) | Le 14 schermate generate + tour logico |
+| [`../design/mockups/`](../design/mockups/) | Mockup schermate (PNG storiche dalle sessioni esplorative) |
 | [`../design/tokens.json`](../design/tokens.json) | (futuro) Design tokens per il codice |
-| [`../design/assets/`](../design/assets/) | (futuro) Logo, icone, illustrazioni |
+| [`../design/assets/`](../design/assets/) | (futuro) Logo, icone, illustrazioni vettoriali |
 
 ## Fixture di test
 
@@ -335,16 +258,16 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 3 | 📋 Governo (backlog + testing + AGENTS) | ✅ COMPLETATA (APPROVED) |
 | 4 | 🧠 Analisi algoritmica | ✅ COMPLETATA |
 | 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
-| 6 | 🔐 Privacy & legale | 🔴 PROSSIMA |
-| 7 | 🎨 UI eseguibile + tokens | 🔴 |
+| 6 | 🔐 Privacy & legale | ✅ COMPLETATA |
+| 7 | 🎨 UI eseguibile + tokens | 🔴 PROSSIMA |
 | 8 | ⚙️ DevOps | 🔴 |
 
 ## Stato del progetto
 
 - **Documenti APPROVED**: 9 (02, 03, 10, 11, 13-ADR×3, 14, AGENTS)
-- **Documenti DRAFT**: 7 (00, 01, 04, 05, 06, 08, 15)
-- **Documenti TODO**: 3 (07, 09, 12)
-- **Completamento progettazione**: ~95%
+- **Documenti DRAFT**: 7 (00, 01, 04, 05, 06, 08, 09, 15)
+- **Documenti TODO**: 2 (07, 12)
+- **Completamento progettazione**: ~97%
 
 ---
 
@@ -363,51 +286,25 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 ## Sessione 0 — 🔒 Consolidamento + Bootstrap
 
 **Data**: ottobre 2026
-**Stato**: 🟡 In corso
-
-### Obiettivi
-
-1. Creare il repository GitHub privato `Life-Soundtrack`
-2. Consolidare tutto il materiale prodotto nelle sessioni esplorative in file strutturati in `docs/` e `design/`
-3. Creare i documenti base di governance (`README.md`, `AGENTS.md`, `INDEX.md`, `SESSIONS.md`, `00-VISION.md`)
-4. Preparare il terreno per le sessioni tecniche 1-8
+**Stato**: ✅ Completata
 
 ### Documenti prodotti
-
 - ✅ `README.md`
-- ✅ `AGENTS.md` (scheletro — da raffinare in Sessione 3)
+- ✅ `AGENTS.md` (scheletro, poi raffinato in Sessione 3)
 - ✅ `docs/INDEX.md`
 - ✅ `docs/SESSIONS.md` (questo file)
-- ✅ `docs/00-VISION.md` (DRAFT)
+- ✅ `docs/00-VISION.md`
 
 ### Decisioni prese
-
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D0.1 | Repo privato su account `amedeo82`, nome `Life-Soundtrack` | Scelta del project owner |
-| D0.2 | Struttura cartelle: `docs/`, `design/`, `fixtures/`, `scripts/` | Separazione chiara tra specifica, asset, test e tooling |
-| D0.3 | Branch model: `main` protetto + branch temporanei feat/fix | Semplice e sicuro |
-| D0.4 | Commit convention: Conventional Commits | Leggibilità della storia |
-| D0.5 | Label GitHub con `agent-ready` come gate per gli agenti | Gli agenti lavorano solo su specifiche approvate |
-| D0.6 | 8 sessioni di progettazione pianificate (vedi INDEX.md) | Copertura completa prima dell'handoff agli agenti |
-| D0.7 | Pilastri non negoziabili: local-first e privacy-first | Differenziazione e compliance GDPR |
-
-### Materiale pregresso da consolidare (Sessione 0 — Parte 2)
-
-| Contenuto prodotto in chat | Destinazione |
-|----------------------------|--------------|
-| Analisi fattibilità + matrice dati piattaforme | `01-PLATFORMS.md` |
-| Architettura (local-first, adapter pattern, stack) | `05-ARCHITECTURE.md` |
-| Design system (brand, palette, type, componenti) | `15-DESIGN-SYSTEM.md` |
-| Tour delle 14 schermate + copy deck | `design/mockups/` + `06-UX-FLOWS-STATES.md` + `08-COPY-I18N.md` |
-| Scelta PWA-first | ADR `0001-pwa-first.md` |
-| Roadmap a fasi + rischi | `11-BACKLOG.md` |
-
-### Prossimi passi
-
-1. Commit e push dei 5 file di governance
-2. Sessione 0 Parte 2: consolidamento materiale pregresso
-3. Sessione 1: schema dati eseguibile
+| D0.1 | Repo su account `amedeo82`, nome `Life-Soundtrack` | Scelta del project owner |
+| D0.2 | Struttura: `docs/`, `design/`, `fixtures/`, `scripts/` | Separazione responsabilità |
+| D0.3 | Branch model: `main` protetto + branch temporanei | Semplice e sicuro |
+| D0.4 | Conventional Commits | Leggibilità storia |
+| D0.5 | Label `agent-ready` come gate | Agenti lavorano solo su spec approvate |
+| D0.6 | 8 sessioni di progettazione pianificate | Copertura completa |
+| D0.7 | Pilastri: local-first, privacy-first | Differenziazione e compliance GDPR |
 
 ---
 
@@ -417,178 +314,61 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata
 
 ### Documenti prodotti
-- ✅ `docs/01-PLATFORMS.md` (DRAFT)
-- ✅ `docs/05-ARCHITECTURE.md` (DRAFT)
-- ✅ `docs/15-DESIGN-SYSTEM.md` (DRAFT)
+- ✅ `docs/01-PLATFORMS.md`
+- ✅ `docs/05-ARCHITECTURE.md`
+- ✅ `docs/15-DESIGN-SYSTEM.md`
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D0.8 | Scope MVP = 8 sorgenti + self-hosted via scrobbling; resto rinviato | Coprire il 90%+ del mercato europeo con sforzo sostenibile |
-| D0.9 | Design system consolidato ora; spec per componente rinviata a Sessione 7 | Evitare over-engineering prima dello schema dati |
-| D0.10 | Edge case noti catalogati in `01-PLATFORMS.md` §5 come vincoli adapter | Gli agenti non devono riscoprirli da zero |
+| D0.8 | Scope MVP = 8 sorgenti europee + self-hosted via scrobbling | Copertura 90% mercato con sforzo sostenibile |
+| D0.9 | Design system consolidato; spec per componente in Sessione 7 | Evitare over-engineering |
+| D0.10 | Edge case catalogati in `01-PLATFORMS.md` §5 | Agenti non devono riscoprirli |
 
-### Prossimi passi
-- Sessione 1: `02-DATA-SCHEMA.md`, `14-GLOSSARY.md`, ADR 0001-0003
+---
 
 ## Sessione 1 — 🗄️ Fondamenta dati
 
 **Data**: ottobre 2026
-**Stato**: ✅ Completata
+**Stato**: ✅ Completata + APPROVED
 
 ### Documenti prodotti
-- ✅ `docs/02-DATA-SCHEMA.md` (DRAFT — pending approvazione Boss)
-- ✅ `docs/14-GLOSSARY.md` (DRAFT — pending approvazione Boss)
-- ✅ `docs/13-ADR/0001-pwa-first.md` (DRAFT — pending approvazione Boss)
-- ✅ `docs/13-ADR/0002-local-first.md` (DRAFT — pending approvazione Boss)
-- ✅ `docs/13-ADR/0003-adapter-pattern.md` (DRAFT — pending approvazione Boss)
+- ✅ `docs/02-DATA-SCHEMA.md` (APPROVED)
+- ✅ `docs/14-GLOSSARY.md` (APPROVED)
+- ✅ `docs/13-ADR/0001-pwa-first.md` (APPROVED)
+- ✅ `docs/13-ADR/0002-local-first.md` (APPROVED)
+- ✅ `docs/13-ADR/0003-adapter-pattern.md` (APPROVED)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D1.1 | `timestamp` = fine ascolto, `startedAt` = inizio; tabella semantica per piattaforma | Coerenza temporale cross-platform |
-| D1.2 | Idempotenza import via `eventKey` unico | Re-import sicuri senza duplicati |
-| D1.3 | Dedup tracce: ISRC → MBID → fuzzy hash **con durata** (DEDUP-1..3) | Bilancia precisione e copertura; bucket 2s |
-| D1.4 | IP non persistito DI DEFAULT; toggle esplicito `PrivacySettings.retainIp` | Privacy-by-design + controllo utente |
-| D1.5 | Derivati versionati (`derivedVersion`) e ricalcolabili | Coerenza analisi nel tempo |
-| D1.6 | Contatori denormalizzati ricalcolabili (`recount()`) | Performance senza perdere verità |
+| D1.1 | `timestamp` = fine ascolto, `startedAt` = inizio | Coerenza cross-platform |
+| D1.2 | Idempotenza via `eventKey` unico | Re-import sicuri |
+| D1.3 | Dedup: ISRC → MBID → fuzzy hash con durata (bucket 2s) | Precisione + copertura |
+| D1.4 | IP non persistito di default; toggle `retainIp` | Privacy-by-design |
+| D1.5 | Derivati versionati (`derivedVersion`) | Ricalcolo coerente |
+| D1.6 | Contatori denormalizzati ricalcolabili | Performance senza perdere verità |
 
-### Aperti per approvazione Boss
-- [ ] 02-DATA-SCHEMA.md → 🟢 APPROVED?
-- [ ] 14-GLOSSARY.md → 🟢 APPROVED?
-- [ ] ADR 0001/0002/0003 → 🟢 APPROVED?
-
-### Prossimo passo
-- **Sessione 2** (in nuova chat): SPEC-TEMPLATE adapter + spotify.md + fixture `fixtures/synthetic-history/spotify-sample.json`
+---
 
 ## Sessione 2 — 🔌 Template adapter + Spotify
 
 **Data**: ottobre 2026
-**Stato**: ✅ Completata
+**Stato**: ✅ Completata + APPROVED
 
 ### Documenti prodotti
-- ✅ `docs/03-ADAPTERS/SPEC-TEMPLATE.md` (DRAFT)
-- ✅ `docs/03-ADAPTERS/spotify.md` (DRAFT)
-- ✅ `fixtures/synthetic-history/spotify-sample.json` (10 eventi sintetici con edge case)
+- ✅ `docs/03-ADAPTERS/SPEC-TEMPLATE.md` (APPROVED)
+- ✅ `docs/03-ADAPTERS/spotify.md` (APPROVED)
+- ✅ `fixtures/synthetic-history/spotify-sample.json`
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D2.1 | SPEC-TEMPLATE come formato fisso per ogni adapter | Coerenza, reviewability |
-| D2.2 | Regola `skipped` derivata (E1) documentata in spotify.md | Risolve bug storico Spotify |
-| D2.3 | `CarDetectionEvent.json` richiede consenso separato da `retainIp` | Tracciamento movimenti = dato particolarmente sensibile |
-| D2.4 | Fixture sintetico con 10 eventi rappresentativi | Base test per tutti gli adapter |
-| D2.5 | `eventKey` = `platform:spotify_uri` o hash fallback | Idempotenza garantita |
-
-### Aperti per approvazione Boss
-- [ ] 03-ADAPTERS/SPEC-TEMPLATE.md → 🟢 APPROVED?
-- [ ] 03-ADAPTERS/spotify.md → 🟢 APPROVED?
-
-### Prossimo passo
-- Sessione 3: Backlog strutturato + Testing strategy + AGENTS.md finale
-- Dopo Sessione 3: valutare bundle di handoff per chiudere chat o continuare
-
-## Sessione 3 — 📋 Governo
-
-**Data**: ottobre 2026
-**Stato**: ✅ Completata
-
-### Documenti prodotti
-- ✅ `docs/11-BACKLOG.md` (DRAFT) — 5 epic, 17 story, ordinamento priorità
-- ✅ `docs/10-TESTING.md` (DRAFT) — piramide test, coverage target, fixture strategy
-- ✅ `AGENTS.md` (v1.0 stabile) — protocollo finale con handoff tra chat
-
-### Decisioni prese
-| # | Decisione | Motivazione |
-|---|-----------|-------------|
-| D3.1 | Backlog con 5 epic (fondamenta, import, analisi, UI, privacy) | Copertura MVP + estensioni future |
-| D3.2 | Story 0.1-0.4 come "fondamenta obbligatorie" sequenziali | Dipendenza critica; senza queste nulla funziona |
-| D3.3 | Label GitHub `agent-ready` come gate unico per lavoro agenti | Evita agenti che improvvisano su spec mancanti |
-| D3.4 | Coverage target differenziato per modulo | Adapter critici al 90%, UI al 70% |
-| D3.5 | 3 categorie di fixture: synthetic-history, db-seed, scenarios | Separazione responsabilità test |
-| D3.6 | AGENTS.md v1.0 stabile con sezione handoff | Pronti per chat multiple senza perdita di contesto |
-
-### Aperti per approvazione Boss
-- [ ] `docs/11-BACKLOG.md` → 🟢 APPROVED?
-- [ ] `docs/10-TESTING.md` → 🟢 APPROVED?
-- [ ] `AGENTS.md` v1.0 → 🟢 APPROVED?
-- [ ] Documenti Sessione 1 (02-DATA-SCHEMA, GLOSSARY, ADR 0001-0003) → 🟢 APPROVED?
-- [ ] Documenti Sessione 2 (SPEC-TEMPLATE, spotify.md) → 🟢 APPROVED?
-
-### Prossimi passi
-- Boss approva i documenti DRAFT (o chiede modifiche)
-- Sessione 4: `04-ANALYSIS-ALGORITHMS.md` (formule mood, ere, eventi, ricordi)
-- Valutare se fare bundle di handoff o continuare qui
-
-## Sessione 4 — 🧠 Algoritmi di analisi
-
-**Data**: ottobre 2026
-**Stato**: ✅ Completata
-
-### Documenti prodotti
-- ✅ `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
-
-### Decisioni prese
-| # | Decisione | Motivazione |
-|---|-----------|-------------|
-| D4.1 | Mood come quadrante valence×energy con fascia neutra centrale | Evita flip-flop tra mood |
-| D4.2 | Era detector via change point detection su firme settimanali | Più robusto del clustering k-means puro |
-| D4.3 | Similarity multi-dimensionale pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi e quantitativi |
-| D4.4 | Event detector via z-score + rilevatori specializzati per silence/exploration | z-score è interpretabile, specializzati catturano casi non-statistici |
-| D4.5 | 5 tipi di ricordo con scoring e ranking | Feed ordinato per rilevanza |
-| D4.6 | Pipeline incrementale (non full-rewrite) | Performance su file grandi |
-| D4.7 | derivedVersion = sha1(config)[:8] | Rileva automaticamente cambiamenti parametri |
-
-### Aperti per approvazione Boss
-- [ ] `04-ANALYSIS-ALGORITHMS.md` → 🟢 APPROVED?
-
-### Stato progetto dopo Sessione 4
-- ✅ Visione, piattaforme, architettura, design system
-- ✅ Schema dati, glossario, ADR fondanti
-- ✅ Template adapter + Spotify adapter + fixture
-- ✅ Backlog, testing, protocollo agenti
-- ✅ **Algoritmi di analisi** ← completato ora
-- ⏳ Rimangono: UX states/i18n (S5), privacy (S6), UI spec (S7), devops (S8)
-
-### Prossimi passi
-- Boss approva `04-ANALYSIS-ALGORITHMS.md`
-- Valutare bundle di handoff per chiudere chat pulita
-- Sessione 5 (UX flows + i18n) in nuova chat o qui
-
-## Sessione 5 — 🧭 UX completa + i18n
-
-**Data**: ottobre 2026
-**Stato**: ✅ Completata
-
-### Documenti prodotti
-- ✅ `docs/06-UX-FLOWS-STATES.md` (DRAFT)
-- ✅ `docs/08-COPY-I18N.md` (DRAFT)
-- ✅ `docs/BUNDLE.md` (snapshot backup)
-
-### Decisioni prese
-| # | Decisione | Motivazione |
-|---|-----------|-------------|
-| D5.1 | 6 stati globali (loading, empty, partial, ready, error, offline) | Copertura completa di ogni scenario |
-| D5.2 | Stato machine di Import con 6 stati | Tracciamento preciso del flusso |
-| D5.3 | Keyboard navigation per ogni schermata | Accessibilità e power user |
-| D5.4 | Alternative testuali per ogni visualizzazione | Screen reader compliance |
-| D5.5 | Namespace i18n per modulo | Manutenibilità |
-| D5.6 | MVP bilingue IT+EN | Target europeo |
-| D5.7 | Pluralizzazione ICU | Supporto corretto per tutte le lingue future |
-| D5.8 | Demo mode con fixture sintetico | Onboarding senza dati personali |
-
-### Stato progetto dopo Sessione 5
-**Progetto completo al 95%.** Rimangono solo Sessioni 6-8 (privacy, UI spec dettagliata, devops) da fare in nuove chat.
-
-### Documenti approvati in questa sessione
-- ✅ Tutti i documenti Sessione 1, 2, 3, 4 confermati APPROVED
-- 🟡 Documenti Sessione 5 (UX flows + i18n) in attesa di approvazione
-
-### Prossimi passi
-- Boss approva Sessione 5
-- Generazione file BUNDLE.md con contenuti effettivi
-- Commit finale e chiusura chat
-- Sessione 6-8 in nuove chat quando Boss vorrà
+| D2.1 | SPEC-TEMPLATE come formato fisso | Coerenza adapter |
+| D2.2 | Regola `skipped` derivata (E1) | Risolve bug storico Spotify |
+| D2.3 | `CarDetectionEvent.json` consenso separato | Tracciamento movimenti = dato sensibile |
+| D2.4 | Fixture 10 eventi con edge case | Base test universale |
+| D2.5 | `eventKey` = `platform:uri` o hash fallback | Idempotenza garantita |
 
 ---
 
@@ -598,19 +378,19 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata + APPROVED
 
 ### Documenti prodotti
-- ✅ `docs/11-BACKLOG.md` (APPROVED) — 5 epic, 17 story, ordinamento priorità
-- ✅ `docs/10-TESTING.md` (APPROVED) — piramide test, coverage target, fixture strategy
-- ✅ `AGENTS.md` v1.0 (APPROVED) — protocollo finale con handoff tra chat
+- ✅ `docs/11-BACKLOG.md` (APPROVED) — 5 epic, 17 story
+- ✅ `docs/10-TESTING.md` (APPROVED) — piramide + coverage + fixture
+- ✅ `AGENTS.md` v1.0 (APPROVED) — protocollo con handoff tra chat
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D3.1 | Backlog con 5 epic (fondamenta, import, analisi, UI, privacy) | Copertura MVP + estensioni future |
-| D3.2 | Story 0.1-0.4 come "fondamenta obbligatorie" sequenziali | Dipendenza critica; senza queste nulla funziona |
-| D3.3 | Label GitHub `agent-ready` come gate unico per lavoro agenti | Evita agenti che improvvisano su spec mancanti |
-| D3.4 | Coverage target differenziato per modulo | Adapter critici al 90%, UI al 70% |
-| D3.5 | 3 categorie di fixture: synthetic-history, db-seed, scenarios | Separazione responsabilità test |
-| D3.6 | AGENTS.md v1.0 stabile con sezione handoff | Pronti per chat multiple senza perdita di contesto |
+| D3.1 | 5 epic (fondamenta, import, analisi, UI, privacy) | Copertura MVP + estensioni |
+| D3.2 | Story 0.1-0.4 sequenziali | Dipendenze critiche |
+| D3.3 | Label `agent-ready` come gate | Evita agenti che improvvisano |
+| D3.4 | Coverage differenziato per modulo | Adapter 90%, UI 70% |
+| D3.5 | 3 categorie fixture: synthetic, db-seed, scenarios | Separazione responsabilità |
+| D3.6 | AGENTS.md v1.0 con handoff | Pronti per chat multiple |
 
 ---
 
@@ -625,13 +405,13 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D4.1 | Mood come quadrante valence×energy con fascia neutra centrale | Evita flip-flop tra mood |
-| D4.2 | Era detector via change point detection su firme settimanali | Più robusto del clustering k-means puro |
-| D4.3 | Similarity multi-dimensionale pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi e quantitativi |
-| D4.4 | Event detector via z-score + rilevatori specializzati per silence/exploration | z-score è interpretabile, specializzati catturano casi non-statistici |
+| D4.1 | Mood come quadrante valence×energy con fascia neutra | Evita flip-flop |
+| D4.2 | Era detector via change point detection su firme settimanali | Più robusto di k-means puro |
+| D4.3 | Similarity pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi/quantitativi |
+| D4.4 | Event detector: z-score + specializzati | Interpretabilità + copertura |
 | D4.5 | 5 tipi di ricordo con scoring e ranking | Feed ordinato per rilevanza |
-| D4.6 | Pipeline incrementale (non full-rewrite) | Performance su file grandi |
-| D4.7 | derivedVersion = sha1(config)[:8] | Rileva automaticamente cambiamenti parametri |
+| D4.6 | Pipeline incrementale | Performance su file grandi |
+| D4.7 | derivedVersion = sha1(config)[:8] | Rileva cambi parametri |
 
 ---
 
@@ -647,33 +427,44 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D5.1 | 6 stati globali (loading, empty, partial, ready, error, offline) | Copertura completa di ogni scenario |
-| D5.2 | Stato machine di Import con 6 stati | Tracciamento preciso del flusso |
-| D5.3 | Keyboard navigation per ogni schermata | Accessibilità e power user |
-| D5.4 | Alternative testuali per ogni visualizzazione | Screen reader compliance |
+| D5.1 | 6 stati globali (loading/empty/partial/ready/error/offline) | Copertura scenari |
+| D5.2 | Stato machine Import con 6 stati | Tracciamento preciso |
+| D5.3 | Keyboard navigation per ogni schermata | Accessibilità |
+| D5.4 | Alternative testuali per visualizzazioni | Screen reader |
 | D5.5 | Namespace i18n per modulo | Manutenibilità |
 | D5.6 | MVP bilingue IT+EN | Target europeo |
-| D5.7 | Pluralizzazione ICU | Supporto corretto per tutte le lingue future |
+| D5.7 | Pluralizzazione ICU | Supporto lingue future |
 | D5.8 | Demo mode con fixture sintetico | Onboarding senza dati personali |
 
-### Sessione 5 — Parte 2 (Review repo)
+---
+
+## Sessione 5 — Parte 2 (Review repo)
 
 **Data**: ottobre 2026
 **Stato**: ✅ Completata
 
-Boss ha reso il repo pubblico (`https://github.com/amedeo82/Life-Soundtrack`) e chiesto verifica di coerenza. Trovati 6 problemi di sincronizzazione tra chat e repo:
-1. INDEX.md non aggiornato
-2. SESSIONS.md senza log Sessioni 3-5
-3. AGENTS.md versione vecchia
-4. SPEC-TEMPLATE.md con refusi
-5. Status APPROVED non riflessi nei file
-6. BUNDLE.md mancante
-
-**Risolto con commit di fix.**
+Boss ha reso il repo pubblico. Trovati 6 problemi di sincronizzazione risolti con commit di fix: INDEX/SESSIONS/AGENTS vecchi, status APPROVED non riflessi, SPEC-TEMPLATE refusi, BUNDLE mancante.
 
 ---
 
-*Aggiornato ad ogni nuova sessione.*
+## Sessione 6 — 🔐 Privacy & Legale
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/09-PRIVACY-SECURITY.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D6.1 | Base giuridica unica: consenso esplicito art. 6.1.a | Coerenza con local-first |
+| D6.2 | Inferenze come dati potenzialmente sensibili | Massima cautela |
+| D6.3 | Disclaimer inferenze obbligatorio in app | Trasparenza, non è consulenza psicologica |
+| D6.4 | Loghi ufficiali VIETATI senza licenza | Rischio trademark |
+| D6.5 | Mai dati reali nei fixture + check CI | Prevenzione leak |
+| D6.6 | DPIA probabilmente non richiesta | Da confermare con legale |
+| D6.7 | Privacy policy = BOZZA da revisionare con legale | Onestà intellettuale |
 
 ---
 
@@ -684,9 +475,6 @@ Boss ha reso il repo pubblico (`https://github.com/amedeo82/Life-Soundtrack`) e 
     **Data**: [data]
     **Stato**: 🟡 In corso / ✅ Completata
 
-    ### Obiettivi
-    - [ ] obiettivo 1
-
     ### Documenti prodotti
     - ✅ `percorso/file.md` (APPROVED/DRAFT)
 
@@ -694,9 +482,6 @@ Boss ha reso il repo pubblico (`https://github.com/amedeo82/Life-Soundtrack`) e 
     | # | Decisione | Motivazione |
     |---|-----------|-------------|
     | D.N.1 | ... | ... |
-
-    ### Prossimi passi
-    - ...
 
 ---
 
@@ -973,9 +758,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED
-> Versione: 1.0
-> Ultima modifica: Sessione 1
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -1336,15 +1119,15 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 | Scrobbling (Last.fm/LB) | sì/no | — | Continuo | |
 | File utente diretto | sì/no | <descrivi> | — | |
 
-## 2. Flusso di import (solo export GDPR se applicabile)
+## 2. Flusso di import
 
 [Stato iniziale] → [Rilevamento formato] → [Parsing streaming] → [Normalizzazione] → [Upsert DB]
 
 
 Descrivi:
 - Come l'utente procura il file (URL, passaggi)
-- Come l'adapter lo riconosce (`detect(input)` — firma magica, header, nome file)
-- Come gestisce file multipli (Spotify: ZIP con JSON partizionati)
+- Come l'adapter lo riconosce (`detect(input)`)
+- Come gestisce file multipli
 
 ## 3. Mapping campi sorgente → unificato
 
@@ -1385,7 +1168,7 @@ Descrivi:
 
 ## 4. Edge case noti (catalogo E)
 
-Copia il catalogo da `01-PLATFORMS.md` §5 filtrando per questa piattaforma, poi aggiungi eventuali nuovi:
+Copia da `01-PLATFORMS.md` §5 filtrando per piattaforma.
 
 | # | Descrizione | Impatto | Azione adapter |
 |---|-------------|---------|----------------|
@@ -1393,11 +1176,11 @@ Copia il catalogo da `01-PLATFORMS.md` §5 filtrando per questa piattaforma, poi
 
 ## 5. Semantica temporale
 
-Specifica chiaramente: il timestamp sorgente rappresenta **l'inizio** o la **fine** dell'ascolto? Come si derivano `timestamp` (fine) e `startedAt` (inizio)?
+Specifica se il timestamp sorgente è inizio o fine ascolto. Come si derivano `timestamp` (fine) e `startedAt` (inizio)?
 
 ## 6. Regole di dedup tracce
 
-Riferimento a `02-DATA-SCHEMA.md` §5 (DEDUP-1..3). Se la piattaforma fornisce ISRC/MBID, specificarlo. Altrimenti conferma DEDUP-3.
+Riferimento a `02-DATA-SCHEMA.md` §5 (DEDUP-1..3).
 
 ## 7. Comportamento privacy
 
@@ -1405,31 +1188,25 @@ Riferimento a `02-DATA-SCHEMA.md` §5 (DEDUP-1..3). Se la piattaforma fornisce I
 |----------------|---------|---------------------|
 | IP address | scartato dopo `country` | conservato |
 | Coordinate GPS | mai raccolte | mai raccolte |
-| ... | — | — |
 
 ## 8. Test — fixture atteso
 
-Riferimento a `fixtures/synthetic-history/<platform>-sample.json`. Il fixture deve contenere almeno un esempio di ogni edge case E.N.x.
+Riferimento a `fixtures/synthetic-history/<platform>-sample.json`.
 
 Casi di test minimi:
 1. Import pulito (happy path)
-2. Idempotenza (re-import stesso file → 0 duplicati)
-3. Ogni edge case E.N.x → risultato atteso documentato
-4. DEDUP: due record con stesso ISRC → una sola track
-5. DEDUP: due record omonimi senza ISRC, durata diversa → due track separate
+2. Idempotenza (re-import → 0 duplicati)
+3. Ogni edge case E.N.x → risultato atteso
+4. DEDUP: due record stesso ISRC → una sola track
+5. DEDUP: due record omonimi, durata diversa → due track
 
 ## 9. Segnalazione all'utente
 
-Elenco messaggi UI che l'adapter può emettere:
-- Warning: "X eventi con timestamp invalidi scartati"
-- Error: "Formato file non riconosciuto"
-- Info: "Import completato: X eventi, Y brani unici"
-
-Codici di warning/errori definiti in `08-COPY-I18N.md`.
+Elenco codici i18n (`08-COPY-I18N.md`) usati dall'adapter.
 
 ## 10. Note di implementazione
 
-Dettagli specifici per questa piattaforma che non rientrano nelle sezioni precedenti. Esempio: limiti di rate API, chunking consigliato, formati di compressione.
+Dettagli specifici (rate limit API, chunking, formati compressione).
 
 ---
 
@@ -1438,7 +1215,6 @@ Dettagli specifici per questa piattaforma che non rientrano nelle sezioni preced
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | Sessione 2 | Template approvato |
-| 0.1 | Sessione 2 | Prima bozza |
 
 
 ===== FILE: docs/03-ADAPTERS/spotify.md =====
@@ -1446,8 +1222,6 @@ Dettagli specifici per questa piattaforma che non rientrano nelle sezioni preced
 # Adapter Spotify
 
 > Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
-> Piattaforma: Spotify
-> Sede legale: Svezia
 > Tier: **S** · Priorità MVP: **sì**
 
 ## 1. Metodi di accesso
