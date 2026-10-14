@@ -63,7 +63,8 @@ Regola: `timestamp` = **momento in cui l'ascolto si conclude**; `startedAt` = in
       reasonEnd: string | null;
       deviceType: DeviceType;
       deviceDetail: string | null;
-      country: string | null;  // ISO 3166-1 alpha-2
+      ip: string | null;         // conservato SOLO se PrivacySettings.retainIp
+      country: string | null;    // ISO 3166-1 alpha-2, sempre derivato      
       day: string;             // 'YYYY-MM-DD' (derivato, indicizzato)
     }
 
@@ -202,6 +203,25 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       addedAt: number | null;
     }
 
+### 3.8 PrivacySettings (toggle espliciti, default off)
+
+    export interface PrivacySettings {
+      retainIp: boolean;          // default false; toggle ESPLICITO dell'utente
+      enrichMetadata: boolean;    // default false; arricchimento metadati brani
+      scrobbleHubs: PlatformId[]; // default []; hub di scrobbling scelti
+      syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2)
+    }
+
+Quando `retainIp` è true:
+- `ListenEvent.ip` è conservato (string, IPv4/IPv6)
+- L'IP resta SOLO nel DB locale, mai inviato in rete
+- L'utente può purgarlo in qualsiasi momento (`purgeIp()` azzera tutti gli ip)
+- Il `country` è sempre derivato dall'IP al parse e conservato (indipendentemente dal toggle)
+
+Quando `retainIp` è false (default):
+- `ListenEvent.ip` è null dopo il parse
+- Il `country` è derivato e conservato (privacy-by-design)
+
 ## 4. Payload degli Insight (unione discriminata)
 
     export type InsightPayload =
@@ -259,16 +279,23 @@ Priorità per `canonicalKey`, valutata al momento dell'upsert:
 |---|--------|--------------|
 | DEDUP-1 | ISRC presente | `isrc:<ISRC upper>` |
 | DEDUP-2 | MBID presente (no ISRC) | `mbid:<mbid>` |
-| DEDUP-3 | altrimenti | `fuzzy:<sha1(normalize(name) + '|' + normalize(artistPrincipal))>` |
+| DEDUP-3 | altrimenti | `fuzzy:<sha1(normalize(name) + '\|' + normalize(artistPrincipal) + '\|' + durationBucketMs)>` |
+
+`durationBucketMs = Math.floor(durationMs / 2000) * 2000` (bucket da 2 secondi)
 
 `normalize(s)`: lowercase → rimuovi feat./ft./with → rimuovi contenuti tra parentesi tonde/quadre → rimuovi punteggiatura → collassa spazi → trim.
+
+### Tradeoff di DEDUP-3 con durata (documentato)
+
+- **Pro**: includere la durata riduce drasticamente le fusioni false di brani omonimi ma diversi (radio edit vs album version vs live)
+- **Contro**: può separare la stessa registrazione quando la durata differisce tra piattaforme (remaster, rounding ±1-2s)
+- **Mitigazione**: DEDUP-1/2 (ISRC/MBID) catturano comunque quelle; il bucket da 2s assorbe il rounding
+- **Rischio accettato**: registrazioni omonime con durata identica restano fuse (documentato; mitigabile in futuro con fuzzy a 3 campi: nome+artista+durata+album)
 
 Comportamento upsert:
 - Se esiste track con stesso canonicalKey → aggiungi platformId, aggiorna lastSeenAt e contatori
 - Altrimenti crea nuova track
 - Conflitti nome: il nome visualizzato è quello della prima piattaforma importata per ordine di priorità (spotify > apple > tidal > listenbrainz > altro), salvo override utente futuro
-
-Nota: DEDUP-3 può unire registrazioni diverse omonime (rischio accettato, documentato; mitigabile in futuro con durata ±2s nel fuzzy hash).
 
 ## 6. Schema Dexie (IndexedDB) — versione 1
 
@@ -298,7 +325,7 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 ## 8. Cosa NON è nello schema (decisioni esplicite)
 
 - **Raw payload piattaforma**: non persistito (ADR-0003). Il file dell'utente è la fonte di verità; l'import è ri-eseguibile
-- **IP address**: non persistito. L'adapter deriva `country` e lo scarta (privacy-by-design, vedi 09)
+- **IP address**: non persistito DI DEFAULT. Conservato SOLO con toggle esplicito `PrivacySettings.retainIp`; mai inviato in rete; purgabile con `purgeIp()`. Il `country` è sempre derivato e conservato
 - **Coordinate GPS**: mai raccolte
 - **Testi/lyrics**: fuori scope
 

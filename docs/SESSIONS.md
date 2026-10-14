@@ -100,6 +100,12 @@
 | D1.5 | Derivati versionati (`derivedVersion`) e ricalcolabili | Coerenza analisi nel tempo |
 | D1.6 | Contatori denormalizzati ricalcolabili (`recount()`) | Performance senza perdere verità |
 
+### Aggiornamenti post-review (Boss)
+| # | Modifica | Motivazione |
+|---|----------|-------------|
+| D1.7 | DEDUP-3 include durata nel fuzzy hash (bucket 2s) | Riduce fusioni false di brani omonimi diversi |
+| D1.8 | Toggle esplicito `PrivacySettings.retainIp` (default off) | Conserva IP solo se utente lo vuole; mai in rete; purgabile |
+
 ### Aperti
 - Approvazione Boss su 00-VISION e ADR 0001-0003 (passaggio a 🟢 APPROVED)
 

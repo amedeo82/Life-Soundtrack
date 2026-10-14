@@ -26,7 +26,8 @@ Il progetto tratta dati altamente personali (cronologia di ascolto, contesto, in
 
 - Positive: trust, costi, semplicità legale
 - Negative: nessun cross-device nel MVP; elaborazione limitata alle risorse del browser
-- Mitigazioni: Web Worker e streaming parse per file grandi; sync E2E opzionale in Fase 2; IP address non persistito (deriva solo `country`)
+- Mitigazioni: Web Worker e streaming parse per file grandi; sync E2E opzionale in Fase 2
+- **IP address**: non persistito di default; conservato SOLO con toggle esplicito `retainIp`; mai inviato in rete; purgabile con `purgeIp()`. Il `country` è sempre derivato (privacy-by-design, vedi 09)
 
 ## Collegamenti
 
