@@ -25,8 +25,8 @@
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🔴 TODO | — | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🔴 TODO | — | Privacy spec, data flow, security |
-| 10 | [`10-TESTING.md`](10-TESTING.md) | 🔴 TODO | — | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🔴 TODO | — | Backlog strutturato (epic → story → task) |
+| 10 | [`10-TESTING.md`](10-TESTING.md) | 🟡 DRAFT | Sessione 3 | Strategia di testing |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟡 DRAFT | Sessione 3 | Backlog strutturato (epic → story → task) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟡 DRAFT | Sessione 1 | Architecture Decision Records (0001-0003) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟡 DRAFT | Sessione 1 | Glossario di dominio |
@@ -60,7 +60,7 @@
 | 0 | 🔒 Consolidamento + Bootstrap | ✅ **COMPLETATA** |
 | 1 | 🗄️ Fondamenta dati | ✅ **COMPLETATA** |
 | 2 | 🔌 Primo adapter (Spotify) | ✅ **COMPLETATA** |
-| 3 | 📋 Governo (backlog + testing + AGENTS finale) | 🔴 |
+| 3 | 📋 Governo (backlog + testing + AGENTS finale) | ✅ **COMPLETATA** |
 | 4 | 🧠 Analisi algoritmica | 🔴 |
 | 5 | 🧭 UX completa + i18n | 🔴 |
 | 6 | 🔐 Privacy & legale | 🔴 |

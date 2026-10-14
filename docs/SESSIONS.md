@@ -133,6 +133,38 @@
 - Sessione 3: Backlog strutturato + Testing strategy + AGENTS.md finale
 - Dopo Sessione 3: valutare bundle di handoff per chiudere chat o continuare
 
+## Sessione 3 — 📋 Governo
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/11-BACKLOG.md` (DRAFT) — 5 epic, 17 story, ordinamento priorità
+- ✅ `docs/10-TESTING.md` (DRAFT) — piramide test, coverage target, fixture strategy
+- ✅ `AGENTS.md` (v1.0 stabile) — protocollo finale con handoff tra chat
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D3.1 | Backlog con 5 epic (fondamenta, import, analisi, UI, privacy) | Copertura MVP + estensioni future |
+| D3.2 | Story 0.1-0.4 come "fondamenta obbligatorie" sequenziali | Dipendenza critica; senza queste nulla funziona |
+| D3.3 | Label GitHub `agent-ready` come gate unico per lavoro agenti | Evita agenti che improvvisano su spec mancanti |
+| D3.4 | Coverage target differenziato per modulo | Adapter critici al 90%, UI al 70% |
+| D3.5 | 3 categorie di fixture: synthetic-history, db-seed, scenarios | Separazione responsabilità test |
+| D3.6 | AGENTS.md v1.0 stabile con sezione handoff | Pronti per chat multiple senza perdita di contesto |
+
+### Aperti per approvazione Boss
+- [ ] `docs/11-BACKLOG.md` → 🟢 APPROVED?
+- [ ] `docs/10-TESTING.md` → 🟢 APPROVED?
+- [ ] `AGENTS.md` v1.0 → 🟢 APPROVED?
+- [ ] Documenti Sessione 1 (02-DATA-SCHEMA, GLOSSARY, ADR 0001-0003) → 🟢 APPROVED?
+- [ ] Documenti Sessione 2 (SPEC-TEMPLATE, spotify.md) → 🟢 APPROVED?
+
+### Prossimi passi
+- Boss approva i documenti DRAFT (o chiede modifiche)
+- Sessione 4: `04-ANALYSIS-ALGORITHMS.md` (formule mood, ere, eventi, ricordi)
+- Valutare se fare bundle di handoff o continuare qui
+
 ---
 
 ## Template sessione (da copiare per le sessioni future)

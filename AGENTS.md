@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Se sei un agente di sviluppo (Cursor, Claude, GPT, Codex, Copilot, etc.) questo documento definisce come lavorare su Life Soundtrack.
+> Versione 1.0 — Sessione 3 (stabile)
 
 ---
 
@@ -10,60 +10,107 @@
 Quando ricevi un task su questo repository, segui questo ordine:
 
 1. **Questo file** (`AGENTS.md`) — il protocollo
-2. **[`docs/INDEX.md`](docs/INDEX.md)** — lo stato del progetto e l'indice dei documenti
-3. **[`docs/00-VISION.md`](docs/00-VISION.md)** — il "perché" del progetto
-4. **[`docs/05-ARCHITECTURE.md`](docs/05-ARCHITECTURE.md)** — l'architettura generale
-5. **[`docs/14-GLOSSARY.md`](docs/14-GLOSSARY.md)`** — definizioni condivise
-6. **La specifica del task** (linkata nell'issue GitHub che ti è stata assegnata)
+2. **[`docs/INDEX.md`](docs/INDEX.md)** — stato del progetto
+3. **[`docs/00-VISION.md`](docs/00-VISION.md)** — il "perché"
+4. **[`docs/05-ARCHITECTURE.md`](docs/05-ARCHITECTURE.md)** — architettura
+5. **[`docs/14-GLOSSARY.md`](docs/14-GLOSSARY.md)** — linguaggio comune
+6. **[`docs/11-BACKLOG.md`](docs/11-BACKLOG.md)** — il lavoro da fare
+7. **[`docs/10-TESTING.md`](docs/10-TESTING.md)`** — come testare
+8. **La specifica del task** (linkata nell'issue)
 
-**Non saltare questi passi.** Il contesto è essenziale per produrre codice coerente.
+**Non saltare questi passi.** Il contesto è essenziale.
+
+## 🔄 Handoff tra conversazioni AI
+
+Questo progetto è progettato per funzionare attraverso conversazioni multiple con l'AI. Quando una conversazione diventa lunga o devi riprendere dopo un'interruzione:
+
+1. Verifica che tutto sia pushato su GitHub: `git status` deve essere pulito
+2. Apri una nuova conversazione con l'AI
+3. Dai il prompt di riattivazione:
+
+       Sono il project owner (@amedeo82) del progetto Life-Soundtrack su
+       https://github.com/amedeo82/Life-Soundtrack.
+
+       Leggi AGENTS.md per capire il protocollo. Poi leggi:
+       - docs/INDEX.md (stato dei documenti)
+       - docs/SESSIONS.md (dove siamo arrivati)
+
+       Dimmi cosa serve fare nella prossima sessione e proponimi i documenti
+       da scrivere, aspettando la mia approvazione prima di procedere.
+
+4. L'AI userà i suoi tool web (se il repo è pubblico) o i file incollati per continuare
+
+**Il PAT va dato agli agenti di sviluppo** (Claude Code, Cursor, Copilot) con scope `contents: read/write` sul repo solo. L'AI di review (come Claude in chat) non ha bisogno di PAT.
 
 ## ✅ Cosa puoi fare autonomamente
 
-- Scrivere codice in TypeScript/React/Python secondo lo stack definito
+- Scrivere codice in TypeScript/React secondo lo stack definito
 - Creare test unitari e di integrazione
-- Aprire PR con checklist di auto-revisione (vedi sotto)
-- Segnalare ambiguità nelle specifiche tramite issue GitHub con label `needs-spec`
+- Aprire PR con checklist di auto-revisione
+- Segnalare ambiguità nelle specifiche tramite issue con label `needs-spec`
+- Usare i fixture in `fixtures/` per i test
 
 ## 🚫 Cosa NON puoi decidere autonomamente
 
-Queste decisioni sono già state prese e **non devono essere rimesse in discussione** senza passare per una issue `needs-spec` e approvazione umana:
+Queste decisioni sono già prese e **vincolanti** (status 🟢 APPROVED):
 
-- Architettura (PWA-first, local-first, adapter pattern)
-- Schema dati (`docs/02-DATA-SCHEMA.md`)
-- Formati e parsing degli adapter (`docs/03-ADAPTERS/`)
-- Algoritmi di analisi (`docs/04-ANALYSIS-ALGORITHMS.md`)
-- Design system (colori, tipografia, componenti → `docs/15-DESIGN-SYSTEM.md`)
-- Copy e stringhe utente (`docs/08-COPY-I18N.md`)
-- Privacy e flusso dati (`docs/09-PRIVACY-SECURITY.md`)
+- Architettura: PWA-first, local-first, adapter pattern (ADR 0001, 0002, 0003)
+- Schema dati: `02-DATA-SCHEMA.md` (quando approvato)
+- Formato adapter: `03-ADAPTERS/SPEC-TEMPLATE.md`
+- Algoritmi: `04-ANALYSIS-ALGORITHMS.md` (quando scritto)
+- Design system: `15-DESIGN-SYSTEM.md`
+- Copy e i18n: `08-COPY-I18N.md` (quando scritto)
+- Privacy: `09-PRIVACY-SECURITY.md` (quando scritto)
+- Test strategy: `10-TESTING.md`
 
-**Regola d'oro**: se una decisione è già documentata, *è vincolante*. In caso di dubbio, **apri una issue invece di inventare**.
+**Regola d'oro**: se una decisione è documentata e 🟢 APPROVED, è vincolante. Se è 🟡 DRAFT, puoi proporre modifiche aprendo una issue. Se non esiste, **apri una issue `needs-spec` invece di inventare**.
 
 ## 🔖 Sistema di issue e label
 
-Le issue su GitHub sono il backlog operativo. Una issue può essere lavorata da un agente **solo se**:
+### Label obbligatorie per agent-ready
 
-- Ha la label `agent-ready`
-- Contiene un link a una specifica approvata (`status: APPROVED`) nel repo
+Una issue può essere lavorata da un agente **solo se**:
+
+- [ ] Ha label `agent-ready`
+- [ ] Contiene link a una specifica 🟢 APPROVED nel repo
+- [ ] Ha acceptance criteria verificabili
 
 ### Label disponibili
 
-| Label | Significato |
-|-------|-------------|
-| `phase-0` … `phase-4` | Fase della roadmap |
-| `area:adapter`, `area:analysis`, `area:ui`, `area:ux`, `area:privacy`, `area:devops` | Modulo coinvolto |
-| `priority:blocker`, `priority:important`, `priority:later` | Priorità |
-| `agent-ready` | ⭐ **Specifica approvata, agente può procedere** |
-| `needs-spec` | 🛑 **Bloccato: manca la specifica** |
-| `bug`, `enhancement`, `refactor` | Classificazione tecnica |
+| Categoria | Label | Significato |
+|-----------|-------|-------------|
+| Fase | `phase-0` … `phase-6` | Fase della roadmap |
+| Area | `area:adapter`, `area:analysis`, `area:ui`, `area:ux`, `area:db`, `area:enrichment`, `area:privacy`, `area:devops` | Modulo coinvolto |
+| Priorità | `priority:blocker`, `priority:important`, `priority:later` | Ordine di lavoro |
+| Size | `size:S`, `size:M`, `size:L`, `size:XL` | Stima relativa |
+| Gate | `agent-ready`, `needs-spec`, `blocked` | Stato lavorabilità |
+| Tipo | `bug`, `enhancement`, `refactor`, `docs` | Classificazione |
+
+### Template issue
+
+    ## Descrizione
+    Cosa deve essere fatto e perché.
+
+    ## Specifica di riferimento
+    - [ ] `docs/XX-NOME.md` (status: 🟢 APPROVED)
+
+    ## Acceptance criteria
+    - [ ] criterio 1 verificabile
+    - [ ] criterio 2 verificabile
+
+    ## Fixture di test
+    - `fixtures/.../...`
+
+    ## Note
+    Eventuali edge case o vincoli.
 
 ## 🌳 Git workflow
 
-- Branch di lavoro: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
-- Commit message: **Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
-- Il branch `main` è protetto: richiede PR e review
+- Branch: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
+- Commit: **Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
+- Branch `main` protetto: richiede PR e review
 - Nessun force push su `main`
-- Una PR = una issue (salvo eccezioni documentate)
+- Una PR = una issue (salvo eccezioni)
 
 ### Template commit
 
@@ -73,72 +120,97 @@ Le issue su GitHub sono il backlog operativo. Una issue può essere lavorata da 
 
     Ref: #<issue-number>
 
-Esempio: `feat(adapter): implement spotify gdpr parser (Ref: #12)`
-
-## 🧪 Testing
-
-- Ogni adapter ha test contro i fixture in `fixtures/synthetic-history/`
-- Ogni algoritmo di analisi ha test con input/output attesi documentati nella specifica
-- Coverage target: 80% sul `packages/core/`
-- Comando test: definito in `docs/10-TESTING.md`
-
 ## 📝 Checklist di auto-revisione PR
 
 Prima di aprire una PR, verifica:
 
 - [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
-- [ ] Il codice rispetta lo schema dati (`docs/02-DATA-SCHEMA.md`)
+- [ ] Il codice rispetta lo schema dati (`02-DATA-SCHEMA.md`)
 - [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
-- [ ] Ho usato i fixture di `fixtures/synthetic-history/` per i test
-- [ ] Ho seguito il naming e lo stile del resto del codebase
-- [ ] Ho aggiunto/aggiornato i commenti JSDoc sulle funzioni pubbliche
+- [ ] Ho usato i fixture di `fixtures/synthetic-history/` e `fixtures/scenarios/`
+- [ ] Ho seguito il naming e lo stile del codebase
+- [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
-- [ ] `npm run lint` e `npm run test` passano in locale
+- [ ] `pnpm run lint` e `pnpm run test` passano in locale
+- [ ] Coverage del modulo ≥ target in `10-TESTING.md` §2
+- [ ] Ho aggiornato `docs/11-BACKLOG.md` se la story è completata
 
 ## 💬 Come segnalare problemi
 
-Se trovi una discrepanza tra una specifica e il codice, o tra due specifiche:
+### Discrepanza tra specifiche
 
-1. Cerca prima tra le issue aperte
-2. Se non esiste, apri una issue con:
-   - Label `needs-spec` o `bug`
-   - Riferimento al documento/linea specifica
-   - Descrizione dell'incoerenza
-   - Proposta di risoluzione (opzionale)
+1. Cerca tra le issue aperte
+2. Apri issue con label `needs-spec`
+3. Riferimento ai documenti e linee specifiche
+4. Descrizione dell'incoerenza
+5. Proposta di risoluzione (opzionale)
 
 **Mai risolvere incoerenze modificando il codice senza documentarlo.**
 
+### Bug nel codice
+
+- Issue con label `bug`
+- Passi per riprodurre
+- Comportamento atteso vs osservato
+- Eventuale test di regressione da aggiungere
+
 ## 📜 Registro delle decisioni
 
-Tutte le decisioni architetturali importanti sono tracciate come **Architecture Decision Record (ADR)** in `docs/13-ADR/`. Prima di proporre una modifica architetturale, verifica che non ci sia già un ADR che la copre.
+Tutte le decisioni architetturali importanti sono in `docs/13-ADR/`. Prima di proporre modifiche architetturali, verifica che non ci sia già un ADR. Se vuoi proporre un nuovo ADR, apri issue con label `area:devops` e proponi il testo.
 
 ## 🗺️ Struttura del repository
 
     Life-Soundtrack/
-    ├── AGENTS.md              ← questo file
+    ├── AGENTS.md                ← questo file
     ├── README.md
-    ├── AGENTS.md              ← contiene i dettagli dell'idea iniziale del progetto, da consultare per capire la struttura del progetto
-    ├── docs/                  ← specifica completa del progetto
-    ├── design/                ← mockup, token, asset grafici
-    ├── fixtures/              ← dataset di test sintetici
-    ├── scripts/               ← utility
-    ├── images/                ← mockup iniziali dell'idea del progetto
-    └── (src/ verrà creato nella Fase 0 tecnica)
+    ├── docs/                    ← specifica completa
+    │   ├── INDEX.md             ← stato master
+    │   ├── SESSIONS.md          ← log sessioni
+    │   ├── 00-VISION.md
+    │   ├── 01-PLATFORMS.md
+    │   ├── 02-DATA-SCHEMA.md
+    │   ├── 03-ADAPTERS/         ← spec di ogni adapter
+    │   ├── 04-ANALYSIS-ALGORITHMS.md
+    │   ├── 05-ARCHITECTURE.md
+    │   ├── 10-TESTING.md
+    │   ├── 11-BACKLOG.md
+    │   ├── 13-ADR/              ← decisioni architetturali
+    │   ├── 14-GLOSSARY.md
+    │   └── 15-DESIGN-SYSTEM.md
+    ├── design/                  ← mockup, token, asset
+    ├── fixtures/                ← dataset di test
+    │   ├── synthetic-history/   ← fixture per adapter
+    │   ├── db-seed/             ← seed per DB
+    │   ├── scenarios/           ← scenari di vita
+    │   └── api-mocks/           ← mock API esterne
+    ├── apps/
+    │   ├── web/                 ← PWA principale
+    │   └── desktop/             ← Tauri (Fase 2)
+    ├── packages/
+    │   ├── core/                ← logica condivisa
+    │   └── ui/                  ← design system
+    └── scripts/                 ← utility
+
+## 🚀 Primo task di un agente
+
+Se sei un agente e ti hanno chiesto di iniziare a lavorare senza un task specifico:
+
+1. Leggi questo file
+2. Leggi `docs/INDEX.md` e `docs/11-BACKLOG.md`
+3. Cerca la prima story ⬚ TODO con label `agent-ready` nella fase più bassa disponibile
+4. Clona il repo, crea branch `feat/<issue>-<descrizione>`
+5. Implementa con test
+6. Apri PR
+
+Se non ci sono issue `agent-ready`, segnalalo al project owner aprendo una issue con label `needs-spec`.
 
 ## 📞 Contatti
 
-Il project owner è `@amedeo82`. Per decisioni non tecniche o dubbi strategici, aspetta la sua review sulla PR. Per tutto ciò che è tecnico, usa le issue.
+- Project owner: `@amedeo82`
+- Per decisioni strategiche: aspetta review sulla PR
+- Per questioni tecniche: usa le issue
+- Per ambiguità di specifica: issue `needs-spec`
 
 ---
 
-## 🔄 Handoff tra conversazioni (per umani)
-
-Questo progetto è progettato per funzionare attraverso **conversazioni multiple** con l'AI (Claude o altri). Quando la conversazione diventa troppo lunga o devi riprendere dopo un'interruzione:
-
-1. **Verifica che tutto sia pushato su GitHub**: `git status` deve essere pulito
-2. **Apri una nuova conversazione** con l'AI
-3. **Dai il prompt di riattivazione** (copialo sotto):
-
----
-
-*Ultimo aggiornamento: Sessione 0 — Bootstrap repository*
+*Ultimo aggiornamento: Sessione 3 — Versione stabile 1.0*
