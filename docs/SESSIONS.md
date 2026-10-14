@@ -165,6 +165,41 @@
 - Sessione 4: `04-ANALYSIS-ALGORITHMS.md` (formule mood, ere, eventi, ricordi)
 - Valutare se fare bundle di handoff o continuare qui
 
+## Sessione 4 — 🧠 Algoritmi di analisi
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D4.1 | Mood come quadrante valence×energy con fascia neutra centrale | Evita flip-flop tra mood |
+| D4.2 | Era detector via change point detection su firme settimanali | Più robusto del clustering k-means puro |
+| D4.3 | Similarity multi-dimensionale pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi e quantitativi |
+| D4.4 | Event detector via z-score + rilevatori specializzati per silence/exploration | z-score è interpretabile, specializzati catturano casi non-statistici |
+| D4.5 | 5 tipi di ricordo con scoring e ranking | Feed ordinato per rilevanza |
+| D4.6 | Pipeline incrementale (non full-rewrite) | Performance su file grandi |
+| D4.7 | derivedVersion = sha1(config)[:8] | Rileva automaticamente cambiamenti parametri |
+
+### Aperti per approvazione Boss
+- [ ] `04-ANALYSIS-ALGORITHMS.md` → 🟢 APPROVED?
+
+### Stato progetto dopo Sessione 4
+- ✅ Visione, piattaforme, architettura, design system
+- ✅ Schema dati, glossario, ADR fondanti
+- ✅ Template adapter + Spotify adapter + fixture
+- ✅ Backlog, testing, protocollo agenti
+- ✅ **Algoritmi di analisi** ← completato ora
+- ⏳ Rimangono: UX states/i18n (S5), privacy (S6), UI spec (S7), devops (S8)
+
+### Prossimi passi
+- Boss approva `04-ANALYSIS-ALGORITHMS.md`
+- Valutare bundle di handoff per chiudere chat pulita
+- Sessione 5 (UX flows + i18n) in nuova chat o qui
+
 ---
 
 ## Template sessione (da copiare per le sessioni future)
