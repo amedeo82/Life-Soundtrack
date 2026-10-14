@@ -24,7 +24,7 @@
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 5 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 5 | Tutte le stringhe UI con chiavi i18n |
-| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🔴 TODO | — | Privacy spec, data flow, security |
+| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 3 | Backlog strutturato (epic → story → task) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
@@ -66,7 +66,7 @@
 | 3 | 📋 Governo (backlog + testing + AGENTS) | ✅ COMPLETATA (APPROVED) |
 | 4 | 🧠 Analisi algoritmica | ✅ COMPLETATA |
 | 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
-| 6 | 🔐 Privacy & legale | 🔴 PROSSIMA |
+| 6 | 🔐 Privacy & legale | ✅ **COMPLETATA** |
 | 7 | 🎨 UI eseguibile + tokens | 🔴 |
 | 8 | ⚙️ DevOps | 🔴 |
 

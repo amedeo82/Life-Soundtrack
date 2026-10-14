@@ -318,6 +318,33 @@ Boss ha reso il repo pubblico (`https://github.com/amedeo82/Life-Soundtrack`) e 
 
 ---
 
+## Sessione 6 — 🔐 Privacy & Legale
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/09-PRIVACY-SECURITY.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D6.1 | Base giuridica unica: consenso esplicito art. 6.1.a per ogni trattamento | Coerenza con local-first; revoca = cancellazione |
+| D6.2 | Inferenze mood/eventi trattate come dati potenzialmente sensibili | Massima cautela pur non essendo art. 9 |
+| D6.3 | Disclaimer inferenze obbligatorio in app (schermata + tooltip) | Trasparenza; non è consulenza psicologica |
+| D6.4 | Loghi ufficiali VIETATI senza licenza; icone proprie | Rischio trademark |
+| D6.5 | Regola repo: mai dati reali nei fixture + check CI | Prevenzione leak |
+| D6.6 | DPIA probabilmente non richiesta (nessun trattamento server-side) | Da confermare con legale |
+| D6.7 | Privacy policy = BOZZA da revisionare con legale prima del lancio | Onestà intellettuale; non siamo avvocati |
+
+### Aperti per approvazione Boss
+- [ ] `09-PRIVACY-SECURITY.md` → 🟢 APPROVED?
+
+### Prossimi passi
+- Sessione 7: UI spec dettagliata + design tokens
+- Sessione 8: DevOps
+- Revisione legale esterna prima del lancio
+
 *Aggiornato ad ogni nuova sessione.*
 
 ---

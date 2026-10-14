@@ -1,0 +1,289 @@
+# 09 — Privacy & Security
+
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 6
+> ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
+> (§7) DEVE essere revisionata da un professionista legale qualificato prima
+> del lancio pubblico. Questo documento non costituisce consulenza legale.
+
+---
+
+## 1. Scopo e scope
+
+Definire:
+- Il flusso completo dei dati personali nell'applicazione
+- Le basi giuridiche GDPR per ogni trattamento
+- Come i diritti dell'utente sono implementati tecnicamente
+- Il testo della privacy policy pubblica
+- I disclaimer per le inferenze psicologiche
+- Le note trademark per i loghi di terze parti
+- Il threat model e le mitigazioni
+- La checklist di compliance pre-lancio
+
+## 2. Principi privacy (richiamo ADR-0002)
+
+| Principio | Implementazione |
+|-----------|-----------------|
+| **Local-first** | Tutti i dati in IndexedDB del browser; nessun server centrale |
+| **Minimizzazione** | Solo i campi necessari; IP scartato di default |
+| **Trasparenza** | Ogni toggle spiega cosa fa; data flow pubblico in questo doc |
+| **Reversibilità** | Export e cancellazione totale sono operazioni locali e immediate |
+| **Privacy by default** | Tutti i toggle privacy sono OFF di default |
+
+## 3. Data flow diagram
+
+### 3.1 Flusso dei dati
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │                     DISPOSITIVO UTENTE                      │
+    │                                                             │
+    │  [File export piattaforma]                                  │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [Adapter: parse + normalizza]                              │
+    │         │                                                   │
+    │         ├──▶ IP? ──NO──▶ scartato dopo derivazione country  │
+    │         │      │                                            │
+    │         │      └─SÌ (toggle retainIp ON)──▶ IndexedDB       │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [IndexedDB: listens, tracks, artists, ...]                 │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [Analysis Engine (Web Worker, locale)]                     │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [Insights: mood, ere, eventi, ricordi]                     │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [UI: timeline, ricordi, analisi]                           │
+    │                                                             │
+    └─────────────────────────────────────────────────────────────┘
+                          │
+                          │ SOLO se toggle specifici ON:
+                          ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    RETE (opzionale)                         │
+    │                                                             │
+    │  [toggle enrichMetadata ON]                                 │
+    │     └─▶ MusicBrainz / FreqBlog: invia SOLO nome brano +     │
+    │         artista (nessun dato utente, nessun timestamp)      │
+    │                                                             │
+    │  [scrobbleHubs configurato]                                 │
+    │     └─▶ Last.fm / ListenBrainz: invia brano + timestamp     │
+    │         (scelta esplicita dell'utente, servizio terzo)      │
+    │                                                             │
+    │  [toggle syncCloud ON — Fase 2]                             │
+    │     └─▶ Server E2E encrypted: ciphertext only               │
+    └─────────────────────────────────────────────────────────────┘
+
+### 3.2 Cosa NON esce mai dal dispositivo
+
+- Cronologia di ascolto completa
+- Indirizzi IP (salvo toggle, e comunque mai inviati in rete)
+- Dati di dispositivo e contesto
+- Insights e inferenze psicologiche
+- Playlist e libreria personale
+- Ricerche effettuate
+
+### 3.3 Cosa esce (solo con toggle esplicito)
+
+| Dato | Destinazione | Trigger | Contenuto inviato |
+|------|--------------|---------|-------------------|
+| Nome brano + artista | MusicBrainz / API audio features | `enrichMetadata` ON | Solo stringhe titolo/artista, nessun dato utente |
+| Brano + timestamp ascolto | Last.fm / ListenBrainz | `scrobbleHubs` configurato | Dati di scrobbling standard (scelta utente) |
+| Ciphertext | Server sync (Fase 2) | `syncCloud` ON | Solo dati cifrati E2E |
+
+## 4. Inventario dati personali trattati
+
+| Dato | Categoria GDPR | Fonte | Persistito? | Base giuridica |
+|------|----------------|-------|-------------|----------------|
+| Cronologia ascolti (brano, artista, timestamp, durata) | Dati personali | Export utente | Sì (locale) | Consenso esplicito (art. 6.1.a) |
+| Paese di connessione | Dati personali | Derivato da IP | Sì (locale) | Consenso esplicito |
+| Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
+| Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale) | Consenso esplicito |
+| Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
+| Playlist e libreria | Dati personali | Export utente | Sì (locale) | Consenso esplicito |
+| Ricerche effettuate | Dati personali | Export Spotify | Sì (locale, opzionale) | Consenso esplicito |
+
+**Nota sui dati derivati**: le inferenze di mood e stati emotivi possono rivelare
+caratteristiche personali profonde. Pur non essendo "categorie particolari" ex
+art. 9 GDPR in senso stretto, sono trattate con la massima cautela: restano
+locali, sono etichettate come ipotesi, e l'utente può cancellarle o correggerle.
+
+## 5. Basi giuridiche GDPR
+
+| Trattamento | Base giuridica | Note |
+|-------------|----------------|------|
+| Import e analisi locale | Art. 6.1.a — Consenso | L'utente importa volontariamente i propri dati |
+| Arricchimento metadati | Art. 6.1.a — Consenso | Toggle esplicito, disattivabile |
+| Scrobbling a hub terzi | Art. 6.1.a — Consenso | L'utente configura il servizio terzo |
+| Sync cloud (Fase 2) | Art. 6.1.a — Consenso | E2E encrypted, opzionale |
+
+**Nessun trattamento si basa su interesse legittimo**: tutto è consenso esplicito
+e revocabile in qualsiasi momento (la revoca = cancellazione locale immediata).
+
+## 6. Diritti dell'utente e implementazione tecnica
+
+| Diritto GDPR | Implementazione in app |
+|--------------|------------------------|
+| **Accesso** (art. 15) | L'utente vede tutti i propri dati nell'app; export JSON completo |
+| **Rettifica** (art. 16) | Correzione insight (`status: corrected`), override nomi brani |
+| **Cancellazione** (art. 17) | "Cancella tutti i dati" con doppia conferma; `purgeIp()` selettivo |
+| **Portabilità** (art. 20) | Export JSON strutturato di listens + insights |
+| **Limitazione** (art. 18) | Toggle per disattivare singoli trattamenti (enrichment, scrobbling) |
+| **Opposizione** (art. 21) | Revoca consenso = disattivazione trattamento |
+| **Revoca consenso** (art. 7.3) | Ogni toggle revocabile; effetti immediati e locali |
+
+### 6.1 Funzioni tecniche obbligatorie
+
+- `exportAll(): Promise<Blob>` — JSON completo di tutti i dati locali
+- `deleteAll(): Promise<void>` — wipe IndexedDB + localStorage
+- `purgeIp(): Promise<void>` — azzera campo `ip` in tutti i listens
+- `purgeInsights(): Promise<void>` — cancella solo le inferenze
+- Ogni funzione è esposta in Settings → Dati
+
+## 7. Privacy Policy (bozza pubblica)
+
+> ⚠️ BOZZA — da revisionare con legale prima del lancio
+
+### 7.1 Chi siamo
+
+Life Soundtrack è un'applicazione web open source che trasforma i dati di
+ascolto delle piattaforme di streaming in un diario musicale personale.
+Non abbiamo server che raccolgono i tuoi dati: l'app funziona interamente
+nel tuo browser.
+
+### 7.2 Quali dati trattiamo
+
+Trattiamo SOLO i dati che TU importi volontariamente dall'export della tua
+piattaforma di streaming (Spotify, Apple Music, YouTube Music, ecc.):
+cronologia ascolti, brani, artisti, timestamp, e — se lo attivi tu — indirizzi IP.
+
+Tutti questi dati restano sul tuo dispositivo. Non li inviamo a nessun server.
+
+### 7.3 Come li usiamo
+
+Li usiamo esclusivamente per mostrarti la tua timeline musicale, i tuoi
+pattern di ascolto e i tuoi ricordi. Le analisi (mood, ere musicali, eventi)
+sono calcolate localmente nel tuo browser e sono etichettate come ipotesi,
+non come verità.
+
+### 7.4 Condivisione con terze parti
+
+Non condividiamo nulla con terze parti, tranne nei casi in cui sei TU ad
+attivarlo esplicitamente:
+- **Arricchimento metadati**: se attivi il toggle, inviamo il nome del brano
+  a servizi pubblici (MusicBrainz) per recuperare caratteristiche musicali.
+  Non inviamo nessun dato su di te.
+- **Scrobbling**: se colleghi Last.fm o ListenBrainz, i tuoi ascolti vengono
+  inviati a quei servizi secondo le loro privacy policy.
+- **Sync cloud** (futuro): se lo attivi, i dati sono cifrati end-to-end e
+  noi non possiamo leggerli.
+
+### 7.5 I tuoi diritti
+
+Puoi in qualsiasi momento: esportare tutti i tuoi dati, correggere le
+inferenze, cancellare tutto, o revocare ogni consenso. Tutte queste operazioni
+sono immediate e locali, nelle Impostazioni dell'app.
+
+### 7.6 Conservazione
+
+I dati restano sul tuo dispositivo finché non li cancelli. Non abbiamo copie
+nei nostri server perché non abbiamo server che li raccolgono.
+
+### 7.7 Contatti
+
+[da compilare: email contatti + eventuale DPO]
+
+## 8. Disclaimer inferenze psicologiche
+
+Testo da mostrare nell'app (schermata Analisi e ogni InsightCard):
+
+> **Le analisi emotive sono ipotesi, non diagnosi.**
+> I mood, le "ere musicali" e gli "eventi" rilevati sono inferenze statistiche
+> basate sulle caratteristiche musicali dei brani che ascolti. Non sono
+> valutazioni psicologiche, mediche o cliniche. Possono essere imprecise.
+> Sei tu a decidere se confermarle, correggerle o ignorarle.
+> Se stai attraversando un momento difficile, parlane con una persona
+> qualificata: questa app non è un sostituto del supporto professionale.
+
+Implementazione:
+- Testo completo in `08-COPY-I18N.md` chiave `insight.disclaimer`
+- Versione corta (`insight.disclaimerShort`) come tooltip su ogni InsightCard
+- Link "Come funzionano le analisi?" → pagina esplicativa
+
+## 9. Note trademark e uso loghi
+
+### 9.1 Principio
+
+I nomi e i loghi di Spotify, Apple Music, YouTube Music, Deezer, Tidal,
+SoundCloud, Last.fm, ListenBrainz sono marchi dei rispettivi proprietari.
+Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
+
+### 9.2 Regole d'uso nell'app
+
+| Elemento | Regola |
+|----------|--------|
+| **Nomi delle piattaforme** | Uso nominativo consentito ("Importa il tuo export Spotify") — necessario per descrivere la compatibilità |
+| **Loghi ufficiali** | ❌ NON usare i loghi ufficiali senza licenza. Usare icone proprie stilizzate o testo |
+| **Colori brand** | Evitare combinazioni che imitino l'identità visiva ufficiale |
+| **Disclaimer** | Footer Settings: "I marchi citati appartengono ai rispettivi proprietari. Life Soundtrack non è affiliata a essi." |
+
+### 9.3 Azioni richieste
+
+- [ ] Sostituire i loghi ufficiali nei mockup con icone proprie (Sessione 7)
+- [ ] Aggiungere disclaimer trademark in Settings e footer
+- [ ] Verificare le brand guidelines di ogni piattaforma prima del lancio
+
+## 10. Threat model
+
+| # | Minaccia | Probabilità | Impatto | Mitigazione |
+|---|----------|-------------|---------|-------------|
+| T1 | Furto dispositivo con dati non cifrati | Media | Alto | Consigliare full-disk encryption OS; valutare cifratura IndexedDB (Fase 2) |
+| T2 | XSS che legge IndexedDB | Bassa | Alto | CSP strict, nessun innerHTML con dati utente, sanitize input |
+| T3 | Estensione browser malevola che legge IndexedDB | Media | Alto | Documentare il rischio; consigliare profile browser dedicato |
+| T4 | Leak via chiamate enrichment | Bassa | Medio | Inviare solo titolo+artista; nessun dato utente; log pubblico delle chiamate |
+| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali |
+| T6 | Sync cloud compromesso (Fase 2) | Bassa | Alto | E2E encryption, chiavi solo sul dispositivo |
+| T7 | Inferenze usate contro l'utente (es. assicurazioni) | Bassa | Alto | Dati mai inviati; disclaimer; export escluso insight su richiesta |
+
+### 10.1 Regola d'oro per il repo
+
+**Mai committare dati reali di ascolto nel repository.** I fixture in
+`fixtures/` sono sintetici. Ogni PR che aggiunga dati reali va rifiutata.
+Aggiungere check CI che scansioni i fixture per pattern sospetti (IP reali,
+email).
+
+## 11. Checklist compliance pre-lancio
+
+- [ ] Privacy policy revisionata da legale qualificato
+- [ ] Disclaimer inferenze presente in app (schermata Analisi + tooltip)
+- [ ] Disclaimer trademark in Settings e footer
+- [ ] Loghi ufficiali sostituiti con icone proprie
+- [ ] Funzioni `exportAll`, `deleteAll`, `purgeIp`, `purgeInsights` testate
+- [ ] Tutti i toggle privacy OFF di default verificato
+- [ ] CSP strict configurata e testata
+- [ ] Nessun dato reale nei fixture (check CI attivo)
+- [ ] Cookie/banner non necessari (l'app non usa cookie di tracciamento)
+- [ ] Registro dei trattamenti GDPR compilato (art. 30) — se applicabile
+- [ ] Valutazione d'impatto (DPIA) considerata — probabilmente NON richiesta
+      (nessun trattamento server-side, nessun dato sensibile ex art. 9 inviato)
+- [ ] Email di contatto e responsabile dati pubblicata
+
+## 12. Note finali
+
+- L'architettura local-first riduce drasticamente gli obblighi GDPR: non
+  essendoci trattamento server-side di PII, Life Soundtrack NON è "titolare
+  del trattamento" per i dati che restano sul dispositivo dell'utente.
+- Diventa titolare solo per: (a) dati inviati volontariamente a servizi terzi
+  configurati dall'utente (ma lì il titolare è il servizio terzo), (b) eventuali
+  statistiche anonime opt-in (Fase 2+), (c) sync cloud (Fase 2).
+- Questo rende il progetto uno dei più privacy-compliant possibili per categoria.
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 6 | Prima versione completa |
