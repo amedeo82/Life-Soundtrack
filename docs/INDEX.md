@@ -1,7 +1,7 @@
 # 📚 Indice della Documentazione
 
 > Stato master del progetto. Aggiornato ad ogni sessione di progettazione.
-> **Leggi questo file prima di qualsiasi altro per avere una panoramic.**
+> **Leggi questo file prima di qualsiasi altro per avere una panoramica.**
 
 ## Legenda stati
 | Status | Significato |
