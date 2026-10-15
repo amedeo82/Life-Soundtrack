@@ -25,7 +25,7 @@
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 3 | Backlog strutturato (epic → story → task) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 8 | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 1 | Architecture Decision Records (0001-0003) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 0 | Design system completo |
@@ -60,13 +60,13 @@
 | 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
 | 6 | 🔐 Privacy & legale | ✅ COMPLETATA |
 | 7 | 🎨 UI eseguibile + tokens | ✅ COMPLETATA |
-| 8 | ⚙️ DevOps | 🔴 PROSSIMA |
+| 8 | ⚙️ DevOps | ✅ COMPLETATA |
 
 ## Stato del progetto
 - **Documenti APPROVED**: 9 (02, 03, 10, 11, 13-ADR×3, 14, AGENTS)
-- **Documenti DRAFT**: 8 (00, 01, 04, 05, 06, 07, 08, 09, 15)
-- **Documenti TODO**: 1 (12)
-- **Completamento progettazione**: ~99%
+- **Documenti DRAFT**: 8 (00, 01, 04, 05, 06, 07, 08, 09, 12, 15)
+- **Documenti TODO**: 0
+- **Completamento progettazione**: 🎉 **100%**
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
