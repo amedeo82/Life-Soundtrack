@@ -334,3 +334,4 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione eseguibile |
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |

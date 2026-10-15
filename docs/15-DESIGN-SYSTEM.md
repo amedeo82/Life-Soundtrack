@@ -143,6 +143,9 @@ Motion reduction rispettata (`prefers-reduced-motion`).
 | > 1024px | Sidebar completa, grid 3-4 colonne |
 | > 1440px | Contenuto centrato max 1400px |
 
+
+
+
 ---
 
 ## Changelog

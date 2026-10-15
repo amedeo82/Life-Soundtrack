@@ -185,3 +185,4 @@ Casi minimi:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 2 | Prima specifica completa |
+| 1.0 | Sessione 2 | 🟢 APPROVED · Versione 1.0 · Sessione 2 |

@@ -32,3 +32,9 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 ## Collegamenti
 
 - 01-PLATFORMS §5 · 02-DATA-SCHEMA §6-7 · 05-ARCHITECTURE §4
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |

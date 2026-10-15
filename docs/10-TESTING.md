@@ -145,3 +145,4 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione |
+| 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |

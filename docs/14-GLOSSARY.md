@@ -58,3 +58,4 @@
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione |
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |

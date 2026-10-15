@@ -190,6 +190,30 @@ Boss ha reso il repo pubblico. Trovati 6 problemi di sincronizzazione risolti co
 
 ---
 
+## Sessione 7 — 🎨 UI eseguibile + Design Tokens
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/07-UI-SPEC.md` (DRAFT) — Specifiche per 10+ componenti (props, stati, a11y, interazioni)
+- ✅ `design/tokens.json` (APPROVED) — Ponte tra design system e codice (colori, typo, spacing, radii, shadow, transition)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D7.1 | Dark-first come default assoluto | Coerenza con l'identità "notturna" e musicale del brand |
+| D7.2 | Glow al posto delle ombre per stati attivi | Evoca luci di palco, più coerente col tema |
+| D7.3 | Accessibilità integrata nelle specifiche (sr-only, aria-label, focus trap) | WCAG 2.1 AA compliance fin dalla progettazione |
+| D7.4 | Design tokens in formato JSON W3C-compatible | Facilita l'import in Tailwind, CSS variables, o Figma |
+| D7.5 | Animazioni rispettano `prefers-reduced-motion` | Accessibilità per utenti con disturbi vestibolari |
+
+### Prossimi passi
+- Sessione 8: DevOps (CI/CD, Docker, deploy, GitHub Actions)
+- Dopo Sessione 8: Handoff completo agli agenti di sviluppo per la Fase 0 tecnica
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]

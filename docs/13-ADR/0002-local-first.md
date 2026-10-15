@@ -32,3 +32,9 @@ Il progetto tratta dati altamente personali (cronologia di ascolto, contesto, in
 ## Collegamenti
 
 - 02-DATA-SCHEMA §8 · 09-PRIVACY-SECURITY (Sessione 6)
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |

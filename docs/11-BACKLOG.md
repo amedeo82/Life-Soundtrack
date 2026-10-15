@@ -316,3 +316,4 @@ Ogni story deve avere label GitHub:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione con 5 epic e 17 story |
+| 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |

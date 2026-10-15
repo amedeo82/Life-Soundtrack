@@ -33,3 +33,9 @@ Il prodotto deve raggiungere utenti desktop e mobile con un team di sviluppo pic
 ## Collegamenti
 
 - 05-ARCHITECTURE §8 · 00-VISION §Perimetro MVP
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
