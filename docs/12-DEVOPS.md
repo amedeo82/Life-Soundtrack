@@ -92,6 +92,7 @@ jobs:
 - Richiede almeno 1 review approvata (da `@amedeo82` o collaboratore).
 - Tutti i check CI devono essere verdi (✅).
 - Nessun file `fixtures/` può contenere pattern di email o IP reali (controllo tramite script pre-commit o CI).
+- **Il job `bundle-check` deve passare** (vedi §9): se modifichi uno o più file del progetto inclusi nel bundle, devi aggiornare anche `scripts/generate-bundle.ps1` (se necessario) e rigenerare `docs/BUNDLE.md` nella stessa PR.
 
 ---
 
@@ -229,9 +230,93 @@ Prima di rendere il repository pubblico o il sito accessibile, verificare:
 
 ---
 
+## 9. Bundle script maintenance
+
+`docs/BUNDLE.md` è uno snapshot di tutti i file del progetto (documentazione, spec, fixture) in un unico markdown, usato per handoff con AI esterne e prompt di re-attivazione. Lo script `scripts/generate-bundle.ps1` lo genera a partire da un array esplicito `$files`.
+
+### 9.1 Comandi dello script
+
+```powershell
+pwsh scripts/generate-bundle.ps1           # genera docs/BUNDLE.md (default)
+pwsh scripts/generate-bundle.ps1 --check   # verifica che BUNDLE.md sia in sync; exit 0/1 (CI-friendly)
+pwsh scripts/generate-bundle.ps1 --list    # stampa la lista dei file inclusi (audit)
+pwsh scripts/generate-bundle.ps1 --help    # help completo
+```
+
+### 9.2 Quando aggiornare lo script
+
+Aggiorna l'array `$files` in `scripts/generate-bundle.ps1` **nella stessa PR** in cui:
+
+- Aggiungi un nuovo file in `docs/` (es. un nuovo ADR, un nuovo doc di sezione)
+- Aggiungi un nuovo file in `fixtures/` (es. fixture per un nuovo adapter)
+- Rinomini o sposti un file esistente che fa parte della specifica
+- Aggiungi un nuovo file di root che vuoi includere (es. `CHANGELOG.md`, `CONTRIBUTING.md`)
+
+### 9.3 Convenzioni di manutenzione
+
+L'ordine dei file nell'array `$files` deve rispettare la struttura di `docs/INDEX.md`:
+
+1. File di root (`AGENTS.md`, `README.md`, `LICENSE`)
+2. Documenti di supporto (`docs/INDEX.md`, `docs/SESSIONS.md`, `docs/AUDIT-*.md`)
+3. Documenti fondamentali in ordine di sezione (00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12)
+4. ADR (`docs/13-ADR/*.md`) in ordine numerico
+5. Resto documenti fondamentali (14, 15)
+6. Fixture (`fixtures/synthetic-history/*.json`)
+
+Non includere mai `docs/BUNDLE.md` stesso (si auto-includerebbe).
+
+### 9.4 Verifica automatica in CI
+
+Aggiungere il job `bundle-check` al workflow `ci.yml`:
+
+```yaml
+  bundle-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PowerShell
+        uses: microsoft/powershell@v1
+        with:
+          pwsh: true
+      - name: Verify BUNDLE.md is in sync
+        shell: pwsh
+        run: pwsh scripts/generate-bundle.ps1 --check
+```
+
+Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
+- `[OK] docs/BUNDLE.md e in sync con la lista corrente (N file).` (exit 0)
+- `[FAIL] Da aggiungere al bundle: <file>` (file nuovo non ancora in `$files`)
+- `[FAIL] Da rimuovere dal bundle: <file>` (file rimosso/rinominato)
+- `[FAIL] Lista file identica, ma contenuto cambiato` (modifica a un file doc, rigenera)
+
+### 9.5 Workflow di manutenzione (sviluppatore)
+
+```
+1. Modifica un file in docs/ o fixtures/
+2. (se hai aggiunto/rimosso file) modifica $files in scripts/generate-bundle.ps1
+3. Esegui: pwsh scripts/generate-bundle.ps1
+4. (opzionale) verifica: pwsh scripts/generate-bundle.ps1 --check
+5. Committa docs/, fixtures/ e scripts/generate-bundle.ps1 + docs/BUNDLE.md nella stessa PR
+```
+
+### 9.6 Test locale
+
+```powershell
+# Stato corrente
+pwsh scripts/generate-bundle.ps1 --list
+
+# Rigenera
+pwsh scripts/generate-bundle.ps1
+
+# Verifica sync (CI parity)
+pwsh scripts/generate-bundle.ps1 --check
+```
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 8 | Prima versione completa |
-| 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10) |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10); **nuovo §9 "Bundle script maintenance"** con comandi, convenzioni, CI check, workflow dev (post-review del bundle) |

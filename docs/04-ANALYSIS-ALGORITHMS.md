@@ -1,6 +1,6 @@
 # 04 — Algoritmi di Analisi
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 4
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
 > Vincolante per: `packages/core/analysis/*` e relativi test
 
 ---
@@ -258,7 +258,7 @@ Rilevare pattern ricorrenti negli ascolti: **circadiano** (ora del giorno), **se
 
 Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 
-    function computeCircadianPattern(events):
+    function computeCircadianPattern(events, userTimezone):
       buckets = {0..23: 0}  // ore
       total = 0
       for e in events:
@@ -268,22 +268,66 @@ Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 
       normalizedBuckets = {h: buckets[h] / total for h in 0..23}
       peakHour = argmax(buckets)
+      nightShare = sum(buckets[h] for h in [0,1,2,3,4,5]) / total
 
       return {
         kind: 'pattern',
         patternType: 'circadian',
         buckets: normalizedBuckets,
         peakHour,
-        nightShare: sum(buckets[h] for h in [0,1,2,3,4,5]) / total
+        peakDay: null,            // non applicabile (circadian = ore)
+        peakMonth: null,          // non applicabile
+        nightShare,
+        weekendShare: null,      // non applicabile
+        userTimezone
       }
 
-    function computeWeeklyPattern(events):
+    function computeWeeklyPattern(events, userTimezone):
       buckets = {Mon..Sun: 0}
-      ... analogo
+      total = 0
+      for e in events:
+        day = dayOfWeek(e.startedAt, userTimezone)  // 0=Sun..6=Sat
+        buckets[day] += e.durationMs
+        total += e.durationMs
 
-    function computeSeasonalPattern(events):
+      normalizedBuckets = {d: buckets[d] / total for d in 0..6}
+      peakDay = argmax(buckets)
+      weekendShare = (buckets[0] + buckets[6]) / total  // Sun + Sat
+
+      return {
+        kind: 'pattern',
+        patternType: 'weekly',
+        buckets: normalizedBuckets,
+        peakHour: null,           // non applicabile
+        peakDay,
+        peakMonth: null,          // non applicabile
+        nightShare: null,         // non applicabile
+        weekendShare,
+        userTimezone
+      }
+
+    function computeSeasonalPattern(events, userTimezone):
       buckets = {Jan..Dec: 0}
-      ... analogo
+      total = 0
+      for e in events:
+        month = monthOf(e.startedAt, userTimezone)  // 1..12
+        buckets[month] += e.durationMs
+        total += e.durationMs
+
+      normalizedBuckets = {m: buckets[m] / total for m in 1..12}
+      peakMonth = argmax(buckets)
+
+      return {
+        kind: 'pattern',
+        patternType: 'seasonal',
+        buckets: normalizedBuckets,
+        peakHour: null,           // non applicabile
+        peakDay: null,            // non applicabile
+        peakMonth,
+        nightShare: null,         // non applicabile
+        weekendShare: null,       // non applicabile
+        userTimezone
+      }
 
 ### 4.3 Metriche derivate
 
@@ -303,8 +347,13 @@ Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 ### 4.5 Invarianti
 
 - `sum(buckets.values) ≈ 1.0` (tolleranza 0.01)
-- `nightShare ∈ [0, 1]`
-- `peakHour ∈ 0..23`
+- `nightShare ∈ [0, 1]` se definito, altrimenti `null`
+- `weekendShare ∈ [0, 1]` se definito, altrimenti `null`
+- `peakHour ∈ 0..23` se definito, altrimenti `null`
+- `peakDay ∈ 0..6` se definito, altrimenti `null` (0=Sun, 6=Sat)
+- `peakMonth ∈ 1..12` se definito, altrimenti `null`
+- `userTimezone` è sempre valorizzato (IANA tz string, es. `Europe/Rome`)
+- Campi non applicabili al `patternType` sono `null` (vedi implementazione §4.2)
 
 ---
 
@@ -765,3 +814,4 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 4 | Prima versione completa |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: §4.2 `computeCircadianPattern`/`Weekly`/`Seasonal` estesi con tutti i campi `PatternPayload` (`02§4` v1.1) — `peakDay`, `peakMonth`, `weekendShare`, `userTimezone`; campi non applicabili esplicitamente `null`; §4.5 invarianti aggiornate |

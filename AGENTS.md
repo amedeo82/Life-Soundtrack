@@ -101,6 +101,28 @@ Una issue può essere lavorata da un agente **solo se**:
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
+- [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
+- [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
+
+## 🔄 Manutenzione del bundle script
+
+`docs/BUNDLE.md` è lo snapshot di tutto il progetto in un unico file markdown, usato per handoff con AI esterne. Quando modifichi la struttura del progetto:
+
+1. **Aggiungi un nuovo file in `docs/`** (es. nuovo ADR, nuovo doc di sezione):
+   - Apri `scripts/generate-bundle.ps1`
+   - Aggiungi il path all'array `$files` rispettando l'ordine di `docs/INDEX.md`
+   - Esegui `pwsh scripts/generate-bundle.ps1` per rigenerare
+   - Committa `scripts/generate-bundle.ps1` e `docs/BUNDLE.md` nella stessa PR
+
+2. **Verifica che il bundle sia allineato** (in CI e in locale):
+   ```powershell
+   pwsh scripts/generate-bundle.ps1 --check
+   ```
+   Exit code 0 = in sync, 1 = da rigenerare, 2 = file dichiarati mancanti.
+
+3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
+
+Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
 
 ## 🗺️ Struttura del repository
 

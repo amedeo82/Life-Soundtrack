@@ -1,6 +1,6 @@
 # Adapter Spotify
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
 > Tier: **S** · Priorità MVP: **sì**
 
 ## 1. Metodi di accesso
@@ -48,31 +48,46 @@ L'adapter riconosce il file da:
 
 ## 3. Mapping campi sorgente → unificato
 
-### 3.1 ListenEvent
+> **Schema di riferimento (Sessione 9)**: `02-DATA-SCHEMA.md` v1.1 — `ListenEvent` è **piatto** con `trackId` come FK; i metadati del brano vivono sull'entità `Track` separata.
+
+### 3.1 ListenEvent (top-level, piatto — vedi `02§3.2`)
 
 | Campo unificato | Campo sorgente | Tipo sorgente | Trasformazione | Note |
 |-----------------|----------------|---------------|----------------|------|
+| `eventKey` | — | — | `'spotify:' + (spotify_track_uri ?? sha1(trackKey+'|'+ts+'|'+ms_played))` | `spotify_track_uri` come `sourceEventId` se presente |
+| `platform` | (fisso) | `PlatformId` | `'spotify'` | |
+| `importId` | (interno) | uuid | generato al parse | FK a `imports` |
 | `timestamp` | `ts` | ISO 8601 UTC | `Date.parse(ts)` | **FINE ascolto** |
-| `startedAt` | — | — | `timestamp - ms_played` | derivato |
-| `durationMs` | `ms_played` | int | diretto | |
-| `eventKey` | — | — | `'spotify:' + (spotify_track_uri ?? sha1(name+artist+ts))` | se URI mancante (podcast?), hash |
-| `platform` | (fisso) | — | `'spotify'` | |
-| `track.name` | `master_metadata_track_name` | string/null | diretto; null → skip evento | |
-| `track.artist` | `master_metadata_album_artist_name` | string/null | diretto; null → "Unknown" | |
-| `track.album` | `master_metadata_album_album_name` | string/null | nullable | |
-| `track.isrc` | — | — | null (non nell'export GDPR) | recuperabile via MBID lookup successivo |
-| `track.mbid` | — | — | null | lookup enrichment pipeline |
-| `deviceType` | `platform` | string | mapping §3.2 | |
-| `deviceDetail` | `platform` | string | valore raw | |
-| `country` | `conn_country` | string | ISO 3166-1 alpha-2 | |
-| `ip` | `ip_addr` | string | conservato SOLO se `PrivacySettings.retainIp` | |
-| `shuffle` | `shuffle` | bool | diretto | |
-| `skipped` | `skipped` + `reason_end` | bool | regola derivata E1 | |
-| `offline` | `offline` | bool | diretto | |
-| `incognito` | `incognito_mode` | bool | diretto | |
-| `reasonStart` | `reason_start` | string | diretto | |
-| `reasonEnd` | `reason_end` | string | diretto | |
-| `completed` | — | — | `ms_played >= durataCatalogo - 5000` | 5s tolleranza |
+| `startedAt` | — | unix ms | `timestamp - ms_played` | derivato |
+| `durationMs` | `ms_played` | int | diretto | — |
+| `trackId` | (interno) | uuid | **risolto dal core via DEDUP** (`02§5`) su `trackKey` = name+artist normalizzati | adapter emette solo `trackKey` |
+| `completed` | — | bool | `ms_played >= durataCatalogo - 5000` | 5s tolleranza |
+| `skipped` | `skipped` + `reason_end` + `ms_played` | bool \| null | regola derivata E1 (§3.3) | nullable |
+| `shuffle` | `shuffle` | bool \| null | diretto | nullable |
+| `offline` | `offline` | bool \| null | diretto | nullable |
+| `incognito` | `incognito_mode` | bool \| null | diretto | nullable |
+| `reasonStart` | `reason_start` | string \| null | diretto | enum Spotify |
+| `reasonEnd` | `reason_end` | string \| null | diretto | enum Spotify |
+| `deviceType` | `platform` | `DeviceType` | mapping §3.2 | — |
+| `deviceDetail` | `platform` | string \| null | valore raw (es. "iOS", "Windows 10") | — |
+| `ip` | `ip_addr` | string \| null | **SOLO se `PrivacySettings.retainIp` true** | mai inviato in rete |
+| `country` | `conn_country` | string | ISO 3166-1 alpha-2 | derivato anche se `ip` scartato |
+| `day` | (derivato) | `YYYY-MM-DD` | da `timestamp` UTC | indice critico |
+
+### 3.1.1 Track (entità separata — vedi `02§3.3`)
+
+L'adapter emette il `trackKey` (e i campi grezzi) insieme al ListenEvent; il core lo normalizza e fa upsert in `tracks` con DEDUP-3 (fuzzy name+artist+duration bucket 2s) poiché l'export GDPR non fornisce ISRC/MBID.
+
+| Campo Track | Campo sorgente | Tipo sorgente | Trasformazione | Note |
+|-------------|----------------|---------------|----------------|------|
+| `name` | `master_metadata_track_name` | string/null | `normalize(name)` (`02§5`); null → skip evento | |
+| `artistId` | `master_metadata_album_artist_name` | uuid | risolto da `artists` (dedup per nome normalizzato); null → "Unknown" | FK a `artists` |
+| `albumId` | `master_metadata_album_album_name` | uuid \| null | risolto da `albums` (dedup per nome+artistId); null se assente | FK a `albums` |
+| `durationMs` | — | int \| null | da catalogo (lookup futuro) o `ms_played` come proxy | usato in DEDUP-3 |
+| `isrc` | — | string \| null | `null` (non nell'export GDPR) | recuperabile via MBID lookup post-import |
+| `mbid` | — | string \| null | `null` | enrichment via MusicBrainz |
+| `genres` | — | string[] | vuoto (Spotify GDPR non include generi) | popolato da enrichment |
+| `platformIds` | `spotify_track_uri` | `Partial<Record<PlatformId, string>>` | `{spotify: extractId(uri)}` | ID nativo |
 
 ### 3.2 Mapping `platform` → `deviceType`
 
@@ -186,3 +201,4 @@ Casi minimi:
 |----------|------|-----------|
 | 0.1 | Sessione 2 | Prima specifica completa |
 | 1.0 | Sessione 2 | 🟢 APPROVED · Versione 1.0 · Sessione 2 |
+| 1.1 | Sessione 9 (2026-10-15) | Audit: §3.1 riscritto per schema flat (`02§3.2` v1.1); aggiunto `trackId` come FK risolta dal core; nuova §3.1.1 (Track) come entità separata; aggiunti `day`, `importId`, `genres`; rimosso `completed` hardcoded (ora derivato); campo `track.isrc`/`mbid` spostati in §3.1.1 |

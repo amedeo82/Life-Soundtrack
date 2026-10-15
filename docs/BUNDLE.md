@@ -1,8 +1,8 @@
-﻿# BUNDLE CONTENUTO
+# BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-15 17:17
-> Totale file: 21
+> Data: 2026-10-15 17:29
+> Totale file: 27
 
 
 ===== FILE: AGENTS.md =====
@@ -110,6 +110,28 @@ Una issue può essere lavorata da un agente **solo se**:
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
+- [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
+- [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
+
+## 🔄 Manutenzione del bundle script
+
+`docs/BUNDLE.md` è lo snapshot di tutto il progetto in un unico file markdown, usato per handoff con AI esterne. Quando modifichi la struttura del progetto:
+
+1. **Aggiungi un nuovo file in `docs/`** (es. nuovo ADR, nuovo doc di sezione):
+   - Apri `scripts/generate-bundle.ps1`
+   - Aggiungi il path all'array `$files` rispettando l'ordine di `docs/INDEX.md`
+   - Esegui `pwsh scripts/generate-bundle.ps1` per rigenerare
+   - Committa `scripts/generate-bundle.ps1` e `docs/BUNDLE.md` nella stessa PR
+
+2. **Verifica che il bundle sia allineato** (in CI e in locale):
+   ```powershell
+   pwsh scripts/generate-bundle.ps1 --check
+   ```
+   Exit code 0 = in sync, 1 = da rigenerare, 2 = file dichiarati mancanti.
+
+3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
+
+Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
 
 ## 🗺️ Struttura del repository
 
@@ -186,6 +208,211 @@ Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lav
 
 *Questo README è mantenuto aggiornato dal log delle sessioni in [`docs/SESSIONS.md`](docs/SESSIONS.md).*
 
+
+
+===== FILE: LICENSE =====
+
+Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an Legal Entity authorized to submit on behalf of the copyright
+      owner. For the purposes of this definition, "submitted" means any form
+      of electronic, verbal, or written communication sent to the Licensor or
+      its representatives, including but not limited to communication on
+      electronic mailing lists, source code control systems, and issue
+      tracking systems that are managed by, or on behalf of, the Licensor
+      for the purpose of tracking or otherwise improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any Legal Entity on behalf of
+      whom a Contribution has been received by Licensor and subsequently
+      incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for describing the origin of the Work and
+      reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Support. While redistributing the Work or
+      Derivative Works thereof, You may choose to offer, and charge a
+      fee for, acceptance of support, warranty, indemnity, or other
+      liability obligations and/or rights consistent with this License.
+      However, in accepting such obligations, You may act only on Your
+      own behalf and on Your sole responsibility, not on behalf of any
+      other Contributor, and only if You agree to indemnify, defend,
+      and hold each Contributor harmless for any liability incurred by,
+      or claims asserted against, such Contributor by reason of your
+      accepting any such warranty or support.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file name and extension be included on the same line as the
+      copyright notice for easy identification within third-party
+      archives.
+
+   Copyright 2026 Life Soundtrack contributors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
 
 
 ===== FILE: docs/INDEX.md =====
@@ -537,6 +764,141 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 
 
 
+===== FILE: docs/AUDIT-2026-10-15.md =====
+
+# AUDIT — Controllo completo di documentazione e decisioni
+
+> Data: 2026-10-15
+> Perimetro: tutti i documenti `docs/` (00-15, 13-ADR, 03-ADAPTERS), `AGENTS.md`, `README.md`, `design/tokens.json`, `fixtures/synthetic-history/`, `docs/INDEX.md`, `docs/SESSIONS.md`
+> Metodo: lettura integrale + verifica incrociata di ogni decisione (D.0.1 → D.8.5) e di ogni riferimento tecnico tra documenti
+> Esito sintetico: **30 decisioni su 38 coerenti**. Spina dorsale APPROVED (02 ↔ 03 ↔ 10 ↔ 11 ↔ 14) solida. **9 incongruenze critiche** (3 tra documenti APPROVED), 13 medie, 6 vuoti. Nessuna decisione architetturale approvata da ribaltare: gli errori sono di allineamento post-sessione, non di sostanza.
+
+---
+
+## 1. Inventario e stato
+
+| Doc | Stato | Ultima sessione | Salute |
+|---|---|---|---|
+| AGENTS.md | 🟢 v1.0 | S3 | ⚠️ footer cita "Sessione 6 — fix sincronizzazione" mai loggata (M10) |
+| 00-VISION | 🟡 0.1 | S0 | ⚠️ decisioni aperte stantie (M12) |
+| 01-PLATFORMS | 🟡 0.1 | S0 | ⚠️ regola E1 obsoleta, changelog fermo (M1, M4) |
+| 02-DATA-SCHEMA | 🟢 1.0 | S1 | ⚠️ mancano carDetectionConsent, searchQueries, generi (C1-C3) |
+| 03-ADAPTERS | 🟢 1.0 | S2 | ✅ solida; fixture E4 incoerente (C6) |
+| 04-ANALYSIS | 🟡 0.1 | S4 | ⚠️ PatternPayload oltre schema, timezone (M6, M7) |
+| 05-ARCHITECTURE | 🟡 0.1 | S0 | 🔴 disallineato con APPROVED (C8: B.1-B.6) |
+| 06-UX-FLOWS | 🟡 0.1 | S5 | ⚠️ soglia file, no re-import (M3, M8) |
+| 07-UI-SPEC | 🟡 0.1 | S7 | ⚠️ artwork non modellato (M5) |
+| 08-COPY-I18N | 🟡 0.1 | S5 | 🔴 chiavi mancanti, toggle non in schema (C5, C9, M2) |
+| 09-PRIVACY | 🟡 0.1 | S6 | ✅ solida; richiede chiavi assenti in 08 (C9) |
+| 10-TESTING | 🟢 1.0 | S3 | ✅ coerente |
+| 11-BACKLOG | 🟢 1.0 | S3 | ⚠️ story 2.2 obsoleta, story mancanti (C7, V4, V5) |
+| 12-DEVOPS | 🟡 0.1 | S8 | ⚠️ Sentry vs ADR-0002, Dockerfile, coverage (C4, M9) |
+| 13-ADR ×3 | 🟢 1.0 | S1 | ✅ vincolanti, rispettate |
+| 14-GLOSSARY | 🟢 1.0 | S1 | ✅ coerente |
+| 15-DESIGN-SYSTEM | 🟡 0.1 | S0 | ⚠️ TOUR.md promesso, ref "§Empty States" inesistente (V2) |
+| INDEX.md | 🟢 LIVE | — | ⚠️ conteggio DRAFT errato: 8 vs 10 reali (M10) |
+| tokens.json | 🟢 S7 | S7 | ⚠️ non formato DTCG W3C (D.7.4), scala display e count-up mancanti (M11) |
+| fixture spotify | 🟢 S2 | S2 | 🔴 expectedOutput dedup non derivabile da DEDUP-3 (C6) |
+
+---
+
+## 2. Registro decisioni — verifica
+
+| Sessione | Verdetto | Note |
+|---|---|---|
+| D.0.1-D.0.4 (4) | ✅ 4/4 | Repo, cartelle, sessioni, pilastri |
+| D.1.1-D.1.4 (4) | ✅ 4/4 | Timestamp-fine, eventKey, DEDUP, IP — coerenti in 02/03/09. Minore: `sourceEventId` citato dalla regola eventKey ma assente dall'interfaccia ListenEvent |
+| D.2.1-D.2.3 (3) | ⚠️ 1/3 | D.2.2 → C1 (consenso senza schema); D.2.3 → C6 (fixture incoerente) |
+| D.3.1-D.3.4 (4) | ⚠️ 2/4 | D.3.3: 12 usa 80% flat vs 10 per-modulo; D.3.4: footer AGENTS (M10) |
+| D.4.1-D.4.4 (4) | ⚠️ 3/4 | D.4.2 → C7 (backlog 2.2 k-means vs 04 change point) |
+| D.5.1-D.5.5 (5) | ⚠️ 4/5 | D.5.2 → M8 (no re-import vs idempotenza) |
+| D.6.1-D.6.4 (4) | ⚠️ 3/4 | D.6.3 → C9 (chiavi disclaimer assenti da 08) |
+| D.7.1-D.7.5 (5) | ⚠️ 4/5 | D.7.4 → M11 (tokens non DTCG) |
+| D.8.1-D.8.5 (5) | ⚠️ 4/5 | D.8.4 → C4 (Sentry) e CSP incompleta (M9) |
+
+---
+
+## 3. Incongruenze critiche
+
+| # | Dove | Problema | Fix proposto | Stato |
+|---|---|---|---|---|
+| **C1** | 03 🟢 ↔ 02 🟢 | Consenso separato `CarDetectionEvent` (03§7) senza campo in `PrivacySettings` (02§3.8) né tabella dedicata | `carDetectionConsent: boolean` in 02 v1.1 | ⬚ da applicare |
+| **C2** | 03 🟢 ↔ 02 🟢 | Tabella `searchQueries` usata da 03§7 e dichiarata da 09§4, assente dallo schema Dexie (02§6) | Aggiungere tabella in 02 v1.1 (o scartare con nota in 03) | ⬚ da decidere |
+| **C3** | 04/06/05 ↔ 02 🟢 | Generi usati da EraPayload, fallback mood (04§1.4), tab Generi (06§2.9), pipeline (05§2) — assenti dallo schema | **DECISO**: `genres: string[]` su Track e Artist in 02 v1.1 | ✅ deciso, ⬚ da applicare |
+| **C4** | 12 ↔ ADR-0002 🟢, 05 | Sentry (12§6) urta "Nessuna telemetria" (ADR-0002, 05§1) | **DECISO**: rinvio a Fase 2; Sentry rimosso da 12, errori loggati localmente | ✅ deciso, ⬚ da applicare |
+| **C5** | 08 ↔ ADR-0002 🟢, 02 | Toggle `privacy.stats` (08§2.9) senza schema, in conflitto con zero-telemetria | **DECISO**: rinvio a Fase 2; chiave rimossa da 08 | ✅ deciso, ⬚ da applicare |
+| **C6** | fixture 🟢 ↔ 02§5/03§8 | Coppie E4 con durate diverse → DEDUP-3 (bucket 2s) non le unisce; `_expectedOutput` dice `uniqueTracks:8, dedupApplied:1`; il test "stesso nome+artista+durata" (03§8.5) non è esercitato | Fixture v1.1: aggiungere coppia davvero dedupplicabile, ricalcolare expectedOutput | ⬚ da applicare |
+| **C7** | 11 🟢 ↔ 04 | Story 2.2 "clustering k-means/DBSCAN" vs 04 change point | Aggiornare acceptance story 2.2 | ⬚ da applicare |
+| **C8** | 05 ↔ APPROVED | §3 formato ≠ 02§3.2 (flat, eventKey, startedAt, day); §5 tabelle/nomi ≠ 02§6 (11 tabelle, PK reali); §4 `RawListenEvent` vs ADR-0003; §6 enum source ≠ 02§3.4; §8 manca fast-check/fake-indexeddb/Turborepo; header ADR stantio. Blocca `agent-ready` story 0.1 | Riscrittura 05 → v0.2 → approvazione Boss | ⬚ da applicare |
+| **C9** | 09 ↔ 08 | `insight.disclaimer` e `insight.disclaimerShort` richieste (09§8), assenti da 08 | Aggiungere chiavi IT/EN | ⬚ da applicare |
+
+## 4. Incongruenze medie
+
+| # | Dove | Problema |
+|---|---|---|
+| M1 | 01 | Regola E1 obsoleta (tutti gli `endplay`) vs 03§3.3 APPROVED; "da validare in Sessione 2" mai aggiornato; changelog fermo |
+| M2 | 03 ↔ 08 | `warn.offlineConverted` citata da 03§9, assente da 08; `wrongFormat` presente solo in 08 |
+| M3 | 06 ↔ 08 | Soglia file: 500MB (06§2.3) vs 1GB (08) |
+| M4 | 01 ↔ 02 | Subsonic/Roon/Maloja citati ma assenti da `PlatformId`; `'manual'` senza spec; diagramma 05§2 omette navidrome |
+| M5 | 07/06 ↔ 02 | `artworkUrl` (MemoryCard, ShareSheet) senza campo né fonte di arricchimento |
+| M6 | 04 ↔ 02 | PatternPayload restituisce `peakHour`/`nightShare`/`weekendShare` fuori schema |
+| M7 | 02 ↔ 04 | `day` UTC (02§1) vs bucket ciradiani in `userTimezone` (04§4.2); timezone non nei config |
+| M8 | 06 ↔ 02/03 | "Doppio drop → no re-import" contraddice l'idempotenza (D.1.2, story 0.3) |
+| M9 | 12 | Coverage flat vs 10§2; Dockerfile senza workspace packages; `script-src` MusicBrainz superfluo |
+| M10 | INDEX, AGENTS | INDEX "DRAFT: 8" ma 10 elencati; footer AGENTS con sessione non loggata |
+| M11 | tokens/15/07 | tokens non DTCG; manca Display 48-64px e `count-up` 600ms; Tidal `#00FFFF` |
+| M12 | 00-VISION, README | Decisioni strategiche stantie; licenza rimandata a 13-ADR dove non esiste |
+| M13 | 11/05/07 | PlatformCard 4 vs 5 stati; NFR 100k vs 50k eventi <30s |
+
+## 5. Vuoti promessi-non-esistenti
+
+| # | Cosa | Promesso da |
+|---|---|---|
+| V1 | `fixtures/db-seed/` ×3, `fixtures/scenarios/` ×3, `demo-user.json`, `scripts/generate-fixtures.ts` | 10§3, 06§2.14 |
+| V2 | `design/mockups/TOUR.md` | 15§7 |
+| V3 | Adapter spec altre 7 piattaforme | 03-ADAPTERS/ (accettabile in Fase 1) |
+| V4 | Story backlog per scrobbling hub (`scrobbleHubs`) | 02/06 |
+| V5 | Story backlog per PWA/service worker e i18n | 12, 08 |
+| V6 | Privacy policy legale, LICENSE, contatti (09§7.7), dominio | 09, 12, README |
+
+---
+
+## 6. Decisioni prese in questo audit (Boss, 2026-10-15)
+
+| # | Decisione | Conseguenze |
+|---|---|---|
+| D.A.1 | **Telemetria e statistiche: rinviate a Fase 2.** Niente Sentry nel MVP, niente toggle statistiche | Rimuovere Sentry da 12§6 (errori in console locale); rimuovere `privacy.stats` da 08§2.9; eventuale ADR-0004 "telemetria opt-in" in Fase 2 |
+| D.A.2 | **Generi: `genres: string[]` su Track e Artist** (02 v1.1) | Aggiornare 02§3.3 + indice eventualmente; sblocca EraPayload, fallback mood (04§1.4), tab Generi (06§2.9) |
+
+## 7. Decisioni ancora aperte
+
+1. **C2**: aggiungere `searchQueries` a 02 o scartare (con nota in 03).
+2. **05 v0.2 — proposte D1-D5**: (D1) Recharts standard + D3 solo Timeline, lazy; (D2) React Query solo per enrichment o rimozione; (D3) verificare provider reali per audio features (FreqBlog/Musicae sono placeholder); (D4) sync cloud come placeholder "da ADR dedicato in Fase 2"; (D5) `detect(): boolean | Promise<boolean>`.
+3. Strategiche 00-VISION: business model, licenza, self-hosting ufficiale, sync cloud.
+4. C1/C3/C5 richiedono applicazione delle decisioni D.A.1/D.A.2 ai file.
+
+## 8. Piano di risoluzione proposto
+
+| Passo | Azione | Stato |
+|---|---|---|
+| 1 | Salvo questo audit | ✅ fatto |
+| 2 | Applicare D.A.1 e D.A.2 (12, 08, 02 v1.1) | ⬚ |
+| 3 | Riscrivere 05 → v0.2 (C8 + decisioni aperte §7.2) → approvazione Boss → story 0.1 `agent-ready` | ⬚ |
+| 4 | Correggere fixture spotify-sample v1.1 (C6) | ⬚ |
+| 5 | Patch doc stantie: 01 (M1), 11 (C7, V4, V5), 08 (C9, M2, M3), 06 (M3, M8), 07/15/tokens (M11), 12 (M9), INDEX/AGENTS (M10), 00-VISION (M12) | ⬚ |
+| 6 | Decidere C2 e proposte D1-D5 | ⬚ |
+| 7 | Registrare audit in INDEX + SESSIONS (Sessione 9) a corredo delle patch | ⬚ |
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | 2026-10-15 | Prima emissione: audit completo + decisioni D.A.1, D.A.2 |
+
+
+
 ===== FILE: docs/00-VISION.md =====
 
 # 00 — Visione e Missione
@@ -640,6 +1002,7 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 ---
 
 *Questo documento è DRAFT. Diventa vincolante per gli agenti solo dopo approvazione di Boss (status: 🟢 APPROVED).*
+
 
 
 ===== FILE: docs/01-PLATFORMS.md =====
@@ -1186,7 +1549,7 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 
 # 03-ADAPTERS/SPEC-TEMPLATE — Template Specifica Adapter
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
 > Scopo: formato riutilizzabile per ogni adapter. Copia questo template in `03-ADAPTERS/<platform>.md` e compilalo.
 
 ---
@@ -1219,40 +1582,60 @@ Descrivi:
 
 ## 3. Mapping campi sorgente → unificato
 
-### 3.1 ListenEvent
+> **Importante (Sessione 9)**: lo schema `02-DATA-SCHEMA.md` v1.1 ha reso `ListenEvent` **piatto**: tutti i campi al top level, con `trackId` come FK all'entità `Track` (vedi `02§3.2` e `02§3.3`). I metadati di brano (`name`, `artistId`, `albumId`, `isrc`, `mbid`, `genres`) vivono sull'entità `Track` separata, non sul ListenEvent.
+
+### 3.1 ListenEvent (top-level, piatto — vedi `02§3.2`)
 
 | Campo unificato | Campo sorgente | Tipo sorgente | Trasformazione | Note |
 |-----------------|----------------|---------------|----------------|------|
-| `timestamp` | — | — | — | vedi §5 (semantica temporale) |
-| `startedAt` | — | — | — | derivato se mancante |
-| `durationMs` | — | — | — | — |
-| `eventKey` | — | — | — | regola di calcolo |
-| `platform` | (fisso) | string | — | — |
-| `track.name` | — | string | — | — |
-| `track.artist` | — | string | — | — |
-| `track.album` | — | string | — | nullable |
-| `track.isrc` | — | string | — | nullable |
-| `track.mbid` | — | string | — | nullable; lookup se possibile |
-| `deviceType` | — | string | — | mapping a enum |
-| `deviceDetail` | — | string | — | stringa raw |
-| `country` | — | string | — | ISO 3166-1 |
-| `ip` | — | string | — | SOLO se `retainIp` true |
-| `shuffle` | — | bool | — | nullable |
-| `skipped` | — | bool | — | regola derivata se inaffidabile |
-| `offline` | — | bool | — | nullable |
-| `incognito` | — | bool | — | nullable |
-| `reasonStart` | — | string | — | raw string |
-| `reasonEnd` | — | string | — | raw string |
-| `completed` | — | bool | — | derivata da duration/total |
+| `eventKey` | — | — | `platform + ':' + (sourceEventId ?? sha1(trackKey + ts + durationMs))` | vedi `05§3.2` |
+| `platform` | (fisso) | `PlatformId` | — | — |
+| `importId` | (interno) | uuid | generato al parse | FK a `imports` |
+| `timestamp` | — | unix ms | vedi §5 (semantica temporale) | fine ascolto, UTC |
+| `startedAt` | — | unix ms \| null | `timestamp - durationMs` se ricavabile | inizio ascolto, UTC |
+| `durationMs` | — | int | diretto | — |
+| `trackId` | (interno) | uuid | **risolto dal core via DEDUP** (`02§5`) — adapter non lo calcola | FK a `tracks` |
+| `completed` | — | bool | `durationMs >= durataCatalogo - 5000` | derivata |
+| `skipped` | — | bool \| null | regola derivata se inaffidabile | vedi §3.3 |
+| `shuffle` | — | bool \| null | diretto | — |
+| `offline` | — | bool \| null | diretto | — |
+| `incognito` | — | bool \| null | diretto | — |
+| `reasonStart` | — | string \| null | raw | enum della piattaforma |
+| `reasonEnd` | — | string \| null | raw | enum della piattaforma |
+| `deviceType` | — | `DeviceType` | mapping pattern → enum | vedi §3.2 mapping |
+| `deviceDetail` | — | string \| null | raw | stringa piattaforma |
+| `ip` | — | string \| null | **SOLO se `PrivacySettings.retainIp` true** | mai inviato in rete |
+| `country` | — | string \| null | ISO 3166-1 alpha-2 | derivato anche se `ip` scartato |
+| `day` | (derivato) | `YYYY-MM-DD` | da `timestamp` UTC | indice critico |
 
-### 3.2 Library / Playlist / Artist / Album
+**Non mappare** qui: `track.name`, `track.artistId`, `track.albumId`, `track.isrc`, `track.mbid` — vanno nell'entità `Track` (vedi §3.1.1).
+
+### 3.1.1 Track (entità separata — vedi `02§3.3`)
+
+L'adapter emette metadati del brano, il core li normalizza e li upserta in `tracks` deduplicando per `canonicalKey` (DEDUP-1/2/3).
+
+| Campo Track | Campo sorgente | Tipo sorgente | Trasformazione | Note |
+|-------------|----------------|---------------|----------------|------|
+| `name` | — | string | `normalize(rawName)` | vedi `02§5 normalize()` |
+| `artistId` | — | uuid | risolto da `tracks.artists` (dedup per nome normalizzato) | FK a `artists` |
+| `albumId` | — | uuid \| null | risolto da `tracks.albums` (dedup per nome+artistId) | FK a `albums` |
+| `durationMs` | — | int \| null | diretto | usato in DEDUP-3 |
+| `isrc` | — | string \| null | upper-case | se presente → DEDUP-1 |
+| `mbid` | — | string \| null | MusicBrainz Recording ID | se presente → DEDUP-2 |
+| `genres` | — | string[] | popolato se la piattaforma li fornisce (es. Last.fm tags) | enrichment successivo |
+| `platformIds` | — | `Partial<Record<PlatformId, string>>` | accumulato cross-import | ID nativo della piattaforma |
+
+### 3.1.2 Artist / Album (entità separate — vedi `02§3.3`)
+
+Stessa logica di Track. L'adapter emette `{name, mbid?, platformIds?}` per Artist e `{name, artistId, mbid?, upc?, releaseDate?, platformIds?}` per Album. Il core fa upsert con dedup per nome normalizzato (Artist) o nome+artistId (Album).
+
+### 3.2 Library / Playlist (vedi `02§3.7`)
 
 | Entità | Campo | Sorgente | Note |
 |--------|-------|----------|------|
-| Artist | — | — | — |
-| Album | — | — | — |
-| Playlist | — | — | — |
-| PlaylistItem | — | — | — |
+| LibraryItem | `kind`, `trackId`/`albumId`/`artistId`, `addedAt` | `YourLibrary.json` (Spotify) o equivalente | vedi `02§3.7` |
+| Playlist | `name`, `createdAt`, `lastModifiedAt` | `Playlist*.json` o equivalente | — |
+| PlaylistItem | `playlistId`, `trackId`, `position`, `addedAt` | items dentro playlist | PK composita `[playlistId+trackId]` |
 
 ## 4. Edge case noti (catalogo E)
 
@@ -1303,13 +1686,14 @@ Dettagli specifici (rate limit API, chunking, formati compressione).
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | Sessione 2 | Template approvato |
+| 1.1 | Sessione 9 (2026-10-15) | Audit: §3.1 riscritto per schema flat (`02§3.2`); aggiunto `trackId` come FK risolta dal core; nuove §3.1.1 (Track) e §3.1.2 (Artist/Album) come entità separate; §3.2 rinominata Library/Playlist |
 
 
 ===== FILE: docs/03-ADAPTERS/spotify.md =====
 
 # Adapter Spotify
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 2
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
 > Tier: **S** · Priorità MVP: **sì**
 
 ## 1. Metodi di accesso
@@ -1357,31 +1741,46 @@ L'adapter riconosce il file da:
 
 ## 3. Mapping campi sorgente → unificato
 
-### 3.1 ListenEvent
+> **Schema di riferimento (Sessione 9)**: `02-DATA-SCHEMA.md` v1.1 — `ListenEvent` è **piatto** con `trackId` come FK; i metadati del brano vivono sull'entità `Track` separata.
+
+### 3.1 ListenEvent (top-level, piatto — vedi `02§3.2`)
 
 | Campo unificato | Campo sorgente | Tipo sorgente | Trasformazione | Note |
 |-----------------|----------------|---------------|----------------|------|
+| `eventKey` | — | — | `'spotify:' + (spotify_track_uri ?? sha1(trackKey+'|'+ts+'|'+ms_played))` | `spotify_track_uri` come `sourceEventId` se presente |
+| `platform` | (fisso) | `PlatformId` | `'spotify'` | |
+| `importId` | (interno) | uuid | generato al parse | FK a `imports` |
 | `timestamp` | `ts` | ISO 8601 UTC | `Date.parse(ts)` | **FINE ascolto** |
-| `startedAt` | — | — | `timestamp - ms_played` | derivato |
-| `durationMs` | `ms_played` | int | diretto | |
-| `eventKey` | — | — | `'spotify:' + (spotify_track_uri ?? sha1(name+artist+ts))` | se URI mancante (podcast?), hash |
-| `platform` | (fisso) | — | `'spotify'` | |
-| `track.name` | `master_metadata_track_name` | string/null | diretto; null → skip evento | |
-| `track.artist` | `master_metadata_album_artist_name` | string/null | diretto; null → "Unknown" | |
-| `track.album` | `master_metadata_album_album_name` | string/null | nullable | |
-| `track.isrc` | — | — | null (non nell'export GDPR) | recuperabile via MBID lookup successivo |
-| `track.mbid` | — | — | null | lookup enrichment pipeline |
-| `deviceType` | `platform` | string | mapping §3.2 | |
-| `deviceDetail` | `platform` | string | valore raw | |
-| `country` | `conn_country` | string | ISO 3166-1 alpha-2 | |
-| `ip` | `ip_addr` | string | conservato SOLO se `PrivacySettings.retainIp` | |
-| `shuffle` | `shuffle` | bool | diretto | |
-| `skipped` | `skipped` + `reason_end` | bool | regola derivata E1 | |
-| `offline` | `offline` | bool | diretto | |
-| `incognito` | `incognito_mode` | bool | diretto | |
-| `reasonStart` | `reason_start` | string | diretto | |
-| `reasonEnd` | `reason_end` | string | diretto | |
-| `completed` | — | — | `ms_played >= durataCatalogo - 5000` | 5s tolleranza |
+| `startedAt` | — | unix ms | `timestamp - ms_played` | derivato |
+| `durationMs` | `ms_played` | int | diretto | — |
+| `trackId` | (interno) | uuid | **risolto dal core via DEDUP** (`02§5`) su `trackKey` = name+artist normalizzati | adapter emette solo `trackKey` |
+| `completed` | — | bool | `ms_played >= durataCatalogo - 5000` | 5s tolleranza |
+| `skipped` | `skipped` + `reason_end` + `ms_played` | bool \| null | regola derivata E1 (§3.3) | nullable |
+| `shuffle` | `shuffle` | bool \| null | diretto | nullable |
+| `offline` | `offline` | bool \| null | diretto | nullable |
+| `incognito` | `incognito_mode` | bool \| null | diretto | nullable |
+| `reasonStart` | `reason_start` | string \| null | diretto | enum Spotify |
+| `reasonEnd` | `reason_end` | string \| null | diretto | enum Spotify |
+| `deviceType` | `platform` | `DeviceType` | mapping §3.2 | — |
+| `deviceDetail` | `platform` | string \| null | valore raw (es. "iOS", "Windows 10") | — |
+| `ip` | `ip_addr` | string \| null | **SOLO se `PrivacySettings.retainIp` true** | mai inviato in rete |
+| `country` | `conn_country` | string | ISO 3166-1 alpha-2 | derivato anche se `ip` scartato |
+| `day` | (derivato) | `YYYY-MM-DD` | da `timestamp` UTC | indice critico |
+
+### 3.1.1 Track (entità separata — vedi `02§3.3`)
+
+L'adapter emette il `trackKey` (e i campi grezzi) insieme al ListenEvent; il core lo normalizza e fa upsert in `tracks` con DEDUP-3 (fuzzy name+artist+duration bucket 2s) poiché l'export GDPR non fornisce ISRC/MBID.
+
+| Campo Track | Campo sorgente | Tipo sorgente | Trasformazione | Note |
+|-------------|----------------|---------------|----------------|------|
+| `name` | `master_metadata_track_name` | string/null | `normalize(name)` (`02§5`); null → skip evento | |
+| `artistId` | `master_metadata_album_artist_name` | uuid | risolto da `artists` (dedup per nome normalizzato); null → "Unknown" | FK a `artists` |
+| `albumId` | `master_metadata_album_album_name` | uuid \| null | risolto da `albums` (dedup per nome+artistId); null se assente | FK a `albums` |
+| `durationMs` | — | int \| null | da catalogo (lookup futuro) o `ms_played` come proxy | usato in DEDUP-3 |
+| `isrc` | — | string \| null | `null` (non nell'export GDPR) | recuperabile via MBID lookup post-import |
+| `mbid` | — | string \| null | `null` | enrichment via MusicBrainz |
+| `genres` | — | string[] | vuoto (Spotify GDPR non include generi) | popolato da enrichment |
+| `platformIds` | `spotify_track_uri` | `Partial<Record<PlatformId, string>>` | `{spotify: extractId(uri)}` | ID nativo |
 
 ### 3.2 Mapping `platform` → `deviceType`
 
@@ -1495,13 +1894,14 @@ Casi minimi:
 |----------|------|-----------|
 | 0.1 | Sessione 2 | Prima specifica completa |
 | 1.0 | Sessione 2 | 🟢 APPROVED · Versione 1.0 · Sessione 2 |
+| 1.1 | Sessione 9 (2026-10-15) | Audit: §3.1 riscritto per schema flat (`02§3.2` v1.1); aggiunto `trackId` come FK risolta dal core; nuova §3.1.1 (Track) come entità separata; aggiunti `day`, `importId`, `genres`; rimosso `completed` hardcoded (ora derivato); campo `track.isrc`/`mbid` spostati in §3.1.1 |
 
 
 ===== FILE: docs/04-ANALYSIS-ALGORITHMS.md =====
 
 # 04 — Algoritmi di Analisi
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 4
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
 > Vincolante per: `packages/core/analysis/*` e relativi test
 
 ---
@@ -1759,7 +2159,7 @@ Rilevare pattern ricorrenti negli ascolti: **circadiano** (ora del giorno), **se
 
 Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 
-    function computeCircadianPattern(events):
+    function computeCircadianPattern(events, userTimezone):
       buckets = {0..23: 0}  // ore
       total = 0
       for e in events:
@@ -1769,22 +2169,66 @@ Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 
       normalizedBuckets = {h: buckets[h] / total for h in 0..23}
       peakHour = argmax(buckets)
+      nightShare = sum(buckets[h] for h in [0,1,2,3,4,5]) / total
 
       return {
         kind: 'pattern',
         patternType: 'circadian',
         buckets: normalizedBuckets,
         peakHour,
-        nightShare: sum(buckets[h] for h in [0,1,2,3,4,5]) / total
+        peakDay: null,            // non applicabile (circadian = ore)
+        peakMonth: null,          // non applicabile
+        nightShare,
+        weekendShare: null,      // non applicabile
+        userTimezone
       }
 
-    function computeWeeklyPattern(events):
+    function computeWeeklyPattern(events, userTimezone):
       buckets = {Mon..Sun: 0}
-      ... analogo
+      total = 0
+      for e in events:
+        day = dayOfWeek(e.startedAt, userTimezone)  // 0=Sun..6=Sat
+        buckets[day] += e.durationMs
+        total += e.durationMs
 
-    function computeSeasonalPattern(events):
+      normalizedBuckets = {d: buckets[d] / total for d in 0..6}
+      peakDay = argmax(buckets)
+      weekendShare = (buckets[0] + buckets[6]) / total  // Sun + Sat
+
+      return {
+        kind: 'pattern',
+        patternType: 'weekly',
+        buckets: normalizedBuckets,
+        peakHour: null,           // non applicabile
+        peakDay,
+        peakMonth: null,          // non applicabile
+        nightShare: null,         // non applicabile
+        weekendShare,
+        userTimezone
+      }
+
+    function computeSeasonalPattern(events, userTimezone):
       buckets = {Jan..Dec: 0}
-      ... analogo
+      total = 0
+      for e in events:
+        month = monthOf(e.startedAt, userTimezone)  // 1..12
+        buckets[month] += e.durationMs
+        total += e.durationMs
+
+      normalizedBuckets = {m: buckets[m] / total for m in 1..12}
+      peakMonth = argmax(buckets)
+
+      return {
+        kind: 'pattern',
+        patternType: 'seasonal',
+        buckets: normalizedBuckets,
+        peakHour: null,           // non applicabile
+        peakDay: null,            // non applicabile
+        peakMonth,
+        nightShare: null,         // non applicabile
+        weekendShare: null,       // non applicabile
+        userTimezone
+      }
 
 ### 4.3 Metriche derivate
 
@@ -1804,8 +2248,13 @@ Per ogni tipo di pattern, distribuire gli eventi in bucket e calcolare quote.
 ### 4.5 Invarianti
 
 - `sum(buckets.values) ≈ 1.0` (tolleranza 0.01)
-- `nightShare ∈ [0, 1]`
-- `peakHour ∈ 0..23`
+- `nightShare ∈ [0, 1]` se definito, altrimenti `null`
+- `weekendShare ∈ [0, 1]` se definito, altrimenti `null`
+- `peakHour ∈ 0..23` se definito, altrimenti `null`
+- `peakDay ∈ 0..6` se definito, altrimenti `null` (0=Sun, 6=Sat)
+- `peakMonth ∈ 1..12` se definito, altrimenti `null`
+- `userTimezone` è sempre valorizzato (IANA tz string, es. `Europe/Rome`)
+- Campi non applicabili al `patternType` sono `null` (vedi implementazione §4.2)
 
 ---
 
@@ -2266,6 +2715,7 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 4 | Prima versione completa |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: §4.2 `computeCircadianPattern`/`Weekly`/`Seasonal` estesi con tutti i campi `PatternPayload` (`02§4` v1.1) — `peakDay`, `peakMonth`, `weekendShare`, `userTimezone`; campi non applicabili esplicitamente `null`; §4.5 invarianti aggiornate |
 
 
 ===== FILE: docs/05-ARCHITECTURE.md =====
@@ -3087,6 +3537,120 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.2 | Sessione 9 (2026-10-15) | Audit: re-import esplicito come idempotente (M8) — niente blocco al doppio drop, dedup via `eventKey`; riferimento count-up al token `motion.countUp.duration` (M11) |
 
 
+===== FILE: docs/07-UI-SPEC.md =====
+
+# 07 — Specifiche UI Componenti
+
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 7
+> Vincolante per: `packages/ui/components`, test di interazione, implementazione frontend
+
+---
+
+## 1. Principi di Design UI
+
+1. **Dark-first**: Tutti i componenti sono progettati per `bg-base` (#0A0E1A). La light mode è un'override, non il default.
+2. **Glow over Shadow**: Usare `box-shadow` con colori brand/mood per stati attivi, mai ombre grigie pesanti.
+3. **Feedback immediato**: Ogni interazione (hover, click, drag) deve avere una transizione ≤ 150ms.
+4. **Accessibilità**: Contrasto minimo 4.5:1. Focus ring visibile per navigazione tastiera.
+
+## 2. Catalogo Componenti
+
+### 2.1 StatCard
+**Uso**: Home, Dashboard. Mostra un numero grande con contesto.
+- **Props**: `value` (number/string), `label` (string), `icon` (Lucide icon name), `trend` (number, opzionale, % cambiamento)
+- **Stati**: `default`, `loading` (skeleton), `hover` (glow viola sottile)
+- **A11y**: `role="status"`, `aria-label` descrive il valore e l'unità.
+- **Interazione**: Hover → count-up animato del valore (se numerico).
+
+### 2.2 MemoryCard
+**Uso**: Feed Ricordi, Home.
+- **Props**: `artworkUrl` (string), `title` (string), `subtitle` (string), `mood` (MoodId), `date` (string), `actions` (array di {icon, label, onClick})
+- **Stati**: `default`, `hover` (scale 1.02 + glow), `swiping` (mobile)
+- **A11y**: Immagine con `alt` descrittivo. Pulsanti azione con `aria-label`.
+- **Interazione**: Swipe left (mobile) → nascondi; Swipe right → salva; Tap → deep link.
+
+### 2.3 EraBand
+**Uso**: Timeline. Segmento orizzontale colorato che rappresenta un'era.
+- **Props**: `label` (string), `mood` (MoodId), `start` (string), `end` (string), `isActive` (boolean)
+- **Stati**: `default`, `hover`, `active` (bordo glow + espansione)
+- **A11y**: `role="button"`, `aria-expanded`, `aria-label` con durata e mood.
+- **Interazione**: Click → espande dettaglio sotto; Hover → sincronizza highlight con grafici adiacenti.
+
+### 2.4 MoodPill
+**Uso**: Filtri, tag, badge.
+- **Props**: `mood` (MoodId), `size` ('sm' | 'md'), `clickable` (boolean)
+- **Stati**: `default`, `hover` (se clickable), `selected` (bordo solido + glow)
+- **A11y**: Se clickable, `role="checkbox"`, `aria-pressed`.
+- **Interazione**: Toggle selezione con animazione di scala (0.95 → 1.0).
+
+### 2.5 PlatformCard
+**Uso**: Schermata Import.
+- **Props**: `platform` (PlatformId), `status` ('empty' | 'validating' | 'parsing' | 'done' | 'error'), `count` (number, opzionale), `onDrop` (function), `onBrowse` (function)
+- **Stati**: Vedi `status`. `error` mostra messaggio specifico sotto la card.
+- **A11y**: Dropzone con `role="button"`, `aria-describedby` per istruzioni.
+- **Interazione**: Drag over → bordo tratteggiato diventa solido + colore brand piattaforma.
+
+### 2.6 DropZone
+**Uso**: Area di trascinamento file generica.
+- **Props**: `acceptedFormats` (array di stringhe), `onDrop` (function), `label` (string)
+- **Stati**: `idle`, `drag-over`, `disabled`
+- **A11y**: `role="region"`, `aria-label`, supporto tasto `Enter`/`Space` per aprire file picker.
+
+### 2.7 StreamChart / MoodLine / BarWeek
+**Uso**: Visualizzazioni dati.
+- **Props**: `data` (array di oggetti con x, y), `colorScheme` (array di hex o 'mood')
+- **Stati**: `loading` (skeleton grafico), `ready`, `tooltip-visible`
+- **A11y**: Grafico SVG con `<title>` e `<desc>`. Tabella dati nascosta (`sr-only`) per screen reader.
+- **Interazione**: Hover su punto/barra → tooltip con valori esatti + highlight incrociato.
+
+### 2.8 QuadrantChart
+**Uso**: Mappa Emotiva.
+- **Props**: `points` (array di {x, y, size, color, label}), `quadrantLabels` (object)
+- **Stati**: `default`, `point-hovered`
+- **A11y**: Ogni punto è un `<button>` o `<a>` con `aria-label` descrittivo.
+- **Interazione**: Click su punto → aggiorna grafici secondari sotto.
+
+### 2.9 InsightCard
+**Uso**: Analisi, spiegazione algoritmi.
+- **Props**: `icon` (Lucide), `title` (string), `description` (string), `confidence` (0-1, opzionale)
+- **Stati**: `pending` (bordo giallo), `confirmed` (bordo verde), `dismissed` (opacità 0.5)
+- **A11y**: `role="article"`, `aria-labelledby`.
+- **Interazione**: Pulsanti nascosti per confermare/correggere/ignorare l'insight.
+
+### 2.10 ShareSheet
+**Uso**: Mobile, condivisione ricordi.
+- **Props**: `imageUrl` (string), `platforms` (array di {id, icon, label, onClick})
+- **Stati**: `generating` (spinner), `ready`, `error`
+- **A11y**: Modal con `role="dialog"`, `aria-modal="true"`, focus trap.
+- **Interazione**: Swipe down o click backdrop → chiudi.
+
+## 3. Regole di Composizione
+
+- **Spacing**: Usare sempre i token di spacing (`gap-4`, `p-6`), mai valori hardcoded.
+- **Tipografia**: Titoli `Inter Tight`, corpo `Inter`, dati tecnici `JetBrains Mono`.
+- **Responsive**: 
+  - Mobile (<768px): 1 colonna, padding 16px, TabBar in basso.
+  - Desktop (>1024px): Sidebar a sinistra, griglia 3-4 colonne, padding 32px.
+
+## 4. Animazioni e Transizioni
+
+| Tipo | Durata | Easing | Uso |
+|------|--------|--------|-----|
+| `fast` | 100ms | `ease-out` | Hover stati, tooltip |
+| `base` | 200ms | `ease-in-out` | Click, toggle, modal open |
+| `slow` | 400ms | `ease-out` | Page transitions, chart load |
+| `count-up` | 600ms | `ease-out` | Numeri StatCard |
+
+Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animazioni, usare transizioni istantanee.
+
+---
+
+## Changelog
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 7 | Prima versione completa |
+
+
 ===== FILE: docs/08-COPY-I18N.md =====
 
 # 08 — Copy e Internationalization
@@ -3425,6 +3989,299 @@ Libreria consigliata: `i18next` + `react-i18next`.
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |
+
+
+===== FILE: docs/09-PRIVACY-SECURITY.md =====
+
+# 09 — Privacy & Security
+
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 6
+> ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
+> (§7) DEVE essere revisionata da un professionista legale qualificato prima
+> del lancio pubblico. Questo documento non costituisce consulenza legale.
+
+---
+
+## 1. Scopo e scope
+
+Definire:
+- Il flusso completo dei dati personali nell'applicazione
+- Le basi giuridiche GDPR per ogni trattamento
+- Come i diritti dell'utente sono implementati tecnicamente
+- Il testo della privacy policy pubblica
+- I disclaimer per le inferenze psicologiche
+- Le note trademark per i loghi di terze parti
+- Il threat model e le mitigazioni
+- La checklist di compliance pre-lancio
+
+## 2. Principi privacy (richiamo ADR-0002)
+
+| Principio | Implementazione |
+|-----------|-----------------|
+| **Local-first** | Tutti i dati in IndexedDB del browser; nessun server centrale |
+| **Minimizzazione** | Solo i campi necessari; IP scartato di default |
+| **Trasparenza** | Ogni toggle spiega cosa fa; data flow pubblico in questo doc |
+| **Reversibilità** | Export e cancellazione totale sono operazioni locali e immediate |
+| **Privacy by default** | Tutti i toggle privacy sono OFF di default |
+
+## 3. Data flow diagram
+
+### 3.1 Flusso dei dati
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │                     DISPOSITIVO UTENTE                      │
+    │                                                             │
+    │  [File export piattaforma]                                  │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [Adapter: parse + normalizza]                              │
+    │         │                                                   │
+    │         ├──▶ IP? ──NO──▶ scartato dopo derivazione country  │
+    │         │      │                                            │
+    │         │      └─SÌ (toggle retainIp ON)──▶ IndexedDB       │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [IndexedDB: listens, tracks, artists, ...]                 │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [Analysis Engine (Web Worker, locale)]                     │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [Insights: mood, ere, eventi, ricordi]                     │
+    │         │                                                   │
+    │         ▼                                                   │
+    │  [UI: timeline, ricordi, analisi]                           │
+    │                                                             │
+    └─────────────────────────────────────────────────────────────┘
+                          │
+                          │ SOLO se toggle specifici ON:
+                          ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    RETE (opzionale)                         │
+    │                                                             │
+    │  [toggle enrichMetadata ON]                                 │
+    │     └─▶ MusicBrainz / FreqBlog: invia SOLO nome brano +     │
+    │         artista (nessun dato utente, nessun timestamp)      │
+    │                                                             │
+    │  [scrobbleHubs configurato]                                 │
+    │     └─▶ Last.fm / ListenBrainz: invia brano + timestamp     │
+    │         (scelta esplicita dell'utente, servizio terzo)      │
+    │                                                             │
+    │  [toggle syncCloud ON — Fase 2]                             │
+    │     └─▶ Server E2E encrypted: ciphertext only               │
+    └─────────────────────────────────────────────────────────────┘
+
+### 3.2 Cosa NON esce mai dal dispositivo
+
+- Cronologia di ascolto completa
+- Indirizzi IP (salvo toggle, e comunque mai inviati in rete)
+- Dati di dispositivo e contesto
+- Insights e inferenze psicologiche
+- Playlist e libreria personale
+- Ricerche effettuate
+
+### 3.3 Cosa esce (solo con toggle esplicito)
+
+| Dato | Destinazione | Trigger | Contenuto inviato |
+|------|--------------|---------|-------------------|
+| Nome brano + artista | MusicBrainz / API audio features | `enrichMetadata` ON | Solo stringhe titolo/artista, nessun dato utente |
+| Brano + timestamp ascolto | Last.fm / ListenBrainz | `scrobbleHubs` configurato | Dati di scrobbling standard (scelta utente) |
+| Ciphertext | Server sync (Fase 2) | `syncCloud` ON | Solo dati cifrati E2E |
+
+## 4. Inventario dati personali trattati
+
+| Dato | Categoria GDPR | Fonte | Persistito? | Base giuridica |
+|------|----------------|-------|-------------|----------------|
+| Cronologia ascolti (brano, artista, timestamp, durata) | Dati personali | Export utente | Sì (locale) | Consenso esplicito (art. 6.1.a) |
+| Paese di connessione | Dati personali | Derivato da IP | Sì (locale) | Consenso esplicito |
+| Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
+| Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale) | Consenso esplicito |
+| Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
+| Playlist e libreria | Dati personali | Export utente | Sì (locale) | Consenso esplicito |
+| Ricerche effettuate | Dati personali | Export Spotify | Sì (locale, opzionale) | Consenso esplicito |
+
+**Nota sui dati derivati**: le inferenze di mood e stati emotivi possono rivelare
+caratteristiche personali profonde. Pur non essendo "categorie particolari" ex
+art. 9 GDPR in senso stretto, sono trattate con la massima cautela: restano
+locali, sono etichettate come ipotesi, e l'utente può cancellarle o correggerle.
+
+## 5. Basi giuridiche GDPR
+
+| Trattamento | Base giuridica | Note |
+|-------------|----------------|------|
+| Import e analisi locale | Art. 6.1.a — Consenso | L'utente importa volontariamente i propri dati |
+| Arricchimento metadati | Art. 6.1.a — Consenso | Toggle esplicito, disattivabile |
+| Scrobbling a hub terzi | Art. 6.1.a — Consenso | L'utente configura il servizio terzo |
+| Sync cloud (Fase 2) | Art. 6.1.a — Consenso | E2E encrypted, opzionale |
+
+**Nessun trattamento si basa su interesse legittimo**: tutto è consenso esplicito
+e revocabile in qualsiasi momento (la revoca = cancellazione locale immediata).
+
+## 6. Diritti dell'utente e implementazione tecnica
+
+| Diritto GDPR | Implementazione in app |
+|--------------|------------------------|
+| **Accesso** (art. 15) | L'utente vede tutti i propri dati nell'app; export JSON completo |
+| **Rettifica** (art. 16) | Correzione insight (`status: corrected`), override nomi brani |
+| **Cancellazione** (art. 17) | "Cancella tutti i dati" con doppia conferma; `purgeIp()` selettivo |
+| **Portabilità** (art. 20) | Export JSON strutturato di listens + insights |
+| **Limitazione** (art. 18) | Toggle per disattivare singoli trattamenti (enrichment, scrobbling) |
+| **Opposizione** (art. 21) | Revoca consenso = disattivazione trattamento |
+| **Revoca consenso** (art. 7.3) | Ogni toggle revocabile; effetti immediati e locali |
+
+### 6.1 Funzioni tecniche obbligatorie
+
+- `exportAll(): Promise<Blob>` — JSON completo di tutti i dati locali
+- `deleteAll(): Promise<void>` — wipe IndexedDB + localStorage
+- `purgeIp(): Promise<void>` — azzera campo `ip` in tutti i listens
+- `purgeInsights(): Promise<void>` — cancella solo le inferenze
+- Ogni funzione è esposta in Settings → Dati
+
+## 7. Privacy Policy (bozza pubblica)
+
+> ⚠️ BOZZA — da revisionare con legale prima del lancio
+
+### 7.1 Chi siamo
+
+Life Soundtrack è un'applicazione web open source che trasforma i dati di
+ascolto delle piattaforme di streaming in un diario musicale personale.
+Non abbiamo server che raccolgono i tuoi dati: l'app funziona interamente
+nel tuo browser.
+
+### 7.2 Quali dati trattiamo
+
+Trattiamo SOLO i dati che TU importi volontariamente dall'export della tua
+piattaforma di streaming (Spotify, Apple Music, YouTube Music, ecc.):
+cronologia ascolti, brani, artisti, timestamp, e — se lo attivi tu — indirizzi IP.
+
+Tutti questi dati restano sul tuo dispositivo. Non li inviamo a nessun server.
+
+### 7.3 Come li usiamo
+
+Li usiamo esclusivamente per mostrarti la tua timeline musicale, i tuoi
+pattern di ascolto e i tuoi ricordi. Le analisi (mood, ere musicali, eventi)
+sono calcolate localmente nel tuo browser e sono etichettate come ipotesi,
+non come verità.
+
+### 7.4 Condivisione con terze parti
+
+Non condividiamo nulla con terze parti, tranne nei casi in cui sei TU ad
+attivarlo esplicitamente:
+- **Arricchimento metadati**: se attivi il toggle, inviamo il nome del brano
+  a servizi pubblici (MusicBrainz) per recuperare caratteristiche musicali.
+  Non inviamo nessun dato su di te.
+- **Scrobbling**: se colleghi Last.fm o ListenBrainz, i tuoi ascolti vengono
+  inviati a quei servizi secondo le loro privacy policy.
+- **Sync cloud** (futuro): se lo attivi, i dati sono cifrati end-to-end e
+  noi non possiamo leggerli.
+
+### 7.5 I tuoi diritti
+
+Puoi in qualsiasi momento: esportare tutti i tuoi dati, correggere le
+inferenze, cancellare tutto, o revocare ogni consenso. Tutte queste operazioni
+sono immediate e locali, nelle Impostazioni dell'app.
+
+### 7.6 Conservazione
+
+I dati restano sul tuo dispositivo finché non li cancelli. Non abbiamo copie
+nei nostri server perché non abbiamo server che li raccolgono.
+
+### 7.7 Contatti
+
+[da compilare: email contatti + eventuale DPO]
+
+## 8. Disclaimer inferenze psicologiche
+
+Testo da mostrare nell'app (schermata Analisi e ogni InsightCard):
+
+> **Le analisi emotive sono ipotesi, non diagnosi.**
+> I mood, le "ere musicali" e gli "eventi" rilevati sono inferenze statistiche
+> basate sulle caratteristiche musicali dei brani che ascolti. Non sono
+> valutazioni psicologiche, mediche o cliniche. Possono essere imprecise.
+> Sei tu a decidere se confermarle, correggerle o ignorarle.
+> Se stai attraversando un momento difficile, parlane con una persona
+> qualificata: questa app non è un sostituto del supporto professionale.
+
+Implementazione:
+- Testo completo in `08-COPY-I18N.md` chiave `insight.disclaimer`
+- Versione corta (`insight.disclaimerShort`) come tooltip su ogni InsightCard
+- Link "Come funzionano le analisi?" → pagina esplicativa
+
+## 9. Note trademark e uso loghi
+
+### 9.1 Principio
+
+I nomi e i loghi di Spotify, Apple Music, YouTube Music, Deezer, Tidal,
+SoundCloud, Last.fm, ListenBrainz sono marchi dei rispettivi proprietari.
+Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
+
+### 9.2 Regole d'uso nell'app
+
+| Elemento | Regola |
+|----------|--------|
+| **Nomi delle piattaforme** | Uso nominativo consentito ("Importa il tuo export Spotify") — necessario per descrivere la compatibilità |
+| **Loghi ufficiali** | ❌ NON usare i loghi ufficiali senza licenza. Usare icone proprie stilizzate o testo |
+| **Colori brand** | Evitare combinazioni che imitino l'identità visiva ufficiale |
+| **Disclaimer** | Footer Settings: "I marchi citati appartengono ai rispettivi proprietari. Life Soundtrack non è affiliata a essi." |
+
+### 9.3 Azioni richieste
+
+- [ ] Sostituire i loghi ufficiali nei mockup con icone proprie (Sessione 7)
+- [ ] Aggiungere disclaimer trademark in Settings e footer
+- [ ] Verificare le brand guidelines di ogni piattaforma prima del lancio
+
+## 10. Threat model
+
+| # | Minaccia | Probabilità | Impatto | Mitigazione |
+|---|----------|-------------|---------|-------------|
+| T1 | Furto dispositivo con dati non cifrati | Media | Alto | Consigliare full-disk encryption OS; valutare cifratura IndexedDB (Fase 2) |
+| T2 | XSS che legge IndexedDB | Bassa | Alto | CSP strict, nessun innerHTML con dati utente, sanitize input |
+| T3 | Estensione browser malevola che legge IndexedDB | Media | Alto | Documentare il rischio; consigliare profile browser dedicato |
+| T4 | Leak via chiamate enrichment | Bassa | Medio | Inviare solo titolo+artista; nessun dato utente; log pubblico delle chiamate |
+| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali |
+| T6 | Sync cloud compromesso (Fase 2) | Bassa | Alto | E2E encryption, chiavi solo sul dispositivo |
+| T7 | Inferenze usate contro l'utente (es. assicurazioni) | Bassa | Alto | Dati mai inviati; disclaimer; export escluso insight su richiesta |
+
+### 10.1 Regola d'oro per il repo
+
+**Mai committare dati reali di ascolto nel repository.** I fixture in
+`fixtures/` sono sintetici. Ogni PR che aggiunga dati reali va rifiutata.
+Aggiungere check CI che scansioni i fixture per pattern sospetti (IP reali,
+email).
+
+## 11. Checklist compliance pre-lancio
+
+- [ ] Privacy policy revisionata da legale qualificato
+- [ ] Disclaimer inferenze presente in app (schermata Analisi + tooltip)
+- [ ] Disclaimer trademark in Settings e footer
+- [ ] Loghi ufficiali sostituiti con icone proprie
+- [ ] Funzioni `exportAll`, `deleteAll`, `purgeIp`, `purgeInsights` testate
+- [ ] Tutti i toggle privacy OFF di default verificato
+- [ ] CSP strict configurata e testata
+- [ ] Nessun dato reale nei fixture (check CI attivo)
+- [ ] Cookie/banner non necessari (l'app non usa cookie di tracciamento)
+- [ ] Registro dei trattamenti GDPR compilato (art. 30) — se applicabile
+- [ ] Valutazione d'impatto (DPIA) considerata — probabilmente NON richiesta
+      (nessun trattamento server-side, nessun dato sensibile ex art. 9 inviato)
+- [ ] Email di contatto e responsabile dati pubblicata
+
+## 12. Note finali
+
+- L'architettura local-first riduce drasticamente gli obblighi GDPR: non
+  essendoci trattamento server-side di PII, Life Soundtrack NON è "titolare
+  del trattamento" per i dati che restano sul dispositivo dell'utente.
+- Diventa titolare solo per: (a) dati inviati volontariamente a servizi terzi
+  configurati dall'utente (ma lì il titolare è il servizio terzo), (b) eventuali
+  statistiche anonime opt-in (Fase 2+), (c) sync cloud (Fase 2).
+- Questo rende il progetto uno dei più privacy-compliant possibili per categoria.
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 6 | Prima versione completa |
 
 
 ===== FILE: docs/10-TESTING.md =====
@@ -4012,6 +4869,333 @@ Ogni story deve avere label GitHub:
 | 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |
 
 
+===== FILE: docs/12-DEVOPS.md =====
+
+# 12 — DevOps, Deployment & Security
+
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Vincolante per: configurazione CI/CD, Docker, hosting, security headers
+
+---
+
+## 1. Principi DevOps
+
+1. **Static-first**: Essendo un'app PWA local-first, il deployment è essenzialmente hosting statico. Niente backend complesso nel MVP.
+2. **Riproducibilità**: Ogni build deve essere identica e verificabile tramite CI.
+3. **Self-hosting friendly**: Fornire Docker out-of-the-box per gli utenti che vogliono ospitare l'app sul proprio NAS/server.
+4. **Security by default**: Content Security Policy (CSP) strict, dipendenze aggiornate, nessun dato sensibile negli artifact.
+
+---
+
+## 2. CI/CD Pipeline (GitHub Actions)
+
+La pipeline si attiva su ogni `push` a `main` e su ogni `pull_request`.
+
+### 2.1 Workflow: `ci.yml`
+
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm run lint
+
+      - name: Run type check
+        run: pnpm run type-check
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Run coverage per package (vedi 10-TESTING §2)
+        run: pnpm --filter @ls/core run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+
+  build:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build PWA
+        run: pnpm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pwa-build
+          path: apps/web/dist/
+```
+
+### 2.2 Regole di Merge
+- Richiede almeno 1 review approvata (da `@amedeo82` o collaboratore).
+- Tutti i check CI devono essere verdi (✅).
+- Nessun file `fixtures/` può contenere pattern di email o IP reali (controllo tramite script pre-commit o CI).
+- **Il job `bundle-check` deve passare** (vedi §9): se modifichi uno o più file del progetto inclusi nel bundle, devi aggiornare anche `scripts/generate-bundle.ps1` (se necessario) e rigenerare `docs/BUNDLE.md` nella stessa PR.
+
+---
+
+## 3. Containerizzazione (Self-Hosting)
+
+Per gli utenti che desiderano ospitare Life Soundtrack sul proprio server (es. Raspberry Pi, NAS), forniamo un'immagine Docker leggera.
+
+### 3.1 `Dockerfile` (Multi-stage)
+
+```dockerfile
+# Stage 1: Build (monorepo-aware)
+FROM node:20-alpine AS builder
+WORKDIR /app
+RUN npm install -g pnpm@9
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY apps apps
+COPY packages packages
+COPY scripts scripts
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @ls/web run build
+
+# Stage 2: Serve (Nginx)
+FROM nginx:alpine
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### 3.2 `docker-compose.yml`
+
+```yaml
+version: '3.8'
+services:
+  life-soundtrack:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    # Nessun volume necessario per l'app stessa, i dati restano nel browser dell'utente finale
+    # Se si vuole persistere i log di nginx:
+    # volumes:
+    #   - ./nginx-logs:/var/log/nginx
+```
+
+---
+
+## 4. Strategia di Deployment
+
+### 4.1 Hosting Pubblico (Consigliato per MVP)
+- **Piattaforma**: Vercel o Netlify.
+- **Motivo**: Supporto nativo per PWA, HTTPS automatico, CDN globale gratuito, zero configurazione server.
+- **Configurazione**:
+  - Build command: `pnpm run build`
+  - Output directory: `apps/web/dist`
+  - Environment variables: Nessuna richiesta per il MVP (local-first).
+
+### 4.2 Custom Domain
+- Configurare il dominio (es. `life-soundtrack.app` o `lifetrack.audio`) con DNS pointing a Vercel/Netlify.
+- Forzare HTTPS (HSTS abilitato di default dalle piattaforme).
+
+---
+
+## 5. Security & Headers
+
+Anche se l'app è local-first, il server che la distribuisce deve essere sicuro.
+
+### 5.1 Content Security Policy (CSP)
+Da configurare in `nginx.conf` o nelle impostazioni di Vercel/Netlify (`vercel.json` o `_headers`):
+
+```text
+Content-Security-Policy: 
+  default-src 'self'; 
+  script-src 'self' 'wasm-unsafe-eval'; 
+  style-src 'self' 'unsafe-inline'; 
+  img-src 'self' data: https:; 
+  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org; 
+  worker-src 'self' blob:;
+  frame-ancestors 'none';
+```
+*Nota*: `'wasm-unsafe-eval'` è necessario per Essentia.js (WebAssembly). `connect-src` limita le chiamate di rete solo a MusicBrainz (provider approvato per enrichment + bonus audio features su MBID). **Rimosso** `https://freqblog.com` (D.A.6: provider non più usato).
+
+### 5.2 Altri Headers di Sicurezza
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: microphone=(), camera=(), geolocation=()` (Disabilita accesso a hardware sensibile non necessario).
+
+---
+
+## 6. Monitoraggio & Errori
+
+- **Nessun tracking utente**: Non installare Google Analytics, Mixpanel, Sentry o simili (D.A.1).
+- **Error Reporting**: errori JS catturati da un error boundary locale e loggati nella **console del browser** dell'utente. L'utente può copiare e incollare il log su GitHub Issues. Nessun dato lascia il dispositivo.
+- **Uptime**: Monitoraggio base tramite GitHub Actions o UptimeRobot sul dominio pubblico (se attivo in Fase 2).
+
+---
+
+## 7. Checklist Pre-Lancio
+
+Prima di rendere il repository pubblico o il sito accessibile, verificare:
+
+### Codice & Build
+- [ ] `pnpm run lint`, `pnpm run type-check`, `pnpm run test` passano senza errori.
+- [ ] Coverage test ≥ 80% per `packages/core`.
+- [ ] Build PWA genera un `dist/` funzionante e service worker registrato.
+- [ ] Nessun `console.log` con dati sensibili lasciato nel codice.
+
+### Sicurezza & Privacy
+- [ ] CSP configurata e testata (nessun blocco di risorse legittime).
+- [ ] Tutti i security headers sono attivi (verificabili con securityheaders.com).
+- [ ] I fixture di test (`fixtures/`) contengono SOLO dati sintetici.
+- [ ] Privacy Policy e Disclaimer inferenze sono visibili e accessibili nell'app.
+
+### Documentazione
+- [ ] `README.md` ha istruzioni chiare per sviluppo e self-hosting.
+- [ ] `AGENTS.md` è aggiornato e punta ai documenti corretti.
+- [ ] Licenza del progetto definita e file `LICENSE` presente (**Apache-2.0**, D.A.10).
+
+### UX & Accessibilità
+- [ ] L'app è installabile come PWA su mobile e desktop.
+- [ ] Navigazione da tastiera funzionante.
+- [ ] Contrasti colori verificati (WCAG AA).
+- [ ] `prefers-reduced-motion` rispettato.
+
+---
+
+## 8. Roadmap Post-Lancio (Fase 2+)
+
+- [ ] Implementazione Sync Cloud E2E Encrypted (opzionale).
+- [ ] Desktop App nativa tramite Tauri 2.0.
+- [ ] Adapters per piattaforme aggiuntive (Deezer, Tidal, Qobuz).
+- [ ] Supporto multilingua completo (aggiunta di ES, DE, FR).
+
+---
+
+## 9. Bundle script maintenance
+
+`docs/BUNDLE.md` è uno snapshot di tutti i file del progetto (documentazione, spec, fixture) in un unico markdown, usato per handoff con AI esterne e prompt di re-attivazione. Lo script `scripts/generate-bundle.ps1` lo genera a partire da un array esplicito `$files`.
+
+### 9.1 Comandi dello script
+
+```powershell
+pwsh scripts/generate-bundle.ps1           # genera docs/BUNDLE.md (default)
+pwsh scripts/generate-bundle.ps1 --check   # verifica che BUNDLE.md sia in sync; exit 0/1 (CI-friendly)
+pwsh scripts/generate-bundle.ps1 --list    # stampa la lista dei file inclusi (audit)
+pwsh scripts/generate-bundle.ps1 --help    # help completo
+```
+
+### 9.2 Quando aggiornare lo script
+
+Aggiorna l'array `$files` in `scripts/generate-bundle.ps1` **nella stessa PR** in cui:
+
+- Aggiungi un nuovo file in `docs/` (es. un nuovo ADR, un nuovo doc di sezione)
+- Aggiungi un nuovo file in `fixtures/` (es. fixture per un nuovo adapter)
+- Rinomini o sposti un file esistente che fa parte della specifica
+- Aggiungi un nuovo file di root che vuoi includere (es. `CHANGELOG.md`, `CONTRIBUTING.md`)
+
+### 9.3 Convenzioni di manutenzione
+
+L'ordine dei file nell'array `$files` deve rispettare la struttura di `docs/INDEX.md`:
+
+1. File di root (`AGENTS.md`, `README.md`, `LICENSE`)
+2. Documenti di supporto (`docs/INDEX.md`, `docs/SESSIONS.md`, `docs/AUDIT-*.md`)
+3. Documenti fondamentali in ordine di sezione (00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12)
+4. ADR (`docs/13-ADR/*.md`) in ordine numerico
+5. Resto documenti fondamentali (14, 15)
+6. Fixture (`fixtures/synthetic-history/*.json`)
+
+Non includere mai `docs/BUNDLE.md` stesso (si auto-includerebbe).
+
+### 9.4 Verifica automatica in CI
+
+Aggiungere il job `bundle-check` al workflow `ci.yml`:
+
+```yaml
+  bundle-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PowerShell
+        uses: microsoft/powershell@v1
+        with:
+          pwsh: true
+      - name: Verify BUNDLE.md is in sync
+        shell: pwsh
+        run: pwsh scripts/generate-bundle.ps1 --check
+```
+
+Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
+- `[OK] docs/BUNDLE.md e in sync con la lista corrente (N file).` (exit 0)
+- `[FAIL] Da aggiungere al bundle: <file>` (file nuovo non ancora in `$files`)
+- `[FAIL] Da rimuovere dal bundle: <file>` (file rimosso/rinominato)
+- `[FAIL] Lista file identica, ma contenuto cambiato` (modifica a un file doc, rigenera)
+
+### 9.5 Workflow di manutenzione (sviluppatore)
+
+```
+1. Modifica un file in docs/ o fixtures/
+2. (se hai aggiunto/rimosso file) modifica $files in scripts/generate-bundle.ps1
+3. Esegui: pwsh scripts/generate-bundle.ps1
+4. (opzionale) verifica: pwsh scripts/generate-bundle.ps1 --check
+5. Committa docs/, fixtures/ e scripts/generate-bundle.ps1 + docs/BUNDLE.md nella stessa PR
+```
+
+### 9.6 Test locale
+
+```powershell
+# Stato corrente
+pwsh scripts/generate-bundle.ps1 --list
+
+# Rigenera
+pwsh scripts/generate-bundle.ps1
+
+# Verifica sync (CI parity)
+pwsh scripts/generate-bundle.ps1 --check
+```
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 8 | Prima versione completa |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10); **nuovo §9 "Bundle script maintenance"** con comandi, convenzioni, CI check, workflow dev (post-review del bundle) |
+
+
+
 ===== FILE: docs/13-ADR/0001-pwa-first.md =====
 
 # ADR-0001 — PWA come piattaforma primaria
@@ -4143,6 +5327,86 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
+
+
+===== FILE: docs/13-ADR/0005-sync-cloud.md =====
+
+# ADR-0005 — Sincronizzazione cloud self-hosted (placeholder, Fase 2)
+
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 9 (audit 2026-10-15)
+> **NON implementato nel MVP.** Da rivedere e portare a 🟢 APPROVED prima dell'implementazione.
+
+## Contesto
+
+`05-ARCHITECTURE.md §8` e D.A.7 prevedono che la sincronizzazione cloud tra dispositivi **non sia presente nel MVP** ma venga affrontata in Fase 2 come servizio **self-hosted opzionale** (mai SaaS gestito da noi, in coerenza con D.A.9-D.A.11). `00-VISION.md` (D.A.12) ha fissato i requisiti di alto livello:
+
+- Crittografia end-to-end (XChaCha20 o AES-256)
+- Consenso granulare per categoria (track, era, insight)
+- Zero telemetria di sync
+
+Questo ADR è un **placeholder** che fissa i vincoli non negoziabili e identifica le decisioni aperte da risolvere prima dell'implementazione.
+
+## Decisione (provvisoria)
+
+Quando implementato (Fase 2):
+
+1. **Architettura**: server di sync self-hosted, opzionale. L'utente può ospitarlo su NAS, Raspberry Pi, VPS personale, Functory, ecc. Il progetto **non fornisce** un'istanza SaaS.
+2. **Crittografia**: end-to-end. Il server riceve solo blob cifrati autenticati (AEAD). Il client detiene la chiave di derivazione (Argon2id da passphrase utente + salt per-device).
+3. **Consenso granulare**: l'utente sceglie **per ogni categoria** (`listens`, `tracks`, `artists`, `insights`, `eras`, `searchQueries`) se sincronizzarla. Default: spento.
+4. **Zero telemetria di sync**: il server non vede mai `deviceId`, IP del client (a meno di reverse-proxy gestito dall'utente), né metadati di utilizzo del sync.
+5. **Conflitti**: CRDT o last-writer-wins per record con `updatedAt`. La scelta concreta dell'algoritmo è una decisione aperta (vedi sotto).
+6. **Trasporto**: HTTPS obbligatorio. WebSocket o HTTP/2 long-poll per push.
+7. **Autenticazione**: token locale per-device, generato al pairing, revocabile dall'utente in qualsiasi momento.
+
+## Alternative considerate
+
+- **SaaS gestito da noi**: scartata (D.A.9 no monetizzazione + D.A.11 self-hosting).
+- **Sync solo Bluetooth/LAN tra device dell'utente**: interessante ma non esclude la necessità di un ADR per il caso multi-device remoto; complementare, non sostitutivo.
+- **Nessun sync per sempre**: possibile ma spegne una promessa di prodotto (multi-device).
+
+## Conseguenze attese
+
+- Positive: multi-device per self-hoster; zero lock-in; compatibile con privacy-by-default.
+- Negative: complessità implementativa significativa (CRDT, key management, pairing UX); richiede documentazione di self-hosting più ricca.
+- Mitigazioni: build progressiva; MVP single-device resta la baseline.
+
+## Decisioni aperte (da chiudere PRIMA dell'implementazione)
+
+| # | Decisione | Note |
+|---|-----------|------|
+| 1 | Algoritmo di conflict resolution (CRDT vs LWW vs operational transform) | Influenza struttura record e UX |
+| 2 | Key management: passphrase-only vs recovery key vs entrambi | Trade-off sicurezza/UX |
+| 3 | Pairing flow: QR code locale, Magic Link via mail,OPAQUE | Vincolato a `06-UX-FLOWS` |
+| 4 | Server reference implementation: Node+Fastify+SQLite vs PocketBase vs custom | Influenza `12-DEVOPS` |
+| 5 | Retention: conservazione sul server di record cancellati lato client (tombstone) | Per quanto? |
+| 6 | Cadenza di push: real-time WebSocket vs poll periodico | Trade-off banda/latency |
+| 7 | Cifratura del database server-side a riposo (defense in depth) | AES-256 con KEK del server |
+| 8 | Audit log locale delle operazioni di sync (no PII) | Per trasparenza utente |
+
+## Vincoli non negoziabili (carry-over da D.A.7/D.A.12)
+
+- Niente telemetria
+- Niente PII senza consenso esplicito
+- Server **mai** requisito per il funzionamento della app
+- E2EE: il server **non può** leggere il contenuto
+
+## Implementazione nel MVP (Fase 0/1)
+
+Nessuna. Questo ADR è **segnaposto**. Il codice di sync non deve essere importato; le dipendenze (libraries CRDT, auth OPAQUE) non devono essere aggiunte.
+
+## Riferimenti
+
+- `00-VISION.md` §Decisioni Strategiche (D.A.12)
+- `02-DATA-SCHEMA.md §3.7 PrivacySettings.syncCloud` (v1.1)
+- `05-ARCHITECTURE.md §8` (D.A.7)
+- `08-COPY-I18N.md §2.9` `privacy.syncCloud` / `privacy.syncCloudDesc` (v0.2)
+- ADR-0002 — Local-first e privacy-by-design
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 9 (2026-10-15) | Placeholder post-audit: vincoli non negoziabili da D.A.7/D.A.12; 8 decisioni aperte da chiudere prima dell'implementazione |
 
 
 ===== FILE: docs/14-GLOSSARY.md =====
@@ -4595,4 +5859,3 @@ Motion reduction rispettata (`prefers-reduced-motion`).
     "dedupApplied": 1
   }
 }
-
