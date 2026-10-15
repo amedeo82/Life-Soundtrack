@@ -1,7 +1,7 @@
 ﻿# BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-15 10:24
+> Data: 2026-10-15 10:32
 > Totale file: 21
 
 
@@ -193,7 +193,7 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 # 📚 Indice della Documentazione
 
 > Stato master del progetto. Aggiornato ad ogni sessione di progettazione.
-> **Leggi questo file prima di qualsiasi altro per avere una panoramic.**
+> **Leggi questo file prima di qualsiasi altro per avere una panoramica.**
 
 ## Legenda stati
 | Status | Significato |
