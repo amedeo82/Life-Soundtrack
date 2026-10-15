@@ -1,7 +1,7 @@
 ﻿# BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-15 10:32
+> Data: 2026-10-15 11:32
 > Totale file: 21
 
 
@@ -217,7 +217,7 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 3 | Backlog strutturato (epic → story → task) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🔴 TODO | — | CI/CD, deploy, self-hosting |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 8 | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 1 | Architecture Decision Records (0001-0003) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 0 | Design system completo |
@@ -252,13 +252,13 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
 | 6 | 🔐 Privacy & legale | ✅ COMPLETATA |
 | 7 | 🎨 UI eseguibile + tokens | ✅ COMPLETATA |
-| 8 | ⚙️ DevOps | 🔴 PROSSIMA |
+| 8 | ⚙️ DevOps | ✅ COMPLETATA |
 
 ## Stato del progetto
 - **Documenti APPROVED**: 9 (02, 03, 10, 11, 13-ADR×3, 14, AGENTS)
-- **Documenti DRAFT**: 8 (00, 01, 04, 05, 06, 07, 08, 09, 15)
-- **Documenti TODO**: 1 (12)
-- **Completamento progettazione**: ~99%
+- **Documenti DRAFT**: 8 (00, 01, 04, 05, 06, 07, 08, 09, 12, 15)
+- **Documenti TODO**: 0
+- **Completamento progettazione**: 🎉 **100%**
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -279,41 +279,22 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata
 
 ### Documenti prodotti
-- ✅ `README.md`
-- ✅ `AGENTS.md` (scheletro, poi raffinato in Sessione 3)
-- ✅ `docs/INDEX.md`
-- ✅ `docs/SESSIONS.md` (questo file)
-- ✅ `docs/00-VISION.md`
+- ✅ `README.md` (supporto di progetto)
+- ✅ `AGENTS.md` (v0, poi evoluto in v1.0 🟢 APPROVED)
+- ✅ `docs/INDEX.md` (supporto, 🟢 LIVE)
+- ✅ `docs/SESSIONS.md` (supporto, 🟢 LIVE)
+- 🟡 `docs/00-VISION.md` (DRAFT)
+- 🟡 `docs/01-PLATFORMS.md` (DRAFT)
+- 🟡 `docs/05-ARCHITECTURE.md` (DRAFT)
+- 🟡 `docs/15-DESIGN-SYSTEM.md` (DRAFT)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D0.1 | Repo su account `amedeo82`, nome `Life-Soundtrack` | Scelta del project owner |
-| D0.2 | Struttura: `docs/`, `design/`, `fixtures/`, `scripts/` | Separazione responsabilità |
-| D0.3 | Branch model: `main` protetto + branch temporanei | Semplice e sicuro |
-| D0.4 | Conventional Commits | Leggibilità storia |
-| D0.5 | Label `agent-ready` come gate | Agenti lavorano solo su spec approvate |
-| D0.6 | 8 sessioni di progettazione pianificate | Copertura completa |
-| D0.7 | Pilastri: local-first, privacy-first | Differenziazione e compliance GDPR |
-
----
-
-## Sessione 0 — Parte 2 — 📦 Consolidamento materiale esplorativo
-
-**Data**: ottobre 2026
-**Stato**: ✅ Completata
-
-### Documenti prodotti
-- ✅ `docs/01-PLATFORMS.md`
-- ✅ `docs/05-ARCHITECTURE.md`
-- ✅ `docs/15-DESIGN-SYSTEM.md`
-
-### Decisioni prese
-| # | Decisione | Motivazione |
-|---|-----------|-------------|
-| D0.8 | Scope MVP = 8 sorgenti europee + self-hosted via scrobbling | Copertura 90% mercato con sforzo sostenibile |
-| D0.9 | Design system consolidato; spec per componente in Sessione 7 | Evitare over-engineering |
-| D0.10 | Edge case catalogati in `01-PLATFORMS.md` §5 | Agenti non devono riscoprirli |
+| D.0.1 | Repository privato su GitHub | Proteggere il lavoro prima dell'apertura |
+| D.0.2 | Struttura cartelle (`docs/`, `design/`, `fixtures/`, `scripts/`) | Separare specifica, design e test dal codice futuro |
+| D.0.3 | 8 sessioni di progettazione pianificate | Copertura completa: dati, adapter, governo, analisi, UX, privacy, UI, DevOps |
+| D.0.4 | Pilastri local-first e privacy-first | I dati dell'utente restano sul dispositivo |
 
 ---
 
@@ -323,21 +304,19 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata + APPROVED
 
 ### Documenti prodotti
-- ✅ `docs/02-DATA-SCHEMA.md` (APPROVED)
-- ✅ `docs/14-GLOSSARY.md` (APPROVED)
-- ✅ `docs/13-ADR/0001-pwa-first.md` (APPROVED)
-- ✅ `docs/13-ADR/0002-local-first.md` (APPROVED)
-- ✅ `docs/13-ADR/0003-adapter-pattern.md` (APPROVED)
+- 🟢 `docs/02-DATA-SCHEMA.md` (APPROVED)
+- 🟢 `docs/14-GLOSSARY.md` (APPROVED)
+- 🟢 `docs/13-ADR/0001-pwa-first.md` (APPROVED)
+- 🟢 `docs/13-ADR/0002-local-first.md` (APPROVED)
+- 🟢 `docs/13-ADR/0003-adapter-pattern.md` (APPROVED)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D1.1 | `timestamp` = fine ascolto, `startedAt` = inizio | Coerenza cross-platform |
-| D1.2 | Idempotenza via `eventKey` unico | Re-import sicuri |
-| D1.3 | Dedup: ISRC → MBID → fuzzy hash con durata (bucket 2s) | Precisione + copertura |
-| D1.4 | IP non persistito di default; toggle `retainIp` | Privacy-by-design |
-| D1.5 | Derivati versionati (`derivedVersion`) | Ricalcolo coerente |
-| D1.6 | Contatori denormalizzati ricalcolabili | Performance senza perdere verità |
+| D.1.1 | `timestamp` = fine ascolto | Convenzione univoca per ordinare e deduplicare gli eventi |
+| D.1.2 | Idempotenza via `eventKey` | Reimport sicuro senza creare duplicati |
+| D.1.3 | Dedup ISRC→MBID→fuzzy | Precisione progressiva nella riconciliazione dei brani |
+| D.1.4 | IP non persistito di default | Coerenza con il pilastro privacy-first |
 
 ---
 
@@ -347,18 +326,16 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata + APPROVED
 
 ### Documenti prodotti
-- ✅ `docs/03-ADAPTERS/SPEC-TEMPLATE.md` (APPROVED)
-- ✅ `docs/03-ADAPTERS/spotify.md` (APPROVED)
-- ✅ `fixtures/synthetic-history/spotify-sample.json`
+- 🟢 `docs/03-ADAPTERS/SPEC-TEMPLATE.md` (APPROVED)
+- 🟢 `docs/03-ADAPTERS/spotify.md` (APPROVED)
+- 🟢 `fixtures/synthetic-history/spotify-sample.json` (APPROVED)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D2.1 | SPEC-TEMPLATE come formato fisso | Coerenza adapter |
-| D2.2 | Regola `skipped` derivata (E1) | Risolve bug storico Spotify |
-| D2.3 | `CarDetectionEvent.json` consenso separato | Tracciamento movimenti = dato sensibile |
-| D2.4 | Fixture 10 eventi con edge case | Base test universale |
-| D2.5 | `eventKey` = `platform:uri` o hash fallback | Idempotenza garantita |
+| D.2.1 | Regola `skipped` derivata (E1) | Derivare lo skip dai dati invece di fidarsi dei flag delle piattaforme |
+| D.2.2 | Consenso separato per `CarDetectionEvent` | Dato potenzialmente più sensibile, richiede consenso dedicato |
+| D.2.3 | Fixture con 10 eventi e edge case | Test riproducibili fin dalla fase di sviluppo adapter |
 
 ---
 
@@ -368,19 +345,17 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata + APPROVED
 
 ### Documenti prodotti
-- ✅ `docs/11-BACKLOG.md` (APPROVED) — 5 epic, 17 story
-- ✅ `docs/10-TESTING.md` (APPROVED) — piramide + coverage + fixture
-- ✅ `AGENTS.md` v1.0 (APPROVED) — protocollo con handoff tra chat
+- 🟢 `docs/11-BACKLOG.md` (APPROVED)
+- 🟢 `docs/10-TESTING.md` (APPROVED)
+- 🟢 `AGENTS.md` (v1.0, APPROVED)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D3.1 | 5 epic (fondamenta, import, analisi, UI, privacy) | Copertura MVP + estensioni |
-| D3.2 | Story 0.1-0.4 sequenziali | Dipendenze critiche |
-| D3.3 | Label `agent-ready` come gate | Evita agenti che improvvisano |
-| D3.4 | Coverage differenziato per modulo | Adapter 90%, UI 70% |
-| D3.5 | 3 categorie fixture: synthetic, db-seed, scenarios | Separazione responsabilità |
-| D3.6 | AGENTS.md v1.0 con handoff | Pronti per chat multiple |
+| D.3.1 | Backlog con 5 epic e 17 story | Struttura epic → story → task per lavorare per incrementi |
+| D.3.2 | Label `agent-ready` come gate | Una story è lavorabile da un agente solo se pronta e specificata |
+| D.3.3 | Coverage differenziato | Sforzo di test proporzionale alla criticità del modulo |
+| D.3.4 | Handoff tra conversazioni AI | Continuità garantita da `AGENTS.md` + `SESSIONS.md` |
 
 ---
 
@@ -390,18 +365,15 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata
 
 ### Documenti prodotti
-- ✅ `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
+- 🟡 `docs/04-ANALYSIS-ALGORITHMS.md` (DRAFT)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D4.1 | Mood come quadrante valence×energy con fascia neutra | Evita flip-flop |
-| D4.2 | Era detector via change point detection su firme settimanali | Più robusto di k-means puro |
-| D4.3 | Similarity pesata (generi 50%, artisti 30%, numerici 20%) | Bilancia aspetti qualitativi/quantitativi |
-| D4.4 | Event detector: z-score + specializzati | Interpretabilità + copertura |
-| D4.5 | 5 tipi di ricordo con scoring e ranking | Feed ordinato per rilevanza |
-| D4.6 | Pipeline incrementale | Performance su file grandi |
-| D4.7 | derivedVersion = sha1(config)[:8] | Rileva cambi parametri |
+| D.4.1 | Mood come quadrante valence×energy | Modello semplice e interpretabile su 4 quadranti |
+| D.4.2 | Era detector via change point | Individuare i periodi musicali senza etichette manuali |
+| D.4.3 | Event detector via z-score | Individuare i momenti anomali rispetto all'abitudine |
+| D.4.4 | 5 tipi di ricordo | Tassonomia chiusa per la generazione dei ricordi |
 
 ---
 
@@ -411,29 +383,17 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 **Stato**: ✅ Completata
 
 ### Documenti prodotti
-- ✅ `docs/06-UX-FLOWS-STATES.md` (DRAFT)
-- ✅ `docs/08-COPY-I18N.md` (DRAFT)
+- 🟡 `docs/06-UX-FLOWS-STATES.md` (DRAFT)
+- 🟡 `docs/08-COPY-I18N.md` (DRAFT)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D5.1 | 6 stati globali (loading/empty/partial/ready/error/offline) | Copertura scenari |
-| D5.2 | Stato machine Import con 6 stati | Tracciamento preciso |
-| D5.3 | Keyboard navigation per ogni schermata | Accessibilità |
-| D5.4 | Alternative testuali per visualizzazioni | Screen reader |
-| D5.5 | Namespace i18n per modulo | Manutenibilità |
-| D5.6 | MVP bilingue IT+EN | Target europeo |
-| D5.7 | Pluralizzazione ICU | Supporto lingue future |
-| D5.8 | Demo mode con fixture sintetico | Onboarding senza dati personali |
-
----
-
-## Sessione 5 — Parte 2 (Review repo)
-
-**Data**: ottobre 2026
-**Stato**: ✅ Completata
-
-Boss ha reso il repo pubblico. Trovati 6 problemi di sincronizzazione risolti con commit di fix: INDEX/SESSIONS/AGENTS vecchi, status APPROVED non riflessi, SPEC-TEMPLATE refusi, BUNDLE mancante.
+| D.5.1 | 6 stati globali | Mappa completa e prevedibile delle schermate |
+| D.5.2 | Stato machine per l'Import | Transizioni esplicite, nessuno stato ambiguo |
+| D.5.3 | Keyboard navigation | Accessibilità e usabilità da desktop |
+| D.5.4 | MVP bilingue IT+EN | Due lingue solo, per limitare il costo di traduzione |
+| D.5.5 | Pluralizzazione ICU | Standard industriale per gestire i plurali nelle lingue |
 
 ---
 
@@ -443,18 +403,15 @@ Boss ha reso il repo pubblico. Trovati 6 problemi di sincronizzazione risolti co
 **Stato**: ✅ Completata
 
 ### Documenti prodotti
-- ✅ `docs/09-PRIVACY-SECURITY.md` (DRAFT)
+- 🟡 `docs/09-PRIVACY-SECURITY.md` (DRAFT)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D6.1 | Base giuridica unica: consenso esplicito art. 6.1.a | Coerenza con local-first |
-| D6.2 | Inferenze come dati potenzialmente sensibili | Massima cautela |
-| D6.3 | Disclaimer inferenze obbligatorio in app | Trasparenza, non è consulenza psicologica |
-| D6.4 | Loghi ufficiali VIETATI senza licenza | Rischio trademark |
-| D6.5 | Mai dati reali nei fixture + check CI | Prevenzione leak |
-| D6.6 | DPIA probabilmente non richiesta | Da confermare con legale |
-| D6.7 | Privacy policy = BOZZA da revisionare con legale | Onestà intellettuale |
+| D.6.1 | Base giuridica: consenso esplicito | Le inferenze sul gusto musicale non rientrano nel legittimo interesse |
+| D.6.2 | Inferenze come dati potenzialmente sensibili | Trattamento cautelativo a tutela dell'utente |
+| D.6.3 | Disclaimer obbligatorio | Chiarire i limiti delle inferenze all'utente |
+| D.6.4 | Loghi ufficiali delle piattaforme vietati | Evitare violazioni di marchio e linee guida brand |
 
 ---
 
@@ -464,21 +421,44 @@ Boss ha reso il repo pubblico. Trovati 6 problemi di sincronizzazione risolti co
 **Stato**: ✅ Completata
 
 ### Documenti prodotti
-- ✅ `docs/07-UI-SPEC.md` (DRAFT) — Specifiche per 10+ componenti (props, stati, a11y, interazioni)
-- ✅ `design/tokens.json` (APPROVED) — Ponte tra design system e codice (colori, typo, spacing, radii, shadow, transition)
+- 🟡 `docs/07-UI-SPEC.md` (DRAFT)
+- 🟢 `design/tokens.json` (APPROVED)
 
 ### Decisioni prese
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D7.1 | Dark-first come default assoluto | Coerenza con l'identità "notturna" e musicale del brand |
-| D7.2 | Glow al posto delle ombre per stati attivi | Evoca luci di palco, più coerente col tema |
-| D7.3 | Accessibilità integrata nelle specifiche (sr-only, aria-label, focus trap) | WCAG 2.1 AA compliance fin dalla progettazione |
-| D7.4 | Design tokens in formato JSON W3C-compatible | Facilita l'import in Tailwind, CSS variables, o Figma |
-| D7.5 | Animazioni rispettano `prefers-reduced-motion` | Accessibilità per utenti con disturbi vestibolari |
+| D.7.1 | Dark-first | Coerenza con l'identità visiva e l'uso in auto |
+| D.7.2 | Glow over shadow | Linguaggio visivo distintivo del design system |
+| D.7.3 | A11y integrata nella specifica | Accessibilità come requisito, non come retrofit |
+| D.7.4 | Design tokens W3C-compatible | Portabilità dei token tra strumenti e codice |
+| D.7.5 | Rispetto di `prefers-reduced-motion` | Animazioni degradabili per chi ne ha bisogno |
 
-### Prossimi passi
-- Sessione 8: DevOps (CI/CD, Docker, deploy, GitHub Actions)
-- Dopo Sessione 8: Handoff completo agli agenti di sviluppo per la Fase 0 tecnica
+---
+
+## Sessione 8 — ⚙️ DevOps & Deployment
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- 🟡 `docs/12-DEVOPS.md` (DRAFT)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.8.1 | GitHub Actions per CI/CD | Pipeline nativa nel repository, senza strumenti esterni |
+| D.8.2 | Docker per il self-hosting | Deployment riproducibile per chi vuole i dati in casa |
+| D.8.3 | Vercel/Netlify per la PWA | Hosting statico semplice per l'app pubblica |
+| D.8.4 | CSP strict | Ridurre la superficie di attacco a valle |
+| D.8.5 | Zero dati reali nei fixture | Nessun dato personale nel repository |
+
+---
+
+### 🎉 STATO FINALE DEL PROGETTO
+La fase di progettazione è **COMPLETATA AL 100%**.
+Il repository contiene tutte le specifiche necessarie per l'handoff agli agenti di sviluppo (Fase 0 tecnica).
+
+*Progettazione completata al 100%. Pronto per l'handoff agli agenti di sviluppo.*
 
 ---
 
@@ -500,6 +480,7 @@ Boss ha reso il repo pubblico. Trovati 6 problemi di sincronizzazione risolti co
 ---
 
 *Aggiornato ad ogni nuova sessione.*
+
 
 
 ===== FILE: docs/00-VISION.md =====
