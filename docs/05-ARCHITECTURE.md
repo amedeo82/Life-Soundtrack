@@ -1,9 +1,9 @@
 # 05 — Architettura Tecnica
 
-> Status: 🟡 DRAFT
-> Versione: 0.1
-> Ultima modifica: Sessione 0 (consolidamento)
-> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern (da scrivere in Sessione 1)
+> Status: 🟢 APPROVED
+> Versione: 1.0
+> Ultima modifica: Sessione 9 (audit 2026-10-15)
+> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2)
 
 ---
 
@@ -12,7 +12,7 @@
 | Principio | Conseguenza |
 |-----------|-------------|
 | **Local-first** | Tutti i dati vivono nel browser (IndexedDB). L'app funziona offline dopo il primo caricamento |
-| **Privacy-first** | Nessuna telemetria. Le uniche chiamate di rete sono: arricchimento metadati (opzionale), scrobbling hub (opzionale), sync cloud (opzionale, E2E) |
+| **Privacy-first** | Nessuna telemetria (D.A.1). Le uniche chiamate di rete sono: arricchimento metadati (opzionale, governed by `PrivacySettings.enrichMetadata`), scrobbling hub (opzionale), sync cloud (Fase 2, ADR-0005) |
 | **Adapter pattern** | Ogni piattaforma è un modulo indipendente che produce il formato unificato; aggiungere una piattaforma = aggiungere un adapter |
 | **Analisi deterministica e documentata** | Ogni insight deriva da formule specificate in `04-ANALYSIS-ALGORITHMS.md`, testabili con fixture |
 | **Progressive enhancement** | Funziona con una sola piattaforma; migliora con più sorgenti |
@@ -30,41 +30,70 @@
     ├────────────────────────────────────────────────┤
     │ LIVELLO 2 — ENRICHMENT PIPELINE                │
     │  AudioFeatures · MusicBrainz lookup · Generi   │
+    │  (React Query — vedi §8)                       │
     ├────────────────────────────────────────────────┤
     │ LIVELLO 1 — IMPORT ENGINE (Adapters)           │
     │  spotify · youtube · apple · deezer · tidal    │
     │  soundcloud · lastfm · listenbrainz · plex     │
+    │  navidrome · manual                            │
     │            ↓ formato unificato ↓               │
-    │  LOCAL DATABASE (IndexedDB / Dexie)            │
+    │  LOCAL DATABASE (IndexedDB / Dexie v2)         │
     └────────────────────────────────────────────────┘
 
 ## 3. Formato unificato (record di ascolto)
 
-Ogni adapter produce record conformi a questo schema (dettaglio completo in `02-DATA-SCHEMA.md`):
+Gli adapter producono record conformi a `02-DATA-SCHEMA.md §3.2 (ListenEvent)`. Forma **piatta**, allineata allo schema, NON nested come nella v0.1:
 
     {
       "id": "uuid",
-      "source_platform": "spotify",
-      "source_id": "spotify:track:xxx",
-      "timestamp": "2024-03-15T14:30:00Z",
-      "duration_ms": 245000,
-      "track": {
-        "name": "...", "artist": "...", "album": "...",
-        "isrc": "GBUM71029604", "mbid": "..."
-      },
-      "context": {
-        "device_type": "mobile", "device_detail": "...",
-        "country": "IT", "offline": false, "incognito": false,
-        "shuffle": true, "skipped": false,
-        "reason_start": "playbtn", "reason_end": "endplay"
-      },
-      "audio_features": {
-        "valence": 0.45, "energy": 0.62, "danceability": 0.41,
-        "tempo": 72.3, "key": 2, "mode": 0
-      }
+      "eventKey": "spotify:abc123",
+      "platform": "spotify",
+      "importId": "import-uuid",
+      "timestamp": 1710523800000,      // unix ms UTC, fine ascolto
+      "startedAt": 1710523555000,     // unix ms UTC, inizio ascolto (null se non noto)
+      "durationMs": 245000,
+      "trackId": "track-uuid",
+      "completed": true,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "playbtn",
+      "reasonEnd": "endplay",
+      "deviceType": "mobile",
+      "deviceDetail": "iPhone 15",
+      "ip": null,                     // popolato SOLO se PrivacySettings.retainIp
+      "country": "IT",                // sempre derivato (privacy-by-design)
+      "day": "2024-03-15"             // derivato, indicizzato
     }
 
 I campi contestuali sono **opzionali**: le piattaforme che non li forniscono li lasciano null. Le analisi devono degradare con grazia in loro assenza.
+
+### 3.1 Trasformazione adapter → core
+
+L'adapter emette un `RawListenEvent` con metadati nativi della piattaforma (`sourceTrackUri`, `sourceArtistName`, `sourceAlbumName`, `rawTimestamp`, `sourceDurationMs`, ...).
+
+Il core trasforma ogni `RawListenEvent` in `ListenEvent` (persistito in `02§3.2`) applicando in ordine:
+
+1. **Normalizzazione timestamp** → UTC unix ms (`timestamp` = fine ascolto, `startedAt` se noto)
+2. **Calcolo `eventKey`** (vedi §3.2)
+3. **Risoluzione `trackId`** via regole DEDUP di `02§5` (ISRC → MBID → fuzzy con `durationBucketMs`)
+4. **Derivazione `day`** da `timestamp` (UTC, formato `YYYY-MM-DD`)
+5. **Mapping `platform` raw** → `PlatformId` normalizzato
+6. **Mapping device** (es. Spotify `iOS`+`iPhone15,2` → `DeviceType.mobile` + `deviceDetail` libero)
+
+Questa separazione permette di:
+- Testare la pipeline di normalizzazione in isolamento con fixture (`10-TESTING.md` §3)
+- Cambiare il formato nativo di un adapter senza toccare lo schema
+- Far evolvere `DEDUP` senza riscrivere gli adapter
+
+### 3.2 Calcolo `eventKey`
+
+    eventKey =
+      platform + ':' +
+      (sourceEventId ?? sha1(trackId + '|' + timestamp + '|' + durationMs))
+
+`sourceEventId` è fornito dall'adapter se la piattaforma espone un identificativo nativo stabile (es. Spotify `trackId` + `played_at`); altrimenti fallback SHA-1. Garantisce idempotenza (D.1.2): reimportare lo stesso file non duplica nulla.
 
 ## 4. Adapter pattern — contratto
 
@@ -72,56 +101,153 @@ Ogni adapter espone la stessa interfaccia logica:
 
     interface PlatformAdapter {
       readonly platform: PlatformId;
-      detect(input: File | Blob): boolean;          // riconosce il formato
-      parse(input: File | Blob): AsyncIterable<RawListenEvent>;
-      parseLibrary?(input: File | Blob): Promise<LibrarySnapshot>; // playlist, saved...
+      readonly name: string;          // es. "Spotify"
+      readonly version: string;       // semver adapter
+      detect(input: File | Blob): boolean | Promise<boolean>;
+      parse(
+        input: File | Blob,
+        options?: { signal?: AbortSignal }
+      ): AsyncIterable<RawListenEvent>;
+      parseLibrary?(input: File | Blob): Promise<LibrarySnapshot>;
     }
 
-Regole:
+**Regole**:
 - `parse` è **streaming** (AsyncIterable): mai caricare 200k eventi in memoria in un colpo
-- Ogni adapter dichiara i propri edge case (vedi `01-PLATFORMS.md` §5) e li gestisce o li marca
-- Output grezzo → normalizzazione UTC → deduplicazione → persistenza
+- **Cancellazione cooperativa**: l'utente può annullare l'import a metà (vedi `06§2.4 Processing`); l'adapter controlla `signal.aborted` ad ogni `yield` (o ogni N eventi per performance) e lancia `DOMException('AbortError')` su cancel
+- **Partial recovery**: se il file è corrotto a metà, gli eventi validi parsati prima dell'errore sono **persistiti** (transazione in `02§7`)
+- `detect()` ritorna `boolean | Promise<boolean>` (D.A.8): supporta detection statica (euristica su header/campi) **e** remota (ping credenziali, Fase 2). I caller devono **sempre** trattarlo come Promise con `await`
+- Ogni adapter dichiara i propri edge case in `01-PLATFORMS.md` §5
+- Output grezzo → normalizzazione UTC → `eventKey` calcolato (`§3.2`) → DEDUP (`02§5`) → upsert in Dexie
+
+**Errori**:
+
+    class AdapterError extends Error {
+      code: 'INVALID_FORMAT' | 'TRUNCATED' | 'UNSUPPORTED_VERSION' | 'INTERNAL';
+      recoverable: boolean;   // se true, partialEvents è stato persistito
+      partialEvents: number;  // quanti eventi validi parsati prima dell'errore
+    }
+
+| `code` | Quando | `recoverable` |
+|--------|--------|---------------|
+| `INVALID_FORMAT` | File completamente sbagliato o versione non supportata | `false` |
+| `TRUNCATED` | File/zip corrotto a metà | `true` |
+| `UNSUPPORTED_VERSION` | Schema della piattaforma cambiato, serve aggiornare adapter | `false` |
+| `INTERNAL` | Bug dell'adapter | dipende |
+
+`sourceEventId` (citato dalla regola `eventKey` in `02§3.2`) è opzionale e fornito dall'adapter quando la piattaforma espone un ID nativo stabile (es. Spotify `trackId` + `played_at`). In assenza, si usa lo SHA-1 di fallback.
 
 ## 5. Database locale
 
 - **Engine**: IndexedDB via Dexie.js
-- **Tabelle principali**: `listen_events`, `tracks`, `artists`, `albums`, `audio_features`, `sessions`, `insights`, `imports_log`
-- **Indici critici**: `listen_events.timestamp`, `listen_events.track_id`, `tracks.isrc`, `tracks.mbid`
-- **Migrazioni**: versionate in Dexie; ogni cambio schema = nuova versione + funzione di upgrade
-- Dettaglio completo in `02-DATA-SCHEMA.md` (Sessione 1)
+- **Versione corrente**: Dexie v2 (vedi `02-DATA-SCHEMA.md §6`)
+- **Tabelle (12)**: `listens`, `tracks`, `artists`, `albums`, `features`, `sessions`, `insights`, `imports`, `library`, `playlists`, `playlistItems`, `searchQueries`
+- **PK reali**:
+  - `listens`: `eventKey` (UNIQUE, idempotenza)
+  - `tracks`: `canonicalKey` (UNIQUE, dedup)
+  - `features`: `trackId` (1:1)
+  - `playlistItems`: `[playlistId+trackId]` (composita)
+- **Indici critici**: `listens.timestamp`, `listens.day`, `listens.trackId`, `tracks.isrc`, `tracks.mbid`, `searchQueries.[platform+normalized]`
+- **Migrazioni**: versionate in Dexie; ogni cambio schema = nuova versione + funzione di upgrade; **mai drop di tabelle utente** (MIG-1)
+- **Transazioni**: ogni import scrive in una **singola transazione** che include `listens` + `tracks` + `artists` upsert. In caso di `AdapterError` con `recoverable: true` (`§4`), la tx viene committata con i record validi già scritti; se `recoverable: false`, rollback totale
+- **Read-only mode**: se IndexedDB è in quota esaurita, in `VersionError` (DB lock) o in blocco browser (private mode Safari, edge cases), l'app entra in **read-only mode**: nessuna scrittura accettata, messaggio utente localizzato in `error.dbCritical` / nuovo `error.dbReadOnly`, e un banner persistente invita a liberare spazio o ricaricare
+- Dettaglio completo in `02-DATA-SCHEMA.md`
 
 ## 6. Pipeline di arricchimento
 
 Problema: Spotify ha deprecato le audio-features (nov 2024); Apple non le ha mai avute.
 
-Strategia a cascata per ogni traccia:
-1. **Cache locale** (già calcolata in precedenza)
-2. **AcousticBrainz dump** (gratuito, congelato a giu-2022) per MBID/ISRC noti
-3. **API esterna** (FreqBlog / Musicae) — chiamata opzionale, governata dal toggle privacy
-4. **Essentia.js (WASM) in-browser** su preview audio quando disponibile
-5. **Fallback**: nessuna feature → le analisi basate su valence/energy degradano a analisi per genere/tag
+**Strategia a cascata per ogni traccia** (D.A.6):
 
-Ogni feature salvata registra la **fonte** (`source: acousticbrainz | api | essentia | manual`) per trasparenza e ri-calcolo futuro.
+1. **Cache locale** (feature già calcolata/scaricata)
+2. **Essentia.js (WASM) in-browser** — provider di default quando è disponibile un preview audio (30s) dal catalogo
+3. **AcousticBrainz** — bonus se il brano ha un MBID mappato (lookup per recording_id)
+4. **Fallback euristico** (`source: 'heuristic'`) — stime da metadata (BPM da genre, energia da popolarità, valence da key/mode); qualità bassa ma copre il 100% del catalogo
+5. **Niente feature**: le analisi basate su valence/energy degradano a mood-by-genre (vedi `04-ANALYSIS-ALGORITHMS.md`)
+
+Ogni feature salvata registra la **fonte** (`AudioFeatures.source: 'essentia' | 'acousticbrainz' | 'heuristic' | 'manual'`) per trasparenza e ricalcolo futuro. **Rimosse** le voci placeholder `api_freqblog` / `api_musicae` (non sono provider reali).
+
+### 6.1 Trigger conditions
+
+La pipeline di arricchimento è invocata in 3 contesti:
+
+| Trigger | Quando | Comportamento |
+|---------|--------|---------------|
+| **on-import** | Al termine di un import (transazione `02§7` committata) | Per ogni nuovo `trackId` senza `AudioFeatures`, prova Essentia → AB → euristica |
+| **on-demand** | L'utente apre una schermata analisi (`06§2.9 Analisi`, `QuadrantChart`) | Refresh lazy delle feature mancanti per i brani nel viewport |
+| **scheduled** | Job in Web Worker idle (`requestIdleCallback`), max 5 min/giorno | Backfill di feature mancanti in batch; throttle 1 track/sec per non impattare la UI |
+
+L'arricchimento **non blocca mai l'import**: se Essentia o AB falliscono, si cade immediatamente al fallback euristico, e l'utente vede i risultati senza attendere.
+
+### 6.2 Caching policy
+
+- **Cache locale**: tabella `features` con PK `trackId` (1:1), indicizzata per `source`
+- **TTL**: nessuno per i risultati Essentia/heuristica (calcolo locale, deterministico). Per AcousticBrainz: 90 giorni (i dataset AB sono congelati per data di dump)
+- **LRU**: limite 50k record; oltre, evict LRU basato su `lastSeenAt` del track
+- **Invalidazione**: bump del `schemaVersion` in `AudioFeatures` (vedi `02§3.4`) quando cambia la versione Essentia o il modello euristica; i record con `schemaVersion` vecchio vengono ricalcolati al prossimo trigger
+- **Disattivazione**: se `PrivacySettings.enrichMetadata === false`, la cache non viene letta né scritta; le analisi degradano a mood-by-genre
 
 ## 7. Analysis engine
 
-Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, EraDetector, EventDetector, MemoryEngine, PatternAnalyzer. Ogni algoritmo è specificato con formula, parametri e esempio input→output in `04-ANALYSIS-ALGORITHMS.md` (Sessione 4). I risultati sono persistiti in `insights` con versionamento del parametro-set (permette ricalcolo coerente).
+Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, EraDetector, EventDetector, MemoryEngine, PatternAnalyzer. Ogni algoritmo è specificato con formula, parametri e esempio input→output in `04-ANALYSIS-ALGORITHMS.md`. I risultati sono persistiti in `insights` con versionamento del parametro-set (`derivedVersion`) per ricalcolo coerente (MIG-3).
+
+### 7.1 Scheduling e incrementalità
+
+- Ogni algoritmo gira in chunk con **budget 50ms** schedulato via `requestIdleCallback` (o fallback `setTimeout(0)`)
+- Gli algoritmi sono **incrementali** (`04§1.2`): ricevono `(state, newEvents)` invece di `(allEvents)`; `state` è persistito in `insights`
+- La pipeline gira **on-trigger** (import completato, on-demand dall'utente) o in **background idle**; max 5 min/giorno di budget
+- L'UI resta a 60fps: nessun algoritmo blocca il main thread
+
+### 7.2 Failure isolation
+
+- Ogni modulo è wrappato in un `try/catch` interno: un crash (es. divisione per zero su dataset patologico) **non blocca gli altri moduli**
+- L'errore viene loggato in console con stack trace + `module` + `inputSummary` (no PII)
+- L'insight parziale viene marcato con `status: 'pending'` e `confidence: 0`; l'utente vede un placeholder "Insight non disponibile"
+- Test in `10-TESTING.md` §3 prevedono fixture patologiche (eventi con `valence: NaN`, durate 0, overlap totale)
+
+### 7.3 Versioning esplicito
+
+- `derivedVersion` calcolato come `sha1(JSON.stringify(configObject)).slice(0, 8)` (`04§1.1`)
+- Quando `configObject` cambia (parametri, pesi, soglie), `derivedVersion` cambia → insight vecchi marcati `stale`
+- Al prossimo avvio (o trigger), `recompute()` ricalcola solo gli insight con `derivedVersion` non corrente
+- L'utente vede una progress bar "Aggiornamento insights in corso (X%)" durante il backfill
 
 ## 8. Stack tecnologico
 
 | Componente | Scelta | Motivazione |
 |------------|--------|-------------|
-| Runtime UI | React 19 + TypeScript + Vite | Ecosistema, PWA-first |
+| Runtime UI | React 19 + TypeScript 5.6+ + Vite 6 | Ecosistema, PWA-first |
 | PWA | vite-plugin-pwa (Workbox) | Offline, installabilità |
-| Stato | Zustand + React Query | Leggerezza, semplicità |
-| DB locale | Dexie.js (IndexedDB) | API matura, migrazioni |
-| Grafici | D3.js (custom) + Recharts (standard) | Timeline custom + velocità |
-| UI kit | Tailwind + shadcn/ui | Coerenza col design system |
-| Parsing | PapaParse (CSV), JSON nativo, streaming | File grandi |
-| Audio features | Essentia.js (WASM) + API fallback | Open source |
-| Test | Vitest + Playwright | Unit + e2e |
+| Stato client | **Zustand** (UI) + **dexie-react-hooks** (DB live queries) | Local-first: stato derivato da Dexie, no store globale |
+| Data fetching remoto | **React Query 5** solo per enrichment (D.A.5) | Chiamate a MB/Last.fm; niente su dati core |
+| DB locale | **Dexie 4** (IndexedDB) v2 schema | API matura, migrazioni |
+| Schema validation | **Zod 3** | `RawListenEvent`, payload adapter, form |
+| Form | **react-hook-form** + `@hookform/resolvers/zod` | Settings/Import |
+| i18n | **i18next** + react-i18next | `08§7`, Story 0.6 |
+| Date/time | **date-fns** + date-fns-tz | `userTimezone` PatternPayload (`02§4`) |
+| Worker bridge | **Comlink 4** | Typed RPC main↔worker (`§7`) |
+| Grafici | **Recharts 2.15+** standard + **D3 7** solo per Timeline (D.A.4, lazy import) | 90% Recharts, Timeline custom |
+| UI kit | **Tailwind 4** + shadcn/ui | Coerenza col design system |
+| Parsing | **PapaParse** (CSV), JSON nativo, streaming | File grandi |
+| Audio features | **Essentia.js (WASM)** (D.A.6) + AcousticBrainz bonus + fallback euristico | Open source, locale, no rete |
+| Logger | **core/logger** wrapper | Schema `{level, module, msg, ctx}` consistente, no PII |
+| Test | **Vitest 2+** + fake-indexeddb + **MSW** + **Playwright 1.5+** | Unit + e2e + API mock |
+| Coverage | **@vitest/coverage-v8** per package | Soglie da `10§2` |
+| Build | Vite 6 + **Turborepo** | Monorepo incrementale |
+| Tooling | **ESLint 9** + Prettier 3 + Husky + lint-staged + commitlint | Convenzioni `AGENTS.md` |
+| Bundle analyzer | rollup-plugin-visualizer | NFR budget 300KB (`§10`) |
 | Desktop (Fase 2) | Tauri 2.0 | 10x più leggero di Electron |
-| Sync cloud (Fase 2+, opzionale) | Fastify + PostgreSQL + CRDT + E2E | Solo se richiesto |
+| **Sync cloud (Fase 2+, ADR-0005)** | **Placeholder** — non implementato nel MVP (D.A.7). Servizio self-hosted opzionale con E2EE | Previsto ma non vincolante per Fase 0/1 |
+
+### 8.1 Tooling dev
+
+- **Linting**: ESLint 9 (flat config) + plugin React/TS/Vitest, Prettier 3
+- **Hook pre-commit**: Husky + lint-staged (lint + format solo sui file staged)
+- **Commit**: commitlint enforce Conventional Commits (vedi `AGENTS.md` §Git workflow)
+- **TypeScript**: 5.6+ con `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`
+- **Path aliases**: `@core/*`, `@ui/*`, `@web/*` (vedi `§9` monorepo)
+- **`fake-indexeddb`**: polyfill per test Node, configurato in `vitest.setup.ts`
+- **Fast-check pre-flight** (smoke test del DB): comando `db.fastCheck()` esposto da `core/db` (vedi `10-TESTING.md §3`)
+- **Turborepo**: pipeline `build → test → lint` cacheata per package
 
 ## 9. Struttura monorepo (target Fase 0 tecnica)
 
@@ -132,24 +258,187 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
     ├── packages/
     │   ├── core/
     │   │   ├── adapters/         # un modulo per piattaforma
-    │   │   ├── analysis/
-    │   │   ├── enrichment/
-    │   │   ├── schema/           # tipi TypeScript condivisi
-    │   │   └── db/
-    │   └── ui/                   # design system componentizzato
+    │   │   ├── analysis/         # Web Worker
+    │   │   ├── enrichment/       # React Query per MB/Last.fm
+    │   │   ├── schema/           # tipi TypeScript condivisi (= 02)
+    │   │   ├── db/               # Dexie wrapper
+    │   │   └── logger/           # wrapper logger strutturato
+    │   ├── ui/                   # design system componentizzato
+    │   └── config/               # tsconfig, eslint, vitest condivisi
     ├── docs/ · design/ · fixtures/ · scripts/
+
+### 9.1 Convenzioni package
+
+- **Naming**: scope `@ls/*` (es. `@ls/core`, `@ls/ui`, `@ls/web`, `@ls/config`)
+- **Versioning**: tutti i package partono da `0.1.0`; bump sincronizzato in fase 1 release (changeset-driven)
+- **Entry point**: `src/index.ts` con `export` espliciti; niente barrel file "tutto da index"
+- **`package.json` minimi**: solo `name`, `version`, `type: "module"`, `main`, `types`, `exports`, `scripts`, `dependencies`, `devDependencies`, `peerDependencies` (no `private` fittizi)
+- **`exports` map**: ogni package dichiara i subpath (`./adapters/spotify`, `./db`, ...) per consentire tree-shaking
+- **Lockfile unico**: `pnpm-lock.yaml` alla root, monorepo-aware (`pnpm-workspace.yaml` con `packages/*`)
+
+### 9.2 Dipendenze tra package (regola aciclica)
+
+Le frecce rappresentano `import from`. Le dipendenze inverse sono **vietate**:
+
+    @ls/web  ──┬──> @ls/ui
+               ├──> @ls/core
+               └──> @ls/config (devDep)
+    
+    @ls/ui    ────> @ls/core (solo tipi, non runtime)
+    @ls/core  ────> (niente, è foglia)
+    @ls/config───> (niente, è foglia)
+
+Regole pratiche:
+- `@ls/core` non importa MAI da `@ls/ui` né `@ls/web` (è runtime-agnostic, gira anche nel Worker)
+- `@ls/core/analysis` non importa da React (è puro TS, gira in Web Worker)
+- `@ls/ui` può importare **solo tipi** da `@ls/core` (no runtime coupling); i consumer passano i dati via props
+- `@ls/web` è l'unico che importa da tutto: orchestra UI + chiama core + usa config
 
 ## 10. Requisiti non funzionali
 
 | Requisito | Target |
 |-----------|--------|
-| Import 100k eventi | < 30 s |
+| Import 50k eventi | < 30 s (revisione M13: 50k è il target realistico Fase 0) |
+| Import 100k eventi | < 90 s (best effort) |
 | First contentful paint | < 1.5 s |
-| Bundle iniziale | < 300 KB gzip (worker e WASM lazy) |
+| Bundle iniziale | < 300 KB gzip (worker, D3, WASM lazy) |
 | Offline | 100% funzionale dopo primo load |
-| Privacy | Zero PII in uscita senza toggle esplicito |
+| Privacy | Zero PII in uscita senza toggle esplicito (D.A.1) |
 | Accessibilità | WCAG 2.1 AA |
 | Browser | Chrome/Edge 90+, Firefox 90+, Safari 15+ |
+
+### 10.1 Budget di performance (per route/feature)
+
+I target sono **P95** (95° percentile) misurati su device baseline (`§10.2`):
+
+| Route / Feature | Metrica | Target P95 |
+|-----------------|---------|------------|
+| First load (cold cache) | FCP | < 1.5 s |
+| Home (schermata ⑥) | Render after DB query | < 200 ms |
+| Timeline (schermata ⑦) | Initial paint + zoom 1y | < 400 ms |
+| Timeline zoom 1d | Re-render con filtri | < 250 ms |
+| Esplora search (schermata ⑨) | Autocomplete response | < 150 ms |
+| Import 50k eventi | E2E (drag → "Import completato") | < 30 s |
+| Import 100k eventi | E2E | < 90 s |
+| Settings toggle | Save + re-render | < 100 ms |
+| PWA install prompt | First paint | < 1 s |
+| Memory footprint (idle) | Heap dopo 10 min su Home | < 250 MB |
+
+I budget sono enforced da:
+- **Bundle**: `rollup-plugin-visualizer` in CI; fallisce la build se main chunk > 300KB gzip
+- **Runtime**: Web Vitals reporting via `core/logger` (no telemetry esterna, vedi D.A.1)
+- **E2E**: Playwright in CI con tracing; soglie via `playwright.config.ts` `expect.toHavePerformanceTiming`
+
+### 10.2 Dispositivi target
+
+L'ottimizzazione è **mobile-first** (la maggioranza degli ascolti musicali avviene da mobile).
+
+**Baseline** (target minimo garantito):
+- iPhone 12 (A14, 4GB RAM, Safari iOS 15)
+- Google Pixel 6 (Tensor, 8GB RAM, Chrome Android)
+- Mid-range Android (Snapdragon 7-series, 6GB RAM, Chrome)
+
+**Desktop**:
+- 1080p+ (target primario)
+- 1440p+ (layout esteso, contenuto centrato max 1400px vedi `15§10`)
+
+**Limiti hardware**:
+- IndexedDB quota: assume `navigator.storage.estimate()` > 1GB disponibile; degradare a read-only sotto soglia (`§5`)
+- WebAssembly SIMD: opzionale, fallback scalare se non disponibile (Essentia.js)
+- Touch target ≥ 44px (vedi `15§9` a11y)
+- Connessione di rete: assume offline dopo primo load; enrichment richiede rete esplicita
+
+## 11. App update management (PWA)
+
+Le PWA richiedono un ciclo di aggiornamento **esplicito e controllato** perché l'utente non scarica attivamente: il Service Worker aggiorna la cache in background. Senza gestione, l'utente può restare bloccato su una versione vecchia (anche con cache buggate).
+
+### 11.1 Version manifest
+
+- L'app pubblica un `version.json` su `/version.json` con `{version, buildHash, releasedAt, minSchemaVersion}`
+- Il client confronta a ogni boot; se `version` corrente > versione cached → update disponibile
+- `minSchemaVersion` indica la **versione minima di `02-DATA-SCHEMA.md`** che il client sa gestire; se il DB locale ha `schemaVersion < minSchemaVersion`, l'utente **deve** aggiornare prima di continuare
+
+### 11.2 Service Worker update lifecycle
+
+Gestito da **Workbox** (`vite-plugin-pwa`):
+
+1. **Install**: SW nuovo scarica i precached assets in `tempCache`
+2. **Waiting**: SW nuovo aspetta che tutte le tab del SW vecchio siano chiuse
+3. **Activate**: SW nuovo prende il controllo, pulisce `oldCaches`
+4. **Clients claim**: il SW nuovo si annuncia via `clients.claim()` solo se la versione è **soft-compatible** (minor/patch); per major → attende chiusura tab
+
+### 11.3 Prompt policy
+
+| Tipo cambio | Comportamento |
+|-------------|---------------|
+| **Patch** (es. 1.0.0 → 1.0.1) | Auto-apply al prossimo boot, nessun prompt |
+| **Minor** (es. 1.0.0 → 1.1.0) | Banner soft: "Nuova versione disponibile" con CTA "Aggiorna ora" / "Più tardi" |
+| **Major** (es. 1.x → 2.x) | **Modal bloccante** se c'è una migrazione DB; altrimenti banner come minor |
+
+Il prompt è gestito dall'hook `useAppUpdate()` in `@ls/web/hooks`, che ascolta `serviceWorker.controllerchange` e il custom event `ls:update-available`.
+
+### 11.4 Migrazione DB tra versioni
+
+Quando una nuova versione di `02-DATA-SCHEMA.md` viene rilasciata, il client:
+
+1. Confronta `currentDbVersion` (letto da `db.verno`) con `expectedDbVersion` (build-time constant)
+2. Se `currentDbVersion < expectedDbVersion`: esegue le funzioni di upgrade di Dexie (`02§7` MIG-1..4) in sequenza
+3. Se l'upgrade fallisce: rollback all'ultima versione funzionante via SW + banner "Ripristino versione precedente" (solo per failure di migrazione, NON per failure di feature)
+
+### 11.5 Cosa NON è qui
+
+- Dettaglio implementativo di Workbox (vedi Story 0.5 + `12-DEVOPS.md`)
+- Changelog UI / "What's new" (vedi Story dedicata, `11-BACKLOG.md` Story 6.2)
+- Operazioni di manutenzione DB (vedi `§12`)
+
+## 12. Database maintenance
+
+Operazioni di manutenzione che il client deve supportare per garantire salute del DB locale nel tempo. Sono **non-bloccanti** per l'utente: girano in background, con throttling, e notifichino l'utente solo se rilevano problemi.
+
+### 12.1 Operazioni standard
+
+| Operazione | Quando | Cosa fa | Costo |
+|------------|--------|---------|-------|
+| `recount()` | Dopo ogni import + settimanale | Ricalcola `listenCount` denormalizzati su tracks/artists | O(n listens) |
+| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati | O(n tracks) |
+| `orphanCleanup()` | Mensile | Rimuove `tracks`/`artists` non referenziati da `listens` né da `library` | O(n tracks) |
+| `indexRebuild()` | Manuale + dopo migrazione | Ricostruisce indici Dexie se corrotti | Lock lungo |
+| `fastCheck()` | Ad ogni boot (in dev/prod) | Smoke test: DB apribile, schema version corretto, indici funzionanti | < 100ms |
+| `quotaCheck()` | Settimanale | `navigator.storage.estimate()` → warning se > 80% | < 50ms |
+| `compact()` | Manuale (utente) | `IDBObjectStore` compaction se supportato | Variabile |
+
+### 12.2 Scheduling
+
+- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`)
+- **Scheduled**: `orphanCleanup`, `quotaCheck` via Web Worker in `requestIdleCallback`, max 5 min/giorno (cumulativo con `§7.1`)
+- **Manuale**: `indexRebuild`, `compact` da pulsante in Settings → "Manutenzione DB" (raro)
+- **Boot**: `fastCheck` sempre; se fallisce, l'app entra in read-only mode (`§5`)
+
+### 12.3 Health monitoring (no telemetry, D.A.1)
+
+- I risultati di `fastCheck` / `quotaCheck` sono loggati in `core/logger` localmente
+- L'utente vede un badge "Tutto ok" o un banner "Spazio in esaurimento" in Settings → Manutenzione
+- Un contatore anonimo `lastMaintenance: { recount, rekey, orphan, fastCheck }` è mostrato all'utente per trasparenza
+- **Nessun dato** viene inviato a server (coerente con ADR-0002)
+
+### 12.4 Migrazioni schema (MIG-1..4)
+
+Le migrazioni sono definite in `02-DATA-SCHEMA.md §7`. Regole di processo:
+
+1. **Mai drop di tabelle utente** (MIG-1)
+2. Ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)` con **funzione di upgrade testata** (vedi `10-TESTING.md §4`)
+3. Le tabelle derivate (`sessions`, `insights`) sono **ricostruibili** con `recompute()` (MIG-2)
+4. I parametri di analisi cambiano `derivedVersion` (MIG-3)
+5. I contatori denormalizzati sono ricalcolabili con `recount()` (MIG-4)
+
+Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollback automatico. L'utente vede un banner "Aggiornamento DB non riuscito, ripristino versione precedente" (`11.4`).
+
+### 12.5 Cosa NON è qui
+
+- Backup cloud (non c'è cloud in MVP, vedi D.A.7)
+- Sync DB (vedi ADR-0005, Fase 2)
+- Operazioni di rete di qualsiasi tipo
+- Implementazione dettagliata di `recount`/`rekey`/etc (vedi Story 0.2 + `10-TESTING.md`)
 
 ---
 
@@ -158,3 +447,5 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: §3 formato unificato riallineato a 02 (piatto, eventKey, day); §3.1 pipeline 6 step RawListenEvent→ListenEvent; §3.2 formula `eventKey`; §4 contratto esteso con `name`/`version`, `AbortSignal`, `AdapterError` con `recoverable` e `partialEvents`; §4 `detect(): boolean \| Promise<boolean>` (D.A.8); §5 allineato a Dexie v2 (12 tabelle); §5 + transazioni e read-only mode; §6 pipeline Essentia→AB→euristica (D.A.6); §6.1 trigger conditions (on-import/on-demand/scheduled); §6.2 caching policy (TTL, LRU, invalidazione); §7.1 scheduling 50ms chunk + incrementalità; §7.2 failure isolation; §7.3 versioning esplicito; §8 stack esteso: TS 5.6, Vite 6, Dexie 4, React Query 5, Tailwind 4, Recharts 2.15, D3 7, Tauri 2, Zod 3, react-hook-form, i18next, date-fns(-tz), Comlink 4, MSW, Playwright 1.5+, @vitest/coverage-v8, rollup-plugin-visualizer, core/logger; §8.1 tooling dev (ESLint 9 flat, Prettier 3, Husky, lint-staged, commitlint, TS strict); §9 + logger/ in core; §9.1 convenzioni package (`@ls/*`, exports map, lockfile unico); §9.2 regole acicliche (core/runtime-agnostic, ui solo tipi, web orchestra); §10 NFR rivisti (M13); §10.1 budget performance P95 per route; §10.2 dispositivi target (mobile-first, baseline iPhone 12/Pixel 6); §11 App update management (PWA) — version manifest, SW lifecycle Workbox, prompt policy patch/minor/major, migrazione DB tra versioni; §12 Database maintenance — recount/rekey/orphanCleanup/indexRebuild/fastCheck/quotaCheck/compact, scheduling, health monitoring locale, MIG-1..4; aggiunti fast-check, fake-indexeddb, Turborepo |
+| 1.0 | Sessione 9 (2026-10-15) | 🟢 APPROVED · Promozione a versione vincolante dopo review completa di tutte le 12 sezioni con Boss. Sblocca story 0.1 `agent-ready` |

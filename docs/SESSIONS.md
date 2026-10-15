@@ -186,11 +186,60 @@
 
 ---
 
-### 🎉 STATO FINALE DEL PROGETTO
-La fase di progettazione è **COMPLETATA AL 100%**.
-Il repository contiene tutte le specifiche necessarie per l'handoff agli agenti di sviluppo (Fase 0 tecnica).
+## Sessione 9 — 🩺 Audit completo + allineamento post-sessione
 
-*Progettazione completata al 100%. Pronto per l'handoff agli agenti di sviluppo.*
+**Data**: 2026-10-15
+**Stato**: ✅ Completata
+**Trigger**: drift tra documenti APPROVED e DRAFT accumulato nelle sessioni 4-8 non sincronizzato.
+
+### Documenti aggiornati
+- 🟢 `docs/02-DATA-SCHEMA.md` → v1.1 (`genres`, `carDetectionConsent`, `searchQueries`, Dexie v2, PatternPayload esteso)
+- 🟡 `docs/00-VISION.md` → v0.2 (decisioni strategiche chiuse)
+- 🟡 `docs/05-ARCHITECTURE.md` → v0.2 (formato flat, detect() union, Essentia→AB→euristic, Recharts+D3 lazy, React Query solo enrichment, sync cloud placeholder)
+- 🟡 `docs/08-COPY-I18N.md` → v0.2 (rimosse `privacy.stats`, aggiunte `carDetection`, `syncCloud`, `insight.disclaimer`, `adapter.spotify.warn.offlineConverted`, soglia 500MB)
+- 🟡 `docs/12-DEVOPS.md` → v0.2 (rimosso Sentry, CSP ripulita, Dockerfile monorepo-aware, Apache-2.0)
+- 🟡 `docs/15-DESIGN-SYSTEM.md` → scale Display + count-up documentate
+- 🟢 `docs/11-BACKLOG.md` → v1.1 (Story 2.2 change point, nuove story scrobbleHubs + PWA/i18n, Story 4.1 Essentia)
+- 🟡 `docs/01-PLATFORMS.md` → E1 validata, hubs chiariti
+- 🟡 `docs/06-UX-FLOWS-STATES.md` → re-import idempotente esplicitato
+- `design/tokens.json` → display scale, count-up duration
+- `docs/INDEX.md` → conteggi corretti, ADR-0005, LICENSE, AUDIT
+- `docs/13-ADR/0005-sync-cloud.md` → nuovo ADR placeholder
+- `LICENSE` → nuovo file (Apache-2.0)
+- `AGENTS.md` → footer aggiornato
+
+### Decisioni prese (audit)
+
+| # | Decisione | Esito |
+|---|-----------|-------|
+| D.A.1 | Telemetria e statistiche | **Rinviate a Fase 2.** Niente Sentry, niente toggle stats |
+| D.A.2 | Generi | `genres: string[]` su Track e Artist in 02 v1.1 |
+| D.A.3 | searchQueries | Aggiungere tabella in 02 v1.1 |
+| D.A.4 | Libreria grafici | Recharts standard + D3 solo Timeline (lazy import) |
+| D.A.5 | React Query | Solo per enrichment |
+| D.A.6 | Provider audio features | Essentia.js (wasm) + AcousticBrainz bonus + fallback euristico |
+| D.A.7 | Cloud sync (impl.) | Placeholder + ADR-0005 in Fase 2 |
+| D.A.8 | `detect()` adapter | `boolean \| Promise<boolean>` |
+| D.A.9 | Business model | Open-source puro, no monetizzazione |
+| D.A.10 | Licenza | **Apache-2.0** |
+| D.A.11 | Self-hosting | Solo self-hosting con docs curata; demo gratuita eventuale in Fase 2 |
+| D.A.12 | Cloud sync (vision) | Previsto come servizio self-hosted in Fase 2; ADR-0005 con E2EE, consenso granulare, opt-in per categoria |
+
+### Esito sintetico
+30 decisioni su 38 storicamente coerenti. **9 incongruenze critiche risolte** (C1-C9), 13 medie risolte o accettate (M1-M13), 6 vuoti documentati (V1-V6).
+
+### Prossimi step
+1. ✅ **Approvazione Boss di `05-ARCHITECTURE.md` v0.2 → v1.0 🟢 APPROVED** (sblocca story 0.1 `agent-ready`)
+2. ⬚ Fixture Spotify v1.1 (C6)
+3. ⬚ `design/mockups/TOUR.md` (V2)
+4. ⬚ Story backlog per `scrobbleHubs` (V4) e PWA/service worker + i18n (V5) — **aggiunte in v1.1 come Story 0.5, 0.6, 0.7, 1.5**
+
+---
+
+### Stato del progetto post-Sessione 9
+La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** ↔ 10 ↔ 11 ↔ 14) solida. Il prossimo handoff è per gli agenti di sviluppo (Fase 0 tecnica): **story 0.1 sbloccata**.
+
+*Progettazione chiusa. 🟢 APPROVED su 8 documenti. Story 0.1 `agent-ready` sbloccata: si parte con la Fase 0 tecnica.*
 
 ---
 

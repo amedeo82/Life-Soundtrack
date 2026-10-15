@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 5
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -176,8 +176,10 @@
 | `privacy.retainIpDesc` | Gli IP restano solo sul tuo dispositivo | IPs stay only on your device |
 | `privacy.enrich` | Arricchimento metadati online | Online metadata enrichment |
 | `privacy.enrichDesc` | Recupera audio features da fonti esterne | Fetch audio features from external sources |
-| `privacy.stats` | Statistiche anonime | Anonymous statistics |
-| `privacy.statsDesc` | Aiutaci a migliorare (no dati personali) | Help us improve (no personal data) |
+| `privacy.carDetection` | Rileva ascolti in auto | Detect car listening |
+| `privacy.carDetectionDesc` | Deduce l'ascolto in auto da segnali locali (Bluetooth, CarPlay). Nessun dato lascia il dispositivo | Deduce car listening from local signals (Bluetooth, CarPlay). No data leaves the device |
+| `privacy.syncCloud` | Sincronizza tra dispositivi (Fase 2) | Sync across devices (Phase 2) |
+| `privacy.syncCloudDesc` | Sincronizzazione cifrata end-to-end, opzionale | End-to-end encrypted sync, optional |
 | `data.export` | Esporta tutto (JSON) | Export all (JSON) |
 | `data.delete` | Cancella tutti i dati | Delete all data |
 | `prefs.theme` | Tema | Theme |
@@ -223,6 +225,7 @@
 | `spotify.wrongFormat` | Questo file sembra di {platform}, non di Spotify | This file looks like {platform}, not Spotify |
 | `spotify.warn.podcastSkipped` | {count} episodi podcast esclusi | {count} podcast episodes excluded |
 | `spotify.warn.overlaps` | {count} eventi sovrapposti rilevati | {count} overlapping events detected |
+| `spotify.warn.offlineConverted` | {count} tracce offline convertite in eventi stimati | {count} offline tracks converted to estimated events |
 | `spotify.info.complete` | Import completato: {events} eventi, {tracks} brani unici | Import complete: {events} events, {tracks} unique tracks |
 | *(analoghi per youtube, apple, deezer, tidal, soundcloud, lastfm, listenbrainz)* | | |
 
@@ -232,7 +235,7 @@
 |-----|----|----|
 | `generic` | Qualcosa è andato storto | Something went wrong |
 | `retry` | Riprova | Retry |
-| `fileTooLarge` | File troppo grande (max 1GB) | File too large (max 1GB) |
+| `fileTooLarge` | File troppo grande (max 500MB) | File too large (max 500MB) |
 | `networkOffline` | Sei offline, i dati sono salvati localmente | You're offline, data is saved locally |
 | `dbCritical` | Errore critico, ricarica l'app | Critical error, reload the app |
 
@@ -271,6 +274,8 @@
 | `memory.milestone.hours` | Hai raggiunto {count} ore di ascolto! | You reached {count} hours of listening! |
 | `memory.return` | Non ascoltavi {artist} da {months} mesi | You hadn't listened to {artist} for {months} months |
 | `memory.seasonal` | Come ogni {month}, è tornato il periodo {genre} | Like every {month}, the {genre} period is back |
+| `disclaimer` | Questo insight è generato automaticamente a partire dai tuoi dati di ascolto. Non è una diagnosi. | This insight is derived automatically from your listening data. It is not a diagnosis. |
+| `disclaimerShort` | Generato automaticamente | Auto-generated |
 
 ## 3. Pluralizzazione
 
@@ -328,3 +333,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |

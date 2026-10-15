@@ -1,6 +1,6 @@
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -81,6 +81,7 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       isrc: string | null;
       mbid: string | null;     // MusicBrainz Recording ID
       explicit: boolean | null;
+      genres: string[];        // popolato da enrichment (MusicBrainz) o dall'adapter
       platformIds: Partial<Record<PlatformId, string>>;
       firstSeenAt: number;
       lastSeenAt: number;
@@ -91,6 +92,7 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       id: string;
       name: string;
       mbid: string | null;
+      genres: string[];        // popolato da enrichment (MusicBrainz) o dall'adapter
       platformIds: Partial<Record<PlatformId, string>>;
       listenCount: number;
     }
@@ -121,7 +123,7 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       mode: 0 | 1 | null;              // 0=minore 1=maggiore
       loudness: number | null;         // dB
       timeSignature: number | null;
-      source: 'acousticbrainz' | 'api_freqblog' | 'api_musicae' | 'essentia' | 'manual';
+      source: 'acousticbrainz' | 'essentia' | 'heuristic' | 'manual';
       fetchedAt: number;
       schemaVersion: number;
     }
@@ -206,8 +208,9 @@ Calcolato dall'adapter. Garantisce import idempotenti.
     export interface PrivacySettings {
       retainIp: boolean;          // default false; toggle ESPLICITO dell'utente
       enrichMetadata: boolean;    // default false; arricchimento metadati brani
+      carDetectionConsent: boolean; // default false; rilevamento ascolti in auto (es. Bluetooth/Battery)
       scrobbleHubs: PlatformId[]; // default []; hub di scrobbling scelti
-      syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2)
+      syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2, ADR-0005)
     }
 
 Quando `retainIp` è true:
@@ -219,6 +222,28 @@ Quando `retainIp` è true:
 Quando `retainIp` è false (default):
 - `ListenEvent.ip` è null dopo il parse
 - Il `country` è derivato e conservato (privacy-by-design)
+
+Quando `carDetectionConsent` è true (default false):
+- L'utente acconsente a eventi `deviceType='car'` rilevati da segnali locali (Bluetooth auto, CarPlay, Android Auto, power profile)
+- L'evento resta locale; nessun dato auto-specifico lascia il dispositivo
+- Disattivabile in qualsiasi momento
+
+### 3.9 SearchQuery (criteri di ricerca)
+
+    export interface SearchQuery {
+      id: string;
+      platform: PlatformId;
+      query: string;             // testo libero cercato dall'utente
+      normalized: string;        // query normalizzata (lowercase, trim) per dedup
+      timestamp: number;         // unix ms UTC
+      resultCount: number | null; // null se non disponibile
+      context: 'manual' | 'browse' | 'recommendation';
+    }
+
+Regole di persistenza:
+- Solo se `PrivacySettings.enrichMetadata` è true OPPURE il consenso specifico è attivo
+- Mai condivisi con terze parti
+- Deduplicazione per `(platform, normalized, day)` via indice
 
 ## 4. Payload degli Insight (unione discriminata)
 
@@ -267,6 +292,12 @@ Quando `retainIp` è false (default):
       kind: 'pattern';
       patternType: 'circadian' | 'weekly' | 'seasonal';
       buckets: Record<string, number>;  // es. ora->quota, giorno->quota, mese->quota
+      peakHour: number | null;         // 0..23, in userTimezone (circadian)
+      peakDay: number | null;          // 0=Sun..6=Sat, in userTimezone (weekly)
+      peakMonth: number | null;        // 1..12, in userTimezone (seasonal)
+      nightShare: number | null;       // quota ascolti 00:00-05:59 (userTimezone)
+      weekendShare: number | null;     // quota sab+dom (userTimezone)
+      userTimezone: string;            // IANA tz, es. 'Europe/Rome'
     }
 
 ## 5. Regole di deduplicazione tracce (DEDUP)
@@ -297,7 +328,7 @@ Comportamento upsert:
 
 ## 6. Schema Dexie (IndexedDB) — versione 1
 
-    db.version(1).stores({
+    db.version(2).stores({
       listens:       '&eventKey, timestamp, startedAt, trackId, platform, day, importId',
       tracks:        '&canonicalKey, name, artistId, albumId, isrc, mbid',
       artists:       '&id, name, mbid',
@@ -309,7 +340,10 @@ Comportamento upsert:
       library:       '&id, trackId, artistId, albumId, platform',
       playlists:     '&id, platform',
       playlistItems: '&[playlistId+trackId], playlistId, addedAt',
+      searchQueries: '&id, platform, timestamp, [platform+normalized]',
     });
+
+Migrazione v1→v2: aggiunge `searchQueries`; nessuna modifica distruttiva a tabelle esistenti. Le colonne `genres` su `tracks`/`artists` sono nullable e backfill opzionale via enrichment.
 
 PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&x` usano x come chiave primaria unica. `id` espliciti sono UUID generati dal core.
 
@@ -335,3 +369,4 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione eseguibile |
 | 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
+| 1.1 | Sessione 9 (2026-10-15) | Audit: `genres: string[]` su Track/Artist (D.A.2); `carDetectionConsent` in PrivacySettings (C1); tabella `searchQueries` + interfaccia (D.A.3); `AudioFeatures.source` ripulito a `{acousticbrainz, essentia, heuristic, manual}` (D.A.6); schema Dexie portato a v2; `PatternPayload` esteso con `peakHour`, `peakDay`, `peakMonth`, `nightShare`, `weekendShare`, `userTimezone` (M6/M7) |

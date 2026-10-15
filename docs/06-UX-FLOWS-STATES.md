@@ -1,6 +1,6 @@
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 5
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -54,7 +54,7 @@ Note: nessuna gestione errore (schermata statica).
 
 **Edge case UX**:
 - Trascinamento di file non supportato → toast "Formato non supportato"
-- Doppio drop stesso file → "Già importato" (no re-import)
+- Doppio drop stesso file (stesso `fileHash`) → toast "File già importato, operazione idempotente" con conteggio `eventsDuplicated`. **Non blocchiamo il re-import** (coerente con D.1.2 di `02-DATA-SCHEMA.md`): l'utente può forzare il re-import cliccando "Riprocessa" e il sistema deduplica via `eventKey`.
 - File > 500MB → warning "File grande, potrebbe richiedere qualche minuto"
 
 ### 2.4 ④ Processing
@@ -95,7 +95,7 @@ Note: nessuna gestione errore (schermata statica).
 | `loading` | Skeleton su tutte le card durante ricalcolo |
 
 **Animazioni**:
-- StatCard: count-up numeri all'apparizione (600ms, easing-out)
+- StatCard: count-up numeri all'apparizione (600ms, easing-out, vedi `design/tokens.json` `motion.countUp.duration`)
 - MemoryCard: fade-in con delay 200ms
 - BarWeek: barre che crescono con stagger
 
@@ -357,3 +357,4 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: re-import esplicito come idempotente (M8) — niente blocco al doppio drop, dedup via `eventKey`; riferimento count-up al token `motion.countUp.duration` (M11) |

@@ -1,8 +1,8 @@
 # 00 — Visione e Missione
 
 > Status: 🟡 DRAFT
-> Versione: 0.1
-> Ultima modifica: Sessione 0
+> Versione: 0.2
+> Ultima modifica: Sessione 9 (audit 2026-10-15)
 > Responsabile: Boss
 
 ---
@@ -52,7 +52,7 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 - **Piattaforma di distribuzione**: PWA (web app installabile)
 - **Modalità operativa**: Local-first, elaborazione in-browser
 - **Lingue MVP**: Italiano, Inglese
-- **Modello di business**: Da definire (placeholder: gratuito + opzioni premium)
+- **Modello di business**: Open-source puro, nessuna monetizzazione (donazioni opzionali) — vedi D.A.9
 
 ## 🚫 Cosa NON è Life Soundtrack
 
@@ -77,15 +77,15 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 - **Engagement con ricordi**: % di ricordi visti / condivisi
 - **NPS**: soddisfazione percepita
 
-## 🧭 Decisioni Strategiche Aperte
+## 🧭 Decisioni Strategiche (risolte in audit 2026-10-15)
 
-| Decisione | Stato | Note |
+| Decisione | Esito | Rif. |
 |-----------|-------|------|
-| Modello di business (free / freemium / donation) | 🔴 Aperto | Da decidere in Sessione 6 |
-| Open source o proprietario | 🔴 Aperto | Tendenza verso open source |
-| Licenza (se open source) | 🔴 Aperto | AGPL vs MIT vs Apache |
-| Self-hosting supportato ufficialmente | 🔴 Aperto | Probabilmente sì, tramite Docker |
-| Sync cloud opzionale | 🔴 Aperto | Probabilmente sì in Fase 2 |
+| Modello di business | ✅ Open-source puro, nessuna monetizzazione | D.A.9 |
+| Licenza | ✅ Apache-2.0 (con patent grant) | D.A.10 |
+| Self-hosting supportato | ✅ Solo self-hosting con docs curata; istanza demo gratuita eventuale in Fase 2 | D.A.11 |
+| Sync cloud | ✅ Previsto come servizio self-hosted in Fase 2 (mai SaaS); ADR-0005 con E2EE + consenso granulare + opt-in per categoria | D.A.12 |
+| Cloud sync (implementazione MVP) | ✅ Placeholder in `05`, ADR-0005 da scrivere prima dell'implementazione | D.A.7 |
 
 ---
 
@@ -94,6 +94,7 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: chiuse tutte le decisioni strategiche aperte (D.A.9-12). Aggiornato modello di business |
 
 ---
 

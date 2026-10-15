@@ -1,6 +1,6 @@
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 8
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -52,7 +52,10 @@ jobs:
         run: pnpm run type-check
 
       - name: Run tests
-        run: pnpm run test:coverage
+        run: pnpm run test
+
+      - name: Run coverage per package (vedi 10-TESTING §2)
+        run: pnpm --filter @ls/core run test:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -99,14 +102,16 @@ Per gli utenti che desiderano ospitare Life Soundtrack sul proprio server (es. R
 ### 3.1 `Dockerfile` (Multi-stage)
 
 ```dockerfile
-# Stage 1: Build
+# Stage 1: Build (monorepo-aware)
 FROM node:20-alpine AS builder
 WORKDIR /app
-RUN npm install -g pnpm
-COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm@9
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY apps apps
+COPY packages packages
+COPY scripts scripts
 RUN pnpm install --frozen-lockfile
-COPY . .
-RUN pnpm run build
+RUN pnpm --filter @ls/web run build
 
 # Stage 2: Serve (Nginx)
 FROM nginx:alpine
@@ -160,14 +165,14 @@ Da configurare in `nginx.conf` o nelle impostazioni di Vercel/Netlify (`vercel.j
 ```text
 Content-Security-Policy: 
   default-src 'self'; 
-  script-src 'self' 'wasm-unsafe-eval' https://api.musicbrainz.org; 
+  script-src 'self' 'wasm-unsafe-eval'; 
   style-src 'self' 'unsafe-inline'; 
   img-src 'self' data: https:; 
-  connect-src 'self' https://api.musicbrainz.org https://freqblog.com; 
+  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org; 
   worker-src 'self' blob:;
   frame-ancestors 'none';
 ```
-*Nota*: `'wasm-unsafe-eval'` è necessario per Essentia.js (WebAssembly). `connect-src` limita le chiamate di rete solo ai servizi di arricchimento esplicitamente approvati.
+*Nota*: `'wasm-unsafe-eval'` è necessario per Essentia.js (WebAssembly). `connect-src` limita le chiamate di rete solo a MusicBrainz (provider approvato per enrichment + bonus audio features su MBID). **Rimosso** `https://freqblog.com` (D.A.6: provider non più usato).
 
 ### 5.2 Altri Headers di Sicurezza
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
@@ -180,9 +185,9 @@ Content-Security-Policy:
 
 ## 6. Monitoraggio & Errori
 
-- **Nessun tracking utente**: Non installare Google Analytics, Mixpanel, o simili.
-- **Error Reporting**: Usare Sentry *solo* per errori di crash dell'applicazione (JS errors), configurato per **anonimizzare** automaticamente qualsiasi dato (no PII, no URL con parametri sensibili).
-- **Uptime**: Monitoraggio base tramite GitHub Actions o UptimeRobot sul dominio pubblico.
+- **Nessun tracking utente**: Non installare Google Analytics, Mixpanel, Sentry o simili (D.A.1).
+- **Error Reporting**: errori JS catturati da un error boundary locale e loggati nella **console del browser** dell'utente. L'utente può copiare e incollare il log su GitHub Issues. Nessun dato lascia il dispositivo.
+- **Uptime**: Monitoraggio base tramite GitHub Actions o UptimeRobot sul dominio pubblico (se attivo in Fase 2).
 
 ---
 
@@ -205,7 +210,7 @@ Prima di rendere il repository pubblico o il sito accessibile, verificare:
 ### Documentazione
 - [ ] `README.md` ha istruzioni chiare per sviluppo e self-hosting.
 - [ ] `AGENTS.md` è aggiornato e punta ai documenti corretti.
-- [ ] Licenza del progetto definita e file `LICENSE` presente (es. MIT o AGPL-3.0).
+- [ ] Licenza del progetto definita e file `LICENSE` presente (**Apache-2.0**, D.A.10).
 
 ### UX & Accessibilità
 - [ ] L'app è installabile come PWA su mobile e desktop.
@@ -229,3 +234,4 @@ Prima di rendere il repository pubblico o il sito accessibile, verificare:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 8 | Prima versione completa |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10) |

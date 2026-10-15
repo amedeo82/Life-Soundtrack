@@ -1,9 +1,9 @@
 # 15 — Design System
 
 > Status: 🟡 DRAFT
-> Versione: 0.1
-> Ultima modifica: Sessione 0 (consolidamento)
-> Asset collegati: `design/mockups/` (14 schermate), `design/tokens.json` (Sessione 7)
+> Versione: 0.2
+> Ultima modifica: Sessione 9 (audit 2026-10-15)
+> Asset collegati: `design/mockups/` (14 schermate), `design/tokens.json` (v0.2)
 
 ---
 
@@ -66,6 +66,15 @@ Spotify `#1DB954` · YouTube `#FF0000` · Apple Music `#FA243C` · Deezer `#A238
 | Dati tecnici (URI, timestamp, IP) | JetBrains Mono | 400 |
 
 Scala: Display 48-64 · H1 32 · H2 24 · H3 20 · Body 16 · Small 14 · Caption 12.
+
+**Display 48-64px** (audit M11): usato per i numeri hero delle `StatCard` (schermata ⑥ Home). Tre scale definite in `design/tokens.json` `typography.fontSize.display.*`:
+
+| Token | px | Uso |
+|-------|-----|-----|
+| `display.sm` | 48 | StatCard con 1-2 cifre (anni, conteggi bassi) |
+| `display.md` | 56 | StatCard standard (ore ascoltate) |
+| `display.lg` | 64 | StatCard hero (eventi totali, metriche signature) |
+
 Licenze: Inter e JetBrains Mono sono SIL OFL → ok per uso commerciale. Documentare in Sessione 6.
 
 ## 4. Principi stilistici
@@ -111,18 +120,18 @@ Spec dettagliate per componente (props, stati, a11y) → Sessione 7 (`07-UI-SPEC
 - **Controllo**: Settings (piattaforme, privacy toggle, export JSON, cancellazione totale)
 - **Empty state**: ogni sezione ha illustrazione + CTA di uscita; mai pagine bianche
 
-Tour completo delle 14 schermate con navigation map: `design/mockups/TOUR.md` (da creare in Sessione 5).
+Tour completo delle 14 schermate con navigation map: `design/mockups/TOUR.md` (audit V2, da creare in Sessione 10).
 
 ## 8. Micro-interazioni
 
-| Interazione | Feedback |
-|-------------|----------|
-| Hover StatCard | Glow + count-up numeri |
-| Click EraBand | Espansione smooth + dettaglio |
-| Scroll Timeline | Ere si illuminano al passaggio |
-| Import completato | Confetti sottili |
-| Prima rivelazione | Ere si colorano in sequenza 2016→2026 |
-| Long-press brano (mobile) | Menu contestuale |
+| Interazione | Feedback | Token |
+|-------------|----------|-------|
+| Hover StatCard | Glow + **count-up** numeri (600ms, easing-out) | `motion.countUp.duration` |
+| Click EraBand | Espansione smooth + dettaglio | `motion.expand` |
+| Scroll Timeline | Ere si illuminano al passaggio | — |
+| Import completato | Confetti sottili | — |
+| Prima rivelazione | Ere si colorano in sequenza 2016→2026 | `motion.reveal` |
+| Long-press brano (mobile) | Menu contestuale | — |
 
 Motion reduction rispettata (`prefers-reduced-motion`).
 
@@ -153,3 +162,4 @@ Motion reduction rispettata (`prefers-reduced-motion`).
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: scala Display 48/56/64 documentata (M11) con tabella di utilizzo; micro-interazioni con riferimento ai token `motion.*`; TOUR.md rinviato a Sessione 10 (V2) |

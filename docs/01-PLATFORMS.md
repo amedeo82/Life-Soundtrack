@@ -1,8 +1,8 @@
 # 01 — Matrice Piattaforme e Dati Ottenibili
 
 > Status: 🟡 DRAFT
-> Versione: 0.1
-> Ultima modifica: Sessione 0 (consolidamento)
+> Versione: 0.2
+> Ultima modifica: Sessione 9 (audit 2026-10-15)
 > Scope: MVP europeo
 
 ---
@@ -105,6 +105,7 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - Nessuna piattaforma commerciale: librerie personali (CD digitalizzati, acquisti, file rari)
 - Integrazione via scrobbling (Maloja, multi-scrobbler, webhook Plex→ListenBrainz)
 - **Valore unico**: copre la parte più intima della storia musicale, invisibile alle piattaforme
+- **Nota su `PlatformId`**: in `02-DATA-SCHEMA.md` le piattaforme commerciali sono in `PlatformId`; Subsonic/Roon/Maloja **non** sono piattaforme sorgente del modello, ma **hub di scrobbling** — vivono in `PrivacySettings.scrobbleHubs` (e nell'eventuale adapter Subsonic dedicato in `03-ADAPTERS/`, fuori perimetro MVP). `navidrome` è in `PlatformId` come caso particolare di Subsonic API.
 
 ### 3.10 Fuori perimetro MVP (estensioni future)
 
@@ -131,7 +132,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 
 | # | Piattaforma | Edge case | Impatto | Azione adapter |
 |---|-------------|-----------|---------|----------------|
-| E1 | Spotify | `skipped` non affidabile: nessun skip registrato 2015-04→2022-10; valori misti prima/dopo | Statistiche skip errate | Regola derivata: `skipped OR reason_end IN (backbtn, unknown, endplay, fwdbtn)` — **da validare in Sessione 2** |
+| E1 | Spotify | `skipped` non affidabile: nessun skip registrato 2015-04→2022-10; valori misti prima/dopo | Statistiche skip errate | Regola derivata: `skipped OR reason_end IN (backbtn, unknown, endplay, fwdbtn)` — **validata in Sessione 2** (`03-ADAPTERS/spotify.md`) |
 | E2 | Spotify | Timestamp sovrapposti (~2.6% della durata totale); stream duplicati identici con `ts` diverso | Durata totale sovrastimata | Deduplicazione per (uri, ts±1s, ms_played) |
 | E3 | Spotify | `offline_timestamp`: unità passate da secondi a millisecondi | Parsing errato | Normalizzazione unità per epoca |
 | E4 | Spotify | Stessa registrazione con URI/ISRC diversi (singolo + album + compilation) | Conteggi frammentati | Dedup via ISRC/MBID + fuzzy title (vedi `02-DATA-SCHEMA.md`) |
@@ -156,3 +157,4 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
+| 0.2 | Sessione 9 (2026-10-15) | Audit: E1 validata in S2 (riferimento `03-ADAPTERS/spotify.md`); chiarita distinzione `PlatformId` (sorgenti) vs `scrobbleHubs` (Subsonic/Roon/Maloja) (M4) |

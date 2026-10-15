@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 3
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -113,12 +113,96 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 **Acceptance criteria**:
 - [ ] Drag&drop ZIP Spotify → import completato con messaggio §9
 - [ ] File errato → errore umano "Questo file sembra di Apple Music, non di Spotify"
-- [ ] Privacy screen mostra i 3 toggle (`retainIp`, `enrichMetadata`, `scrobbleHubs`)
+- [ ] Privacy screen mostra i 4 toggle (`retainIp`, `enrichMetadata`, `carDetection`, `syncCloud`)
 - [ ] Nessun dato persistito prima del click "Importa tutto"
 - [ ] Design system rispettato (colori, typo, componenti `15-DESIGN-SYSTEM.md`)
 
 **Dipendenze**: Story 0.3
 **Spec**: `15-DESIGN-SYSTEM.md`, mockup schermate ①-④
+
+---
+
+### Story 0.5 — PWA e service worker `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:M]` `[DEP:0.1]`
+
+**Descrizione**: Trasformare la web app in una PWA installabile, con service worker che gestisce offline-first, precache degli asset e strategia network-first per enrichment con fallback cache.
+
+**Task**:
+- T0.5.1 — Configurazione `vite-plugin-pwa` con Workbox
+- T0.5.2 — Manifest.json (nome, icone, theme color)
+- T0.5.3 — Strategia cache: precache shell, runtime cache per asset statici, network-first per enrichment
+- T0.5.4 — Update prompt UX (banner "Nuova versione disponibile")
+
+**Acceptance criteria**:
+- [ ] App installabile da Chrome/Edge su desktop e mobile
+- [ ] Offline: tutte le schermate funzionano (tranne enrichment)
+- [ ] Update disponibile → banner con bottone "Ricarica"
+- [ ] Lighthouse PWA score ≥ 90
+
+**Dipendenze**: Story 0.1
+**Spec**: `05-ARCHITECTURE.md` §8, ADR-0001
+
+---
+
+### Story 0.6 — Setup i18n (i18next) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:S]` `[DEP:0.1]`
+
+**Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
+
+**Task**:
+- T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
+- T0.6.2 — Language detector (localStorage → browser)
+- T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
+- T0.6.4 — Componente `<T>` e hook `useT()`
+
+**Acceptance criteria**:
+- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
+- [ ] Switch IT↔EN senza reload
+- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
+- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
+
+**Dipendenze**: Story 0.1
+**Spec**: `08-COPY-I18N.md` §3, §4, §5
+
+---
+
+### Story 0.7 — Operations runbook + manutenzione `[PHASE-0]` `[AREA:devops]` `[PRI:I]` `[SIZE:M]` `[DEP:0.2, 0.5]`
+
+**Descrizione**: Documentare in dettaglio le operazioni di update management (`05§11`) e DB maintenance (`05§12`) nel nuovo file `docs/16-OPERATIONS.md`. Includere runbook per l'operatore (sviluppatore che mantiene il progetto) su diagnosi e remediation di problemi noti.
+
+**Task**:
+- T0.7.1 — Creare `docs/16-OPERATIONS.md` 🟡 DRAFT con §1 Update playbook, §2 Maintenance playbook, §3 Migrazioni schema, §4 Diagnosi & remediation
+- T0.7.2 — Hook `useAppUpdate()` in `@ls/web` (vedi `05§11.3`)
+- T0.7.3 — Implementare `recount()`, `rekey()`, `orphanCleanup()` in `@ls/core/db` con test (`10-TESTING.md §4`)
+- T0.7.4 — Implementare `fastCheck()` + `quotaCheck()` con logging strutturato
+- T0.7.5 — Settings → Manutenzione: UI per `indexRebuild`/`compact` manuale e contatore `lastMaintenance`
+- T0.7.6 — Version manifest: build script che genera `public/version.json` da `package.json` + `git rev-parse HEAD`
+
+**Acceptance criteria**:
+- [ ] `16-OPERATIONS.md` esiste e referenzia le sezioni `05§11` e `05§12`
+- [ ] Tutte le funzioni di manutenzione hanno test unitari ≥ 80% coverage
+- [ ] `fastCheck` eseguito al boot; failure → read-only mode + banner
+- [ ] Update soft (minor) mostra banner; update major mostra modal
+- [ ] Migrazione DB v1→v2 simulata in test passa senza perdita dati
+- [ ] Rollback SW in caso di migration failure funziona (test E2E)
+
+**Dipendenze**: Story 0.2, Story 0.5
+**Spec**: `05-ARCHITECTURE.md` §11, §12; `02-DATA-SCHEMA.md` §7
+
+**Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
+
+**Task**:
+- T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
+- T0.6.2 — Language detector (localStorage → browser)
+- T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
+- T0.6.4 — Componente `<T>` e hook `useT()`
+
+**Acceptance criteria**:
+- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
+- [ ] Switch IT↔EN senza reload
+- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
+- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
+
+**Dipendenze**: Story 0.1
+**Spec**: `08-COPY-I18N.md` §3, §4, §5
 
 ---
 
@@ -177,6 +261,27 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 1.5 — Scrobbling hub (Last.fm, ListenBrainz, Maloja) `[PHASE-1]` `[AREA:adapter]` `[PRI:L]` `[SIZE:L]` `[DEP:0.3]`
+
+**Descrizione**: Sorgente continua di ascolti tramite hub di scrobbling. Risolve il vuoto V4 dell'audit.
+
+**Task**:
+- T1.5.1 — Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)
+- T1.5.2 — Adapter ListenBrainz (recupero storico via API `/1/user/{username}/listens`)
+- T1.5.3 — Adapter Maloja self-hosted (server opzionale, scope futuro Fase 2)
+- T1.5.4 — Toggle `PrivacySettings.scrobbleHubs` per abilitare l'invio
+- T1.5.5 — Rispetto rate limit (Last.fm ~5 req/s, ListenBrainz ragionevole)
+
+**Acceptance criteria**:
+- [ ] Storico completo recuperato (paginazione)
+- [ ] MBID da ListenBrainz alimenta DEDUP-2 e genera `track.genres` via MusicBrainz lookup
+- [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura)
+- [ ] Test con mock API
+
+**Spec**: `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8
+
+---
+
 ## EPIC 2 — Analisi (Fase 2)
 
 ### Story 2.1 — Mood Tracker giornaliero `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
@@ -191,8 +296,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 ### Story 2.2 — Era Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
 **Acceptance criteria**:
-- [ ] Clustering (k-means o DBSCAN) con parametri documentati
-- [ ] EraPayload completo per ogni era
+- [ ] **Change point detection** (Bayesiano o PELT) con parametri `windowDays`, `kMin`, `kMax`, `similarityThreshold` documentati in `04-ANALYSIS-ALGORITHMS.md` §4
+- [ ] EraPayload completo per ogni era (vedi `02-DATA-SCHEMA.md` §4)
 - [ ] Test: 1 anno con 2 ere evidenti → rilevate correttamente
 
 ---
@@ -250,10 +355,10 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
 
 **Acceptance criteria**:
-- [ ] Cascata: cache → AcousticBrainz → API FreqBlog/Musicae → Essentia.js
+- [ ] Cascata: cache → **Essentia.js (WASM, browser)** → **AcousticBrainz (bonus su MBID)** → **fallback euristico** (D.A.6)
 - [ ] Toggle privacy `enrichMetadata` rispettato
-- [ ] Rate limiting API esterne
-- [ ] `AudioFeatures.source` tracciato
+- [ ] Rate limiting MusicBrainz (1 req/s)
+- [ ] `AudioFeatures.source` ∈ `{essentia, acousticbrainz, heuristic, manual}` tracciato
 
 ---
 
@@ -291,16 +396,20 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 
 1. **0.1** Setup monorepo
-2. **0.2** Schema DB
-3. **0.3** Adapter Spotify
-4. **0.4** UI import
-5. **1.1, 1.2, 1.3** in parallelo (altri adapter)
-6. **1.4** Dedup promozione
-7. **2.1, 2.4** analisi base
-8. **2.2, 2.3** analisi avanzata
-9. **4.1, 4.2** enrichment
-10. **3.1, 3.2, 3.3** UI
-11. **5.1, 5.2** privacy
+2. **0.5** PWA / service worker (parallelo a 0.1)
+3. **0.6** i18n setup (parallelo a 0.1)
+4. **0.2** Schema DB
+5. **0.7** Operations runbook + manutenzione (dopo 0.2 e 0.5)
+6. **0.3** Adapter Spotify
+7. **0.4** UI import
+8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
+9. **1.4** Dedup promozione
+10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
+11. **2.1, 2.4** analisi base
+12. **2.2, 2.3** analisi avanzata
+13. **4.1, 4.2** enrichment
+14. **3.1, 3.2, 3.3** UI
+15. **5.1, 5.2** privacy
 
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
@@ -317,3 +426,4 @@ Ogni story deve avere label GitHub:
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione con 5 epic e 17 story |
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
+| 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |

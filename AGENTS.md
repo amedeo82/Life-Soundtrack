@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.0 — Sessione 3 (stabile)
+> Versione 1.1 — Sessione 9 (post-audit, stabile)
 
 ---
 
@@ -138,4 +138,4 @@ Se non ci sono issue `agent-ready`, apri issue con label `needs-spec`.
 
 ---
 
-*Ultimo aggiornamento: Sessione 6 — fix sincronizzazione*
+*Ultimo aggiornamento: Sessione 9 (2026-10-15) — allineamento post-audit*

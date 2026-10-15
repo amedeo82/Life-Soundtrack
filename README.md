@@ -26,7 +26,7 @@ Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lav
 
 ## 📜 Licenza
 
-Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti riservati.
+[Apache-2.0](LICENSE) — vedi decisione D.A.10 dell'audit del 2026-10-15. Open-source puro, nessuna monetizzazione (D.A.9).
 
 ---
 
