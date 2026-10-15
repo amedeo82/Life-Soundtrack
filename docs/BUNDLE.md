@@ -1,7 +1,7 @@
 ﻿# BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-14 15:55
+> Data: 2026-10-15 10:24
 > Totale file: 21
 
 
@@ -193,10 +193,9 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 # 📚 Indice della Documentazione
 
 > Stato master del progetto. Aggiornato ad ogni sessione di progettazione.
-> **Leggi questo file prima di qualsiasi altro per avere una panoramica.**
+> **Leggi questo file prima di qualsiasi altro per avere una panoramic.**
 
 ## Legenda stati
-
 | Status | Significato |
 |--------|-------------|
 | 🟢 APPROVED | Documento approvato da Boss, vincolante per gli agenti |
@@ -204,7 +203,6 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 🔴 TODO | Documento da scrivere |
 
 ## Documenti fondamentali
-
 | # | File | Stato | Ultima modifica | Descrizione |
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 0 | Visione, missione, target, principi |
@@ -214,7 +212,7 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 4 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟡 DRAFT | Sessione 0 | Architettura tecnica generale |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 5 | Flussi UX e stati per schermata |
-| 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🔴 TODO | — | Specifiche UI componenti |
+| 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 5 | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
@@ -225,7 +223,6 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 0 | Design system completo |
 
 ## Documenti di supporto
-
 | File | Stato | Descrizione |
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni di progettazione |
@@ -233,23 +230,18 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.0 | Protocollo per agenti |
 
 ## Design & mockup
-
 | Cartella | Contenuto |
 |----------|-----------|
-| [`../design/mockups/`](../design/mockups/) | Mockup schermate (PNG storiche dalle sessioni esplorative) |
-| [`../design/tokens.json`](../design/tokens.json) | (futuro) Design tokens per il codice |
-| [`../design/assets/`](../design/assets/) | (futuro) Logo, icone, illustrazioni vettoriali |
+| [`../design/mockups/`](../design/mockups/) | Mockup schermate (PNG storiche) |
+| [`../design/tokens.json`](../design/tokens.json) | 🟢 Design tokens per il codice |
+| [`../design/assets/`](../design/assets/) | 🔴 (futuro) Logo, icone, illustrazioni vettoriali |
 
 ## Fixture di test
-
 | Cartella | Contenuto |
 |----------|-----------|
 | [`../fixtures/synthetic-history/`](../fixtures/synthetic-history/) | Dataset di test sintetici per ogni adapter |
-| [`../fixtures/db-seed/`](../fixtures/db-seed/) | (futuro) Seed per test DB |
-| [`../fixtures/scenarios/`](../fixtures/scenarios/) | (futuro) Scenari di vita pre-costruiti |
 
 ## Roadmap Sessioni di Progettazione
-
 | Sessione | Nome | Stato |
 |----------|------|-------|
 | 0 | 🔒 Consolidamento + Bootstrap | ✅ COMPLETATA |
@@ -259,18 +251,16 @@ Da definire (vedi [`docs/13-ADR/`](docs/13-ADR/)). Placeholder: tutti i diritti 
 | 4 | 🧠 Analisi algoritmica | ✅ COMPLETATA |
 | 5 | 🧭 UX completa + i18n | ✅ COMPLETATA |
 | 6 | 🔐 Privacy & legale | ✅ COMPLETATA |
-| 7 | 🎨 UI eseguibile + tokens | 🔴 PROSSIMA |
-| 8 | ⚙️ DevOps | 🔴 |
+| 7 | 🎨 UI eseguibile + tokens | ✅ COMPLETATA |
+| 8 | ⚙️ DevOps | 🔴 PROSSIMA |
 
 ## Stato del progetto
-
 - **Documenti APPROVED**: 9 (02, 03, 10, 11, 13-ADR×3, 14, AGENTS)
-- **Documenti DRAFT**: 7 (00, 01, 04, 05, 06, 08, 09, 15)
-- **Documenti TODO**: 2 (07, 12)
-- **Completamento progettazione**: ~97%
+- **Documenti DRAFT**: 8 (00, 01, 04, 05, 06, 07, 08, 09, 15)
+- **Documenti TODO**: 1 (12)
+- **Completamento progettazione**: ~99%
 
 ---
-
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
 
 
@@ -465,6 +455,30 @@ Boss ha reso il repo pubblico. Trovati 6 problemi di sincronizzazione risolti co
 | D6.5 | Mai dati reali nei fixture + check CI | Prevenzione leak |
 | D6.6 | DPIA probabilmente non richiesta | Da confermare con legale |
 | D6.7 | Privacy policy = BOZZA da revisionare con legale | Onestà intellettuale |
+
+---
+
+## Sessione 7 — 🎨 UI eseguibile + Design Tokens
+
+**Data**: ottobre 2026
+**Stato**: ✅ Completata
+
+### Documenti prodotti
+- ✅ `docs/07-UI-SPEC.md` (DRAFT) — Specifiche per 10+ componenti (props, stati, a11y, interazioni)
+- ✅ `design/tokens.json` (APPROVED) — Ponte tra design system e codice (colori, typo, spacing, radii, shadow, transition)
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D7.1 | Dark-first come default assoluto | Coerenza con l'identità "notturna" e musicale del brand |
+| D7.2 | Glow al posto delle ombre per stati attivi | Evoca luci di palco, più coerente col tema |
+| D7.3 | Accessibilità integrata nelle specifiche (sr-only, aria-label, focus trap) | WCAG 2.1 AA compliance fin dalla progettazione |
+| D7.4 | Design tokens in formato JSON W3C-compatible | Facilita l'import in Tailwind, CSS variables, o Figma |
+| D7.5 | Animazioni rispettano `prefers-reduced-motion` | Accessibilità per utenti con disturbi vestibolari |
+
+### Prossimi passi
+- Sessione 8: DevOps (CI/CD, Docker, deploy, GitHub Actions)
+- Dopo Sessione 8: Handoff completo agli agenti di sviluppo per la Fase 0 tecnica
 
 ---
 
@@ -1092,6 +1106,7 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione eseguibile |
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
 
 
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
@@ -1406,6 +1421,7 @@ Casi minimi:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 2 | Prima specifica completa |
+| 1.0 | Sessione 2 | 🟢 APPROVED · Versione 1.0 · Sessione 2 |
 
 
 ===== FILE: docs/04-ANALYSIS-ALGORITHMS.md =====
@@ -3189,6 +3205,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione |
+| 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 
 
 ===== FILE: docs/11-BACKLOG.md =====
@@ -3511,6 +3528,7 @@ Ogni story deve avere label GitHub:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione con 5 epic e 17 story |
+| 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 
 
 ===== FILE: docs/13-ADR/0001-pwa-first.md =====
@@ -3551,6 +3569,12 @@ Il prodotto deve raggiungere utenti desktop e mobile con un team di sviluppo pic
 
 - 05-ARCHITECTURE §8 · 00-VISION §Perimetro MVP
 
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
+
 
 ===== FILE: docs/13-ADR/0002-local-first.md =====
 
@@ -3589,6 +3613,12 @@ Il progetto tratta dati altamente personali (cronologia di ascolto, contesto, in
 
 - 02-DATA-SCHEMA §8 · 09-PRIVACY-SECURITY (Sessione 6)
 
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
+
 
 ===== FILE: docs/13-ADR/0003-adapter-pattern.md =====
 
@@ -3626,6 +3656,12 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 ## Collegamenti
 
 - 01-PLATFORMS §5 · 02-DATA-SCHEMA §6-7 · 05-ARCHITECTURE §4
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
 
 
 ===== FILE: docs/14-GLOSSARY.md =====
@@ -3690,6 +3726,7 @@ Otto+ sorgenti eterogenee (formati, campi, semantica temporale, edge case). Serv
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione |
+| 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
 
 
 ===== FILE: docs/15-DESIGN-SYSTEM.md =====
@@ -3838,6 +3875,9 @@ Motion reduction rispettata (`prefers-reduced-motion`).
 | 768-1024px | Sidebar a icone, grid 2 colonne |
 | > 1024px | Sidebar completa, grid 3-4 colonne |
 | > 1440px | Contenuto centrato max 1400px |
+
+
+
 
 ---
 
