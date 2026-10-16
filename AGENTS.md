@@ -165,8 +165,12 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
     ├── design/                  ← mockup, token, asset
     │   └── mockups/             ← PNG storiche dalle sessioni esplorative
     ├── fixtures/                ← dataset di test
-    │   └── synthetic-history/
-    └── scripts/                 ← utility (es. generate-bundle.ps1)
+    │   ├── synthetic-history/   ← per adapter (es. spotify-sample.json)
+    │   ├── db-seed/             ← minimal/medium/large per test DB (vedi 10-TESTING §3.2)
+    │   └── scenarios/           ← scenari di vita sintetici (vedi 10-TESTING §3.3)
+    └── scripts/                 ← utility
+        ├── generate-bundle.ps1      ← snapshot docs in BUNDLE.md
+        └── generate-fixtures.mjs    ← generator deterministico dei fixture (10-TESTING §3.5)
 
 ## 🚀 Primo task di un agente
 

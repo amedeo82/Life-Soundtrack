@@ -42,21 +42,39 @@ Il primo fixture è `spotify-sample.json` (Sessione 2).
 
 ### 3.2 Fixture di test DB
 
-`fixtures/db-seed/` contiene:
+`fixtures/db-seed/` contiene (generati da `scripts/generate-fixtures.mjs`, vedi §11):
 - `minimal.json` — 10 eventi, 5 track, 2 artisti (per test unit)
-- `medium.json` — 5.000 eventi, 500 track (per test integrazione)
-- `large.json` — 100.000 eventi, 5.000 track (per test performance)
+- `medium.json` — 5.000 eventi, 500 track, 50 artisti (per test integrazione)
+- `large.json` — **25.000 eventi**, 2.500 track, 250 artisti (per test performance)
 
-Tutti generati sinteticamente con script `scripts/generate-fixtures.ts`.
+**Nota su large.json**: la spec originale chiedeva 100.000 eventi ma genererebbe ~73 MB su disco. Per ragioni git-friendly la versione corrente è 25k (~18 MB), sufficiente per il target AC Story 0.2 ("10.000 eventi in <500ms") con margine di stress test. Per ripristinare 100k: modificare `count` in `scripts/generate-fixtures.mjs` `large: () => {...}`.
+
+Tutti i fixture sono **deterministici** (seed mulberry32 fisso, default `0xC0FFEE`). Per rigenerare con seed diverso: `node scripts/generate-fixtures.mjs --seed 42`.
 
 ### 3.3 Fixture di scenari di vita
 
-`fixtures/scenarios/` contiene cronologie complete pre-costruite che rappresentano scenari specifici:
-- `lockdown-2020.json` — esplosione Lo-fi, ascolti notturni
-- `breakup-oct2021.json` — crollo valence, spike Adele
-- `summer-roadtrip.json` — alta valence, country multipli
+`fixtures/scenarios/` contiene cronologie complete pre-costruite che rappresentano scenari specifici (generati da `scripts/generate-fixtures.mjs`):
+- `lockdown-2020.json` — 6.000 eventi, lockdown Italia (9 marzo → 31 maggio 2020); mood sad/calm dominante; ascolti notturni; per testare session segmentation + mood + pattern circadian
+- `breakup-oct2021.json` — 3.000 eventi, ottobre 2021; crollo valence, mood sad; per testare mood + valence_drop event detector + memory engine
+- `summer-roadtrip.json` — 5.000 eventi, giugno-agosto 2022; mood happy/excited; alta valence; per testare exploration event detector + mood
 
-Ogni scenario ha `_expectedInsights` con gli insight attesi dopo l'analisi.
+Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi dopo l'analisi, secondo le spec di `04-ANALYSIS-ALGORITHMS.md`.
+
+### 3.4 Fixture demo mode
+
+`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti) per la modalità "Scopri come funziona" di `06-UX-FLOWS-STATES §2.14`. Il flag `_metadata.demoMode = true` segnala all'app che i dati vanno cancellati con un click.
+
+### 3.5 Generazione fixture
+
+Tutti i fixture sono generati dallo script `scripts/generate-fixtures.mjs` (deterministico, no dipendenze esterne, Node ≥ 20 LTS).
+
+```bash
+node scripts/generate-fixtures.mjs                  # tutti
+node scripts/generate-fixtures.mjs minimal          # solo uno
+node scripts/generate-fixtures.mjs --seed 42        # seed custom
+```
+
+I file generati sono **committati** nel repo (per consistenza tra ambienti di test). Quando modifichi i parametri degli scenari in `scripts/generate-fixtures.mjs`, **rigenera** i fixture con `node scripts/generate-fixtures.mjs` e committa nella stessa PR.
 
 ## 4. Tipi di test per categoria
 

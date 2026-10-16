@@ -117,7 +117,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 **Descrizione**: Schermate ① Benvenuto → ② Privacy → ③ Import → ④ Processing.
 
 **Task**:
-- T0.4.1 — Componente `DropZone` + `PlatformCard` (4 stati: vuoto/processing/done/error)
+- T0.4.1 — Componente `DropZone` + `PlatformCard` (**5 stati: `empty` / `validating` / `parsing` / `done` / `error`** — vedi `07-UI-SPEC §2.5`; aggiornato in Sessione 13, chiusura M13 audit)
 - T0.4.2 — Schermata Benvenuto + Privacy
 - T0.4.3 — Schermata Import con validazione file
 - T0.4.4 — Schermata Processing con progress e counter live
@@ -129,6 +129,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Privacy screen mostra i 4 toggle (`retainIp`, `enrichMetadata`, `carDetection`, `syncCloud`)
 - [ ] Nessun dato persistito prima del click "Importa tutto"
 - [ ] Design system rispettato (colori, typo, componenti `15-DESIGN-SYSTEM.md`)
+- [ ] PlatformCard: tutti gli stati `empty`/`validating`/`parsing`/`done`/`error` visibili e accessibili (a11y `role="button"` + `aria-describedby`)
 
 **Dipendenze**: Story 0.3
 **Spec**: `15-DESIGN-SYSTEM.md`, mockup schermate ①-④
@@ -292,9 +293,9 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 ### Story 2.2 — Era Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
 **Acceptance criteria**:
-- [ ] **Change point detection** (Bayesiano o PELT) con parametri `windowDays`, `kMin`, `kMax`, `similarityThreshold` documentati in `04-ANALYSIS-ALGORITHMS.md` §4
-- [ ] EraPayload completo per ogni era (vedi `02-DATA-SCHEMA.md` §4)
-- [ ] Test: 1 anno con 2 ere evidenti → rilevate correttamente
+- [ ] **Algoritmo come specificato in `04-ANALYSIS-ALGORITHMS §5`** (sliding window + change point su similarity signature): parametri `windowDays=14`, `stepDays=7`, `similarityThreshold=0.65`, `minEraDays=14`, `weights={genre:0.5, artist:0.3, numeric:0.2}` (allineato alla spec, chiusura ambiguità "Bayesiano/PELT" in Sessione 13)
+- [ ] EraPayload completo per ogni era (vedi `02-DATA-SCHEMA.md §4`): `label`, `moodDominant`, `topArtistIds`, `topTrackIds`, `genreDistribution`, `avgValence`, `avgEnergy`, `nightShare`, `repeatRate`
+- [ ] Test: 1 anno con 2 ere evidenti (`fixtures/scenarios/lockdown-2020.json`) → rilevate correttamente; invarianti `04§5.5` verificate (disgiunte e coprenti, `sum(genreDistribution)≈1.0`, `moodDominant ∈ enum`)
 
 ---
 
@@ -364,6 +365,32 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Lookup per track name + artist
 - [ ] Cache locale MBID
 - [ ] Rispetto rate limit MB (1 req/s)
+
+---
+
+### Story 4.3 — Artwork enrichment `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]` `[DEP:4.2]`
+
+**Descrizione**: Popolamento di `Track.artworkUrl` e `Album.artworkUrl` (aggiunti in `02 v1.2` per chiusura M5 audit). Cascata di fonti: **Spotify Web API** (se utente Spotify-first e `PrivacySettings.enrichMetadata=true`) → **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`, no auth, rate limit 1 req/s) → **iTunes Search API** (`/search?term=`, no auth, fallback per utenti Apple/Last.fm-first) → **placeholder gradient** generato runtime.
+
+**Task**:
+- T4.3.1 — Modulo `enrichment/artwork.ts` con funzione `fetchArtworkUrl(track|album, deps)` che applica la cascata
+- T4.3.2 — Integrazione con `recount()` o job `enrichOnImport()` di Story 0.7 per popolamento batch post-import
+- T4.3.3 — Trigger on-demand: schermata che richiede artwork (`Home MemoryCard`, `Timeline EraBand`, `Esplora`) → fetch lazy se `artworkUrl === null`
+- T4.3.4 — Rispettare `PrivacySettings.enrichMetadata`: se `false`, salta Spotify API (no rete); mantieni solo MB Cover Art (no PII esposta, è solo fetch pubblico) e iTunes Search; placeholder come fallback finale
+- T4.3.5 — Gestione errori: 404 (no artwork disponibile), 429 (rate limit MB), timeout → fallback a fonte successiva
+- T4.3.6 — Migrazione Dexie v2→v3 (`02 §10`): aggiunta campo nullable, non distruttiva
+
+**Acceptance criteria**:
+- [ ] Dato un Track con `spotify:track:<id>`, `fetchArtworkUrl()` ritorna URL Spotify valido (mock test)
+- [ ] Dato un Track con solo `mbid`, fallback a MB Cover Art Archive (mock test)
+- [ ] Dato un Track senza ID, fallback a iTunes Search (mock test)
+- [ ] Dato un Track senza match, ritorna `null` (UI mostra placeholder gradient)
+- [ ] Toggle `enrichMetadata=false` → Spotify API saltata; altre fonti tentate
+- [ ] Migrazione Dexie v2→v3 testata con dati pre-migrazione (10-TESTING §4.3)
+- [ ] Placeholder gradient generato coerente con Mood (vedi `15-DESIGN-SYSTEM` §3 palette mood)
+
+**Dipendenze**: Story 4.2 (per `mbid` arricchito da MB lookup)
+**Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
 ---
 
@@ -475,3 +502,4 @@ Ogni story deve avere label GitHub:
 | 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
 | 1.2.1 | Sessione 11 (2026-10-16) | **Story 0.1 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (scaffold monorepo + toolchain); nuove sezioni "Stato" e "Cosa rimane" nella story; aggiunta tabella "Stato di avanzamento" globale; cross-ref a `17-DEV-NOTES.md` e `18-DEV-LOG.md` |
 | 1.2.2 | Sessione 12 (2026-10-16) | **Doc-sync post-merge**: Story 0.1 ora ✅ DONE (PR #2 squash-merged `c0fb0a4`); tabella "Stato di avanzamento" corretta; riferimento "8 problemi" → "9 problemi" (coerente con messaggio commit) |
+| 1.2.3 | Sessione 13 (2026-10-16) | **Consolidamento doc pre-Fase 0**: Story 0.4 T0.4.1 PlatformCard → 5 stati canonici (chiusura M13); Story 2.2 AC allineata a `04§5` (chiusura ambiguità "Bayesiano/PELT"); **nuova Story 4.3 Artwork enrichment** (chiusura M5 con `artworkUrl` in 02 v1.2); aggiornato ordine di lavorazione per agenti |

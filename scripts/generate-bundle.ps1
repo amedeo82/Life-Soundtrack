@@ -95,8 +95,12 @@ $files = @(
     "docs/13-ADR/0005-sync-cloud.md",
     "docs/14-GLOSSARY.md",
     "docs/15-DESIGN-SYSTEM.md",
-    # Fixture
-    "fixtures/synthetic-history/spotify-sample.json"
+    # Fixture (small/foundational) — i file di grandi dimensioni (medium/large/scenarios/demo-user)
+    # sono generati da scripts/generate-fixtures.mjs su richiesta, e NON inclusi nel bundle
+    # (vedi 10-TESTING §3.5). Lo script generator è incluso.
+    "scripts/generate-fixtures.mjs",
+    "fixtures/synthetic-history/spotify-sample.json",
+    "fixtures/db-seed/minimal.json"
 )
 
 # === Costruzione del bundle (in memoria) ===

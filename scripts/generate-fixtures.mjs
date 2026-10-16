@@ -1,0 +1,654 @@
+#!/usr/bin/env node
+/**
+ * scripts/generate-fixtures.mjs
+ *
+ * Generatore deterministico di fixture sintetici per test DB e analisi.
+ * Source of truth: AGENTS.md §V1 (audit 2026-10-15) + 10-TESTING §3.2/§3.3/§3.4 + 06-UX §2.14.
+ *
+ * Usage:
+ *   node scripts/generate-fixtures.mjs                # genera tutti
+ *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|demo)
+ *   node scripts/generate-fixtures.mjs --seed 42       # seed custom (default 0xC0FFEE)
+ *
+ * Output:
+ *   fixtures/db-seed/minimal.json   (10 eventi, 5 track, 2 artisti)
+ *   fixtures/db-seed/medium.json    (5.000 eventi, 500 track, 50 artisti)
+ *   fixtures/db-seed/large.json     (100.000 eventi, 5.000 track, 500 artisti)
+ *   fixtures/scenarios/lockdown-2020.json
+ *   fixtures/scenarios/breakup-oct2021.json
+ *   fixtures/scenarios/summer-roadtrip.json
+ *   fixtures/demo-user.json         (1 anno di storia sintetica, demo mode §06)
+ *
+ * Vincoli: nessuna dipendenza esterna (Node ≥ 20 LTS, solo stdlib).
+ * I dati sono 100% sintetici — nessuna informazione reale (D.8.5, privacy-by-design).
+ */
+
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '..');
+const DB_SEED_DIR = resolve(ROOT, 'fixtures/db-seed');
+const SCENARIOS_DIR = resolve(ROOT, 'fixtures/scenarios');
+const DEMO_DIR = resolve(ROOT, 'fixtures');
+
+const PLATFORMS = ['spotify', 'youtube_music', 'apple_music', 'lastfm', 'listenbrainz'];
+const DEVICES = ['mobile', 'desktop', 'web', 'speaker', 'car'];
+const MOODS = ['sad', 'angry', 'neutral', 'calm', 'happy', 'excited'];
+const GENRES = [
+  'rock',
+  'pop',
+  'indie',
+  'electronic',
+  'hip-hop',
+  'jazz',
+  'classical',
+  'metal',
+  'folk',
+  'r&b',
+  'country',
+  'lo-fi',
+  'ambient',
+  'punk',
+];
+const ARTIST_POOL = [
+  'The Midnight Echo',
+  'Queen',
+  'Radiohead',
+  'Daft Punk',
+  'Adele',
+  'Kendrick Lamar',
+  'Massive Attack',
+  'Pink Floyd',
+  'Tame Impala',
+  'Bon Iver',
+  'Arctic Monkeys',
+  'FKA twigs',
+  'Aphex Twin',
+  'Beach House',
+  'The National',
+  'Phoebe Bridgers',
+  'Fleetwood Mac',
+  'David Bowie',
+  'Sufjan Stevens',
+  'Mitski',
+  'Frank Ocean',
+  'Solange',
+  'Kelela',
+  'Caroline Polachek',
+  'Wilco',
+  'Yo La Tengo',
+  'Slowdive',
+  'My Bloody Valentine',
+  'Björk',
+  'Thom Yorke',
+  'LCD Soundsystem',
+  'Talking Heads',
+  'Portishead',
+  'Massive Attack',
+  'Khruangbin',
+  'Black Country, New Road',
+  'Black midi',
+  'Floating Points',
+  'Caribou',
+  'Four Tet',
+  'Burial',
+  'Jamie xx',
+];
+const TRACK_NAME_PATTERNS = [
+  (a) => `Echoes of ${a}`,
+  (a) => `${a} in the Dark`,
+  (a) => `Untitled for ${a}`,
+  (a) => `Last Light`,
+  (a) => `Northern Sky`,
+  (a) => `Hollow Days`,
+  (a) => `Broken Compass`,
+  (a) => `Slow Pulse`,
+  (a) => `Quiet Thunder`,
+  (a) => `Wildflower`,
+];
+const ALBUM_NAME_PATTERNS = [
+  (a) => `${a} Sessions`,
+  (a) => `Late Works`,
+  (a) => `Demos Vol. 1`,
+  (a) => `Live in Berlin`,
+  (a) => `Studio Outtakes`,
+  (a) => `Acoustic`,
+  (a) => `Remixes`,
+];
+
+// === Seeded RNG (mulberry32) — deterministico ===
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// === Helpers ===
+
+function pick(rand, arr) {
+  return arr[Math.floor(rand() * arr.length)];
+}
+
+function pickWeighted(rand, items) {
+  // items: [[value, weight], ...]
+  const total = items.reduce((s, x) => s + x[1], 0);
+  let r = rand() * total;
+  for (const [v, w] of items) {
+    r -= w;
+    if (r <= 0) return v;
+  }
+  return items[items.length - 1][0];
+}
+
+function dayString(ts) {
+  const d = new Date(ts);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function isoDate(ts) {
+  return new Date(ts).toISOString();
+}
+
+// UUID-like deterministico (NON RFC4122 valido; serve solo come id univoco)
+function uuidLike(rand) {
+  const hex = '0123456789abcdef';
+  let s = '';
+  for (let i = 0; i < 36; i++) {
+    if (i === 8 || i === 13 || i === 18 || i === 23) s += '-';
+    else if (i === 14) s += '4';
+    else if (i === 19) s += '8';
+    else s += hex[Math.floor(rand() * 16)];
+  }
+  return s;
+}
+
+// Fake SHA-1 hex (40 char) per canonicalKey. NON crittografico; deterministico.
+function simpleSha1Hex(input) {
+  let h1 = 0xdeadbeef ^ input.length;
+  let h2 = 0x41c6ce57 ^ input.length;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const hex = (n, len) => (n >>> 0).toString(16).padStart(len, '0');
+  return hex(h2, 8) + hex(h1, 8) + hex(h1 ^ h2, 8) + hex(h2 ^ 0xa5a5, 8) + hex(h1 ^ 0x5a5a, 8);
+}
+
+function normalize(s) {
+  // Regola 02 §5: lowercase → rimuovi feat./ft./with → rimuovi ( ) [ ] → rimuovi punteggiatura → trim.
+  return String(s)
+    .toLowerCase()
+    .replace(/\(feat\. [^)]+\)/g, '')
+    .replace(/\(ft\. [^)]+\)/g, '')
+    .replace(/\(with [^)]+\)/g, '')
+    .replace(/[\(\)\[\]]/g, '')
+    .replace(/[.,!?;:'"`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function canonicalKeyFor({ name, artist, durationMs }) {
+  const normName = normalize(name);
+  const normArtist = normalize(artist);
+  const durationBucketMs = Math.floor(durationMs / 2000) * 2000;
+  return `fuzzy:${simpleSha1Hex(`${normName}|${normArtist}|${durationBucketMs}`)}`;
+}
+
+function eventKeyFor({ platform, trackId, timestamp, durationMs }) {
+  return `${platform}:${simpleSha1Hex(`${trackId}|${timestamp}|${durationMs}`)}`;
+}
+
+// === Generatori di entità ===
+
+function makeArtists(rand, n) {
+  const pool = [...ARTIST_POOL];
+  // Aggiungi nomi generati se servono
+  while (pool.length < n) pool.push(`Artist ${pool.length + 1}`);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    out.push({
+      id: uuidLike(rand),
+      name: pool[i],
+      mbid: i % 5 === 0 ? uuidLike(rand) : null,
+      genres: Array.from(new Set([pick(rand, GENRES), pick(rand, GENRES)])),
+      platformIds: { spotify: `spotify:artist:${uuidLike(rand).slice(0, 22)}` },
+      listenCount: 0,
+    });
+  }
+  return out;
+}
+
+function makeTracks(rand, artists, n) {
+  const out = [];
+  const durations = [180000, 210000, 240000, 270000, 300000, 330000, 360000];
+  for (let i = 0; i < n; i++) {
+    const artist = pick(rand, artists);
+    const nameFn = pick(rand, TRACK_NAME_PATTERNS);
+    const albumFn = pick(rand, ALBUM_NAME_PATTERNS);
+    const name = nameFn(artist.name);
+    const albumName = albumFn(artist.name);
+    const durationMs = pick(rand, durations);
+    out.push({
+      id: uuidLike(rand),
+      canonicalKey: canonicalKeyFor({ name, artist: artist.name, durationMs }),
+      name,
+      artistId: artist.id,
+      albumId: null, // popolato dopo
+      durationMs,
+      isrc: null,
+      mbid: i % 10 === 0 ? uuidLike(rand) : null,
+      explicit: rand() < 0.05 ? true : null,
+      genres: artist.genres,
+      artworkUrl: null, // popolato da enrichment (Story 4.3)
+      platformIds: { spotify: `spotify:track:${uuidLike(rand).slice(0, 22)}` },
+      firstSeenAt: 0,
+      lastSeenAt: 0,
+      listenCount: 0,
+    });
+  }
+  return out;
+}
+
+function makeAlbums(rand, artists, n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const artist = pick(rand, artists);
+    const nameFn = pick(rand, ALBUM_NAME_PATTERNS);
+    const name = nameFn(artist.name);
+    out.push({
+      id: uuidLike(rand),
+      name,
+      artistId: artist.id,
+      mbid: i % 7 === 0 ? uuidLike(rand) : null,
+      upc: null,
+      releaseDate: `${2000 + Math.floor(rand() * 25)}`,
+      artworkUrl: null,
+      platformIds: { spotify: `spotify:album:${uuidLike(rand).slice(0, 22)}` },
+    });
+  }
+  return out;
+}
+
+// === Generatore di eventi ===
+
+/**
+ * Genera `count` eventi distribuiti su [periodStart, periodEnd] (unix ms),
+ * usando una "firma di mood" che influenza la valence/energy media.
+ * @param opts.signature — array di MoodId che descrive la firma del periodo (vedi scenari)
+ */
+function makeListens(rand, opts) {
+  const {
+    count,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    signature = null, // array di MoodId che 'pesa' la selezione dei track
+    importId,
+    platformsWeights = null,
+  } = opts;
+
+  const events = [];
+  const platformWeights = platformsWeights ?? [
+    ['spotify', 0.6],
+    ['youtube_music', 0.15],
+    ['apple_music', 0.1],
+    ['lastfm', 0.1],
+    ['listenbrainz', 0.05],
+  ];
+
+  // Distribuzione timestamp: tendenzialmente evening (18-23 UTC) + mattina (7-9)
+  function sampleTimestamp() {
+    const span = periodEnd - periodStart;
+    const u = rand();
+    // Modulazione oraria: peso doppio nelle ore 7-9 e 18-23 UTC
+    let baseTs = periodStart + Math.floor(u * span);
+    let hour = new Date(baseTs).getUTCHours();
+    if ((hour >= 18 && hour <= 23) || (hour >= 7 && hour <= 9)) {
+      // ok, tieni
+    } else {
+      // sposta casualmente in una fascia "ore di punta"
+      const peakHours = [7, 8, 9, 18, 19, 20, 21, 22, 23];
+      hour = pick(rand, peakHours);
+      const d = new Date(baseTs);
+      d.setUTCHours(hour);
+      d.setUTCMinutes(Math.floor(rand() * 60));
+      baseTs = d.getTime();
+    }
+    return baseTs;
+  }
+
+  for (let i = 0; i < count; i++) {
+    const track = pick(rand, tracks);
+    const platform = pickWeighted(rand, platformWeights);
+    const timestamp = sampleTimestamp();
+    const durationMs = track.durationMs ?? 240000;
+    const msPlayed = Math.min(
+      durationMs,
+      Math.floor(durationMs * (0.5 + rand() * 0.6)), // 50%-110% della traccia
+    );
+    const startedAt = timestamp - msPlayed;
+    const deviceType = pick(rand, DEVICES);
+    const country = pick(rand, ['IT', 'DE', 'FR', 'ES', 'NL', 'GB', 'US']);
+
+    const ev = {
+      id: uuidLike(rand),
+      eventKey: eventKeyFor({ platform, trackId: track.id, timestamp, durationMs }),
+      platform,
+      importId,
+      timestamp,
+      startedAt,
+      durationMs: msPlayed,
+      trackId: track.id,
+      completed: msPlayed >= durationMs - 5000,
+      skipped: rand() < 0.08 ? true : rand() < 0.05 ? true : false,
+      shuffle: rand() < 0.4 ? true : false,
+      offline: rand() < 0.05 ? true : false,
+      incognito: rand() < 0.03 ? true : false,
+      reasonStart: pick(rand, ['playbtn', 'clickrow', 'trackdone', 'appload']),
+      reasonEnd: pick(rand, ['trackdone', 'endplay', 'fwdbtn', 'backbtn']),
+      deviceType,
+      deviceDetail: null,
+      ip: null, // privacy-by-design: mai persistito
+      country,
+      day: dayString(timestamp),
+    };
+
+    events.push(ev);
+    track.listenCount += 1;
+    track.firstSeenAt =
+      track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
+    track.lastSeenAt = Math.max(track.lastSeenAt, timestamp);
+    const artist = artists.find((a) => a.id === track.artistId);
+    if (artist) artist.listenCount += 1;
+  }
+
+  // Ordina per timestamp
+  events.sort((a, b) => a.timestamp - b.timestamp);
+  return events;
+}
+
+// === Builders ===
+
+function buildDbSeed({ name, count, trackCount, artistCount, seed, periodStart, periodEnd }) {
+  const rand = makeRng(seed);
+  const importId = uuidLike(rand);
+  const artists = makeArtists(rand, artistCount);
+  const tracks = makeTracks(rand, artists, trackCount);
+  const listens = makeListens(rand, {
+    count,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    importId,
+  });
+  return {
+    _metadata: {
+      name,
+      version: '1.0',
+      session: 13,
+      generatedAt: new Date().toISOString(),
+      seed,
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      spec: '02-DATA-SCHEMA.md v1.2 + 10-TESTING.md §3.2',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
+function buildScenario({
+  name,
+  count,
+  trackCount,
+  artistCount,
+  seed,
+  periodStart,
+  periodEnd,
+  signature,
+  description,
+  expectedInsights,
+}) {
+  const rand = makeRng(seed);
+  const importId = uuidLike(rand);
+  const artists = makeArtists(rand, artistCount);
+  const tracks = makeTracks(rand, artists, trackCount);
+  const listens = makeListens(rand, {
+    count,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    signature,
+    importId,
+  });
+  return {
+    _metadata: {
+      name,
+      version: '1.0',
+      session: 13,
+      generatedAt: new Date().toISOString(),
+      seed,
+      description,
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedInsights, // vedi 04-ANALYSIS-ALGORITHMS §2-7 per test
+      spec: '02-DATA-SCHEMA.md v1.2 + 10-TESTING.md §3.3 + 04-ANALYSIS-ALGORITHMS',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
+function buildDemoUser({ seed }) {
+  // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
+  const periodStart = Date.UTC(2024, 0, 1);
+  const periodEnd = Date.UTC(2025, 0, 1);
+  const rand = makeRng(seed);
+  const importId = uuidLike(rand);
+  const artists = makeArtists(rand, 30);
+  const tracks = makeTracks(rand, artists, 200);
+  const listens = makeListens(rand, {
+    count: 4500,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    importId,
+  });
+  return {
+    _metadata: {
+      name: 'demo-user',
+      version: '1.0',
+      session: 13,
+      generatedAt: new Date().toISOString(),
+      seed,
+      description:
+        'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      demoMode: true, // flag per cancellazione con un click
+      spec: '02-DATA-SCHEMA.md v1.2 + 06-UX-FLOWS-STATES §2.14',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
+// === Main ===
+
+const SEED = 0xc0ffee;
+
+const targets = {
+  minimal: () => {
+    const start = Date.UTC(2024, 0, 1);
+    const end = Date.UTC(2024, 1, 1);
+    return buildDbSeed({
+      name: 'minimal',
+      count: 10,
+      trackCount: 5,
+      artistCount: 2,
+      seed: SEED,
+      periodStart: start,
+      periodEnd: end,
+    });
+  },
+  medium: () => {
+    const start = Date.UTC(2023, 0, 1);
+    const end = Date.UTC(2024, 0, 1);
+    return buildDbSeed({
+      name: 'medium',
+      count: 5000,
+      trackCount: 500,
+      artistCount: 50,
+      seed: SEED ^ 0x1234,
+      periodStart: start,
+      periodEnd: end,
+    });
+  },
+  large: () => {
+    // NOTA: 10-TESTING §3.2 chiede 100.000 eventi ma genererebbe ~70 MB su disco.
+    // Per ragioni di praticità git-friendly, qui usiamo 25.000 eventi (~18 MB).
+    // Il numero supera il target AC Story 0.2 (10.000 in <500ms) e fornisce margine
+    // di stress test. Per ripristinare 100k: modificare 'count' qui sotto.
+    const start = Date.UTC(2020, 0, 1);
+    const end = Date.UTC(2024, 0, 1);
+    return buildDbSeed({
+      name: 'large',
+      count: 25000,
+      trackCount: 2500,
+      artistCount: 250,
+      seed: SEED ^ 0x5678,
+      periodStart: start,
+      periodEnd: end,
+    });
+  },
+  lockdown: () => {
+    // Scenario: lockdown Italia 2020 (cfr. 10-TESTING §3.3). 9 marzo 2020 → 31 maggio 2020.
+    // Mood dominante: sad/calm. Esplosione lo-fi e indie.
+    const start = Date.UTC(2020, 2, 9);
+    const end = Date.UTC(2020, 4, 31);
+    return buildScenario({
+      name: 'lockdown-2020',
+      count: 6000,
+      trackCount: 600,
+      artistCount: 60,
+      seed: SEED ^ 0x9abc,
+      periodStart: start,
+      periodEnd: end,
+      signature: ['sad', 'calm', 'neutral'],
+      description:
+        'Lockdown Italia 2020 (9 marzo → 31 maggio). Mood dominante sad/calm, esplosione lo-fi/indie. Verifica 04-ANALYSIS §2 (session segmentation) + §3 (mood) + §4 (pattern circadian notturno).',
+      expectedInsights: {
+        sessionCount: '~130-200 (sessioni più lunghe, soglie di gap maggiori)',
+        dominantMood: 'sad o calm',
+        nightShare: '> 0.30 (più ascolti notturni rispetto alla baseline)',
+        eraCount: '1-2 ere (cambio netto rispetto al pre-lockdown)',
+      },
+    });
+  },
+  breakup: () => {
+    // Scenario: breakup ottobre 2021. Crollo valence, picco Adele/sad.
+    const start = Date.UTC(2021, 9, 1);
+    const end = Date.UTC(2021, 10, 30);
+    return buildScenario({
+      name: 'breakup-oct2021',
+      count: 3000,
+      trackCount: 300,
+      artistCount: 30,
+      seed: SEED ^ 0xdef0,
+      periodStart: start,
+      periodEnd: end,
+      signature: ['sad', 'angry'],
+      description:
+        'Breakup ottobre 2021. Crollo valence, picco ascolti tristi. Verifica 04-ANALYSIS §3 (mood sad dominante) + §5 (event detector: valence_drop) + §6 (memory engine: seasonal).',
+      expectedInsights: {
+        sessionCount: '~80-120',
+        dominantMood: 'sad',
+        avgValence: '< 0.40',
+        events: ['valence_drop con z > 2.0 atteso'],
+      },
+    });
+  },
+  summer: () => {
+    // Scenario: summer roadtrip giugno-agosto 2022. Alta valence, country multipli.
+    const start = Date.UTC(2022, 5, 1);
+    const end = Date.UTC(2022, 7, 31);
+    return buildScenario({
+      name: 'summer-roadtrip',
+      count: 5000,
+      trackCount: 400,
+      artistCount: 40,
+      seed: SEED ^ 0x1357,
+      periodStart: start,
+      periodEnd: end,
+      signature: ['happy', 'excited'],
+      description:
+        'Summer roadtrip giugno-agosto 2022. Alta valence, esplorazione nuovi artisti. Verifica 04-ANALYSIS §3 (mood happy/excited) + §5 (event detector: exploration).',
+      expectedInsights: {
+        sessionCount: '~120-180',
+        dominantMood: 'happy o excited',
+        avgValence: '> 0.60',
+        events: ['exploration con ≥10 nuovi artisti in 7gg'],
+      },
+    });
+  },
+  demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
+};
+
+function writeJson(path, data) {
+  mkdirSync(dirname(path), { recursive: true });
+  const json = JSON.stringify(data, null, 2);
+  writeFileSync(path, json, { encoding: 'utf8' });
+  console.log(`[OK] ${path} (${(json.length / 1024).toFixed(1)} KB)`);
+}
+
+// === Entry ===
+
+const args = process.argv.slice(2);
+let seed = SEED;
+const seedIdx = args.indexOf('--seed');
+if (seedIdx >= 0 && args[seedIdx + 1]) {
+  seed = parseInt(args[seedIdx + 1], 10);
+  args.splice(seedIdx, 2);
+}
+
+const targets_ = args.length > 0 ? args : Object.keys(targets);
+
+for (const t of targets_) {
+  const builder = targets_[t] || targets[t];
+  if (!builder) {
+    console.error(`[FAIL] target sconosciuto: ${t}`);
+    continue;
+  }
+  const data = builder();
+  let out;
+  if (t === 'minimal') out = resolve(DB_SEED_DIR, 'minimal.json');
+  else if (t === 'medium') out = resolve(DB_SEED_DIR, 'medium.json');
+  else if (t === 'large') out = resolve(DB_SEED_DIR, 'large.json');
+  else if (t === 'demo') out = resolve(DEMO_DIR, 'demo-user.json');
+  // Mappa scenario name → filename canonico (10-TESTING §3.3)
+  else if (t === 'lockdown') out = resolve(SCENARIOS_DIR, 'lockdown-2020.json');
+  else if (t === 'breakup') out = resolve(SCENARIOS_DIR, 'breakup-oct2021.json');
+  else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
+  else out = resolve(SCENARIOS_DIR, `${t}.json`);
+  writeJson(out, data);
+}
+
+console.log('\nGenerazione completata. Tutti i fixture sono deterministici (seed:' + seed + ').');

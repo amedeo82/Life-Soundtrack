@@ -15,7 +15,7 @@
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 9 (v1.1) | Schema dati unificato (TypeScript + Dexie) |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 2 | SPEC-TEMPLATE + Spotify (altri TBD) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 9 (v1.0) | Architettura tecnica generale |
@@ -24,7 +24,7 @@
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 10 (v1.2) | Backlog strutturato (epic → story → task) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 13 (v1.2.3) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 9 | Architecture Decision Records (0001, 0002, 0003, 0005) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -51,7 +51,10 @@
 ## Fixture di test
 | Cartella | Contenuto |
 |----------|-----------|
-| [`../fixtures/synthetic-history/`](../fixtures/synthetic-history/) | Dataset di test sintetici per ogni adapter |
+| [`../fixtures/synthetic-history/`](../fixtures/synthetic-history/) | Dataset di test per adapter (es. `spotify-sample.json` v1.1) |
+| [`../fixtures/db-seed/`](../fixtures/db-seed/) | Dataset di seed DB per test (minimal 10, medium 5k, large 25k) — generati da `scripts/generate-fixtures.mjs` |
+| [`../fixtures/scenarios/`](../fixtures/scenarios/) | Scenari di vita sintetici (lockdown-2020, breakup-oct2021, summer-roadtrip) — generati |
+| [`../fixtures/demo-user.json`](../fixtures/demo-user.json) | Dataset demo per modalità "Scopri come funziona" (06-UX §2.14) |
 
 ## Roadmap Sessioni di Progettazione
 | Sessione | Nome | Stato |
@@ -69,14 +72,16 @@
 | 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
 | 11 | 🛠️ Implementazione Story 0.1 (scaffold monorepo) | ✅ COMPLETATA |
 | 12 | 📚 Doc-sync post-merge (gate AGENTS.md) | ✅ COMPLETATA |
+| 13 | 🔧 Consolidamento documentazione pre-Fase 0 | ✅ COMPLETATA |
 
-## Stato del progetto (post-Sessione 12, 2026-10-16)
-- **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
-- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18)
+## Stato del progetto (post-Sessione 13, 2026-10-16)
+- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10, 11 **v1.2.3**, 13-ADR ×4, 14)
+- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4. Gate "post-merge doc sync" aggiunto a `AGENTS.md` (S12) per evitare drift futuri. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
+- **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4.
+- **Sessione 13** — consolidamento doc: chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. **Documentazione pronta per `agent-ready` Story 0.2**.
 - **Prossimo step tecnico**: aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie)
 
 ---
