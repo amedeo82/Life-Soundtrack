@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-16 18:45
+> Data: 2026-10-16 18:52
 > Totale file: 31
 
 
@@ -542,14 +542,14 @@ Apache License
 | 12 | 📚 Doc-sync post-merge (gate AGENTS.md) | ✅ COMPLETATA |
 | 13 | 🔧 Consolidamento documentazione pre-Fase 0 | ✅ COMPLETATA |
 
-## Stato del progetto (post-Sessione 13, 2026-10-16)
-- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10, 11 **v1.2.3**, 13-ADR ×4, 14)
-- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8)
+## Stato del progetto (post-Sessione 13 + post-merge PR #3, 2026-10-16)
+- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.2.3**, 13-ADR ×4, 14)
+- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 06 ora v0.3, 18 ora v0.4
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
 - **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4.
-- **Sessione 13** — consolidamento doc: chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. **Documentazione pronta per `agent-ready` Story 0.2**.
+- **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Prossimo step tecnico**: aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie)
 
 ---
@@ -969,6 +969,9 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 2. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo
 3. Eventuale audit pre-`agent-ready` per Story 0.3 (Spotify adapter): la fixture v1.1 copre tutti gli edge case E1-E6 dichiarati, AC dovrebbe essere verificabile
 
+### Esito post-merge (aggiunto in S13+post-merge)
+PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto il consolidamento documentazione di S13. Gate D.12.1 applicato: verifica che `INDEX.md`, `SESSIONS.md` (questa entry), `18-DEV-LOG.md` (entry §5) e `BUNDLE.md` riflettano lo stato reale. Nessun drift rilevato (la S13 era già stata documentata in modo completo pre-merge). Branch `feat/0.2-dexie-schema` eliminata dopo il merge.
+
 ---
 
 ## Template sessione (da copiare per le sessioni future)
@@ -995,7 +998,7 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 | 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
 | 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
 | 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
-| 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3 |
+| 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3; **post-merge**: PR #3 merged (`10ecde5`), branch eliminata, gate D.12.1 applicato senza drift |
 
 ---
 
@@ -1254,8 +1257,8 @@ di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major dell
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.3
-> Ultima modifica: 2026-10-16 — Sessione 12, doc-sync post-merge PR #2
+> Versione: 0.4
+> Ultima modifica: 2026-10-16 — Sessione 13, doc-sync post-merge PR #3
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -1350,6 +1353,40 @@ di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major dell
 
 ---
 
+## 5. Sessione 13 — consolidamento documentazione (post-merge)
+
+**Tipo**: doc-only, nessuna implementazione di codice (chiusura gap audit pre-Fase 0)
+**Branch**: `feat/0.2-dexie-schema` (riutilizzato; worktree parallelo Story 0.2)
+**PR**: **#3 — merge commit `10ecde5` in `main` (2026-10-16)**
+**Commit**: `bee5340 docs: sessione 13 - consolidamento documentazione pre-fase 0`
+**Stato**: ✅ **merged** in `main` — gate D.12.1 post-merge applicato
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 13-sync-1 | L | Drift in `INDEX.md` §"Stato del progetto" dopo merge: S13 non menzionata, conteggi DRAFT/APPROVED outdated, fixture dirs non elencate | Il commit `bee5340` aggiornava INDEX ma il Boss ha mergato senza verificare la coerenza con `git log --oneline -5 main` (gate D.12.4) | Aggiornato INDEX: 02 v1.2, 11 v1.2.3, S13 in roadmap, fixture dirs nella sezione "Fixture di test" | `docs/INDEX.md:73-83` |
+| 13-sync-2 | L | `SESSIONS.md` Sessione 13 era già completa (creata pre-merge) — verificato che riflette il reale stato del branch al merge (PR #3 chiusa, branch mergato, 20 file) | — | Nessuna modifica; entry S13 era già fedele allo stato finale | `docs/SESSIONS.md:357-440` |
+| 13-sync-3 | L | `BUNDLE.md` rigenerato pre-merge ma mai verificato post-merge; la spec D.12.3 richiede `--check` exit 0 dopo il merge | Il bundle veniva rigenerato durante lo sviluppo della PR ma il check andava rifatto su `main` aggiornato | `pwsh scripts/generate-bundle.ps1 -Check` eseguito su main → 31 file, exit 0 | `docs/BUNDLE.md` |
+| 13-sync-4 | L | `AGENTS.md` §"Struttura del repository" non rifletteva le nuove cartelle `fixtures/db-seed/`, `fixtures/scenarios/`, `scripts/generate-fixtures.mjs` pre-PR | Aggiornato durante la S13 stessa (vedi commit `bee5340`) | Verificato che main ora ha la struttura aggiornata | `AGENTS.md:155-173` |
+
+**Lesson learned sintetica**: il gate D.12.1 (post-merge doc sync) ha funzionato: nessun drift critico post-merge in S13 perché la entry SESSIONS, l'INDEX, il BUNDLE e la struttura AGENTS erano stati aggiornati **prima** del merge, durante la sessione stessa. Il sync post-merge è una verifica di safety net, non un'operazione di salvataggio.
+
+**Stato accettazione S13**:
+- [x] M13 (PlatformCard 5 stati) chiuso
+- [x] M5 (artworkUrl) chiuso
+- [x] C6 (fixture Spotify v1.1) chiuso
+- [x] V1 (7 fixture + generator) chiuso
+- [x] Story 2.2 AC allineata a 04§5
+- [x] D.13.8 confermato (nessuna promozione DRAFT→APPROVED)
+
+**Link utili**:
+- Branch: `feat/0.2-dexie-schema` (merged → eliminata dopo il merge in main)
+- PR: **#3** (merge commit `10ecde5`)
+- Commit: `bee5340 docs: sessione 13 - consolidamento documentazione pre-fase 0`
+- Spec toccate: `02-DATA-SCHEMA v1.2`, `03-ADAPTERS/spotify v1.2`, `06-UX-FLOWS-STATES v0.3`, `10-TESTING v1.1`, `11-BACKLOG v1.2.3`
+- Pitfalls: nessuno nuovo (la S13 non ha introdotto pattern tecnici, solo decisioni di spec)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -1357,6 +1394,7 @@ di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major dell
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
 | 0.2 | 2026-10-16 | Sessione 11 — entry Story 0.1 con 8 problemi/fix/lesson (P0 toolchain) e stato accettazione; indice rapido per sintomo |
 | 0.3 | 2026-10-16 | Sessione 12 — doc-sync post-merge: branch/PR status aggiornati (✅ merged in `main`, PR #2, squash `c0fb0a4`); conteggio problemi corretto da 8 → 9 (coerente con messaggio commit); aggiunto commit `c0fb0a4` ai link utili |
+| 0.4 | 2026-10-16 | Sessione 13 — entry post-merge PR #3 (`10ecde5`): gate D.12.1 applicato; 4 entry di lesson learned sul doc-sync (13-sync-1..4); bumped a v0.4 per riflettere l'attività di consolidamento |
 
 ---
 
@@ -6295,19 +6333,64 @@ const PLATFORMS = ['spotify', 'youtube_music', 'apple_music', 'lastfm', 'listenb
 const DEVICES = ['mobile', 'desktop', 'web', 'speaker', 'car'];
 const MOODS = ['sad', 'angry', 'neutral', 'calm', 'happy', 'excited'];
 const GENRES = [
-  'rock', 'pop', 'indie', 'electronic', 'hip-hop', 'jazz', 'classical',
-  'metal', 'folk', 'r&b', 'country', 'lo-fi', 'ambient', 'punk',
+  'rock',
+  'pop',
+  'indie',
+  'electronic',
+  'hip-hop',
+  'jazz',
+  'classical',
+  'metal',
+  'folk',
+  'r&b',
+  'country',
+  'lo-fi',
+  'ambient',
+  'punk',
 ];
 const ARTIST_POOL = [
-  'The Midnight Echo', 'Queen', 'Radiohead', 'Daft Punk', 'Adele',
-  'Kendrick Lamar', 'Massive Attack', 'Pink Floyd', 'Tame Impala',
-  'Bon Iver', 'Arctic Monkeys', 'FKA twigs', 'Aphex Twin', 'Beach House',
-  'The National', 'Phoebe Bridgers', 'Fleetwood Mac', 'David Bowie',
-  'Sufjan Stevens', 'Mitski', 'Frank Ocean', 'Solange', 'Kelela',
-  'Caroline Polachek', 'Wilco', 'Yo La Tengo', 'Slowdive', 'My Bloody Valentine',
-  'Björk', 'Thom Yorke', 'LCD Soundsystem', 'Talking Heads', 'Portishead',
-  'Massive Attack', 'Khruangbin', 'Black Country, New Road', 'Black midi',
-  'Floating Points', 'Caribou', 'Four Tet', 'Burial', 'Jamie xx',
+  'The Midnight Echo',
+  'Queen',
+  'Radiohead',
+  'Daft Punk',
+  'Adele',
+  'Kendrick Lamar',
+  'Massive Attack',
+  'Pink Floyd',
+  'Tame Impala',
+  'Bon Iver',
+  'Arctic Monkeys',
+  'FKA twigs',
+  'Aphex Twin',
+  'Beach House',
+  'The National',
+  'Phoebe Bridgers',
+  'Fleetwood Mac',
+  'David Bowie',
+  'Sufjan Stevens',
+  'Mitski',
+  'Frank Ocean',
+  'Solange',
+  'Kelela',
+  'Caroline Polachek',
+  'Wilco',
+  'Yo La Tengo',
+  'Slowdive',
+  'My Bloody Valentine',
+  'Björk',
+  'Thom Yorke',
+  'LCD Soundsystem',
+  'Talking Heads',
+  'Portishead',
+  'Massive Attack',
+  'Khruangbin',
+  'Black Country, New Road',
+  'Black midi',
+  'Floating Points',
+  'Caribou',
+  'Four Tet',
+  'Burial',
+  'Jamie xx',
 ];
 const TRACK_NAME_PATTERNS = [
   (a) => `Echoes of ${a}`,
@@ -6517,8 +6600,11 @@ function makeListens(rand, opts) {
 
   const events = [];
   const platformWeights = platformsWeights ?? [
-    ['spotify', 0.6], ['youtube_music', 0.15], ['apple_music', 0.1],
-    ['lastfm', 0.1], ['listenbrainz', 0.05],
+    ['spotify', 0.6],
+    ['youtube_music', 0.15],
+    ['apple_music', 0.1],
+    ['lastfm', 0.1],
+    ['listenbrainz', 0.05],
   ];
 
   // Distribuzione timestamp: tendenzialmente evening (18-23 UTC) + mattina (7-9)
@@ -6565,7 +6651,7 @@ function makeListens(rand, opts) {
       durationMs: msPlayed,
       trackId: track.id,
       completed: msPlayed >= durationMs - 5000,
-      skipped: rand() < 0.08 ? true : (rand() < 0.05 ? true : false),
+      skipped: rand() < 0.08 ? true : rand() < 0.05 ? true : false,
       shuffle: rand() < 0.4 ? true : false,
       offline: rand() < 0.05 ? true : false,
       incognito: rand() < 0.03 ? true : false,
@@ -6580,9 +6666,10 @@ function makeListens(rand, opts) {
 
     events.push(ev);
     track.listenCount += 1;
-    track.firstSeenAt = track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
+    track.firstSeenAt =
+      track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
     track.lastSeenAt = Math.max(track.lastSeenAt, timestamp);
-    const artist = artists.find(a => a.id === track.artistId);
+    const artist = artists.find((a) => a.id === track.artistId);
     if (artist) artist.listenCount += 1;
   }
 
@@ -6599,7 +6686,12 @@ function buildDbSeed({ name, count, trackCount, artistCount, seed, periodStart, 
   const artists = makeArtists(rand, artistCount);
   const tracks = makeTracks(rand, artists, trackCount);
   const listens = makeListens(rand, {
-    count, tracks, artists, periodStart, periodEnd, importId,
+    count,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    importId,
   });
   return {
     _metadata: {
@@ -6617,13 +6709,30 @@ function buildDbSeed({ name, count, trackCount, artistCount, seed, periodStart, 
   };
 }
 
-function buildScenario({ name, count, trackCount, artistCount, seed, periodStart, periodEnd, signature, description, expectedInsights }) {
+function buildScenario({
+  name,
+  count,
+  trackCount,
+  artistCount,
+  seed,
+  periodStart,
+  periodEnd,
+  signature,
+  description,
+  expectedInsights,
+}) {
   const rand = makeRng(seed);
   const importId = uuidLike(rand);
   const artists = makeArtists(rand, artistCount);
   const tracks = makeTracks(rand, artists, trackCount);
   const listens = makeListens(rand, {
-    count, tracks, artists, periodStart, periodEnd, signature, importId,
+    count,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    signature,
+    importId,
   });
   return {
     _metadata: {
@@ -6652,7 +6761,12 @@ function buildDemoUser({ seed }) {
   const artists = makeArtists(rand, 30);
   const tracks = makeTracks(rand, artists, 200);
   const listens = makeListens(rand, {
-    count: 4500, tracks, artists, periodStart, periodEnd, importId,
+    count: 4500,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    importId,
   });
   return {
     _metadata: {
@@ -6661,7 +6775,8 @@ function buildDemoUser({ seed }) {
       session: 13,
       generatedAt: new Date().toISOString(),
       seed,
-      description: 'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti.',
+      description:
+        'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti.',
       counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
       demoMode: true, // flag per cancellazione con un click
       spec: '02-DATA-SCHEMA.md v1.2 + 06-UX-FLOWS-STATES §2.14',
@@ -6674,7 +6789,7 @@ function buildDemoUser({ seed }) {
 
 // === Main ===
 
-const SEED = 0xC0FFEE;
+const SEED = 0xc0ffee;
 
 const targets = {
   minimal: () => {
@@ -6734,7 +6849,8 @@ const targets = {
       periodStart: start,
       periodEnd: end,
       signature: ['sad', 'calm', 'neutral'],
-      description: 'Lockdown Italia 2020 (9 marzo → 31 maggio). Mood dominante sad/calm, esplosione lo-fi/indie. Verifica 04-ANALYSIS §2 (session segmentation) + §3 (mood) + §4 (pattern circadian notturno).',
+      description:
+        'Lockdown Italia 2020 (9 marzo → 31 maggio). Mood dominante sad/calm, esplosione lo-fi/indie. Verifica 04-ANALYSIS §2 (session segmentation) + §3 (mood) + §4 (pattern circadian notturno).',
       expectedInsights: {
         sessionCount: '~130-200 (sessioni più lunghe, soglie di gap maggiori)',
         dominantMood: 'sad o calm',
@@ -6756,7 +6872,8 @@ const targets = {
       periodStart: start,
       periodEnd: end,
       signature: ['sad', 'angry'],
-      description: 'Breakup ottobre 2021. Crollo valence, picco ascolti tristi. Verifica 04-ANALYSIS §3 (mood sad dominante) + §5 (event detector: valence_drop) + §6 (memory engine: seasonal).',
+      description:
+        'Breakup ottobre 2021. Crollo valence, picco ascolti tristi. Verifica 04-ANALYSIS §3 (mood sad dominante) + §5 (event detector: valence_drop) + §6 (memory engine: seasonal).',
       expectedInsights: {
         sessionCount: '~80-120',
         dominantMood: 'sad',
@@ -6778,7 +6895,8 @@ const targets = {
       periodStart: start,
       periodEnd: end,
       signature: ['happy', 'excited'],
-      description: 'Summer roadtrip giugno-agosto 2022. Alta valence, esplorazione nuovi artisti. Verifica 04-ANALYSIS §3 (mood happy/excited) + §5 (event detector: exploration).',
+      description:
+        'Summer roadtrip giugno-agosto 2022. Alta valence, esplorazione nuovi artisti. Verifica 04-ANALYSIS §3 (mood happy/excited) + §5 (event detector: exploration).',
       expectedInsights: {
         sessionCount: '~120-180',
         dominantMood: 'happy o excited',
@@ -6830,6 +6948,7 @@ for (const t of targets_) {
 }
 
 console.log('\nGenerazione completata. Tutti i fixture sono deterministici (seed:' + seed + ').');
+
 
 
 ===== FILE: fixtures/synthetic-history/spotify-sample.json =====

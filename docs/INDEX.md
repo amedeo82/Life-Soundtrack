@@ -74,14 +74,14 @@
 | 12 | 📚 Doc-sync post-merge (gate AGENTS.md) | ✅ COMPLETATA |
 | 13 | 🔧 Consolidamento documentazione pre-Fase 0 | ✅ COMPLETATA |
 
-## Stato del progetto (post-Sessione 13, 2026-10-16)
-- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10, 11 **v1.2.3**, 13-ADR ×4, 14)
-- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8)
+## Stato del progetto (post-Sessione 13 + post-merge PR #3, 2026-10-16)
+- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.2.3**, 13-ADR ×4, 14)
+- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 06 ora v0.3, 18 ora v0.4
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
 - **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4.
-- **Sessione 13** — consolidamento doc: chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. **Documentazione pronta per `agent-ready` Story 0.2**.
+- **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Prossimo step tecnico**: aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie)
 
 ---

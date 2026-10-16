@@ -409,6 +409,9 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 2. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo
 3. Eventuale audit pre-`agent-ready` per Story 0.3 (Spotify adapter): la fixture v1.1 copre tutti gli edge case E1-E6 dichiarati, AC dovrebbe essere verificabile
 
+### Esito post-merge (aggiunto in S13+post-merge)
+PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto il consolidamento documentazione di S13. Gate D.12.1 applicato: verifica che `INDEX.md`, `SESSIONS.md` (questa entry), `18-DEV-LOG.md` (entry §5) e `BUNDLE.md` riflettano lo stato reale. Nessun drift rilevato (la S13 era già stata documentata in modo completo pre-merge). Branch `feat/0.2-dexie-schema` eliminata dopo il merge.
+
 ---
 
 ## Template sessione (da copiare per le sessioni future)
@@ -435,7 +438,7 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 | 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
 | 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
 | 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
-| 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3 |
+| 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3; **post-merge**: PR #3 merged (`10ecde5`), branch eliminata, gate D.12.1 applicato senza drift |
 
 ---
 

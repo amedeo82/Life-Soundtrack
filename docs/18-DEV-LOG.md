@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.3
-> Ultima modifica: 2026-10-16 — Sessione 12, doc-sync post-merge PR #2
+> Versione: 0.4
+> Ultima modifica: 2026-10-16 — Sessione 13, doc-sync post-merge PR #3
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -97,6 +97,40 @@
 
 ---
 
+## 5. Sessione 13 — consolidamento documentazione (post-merge)
+
+**Tipo**: doc-only, nessuna implementazione di codice (chiusura gap audit pre-Fase 0)
+**Branch**: `feat/0.2-dexie-schema` (riutilizzato; worktree parallelo Story 0.2)
+**PR**: **#3 — merge commit `10ecde5` in `main` (2026-10-16)**
+**Commit**: `bee5340 docs: sessione 13 - consolidamento documentazione pre-fase 0`
+**Stato**: ✅ **merged** in `main` — gate D.12.1 post-merge applicato
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 13-sync-1 | L | Drift in `INDEX.md` §"Stato del progetto" dopo merge: S13 non menzionata, conteggi DRAFT/APPROVED outdated, fixture dirs non elencate | Il commit `bee5340` aggiornava INDEX ma il Boss ha mergato senza verificare la coerenza con `git log --oneline -5 main` (gate D.12.4) | Aggiornato INDEX: 02 v1.2, 11 v1.2.3, S13 in roadmap, fixture dirs nella sezione "Fixture di test" | `docs/INDEX.md:73-83` |
+| 13-sync-2 | L | `SESSIONS.md` Sessione 13 era già completa (creata pre-merge) — verificato che riflette il reale stato del branch al merge (PR #3 chiusa, branch mergato, 20 file) | — | Nessuna modifica; entry S13 era già fedele allo stato finale | `docs/SESSIONS.md:357-440` |
+| 13-sync-3 | L | `BUNDLE.md` rigenerato pre-merge ma mai verificato post-merge; la spec D.12.3 richiede `--check` exit 0 dopo il merge | Il bundle veniva rigenerato durante lo sviluppo della PR ma il check andava rifatto su `main` aggiornato | `pwsh scripts/generate-bundle.ps1 -Check` eseguito su main → 31 file, exit 0 | `docs/BUNDLE.md` |
+| 13-sync-4 | L | `AGENTS.md` §"Struttura del repository" non rifletteva le nuove cartelle `fixtures/db-seed/`, `fixtures/scenarios/`, `scripts/generate-fixtures.mjs` pre-PR | Aggiornato durante la S13 stessa (vedi commit `bee5340`) | Verificato che main ora ha la struttura aggiornata | `AGENTS.md:155-173` |
+
+**Lesson learned sintetica**: il gate D.12.1 (post-merge doc sync) ha funzionato: nessun drift critico post-merge in S13 perché la entry SESSIONS, l'INDEX, il BUNDLE e la struttura AGENTS erano stati aggiornati **prima** del merge, durante la sessione stessa. Il sync post-merge è una verifica di safety net, non un'operazione di salvataggio.
+
+**Stato accettazione S13**:
+- [x] M13 (PlatformCard 5 stati) chiuso
+- [x] M5 (artworkUrl) chiuso
+- [x] C6 (fixture Spotify v1.1) chiuso
+- [x] V1 (7 fixture + generator) chiuso
+- [x] Story 2.2 AC allineata a 04§5
+- [x] D.13.8 confermato (nessuna promozione DRAFT→APPROVED)
+
+**Link utili**:
+- Branch: `feat/0.2-dexie-schema` (merged → eliminata dopo il merge in main)
+- PR: **#3** (merge commit `10ecde5`)
+- Commit: `bee5340 docs: sessione 13 - consolidamento documentazione pre-fase 0`
+- Spec toccate: `02-DATA-SCHEMA v1.2`, `03-ADAPTERS/spotify v1.2`, `06-UX-FLOWS-STATES v0.3`, `10-TESTING v1.1`, `11-BACKLOG v1.2.3`
+- Pitfalls: nessuno nuovo (la S13 non ha introdotto pattern tecnici, solo decisioni di spec)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -104,6 +138,7 @@
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
 | 0.2 | 2026-10-16 | Sessione 11 — entry Story 0.1 con 8 problemi/fix/lesson (P0 toolchain) e stato accettazione; indice rapido per sintomo |
 | 0.3 | 2026-10-16 | Sessione 12 — doc-sync post-merge: branch/PR status aggiornati (✅ merged in `main`, PR #2, squash `c0fb0a4`); conteggio problemi corretto da 8 → 9 (coerente con messaggio commit); aggiunto commit `c0fb0a4` ai link utili |
+| 0.4 | 2026-10-16 | Sessione 13 — entry post-merge PR #3 (`10ecde5`): gate D.12.1 applicato; 4 entry di lesson learned sul doc-sync (13-sync-1..4); bumped a v0.4 per riflettere l'attività di consolidamento |
 
 ---
 
