@@ -414,6 +414,54 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 
 ---
 
+## Sessione 14 — 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie)
+
+**Data**: 2026-10-16
+**Stato**: ✅ Completata (implementazione; in attesa di review/merge su `main`)
+**Trigger**: `main` aggiornato a `774e520` (doc-sync post PR #3): Story 0.2 sbloccata da 0.1 ✅, spec APPROVED `02-DATA-SCHEMA v1.2` + fixture `db-seed` disponibili. Nota operativa: una sessione parallela aveva lasciato un'implementazione parziale in stash sul branch (nome `feat/0.2-dexie-schema` consumato da PR #3); il lavoro è stato recuperato via stash, allineato a 02 v1.2 e completato.
+
+### Risultato concreto di Story 0.2
+
+- **Interfacce TypeScript complete** in `packages/core/src/schema/` (02 v1.2 §3+§4: `ListenEvent`, `Track`, `Artist`, `Album` con `artworkUrl`, `AudioFeatures`, `ListeningSession`, `Insight` + payload union, `ImportRecord`, `LibraryItem`, `Playlist(Item)`, `PrivacySettings`, `SearchQuery`; enum runtime `PLATFORM_IDS` allineati a §3.1 con `youtube_music`/`apple_music`)
+- **Classe Dexie 4** `LifeSoundtrackDB` in `packages/core/src/db/db.ts`: `version(1).stores(...)` (11 tabelle) + `version(2)` (aggiunge `searchQueries`, D.A.3) — indici identici a 02 §6, verificati testualmente nel test di schema
+- **Repository** CRUD + query base su `listens`, `tracks`, `artists`, `albums`, `features` in `repositories.ts` (upsert per PK `eventKey`/`canonicalKey`, query indicizzate, `purgeIp()` §3.8)
+- **`recount()`** per contatori denormalizzati `listenCount` (02 §7 MIG-4), idempotente
+- **26 test** con fake-indexeddb: schema/indici §6, migrazione v1→v2 con dati preservati, CRUD, idempotenza `eventKey` (invariante 10-TESTING §7), recount su fixture db-seed, integrazione `medium.json` (5k eventi, merge DEDUP su PK canonicalKey), performance (AC 10k < 500ms, min-of-3)
+- **Coverage `packages/core/db/`: 100% stmts/branch/funcs** (target ≥80%); script `test:coverage` (core + root) che esclude i test di performance dalla strumentazione (P9)
+
+### Acceptance criteria di Story 0.2 — tutte verificate ✅
+
+- [x] Tutte le tabelle di `02-DATA-SCHEMA.md` §6 esistono (12/12)
+- [x] Indici corrispondono alla spec (primKey + indici verificati uno a uno)
+- [x] `recount()` ricalcola `listenCount` correttamente (minimal + medium, incluse fusioni DEDUP)
+- [x] Coverage `db/` ≥80% (raggiunto 100%)
+- [x] Test 10.000 ListenEvent < 500ms (AC, min-of-3)
+
+### Decisioni / lesson learned emerse
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.14.1 | `Artist` riallineato a 02 v1.2 §3.3 (rimossi `artworkUrl`/`firstSeenAt`/`lastSeenAt` introdotti nel consolidamento S13) | Golden rule: la spec APPROVED è fonte di verità; i fixture db-seed non emettono quei campi |
+| D.14.2 | Semantica FK documentata: `listens.trackId` → `Track.id` (UUID), PK di `tracks` resta `canonicalKey` | I fixture db-seed (10-TESTING §3.2) usano l'UUID; il DEDUP resta identità della track |
+| D.14.3 | Test di performance isolati in `perf.test.ts`, esclusi dalle run coverage (`test:coverage`) | La strumentazione v8 raddoppia i tempi: l'AC sotto coverage sarebbe un artefatto (dettagli in `17-DEV-NOTES` P9) |
+| D.14.4 | Verifiche di re-import su slice nei test (fake-indexeddb slow-path su bulkPut di chiavi esistenti) | L'invariante è garantito dalla PK unique; il re-import integrale 50k è AC Story 0.3 su IndexedDB nativo |
+| D.14.5 | Zod NON incluso in Story 0.2 | I task/AC del backlog (v1.2.4) non lo prevedono; la validazione runtime è naturale confine dell'adapter (Story 0.3) |
+
+### Documenti aggiornati
+
+- `docs/11-BACKLOG.md` → **v1.2.4**: Story 0.2 🟡 IN PROGRESS (5/5 task, 5/5 AC), tabella stato avanzamento, changelog
+- `docs/17-DEV-NOTES.md` → **v0.2**: pitfall P6 (Dexie `modify` su Collection), P7 (slow-path fake-indexeddb), P8 (barrel multipli + `import type`), P9 (perf vs coverage); §1 comando `test:coverage`; §4 aggiornato
+- `docs/18-DEV-LOG.md` → **v0.5**: §6 entry Sessione 14 (5 problemi/fix/lesson 0.2-1..5) + indice sintomi + osservazione fixture per Story 0.3
+- `docs/INDEX.md` → roadmap (Sessione 14) e "Stato del progetto" aggiornati
+- `docs/BUNDLE.md` → rigenerato
+
+### Prossimi step
+1. Review + merge della PR Story 0.2 (`feat/0.2-schema-db-dexie` → `main`), poi gate D.12.1 post-merge
+2. **Story 0.3 (Adapter Spotify base)** — sbloccata dal 0.2; in parallelo Story 0.5 (PWA) e 0.6 (i18n)
+3. Story 0.7 (Operations runbook) resta in attesa di 0.5
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -439,6 +487,7 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 | 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
 | 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
 | 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3; **post-merge**: PR #3 merged (`10ecde5`), branch eliminata, gate D.12.1 applicato senza drift |
+| 0.5 | Sessione 14 (2026-10-16) | Aggiunta Sessione 14 (implementazione Story 0.2 — schema DB e layer Dexie): 5/5 task + 5/5 AC, coverage `db/` 100%, decisioni D.14.1-D.14.5 (riallineamento Artist a 02 v1.2, semantica FK, perf test isolati, Zod fuori perimetro) |
 
 ---
 

@@ -1,8 +1,8 @@
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.1
-> Ultima modifica: 2026-10-16 — implementazione Story 0.1 (Sessione 10-11)
+> Versione: 0.2
+> Ultima modifica: 2026-10-16 — implementazione Story 0.2 (Sessione 14)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
 
@@ -16,6 +16,7 @@
 | `pnpm run lint` | ESLint 9 flat config su tutti i package (via Turborepo, cacheato) |
 | `pnpm run typecheck` | `tsc --noEmit` per package |
 | `pnpm run test` | Vitest in tutti i package con test |
+| `pnpm run test:coverage` | Coverage (provider v8); in `@ls/core` esclude i test di performance (`perf.test.ts`, vedi P9) |
 | `pnpm run build` | `tsc` → `dist/` per `@ls/core` e `@ls/ui`, `vite build` per `@ls/web` |
 | `pnpm run e2e` | Playwright su `apps/web` (al primo avvio serve `pnpm exec playwright install chromium`) |
 | `pnpm run format` / `format:check` | Prettier (i doc in `docs/`, `fixtures/`, `design/` sono esclusi via `.prettierignore`) |
@@ -98,9 +99,50 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
 - Commit: Conventional Commits (hook `commit-msg` con commitlint); pre-commit: lint-staged.
 - I test leggono i fixture da `fixtures/synthetic-history/` (spec `10-TESTING.md` §3).
 
+### P6 — Dexie 4: `modify()` esiste solo su `Collection` (non su `Table`)
+
+- **Sintomo**: `TypeError: db.tracks.modify is not a function`.
+- **Causa**: `modify()` è un metodo di `Collection`; su `Table` esiste solo `update(key, changes)`.
+- **Soluzione**: per modifiche in blocco usare `db.<table>.toCollection().modify(fn)` o un
+  `where(...).modify(fn)` dentro una transazione (`db.transaction('rw', db.<tables>, async () => ...)`).
+  Altri punti Dexie: `db.verno` è affidabile anche prima di `open()`; la chiave primaria di una
+  tabella dichiarata `'&x, ...'` è `x` (unica); non esiste `Dexie.openOrCreate()` statico — usare
+  `new <Db>(name)` + `await db.open()`.
+
+### P7 — fake-indexeddb: bulkPut su chiavi **esistenti** attraversa uno slow-path costoso
+
+- **Sintomo**: re-put di 5k eventi già presenti > 5s (timeout dei test), mentre l'insert fresh
+  della stessa mole è ~150ms; i test successivi ereditano timeout a cascata.
+- **Causa**: il fallback di `bulkPut` (bulkAdd fallito → risoluzione per chiave) fa scan per
+  chunk, superlineare in fake-indexeddb (in IndexedDB nativo è nativo e veloce).
+- **Soluzione**: nei test, verificare il re-import su **slice** (decine di eventi) e coprire
+  l'idempotenza integrale su tabelle piccole (100 eventi); l'invariante resta garantito dalla
+  PK unique. Il re-import integrale a 50k è AC della Story 0.3 e gira nel browser.
+
+### P8 — `@ls/core` ha due barrel: non confondere `../index` (db) con `../../index` (radice)
+
+- **Sintomo**: `TS2305: Module '"../index"' has no exported member 'Track'` da `src/db/__tests__/`;
+  oppure `ReferenceError: LifeSoundtrackDB is not defined` a runtime con `import type` + `new`.
+- **Causa**: da `src/db/__tests__/` il path `'../index'` risolve al **barrel db** (`src/db/index.ts`),
+  non a quello radice; inoltre `import type` viene cancellato da `verbatimModuleSyntax`, quindi
+  un valore istanziato a runtime richiede l'import del valore.
+- **Soluzione**: tipi schema da `'../../schema'`, classe/repo db dal barrel db o da `'../index'`
+  (radice, che ora esporta esplicitamente schema + db — 05 §9.1). Con `lib: ES2022`
+  `MapIterator.map` non esiste: usare spread `[...iter].map()`.
+
+### P9 — Test di performance: isolare le asserzioni AC dalla strumentazione coverage
+
+- **Sintomo**: il test AC "10.000 ListenEvent in < 500ms" fallisce sotto `--coverage` (~2× overhead v8).
+- **Causa**: la strumentazione raddoppia i tempi misurati; l'asserzione diventa un artefatto.
+- **Soluzione**: test perf in file dedicato (`perf.test.ts`), escluso dalle run coverage via
+  script `test:coverage` (`vitest run --coverage --exclude src/db/__tests__/perf.test.ts`);
+  misurare con warm-up non misurato + **minimo di 3 round** (steady-state, robusto a jitter).
+
 ## 4. Cosa NON è ancora implementato
 
-Dexie 4 + Zod (Story 0.2), Zustand, i18next (Story 0.6), Tailwind 4 (Story 0.4), MSW (prime
-API), PWA/service worker (Story 0.5). Il placeholder `packages/core/src/db/index.ts` è vuoto
-di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major della toolchain
-(pnpm 12, ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
+Zod (validazione runtime: fuori perimetro Story 0.2, valutare con Story 0.3 adapter), Zustand,
+i18next (Story 0.6), Tailwind 4 (Story 0.4), MSW (prime API), PWA/service worker (Story 0.5),
+migrazione Dexie v2→v3 per `artworkUrl` (02 §10: nullable, nessun indice — richiesta solo se
+si apre lo schema; alternativa in Story 0.7). Il layer `@ls/core/db` è operativo da Story 0.2
+(classe Dexie v1+v2, repository, `recount()`). Gli upgrade major della toolchain (pnpm 12,
+ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
