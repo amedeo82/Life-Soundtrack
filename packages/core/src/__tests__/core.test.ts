@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createLogger, type LogEntry } from '../logger';
 import { PLATFORM_IDS } from '../schema';
+import { DB_SCHEMA_V2, recount } from '../index';
 
 describe('logger', () => {
   it('emette entry strutturate {level, module, msg, ctx}', () => {
@@ -40,10 +41,21 @@ describe('logger', () => {
   });
 });
 
-describe('schema placeholder', () => {
-  it('espone gli id piattaforma di 05-ARCHITECTURE.md §2', () => {
+describe('schema', () => {
+  it('espone gli id piattaforma di 02-DATA-SCHEMA.md §3.1', () => {
     expect(PLATFORM_IDS).toContain('spotify');
+    expect(PLATFORM_IDS).toContain('youtube_music');
+    expect(PLATFORM_IDS).toContain('apple_music');
     expect(PLATFORM_IDS).toContain('manual');
     expect(new Set(PLATFORM_IDS).size).toBe(PLATFORM_IDS.length);
+  });
+});
+
+describe('barrel radice @ls/core', () => {
+  it('espone la API pubblica di schema e db (05-ARCHITECTURE.md §9.1)', () => {
+    expect(typeof recount).toBe('function');
+    expect(Object.keys(DB_SCHEMA_V2)).toHaveLength(12);
+    expect(DB_SCHEMA_V2.listens).toContain('&eventKey');
+    expect(DB_SCHEMA_V2.tracks).toContain('&canonicalKey');
   });
 });
