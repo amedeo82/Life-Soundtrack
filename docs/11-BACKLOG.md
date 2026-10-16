@@ -66,21 +66,24 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.2 — Schema DB e layer Dexie `[PHASE-0]` `[AREA:db]` `[PRI:B]` `[SIZE:L]` `[DEP:0.1]`
 
+**Stato**: 🟡 **IN PROGRESS** (Sessione 14) — implementazione completa su branch `feat/0.2-schema-db-dexie`, in attesa di review/merge
+**Registro**: `docs/18-DEV-LOG.md` §6 entry Story 0.2
+
 **Descrizione**: Implementare lo schema Dexie come definito in `02-DATA-SCHEMA.md` §6, con migrazioni e API di accesso.
 
 **Task**:
-- T0.2.1 — Interfacce TypeScript in `packages/core/schema/`
-- T0.2.2 — Class Dexie con `db.version(1).stores(...)`
-- T0.2.3 — Repository: `listens`, `tracks`, `artists`, `albums`, `features` (CRUD + query base)
-- T0.2.4 — Funzione `recount()` per contatori denormalizzati
-- T0.2.5 — Test con DB in-memory (fake-indexeddb)
+- [x] T0.2.1 — Interfacce TypeScript in `packages/core/schema/`
+- [x] T0.2.2 — Class Dexie con `db.version(1).stores(...)` (più `version(2)` con `searchQueries`, 02 v1.1/v1.2 §6)
+- [x] T0.2.3 — Repository: `listens`, `tracks`, `artists`, `albums`, `features` (CRUD + query base)
+- [x] T0.2.4 — Funzione `recount()` per contatori denormalizzati
+- [x] T0.2.5 — Test con DB in-memory (fake-indexeddb)
 
 **Acceptance criteria**:
-- [ ] Tutte le tabelle di `02-DATA-SCHEMA.md` §6 esistono
-- [ ] Indici corrispondono alla spec
-- [ ] `recount()` ricalcola `listenCount` correttamente
-- [ ] Test unitari: ≥80% coverage su `packages/core/db/`
-- [ ] Test con 10.000 ListenEvent in < 500ms
+- [x] Tutte le tabelle di `02-DATA-SCHEMA.md` §6 esistono
+- [x] Indici corrispondono alla spec
+- [x] `recount()` ricalcola `listenCount` correttamente
+- [x] Test unitari: ≥80% coverage su `packages/core/db/` (raggiunto 100% stmts su `db/`)
+- [x] Test con 10.000 ListenEvent in < 500ms
 
 **Dipendenze**: Story 0.1
 **Spec**: `02-DATA-SCHEMA.md` §3, §6, §7
@@ -464,12 +467,12 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato alla **Sessione 12** (2026-10-16) dopo doc-sync post-merge. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato alla **Sessione 14** (2026-10-16). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
 | 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
-| 0 | 0.2 Schema DB Dexie | ⬚ TODO (sbloccata) | — | sbloccata da 0.1 ✅; issue `agent-ready` da aprire |
+| 0 | 0.2 Schema DB Dexie | 🟡 IN PROGRESS | `feat/0.2-schema-db-dexie` | 5/5 task + 5/5 AC verificati (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. PR da aprire. |
 | 0 | 0.3 Adapter Spotify | ⬚ TODO | — | dipende da 0.2 |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
@@ -503,3 +506,4 @@ Ogni story deve avere label GitHub:
 | 1.2.1 | Sessione 11 (2026-10-16) | **Story 0.1 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (scaffold monorepo + toolchain); nuove sezioni "Stato" e "Cosa rimane" nella story; aggiunta tabella "Stato di avanzamento" globale; cross-ref a `17-DEV-NOTES.md` e `18-DEV-LOG.md` |
 | 1.2.2 | Sessione 12 (2026-10-16) | **Doc-sync post-merge**: Story 0.1 ora ✅ DONE (PR #2 squash-merged `c0fb0a4`); tabella "Stato di avanzamento" corretta; riferimento "8 problemi" → "9 problemi" (coerente con messaggio commit) |
 | 1.2.3 | Sessione 13 (2026-10-16) | **Consolidamento doc pre-Fase 0**: Story 0.4 T0.4.1 PlatformCard → 5 stati canonici (chiusura M13); Story 2.2 AC allineata a `04§5` (chiusura ambiguità "Bayesiano/PELT"); **nuova Story 4.3 Artwork enrichment** (chiusura M5 con `artworkUrl` in 02 v1.2); aggiornato ordine di lavorazione per agenti |
+| 1.2.4 | Sessione 14 (2026-10-16) | **Story 0.2 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (schema Dexie v1+v2, repository CRUD, `recount()`; coverage `db/` 100%, AC 10k eventi < 500ms con fake-indexeddb); test di performance isolati in `perf.test.ts` ed esclusi dalle run coverage; cross-ref a `18-DEV-LOG` §6 |

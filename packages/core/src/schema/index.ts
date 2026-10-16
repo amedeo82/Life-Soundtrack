@@ -53,7 +53,7 @@ export interface ListenEvent {
   startedAt: number | null;
   /** ms effettivamente ascoltati. */
   durationMs: number;
-  /** FK tracks (primaria canonicalKey, §5/§6). */
+  /** FK tracks: Track.id (UUID, come nei fixture 10-TESTING §3.2; PK di tracks è canonicalKey). */
   trackId: string;
   /** Ascoltato fino alla fine. */
   completed: boolean;
