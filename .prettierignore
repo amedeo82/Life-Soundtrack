@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.turbo/
+pnpm-lock.yaml
+playwright-report/
+test-results/
+
+# Documenti di specifica e fixture: mai riformattati automaticamente
+# (il bundle docs/BUNDLE.md deve restare in sync)
+docs/
+design/
+fixtures/
+README.md
+AGENTS.md
+LICENSE

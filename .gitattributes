@@ -1,0 +1,13 @@
+# Normalizzazione line endings: repo cross-platform (Windows/Linux CI)
+# Tutti i file di testo usano LF nel working tree e nell'indice,
+# cosi il bundle check genera output identico su ogni OS.
+* text=auto eol=lf
+
+# Binari
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

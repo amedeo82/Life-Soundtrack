@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-15 17:29
-> Totale file: 27
+> Data: 2026-10-16 14:35
+> Totale file: 28
 
 
 ===== FILE: AGENTS.md =====
@@ -443,7 +443,7 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 9 (v1.1) | Backlog strutturato (epic → story → task) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 10 (v1.2) | Backlog strutturato (epic → story → task) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 9 | Architecture Decision Records (0001, 0002, 0003, 0005) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -457,6 +457,7 @@ Apache License
 | [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.1 | Protocollo per agenti |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
+| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -483,9 +484,10 @@ Apache License
 | 7 | 🎨 UI eseguibile + tokens | ✅ COMPLETATA |
 | 8 | ⚙️ DevOps | ✅ COMPLETATA |
 | 9 | 🩺 Audit + allineamento post-sessione | ✅ COMPLETATA |
+| 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
 
 ## Stato del progetto (post-audit 2026-10-15)
-- **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.1, 13-ADR ×4, 14)
+- **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
 - **Documenti DRAFT**: 8 (00, 01, 04, 06, 07, 08, 09, 12, 15)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
@@ -743,6 +745,29 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 
 ---
 
+## Sessione 10 — 🔄 Policy versioni toolchain (mini-sessione)
+
+**Data**: 2026-10-16
+**Stato**: ✅ Completata
+**Trigger**: durante `pnpm install` compaiono l'avviso "Update available! 9.15.9 → 12.11.2" (pnpm) e `WARN deprecated eslint@9.39.5`. Il Boss chiede verifica in documentazione: la policy "ultime versioni per tutti i pacchetti" **non era mai stata formalizzata** (nessuna decisione in Sessioni 0-9 né nell'audit).
+
+### Decisioni prese
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.10.1 | Policy versioni: toolchain e dipendenze dirette seguono le **ultime major disponibili** | Evitare di sviluppare su major EOL (es. ESLint 9) e accumulare debito di upgrade |
+| D.10.2 | L'upgrade corrente (pnpm 9→12, ESLint 9→10+, bump a cascata) è **differito al termine dell'implementazione** → Story 6.1 `[PHASE-POST]` in `11-BACKLOG.md` v1.2 | Non bloccare la Fase 0 tecnica: le story correnti proseguono su pnpm 9 / ESLint 9 finché l'implementazione non è conclusa |
+
+### Documenti aggiornati
+- 🟢 `docs/11-BACKLOG.md` → v1.2 (EPIC 6 + Story 6.1; rimossa duplicazione accidentale del blocco Story 0.6)
+- 🟢 `docs/SESSIONS.md` → questa entry
+- `docs/INDEX.md` → roadmap e versione backlog allineate
+- `docs/BUNDLE.md` → rigenerato
+
+### Prossimi step
+1. Proseguire con la Fase 0 tecnica (story 0.1 `agent-ready`) **senza attendere l'upgrade**: Story 6.1 viene eseguita solo a implementazione conclusa.
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -896,6 +921,117 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | 2026-10-15 | Prima emissione: audit completo + decisioni D.A.1, D.A.2 |
+
+
+
+===== FILE: docs/17-DEV-NOTES.md =====
+
+# 17 — Note di sviluppo (toolchain & workflow)
+
+> Status: 🟡 DRAFT
+> Versione: 0.1
+> Ultima modifica: 2026-10-16 — implementazione Story 0.1 (Sessione 10-11)
+> Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
+> nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
+
+---
+
+## 1. Comandi di sviluppo
+
+| Comando | Cosa fa |
+|---------|---------|
+| `pnpm install` | Installa tutto il workspace (attiva anche gli hook Husky via script `prepare`) |
+| `pnpm run lint` | ESLint 9 flat config su tutti i package (via Turborepo, cacheato) |
+| `pnpm run typecheck` | `tsc --noEmit` per package |
+| `pnpm run test` | Vitest in tutti i package con test |
+| `pnpm run build` | `tsc` → `dist/` per `@ls/core` e `@ls/ui`, `vite build` per `@ls/web` |
+| `pnpm run e2e` | Playwright su `apps/web` (al primo avvio serve `pnpm exec playwright install chromium`) |
+| `pnpm run format` / `format:check` | Prettier (i doc in `docs/`, `fixtures/`, `design/` sono esclusi via `.prettierignore`) |
+| `powershell scripts/generate-bundle.ps1 --check` | Verifica sync bundle (in CI: `pwsh`; in locale se `pwsh` 7 non è installato funziona PowerShell 5.1) |
+
+Requisiti: Node ≥ 20 (testato su 20 LTS e 24), pnpm 9 (pinnato in `packageManager`).
+
+## 2. Struttura monorepo
+
+Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
+
+    apps/web        @ls/web   PWA React 19 + Vite 6 (orchestra tutto)
+    packages/core   @ls/core  foglia runtime-agnostic (schema, db, logger, adapters, analysis, enrichment)
+    packages/ui     @ls/ui    design system (importa SOLO tipi da core)
+    packages/config @ls/config  preset condivisi: tsconfig, eslint, vitest
+
+- Alias TS: `@core/*`, `@ui/*`, `@web/*` → sorgenti dei package (usati negli import interni).
+- I package espongono anche exports map `@ls/core`/`./schema`, `./db`, `./logger` su `dist/` (§9.1).
+- Regola aciclica (§9.2): `core` non importa nulla di interno; `ui` solo tipi da `core`; `web` orchestra.
+
+## 3. Pitfalls toolchain (risolti — non ripetere)
+
+### P0 — Policy versioni (D.10.1/D.10.2): gli avvisi di update sono attesi
+
+- Durante `pnpm install` compaiono avvisi tipo "Update available! 9.15.9 → 12.11.2" (pnpm) e
+  `WARN deprecated eslint@9.39.5`: sono **noti e voluti**. La policy (D.10.1) prevede ultime
+  major come target, ma l'upgrade corrente è **differito a fine implementazione** (D.10.2,
+  Story 6.1 `[PHASE-POST]` in `11-BACKLOG.md` v1.2). Fino ad allora: **non bumpare major**
+  di toolchain (pnpm, ESLint, Vite, Vitest, React) nelle story correnti.
+
+### P1 — Vitest e Vite: usa Vitest ≥ 3 con Vite 6
+
+- **Sintomo**: `typecheck` fallisce in `apps/web/vite.config.ts` con `TS2345`/`TS2769`
+  (`PluginOption` non assegnabile) e negli errori compaiono **due percorsi** `vite@5.x` e
+  `vite@6.x` dentro `node_modules/.pnpm`.
+- **Causa**: Vitest 2.1.x dipende da Vite 5; con Vite 6 nell'app, `vitest/config` e `vite`
+  espongono tipi da due istanze diverse di Vite.
+- **Soluzione**: Vitest `^3.0.5` + `@vitest/coverage-v8` `^3.0.5` in tutti i package che
+  testano (pnpm deduplica → una sola istanza di Vite 6). Lo stack richiesto è "Vitest 2+":
+  Vitest 3 lo soddisfa ed è la major corrente (D.10.1). **Quando si aggiorna Vite, allineare
+  Vitest nella stessa PR; upgrade major differiti a Story 6.1 (D.10.2).**
+
+### P2 — I `paths` TS vanno dichiarati nel tsconfig del package che li usa
+
+- **Sintomo**: `TS2307: Cannot find module '@core/schema'` anche con `paths` nel preset
+  condiviso; oppure `TS5090: Non-relative paths are not allowed when 'baseUrl' is not set`.
+- **Causa**: i `paths` ereditati via `extends` da un tsconfig condiviso non si risolvono in
+  modo affidabile rispetto al file dichiarante; inoltre i valori non-relativi richiedono
+  `baseUrl`.
+- **Soluzione**: dichiarare `paths` in `apps/web/tsconfig.json` con percorsi relativi al file
+  (`"../../packages/core/src/*"`) e prefisso `./` per i path interni (`"./src/*"`). Non
+  rimettere `paths` in `packages/config/tsconfig/base.json`.
+
+### P3 — Line endings: `.gitattributes` impone LF (non rimuoverlo)
+
+- **Sintomo**: `generate-bundle.ps1 --check` fallisce su Windows con "Lista file identica, ma
+  contenuto cambiato" anche senza modifiche ai documenti.
+- **Causa**: con `core.autocrlf=true` i doc vengono estratti con CRLF; il bundle rigenerato
+  incorpora CRLF e diverge dal bundle committato (LF, generato in CI/Linux).
+- **Soluzione**: `.gitattributes` con `* text=auto eol=lf` (più regole `binary` per asset).
+  Dopo una modifica agli attributi, riscrivere il working tree prima di rigenerare il bundle
+  (es. `git checkout-index -f -a`, o eliminare i file tracciati e richeckoutarli). In locale
+  il check gira anche con PowerShell 5.1 se `pwsh` 7 non è installato.
+
+### P4 — exports map di `@ls/config`: serve la condizione `types` per i preset JS
+
+- **Sintomo**: `TS7016: Could not find a declaration file for module '@ls/config/vitest/base'`.
+- **Causa**: un subpath wildcard come `"./vitest/*": "./vitest/*"` (senza estensione) non fa
+  risolvere a TypeScript il `.d.ts` sibling del `.js`.
+- **Soluzione**: subpath esplicito con condizioni —
+  `"./vitest/base": { "types": "./vitest/base.d.ts", "default": "./vitest/base.js" }`.
+  Stesso pattern per eventuali nuovi preset JS consumati da file TS.
+
+### P5 — Convenzioni che evitano ritordi
+
+- ESLint preset: non chiamare `react` l'import di `eslint-plugin-react` se il modulo esporta
+  a sua volta un binding `react` (collisione `Identifier 'react' has already been declared`).
+- Nuovo file in `docs/` ⇒ aggiornare `$files` in `scripts/generate-bundle.ps1` e rigenerare
+  `docs/BUNDLE.md` nella stessa PR (vedi `AGENTS.md` §Manutenzione del bundle).
+- Commit: Conventional Commits (hook `commit-msg` con commitlint); pre-commit: lint-staged.
+- I test leggono i fixture da `fixtures/synthetic-history/` (spec `10-TESTING.md` §3).
+
+## 4. Cosa NON è ancora implementato
+
+Dexie 4 + Zod (Story 0.2), Zustand, i18next (Story 0.6), Tailwind 4 (Story 0.4), MSW (prime
+API), PWA/service worker (Story 0.5). Il placeholder `packages/core/src/db/index.ts` è vuoto
+di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major della toolchain
+(pnpm 12, ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 
 
 
@@ -4440,7 +4576,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -4450,6 +4586,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 | Simbolo | Significato |
 |---------|-------------|
 | `[PHASE-N]` | Fase della roadmap (0=fondamenta, 1=import core, 2=analisi, 3=UI, 4=beta) |
+| `[PHASE-POST]` | Post-implementazione: da eseguire **solo a sviluppo concluso** (decisione D.10.2, `SESSIONS.md`) |
 | `[AREA:X]` | Modulo: `adapter`, `analysis`, `ui`, `ux`, `db`, `enrichment`, `privacy`, `devops` |
 | `[PRI:B]` / `[PRI:I]` / `[PRI:L]` | Priorità: blocker / important / later |
 | `[DEP:#]` | Dipende dalla story # |
@@ -4626,23 +4763,6 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Dipendenze**: Story 0.2, Story 0.5
 **Spec**: `05-ARCHITECTURE.md` §11, §12; `02-DATA-SCHEMA.md` §7
-
-**Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
-
-**Task**:
-- T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
-- T0.6.2 — Language detector (localStorage → browser)
-- T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
-- T0.6.4 — Componente `<T>` e hook `useT()`
-
-**Acceptance criteria**:
-- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
-- [ ] Switch IT↔EN senza reload
-- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
-- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
-
-**Dipendenze**: Story 0.1
-**Spec**: `08-COPY-I18N.md` §3, §4, §5
 
 ---
 
@@ -4831,6 +4951,33 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+## EPIC 6 — Manutenzione stack (post-implementazione)
+
+Obiettivo: allineare toolchain e dipendenze alle ultime major disponibili **a sviluppo concluso**, senza bloccare le fasi correnti (decisioni D.10.1 e D.10.2, `SESSIONS.md`).
+
+### Story 6.1 — Upgrade toolchain e dipendenze a ultime major `[PHASE-POST]` `[AREA:devops]` `[PRI:L]` `[SIZE:M]` `[DEP:0.1]`
+
+**Descrizione**: Il progetto adotta la policy "ultime major disponibili" per toolchain e dipendenze dirette (D.10.1). L'upgrade **non viene eseguito durante le fasi di sviluppo**: si esegue al termine dell'implementazione (D.10.2), così la Fase 0 tecnica e le story correnti proseguono senza attese. Alla data della decisione (2026-10-16) gli avvisi noti sono: pnpm 9.15.9 → 12.x, ESLint 9 (linea deprecata) → 10.x. **All'esecuzione valgono le major più recenti disponibili in quel momento**, non le versioni citate qui.
+
+**Task**:
+- T6.1.1 — Bump `packageManager` in `package.json` all'ultima major di pnpm; rigenerare `pnpm-lock.yaml`; allineare CI (`12-DEVOPS.md` §2) e Dockerfile (`§3.1`)
+- T6.1.2 — Bump ESLint a ultima major in `packages/config/` (flat config) con plugin compatibili (`typescript-eslint`, react, vitest); correggere le nuove regole
+- T6.1.3 — Bump a cascata di tooling e dipendenze dirette (TypeScript, Vite, Vitest, Tailwind, Turborepo, ...) via `pnpm update --latest`; revisionare i breaking changes
+- T6.1.4 — Allineare la documentazione: `05-ARCHITECTURE.md` §8/§8.1 e `12-DEVOPS.md` alle versioni effettive; rigenerare `docs/BUNDLE.md`
+- T6.1.5 — Verifica completa: `pnpm run lint`, `pnpm run test`, `pnpm run build`, `pnpm run e2e`; CI verde
+
+**Acceptance criteria**:
+- [ ] `pnpm install --frozen-lockfile` passa in CI con il lockfile rigenerato
+- [ ] Nessun warning `deprecated` sulle dipendenze dirette (root + workspace projects)
+- [ ] `pnpm run lint`, `pnpm run test`, `pnpm run build` verdi dopo il bump
+- [ ] `05-ARCHITECTURE.md` §8 e `12-DEVOPS.md` citano le versioni effettivamente in uso
+- [ ] `pwsh scripts/generate-bundle.ps1 --check` exit 0
+
+**Dipendenze**: Story 0.1 (scheduling: **solo a implementazione conclusa**, mai a metà di altre story)
+**Spec**: `05-ARCHITECTURE.md` §8; `12-DEVOPS.md` §2-3; decisioni D.10.1/D.10.2 in `SESSIONS.md`
+
+---
+
 ## Priorità di lavorazione per agenti
 
 Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
@@ -4850,6 +4997,7 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 13. **4.1, 4.2** enrichment
 14. **3.1, 3.2, 3.3** UI
 15. **5.1, 5.2** privacy
+16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
@@ -4867,6 +5015,7 @@ Ogni story deve avere label GitHub:
 | 0.1 | Sessione 3 | Prima versione con 5 epic e 17 story |
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |
+| 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
 
 
 ===== FILE: docs/12-DEVOPS.md =====

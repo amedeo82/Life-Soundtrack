@@ -70,6 +70,8 @@ $files = @(
     "docs/INDEX.md",
     "docs/SESSIONS.md",
     "docs/AUDIT-2026-10-15.md",
+    # Note di sviluppo (pitfalls toolchain, Story 0.1)
+    "docs/17-DEV-NOTES.md",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",
     "docs/01-PLATFORMS.md",
