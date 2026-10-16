@@ -24,7 +24,7 @@
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 9 (v1.1) | Backlog strutturato (epic → story → task) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 10 (v1.2) | Backlog strutturato (epic → story → task) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 9 | Architecture Decision Records (0001, 0002, 0003, 0005) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -64,9 +64,10 @@
 | 7 | 🎨 UI eseguibile + tokens | ✅ COMPLETATA |
 | 8 | ⚙️ DevOps | ✅ COMPLETATA |
 | 9 | 🩺 Audit + allineamento post-sessione | ✅ COMPLETATA |
+| 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
 
 ## Stato del progetto (post-audit 2026-10-15)
-- **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.1, 13-ADR ×4, 14)
+- **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
 - **Documenti DRAFT**: 8 (00, 01, 04, 06, 07, 08, 09, 12, 15)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0

@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -10,6 +10,7 @@
 | Simbolo | Significato |
 |---------|-------------|
 | `[PHASE-N]` | Fase della roadmap (0=fondamenta, 1=import core, 2=analisi, 3=UI, 4=beta) |
+| `[PHASE-POST]` | Post-implementazione: da eseguire **solo a sviluppo concluso** (decisione D.10.2, `SESSIONS.md`) |
 | `[AREA:X]` | Modulo: `adapter`, `analysis`, `ui`, `ux`, `db`, `enrichment`, `privacy`, `devops` |
 | `[PRI:B]` / `[PRI:I]` / `[PRI:L]` | Priorità: blocker / important / later |
 | `[DEP:#]` | Dipende dalla story # |
@@ -186,23 +187,6 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Dipendenze**: Story 0.2, Story 0.5
 **Spec**: `05-ARCHITECTURE.md` §11, §12; `02-DATA-SCHEMA.md` §7
-
-**Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
-
-**Task**:
-- T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
-- T0.6.2 — Language detector (localStorage → browser)
-- T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
-- T0.6.4 — Componente `<T>` e hook `useT()`
-
-**Acceptance criteria**:
-- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
-- [ ] Switch IT↔EN senza reload
-- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
-- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
-
-**Dipendenze**: Story 0.1
-**Spec**: `08-COPY-I18N.md` §3, §4, §5
 
 ---
 
@@ -391,6 +375,33 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+## EPIC 6 — Manutenzione stack (post-implementazione)
+
+Obiettivo: allineare toolchain e dipendenze alle ultime major disponibili **a sviluppo concluso**, senza bloccare le fasi correnti (decisioni D.10.1 e D.10.2, `SESSIONS.md`).
+
+### Story 6.1 — Upgrade toolchain e dipendenze a ultime major `[PHASE-POST]` `[AREA:devops]` `[PRI:L]` `[SIZE:M]` `[DEP:0.1]`
+
+**Descrizione**: Il progetto adotta la policy "ultime major disponibili" per toolchain e dipendenze dirette (D.10.1). L'upgrade **non viene eseguito durante le fasi di sviluppo**: si esegue al termine dell'implementazione (D.10.2), così la Fase 0 tecnica e le story correnti proseguono senza attese. Alla data della decisione (2026-10-16) gli avvisi noti sono: pnpm 9.15.9 → 12.x, ESLint 9 (linea deprecata) → 10.x. **All'esecuzione valgono le major più recenti disponibili in quel momento**, non le versioni citate qui.
+
+**Task**:
+- T6.1.1 — Bump `packageManager` in `package.json` all'ultima major di pnpm; rigenerare `pnpm-lock.yaml`; allineare CI (`12-DEVOPS.md` §2) e Dockerfile (`§3.1`)
+- T6.1.2 — Bump ESLint a ultima major in `packages/config/` (flat config) con plugin compatibili (`typescript-eslint`, react, vitest); correggere le nuove regole
+- T6.1.3 — Bump a cascata di tooling e dipendenze dirette (TypeScript, Vite, Vitest, Tailwind, Turborepo, ...) via `pnpm update --latest`; revisionare i breaking changes
+- T6.1.4 — Allineare la documentazione: `05-ARCHITECTURE.md` §8/§8.1 e `12-DEVOPS.md` alle versioni effettive; rigenerare `docs/BUNDLE.md`
+- T6.1.5 — Verifica completa: `pnpm run lint`, `pnpm run test`, `pnpm run build`, `pnpm run e2e`; CI verde
+
+**Acceptance criteria**:
+- [ ] `pnpm install --frozen-lockfile` passa in CI con il lockfile rigenerato
+- [ ] Nessun warning `deprecated` sulle dipendenze dirette (root + workspace projects)
+- [ ] `pnpm run lint`, `pnpm run test`, `pnpm run build` verdi dopo il bump
+- [ ] `05-ARCHITECTURE.md` §8 e `12-DEVOPS.md` citano le versioni effettivamente in uso
+- [ ] `pwsh scripts/generate-bundle.ps1 --check` exit 0
+
+**Dipendenze**: Story 0.1 (scheduling: **solo a implementazione conclusa**, mai a metà di altre story)
+**Spec**: `05-ARCHITECTURE.md` §8; `12-DEVOPS.md` §2-3; decisioni D.10.1/D.10.2 in `SESSIONS.md`
+
+---
+
 ## Priorità di lavorazione per agenti
 
 Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
@@ -410,6 +421,7 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 13. **4.1, 4.2** enrichment
 14. **3.1, 3.2, 3.3** UI
 15. **5.1, 5.2** privacy
+16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
@@ -427,3 +439,4 @@ Ogni story deve avere label GitHub:
 | 0.1 | Sessione 3 | Prima versione con 5 epic e 17 story |
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |
+| 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
