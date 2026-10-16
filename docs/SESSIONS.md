@@ -266,6 +266,63 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 
 ---
 
+## Sessione 11 — 🛠️ Implementazione Story 0.1 (scaffold monorepo + toolchain)
+
+**Data**: 2026-10-16
+**Stato**: ✅ Completata (per il perimetro Story 0.1)
+**Trigger**: dopo l'approvazione di `05-ARCHITECTURE` v1.0 (S9) e la policy versioni D.10.1/D.10.2 (S10), Story 0.1 viene implementata come prima storia della Fase 0 tecnica.
+
+### Stato di avanzamento per story
+
+| Story | Stato | Note |
+|-------|-------|------|
+| 0.1 Setup monorepo e toolchain | 🟡 **IN PROGRESS** (scaffold completo, feature work delegato a 0.2+) | Branch `feat/0.1-monorepo-setup` aperto; 3 commit sul branch (non merged in `main`) documentati in `18-DEV-LOG.md` |
+| 0.2 Schema DB e layer Dexie | ⬚ TODO | dipende da 0.1 ✅ |
+| 0.3 Adapter Spotify base | ⬚ TODO | dipende da 0.2 |
+| 0.4 UI import (onboarding) | ⬚ TODO | dipende da 0.3 |
+| 0.5 PWA / service worker | ⬚ TODO | parallelo a 0.1, può partire |
+| 0.6 Setup i18n | ⬚ TODO | parallelo a 0.1, può partire |
+| 0.7 Operations runbook | ⬚ TODO | dipende da 0.2 e 0.5 |
+
+### Risultato concreto di Story 0.1
+
+- **Monorepo Turborepo** con workspace `apps/web` (@ls/web), `packages/core` (@ls/core), `packages/ui` (@ls/ui), `packages/config` (@ls/config)
+- **Toolchain operativa**: ESLint 9 flat config, Prettier 3, Husky + lint-staged + commitlint, Vitest 3 + Playwright 1.5+
+- **TypeScript 5.6+** con `paths` aliases (`@core/*`, `@ui/*`, `@web/*`); strict mode attivo
+- **CI GitHub Actions** con Node 20, job lint + typecheck + test + build + bundle --check
+- **Scaffold minimo** in `@ls/core`: `Logger` (con sink console, schema `{level, module, msg, ctx}`), `PLATFORM_IDS`/`PlatformId`, placeholder `packages/core/src/db/index.ts` per Story 0.2
+- **Scaffold minimo** in `@ls/ui`: componente `Button` dimostrativo
+- **Scaffold minimo** in `@ls/web`: `App.tsx` con rendering di PlatformId list + Button, smoke test Vitest, smoke E2E Playwright
+- **Bundle script** esteso con `--check` mode (CI-friendly, deterministico)
+
+### Acceptance criteria di Story 0.1 — tutte verificate ✅
+
+- [x] `pnpm install` senza errori su node 20 LTS (warning pnpm 9→12 atteso per D.10.2)
+- [x] `pnpm run lint` passa su codebase vuoto
+- [x] `pnpm run test` esegue test in `@ls/core` e `@ls/web`
+- [x] `pnpm run build` produce artefatti (`dist/` in @ls/core, @ls/ui, @ls/web)
+- [x] CI GitHub Actions: lint + typecheck + test + build su ogni PR
+
+### Documenti aggiornati
+- 🟡 `docs/17-DEV-NOTES.md` (nuovo) — pitfalls toolchain consolidati (P0-P5)
+- 🟡 `docs/18-DEV-LOG.md` (nuovo) — registro cronologico con entry Story 0.1 (8 problemi/fix/lesson)
+- `docs/INDEX.md` → aggiornato post-S11
+- `docs/11-BACKLOG.md` → Story 0.1 task marcati ✅
+- `docs/BUNDLE.md` → rigenerato (include 17-DEV-NOTES, 18-DEV-LOG)
+- `scripts/generate-bundle.ps1` → aggiornato con `docs/18-DEV-LOG.md`
+
+### Decisioni / lesson learned emerse
+- **Toolchain monorepo è single point of failure** (Vite/Vitest, paths, exports map, line endings): allocare sempre tempo per stabilizzarla prima delle feature (lesson consolidata in `18-DEV-LOG.md` Story 0.1)
+- **Aggiungere sempre `docs/18-DEV-LOG.md` al `$files` del bundle** quando si crea un nuovo file in `docs/`
+- **17-DEV-NOTES.md è la reference stabile dei pitfalls**; 18-DEV-LOG.md è il registro cronologico per story
+
+### Prossimi step
+1. Aprire PR per Story 0.1 (branch `feat/0.1-monorepo-setup` → `main`) con body che referenza Story 0.1
+2. Aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie) — ora sbloccata
+3. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo a 0.2
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -280,6 +337,15 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
     | # | Decisione | Motivazione |
     |---|-----------|-------------|
     | D.N.1 | ... | ... |
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
+| 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
 
 ---
 
