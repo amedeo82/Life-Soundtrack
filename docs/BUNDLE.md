@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-16 14:35
-> Totale file: 28
+> Data: 2026-10-16 16:47
+> Totale file: 29
 
 
 ===== FILE: AGENTS.md =====
@@ -190,15 +190,32 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 
 ## 🏗️ Stato del progetto
 
-Attualmente in **fase di progettazione** (docs/). Nessuna riga di codice ancora scritta.
+**Fase 0 tecnica avviata** (2026-10-16). Il monorepo esiste ed è operativo; le feature di prodotto arriveranno con le story 0.2+.
+
+**Cosa c'è oggi** (branch `feat/0.1-monorepo-setup`):
+- Monorepo Turborepo: `apps/web` (@ls/web), `packages/core` (@ls/core), `packages/ui` (@ls/ui), `packages/config` (@ls/config)
+- Toolchain: pnpm 9, Node 20+, TypeScript 5.6+, ESLint 9, Prettier 3, Vitest 3, Playwright 1.49+
+- CI GitHub Actions (lint + typecheck + test + build)
+- Scaffold minimo: Logger in `@ls/core`, PlatformId enum, componente Button in `@ls/ui`, App skeleton in `@ls/web`
+- Documentazione completa + spec per tutte le story 0.2-6.1
+
+**Prossima sbloccata**: Story 0.2 (Schema DB Dexie) — vedi `docs/11-BACKLOG.md`.
+
+**Storico**:
+- S0-S9: progettazione completa (audit 2026-10-15 chiude 9 incongruenze critiche + 13 medie)
+- S10: policy versioni toolchain (D.10.1/D.10.2, upgrade a fine implementazione)
+- S11: implementazione Story 0.1 (scaffold monorepo + toolchain), 8 problemi risolti documentati in `18-DEV-LOG.md`
 
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)
 - Visione: [`docs/00-VISION.md`](docs/00-VISION.md)
+- Backlog: [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md)
+- Diario implementazione: [`docs/18-DEV-LOG.md`](docs/18-DEV-LOG.md)
+- Note sviluppo: [`docs/17-DEV-NOTES.md`](docs/17-DEV-NOTES.md)
 
 ## 🤝 Come contribuire
 
-Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lavorare sul codice, leggi **`AGENTS.md`** come primo file.
+Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lavorare sul codice, leggi **`AGENTS.md`** come primo file, poi segui l'ordine di lettura lì indicato. Per dettagli sull'implementazione corrente, leggi `docs/17-DEV-NOTES.md` (pitfalls consolidati) e `docs/18-DEV-LOG.md` (registro cronologico per story).
 
 ## 📜 Licenza
 
@@ -452,12 +469,13 @@ Apache License
 ## Documenti di supporto
 | File | Stato | Descrizione |
 |------|-------|-------------|
-| [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni di progettazione |
-| [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Backup completo del progetto |
+| [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
+| [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
 | [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.1 | Protocollo per agenti |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
-| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain |
+| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.1 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v0.2 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -485,14 +503,16 @@ Apache License
 | 8 | ⚙️ DevOps | ✅ COMPLETATA |
 | 9 | 🩺 Audit + allineamento post-sessione | ✅ COMPLETATA |
 | 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
+| 11 | 🛠️ Implementazione Story 0.1 (scaffold monorepo) | ✅ COMPLETATA |
 
-## Stato del progetto (post-audit 2026-10-15)
+## Stato del progetto (post-Sessione 11, 2026-10-16)
 - **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
-- **Documenti DRAFT**: 8 (00, 01, 04, 06, 07, 08, 09, 12, 15)
+- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Prossimo step tecnico**: story 0.1 (`agent-ready`) **sbloccata** dopo approvazione Boss di `05` v1.0
+- **Implementazione**: 🟡 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) in `feat/0.1-monorepo-setup`, 5/5 task + 5/5 AC verificati. 8 problemi risolti e documentati in `18-DEV-LOG.md`. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
+- **Prossimo step tecnico**: aprire PR per Story 0.1, poi issue `agent-ready` per Story 0.2
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -768,6 +788,63 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 
 ---
 
+## Sessione 11 — 🛠️ Implementazione Story 0.1 (scaffold monorepo + toolchain)
+
+**Data**: 2026-10-16
+**Stato**: ✅ Completata (per il perimetro Story 0.1)
+**Trigger**: dopo l'approvazione di `05-ARCHITECTURE` v1.0 (S9) e la policy versioni D.10.1/D.10.2 (S10), Story 0.1 viene implementata come prima storia della Fase 0 tecnica.
+
+### Stato di avanzamento per story
+
+| Story | Stato | Note |
+|-------|-------|------|
+| 0.1 Setup monorepo e toolchain | 🟡 **IN PROGRESS** (scaffold completo, feature work delegato a 0.2+) | Branch `feat/0.1-monorepo-setup` aperto; 3 commit sul branch (non merged in `main`) documentati in `18-DEV-LOG.md` |
+| 0.2 Schema DB e layer Dexie | ⬚ TODO | dipende da 0.1 ✅ |
+| 0.3 Adapter Spotify base | ⬚ TODO | dipende da 0.2 |
+| 0.4 UI import (onboarding) | ⬚ TODO | dipende da 0.3 |
+| 0.5 PWA / service worker | ⬚ TODO | parallelo a 0.1, può partire |
+| 0.6 Setup i18n | ⬚ TODO | parallelo a 0.1, può partire |
+| 0.7 Operations runbook | ⬚ TODO | dipende da 0.2 e 0.5 |
+
+### Risultato concreto di Story 0.1
+
+- **Monorepo Turborepo** con workspace `apps/web` (@ls/web), `packages/core` (@ls/core), `packages/ui` (@ls/ui), `packages/config` (@ls/config)
+- **Toolchain operativa**: ESLint 9 flat config, Prettier 3, Husky + lint-staged + commitlint, Vitest 3 + Playwright 1.5+
+- **TypeScript 5.6+** con `paths` aliases (`@core/*`, `@ui/*`, `@web/*`); strict mode attivo
+- **CI GitHub Actions** con Node 20, job lint + typecheck + test + build + bundle --check
+- **Scaffold minimo** in `@ls/core`: `Logger` (con sink console, schema `{level, module, msg, ctx}`), `PLATFORM_IDS`/`PlatformId`, placeholder `packages/core/src/db/index.ts` per Story 0.2
+- **Scaffold minimo** in `@ls/ui`: componente `Button` dimostrativo
+- **Scaffold minimo** in `@ls/web`: `App.tsx` con rendering di PlatformId list + Button, smoke test Vitest, smoke E2E Playwright
+- **Bundle script** esteso con `--check` mode (CI-friendly, deterministico)
+
+### Acceptance criteria di Story 0.1 — tutte verificate ✅
+
+- [x] `pnpm install` senza errori su node 20 LTS (warning pnpm 9→12 atteso per D.10.2)
+- [x] `pnpm run lint` passa su codebase vuoto
+- [x] `pnpm run test` esegue test in `@ls/core` e `@ls/web`
+- [x] `pnpm run build` produce artefatti (`dist/` in @ls/core, @ls/ui, @ls/web)
+- [x] CI GitHub Actions: lint + typecheck + test + build su ogni PR
+
+### Documenti aggiornati
+- 🟡 `docs/17-DEV-NOTES.md` (nuovo) — pitfalls toolchain consolidati (P0-P5)
+- 🟡 `docs/18-DEV-LOG.md` (nuovo) — registro cronologico con entry Story 0.1 (8 problemi/fix/lesson)
+- `docs/INDEX.md` → aggiornato post-S11
+- `docs/11-BACKLOG.md` → Story 0.1 task marcati ✅
+- `docs/BUNDLE.md` → rigenerato (include 17-DEV-NOTES, 18-DEV-LOG)
+- `scripts/generate-bundle.ps1` → aggiornato con `docs/18-DEV-LOG.md`
+
+### Decisioni / lesson learned emerse
+- **Toolchain monorepo è single point of failure** (Vite/Vitest, paths, exports map, line endings): allocare sempre tempo per stabilizzarla prima delle feature (lesson consolidata in `18-DEV-LOG.md` Story 0.1)
+- **Aggiungere sempre `docs/18-DEV-LOG.md` al `$files` del bundle** quando si crea un nuovo file in `docs/`
+- **17-DEV-NOTES.md è la reference stabile dei pitfalls**; 18-DEV-LOG.md è il registro cronologico per story
+
+### Prossimi step
+1. Aprire PR per Story 0.1 (branch `feat/0.1-monorepo-setup` → `main`) con body che referenza Story 0.1
+2. Aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie) — ora sbloccata
+3. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo a 0.2
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -782,6 +859,15 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
     | # | Decisione | Motivazione |
     |---|-----------|-------------|
     | D.N.1 | ... | ... |
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
+| 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
 
 ---
 
@@ -947,7 +1033,7 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 | `pnpm run build` | `tsc` → `dist/` per `@ls/core` e `@ls/ui`, `vite build` per `@ls/web` |
 | `pnpm run e2e` | Playwright su `apps/web` (al primo avvio serve `pnpm exec playwright install chromium`) |
 | `pnpm run format` / `format:check` | Prettier (i doc in `docs/`, `fixtures/`, `design/` sono esclusi via `.prettierignore`) |
-| `powershell scripts/generate-bundle.ps1 --check` | Verifica sync bundle (in CI: `pwsh`; in locale se `pwsh` 7 non è installato funziona PowerShell 5.1) |
+| `pwsh scripts/generate-bundle.ps1 --check` (CI) / `powershell scripts/generate-bundle.ps1 -Check` (locale Win PS 5.1) | Verifica sync bundle. ⚠ In PowerShell 5.1 il flag è `-Check`, non `--check` |
 
 Requisiti: Node ≥ 20 (testato su 20 LTS e 24), pnpm 9 (pinnato in `packageManager`).
 
@@ -1032,6 +1118,119 @@ Dexie 4 + Zod (Story 0.2), Zustand, i18next (Story 0.6), Tailwind 4 (Story 0.4),
 API), PWA/service worker (Story 0.5). Il placeholder `packages/core/src/db/index.ts` è vuoto
 di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major della toolchain
 (pnpm 12, ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
+
+
+
+===== FILE: docs/18-DEV-LOG.md =====
+
+# 18 — Diario di Sviluppo (problemi, fix, lesson learned)
+
+> Status: 🟡 DRAFT
+> Versione: 0.2
+> Ultima modifica: 2026-10-16 — Sessione 11, entry Story 0.1
+> Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
+> durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
+> agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
+> la toolchain/doc ha richiesto correzioni.
+> Collegato in `docs/INDEX.md` (Documenti di supporto). Riferimenti: `AGENTS.md`
+> §"Fine di un'implementazione" e §"Checklist di auto-revisione PR".
+
+---
+
+## 1. Regole di compilazione
+
+- **Quando**: al termine di **ogni** implementazione (PR o gruppo di PR chiuse), prima del merge.
+- **Chi**: l'agente che ha implementato. Il Boss revisiona in PR.
+- **Cosa registrare**:
+  - **P** (Problema): un intoppo che ha richiesto ≥ 1 fix non ovvio.
+  - **F** (Fix): la soluzione adottata, con riferimento al commit/branch.
+  - **L** (Lesson learned): cosa fare d'ora in poi per non ripeterlo.
+  - Le **decisioni di scope** o le **ambiguità di specifica** NON vanno qui: vanno in
+    `docs/SESSIONS.md` (se di progettazione) o in una issue `needs-spec` (se bloccanti).
+- **Come**: una sezione `## Story X.Y — <nome>` con **una entry per problema**. Niente
+  diapositive narrative: tabelle + snippet. Link sempre a file:riga quando possibile.
+- **Cosa NON duplicare**: pitfalls già stabilizzati in `17-DEV-NOTES.md` §3 vanno solo
+  referenziati, non ricopiati. Questo file è per eventi **cronologici**; `17` resta
+  la reference delle **convenzioni stabili**.
+
+## 2. Indice rapido (per sintomo)
+
+| Sintomo / area | Story | ID | Stato |
+|----------------|-------|----|-------|
+| TS2345/TS2769 su `vite.config.ts` (PluginOption) | 0.1 | 0.1-1 | ✅ risolto (Vitest 3) |
+| TS2307/TS5090 su path alias (`@core/*`) | 0.1 | 0.1-2 | ✅ risolto (paths locali) |
+| TS7016 su preset JS senza `.d.ts` | 0.1 | 0.1-3 | ✅ risolto (exports map con `types`) |
+| `bundle --check` fallisce su Windows senza modifiche | 0.1 | 0.1-4 | ✅ risolto (`.gitattributes` + LF) |
+| Identical-list-but-content-changed rumoroso | 0.1 | 0.1-5 | ✅ risolto (normalizz. timestamp in check) |
+| `Identifier 'react' has already been declared` in eslint preset | 0.1 | 0.1-6 | ✅ risolto (rinominato import) |
+| `bundle --check` (doppio dash) ignorato da PowerShell 5.1 | 0.1 | 0.1-9 | ✅ documentato (usare `-Check` su Win PS 5.1, `--check` su pwsh 7+) |
+
+## 3. Template entry (da copiare)
+
+    ### Story 0.X — <nome story>
+    **Branch**: feat/<num>-<slug>
+    **PR**: #NN
+    **Data**: YYYY-MM-DD
+
+    | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+    |---|------|---------|-------|-------------------|------|
+    | 1 | P+F+L | ... | ... | ... | file:line |
+
+    **Lesson learned sintetica** (1-2 righe): ...
+
+    **Link utili**: commit, PR, issue correlata, sezione spec toccata.
+
+## 4. Entries cronologiche
+
+### Story 0.1 — Setup monorepo e toolchain
+**Branch**: `feat/0.1-monorepo-setup` (in progress, non merged)
+**PR**: non ancora aperta
+**Data**: 2026-10-16
+**Stato**: 🟡 IN PROGRESS — scaffold monorepo + toolchain funzionanti; feature work delegato a Story 0.2+
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 0.1-1 | P+F+L | `typecheck` fallisce in `apps/web/vite.config.ts` con `TS2345`/`TS2769` (`PluginOption` non assegnabile); due `vite@5.x` + `vite@6.x` in `node_modules/.pnpm` | Vitest 2.1.x dipende da Vite 5; con Vite 6 nell'app, `vitest/config` e `vite` espongono tipi da due istanze diverse | Vitest `^3.0.5` + `@vitest/coverage-v8` `^3.0.5` in tutti i package che testano (pnpm deduplica → una sola istanza di Vite 6). Allineare Vitest a Vite nella stessa PR | `packages/core/vitest.config.ts:1`, `packages/config/vitest/base.js:1` |
+| 0.1-2 | P+F+L | `TS2307: Cannot find module '@core/schema'` con `paths` solo nel preset condiviso; oppure `TS5090: Non-relative paths are not allowed when 'baseUrl' is not set` | I `paths` ereditati via `extends` da un tsconfig condiviso non si risolvono in modo affidabile rispetto al file dichiarante; valori non-relativi richiedono `baseUrl` | Dichiarare `paths` in `apps/web/tsconfig.json` con percorsi relativi al file (`"../../packages/core/src/*"`) e prefisso `./` per i path interni (`"./src/*"`). **Non** rimettere `paths` in `packages/config/tsconfig/base.json` | `apps/web/tsconfig.json:8-10` |
+| 0.1-3 | P+F+L | `TS7016: Could not find a declaration file for module '@ls/config/vitest/base'` consumato da `vitest.config.ts` | Subpath wildcard `"./vitest/*": "./vitest/*"` (senza estensione) non fa risolvere a TypeScript il `.d.ts` sibling del `.js` | Subpath esplicito con condizioni: `"./vitest/base": { "types": "./vitest/base.d.ts", "default": "./vitest/base.js" }`. Stesso pattern per ogni preset JS consumato da file TS | `packages/config/package.json:exports` |
+| 0.1-4 | P+F+L | `generate-bundle.ps1 --check` fallisce su Windows con "Lista file identica, ma contenuto cambiato" anche senza modifiche ai documenti | `core.autocrlf=true` estrae i doc con CRLF; il bundle rigenerato incorpora CRLF e diverge dal bundle committato (LF, generato in CI/Linux) | `.gitattributes` con `* text=auto eol=lf` (+ regole `binary` per asset). Dopo modifica attributi, riscrivere il working tree prima di rigenerare. **Importante**: non rimuovere `.gitattributes` | `.gitattributes:1` |
+| 0.1-5 | P+F+L | `bundle --check` fallisce sempre subito dopo la generazione perché il timestamp cambia | Il confronto `$existing -eq $newBundle` legge il file con timestamp "X" e lo confronta con un bundle appena generato con timestamp "Y" (un minuto dopo) | In `--check`, normalizzare il timestamp (`-replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00'`) su entrambi i lati. Il check diventa deterministico, basato solo sul contenuto | `scripts/generate-bundle.ps1:166-170` |
+| 0.1-6 | P+F+L | ESLint preset fallisce con `Identifier 'react' has already been declared` | `import react from 'eslint-plugin-react'` collide con il binding `react` esportato da `eslint-plugin-react` stesso (in alcune versioni del plugin) | Rinominare l'import: `import reactPlugin from 'eslint-plugin-react'` (o usare destrutturazione selettiva). Convenzione adottata: mai importare un modulo col nome della sua dipendenza omonima | `packages/config/eslint/react.js:1` |
+| 0.1-7 | P+F | `Out-File -Encoding utf8` in PowerShell 5.1 scrive un BOM UTF-8 che rompe il byte-equality del check | PS 5.1 `Out-File` aggiunge BOM; `Get-Content` non lo strappa → `$existing` differisce da `$newBundle` di 3 byte | Usare `[System.IO.File]::WriteAllText($path, $content, [System.Text.UTF8Encoding]::new($false))` (UTF-8 senza BOM). Output deterministico cross-platform | `scripts/generate-bundle.ps1:189-192` |
+| 0.1-8 | P+L | `pnpm install` mostra "Update available! 9.15.9 → 12.11.2" e `WARN deprecated eslint@9.39.5`; il Boss chiede se la policy "ultime versioni" fosse documentata → **non lo era** | Le Sessioni 0-9 e l'audit non avevano mai formalizzato la policy di versionamento toolchain | Decisioni D.10.1 ("ultime major disponibili") + D.10.2 (upgrade corrente differito a fine implementazione → Story 6.1 `[PHASE-POST]`). Fino a Story 6.1: **non bumpare major** di toolchain nelle story correnti. Aggiunti a `17-DEV-NOTES.md §3 P0` | `docs/SESSIONS.md:246-256`, `docs/11-BACKLOG.md` v1.2 Story 6.1 |
+| 0.1-9 | P+L | In locale (Windows PowerShell 5.1) `generate-bundle.ps1 --check` salta silenziosamente il check, rigenera il file ed esce 0; in CI con `pwsh` 7 il check funziona correttamente | PowerShell 5.1 non riconosce lo stile argomento `--check` su switch `[switch]$Check` (accetta solo `-Check`) | Nei doc locali usare `powershell scripts/generate-bundle.ps1 -Check`; CI usa `pwsh ... --check` (`12-DEVOPS.md` §2). Documentato in `17-DEV-NOTES.md` §1 riga bundle | `docs/17-DEV-NOTES.md:22` |
+
+**Lesson learned sintetica**: in un monorepo monolitico, toolchain e tsconfig condivisi sono il single point of failure per 4 categorie di errori (Vite/Vitest, paths, exports map, line endings). Quando si bootstrappa un monorepo, allocare sempre tempo per stabilizzare la toolchain PRIMA di iniziare feature work.
+
+**Stato accettazione Story 0.1** (riferimento `docs/11-BACKLOG.md`):
+
+- [x] `pnpm install` senza errori su node 20 LTS — **OK** (warning di pnpm 9→12 atteso per D.10.2)
+- [x] `pnpm run lint` passa su codebase vuoto — **OK** (ESLint 9 flat config)
+- [x] `pnpm run test` esegue almeno un test dummy — **OK** (Vitest in `@ls/core` e `@ls/web`)
+- [x] `pnpm run build` produce artefatti — **OK** (`dist/` in `@ls/core`, `@ls/ui`, `@ls/web`)
+- [x] CI GitHub Actions: lint + test su ogni PR — **OK** (`.github/workflows/ci.yml`)
+
+**Link utili**:
+- Commit: `66cbc72 feat: init monorepo turborepo + toolchain (story 0.1)`
+- Commit: `bff252d docs: policy versioni toolchain (D.10.1/D.10.2) e Story 6.1 differita`
+- Commit: `e654ffc docs: aggiungi 17-DEV-NOTES con pitfalls toolchain e policy versioni (D.10.x)`
+- Branch: `feat/0.1-monorepo-setup`
+- Spec toccata: `05-ARCHITECTURE.md §8 §9` (confermata in pratica)
+- Pitfalls consolidati: `17-DEV-NOTES.md §3`
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
+| 0.2 | 2026-10-16 | Sessione 11 — entry Story 0.1 con 8 problemi/fix/lesson (P0 toolchain) e stato accettazione; indice rapido per sintomo |
+
+---
+
+*Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
+tra conversazioni AI e durante l'audit di Sessione (vedi `AGENTS.md` §"Fine di un'implementazione").*
 
 
 
@@ -4576,7 +4775,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16) · aggiornato S11
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -4607,24 +4806,36 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.1 — Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:L]`
 
+**Stato**: 🟡 **IN PROGRESS** (Sessione 11) — scaffold completo, feature work delegato a Story 0.2+
+**Branch**: `feat/0.1-monorepo-setup` (aperta, non merged)
+**Commits**: `66cbc72`, `bff252d`, `e654ffc`
+**Registro**: `docs/18-DEV-LOG.md` §4 entry Story 0.1 (8 problemi/fix/lesson)
+**Pitfalls**: `docs/17-DEV-NOTES.md` §3 (P0-P5)
+
 **Descrizione**: Inizializzare il monorepo Turborepo con le cartelle `apps/web`, `packages/core`, `packages/ui`, toolchain TypeScript, lint, format.
 
 **Task**:
-- T0.1.1 — Init monorepo con pnpm workspaces + Turborepo
-- T0.1.2 — Config TypeScript base + path aliases
-- T0.1.3 — ESLint + Prettier + commit hook (husky + lint-staged)
-- T0.1.4 — Vitest + Playwright setup
-- T0.1.5 — `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
+- [x] T0.1.1 — Init monorepo con pnpm workspaces + Turborepo
+- [x] T0.1.2 — Config TypeScript base + path aliases
+- [x] T0.1.3 — ESLint + Prettier + commit hook (husky + lint-staged + commitlint)
+- [x] T0.1.4 — Vitest + Playwright setup
+- [x] T0.1.5 — `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
 
 **Acceptance criteria**:
-- [ ] `pnpm install` senza errori su node 20 LTS
-- [ ] `pnpm run lint` passa su codebase vuoto
-- [ ] `pnpm run test` esegue almeno un test dummy
-- [ ] `pnpm run build` produce artefatti
-- [ ] CI GitHub Actions: lint + test su ogni PR
+- [x] `pnpm install` senza errori su node 20 LTS (warning pnpm 9→12 atteso per D.10.2, differito a Story 6.1)
+- [x] `pnpm run lint` passa su codebase vuoto
+- [x] `pnpm run test` esegue almeno un test dummy (in `@ls/core` e `@ls/web`)
+- [x] `pnpm run build` produce artefatti (`dist/` in @ls/core, @ls/ui, @ls/web)
+- [x] CI GitHub Actions: lint + typecheck + test + build su ogni PR
+
+**Cosa rimane (non bloccante per Story 0.2+)**:
+- Sostituire `@ls/core` placeholder `db/index.ts` con implementazione Dexie reale (Story 0.2)
+- Sostituire `Button` placeholder in `@ls/ui` con design system reale (Story 3.1+)
+- Sostituire `App.tsx` placeholder in `@ls/web` con onboarding reale (Story 0.4)
 
 **Dipendenze**: nessuna
-**Spec**: `05-ARCHITECTURE.md` §8-9
+**Spec**: `05-ARCHITECTURE.md` §8-9 (confermata in pratica)
+**Sblocca**: Story 0.2 (Schema DB), Story 0.5 (PWA), Story 0.6 (i18n)
 
 ---
 
@@ -4999,6 +5210,27 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 15. **5.1, 5.2** privacy
 16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
+## Stato di avanzamento (snapshot implementazione)
+
+> Aggiornato alla **Sessione 11** (2026-10-16). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+
+| EPIC | Story | Stato | Branch | Note |
+|------|-------|-------|--------|------|
+| 0 | 0.1 Setup monorepo | 🟡 IN PROGRESS | `feat/0.1-monorepo-setup` | Scaffold + toolchain completi (5/5 task, 5/5 AC); 8 problemi risolti in `18-DEV-LOG`. PR non ancora aperta. |
+| 0 | 0.2 Schema DB Dexie | ⬚ TODO (sbloccata) | — | sbloccata da 0.1 ✅; issue `agent-ready` da aprire |
+| 0 | 0.3 Adapter Spotify | ⬚ TODO | — | dipende da 0.2 |
+| 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
+| 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
+| 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
+| 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
+| 1 | 1.5 Scrobbling hub | ⬚ TODO | — | — |
+| 2-3 | 2.x, 3.x analisi + UI | ⬚ TODO | — | dipendono da 0.2 |
+| 4 | 4.x enrichment | ⬚ TODO | — | dipendono da 0.2 |
+| 5 | 5.x privacy | ⬚ TODO | — | — |
+| 6 | 6.1 Upgrade stack | ⬚ SCHEDULED (post-impl) | — | D.10.2: solo a implementazione conclusa |
+
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
 - `area:adapter` / `area:db` / `area:ui` / `area:analysis` / `area:enrichment` / `area:privacy`
@@ -5016,6 +5248,7 @@ Ogni story deve avere label GitHub:
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |
 | 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
+| 1.2.1 | Sessione 11 (2026-10-16) | **Story 0.1 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (scaffold monorepo + toolchain); nuove sezioni "Stato" e "Cosa rimane" nella story; aggiunta tabella "Stato di avanzamento" globale; cross-ref a `17-DEV-NOTES.md` e `18-DEV-LOG.md` |
 
 
 ===== FILE: docs/12-DEVOPS.md =====

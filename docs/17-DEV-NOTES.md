@@ -19,7 +19,7 @@
 | `pnpm run build` | `tsc` → `dist/` per `@ls/core` e `@ls/ui`, `vite build` per `@ls/web` |
 | `pnpm run e2e` | Playwright su `apps/web` (al primo avvio serve `pnpm exec playwright install chromium`) |
 | `pnpm run format` / `format:check` | Prettier (i doc in `docs/`, `fixtures/`, `design/` sono esclusi via `.prettierignore`) |
-| `powershell scripts/generate-bundle.ps1 --check` | Verifica sync bundle (in CI: `pwsh`; in locale se `pwsh` 7 non è installato funziona PowerShell 5.1) |
+| `pwsh scripts/generate-bundle.ps1 --check` (CI) / `powershell scripts/generate-bundle.ps1 -Check` (locale Win PS 5.1) | Verifica sync bundle. ⚠ In PowerShell 5.1 il flag è `-Check`, non `--check` |
 
 Requisiti: Node ≥ 20 (testato su 20 LTS e 24), pnpm 9 (pinnato in `packageManager`).
 

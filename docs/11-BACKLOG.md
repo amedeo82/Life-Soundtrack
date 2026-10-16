@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16) · aggiornato S11
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -31,24 +31,36 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.1 — Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:L]`
 
+**Stato**: 🟡 **IN PROGRESS** (Sessione 11) — scaffold completo, feature work delegato a Story 0.2+
+**Branch**: `feat/0.1-monorepo-setup` (aperta, non merged)
+**Commits**: `66cbc72`, `bff252d`, `e654ffc`
+**Registro**: `docs/18-DEV-LOG.md` §4 entry Story 0.1 (8 problemi/fix/lesson)
+**Pitfalls**: `docs/17-DEV-NOTES.md` §3 (P0-P5)
+
 **Descrizione**: Inizializzare il monorepo Turborepo con le cartelle `apps/web`, `packages/core`, `packages/ui`, toolchain TypeScript, lint, format.
 
 **Task**:
-- T0.1.1 — Init monorepo con pnpm workspaces + Turborepo
-- T0.1.2 — Config TypeScript base + path aliases
-- T0.1.3 — ESLint + Prettier + commit hook (husky + lint-staged)
-- T0.1.4 — Vitest + Playwright setup
-- T0.1.5 — `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
+- [x] T0.1.1 — Init monorepo con pnpm workspaces + Turborepo
+- [x] T0.1.2 — Config TypeScript base + path aliases
+- [x] T0.1.3 — ESLint + Prettier + commit hook (husky + lint-staged + commitlint)
+- [x] T0.1.4 — Vitest + Playwright setup
+- [x] T0.1.5 — `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
 
 **Acceptance criteria**:
-- [ ] `pnpm install` senza errori su node 20 LTS
-- [ ] `pnpm run lint` passa su codebase vuoto
-- [ ] `pnpm run test` esegue almeno un test dummy
-- [ ] `pnpm run build` produce artefatti
-- [ ] CI GitHub Actions: lint + test su ogni PR
+- [x] `pnpm install` senza errori su node 20 LTS (warning pnpm 9→12 atteso per D.10.2, differito a Story 6.1)
+- [x] `pnpm run lint` passa su codebase vuoto
+- [x] `pnpm run test` esegue almeno un test dummy (in `@ls/core` e `@ls/web`)
+- [x] `pnpm run build` produce artefatti (`dist/` in @ls/core, @ls/ui, @ls/web)
+- [x] CI GitHub Actions: lint + typecheck + test + build su ogni PR
+
+**Cosa rimane (non bloccante per Story 0.2+)**:
+- Sostituire `@ls/core` placeholder `db/index.ts` con implementazione Dexie reale (Story 0.2)
+- Sostituire `Button` placeholder in `@ls/ui` con design system reale (Story 3.1+)
+- Sostituire `App.tsx` placeholder in `@ls/web` con onboarding reale (Story 0.4)
 
 **Dipendenze**: nessuna
-**Spec**: `05-ARCHITECTURE.md` §8-9
+**Spec**: `05-ARCHITECTURE.md` §8-9 (confermata in pratica)
+**Sblocca**: Story 0.2 (Schema DB), Story 0.5 (PWA), Story 0.6 (i18n)
 
 ---
 
@@ -423,6 +435,27 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 15. **5.1, 5.2** privacy
 16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
+## Stato di avanzamento (snapshot implementazione)
+
+> Aggiornato alla **Sessione 11** (2026-10-16). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+
+| EPIC | Story | Stato | Branch | Note |
+|------|-------|-------|--------|------|
+| 0 | 0.1 Setup monorepo | 🟡 IN PROGRESS | `feat/0.1-monorepo-setup` | Scaffold + toolchain completi (5/5 task, 5/5 AC); 8 problemi risolti in `18-DEV-LOG`. PR non ancora aperta. |
+| 0 | 0.2 Schema DB Dexie | ⬚ TODO (sbloccata) | — | sbloccata da 0.1 ✅; issue `agent-ready` da aprire |
+| 0 | 0.3 Adapter Spotify | ⬚ TODO | — | dipende da 0.2 |
+| 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
+| 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
+| 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
+| 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
+| 1 | 1.5 Scrobbling hub | ⬚ TODO | — | — |
+| 2-3 | 2.x, 3.x analisi + UI | ⬚ TODO | — | dipendono da 0.2 |
+| 4 | 4.x enrichment | ⬚ TODO | — | dipendono da 0.2 |
+| 5 | 5.x privacy | ⬚ TODO | — | — |
+| 6 | 6.1 Upgrade stack | ⬚ SCHEDULED (post-impl) | — | D.10.2: solo a implementazione conclusa |
+
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
 - `area:adapter` / `area:db` / `area:ui` / `area:analysis` / `area:enrichment` / `area:privacy`
@@ -440,3 +473,4 @@ Ogni story deve avere label GitHub:
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |
 | 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
+| 1.2.1 | Sessione 11 (2026-10-16) | **Story 0.1 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (scaffold monorepo + toolchain); nuove sezioni "Stato" e "Cosa rimane" nella story; aggiunta tabella "Stato di avanzamento" globale; cross-ref a `17-DEV-NOTES.md` e `18-DEV-LOG.md` |

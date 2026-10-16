@@ -33,12 +33,13 @@
 ## Documenti di supporto
 | File | Stato | Descrizione |
 |------|-------|-------------|
-| [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni di progettazione |
-| [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Backup completo del progetto |
+| [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
+| [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
 | [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.1 | Protocollo per agenti |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
-| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain |
+| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.1 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v0.2 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -66,14 +67,16 @@
 | 8 | ⚙️ DevOps | ✅ COMPLETATA |
 | 9 | 🩺 Audit + allineamento post-sessione | ✅ COMPLETATA |
 | 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
+| 11 | 🛠️ Implementazione Story 0.1 (scaffold monorepo) | ✅ COMPLETATA |
 
-## Stato del progetto (post-audit 2026-10-15)
+## Stato del progetto (post-Sessione 11, 2026-10-16)
 - **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
-- **Documenti DRAFT**: 8 (00, 01, 04, 06, 07, 08, 09, 12, 15)
+- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Prossimo step tecnico**: story 0.1 (`agent-ready`) **sbloccata** dopo approvazione Boss di `05` v1.0
+- **Implementazione**: 🟡 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) in `feat/0.1-monorepo-setup`, 5/5 task + 5/5 AC verificati. 8 problemi risolti e documentati in `18-DEV-LOG.md`. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
+- **Prossimo step tecnico**: aprire PR per Story 0.1, poi issue `agent-ready` per Story 0.2
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
