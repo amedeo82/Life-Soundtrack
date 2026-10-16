@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.2
-> Ultima modifica: 2026-10-16 — Sessione 11, entry Story 0.1
+> Versione: 0.3
+> Ultima modifica: 2026-10-16 — Sessione 12, doc-sync post-merge PR #2
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -58,10 +58,10 @@
 ## 4. Entries cronologiche
 
 ### Story 0.1 — Setup monorepo e toolchain
-**Branch**: `feat/0.1-monorepo-setup` (in progress, non merged)
-**PR**: non ancora aperta
+**Branch**: `feat/0.1-monorepo-setup` (**merged in `main`** → branch eliminata dopo merge)
+**PR**: **#2 — squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**
 **Data**: 2026-10-16
-**Stato**: 🟡 IN PROGRESS — scaffold monorepo + toolchain funzionanti; feature work delegato a Story 0.2+
+**Stato**: ✅ **DONE** — scaffold monorepo + toolchain funzionanti; 5/5 task + 5/5 AC verificati; feature work delegato a Story 0.2+
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -89,7 +89,9 @@
 - Commit: `66cbc72 feat: init monorepo turborepo + toolchain (story 0.1)`
 - Commit: `bff252d docs: policy versioni toolchain (D.10.1/D.10.2) e Story 6.1 differita`
 - Commit: `e654ffc docs: aggiungi 17-DEV-NOTES con pitfalls toolchain e policy versioni (D.10.x)`
-- Branch: `feat/0.1-monorepo-setup`
+- **Commit: `c0fb0a4 feat: Story 0.1 — scaffold monorepo + toolchain (#2)` (squash merge in `main`)**
+- Branch: `feat/0.1-monorepo-setup` (merged → eliminata)
+- PR: **#2** (squash merge)
 - Spec toccata: `05-ARCHITECTURE.md §8 §9` (confermata in pratica)
 - Pitfalls consolidati: `17-DEV-NOTES.md §3`
 
@@ -101,6 +103,7 @@
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
 | 0.2 | 2026-10-16 | Sessione 11 — entry Story 0.1 con 8 problemi/fix/lesson (P0 toolchain) e stato accettazione; indice rapido per sintomo |
+| 0.3 | 2026-10-16 | Sessione 12 — doc-sync post-merge: branch/PR status aggiornati (✅ merged in `main`, PR #2, squash `c0fb0a4`); conteggio problemi corretto da 8 → 9 (coerente con messaggio commit); aggiunto commit `c0fb0a4` ai link utili |
 
 ---
 

@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16) · aggiornato S11
+> Status: 🟢 APPROVED · Versione 1.2.2 · Sessione 12 (2026-10-16) · aggiornato S12 (doc-sync post-merge PR #2)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -31,10 +31,10 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.1 — Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:L]`
 
-**Stato**: 🟡 **IN PROGRESS** (Sessione 11) — scaffold completo, feature work delegato a Story 0.2+
-**Branch**: `feat/0.1-monorepo-setup` (aperta, non merged)
-**Commits**: `66cbc72`, `bff252d`, `e654ffc`
-**Registro**: `docs/18-DEV-LOG.md` §4 entry Story 0.1 (8 problemi/fix/lesson)
+**Stato**: ✅ **DONE** — merged in `main` (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200)
+**Branch**: `feat/0.1-monorepo-setup` (merged → eliminata dopo il merge)
+**Commits**: `66cbc72`, `bff252d`, `e654ffc` (branch) + `c0fb0a4` (squash merge in `main`)
+**Registro**: `docs/18-DEV-LOG.md` §4 entry Story 0.1 (**9** problemi/fix/lesson)
 **Pitfalls**: `docs/17-DEV-NOTES.md` §3 (P0-P5)
 
 **Descrizione**: Inizializzare il monorepo Turborepo con le cartelle `apps/web`, `packages/core`, `packages/ui`, toolchain TypeScript, lint, format.
@@ -437,11 +437,11 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato alla **Sessione 11** (2026-10-16). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato alla **Sessione 12** (2026-10-16) dopo doc-sync post-merge. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
-| 0 | 0.1 Setup monorepo | 🟡 IN PROGRESS | `feat/0.1-monorepo-setup` | Scaffold + toolchain completi (5/5 task, 5/5 AC); 8 problemi risolti in `18-DEV-LOG`. PR non ancora aperta. |
+| 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
 | 0 | 0.2 Schema DB Dexie | ⬚ TODO (sbloccata) | — | sbloccata da 0.1 ✅; issue `agent-ready` da aprire |
 | 0 | 0.3 Adapter Spotify | ⬚ TODO | — | dipende da 0.2 |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
@@ -474,3 +474,4 @@ Ogni story deve avere label GitHub:
 | 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |
 | 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
 | 1.2.1 | Sessione 11 (2026-10-16) | **Story 0.1 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (scaffold monorepo + toolchain); nuove sezioni "Stato" e "Cosa rimane" nella story; aggiunta tabella "Stato di avanzamento" globale; cross-ref a `17-DEV-NOTES.md` e `18-DEV-LOG.md` |
+| 1.2.2 | Sessione 12 (2026-10-16) | **Doc-sync post-merge**: Story 0.1 ora ✅ DONE (PR #2 squash-merged `c0fb0a4`); tabella "Stato di avanzamento" corretta; riferimento "8 problemi" → "9 problemi" (coerente con messaggio commit) |

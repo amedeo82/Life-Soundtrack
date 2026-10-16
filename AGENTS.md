@@ -104,6 +104,34 @@ Una issue può essere lavorata da un agente **solo se**:
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
 
+### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
+
+La documentazione di stato (INDEX, SESSIONS, BACKLOG, 18-DEV-LOG, BUNDLE) **deve riflet-care lo stato reale del branch `main` subito dopo ogni merge**. Senza questo gate la documentazione diverge silenziosamente e gli agenti futuri leggono uno stato falso.
+
+Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella stessa PR, prima del merge** (o in un commit di follow-up immediatamente successivo se il merge è già avvenuto) i seguenti file, in base a cosa è cambiato:
+
+| Cosa è cambiato nella PR | File da aggiornare |
+|---|---|
+| Stato di una story (es. ⬚→🟡, 🟡→✅, ✅→⬚) | `docs/11-BACKLOG.md` (sezione Story + tabella "Stato di avanzamento") |
+| Stato di una story | `docs/INDEX.md` (§"Stato del progetto" e roadmap sessioni) |
+| Stato di una story / chiusura di una sessione | `docs/SESSIONS.md` (entry sessione + changelog) |
+| Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) |
+| Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
+| Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
+| Modifica al toolchain o alla policy di versionamento | `docs/17-DEV-NOTES.md` + nuova entry in `SESSIONS.md` |
+
+**Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
+
+**Auto-check**: prima del merge, eseguire localmente
+
+```powershell
+pwsh scripts/generate-bundle.ps1 --check   # exit 0 = documentazione in sync
+```
+
+Se esce con exit ≠ 0, rigenerare il bundle e committarlo nella stessa PR.
+
+**Verifica statale post-merge** (opzionale ma consigliata per il reviewer): dopo il merge, aprire `docs/INDEX.md` e `docs/11-BACKLOG.md` e confermare che lo "Stato del progetto" rifletta `git log --oneline -5 main`. Se diverge, aprire una PR `docs:` immediata di riallineamento (è esattamente quello che è successo in Sessione 12, vedi `SESSIONS.md`).
+
 ## 🔄 Manutenzione del bundle script
 
 `docs/BUNDLE.md` è lo snapshot di tutto il progetto in un unico file markdown, usato per handoff con AI esterne. Quando modifichi la struttura del progetto:

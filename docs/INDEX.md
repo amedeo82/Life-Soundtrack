@@ -68,15 +68,16 @@
 | 9 | 🩺 Audit + allineamento post-sessione | ✅ COMPLETATA |
 | 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
 | 11 | 🛠️ Implementazione Story 0.1 (scaffold monorepo) | ✅ COMPLETATA |
+| 12 | 📚 Doc-sync post-merge (gate AGENTS.md) | ✅ COMPLETATA |
 
-## Stato del progetto (post-Sessione 11, 2026-10-16)
+## Stato del progetto (post-Sessione 12, 2026-10-16)
 - **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
 - **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟡 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) in `feat/0.1-monorepo-setup`, 5/5 task + 5/5 AC verificati. 8 problemi risolti e documentati in `18-DEV-LOG.md`. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
-- **Prossimo step tecnico**: aprire PR per Story 0.1, poi issue `agent-ready` per Story 0.2
+- **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4. Gate "post-merge doc sync" aggiunto a `AGENTS.md` (S12) per evitare drift futuri. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
+- **Prossimo step tecnico**: aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie)
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

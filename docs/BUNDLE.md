@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-16 16:47
+> Data: 2026-10-16 17:53
 > Totale file: 29
 
 
@@ -112,6 +112,34 @@ Una issue può essere lavorata da un agente **solo se**:
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
+
+### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
+
+La documentazione di stato (INDEX, SESSIONS, BACKLOG, 18-DEV-LOG, BUNDLE) **deve riflet-care lo stato reale del branch `main` subito dopo ogni merge**. Senza questo gate la documentazione diverge silenziosamente e gli agenti futuri leggono uno stato falso.
+
+Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella stessa PR, prima del merge** (o in un commit di follow-up immediatamente successivo se il merge è già avvenuto) i seguenti file, in base a cosa è cambiato:
+
+| Cosa è cambiato nella PR | File da aggiornare |
+|---|---|
+| Stato di una story (es. ⬚→🟡, 🟡→✅, ✅→⬚) | `docs/11-BACKLOG.md` (sezione Story + tabella "Stato di avanzamento") |
+| Stato di una story | `docs/INDEX.md` (§"Stato del progetto" e roadmap sessioni) |
+| Stato di una story / chiusura di una sessione | `docs/SESSIONS.md` (entry sessione + changelog) |
+| Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) |
+| Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
+| Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
+| Modifica al toolchain o alla policy di versionamento | `docs/17-DEV-NOTES.md` + nuova entry in `SESSIONS.md` |
+
+**Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
+
+**Auto-check**: prima del merge, eseguire localmente
+
+```powershell
+pwsh scripts/generate-bundle.ps1 --check   # exit 0 = documentazione in sync
+```
+
+Se esce con exit ≠ 0, rigenerare il bundle e committarlo nella stessa PR.
+
+**Verifica statale post-merge** (opzionale ma consigliata per il reviewer): dopo il merge, aprire `docs/INDEX.md` e `docs/11-BACKLOG.md` e confermare che lo "Stato del progetto" rifletta `git log --oneline -5 main`. Se diverge, aprire una PR `docs:` immediata di riallineamento (è esattamente quello che è successo in Sessione 12, vedi `SESSIONS.md`).
 
 ## 🔄 Manutenzione del bundle script
 
@@ -504,15 +532,16 @@ Apache License
 | 9 | 🩺 Audit + allineamento post-sessione | ✅ COMPLETATA |
 | 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
 | 11 | 🛠️ Implementazione Story 0.1 (scaffold monorepo) | ✅ COMPLETATA |
+| 12 | 📚 Doc-sync post-merge (gate AGENTS.md) | ✅ COMPLETATA |
 
-## Stato del progetto (post-Sessione 11, 2026-10-16)
+## Stato del progetto (post-Sessione 12, 2026-10-16)
 - **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
 - **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟡 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) in `feat/0.1-monorepo-setup`, 5/5 task + 5/5 AC verificati. 8 problemi risolti e documentati in `18-DEV-LOG.md`. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
-- **Prossimo step tecnico**: aprire PR per Story 0.1, poi issue `agent-ready` per Story 0.2
+- **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4. Gate "post-merge doc sync" aggiunto a `AGENTS.md` (S12) per evitare drift futuri. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
+- **Prossimo step tecnico**: aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie)
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -791,14 +820,14 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 ## Sessione 11 — 🛠️ Implementazione Story 0.1 (scaffold monorepo + toolchain)
 
 **Data**: 2026-10-16
-**Stato**: ✅ Completata (per il perimetro Story 0.1)
+**Stato**: ✅ Completata e **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200)
 **Trigger**: dopo l'approvazione di `05-ARCHITECTURE` v1.0 (S9) e la policy versioni D.10.1/D.10.2 (S10), Story 0.1 viene implementata come prima storia della Fase 0 tecnica.
 
 ### Stato di avanzamento per story
 
 | Story | Stato | Note |
 |-------|-------|------|
-| 0.1 Setup monorepo e toolchain | 🟡 **IN PROGRESS** (scaffold completo, feature work delegato a 0.2+) | Branch `feat/0.1-monorepo-setup` aperto; 3 commit sul branch (non merged in `main`) documentati in `18-DEV-LOG.md` |
+| 0.1 Setup monorepo e toolchain | ✅ **DONE** — merged in `main` (PR #2, squash `c0fb0a4`) | scaffold completo; 5/5 task + 5/5 AC verificati; 9 problemi/fix/lesson in `18-DEV-LOG.md` §4 |
 | 0.2 Schema DB e layer Dexie | ⬚ TODO | dipende da 0.1 ✅ |
 | 0.3 Adapter Spotify base | ⬚ TODO | dipende da 0.2 |
 | 0.4 UI import (onboarding) | ⬚ TODO | dipende da 0.3 |
@@ -839,9 +868,43 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 - **17-DEV-NOTES.md è la reference stabile dei pitfalls**; 18-DEV-LOG.md è il registro cronologico per story
 
 ### Prossimi step
-1. Aprire PR per Story 0.1 (branch `feat/0.1-monorepo-setup` → `main`) con body che referenza Story 0.1
+1. ✅ ~~Aprire PR per Story 0.1~~ — **fatto**: PR #2 squash-merged `c0fb0a4`
 2. Aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie) — ora sbloccata
 3. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo a 0.2
+
+### Esito post-merge (aggiunto S12)
+PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDEX, SESSIONS, BACKLOG, 18-DEV-LOG) sono rimasti indietro rispetto al branch mergato (dicevano tutti "IN PROGRESS / PR non ancora aperta" mentre la realtà era ✅ merged). Il drift è stato corretto in **Sessione 12** e da quel momento `AGENTS.md` include un gate esplicito "post-merge doc sync" per evitare recidive.
+
+---
+
+## Sessione 12 — 📚 Doc-sync post-merge + gate AGENTS.md
+
+**Data**: 2026-10-16
+**Stato**: ✅ Completata
+**Trigger**: il Boss nota che dopo la merge di PR #2 (squash `c0fb0a4`) i documenti di stato (INDEX, SESSIONS, BACKLOG, 18-DEV-LOG) sono rimasti leggermente indietro: Story 0.1 risultava "🟡 IN PROGRESS / PR non ancora aperta" mentre era in realtà ✅ merged. È esattamente il caso che il check-list PR di `AGENTS.md` non copriva: il gate esistente parlava di "documenti creati nella PR", non di **stato delle story dopo il merge**.
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.12.1 | Aggiungere in `AGENTS.md` la sezione **"Checklist di sincronizzazione documentazione al merge"** (obbligatoria) | Il drift Story 0.1 dimostra che la checklist PR non bastava: serve un gate post-merge esplicito con tabella "cosa è cambiato → file da aggiornare" |
+| D.12.2 | Responsabilità del sync = **chi esegue il merge** (o chi chiude la PR) | Chi fa il merge vede lo stato finale; deve aggiornare i doc nella stessa PR o in un commit di follow-up immediato |
+| D.12.3 | Auto-check obbligatorio: `pwsh scripts/generate-bundle.ps1 --check` deve uscire 0 prima del merge | Il check già esiste in CI; promosso a gate di merge |
+| D.12.4 | Verifica statale post-merge (revisioner): `docs/INDEX.md` §"Stato del progetto" deve riflettere `git log --oneline -5 main` | Catch-of-last-resort: se il sync fallisce in PR, il reviewer lo intercetta post-merge e apre una PR `docs:` immediata |
+| D.12.5 | Aggiornare contestualmente INDEX, SESSIONS, BACKLOG, 18-DEV-LOG per riflettere lo stato reale di Story 0.1 | Allineamento alla realtà: PR #2 merged, branch `feat/0.1-monorepo-setup` non più aperto, 9 problemi risolti (non 8) |
+
+### Documenti aggiornati
+- `AGENTS.md` → aggiunta sezione "Checklist di sincronizzazione documentazione al merge"
+- `docs/INDEX.md` → "Stato del progetto" e roadmap sessioni aggiornati; aggiunta Sessione 12
+- `docs/SESSIONS.md` → Sessione 11 corretta (DONE, PR #2, `c0fb0a4`); aggiunta questa Sessione 12; changelog bumped
+- `docs/11-BACKLOG.md` → Story 0.1 ✅ DONE; tabella "Stato di avanzamento" aggiornata; changelog bumped a v1.2.2
+- `docs/18-DEV-LOG.md` → branch/PR status aggiornati; "8 problemi" → "9 problemi" (consistente con messaggio commit `c0fb0a4`); versione bumped a v0.3
+- `docs/BUNDLE.md` → rigenerato (include le correzioni)
+
+### Prossimi step
+1. Aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie)
+2. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo
+3. Da ora in poi: ogni PR con merge in `main` deve soddisfare il nuovo gate D.12.1
 
 ---
 
@@ -868,6 +931,7 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
 | 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
+| 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
 
 ---
 
@@ -1126,8 +1190,8 @@ di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major dell
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.2
-> Ultima modifica: 2026-10-16 — Sessione 11, entry Story 0.1
+> Versione: 0.3
+> Ultima modifica: 2026-10-16 — Sessione 12, doc-sync post-merge PR #2
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -1183,10 +1247,10 @@ di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major dell
 ## 4. Entries cronologiche
 
 ### Story 0.1 — Setup monorepo e toolchain
-**Branch**: `feat/0.1-monorepo-setup` (in progress, non merged)
-**PR**: non ancora aperta
+**Branch**: `feat/0.1-monorepo-setup` (**merged in `main`** → branch eliminata dopo merge)
+**PR**: **#2 — squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**
 **Data**: 2026-10-16
-**Stato**: 🟡 IN PROGRESS — scaffold monorepo + toolchain funzionanti; feature work delegato a Story 0.2+
+**Stato**: ✅ **DONE** — scaffold monorepo + toolchain funzionanti; 5/5 task + 5/5 AC verificati; feature work delegato a Story 0.2+
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1214,7 +1278,9 @@ di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major dell
 - Commit: `66cbc72 feat: init monorepo turborepo + toolchain (story 0.1)`
 - Commit: `bff252d docs: policy versioni toolchain (D.10.1/D.10.2) e Story 6.1 differita`
 - Commit: `e654ffc docs: aggiungi 17-DEV-NOTES con pitfalls toolchain e policy versioni (D.10.x)`
-- Branch: `feat/0.1-monorepo-setup`
+- **Commit: `c0fb0a4 feat: Story 0.1 — scaffold monorepo + toolchain (#2)` (squash merge in `main`)**
+- Branch: `feat/0.1-monorepo-setup` (merged → eliminata)
+- PR: **#2** (squash merge)
 - Spec toccata: `05-ARCHITECTURE.md §8 §9` (confermata in pratica)
 - Pitfalls consolidati: `17-DEV-NOTES.md §3`
 
@@ -1226,6 +1292,7 @@ di proposito: il contenuto reale arriva con la Story 0.2. Gli upgrade major dell
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
 | 0.2 | 2026-10-16 | Sessione 11 — entry Story 0.1 con 8 problemi/fix/lesson (P0 toolchain) e stato accettazione; indice rapido per sintomo |
+| 0.3 | 2026-10-16 | Sessione 12 — doc-sync post-merge: branch/PR status aggiornati (✅ merged in `main`, PR #2, squash `c0fb0a4`); conteggio problemi corretto da 8 → 9 (coerente con messaggio commit); aggiunto commit `c0fb0a4` ai link utili |
 
 ---
 
@@ -4775,7 +4842,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 10 (2026-10-16) · aggiornato S11
+> Status: 🟢 APPROVED · Versione 1.2.2 · Sessione 12 (2026-10-16) · aggiornato S12 (doc-sync post-merge PR #2)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -4806,10 +4873,10 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.1 — Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:L]`
 
-**Stato**: 🟡 **IN PROGRESS** (Sessione 11) — scaffold completo, feature work delegato a Story 0.2+
-**Branch**: `feat/0.1-monorepo-setup` (aperta, non merged)
-**Commits**: `66cbc72`, `bff252d`, `e654ffc`
-**Registro**: `docs/18-DEV-LOG.md` §4 entry Story 0.1 (8 problemi/fix/lesson)
+**Stato**: ✅ **DONE** — merged in `main` (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200)
+**Branch**: `feat/0.1-monorepo-setup` (merged → eliminata dopo il merge)
+**Commits**: `66cbc72`, `bff252d`, `e654ffc` (branch) + `c0fb0a4` (squash merge in `main`)
+**Registro**: `docs/18-DEV-LOG.md` §4 entry Story 0.1 (**9** problemi/fix/lesson)
 **Pitfalls**: `docs/17-DEV-NOTES.md` §3 (P0-P5)
 
 **Descrizione**: Inizializzare il monorepo Turborepo con le cartelle `apps/web`, `packages/core`, `packages/ui`, toolchain TypeScript, lint, format.
@@ -5212,11 +5279,11 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato alla **Sessione 11** (2026-10-16). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato alla **Sessione 12** (2026-10-16) dopo doc-sync post-merge. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
-| 0 | 0.1 Setup monorepo | 🟡 IN PROGRESS | `feat/0.1-monorepo-setup` | Scaffold + toolchain completi (5/5 task, 5/5 AC); 8 problemi risolti in `18-DEV-LOG`. PR non ancora aperta. |
+| 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
 | 0 | 0.2 Schema DB Dexie | ⬚ TODO (sbloccata) | — | sbloccata da 0.1 ✅; issue `agent-ready` da aprire |
 | 0 | 0.3 Adapter Spotify | ⬚ TODO | — | dipende da 0.2 |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
@@ -5249,6 +5316,7 @@ Ogni story deve avere label GitHub:
 | 1.1 | Sessione 9 (2026-10-15) | Audit: Story 2.2 aggiornata a change point detection (C7); Story 4.1 provider audio features → Essentia.js + AcousticBrainz + euristica (D.A.6); Story 0.4 toggle privacy → 4 (`carDetection`, `syncCloud` aggiunti); nuove Story 0.5 (PWA/service worker) e 0.6 (i18n setup) per V5; nuova Story 1.5 (scrobbling hub) per V4; **nuova Story 0.7 Operations runbook** (post-review `05` v0.2 §11+12) per documentare update management e DB maintenance; ordine priorità rivisto |
 | 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
 | 1.2.1 | Sessione 11 (2026-10-16) | **Story 0.1 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (scaffold monorepo + toolchain); nuove sezioni "Stato" e "Cosa rimane" nella story; aggiunta tabella "Stato di avanzamento" globale; cross-ref a `17-DEV-NOTES.md` e `18-DEV-LOG.md` |
+| 1.2.2 | Sessione 12 (2026-10-16) | **Doc-sync post-merge**: Story 0.1 ora ✅ DONE (PR #2 squash-merged `c0fb0a4`); tabella "Stato di avanzamento" corretta; riferimento "8 problemi" → "9 problemi" (coerente con messaggio commit) |
 
 
 ===== FILE: docs/12-DEVOPS.md =====
