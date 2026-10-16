@@ -38,6 +38,7 @@
 | [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.1 | Protocollo per agenti |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
+| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain |
 
 ## Design & mockup
 | Cartella | Contenuto |
