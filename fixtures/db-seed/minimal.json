@@ -1,0 +1,377 @@
+{
+  "_metadata": {
+    "name": "minimal",
+    "version": "1.0",
+    "session": 13,
+    "generatedAt": "2026-10-16T16:36:34.058Z",
+    "seed": 12648430,
+    "counts": {
+      "listens": 10,
+      "tracks": 5,
+      "artists": 2
+    },
+    "spec": "02-DATA-SCHEMA.md v1.2 + 10-TESTING.md §3.2"
+  },
+  "listens": [
+    {
+      "id": "91b6b9af-276f-4225-84a7-412e6a1af058",
+      "eventKey": "spotify:58a865c725fe372d7d5652ea58a8c06225fe6d77",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704147547285,
+      "startedAt": 1704147307285,
+      "durationMs": 240000,
+      "trackId": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "completed": true,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "playbtn",
+      "reasonEnd": "trackdone",
+      "deviceType": "web",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-01"
+    },
+    {
+      "id": "51f758ca-d072-4de3-82e0-7dc7a1387875",
+      "eventKey": "apple_music:9c9ef2b386a35a991a3da82a9c9e571686a300c3",
+      "platform": "apple_music",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704183047935,
+      "startedAt": 1704182853727,
+      "durationMs": 194208,
+      "trackId": "53cb3060-3052-4ad2-8a8b-587a170d5939",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "clickrow",
+      "reasonEnd": "trackdone",
+      "deviceType": "car",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-02"
+    },
+    {
+      "id": "168e8215-b473-4c32-8632-47afb017de89",
+      "eventKey": "spotify:9720e4906c1755affb37b13f972041356c170ff5",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704525599770,
+      "startedAt": 1704525426213,
+      "durationMs": 173557,
+      "trackId": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "trackdone",
+      "deviceType": "speaker",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "DE",
+      "day": "2024-01-06"
+    },
+    {
+      "id": "59a050fe-1d63-4e95-8a4a-b37f5c52a556",
+      "eventKey": "spotify:177c9536be0c9bdda9700eeb177c3093be0cc187",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704665929007,
+      "startedAt": 1704665700611,
+      "durationMs": 228396,
+      "trackId": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "completed": false,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "fwdbtn",
+      "deviceType": "web",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "FR",
+      "day": "2024-01-07"
+    },
+    {
+      "id": "2414a0ff-884b-48b3-8afe-9d285ac0a6b5",
+      "eventKey": "lastfm:ae084a0a1c75c60db27d8c07ae08efaf1c759c57",
+      "platform": "lastfm",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704876602423,
+      "startedAt": 1704876332423,
+      "durationMs": 270000,
+      "trackId": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "completed": true,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "endplay",
+      "deviceType": "mobile",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "IT",
+      "day": "2024-01-10"
+    },
+    {
+      "id": "61ff65d8-0b10-40a4-8d64-3ed82bde4a83",
+      "eventKey": "spotify:aad4aeb013347c1bb9e0d2abaad40b1513342641",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1705262322242,
+      "startedAt": 1705262182007,
+      "durationMs": 140235,
+      "trackId": "ab670676-6316-4b4f-8f35-ac14ce59e897",
+      "completed": false,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "trackdone",
+      "reasonEnd": "fwdbtn",
+      "deviceType": "speaker",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "DE",
+      "day": "2024-01-14"
+    },
+    {
+      "id": "a1688bfb-f5b3-4582-8fcf-17bf2a91c5f8",
+      "eventKey": "apple_music:f30fce23f3f0aa9900ff64baf30f6b86f3f0f0c3",
+      "platform": "apple_music",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1705534630352,
+      "startedAt": 1705534404088,
+      "durationMs": 226264,
+      "trackId": "4e44938a-486f-4c36-81f7-b419f445eccc",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "clickrow",
+      "reasonEnd": "fwdbtn",
+      "deviceType": "mobile",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "GB",
+      "day": "2024-01-17"
+    },
+    {
+      "id": "df7347a8-fe4e-4095-8a1a-189b84132a9b",
+      "eventKey": "lastfm:92cfe2f9c86482cb5aab603292cf475cc864d891",
+      "platform": "lastfm",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1705700855946,
+      "startedAt": 1705700620461,
+      "durationMs": 235485,
+      "trackId": "4e44938a-486f-4c36-81f7-b419f445eccc",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "endplay",
+      "deviceType": "car",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-19"
+    },
+    {
+      "id": "c3932021-eb2d-41d3-8557-0d11f554fc3d",
+      "eventKey": "spotify:7f02a45f0761b5fa786311a57f0201fa0761efa0",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1706036638705,
+      "startedAt": 1706036458002,
+      "durationMs": 180703,
+      "trackId": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "clickrow",
+      "reasonEnd": "trackdone",
+      "deviceType": "speaker",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-23"
+    },
+    {
+      "id": "7112e88e-2639-43ce-818c-04284ec56a39",
+      "eventKey": "lastfm:8997d8cba2e9776a2b7eafa189977d6ea2e92d30",
+      "platform": "lastfm",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1706467041580,
+      "startedAt": 1706466921013,
+      "durationMs": 120567,
+      "trackId": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "playbtn",
+      "reasonEnd": "endplay",
+      "deviceType": "desktop",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "GB",
+      "day": "2024-01-28"
+    }
+  ],
+  "tracks": [
+    {
+      "id": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "canonicalKey": "fuzzy:f672bb4a79b421b58fc69afff6721eef79b47bef",
+      "name": "Broken Compass",
+      "artistId": "344b0e45-f189-4236-8b16-c8b31a54e135",
+      "albumId": null,
+      "durationMs": 270000,
+      "isrc": null,
+      "mbid": "81d2c556-bdfe-420c-87f3-ab92d578c2bd",
+      "explicit": null,
+      "genres": [
+        "jazz",
+        "folk"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:f0b46110-ee06-48a8-8cb"
+      },
+      "firstSeenAt": 1704525599770,
+      "lastSeenAt": 1704876602423,
+      "listenCount": 3
+    },
+    {
+      "id": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "canonicalKey": "fuzzy:db00b547c7e463cf1ce4d688db0010e2c7e43995",
+      "name": "Untitled for The Midnight Echo",
+      "artistId": "134aa790-a846-4947-86fb-ec74e652170a",
+      "albumId": null,
+      "durationMs": 240000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:3fa7d68d-6144-4437-820"
+      },
+      "firstSeenAt": 1704147547285,
+      "lastSeenAt": 1706467041580,
+      "listenCount": 3
+    },
+    {
+      "id": "4e44938a-486f-4c36-81f7-b419f445eccc",
+      "canonicalKey": "fuzzy:4d6631b47e5085963336b4224d6694117e50dfcc",
+      "name": "Broken Compass",
+      "artistId": "134aa790-a846-4947-86fb-ec74e652170a",
+      "albumId": null,
+      "durationMs": 270000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:89f92516-1ce6-4838-87e"
+      },
+      "firstSeenAt": 1705534630352,
+      "lastSeenAt": 1705700855946,
+      "listenCount": 2
+    },
+    {
+      "id": "53cb3060-3052-4ad2-8a8b-587a170d5939",
+      "canonicalKey": "fuzzy:3e7e6f140e9f015d30e16e493e7ecab10e9f5b07",
+      "name": "Quiet Thunder",
+      "artistId": "344b0e45-f189-4236-8b16-c8b31a54e135",
+      "albumId": null,
+      "durationMs": 210000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "jazz",
+        "folk"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:afba64d4-367c-41b6-82b"
+      },
+      "firstSeenAt": 1704183047935,
+      "lastSeenAt": 1704183047935,
+      "listenCount": 1
+    },
+    {
+      "id": "ab670676-6316-4b4f-8f35-ac14ce59e897",
+      "canonicalKey": "fuzzy:4d6631b47e5085963336b4224d6694117e50dfcc",
+      "name": "Broken Compass",
+      "artistId": "134aa790-a846-4947-86fb-ec74e652170a",
+      "albumId": null,
+      "durationMs": 270000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:38280439-1d93-430b-816"
+      },
+      "firstSeenAt": 1705262322242,
+      "lastSeenAt": 1705262322242,
+      "listenCount": 1
+    }
+  ],
+  "artists": [
+    {
+      "id": "134aa790-a846-4947-86fb-ec74e652170a",
+      "name": "The Midnight Echo",
+      "mbid": "5a484267-fdd2-4845-814d-7fc7cfe44ef5",
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "platformIds": {
+        "spotify": "spotify:artist:0e124e4e-24c5-4d0d-808"
+      },
+      "listenCount": 6
+    },
+    {
+      "id": "344b0e45-f189-4236-8b16-c8b31a54e135",
+      "name": "Queen",
+      "mbid": null,
+      "genres": [
+        "jazz",
+        "folk"
+      ],
+      "platformIds": {
+        "spotify": "spotify:artist:5cef928c-ef22-4b00-8e4"
+      },
+      "listenCount": 4
+    }
+  ]
+}

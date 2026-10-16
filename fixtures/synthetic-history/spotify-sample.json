@@ -1,9 +1,14 @@
 {
-  "_comment": "Dataset sintetico per test adapter Spotify. Include edge case E1-E6. 10 eventi rappresentativi.",
+  "_comment": "Dataset sintetico per test adapter Spotify (v1.1, Sessione 13). Include edge case E1-E6 e 1 caso reale DEDUP-3. 12 eventi rappresentativi.",
   "_metadata": {
     "generatedFor": "Life-Soundtrack adapter testing",
-    "version": "0.1",
-    "session": 2
+    "version": "1.1",
+    "session": 13,
+    "fixesFromAudit": [
+      "C6 chiusura — _expectedOutput ricalcolato; aggiunto caso E4_dedup_same_recording_different_uri che esercita realmente DEDUP-3 (stessa name+artist+durationBucket → merge in un singolo Track)",
+      "Aggiunti 2 eventi (E4_dedup_same_recording_different_uri + conferma caso E4) per esercitare DEDUP-3"
+    ],
+    "expectedDedupRules": "02-DATA-SCHEMA §5: canonicalKey = isrc: / mbid: / fuzzy:<sha1(normalize(name)+'|'+normalize(artistPrincipal)+'|'+durationBucketMs)>; durationBucketMs = floor(durationMs/2000)*2000"
   },
   "events": [
     {
@@ -84,6 +89,7 @@
     },
     {
       "_case": "E4_duplicate_uri_different_album",
+      "_comment": "URI diversi, stessa name+artist, ma durata 354000 → bucket 177 (DIVERSO da event #1 bucket 122); DEDUP-3 NON li unisce (test del 'contro' del tradeoff §5)",
       "ts": "2022-05-20T19:45:00Z",
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 354000,
@@ -102,7 +108,28 @@
       "incognito_mode": false
     },
     {
+      "_case": "E4_dedup_same_recording_different_uri",
+      "_comment": "NUOVO (v1.1): URI diversi, stessa name+artist, STESSA durata 354000 (stesso bucket 177); DEDUP-3 UNISCE in un singolo Track con 2 eventi. Caso che esercita davvero la regola DEDUP-3 (chiusura C6 audit).",
+      "ts": "2022-05-20T19:48:00Z",
+      "platform": "iOS 16.4 (iPhone 13)",
+      "ms_played": 354000,
+      "conn_country": "IT",
+      "ip_addr": "92.40.100.50",
+      "master_metadata_track_name": "Bohemian Rhapsody",
+      "master_metadata_album_artist_name": "Queen",
+      "master_metadata_album_album_name": "Greatest Hits (Remaster)",
+      "spotify_track_uri": "spotify:track:DIFFERENT_URI_3",
+      "reason_start": "trackdone",
+      "reason_end": "trackdone",
+      "shuffle": false,
+      "skipped": false,
+      "offline": false,
+      "offline_timestamp": null,
+      "incognito_mode": false
+    },
+    {
       "_case": "E4_duplicate_uri_same_name_different_recording",
+      "_comment": "URI diversi, stessa name+artist, durata 412000 → bucket 206; DEDUP-3 NON li unisce (registrazione live diversa da album)",
       "ts": "2022-05-20T20:00:00Z",
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 412000,
@@ -160,6 +187,7 @@
     },
     {
       "_case": "E6_podcast_episode",
+      "_comment": "Podcast: episode_name+episode_show_name presenti, master_metadata_* null → evento di tipo podcast, skip o marca come non-musicale",
       "ts": "2024-02-14T07:30:00Z",
       "platform": "android",
       "ms_played": 1800000,
@@ -201,14 +229,18 @@
     }
   ],
   "_expectedOutput": {
-    "totalEvents": 10,
-    "musicEvents": 9,
+    "_comment": "Ricalcolato in v1.1 (chiusura C6 audit). 11 eventi musicali + 1 podcast = 12 totali. DEDUP-3 unisce event #5 e #6 (stesso bucket durata 354000) → 9 Track unici musicali.",
+    "totalEvents": 12,
+    "musicEvents": 11,
     "podcastEvents": 1,
-    "uniqueTracks": 8,
+    "uniqueTracks": 9,
+    "_uniqueTracksDerivation": "10 music events - 1 DEDUP-3 merge (event #5 + #6) = 9 unique Tracks",
     "uniqueArtists": 3,
     "skippedDerived": 2,
+    "_skippedDerivedDerivation": "event #2 (reason_end='fwdbtn') + event #3 (reason_end='endplay' con ms_played=25000 < soglia 30000) → entrambi skipped=true per regola E1",
     "offlineTimestampsConverted": 1,
     "incognitoCount": 1,
-    "dedupApplied": 1
+    "dedupApplied": 1,
+    "_dedupAppliedDerivation": "event #5 + #6 uniti in 1 Track; 1 dedup, 2 eventi collegati"
   }
 }

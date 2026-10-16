@@ -46,11 +46,22 @@ Note: nessuna gestione errore (schermata statica).
 | `error` | Piattaforma con file invalido → messaggio specifico sotto la card |
 | `empty` | (non applicabile: c'è sempre la lista piattaforme) |
 
+**Stati della singola PlatformCard** (vedi `07-UI-SPEC §2.5`, 5 stati, chiusura M13 audit Sessione 13):
+
+| Stato PlatformCard | Quando | UI |
+|--------------------|--------|-----|
+| `empty` | Stato iniziale, nessun file | DropZone con istruzioni |
+| `validating` | Adapter `detect()` in corso | Spinner + "Riconoscimento file..." |
+| `parsing` | `parse()` streaming in corso | Progress bar + counter eventi live |
+| `error` | Validazione fallita o parsing troncato non recuperabile | Messaggio specifico (es. "Questo file sembra di Apple Music, non di Spotify") + bottone "Riprova" |
+| `done` | Import completato con successo per questa card | Badge verde + conteggio eventi |
+
 **Transizioni**:
-- Drop file → stato `loading` della PlatformCard (spinner interno)
-- Validazione fallita → stato `error` della card con messaggio (es. "Questo file sembra di Apple Music, non di Spotify")
-- Validazione OK → stato `done` della card con badge verde e conteggio
-- "Importa tutto" disabilitato se 0 piattaforme in stato `done`
+- Drop file → PlatformCard `empty` → `validating` (chiamata `adapter.detect()`; vedi `05-ARCHITECTURE §4`)
+- `validating` OK → `parsing` (streaming `adapter.parse()` AsyncIterable, vedi `05-ARCHITECTURE §4`)
+- `parsing` OK → `done` (transazione committata, vedi `05-ARCHITECTURE §5`)
+- `validating` o `parsing` falliti → `error` con `AdapterError.code` (`05-ARCHITECTURE §4`); se `recoverable: true`, gli eventi validi parsati prima dell'errore sono persistiti e la card mostra "Importato parzialmente: X di Y"
+- "Importa tutto" disabilitato se 0 piattaforme in stato `done` (o `done` con eventi > 0)
 
 **Edge case UX**:
 - Trascinamento di file non supportato → toast "Formato non supportato"
@@ -229,7 +240,7 @@ Note: nessuna gestione errore (schermata statica).
 - Analisi: "Importa per vedere le tue analisi"
 - Ricordi: "Importa per generare ricordi"
 
-**Demo mode**: click su "Scopri come funziona" → carica fixture `demo-user.json` con 1 anno di storia sintetica, flag `demo=true` (tutti i dati cancellabili con un click).
+**Demo mode**: click su "Scopri come funziona" → carica fixture `fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, generato da `scripts/generate-fixtures.mjs`); flag `_metadata.demoMode = true` (tutti i dati cancellabili con un click).
 
 ## 3. Flussi utente principali
 
@@ -358,3 +369,4 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: re-import esplicito come idempotente (M8) — niente blocco al doppio drop, dedup via `eventKey`; riferimento count-up al token `motion.countUp.duration` (M11) |
+| 0.3 | Sessione 13 (2026-10-16) | **M13 chiuso**: §2.3 Import ora esplicita i 5 stati della singola PlatformCard (`empty`/`validating`/`parsing`/`done`/`error`) con tabella + transizioni dettagliate. §2.14 demo-user.json ora punta a `fixtures/demo-user.json` (1 anno, 4500 eventi, flag `demoMode=true`) |

@@ -1,6 +1,6 @@
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 13 (2026-10-16)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -82,6 +82,8 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       mbid: string | null;     // MusicBrainz Recording ID
       explicit: boolean | null;
       genres: string[];        // popolato da enrichment (MusicBrainz) o dall'adapter
+      /** URL immagine di copertina (lato). vedi §11 fonti */
+      artworkUrl: string | null;
       platformIds: Partial<Record<PlatformId, string>>;
       firstSeenAt: number;
       lastSeenAt: number;
@@ -104,6 +106,8 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       mbid: string | null;
       upc: string | null;
       releaseDate: string | null;   // 'YYYY' | 'YYYY-MM' | 'YYYY-MM-DD'
+      /** URL immagine di copertina album (lato). vedi §11 fonti */
+      artworkUrl: string | null;
       platformIds: Partial<Record<PlatformId, string>>;
     }
 
@@ -361,6 +365,38 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 - **Coordinate GPS**: mai raccolte
 - **Testi/lyrics**: fuori scope
 
+## 9. Schema Dexie — indici aggiuntivi
+
+L'aggiunta di `artworkUrl` su `Track` e `Album` (§3.3) non richiede nuovi indici: il campo è letto solo insieme all'entità stessa. **Nessuna modifica a Dexie schema v2.**
+
+## 10. Migrazione v2 → v3 (per Track.artworkUrl / Album.artworkUrl)
+
+`artworkUrl` è nullable. La migrazione aggiunge il campo `null` a tutti i record esistenti senza ricalcolo. Da `db.version(3).stores({...}).upgrade(tx => tx.table('tracks').toCollection().modify(t => { t.artworkUrl = t.artworkUrl ?? null; }))` (idem per albums).
+
+Migrazione **non distruttiva** (MIG-1). Implementazione attesa nella Story 0.7 (Operations runbook + manutenzione) o in un mini-task di Story 0.2 se Dexie v2→v3 viene aperto subito.
+
+## 11. Artwork (copertina album/track): fonti e popolamento
+
+Il campo `artworkUrl` su Track/Album (§3.3) **non è popolato dall'import**: l'export GDPR delle piattaforme (es. Spotify) non contiene URL di copertina, e l'utente non ha un consenso esplicito per fetch remoti al momento dell'import. Il popolamento è demandato alla pipeline di enrichment (Fase 2), rispettando `PrivacySettings.enrichMetadata`.
+
+**Fonti in ordine di priorità** (cascata, come `05-ARCHITECTURE §6` per le audio features):
+
+| # | Fonte | Quando | Note |
+|---|-------|--------|------|
+| 1 | **Spotify Web API** (`/v1/tracks/{id}` campo `album.images[0].url`) | Dopo import Spotify, se l'utente ha effettuato OAuth Dev Mode (Fase 2+, vedi D.A.11) | Richiede `PrivacySettings.enrichMetadata=true` + token utente |
+| 2 | **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`) | Quando il Track o l'Album ha `mbid` valorizzato (da ListenBrainz import o enrichment) | No chiave API richiesta, rate limit `1 req/s` |
+| 3 | **iTunes Search API** (`/search?term=...&entity=song`) | Fallback se Spotify non disponibile (es. utenti Apple/Last.fm-first) | No autenticazione, no rate limit stretto; ricerca per `name+artist` |
+| 4 | **Placeholder** (gradient + mood color) | Se tutte le fonti falliscono | Generato lato UI, non persistito |
+
+**Regole di persistenza**:
+- `artworkUrl` è un URL HTTPS assoluto (no path relativi)
+- Se la copertina cambia su Spotify (es. album reissue), `artworkUrl` viene aggiornato al prossimo enrichment
+- L'arricchimento è **lazy**: popolato on-import + on-demand (schermata che richiede artwork) + scheduled idle (vedi `05-ARCHITECTURE §6.1`)
+- **No logo piattaforma**: `artworkUrl` è solo artwork di copertina del brano/album; i loghi commerciali sono vietati (D.6.4)
+- **Cache**: nessuna tabella dedicata; l'URL è direttamente su Track/Album (è un singolo valore, no LRU)
+
+Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiunta in Sessione 13, vedi `11-BACKLOG §4`).
+
 ---
 
 ## Changelog
@@ -370,3 +406,4 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 | 0.1 | Sessione 1 | Prima versione eseguibile |
 | 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: `genres: string[]` su Track/Artist (D.A.2); `carDetectionConsent` in PrivacySettings (C1); tabella `searchQueries` + interfaccia (D.A.3); `AudioFeatures.source` ripulito a `{acousticbrainz, essentia, heuristic, manual}` (D.A.6); schema Dexie portato a v2; `PatternPayload` esteso con `peakHour`, `peakDay`, `peakMonth`, `nightShare`, `weekendShare`, `userTimezone` (M6/M7) |
+| 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |

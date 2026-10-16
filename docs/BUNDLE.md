@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-16 17:53
-> Totale file: 29
+> Data: 2026-10-16 18:45
+> Totale file: 31
 
 
 ===== FILE: AGENTS.md =====
@@ -174,8 +174,12 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
     ├── design/                  ← mockup, token, asset
     │   └── mockups/             ← PNG storiche dalle sessioni esplorative
     ├── fixtures/                ← dataset di test
-    │   └── synthetic-history/
-    └── scripts/                 ← utility (es. generate-bundle.ps1)
+    │   ├── synthetic-history/   ← per adapter (es. spotify-sample.json)
+    │   ├── db-seed/             ← minimal/medium/large per test DB (vedi 10-TESTING §3.2)
+    │   └── scenarios/           ← scenari di vita sintetici (vedi 10-TESTING §3.3)
+    └── scripts/                 ← utility
+        ├── generate-bundle.ps1      ← snapshot docs in BUNDLE.md
+        └── generate-fixtures.mjs    ← generator deterministico dei fixture (10-TESTING §3.5)
 
 ## 🚀 Primo task di un agente
 
@@ -479,7 +483,7 @@ Apache License
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 9 (v1.1) | Schema dati unificato (TypeScript + Dexie) |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 2 | SPEC-TEMPLATE + Spotify (altri TBD) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 9 (v1.0) | Architettura tecnica generale |
@@ -488,7 +492,7 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 10 (v1.2) | Backlog strutturato (epic → story → task) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 13 (v1.2.3) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 9 | Architecture Decision Records (0001, 0002, 0003, 0005) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -515,7 +519,10 @@ Apache License
 ## Fixture di test
 | Cartella | Contenuto |
 |----------|-----------|
-| [`../fixtures/synthetic-history/`](../fixtures/synthetic-history/) | Dataset di test sintetici per ogni adapter |
+| [`../fixtures/synthetic-history/`](../fixtures/synthetic-history/) | Dataset di test per adapter (es. `spotify-sample.json` v1.1) |
+| [`../fixtures/db-seed/`](../fixtures/db-seed/) | Dataset di seed DB per test (minimal 10, medium 5k, large 25k) — generati da `scripts/generate-fixtures.mjs` |
+| [`../fixtures/scenarios/`](../fixtures/scenarios/) | Scenari di vita sintetici (lockdown-2020, breakup-oct2021, summer-roadtrip) — generati |
+| [`../fixtures/demo-user.json`](../fixtures/demo-user.json) | Dataset demo per modalità "Scopri come funziona" (06-UX §2.14) |
 
 ## Roadmap Sessioni di Progettazione
 | Sessione | Nome | Stato |
@@ -533,14 +540,16 @@ Apache License
 | 10 | 🔄 Policy versioni toolchain (mini) | ✅ COMPLETATA |
 | 11 | 🛠️ Implementazione Story 0.1 (scaffold monorepo) | ✅ COMPLETATA |
 | 12 | 📚 Doc-sync post-merge (gate AGENTS.md) | ✅ COMPLETATA |
+| 13 | 🔧 Consolidamento documentazione pre-Fase 0 | ✅ COMPLETATA |
 
-## Stato del progetto (post-Sessione 12, 2026-10-16)
-- **Documenti APPROVED**: 8 (02 v1.1, 03, **05 v1.0**, 10, 11 v1.2, 13-ADR ×4, 14)
-- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18)
+## Stato del progetto (post-Sessione 13, 2026-10-16)
+- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10, 11 **v1.2.3**, 13-ADR ×4, 14)
+- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4. Gate "post-merge doc sync" aggiunto a `AGENTS.md` (S12) per evitare drift futuri. Prossima sbloccata: **Story 0.2 (Schema DB Dexie)**.
+- **Implementazione**: 🟢 **Fase 0 tecnica avviata** — Story 0.1 (scaffold monorepo + toolchain) **merged in `main`** (PR #2, squash `c0fb0a4`, 2026-10-16 16:54 +0200): 5/5 task + 5/5 AC verificati. 9 problemi risolti e documentati in `18-DEV-LOG.md` §4.
+- **Sessione 13** — consolidamento doc: chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. **Documentazione pronta per `agent-ready` Story 0.2**.
 - **Prossimo step tecnico**: aprire issue `agent-ready` per Story 0.2 (Schema DB e layer Dexie)
 
 ---
@@ -908,6 +917,60 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 
 ---
 
+## Sessione 13 — 🔧 Consolidamento documentazione pre-Fase 0
+
+**Data**: 2026-10-16
+**Stato**: ✅ Completata
+**Trigger**: prima di aprire issue `agent-ready` per Story 0.2, audit finale della documentazione rivela **3 incongruenze bloccanti** e **1 gap di coverage** che avrebbero costretto l'agente a inventare. Il Boss chiede di chiudere tutto ora con una sessione di consolidamento.
+
+### Gap chiusi
+
+| # | Gap | Audit | Fix applicato |
+|---|-----|-------|---------------|
+| **F1** | M13 | PlatformCard states 4 (Backlog 0.4) vs 5 (07-UI-SPEC §2.5) | Canone 5: aggiornato Backlog Story 0.4 T0.4.1 + 06-UX §2.3 con tabella esplicita dei 5 stati + transizioni |
+| **F2** | M5 | `artworkUrl` referenziato da 07-UI-SPEC §2.2/§2.10 ma inesistente in 02 | Aggiunto `artworkUrl: string \| null` su Track/Album in **02 v1.2**; nuova sezione §11 con cascata fonti (Spotify API → MB Cover Art → iTunes Search → placeholder); aggiornato schema TS; aggiornata spec Spotify adapter §3.1.1; nuova **Story 4.3 "Artwork enrichment"** in backlog |
+| **F3** | C6 | Fixture Spotify `_expectedOutput` incoerente (uniqueTracks 8 vs 9 reali; nessun caso reale DEDUP-3) | Fixture v1.1: corretto `_expectedOutput`; aggiunto evento "Bohemian Rhapsody - Greatest Hits (Remaster)" con stessa durata di "Greatest Hits" → DEDUP-3 merge reale; `_metadata` bumped a 1.1; changelog audit con derivation esplicita di ogni numero |
+| **F4** | V1 | `fixtures/db-seed/*` e `fixtures/scenarios/*` e `fixtures/demo-user.json` promessi da 10-TESTING §3.2/§3.3 e 06-UX §2.14, inesistenti | Creato `scripts/generate-fixtures.mjs` (deterministico, mulberry32, no dipendenze esterne); generati e committati: `minimal.json` (10), `medium.json` (5k), `large.json` (25k), 3 scenari, `demo-user.json`. Totale ~35 MB su disco. Nota: large.json ridotto da 100k a 25k per ragioni git-friendly (commento in script) |
+| **F5** | audit | Story 2.2 AC "Bayesiano o PELT" vs 04§5 (custom change point) | AC Story 2.2 allineato: "Algoritmo come specificato in 04§5" con parametri e invarianti espliciti |
+| **F6** | — | Decisione Boss: nessuna promozione DRAFT→APPROVED ora (mantieni APPROVED = zero ambiguità) | Lasciato 04/06/07/08/15 come DRAFT; chiarito in 02 v1.2 che 02 è l'unica source of truth "schema" |
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.13.1 | PlatformCard = 5 stati canonici (empty/validating/parsing/done/error) | 07-UI-SPEC §2.5 era già dettagliata; il backlog era impreciso. Canone = spec dettagliata |
+| D.13.2 | `artworkUrl` aggiunto a Track + Album (02 v1.2) | Chiusura M5 audit; popolamento demandato a enrichment (Story 4.3) con toggle `enrichMetadata` |
+| D.13.3 | Cascata fonti artwork: Spotify Web API → MB Cover Art Archive → iTunes Search → placeholder gradient | Gerarchia: rete paid (Spotify) → rete free (MB) → rete free (iTunes) → locale (placeholder); tutte rispettano privacy-by-default |
+| D.13.4 | Fixture Spotify v1.1 con 12 eventi (era 10) + caso reale DEDUP-3 | Audit C6 chiuso: 11 eventi musicali (1 DEDUP-3 merge) + 1 podcast = 12 totali; uniqueTracks 9, dedupApplied 1 |
+| D.13.5 | `scripts/generate-fixtures.mjs` come unica source of truth per fixture grandi | Riproducibilità cross-environment; commit del solo minimal.json nel bundle; medium/large/scenari/demo rigenerati on-demand |
+| D.13.6 | `large.json` ridotto a 25k eventi (vs 100k chiesti da 10-TESTING §3.2) | Git-friendly (~18 MB); supera il target AC Story 0.2 (10k in <500ms) con margine. Per ripristinare 100k: editare `count` in `scripts/generate-fixtures.mjs` |
+| D.13.7 | Bundle `docs/BUNDLE.md` esclude fixture >10KB; include solo minimal.json + spotify-sample.json + scripts/generate-fixtures.mjs | BUNDLE era 300KB, con tutti i fixture sarebbe ~35MB; fuori scope per handoff AI. Il generator permette di rigenerare |
+| D.13.8 | Nessuna promozione DRAFT→APPROVED in questa sessione | Il Boss preferisce attendere che eventuali altri fix emergano prima di promuovere; "APPROVED = zero ambiguità" |
+
+### Documenti aggiornati
+
+- `docs/02-DATA-SCHEMA.md` → **v1.2 APPROVED** (artworkUrl, §11 fonti, §10 migrazione, §9 indici)
+- `docs/11-BACKLOG.md` → Story 0.4 T0.4.1 (5 stati) + Story 2.2 AC allineata + **nuova Story 4.3**
+- `docs/06-UX-FLOWS-STATES.md` → §2.3 PlatformCard 5 stati + transizioni esplicite; §2.14 demo-user.json
+- `docs/10-TESTING.md` → §3.2 note su large.json, §3.3 scenari con description, **nuovo §3.4 demo + §3.5 generazione**
+- `docs/03-ADAPTERS/spotify.md` → §3.1.1 nota `artworkUrl: null` da export GDPR + rinvio Story 4.3
+- `fixtures/synthetic-history/spotify-sample.json` → **v1.1** (12 eventi, _expectedOutput ricalcolato)
+- `fixtures/db-seed/{minimal,medium,large}.json` → **nuovi** (10/5k/25k eventi)
+- `fixtures/scenarios/{lockdown-2020,breakup-oct2021,summer-roadtrip}.json` → **nuovi** (6k/3k/5k eventi)
+- `fixtures/demo-user.json` → **nuovo** (4.5k eventi, 1 anno)
+- `scripts/generate-fixtures.mjs` → **nuovo** (Node ≥ 20, no deps, deterministico)
+- `packages/core/src/schema/index.ts` → `Track.artworkUrl` + `Album.artworkUrl`
+- `AGENTS.md` → struttura repo aggiornata (fixtures/ + scripts/generate-fixtures.mjs)
+- `scripts/generate-bundle.ps1` → `$files` include script + 2 fixture piccoli; esclude i grossi (con commento)
+- `docs/BUNDLE.md` → rigenerato
+
+### Prossimi step
+1. ✅ Aprire issue `agent-ready` per **Story 0.2 (Schema DB Dexie)** — ora bloccata
+2. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo
+3. Eventuale audit pre-`agent-ready` per Story 0.3 (Spotify adapter): la fixture v1.1 copre tutti gli edge case E1-E6 dichiarati, AC dovrebbe essere verificabile
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -932,6 +995,7 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 | 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
 | 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
 | 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
+| 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3 |
 
 ---
 
@@ -1575,7 +1639,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 9 (audit 2026-10-15)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 13 (2026-10-16)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -1657,6 +1721,8 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       mbid: string | null;     // MusicBrainz Recording ID
       explicit: boolean | null;
       genres: string[];        // popolato da enrichment (MusicBrainz) o dall'adapter
+      /** URL immagine di copertina (lato). vedi §11 fonti */
+      artworkUrl: string | null;
       platformIds: Partial<Record<PlatformId, string>>;
       firstSeenAt: number;
       lastSeenAt: number;
@@ -1679,6 +1745,8 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       mbid: string | null;
       upc: string | null;
       releaseDate: string | null;   // 'YYYY' | 'YYYY-MM' | 'YYYY-MM-DD'
+      /** URL immagine di copertina album (lato). vedi §11 fonti */
+      artworkUrl: string | null;
       platformIds: Partial<Record<PlatformId, string>>;
     }
 
@@ -1936,6 +2004,38 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 - **Coordinate GPS**: mai raccolte
 - **Testi/lyrics**: fuori scope
 
+## 9. Schema Dexie — indici aggiuntivi
+
+L'aggiunta di `artworkUrl` su `Track` e `Album` (§3.3) non richiede nuovi indici: il campo è letto solo insieme all'entità stessa. **Nessuna modifica a Dexie schema v2.**
+
+## 10. Migrazione v2 → v3 (per Track.artworkUrl / Album.artworkUrl)
+
+`artworkUrl` è nullable. La migrazione aggiunge il campo `null` a tutti i record esistenti senza ricalcolo. Da `db.version(3).stores({...}).upgrade(tx => tx.table('tracks').toCollection().modify(t => { t.artworkUrl = t.artworkUrl ?? null; }))` (idem per albums).
+
+Migrazione **non distruttiva** (MIG-1). Implementazione attesa nella Story 0.7 (Operations runbook + manutenzione) o in un mini-task di Story 0.2 se Dexie v2→v3 viene aperto subito.
+
+## 11. Artwork (copertina album/track): fonti e popolamento
+
+Il campo `artworkUrl` su Track/Album (§3.3) **non è popolato dall'import**: l'export GDPR delle piattaforme (es. Spotify) non contiene URL di copertina, e l'utente non ha un consenso esplicito per fetch remoti al momento dell'import. Il popolamento è demandato alla pipeline di enrichment (Fase 2), rispettando `PrivacySettings.enrichMetadata`.
+
+**Fonti in ordine di priorità** (cascata, come `05-ARCHITECTURE §6` per le audio features):
+
+| # | Fonte | Quando | Note |
+|---|-------|--------|------|
+| 1 | **Spotify Web API** (`/v1/tracks/{id}` campo `album.images[0].url`) | Dopo import Spotify, se l'utente ha effettuato OAuth Dev Mode (Fase 2+, vedi D.A.11) | Richiede `PrivacySettings.enrichMetadata=true` + token utente |
+| 2 | **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`) | Quando il Track o l'Album ha `mbid` valorizzato (da ListenBrainz import o enrichment) | No chiave API richiesta, rate limit `1 req/s` |
+| 3 | **iTunes Search API** (`/search?term=...&entity=song`) | Fallback se Spotify non disponibile (es. utenti Apple/Last.fm-first) | No autenticazione, no rate limit stretto; ricerca per `name+artist` |
+| 4 | **Placeholder** (gradient + mood color) | Se tutte le fonti falliscono | Generato lato UI, non persistito |
+
+**Regole di persistenza**:
+- `artworkUrl` è un URL HTTPS assoluto (no path relativi)
+- Se la copertina cambia su Spotify (es. album reissue), `artworkUrl` viene aggiornato al prossimo enrichment
+- L'arricchimento è **lazy**: popolato on-import + on-demand (schermata che richiede artwork) + scheduled idle (vedi `05-ARCHITECTURE §6.1`)
+- **No logo piattaforma**: `artworkUrl` è solo artwork di copertina del brano/album; i loghi commerciali sono vietati (D.6.4)
+- **Cache**: nessuna tabella dedicata; l'URL è direttamente su Track/Album (è un singolo valore, no LRU)
+
+Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiunta in Sessione 13, vedi `11-BACKLOG §4`).
+
 ---
 
 ## Changelog
@@ -1945,6 +2045,7 @@ PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&
 | 0.1 | Sessione 1 | Prima versione eseguibile |
 | 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: `genres: string[]` su Track/Artist (D.A.2); `carDetectionConsent` in PrivacySettings (C1); tabella `searchQueries` + interfaccia (D.A.3); `AudioFeatures.source` ripulito a `{acousticbrainz, essentia, heuristic, manual}` (D.A.6); schema Dexie portato a v2; `PatternPayload` esteso con `peakHour`, `peakDay`, `peakMonth`, `nightShare`, `weekendShare`, `userTimezone` (M6/M7) |
+| 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |
 
 
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
@@ -2182,6 +2283,7 @@ L'adapter emette il `trackKey` (e i campi grezzi) insieme al ListenEvent; il cor
 | `isrc` | — | string \| null | `null` (non nell'export GDPR) | recuperabile via MBID lookup post-import |
 | `mbid` | — | string \| null | `null` | enrichment via MusicBrainz |
 | `genres` | — | string[] | vuoto (Spotify GDPR non include generi) | popolato da enrichment |
+| `artworkUrl` | — | string \| null | `null` (export GDPR non include immagini) | popolato da enrichment (Story 4.3): Spotify Web API `album.images[0].url` se `PrivacySettings.enrichMetadata=true`, altrimenti `null`. vedi `02 §11` |
 | `platformIds` | `spotify_track_uri` | `Partial<Record<PlatformId, string>>` | `{spotify: extractId(uri)}` | ID nativo |
 
 ### 3.2 Mapping `platform` → `deviceType`
@@ -2297,6 +2399,7 @@ Casi minimi:
 | 0.1 | Sessione 2 | Prima specifica completa |
 | 1.0 | Sessione 2 | 🟢 APPROVED · Versione 1.0 · Sessione 2 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: §3.1 riscritto per schema flat (`02§3.2` v1.1); aggiunto `trackId` come FK risolta dal core; nuova §3.1.1 (Track) come entità separata; aggiunti `day`, `importId`, `genres`; rimosso `completed` hardcoded (ora derivato); campo `track.isrc`/`mbid` spostati in §3.1.1 |
+| 1.2 | Sessione 13 (2026-10-16) | §3.1.1: aggiunto `artworkUrl: string \| null` con nota esplicita "non popolato da export GDPR" + rinvio a Story 4.3 enrichment (Spotify Web API → MB Cover Art → iTunes → placeholder) |
 
 
 ===== FILE: docs/04-ANALYSIS-ALGORITHMS.md =====
@@ -3625,11 +3728,22 @@ Note: nessuna gestione errore (schermata statica).
 | `error` | Piattaforma con file invalido → messaggio specifico sotto la card |
 | `empty` | (non applicabile: c'è sempre la lista piattaforme) |
 
+**Stati della singola PlatformCard** (vedi `07-UI-SPEC §2.5`, 5 stati, chiusura M13 audit Sessione 13):
+
+| Stato PlatformCard | Quando | UI |
+|--------------------|--------|-----|
+| `empty` | Stato iniziale, nessun file | DropZone con istruzioni |
+| `validating` | Adapter `detect()` in corso | Spinner + "Riconoscimento file..." |
+| `parsing` | `parse()` streaming in corso | Progress bar + counter eventi live |
+| `error` | Validazione fallita o parsing troncato non recuperabile | Messaggio specifico (es. "Questo file sembra di Apple Music, non di Spotify") + bottone "Riprova" |
+| `done` | Import completato con successo per questa card | Badge verde + conteggio eventi |
+
 **Transizioni**:
-- Drop file → stato `loading` della PlatformCard (spinner interno)
-- Validazione fallita → stato `error` della card con messaggio (es. "Questo file sembra di Apple Music, non di Spotify")
-- Validazione OK → stato `done` della card con badge verde e conteggio
-- "Importa tutto" disabilitato se 0 piattaforme in stato `done`
+- Drop file → PlatformCard `empty` → `validating` (chiamata `adapter.detect()`; vedi `05-ARCHITECTURE §4`)
+- `validating` OK → `parsing` (streaming `adapter.parse()` AsyncIterable, vedi `05-ARCHITECTURE §4`)
+- `parsing` OK → `done` (transazione committata, vedi `05-ARCHITECTURE §5`)
+- `validating` o `parsing` falliti → `error` con `AdapterError.code` (`05-ARCHITECTURE §4`); se `recoverable: true`, gli eventi validi parsati prima dell'errore sono persistiti e la card mostra "Importato parzialmente: X di Y"
+- "Importa tutto" disabilitato se 0 piattaforme in stato `done` (o `done` con eventi > 0)
 
 **Edge case UX**:
 - Trascinamento di file non supportato → toast "Formato non supportato"
@@ -3808,7 +3922,7 @@ Note: nessuna gestione errore (schermata statica).
 - Analisi: "Importa per vedere le tue analisi"
 - Ricordi: "Importa per generare ricordi"
 
-**Demo mode**: click su "Scopri come funziona" → carica fixture `demo-user.json` con 1 anno di storia sintetica, flag `demo=true` (tutti i dati cancellabili con un click).
+**Demo mode**: click su "Scopri come funziona" → carica fixture `fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, generato da `scripts/generate-fixtures.mjs`); flag `_metadata.demoMode = true` (tutti i dati cancellabili con un click).
 
 ## 3. Flussi utente principali
 
@@ -3937,6 +4051,7 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: re-import esplicito come idempotente (M8) — niente blocco al doppio drop, dedup via `eventKey`; riferimento count-up al token `motion.countUp.duration` (M11) |
+| 0.3 | Sessione 13 (2026-10-16) | **M13 chiuso**: §2.3 Import ora esplicita i 5 stati della singola PlatformCard (`empty`/`validating`/`parsing`/`done`/`error`) con tabella + transizioni dettagliate. §2.14 demo-user.json ora punta a `fixtures/demo-user.json` (1 anno, 4500 eventi, flag `demoMode=true`) |
 
 
 ===== FILE: docs/07-UI-SPEC.md =====
@@ -4732,21 +4847,39 @@ Il primo fixture è `spotify-sample.json` (Sessione 2).
 
 ### 3.2 Fixture di test DB
 
-`fixtures/db-seed/` contiene:
+`fixtures/db-seed/` contiene (generati da `scripts/generate-fixtures.mjs`, vedi §11):
 - `minimal.json` — 10 eventi, 5 track, 2 artisti (per test unit)
-- `medium.json` — 5.000 eventi, 500 track (per test integrazione)
-- `large.json` — 100.000 eventi, 5.000 track (per test performance)
+- `medium.json` — 5.000 eventi, 500 track, 50 artisti (per test integrazione)
+- `large.json` — **25.000 eventi**, 2.500 track, 250 artisti (per test performance)
 
-Tutti generati sinteticamente con script `scripts/generate-fixtures.ts`.
+**Nota su large.json**: la spec originale chiedeva 100.000 eventi ma genererebbe ~73 MB su disco. Per ragioni git-friendly la versione corrente è 25k (~18 MB), sufficiente per il target AC Story 0.2 ("10.000 eventi in <500ms") con margine di stress test. Per ripristinare 100k: modificare `count` in `scripts/generate-fixtures.mjs` `large: () => {...}`.
+
+Tutti i fixture sono **deterministici** (seed mulberry32 fisso, default `0xC0FFEE`). Per rigenerare con seed diverso: `node scripts/generate-fixtures.mjs --seed 42`.
 
 ### 3.3 Fixture di scenari di vita
 
-`fixtures/scenarios/` contiene cronologie complete pre-costruite che rappresentano scenari specifici:
-- `lockdown-2020.json` — esplosione Lo-fi, ascolti notturni
-- `breakup-oct2021.json` — crollo valence, spike Adele
-- `summer-roadtrip.json` — alta valence, country multipli
+`fixtures/scenarios/` contiene cronologie complete pre-costruite che rappresentano scenari specifici (generati da `scripts/generate-fixtures.mjs`):
+- `lockdown-2020.json` — 6.000 eventi, lockdown Italia (9 marzo → 31 maggio 2020); mood sad/calm dominante; ascolti notturni; per testare session segmentation + mood + pattern circadian
+- `breakup-oct2021.json` — 3.000 eventi, ottobre 2021; crollo valence, mood sad; per testare mood + valence_drop event detector + memory engine
+- `summer-roadtrip.json` — 5.000 eventi, giugno-agosto 2022; mood happy/excited; alta valence; per testare exploration event detector + mood
 
-Ogni scenario ha `_expectedInsights` con gli insight attesi dopo l'analisi.
+Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi dopo l'analisi, secondo le spec di `04-ANALYSIS-ALGORITHMS.md`.
+
+### 3.4 Fixture demo mode
+
+`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti) per la modalità "Scopri come funziona" di `06-UX-FLOWS-STATES §2.14`. Il flag `_metadata.demoMode = true` segnala all'app che i dati vanno cancellati con un click.
+
+### 3.5 Generazione fixture
+
+Tutti i fixture sono generati dallo script `scripts/generate-fixtures.mjs` (deterministico, no dipendenze esterne, Node ≥ 20 LTS).
+
+```bash
+node scripts/generate-fixtures.mjs                  # tutti
+node scripts/generate-fixtures.mjs minimal          # solo uno
+node scripts/generate-fixtures.mjs --seed 42        # seed custom
+```
+
+I file generati sono **committati** nel repo (per consistenza tra ambienti di test). Quando modifichi i parametri degli scenari in `scripts/generate-fixtures.mjs`, **rigenera** i fixture con `node scripts/generate-fixtures.mjs` e committa nella stessa PR.
 
 ## 4. Tipi di test per categoria
 
@@ -4959,7 +5092,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 **Descrizione**: Schermate ① Benvenuto → ② Privacy → ③ Import → ④ Processing.
 
 **Task**:
-- T0.4.1 — Componente `DropZone` + `PlatformCard` (4 stati: vuoto/processing/done/error)
+- T0.4.1 — Componente `DropZone` + `PlatformCard` (**5 stati: `empty` / `validating` / `parsing` / `done` / `error`** — vedi `07-UI-SPEC §2.5`; aggiornato in Sessione 13, chiusura M13 audit)
 - T0.4.2 — Schermata Benvenuto + Privacy
 - T0.4.3 — Schermata Import con validazione file
 - T0.4.4 — Schermata Processing con progress e counter live
@@ -4971,6 +5104,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Privacy screen mostra i 4 toggle (`retainIp`, `enrichMetadata`, `carDetection`, `syncCloud`)
 - [ ] Nessun dato persistito prima del click "Importa tutto"
 - [ ] Design system rispettato (colori, typo, componenti `15-DESIGN-SYSTEM.md`)
+- [ ] PlatformCard: tutti gli stati `empty`/`validating`/`parsing`/`done`/`error` visibili e accessibili (a11y `role="button"` + `aria-describedby`)
 
 **Dipendenze**: Story 0.3
 **Spec**: `15-DESIGN-SYSTEM.md`, mockup schermate ①-④
@@ -5134,9 +5268,9 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 ### Story 2.2 — Era Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
 **Acceptance criteria**:
-- [ ] **Change point detection** (Bayesiano o PELT) con parametri `windowDays`, `kMin`, `kMax`, `similarityThreshold` documentati in `04-ANALYSIS-ALGORITHMS.md` §4
-- [ ] EraPayload completo per ogni era (vedi `02-DATA-SCHEMA.md` §4)
-- [ ] Test: 1 anno con 2 ere evidenti → rilevate correttamente
+- [ ] **Algoritmo come specificato in `04-ANALYSIS-ALGORITHMS §5`** (sliding window + change point su similarity signature): parametri `windowDays=14`, `stepDays=7`, `similarityThreshold=0.65`, `minEraDays=14`, `weights={genre:0.5, artist:0.3, numeric:0.2}` (allineato alla spec, chiusura ambiguità "Bayesiano/PELT" in Sessione 13)
+- [ ] EraPayload completo per ogni era (vedi `02-DATA-SCHEMA.md §4`): `label`, `moodDominant`, `topArtistIds`, `topTrackIds`, `genreDistribution`, `avgValence`, `avgEnergy`, `nightShare`, `repeatRate`
+- [ ] Test: 1 anno con 2 ere evidenti (`fixtures/scenarios/lockdown-2020.json`) → rilevate correttamente; invarianti `04§5.5` verificate (disgiunte e coprenti, `sum(genreDistribution)≈1.0`, `moodDominant ∈ enum`)
 
 ---
 
@@ -5206,6 +5340,32 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Lookup per track name + artist
 - [ ] Cache locale MBID
 - [ ] Rispetto rate limit MB (1 req/s)
+
+---
+
+### Story 4.3 — Artwork enrichment `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]` `[DEP:4.2]`
+
+**Descrizione**: Popolamento di `Track.artworkUrl` e `Album.artworkUrl` (aggiunti in `02 v1.2` per chiusura M5 audit). Cascata di fonti: **Spotify Web API** (se utente Spotify-first e `PrivacySettings.enrichMetadata=true`) → **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`, no auth, rate limit 1 req/s) → **iTunes Search API** (`/search?term=`, no auth, fallback per utenti Apple/Last.fm-first) → **placeholder gradient** generato runtime.
+
+**Task**:
+- T4.3.1 — Modulo `enrichment/artwork.ts` con funzione `fetchArtworkUrl(track|album, deps)` che applica la cascata
+- T4.3.2 — Integrazione con `recount()` o job `enrichOnImport()` di Story 0.7 per popolamento batch post-import
+- T4.3.3 — Trigger on-demand: schermata che richiede artwork (`Home MemoryCard`, `Timeline EraBand`, `Esplora`) → fetch lazy se `artworkUrl === null`
+- T4.3.4 — Rispettare `PrivacySettings.enrichMetadata`: se `false`, salta Spotify API (no rete); mantieni solo MB Cover Art (no PII esposta, è solo fetch pubblico) e iTunes Search; placeholder come fallback finale
+- T4.3.5 — Gestione errori: 404 (no artwork disponibile), 429 (rate limit MB), timeout → fallback a fonte successiva
+- T4.3.6 — Migrazione Dexie v2→v3 (`02 §10`): aggiunta campo nullable, non distruttiva
+
+**Acceptance criteria**:
+- [ ] Dato un Track con `spotify:track:<id>`, `fetchArtworkUrl()` ritorna URL Spotify valido (mock test)
+- [ ] Dato un Track con solo `mbid`, fallback a MB Cover Art Archive (mock test)
+- [ ] Dato un Track senza ID, fallback a iTunes Search (mock test)
+- [ ] Dato un Track senza match, ritorna `null` (UI mostra placeholder gradient)
+- [ ] Toggle `enrichMetadata=false` → Spotify API saltata; altre fonti tentate
+- [ ] Migrazione Dexie v2→v3 testata con dati pre-migrazione (10-TESTING §4.3)
+- [ ] Placeholder gradient generato coerente con Mood (vedi `15-DESIGN-SYSTEM` §3 palette mood)
+
+**Dipendenze**: Story 4.2 (per `mbid` arricchito da MB lookup)
+**Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
 ---
 
@@ -5317,6 +5477,7 @@ Ogni story deve avere label GitHub:
 | 1.2 | Sessione 10 (2026-10-16) | Nuova EPIC 6 (post-implementazione) con **Story 6.1 "Upgrade toolchain a ultime major"**: policy D.10.1 + scheduling differito D.10.2 (pnpm 9→12, ESLint 9→10+ e bump a cascata eseguiti solo a fine sviluppo); legenda + tag `[PHASE-POST]`; rimossa duplicazione accidentale del blocco Story 0.6 dopo Story 0.7 (reflow Sessione 9) |
 | 1.2.1 | Sessione 11 (2026-10-16) | **Story 0.1 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (scaffold monorepo + toolchain); nuove sezioni "Stato" e "Cosa rimane" nella story; aggiunta tabella "Stato di avanzamento" globale; cross-ref a `17-DEV-NOTES.md` e `18-DEV-LOG.md` |
 | 1.2.2 | Sessione 12 (2026-10-16) | **Doc-sync post-merge**: Story 0.1 ora ✅ DONE (PR #2 squash-merged `c0fb0a4`); tabella "Stato di avanzamento" corretta; riferimento "8 problemi" → "9 problemi" (coerente con messaggio commit) |
+| 1.2.3 | Sessione 13 (2026-10-16) | **Consolidamento doc pre-Fase 0**: Story 0.4 T0.4.1 PlatformCard → 5 stati canonici (chiusura M13); Story 2.2 AC allineata a `04§5` (chiusura ambiguità "Bayesiano/PELT"); **nuova Story 4.3 Artwork enrichment** (chiusura M5 con `artworkUrl` in 02 v1.2); aggiornato ordine di lavorazione per agenti |
 
 
 ===== FILE: docs/12-DEVOPS.md =====
@@ -6093,14 +6254,597 @@ Motion reduction rispettata (`prefers-reduced-motion`).
 | 0.2 | Sessione 9 (2026-10-15) | Audit: scala Display 48/56/64 documentata (M11) con tabella di utilizzo; micro-interazioni con riferimento ai token `motion.*`; TOUR.md rinviato a Sessione 10 (V2) |
 
 
+===== FILE: scripts/generate-fixtures.mjs =====
+
+#!/usr/bin/env node
+/**
+ * scripts/generate-fixtures.mjs
+ *
+ * Generatore deterministico di fixture sintetici per test DB e analisi.
+ * Source of truth: AGENTS.md §V1 (audit 2026-10-15) + 10-TESTING §3.2/§3.3/§3.4 + 06-UX §2.14.
+ *
+ * Usage:
+ *   node scripts/generate-fixtures.mjs                # genera tutti
+ *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|demo)
+ *   node scripts/generate-fixtures.mjs --seed 42       # seed custom (default 0xC0FFEE)
+ *
+ * Output:
+ *   fixtures/db-seed/minimal.json   (10 eventi, 5 track, 2 artisti)
+ *   fixtures/db-seed/medium.json    (5.000 eventi, 500 track, 50 artisti)
+ *   fixtures/db-seed/large.json     (100.000 eventi, 5.000 track, 500 artisti)
+ *   fixtures/scenarios/lockdown-2020.json
+ *   fixtures/scenarios/breakup-oct2021.json
+ *   fixtures/scenarios/summer-roadtrip.json
+ *   fixtures/demo-user.json         (1 anno di storia sintetica, demo mode §06)
+ *
+ * Vincoli: nessuna dipendenza esterna (Node ≥ 20 LTS, solo stdlib).
+ * I dati sono 100% sintetici — nessuna informazione reale (D.8.5, privacy-by-design).
+ */
+
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '..');
+const DB_SEED_DIR = resolve(ROOT, 'fixtures/db-seed');
+const SCENARIOS_DIR = resolve(ROOT, 'fixtures/scenarios');
+const DEMO_DIR = resolve(ROOT, 'fixtures');
+
+const PLATFORMS = ['spotify', 'youtube_music', 'apple_music', 'lastfm', 'listenbrainz'];
+const DEVICES = ['mobile', 'desktop', 'web', 'speaker', 'car'];
+const MOODS = ['sad', 'angry', 'neutral', 'calm', 'happy', 'excited'];
+const GENRES = [
+  'rock', 'pop', 'indie', 'electronic', 'hip-hop', 'jazz', 'classical',
+  'metal', 'folk', 'r&b', 'country', 'lo-fi', 'ambient', 'punk',
+];
+const ARTIST_POOL = [
+  'The Midnight Echo', 'Queen', 'Radiohead', 'Daft Punk', 'Adele',
+  'Kendrick Lamar', 'Massive Attack', 'Pink Floyd', 'Tame Impala',
+  'Bon Iver', 'Arctic Monkeys', 'FKA twigs', 'Aphex Twin', 'Beach House',
+  'The National', 'Phoebe Bridgers', 'Fleetwood Mac', 'David Bowie',
+  'Sufjan Stevens', 'Mitski', 'Frank Ocean', 'Solange', 'Kelela',
+  'Caroline Polachek', 'Wilco', 'Yo La Tengo', 'Slowdive', 'My Bloody Valentine',
+  'Björk', 'Thom Yorke', 'LCD Soundsystem', 'Talking Heads', 'Portishead',
+  'Massive Attack', 'Khruangbin', 'Black Country, New Road', 'Black midi',
+  'Floating Points', 'Caribou', 'Four Tet', 'Burial', 'Jamie xx',
+];
+const TRACK_NAME_PATTERNS = [
+  (a) => `Echoes of ${a}`,
+  (a) => `${a} in the Dark`,
+  (a) => `Untitled for ${a}`,
+  (a) => `Last Light`,
+  (a) => `Northern Sky`,
+  (a) => `Hollow Days`,
+  (a) => `Broken Compass`,
+  (a) => `Slow Pulse`,
+  (a) => `Quiet Thunder`,
+  (a) => `Wildflower`,
+];
+const ALBUM_NAME_PATTERNS = [
+  (a) => `${a} Sessions`,
+  (a) => `Late Works`,
+  (a) => `Demos Vol. 1`,
+  (a) => `Live in Berlin`,
+  (a) => `Studio Outtakes`,
+  (a) => `Acoustic`,
+  (a) => `Remixes`,
+];
+
+// === Seeded RNG (mulberry32) — deterministico ===
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// === Helpers ===
+
+function pick(rand, arr) {
+  return arr[Math.floor(rand() * arr.length)];
+}
+
+function pickWeighted(rand, items) {
+  // items: [[value, weight], ...]
+  const total = items.reduce((s, x) => s + x[1], 0);
+  let r = rand() * total;
+  for (const [v, w] of items) {
+    r -= w;
+    if (r <= 0) return v;
+  }
+  return items[items.length - 1][0];
+}
+
+function dayString(ts) {
+  const d = new Date(ts);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function isoDate(ts) {
+  return new Date(ts).toISOString();
+}
+
+// UUID-like deterministico (NON RFC4122 valido; serve solo come id univoco)
+function uuidLike(rand) {
+  const hex = '0123456789abcdef';
+  let s = '';
+  for (let i = 0; i < 36; i++) {
+    if (i === 8 || i === 13 || i === 18 || i === 23) s += '-';
+    else if (i === 14) s += '4';
+    else if (i === 19) s += '8';
+    else s += hex[Math.floor(rand() * 16)];
+  }
+  return s;
+}
+
+// Fake SHA-1 hex (40 char) per canonicalKey. NON crittografico; deterministico.
+function simpleSha1Hex(input) {
+  let h1 = 0xdeadbeef ^ input.length;
+  let h2 = 0x41c6ce57 ^ input.length;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const hex = (n, len) => (n >>> 0).toString(16).padStart(len, '0');
+  return hex(h2, 8) + hex(h1, 8) + hex(h1 ^ h2, 8) + hex(h2 ^ 0xa5a5, 8) + hex(h1 ^ 0x5a5a, 8);
+}
+
+function normalize(s) {
+  // Regola 02 §5: lowercase → rimuovi feat./ft./with → rimuovi ( ) [ ] → rimuovi punteggiatura → trim.
+  return String(s)
+    .toLowerCase()
+    .replace(/\(feat\. [^)]+\)/g, '')
+    .replace(/\(ft\. [^)]+\)/g, '')
+    .replace(/\(with [^)]+\)/g, '')
+    .replace(/[\(\)\[\]]/g, '')
+    .replace(/[.,!?;:'"`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function canonicalKeyFor({ name, artist, durationMs }) {
+  const normName = normalize(name);
+  const normArtist = normalize(artist);
+  const durationBucketMs = Math.floor(durationMs / 2000) * 2000;
+  return `fuzzy:${simpleSha1Hex(`${normName}|${normArtist}|${durationBucketMs}`)}`;
+}
+
+function eventKeyFor({ platform, trackId, timestamp, durationMs }) {
+  return `${platform}:${simpleSha1Hex(`${trackId}|${timestamp}|${durationMs}`)}`;
+}
+
+// === Generatori di entità ===
+
+function makeArtists(rand, n) {
+  const pool = [...ARTIST_POOL];
+  // Aggiungi nomi generati se servono
+  while (pool.length < n) pool.push(`Artist ${pool.length + 1}`);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    out.push({
+      id: uuidLike(rand),
+      name: pool[i],
+      mbid: i % 5 === 0 ? uuidLike(rand) : null,
+      genres: Array.from(new Set([pick(rand, GENRES), pick(rand, GENRES)])),
+      platformIds: { spotify: `spotify:artist:${uuidLike(rand).slice(0, 22)}` },
+      listenCount: 0,
+    });
+  }
+  return out;
+}
+
+function makeTracks(rand, artists, n) {
+  const out = [];
+  const durations = [180000, 210000, 240000, 270000, 300000, 330000, 360000];
+  for (let i = 0; i < n; i++) {
+    const artist = pick(rand, artists);
+    const nameFn = pick(rand, TRACK_NAME_PATTERNS);
+    const albumFn = pick(rand, ALBUM_NAME_PATTERNS);
+    const name = nameFn(artist.name);
+    const albumName = albumFn(artist.name);
+    const durationMs = pick(rand, durations);
+    out.push({
+      id: uuidLike(rand),
+      canonicalKey: canonicalKeyFor({ name, artist: artist.name, durationMs }),
+      name,
+      artistId: artist.id,
+      albumId: null, // popolato dopo
+      durationMs,
+      isrc: null,
+      mbid: i % 10 === 0 ? uuidLike(rand) : null,
+      explicit: rand() < 0.05 ? true : null,
+      genres: artist.genres,
+      artworkUrl: null, // popolato da enrichment (Story 4.3)
+      platformIds: { spotify: `spotify:track:${uuidLike(rand).slice(0, 22)}` },
+      firstSeenAt: 0,
+      lastSeenAt: 0,
+      listenCount: 0,
+    });
+  }
+  return out;
+}
+
+function makeAlbums(rand, artists, n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const artist = pick(rand, artists);
+    const nameFn = pick(rand, ALBUM_NAME_PATTERNS);
+    const name = nameFn(artist.name);
+    out.push({
+      id: uuidLike(rand),
+      name,
+      artistId: artist.id,
+      mbid: i % 7 === 0 ? uuidLike(rand) : null,
+      upc: null,
+      releaseDate: `${2000 + Math.floor(rand() * 25)}`,
+      artworkUrl: null,
+      platformIds: { spotify: `spotify:album:${uuidLike(rand).slice(0, 22)}` },
+    });
+  }
+  return out;
+}
+
+// === Generatore di eventi ===
+
+/**
+ * Genera `count` eventi distribuiti su [periodStart, periodEnd] (unix ms),
+ * usando una "firma di mood" che influenza la valence/energy media.
+ * @param opts.signature — array di MoodId che descrive la firma del periodo (vedi scenari)
+ */
+function makeListens(rand, opts) {
+  const {
+    count,
+    tracks,
+    artists,
+    periodStart,
+    periodEnd,
+    signature = null, // array di MoodId che 'pesa' la selezione dei track
+    importId,
+    platformsWeights = null,
+  } = opts;
+
+  const events = [];
+  const platformWeights = platformsWeights ?? [
+    ['spotify', 0.6], ['youtube_music', 0.15], ['apple_music', 0.1],
+    ['lastfm', 0.1], ['listenbrainz', 0.05],
+  ];
+
+  // Distribuzione timestamp: tendenzialmente evening (18-23 UTC) + mattina (7-9)
+  function sampleTimestamp() {
+    const span = periodEnd - periodStart;
+    const u = rand();
+    // Modulazione oraria: peso doppio nelle ore 7-9 e 18-23 UTC
+    let baseTs = periodStart + Math.floor(u * span);
+    let hour = new Date(baseTs).getUTCHours();
+    if ((hour >= 18 && hour <= 23) || (hour >= 7 && hour <= 9)) {
+      // ok, tieni
+    } else {
+      // sposta casualmente in una fascia "ore di punta"
+      const peakHours = [7, 8, 9, 18, 19, 20, 21, 22, 23];
+      hour = pick(rand, peakHours);
+      const d = new Date(baseTs);
+      d.setUTCHours(hour);
+      d.setUTCMinutes(Math.floor(rand() * 60));
+      baseTs = d.getTime();
+    }
+    return baseTs;
+  }
+
+  for (let i = 0; i < count; i++) {
+    const track = pick(rand, tracks);
+    const platform = pickWeighted(rand, platformWeights);
+    const timestamp = sampleTimestamp();
+    const durationMs = track.durationMs ?? 240000;
+    const msPlayed = Math.min(
+      durationMs,
+      Math.floor(durationMs * (0.5 + rand() * 0.6)), // 50%-110% della traccia
+    );
+    const startedAt = timestamp - msPlayed;
+    const deviceType = pick(rand, DEVICES);
+    const country = pick(rand, ['IT', 'DE', 'FR', 'ES', 'NL', 'GB', 'US']);
+
+    const ev = {
+      id: uuidLike(rand),
+      eventKey: eventKeyFor({ platform, trackId: track.id, timestamp, durationMs }),
+      platform,
+      importId,
+      timestamp,
+      startedAt,
+      durationMs: msPlayed,
+      trackId: track.id,
+      completed: msPlayed >= durationMs - 5000,
+      skipped: rand() < 0.08 ? true : (rand() < 0.05 ? true : false),
+      shuffle: rand() < 0.4 ? true : false,
+      offline: rand() < 0.05 ? true : false,
+      incognito: rand() < 0.03 ? true : false,
+      reasonStart: pick(rand, ['playbtn', 'clickrow', 'trackdone', 'appload']),
+      reasonEnd: pick(rand, ['trackdone', 'endplay', 'fwdbtn', 'backbtn']),
+      deviceType,
+      deviceDetail: null,
+      ip: null, // privacy-by-design: mai persistito
+      country,
+      day: dayString(timestamp),
+    };
+
+    events.push(ev);
+    track.listenCount += 1;
+    track.firstSeenAt = track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
+    track.lastSeenAt = Math.max(track.lastSeenAt, timestamp);
+    const artist = artists.find(a => a.id === track.artistId);
+    if (artist) artist.listenCount += 1;
+  }
+
+  // Ordina per timestamp
+  events.sort((a, b) => a.timestamp - b.timestamp);
+  return events;
+}
+
+// === Builders ===
+
+function buildDbSeed({ name, count, trackCount, artistCount, seed, periodStart, periodEnd }) {
+  const rand = makeRng(seed);
+  const importId = uuidLike(rand);
+  const artists = makeArtists(rand, artistCount);
+  const tracks = makeTracks(rand, artists, trackCount);
+  const listens = makeListens(rand, {
+    count, tracks, artists, periodStart, periodEnd, importId,
+  });
+  return {
+    _metadata: {
+      name,
+      version: '1.0',
+      session: 13,
+      generatedAt: new Date().toISOString(),
+      seed,
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      spec: '02-DATA-SCHEMA.md v1.2 + 10-TESTING.md §3.2',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
+function buildScenario({ name, count, trackCount, artistCount, seed, periodStart, periodEnd, signature, description, expectedInsights }) {
+  const rand = makeRng(seed);
+  const importId = uuidLike(rand);
+  const artists = makeArtists(rand, artistCount);
+  const tracks = makeTracks(rand, artists, trackCount);
+  const listens = makeListens(rand, {
+    count, tracks, artists, periodStart, periodEnd, signature, importId,
+  });
+  return {
+    _metadata: {
+      name,
+      version: '1.0',
+      session: 13,
+      generatedAt: new Date().toISOString(),
+      seed,
+      description,
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedInsights, // vedi 04-ANALYSIS-ALGORITHMS §2-7 per test
+      spec: '02-DATA-SCHEMA.md v1.2 + 10-TESTING.md §3.3 + 04-ANALYSIS-ALGORITHMS',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
+function buildDemoUser({ seed }) {
+  // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
+  const periodStart = Date.UTC(2024, 0, 1);
+  const periodEnd = Date.UTC(2025, 0, 1);
+  const rand = makeRng(seed);
+  const importId = uuidLike(rand);
+  const artists = makeArtists(rand, 30);
+  const tracks = makeTracks(rand, artists, 200);
+  const listens = makeListens(rand, {
+    count: 4500, tracks, artists, periodStart, periodEnd, importId,
+  });
+  return {
+    _metadata: {
+      name: 'demo-user',
+      version: '1.0',
+      session: 13,
+      generatedAt: new Date().toISOString(),
+      seed,
+      description: 'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      demoMode: true, // flag per cancellazione con un click
+      spec: '02-DATA-SCHEMA.md v1.2 + 06-UX-FLOWS-STATES §2.14',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
+// === Main ===
+
+const SEED = 0xC0FFEE;
+
+const targets = {
+  minimal: () => {
+    const start = Date.UTC(2024, 0, 1);
+    const end = Date.UTC(2024, 1, 1);
+    return buildDbSeed({
+      name: 'minimal',
+      count: 10,
+      trackCount: 5,
+      artistCount: 2,
+      seed: SEED,
+      periodStart: start,
+      periodEnd: end,
+    });
+  },
+  medium: () => {
+    const start = Date.UTC(2023, 0, 1);
+    const end = Date.UTC(2024, 0, 1);
+    return buildDbSeed({
+      name: 'medium',
+      count: 5000,
+      trackCount: 500,
+      artistCount: 50,
+      seed: SEED ^ 0x1234,
+      periodStart: start,
+      periodEnd: end,
+    });
+  },
+  large: () => {
+    // NOTA: 10-TESTING §3.2 chiede 100.000 eventi ma genererebbe ~70 MB su disco.
+    // Per ragioni di praticità git-friendly, qui usiamo 25.000 eventi (~18 MB).
+    // Il numero supera il target AC Story 0.2 (10.000 in <500ms) e fornisce margine
+    // di stress test. Per ripristinare 100k: modificare 'count' qui sotto.
+    const start = Date.UTC(2020, 0, 1);
+    const end = Date.UTC(2024, 0, 1);
+    return buildDbSeed({
+      name: 'large',
+      count: 25000,
+      trackCount: 2500,
+      artistCount: 250,
+      seed: SEED ^ 0x5678,
+      periodStart: start,
+      periodEnd: end,
+    });
+  },
+  lockdown: () => {
+    // Scenario: lockdown Italia 2020 (cfr. 10-TESTING §3.3). 9 marzo 2020 → 31 maggio 2020.
+    // Mood dominante: sad/calm. Esplosione lo-fi e indie.
+    const start = Date.UTC(2020, 2, 9);
+    const end = Date.UTC(2020, 4, 31);
+    return buildScenario({
+      name: 'lockdown-2020',
+      count: 6000,
+      trackCount: 600,
+      artistCount: 60,
+      seed: SEED ^ 0x9abc,
+      periodStart: start,
+      periodEnd: end,
+      signature: ['sad', 'calm', 'neutral'],
+      description: 'Lockdown Italia 2020 (9 marzo → 31 maggio). Mood dominante sad/calm, esplosione lo-fi/indie. Verifica 04-ANALYSIS §2 (session segmentation) + §3 (mood) + §4 (pattern circadian notturno).',
+      expectedInsights: {
+        sessionCount: '~130-200 (sessioni più lunghe, soglie di gap maggiori)',
+        dominantMood: 'sad o calm',
+        nightShare: '> 0.30 (più ascolti notturni rispetto alla baseline)',
+        eraCount: '1-2 ere (cambio netto rispetto al pre-lockdown)',
+      },
+    });
+  },
+  breakup: () => {
+    // Scenario: breakup ottobre 2021. Crollo valence, picco Adele/sad.
+    const start = Date.UTC(2021, 9, 1);
+    const end = Date.UTC(2021, 10, 30);
+    return buildScenario({
+      name: 'breakup-oct2021',
+      count: 3000,
+      trackCount: 300,
+      artistCount: 30,
+      seed: SEED ^ 0xdef0,
+      periodStart: start,
+      periodEnd: end,
+      signature: ['sad', 'angry'],
+      description: 'Breakup ottobre 2021. Crollo valence, picco ascolti tristi. Verifica 04-ANALYSIS §3 (mood sad dominante) + §5 (event detector: valence_drop) + §6 (memory engine: seasonal).',
+      expectedInsights: {
+        sessionCount: '~80-120',
+        dominantMood: 'sad',
+        avgValence: '< 0.40',
+        events: ['valence_drop con z > 2.0 atteso'],
+      },
+    });
+  },
+  summer: () => {
+    // Scenario: summer roadtrip giugno-agosto 2022. Alta valence, country multipli.
+    const start = Date.UTC(2022, 5, 1);
+    const end = Date.UTC(2022, 7, 31);
+    return buildScenario({
+      name: 'summer-roadtrip',
+      count: 5000,
+      trackCount: 400,
+      artistCount: 40,
+      seed: SEED ^ 0x1357,
+      periodStart: start,
+      periodEnd: end,
+      signature: ['happy', 'excited'],
+      description: 'Summer roadtrip giugno-agosto 2022. Alta valence, esplorazione nuovi artisti. Verifica 04-ANALYSIS §3 (mood happy/excited) + §5 (event detector: exploration).',
+      expectedInsights: {
+        sessionCount: '~120-180',
+        dominantMood: 'happy o excited',
+        avgValence: '> 0.60',
+        events: ['exploration con ≥10 nuovi artisti in 7gg'],
+      },
+    });
+  },
+  demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
+};
+
+function writeJson(path, data) {
+  mkdirSync(dirname(path), { recursive: true });
+  const json = JSON.stringify(data, null, 2);
+  writeFileSync(path, json, { encoding: 'utf8' });
+  console.log(`[OK] ${path} (${(json.length / 1024).toFixed(1)} KB)`);
+}
+
+// === Entry ===
+
+const args = process.argv.slice(2);
+let seed = SEED;
+const seedIdx = args.indexOf('--seed');
+if (seedIdx >= 0 && args[seedIdx + 1]) {
+  seed = parseInt(args[seedIdx + 1], 10);
+  args.splice(seedIdx, 2);
+}
+
+const targets_ = args.length > 0 ? args : Object.keys(targets);
+
+for (const t of targets_) {
+  const builder = targets_[t] || targets[t];
+  if (!builder) {
+    console.error(`[FAIL] target sconosciuto: ${t}`);
+    continue;
+  }
+  const data = builder();
+  let out;
+  if (t === 'minimal') out = resolve(DB_SEED_DIR, 'minimal.json');
+  else if (t === 'medium') out = resolve(DB_SEED_DIR, 'medium.json');
+  else if (t === 'large') out = resolve(DB_SEED_DIR, 'large.json');
+  else if (t === 'demo') out = resolve(DEMO_DIR, 'demo-user.json');
+  // Mappa scenario name → filename canonico (10-TESTING §3.3)
+  else if (t === 'lockdown') out = resolve(SCENARIOS_DIR, 'lockdown-2020.json');
+  else if (t === 'breakup') out = resolve(SCENARIOS_DIR, 'breakup-oct2021.json');
+  else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
+  else out = resolve(SCENARIOS_DIR, `${t}.json`);
+  writeJson(out, data);
+}
+
+console.log('\nGenerazione completata. Tutti i fixture sono deterministici (seed:' + seed + ').');
+
+
 ===== FILE: fixtures/synthetic-history/spotify-sample.json =====
 
 {
-  "_comment": "Dataset sintetico per test adapter Spotify. Include edge case E1-E6. 10 eventi rappresentativi.",
+  "_comment": "Dataset sintetico per test adapter Spotify (v1.1, Sessione 13). Include edge case E1-E6 e 1 caso reale DEDUP-3. 12 eventi rappresentativi.",
   "_metadata": {
     "generatedFor": "Life-Soundtrack adapter testing",
-    "version": "0.1",
-    "session": 2
+    "version": "1.1",
+    "session": 13,
+    "fixesFromAudit": [
+      "C6 chiusura — _expectedOutput ricalcolato; aggiunto caso E4_dedup_same_recording_different_uri che esercita realmente DEDUP-3 (stessa name+artist+durationBucket → merge in un singolo Track)",
+      "Aggiunti 2 eventi (E4_dedup_same_recording_different_uri + conferma caso E4) per esercitare DEDUP-3"
+    ],
+    "expectedDedupRules": "02-DATA-SCHEMA §5: canonicalKey = isrc: / mbid: / fuzzy:<sha1(normalize(name)+'|'+normalize(artistPrincipal)+'|'+durationBucketMs)>; durationBucketMs = floor(durationMs/2000)*2000"
   },
   "events": [
     {
@@ -6181,6 +6925,7 @@ Motion reduction rispettata (`prefers-reduced-motion`).
     },
     {
       "_case": "E4_duplicate_uri_different_album",
+      "_comment": "URI diversi, stessa name+artist, ma durata 354000 → bucket 177 (DIVERSO da event #1 bucket 122); DEDUP-3 NON li unisce (test del 'contro' del tradeoff §5)",
       "ts": "2022-05-20T19:45:00Z",
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 354000,
@@ -6199,7 +6944,28 @@ Motion reduction rispettata (`prefers-reduced-motion`).
       "incognito_mode": false
     },
     {
+      "_case": "E4_dedup_same_recording_different_uri",
+      "_comment": "NUOVO (v1.1): URI diversi, stessa name+artist, STESSA durata 354000 (stesso bucket 177); DEDUP-3 UNISCE in un singolo Track con 2 eventi. Caso che esercita davvero la regola DEDUP-3 (chiusura C6 audit).",
+      "ts": "2022-05-20T19:48:00Z",
+      "platform": "iOS 16.4 (iPhone 13)",
+      "ms_played": 354000,
+      "conn_country": "IT",
+      "ip_addr": "92.40.100.50",
+      "master_metadata_track_name": "Bohemian Rhapsody",
+      "master_metadata_album_artist_name": "Queen",
+      "master_metadata_album_album_name": "Greatest Hits (Remaster)",
+      "spotify_track_uri": "spotify:track:DIFFERENT_URI_3",
+      "reason_start": "trackdone",
+      "reason_end": "trackdone",
+      "shuffle": false,
+      "skipped": false,
+      "offline": false,
+      "offline_timestamp": null,
+      "incognito_mode": false
+    },
+    {
       "_case": "E4_duplicate_uri_same_name_different_recording",
+      "_comment": "URI diversi, stessa name+artist, durata 412000 → bucket 206; DEDUP-3 NON li unisce (registrazione live diversa da album)",
       "ts": "2022-05-20T20:00:00Z",
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 412000,
@@ -6257,6 +7023,7 @@ Motion reduction rispettata (`prefers-reduced-motion`).
     },
     {
       "_case": "E6_podcast_episode",
+      "_comment": "Podcast: episode_name+episode_show_name presenti, master_metadata_* null → evento di tipo podcast, skip o marca come non-musicale",
       "ts": "2024-02-14T07:30:00Z",
       "platform": "android",
       "ms_played": 1800000,
@@ -6298,14 +7065,399 @@ Motion reduction rispettata (`prefers-reduced-motion`).
     }
   ],
   "_expectedOutput": {
-    "totalEvents": 10,
-    "musicEvents": 9,
+    "_comment": "Ricalcolato in v1.1 (chiusura C6 audit). 11 eventi musicali + 1 podcast = 12 totali. DEDUP-3 unisce event #5 e #6 (stesso bucket durata 354000) → 9 Track unici musicali.",
+    "totalEvents": 12,
+    "musicEvents": 11,
     "podcastEvents": 1,
-    "uniqueTracks": 8,
+    "uniqueTracks": 9,
+    "_uniqueTracksDerivation": "10 music events - 1 DEDUP-3 merge (event #5 + #6) = 9 unique Tracks",
     "uniqueArtists": 3,
     "skippedDerived": 2,
+    "_skippedDerivedDerivation": "event #2 (reason_end='fwdbtn') + event #3 (reason_end='endplay' con ms_played=25000 < soglia 30000) → entrambi skipped=true per regola E1",
     "offlineTimestampsConverted": 1,
     "incognitoCount": 1,
-    "dedupApplied": 1
+    "dedupApplied": 1,
+    "_dedupAppliedDerivation": "event #5 + #6 uniti in 1 Track; 1 dedup, 2 eventi collegati"
   }
+}
+
+
+===== FILE: fixtures/db-seed/minimal.json =====
+
+{
+  "_metadata": {
+    "name": "minimal",
+    "version": "1.0",
+    "session": 13,
+    "generatedAt": "2026-10-16T16:36:34.058Z",
+    "seed": 12648430,
+    "counts": {
+      "listens": 10,
+      "tracks": 5,
+      "artists": 2
+    },
+    "spec": "02-DATA-SCHEMA.md v1.2 + 10-TESTING.md §3.2"
+  },
+  "listens": [
+    {
+      "id": "91b6b9af-276f-4225-84a7-412e6a1af058",
+      "eventKey": "spotify:58a865c725fe372d7d5652ea58a8c06225fe6d77",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704147547285,
+      "startedAt": 1704147307285,
+      "durationMs": 240000,
+      "trackId": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "completed": true,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "playbtn",
+      "reasonEnd": "trackdone",
+      "deviceType": "web",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-01"
+    },
+    {
+      "id": "51f758ca-d072-4de3-82e0-7dc7a1387875",
+      "eventKey": "apple_music:9c9ef2b386a35a991a3da82a9c9e571686a300c3",
+      "platform": "apple_music",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704183047935,
+      "startedAt": 1704182853727,
+      "durationMs": 194208,
+      "trackId": "53cb3060-3052-4ad2-8a8b-587a170d5939",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "clickrow",
+      "reasonEnd": "trackdone",
+      "deviceType": "car",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-02"
+    },
+    {
+      "id": "168e8215-b473-4c32-8632-47afb017de89",
+      "eventKey": "spotify:9720e4906c1755affb37b13f972041356c170ff5",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704525599770,
+      "startedAt": 1704525426213,
+      "durationMs": 173557,
+      "trackId": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "trackdone",
+      "deviceType": "speaker",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "DE",
+      "day": "2024-01-06"
+    },
+    {
+      "id": "59a050fe-1d63-4e95-8a4a-b37f5c52a556",
+      "eventKey": "spotify:177c9536be0c9bdda9700eeb177c3093be0cc187",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704665929007,
+      "startedAt": 1704665700611,
+      "durationMs": 228396,
+      "trackId": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "completed": false,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "fwdbtn",
+      "deviceType": "web",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "FR",
+      "day": "2024-01-07"
+    },
+    {
+      "id": "2414a0ff-884b-48b3-8afe-9d285ac0a6b5",
+      "eventKey": "lastfm:ae084a0a1c75c60db27d8c07ae08efaf1c759c57",
+      "platform": "lastfm",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1704876602423,
+      "startedAt": 1704876332423,
+      "durationMs": 270000,
+      "trackId": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "completed": true,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "endplay",
+      "deviceType": "mobile",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "IT",
+      "day": "2024-01-10"
+    },
+    {
+      "id": "61ff65d8-0b10-40a4-8d64-3ed82bde4a83",
+      "eventKey": "spotify:aad4aeb013347c1bb9e0d2abaad40b1513342641",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1705262322242,
+      "startedAt": 1705262182007,
+      "durationMs": 140235,
+      "trackId": "ab670676-6316-4b4f-8f35-ac14ce59e897",
+      "completed": false,
+      "skipped": false,
+      "shuffle": true,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "trackdone",
+      "reasonEnd": "fwdbtn",
+      "deviceType": "speaker",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "DE",
+      "day": "2024-01-14"
+    },
+    {
+      "id": "a1688bfb-f5b3-4582-8fcf-17bf2a91c5f8",
+      "eventKey": "apple_music:f30fce23f3f0aa9900ff64baf30f6b86f3f0f0c3",
+      "platform": "apple_music",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1705534630352,
+      "startedAt": 1705534404088,
+      "durationMs": 226264,
+      "trackId": "4e44938a-486f-4c36-81f7-b419f445eccc",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "clickrow",
+      "reasonEnd": "fwdbtn",
+      "deviceType": "mobile",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "GB",
+      "day": "2024-01-17"
+    },
+    {
+      "id": "df7347a8-fe4e-4095-8a1a-189b84132a9b",
+      "eventKey": "lastfm:92cfe2f9c86482cb5aab603292cf475cc864d891",
+      "platform": "lastfm",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1705700855946,
+      "startedAt": 1705700620461,
+      "durationMs": 235485,
+      "trackId": "4e44938a-486f-4c36-81f7-b419f445eccc",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "appload",
+      "reasonEnd": "endplay",
+      "deviceType": "car",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-19"
+    },
+    {
+      "id": "c3932021-eb2d-41d3-8557-0d11f554fc3d",
+      "eventKey": "spotify:7f02a45f0761b5fa786311a57f0201fa0761efa0",
+      "platform": "spotify",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1706036638705,
+      "startedAt": 1706036458002,
+      "durationMs": 180703,
+      "trackId": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "clickrow",
+      "reasonEnd": "trackdone",
+      "deviceType": "speaker",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "US",
+      "day": "2024-01-23"
+    },
+    {
+      "id": "7112e88e-2639-43ce-818c-04284ec56a39",
+      "eventKey": "lastfm:8997d8cba2e9776a2b7eafa189977d6ea2e92d30",
+      "platform": "lastfm",
+      "importId": "0acb1825-c460-4d83-858c-468c69f0a43a",
+      "timestamp": 1706467041580,
+      "startedAt": 1706466921013,
+      "durationMs": 120567,
+      "trackId": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "completed": false,
+      "skipped": false,
+      "shuffle": false,
+      "offline": false,
+      "incognito": false,
+      "reasonStart": "playbtn",
+      "reasonEnd": "endplay",
+      "deviceType": "desktop",
+      "deviceDetail": null,
+      "ip": null,
+      "country": "GB",
+      "day": "2024-01-28"
+    }
+  ],
+  "tracks": [
+    {
+      "id": "52b938bc-127d-4659-80a5-ce445ee53868",
+      "canonicalKey": "fuzzy:f672bb4a79b421b58fc69afff6721eef79b47bef",
+      "name": "Broken Compass",
+      "artistId": "344b0e45-f189-4236-8b16-c8b31a54e135",
+      "albumId": null,
+      "durationMs": 270000,
+      "isrc": null,
+      "mbid": "81d2c556-bdfe-420c-87f3-ab92d578c2bd",
+      "explicit": null,
+      "genres": [
+        "jazz",
+        "folk"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:f0b46110-ee06-48a8-8cb"
+      },
+      "firstSeenAt": 1704525599770,
+      "lastSeenAt": 1704876602423,
+      "listenCount": 3
+    },
+    {
+      "id": "739096d4-86f6-4e41-8e41-791751cd60a7",
+      "canonicalKey": "fuzzy:db00b547c7e463cf1ce4d688db0010e2c7e43995",
+      "name": "Untitled for The Midnight Echo",
+      "artistId": "134aa790-a846-4947-86fb-ec74e652170a",
+      "albumId": null,
+      "durationMs": 240000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:3fa7d68d-6144-4437-820"
+      },
+      "firstSeenAt": 1704147547285,
+      "lastSeenAt": 1706467041580,
+      "listenCount": 3
+    },
+    {
+      "id": "4e44938a-486f-4c36-81f7-b419f445eccc",
+      "canonicalKey": "fuzzy:4d6631b47e5085963336b4224d6694117e50dfcc",
+      "name": "Broken Compass",
+      "artistId": "134aa790-a846-4947-86fb-ec74e652170a",
+      "albumId": null,
+      "durationMs": 270000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:89f92516-1ce6-4838-87e"
+      },
+      "firstSeenAt": 1705534630352,
+      "lastSeenAt": 1705700855946,
+      "listenCount": 2
+    },
+    {
+      "id": "53cb3060-3052-4ad2-8a8b-587a170d5939",
+      "canonicalKey": "fuzzy:3e7e6f140e9f015d30e16e493e7ecab10e9f5b07",
+      "name": "Quiet Thunder",
+      "artistId": "344b0e45-f189-4236-8b16-c8b31a54e135",
+      "albumId": null,
+      "durationMs": 210000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "jazz",
+        "folk"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:afba64d4-367c-41b6-82b"
+      },
+      "firstSeenAt": 1704183047935,
+      "lastSeenAt": 1704183047935,
+      "listenCount": 1
+    },
+    {
+      "id": "ab670676-6316-4b4f-8f35-ac14ce59e897",
+      "canonicalKey": "fuzzy:4d6631b47e5085963336b4224d6694117e50dfcc",
+      "name": "Broken Compass",
+      "artistId": "134aa790-a846-4947-86fb-ec74e652170a",
+      "albumId": null,
+      "durationMs": 270000,
+      "isrc": null,
+      "mbid": null,
+      "explicit": null,
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "artworkUrl": null,
+      "platformIds": {
+        "spotify": "spotify:track:38280439-1d93-430b-816"
+      },
+      "firstSeenAt": 1705262322242,
+      "lastSeenAt": 1705262322242,
+      "listenCount": 1
+    }
+  ],
+  "artists": [
+    {
+      "id": "134aa790-a846-4947-86fb-ec74e652170a",
+      "name": "The Midnight Echo",
+      "mbid": "5a484267-fdd2-4845-814d-7fc7cfe44ef5",
+      "genres": [
+        "indie",
+        "metal"
+      ],
+      "platformIds": {
+        "spotify": "spotify:artist:0e124e4e-24c5-4d0d-808"
+      },
+      "listenCount": 6
+    },
+    {
+      "id": "344b0e45-f189-4236-8b16-c8b31a54e135",
+      "name": "Queen",
+      "mbid": null,
+      "genres": [
+        "jazz",
+        "folk"
+      ],
+      "platformIds": {
+        "spotify": "spotify:artist:5cef928c-ef22-4b00-8e4"
+      },
+      "listenCount": 4
+    }
+  ]
 }

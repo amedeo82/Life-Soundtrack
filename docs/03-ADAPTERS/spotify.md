@@ -87,6 +87,7 @@ L'adapter emette il `trackKey` (e i campi grezzi) insieme al ListenEvent; il cor
 | `isrc` | — | string \| null | `null` (non nell'export GDPR) | recuperabile via MBID lookup post-import |
 | `mbid` | — | string \| null | `null` | enrichment via MusicBrainz |
 | `genres` | — | string[] | vuoto (Spotify GDPR non include generi) | popolato da enrichment |
+| `artworkUrl` | — | string \| null | `null` (export GDPR non include immagini) | popolato da enrichment (Story 4.3): Spotify Web API `album.images[0].url` se `PrivacySettings.enrichMetadata=true`, altrimenti `null`. vedi `02 §11` |
 | `platformIds` | `spotify_track_uri` | `Partial<Record<PlatformId, string>>` | `{spotify: extractId(uri)}` | ID nativo |
 
 ### 3.2 Mapping `platform` → `deviceType`
@@ -202,3 +203,4 @@ Casi minimi:
 | 0.1 | Sessione 2 | Prima specifica completa |
 | 1.0 | Sessione 2 | 🟢 APPROVED · Versione 1.0 · Sessione 2 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: §3.1 riscritto per schema flat (`02§3.2` v1.1); aggiunto `trackId` come FK risolta dal core; nuova §3.1.1 (Track) come entità separata; aggiunti `day`, `importId`, `genres`; rimosso `completed` hardcoded (ora derivato); campo `track.isrc`/`mbid` spostati in §3.1.1 |
+| 1.2 | Sessione 13 (2026-10-16) | §3.1.1: aggiunto `artworkUrl: string \| null` con nota esplicita "non popolato da export GDPR" + rinvio a Story 4.3 enrichment (Spotify Web API → MB Cover Art → iTunes → placeholder) |

@@ -357,6 +357,60 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 
 ---
 
+## Sessione 13 — 🔧 Consolidamento documentazione pre-Fase 0
+
+**Data**: 2026-10-16
+**Stato**: ✅ Completata
+**Trigger**: prima di aprire issue `agent-ready` per Story 0.2, audit finale della documentazione rivela **3 incongruenze bloccanti** e **1 gap di coverage** che avrebbero costretto l'agente a inventare. Il Boss chiede di chiudere tutto ora con una sessione di consolidamento.
+
+### Gap chiusi
+
+| # | Gap | Audit | Fix applicato |
+|---|-----|-------|---------------|
+| **F1** | M13 | PlatformCard states 4 (Backlog 0.4) vs 5 (07-UI-SPEC §2.5) | Canone 5: aggiornato Backlog Story 0.4 T0.4.1 + 06-UX §2.3 con tabella esplicita dei 5 stati + transizioni |
+| **F2** | M5 | `artworkUrl` referenziato da 07-UI-SPEC §2.2/§2.10 ma inesistente in 02 | Aggiunto `artworkUrl: string \| null` su Track/Album in **02 v1.2**; nuova sezione §11 con cascata fonti (Spotify API → MB Cover Art → iTunes Search → placeholder); aggiornato schema TS; aggiornata spec Spotify adapter §3.1.1; nuova **Story 4.3 "Artwork enrichment"** in backlog |
+| **F3** | C6 | Fixture Spotify `_expectedOutput` incoerente (uniqueTracks 8 vs 9 reali; nessun caso reale DEDUP-3) | Fixture v1.1: corretto `_expectedOutput`; aggiunto evento "Bohemian Rhapsody - Greatest Hits (Remaster)" con stessa durata di "Greatest Hits" → DEDUP-3 merge reale; `_metadata` bumped a 1.1; changelog audit con derivation esplicita di ogni numero |
+| **F4** | V1 | `fixtures/db-seed/*` e `fixtures/scenarios/*` e `fixtures/demo-user.json` promessi da 10-TESTING §3.2/§3.3 e 06-UX §2.14, inesistenti | Creato `scripts/generate-fixtures.mjs` (deterministico, mulberry32, no dipendenze esterne); generati e committati: `minimal.json` (10), `medium.json` (5k), `large.json` (25k), 3 scenari, `demo-user.json`. Totale ~35 MB su disco. Nota: large.json ridotto da 100k a 25k per ragioni git-friendly (commento in script) |
+| **F5** | audit | Story 2.2 AC "Bayesiano o PELT" vs 04§5 (custom change point) | AC Story 2.2 allineato: "Algoritmo come specificato in 04§5" con parametri e invarianti espliciti |
+| **F6** | — | Decisione Boss: nessuna promozione DRAFT→APPROVED ora (mantieni APPROVED = zero ambiguità) | Lasciato 04/06/07/08/15 come DRAFT; chiarito in 02 v1.2 che 02 è l'unica source of truth "schema" |
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.13.1 | PlatformCard = 5 stati canonici (empty/validating/parsing/done/error) | 07-UI-SPEC §2.5 era già dettagliata; il backlog era impreciso. Canone = spec dettagliata |
+| D.13.2 | `artworkUrl` aggiunto a Track + Album (02 v1.2) | Chiusura M5 audit; popolamento demandato a enrichment (Story 4.3) con toggle `enrichMetadata` |
+| D.13.3 | Cascata fonti artwork: Spotify Web API → MB Cover Art Archive → iTunes Search → placeholder gradient | Gerarchia: rete paid (Spotify) → rete free (MB) → rete free (iTunes) → locale (placeholder); tutte rispettano privacy-by-default |
+| D.13.4 | Fixture Spotify v1.1 con 12 eventi (era 10) + caso reale DEDUP-3 | Audit C6 chiuso: 11 eventi musicali (1 DEDUP-3 merge) + 1 podcast = 12 totali; uniqueTracks 9, dedupApplied 1 |
+| D.13.5 | `scripts/generate-fixtures.mjs` come unica source of truth per fixture grandi | Riproducibilità cross-environment; commit del solo minimal.json nel bundle; medium/large/scenari/demo rigenerati on-demand |
+| D.13.6 | `large.json` ridotto a 25k eventi (vs 100k chiesti da 10-TESTING §3.2) | Git-friendly (~18 MB); supera il target AC Story 0.2 (10k in <500ms) con margine. Per ripristinare 100k: editare `count` in `scripts/generate-fixtures.mjs` |
+| D.13.7 | Bundle `docs/BUNDLE.md` esclude fixture >10KB; include solo minimal.json + spotify-sample.json + scripts/generate-fixtures.mjs | BUNDLE era 300KB, con tutti i fixture sarebbe ~35MB; fuori scope per handoff AI. Il generator permette di rigenerare |
+| D.13.8 | Nessuna promozione DRAFT→APPROVED in questa sessione | Il Boss preferisce attendere che eventuali altri fix emergano prima di promuovere; "APPROVED = zero ambiguità" |
+
+### Documenti aggiornati
+
+- `docs/02-DATA-SCHEMA.md` → **v1.2 APPROVED** (artworkUrl, §11 fonti, §10 migrazione, §9 indici)
+- `docs/11-BACKLOG.md` → Story 0.4 T0.4.1 (5 stati) + Story 2.2 AC allineata + **nuova Story 4.3**
+- `docs/06-UX-FLOWS-STATES.md` → §2.3 PlatformCard 5 stati + transizioni esplicite; §2.14 demo-user.json
+- `docs/10-TESTING.md` → §3.2 note su large.json, §3.3 scenari con description, **nuovo §3.4 demo + §3.5 generazione**
+- `docs/03-ADAPTERS/spotify.md` → §3.1.1 nota `artworkUrl: null` da export GDPR + rinvio Story 4.3
+- `fixtures/synthetic-history/spotify-sample.json` → **v1.1** (12 eventi, _expectedOutput ricalcolato)
+- `fixtures/db-seed/{minimal,medium,large}.json` → **nuovi** (10/5k/25k eventi)
+- `fixtures/scenarios/{lockdown-2020,breakup-oct2021,summer-roadtrip}.json` → **nuovi** (6k/3k/5k eventi)
+- `fixtures/demo-user.json` → **nuovo** (4.5k eventi, 1 anno)
+- `scripts/generate-fixtures.mjs` → **nuovo** (Node ≥ 20, no deps, deterministico)
+- `packages/core/src/schema/index.ts` → `Track.artworkUrl` + `Album.artworkUrl`
+- `AGENTS.md` → struttura repo aggiornata (fixtures/ + scripts/generate-fixtures.mjs)
+- `scripts/generate-bundle.ps1` → `$files` include script + 2 fixture piccoli; esclude i grossi (con commento)
+- `docs/BUNDLE.md` → rigenerato
+
+### Prossimi step
+1. ✅ Aprire issue `agent-ready` per **Story 0.2 (Schema DB Dexie)** — ora bloccata
+2. Story 0.5 (PWA) e 0.6 (i18n) possono partire in parallelo
+3. Eventuale audit pre-`agent-ready` per Story 0.3 (Spotify adapter): la fixture v1.1 copre tutti gli edge case E1-E6 dichiarati, AC dovrebbe essere verificabile
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -381,6 +435,7 @@ PR #2 ha portato in `main` scaffold + toolchain completi ma i doc di stato (INDE
 | 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
 | 0.2 | Sessione 11 (2026-10-16) | Aggiunte Sessioni 10 (policy versioni D.10.1/D.10.2) e 11 (Story 0.1 scaffold monorepo) con stato avanzamento per story |
 | 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
+| 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3 |
 
 ---
 
