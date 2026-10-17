@@ -26,7 +26,7 @@
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 14 (v1.2.5) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment · v1.2.5: Story 0.2 ✅ DONE, Story 0.3 sbloccata |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 18 (0006) | Architecture Decision Records (0001-0003, 0005, 0006 — 0006: task claiming per agenti paralleli) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 19 (0001-0007) | Architecture Decision Records (0001-0003, 0005-0007; 0006 claim agenti, 0007 macchina a stati `status:*`) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 
@@ -35,7 +35,7 @@
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.3 | Protocollo per agenti (Sessione 18: §"🎫 Presa in carico delle story (claim)" + claim-first in §"🚀 Primo task"; Sessione 17: §"♻️ Pulizia branch post-merge") |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.4 | Protocollo per agenti (Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -76,6 +76,7 @@
 | 14 | 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie) | ✅ COMPLETATA |
 | 17 | 🧹 Governance post-merge (cleanup + parallelismo) | ✅ COMPLETATA |
 | 18 | 🎫 Protocollo claim per agenti paralleli (ADR-0006) | ✅ COMPLETATA |
+| 19 | 📦 Macchina a stati delle issue (status:* post-claim — ADR-0007) | 🟡 IN CORSO |
 
 ## Stato del progetto (post-merge PR #12, 2026-10-17)
 - **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.3.0**, 13-ADR ×5 (0006 incluso), 14)
@@ -87,7 +88,8 @@
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
-- **Prossimo step tecnico**: implementare **in parallelo** Story 0.3 (issue #6), Story 0.5 (issue #7) e Story 0.6 (issue #5) — tutte `agent-ready`, aree di file disgiunte (adapter / devops / ui), nessun conflitto atteso; ogni agente esegue **prima** la procedura di claim definita in `AGENTS.md` §"🎫 Presa in carico delle story" prima di lavorare. Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
+- **Sessione 19** — macchina a stati post-claim (ADR-0007) **in corso** (PR #13, branch `feat/13-issue-state-machine`, claim `kilo-HP-ELITEBOOK-jm9f`, 2026-10-17): `AGENTS.md` **v1.4** con nuova §"📦 Macchina a stati delle issue (status:*)" (estensione di §"🎫 Presa in carico delle story") + tabella label estesa + campo `Closes #N` reso obbligatorio nella checklist PR; `11-BACKLOG.md` **v1.4.0** con §"Stato di una Story" estesa (4 stati `status:*` + nota mutua esclusione `agent-ready` ∩ `status:*` = ∅); `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0 (macchina a stati completa, transizioni, `jq` per query candidati, pattern `Closes #N`); 4 label `status:*` create su GitHub (`done` / `in-review` / `wontdo` / `blocked-other`); issue #11 chiusa come completed (rimossa `agent-ready`, era rimasta `OPEN` nonostante `PR #12` mergata — sintomo esatto che ADR-0007 previene); cleanup retroattivo documentato nel commento di chiusura di #11; `scripts/generate-bundle.ps1` `$files` include ADR-0007; BUNDLE rigenerato.
+- **Prossimo step tecnico**: PR #13 da aprire/mergeare; dopo il merge, le 3 issue `agent-ready` ancora attive (#5, #6, #7) sono claimabili con la nuova query che esclude `status:*`. Issue #9 rivalutata (rivalutazione S17 sync) → chiusura in PR o follow-up. Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

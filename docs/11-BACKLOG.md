@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.3.0 · Sessione 18 (2026-10-17) · aggiunta regola claim-first per agenti paralleli (ADR-0006)
+> Status: 🟢 APPROVED · Versione 1.4.0 · Sessione 19 (2026-10-17) · aggiunti 4 stati 'status:*' post-claim (ADR-0007) alla §"Stato di una Story"
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -20,8 +20,12 @@
 
 - ⬚ TODO — non iniziata
 - 🟡 IN PROGRESS — in lavorazione (issue con label `in-progress` su GitHub, vedi ADR-0006)
-- ✅ DONE — completata e verificata
-- 🛑 BLOCKED — dipende da altro o da spec mancante
+- 👀 IN REVIEW — PR aperta, in attesa di review; label `status:in-review` (ADR-0007)
+- ✅ DONE — completata, PR mergata e validata; label `status:done`, issue chiusa (ADR-0007)
+- ❌ WONTDO — PR rifiutata / scope cancellato; label `status:wontdo`, issue chiusa (ADR-0007)
+- 🛑 BLOCKED — dipende da altro o da spec mancante; label `status:blocked-other` (ADR-0007)
+
+**Mutua esclusione**: `agent-ready` e `status:*` sono mutuamente esclusivi su un'issue. Un'issue è candidabile al claim solo se ha `agent-ready` e nessuna `status:*` (vedi ADR-0007 + `AGENTS.md` §"🚀 Primo task").
 
 ---
 
@@ -512,3 +516,4 @@ Ogni story deve avere label GitHub:
 | 1.2.4 | Sessione 14 (2026-10-16) | **Story 0.2 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (schema Dexie v1+v2, repository CRUD, `recount()`; coverage `db/` 100%, AC 10k eventi < 500ms con fake-indexeddb); test di performance isolati in `perf.test.ts` ed esclusi dalle run coverage; cross-ref a `18-DEV-LOG` §6 |
 | 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
+| 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |

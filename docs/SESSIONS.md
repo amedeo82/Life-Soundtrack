@@ -555,6 +555,59 @@ PR #12 (merge commit `2891cb5` su `main`, 2026-10-17) ha portato in `main` il pr
 
 ---
 
+## Sessione 19 — 📦 Macchina a stati delle issue (status:* post-claim) — ADR-0007
+
+**Data**: 2026-10-17
+**Stato**: 🟡 In corso (implementazione PR #13)
+
+**Trigger**: il project owner nota che il workflow post-claim (ADR-0006) non codifica gli stati successivi al rilascio del claim. Verifica 2026-10-17: tutte le 6 PR mergate (`PR #1`–`#12`) hanno `closingIssuesReferences` vuoto (nessuna clausola `Closes #N` nel body). L'issue stessa #11 (ADR-0006 docs) è rimasta `OPEN` con `agent-ready` dopo il merge di `PR #12` (`2891cb5`). Analisi congiunta Boss ↔ AI → 3 decisioni via `question` (opzione A: `status:*` + chiusura al merge; cleanup immediato #11; tracciamento via issue `agent-ready` #13).
+
+### Attività svolte
+
+- **Cleanup retroattivo #11**: rimosso `agent-ready`, chiusa come completed con commento di riepilogo (puntava a `PR #12` e a #13)
+- **Issue #13** aperta `agent-ready` (`area:devops` + `size:M` + `docs` + `priority:important`) con mini-spec inline
+- **4 label `status:*`** create su GitHub: `done` (verde `0E8A16`), `in-review` (blu `1D76DB`), `wontdo` (grigio `999999`), `blocked-other` (arancione `D93F0B`)
+- **ADR-0007** `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0: 4 stati post-claim + transizioni; query candidati con `jq`; pattern `Closes #N` obbligatorio. Retro-compatibile con ADR-0006
+- **`AGENTS.md`** → **v1.4**: nuova sezione §"📦 Macchina a stati delle issue (status:*)"; tabella label estesa con `status:*`; campo `Closes #N` reso obbligatorio nella checklist PR; §"🚀 Primo task" aggiornato con le transizioni
+- **`docs/11-BACKLOG.md`** → **v1.4.0**: §"Stato di una Story" estesa con 4 stati `status:*` + nota di mutua esclusione `agent-ready` ∩ `status:*` = ∅
+- **`docs/INDEX.md`**, **`docs/18-DEV-LOG.md`**, **`scripts/generate-bundle.ps1`** aggiornati; **`docs/BUNDLE.md`** rigenerato; `pwsh scripts/generate-bundle.ps1 --check` exit 0 con ADR-0007 incluso
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.19.1 | 4 label `status:*` (done, in-review, wontdo, blocked-other) | Granularità minima per coprire i 4 esiti tipici del post-claim; retro-compatibile con ADR-0006 (claim e TTL invariati) |
+| D.19.2 | Query candidati: `gh issue list --label agent-ready` + `jq` exclude `status:*` | Forma robusta indipendentemente dal filtro usato; mutua-esclusione gestita sia semanticamente che sintatticamente |
+| D.19.3 | `Closes #N` obbligatorio nel body PR + `status:done` al merge | GitHub auto-chiusura + etichetta ricercabile; previene la recidiva del problema di #11 |
+| D.19.4 | ADR-0007 come documento separato (non emendamento ADR-0006) | Estensione significativa della macchina a stati (4 nuovi stati, label, query); più chiaro come riferimento |
+| D.19.5 | Issue #9 rivalutata in PR (rimozione `agent-ready` + `status:done` + chiusura) | Il follow-up S17 (doc-sync) è stato mergato ma #9 è ancora `agent-ready` + `in-progress`; va chiusa in questa PR o in un commit di follow-up |
+
+### Documenti aggiornati
+
+- 🟢 `docs/13-ADR/0007-issue-state-machine.md` (**nuovo** v1.0)
+- `AGENTS.md` → **v1.4** (§"📦 Macchina a stati delle issue (status:*)" + label table + checklist PR + footer)
+- `docs/11-BACKLOG.md` → **v1.4.0** (§"Stato di una Story" estesa, changelog v1.4.0)
+- `docs/INDEX.md` (versione AGENTS v1.4, 11 v1.4.0, ADR-0007 entry, S19 in roadmap)
+- `docs/18-DEV-LOG.md` → **v0.7** (§8 S19, changelog v0.8)
+- `docs/SESSIONS.md` → **v1.0** (questa entry + changelog v1.0)
+- `scripts/generate-bundle.ps1` (`$files` include ADR-0007)
+- `docs/BUNDLE.md` rigenerato (33 file, ADR-0007 incluso)
+- 4 label GitHub `status:*` create
+
+### Prossimi step
+
+1. Aprire PR per #13 → merge in `main`
+2. Eliminare il branch `feat/13-issue-state-machine` dopo il merge (policy §♻️)
+3. Rilasciare claim su #13 (`release:` + rimozione `in-progress` + applicazione `status:done` + chiusura via `Closes #13` al merge)
+4. Rivalutare #9: chiusura e applicazione `status:done` nella stessa PR o in un follow-up
+5. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili dagli agenti con la nuova query
+
+### Esito post-merge (placeholder, 2026-10-17)
+
+PR #13 (merge commit `<da-compilare>`, 2026-10-17) portata in `main`: 6/6 file doc aggiornati + 4 label GitHub + ADR-0007 nuovo. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 --check` exit 0, branch remoto eliminato, claim rilasciato su #13.
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -585,6 +638,7 @@ PR #12 (merge commit `2891cb5` su `main`, 2026-10-17) ha portato in `main` il pr
 | 0.7 | 2026-10-17 (Sessione 17) | Aggiunta Sessione 17 (governance post-merge): policy pulizia branch in AGENTS.md v1.2 (PR #8, `a9f31a3`), cleanup branch remoti, label GitHub creati, 3 issue `agent-ready` aperte (#5/#6/#7), follow-up #9/#10; sync INDEX/SESSIONS via issue #9 |
 | 0.8 | 2026-10-17 (Sessione 18) | Aggiunta Sessione 18 (protocollo claim agenti paralleli — ADR-0006): self-claim via label `in-progress` + commento `claim:`, ID GitHub come discriminatore del vincitore, TTL 12h, rilascio obbligatorio; AGENTS.md v1.3 con §"🎫 Presa in carico delle story" + §"🚀 Primo task" claim-first; 11-BACKLOG v1.3.0; decisioni D.18.1-D.18.4; issue #11 in-progress (claim `kilo-HP-ELITEBOOK-hjoe`) |
 | 0.9 | 2026-10-17 (post-merge) | **Esito post-merge S18**: PR #12 merged (`2891cb5`), gate D.12.1 applicato: Sessione 18 ✅ Completata, branch remoto eliminato (policy §♻️), auto-check pulito, claim rilasciato su #11; Sessione 18 aggiornata con esito |
+| 1.0 | 2026-10-17 (Sessione 19) | **Aggiunta Sessione 19** (ADR-0007 — macchina a stati post-claim): 4 label `status:*` + transizioni + `Closes #N` obbligatorio; cleanup retroattivo #11 (chiusa come completed); issue #13 aperta `agent-ready` come contenitore del lavoro; `AGENTS.md` v1.4 + 11-BACKLOG v1.4.0 + 18-DEV-LOG v0.7 + scripts/generate-bundle.ps1 aggiornato; BUNDLE rigenerato; 4 lesson learned (19-1 dogfooding cleanup, 19-2 label 422, 19-3 write tool + JSON, 19-4 single-quote jq) |
 
 ---
 

@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.3 — Sessione 18 (2026-10-17)
+> Versione 1.4 — Sessione 19 (2026-10-17)
 
 ---
 
@@ -82,7 +82,12 @@ Una issue può essere lavorata da un agente **solo se**:
 | Priorità | `priority:blocker`, `priority:important`, `priority:later` | Ordine di lavoro |
 | Size | `size:S`, `size:M`, `size:L`, `size:XL` | Stima relativa |
 | Gate | `agent-ready`, `needs-spec`, `blocked`, `in-progress` | Stato lavorabilità (`in-progress` = claim attivo di un agente, vedi §"🎫 Presa in carico delle story" e ADR-0006) |
+| Status (post-claim) | `status:done`, `status:in-review`, `status:wontdo`, `status:blocked-other` | Stato dopo il rilascio del claim (vedi §"📦 Macchina a stati delle issue" e ADR-0007). Mutuamente esclusivo con `agent-ready`. |
 | Tipo | `bug`, `enhancement`, `refactor`, `docs` | Classificazione |
+
+### Ortopedie fra label Gate e Status
+
+Le label `agent-ready` e `status:*` sono **mutuamente esclusive**: un'issue ha l'una OPPURE l'altra, mai entrambe. La query candidati di §"🚀 Primo task" lo garantisce. `needs-spec` e `blocked` sono ortogonali (compossibili con `status:*`).
 
 ## 🎫 Presa in carico delle story (claim)
 
@@ -94,13 +99,13 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 
 ### Procedura di claim
 
-1. **Elenca le issue candidabili** — aperte, `agent-ready`, **senza** label `in-progress`:
+1. **Elenca le issue candidabili** — aperte, `agent-ready`, **senza** label `in-progress` e **senza** alcuna `status:*` (vedi §"📦 Macchina a stati delle issue"):
 
    ```powershell
-   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels
+   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels | jq '[.[] | select(([.labels[].name] | any(startswith('status:')) | not))]'
    ```
 
-   Filtra via quelle che hanno `in-progress` tra le label.
+   Filtra via quelle che hanno `in-progress` oppure una qualsiasi `status:*` tra le label.
 
 2. **Scegli la prima libera** secondo l'ordine di `11-BACKLOG.md` §"Priorità di lavorazione". Se il project owner ha indicato una issue specifica nell'initial prompt, usa quella.
 
@@ -129,17 +134,52 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 ### Rilascio del claim
 
 ```powershell
-gh issue comment <N> --body "release: <AGENT-ID> — <motivo: PR mergata / abbandono / spec cambiata>"
+gh issue comment <N> --body "release: <AGENT-ID> — <motivo: PR mergata / PR rifiutata / abbandono / spec cambiata / passata a status:* >"
 gh issue edit <N> --remove-label in-progress
 ```
 
 Il rilascio è **obbligatorio**: al merge o rifiuto della PR, in caso di abbandono, o se la spec collegata torna 🟡 DRAFT. Mai lasciare label `in-progress` orfane: sono falsi blocchi che solo il TTL può pulire.
+
+**A seconda dell'esito del lavoro**, l'agente che rilascia applica anche una label `status:*` (vedi §"📦 Macchina a stati delle issue"). Il `release:` da solo non è sufficiente a chiudere l'issue.
 
 ### Casi particolari
 
 - **Assegnazione esplicita del project owner**: l'agente esegue comunque claim + riverifica (punti 3-4), così la presa in carico resta visibile agli altri agenti.
 - **Issue senza `in-progress` ma con branch `feat/<N>-…` remoto esistente**: segnala con issue `needs-spec` e passa alla prossima. Un branch orfano non è un lock (ADR-0006) ed è materia della §"♻️ Pulizia branch post-merge".
 - **Nessuna issue candidabile**: apri issue `needs-spec` e termina la sessione **senza lavorare nessuna story**.
+
+## 📦 Macchina a stati delle issue (status:*)
+
+**Regola vincolante (ADR-0007):** quando un'issue esce dal ciclo di lavorazione, l'agente che rilascia il claim applica una label `status:*` al posto di `agent-ready`. Le label `status:*` sono **mutuamente esclusive** con `agent-ready`: un'issue con `status:*` non è candidabile per claim.
+
+### Stati possibili
+
+| Stato | Label | Issue aperta? |
+|-------|-------|---------------|
+| ⬚ candidato | (solo `agent-ready`) | sì |
+| 🟡 claim attivo | `agent-ready` + `in-progress` | sì |
+| 👀 PR aperta, in attesa di review | `status:in-review` | sì |
+| ✅ PR merged & validata | `status:done` | **chiusa** |
+| ❌ PR rifiutata / scope cancellato | `status:wontdo` | **chiusa** |
+| 🛑 Bloccata da dipendenza | `status:blocked-other` | sì |
+
+### Regole di transizione (dopo il rilascio del claim)
+
+| Esito del lavoro | Azione aggiuntiva dopo `release:` |
+|------------------|-----------------------------------|
+| PR aperta, in attesa di review | Rimuovi `agent-ready`, aggiungi `status:in-review`. Issue resta aperta. |
+| PR merged, doc-sync (gate D.12.1) applicato | Issue già chiusa da GitHub via `Closes #N`. Aggiungi `status:done` alla chiusura. |
+| PR rifiutata in review | Rimuovi `agent-ready`, aggiungi `status:wontdo`. Chiudi l'issue con commento motivato. |
+| Lavoro abbandonato (spec non più valida, scope cancellato) | Rimuovi `agent-ready`, aggiungi `status:wontdo`. Chiudi l'issue con motivazione. |
+| Story bloccata da dipendenza esterna | Rimuovi `agent-ready`, aggiungi `status:blocked-other`. Issue resta aperta. |
+
+### Chiusura al merge: campo `Closes #N` (obbligatorio)
+
+Ogni PR che risolve un'issue **deve** contenere **`Closes #N`**, **`Fixes #N`** o **`Resolves #N`** nel body. GitHub li riconosce e chiude automaticamente l'issue al merge. Vedi §"📝 Checklist di auto-revisione PR".
+
+### Audit retroattivo
+
+Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il sintomo che ADR-0007 risolve — vedi issue #11 durante Sessione 19, merge `2891cb5`): rimuovi `agent-ready`, applica `status:done`, chiudi l'issue con commento di riepilogo che punta alla PR già mergata.
 
 ## 🌳 Git workflow
 
@@ -149,6 +189,7 @@ Il rilascio è **obbligatorio**: al merge o rifiuto della PR, in caso di abbando
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
+- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 ## ♻️ Pulizia branch post-merge *(obbligatoria)*
 
@@ -198,6 +239,8 @@ Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni doc
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
+- [ ] **Il body della PR include `Closes #N`** (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub lo usa per chiudere automaticamente l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)")
+- [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
 
@@ -216,6 +259,7 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
 | Modifica al toolchain o alla policy di versionamento | `docs/17-DEV-NOTES.md` + nuova entry in `SESSIONS.md` |
+| Issue chiusa al merge | `status:done` applicato (vedi §"📦 Macchina a stati delle issue (status:*)"); rimozione `agent-ready` |
 
 **Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
 
@@ -280,10 +324,11 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 ## 🚀 Primo task di un agente
 
 1. Leggi questo file
-2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — mai una issue già in `in-progress`
+2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — una issue è libera se non ha `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
 3. Crea branch `feat/<issue>-<descrizione>`
 4. Leggi la specifica del task e implementa con test
-5. Apri PR
+5. Apri PR (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue)
+6. Al merge: verifica che `Closes #N` abbia chiuso l'issue e che `status:done` sia applicato (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -296,4 +341,4 @@ Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **
 
 ---
 
-*Ultimo aggiornamento: Sessione 18 (2026-10-17) — v1.3: aggiunta §"🎫 Presa in carico delle story (claim)" (ADR-0006: label `in-progress` + commento di claim, riverifica, cascata, TTL 12h); §"Primo task" riscritto claim-first; PAT esteso a `issues: read/write`*
+*Ultimo aggiornamento: Sessione 19 (2026-10-17) — v1.4: aggiunta §"📦 Macchina a stati delle issue (status:*)" (ADR-0007 — estensione post-claim di ADR-0006, 4 stati: `done` / `in-review` / `wontdo` / `blocked-other`); campo `Closes #N` reso obbligatorio nella checklist PR; transizione `agent-ready` → `status:in-review` documentata; tabella label estesa con `status:*`; §"🚀 Primo task" ora include le nuove transizioni*
