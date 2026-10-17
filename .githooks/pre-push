@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Pre-push hook:
+# 1. BUNDLE auto-regen se `docs/` e' cambiato (D4, G4 mitigation)
+# 2. Base-stale warning se il branch e' > 5 commit dietro origin/main (D5, G3 mitigation)
+#
+# Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
+# Bypass: git push --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git push ...)
+
+set -e
+
+if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+  exit 0
+fi
+
+remote="$1"
+remote_branch="$2"
+
+# Sanity check: se remote/branch non passati, skip silente
+if [ -z "$remote" ] || [ -z "$remote_branch" ]; then
+  exit 0
+fi
+
+# Check 1: BUNDLE auto-regen (D4) se docs/ e' cambiato
+changed_docs=$(git diff --name-only "origin/${remote_branch}...HEAD" 2>/dev/null | grep -E '^docs/' | grep -v '^docs/BUNDLE.md$' || true)
+
+if [ -n "$changed_docs" ]; then
+  echo "[pre-push] docs/ modificato rispetto a origin/${remote_branch}. Rigenero BUNDLE.md..."
+
+  regen_ok=0
+  if command -v pwsh >/dev/null 2>&1; then
+    if pwsh scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+      echo "[pre-push] BUNDLE.md rigenerato con pwsh"
+      regen_ok=1
+    fi
+  elif command -v powershell >/dev/null 2>&1; then
+    if powershell -ExecutionPolicy Bypass -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+      echo "[pre-push] BUNDLE.md rigenerato con powershell"
+      regen_ok=1
+    fi
+  fi
+
+  if [ "$regen_ok" -eq 0 ]; then
+    echo "[pre-push] WARN: BUNDLE.md non rigenerato (pwsh/powershell non disponibili o script fallito)."
+    echo "[pre-push] Aggiungi manualmente: pwsh scripts/generate-bundle.ps1"
+  else
+    # Se BUNDLE.md e' cambiato, committalo
+    if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
+      git add docs/BUNDLE.md
+      if ! git diff --cached --quiet docs/BUNDLE.md 2>/dev/null; then
+        if git commit --no-verify -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/"; then
+          echo "[pre-push] BUNDLE.md committato"
+        else
+          echo "[pre-push] WARN: commit di BUNDLE.md fallito. Aggiungi manualmente."
+        fi
+      fi
+    fi
+  fi
+fi
+
+# Check 2: base-stale warning (D5)
+if git fetch origin --quiet 2>/dev/null; then
+  behind=$(git rev-list --count "HEAD..origin/${remote_branch}" 2>/dev/null || echo 0)
+  if [ "$behind" -gt 5 ]; then
+    echo ""
+    echo "[pre-push] WARN: il branch e' $behind commit dietro origin/${remote_branch}."
+    echo "  Considera rebase prima del merge:"
+    echo "    git fetch origin && git rebase origin/${remote_branch}"
+    echo "  (non blocca il push; solo un warning per mitigare F4 base stale)"
+    echo ""
+  fi
+fi
+
+exit 0

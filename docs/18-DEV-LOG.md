@@ -277,6 +277,40 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 10. Sessione 21 — refactor catena multi-agente (doc-sync IN PR + GH Action + hook extensions)
+
+**Tipo**: doc-only + script (`AGENTS.md`, `docs/`, `.githooks/`, `.github/workflows/`); nessuna modifica a codice applicativo
+**Branch**: `feat/17-chain-refactor` (da `main` @ `c048562`)
+**PR**: **#17 — merge `<da-compilare>` in `main` (2026-10-17)**
+**Issue**: #17 (claim `kilo-HP-ELITEBOOK-q7w3`)
+**Stato**: 🟡 in corso (post-merge compile)
+
+### Sintesi
+
+- **`.github/workflows/auto-status-done.yml`** (nuovo): GH Action che applica `status:done` alle issue chiuse al merge, rimuovendo `in-progress` e `status:in-review`. Trigger: `pull_request: closed` con `merged == true`. Usa `actions/github-script` con `permissions: issues: write`.
+- **`.githooks/pre-push`** (nuovo): due check pre-push — (a) D4 BUNDLE auto-regen se `docs/` cambia; (b) D5 base-stale warning se > 5 commit dietro `origin/main`. Cross-platform (pwsh preferito, powershell fallback, skip+warn se nessuno dei due).
+- **`.githooks/pre-commit`** (esteso, D3): aggiunto `git diff --quiet HEAD && git diff --cached --quiet HEAD` check (working tree clean) per mitigare F5 stash collision.
+- **`AGENTS.md`** v1.6: §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); nuova §"📤 Post-merge actions" (comment release + branch cleanup); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito IN PR, "follow-up" declassato).
+
+### Lesson learned
+
+| # | Tipo | Osservazione | Rif. |
+|---|------|--------------|------|
+| 21-1 | L | **Il doc-sync post-merge su main è intrinsecamente racy**: doc-sync è un'operazione non-idempotente su uno shared branch; ogni commit di doc-sync da parte di un agente N crea un commit che richiede che gli agenti N-1 e N+1 rebasino se mergiano in stretta successione. La soluzione strutturale è fare il doc-sync nel branch PR (isolato), non in main. Pattern replicabile: qualsiasi "post-merge cleanup" su un shared branch è un anti-pattern; preferire commit nel branch o operazioni atomiche GitHub (label, comment) | issue #17 + AGENTS.md v1.6 |
+| 21-2 | L | **GitHub Actions può sostituire le label transitions manuali**: la transition `status:in-review → status:done` è un effetto diretto del merge (trigger: `pull_request closed` con `merged == true`). Usare le GH Actions per le label transitions elimina una classe di bug umani (dimenticanze) e rende il workflow self-documenting nel log dell'action | `.github/workflows/auto-status-done.yml` |
+| 21-3 | L | **Pre-push hook cross-platform**: bash + `command -v pwsh` o `command -v powershell` come fallback è una buona pattern per i tool che devono girare su Linux (CI) e Windows (dev locale). Il skip+warn se nessuno dei due è disponibile è non-fatale per design | `.githooks/pre-push` |
+| 21-4 | L | **Doc-sync IN PR richiede 2 commit**: docs-v1 (placeholder) + docs-v2 (PR number reale). Il primo commit va in PR con placeholders; dopo aver aperto la PR, l'agente conosce il PR number e committa docs-v2 sullo stesso branch. Il merge poi riceve entrambi atomicamente. Pattern: prevedere 1-2 commit "post-implementation" sul branch PR per il doc-sync, non su main | AGENTS.md §"🚀 Primo task" step 6 |
+
+### Link utili
+
+- Branch: `feat/17-chain-refactor` (post-merge → eliminata per policy §♻️)
+- PR: **#17** (merge commit `<da-compilare>`, 2026-10-17)
+- Issue: #17 (claim `kilo-HP-ELITEBOOK-q7w3`)
+- Spec introdotte: AGENTS.md v1.6 (D1 doc-sync IN PR + D2 GH Action + D3 pre-commit clean + D4 pre-push BUNDLE + D5 pre-push base-stale), `.github/workflows/auto-status-done.yml`, `.githooks/pre-push`
+- Spec toccate: `package.json` (invariato, già S20), `docs/INDEX.md` (S21 in roadmap + §"Stato del progetto"), `docs/SESSIONS.md` (Sessione 21 + changelog), `docs/18-DEV-LOG.md` (§10 + changelog), `.githooks/pre-commit` (D3 clean check), `.githooks/README.md` (aggiornare con nuovi hook)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -291,6 +325,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #14 (merge `a500ea2`, 2026-10-17T15:03:21Z), claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione). **Post-merge**: branch remoto eliminato (policy §♻️), claim rilasciato con `status:done` applicato a #13 |
 | 0.9 | 2026-10-17 (S20) | **§9 Sessione 20** (hardening multi-agente): entry PR #15 (claim `kilo-HP-ELITEBOOK-r9p2`); 4 lesson (20-1 difese stratificate > unica, 20-2 postinstall double-edged, 20-3 pattern `N` obbligatorio, 20-4 `core.hooksPath` per-clone); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); F3 e F5 non mitigati direttamente (richiedono worktree, scelta Boss C) |
 | 1.0 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati |
+| 1.1 | 2026-10-17 (Sessione 21) | **§10 Sessione 21** (refactor catena): entry PR #17 (claim `kilo-HP-ELITEBOOK-q7w3`); 4 lesson (21-1 doc-sync post-merge su main è intrinsecamente racy — soluzione: doc-sync IN PR, 21-2 GH Action può sostituire label transitions manuali, 21-3 pre-push hook cross-platform pattern pwsh/powershell fallback, 21-4 doc-sync IN PR richiede 2 commit sul branch); D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning; race condition al punto 8 (doc-sync post-merge) eliminato atomicamente |
 
 ---
 
