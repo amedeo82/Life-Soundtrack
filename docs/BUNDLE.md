@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-17 17:07
+> Data: 2026-10-17 17:22
 > Totale file: 33
 
 
@@ -10,7 +10,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.4 — Sessione 19 (2026-10-17)
+> Versione 1.5 — Sessione 20 (2026-10-17)
 
 ---
 
@@ -198,7 +198,8 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
-- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
+- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina di stati delle issue (status:*)")
+- **Push early obbligatorio**: dopo `git checkout -b feat/<N>-<desc>`, eseguire `git push -u origin <branch>` (anche con zero commit). Visibilità + backup + anti-collision. Vedi §"🪝 Pre-commit hook" per il setup / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 ## ♻️ Pulizia branch post-merge *(obbligatoria)*
 
@@ -238,6 +239,40 @@ git branch -r --merged main | Select-String -NotMatch 'main$|HEAD'
 Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni documentate sopra). Gate minimo: **nessun branch remoto mergato deve restare in `origin`** salvo eccezioni.
 
 **Perché è importante**: con il workflow parallelo (più agenti su più issue contemporaneamente, vedi `11-BACKLOG.md` §"Priorità di lavorazione"), i branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma in fase di review.
+
+## 🪝 Pre-commit hook
+
+Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
+
+- `main` (solo per admin / doc-sync)
+- `docs/<desc>` (branch di documentazione)
+- `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
+
+### Setup
+
+Il setup è automatico via `postinstall` di `package.json`: dopo `pnpm install`, lo script `scripts/setup-hooks.js` esegue `git config core.hooksPath .githooks` automaticamente (non-fatal se git non disponibile in CI).
+
+Per setup manuale (fallback):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+### Bypass (emergenza)
+
+```bash
+git commit --no-verify                           # salta il pre-commit una volta
+LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...     # salta via env var
+```
+
+Usare il bypass solo in caso di emergenza (cherry-pick, hotfix, fix urgente) e documentare la ragione nel messaggio di commit.
+
+### Failure mode coperti
+
+- **F1**: commit accidentale su `main` → abort
+- **F7**: commit su branch dopo merge (dimenticanza di `git checkout main && git pull`) → abort
+
+Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5, F8) e del perché alcune difese richiedono worktree (scelta NO del Boss, Sessione 20 D.20.1).
 
 ## 📝 Checklist di auto-revisione PR
 
@@ -341,6 +376,19 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
+## 🛡️ Session start checklist
+
+Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti 4 check per catturare precocemente i failure mode del parallelismo:
+
+```powershell
+git status                          # working tree clean? (F3, F5)
+git branch --show-current           # sul branch giusto? (F1)
+git fetch origin && git status -uno # main stale? (F4)
+gh issue view <N> --jq .state       # issue ancora nostra e aperta? (F7)
+```
+
+Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+
 ## 📞 Contatti
 
 - Project owner: `@amedeo82`
@@ -350,7 +398,7 @@ Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **
 
 ---
 
-*Ultimo aggiornamento: Sessione 19 (2026-10-17) — v1.4: aggiunta §"📦 Macchina a stati delle issue (status:*)" (ADR-0007 — estensione post-claim di ADR-0006, 4 stati: `done` / `in-review` / `wontdo` / `blocked-other`); campo `Closes #N` reso obbligatorio nella checklist PR; transizione `agent-ready` → `status:in-review` documentata; tabella label estesa con `status:*`; §"🚀 Primo task" ora include le nuove transizioni*
+*Ultimo aggiornamento: Sessione 20 (2026-10-17) — v1.5: push early obbligatorio in §"🌳 Git workflow"; nuove sezioni §"🛡️ Session start checklist" (4 comandi di sanity check) e §"🪝 Pre-commit hook" (setup + bypass); trigger automatico via `package.json` `postinstall` (vedi Sessione 20, 3 difese a basso costo coprono 5 failure mode)*
 
 
 ===== FILE: README.md =====
@@ -652,7 +700,7 @@ Apache License
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.4 | Protocollo per agenti (Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.5 | Protocollo per agenti (Sessione 20: push early obbligatorio + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -694,6 +742,7 @@ Apache License
 | 17 | 🧹 Governance post-merge (cleanup + parallelismo) | ✅ COMPLETATA |
 | 18 | 🎫 Protocollo claim per agenti paralleli (ADR-0006) | ✅ COMPLETATA |
 | 19 | 📦 Macchina a stati delle issue (status:* post-claim — ADR-0007) | ✅ COMPLETATA |
+| 20 | 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist) | 🟡 IN CORSO |
 
 ## Stato del progetto (post-merge PR #12, 2026-10-17)
 - **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.4.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
@@ -706,7 +755,8 @@ Apache License
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
 - **Sessione 19** — macchina a stati post-claim (ADR-0007) **merged in `main`** (PR #14, merge commit `a500ea2`, 2026-10-17T15:03:21Z): `AGENTS.md` **v1.4** con nuova §"📦 Macchina a stati delle issue (status:*)" (estensione di §"🎫 Presa in carico delle story") + tabella label estesa + campo `Closes #N` reso obbligatorio nella checklist PR; `11-BACKLOG.md` **v1.4.0** con §"Stato di una Story" estesa (4 stati `status:*` + nota mutua esclusione `agent-ready` ∩ `status:*` = ∅); `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0 (macchina a stati completa, transizioni, `jq` per query candidati, pattern `Closes #N`); 4 label `status:*` create su GitHub (`done` / `in-review` / `wontdo` / `blocked-other`); issue #11 chiusa come completed (rimossa `agent-ready`, era rimasta `OPEN` nonostante `PR #12` mergata — sintomo esatto che ADR-0007 previene); issue #9 rivalutata (rimossa `agent-ready` + `in-progress`, aggiunta `status:done`, chiusa); `scripts/generate-bundle.ps1` `$files` include ADR-0007; BUNDLE rigenerato. **Esito post-merge**: branch `feat/13-issue-state-machine` eliminato (policy §♻️); claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con `status:done` applicato; issue #13 chiusa via `Closes #13` (auto-close GitHub). Gate D.12.1 applicato.
-- **Prossimo step tecnico**: PR #13 da aprire/mergeare; dopo il merge, le 3 issue `agent-ready` ancora attive (#5, #6, #7) sono claimabili con la nuova query che esclude `status:*`. Issue #9 rivalutata (rivalutazione S17 sync) → chiusura in PR o follow-up. Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
+- **Sessione 20** — hardening multi-agente (push early + pre-commit hook + session checklist) **in corso** (PR #15, branch `feat/15-parallel-safety`, claim `kilo-HP-ELITEBOOK-r9p2`, 2026-10-17): `AGENTS.md` **v1.5** con push early obbligatorio in §"🌳 Git workflow" + nuove §"🛡️ Session start checklist" (4 comandi obbligatori) e §"🪝 Pre-commit hook" (setup + bypass); `.githooks/pre-commit` (nuovo script bash committato, verifica pattern branch) + `scripts/setup-hooks.js` (nuovo Node ESM idempotente) + `package.json` con `postinstall` automatico; 3 difese a basso costo coprono 5 failure mode (F1 commit su main, F2 branch invisibile, F4 base stale, F6 collision, F7 commit post-merge); NO worktree (Boss scelta C, F3 file conflict e F5 stash collision non mitigati direttamente, documentati come limiti noti). 4 lesson learned in 18-DEV-LOG §9.
+- **Prossimo step tecnico**: PR #15 (S20 hardening multi-agente) da aprire/mergeare; dopo il merge, le 3 issue `agent-ready` ancora attive (#5, #6, #7) sono claimabili con la nuova query che esclude `status:*` (S19) E con le nuove difese di push early + pre-commit hook (S20). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -1324,6 +1374,63 @@ PR #14 (merge commit `a500ea2`, 2026-10-17T15:03:21Z) portata in `main`: 8 file 
 
 ---
 
+## Sessione 20 — 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist)
+
+**Data**: 2026-10-17
+**Stato**: 🟡 In corso (implementazione PR #15)
+
+**Trigger**: il Boss nota che il workflow multi-agente, pur con ADR-0006 (claim) e ADR-0007 (status post-claim), non gestisce esplicitamente i failure mode del parallelismo: commit su main per distrazione, branch non pushati per ore, base stale dopo merge, post-merge zombie commit, file conflict nella working copy condivisa. Analisi con 3 decisioni via `question` (2026-10-17):
+
+- **Worktree**: NO (scelta C). La working copy resta condivisa; difese via hook e protocollo mitigano i rischi
+- **Push early**: obbligatorio (scelta A). `git push -u origin <branch>` subito dopo `git checkout -b`, anche con zero commit
+- **Implementazione**: hook + checklist + push early (scelta A). Nessun worktree, solo verifiche + enforcement via hook bash
+
+### Attività svolte
+
+- **`.githooks/pre-commit`** (nuovo, script bash committato): verifica che il branch corrente sia `main` o `docs/*` o `feat/<N>-*` o `fix/<N>-*`. Setup via `git config core.hooksPath .githooks`. Bypass con `git commit --no-verify` o `LIFE_SOUNDTRACK_SKIP_HOOKS=1`
+- **`.githooks/README.md`** (nuovo): istruzioni di setup e failure mode coperti/non coperti
+- **`scripts/setup-hooks.js`** (nuovo, Node ESM): script idempotente non-fatal che configura `core.hooksPath` automaticamente. Skip in CI se `.git` non presente
+- **`package.json`** aggiornato: aggiunto `postinstall: "node scripts/setup-hooks.js"` (e alias `setup-hooks`). Trigger automatico
+- **`AGENTS.md`** aggiornato a **v1.5**: push early obbligatorio in §"🌳 Git workflow"; nuove sezioni §"🛡️ Session start checklist" (4 comandi obbligatori) e §"🪝 Pre-commit hook" (setup + bypass); footer aggiornato
+- **`docs/18-DEV-LOG.md`** aggiornato a **v0.8** (§9 Sessione 20 + 4 lesson learned + changelog)
+- **`docs/SESSIONS.md`** aggiornato a **v1.2** (questa entry + changelog)
+- **`docs/INDEX.md`** aggiornato (S20 in roadmap, AGENTS v1.5, ADR count invariato)
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.20.1 | NO worktree (mantenuto) | Costo di setup non giustificato a questo punto del progetto (3 agenti max realistici); difese via hook e protocollo mitigano F1, F4, F7. Rivedere se il parallelismo cresce |
+| D.20.2 | Push early obbligatorio in AGENTS.md | Costo zero, beneficio alto (visibilità + backup + anti-collision F2, F6) |
+| D.20.3 | Pre-commit hook in `.githooks/`, committato | Difesa attiva per F1 (commit su main) e F7 (commit post-merge); bypass con `--no-verify` in emergenza documentato |
+| D.20.4 | Setup hook automatico via `postinstall` di `package.json` | Elimina frizione di setup manuale (`git config core.hooksPath .githooks`); script `setup-hooks.js` non-fatal se git non disponibile |
+| D.20.5 | Hook `pre-commit` documentato come opzionale (con escape hatch) | Enforcement forte ma con escape esplicito per cherry-pick, hotfix, fix urgente |
+| D.20.6 | Pattern hook `^(main\|docs/.+\|feat/N-.+\|fix/N-.+)$` | 4 forme di branch: admin, docs, feature, fix; nessuna restrizione sul suffix (descrizione libera); issue number obbligatorio per `feat`/`fix` |
+
+### Documenti aggiornati
+
+- `AGENTS.md` → **v1.5** (push early, session checklist, hook setup, footer)
+- `package.json` (postinstall + setup-hooks script)
+- `scripts/setup-hooks.js` (**nuovo**)
+- `.githooks/pre-commit` (**nuovo**, script bash)
+- `.githooks/README.md` (**nuovo**, istruzioni setup)
+- `docs/18-DEV-LOG.md` → **v0.8** (§9 Sessione 20, changelog)
+- `docs/SESSIONS.md` → **v1.2** (questa entry, changelog)
+- `docs/INDEX.md` (S20 in roadmap, AGENTS v1.5)
+
+### Prossimi step
+
+1. Aprire PR per #15 → merge in `main`
+2. Eliminare il branch `feat/15-parallel-safety` dopo il merge (policy §♻️)
+3. Rilasciare claim su #15 con `release:` + rimozione `in-progress` + `status:done` al merge
+4. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili con il nuovo protocollo di sicurezza
+
+### Esito post-merge (placeholder, 2026-10-17)
+
+PR #15 (merge commit `<da-compilare>`, 2026-10-17): 5 file doc/script aggiornati + 3 file nuovi (`.githooks/pre-commit`, `.githooks/README.md`, `scripts/setup-hooks.js`) + 1 file `package.json` modificato. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 --check` exit 0, branch remoto eliminato, claim rilasciato.
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -1356,6 +1463,7 @@ PR #14 (merge commit `a500ea2`, 2026-10-17T15:03:21Z) portata in `main`: 8 file 
 | 0.9 | 2026-10-17 (post-merge) | **Esito post-merge S18**: PR #12 merged (`2891cb5`), gate D.12.1 applicato: Sessione 18 ✅ Completata, branch remoto eliminato (policy §♻️), auto-check pulito, claim rilasciato su #11; Sessione 18 aggiornata con esito |
 | 1.0 | 2026-10-17 (Sessione 19) | **Aggiunta Sessione 19** (ADR-0007 — macchina a stati post-claim): 4 label `status:*` + transizioni + `Closes #N` obbligatorio; cleanup retroattivo #11 (chiusa come completed); issue #13 aperta `agent-ready` come contenitore del lavoro; `AGENTS.md` v1.4 + 11-BACKLOG v1.4.0 + 18-DEV-LOG v0.7 + scripts/generate-bundle.ps1 aggiornato; BUNDLE rigenerato; 4 lesson learned (19-1 dogfooding cleanup, 19-2 label 422, 19-3 write tool + JSON, 19-4 single-quote jq) |
 | 1.1 | 2026-10-17 (post-merge S19) | **Esito post-merge S19**: PR #14 merged (commit `a500ea2`, 2026-10-17T15:03:21Z), gate D.12.1 applicato: Sessione 19 ✅ Completata, branch remoto `feat/13-issue-state-machine` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con applicazione `status:done`, issue #13 chiusa via `Closes #13`. Issue #9 transita a `status:done` (cleanup retroattivo, D.19.5). Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v0.8 (18-DEV-LOG) e v1.1 (SESSIONS) allineati |
+| 1.2 | 2026-10-17 (Sessione 20) | **Aggiunta Sessione 20** (hardening multi-agente): `.githooks/pre-commit` (nuovo script bash) + `scripts/setup-hooks.js` (nuovo Node ESM idempotente) + `package.json` con `postinstall` automatico; `AGENTS.md` v1.5 (push early obbligatorio + §"🛡️ Session start checklist" 4 comandi + §"🪝 Pre-commit hook" setup); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); NO worktree (Boss scelta C); 4 lesson learned in 18-DEV-LOG §9 (20-1 difese stratificate, 20-2 postinstall double-edged, 20-3 pattern N, 20-4 per-clone) |
 
 ---
 
@@ -1897,6 +2005,41 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 9. Sessione 20 — hardening multi-agente (push early + pre-commit hook + session checklist)
+
+**Tipo**: doc-only + script (`AGENTS.md`, `docs/`, `.githooks/`, `scripts/setup-hooks.js`, `package.json`); nessuna modifica a codice applicativo
+**Branch**: `feat/15-parallel-safety` (da `main` @ `ac09ec9`)
+**PR**: **#15 — merge `<da-compilare>` in `main` (2026-10-17)**
+**Issue**: #15 (claim `kilo-HP-ELITEBOOK-r9p2`)
+**Stato**: 🟡 in corso (post-merge compile)
+
+### Sintesi
+
+- **`.githooks/pre-commit`** (nuovo): script bash committato che verifica il branch corrente. Pattern `^(main|docs/.+|feat/N-.+|fix/N-.+)$`. Bypass con `git commit --no-verify` o `LIFE_SOUNDTRACK_SKIP_HOOKS=1`.
+- **`scripts/setup-hooks.js`** (nuovo): script Node idempotente per `git config core.hooksPath .githooks` via `postinstall` di `package.json`. Non-fatal in CI/build container senza git.
+- **`package.json`** aggiornato: aggiunto `postinstall: "node scripts/setup-hooks.js"` (e alias `setup-hooks`). Trigger automatico del hook.
+- **`AGENTS.md`** v1.5: push early obbligatorio in §"🌳 Git workflow"; §"🛡️ Session start checklist" (4 comandi); §"🪝 Pre-commit hook" (setup + bypass). Footer aggiornato.
+- **Failure mode coperti**: F1 (commit su main), F2 (branch invisibile), F4 (base stale), F6 (collision), F7 (commit post-merge). F3 (file conflict) e F5 (stash collision) non mitigati direttamente — documentati come limiti noti, richiedono worktree per difesa forte (decisione D.20.1, Boss scelto C).
+
+### Lesson learned
+
+| # | Tipo | Osservazione | Rif. |
+|---|------|--------------|------|
+| 20-1 | L | **Difese stratificate > difesa unica**: 3 difese a basso costo (push early, pre-commit hook, session checklist) coprono 5 failure mode su 8. Nessuna singola difesa è perfetta; la combinazione mitiga i rischi più probabili mantenendo bassa la frizione | issue #15 + AGENTS.md v1.5 |
+| 20-2 | L+F | **Setup via postinstall è double-edged**: automatizza ma può rompere in ambienti senza git (CI, build containers). Soluzione adottata: script non-fatal che skip + warn. Trade-off accettato: il setup automatico fallisce silente in CI ma funziona per gli agenti umani/AI locali | `scripts/setup-hooks.js` |
+| 20-3 | L | **Pattern di branch con N obbligatorio forza la connessione issue-branch**: `feat/<N>-<desc>` significa che `N` è sempre un numero di issue, eliminando `feat/foo-bar` che non traccia nulla. Convenzione debole ma enforcement forte via hook | `.githooks/pre-commit` |
+| 20-4 | L | **`git config core.hooksPath` è un setting per-clone, non per-utente**: ogni agente che clona il repo deve eseguire il setup. `postinstall` lo risolve ma solo se l'agente fa `pnpm install` dopo il clone. Workaround futuro: hook in `core.hooksPath` standardizzato in `init.templateDir` o documentato in `CONTRIBUTING.md` (da valutare post-implementazione) | `package.json` postinstall |
+
+### Link utili
+
+- Branch: `feat/15-parallel-safety` (post-merge → eliminata per policy §♻️)
+- PR: **#15** (merge commit `<da-compilare>`, 2026-10-17)
+- Issue: #15 (claim `kilo-HP-ELITEBOOK-r9p2`)
+- Spec introdotte: AGENTS.md v1.5 (push early, session checklist, hook setup)
+- Spec toccate: `package.json` (postinstall), `docs/INDEX.md` (S20), `docs/SESSIONS.md` (Sessione 20 + changelog), `docs/18-DEV-LOG.md` (§9 + changelog), `scripts/setup-hooks.js` (nuovo), `.githooks/pre-commit` (nuovo), `.githooks/README.md` (nuovo)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -1909,6 +2052,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
 | 0.7 | 2026-10-17 | **§7 Sessione 18** (protocollo claim — ADR-0006): entry `merged` con PR #12 (`2891cb5`), claim `kilo-HP-ELITEBOOK-hjoe` rilasciato, branch `feat/11-task-claiming-protocol` eliminata; 3 lesson learned (18-1 dogfooding claim, 18-2 PowerShell BOM su body commit/PR, 18-3 `git branch -d` su merge-commit); osservazione operativa per le 3 issue `agent-ready` aperte in S17 |
 | 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #14 (merge `a500ea2`, 2026-10-17T15:03:21Z), claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione). **Post-merge**: branch remoto eliminato (policy §♻️), claim rilasciato con `status:done` applicato a #13 |
+| 0.9 | 2026-10-17 (S20) | **§9 Sessione 20** (hardening multi-agente): entry PR #15 (claim `kilo-HP-ELITEBOOK-r9p2`); 4 lesson (20-1 difese stratificate > unica, 20-2 postinstall double-edged, 20-3 pattern `N` obbligatorio, 20-4 `core.hooksPath` per-clone); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); F3 e F5 non mitigati direttamente (richiedono worktree, scelta Boss C) |
 
 ---
 

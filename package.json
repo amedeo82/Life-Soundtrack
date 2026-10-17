@@ -16,7 +16,9 @@
     "e2e": "turbo run e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "node scripts/setup-hooks.js",
+    "setup-hooks": "node scripts/setup-hooks.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",

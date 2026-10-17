@@ -242,6 +242,41 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 9. Sessione 20 — hardening multi-agente (push early + pre-commit hook + session checklist)
+
+**Tipo**: doc-only + script (`AGENTS.md`, `docs/`, `.githooks/`, `scripts/setup-hooks.js`, `package.json`); nessuna modifica a codice applicativo
+**Branch**: `feat/15-parallel-safety` (da `main` @ `ac09ec9`)
+**PR**: **#15 — merge `<da-compilare>` in `main` (2026-10-17)**
+**Issue**: #15 (claim `kilo-HP-ELITEBOOK-r9p2`)
+**Stato**: 🟡 in corso (post-merge compile)
+
+### Sintesi
+
+- **`.githooks/pre-commit`** (nuovo): script bash committato che verifica il branch corrente. Pattern `^(main|docs/.+|feat/N-.+|fix/N-.+)$`. Bypass con `git commit --no-verify` o `LIFE_SOUNDTRACK_SKIP_HOOKS=1`.
+- **`scripts/setup-hooks.js`** (nuovo): script Node idempotente per `git config core.hooksPath .githooks` via `postinstall` di `package.json`. Non-fatal in CI/build container senza git.
+- **`package.json`** aggiornato: aggiunto `postinstall: "node scripts/setup-hooks.js"` (e alias `setup-hooks`). Trigger automatico del hook.
+- **`AGENTS.md`** v1.5: push early obbligatorio in §"🌳 Git workflow"; §"🛡️ Session start checklist" (4 comandi); §"🪝 Pre-commit hook" (setup + bypass). Footer aggiornato.
+- **Failure mode coperti**: F1 (commit su main), F2 (branch invisibile), F4 (base stale), F6 (collision), F7 (commit post-merge). F3 (file conflict) e F5 (stash collision) non mitigati direttamente — documentati come limiti noti, richiedono worktree per difesa forte (decisione D.20.1, Boss scelto C).
+
+### Lesson learned
+
+| # | Tipo | Osservazione | Rif. |
+|---|------|--------------|------|
+| 20-1 | L | **Difese stratificate > difesa unica**: 3 difese a basso costo (push early, pre-commit hook, session checklist) coprono 5 failure mode su 8. Nessuna singola difesa è perfetta; la combinazione mitiga i rischi più probabili mantenendo bassa la frizione | issue #15 + AGENTS.md v1.5 |
+| 20-2 | L+F | **Setup via postinstall è double-edged**: automatizza ma può rompere in ambienti senza git (CI, build containers). Soluzione adottata: script non-fatal che skip + warn. Trade-off accettato: il setup automatico fallisce silente in CI ma funziona per gli agenti umani/AI locali | `scripts/setup-hooks.js` |
+| 20-3 | L | **Pattern di branch con N obbligatorio forza la connessione issue-branch**: `feat/<N>-<desc>` significa che `N` è sempre un numero di issue, eliminando `feat/foo-bar` che non traccia nulla. Convenzione debole ma enforcement forte via hook | `.githooks/pre-commit` |
+| 20-4 | L | **`git config core.hooksPath` è un setting per-clone, non per-utente**: ogni agente che clona il repo deve eseguire il setup. `postinstall` lo risolve ma solo se l'agente fa `pnpm install` dopo il clone. Workaround futuro: hook in `core.hooksPath` standardizzato in `init.templateDir` o documentato in `CONTRIBUTING.md` (da valutare post-implementazione) | `package.json` postinstall |
+
+### Link utili
+
+- Branch: `feat/15-parallel-safety` (post-merge → eliminata per policy §♻️)
+- PR: **#15** (merge commit `<da-compilare>`, 2026-10-17)
+- Issue: #15 (claim `kilo-HP-ELITEBOOK-r9p2`)
+- Spec introdotte: AGENTS.md v1.5 (push early, session checklist, hook setup)
+- Spec toccate: `package.json` (postinstall), `docs/INDEX.md` (S20), `docs/SESSIONS.md` (Sessione 20 + changelog), `docs/18-DEV-LOG.md` (§9 + changelog), `scripts/setup-hooks.js` (nuovo), `.githooks/pre-commit` (nuovo), `.githooks/README.md` (nuovo)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -254,6 +289,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
 | 0.7 | 2026-10-17 | **§7 Sessione 18** (protocollo claim — ADR-0006): entry `merged` con PR #12 (`2891cb5`), claim `kilo-HP-ELITEBOOK-hjoe` rilasciato, branch `feat/11-task-claiming-protocol` eliminata; 3 lesson learned (18-1 dogfooding claim, 18-2 PowerShell BOM su body commit/PR, 18-3 `git branch -d` su merge-commit); osservazione operativa per le 3 issue `agent-ready` aperte in S17 |
 | 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #14 (merge `a500ea2`, 2026-10-17T15:03:21Z), claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione). **Post-merge**: branch remoto eliminato (policy §♻️), claim rilasciato con `status:done` applicato a #13 |
+| 0.9 | 2026-10-17 (S20) | **§9 Sessione 20** (hardening multi-agente): entry PR #15 (claim `kilo-HP-ELITEBOOK-r9p2`); 4 lesson (20-1 difese stratificate > unica, 20-2 postinstall double-edged, 20-3 pattern `N` obbligatorio, 20-4 `core.hooksPath` per-clone); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); F3 e F5 non mitigati direttamente (richiedono worktree, scelta Boss C) |
 
 ---
 
