@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.4 — Sessione 19 (2026-10-17)
+> Versione 1.5 — Sessione 20 (2026-10-17)
 
 ---
 
@@ -189,7 +189,8 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
-- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
+- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina di stati delle issue (status:*)")
+- **Push early obbligatorio**: dopo `git checkout -b feat/<N>-<desc>`, eseguire `git push -u origin <branch>` (anche con zero commit). Visibilità + backup + anti-collision. Vedi §"🪝 Pre-commit hook" per il setup / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 ## ♻️ Pulizia branch post-merge *(obbligatoria)*
 
@@ -229,6 +230,40 @@ git branch -r --merged main | Select-String -NotMatch 'main$|HEAD'
 Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni documentate sopra). Gate minimo: **nessun branch remoto mergato deve restare in `origin`** salvo eccezioni.
 
 **Perché è importante**: con il workflow parallelo (più agenti su più issue contemporaneamente, vedi `11-BACKLOG.md` §"Priorità di lavorazione"), i branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma in fase di review.
+
+## 🪝 Pre-commit hook
+
+Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
+
+- `main` (solo per admin / doc-sync)
+- `docs/<desc>` (branch di documentazione)
+- `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
+
+### Setup
+
+Il setup è automatico via `postinstall` di `package.json`: dopo `pnpm install`, lo script `scripts/setup-hooks.js` esegue `git config core.hooksPath .githooks` automaticamente (non-fatal se git non disponibile in CI).
+
+Per setup manuale (fallback):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+### Bypass (emergenza)
+
+```bash
+git commit --no-verify                           # salta il pre-commit una volta
+LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...     # salta via env var
+```
+
+Usare il bypass solo in caso di emergenza (cherry-pick, hotfix, fix urgente) e documentare la ragione nel messaggio di commit.
+
+### Failure mode coperti
+
+- **F1**: commit accidentale su `main` → abort
+- **F7**: commit su branch dopo merge (dimenticanza di `git checkout main && git pull`) → abort
+
+Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5, F8) e del perché alcune difese richiedono worktree (scelta NO del Boss, Sessione 20 D.20.1).
 
 ## 📝 Checklist di auto-revisione PR
 
@@ -332,6 +367,19 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
+## 🛡️ Session start checklist
+
+Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti 4 check per catturare precocemente i failure mode del parallelismo:
+
+```powershell
+git status                          # working tree clean? (F3, F5)
+git branch --show-current           # sul branch giusto? (F1)
+git fetch origin && git status -uno # main stale? (F4)
+gh issue view <N> --jq .state       # issue ancora nostra e aperta? (F7)
+```
+
+Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+
 ## 📞 Contatti
 
 - Project owner: `@amedeo82`
@@ -341,4 +389,4 @@ Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **
 
 ---
 
-*Ultimo aggiornamento: Sessione 19 (2026-10-17) — v1.4: aggiunta §"📦 Macchina a stati delle issue (status:*)" (ADR-0007 — estensione post-claim di ADR-0006, 4 stati: `done` / `in-review` / `wontdo` / `blocked-other`); campo `Closes #N` reso obbligatorio nella checklist PR; transizione `agent-ready` → `status:in-review` documentata; tabella label estesa con `status:*`; §"🚀 Primo task" ora include le nuove transizioni*
+*Ultimo aggiornamento: Sessione 20 (2026-10-17) — v1.5: push early obbligatorio in §"🌳 Git workflow"; nuove sezioni §"🛡️ Session start checklist" (4 comandi di sanity check) e §"🪝 Pre-commit hook" (setup + bypass); trigger automatico via `package.json` `postinstall` (vedi Sessione 20, 3 difese a basso costo coprono 5 failure mode)*

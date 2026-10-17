@@ -608,6 +608,63 @@ PR #14 (merge commit `a500ea2`, 2026-10-17T15:03:21Z) portata in `main`: 8 file 
 
 ---
 
+## Sessione 20 — 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist)
+
+**Data**: 2026-10-17
+**Stato**: 🟡 In corso (implementazione PR #15)
+
+**Trigger**: il Boss nota che il workflow multi-agente, pur con ADR-0006 (claim) e ADR-0007 (status post-claim), non gestisce esplicitamente i failure mode del parallelismo: commit su main per distrazione, branch non pushati per ore, base stale dopo merge, post-merge zombie commit, file conflict nella working copy condivisa. Analisi con 3 decisioni via `question` (2026-10-17):
+
+- **Worktree**: NO (scelta C). La working copy resta condivisa; difese via hook e protocollo mitigano i rischi
+- **Push early**: obbligatorio (scelta A). `git push -u origin <branch>` subito dopo `git checkout -b`, anche con zero commit
+- **Implementazione**: hook + checklist + push early (scelta A). Nessun worktree, solo verifiche + enforcement via hook bash
+
+### Attività svolte
+
+- **`.githooks/pre-commit`** (nuovo, script bash committato): verifica che il branch corrente sia `main` o `docs/*` o `feat/<N>-*` o `fix/<N>-*`. Setup via `git config core.hooksPath .githooks`. Bypass con `git commit --no-verify` o `LIFE_SOUNDTRACK_SKIP_HOOKS=1`
+- **`.githooks/README.md`** (nuovo): istruzioni di setup e failure mode coperti/non coperti
+- **`scripts/setup-hooks.js`** (nuovo, Node ESM): script idempotente non-fatal che configura `core.hooksPath` automaticamente. Skip in CI se `.git` non presente
+- **`package.json`** aggiornato: aggiunto `postinstall: "node scripts/setup-hooks.js"` (e alias `setup-hooks`). Trigger automatico
+- **`AGENTS.md`** aggiornato a **v1.5**: push early obbligatorio in §"🌳 Git workflow"; nuove sezioni §"🛡️ Session start checklist" (4 comandi obbligatori) e §"🪝 Pre-commit hook" (setup + bypass); footer aggiornato
+- **`docs/18-DEV-LOG.md`** aggiornato a **v0.8** (§9 Sessione 20 + 4 lesson learned + changelog)
+- **`docs/SESSIONS.md`** aggiornato a **v1.2** (questa entry + changelog)
+- **`docs/INDEX.md`** aggiornato (S20 in roadmap, AGENTS v1.5, ADR count invariato)
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.20.1 | NO worktree (mantenuto) | Costo di setup non giustificato a questo punto del progetto (3 agenti max realistici); difese via hook e protocollo mitigano F1, F4, F7. Rivedere se il parallelismo cresce |
+| D.20.2 | Push early obbligatorio in AGENTS.md | Costo zero, beneficio alto (visibilità + backup + anti-collision F2, F6) |
+| D.20.3 | Pre-commit hook in `.githooks/`, committato | Difesa attiva per F1 (commit su main) e F7 (commit post-merge); bypass con `--no-verify` in emergenza documentato |
+| D.20.4 | Setup hook automatico via `postinstall` di `package.json` | Elimina frizione di setup manuale (`git config core.hooksPath .githooks`); script `setup-hooks.js` non-fatal se git non disponibile |
+| D.20.5 | Hook `pre-commit` documentato come opzionale (con escape hatch) | Enforcement forte ma con escape esplicito per cherry-pick, hotfix, fix urgente |
+| D.20.6 | Pattern hook `^(main\|docs/.+\|feat/N-.+\|fix/N-.+)$` | 4 forme di branch: admin, docs, feature, fix; nessuna restrizione sul suffix (descrizione libera); issue number obbligatorio per `feat`/`fix` |
+
+### Documenti aggiornati
+
+- `AGENTS.md` → **v1.5** (push early, session checklist, hook setup, footer)
+- `package.json` (postinstall + setup-hooks script)
+- `scripts/setup-hooks.js` (**nuovo**)
+- `.githooks/pre-commit` (**nuovo**, script bash)
+- `.githooks/README.md` (**nuovo**, istruzioni setup)
+- `docs/18-DEV-LOG.md` → **v0.8** (§9 Sessione 20, changelog)
+- `docs/SESSIONS.md` → **v1.2** (questa entry, changelog)
+- `docs/INDEX.md` (S20 in roadmap, AGENTS v1.5)
+
+### Prossimi step
+
+1. Aprire PR per #15 → merge in `main`
+2. Eliminare il branch `feat/15-parallel-safety` dopo il merge (policy §♻️)
+3. Rilasciare claim su #15 con `release:` + rimozione `in-progress` + `status:done` al merge
+4. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili con il nuovo protocollo di sicurezza
+
+### Esito post-merge (placeholder, 2026-10-17)
+
+PR #15 (merge commit `<da-compilare>`, 2026-10-17): 5 file doc/script aggiornati + 3 file nuovi (`.githooks/pre-commit`, `.githooks/README.md`, `scripts/setup-hooks.js`) + 1 file `package.json` modificato. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 --check` exit 0, branch remoto eliminato, claim rilasciato.
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -640,6 +697,7 @@ PR #14 (merge commit `a500ea2`, 2026-10-17T15:03:21Z) portata in `main`: 8 file 
 | 0.9 | 2026-10-17 (post-merge) | **Esito post-merge S18**: PR #12 merged (`2891cb5`), gate D.12.1 applicato: Sessione 18 ✅ Completata, branch remoto eliminato (policy §♻️), auto-check pulito, claim rilasciato su #11; Sessione 18 aggiornata con esito |
 | 1.0 | 2026-10-17 (Sessione 19) | **Aggiunta Sessione 19** (ADR-0007 — macchina a stati post-claim): 4 label `status:*` + transizioni + `Closes #N` obbligatorio; cleanup retroattivo #11 (chiusa come completed); issue #13 aperta `agent-ready` come contenitore del lavoro; `AGENTS.md` v1.4 + 11-BACKLOG v1.4.0 + 18-DEV-LOG v0.7 + scripts/generate-bundle.ps1 aggiornato; BUNDLE rigenerato; 4 lesson learned (19-1 dogfooding cleanup, 19-2 label 422, 19-3 write tool + JSON, 19-4 single-quote jq) |
 | 1.1 | 2026-10-17 (post-merge S19) | **Esito post-merge S19**: PR #14 merged (commit `a500ea2`, 2026-10-17T15:03:21Z), gate D.12.1 applicato: Sessione 19 ✅ Completata, branch remoto `feat/13-issue-state-machine` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con applicazione `status:done`, issue #13 chiusa via `Closes #13`. Issue #9 transita a `status:done` (cleanup retroattivo, D.19.5). Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v0.8 (18-DEV-LOG) e v1.1 (SESSIONS) allineati |
+| 1.2 | 2026-10-17 (Sessione 20) | **Aggiunta Sessione 20** (hardening multi-agente): `.githooks/pre-commit` (nuovo script bash) + `scripts/setup-hooks.js` (nuovo Node ESM idempotente) + `package.json` con `postinstall` automatico; `AGENTS.md` v1.5 (push early obbligatorio + §"🛡️ Session start checklist" 4 comandi + §"🪝 Pre-commit hook" setup); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); NO worktree (Boss scelta C); 4 lesson learned in 18-DEV-LOG §9 (20-1 difese stratificate, 20-2 postinstall double-edged, 20-3 pattern N, 20-4 per-clone) |
 
 ---
 

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Pre-commit hook: verifica che il branch corrente sia valido per il workflow agenti.
+# Previene commit accidentali su branch non conformi alla naming convention.
+#
+# Setup: git config core.hooksPath .githooks
+# Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
+
+set -e
+
+# Skip se variabile d'ambiente disattivata
+if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+  exit 0
+fi
+
+current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+if [ -z "$current_branch" ]; then
+  echo "[pre-commit] ERRORE: detached HEAD. Crea un branch prima di committare:"
+  echo "  git checkout -b feat/<N>-<desc>  (o fix/<N>-<desc> o docs/<desc>)"
+  exit 1
+fi
+
+# Pattern ammessi:
+# - main (per admin / doc-sync)
+# - docs/* (per branch di documentazione senza issue number)
+# - feat/<N>-* o fix/<N>-* (per issue con numero)
+if [[ "$current_branch" =~ ^main$ ]] \
+   || [[ "$current_branch" =~ ^docs/.+ ]] \
+   || [[ "$current_branch" =~ ^feat/[0-9]+-.+ ]] \
+   || [[ "$current_branch" =~ ^fix/[0-9]+-.+ ]]; then
+  exit 0
+fi
+
+echo "[pre-commit] ERRORE: branch '$current_branch' non matcha il pattern del workflow agenti."
+echo "  Pattern ammessi:"
+echo "    - main                  (solo per admin/doc-sync)"
+echo "    - docs/<desc>           (branch di documentazione)"
+echo "    - feat/<N>-<desc>       (feature legata a issue #N)"
+echo "    - fix/<N>-<desc>        (bugfix legato a issue #N)"
+echo ""
+echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
+echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
+exit 1
