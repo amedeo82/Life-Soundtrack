@@ -558,7 +558,7 @@ PR #12 (merge commit `2891cb5` su `main`, 2026-10-17) ha portato in `main` il pr
 ## Sessione 19 — 📦 Macchina a stati delle issue (status:* post-claim) — ADR-0007
 
 **Data**: 2026-10-17
-**Stato**: 🟡 In corso (implementazione PR #13)
+**Stato**: ✅ Completata — merged in `main` (PR #14, merge commit `a500ea2`, 2026-10-17T15:03:21Z)
 
 **Trigger**: il project owner nota che il workflow post-claim (ADR-0006) non codifica gli stati successivi al rilascio del claim. Verifica 2026-10-17: tutte le 6 PR mergate (`PR #1`–`#12`) hanno `closingIssuesReferences` vuoto (nessuna clausola `Closes #N` nel body). L'issue stessa #11 (ADR-0006 docs) è rimasta `OPEN` con `agent-ready` dopo il merge di `PR #12` (`2891cb5`). Analisi congiunta Boss ↔ AI → 3 decisioni via `question` (opzione A: `status:*` + chiusura al merge; cleanup immediato #11; tracciamento via issue `agent-ready` #13).
 
@@ -594,17 +594,17 @@ PR #12 (merge commit `2891cb5` su `main`, 2026-10-17) ha portato in `main` il pr
 - `docs/BUNDLE.md` rigenerato (33 file, ADR-0007 incluso)
 - 4 label GitHub `status:*` create
 
-### Prossimi step
+### Prossimi step (verificati post-merge)
 
-1. Aprire PR per #13 → merge in `main`
-2. Eliminare il branch `feat/13-issue-state-machine` dopo il merge (policy §♻️)
-3. Rilasciare claim su #13 (`release:` + rimozione `in-progress` + applicazione `status:done` + chiusura via `Closes #13` al merge)
-4. Rivalutare #9: chiusura e applicazione `status:done` nella stessa PR o in un follow-up
-5. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili dagli agenti con la nuova query
+- [x] Aprire PR per #13 → merge in `main` (PR #14, merge commit `a500ea2`, 2026-10-17T15:03:21Z)
+- [x] Eliminare il branch `feat/13-issue-state-machine` dopo il merge (policy §♻️)
+- [x] Rilasciare claim su #13 (`release:` + rimozione `in-progress` + applicazione `status:done` + chiusura via `Closes #13` al merge)
+- [x] Rivalutare #9: chiusura e applicazione `status:done` nella stessa PR (D.19.5)
+- [ ] Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili dagli agenti con la nuova query
 
-### Esito post-merge (placeholder, 2026-10-17)
+### Esito post-merge (2026-10-17T15:03:21Z)
 
-PR #13 (merge commit `<da-compilare>`, 2026-10-17) portata in `main`: 6/6 file doc aggiornati + 4 label GitHub + ADR-0007 nuovo. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 --check` exit 0, branch remoto eliminato, claim rilasciato su #13.
+PR #14 (merge commit `a500ea2`, 2026-10-17T15:03:21Z) portata in `main`: 8 file doc aggiornati (AGENTS v1.4, 11-BACKLOG v1.4.0, 18-DEV-LOG v0.7, SESSIONS v1.0, INDEX, scripts/generate-bundle.ps1, BUNDLE.md, ADR-0007 nuovo) + 4 label GitHub `status:*` create. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 --check` exit 0, branch remoto `feat/13-issue-state-machine` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con applicazione `status:done`. Issue #11 e #9 transitate a `status:done` come cleanup retroattivo (issue #9 chiusa manualmente; issue #11 era il sintomo esatto che ADR-0007 previene).
 
 ---
 
@@ -639,6 +639,7 @@ PR #13 (merge commit `<da-compilare>`, 2026-10-17) portata in `main`: 6/6 file d
 | 0.8 | 2026-10-17 (Sessione 18) | Aggiunta Sessione 18 (protocollo claim agenti paralleli — ADR-0006): self-claim via label `in-progress` + commento `claim:`, ID GitHub come discriminatore del vincitore, TTL 12h, rilascio obbligatorio; AGENTS.md v1.3 con §"🎫 Presa in carico delle story" + §"🚀 Primo task" claim-first; 11-BACKLOG v1.3.0; decisioni D.18.1-D.18.4; issue #11 in-progress (claim `kilo-HP-ELITEBOOK-hjoe`) |
 | 0.9 | 2026-10-17 (post-merge) | **Esito post-merge S18**: PR #12 merged (`2891cb5`), gate D.12.1 applicato: Sessione 18 ✅ Completata, branch remoto eliminato (policy §♻️), auto-check pulito, claim rilasciato su #11; Sessione 18 aggiornata con esito |
 | 1.0 | 2026-10-17 (Sessione 19) | **Aggiunta Sessione 19** (ADR-0007 — macchina a stati post-claim): 4 label `status:*` + transizioni + `Closes #N` obbligatorio; cleanup retroattivo #11 (chiusa come completed); issue #13 aperta `agent-ready` come contenitore del lavoro; `AGENTS.md` v1.4 + 11-BACKLOG v1.4.0 + 18-DEV-LOG v0.7 + scripts/generate-bundle.ps1 aggiornato; BUNDLE rigenerato; 4 lesson learned (19-1 dogfooding cleanup, 19-2 label 422, 19-3 write tool + JSON, 19-4 single-quote jq) |
+| 1.1 | 2026-10-17 (post-merge S19) | **Esito post-merge S19**: PR #14 merged (commit `a500ea2`, 2026-10-17T15:03:21Z), gate D.12.1 applicato: Sessione 19 ✅ Completata, branch remoto `feat/13-issue-state-machine` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con applicazione `status:done`, issue #13 chiusa via `Closes #13`. Issue #9 transita a `status:done` (cleanup retroattivo, D.19.5). Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v0.8 (18-DEV-LOG) e v1.1 (SESSIONS) allineati |
 
 ---
 

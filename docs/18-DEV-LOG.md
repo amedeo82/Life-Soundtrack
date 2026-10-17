@@ -211,9 +211,9 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 **Tipo**: doc-only (`docs/`, `AGENTS.md`, `scripts/generate-bundle.ps1`); nessuna modifica a codice o schema dati
 **Branch**: `feat/13-issue-state-machine` (da `main` @ `<tip>`)
-**PR**: **#13 — merge `<da-compilare>` in `main` (2026-10-17)**
+**PR**: **#14 — merge commit `a500ea2` in `main` (2026-10-17T15:03:21Z)**
 **Issue**: #13 (claim `kilo-HP-ELITEBOOK-jm9f`, dogfooding del protocollo ADR-0007)
-**Stato**: 🟡 in corso (post-merge compile)
+**Stato**: ✅ merged in `main`; claim `kilo-HP-ELITEBOOK-jm9f` rilasciato; branch remoto eliminato (policy §♻️); cleanup retroattivo #11 e #9 eseguito
 
 ### Sintesi
 
@@ -235,7 +235,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 ### Link utili
 
 - Branch: `feat/13-issue-state-machine` (post-merge → eliminata per policy §♻️)
-- PR: **#13** (merge commit `<da-compilare>`, 2026-10-17)
+- PR: **#14** (merge commit `a500ea2`, 2026-10-17T15:03:21Z)
 - Issue: #13 (claim `kilo-HP-ELITEBOOK-jm9f`)
 - Spec introdotte: ADR-0007 v1.0, AGENTS.md v1.4, 11-BACKLOG.md v1.4.0
 - Spec toccate: `docs/INDEX.md` (version, S19), `docs/SESSIONS.md` (Sessione 19 + changelog v1.0), `docs/18-DEV-LOG.md` (§8 + changelog v0.7), `scripts/generate-bundle.ps1` (`$files` include ADR-0007)
@@ -253,7 +253,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.5 | 2026-10-16 | Sessione 14 — entry Story 0.2 con 5 problemi/fix/lesson (0.2-1..5): Dexie `modify()` su Collection, riallineamento `Artist` a 02 v1.2, slow-path fake-indexeddb su re-put, test perf isolati dalle run coverage, pitfalls barrel/MapIterator; osservazione fixture per Story 0.3 |
 | 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
 | 0.7 | 2026-10-17 | **§7 Sessione 18** (protocollo claim — ADR-0006): entry `merged` con PR #12 (`2891cb5`), claim `kilo-HP-ELITEBOOK-hjoe` rilasciato, branch `feat/11-task-claiming-protocol` eliminata; 3 lesson learned (18-1 dogfooding claim, 18-2 PowerShell BOM su body commit/PR, 18-3 `git branch -d` su merge-commit); osservazione operativa per le 3 issue `agent-ready` aperte in S17 |
-| 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #13, claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione) |
+| 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #14 (merge `a500ea2`, 2026-10-17T15:03:21Z), claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione). **Post-merge**: branch remoto eliminato (policy §♻️), claim rilasciato con `status:done` applicato a #13 |
 
 ---
 
