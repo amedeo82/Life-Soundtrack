@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-17 12:25
+> Data: 2026-10-17 12:40
 > Totale file: 31
 
 
@@ -100,6 +100,46 @@ Una issue può essere lavorata da un agente **solo se**:
 - Branch `main` protetto: richiede PR e review
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
+- **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
+
+## ♻️ Pulizia branch post-merge *(obbligatoria)*
+
+Dopo che una PR è stata mergata e verificata in `main`, il branch remoto `feat/*` o `fix/*` non serve più e **deve essere eliminato** per evitare accumulo di ref stale, drift tra agenti paralleli e confusione su "qual è la source of truth".
+
+**Chi esegue**: l'agente che ha mergato la PR (o, in mancanza, il reviewer al momento del merge). Se l'agente usa una worktree, deve anche rimuovere la worktree locale (`git worktree remove`).
+
+**Comandi minimi** (eseguire sul repo locale dopo il merge):
+
+```powershell
+# 1. Conferma che il branch è mergato in main
+git branch -r --merged main
+# (deve mostrare il branch tra gli elencati)
+
+# 2. Elimina il branch remoto
+git push origin --delete feat/<issue-number>-<descrizione>
+
+# 3. (Opzionale) Se esiste un tracking locale
+git branch -d feat/<issue-number>-<descrizione
+
+# 4. Pulisci ref remote stale nella tua working copy
+git remote prune origin
+```
+
+**Eccezioni** (NON eliminare):
+
+- Branch di release (`release/*`, `hotfix/*` di una versione pubblicata ancora supportata)
+- Branch usato come base da un'altra PR aperta (verificare con `git branch -r --no-merged main`)
+- Branch di lavoro abbandonato ma ancora citato in una issue `blocked` o `needs-spec`
+
+**Auto-check** (sostituisce o integra la "Verifica statale post-merge"):
+
+```powershell
+git branch -r --merged main | Select-String -NotMatch 'main$|HEAD'
+```
+
+Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni documentate sopra). Gate minimo: **nessun branch remoto mergato deve restare in `origin`** salvo eccezioni.
+
+**Perché è importante**: con il workflow parallelo (più agenti su più issue contemporaneamente, vedi `11-BACKLOG.md` §"Priorità di lavorazione"), i branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma in fase di review.
 
 ## 📝 Checklist di auto-revisione PR
 
@@ -124,7 +164,7 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Stato di una story (es. ⬚→🟡, 🟡→✅, ✅→⬚) | `docs/11-BACKLOG.md` (sezione Story + tabella "Stato di avanzamento") |
 | Stato di una story | `docs/INDEX.md` (§"Stato del progetto" e roadmap sessioni) |
 | Stato di una story / chiusura di una sessione | `docs/SESSIONS.md` (entry sessione + changelog) |
-| Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) |
+| Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) + **eliminare il branch remoto** (vedi §"♻️ Pulizia branch post-merge") |
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
 | Modifica al toolchain o alla policy di versionamento | `docs/17-DEV-NOTES.md` + nuova entry in `SESSIONS.md` |
@@ -138,6 +178,14 @@ pwsh scripts/generate-bundle.ps1 --check   # exit 0 = documentazione in sync
 ```
 
 Se esce con exit ≠ 0, rigenerare il bundle e committarlo nella stessa PR.
+
+**Auto-check post-merge** (subito dopo il merge, prima di considerare chiusa l'operazione):
+
+```powershell
+git branch -r --merged main | Select-String -NotMatch 'main$|HEAD'
+```
+
+Se l'output elenca branch `feat/*` o `fix/*` (oltre a `main` e `HEAD`), eliminarli con `git push origin --delete <branch>` (vedi §"♻️ Pulizia branch post-merge").
 
 **Verifica statale post-merge** (opzionale ma consigliata per il reviewer): dopo il merge, aprire `docs/INDEX.md` e `docs/11-BACKLOG.md` e confermare che lo "Stato del progetto" rifletta `git log --oneline -5 main`. Se diverge, aprire una PR `docs:` immediata di riallineamento (è esattamente quello che è successo in Sessione 12, vedi `SESSIONS.md`).
 
@@ -201,7 +249,7 @@ Se non ci sono issue `agent-ready`, apri issue con label `needs-spec`.
 
 ---
 
-*Ultimo aggiornamento: Sessione 9 (2026-10-15) — allineamento post-audit*
+*Ultimo aggiornamento: Sessione 17 (2026-10-17) — v1.2: aggiunta §"♻️ Pulizia branch post-merge" + gate di auto-check; cleanup `origin/feat/0.2-dexie-schema` e `origin/feat/0.2-schema-db-dexie`; apertura issues #5 #6 #7*
 
 
 ===== FILE: README.md =====
