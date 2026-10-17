@@ -1,0 +1,82 @@
+name: auto-status-done
+
+# Trigger al merge di una PR. Applica `status:done` a tutte le issue
+# chiuse dalla PR (Closes/Fixes/Resolves nel body). Rimuove anche
+# `in-progress` e `status:in-review`.
+#
+# Failure mode: se l'action fallisce, l'issue resta in `status:in-review`
+# (visibile e recuperabile manualmente). L'action NON blocca il merge.
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  apply-status-done:
+    # Esegui solo se la PR è stata mergiata (non solo chiusa)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Parse linked issues and apply status:done
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+
+            // Regex per "Closes #N", "Fixes #N", "Resolves #N" (case-insensitive)
+            const regex = /(?:Closes|Fixes|Resolves)\s+#(\d+)/gi;
+            const matches = [...body.matchAll(regex)];
+            const issueNumbers = [...new Set(matches.map(m => parseInt(m[1], 10)))];
+
+            if (issueNumbers.length === 0) {
+              core.info('No linked issues found in PR body. Skipping.');
+              return;
+            }
+
+            core.info(`Found ${issueNumbers.length} linked issue(s): ${issueNumbers.map(n => '#' + n).join(', ')}`);
+
+            for (const issueNumber of issueNumbers) {
+              try {
+                // Rimuovi `in-progress` (se presente, ignora se non esiste)
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNumber,
+                    name: 'in-progress',
+                  });
+                  core.info(`  Removed 'in-progress' from #${issueNumber}`);
+                } catch (e) {
+                  // Ignora: label probabilmente non presente
+                }
+
+                // Rimuovi `status:in-review` (se presente, ignora se non esiste)
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNumber,
+                    name: 'status:in-review',
+                  });
+                  core.info(`  Removed 'status:in-review' from #${issueNumber}`);
+                } catch (e) {
+                  // Ignora: label probabilmente non presente
+                }
+
+                // Aggiungi `status:done`
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: ['status:done'],
+                });
+                core.info(`  Added 'status:done' to #${issueNumber}`);
+              } catch (err) {
+                core.warning(`Failed to apply status:done to #${issueNumber}: ${err.message}`);
+              }
+            }
+
+            core.info('auto-status-done completed');

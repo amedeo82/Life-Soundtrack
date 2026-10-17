@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Pre-commit hook: verifica che il branch corrente sia valido per il workflow agenti.
 # Previene commit accidentali su branch non conformi alla naming convention.
+# (D3) Aggiunto check working tree clean per mitigare F5 stash collision.
 #
 # Setup: git config core.hooksPath .githooks
 # Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
@@ -10,6 +11,17 @@ set -e
 # Skip se variabile d'ambiente disattivata
 if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
   exit 0
+fi
+
+# Check 1 (D3): working tree clean (F5 stash collision mitigation)
+if ! git diff --quiet HEAD 2>/dev/null || ! git diff --cached --quiet HEAD 2>/dev/null; then
+  echo "[pre-commit] ERRORE: working tree ha modifiche non committate."
+  echo "  Committa o stasha prima del prossimo commit:"
+  echo "    git stash push -m 'wip'"
+  echo "    git commit -am 'fix'"
+  echo "    git stash pop"
+  echo "  Oppure per uscire: git commit --no-verify"
+  exit 1
 fi
 
 current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")

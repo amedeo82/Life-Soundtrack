@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.5 — Sessione 20 (2026-10-17)
+> Versione 1.6 — Sessione 21 (2026-10-17)
 
 ---
 
@@ -298,6 +298,8 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 
 **Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
 
+**Doc-sync nel branch (preferito, vedi Sessione 21 D.21.1)**: il doc-sync finale (con PR number e merge commit hash) va committato nel branch della PR, NON come commit separato su `main` (vedi §"📤 Post-merge actions"). L'eccezione "commit di follow-up immediatamente successivo" è declassata a fallback sconsigliato per race con altri agenti in parallelo.
+
 **Auto-check**: prima del merge, eseguire localmente
 
 ```powershell
@@ -362,10 +364,22 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — una issue è libera se non ha `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
 3. Crea branch `feat/<issue>-<descrizione>`
 4. Leggi la specifica del task e implementa con test
-5. Apri PR (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue)
-6. Al merge: verifica che `Closes #N` abbia chiuso l'issue e che `status:done` sia applicato (vedi §"📦 Macchina a stati delle issue (status:*)")
+5. Apri PR (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
+6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done`; tu fai solo `release:` comment + branch cleanup (vedi §"📤 Post-merge actions") (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
+
+## 📤 Post-merge actions
+
+Dopo che il Boss mergia la PR, le azioni post-merge sono **solo a livello di issue** (no commit su `main`, no race con altri agenti):
+
+1. **GitHub Action `auto-status-done`** (vedi `.github/workflows/auto-status-done.yml`) applica automaticamente `status:done` all'issue chiusa dalla PR. Rimuove anche `in-progress` e `status:in-review`. **Niente da fare manualmente per le label**.
+2. **Tu devi**:
+   - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
+   - Cancellare il branch remoto: `git push origin --delete <branch>`
+3. **Niente commit su `main`**: il doc-sync finale (con PR number e merge commit) è già nel branch PR (vedi §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge"). L'eccezione "follow-up su main" è sconsigliata: crea race con altri agenti.
+
+Vedi §"🛡️ Hardening multi-agente" (Sessione 21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue) elimina le race condition.
 
 ## 🛡️ Session start checklist
 
@@ -389,4 +403,4 @@ Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: Sessione 20 (2026-10-17) — v1.5: push early obbligatorio in §"🌳 Git workflow"; nuove sezioni §"🛡️ Session start checklist" (4 comandi di sanity check) e §"🪝 Pre-commit hook" (setup + bypass); trigger automatico via `package.json` `postinstall` (vedi Sessione 20, 3 difese a basso costo coprono 5 failure mode)*
+*Ultimo aggiornamento: Sessione 21 (2026-10-17) — v1.6: refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
