@@ -24,9 +24,9 @@
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 13 (v1.2.3) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 14 (v1.2.5) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment · v1.2.5: Story 0.2 ✅ DONE, Story 0.3 sbloccata |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 9 | Architecture Decision Records (0001, 0002, 0003, 0005) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 18 (0006) | Architecture Decision Records (0001-0003, 0005, 0006 — 0006: task claiming per agenti paralleli) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 
@@ -35,11 +35,11 @@
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.1 | Protocollo per agenti |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.3 | Protocollo per agenti (Sessione 18: §"🎫 Presa in carico delle story (claim)" + claim-first in §"🚀 Primo task"; Sessione 17: §"♻️ Pulizia branch post-merge") |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
-| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.1 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v0.2 | Diario cronologico per story: problemi, fix, lesson learned |
+| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v0.6 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -74,16 +74,20 @@
 | 12 | 📚 Doc-sync post-merge (gate AGENTS.md) | ✅ COMPLETATA |
 | 13 | 🔧 Consolidamento documentazione pre-Fase 0 | ✅ COMPLETATA |
 | 14 | 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie) | ✅ COMPLETATA |
+| 17 | 🧹 Governance post-merge (cleanup + parallelismo) | ✅ COMPLETATA |
+| 18 | 🎫 Protocollo claim per agenti paralleli (ADR-0006) | 🟡 IN CORSO (issue #11) |
 
-## Stato del progetto (post-merge PR #4, 2026-10-17)
-- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.2.5**, 13-ADR ×4, 14)
+## Stato del progetto (post-merge PR #8, 2026-10-17)
+- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.3.0**, 13-ADR ×5 (0006 incluso), 14)
 - **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
 - **Implementazione**: 🟢 **Fase 0 tecnica: fondamenta completate** — Story 0.1 (scaffold monorepo) merged (PR #2, squash `c0fb0a4`); **Story 0.2 (schema DB e layer Dexie) merged in `main`** (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅): 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms), 5 problemi/lesson in `18-DEV-LOG.md` §6, pitfalls P6-P9 in `17-DEV-NOTES.md` §3. Gate D.12.1 applicato senza drift.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
-- **Prossimo step tecnico**: aprire issue `agent-ready` per **Story 0.3 (Adapter Spotify base)** — sbloccata dal merge di 0.2; in parallelo Story 0.5 (PWA) / 0.6 (i18n). Nota: su GitHub mancano i label `agent-ready`, `phase-0`, `area:db` ecc. (solo default) — da creare prima.
+- **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
+- **Sessione 18** — protocollo claim (ADR-0006) **in corso** (issue #11, claim `kilo-HP-ELITEBOOK-hjoe`): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze).
+- **Prossimo step tecnico**: implementare **in parallelo** Story 0.3 (issue #6), Story 0.5 (issue #7) e Story 0.6 (issue #5) — tutte `agent-ready`, aree di file disgiunte (adapter / devops / ui), nessun conflitto atteso; ogni agente esegue **prima** la procedura di claim definita in `AGENTS.md` §"🎫 Presa in carico delle story" prima di lavorare. Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

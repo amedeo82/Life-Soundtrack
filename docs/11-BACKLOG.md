@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.2.2 · Sessione 12 (2026-10-16) · aggiornato S12 (doc-sync post-merge PR #2)
+> Status: 🟢 APPROVED · Versione 1.3.0 · Sessione 18 (2026-10-17) · aggiunta regola claim-first per agenti paralleli (ADR-0006)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -19,7 +19,7 @@
 ## Stato di una Story
 
 - ⬚ TODO — non iniziata
-- 🟡 IN PROGRESS — in lavorazione
+- 🟡 IN PROGRESS — in lavorazione (issue con label `in-progress` su GitHub, vedi ADR-0006)
 - ✅ DONE — completata e verificata
 - 🛑 BLOCKED — dipende da altro o da spec mancante
 
@@ -447,7 +447,7 @@ Obiettivo: allineare toolchain e dipendenze alle ultime major disponibili **a sv
 
 ## Priorità di lavorazione per agenti
 
-Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
+Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di preferenza:
 
 1. **0.1** Setup monorepo
 2. **0.5** PWA / service worker (parallelo a 0.1)
@@ -465,6 +465,8 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 14. **3.1, 3.2, 3.3** UI
 15. **5.1, 5.2** privacy
 16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
+
+**Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
 ## Stato di avanzamento (snapshot implementazione)
 
@@ -509,3 +511,4 @@ Ogni story deve avere label GitHub:
 | 1.2.3 | Sessione 13 (2026-10-16) | **Consolidamento doc pre-Fase 0**: Story 0.4 T0.4.1 PlatformCard → 5 stati canonici (chiusura M13); Story 2.2 AC allineata a `04§5` (chiusura ambiguità "Bayesiano/PELT"); **nuova Story 4.3 Artwork enrichment** (chiusura M5 con `artworkUrl` in 02 v1.2); aggiornato ordine di lavorazione per agenti |
 | 1.2.4 | Sessione 14 (2026-10-16) | **Story 0.2 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (schema Dexie v1+v2, repository CRUD, `recount()`; coverage `db/` 100%, AC 10k eventi < 500ms con fake-indexeddb); test di performance isolati in `perf.test.ts` ed esclusi dalle run coverage; cross-ref a `18-DEV-LOG` §6 |
 | 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |
+| 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |

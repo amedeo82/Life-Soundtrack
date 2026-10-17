@@ -465,6 +465,91 @@ PR #4 (merge commit `fa09b06` su `main`) ha portato in `main` l'implementazione 
 
 ---
 
+## Sessione 17 — 🧹 Governance post-merge (cleanup + parallelismo)
+
+**Data**: 2026-10-17
+**Stato**: ✅ Completata
+**Trigger**: le verifiche di governance post-merge di Story 0.2 (PR #4) rivelano due branch remoti mergati non eliminati (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie`), l'assenza dei label GitHub previsti da `11-BACKLOG.md` (gate `agent-ready`) e nessuna issue aperta per le story sbloccate. La pulizia dei branch era una pratica implicita: viene formalizzata come policy obbligatoria in `AGENTS.md`.
+
+### Attività svolte
+
+- **Cleanup branch remoti**: eliminati `origin/feat/0.2-schema-db-dexie` (merged via PR #4, `fa09b06`) e `origin/feat/0.2-dexie-schema` (merged via PR #3, `10ecde5`); `git remote prune origin` eseguito. Stato finale: **zero branch remoti** oltre a `main` (auto-check §♻️ pulito).
+- **Policy**: `AGENTS.md` → **v1.2** (PR #8, branch `docs/agents-md-post-merge-cleanup`, merge commit `a9f31a3`): nuova sezione obbligatoria **"♻️ Pulizia branch post-merge"** (chi esegue, comandi minimi, eccezioni, auto-check one-liner) + riferimenti in §"Git workflow" e nella tabella "Checklist di sincronizzazione documentazione al merge". `docs/BUNDLE.md` rigenerato nella PR e riallineato con follow-up `e514404` (solo header `Data:`).
+- **Label GitHub creati**: `agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:adapter`, `area:ui`, `area:devops`, `priority:blocker`, `priority:important`, `priority:later`, `size:S`, `size:M`, `size:L` — il set previsto da `11-BACKLOG.md` §"Stato di avanzamento" e `AGENTS.md` §"Sistema di issue e label".
+- **Issue aperte per il parallelismo della Fase 0** (tutte `agent-ready`, aree di file disgiunte):
+  - #5 — Story 0.6 Setup i18n (i18next) — `size:S`, `area:ui`
+  - #6 — Story 0.3 Adapter Spotify base — `size:L`, `area:adapter`
+  - #7 — Story 0.5 PWA e service worker — `size:M`, `area:devops`
+- **Issue di follow-up**: #9 (questo sync di INDEX/SESSIONS), #10 (bug: `generate-bundle.ps1 --check` ritenuto non deterministico — `needs-spec`, decisione Boss pendente; verifica 2026-10-17: la normalizzazione della riga `Data:` è attiva in `main` dal commit `03c1290`, vedi `18-DEV-LOG.md` 0.1-5, e il check esce 0 con timestamp stantio).
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.17.1 | La pulizia dei branch remoti post-merge diventa policy obbligatoria in `AGENTS.md` v1.2, con auto-check | I branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma nel workflow parallelo (più agenti su più issue) |
+| D.17.2 | PR #8 mantenuta chirurgica (solo `AGENTS.md` + `BUNDLE.md`); il sync di INDEX/SESSIONS demandato all'issue dedicata #9 | Prima si approva la policy (review focalizzata), poi si registra lo stato nelle memorie di progetto |
+| D.17.3 | Apertura immediata di 3 issue `agent-ready` (Story 0.3, 0.5, 0.6) per abilitare il lavoro parallelo di più agenti | Le tre story non condividono file: adapter (`@ls/core/adapters/spotify/*`), PWA (`apps/web` vite/manifest), i18n (setup `@ls/web`) — nessun merge conflict atteso |
+| D.17.4 | Issue #10 (bundle-check) lasciata `needs-spec`: la scelta tra le opzioni A/B/C compete al Boss | Il check è un gate CI: cambiarne la semantica richiede la decisione del project owner, non di un agente |
+
+### Documenti aggiornati
+
+- `AGENTS.md` → **v1.2** (§"♻️ Pulizia branch post-merge" + auto-check) — PR #8, `a9f31a3`
+- `docs/BUNDLE.md` → rigenerato in PR #8; riallineato con follow-up `e514404`
+- `docs/INDEX.md` → issue #9 (questa PR): riga 17 in roadmap, §"Stato del progetto", versioni allineate nella tabella documenti (AGENTS v1.2, 11 v1.2.5, 17 v0.2, 18 v0.6)
+- `docs/SESSIONS.md` → issue #9 (questa PR): questa entry + changelog v0.7
+
+### Prossimi step
+
+1. Lavorare in parallelo le issue #6 (Story 0.3), #7 (Story 0.5), #5 (Story 0.6) — un branch `feat/*` per issue
+2. Decisione del Boss su #10 (evidenza raccolta nel commento sull'issue: normalizzazione già attiva)
+3. Story 0.4 (UI import) dopo 0.3; Story 0.7 (Operations runbook) dopo 0.2 + 0.5
+4. A ogni merge: applicare la policy §♻️ (eliminazione branch remoto + auto-check `git branch -r --merged main | Select-String -NotMatch 'main$|HEAD'`)
+
+---
+
+## Sessione 18 — 🎫 Protocollo di claim per agenti paralleli (ADR-0006)
+
+**Data**: 2026-10-17
+**Stato**: 🟡 In corso (issue #11, claim `kilo-HP-ELITEBOOK-hjoe`)
+
+**Trigger**: il project owner nota che il workflow multi-agente produceva duplicazioni: N agenti lanciati in parallelo seguivano lo stesso percorso documentato e convergevano sulla stessa story. Mancava un meccanismo di claim + lock visibile.
+
+### Attività svolte
+
+- **ADR-0006** creato in `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0: self-claim via label `in-progress` + commento `claim:`; vince l'ID commento GitHub più basso; riverifica obbligatoria; cascata per priorità; TTL 12h; rilascio obbligatorio; assignee scartato come discriminatore perché gli agenti condividono lo stesso PAT.
+- **`AGENTS.md`** aggiornato a **v1.3**: nuova sezione **"🎫 Presa in carico delle story (claim)"** con procedura `gh` (claim, riverifica, yield, stale-release, release); §"🚀 Primo task" riscritta claim-first; label `in-progress` aggiunta alla tabella label; PAT scope esteso a `issues: read/write`.
+- **`docs/11-BACKLOG.md`** aggiornato a **v1.3.0**: §"Priorità di lavorazione" rivista come ordine di **tentativo** (claim-first), con regola ADR-0006 in calce; legenda 🟡 legata alla label `in-progress`; changelog.
+- **`docs/INDEX.md`** aggiornato: `13-ADR` ×5 (0006 incluso), AGENTS v1.2 (NB: bump a v1.3 avviene in questa stessa PR), "Stato del progetto" e roadmap allineati.
+- **`docs/BUNDLE.md`** rigenerato; `scripts/generate-bundle.ps1 --check` esce 0.
+- **Label GitHub `in-progress`** creata (le altre label del set erano state create in S17).
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.18.1 | Self-claim via label `in-progress` + commento `claim:` come meccanismo primario di presa in carico | Race condition eliminata deterministicamente (ID commento GitHub monotonico) e visibile in UI senza toccare `main` |
+| D.18.2 | Assignee GitHub scartato come discriminatore del vincitore | Tutti gli agenti di sviluppo condividono lo stesso PAT (`@me` non discrimina); usato il commento + ID agente |
+| D.18.3 | TTL claim 12h con procedura `stale-release` esplicita | Recupero automatico di claim abbandonati senza intervento del project owner |
+| D.18.4 | PAT esteso a `contents: read/write` **+ `issues: read/write`** (repo-only) per gli agenti di sviluppo | Necessario per `gh issue edit/comment`; l'AI di review non richiede PAT |
+
+### Documenti aggiornati
+
+- `docs/13-ADR/0006-multi-agent-task-claiming.md` → **nuovo** 🟢 APPROVED v1.0
+- `AGENTS.md` → **v1.3** (§"🎫 Presa in carico delle story" + §"🚀 Primo task" claim-first + label `in-progress` in tabella + PAT esteso)
+- `docs/11-BACKLOG.md` → **v1.3.0** (claim-first + legenda 🟡 + changelog)
+- `docs/INDEX.md` → tabella documenti e "Stato del progetto" allineati
+- `docs/SESSIONS.md` → questa entry + changelog v0.8
+- `docs/BUNDLE.md` → rigenerato
+- `scripts/generate-bundle.ps1` → `$files` include `docs/13-ADR/0006-multi-agent-task-claiming.md`
+
+### Prossimi step
+
+1. Aprire PR per questa issue (#11) → merge in `main`
+2. Eliminare il branch `feat/11-task-claiming-protocol` dopo il merge (policy §♻️)
+3. Da questo merge in poi: ogni agente che arriva sul repo esegue **prima** la procedura di claim descritta in `AGENTS.md` §"🎫 Presa in carico delle story" prima di toccare codice o branch
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -492,6 +577,8 @@ PR #4 (merge commit `fa09b06` su `main`) ha portato in `main` l'implementazione 
 | 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3; **post-merge**: PR #3 merged (`10ecde5`), branch eliminata, gate D.12.1 applicato senza drift |
 | 0.5 | Sessione 14 (2026-10-16) | Aggiunta Sessione 14 (implementazione Story 0.2 — schema DB e layer Dexie): 5/5 task + 5/5 AC, coverage `db/` 100%, decisioni D.14.1-D.14.5 (riallineamento Artist a 02 v1.2, semantica FK, perf test isolati, Zod fuori perimetro) |
 | 0.6 | 2026-10-17 (post-merge) | **Esito post-merge S14**: PR #4 merged (`fa09b06`, CI su main ✅), gate D.12.1 applicato senza drift; Story 0.3 sbloccata; Sessione 14 aggiornata con esito |
+| 0.7 | 2026-10-17 (Sessione 17) | Aggiunta Sessione 17 (governance post-merge): policy pulizia branch in AGENTS.md v1.2 (PR #8, `a9f31a3`), cleanup branch remoti, label GitHub creati, 3 issue `agent-ready` aperte (#5/#6/#7), follow-up #9/#10; sync INDEX/SESSIONS via issue #9 |
+| 0.8 | 2026-10-17 (Sessione 18) | Aggiunta Sessione 18 (protocollo claim agenti paralleli — ADR-0006): self-claim via label `in-progress` + commento `claim:`, ID GitHub come discriminatore del vincitore, TTL 12h, rilascio obbligatorio; AGENTS.md v1.3 con §"🎫 Presa in carico delle story" + §"🚀 Primo task" claim-first; 11-BACKLOG v1.3.0; decisioni D.18.1-D.18.4; issue #11 in-progress (claim `kilo-HP-ELITEBOOK-hjoe`) |
 
 ---
 
