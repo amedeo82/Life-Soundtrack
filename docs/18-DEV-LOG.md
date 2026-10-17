@@ -281,9 +281,9 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 **Tipo**: doc-only + script (`AGENTS.md`, `docs/`, `.githooks/`, `.github/workflows/`); nessuna modifica a codice applicativo
 **Branch**: `feat/17-chain-refactor` (da `main` @ `c048562`)
-**PR**: **#17 — merge `<da-compilare>` in `main` (2026-10-17)**
+**PR**: **#18 — merge commit `6c0f79b` in `main` (2026-10-17T18:00:26Z)**
 **Issue**: #17 (claim `kilo-HP-ELITEBOOK-q7w3`)
-**Stato**: 🟡 in corso (post-merge compile)
+**Stato**: ✅ merged in `main`; claim `kilo-HP-ELITEBOOK-q7w3` rilasciato; branch remoto eliminato (policy §♻️); GH Action `auto-status-done` testata con successo (applicata automaticamente a #17)
 
 ### Sintesi
 
@@ -304,7 +304,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 ### Link utili
 
 - Branch: `feat/17-chain-refactor` (post-merge → eliminata per policy §♻️)
-- PR: **#17** (merge commit `<da-compilare>`, 2026-10-17)
+- PR: **#18** (merge commit `6c0f79b`, 2026-10-17T18:00:26Z)
 - Issue: #17 (claim `kilo-HP-ELITEBOOK-q7w3`)
 - Spec introdotte: AGENTS.md v1.6 (D1 doc-sync IN PR + D2 GH Action + D3 pre-commit clean + D4 pre-push BUNDLE + D5 pre-push base-stale), `.github/workflows/auto-status-done.yml`, `.githooks/pre-push`
 - Spec toccate: `package.json` (invariato, già S20), `docs/INDEX.md` (S21 in roadmap + §"Stato del progetto"), `docs/SESSIONS.md` (Sessione 21 + changelog), `docs/18-DEV-LOG.md` (§10 + changelog), `.githooks/pre-commit` (D3 clean check), `.githooks/README.md` (aggiornare con nuovi hook)
@@ -326,6 +326,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.9 | 2026-10-17 (S20) | **§9 Sessione 20** (hardening multi-agente): entry PR #15 (claim `kilo-HP-ELITEBOOK-r9p2`); 4 lesson (20-1 difese stratificate > unica, 20-2 postinstall double-edged, 20-3 pattern `N` obbligatorio, 20-4 `core.hooksPath` per-clone); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); F3 e F5 non mitigati direttamente (richiedono worktree, scelta Boss C) |
 | 1.0 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati |
 | 1.1 | 2026-10-17 (Sessione 21) | **§10 Sessione 21** (refactor catena): entry PR #17 (claim `kilo-HP-ELITEBOOK-q7w3`); 4 lesson (21-1 doc-sync post-merge su main è intrinsecamente racy — soluzione: doc-sync IN PR, 21-2 GH Action può sostituire label transitions manuali, 21-3 pre-push hook cross-platform pattern pwsh/powershell fallback, 21-4 doc-sync IN PR richiede 2 commit sul branch); D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning; race condition al punto 8 (doc-sync post-merge) eliminato atomicamente |
+| 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
 
 ---
 

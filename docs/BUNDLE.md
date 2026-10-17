@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-17 19:58
+> Data: 2026-10-17 20:02
 > Totale file: 33
 
 
@@ -757,7 +757,7 @@ Apache License
 | 18 | 🎫 Protocollo claim per agenti paralleli (ADR-0006) | ✅ COMPLETATA |
 | 19 | 📦 Macchina a stati delle issue (status:* post-claim — ADR-0007) | ✅ COMPLETATA |
 | 20 | 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist) | ✅ COMPLETATA |
-| 21 | 🔗 Refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) | 🟡 IN CORSO |
+| 21 | 🔗 Refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) | ✅ COMPLETATA |
 
 ## Stato del progetto (post-merge PR #12, 2026-10-17)
 - **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.4.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
@@ -771,8 +771,8 @@ Apache License
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
 - **Sessione 19** — macchina a stati post-claim (ADR-0007) **merged in `main`** (PR #14, merge commit `a500ea2`, 2026-10-17T15:03:21Z): `AGENTS.md` **v1.4** con nuova §"📦 Macchina a stati delle issue (status:*)" (estensione di §"🎫 Presa in carico delle story") + tabella label estesa + campo `Closes #N` reso obbligatorio nella checklist PR; `11-BACKLOG.md` **v1.4.0** con §"Stato di una Story" estesa (4 stati `status:*` + nota mutua esclusione `agent-ready` ∩ `status:*` = ∅); `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0 (macchina a stati completa, transizioni, `jq` per query candidati, pattern `Closes #N`); 4 label `status:*` create su GitHub (`done` / `in-review` / `wontdo` / `blocked-other`); issue #11 chiusa come completed (rimossa `agent-ready`, era rimasta `OPEN` nonostante `PR #12` mergata — sintomo esatto che ADR-0007 previene); issue #9 rivalutata (rimossa `agent-ready` + `in-progress`, aggiunta `status:done`, chiusa); `scripts/generate-bundle.ps1` `$files` include ADR-0007; BUNDLE rigenerato. **Esito post-merge**: branch `feat/13-issue-state-machine` eliminato (policy §♻️); claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con `status:done` applicato; issue #13 chiusa via `Closes #13` (auto-close GitHub). Gate D.12.1 applicato.
 - **Sessione 20** — hardening multi-agente (push early + pre-commit hook + session checklist) **merged in `main`** (PR #16, merge commit `506c86a`, 2026-10-17T15:24:31Z): `AGENTS.md` **v1.5** con push early obbligatorio in §"🌳 Git workflow" + nuove §"🛡️ Session start checklist" (4 comandi obbligatori) e §"🪝 Pre-commit hook" (setup + bypass); `.githooks/pre-commit` (nuovo script bash committato, verifica pattern branch) + `scripts/setup-hooks.js` (nuovo Node ESM idempotente) + `package.json` con `postinstall` automatico; 3 difese a basso costo coprono 5 failure mode (F1 commit su main, F2 branch invisibile, F4 base stale, F6 collision, F7 commit post-merge); NO worktree (Boss scelta C, F3 file conflict e F5 stash collision non mitigati direttamente, documentati come limiti noti). 4 lesson learned in 18-DEV-LOG §9.
-- **Sessione 21** — refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) **in corso** (PR #17, branch `feat/17-chain-refactor`, claim `kilo-HP-ELITEBOOK-q7w3`, 2026-10-17): `AGENTS.md` **v1.6** con nuova §"📤 Post-merge actions" (post-merge solo issue-level, no commit su main) + §"🚀 Primo task" step 6 semplificato (GH Action applica status:done) + §"Checklist di sincronizzazione" aggiornata (doc-sync preferito IN PR, "follow-up" declassato); `.github/workflows/auto-status-done.yml` (**nuovo**, D2) + `.githooks/pre-push` (**nuovo**, D4+D5) + `.githooks/pre-commit` esteso (D3 working tree clean check). Race condition al punto 8 (doc-sync post-merge su `main`) eliminato. 4 lesson learned in 18-DEV-LOG §10. 6 decisioni (D.21.1-D.21.6) in SESSIONS.md Sessione 21.
-- **Prossimo step tecnico**: PR #17 (S21 refactor catena) da aprire/mergeare; dopo il merge: GH Action `auto-status-done` automatizza le label transitions, doc-sync IN PR elimina race su `main`, pre-push hook auto-rigenera BUNDLE. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) sono claimabili con il protocollo completo (S19 + S20 + S21). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
+- **Sessione 21** — refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) **merged in `main`** (PR #18, merge commit `6c0f79b`, 2026-10-17T18:00:26Z): `AGENTS.md` **v1.6** con nuova §"📤 Post-merge actions" (post-merge solo issue-level, no commit su main) + §"🚀 Primo task" step 6 semplificato (GH Action applica status:done) + §"Checklist di sincronizzazione" aggiornata (doc-sync preferito IN PR, "follow-up" declassato); `.github/workflows/auto-status-done.yml` (**nuovo**, D2) + `.githooks/pre-push` (**nuovo**, D4+D5) + `.githooks/pre-commit` esteso (D3 working tree clean check). Race condition al punto 8 (doc-sync post-merge su `main`) eliminato. 4 lesson learned in 18-DEV-LOG §10. 6 decisioni (D.21.1-D.21.6) in SESSIONS.md Sessione 21.
+- **Prossimo step tecnico**: tutte le difese S19 + S20 + S21 sono live. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) sono claimabili con il protocollo completo: query candidati `jq` (S19) + push early + pre-commit hook (S20) + doc-sync IN PR + GH Action `auto-status-done` + pre-push BUNDLE/branch-base check (S21). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -1450,7 +1450,7 @@ PR #16 (merge commit `506c86a`, 2026-10-17T15:24:31Z) portata in `main`: 9 file 
 ## Sessione 21 — 🔗 Refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions)
 
 **Data**: 2026-10-17
-**Stato**: 🟡 In corso (implementazione PR #17)
+**Stato**: ✅ Completata — merged in `main` (PR #18, merge commit `6c0f79b`, 2026-10-17T18:00:26Z)
 
 **Trigger**: il Boss nota che la catena attuale, pur con le difese S19+S20, ha un race condition al **punto 8 (doc-sync post-merge su `main`)**: due agenti che mergiano in successione ravvicinata si pestano con `git push rejected` per non-fast-forward. Causa: il doc-sync è un commit separato su `main` invece che nel branch della PR. Analisi congiunta Boss ↔ AI → 3 decisioni via `question` (2026-10-17):
 
@@ -1502,9 +1502,9 @@ PR #16 (merge commit `506c86a`, 2026-10-17T15:24:31Z) portata in `main`: 9 file 
 4. Verifica end-to-end: mergiata la PR, la prossima issue `agent-ready` che viene chiusa dovrebbe avere `status:done` applicato automaticamente
 5. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili con il protocollo completo (S19 + S20 + S21)
 
-### Esito post-merge (placeholder, 2026-10-17)
+### Esito post-merge (2026-10-17T18:00:26Z)
 
-PR #17 (merge commit `<da-compilare>`, 2026-10-17): 2 file nuovi (`.github/workflows/auto-status-done.yml`, `.githooks/pre-push`) + 1 file esteso (`.githooks/pre-commit`) + 5 file doc aggiornati. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 -Check` exit 0, branch remoto eliminato, claim rilasciato. **Test critico**: la GH Action `auto-status-done` viene eseguita automaticamente al merge → applica `status:done` all'issue chiusa → verifica manuale che l'issue abbia effettivamente la label.
+PR #18 (merge commit `6c0f79b`, 2026-10-17T18:00:26Z) portata in `main`: 8 file modificati/creati (AGENTS.md v1.6, .githooks/pre-commit esteso, docs/18-DEV-LOG v1.1, docs/SESSIONS v1.4, docs/INDEX, docs/BUNDLE, + 2 file nuovi `.github/workflows/auto-status-done.yml`, `.githooks/pre-push`). Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 -Check` exit 0 (33 file, hook non incluso nel bundle per design), branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato. Issue #17 chiusa via `Closes #17` (auto-close GitHub). 2 file nuovi (`.github/workflows/auto-status-done.yml`, `.githooks/pre-push`) + 1 file esteso (`.githooks/pre-commit`) + 5 file doc aggiornati. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 -Check` exit 0, branch remoto eliminato, claim rilasciato. **🎉 Test critico SUPERATO**: la GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge, rimuovendo `in-progress` e `status:in-review`. La catena S21 funziona end-to-end. Le prossime issue `agent-ready` mergiate vedranno `status:done` automatico senza intervento manuale.
 
 ---
 
@@ -1543,6 +1543,7 @@ PR #17 (merge commit `<da-compilare>`, 2026-10-17): 2 file nuovi (`.github/workf
 | 1.2 | 2026-10-17 (Sessione 20) | **Aggiunta Sessione 20** (hardening multi-agente): `.githooks/pre-commit` (nuovo script bash) + `scripts/setup-hooks.js` (nuovo Node ESM idempotente) + `package.json` con `postinstall` automatico; `AGENTS.md` v1.5 (push early obbligatorio + §"🛡️ Session start checklist" 4 comandi + §"🪝 Pre-commit hook" setup); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); NO worktree (Boss scelta C); 4 lesson learned in 18-DEV-LOG §9 (20-1 difese stratificate, 20-2 postinstall double-edged, 20-3 pattern N, 20-4 per-clone) |
 | 1.3 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge" e §"Link utili" del §9 (18-DEV-LOG), §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati, INDEX aggiornato (Roadmap S20 → ✅ COMPLETATA, §"Stato del progetto" S20 → "merged in main") |
 | 1.4 | 2026-10-17 (Sessione 21) | **Aggiunta Sessione 21** (refactor catena multi-agente): GH Action `auto-status-done` (nuovo `.github/workflows/`) automatizza le label transitions post-merge; pre-commit hook esteso con working tree clean check (D3); pre-push hook nuovo con BUNDLE auto-regen (D4) + base-stale warning (D5); `AGENTS.md` v1.6 con nuova §"📤 Post-merge actions" + §"🚀 Primo task" step 6 semplificato (GH Action applica status:done) + §"Checklist di sincronizzazione" aggiornata (doc-sync preferito IN PR, no race su main). Elimina il race condition al punto 8 della catena precedente (doc-sync post-merge su `main`). 4 lesson learned in 18-DEV-LOG §10 (21-1 doc-sync racy, 21-2 GH Action per label, 21-3 pre-push cross-platform, 21-4 2 commit pattern) |
+| 1.5 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17 con comment `release:` (commit SHA incluso). **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end. Placeholder `<da-compilare>` sostituito in §"Esito post-merge" e §10 (18-DEV-LOG), §"Stato" → "Completata", §"Prossimi step" → checkboxes; changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati, INDEX aggiornato (Roadmap S21 → ✅ COMPLETATA, §"Stato del progetto" S21 → "merged in main", Prossimo step → "tutte le difese S19+S20+S21 live") |
 
 ---
 
@@ -2123,9 +2124,9 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 **Tipo**: doc-only + script (`AGENTS.md`, `docs/`, `.githooks/`, `.github/workflows/`); nessuna modifica a codice applicativo
 **Branch**: `feat/17-chain-refactor` (da `main` @ `c048562`)
-**PR**: **#17 — merge `<da-compilare>` in `main` (2026-10-17)**
+**PR**: **#18 — merge commit `6c0f79b` in `main` (2026-10-17T18:00:26Z)**
 **Issue**: #17 (claim `kilo-HP-ELITEBOOK-q7w3`)
-**Stato**: 🟡 in corso (post-merge compile)
+**Stato**: ✅ merged in `main`; claim `kilo-HP-ELITEBOOK-q7w3` rilasciato; branch remoto eliminato (policy §♻️); GH Action `auto-status-done` testata con successo (applicata automaticamente a #17)
 
 ### Sintesi
 
@@ -2146,7 +2147,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 ### Link utili
 
 - Branch: `feat/17-chain-refactor` (post-merge → eliminata per policy §♻️)
-- PR: **#17** (merge commit `<da-compilare>`, 2026-10-17)
+- PR: **#18** (merge commit `6c0f79b`, 2026-10-17T18:00:26Z)
 - Issue: #17 (claim `kilo-HP-ELITEBOOK-q7w3`)
 - Spec introdotte: AGENTS.md v1.6 (D1 doc-sync IN PR + D2 GH Action + D3 pre-commit clean + D4 pre-push BUNDLE + D5 pre-push base-stale), `.github/workflows/auto-status-done.yml`, `.githooks/pre-push`
 - Spec toccate: `package.json` (invariato, già S20), `docs/INDEX.md` (S21 in roadmap + §"Stato del progetto"), `docs/SESSIONS.md` (Sessione 21 + changelog), `docs/18-DEV-LOG.md` (§10 + changelog), `.githooks/pre-commit` (D3 clean check), `.githooks/README.md` (aggiornare con nuovi hook)
@@ -2168,6 +2169,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.9 | 2026-10-17 (S20) | **§9 Sessione 20** (hardening multi-agente): entry PR #15 (claim `kilo-HP-ELITEBOOK-r9p2`); 4 lesson (20-1 difese stratificate > unica, 20-2 postinstall double-edged, 20-3 pattern `N` obbligatorio, 20-4 `core.hooksPath` per-clone); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); F3 e F5 non mitigati direttamente (richiedono worktree, scelta Boss C) |
 | 1.0 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati |
 | 1.1 | 2026-10-17 (Sessione 21) | **§10 Sessione 21** (refactor catena): entry PR #17 (claim `kilo-HP-ELITEBOOK-q7w3`); 4 lesson (21-1 doc-sync post-merge su main è intrinsecamente racy — soluzione: doc-sync IN PR, 21-2 GH Action può sostituire label transitions manuali, 21-3 pre-push hook cross-platform pattern pwsh/powershell fallback, 21-4 doc-sync IN PR richiede 2 commit sul branch); D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning; race condition al punto 8 (doc-sync post-merge) eliminato atomicamente |
+| 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
 
 ---
 
