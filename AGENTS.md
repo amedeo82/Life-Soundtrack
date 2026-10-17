@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.1 — Sessione 9 (post-audit, stabile)
+> Versione 1.3 — Sessione 18 (2026-10-17)
 
 ---
 
@@ -40,7 +40,7 @@ Questo progetto è progettato per funzionare attraverso conversazioni multiple c
 
 4. L'AI userà i suoi tool web per leggere il repo e continuerà esattamente da dove eri rimasto
 
-**Il PAT va dato agli agenti di sviluppo** (Claude Code, Cursor, Copilot) con scope `contents: read/write` sul repo solo. L'AI di review non ha bisogno di PAT.
+**Il PAT va dato agli agenti di sviluppo** (Claude Code, Cursor, Copilot) con scope `contents: read/write` **+ `issues: read/write`** sul repo solo (lo scope Issues è richiesto dal protocollo di claim, §"🎫 Presa in carico delle story"). L'AI di review non ha bisogno di PAT.
 
 ## ✅ Cosa puoi fare autonomamente
 
@@ -81,8 +81,65 @@ Una issue può essere lavorata da un agente **solo se**:
 | Area | `area:adapter`, `area:analysis`, `area:ui`, `area:ux`, `area:db`, `area:enrichment`, `area:privacy`, `area:devops` | Modulo coinvolto |
 | Priorità | `priority:blocker`, `priority:important`, `priority:later` | Ordine di lavoro |
 | Size | `size:S`, `size:M`, `size:L`, `size:XL` | Stima relativa |
-| Gate | `agent-ready`, `needs-spec`, `blocked` | Stato lavorabilità |
+| Gate | `agent-ready`, `needs-spec`, `blocked`, `in-progress` | Stato lavorabilità (`in-progress` = claim attivo di un agente, vedi §"🎫 Presa in carico delle story" e ADR-0006) |
 | Tipo | `bug`, `enhancement`, `refactor`, `docs` | Classificazione |
+
+## 🎫 Presa in carico delle story (claim)
+
+**Regola vincolante (ADR-0006): nessun agente inizia a lavorare una story senza un claim valido.** Il claim è il meccanismo che impedisce a più agenti paralleli di scegliere e implementare la stessa issue. È il primo gesto operativo, **prima** di leggere la spec dettagliata e creare il branch.
+
+### Identificativo agente
+
+All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-<hostname>-<random>` (es. `kilo-HP-ELITEBOOK-hjoe`). Serve perché gli agenti condividono lo stesso PAT: l'utente GitHub non discrimina, l'identificativo agente sì.
+
+### Procedura di claim
+
+1. **Elenca le issue candidabili** — aperte, `agent-ready`, **senza** label `in-progress`:
+
+   ```powershell
+   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels
+   ```
+
+   Filtra via quelle che hanno `in-progress` tra le label.
+
+2. **Scegli la prima libera** secondo l'ordine di `11-BACKLOG.md` §"Priorità di lavorazione". Se il project owner ha indicato una issue specifica nell'initial prompt, usa quella.
+
+3. **Claim immediato** (label + commento, in sequenza rapida). Il commento DEVE iniziare con `claim:` — è il marker che la riverifica cerca:
+
+   ```powershell
+   gh issue edit <N> --add-label in-progress
+   gh issue comment <N> --body "claim: <AGENT-ID> (UTC <timestamp>)"
+   ```
+
+4. **Riverifica** — scarica tutti i commenti di claim e verifica che il tuo abbia l'**ID GitHub più basso** tra i claim non ancora rilasciati (vince chi ha commentato per primo):
+
+   ```powershell
+   gh api repos/amedeo82/Life-Soundtrack/issues/<N>/comments --jq '.[] | select(.body | startswith("claim:")) | {id, created_at, body}'
+   ```
+
+   - **Vinci**: procedi — branch `feat/<N>-<descrizione>` e resto del protocollo.
+   - **Perdi**: lascia un commento `yield: <AGENT-ID>` e passa alla prossima issue candidabile (torna al punto 2). **Non rimuovere la label `in-progress`**: serve al vincitore.
+
+### Mantenere il claim
+
+- **Un agente = una story alla volta.** Nessun claim multiplo simultaneo.
+- **Attività obbligatoria**: qualsiasi attività (commit pushato, PR aperta, commento di progresso `progress: <AGENT-ID> — <update>`) resetta il TTL di 12 ore.
+- **Claim stantio (TTL 12 ore)**: un claim senza attività per 12 ore è considerato abbandonato. Qualsiasi agente può prenderlo: prima commenta `stale-release: <AGENT-ID> — claim scaduto, ultima attività >12h`, poi esegue la procedura di claim normale (punti 3-4). Un agente che torna dopo uno stale-release verifica lo storico dei commenti: se esiste un claim più recente attivo, si arrende con `yield:`.
+
+### Rilascio del claim
+
+```powershell
+gh issue comment <N> --body "release: <AGENT-ID> — <motivo: PR mergata / abbandono / spec cambiata>"
+gh issue edit <N> --remove-label in-progress
+```
+
+Il rilascio è **obbligatorio**: al merge o rifiuto della PR, in caso di abbandono, o se la spec collegata torna 🟡 DRAFT. Mai lasciare label `in-progress` orfane: sono falsi blocchi che solo il TTL può pulire.
+
+### Casi particolari
+
+- **Assegnazione esplicita del project owner**: l'agente esegue comunque claim + riverifica (punti 3-4), così la presa in carico resta visibile agli altri agenti.
+- **Issue senza `in-progress` ma con branch `feat/<N>-…` remoto esistente**: segnala con issue `needs-spec` e passa alla prossima. Un branch orfano non è un lock (ADR-0006) ed è materia della §"♻️ Pulizia branch post-merge".
+- **Nessuna issue candidabile**: apri issue `needs-spec` e termina la sessione **senza lavorare nessuna story**.
 
 ## 🌳 Git workflow
 
@@ -223,13 +280,12 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 ## 🚀 Primo task di un agente
 
 1. Leggi questo file
-2. Leggi `docs/INDEX.md` e `docs/11-BACKLOG.md`
-3. Cerca la prima story ⬚ TODO con label `agent-ready`
-4. Clona il repo, crea branch `feat/<issue>-<descrizione>`
-5. Implementa con test
-6. Apri PR
+2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — mai una issue già in `in-progress`
+3. Crea branch `feat/<issue>-<descrizione>`
+4. Leggi la specifica del task e implementa con test
+5. Apri PR
 
-Se non ci sono issue `agent-ready`, apri issue con label `needs-spec`.
+Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
 ## 📞 Contatti
 
@@ -240,4 +296,4 @@ Se non ci sono issue `agent-ready`, apri issue con label `needs-spec`.
 
 ---
 
-*Ultimo aggiornamento: Sessione 17 (2026-10-17) — v1.2: aggiunta §"♻️ Pulizia branch post-merge" + gate di auto-check; cleanup `origin/feat/0.2-dexie-schema` e `origin/feat/0.2-schema-db-dexie`; apertura issues #5 #6 #7*
+*Ultimo aggiornamento: Sessione 18 (2026-10-17) — v1.3: aggiunta §"🎫 Presa in carico delle story (claim)" (ADR-0006: label `in-progress` + commento di claim, riverifica, cascata, TTL 12h); §"Primo task" riscritto claim-first; PAT esteso a `issues: read/write`*

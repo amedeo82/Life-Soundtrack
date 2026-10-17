@@ -93,6 +93,7 @@ $files = @(
     "docs/13-ADR/0002-local-first.md",
     "docs/13-ADR/0003-adapter-pattern.md",
     "docs/13-ADR/0005-sync-cloud.md",
+    "docs/13-ADR/0006-multi-agent-task-claiming.md",
     "docs/14-GLOSSARY.md",
     "docs/15-DESIGN-SYSTEM.md",
     # Fixture (small/foundational) — i file di grandi dimensioni (medium/large/scenarios/demo-user)
