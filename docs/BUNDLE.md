@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-17 16:27
-> Totale file: 32
+> Data: 2026-10-17 16:59
+> Totale file: 33
 
 
 ===== FILE: AGENTS.md =====
@@ -10,7 +10,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.3 — Sessione 18 (2026-10-17)
+> Versione 1.4 — Sessione 19 (2026-10-17)
 
 ---
 
@@ -91,7 +91,12 @@ Una issue può essere lavorata da un agente **solo se**:
 | Priorità | `priority:blocker`, `priority:important`, `priority:later` | Ordine di lavoro |
 | Size | `size:S`, `size:M`, `size:L`, `size:XL` | Stima relativa |
 | Gate | `agent-ready`, `needs-spec`, `blocked`, `in-progress` | Stato lavorabilità (`in-progress` = claim attivo di un agente, vedi §"🎫 Presa in carico delle story" e ADR-0006) |
+| Status (post-claim) | `status:done`, `status:in-review`, `status:wontdo`, `status:blocked-other` | Stato dopo il rilascio del claim (vedi §"📦 Macchina a stati delle issue" e ADR-0007). Mutuamente esclusivo con `agent-ready`. |
 | Tipo | `bug`, `enhancement`, `refactor`, `docs` | Classificazione |
+
+### Ortopedie fra label Gate e Status
+
+Le label `agent-ready` e `status:*` sono **mutuamente esclusive**: un'issue ha l'una OPPURE l'altra, mai entrambe. La query candidati di §"🚀 Primo task" lo garantisce. `needs-spec` e `blocked` sono ortogonali (compossibili con `status:*`).
 
 ## 🎫 Presa in carico delle story (claim)
 
@@ -103,13 +108,13 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 
 ### Procedura di claim
 
-1. **Elenca le issue candidabili** — aperte, `agent-ready`, **senza** label `in-progress`:
+1. **Elenca le issue candidabili** — aperte, `agent-ready`, **senza** label `in-progress` e **senza** alcuna `status:*` (vedi §"📦 Macchina a stati delle issue"):
 
    ```powershell
-   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels
+   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels | jq '[.[] | select(([.labels[].name] | any(startswith('status:')) | not))]'
    ```
 
-   Filtra via quelle che hanno `in-progress` tra le label.
+   Filtra via quelle che hanno `in-progress` oppure una qualsiasi `status:*` tra le label.
 
 2. **Scegli la prima libera** secondo l'ordine di `11-BACKLOG.md` §"Priorità di lavorazione". Se il project owner ha indicato una issue specifica nell'initial prompt, usa quella.
 
@@ -138,17 +143,52 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 ### Rilascio del claim
 
 ```powershell
-gh issue comment <N> --body "release: <AGENT-ID> — <motivo: PR mergata / abbandono / spec cambiata>"
+gh issue comment <N> --body "release: <AGENT-ID> — <motivo: PR mergata / PR rifiutata / abbandono / spec cambiata / passata a status:* >"
 gh issue edit <N> --remove-label in-progress
 ```
 
 Il rilascio è **obbligatorio**: al merge o rifiuto della PR, in caso di abbandono, o se la spec collegata torna 🟡 DRAFT. Mai lasciare label `in-progress` orfane: sono falsi blocchi che solo il TTL può pulire.
+
+**A seconda dell'esito del lavoro**, l'agente che rilascia applica anche una label `status:*` (vedi §"📦 Macchina a stati delle issue"). Il `release:` da solo non è sufficiente a chiudere l'issue.
 
 ### Casi particolari
 
 - **Assegnazione esplicita del project owner**: l'agente esegue comunque claim + riverifica (punti 3-4), così la presa in carico resta visibile agli altri agenti.
 - **Issue senza `in-progress` ma con branch `feat/<N>-…` remoto esistente**: segnala con issue `needs-spec` e passa alla prossima. Un branch orfano non è un lock (ADR-0006) ed è materia della §"♻️ Pulizia branch post-merge".
 - **Nessuna issue candidabile**: apri issue `needs-spec` e termina la sessione **senza lavorare nessuna story**.
+
+## 📦 Macchina a stati delle issue (status:*)
+
+**Regola vincolante (ADR-0007):** quando un'issue esce dal ciclo di lavorazione, l'agente che rilascia il claim applica una label `status:*` al posto di `agent-ready`. Le label `status:*` sono **mutuamente esclusive** con `agent-ready`: un'issue con `status:*` non è candidabile per claim.
+
+### Stati possibili
+
+| Stato | Label | Issue aperta? |
+|-------|-------|---------------|
+| ⬚ candidato | (solo `agent-ready`) | sì |
+| 🟡 claim attivo | `agent-ready` + `in-progress` | sì |
+| 👀 PR aperta, in attesa di review | `status:in-review` | sì |
+| ✅ PR merged & validata | `status:done` | **chiusa** |
+| ❌ PR rifiutata / scope cancellato | `status:wontdo` | **chiusa** |
+| 🛑 Bloccata da dipendenza | `status:blocked-other` | sì |
+
+### Regole di transizione (dopo il rilascio del claim)
+
+| Esito del lavoro | Azione aggiuntiva dopo `release:` |
+|------------------|-----------------------------------|
+| PR aperta, in attesa di review | Rimuovi `agent-ready`, aggiungi `status:in-review`. Issue resta aperta. |
+| PR merged, doc-sync (gate D.12.1) applicato | Issue già chiusa da GitHub via `Closes #N`. Aggiungi `status:done` alla chiusura. |
+| PR rifiutata in review | Rimuovi `agent-ready`, aggiungi `status:wontdo`. Chiudi l'issue con commento motivato. |
+| Lavoro abbandonato (spec non più valida, scope cancellato) | Rimuovi `agent-ready`, aggiungi `status:wontdo`. Chiudi l'issue con motivazione. |
+| Story bloccata da dipendenza esterna | Rimuovi `agent-ready`, aggiungi `status:blocked-other`. Issue resta aperta. |
+
+### Chiusura al merge: campo `Closes #N` (obbligatorio)
+
+Ogni PR che risolve un'issue **deve** contenere **`Closes #N`**, **`Fixes #N`** o **`Resolves #N`** nel body. GitHub li riconosce e chiude automaticamente l'issue al merge. Vedi §"📝 Checklist di auto-revisione PR".
+
+### Audit retroattivo
+
+Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il sintomo che ADR-0007 risolve — vedi issue #11 durante Sessione 19, merge `2891cb5`): rimuovi `agent-ready`, applica `status:done`, chiudi l'issue con commento di riepilogo che punta alla PR già mergata.
 
 ## 🌳 Git workflow
 
@@ -158,6 +198,7 @@ Il rilascio è **obbligatorio**: al merge o rifiuto della PR, in caso di abbando
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
+- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 ## ♻️ Pulizia branch post-merge *(obbligatoria)*
 
@@ -207,6 +248,8 @@ Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni doc
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` e `pnpm run test` passano in locale
+- [ ] **Il body della PR include `Closes #N`** (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub lo usa per chiudere automaticamente l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)")
+- [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
 
@@ -225,6 +268,7 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
 | Modifica al toolchain o alla policy di versionamento | `docs/17-DEV-NOTES.md` + nuova entry in `SESSIONS.md` |
+| Issue chiusa al merge | `status:done` applicato (vedi §"📦 Macchina a stati delle issue (status:*)"); rimozione `agent-ready` |
 
 **Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
 
@@ -289,10 +333,11 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 ## 🚀 Primo task di un agente
 
 1. Leggi questo file
-2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — mai una issue già in `in-progress`
+2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — una issue è libera se non ha `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
 3. Crea branch `feat/<issue>-<descrizione>`
 4. Leggi la specifica del task e implementa con test
-5. Apri PR
+5. Apri PR (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue)
+6. Al merge: verifica che `Closes #N` abbia chiuso l'issue e che `status:done` sia applicato (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -305,7 +350,7 @@ Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **
 
 ---
 
-*Ultimo aggiornamento: Sessione 18 (2026-10-17) — v1.3: aggiunta §"🎫 Presa in carico delle story (claim)" (ADR-0006: label `in-progress` + commento di claim, riverifica, cascata, TTL 12h); §"Primo task" riscritto claim-first; PAT esteso a `issues: read/write`*
+*Ultimo aggiornamento: Sessione 19 (2026-10-17) — v1.4: aggiunta §"📦 Macchina a stati delle issue (status:*)" (ADR-0007 — estensione post-claim di ADR-0006, 4 stati: `done` / `in-review` / `wontdo` / `blocked-other`); campo `Closes #N` reso obbligatorio nella checklist PR; transizione `agent-ready` → `status:in-review` documentata; tabella label estesa con `status:*`; §"🚀 Primo task" ora include le nuove transizioni*
 
 
 ===== FILE: README.md =====
@@ -598,7 +643,7 @@ Apache License
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 14 (v1.2.5) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment · v1.2.5: Story 0.2 ✅ DONE, Story 0.3 sbloccata |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 18 (0006) | Architecture Decision Records (0001-0003, 0005, 0006 — 0006: task claiming per agenti paralleli) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 19 (0001-0007) | Architecture Decision Records (0001-0003, 0005-0007; 0006 claim agenti, 0007 macchina a stati `status:*`) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 
@@ -607,7 +652,7 @@ Apache License
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.3 | Protocollo per agenti (Sessione 18: §"🎫 Presa in carico delle story (claim)" + claim-first in §"🚀 Primo task"; Sessione 17: §"♻️ Pulizia branch post-merge") |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.4 | Protocollo per agenti (Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -648,6 +693,7 @@ Apache License
 | 14 | 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie) | ✅ COMPLETATA |
 | 17 | 🧹 Governance post-merge (cleanup + parallelismo) | ✅ COMPLETATA |
 | 18 | 🎫 Protocollo claim per agenti paralleli (ADR-0006) | ✅ COMPLETATA |
+| 19 | 📦 Macchina a stati delle issue (status:* post-claim — ADR-0007) | 🟡 IN CORSO |
 
 ## Stato del progetto (post-merge PR #12, 2026-10-17)
 - **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.3.0**, 13-ADR ×5 (0006 incluso), 14)
@@ -659,7 +705,8 @@ Apache License
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
-- **Prossimo step tecnico**: implementare **in parallelo** Story 0.3 (issue #6), Story 0.5 (issue #7) e Story 0.6 (issue #5) — tutte `agent-ready`, aree di file disgiunte (adapter / devops / ui), nessun conflitto atteso; ogni agente esegue **prima** la procedura di claim definita in `AGENTS.md` §"🎫 Presa in carico delle story" prima di lavorare. Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
+- **Sessione 19** — macchina a stati post-claim (ADR-0007) **in corso** (PR #13, branch `feat/13-issue-state-machine`, claim `kilo-HP-ELITEBOOK-jm9f`, 2026-10-17): `AGENTS.md` **v1.4** con nuova §"📦 Macchina a stati delle issue (status:*)" (estensione di §"🎫 Presa in carico delle story") + tabella label estesa + campo `Closes #N` reso obbligatorio nella checklist PR; `11-BACKLOG.md` **v1.4.0** con §"Stato di una Story" estesa (4 stati `status:*` + nota mutua esclusione `agent-ready` ∩ `status:*` = ∅); `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0 (macchina a stati completa, transizioni, `jq` per query candidati, pattern `Closes #N`); 4 label `status:*` create su GitHub (`done` / `in-review` / `wontdo` / `blocked-other`); issue #11 chiusa come completed (rimossa `agent-ready`, era rimasta `OPEN` nonostante `PR #12` mergata — sintomo esatto che ADR-0007 previene); cleanup retroattivo documentato nel commento di chiusura di #11; `scripts/generate-bundle.ps1` `$files` include ADR-0007; BUNDLE rigenerato.
+- **Prossimo step tecnico**: PR #13 da aprire/mergeare; dopo il merge, le 3 issue `agent-ready` ancora attive (#5, #6, #7) sono claimabili con la nuova query che esclude `status:*`. Issue #9 rivalutata (rivalutazione S17 sync) → chiusura in PR o follow-up. Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -1224,6 +1271,59 @@ PR #12 (merge commit `2891cb5` su `main`, 2026-10-17) ha portato in `main` il pr
 
 ---
 
+## Sessione 19 — 📦 Macchina a stati delle issue (status:* post-claim) — ADR-0007
+
+**Data**: 2026-10-17
+**Stato**: 🟡 In corso (implementazione PR #13)
+
+**Trigger**: il project owner nota che il workflow post-claim (ADR-0006) non codifica gli stati successivi al rilascio del claim. Verifica 2026-10-17: tutte le 6 PR mergate (`PR #1`–`#12`) hanno `closingIssuesReferences` vuoto (nessuna clausola `Closes #N` nel body). L'issue stessa #11 (ADR-0006 docs) è rimasta `OPEN` con `agent-ready` dopo il merge di `PR #12` (`2891cb5`). Analisi congiunta Boss ↔ AI → 3 decisioni via `question` (opzione A: `status:*` + chiusura al merge; cleanup immediato #11; tracciamento via issue `agent-ready` #13).
+
+### Attività svolte
+
+- **Cleanup retroattivo #11**: rimosso `agent-ready`, chiusa come completed con commento di riepilogo (puntava a `PR #12` e a #13)
+- **Issue #13** aperta `agent-ready` (`area:devops` + `size:M` + `docs` + `priority:important`) con mini-spec inline
+- **4 label `status:*`** create su GitHub: `done` (verde `0E8A16`), `in-review` (blu `1D76DB`), `wontdo` (grigio `999999`), `blocked-other` (arancione `D93F0B`)
+- **ADR-0007** `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0: 4 stati post-claim + transizioni; query candidati con `jq`; pattern `Closes #N` obbligatorio. Retro-compatibile con ADR-0006
+- **`AGENTS.md`** → **v1.4**: nuova sezione §"📦 Macchina a stati delle issue (status:*)"; tabella label estesa con `status:*`; campo `Closes #N` reso obbligatorio nella checklist PR; §"🚀 Primo task" aggiornato con le transizioni
+- **`docs/11-BACKLOG.md`** → **v1.4.0**: §"Stato di una Story" estesa con 4 stati `status:*` + nota di mutua esclusione `agent-ready` ∩ `status:*` = ∅
+- **`docs/INDEX.md`**, **`docs/18-DEV-LOG.md`**, **`scripts/generate-bundle.ps1`** aggiornati; **`docs/BUNDLE.md`** rigenerato; `pwsh scripts/generate-bundle.ps1 --check` exit 0 con ADR-0007 incluso
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.19.1 | 4 label `status:*` (done, in-review, wontdo, blocked-other) | Granularità minima per coprire i 4 esiti tipici del post-claim; retro-compatibile con ADR-0006 (claim e TTL invariati) |
+| D.19.2 | Query candidati: `gh issue list --label agent-ready` + `jq` exclude `status:*` | Forma robusta indipendentemente dal filtro usato; mutua-esclusione gestita sia semanticamente che sintatticamente |
+| D.19.3 | `Closes #N` obbligatorio nel body PR + `status:done` al merge | GitHub auto-chiusura + etichetta ricercabile; previene la recidiva del problema di #11 |
+| D.19.4 | ADR-0007 come documento separato (non emendamento ADR-0006) | Estensione significativa della macchina a stati (4 nuovi stati, label, query); più chiaro come riferimento |
+| D.19.5 | Issue #9 rivalutata in PR (rimozione `agent-ready` + `status:done` + chiusura) | Il follow-up S17 (doc-sync) è stato mergato ma #9 è ancora `agent-ready` + `in-progress`; va chiusa in questa PR o in un commit di follow-up |
+
+### Documenti aggiornati
+
+- 🟢 `docs/13-ADR/0007-issue-state-machine.md` (**nuovo** v1.0)
+- `AGENTS.md` → **v1.4** (§"📦 Macchina a stati delle issue (status:*)" + label table + checklist PR + footer)
+- `docs/11-BACKLOG.md` → **v1.4.0** (§"Stato di una Story" estesa, changelog v1.4.0)
+- `docs/INDEX.md` (versione AGENTS v1.4, 11 v1.4.0, ADR-0007 entry, S19 in roadmap)
+- `docs/18-DEV-LOG.md` → **v0.7** (§8 S19, changelog v0.8)
+- `docs/SESSIONS.md` → **v1.0** (questa entry + changelog v1.0)
+- `scripts/generate-bundle.ps1` (`$files` include ADR-0007)
+- `docs/BUNDLE.md` rigenerato (33 file, ADR-0007 incluso)
+- 4 label GitHub `status:*` create
+
+### Prossimi step
+
+1. Aprire PR per #13 → merge in `main`
+2. Eliminare il branch `feat/13-issue-state-machine` dopo il merge (policy §♻️)
+3. Rilasciare claim su #13 (`release:` + rimozione `in-progress` + applicazione `status:done` + chiusura via `Closes #13` al merge)
+4. Rivalutare #9: chiusura e applicazione `status:done` nella stessa PR o in un follow-up
+5. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili dagli agenti con la nuova query
+
+### Esito post-merge (placeholder, 2026-10-17)
+
+PR #13 (merge commit `<da-compilare>`, 2026-10-17) portata in `main`: 6/6 file doc aggiornati + 4 label GitHub + ADR-0007 nuovo. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 --check` exit 0, branch remoto eliminato, claim rilasciato su #13.
+
+---
+
 ## Template sessione (da copiare per le sessioni future)
 
     ## Sessione N — 🎯 [Nome]
@@ -1254,6 +1354,7 @@ PR #12 (merge commit `2891cb5` su `main`, 2026-10-17) ha portato in `main` il pr
 | 0.7 | 2026-10-17 (Sessione 17) | Aggiunta Sessione 17 (governance post-merge): policy pulizia branch in AGENTS.md v1.2 (PR #8, `a9f31a3`), cleanup branch remoti, label GitHub creati, 3 issue `agent-ready` aperte (#5/#6/#7), follow-up #9/#10; sync INDEX/SESSIONS via issue #9 |
 | 0.8 | 2026-10-17 (Sessione 18) | Aggiunta Sessione 18 (protocollo claim agenti paralleli — ADR-0006): self-claim via label `in-progress` + commento `claim:`, ID GitHub come discriminatore del vincitore, TTL 12h, rilascio obbligatorio; AGENTS.md v1.3 con §"🎫 Presa in carico delle story" + §"🚀 Primo task" claim-first; 11-BACKLOG v1.3.0; decisioni D.18.1-D.18.4; issue #11 in-progress (claim `kilo-HP-ELITEBOOK-hjoe`) |
 | 0.9 | 2026-10-17 (post-merge) | **Esito post-merge S18**: PR #12 merged (`2891cb5`), gate D.12.1 applicato: Sessione 18 ✅ Completata, branch remoto eliminato (policy §♻️), auto-check pulito, claim rilasciato su #11; Sessione 18 aggiornata con esito |
+| 1.0 | 2026-10-17 (Sessione 19) | **Aggiunta Sessione 19** (ADR-0007 — macchina a stati post-claim): 4 label `status:*` + transizioni + `Closes #N` obbligatorio; cleanup retroattivo #11 (chiusa come completed); issue #13 aperta `agent-ready` come contenitore del lavoro; `AGENTS.md` v1.4 + 11-BACKLOG v1.4.0 + 18-DEV-LOG v0.7 + scripts/generate-bundle.ps1 aggiornato; BUNDLE rigenerato; 4 lesson learned (19-1 dogfooding cleanup, 19-2 label 422, 19-3 write tool + JSON, 19-4 single-quote jq) |
 
 ---
 
@@ -1760,6 +1861,41 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 8. Sessione 19 — issue state machine (status:* post-claim)
+
+**Tipo**: doc-only (`docs/`, `AGENTS.md`, `scripts/generate-bundle.ps1`); nessuna modifica a codice o schema dati
+**Branch**: `feat/13-issue-state-machine` (da `main` @ `<tip>`)
+**PR**: **#13 — merge `<da-compilare>` in `main` (2026-10-17)**
+**Issue**: #13 (claim `kilo-HP-ELITEBOOK-jm9f`, dogfooding del protocollo ADR-0007)
+**Stato**: 🟡 in corso (post-merge compile)
+
+### Sintesi
+
+- **ADR-0007** `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0: 4 label `status:*` (done / in-review / wontdo / blocked-other), transizioni claim → in-review → done/wontdo, query candidati con `jq`, pattern `Closes #N` obbligatorio. Retro-compatibile con ADR-0006 (claim e TTL invariati).
+- **`AGENTS.md`** v1.4: nuova sezione §"📦 Macchina a stati delle issue (status:*)" con regole di transizione; query §"🚀 Primo task" aggiornata con `jq`; tabella label estesa; campo `Closes #N` reso obbligatorio nella checklist PR.
+- **`docs/11-BACKLOG.md`** v1.4.0: §"Stato di una Story" estesa con i 4 stati `status:*` + nota di mutua esclusione con `agent-ready`.
+- **`docs/INDEX.md`**, **`docs/SESSIONS.md`**, **`scripts/generate-bundle.ps1`**, **`docs/18-DEV-LOG.md`**, **`docs/BUNDLE.md`** aggiornati (7 file sincronizzati per il gate D.12.1).
+- 4 label GitHub create (`status:done`/`status:in-review`/`status:wontdo`/`status:blocked-other`) con descrizioni e colori dedicati.
+
+### Lesson learned
+
+| # | Tipo | Osservazione | Rif. |
+|---|------|--------------|------|
+| 19-1 | L | **Issue mergata ma non chiusa come sintomo (dogfooding)**: il problema del Boss (#11 rimasta `agent-ready` dopo `PR #12` merged) è ESATTAMENTE l'orfano che il nuovo ADR-0007 previene; il cleanup retroattivo è sia il fix che la dimostrazione del problema. Pattern replicabile: quando un agent si accorge che il workflow documentato non copre un caso reale, apre `agent-ready` con la mini-spec prima di scrivere codice | issue #11 → cleanup-retroattivo; issue #13 (tracciamento) |
+| 19-2 | L+F | **Label description > 100 char in `gh label create` fallisce con HTTP 422**: GitHub ha un limite di 100 caratteri sulle descrizioni delle label. Tenere le descrizioni concise (≤90 char) o documentarle in AGENTS.md invece che nel description GitHub | `gh label create "status:blocked-other" --description "..."` con 122 char → 422; corretto a 90 char |
+| 19-3 | L | **`write` tool input size limit + JSON escaping**: un singolo `write` di un file da 350+ righe con contenuti Markdown ricchi di `"` può rompere il JSON (escape sbagliato o troncamento). Preferire `edit` con anchor piccoli a `write` per file grandi | preparazione PR #13 |
+| 19-4 | L | **PowerShell 5.1 single-quote vs double-quote in `jq`**: per evitare escaping JSON nel command, usare `startswith('status:')` invece di `startswith("status:")` nelle query jq passate a PowerShell. `jq` accetta indifferentemente `'` e `"` come delimitatori di stringa | `AGENTS.md` §"🎫 Presa in carico delle story" (nuova query) |
+
+### Link utili
+
+- Branch: `feat/13-issue-state-machine` (post-merge → eliminata per policy §♻️)
+- PR: **#13** (merge commit `<da-compilare>`, 2026-10-17)
+- Issue: #13 (claim `kilo-HP-ELITEBOOK-jm9f`)
+- Spec introdotte: ADR-0007 v1.0, AGENTS.md v1.4, 11-BACKLOG.md v1.4.0
+- Spec toccate: `docs/INDEX.md` (version, S19), `docs/SESSIONS.md` (Sessione 19 + changelog v1.0), `docs/18-DEV-LOG.md` (§8 + changelog v0.7), `scripts/generate-bundle.ps1` (`$files` include ADR-0007)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -1771,6 +1907,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.5 | 2026-10-16 | Sessione 14 — entry Story 0.2 con 5 problemi/fix/lesson (0.2-1..5): Dexie `modify()` su Collection, riallineamento `Artist` a 02 v1.2, slow-path fake-indexeddb su re-put, test perf isolati dalle run coverage, pitfalls barrel/MapIterator; osservazione fixture per Story 0.3 |
 | 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
 | 0.7 | 2026-10-17 | **§7 Sessione 18** (protocollo claim — ADR-0006): entry `merged` con PR #12 (`2891cb5`), claim `kilo-HP-ELITEBOOK-hjoe` rilasciato, branch `feat/11-task-claiming-protocol` eliminata; 3 lesson learned (18-1 dogfooding claim, 18-2 PowerShell BOM su body commit/PR, 18-3 `git branch -d` su merge-commit); osservazione operativa per le 3 issue `agent-ready` aperte in S17 |
+| 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #13, claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione) |
 
 ---
 
@@ -5389,7 +5526,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.3.0 · Sessione 18 (2026-10-17) · aggiunta regola claim-first per agenti paralleli (ADR-0006)
+> Status: 🟢 APPROVED · Versione 1.4.0 · Sessione 19 (2026-10-17) · aggiunti 4 stati 'status:*' post-claim (ADR-0007) alla §"Stato di una Story"
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -5409,8 +5546,12 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 - ⬚ TODO — non iniziata
 - 🟡 IN PROGRESS — in lavorazione (issue con label `in-progress` su GitHub, vedi ADR-0006)
-- ✅ DONE — completata e verificata
-- 🛑 BLOCKED — dipende da altro o da spec mancante
+- 👀 IN REVIEW — PR aperta, in attesa di review; label `status:in-review` (ADR-0007)
+- ✅ DONE — completata, PR mergata e validata; label `status:done`, issue chiusa (ADR-0007)
+- ❌ WONTDO — PR rifiutata / scope cancellato; label `status:wontdo`, issue chiusa (ADR-0007)
+- 🛑 BLOCKED — dipende da altro o da spec mancante; label `status:blocked-other` (ADR-0007)
+
+**Mutua esclusione**: `agent-ready` e `status:*` sono mutuamente esclusivi su un'issue. Un'issue è candidabile al claim solo se ha `agent-ready` e nessuna `status:*` (vedi ADR-0007 + `AGENTS.md` §"🚀 Primo task").
 
 ---
 
@@ -5901,6 +6042,7 @@ Ogni story deve avere label GitHub:
 | 1.2.4 | Sessione 14 (2026-10-16) | **Story 0.2 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (schema Dexie v1+v2, repository CRUD, `recount()`; coverage `db/` 100%, AC 10k eventi < 500ms con fake-indexeddb); test di performance isolati in `perf.test.ts` ed esclusi dalle run coverage; cross-ref a `18-DEV-LOG` §6 |
 | 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
+| 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |
 
 
 
@@ -6509,6 +6651,96 @@ Gli agenti di sviluppo condividono **lo stesso PAT del project owner** (AGENTS.m
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | Sessione 18 (2026-10-17) | Primo rilascio: self-claim via label `in-progress` + commento `claim:`, vince l'ID commento più basso, riverifica obbligatoria, cascata per priorità, TTL 12h, rilascio obbligatorio, assegnazione esplicita opzionale |
+
+
+
+===== FILE: docs/13-ADR/0007-issue-state-machine.md =====
+
+# ADR-0007 — Macchina a stati completa delle issue (status:* post-claim)
+
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 19 (2026-10-17)
+> Decisioni approvate dal project owner in sessione interattiva (issue #13).
+
+## Contesto
+
+ADR-0006 ha definito il protocollo di claim (label `in-progress` + commento `claim:`) per gli stati **⬚ candidato → 🟡 claimato → ↩️ rilasciato**, ma **non codifica gli stati successivi al rilascio del claim** (PR aperta, PR mergata, PR rifiutata, story bloccata da dipendenza). Conseguenza strutturale: la query `gh issue list --state open --label agent-ready` continua a proporre issue la cui PR è già in `main`.
+
+**Verifica del 2026-10-17**: tutte le 6 PR mergate nel repo (`PR #1`, `#2`, `#3`, `#4`, `#8`, `#12`) hanno `closingIssuesReferences` vuoto — nessuna clausola `Closes #N` nel body. L'issue **#11** stessa — quella che definiva il claim protocol — è rimasta `OPEN` con label `agent-ready` fino al cleanup di oggi, nonostante `PR #12` (`2891cb5`) fosse merged. Issue **#5/#6/#7** restano invece correttamente in `agent-ready` perché le rispettive PR non sono ancora state aperte. Il problema è sistematico ma limitato alla fase "post-claim": il protocollo ADR-0006 funziona finché la issue è in volo.
+
+Thread di analisi completo: issue #13 (aperta e chiusa come `agent-ready` in S19 per essere il contenitore del lavoro).
+
+## Decisione
+
+Estendiamo il protocollo di claim con una famiglia di label **`status:*`** da applicare al posto di `agent-ready` quando l'issue esce dal ciclo di lavorazione. Le label sono additive (nessuna sostituzione forzata) e mutuamente esclusive con `agent-ready`: un'issue che ha `status:*` non è candidabile per claim.
+
+| Label | Stato equivalente | `agent-ready`? | Issue aperta? |
+|-------|-------------------|----------------|---------------|
+| `agent-ready` (da sola) | ⬚ candidato | sì | sì |
+| `agent-ready` + `in-progress` | 🟡 claim attivo (ADR-0006) | sì | sì |
+| `status:in-review` | 👀 PR aperta, in attesa di review | **no** | sì |
+| `status:done` | ✅ PR merged & validata | **no** | **chiusa** |
+| `status:wontdo` | ❌ PR rifiutata / scope cancellato | **no** | **chiusa** |
+| `status:blocked-other` | 🛑 Bloccata da dipendenza (story da completare prima) | **no** | sì |
+
+### Regole di transizione
+
+1. **Claim** (ADR-0006): l'agente in claim attivo aggiunge `in-progress`. Nessuna `status:*`. Lo stato interno al backlog è 🟡 IN PROGRESS.
+2. **Apertura PR**: appena l'agente apre la PR, **rimuove `agent-ready`** e **aggiunge `status:in-review`**. La query candidati cessa di proporla. Issue resta aperta.
+3. **Merge della PR**:
+   - Il body della PR contiene il campo **`Closes #N`** (convenzione rinforzata in `AGENTS.md` §"📝 Checklist di auto-revisione PR").
+   - GitHub auto-chiude l'issue al merge.
+   - L'agente che applica il **gate D.12.1 post-merge doc-sync** verifica che l'issue sia chiusa e abbia `status:done`. Se manca, lo aggiunge prima del commit di follow-up (o nel body del merge commit se D.12.1 è soddisfatto).
+4. **PR rifiutata (close senza merge)**: l'agente aggiunge `status:wontdo` e chiude l'issue con commento motivato (riferimento al PR, motivazione del rifiuto).
+5. **Blocked da dipendenza**: l'agente o il project owner aggiunge `status:blocked-other` rimuovendo `agent-ready`. Issue resta aperta; quando la dipendenza è risolta, l'agente rimuove `status:blocked-other` (e, se la issue deve tornare lavorabile, riapre la questione della spec).
+6. **`needs-spec` è ortogonale** (vedi `AGENTS.md` §"🔖 Sistema di issue e label"): un'issue può essere contemporaneamente `needs-spec` (manca la specifica) e con `status:blocked-other` (dipendenza esterna) — le due label convivono senza esclusione.
+
+### Query candidati aggiornata
+
+Da (query "vecchia"):
+
+```bash
+gh issue list --state open --label agent-ready --limit 20 --json number,title,labels
+```
+
+a (query "nuova", esclude qualsiasi issue che abbia una label che inizia con `status:`):
+
+```bash
+gh issue list --state open --label agent-ready --limit 20 --json number,title,labels \
+  | jq '[.[] | select(([.labels[].name] | any(startswith("status:")) | not))]'
+```
+
+Per mutua-esclusione `agent-ready` / `status:*`, le due clausole sono logicamente equivalenti in condizioni normali. La forma con `jq` è **robusta** se mai una issue portasse entrambe le label (errore di etichettatura) o se si vuole filtrare via anche le issue che hanno solo `status:*` senza `agent-ready` (es. `status:blocked-other` per riesame).
+
+### Pattern `Closes #N` (rinforzo)
+
+Ogni PR che risolve un'issue deve contenere **`Closes #N`**, **`Fixes #N`** o **`Resolves #N`** nel body (GitHub li riconosce come keyword e chiude automaticamente l'issue al merge). La convention è documentata in `AGENTS.md` §"📝 Checklist di auto-revisione PR" come punto obbligatorio.
+
+## Alternative considerate
+
+- **Solo chiusura al merge, senza label esplicite**: scartata — perde la distinzione tra `merged+done` (lavoro accettato) e `merged+awaiting-review` (gate D.12.1 ancora da completare). Inoltre non distingue `rifiutato` da `completato`.
+- **GitHub Projects V2 con colonne Todo/InProgress/InReview/Done/Rejected**: scartata retroattivamente — il repo non ha Projects abilitato e l'introduzione di board aggiungerebbe una dipendenza UI non necessaria per sole 4 etichette. Resta un'opzione per il futuro se il volume di issue dovesse giustificarlo.
+- **Una sola label `done` per qualsiasi esito**: scartata — perde l'informazione di "perché l'issue è chiusa/comunque uscita dal ciclo" (`wontdo` vs `done` vs `blocked-other`). Rende le query di audit ("quante issue di tipo rifiutato abbiamo avuto nel mese?") impossibili.
+
+## Conseguenze attese
+
+- **Positive**: la query candidati cessa di essere ambigua (`agent-ready` ∩ `not has status:*`); la history di un'issue conserva lo stato finale `status:done` (ricercabile con `gh issue list --label status:done`); `release:` di ADR-0006 resta intatto (le label `in-progress` e `status:*` sono su piani distinti); il pattern `Closes #N` diventa standard e abilita il cross-link GitHub (lista PR che hanno chiuso l'issue visibile nella sidebar).
+- **Negative**: richiede che gli agenti rispettino la sequenza claim → in-review → done/wontdo a ogni PR; una regressione (issue rimasta OPEN con `agent-ready` dopo merge) resta facile da commettere ma è altrettanto facile da diagnosticare.
+- **Mitigazioni**: gate D.12.1 (post-merge doc-sync) verifica `status:done`; autocheck futuro proposto `gh issue list --state open --label agent-ready --json number | xargs -I{} gh pr list --search {} --state merged` per trovare PR aperte collegate a issue ancora `agent-ready` (per ora check manuale del reviewer).
+
+## Riferimenti
+
+- `AGENTS.md` §"📦 Macchina a stati delle issue (status:*)" — sezione nuova, spec operativa
+- `AGENTS.md` §"🚀 Primo task di un agente" — query candidati aggiornata con `jq`
+- `AGENTS.md` §"📝 Checklist di auto-revisione PR" — campo `Closes #N` reso obbligatorio
+- `AGENTS.md` §"🔖 Sistema di issue e label" — tabella label estesa con `status:*`
+- `docs/11-BACKLOG.md` §"Stato di una Story" — legenda estesa (v1.4)
+- Issue #13, Sessione 19 in `docs/SESSIONS.md`
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 19 (2026-10-17) | Primo rilascio: 4 label `status:*`, transizioni claim → in-review → done/wontdo, query candidati con `jq`, pattern `Closes #N` obbligatorio, retro-compatibile con ADR-0006 (claim-first e TTL invariati) |
 
 
 

@@ -207,6 +207,41 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 8. Sessione 19 — issue state machine (status:* post-claim)
+
+**Tipo**: doc-only (`docs/`, `AGENTS.md`, `scripts/generate-bundle.ps1`); nessuna modifica a codice o schema dati
+**Branch**: `feat/13-issue-state-machine` (da `main` @ `<tip>`)
+**PR**: **#13 — merge `<da-compilare>` in `main` (2026-10-17)**
+**Issue**: #13 (claim `kilo-HP-ELITEBOOK-jm9f`, dogfooding del protocollo ADR-0007)
+**Stato**: 🟡 in corso (post-merge compile)
+
+### Sintesi
+
+- **ADR-0007** `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0: 4 label `status:*` (done / in-review / wontdo / blocked-other), transizioni claim → in-review → done/wontdo, query candidati con `jq`, pattern `Closes #N` obbligatorio. Retro-compatibile con ADR-0006 (claim e TTL invariati).
+- **`AGENTS.md`** v1.4: nuova sezione §"📦 Macchina a stati delle issue (status:*)" con regole di transizione; query §"🚀 Primo task" aggiornata con `jq`; tabella label estesa; campo `Closes #N` reso obbligatorio nella checklist PR.
+- **`docs/11-BACKLOG.md`** v1.4.0: §"Stato di una Story" estesa con i 4 stati `status:*` + nota di mutua esclusione con `agent-ready`.
+- **`docs/INDEX.md`**, **`docs/SESSIONS.md`**, **`scripts/generate-bundle.ps1`**, **`docs/18-DEV-LOG.md`**, **`docs/BUNDLE.md`** aggiornati (7 file sincronizzati per il gate D.12.1).
+- 4 label GitHub create (`status:done`/`status:in-review`/`status:wontdo`/`status:blocked-other`) con descrizioni e colori dedicati.
+
+### Lesson learned
+
+| # | Tipo | Osservazione | Rif. |
+|---|------|--------------|------|
+| 19-1 | L | **Issue mergata ma non chiusa come sintomo (dogfooding)**: il problema del Boss (#11 rimasta `agent-ready` dopo `PR #12` merged) è ESATTAMENTE l'orfano che il nuovo ADR-0007 previene; il cleanup retroattivo è sia il fix che la dimostrazione del problema. Pattern replicabile: quando un agent si accorge che il workflow documentato non copre un caso reale, apre `agent-ready` con la mini-spec prima di scrivere codice | issue #11 → cleanup-retroattivo; issue #13 (tracciamento) |
+| 19-2 | L+F | **Label description > 100 char in `gh label create` fallisce con HTTP 422**: GitHub ha un limite di 100 caratteri sulle descrizioni delle label. Tenere le descrizioni concise (≤90 char) o documentarle in AGENTS.md invece che nel description GitHub | `gh label create "status:blocked-other" --description "..."` con 122 char → 422; corretto a 90 char |
+| 19-3 | L | **`write` tool input size limit + JSON escaping**: un singolo `write` di un file da 350+ righe con contenuti Markdown ricchi di `"` può rompere il JSON (escape sbagliato o troncamento). Preferire `edit` con anchor piccoli a `write` per file grandi | preparazione PR #13 |
+| 19-4 | L | **PowerShell 5.1 single-quote vs double-quote in `jq`**: per evitare escaping JSON nel command, usare `startswith('status:')` invece di `startswith("status:")` nelle query jq passate a PowerShell. `jq` accetta indifferentemente `'` e `"` come delimitatori di stringa | `AGENTS.md` §"🎫 Presa in carico delle story" (nuova query) |
+
+### Link utili
+
+- Branch: `feat/13-issue-state-machine` (post-merge → eliminata per policy §♻️)
+- PR: **#13** (merge commit `<da-compilare>`, 2026-10-17)
+- Issue: #13 (claim `kilo-HP-ELITEBOOK-jm9f`)
+- Spec introdotte: ADR-0007 v1.0, AGENTS.md v1.4, 11-BACKLOG.md v1.4.0
+- Spec toccate: `docs/INDEX.md` (version, S19), `docs/SESSIONS.md` (Sessione 19 + changelog v1.0), `docs/18-DEV-LOG.md` (§8 + changelog v0.7), `scripts/generate-bundle.ps1` (`$files` include ADR-0007)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -218,6 +253,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.5 | 2026-10-16 | Sessione 14 — entry Story 0.2 con 5 problemi/fix/lesson (0.2-1..5): Dexie `modify()` su Collection, riallineamento `Artist` a 02 v1.2, slow-path fake-indexeddb su re-put, test perf isolati dalle run coverage, pitfalls barrel/MapIterator; osservazione fixture per Story 0.3 |
 | 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
 | 0.7 | 2026-10-17 | **§7 Sessione 18** (protocollo claim — ADR-0006): entry `merged` con PR #12 (`2891cb5`), claim `kilo-HP-ELITEBOOK-hjoe` rilasciato, branch `feat/11-task-claiming-protocol` eliminata; 3 lesson learned (18-1 dogfooding claim, 18-2 PowerShell BOM su body commit/PR, 18-3 `git branch -d` su merge-commit); osservazione operativa per le 3 issue `agent-ready` aperte in S17 |
+| 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #13, claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione) |
 
 ---
 
