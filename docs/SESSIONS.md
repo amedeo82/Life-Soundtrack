@@ -611,7 +611,7 @@ PR #14 (merge commit `a500ea2`, 2026-10-17T15:03:21Z) portata in `main`: 8 file 
 ## Sessione 20 — 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist)
 
 **Data**: 2026-10-17
-**Stato**: 🟡 In corso (implementazione PR #15)
+**Stato**: ✅ Completata — merged in `main` (PR #16, merge commit `506c86a`, 2026-10-17T15:24:31Z)
 
 **Trigger**: il Boss nota che il workflow multi-agente, pur con ADR-0006 (claim) e ADR-0007 (status post-claim), non gestisce esplicitamente i failure mode del parallelismo: commit su main per distrazione, branch non pushati per ore, base stale dopo merge, post-merge zombie commit, file conflict nella working copy condivisa. Analisi con 3 decisioni via `question` (2026-10-17):
 
@@ -652,16 +652,16 @@ PR #14 (merge commit `a500ea2`, 2026-10-17T15:03:21Z) portata in `main`: 8 file 
 - `docs/SESSIONS.md` → **v1.2** (questa entry, changelog)
 - `docs/INDEX.md` (S20 in roadmap, AGENTS v1.5)
 
-### Prossimi step
+### Prossimi step (verificati post-merge)
 
-1. Aprire PR per #15 → merge in `main`
-2. Eliminare il branch `feat/15-parallel-safety` dopo il merge (policy §♻️)
-3. Rilasciare claim su #15 con `release:` + rimozione `in-progress` + `status:done` al merge
-4. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili con il nuovo protocollo di sicurezza
+- [x] Aprire PR per #15 → merge in `main` (PR #16, merge commit `506c86a`, 2026-10-17T15:24:31Z)
+- [x] Eliminare il branch `feat/15-parallel-safety` dopo il merge (policy §♻️)
+- [x] Rilasciare claim su #15 (`release:` + rimozione `in-progress` + applicazione `status:done` + chiusura via `Closes #15` al merge)
+- [ ] Le 3 issue `agent-ready` ancora attive (#5, #6, #7) claimabili con il nuovo protocollo di sicurezza (S20 difese attive)
 
-### Esito post-merge (placeholder, 2026-10-17)
+### Esito post-merge (2026-10-17T15:24:31Z)
 
-PR #15 (merge commit `<da-compilare>`, 2026-10-17): 5 file doc/script aggiornati + 3 file nuovi (`.githooks/pre-commit`, `.githooks/README.md`, `scripts/setup-hooks.js`) + 1 file `package.json` modificato. Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 --check` exit 0, branch remoto eliminato, claim rilasciato.
+PR #16 (merge commit `506c86a`, 2026-10-17T15:24:31Z) portata in `main`: 9 file modificati/creati (AGENTS.md v1.5, package.json, docs/18-DEV-LOG v0.8, docs/SESSIONS v1.2, docs/INDEX, docs/BUNDLE, + 3 file nuovi `.githooks/pre-commit`, `.githooks/README.md`, `scripts/setup-hooks.js`). Gate D.12.1 applicato: `pwsh scripts/generate-bundle.ps1 -Check` exit 0 (33 file, hook non incluso nel bundle per design), branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`. Issue #15 chiusa via `Closes #15` (auto-close GitHub).
 
 ---
 
@@ -698,6 +698,7 @@ PR #15 (merge commit `<da-compilare>`, 2026-10-17): 5 file doc/script aggiornati
 | 1.0 | 2026-10-17 (Sessione 19) | **Aggiunta Sessione 19** (ADR-0007 — macchina a stati post-claim): 4 label `status:*` + transizioni + `Closes #N` obbligatorio; cleanup retroattivo #11 (chiusa come completed); issue #13 aperta `agent-ready` come contenitore del lavoro; `AGENTS.md` v1.4 + 11-BACKLOG v1.4.0 + 18-DEV-LOG v0.7 + scripts/generate-bundle.ps1 aggiornato; BUNDLE rigenerato; 4 lesson learned (19-1 dogfooding cleanup, 19-2 label 422, 19-3 write tool + JSON, 19-4 single-quote jq) |
 | 1.1 | 2026-10-17 (post-merge S19) | **Esito post-merge S19**: PR #14 merged (commit `a500ea2`, 2026-10-17T15:03:21Z), gate D.12.1 applicato: Sessione 19 ✅ Completata, branch remoto `feat/13-issue-state-machine` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con applicazione `status:done`, issue #13 chiusa via `Closes #13`. Issue #9 transita a `status:done` (cleanup retroattivo, D.19.5). Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v0.8 (18-DEV-LOG) e v1.1 (SESSIONS) allineati |
 | 1.2 | 2026-10-17 (Sessione 20) | **Aggiunta Sessione 20** (hardening multi-agente): `.githooks/pre-commit` (nuovo script bash) + `scripts/setup-hooks.js` (nuovo Node ESM idempotente) + `package.json` con `postinstall` automatico; `AGENTS.md` v1.5 (push early obbligatorio + §"🛡️ Session start checklist" 4 comandi + §"🪝 Pre-commit hook" setup); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); NO worktree (Boss scelta C); 4 lesson learned in 18-DEV-LOG §9 (20-1 difese stratificate, 20-2 postinstall double-edged, 20-3 pattern N, 20-4 per-clone) |
+| 1.3 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge" e §"Link utili" del §9 (18-DEV-LOG), §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati, INDEX aggiornato (Roadmap S20 → ✅ COMPLETATA, §"Stato del progetto" S20 → "merged in main") |
 
 ---
 

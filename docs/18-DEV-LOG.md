@@ -246,9 +246,9 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 **Tipo**: doc-only + script (`AGENTS.md`, `docs/`, `.githooks/`, `scripts/setup-hooks.js`, `package.json`); nessuna modifica a codice applicativo
 **Branch**: `feat/15-parallel-safety` (da `main` @ `ac09ec9`)
-**PR**: **#15 — merge `<da-compilare>` in `main` (2026-10-17)**
+**PR**: **#16 — merge commit `506c86a` in `main` (2026-10-17T15:24:31Z)**
 **Issue**: #15 (claim `kilo-HP-ELITEBOOK-r9p2`)
-**Stato**: 🟡 in corso (post-merge compile)
+**Stato**: ✅ merged in `main`; claim `kilo-HP-ELITEBOOK-r9p2` rilasciato; branch remoto eliminato (policy §♻️); 3 difese a basso costo (push early + pre-commit hook + session checklist) live
 
 ### Sintesi
 
@@ -270,7 +270,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 ### Link utili
 
 - Branch: `feat/15-parallel-safety` (post-merge → eliminata per policy §♻️)
-- PR: **#15** (merge commit `<da-compilare>`, 2026-10-17)
+- PR: **#16** (merge commit `506c86a`, 2026-10-17T15:24:31Z)
 - Issue: #15 (claim `kilo-HP-ELITEBOOK-r9p2`)
 - Spec introdotte: AGENTS.md v1.5 (push early, session checklist, hook setup)
 - Spec toccate: `package.json` (postinstall), `docs/INDEX.md` (S20), `docs/SESSIONS.md` (Sessione 20 + changelog), `docs/18-DEV-LOG.md` (§9 + changelog), `scripts/setup-hooks.js` (nuovo), `.githooks/pre-commit` (nuovo), `.githooks/README.md` (nuovo)
@@ -290,6 +290,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 0.7 | 2026-10-17 | **§7 Sessione 18** (protocollo claim — ADR-0006): entry `merged` con PR #12 (`2891cb5`), claim `kilo-HP-ELITEBOOK-hjoe` rilasciato, branch `feat/11-task-claiming-protocol` eliminata; 3 lesson learned (18-1 dogfooding claim, 18-2 PowerShell BOM su body commit/PR, 18-3 `git branch -d` su merge-commit); osservazione operativa per le 3 issue `agent-ready` aperte in S17 |
 | 0.8 | 2026-10-17 (S19) | **§8 Sessione 19** (ADR-0007 — issue state machine `status:*`): entry PR #14 (merge `a500ea2`, 2026-10-17T15:03:21Z), claim `kilo-HP-ELITEBOOK-jm9f`; 4 lesson (19-1 dogfooding cleanup #11, 19-2 label description > 100 char fallisce 422, 19-3 write tool input + JSON escaping, 19-4 single-quote `jq` in PowerShell); osservazione operativa: `agent-ready` ∩ `status:*` = ∅ (mutua esclusione). **Post-merge**: branch remoto eliminato (policy §♻️), claim rilasciato con `status:done` applicato a #13 |
 | 0.9 | 2026-10-17 (S20) | **§9 Sessione 20** (hardening multi-agente): entry PR #15 (claim `kilo-HP-ELITEBOOK-r9p2`); 4 lesson (20-1 difese stratificate > unica, 20-2 postinstall double-edged, 20-3 pattern `N` obbligatorio, 20-4 `core.hooksPath` per-clone); 3 difese a basso costo (push early + pre-commit hook + session checklist) coprono 5 failure mode (F1, F2, F4, F6, F7); F3 e F5 non mitigati direttamente (richiedono worktree, scelta Boss C) |
+| 1.0 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati |
 
 ---
 
