@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-17 00:01
+> Data: 2026-10-17 12:25
 > Totale file: 31
 
 
@@ -543,15 +543,15 @@ Apache License
 | 13 | 🔧 Consolidamento documentazione pre-Fase 0 | ✅ COMPLETATA |
 | 14 | 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie) | ✅ COMPLETATA |
 
-## Stato del progetto (post-Sessione 14, 2026-10-16)
-- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.2.4**, 13-ADR ×4, 14)
-- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.5
+## Stato del progetto (post-merge PR #4, 2026-10-17)
+- **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.2.5**, 13-ADR ×4, 14)
+- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟡 **Fase 0 tecnica in corso** — Story 0.1 merged in `main` (PR #2, squash `c0fb0a4`); **Story 0.2 (schema DB e layer Dexie) implementata** su `feat/0.2-schema-db-dexie`: 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms), 5 problemi/lesson in `18-DEV-LOG.md` §6, pitfalls P6-P9 in `17-DEV-NOTES.md` §3.
+- **Implementazione**: 🟢 **Fase 0 tecnica: fondamenta completate** — Story 0.1 (scaffold monorepo) merged (PR #2, squash `c0fb0a4`); **Story 0.2 (schema DB e layer Dexie) merged in `main`** (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅): 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms), 5 problemi/lesson in `18-DEV-LOG.md` §6, pitfalls P6-P9 in `17-DEV-NOTES.md` §3. Gate D.12.1 applicato senza drift.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
-- **Prossimo step tecnico**: review/merge PR Story 0.2, poi **Story 0.3 (Adapter Spotify)** — sbloccata dal 0.2 — e in parallelo Story 0.5 (PWA) / 0.6 (i18n)
+- **Prossimo step tecnico**: aprire issue `agent-ready` per **Story 0.3 (Adapter Spotify base)** — sbloccata dal merge di 0.2; in parallelo Story 0.5 (PWA) / 0.6 (i18n). Nota: su GitHub mancano i label `agent-ready`, `phase-0`, `area:db` ecc. (solo default) — da creare prima.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -977,8 +977,8 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 
 ## Sessione 14 — 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie)
 
-**Data**: 2026-10-16
-**Stato**: ✅ Completata (implementazione; in attesa di review/merge su `main`)
+**Data**: 2026-10-16/17
+**Stato**: ✅ Completata + **merged in `main`** (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅)
 **Trigger**: `main` aggiornato a `774e520` (doc-sync post PR #3): Story 0.2 sbloccata da 0.1 ✅, spec APPROVED `02-DATA-SCHEMA v1.2` + fixture `db-seed` disponibili. Nota operativa: una sessione parallela aveva lasciato un'implementazione parziale in stash sul branch (nome `feat/0.2-dexie-schema` consumato da PR #3); il lavoro è stato recuperato via stash, allineato a 02 v1.2 e completato.
 
 ### Risultato concreto di Story 0.2
@@ -1017,9 +1017,12 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 - `docs/BUNDLE.md` → rigenerato
 
 ### Prossimi step
-1. Review + merge della PR Story 0.2 (`feat/0.2-schema-db-dexie` → `main`), poi gate D.12.1 post-merge
-2. **Story 0.3 (Adapter Spotify base)** — sbloccata dal 0.2; in parallelo Story 0.5 (PWA) e 0.6 (i18n)
-3. Story 0.7 (Operations runbook) resta in attesa di 0.5
+1. ~~Review + merge della PR Story 0.2~~ ✅ **PR #4 merged (`fa09b06`, 2026-10-17), CI su main ✅, gate D.12.1 applicato**
+2. **Story 0.3 (Adapter Spotify base)** — sbloccata dal merge di 0.2; aprire issue `agent-ready` (creare prima i label mancanti su GitHub: `agent-ready`, `phase-0`, `area:db`, …)
+3. In parallelo: Story 0.5 (PWA) e 0.6 (i18n); Story 0.7 (Operations runbook) resta in attesa di 0.5
+
+### Esito post-merge (aggiunto in S14+post-merge, 2026-10-17)
+PR #4 (merge commit `fa09b06` su `main`) ha portato in `main` l'implementazione completa di Story 0.2 (19 file, +1458/−58). Gate D.12.1 applicato senza drift: `11-BACKLOG` v1.2.5 (Story 0.2 ✅ DONE, 0.3 sbloccata), `INDEX.md` (stato "fondamenta completate"), `18-DEV-LOG` §6 (stato merged), `BUNDLE.md` rigenerato (check exit 0). CI su main: **success**. Branch `feat/0.2-schema-db-dexie` eliminata dopo il merge.
 
 ---
 
@@ -1049,6 +1052,7 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 | 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
 | 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3; **post-merge**: PR #3 merged (`10ecde5`), branch eliminata, gate D.12.1 applicato senza drift |
 | 0.5 | Sessione 14 (2026-10-16) | Aggiunta Sessione 14 (implementazione Story 0.2 — schema DB e layer Dexie): 5/5 task + 5/5 AC, coverage `db/` 100%, decisioni D.14.1-D.14.5 (riallineamento Artist a 02 v1.2, semantica FK, perf test isolati, Zod fuori perimetro) |
+| 0.6 | 2026-10-17 (post-merge) | **Esito post-merge S14**: PR #4 merged (`fa09b06`, CI su main ✅), gate D.12.1 applicato senza drift; Story 0.3 sbloccata; Sessione 14 aggiornata con esito |
 
 ---
 
@@ -1349,8 +1353,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.5
-> Ultima modifica: 2026-10-16 — Sessione 14, implementazione Story 0.2 (schema DB e layer Dexie)
+> Versione: 0.6
+> Ultima modifica: 2026-10-17 — doc-sync post-merge PR #4 (Story 0.2 merged)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -1487,9 +1491,9 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 ## 6. Sessione 14 — implementazione Story 0.2 (schema DB e layer Dexie)
 
 **Branch**: `feat/0.2-schema-db-dexie` (da `main` @ `774e520`)
-**PR**: (da aprire)
-**Data**: 2026-10-16
-**Stato**: 🟡 implementazione completa, in attesa di review/merge
+**PR**: **#4 — merge commit `fa09b06` in `main` (2026-10-17)**
+**Data**: 2026-10-16/17
+**Stato**: ✅ **merged** in `main` — gate D.12.1 applicato (CI su main ✅)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1504,7 +1508,9 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 **Osservazione fixture (per Story 0.3)**: `medium.json` contiene 500 track ma solo 467 `canonicalKey` unici (31 gruppi DEDUP) e 33 UUID "orfani" referenziati dai listens. Con PK `canonicalKey` il bulkPut fonde i gruppi e gli ascolti sugli UUID soppiantati non contribuiscono ai contatori (verificato nel test di integrazione). L'adapter dovrà risolvere `trackId` via DEDUP (05§3) **prima** dell'inserimento.
 
 **Link utili**:
-- Branch: `feat/0.2-schema-db-dexie`
+- Branch: `feat/0.2-schema-db-dexie` (merged → eliminata dopo il merge in main)
+- PR: **#4** (merge commit `fa09b06`, 2026-10-17; CI pull_request ✅ + CI main ✅)
+- Commit: `57f2e11 feat: story 0.2 — schema dexie, repository e recount (@ls/core)` + `227e910 docs: story 0.2 — sync backlog, dev-notes, dev-log, sessions, index, bundle`
 - Spec: `02-DATA-SCHEMA v1.2` §3, §6, §7, §11; `10-TESTING v1.1` §2, §3.2; `05-ARCHITECTURE` §5, §9.1
 - Coverage: `db/` al 100% stmts (target ≥80%); suite 26 test (23 funzionali + 2 perf + 1 barrel)
 
@@ -1519,6 +1525,7 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 | 0.3 | 2026-10-16 | Sessione 12 — doc-sync post-merge: branch/PR status aggiornati (✅ merged in `main`, PR #2, squash `c0fb0a4`); conteggio problemi corretto da 8 → 9 (coerente con messaggio commit); aggiunto commit `c0fb0a4` ai link utili |
 | 0.4 | 2026-10-16 | Sessione 13 — entry post-merge PR #3 (`10ecde5`): gate D.12.1 applicato; 4 entry di lesson learned sul doc-sync (13-sync-1..4); bumped a v0.4 per riflettere l'attività di consolidamento |
 | 0.5 | 2026-10-16 | Sessione 14 — entry Story 0.2 con 5 problemi/fix/lesson (0.2-1..5): Dexie `modify()` su Collection, riallineamento `Artist` a 02 v1.2, slow-path fake-indexeddb su re-put, test perf isolati dalle run coverage, pitfalls barrel/MapIterator; osservazione fixture per Story 0.3 |
+| 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
 
 ---
 
@@ -5203,8 +5210,9 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.2 — Schema DB e layer Dexie `[PHASE-0]` `[AREA:db]` `[PRI:B]` `[SIZE:L]` `[DEP:0.1]`
 
-**Stato**: 🟡 **IN PROGRESS** (Sessione 14) — implementazione completa su branch `feat/0.2-schema-db-dexie`, in attesa di review/merge
-**Registro**: `docs/18-DEV-LOG.md` §6 entry Story 0.2
+**Stato**: ✅ **DONE** — merged in `main` (PR #4, merge commit `fa09b06`, 2026-10-17)
+**Branch**: `feat/0.2-schema-db-dexie` (merged → eliminata dopo il merge)
+**Registro**: `docs/18-DEV-LOG.md` §6 entry Story 0.2 (5 problemi/fix/lesson 0.2-1..5)
 
 **Descrizione**: Implementare lo schema Dexie come definito in `02-DATA-SCHEMA.md` §6, con migrazioni e API di accesso.
 
@@ -5604,13 +5612,13 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato alla **Sessione 14** (2026-10-16). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato al **2026-10-17** (post-merge PR #4). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
 | 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
-| 0 | 0.2 Schema DB Dexie | 🟡 IN PROGRESS | `feat/0.2-schema-db-dexie` | 5/5 task + 5/5 AC verificati (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. PR da aprire. |
-| 0 | 0.3 Adapter Spotify | ⬚ TODO | — | dipende da 0.2 |
+| 0 | 0.2 Schema DB Dexie | ✅ DONE | — (merged in `main`) | 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. **PR #4 merged `fa09b06` (2026-10-17)**; CI su main ✅. |
+| 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
 | 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
@@ -5644,6 +5652,7 @@ Ogni story deve avere label GitHub:
 | 1.2.2 | Sessione 12 (2026-10-16) | **Doc-sync post-merge**: Story 0.1 ora ✅ DONE (PR #2 squash-merged `c0fb0a4`); tabella "Stato di avanzamento" corretta; riferimento "8 problemi" → "9 problemi" (coerente con messaggio commit) |
 | 1.2.3 | Sessione 13 (2026-10-16) | **Consolidamento doc pre-Fase 0**: Story 0.4 T0.4.1 PlatformCard → 5 stati canonici (chiusura M13); Story 2.2 AC allineata a `04§5` (chiusura ambiguità "Bayesiano/PELT"); **nuova Story 4.3 Artwork enrichment** (chiusura M5 con `artworkUrl` in 02 v1.2); aggiornato ordine di lavorazione per agenti |
 | 1.2.4 | Sessione 14 (2026-10-16) | **Story 0.2 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (schema Dexie v1+v2, repository CRUD, `recount()`; coverage `db/` 100%, AC 10k eventi < 500ms con fake-indexeddb); test di performance isolati in `perf.test.ts` ed esclusi dalle run coverage; cross-ref a `18-DEV-LOG` §6 |
+| 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |
 
 
 

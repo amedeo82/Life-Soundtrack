@@ -416,8 +416,8 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 
 ## Sessione 14 — 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie)
 
-**Data**: 2026-10-16
-**Stato**: ✅ Completata (implementazione; in attesa di review/merge su `main`)
+**Data**: 2026-10-16/17
+**Stato**: ✅ Completata + **merged in `main`** (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅)
 **Trigger**: `main` aggiornato a `774e520` (doc-sync post PR #3): Story 0.2 sbloccata da 0.1 ✅, spec APPROVED `02-DATA-SCHEMA v1.2` + fixture `db-seed` disponibili. Nota operativa: una sessione parallela aveva lasciato un'implementazione parziale in stash sul branch (nome `feat/0.2-dexie-schema` consumato da PR #3); il lavoro è stato recuperato via stash, allineato a 02 v1.2 e completato.
 
 ### Risultato concreto di Story 0.2
@@ -456,9 +456,12 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 - `docs/BUNDLE.md` → rigenerato
 
 ### Prossimi step
-1. Review + merge della PR Story 0.2 (`feat/0.2-schema-db-dexie` → `main`), poi gate D.12.1 post-merge
-2. **Story 0.3 (Adapter Spotify base)** — sbloccata dal 0.2; in parallelo Story 0.5 (PWA) e 0.6 (i18n)
-3. Story 0.7 (Operations runbook) resta in attesa di 0.5
+1. ~~Review + merge della PR Story 0.2~~ ✅ **PR #4 merged (`fa09b06`, 2026-10-17), CI su main ✅, gate D.12.1 applicato**
+2. **Story 0.3 (Adapter Spotify base)** — sbloccata dal merge di 0.2; aprire issue `agent-ready` (creare prima i label mancanti su GitHub: `agent-ready`, `phase-0`, `area:db`, …)
+3. In parallelo: Story 0.5 (PWA) e 0.6 (i18n); Story 0.7 (Operations runbook) resta in attesa di 0.5
+
+### Esito post-merge (aggiunto in S14+post-merge, 2026-10-17)
+PR #4 (merge commit `fa09b06` su `main`) ha portato in `main` l'implementazione completa di Story 0.2 (19 file, +1458/−58). Gate D.12.1 applicato senza drift: `11-BACKLOG` v1.2.5 (Story 0.2 ✅ DONE, 0.3 sbloccata), `INDEX.md` (stato "fondamenta completate"), `18-DEV-LOG` §6 (stato merged), `BUNDLE.md` rigenerato (check exit 0). CI su main: **success**. Branch `feat/0.2-schema-db-dexie` eliminata dopo il merge.
 
 ---
 
@@ -488,6 +491,7 @@ PR #3 (merge commit `10ecde5` su `main`, 2026-10-16) ha portato in `main` tutto 
 | 0.3 | Sessione 12 (2026-10-16) | Corretta Sessione 11 (Story 0.1 ✅ DONE, PR #2, squash `c0fb0a4`); aggiunta Sessione 12 (doc-sync post-merge + gate D.12.1-D.12.5 in `AGENTS.md`) |
 | 0.4 | Sessione 13 (2026-10-16) | Aggiunta Sessione 13 (consolidamento documentazione pre-Fase 0): chiusi M13/M5/C6/V1 + ambiguità Story 2.2; 02 v1.2 con artworkUrl; nuovi fixture generator + 7 file; backlog v1.2.3 con Story 4.3; **post-merge**: PR #3 merged (`10ecde5`), branch eliminata, gate D.12.1 applicato senza drift |
 | 0.5 | Sessione 14 (2026-10-16) | Aggiunta Sessione 14 (implementazione Story 0.2 — schema DB e layer Dexie): 5/5 task + 5/5 AC, coverage `db/` 100%, decisioni D.14.1-D.14.5 (riallineamento Artist a 02 v1.2, semantica FK, perf test isolati, Zod fuori perimetro) |
+| 0.6 | 2026-10-17 (post-merge) | **Esito post-merge S14**: PR #4 merged (`fa09b06`, CI su main ✅), gate D.12.1 applicato senza drift; Story 0.3 sbloccata; Sessione 14 aggiornata con esito |
 
 ---
 

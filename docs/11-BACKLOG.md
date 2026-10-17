@@ -66,8 +66,9 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.2 — Schema DB e layer Dexie `[PHASE-0]` `[AREA:db]` `[PRI:B]` `[SIZE:L]` `[DEP:0.1]`
 
-**Stato**: 🟡 **IN PROGRESS** (Sessione 14) — implementazione completa su branch `feat/0.2-schema-db-dexie`, in attesa di review/merge
-**Registro**: `docs/18-DEV-LOG.md` §6 entry Story 0.2
+**Stato**: ✅ **DONE** — merged in `main` (PR #4, merge commit `fa09b06`, 2026-10-17)
+**Branch**: `feat/0.2-schema-db-dexie` (merged → eliminata dopo il merge)
+**Registro**: `docs/18-DEV-LOG.md` §6 entry Story 0.2 (5 problemi/fix/lesson 0.2-1..5)
 
 **Descrizione**: Implementare lo schema Dexie come definito in `02-DATA-SCHEMA.md` §6, con migrazioni e API di accesso.
 
@@ -467,13 +468,13 @@ Quando un agente arriva sul repo, deve lavorare le story in questo ordine:
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato alla **Sessione 14** (2026-10-16). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato al **2026-10-17** (post-merge PR #4). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
 | 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
-| 0 | 0.2 Schema DB Dexie | 🟡 IN PROGRESS | `feat/0.2-schema-db-dexie` | 5/5 task + 5/5 AC verificati (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. PR da aprire. |
-| 0 | 0.3 Adapter Spotify | ⬚ TODO | — | dipende da 0.2 |
+| 0 | 0.2 Schema DB Dexie | ✅ DONE | — (merged in `main`) | 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. **PR #4 merged `fa09b06` (2026-10-17)**; CI su main ✅. |
+| 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
 | 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
@@ -507,3 +508,4 @@ Ogni story deve avere label GitHub:
 | 1.2.2 | Sessione 12 (2026-10-16) | **Doc-sync post-merge**: Story 0.1 ora ✅ DONE (PR #2 squash-merged `c0fb0a4`); tabella "Stato di avanzamento" corretta; riferimento "8 problemi" → "9 problemi" (coerente con messaggio commit) |
 | 1.2.3 | Sessione 13 (2026-10-16) | **Consolidamento doc pre-Fase 0**: Story 0.4 T0.4.1 PlatformCard → 5 stati canonici (chiusura M13); Story 2.2 AC allineata a `04§5` (chiusura ambiguità "Bayesiano/PELT"); **nuova Story 4.3 Artwork enrichment** (chiusura M5 con `artworkUrl` in 02 v1.2); aggiornato ordine di lavorazione per agenti |
 | 1.2.4 | Sessione 14 (2026-10-16) | **Story 0.2 marcata IN PROGRESS**: task 5/5, AC 5/5 verificati (schema Dexie v1+v2, repository CRUD, `recount()`; coverage `db/` 100%, AC 10k eventi < 500ms con fake-indexeddb); test di performance isolati in `perf.test.ts` ed esclusi dalle run coverage; cross-ref a `18-DEV-LOG` §6 |
+| 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |

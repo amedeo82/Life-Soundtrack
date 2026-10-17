@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.5
-> Ultima modifica: 2026-10-16 — Sessione 14, implementazione Story 0.2 (schema DB e layer Dexie)
+> Versione: 0.6
+> Ultima modifica: 2026-10-17 — doc-sync post-merge PR #4 (Story 0.2 merged)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -139,9 +139,9 @@
 ## 6. Sessione 14 — implementazione Story 0.2 (schema DB e layer Dexie)
 
 **Branch**: `feat/0.2-schema-db-dexie` (da `main` @ `774e520`)
-**PR**: (da aprire)
-**Data**: 2026-10-16
-**Stato**: 🟡 implementazione completa, in attesa di review/merge
+**PR**: **#4 — merge commit `fa09b06` in `main` (2026-10-17)**
+**Data**: 2026-10-16/17
+**Stato**: ✅ **merged** in `main` — gate D.12.1 applicato (CI su main ✅)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -156,7 +156,9 @@
 **Osservazione fixture (per Story 0.3)**: `medium.json` contiene 500 track ma solo 467 `canonicalKey` unici (31 gruppi DEDUP) e 33 UUID "orfani" referenziati dai listens. Con PK `canonicalKey` il bulkPut fonde i gruppi e gli ascolti sugli UUID soppiantati non contribuiscono ai contatori (verificato nel test di integrazione). L'adapter dovrà risolvere `trackId` via DEDUP (05§3) **prima** dell'inserimento.
 
 **Link utili**:
-- Branch: `feat/0.2-schema-db-dexie`
+- Branch: `feat/0.2-schema-db-dexie` (merged → eliminata dopo il merge in main)
+- PR: **#4** (merge commit `fa09b06`, 2026-10-17; CI pull_request ✅ + CI main ✅)
+- Commit: `57f2e11 feat: story 0.2 — schema dexie, repository e recount (@ls/core)` + `227e910 docs: story 0.2 — sync backlog, dev-notes, dev-log, sessions, index, bundle`
 - Spec: `02-DATA-SCHEMA v1.2` §3, §6, §7, §11; `10-TESTING v1.1` §2, §3.2; `05-ARCHITECTURE` §5, §9.1
 - Coverage: `db/` al 100% stmts (target ≥80%); suite 26 test (23 funzionali + 2 perf + 1 barrel)
 
@@ -171,6 +173,7 @@
 | 0.3 | 2026-10-16 | Sessione 12 — doc-sync post-merge: branch/PR status aggiornati (✅ merged in `main`, PR #2, squash `c0fb0a4`); conteggio problemi corretto da 8 → 9 (coerente con messaggio commit); aggiunto commit `c0fb0a4` ai link utili |
 | 0.4 | 2026-10-16 | Sessione 13 — entry post-merge PR #3 (`10ecde5`): gate D.12.1 applicato; 4 entry di lesson learned sul doc-sync (13-sync-1..4); bumped a v0.4 per riflettere l'attività di consolidamento |
 | 0.5 | 2026-10-16 | Sessione 14 — entry Story 0.2 con 5 problemi/fix/lesson (0.2-1..5): Dexie `modify()` su Collection, riallineamento `Artist` a 02 v1.2, slow-path fake-indexeddb su re-put, test perf isolati dalle run coverage, pitfalls barrel/MapIterator; osservazione fixture per Story 0.3 |
+| 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
 
 ---
 
