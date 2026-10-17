@@ -75,9 +75,9 @@
 | 13 | 🔧 Consolidamento documentazione pre-Fase 0 | ✅ COMPLETATA |
 | 14 | 🗄️ Implementazione Story 0.2 (schema DB e layer Dexie) | ✅ COMPLETATA |
 | 17 | 🧹 Governance post-merge (cleanup + parallelismo) | ✅ COMPLETATA |
-| 18 | 🎫 Protocollo claim per agenti paralleli (ADR-0006) | 🟡 IN CORSO (issue #11) |
+| 18 | 🎫 Protocollo claim per agenti paralleli (ADR-0006) | ✅ COMPLETATA |
 
-## Stato del progetto (post-merge PR #8, 2026-10-17)
+## Stato del progetto (post-merge PR #12, 2026-10-17)
 - **Documenti APPROVED**: 8 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.3.0**, 13-ADR ×5 (0006 incluso), 14)
 - **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
 - **Documenti TODO**: 0
@@ -86,7 +86,7 @@
 - **Implementazione**: 🟢 **Fase 0 tecnica: fondamenta completate** — Story 0.1 (scaffold monorepo) merged (PR #2, squash `c0fb0a4`); **Story 0.2 (schema DB e layer Dexie) merged in `main`** (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅): 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms), 5 problemi/lesson in `18-DEV-LOG.md` §6, pitfalls P6-P9 in `17-DEV-NOTES.md` §3. Gate D.12.1 applicato senza drift.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
-- **Sessione 18** — protocollo claim (ADR-0006) **in corso** (issue #11, claim `kilo-HP-ELITEBOOK-hjoe`): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze).
+- **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
 - **Prossimo step tecnico**: implementare **in parallelo** Story 0.3 (issue #6), Story 0.5 (issue #7) e Story 0.6 (issue #5) — tutte `agent-ready`, aree di file disgiunte (adapter / devops / ui), nessun conflitto atteso; ogni agente esegue **prima** la procedura di claim definita in `AGENTS.md` §"🎫 Presa in carico delle story" prima di lavorare. Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 
 ---

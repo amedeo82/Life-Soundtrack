@@ -164,6 +164,49 @@
 
 ---
 
+## 7. Sessione 18 — protocollo claim agenti paralleli (ADR-0006)
+
+**Tipo**: doc-only (`docs/`, `AGENTS.md`, `scripts/generate-bundle.ps1`); nessuna modifica a codice o schema dati
+**Branch**: `feat/11-task-claiming-protocol` (da `main` @ `e514404`)
+**PR**: **#12 — merge commit `2891cb5` in `main` (2026-10-17)**
+**Commit**: `7b4b10b docs(agents): protocollo claim per agenti paralleli (ADR-0006)`
+**Issue**: #11 (claim `kilo-HP-ELITEBOOK-hjoe`, dogfooding del protocollo definito nella stessa issue)
+**Stato**: ✅ **merged** in `main` — gate D.12.1 post-merge applicato, branch remoto eliminato (policy §♻️), claim rilasciato su #11 con `release:` + rimozione label `in-progress`
+
+### Sintesi
+
+- ADR-0006 `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0: self-claim via label `in-progress` + commento `claim:`; discriminatore del vincitore = ID commento GitHub più basso (assignee scartato perché gli agenti condividono il PAT); TTL 12h con procedura `stale-release:`; rilascio obbligatorio al merge / abbandono / spec tornata 🟡 DRAFT.
+- `AGENTS.md` v1.3: nuova sezione obbligatoria "🎫 Presa in carico delle story (claim)" con procedura `gh` (4 step: enum candidabili, claim con label+commento, riverifica, vincita/yield); §"🚀 Primo task di un agente" riscritta claim-first; label `in-progress` aggiunta alla tabella label; PAT esteso a `issues: read/write`.
+- `docs/11-BACKLOG.md` v1.3.0: §"Priorità di lavorazione" rivista come ordine di **tentativo** (claim-first), con regola ADR-0006 in calce; legenda 🟡 legata alla label `in-progress`.
+- `docs/BUNDLE.md` rigenerato; `scripts/generate-bundle.ps1 --check` exit 0 (32 file, ADR-0006 incluso).
+
+### Lesson learned
+
+| # | Tipo | Osservazione | Rif. |
+|---|------|--------------|------|
+| 18-1 | L | **Dogfooding del claim**: implementando il protocollo di claim con la stessa procedura (claim `kilo-HP-ELITEBOOK-hjoe` su #11 prima di iniziare a scrivere codice) si è verificato che la procedura regge end-to-end anche in sessioni AI che lavorano a lungo su una singola issue | issue #11 commento claim |
+| 18-2 | L+F | **PowerShell interpreta `claim:` come cmdlet**: passare il body del `gh` tramite `--body-file` o escape esplicito; PowerShell 5.1 con `Out-String` lascia un BOM UTF-8 che rompe il commitlint (`header-trim`) — usare `[System.IO.File]::WriteAllText($path, $content, [System.Text.UTF8Encoding]::new($false))` (lesson 0.1-7 riconfermata) | `docs/17-DEV-NOTES.md §1` |
+| 18-3 | L | **`git branch -d` rifiuta branch merged via merge-commit**: dopo un merge commit, git considera il branch "non fast-forward reachable" dalla testa locale e rifiuta `-d`. Verificare il merge con `git branch -r --contains <sha>` o `--merged origin/main`, poi usare `-D` solo dopo conferma. Su Windows PowerShell l'auto-check `git branch -r --merged main` filtra per il branch locale, non per `origin/main` — passare esplicitamente `origin/main` | AGENTS.md §"♻️ Pulizia branch post-merge" (auto-check già documentato) |
+
+### Osservazione operativa (per le prossime 3 story `agent-ready`)
+
+Le 3 issue aperte in S17 (#5 Story 0.6 i18n, #6 Story 0.3 Adapter Spotify, #7 Story 0.5 PWA) hanno **aree di file disgiunte** (ui / adapter / devops). Ora che ADR-0006 è merged, ogni agente che le prende deve:
+1. Claim `kilo-<hostname>-<random>` su GitHub Issues prima di creare il branch
+2. Vincere la riverifica (ID commento più basso)
+3. Lavorare solo dopo aver verificato lo stato
+
+Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha scritto per primo; l'altro rilascia `yield:` e passa alla successiva.
+
+### Link utili
+
+- Branch: `feat/11-task-claiming-protocol` (merged → eliminata dopo il merge in main, policy §♻️)
+- PR: **#12** (merge commit `2891cb5`, 2026-10-17)
+- Commit: `7b4b10b docs(agents): protocollo claim per agenti paralleli (ADR-0006)`
+- Spec introdotte: ADR-0006 v1.0, AGENTS.md v1.3, 11-BACKLOG.md v1.3.0
+- Spec toccate: `docs/INDEX.md` (ADR x5, AGENTS v1.3), `docs/SESSIONS.md` (Sessione 18 + changelog v0.8 + v0.9 post-merge), `scripts/generate-bundle.ps1` (`$files` include ADR-0006)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -174,6 +217,7 @@
 | 0.4 | 2026-10-16 | Sessione 13 — entry post-merge PR #3 (`10ecde5`): gate D.12.1 applicato; 4 entry di lesson learned sul doc-sync (13-sync-1..4); bumped a v0.4 per riflettere l'attività di consolidamento |
 | 0.5 | 2026-10-16 | Sessione 14 — entry Story 0.2 con 5 problemi/fix/lesson (0.2-1..5): Dexie `modify()` su Collection, riallineamento `Artist` a 02 v1.2, slow-path fake-indexeddb su re-put, test perf isolati dalle run coverage, pitfalls barrel/MapIterator; osservazione fixture per Story 0.3 |
 | 0.6 | 2026-10-17 | Doc-sync post-merge: §6 Story 0.2 aggiornata a ✅ merged (PR #4, `fa09b06`, CI main ✅); link commit completati; gate D.12.1 applicato |
+| 0.7 | 2026-10-17 | **§7 Sessione 18** (protocollo claim — ADR-0006): entry `merged` con PR #12 (`2891cb5`), claim `kilo-HP-ELITEBOOK-hjoe` rilasciato, branch `feat/11-task-claiming-protocol` eliminata; 3 lesson learned (18-1 dogfooding claim, 18-2 PowerShell BOM su body commit/PR, 18-3 `git branch -d` su merge-commit); osservazione operativa per le 3 issue `agent-ready` aperte in S17 |
 
 ---
 

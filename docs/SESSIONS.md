@@ -510,7 +510,8 @@ PR #4 (merge commit `fa09b06` su `main`) ha portato in `main` l'implementazione 
 ## Sessione 18 — 🎫 Protocollo di claim per agenti paralleli (ADR-0006)
 
 **Data**: 2026-10-17
-**Stato**: 🟡 In corso (issue #11, claim `kilo-HP-ELITEBOOK-hjoe`)
+**Stato**: ✅ Completata — **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17)
+**Branch**: `feat/11-task-claiming-protocol` (merged → eliminata dopo il merge, policy §♻️)
 
 **Trigger**: il project owner nota che il workflow multi-agente produceva duplicazioni: N agenti lanciati in parallelo seguivano lo stesso percorso documentato e convergevano sulla stessa story. Mancava un meccanismo di claim + lock visibile.
 
@@ -548,6 +549,10 @@ PR #4 (merge commit `fa09b06` su `main`) ha portato in `main` l'implementazione 
 2. Eliminare il branch `feat/11-task-claiming-protocol` dopo il merge (policy §♻️)
 3. Da questo merge in poi: ogni agente che arriva sul repo esegue **prima** la procedura di claim descritta in `AGENTS.md` §"🎫 Presa in carico delle story" prima di toccare codice o branch
 
+### Esito post-merge (2026-10-17)
+
+PR #12 (merge commit `2891cb5` su `main`, 2026-10-17) ha portato in `main` il protocollo claim (ADR-0006): 7 file modificati, +476/−44. Gate D.12.1 applicato: stato aggiornato, branch remoto `feat/11-task-claiming-protocol` eliminato (policy §♻️), auto-check `git branch -r --merged origin/main | Select-String -NotMatch 'main$|HEAD'` pulito (zero branch remoti oltre `main` + `HEAD`). Claim su issue #11 rilasciato con `release:` + rimozione label `in-progress`. Claim `kilo-HP-ELITEBOOK-hjoe` archiviato, ID agente pronto per il prossimo task.
+
 ---
 
 ## Template sessione (da copiare per le sessioni future)
@@ -579,6 +584,7 @@ PR #4 (merge commit `fa09b06` su `main`) ha portato in `main` l'implementazione 
 | 0.6 | 2026-10-17 (post-merge) | **Esito post-merge S14**: PR #4 merged (`fa09b06`, CI su main ✅), gate D.12.1 applicato senza drift; Story 0.3 sbloccata; Sessione 14 aggiornata con esito |
 | 0.7 | 2026-10-17 (Sessione 17) | Aggiunta Sessione 17 (governance post-merge): policy pulizia branch in AGENTS.md v1.2 (PR #8, `a9f31a3`), cleanup branch remoti, label GitHub creati, 3 issue `agent-ready` aperte (#5/#6/#7), follow-up #9/#10; sync INDEX/SESSIONS via issue #9 |
 | 0.8 | 2026-10-17 (Sessione 18) | Aggiunta Sessione 18 (protocollo claim agenti paralleli — ADR-0006): self-claim via label `in-progress` + commento `claim:`, ID GitHub come discriminatore del vincitore, TTL 12h, rilascio obbligatorio; AGENTS.md v1.3 con §"🎫 Presa in carico delle story" + §"🚀 Primo task" claim-first; 11-BACKLOG v1.3.0; decisioni D.18.1-D.18.4; issue #11 in-progress (claim `kilo-HP-ELITEBOOK-hjoe`) |
+| 0.9 | 2026-10-17 (post-merge) | **Esito post-merge S18**: PR #12 merged (`2891cb5`), gate D.12.1 applicato: Sessione 18 ✅ Completata, branch remoto eliminato (policy §♻️), auto-check pulito, claim rilasciato su #11; Sessione 18 aggiornata con esito |
 
 ---
 
