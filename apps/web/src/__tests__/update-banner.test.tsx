@@ -74,4 +74,42 @@ describe('UpdateBanner', () => {
     expect(banner.getAttribute('role')).toBe('status');
     expect(banner.getAttribute('aria-live')).toBe('polite');
   });
+
+  it('major con requiresDbMigration mostra modal bloccante senza "Più tardi"', () => {
+    render(
+      <UpdateBanner
+        {...baseProps}
+        updateKind="major"
+        nextVersionLabel="2.0.0"
+        requiresDbMigration={true}
+      />,
+    );
+
+    const overlay = screen.getByTestId('update-banner');
+    expect(overlay.getAttribute('data-update-kind')).toBe('major');
+    expect(overlay.getAttribute('role')).toBe('alertdialog');
+    expect(overlay.getAttribute('aria-modal')).toBe('true');
+    expect(screen.getByText(/Aggiornamento importante/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Aggiorna e riavvia/ })).toBeTruthy();
+    expect(screen.queryByTestId('update-banner-dismiss')).toBeNull();
+    expect(document.body.style.overflow).toBe('hidden');
+  });
+
+  it('major senza requiresDbMigration mostra banner (come minor)', () => {
+    render(
+      <UpdateBanner
+        {...baseProps}
+        updateKind="major"
+        nextVersionLabel="2.0.0"
+        requiresDbMigration={false}
+      />,
+    );
+
+    const banner = screen.getByTestId('update-banner');
+    expect(banner.getAttribute('role')).toBe('status');
+    expect(banner.getAttribute('data-update-kind')).toBe('major');
+    expect(screen.getByRole('button', { name: /Aggiorna e riavvia/ })).toBeTruthy();
+    expect(screen.queryByTestId('update-banner-dismiss')).toBeNull();
+    expect(document.body.style.overflow).toBe('');
+  });
 });

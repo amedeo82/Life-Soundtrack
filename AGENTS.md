@@ -208,8 +208,8 @@ git branch -r --merged main
 # 2. Elimina il branch remoto
 git push origin --delete feat/<issue-number>-<descrizione>
 
-# 3. (Opzionale) Se esiste un tracking locale
-git branch -d feat/<issue-number>-<descrizione
+# 3. Elimina il branch locale corrispondente (obbligatorio se mergato in main)
+git branch -d feat/<issue-number>-<descrizione>
 
 # 4. Pulisci ref remote stale nella tua working copy
 git remote prune origin
@@ -370,7 +370,7 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 3. Crea branch `feat/<issue>-<descrizione>`
 4. Leggi la specifica del task e implementa con test
 5. Apri PR (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
-6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done`; tu fai solo `release:` comment + branch cleanup (vedi §"📤 Post-merge actions") (vedi §"📦 Macchina a stati delle issue (status:*)")
+6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done`; tu fai `release:` comment + **branch cleanup obbligatorio (locale e remoto)** (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge") (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -379,9 +379,11 @@ Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **
 Dopo che il Boss mergia la PR, le azioni post-merge sono **solo a livello di issue** (no commit su `main`, no race con altri agenti):
 
 1. **GitHub Action `auto-status-done`** (vedi `.github/workflows/auto-status-done.yml`) applica automaticamente `status:done` all'issue chiusa dalla PR. Rimuove anche `in-progress` e `status:in-review`. **Niente da fare manualmente per le label**.
-2. **Tu devi**:
-   - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
-   - Cancellare il branch remoto: `git push origin --delete <branch>`
+   2. **Tu devi**:
+      - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
+      - Cancellare il branch remoto: `git push origin --delete <branch>`
+      - Cancellare il branch locale corrispondente: `git branch -d <branch>` (solo se è stato mergato in `main`)
+      - Pulire i ref remoti obsoleti: `git remote prune origin`
 3. **Niente commit su `main`**: il doc-sync finale (con PR number e merge commit) è già nel branch PR (vedi §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge"). L'eccezione "follow-up su main" è sconsigliata: crea race con altri agenti.
 
 Vedi §"🛡️ Hardening multi-agente" (Sessione 21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue) elimina le race condition.

@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-18 18:18
+> Data: 2026-10-18 20:32
 > Totale file: 38
 
 
@@ -217,8 +217,8 @@ git branch -r --merged main
 # 2. Elimina il branch remoto
 git push origin --delete feat/<issue-number>-<descrizione>
 
-# 3. (Opzionale) Se esiste un tracking locale
-git branch -d feat/<issue-number>-<descrizione
+# 3. Elimina il branch locale corrispondente (obbligatorio se mergato in main)
+git branch -d feat/<issue-number>-<descrizione>
 
 # 4. Pulisci ref remote stale nella tua working copy
 git remote prune origin
@@ -379,7 +379,7 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 3. Crea branch `feat/<issue>-<descrizione>`
 4. Leggi la specifica del task e implementa con test
 5. Apri PR (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
-6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done`; tu fai solo `release:` comment + branch cleanup (vedi §"📤 Post-merge actions") (vedi §"📦 Macchina a stati delle issue (status:*)")
+6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done`; tu fai `release:` comment + **branch cleanup obbligatorio (locale e remoto)** (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge") (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -388,9 +388,11 @@ Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **
 Dopo che il Boss mergia la PR, le azioni post-merge sono **solo a livello di issue** (no commit su `main`, no race con altri agenti):
 
 1. **GitHub Action `auto-status-done`** (vedi `.github/workflows/auto-status-done.yml`) applica automaticamente `status:done` all'issue chiusa dalla PR. Rimuove anche `in-progress` e `status:in-review`. **Niente da fare manualmente per le label**.
-2. **Tu devi**:
-   - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
-   - Cancellare il branch remoto: `git push origin --delete <branch>`
+   2. **Tu devi**:
+      - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
+      - Cancellare il branch remoto: `git push origin --delete <branch>`
+      - Cancellare il branch locale corrispondente: `git branch -d <branch>` (solo se è stato mergato in `main`)
+      - Pulire i ref remoti obsoleti: `git remote prune origin`
 3. **Niente commit su `main`**: il doc-sync finale (con PR number e merge commit) è già nel branch PR (vedi §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge"). L'eccezione "follow-up su main" è sconsigliata: crea race con altri agenti.
 
 Vedi §"🛡️ Hardening multi-agente" (Sessione 21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue) elimina le race condition.
@@ -5228,7 +5230,7 @@ Ogni adapter espone la stessa interfaccia logica:
 - **Indici critici**: `listens.timestamp`, `listens.day`, `listens.trackId`, `tracks.isrc`, `tracks.mbid`, `searchQueries.[platform+normalized]`
 - **Migrazioni**: versionate in Dexie; ogni cambio schema = nuova versione + funzione di upgrade; **mai drop di tabelle utente** (MIG-1)
 - **Transazioni**: ogni import scrive in una **singola transazione** che include `listens` + `tracks` + `artists` upsert. In caso di `AdapterError` con `recoverable: true` (`§4`), la tx viene committata con i record validi già scritti; se `recoverable: false`, rollback totale
-- **Read-only mode**: se IndexedDB è in quota esaurita, in `VersionError` (DB lock) o in blocco browser (private mode Safari, edge cases), l'app entra in **read-only mode**: nessuna scrittura accettata, messaggio utente localizzato in `error.dbCritical` / nuovo `error.dbReadOnly`, e un banner persistente invita a liberare spazio o ricaricare
+- **Read-only mode**: se IndexedDB è in quota esaurita, in `VersionError` (DB lock) o in blocco browser (private mode Safari, edge cases), l'app entra in **read-only mode**: nessuna scrittura accettata, messaggio utente localizzato in `error.dbCritical` / nuovo `error.dbReadOnly`, e un banner persistente invita a liberare spazio o ricaricare **(futuro — Story 0.7)**.
 - Dettaglio completo in `02-DATA-SCHEMA.md`
 
 ## 6. Pipeline di arricchimento
@@ -5292,30 +5294,32 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 
 ## 8. Stack tecnologico
 
-| Componente | Scelta | Motivazione |
-|------------|--------|-------------|
-| Runtime UI | React 19 + TypeScript 5.6+ + Vite 6 | Ecosistema, PWA-first |
-| PWA | vite-plugin-pwa (Workbox) | Offline, installabilità |
-| Stato client | **Zustand** (UI) + **dexie-react-hooks** (DB live queries) | Local-first: stato derivato da Dexie, no store globale |
-| Data fetching remoto | **React Query 5** solo per enrichment (D.A.5) | Chiamate a MB/Last.fm; niente su dati core |
-| DB locale | **Dexie 4** (IndexedDB) v2 schema | API matura, migrazioni |
-| Schema validation | **Zod 3** | `RawListenEvent`, payload adapter, form |
-| Form | **react-hook-form** + `@hookform/resolvers/zod` | Settings/Import |
-| i18n | **i18next** + react-i18next | `08§7`, Story 0.6 |
-| Date/time | **date-fns** + date-fns-tz | `userTimezone` PatternPayload (`02§4`) |
-| Worker bridge | **Comlink 4** | Typed RPC main↔worker (`§7`) |
-| Grafici | **Recharts 2.15+** standard + **D3 7** solo per Timeline (D.A.4, lazy import) | 90% Recharts, Timeline custom |
-| UI kit | **Tailwind 4** + shadcn/ui | Coerenza col design system |
-| Parsing | **PapaParse** (CSV), JSON nativo, streaming | File grandi |
-| Audio features | **Essentia.js (WASM)** (D.A.6) + AcousticBrainz bonus + fallback euristico | Open source, locale, no rete |
-| Logger | **core/logger** wrapper | Schema `{level, module, msg, ctx}` consistente, no PII |
-| Test | **Vitest 2+** + fake-indexeddb + **MSW** + **Playwright 1.5+** | Unit + e2e + API mock |
-| Coverage | **@vitest/coverage-v8** per package | Soglie da `10§2` |
-| Build | Vite 6 + **Turborepo** | Monorepo incrementale |
-| Tooling | **ESLint 9** + Prettier 3 + Husky + lint-staged + commitlint | Convenzioni `AGENTS.md` |
-| Bundle analyzer | rollup-plugin-visualizer | NFR budget 300KB (`§10`) |
-| Desktop (Fase 2) | Tauri 2.0 | 10x più leggero di Electron |
-| **Sync cloud (Fase 2+, ADR-0005)** | **Placeholder** — non implementato nel MVP (D.A.7). Servizio self-hosted opzionale con E2EE | Previsto ma non vincolante per Fase 0/1 |
+| Componente | Scelta | Motivazione | Fase |
+|------------|--------|-------------|------|
+| Runtime UI | React 19 + TypeScript 5.6+ + Vite 6 | Ecosistema, PWA-first | attivo |
+| PWA | vite-plugin-pwa (Workbox) | Offline, installabilità | attivo |
+| Stato client | **Zustand** (UI) + **dexie-react-hooks** (DB live queries) | Local-first: stato derivato da Dexie, no store globale | futuro (Fase 3) |
+| Data fetching remoto | **React Query 5** solo per enrichment (D.A.5) | Chiamate a MB/Last.fm; niente su dati core | futuro (Fase 2) |
+| DB locale | **Dexie 4** (IndexedDB) v2 schema | API matura, migrazioni | attivo |
+| Schema validation | **Zod 3** | `RawListenEvent`, payload adapter, form | futuro (Fase 3) |
+| Form | **react-hook-form** + `@hookform/resolvers/zod` | Settings/Import | futuro (Fase 3) |
+| i18n | **i18next** + react-i18next | `08§7`, Story 0.6 | attivo |
+| Date/time | **date-fns** + date-fns-tz | `userTimezone` PatternPayload (`02§4`) | futuro (Fase 2) |
+| Worker bridge | **Comlink 4** | Typed RPC main↔worker (`§7`) | futuro (Fase 2) |
+| Grafici | **Recharts 2.15+** standard + **D3 7** solo per Timeline (D.A.4, lazy import) | 90% Recharts, Timeline custom | futuro (Fase 3) |
+| UI kit | **Tailwind 4** + shadcn/ui | Coerenza col design system | futuro (Fase 3) |
+| Parsing | **PapaParse** (CSV), JSON nativo, streaming | File grandi | futuro (Fase 1) |
+| Audio features | **Essentia.js (WASM)** (D.A.6) + AcousticBrainz bonus + fallback euristico | Open source, locale, no rete | futuro (Fase 2) |
+| Logger | **core/logger** wrapper | Schema `{level, module, msg, ctx}` consistente, no PII | attivo |
+| Test | **Vitest 2+** + fake-indexeddb + **MSW** + **Playwright 1.5+** | Unit + e2e + API mock | attivo (MSW futuro) |
+| Coverage | **@vitest/coverage-v8** per package | Soglie da `10§2` | attivo |
+| Build | Vite 6 + **Turborepo** | Monorepo incrementale | attivo |
+| Tooling | **ESLint 9** + Prettier 3 + Husky + lint-staged + commitlint | Convenzioni `AGENTS.md` | attivo (Husky/lint-staged/commitlint in setup) |
+| Bundle analyzer | rollup-plugin-visualizer | NFR budget 300KB (`§10`) | futuro (Fase 6) |
+| Desktop (Fase 2) | Tauri 2.0 | 10x più leggero di Electron | futuro (Fase 2) |
+| **Sync cloud (Fase 2+, ADR-0005)** | **Placeholder** — non implementato nel MVP (D.A.7). Servizio self-hosted opzionale con E2EE | Previsto ma non vincolante per Fase 0/1 | futuro (Fase 2+) |
+
+> **Nota**: le voci marcate "futuro" non sono installate in `package.json` né in `packages/*/package.json` alla data di questa revisione. Verranno aggiunte nelle rispettive fasi (vedi `11-BACKLOG.md` EPIC 6 per il bump post-implementazione).
 
 ### 8.1 Tooling dev
 
@@ -5476,22 +5480,22 @@ Operazioni di manutenzione che il client deve supportare per garantire salute de
 
 ### 12.1 Operazioni standard
 
-| Operazione | Quando | Cosa fa | Costo |
-|------------|--------|---------|-------|
-| `recount()` | Dopo ogni import + settimanale | Ricalcola `listenCount` denormalizzati su tracks/artists | O(n listens) |
-| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati | O(n tracks) |
-| `orphanCleanup()` | Mensile | Rimuove `tracks`/`artists` non referenziati da `listens` né da `library` | O(n tracks) |
-| `indexRebuild()` | Manuale + dopo migrazione | Ricostruisce indici Dexie se corrotti | Lock lungo |
-| `fastCheck()` | Ad ogni boot (in dev/prod) | Smoke test: DB apribile, schema version corretto, indici funzionanti | < 100ms |
-| `quotaCheck()` | Settimanale | `navigator.storage.estimate()` → warning se > 80% | < 50ms |
-| `compact()` | Manuale (utente) | `IDBObjectStore` compaction se supportato | Variabile |
+| Operazione | Quando | Cosa fa | Costo | Fase |
+|------------|--------|---------|-------|------|
+| `recount()` | Dopo ogni import + settimanale | Ricalcola `listenCount` denormalizzati su tracks/artists | O(n listens) | attivo (Story 0.2) |
+| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati | O(n tracks) | futuro (Story 0.7) |
+| `orphanCleanup()` | Mensile | Rimuove `tracks`/`artists` non referenziati da `listens` né da `library` | O(n tracks) | futuro (Story 0.7) |
+| `indexRebuild()` | Manuale + dopo migrazione | Ricostruisce indici Dexie se corrotti | Lock lungo | futuro (Story 0.7) |
+| `fastCheck()` | Ad ogni boot (in dev/prod) | Smoke test: DB apribile, schema version corretto, indici funzionanti | < 100ms | futuro (Story 0.7) |
+| `quotaCheck()` | Settimanale | `navigator.storage.estimate()` → warning se > 80% | < 50ms | futuro (Story 0.7) |
+| `compact()` | Manuale (utente) | `IDBObjectStore` compaction se supportato | Variabile | futuro (Story 0.7) |
 
 ### 12.2 Scheduling
 
-- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`)
-- **Scheduled**: `orphanCleanup`, `quotaCheck` via Web Worker in `requestIdleCallback`, max 5 min/giorno (cumulativo con `§7.1`)
-- **Manuale**: `indexRebuild`, `compact` da pulsante in Settings → "Manutenzione DB" (raro)
-- **Boot**: `fastCheck` sempre; se fallisce, l'app entra in read-only mode (`§5`)
+- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`) — `recount` attivo (Story 0.2), `rekey` futuro (Story 0.7)
+- **Scheduled**: `orphanCleanup`, `quotaCheck` via Web Worker in `requestIdleCallback`, max 5 min/giorno (cumulativo con `§7.1`) — futuro (Story 0.7)
+- **Manuale**: `indexRebuild`, `compact` da pulsante in Settings → "Manutenzione DB" (raro) — futuro (Story 0.7)
+- **Boot**: `fastCheck` sempre; se fallisce, l'app entra in read-only mode (`§5`) — futuro (Story 0.7)
 
 ### 12.3 Health monitoring (no telemetry, D.A.1)
 
@@ -7363,6 +7367,7 @@ Ogni story deve avere label GitHub:
 |-------|-------|----|--------------|------|
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
 

@@ -50,6 +50,16 @@ export const DB_SCHEMA_V2: Record<string, string> = {
 };
 
 /**
+ * Schema Dexie versione 3 — 02-DATA-SCHEMA.md §10 (v1.2, Sessione 13).
+ * Aggiunge `artworkUrl` (nullable) a `tracks` e `albums`; nessuna nuova
+ * chiave di indicizzazione (§9). Migrazione non distruttiva (MIG-1).
+ * I record esistenti ricevono `artworkUrl = null` via upgrade function.
+ */
+export const DB_SCHEMA_V3: Record<string, string> = {
+  ...DB_SCHEMA_V2,
+};
+
+/**
  * Database locale Life-Soundtrack (IndexedDB via Dexie 4).
  *
  * Le tabelle con `&x` usano x come chiave primaria unica (02§6): in particolare
@@ -75,6 +85,19 @@ export class LifeSoundtrackDB extends Dexie {
     super(name);
     this.version(1).stores(DB_SCHEMA_V1);
     this.version(2).stores(DB_SCHEMA_V2);
+    this.version(3).stores(DB_SCHEMA_V3);
+    this.version(3).upgrade((tx) => {
+      tx.table('tracks')
+        .toCollection()
+        .modify((t) => {
+          t.artworkUrl = t.artworkUrl ?? null;
+        });
+      tx.table('albums')
+        .toCollection()
+        .modify((t) => {
+          t.artworkUrl = t.artworkUrl ?? null;
+        });
+    });
   }
 }
 
