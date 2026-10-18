@@ -312,6 +312,12 @@ pwsh scripts/generate-bundle.ps1
 pwsh scripts/generate-bundle.ps1 --check
 ```
 
+### 9.7 Determinismo del `--check`
+
+Il confronto `--check` normalizza sia la riga `> Data:` (timestamp) sia i line endings (`CRLF` → `LF`) sia nel file su disco che nel bundle rigenerato, prima del confronto. Questo rende il check deterministico: non fallisce per solo cambio di timestamp o per differenza di line endings tra Windows e Linux/CI.
+
+Il check continua a rilevare drift reali (file aggiunti/rimossi, contenuto modificato).
+
 ---
 
 ## Changelog

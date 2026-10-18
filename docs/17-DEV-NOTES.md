@@ -70,16 +70,20 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   (`"../../packages/core/src/*"`) e prefisso `./` per i path interni (`"./src/*"`). Non
   rimettere `paths` in `packages/config/tsconfig/base.json`.
 
-### P3 — Line endings: `.gitattributes` impone LF (non rimuoverlo)
+### P3 — Line endings + timestamp: `--check` non deterministico su Windows
 
 - **Sintomo**: `generate-bundle.ps1 --check` fallisce su Windows con "Lista file identica, ma
-  contenuto cambiato" anche senza modifiche ai documenti.
-- **Causa**: con `core.autocrlf=true` i doc vengono estratti con CRLF; il bundle rigenerato
-  incorpora CRLF e diverge dal bundle committato (LF, generato in CI/Linux).
-- **Soluzione**: `.gitattributes` con `* text=auto eol=lf` (più regole `binary` per asset).
-  Dopo una modifica agli attributi, riscrivere il working tree prima di rigenerare il bundle
-  (es. `git checkout-index -f -a`, o eliminare i file tracciati e richeckoutarli). In locale
-  il check gira anche con PowerShell 5.1 se `pwsh` 7 non è installato.
+  contenuto cambiato" anche senza modifiche ai documenti. Fallisce ad ogni run se l'orologio
+  di sistema cambia tra due esecuzioni.
+- **Causa**: (1) il bundle include una riga `> Data: <timestamp>` che cambia ad ogni run;
+  (2) il bundle rigenerato in memoria su Windows usa CRLF, mentre il file committato ha LF
+  (estratti da `.gitattributes` o da CI/Linux). Nessuna delle due differenze viene normalizzata
+  prima del confronto.
+- **Soluzione**: in `scripts/generate-bundle.ps1` (§9.7), sia `$existing` che `$newBundle`
+  vengono normalizzati prima del confronto: la riga `> Data: .+` viene sostituita con
+  `> Data: 0000-00-00 00:00` e i `CRLF` vengono collassati a `LF`. Il check è ora
+  deterministico e continua a rilevare drift reali (file aggiunti/rimossi, contenuto modificato).
+  Mantieni `.gitattributes` con `* text=auto eol=lf` per coerenza tra piattaforme.
 
 ### P4 — exports map di `@ls/config`: serve la condizione `types` per i preset JS
 
