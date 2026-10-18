@@ -5,6 +5,7 @@ import type { LifeSoundtrackDB } from '../index';
 import {
   DB_SCHEMA_V1,
   DB_SCHEMA_V2,
+  DB_SCHEMA_V3,
   countListens,
   getAlbum,
   getArtist,
@@ -112,13 +113,13 @@ describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
     }
   });
 
-  it('dichiara la versione 2 come massima (aggiunta searchQueries, D.A.3)', async () => {
+  it('dichiara la versione 3 come massima (aggiunta searchQueries v1→v2, artworkUrl v2→v3)', async () => {
     const db = freshDb('ls-schema-versions');
     await db.open();
-    expect(db.verno).toBe(2);
+    expect(db.verno).toBe(3);
     expect(Object.keys(DB_SCHEMA_V2)).toContain('searchQueries');
     expect(Object.keys(DB_SCHEMA_V1)).not.toContain('searchQueries');
-    expect(Object.keys(DB_SCHEMA_V2).length).toBe(Object.keys(DB_SCHEMA_V1).length + 1);
+    expect(Object.keys(DB_SCHEMA_V3).length).toBe(Object.keys(DB_SCHEMA_V2).length);
   });
 
   it('openDb apre o crea il DB col nome di default', async () => {
@@ -153,10 +154,10 @@ describe('migrazione v1 → v2', () => {
     expect(await legacy.table('listens').count()).toBe(1);
     legacy.close();
 
-    // 2. Riapre con lo schema corrente (v2): la migrazione è automatica.
+    // 2. Riapre con lo schema corrente (v1→v2→v3): le migrazioni sono automatiche.
     const upgraded = freshDb(name);
     await upgraded.open();
-    expect(upgraded.verno).toBe(2);
+    expect(upgraded.verno).toBe(3);
     expect(await getListen(upgraded, listen.eventKey)).toEqual(listen);
     expect(await getTrack(upgraded, track.canonicalKey)).toEqual(track);
     expect(upgraded.table('searchQueries')).toBeDefined();
@@ -172,6 +173,47 @@ describe('migrazione v1 → v2', () => {
       context: 'manual',
     });
     expect(await upgraded.searchQueries.get('sq-1')).toMatchObject({ query: 'Radiohead' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Migrazione v2 → v3 (02-DATA-SCHEMA.md §10, artworkUrl nullable)
+// ---------------------------------------------------------------------------
+
+describe('migrazione v2 → v3', () => {
+  it('aggiunge artworkUrl null a track e album esistenti senza perdere dati', async () => {
+    // 1. Crea un DB "legacy" con solo lo schema v2 e inserisci dati.
+    class LegacyV2DB extends Dexie {
+      constructor(name: string) {
+        super(name);
+        this.version(1).stores(DB_SCHEMA_V1);
+        this.version(2).stores(DB_SCHEMA_V2);
+      }
+    }
+    const name = 'ls-migration-v2-v3';
+    const legacy = new LegacyV2DB(name);
+    registerDb(legacy as unknown as LifeSoundtrackDB);
+    const track = makeTrack();
+    const album = makeAlbum();
+    await legacy.open();
+    await legacy.table('tracks').put(track);
+    await legacy.table('albums').put(album);
+    expect(await legacy.table('tracks').count()).toBe(1);
+    expect(await legacy.table('albums').count()).toBe(1);
+    legacy.close();
+
+    // 2. Riapre con lo schema corrente (v3): la migrazione v2→v3 è automatica.
+    const upgraded = freshDb(name);
+    await upgraded.open();
+    expect(upgraded.verno).toBe(3);
+
+    // 3. I dati esistenti sono preservati e artworkUrl è stato aggiunto come null.
+    const storedTrack = await upgraded.table('tracks').get(track.canonicalKey);
+    const storedAlbum = await upgraded.table('albums').get(album.id);
+    expect(storedTrack?.artworkUrl).toBe(null);
+    expect(storedAlbum?.artworkUrl).toBe(null);
+    expect(storedTrack?.name).toBe(track.name);
+    expect(storedAlbum?.name).toBe(album.name);
   });
 });
 
