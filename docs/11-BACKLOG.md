@@ -183,10 +183,10 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - T0.6.4 — Componente `<T>` e hook `useT()`
 
 **Acceptance criteria**:
-- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
-- [ ] Switch IT↔EN senza reload
-- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
-- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
+- [x] Tutte le chiavi di `08-COPY-I18N.md` sono importate
+- [x] Switch IT↔EN senza reload
+- [x] Plurali corretti (`{count, plural, one {...} other {...}}`)
+- [x] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
 
 **Dipendenze**: Story 0.1
 **Spec**: `08-COPY-I18N.md` §3, §4, §5
@@ -490,7 +490,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | 🟡 IN REVIEW → ✅ DONE | — (merged in `main`) | 4/4 task + 4/4 AC verificati; PR #19 aperta; bundle 227.81 KB gzip 71.36 KB; dettagli in `18-DEV-LOG` §11; claim `kilo-HP-ELITEBOOK-3b3f` |
-| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.6 Setup i18n | ✅ DONE | — | merged in `main` (PR #22, squash `06812d4` su `5235c88`, 2026-10-18T17:02Z +0200); 4/4 AC verificati, coverage 96% |
 | 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
 | 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
 | 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
