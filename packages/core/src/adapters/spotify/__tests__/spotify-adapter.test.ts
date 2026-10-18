@@ -42,10 +42,15 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
   });
 
   it('casi 1,3,4,5,6,7: import pulito con tutti i valori attesi', async () => {
-    const summary = await runImport(db, new SpotifyAdapter(), new Blob([fixtureBytes()]), {
-      privacy: PRIVACY_OFF,
-      fileName: 'spotify-sample.json',
-    });
+    const summary = await runImport(
+      db,
+      new SpotifyAdapter(),
+      new Blob([fixtureBytes() as unknown as ArrayBuffer]),
+      {
+        privacy: PRIVACY_OFF,
+        fileName: 'spotify-sample.json',
+      },
+    );
 
     // Cosa è stato parsato e scritto
     expect(summary.status).toBe('done');
@@ -111,7 +116,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
 
   it('caso 2: re-import dello stesso file è idempotente (eventKey unico)', async () => {
     const adapter = new SpotifyAdapter();
-    const input = new Blob([fixtureBytes()]);
+    const input = new Blob([fixtureBytes() as unknown as ArrayBuffer]);
     const first = await runImport(db, adapter, input, { privacy: PRIVACY_OFF });
     const second = await runImport(db, adapter, input, { privacy: PRIVACY_OFF });
 
@@ -126,7 +131,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
 
   it('casi 9-10: retainIp true conserva gli IP; false li scarta ma tiene country', async () => {
     const adapter = new SpotifyAdapter();
-    const input = new Blob([fixtureBytes()]);
+    const input = new Blob([fixtureBytes() as unknown as ArrayBuffer]);
 
     const noIp = await runImport(db, adapter, input, { privacy: PRIVACY_OFF });
     expect(noIp.status).toBe('done');
@@ -177,7 +182,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
       runImport(db, new SpotifyAdapter(), new Blob([zip]), { privacy: PRIVACY_OFF }),
     ).rejects.toThrow(AdapterError);
     expect(await db.listens.count()).toBe(0);
-    const [record] = await db.imports.toArray();
+    const record = (await db.imports.toArray())[0]!;
     expect(record.status).toBe('failed');
   });
 
@@ -194,7 +199,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     expect((failure as AdapterError).code).toBe('TRUNCATED');
     expect((failure as AdapterError).recoverable).toBe(true);
 
-    const [record] = await db.imports.toArray();
+    const record = (await db.imports.toArray())[0]!;
     expect(record.status).toBe('partial');
     expect(record.eventsInserted).toBeGreaterThan(0);
     expect(await db.listens.count()).toBe(record.eventsInserted);
@@ -203,7 +208,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
   it('cancellazione cooperativa: AbortSignal ⇒ status partial senza errori (05§4)', async () => {
     const controller = new AbortController();
     const adapter = new SpotifyAdapter();
-    const input = new Blob([fixtureBytes()]);
+    const input = new Blob([fixtureBytes() as unknown as ArrayBuffer]);
     const summary = await runImport(db, adapter, input, {
       privacy: PRIVACY_OFF,
       signal: controller.signal,
@@ -247,7 +252,12 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
   });
 
   it("recount() dopo l'import resta coerente (02§7 MIG-4)", async () => {
-    await runImport(db, new SpotifyAdapter(), new Blob([fixtureBytes()]), { privacy: PRIVACY_OFF });
+    await runImport(
+      db,
+      new SpotifyAdapter(),
+      new Blob([fixtureBytes() as unknown as ArrayBuffer]),
+      { privacy: PRIVACY_OFF },
+    );
     await recount(db);
     const tracks = await db.tracks.toArray();
     const totalListens = tracks.reduce((sum, t) => sum + t.listenCount, 0);
