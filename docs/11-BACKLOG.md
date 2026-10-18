@@ -487,7 +487,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 |------|-------|-------|--------|------|
 | 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
 | 0 | 0.2 Schema DB Dexie | ✅ DONE | — (merged in `main`) | 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. **PR #4 merged `fa09b06` (2026-10-17)**; CI su main ✅. |
-| 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
+| 0 | 0.3 Adapter Spotify | ✅ DONE | #28 | merged PR #28 `3dc9654` (main, 2026-10-18) |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | 🟡 IN REVIEW → ✅ DONE | — (merged in `main`) | 4/4 task + 4/4 AC verificati; PR #19 aperta; bundle 227.81 KB gzip 71.36 KB; dettagli in `18-DEV-LOG` §11; claim `kilo-HP-ELITEBOOK-3b3f` |
 | 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |

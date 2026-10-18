@@ -37,7 +37,7 @@
     │  soundcloud · lastfm · listenbrainz · plex     │
     │  navidrome · manual                            │
     │            ↓ formato unificato ↓               │
-    │  LOCAL DATABASE (IndexedDB / Dexie v2)         │
+    │  LOCAL DATABASE (IndexedDB / Dexie 4, schema v2)│
     └────────────────────────────────────────────────┘
 
 ## 3. Formato unificato (record di ascolto)
@@ -139,7 +139,7 @@ Ogni adapter espone la stessa interfaccia logica:
 ## 5. Database locale
 
 - **Engine**: IndexedDB via Dexie.js
-- **Versione corrente**: Dexie v2 (vedi `02-DATA-SCHEMA.md §6`)
+- **Versione corrente**: Dexie 4 (schema v2, vedi `02-DATA-SCHEMA.md §6`)
 - **Tabelle (12)**: `listens`, `tracks`, `artists`, `albums`, `features`, `sessions`, `insights`, `imports`, `library`, `playlists`, `playlistItems`, `searchQueries`
 - **PK reali**:
   - `listens`: `eventKey` (UNIQUE, idempotenza)
