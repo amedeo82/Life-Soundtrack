@@ -183,7 +183,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     ).rejects.toThrow(AdapterError);
     expect(await db.listens.count()).toBe(0);
     const record = (await db.imports.toArray())[0]!;
-    expect(record.status).toBe('failed');
+    expect(record!.status).toBe('failed');
   });
 
   it('TRUNCATED: file troncato a metà ⇒ partial con eventi già scritti (05§4)', async () => {
@@ -200,9 +200,9 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     expect((failure as AdapterError).recoverable).toBe(true);
 
     const record = (await db.imports.toArray())[0]!;
-    expect(record.status).toBe('partial');
-    expect(record.eventsInserted).toBeGreaterThan(0);
-    expect(await db.listens.count()).toBe(record.eventsInserted);
+    expect(record!.status).toBe('partial');
+    expect(record!.eventsInserted).toBeGreaterThan(0);
+    expect(await db.listens.count()).toBe(record!.eventsInserted);
   });
 
   it('cancellazione cooperativa: AbortSignal ⇒ status partial senza errori (05§4)', async () => {
