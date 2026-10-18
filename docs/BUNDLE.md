@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-18 11:55
+> Data: 2026-10-18 16:58
 > Totale file: 34
 
 
@@ -774,9 +774,9 @@ Apache License
 - **Sessione 19** — macchina a stati post-claim (ADR-0007) **merged in `main`** (PR #14, merge commit `a500ea2`, 2026-10-17T15:03:21Z): `AGENTS.md` **v1.4** con nuova §"📦 Macchina a stati delle issue (status:*)" (estensione di §"🎫 Presa in carico delle story") + tabella label estesa + campo `Closes #N` reso obbligatorio nella checklist PR; `11-BACKLOG.md` **v1.4.0** con §"Stato di una Story" estesa (4 stati `status:*` + nota mutua esclusione `agent-ready` ∩ `status:*` = ∅); `docs/13-ADR/0007-issue-state-machine.md` 🟢 APPROVED v1.0 (macchina a stati completa, transizioni, `jq` per query candidati, pattern `Closes #N`); 4 label `status:*` create su GitHub (`done` / `in-review` / `wontdo` / `blocked-other`); issue #11 chiusa come completed (rimossa `agent-ready`, era rimasta `OPEN` nonostante `PR #12` mergata — sintomo esatto che ADR-0007 previene); issue #9 rivalutata (rimossa `agent-ready` + `in-progress`, aggiunta `status:done`, chiusa); `scripts/generate-bundle.ps1` `$files` include ADR-0007; BUNDLE rigenerato. **Esito post-merge**: branch `feat/13-issue-state-machine` eliminato (policy §♻️); claim `kilo-HP-ELITEBOOK-jm9f` rilasciato su #13 con `status:done` applicato; issue #13 chiusa via `Closes #13` (auto-close GitHub). Gate D.12.1 applicato.
 - **Sessione 20** — hardening multi-agente (push early + pre-commit hook + session checklist) **merged in `main`** (PR #16, merge commit `506c86a`, 2026-10-17T15:24:31Z): `AGENTS.md` **v1.5** con push early obbligatorio in §"🌳 Git workflow" + nuove §"🛡️ Session start checklist" (4 comandi obbligatori) e §"🪝 Pre-commit hook" (setup + bypass); `.githooks/pre-commit` (nuovo script bash committato, verifica pattern branch) + `scripts/setup-hooks.js` (nuovo Node ESM idempotente) + `package.json` con `postinstall` automatico; 3 difese a basso costo coprono 5 failure mode (F1 commit su main, F2 branch invisibile, F4 base stale, F6 collision, F7 commit post-merge); NO worktree (Boss scelta C, F3 file conflict e F5 stash collision non mitigati direttamente, documentati come limiti noti). 4 lesson learned in 18-DEV-LOG §9.
 - **Sessione 21** — refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) **merged in `main`** (PR #18, merge commit `6c0f79b`, 2026-10-17T18:00:26Z): `AGENTS.md` **v1.6** con nuova §"📤 Post-merge actions" (post-merge solo issue-level, no commit su main) + §"🚀 Primo task" step 6 semplificato (GH Action applica status:done) + §"Checklist di sincronizzazione" aggiornata (doc-sync preferito IN PR, "follow-up" declassato); `.github/workflows/auto-status-done.yml` (**nuovo**, D2) + `.githooks/pre-push` (**nuovo**, D4+D5) + `.githooks/pre-commit` esteso (D3 working tree clean check). Race condition al punto 8 (doc-sync post-merge su `main`) eliminato. 4 lesson learned in 18-DEV-LOG §10. 6 decisioni (D.21.1-D.21.6) in SESSIONS.md Sessione 21.
-- **Prossimo step tecnico**: tutte le difese S19 + S20 + S21 sono live. Le 3 issue `agent-ready` ancora attive (#5, #6, #7) sono claimabili con il protocollo completo: query candidati `jq` (S19) + push early + pre-commit hook (S20) + doc-sync IN PR + GH Action `auto-status-done` + pre-push BUNDLE/branch-base check (S21). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`).
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
+- **Prossimo step tecnico**: tutte le difese S19 + S20 + S21 + S23 sono live e dogfooding in parallelo (2026-10-18): Story 0.5 PWA (#7, PR #19) e Story 0.6 i18n (#5, **PR #22**, claim `kilo-HP-ELITEBOOK-7051`) sono `status:in-review`; Story 0.3 Adapter Spotify (#6) resta l'unica `agent-ready` libera e claimabile con il protocollo completo (query candidati + push early + pre-commit + doc-sync IN PR + GH Action `auto-status-done` + pre-push). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) di 0.2+0.5. Pending Boss: decisione su issue #10.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -1978,6 +1978,11 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 | Re-put bulkPut su chiavi esistenti lentissimo in fake-indexeddb | 0.2 | 0.2-3 | ✅ risolto (verify su slice) |
 | Test perf AC falliscono sotto coverage (overhead v8) | 0.2 | 0.2-4 | ✅ risolto (`perf.test.ts` + `--exclude`, min-of-3) |
 | Barrel multipli / `MapIterator.map` / `import type` + `new` | 0.2 | 0.2-5 | ✅ risolto (import espliciti, spread) |
+| `gh --jq` con stringhe tra doppi apici in PowerShell | 0.6 | 0.6-1 | ✅ risolto (output oggetto completo, no filter) |
+| `write` tool rifiuta contenuti che iniziano con `{` | 0.6 | 0.6-2 | ✅ risolto (here-string PS + `WriteAllText` UTF-8 no BOM) |
+| `Intl.NumberFormat('it')` non raggruppa 1000 (CLDR 46) | 0.6 | 0.6-3 | ✅ risolto (`useGrouping: true`) |
+| `vitest/valid-title` "duplicate prefix" su titoli che iniziano con `it ` | 0.6 | 0.6-4 | ✅ risolto (titolo rinominato) |
+| Collisioni chiavi 08§2.9 vs nesting JSON | 0.6 | 0.6-5 | ✅ risolto (`keySeparator: false`, chiavi flat) |
 
 ## 3. Template entry (da copiare)
 
@@ -2302,6 +2307,37 @@ ALL PASS
 
 ---
 
+## 12. Story 0.6 — Setup i18n (i18next)
+
+**Tipo**: implementazione (`apps/web/src/i18n/`); nuova pipeline i18n + formatter + 3 file test
+**Branch**: `feat/5-i18n-setup` (da `main` @ `8088b51`; lavoro eseguito in worktree dedicato `Temp/kilo/ls-i18n`)
+**PR**: #22
+**Issue**: #5 (claim `kilo-HP-ELITEBOOK-7051`, UTC 2026-10-18T09:10:33Z; riverifica OK, claim unico)
+**Data**: 2026-10-18
+**Stato**: 👀 IN REVIEW — 4/4 task + 4/4 AC verificati; 33/33 test verdi; coverage `src/i18n` 96%; lint/typecheck/build verdi
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 0.6-1 | P+F | `gh api --jq '.[] | select(.body | startswith("claim:"))'` fallisce con `unexpected token ":"`: la shell PowerShell 5.1 rimuove i doppi apici interni prima che `gh` riceva l'espressione | Il wrapper del tool shell de-quota le stringhe; jq riceve `startswith(claim:)` | Passare a `--jq` un'espressione senza stringhe letterali (es. proiettare l'oggetto completo `[.[] | {id, created_at, body}]`) e filtrare a occhio; per il filtering server-side usare apici singoli solo se il wrapper li preserva | `AGENTS.md` §"🎫 Presa in carico" (riverifica) |
+| 0.6-2 | P+F+L | Il tool `write` rifiuta un file JSON con errore "Expected string, got {object}": il contenuto che inizia con `{` viene interpretato come parametro strutturato, non come stringa | Il serializer dei parametri del tool prova prima il parse JSON sul valore | Scrivere JSON flat di grandi dimensioni via PowerShell: here-string singolo `@'...'@` (letterale) + `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($false)))` (UTF-8 **senza BOM**: `Set-Content -Encoding UTF8` su PS 5.1 scrive il BOM e rompe i parser JSON a valle) | `apps/web/src/i18n/locales/it.json` |
+| 0.6-3 | F+L | `Intl.NumberFormat('it').format(1000)` restituisce `1000`, non `1.000` come da 08§5; il test della formatter falliva | CLDR 46 introduce `minimumGroupingDigits: 2` per l'italiano (e altre lingue): sotto 10.000 non c'è separatore delle migliaia | Passare `useGrouping: true` (spec Intl v3: il boolean `true` è interpretato come `always`), che ripristina il comportamento 08§5 su engine vecchie e nuove; alternativa `minimumGroupingDigits: 1` NON ancora onorata da V8/Node 24 | `apps/web/src/i18n/formatter.ts` |
+| 0.6-4 | F | `eslint` fallisce su `vitest/valid-title` "should not have duplicate prefix" per il titolo `it('it ed en hanno...')` | La regola considera il prefisso `it ` del titolo duplicato rispetto alla funzione `it` | Evitare titoli di test che iniziano con `it `/`test `; rinominare (es. `it('lingue it ed en con...')`) | `apps/web/src/__tests__/i18n.test.ts:31` |
+| 0.6-5 | L | Le chiavi di 08§2.9 hanno collisioni strutturali (`settings.privacy` è sia label sia prefisso di `settings.privacy.retainIp`): il nesting JSON nativo di i18next (`keySeparator: '.'`) non può rappresentarle | Le chiavi documentate usano punti a livello flat, non gerarchie vere | Usare `keySeparator: false` + `nsSeparator: false` con risorse flat (chiavi complete come stringhe): le chiavi restano IDENTICHE al documento 08, la test di parity verifica `it.json` ≡ `en.json`; i plurali v4 (`_one`/`_other`) funzionano anche su chiavi flat | `apps/web/src/i18n/index.ts`, `docs/08-COPY-I18N.md` §2.9 |
+
+**Lesson learned sintetica**: le chiavi i18n sono un *contratto documentale*, non una struttura dati: flat + `keySeparator: false` tiene spec e codice sincroni per costruzione (test di parity), e le scelte Intl vanno testate contro il CLDR in evoluzione (min2 grouping).
+
+> Conflitti con Sessione 23 risolti al rebase: questa sezione era inizialmente §11, portata a §12 per non collidere; nessun cambio di contenuto.
+
+### Link utili
+
+- Branch: `feat/5-i18n-setup` (post-merge → eliminare per policy §♻️)
+- PR: **#22**
+- Issue: #5 (claim `kilo-HP-ELITEBOOK-7051`)
+- Spec toccate: `docs/08-COPY-I18N.md` §2.1-2.15, §3, §4, §5, §7 (implementazione); `docs/11-BACKLOG.md` Story 0.6; `apps/web/src/main.tsx` (wire-up); `apps/web/package.json` (+`i18next`, `react-i18next`, `@vitest/coverage-v8`)
+- Note: typo 08§2.2 `home.days.thu` IT "Thu" → implementato "Gio" (proposta correzione in 08, DRAFT)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -2320,6 +2356,7 @@ ALL PASS
 | 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
 | 1.3 | 2026-10-18 (Sessione 23) | **§11 Sessione 23** (fix bug pre-commit hook issue #20): entry PR #20 (claim `kilo-HP-ELITEBOOK-hc0f`); 6 lesson (23-1 typo `git diff HEAD` vs `git diff` blocca workflow, 23-2 `git ls-files --others --exclude-standard` per copertura untracked, 23-3 test bash con `eval`+repo tmp `mktemp -d`, 23-4 PowerShell call operator per invocare bash, 23-5 `core.autocrlf` sporca test `git diff`, 23-6 ogni hook nuovo deve avere test in `scripts/test-*.sh` pre-merge — proposta gate §"📝 Checklist di auto-revisione PR"); D3 fix in `.githooks/pre-commit`: `git diff --quiet` + untracked check; test `scripts/test-pre-commit-clean-check.sh` 8/8 PASS (S2 OLD=YES dimostra bug originale) |
 | 1.4 | 2026-10-18 (post-merge S23) | **Esito post-merge S23**: PR #21 merged (commit `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40`, 2026-10-18T09:54:10Z, squash da `c81a1c2`), gate D.12.1 applicato: Sessione 23 ✅ Completata, branch remoto `fix/20-pre-commit-unstaged-only-check` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-hc0f` rilasciato su #20 con applicazione `status:done` (via GH Action `auto-status-done`), issue #20 chiusa via `Closes #20`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge" e §11, changelog v1.4 (18-DEV-LOG) e v1.7 (SESSIONS) allineati, INDEX aggiornato (Roadmap S23 → ✅ COMPLETATA, §"Stato del progetto" S23 → "merged in main") |
+| 1.5 | 2026-10-18 (Story 0.6) | **§12 Story 0.6** (setup i18n): PR #22 aperta (claim `kilo-HP-ELITEBOOK-7051`, worktree dedicato); 5 problemi/lesson (0.6-1 quoting jq in PS 5.1, 0.6-2 write tool + JSON → here-string UTF-8 no BOM, 0.6-3 CLDR 46 min2 grouping su it, 0.6-4 valid-title duplicate prefix, 0.6-5 chiavi flat vs collisioni 08§2.9); 4/4 AC verificati, coverage `src/i18n` 96% |
 
 ---
 
@@ -5938,7 +5975,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.4.0 · Sessione 19 (2026-10-17) · aggiunti 4 stati 'status:*' post-claim (ADR-0007) alla §"Stato di una Story"
+> Status: 🟢 APPROVED · Versione 1.4.1 · 2026-10-18 · Story 0.6 IN REVIEW (PR #22)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -6105,19 +6142,23 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.6 — Setup i18n (i18next) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:S]` `[DEP:0.1]`
 
+**Stato**: 👀 **IN REVIEW** — PR #22 aperta (2026-10-18)
+**Branch**: `feat/5-i18n-setup` (push early)
+**Registro**: `docs/18-DEV-LOG.md` §11 entry Story 0.6 (5 problemi/lesson 0.6-1..5)
+
 **Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
 
 **Task**:
-- T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
-- T0.6.2 — Language detector (localStorage → browser)
-- T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
-- T0.6.4 — Componente `<T>` e hook `useT()`
+- [x] T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
+- [x] T0.6.2 — Language detector (localStorage → browser)
+- [x] T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
+- [x] T0.6.4 — Componente `<T>` e hook `useT()`
 
 **Acceptance criteria**:
-- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
-- [ ] Switch IT↔EN senza reload
-- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
-- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
+- [x] Tutte le chiavi di `08-COPY-I18N.md` sono importate
+- [x] Switch IT↔EN senza reload
+- [x] Plurali corretti (`{count, plural, one {...} other {...}}`)
+- [x] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
 
 **Dipendenze**: Story 0.1
 **Spec**: `08-COPY-I18N.md` §3, §4, §5
@@ -6412,7 +6453,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato al **2026-10-17** (post-merge PR #4). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato al **2026-10-18** (Story 0.6 in review, PR #22). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
@@ -6421,7 +6462,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
-| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.6 Setup i18n | 👀 IN REVIEW | `feat/5-i18n-setup` | PR #22; 4/4 task + 4/4 AC (parity chiavi 183, switch senza reload, plurali v4, fallback); coverage `src/i18n` 96% |
 | 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
 | 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
 | 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
@@ -6455,6 +6496,7 @@ Ogni story deve avere label GitHub:
 | 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
 | 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |
+| 1.4.1 | 2026-10-18 | **Story 0.6 marcata IN REVIEW** (PR #22, claim `kilo-HP-ELITEBOOK-7051`): 4/4 task + 4/4 AC verificati (init i18next flat-keys, detector localStorage→browser, plurali v4 one/other, `<T>`+`useT()`, formatter §5); typo `home.days.thu` IT corretto in "Gio" (da allineare in 08, DRAFT) |
 
 
 
