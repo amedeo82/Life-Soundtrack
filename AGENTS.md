@@ -344,7 +344,11 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
     ├── AGENTS.md                ← questo file
     ├── README.md
     ├── docs/                    ← specifica completa
-    │   ├── INDEX.md, SESSIONS.md, BUNDLE.md
+    │   ├── INDEX.md, SESSIONS.md, BUNDLE.md (rigenerati da aggregator, vedi §"🔄 Lazy-state aggregation")
+    │   ├── state/               ← sorgenti atomiche per lazy-state aggregation (ADR-0008)
+    │   │   ├── _index.md
+    │   │   ├── sessions/<N>-<slug>.md
+    │   │   └── stories/<id>-<slug>.md
     │   ├── 00-VISION.md … 15-DESIGN-SYSTEM.md
     │   ├── 03-ADAPTERS/, 13-ADR/
     │   └── 09-PRIVACY-SECURITY.md
@@ -356,7 +360,8 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
     │   └── scenarios/           ← scenari di vita sintetici (vedi 10-TESTING §3.3)
     └── scripts/                 ← utility
         ├── generate-bundle.ps1      ← snapshot docs in BUNDLE.md
-        └── generate-fixtures.mjs    ← generator deterministico dei fixture (10-TESTING §3.5)
+        ├── generate-fixtures.mjs    ← generator deterministico dei fixture (10-TESTING §3.5)
+        └── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
 
 ## 🚀 Primo task di un agente
 
@@ -380,6 +385,54 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **solo a livello di iss
 3. **Niente commit su `main`**: il doc-sync finale (con PR number e merge commit) è già nel branch PR (vedi §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge"). L'eccezione "follow-up su main" è sconsigliata: crea race con altri agenti.
 
 Vedi §"🛡️ Hardening multi-agente" (Sessione 21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue) elimina le race condition.
+
+## 🔄 Lazy-state aggregation (D.24.x)
+
+Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di merge ricorrenti generati dal doc-sync IN PR su file globali (`docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`). Vedi `docs/13-ADR/0008-lazy-state-aggregation.md` per la spec completa.
+
+### Regola d'oro (vincolante per tutti gli agenti da S25 in poi)
+
+**Le PR di implementazione **NON** toccano direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/INDEX.md`.** Modificano invece solo:
+
+- I file nelle rispettive aree tecniche (`apps/*`, `packages/*`, `scripts/*`, ...)
+- I file in `docs/state/sessions/<N>-<slug>.md` (se la PR documenta una sessione)
+- I file in `docs/state/stories/<id>-<slug>.md` (se la PR chiude una story)
+
+I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `auto-state-aggregate.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
+
+### Eccezione
+
+La PR di introduzione S25 (`#24` / `feat/24-lazy-state-aggregation`) è l'unica che tocca direttamente `INDEX/SESSIONS/BACKLOG` (necessario per inserire i marker `<!-- AGGREGATE-* -->` e fare la migration iniziale delle 3 sessioni + 2 story seed). Dopo S25, vietato modificare i blocchi globali a mano.
+
+### Pattern `state/`
+
+```
+docs/state/
+├── _index.md                      ← schema frontmatter + convenzioni
+├── sessions/<N>-<slug>.md         ← una entry per sessione (frontmatter + body)
+└── stories/<id>-<slug>.md         ← una entry per story (frontmatter + body)
+```
+
+Esempi: `docs/state/sessions/22-pwa.md`, `docs/state/stories/0.5-pwa.md`. Schema completo in `docs/state/_index.md` §"Schema frontmatter".
+
+### Aggregator
+
+```powershell
+pwsh scripts/aggregate-state.ps1 --list       # audit: cosa verrebbe letto/scritto
+pwsh scripts/aggregate-state.ps1 --check      # CI gate: --check exit 0 = in sync
+pwsh scripts/aggregate-state.ps1 --dry-run    # preview senza scrivere
+pwsh scripts/aggregate-state.ps1              # scrivi (idempotente)
+```
+
+CI gate consigliato: aggiungere `pwsh scripts/aggregate-state.ps1 --check` al workflow quality (lo stesso che esegue `generate-bundle.ps1 --check`). Se la PR modifica solo `docs/state/`, lo script esce 0 e non blocca. Se per errore un agente modifica `SESSIONS.md` o `BACKLOG.md` direttamente, lo script rileva drift e fallisce.
+
+### Checklist PR aggiuntiva (D.24.x)
+
+- [ ] **NON** ho modificato direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
+- [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
+- [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
+- [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
+- [ ] Se ho aggiunto un nuovo file in `docs/state/` o `scripts/aggregate-state.ps1`, ho aggiornato `scripts/generate-bundle.ps1` `$files` + rigenerato `BUNDLE.md`
 
 ## 🛡️ Session start checklist
 

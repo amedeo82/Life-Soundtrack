@@ -853,3 +853,164 @@ PR #18 (merge commit `6c0f79b`, 2026-10-17T18:00:26Z) portata in `main`: 8 file 
 ---
 
 *Aggiornato ad ogni nuova sessione.*
+
+<!-- AGGREGATE-SESSIONS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` leggendo `docs/state/sessions/*.md`.
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+> Aggregator version: 1 (ADR-0008, S25).
+
+### Sessione 22 - 📱 Implementazione Story 0.5 (PWA e service worker)
+
+- **Data**: 2026-10-18
+- **Stato**: 🟡
+- **PR**: #19
+- **Claim**: `kilo-HP-ELITEBOOK-3b3f`
+
+```
+
+## Sintesi
+
+Prima implementazione di una PWA reale del progetto (vite-plugin-pwa@^2.0.0 + Workbox + manifest + icone PNG zero-deps + hook `useAppUpdate()` + componente `<UpdateBanner>`). 33/33 test verdi, bundle 227.81 KB gzip 71.36 KB (budget 300 KB ✅). PR #19 aperta ma in CONFLICTING ricorrenti con `main` (5 conflitti doc) a causa dei merge successivi di PR #21 (S23) e PR #22 (S24) che hanno toccato gli stessi file di stato INDEX/SESSIONS/BACKLOG/BUNDLE — è esattamente il sintomo che motivano `state/`.
+
+## Claim
+
+- Claim `kilo-HP-ELITEBOOK-3b3f` (UTC 2026-10-18T08:30:15Z) su issue #7
+- Comment ID GitHub `6247654703`, vincitore per unanimità (un solo claim)
+- Push early `feat/7-pwa-and-service-worker` (D.20.2)
+
+## Decisioni (D.22.1-D.22.6)
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.22.1 | `registerType: 'prompt'` (NON `'autoUpdate'`) | L'utente deve poter scegliere quando applicare un update (spec §11.3) |
+| D.22.2 | NetworkFirst con TTL 5min per `/version.json` (NON CacheFirst) | Versione server letta regolarmente; fallback cache se offline |
+| D.22.3 | Mock `virtual:pwa-register/react` via `resolve.alias` | Modulo virtuale di Vite plugin esiste a build-time; jsdom non lo conosce |
+| D.22.4 | Cleanup esplicito via `test-setup.ts` con `afterEach(cleanup)` | `vitestBase` ha `globals: false`, auto-cleanup RTL non scatta |
+| D.22.5 | PNG generator zero-deps con `node:zlib` | Lighthouse richiede PNG (SVG non passa); non serve sharp/resvg/pngjs |
+| D.22.6 | CSS inline per `<UpdateBanner>` invece di importare `@ls/ui` | Tokens arriveranno con Story 3.1; inline evita dipendenza circolare |
+
+## Lesson learned
+
+- **race condition** nel workflow multi-agente (doc-sync IN PR causa conflitti su 5+ file condivisi) → motivazione per ADR-0008 (lazy-state aggregation)
+- `registerType: 'prompt'` è la scelta giusta per app con migrazione DB: `'autoUpdate'` può lasciare l'utente su cache buggata
+- L'alias `resolve.alias` in `vite.config.ts` è preferibile a `vi.mock` globale per moduli virtuali di plugin Vite
+
+## Documenti aggiornati (doc-sync IN PR, D.21.1)
+
+- `docs/11-BACKLOG.md` → v1.5.0 (Story 0.5 task ✅ + AC ✅, changelog)
+- `docs/18-DEV-LOG.md` → v1.3 (§11 entry Story 0.5 con 5 lesson 0.5-1..5)
+- `docs/INDEX.md` → §"Stato del progetto" aggiornata
+- `docs/SESSIONS.md` → questa entry + changelog v1.6
+- `docs/BUNDLE.md` → rigenerato (auto-regen via `pre-push` hook D4)
+- `scripts/generate-bundle.ps1` → `$files` include `scripts/generate-pwa-icons.mjs`
+- `apps/web/src/App.tsx` → mostra `<UpdateBanner>` quando `needRefresh`
+```
+
+### Sessione 23 - 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20)
+
+- **Data**: 2026-10-18
+- **Stato**: 🟢
+- **PR**: #21
+- **Claim**: `kilo-HP-ELITEBOOK-hc0f`
+
+```
+
+## Sintesi
+
+Il check pre-commit introdotto in S21 (D.21.3 + D3) bloccava ogni commit normale con `git diff HEAD`, costringendo all'uso di `--no-verify`. Fix minimale: `git diff` (unstaged-only) + `git ls-files --others --exclude-standard` (untracked). 8/8 scenari di test passati.
+
+## Claim
+
+- Claim `kilo-HP-ELITEBOOK-hc0f` (UTC 2026-10-18T09:00:14Z) su issue #20
+- Comment ID GitHub `6247976214`, vincitore (un solo claim)
+- Push early `fix/20-pre-commit-unstaged-only-check` (D.20.2)
+
+## Decisioni (D.23.1-D.23.5)
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.23.1 | Check `git diff --quiet` (no args) come cuore della fix | `git diff HEAD` mescola staged + working tree; `git diff` è la correzione minimale |
+| D.23.2 | Aggiungere `git ls-files --others --exclude-standard` per copertura untracked | `git diff` copre solo tracked; F5 stash collision include `git stash -u` |
+| D.23.3 | Test bash `scripts/test-pre-commit-clean-check.sh` con 8 scenari in repo tmp | Test del solo check expression (no recursive hook); confronto OLD vs NEW |
+| D.23.4 | Lesson 23-6: ogni nuovo check in `.githooks/*` deve avere un test in `scripts/test-*.sh` | D3 era concettualmente giusto ma `git diff HEAD` invece di `git diff` è typo invisibile senza test |
+| D.23.5 | Doc-sync IN PR (D.21.1) e via pre-push auto-regen BUNDLE (D4) | Continuità del protocollo S21; nessun commit separato su `main` per la doc-sync |
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 23-1 | `git diff HEAD` blocca `git add && git commit` (caso normale) | ✅ risolto (`git diff --quiet`) |
+| 23-2 | untracked file `git add`-ati poi scoperti non come "working tree sporco" | ✅ risolto (`ls-files --others --exclude-standard`) |
+| 23-3 | test del check hook con commit ricorsivo = recursive hook | ✅ documentato (repo tmp `mktemp -d`) |
+
+## Documenti aggiornati (doc-sync IN PR, D.21.1)
+
+- `.githooks/pre-commit` (D3 fix)
+- `.githooks/README.md` (§"Failure mode coperti" + nota F5)
+- `scripts/test-pre-commit-clean-check.sh` (**nuovo**, ~90 righe bash)
+- `docs/INDEX.md` (Roadmap S23 + §"Stato del progetto" S23 entry)
+- `docs/SESSIONS.md` (entry S23 + changelog v1.6)
+- `docs/18-DEV-LOG.md` (§11 S23 + 6 lesson 23-1..6)
+- `docs/BUNDLE.md` (auto-regen via pre-push D4)
+- `scripts/generate-bundle.ps1` (`$files` include `scripts/test-pre-commit-clean-check.sh`)
+
+## Esito post-merge
+
+PR #21 merged `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`). Branch eliminata. GH Action `auto-status-done` ha applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
+```
+
+### Sessione 24 - 🌐 Implementazione Story 0.6 i18n setup (issue #5)
+
+- **Data**: 2026-10-18
+- **Stato**: 🟢
+- **PR**: #22
+- **Claim**: `kilo-HP-ELITEBOOK-7051`
+
+```
+
+## Sintesi
+
+Story 0.6 "i18n setup" completata e mergiata. Stack adottato: `i18next@^25.x` + `react-i18next@^15.x` installati in `apps/web`. Componente `<T>` + hook `useT()` in `apps/web/src/i18n/`. Formatter ICU per pluralizzazione. Detector `localStorage→browser→*` in `apps/web/src/i18n/detector.ts`. IT/EN locales: 185 voci ciascuno in `apps/web/src/i18n/locales/{it,en}.json`. 8/8 test verdi (formatter + react-i18n + i18n init).
+
+## Claim
+
+- Claim `kilo-HP-ELITEBOOK-7051` su issue #5
+- Push early `feat/5-i18n-setup`
+
+## Acceptance criteria — tutte verificate ✅
+
+- [x] IT e EN funzionanti con ICU plural (singolare/plurale + chiavi annidate con `keySeparator: false`)
+- [x] Componente `<T>` + hook `useT()` con typecheck pulito
+- [x] Detector localStorage→browser (fallback graceful)
+- [x] Wire-up completo in `apps/web/src/main.tsx`
+- [x] Test 8/8 PASS
+
+## Lesson learned (dalla sessione)
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 0.6-1 | `gh --jq` con stringhe tra doppi apici in PowerShell | ✅ risolto (output oggetto completo, no filter) |
+| 0.6-2 | `write` tool rifiuta contenuti che iniziano con `{` | ✅ risolto (here-string PS + `WriteAllText` UTF-8 no BOM) |
+| 0.6-3 | `Intl.NumberFormat('it')` non raggruppa 1000 (CLDR 46) | ✅ risolto (`useGrouping: true`) |
+| 0.6-4 | `vitest/valid-title` "duplicate prefix" su titoli che iniziano con `it ` | ✅ risolto (titolo rinominato) |
+| 0.6-5 | Collisioni chiavi 08§2.9 vs nesting JSON | ✅ risolto (`keySeparator: false`, chiavi flat) |
+
+## Documenti aggiornati (doc-sync IN PR, D.21.1)
+
+- `apps/web/package.json` → + `i18next@^25.x`, `react-i18next@^15.x`
+- `apps/web/src/i18n/` (nuovo) → `<T>`, `useT()`, `formatter.ts`, `detector.ts`, locales `{it,en}.json`
+- `apps/web/src/__tests__/` → 8 test (formatter + react-i18n + i18n init)
+- `apps/web/src/main.tsx` → wire-up
+- `docs/11-BACKLOG.md` → v1.4.1 (Story 0.6 task ✅ + AC ✅)
+- `docs/18-DEV-LOG.md` → §12 entry Story 0.6 con 5 lesson 0.6-1..5
+- `docs/INDEX.md` → §"Stato del progetto" Sessione 24
+- `docs/BUNDLE.md` → rigenerato (commit `b276189`)
+- `scripts/generate-bundle.ps1` → `$files` include i 2 json i18n + 8 test
+
+## Esito post-merge
+
+PR #22 merged `5235c88` (2026-10-18T17:02Z +0200). Branch `feat/5-i18n-setup` eliminata. GH Action `auto-status-done` applica `status:done` a #5.
+```
+
+<!-- AGGREGATE-SESSIONS-END -->
