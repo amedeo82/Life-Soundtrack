@@ -944,7 +944,7 @@ PR #22 merged (squash `06812d4` su `5235c88`), GH Action `auto-status-done` appl
 ### Sessione 22 - 📱 Implementazione Story 0.5 (PWA e service worker)
 
 - **Data**: 2026-10-18
-- **Stato**: 🟡
+- **Stato**: 🟢
 - **PR**: #19
 - **Claim**: `kilo-HP-ELITEBOOK-3b3f`
 
