@@ -13,14 +13,26 @@ if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
   exit 0
 fi
 
-# Check 1 (D3): working tree clean (F5 stash collision mitigation)
-if ! git diff --quiet HEAD 2>/dev/null || ! git diff --cached --quiet HEAD 2>/dev/null; then
-  echo "[pre-commit] ERRORE: working tree ha modifiche non committate."
-  echo "  Committa o stasha prima del prossimo commit:"
-  echo "    git stash push -m 'wip'"
-  echo "    git commit -am 'fix'"
-  echo "    git stash pop"
-  echo "  Oppure per uscire: git commit --no-verify"
+# Check 1 (D3): working tree senza modifiche UNSTAGED (F5 stash collision mitigation)
+# Componenti del check:
+#   - `git diff --quiet`              = unstaged tracked changes (working tree vs index)
+#   - `git ls-files --others ...`     = untracked files (esclude .gitignore)
+# NON usare `git diff HEAD` per il primo confronto: includerebbe anche le staged
+# changes e bloccherebbe ogni commit normale. Vedi fix Sessione 23 / issue #20.
+if ! git diff --quiet 2>/dev/null \
+   || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+  echo "[pre-commit] ERRORE: working tree ha modifiche non committate (unstaged o untracked)."
+  echo "  Le STAGED changes sono OK (sono il payload del commit);"
+  echo "  ma UNSTAGED modifications o file untracked inquinano la working copy"
+  echo "  e abilitano F5 stash collision."
+  echo ""
+  echo "  Risolvi con:"
+  echo "    git add -A && git commit -m 'fix: wip'   # includi tutto"
+  echo "    # oppure"
+  echo "    git stash push -u -m 'wip'               # metti da parte (include untracked)"
+  echo "    git stash pop                            # recupera dopo il commit"
+  echo ""
+  echo "  Bypass emergenza (solo cherry-pick/hotfix): git commit --no-verify"
   exit 1
 fi
 

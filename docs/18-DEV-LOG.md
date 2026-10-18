@@ -2,7 +2,7 @@
 
 > Status: 🟡 DRAFT
 > Versione: 0.6
-> Ultima modifica: 2026-10-17 — doc-sync post-merge PR #4 (Story 0.2 merged)
+> Ultima modifica: 2026-10-18 — Sessione 23 (fix pre-commit hook issue #20)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -311,6 +311,63 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 11. Sessione 23 — fix bug pre-commit hook (D3 staged-vs-unstaged)
+
+**Tipo**: bugfix + script (`.githooks/pre-commit`, `scripts/test-pre-commit-clean-check.sh`, doc)
+**Branch**: `fix/20-pre-commit-unstaged-only-check` (da `main` @ `44c79d1`)
+**PR**: aperta su #20 (claim `kilo-HP-ELITEBOOK-hc0f`)
+**Issue**: #20 (label: `bug`, `area:devops`, `priority:important`, `size:S`)
+**Data**: 2026-10-18
+**Stato**: 🟡 In progress (claim attivo)
+
+### Sintesi
+
+- **`.githooks/pre-commit`** (D3 fix): il check "working tree clean" introdotto in S21 (D.21.3) usava `git diff --quiet HEAD || git diff --cached --quiet HEAD`. `git diff HEAD` confronta working tree **+ staged** vs HEAD → ogni `git commit` con staged changes fallisce. Il check corretto per F5 stash collision è:
+  - `git diff --quiet` (no args) = working tree vs index = **unstaged-only**
+  - `git ls-files --others --exclude-standard` = untracked files (esclude `.gitignore`)
+- **`scripts/test-pre-commit-clean-check.sh`** (nuovo, 88 righe): test in 8 scenari (clean / staged / unstaged / mixed / untracked / chmod) che verifica il check FIXED e dimostra che il check BUGGY blocca il caso normale (S2: commit con solo staged changes).
+- **`.githooks/README.md`** (S23 update): sezione "Failure mode coperti" estesa con F5 parziale e nota sull'ambito (unstaged tracked + untracked, NON staged).
+- **AGENTS.md, `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/18-DEV-LOG.md`**: aggiornati con Sessione 23 + changelog.
+
+### Lesson learned
+
+| # | Tipo | Osservazione | Rif. |
+|---|------|--------------|-----|
+| 23-1 | P+F+L | **`git diff HEAD` vs `git diff` è un banale typo che blocca l'intero workflow**: il check D.21.3 era concettualmente giusto (working tree clean = no F5 stash collision) ma l'espressione `git diff HEAD` mescola staged + working tree, che per definizione è modificato in ogni commit. Il check corretto è `git diff` (no args = working tree vs index). Test essenziale: scenario "staged only" deve **passare** (è il caso normale `git add && git commit`); senza quel test il bug è invisibile perché il check "anti-dirty" sembra corretto a prima vista | issue #20 |
+| 23-2 | L+F | **`git ls-files --others --exclude-standard` completa la copertura F5**: `git diff` copre solo le tracked unstaged; un file untracked (`touch newfile.txt`) non appare in `git diff`. Per la F5 stash collision mitigation completa (anche `git stash -u` coinvolge untracked), aggiungere il check untracked. Rispetta `.gitignore` per default (`--exclude-standard`) | `.githooks/pre-commit:20` |
+| 23-3 | L | **Test bash per hook senza `git commit` reale**: per testare l'espressione interna di un hook (`! git diff --quiet ...`) senza eseguire un commit vero (che attiverebbe il recursive pre-commit), si può `eval` la stringa in un repo temporaneo (`mktemp -d` + `git init`). 8 scenari + 1 confronto OLD vs NEW in ~90 righe, exit 0/1 dipendente dal numero di scenari passati | `scripts/test-pre-commit-clean-check.sh` |
+| 23-4 | L | **PowerShell 5.1 + bash one-liner**: `bash --version` viene interpretato come parametro PowerShell → usare `& "C:\Program Files\Git\bin\bash.exe"` (call operator) per invocare bash su Windows. Il `bash` registrato in PATH è il WSL stub (`Windows Subsystem for Linux has no installed distributions`) | sessione locale |
+| 23-5 | L | **`core.autocrlf` sporca i test `git diff`**: su Windows il default `core.autocrlf=true` normalizza LF→CRLF al checkout, quindi `echo v0 > file.txt` produce working tree ≠ HEAD anche per "stesso contenuto". In test bash disabilitare: `git config core.autocrlf false && git config core.eol lf`; commit iniziale con `printf '%s\n' v0 > ...` per coerenza | `scripts/test-pre-commit-clean-check.sh:30-32` |
+| 23-6 | L | **S21 D3 check introdotto senza test = bug invisibile**: la S21 ha introdotto il check a colpo sicuro basandosi sulla descrizione D3. Il mancato test (session-start checklist non include "smoke test del hook" su uno scenario staged) ha permesso al bug di atterrare in `main` indisturbato. **Lesson per la S24+**: ogni nuovo check in `.githooks/*` deve avere un test in `scripts/test-*.sh` prima del merge. Aggiungibile come gate §"📝 Checklist di auto-revisione PR" item "hook smoke-test" | lesson per prossima sessione |
+
+### Test verification (S23 fix)
+
+```bash
+$ bash scripts/test-pre-commit-clean-check.sh
+S1 clean working tree, no staged, no unstaged     | expected=no  | NEW=no  (OK) | OLD=no  (info)
+S2 staged changes only (NORMAL COMMIT FLOW)       | expected=no  | NEW=no  (OK) | OLD=yes (info)  ← BUG ORIGINALE
+S3 unstaged changes only                          | expected=yes | NEW=yes (OK) | OLD=yes (info)
+S4 both staged and unstaged changes               | expected=yes | NEW=yes (OK) | OLD=yes (info)
+S5 brand new untracked file (unstaged)            | expected=yes | NEW=yes (OK) | OLD=no  (info)
+S6 brand new file staged (git add)                | expected=no  | NEW=no  (OK) | OLD=yes (info)
+S7 modifica a file tracked ma NON staged          | expected=yes | NEW=yes (OK) | OLD=yes (info)
+S8 piffero: solo differenza in mode (chmod)       | expected=no  | NEW=no  (OK) | OLD=yes (info)
+---
+Pass: 8   Fail: 0
+ALL PASS
+```
+
+**OLD bug reproduce (S2, the user-reported bug)**: con il check broken, `git commit` dopo un normale `git add` viene bloccato con messaggio "working tree ha modifiche non committate" costringendo tutti gli agenti a `git commit --no-verify`.
+
+### Link utili
+
+- Branch: `fix/20-pre-commit-unstaged-only-check`
+- Issue: #20 (claim `kilo-HP-ELITEBOOK-hc0f`)
+- Fix files: `.githooks/pre-commit`, `scripts/test-pre-commit-clean-check.sh` (nuovo)
+- Doc touched: `.githooks/README.md`, `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/18-DEV-LOG.md`, `docs/BUNDLE.md` (auto-regen via pre-push hook)
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -327,6 +384,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 1.0 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati |
 | 1.1 | 2026-10-17 (Sessione 21) | **§10 Sessione 21** (refactor catena): entry PR #17 (claim `kilo-HP-ELITEBOOK-q7w3`); 4 lesson (21-1 doc-sync post-merge su main è intrinsecamente racy — soluzione: doc-sync IN PR, 21-2 GH Action può sostituire label transitions manuali, 21-3 pre-push hook cross-platform pattern pwsh/powershell fallback, 21-4 doc-sync IN PR richiede 2 commit sul branch); D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning; race condition al punto 8 (doc-sync post-merge) eliminato atomicamente |
 | 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
+| 1.3 | 2026-10-18 (Sessione 23) | **§11 Sessione 23** (fix bug pre-commit hook issue #20): entry PR #20 (claim `kilo-HP-ELITEBOOK-hc0f`); 6 lesson (23-1 typo `git diff HEAD` vs `git diff` blocca workflow, 23-2 `git ls-files --others --exclude-standard` per copertura untracked, 23-3 test bash con `eval`+repo tmp `mktemp -d`, 23-4 PowerShell call operator per invocare bash, 23-5 `core.autocrlf` sporca test `git diff`, 23-6 ogni hook nuovo deve avere test in `scripts/test-*.sh` pre-merge — proposta gate §"📝 Checklist di auto-revisione PR"); D3 fix in `.githooks/pre-commit`: `git diff --quiet` + untracked check; test `scripts/test-pre-commit-clean-check.sh` 8/8 PASS (S2 OLD=YES dimostra bug originale) |
 
 ---
 
