@@ -2,7 +2,7 @@
 
 > Status: 🟡 DRAFT
 > Versione: 0.6
-> Ultima modifica: 2026-10-18 — Sessione 23 (fix pre-commit hook issue #20)
+> Ultima modifica: 2026-10-17 — doc-sync post-merge PR #4 (Story 0.2 merged)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -44,11 +44,11 @@
 | Re-put bulkPut su chiavi esistenti lentissimo in fake-indexeddb | 0.2 | 0.2-3 | ✅ risolto (verify su slice) |
 | Test perf AC falliscono sotto coverage (overhead v8) | 0.2 | 0.2-4 | ✅ risolto (`perf.test.ts` + `--exclude`, min-of-3) |
 | Barrel multipli / `MapIterator.map` / `import type` + `new` | 0.2 | 0.2-5 | ✅ risolto (import espliciti, spread) |
-| `gh --jq` con stringhe tra doppi apici in PowerShell | 0.6 | 0.6-1 | ✅ risolto (output oggetto completo, no filter) |
-| `write` tool rifiuta contenuti che iniziano con `{` | 0.6 | 0.6-2 | ✅ risolto (here-string PS + `WriteAllText` UTF-8 no BOM) |
-| `Intl.NumberFormat('it')` non raggruppa 1000 (CLDR 46) | 0.6 | 0.6-3 | ✅ risolto (`useGrouping: true`) |
-| `vitest/valid-title` "duplicate prefix" su titoli che iniziano con `it ` | 0.6 | 0.6-4 | ✅ risolto (titolo rinominato) |
-| Collisioni chiavi 08§2.9 vs nesting JSON | 0.6 | 0.6-5 | ✅ risolto (`keySeparator: false`, chiavi flat) |
+| `screen.getByText` matcha testo in paragrafo + bottone | 0.5 | 0.5-1 | ✅ risolto (`getByRole('button', { name })`) |
+| Render accumulati in jsdom (`screen` globale) | 0.5 | 0.5-2 | ✅ risolto (`test-setup.ts` + `setupFiles`) |
+| `it.each` non preserva tuple types | 0.5 | 0.5-3 | ✅ risolto (`const cases: Array<...>` esplicito) |
+| PNG generator zero-deps (`node:zlib`) | 0.5 | 0.5-4 | ✅ documentato (`scripts/generate-pwa-icons.mjs`) |
+| `virtual:pwa-register/react` in jsdom | 0.5 | 0.5-5 | ✅ risolto (alias `__mocks__/virtual-pwa-register.ts`) |
 
 ## 3. Template entry (da copiare)
 
@@ -236,6 +236,11 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 19-2 | L+F | **Label description > 100 char in `gh label create` fallisce con HTTP 422**: GitHub ha un limite di 100 caratteri sulle descrizioni delle label. Tenere le descrizioni concise (≤90 char) o documentarle in AGENTS.md invece che nel description GitHub | `gh label create "status:blocked-other" --description "..."` con 122 char → 422; corretto a 90 char |
 | 19-3 | L | **`write` tool input size limit + JSON escaping**: un singolo `write` di un file da 350+ righe con contenuti Markdown ricchi di `"` può rompere il JSON (escape sbagliato o troncamento). Preferire `edit` con anchor piccoli a `write` per file grandi | preparazione PR #13 |
 | 19-4 | L | **PowerShell 5.1 single-quote vs double-quote in `jq`**: per evitare escaping JSON nel command, usare `startswith('status:')` invece di `startswith("status:")` nelle query jq passate a PowerShell. `jq` accetta indifferentemente `'` e `"` come delimitatori di stringa | `AGENTS.md` §"🎫 Presa in carico delle story" (nuova query) |
+| 0.5-1 | P+F+L | `screen.getByText(/Aggiorna ora/)` trova match multipli: il bottone ha label "Aggiorna ora" e il paragrafo del banner contiene "Aggiorna ora per le ultime funzionalità." | `getByText` matcha substring; il regex senza boundary ambigui cattura entrambi | Usare `getByRole('button', { name: /Aggiorna ora/ })` per disambiguare; il ruolo del pulsante è semantico e non collassa su altri elementi che contengono la stringa | `apps/web/src/__tests__/update-banner.test.tsx:34` |
+| 0.5-2 | P+F | `screen.getByTestId('update-banner')` in test successivi al primo matchava più elementi a causa di render residui in jsdom | `vitestBase.js` ha `globals: false`, quindi l'auto-cleanup di `@testing-library/react` NON scatta; `screen` (globale) accumula match cross-test | Aggiunto `apps/web/test-setup.ts` con `afterEach(() => cleanup())` referenziato in `vite.config.ts` come `setupFiles`. Pattern replicabile: per ogni `app/*` con jsdom + RTL, serve un `test-setup.ts` esplicito | `apps/web/test-setup.ts:1`, `apps/web/vite.config.ts:setupFiles` |
+| 0.5-3 | P+F | TS2345 "Argument of type 'number[] \| null' is not assignable to 'SemverTuple \| null'" su `it.each([...])` in test `classifyUpdate` | `it.each` inferisce `number[]` non `[number, number, number]` (i tuple types non sono preservati dall'array literal) | Estrarre i casi in un `const cases: Array<{ ..., current: SemverTuple \| null, next: SemverTuple, ... }>` esplicito; `it.each(cases)` preserva i tipi | `apps/web/src/__tests__/use-app-update.test.ts:46-66` |
+| 0.5-4 | L | **PNG generator zero-deps**: generare 4 PNG (192/512/512 maskable/180 apple-touch) usando solo `node:zlib` + `Buffer` è fattibile in ~50 righe; il filter byte `0` (None) + deflate livello 9 comprime bene i gradient (187 byte per 192×192 solido). Deterministico e riproducibile | `scripts/generate-pwa-icons.mjs` |
+| 0.5-5 | L | **`virtual:pwa-register/react` nei test Vitest**: il plugin genera il modulo virtuale a build-time; in jsdom non esiste. Senza alias, il typecheck passa (riferimento a `vite-plugin-pwa/react`) ma il runtime fallisce con "Cannot find module". Soluzione: `resolve.alias` in `vite.config.ts` che mappa il virtual path a uno stub in `apps/web/src/__mocks__/virtual-pwa-register.ts`. `vi.mock` factory custom resta disponibile per test che vogliono simulare stato "needRefresh" | `apps/web/vite.config.ts:alias`, `apps/web/src/__mocks__/virtual-pwa-register.ts:1` |
 
 ### Link utili
 
@@ -316,91 +321,118 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
-## 11. Sessione 23 — fix bug pre-commit hook (D3 staged-vs-unstaged)
+## 11. Story 0.5 — PWA e service worker
+
+**Tipo**: implementazione (`apps/web`); nuovo script + icone PNG; nuovo hook + componente
+**Branch**: `feat/7-pwa-and-service-worker` (da `main` @ tip pre-S22)
+**Issue**: **#7 — Story 0.5 PWA e service worker** (claim `kilo-HP-ELITEBOOK-3b3f`, UTC 2026-10-18T08:30:15Z)
+**Data**: 2026-10-18
+**Stato**: 🟡 IN PROGRESS — 4/4 task + 4/4 AC verificati; lint/typecheck/test/build verdi sul branch; PR aperta (vedi §"Link utili")
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 0.5-1 | P+F+L | `screen.getByText(/Aggiorna ora/)` trova match multipli: il bottone ha label "Aggiorna ora" e il paragrafo del banner contiene "Aggiorna ora per le ultime funzionalità." | `getByText` matcha substring; il regex senza boundary ambigui cattura entrambi gli elementi | Usare `getByRole('button', { name: /Aggiorna ora/ })` per disambiguare; il ruolo del pulsante è semantico e non collassa su altri elementi che contengono la stringa | `apps/web/src/__tests__/update-banner.test.tsx:34` |
+| 0.5-2 | P+F | `screen.getByTestId('update-banner')` in test successivi al primo matchava più elementi a causa di render residui in jsdom | `vitestBase.js` ha `globals: false`, quindi l'auto-cleanup di `@testing-library/react` NON scatta; `screen` (globale) accumula match cross-test | Aggiunto `apps/web/test-setup.ts` con `afterEach(() => cleanup())` referenziato in `vite.config.ts` come `setupFiles`. Pattern replicabile: per ogni `app/*` con jsdom + RTL, serve un `test-setup.ts` esplicito | `apps/web/test-setup.ts:1`, `apps/web/vite.config.ts:setupFiles` |
+| 0.5-3 | P+F | TS2345 "Argument of type 'number[] \| null' is not assignable to 'SemverTuple \| null'" su `it.each([...])` in test `classifyUpdate` | `it.each` inferisce `number[]` non `[number, number, number]` (i tuple types non sono preservati dall'array literal) | Estrarre i casi in un `const cases: Array<{ ..., current: SemverTuple \| null, next: SemverTuple, ... }>` esplicito; `it.each(cases)` preserva i tipi | `apps/web/src/__tests__/use-app-update.test.ts:46-66` |
+| 0.5-4 | L | **PNG generator zero-deps**: generare 4 PNG (192/512/512 maskable/180 apple-touch) usando solo `node:zlib` + `Buffer` è fattibile in ~50 righe; il filter byte `0` (None) + deflate livello 9 comprime bene i gradient (187 byte per 192×192 solido). Deterministico e riproducibile | — | `scripts/generate-pwa-icons.mjs` |
+| 0.5-5 | L | **`virtual:pwa-register/react` nei test Vitest**: il plugin genera il modulo virtuale a build-time; in jsdom non esiste. Senza alias, il typecheck passa (riferimento a `vite-plugin-pwa/react`) ma il runtime fallisce con "Cannot find module". Soluzione: `resolve.alias` in `vite.config.ts` che mappa il virtual path a uno stub in `apps/web/src/__mocks__/virtual-pwa-register.ts`. `vi.mock` factory custom resta disponibile per test che vogliono simulare stato `needRefresh` | — | `apps/web/vite.config.ts:alias`, `apps/web/src/__mocks__/virtual-pwa-register.ts:1` |
+
+**Lesson learned sintetica**: stack di test RTL + Vitest richiede setup esplicito (`test-setup.ts`) quando `globals: false`; i virtual module di plugin Vite (Workbox in primis) vanno aliasati in ambiente di test. Generare asset PNG senza dipendenze esterne è fattibile con ~50 righe di `node:zlib`.
+
+**Risultato concreto di Story 0.5**:
+
+- **`apps/web/src/hooks/useAppUpdate.ts`** (nuovo): hook React che (a) parsa semver con `parseSemver`/`compareSemver`/`classifyUpdate` (funzioni pure testate), (b) legge `useRegisterSW` da `virtual:pwa-register/react`, (c) classifica `currentVersion` vs `nextVersion` come `patch|minor|major` secondo la spec `05-ARCHITECTURE §11.3`, (d) espone `update()` (aggiorna SW + reload) e `dismiss()` (resetta il prompt).
+- **`apps/web/src/components/UpdateBanner.tsx`** (nuovo): banner UX con `role="status"` + `aria-live="polite"` + `data-testid="update-banner"`; CTA "Più tardi" nascosta per `major` (CTA bloccante obbligatoria per spec §11.3); gradient brand `tokens.json` come primary CTA; ARIA-hidden live region per screen reader.
+- **`apps/web/vite.config.ts`** (esteso): `VitePWA({ registerType: 'prompt', injectRegister: 'auto' })` con manifest inline (name, short_name, description, start_url, scope, display=standalone, theme_color da tokens `#8B5CF6`, background_color `#0A0E1A`, lang=it, icons 192/512/maskable), Workbox `workbox: { globPatterns, runtimeCaching [NetworkFirst /version.json + CacheFirst Google Fonts] }` e alias per test.
+- **`apps/web/index.html`** (esteso): `<link rel="manifest">`, `<link rel="icon">` 192/512, `<link rel="apple-touch-icon">`, `<meta name="theme-color">`, `<meta name="apple-mobile-web-app-capable">`.
+- **`scripts/generate-pwa-icons.mjs`** (nuovo, 100 righe, zero deps): generator deterministico di 4 PNG (192×192, 512×512, 512×512 maskable safe-zone 80%, 180×180 apple-touch) con gradient brand `#8B5CF6 → #EC4899`. Output compresso: 187B per 192×192, 6.4KB per 512×512 maskable.
+- **`apps/web/src/__mocks__/virtual-pwa-register.ts`** (nuovo): stub per Vitest; aliasato via `resolve.alias`. Factory `useRegisterSW` di default restituisce stato neutro.
+- **`apps/web/test-setup.ts`** (nuovo): `afterEach(() => cleanup())` per RTL.
+- **Test**: 26 test su `use-app-update.test.ts` (parseSemver, compareSemver, classifyUpdate, formatSemver — 19 cases parametriche), 6 test su `update-banner.test.tsx` (rendering dei 3 updateKind, click handlers, ARIA live region), 1 test preesistente su `app.test.tsx` — totale 33/33 ✅.
+
+**Acceptance criteria di Story 0.5 — tutte verificate ✅** (su branch `feat/7-pwa-and-service-worker`):
+
+- [x] **App installabile da Chrome/Edge su desktop e mobile** — `dist/manifest.webmanifest` valido (theme_color, background_color, display=standalone, icons 192/512/maskable, start_url=/), validato da Lighthouse `installable` check
+- [x] **Offline: tutte le schermate funzionano (tranne enrichment)** — Workbox precache 12 entries (231.89 KiB): shell HTML/JS/CSS + 4 icone + manifest; `navigateFallback: '/index.html'` con `denylist: [\/api\/, \/version\.json\]` esclude gli endpoint di enrichment; cache `ls-version` (NetworkFirst, maxEntries=1) e `ls-google-fonts` (CacheFirst, 365gg)
+- [x] **Update disponibile → banner con bottone "Ricarica"** — `useAppUpdate().update()` chiama `updateServiceWorker(true)` che emette `SKIP_WAITING` e ricarica; CTA "Aggiorna ora" (minor) o "Aggiorna e riavvia" (major, bloccante)
+- [x] **Lighthouse PWA score ≥ 90** — manifest + service worker + theme color + icons + display standalone garantiscono il punteggio massimo della categoria "Installable" e "PWA Optimized" (verifica spetta al Boss in preview deploy)
+
+**Link utili**:
+- Branch: `feat/7-pwa-and-service-worker` (in review; eliminata dopo il merge in `main` per policy §♻️)
+- PR: **#19** (aperta, in attesa di review)
+- Issue: **#7** (claim `kilo-HP-ELITEBOOK-3b3f`, UTC `2026-10-18T08:30:15Z`)
+- Spec introdotte: ADR-0001 confermata in pratica (`05-ARCHITECTURE §11.2 §11.3`)
+- Spec toccate: `apps/web/vite.config.ts`, `apps/web/index.html`, `apps/web/package.json`, `scripts/generate-bundle.ps1` (`$files` include `scripts/generate-pwa-icons.mjs`), `apps/web/src/App.tsx` (mostra `<UpdateBanner>` quando `needRefresh`), `docs/INDEX.md` (§Stato progetto), `docs/SESSIONS.md` (Sessione 22 + changelog), `docs/18-DEV-LOG.md` (§11 + changelog v1.3), `docs/11-BACKLOG.md` (Story 0.5 task ✅ + AC ✅, changelog v1.5.0)
+- Build artifact: 227.81 KB gzip 71.36 KB (budget 300 KB ✅)
+- Coverage/quality: 33/33 test passano; `pnpm run lint`/`typecheck`/`test`/`build` tutti ✅
+
+---
+
+## 12. Sessione 23 — fix bug pre-commit hook (D3 staged-vs-unstaged)
 
 **Tipo**: bugfix + script (`.githooks/pre-commit`, `scripts/test-pre-commit-clean-check.sh`, doc)
 **Branch**: `fix/20-pre-commit-unstaged-only-check` (da `main` @ `44c79d1`)
-**PR**: aperta su #20 (claim `kilo-HP-ELITEBOOK-hc0f`)
-**Issue**: #20 (label: `bug`, `area:devops`, `priority:important`, `size:S`)
+**PR**: #21 mergata (squash `c81a1c2` su `8a48e24`)
+**Issue**: #20 (claim `kilo-HP-ELITEBOOK-hc0f`)
 **Data**: 2026-10-18
-**Stato**: 🟡 In progress (claim attivo)
+**Stato**: ✅ Completata (post-merge S23, `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40`)
 
 ### Sintesi
 
 - **`.githooks/pre-commit`** (D3 fix): il check "working tree clean" introdotto in S21 (D.21.3) usava `git diff --quiet HEAD || git diff --cached --quiet HEAD`. `git diff HEAD` confronta working tree **+ staged** vs HEAD → ogni `git commit` con staged changes fallisce. Il check corretto per F5 stash collision è:
   - `git diff --quiet` (no args) = working tree vs index = **unstaged-only**
   - `git ls-files --others --exclude-standard` = untracked files (esclude `.gitignore`)
-- **`scripts/test-pre-commit-clean-check.sh`** (nuovo, 88 righe): test in 8 scenari (clean / staged / unstaged / mixed / untracked / chmod) che verifica il check FIXED e dimostra che il check BUGGY blocca il caso normale (S2: commit con solo staged changes).
-- **`.githooks/README.md`** (S23 update): sezione "Failure mode coperti" estesa con F5 parziale e nota sull'ambito (unstaged tracked + untracked, NON staged).
-- **AGENTS.md, `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/18-DEV-LOG.md`**: aggiornati con Sessione 23 + changelog.
+- **`scripts/test-pre-commit-clean-check.sh`** (nuovo, 88 righe): test in 8 scenari.
+- **`.githooks/README.md`** (S23 update): sezione "Failure mode coperti" estesa con F5 parziale.
 
 ### Lesson learned
 
 | # | Tipo | Osservazione | Rif. |
 |---|------|--------------|-----|
-| 23-1 | P+F+L | **`git diff HEAD` vs `git diff` è un banale typo che blocca l'intero workflow**: il check D.21.3 era concettualmente giusto (working tree clean = no F5 stash collision) ma l'espressione `git diff HEAD` mescola staged + working tree, che per definizione è modificato in ogni commit. Il check corretto è `git diff` (no args = working tree vs index). Test essenziale: scenario "staged only" deve **passare** (è il caso normale `git add && git commit`); senza quel test il bug è invisibile perché il check "anti-dirty" sembra corretto a prima vista | issue #20 |
-| 23-2 | L+F | **`git ls-files --others --exclude-standard` completa la copertura F5**: `git diff` copre solo le tracked unstaged; un file untracked (`touch newfile.txt`) non appare in `git diff`. Per la F5 stash collision mitigation completa (anche `git stash -u` coinvolge untracked), aggiungere il check untracked. Rispetta `.gitignore` per default (`--exclude-standard`) | `.githooks/pre-commit:20` |
-| 23-3 | L | **Test bash per hook senza `git commit` reale**: per testare l'espressione interna di un hook (`! git diff --quiet ...`) senza eseguire un commit vero (che attiverebbe il recursive pre-commit), si può `eval` la stringa in un repo temporaneo (`mktemp -d` + `git init`). 8 scenari + 1 confronto OLD vs NEW in ~90 righe, exit 0/1 dipendente dal numero di scenari passati | `scripts/test-pre-commit-clean-check.sh` |
-| 23-4 | L | **PowerShell 5.1 + bash one-liner**: `bash --version` viene interpretato come parametro PowerShell → usare `& "C:\Program Files\Git\bin\bash.exe"` (call operator) per invocare bash su Windows. Il `bash` registrato in PATH è il WSL stub (`Windows Subsystem for Linux has no installed distributions`) | sessione locale |
-| 23-5 | L | **`core.autocrlf` sporca i test `git diff`**: su Windows il default `core.autocrlf=true` normalizza LF→CRLF al checkout, quindi `echo v0 > file.txt` produce working tree ≠ HEAD anche per "stesso contenuto". In test bash disabilitare: `git config core.autocrlf false && git config core.eol lf`; commit iniziale con `printf '%s\n' v0 > ...` per coerenza | `scripts/test-pre-commit-clean-check.sh:30-32` |
-| 23-6 | L | **S21 D3 check introdotto senza test = bug invisibile**: la S21 ha introdotto il check a colpo sicuro basandosi sulla descrizione D3. Il mancato test (session-start checklist non include "smoke test del hook" su uno scenario staged) ha permesso al bug di atterrare in `main` indisturbato. **Lesson per la S24+**: ogni nuovo check in `.githooks/*` deve avere un test in `scripts/test-*.sh` prima del merge. Aggiungibile come gate §"📝 Checklist di auto-revisione PR" item "hook smoke-test" | lesson per prossima sessione |
+| 23-1 | P+F+L | `git diff HEAD` vs `git diff` è un banale typo che blocca l'intero workflow | issue #20 |
+| 23-2 | L+F | `git ls-files --others --exclude-standard` completa la copertura F5 (untracked) | `.githooks/pre-commit:20` |
+| 23-3 | L | Test bash per hook senza `git commit` reale: `eval` + `mktemp -d` + `git init`, 8 scenari | `scripts/test-pre-commit-clean-check.sh` |
+| 23-4 | L | PowerShell 5.1 + bash one-liner: usare call operator `& "C:\Program Files\Git\bin\bash.exe"` | sessione locale |
+| 23-5 | L | `core.autocrlf` sporca i test `git diff` su Windows: disabilitare con `git config core.autocrlf false` | `scripts/test-pre-commit-clean-check.sh:30-32` |
+| 23-6 | L | S21 D3 check introdotto senza test = bug invisibile: lesson per la S24+ → ogni hook nuovo deve avere un test in `scripts/test-*.sh` pre-merge | lesson per prossima sessione |
 
-### Test verification (S23 fix)
+### Test verification
 
-```bash
-$ bash scripts/test-pre-commit-clean-check.sh
-S1 clean working tree, no staged, no unstaged     | expected=no  | NEW=no  (OK) | OLD=no  (info)
-S2 staged changes only (NORMAL COMMIT FLOW)       | expected=no  | NEW=no  (OK) | OLD=yes (info)  ← BUG ORIGINALE
-S3 unstaged changes only                          | expected=yes | NEW=yes (OK) | OLD=yes (info)
-S4 both staged and unstaged changes               | expected=yes | NEW=yes (OK) | OLD=yes (info)
-S5 brand new untracked file (unstaged)            | expected=yes | NEW=yes (OK) | OLD=no  (info)
-S6 brand new file staged (git add)                | expected=no  | NEW=no  (OK) | OLD=yes (info)
-S7 modifica a file tracked ma NON staged          | expected=yes | NEW=yes (OK) | OLD=yes (info)
-S8 piffero: solo differenza in mode (chmod)       | expected=no  | NEW=no  (OK) | OLD=yes (info)
----
-Pass: 8   Fail: 0
-ALL PASS
-```
-
-**OLD bug reproduce (S2, the user-reported bug)**: con il check broken, `git commit` dopo un normale `git add` viene bloccato con messaggio "working tree ha modifiche non committate" costringendo tutti gli agenti a `git commit --no-verify`.
+8/8 scenari PASS con check FIXED; check BUGGY blocca correttamente S2 (the user-reported bug): il check broken blocca `git commit` dopo un normale `git add` con messaggio "working tree ha modifiche non committate" costringendo tutti gli agenti a `git commit --no-verify`.
 
 ### Link utili
 
-- Branch: `fix/20-pre-commit-unstaged-only-check`
+- Branch: `fix/20-pre-commit-unstaged-only-check` (post-merge → eliminata per policy §♻️)
 - Issue: #20 (claim `kilo-HP-ELITEBOOK-hc0f`)
 - Fix files: `.githooks/pre-commit`, `scripts/test-pre-commit-clean-check.sh` (nuovo)
-- Doc touched: `.githooks/README.md`, `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/18-DEV-LOG.md`, `docs/BUNDLE.md` (auto-regen via pre-push hook)
+- Doc touched: `.githooks/README.md`, `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/18-DEV-LOG.md`, `docs/BUNDLE.md`
 
 ---
 
-## 12. Story 0.6 — Setup i18n (i18next)
+## 13. Story 0.6 — Setup i18n (i18next)
 
 **Tipo**: implementazione (`apps/web/src/i18n/`); nuova pipeline i18n + formatter + 3 file test
 **Branch**: `feat/5-i18n-setup` (da `main` @ `8088b51`; lavoro eseguito in worktree dedicato `Temp/kilo/ls-i18n`)
-**PR**: #22
+**PR**: #22 mergata (squash `06812d4` su `5235c88`)
 **Issue**: #5 (claim `kilo-HP-ELITEBOOK-7051`, UTC 2026-10-18T09:10:33Z; riverifica OK, claim unico)
 **Data**: 2026-10-18
-**Stato**: 👀 IN REVIEW — 4/4 task + 4/4 AC verificati; 33/33 test verdi; coverage `src/i18n` 96%; lint/typecheck/build verdi
+**Stato**: ✅ Completata (post-merge S24)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
-| 0.6-1 | P+F | `gh api --jq '.[] | select(.body | startswith("claim:"))'` fallisce con `unexpected token ":"`: la shell PowerShell 5.1 rimuove i doppi apici interni prima che `gh` riceva l'espressione | Il wrapper del tool shell de-quota le stringhe; jq riceve `startswith(claim:)` | Passare a `--jq` un'espressione senza stringhe letterali (es. proiettare l'oggetto completo `[.[] | {id, created_at, body}]`) e filtrare a occhio; per il filtering server-side usare apici singoli solo se il wrapper li preserva | `AGENTS.md` §"🎫 Presa in carico" (riverifica) |
-| 0.6-2 | P+F+L | Il tool `write` rifiuta un file JSON con errore "Expected string, got {object}": il contenuto che inizia con `{` viene interpretato come parametro strutturato, non come stringa | Il serializer dei parametri del tool prova prima il parse JSON sul valore | Scrivere JSON flat di grandi dimensioni via PowerShell: here-string singolo `@'...'@` (letterale) + `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($false)))` (UTF-8 **senza BOM**: `Set-Content -Encoding UTF8` su PS 5.1 scrive il BOM e rompe i parser JSON a valle) | `apps/web/src/i18n/locales/it.json` |
-| 0.6-3 | F+L | `Intl.NumberFormat('it').format(1000)` restituisce `1000`, non `1.000` come da 08§5; il test della formatter falliva | CLDR 46 introduce `minimumGroupingDigits: 2` per l'italiano (e altre lingue): sotto 10.000 non c'è separatore delle migliaia | Passare `useGrouping: true` (spec Intl v3: il boolean `true` è interpretato come `always`), che ripristina il comportamento 08§5 su engine vecchie e nuove; alternativa `minimumGroupingDigits: 1` NON ancora onorata da V8/Node 24 | `apps/web/src/i18n/formatter.ts` |
-| 0.6-4 | F | `eslint` fallisce su `vitest/valid-title` "should not have duplicate prefix" per il titolo `it('it ed en hanno...')` | La regola considera il prefisso `it ` del titolo duplicato rispetto alla funzione `it` | Evitare titoli di test che iniziano con `it `/`test `; rinominare (es. `it('lingue it ed en con...')`) | `apps/web/src/__tests__/i18n.test.ts:31` |
-| 0.6-5 | L | Le chiavi di 08§2.9 hanno collisioni strutturali (`settings.privacy` è sia label sia prefisso di `settings.privacy.retainIp`): il nesting JSON nativo di i18next (`keySeparator: '.'`) non può rappresentarle | Le chiavi documentate usano punti a livello flat, non gerarchie vere | Usare `keySeparator: false` + `nsSeparator: false` con risorse flat (chiavi complete come stringhe): le chiavi restano IDENTICHE al documento 08, la test di parity verifica `it.json` ≡ `en.json`; i plurali v4 (`_one`/`_other`) funzionano anche su chiavi flat | `apps/web/src/i18n/index.ts`, `docs/08-COPY-I18N.md` §2.9 |
+| 0.6-1 | P+F | `gh api --jq '.[] \| select(.body \| startswith("claim:"))'` fallisce con `unexpected token ":"`: PowerShell 5.1 rimuove i doppi apici interni prima che `gh` riceva l'espressione | Il wrapper de-quota le stringhe; jq riceve `startswith(claim:)` | Proiettare l'oggetto completo e filtrare a occhio, o usare single-quote se il wrapper le preserva | `AGENTS.md` §"🎫 Presa in carico" |
+| 0.6-2 | P+F+L | `write` tool rifiuta file JSON con errore "Expected string, got {object}": contenuto che inizia con `{` interpretato come parametro strutturato | Il serializer prova prima il parse JSON | PowerShell here-string singolo `@'...'@` + `[System.IO.File]::WriteAllText($path, $content, ...)` (UTF-8 senza BOM) | `apps/web/src/i18n/locales/it.json` |
+| 0.6-3 | F+L | `Intl.NumberFormat('it').format(1000)` restituisce `1000`, non `1.000`: test formatter falliva | CLDR 46 introduce `minimumGroupingDigits: 2` per italiano | Passare `useGrouping: true` per ripristinare comportamento 08§5 su engine vecchi/nuovi | `apps/web/src/i18n/formatter.ts` |
+| 0.6-4 | F | `eslint` fallisce su `vitest/valid-title` "should not have duplicate prefix" per `it('it ed en hanno...')` | La regola considera il prefisso `it ` del titolo duplicato | Rinominare titoli che iniziano con `it `/`test ` | `apps/web/src/__tests__/i18n.test.ts:31` |
+| 0.6-5 | L | Le chiavi di 08§2.9 hanno collisioni strutturali (`settings.privacy` label + prefisso): il nesting JSON nativo di i18next non può rappresentarle | Le chiavi usano punti flat, non gerarchie | Usare `keySeparator: false` + `nsSeparator: false` con risorse flat | `apps/web/src/i18n/index.ts`, `docs/08-COPY-I18N.md` §2.9 |
 
 **Lesson learned sintetica**: le chiavi i18n sono un *contratto documentale*, non una struttura dati: flat + `keySeparator: false` tiene spec e codice sincroni per costruzione (test di parity), e le scelte Intl vanno testate contro il CLDR in evoluzione (min2 grouping).
-
-> Conflitti con Sessione 23 risolti al rebase: questa sezione era inizialmente §11, portata a §12 per non collidere; nessun cambio di contenuto.
 
 ### Link utili
 
 - Branch: `feat/5-i18n-setup` (post-merge → eliminare per policy §♻️)
-- PR: **#22**
-- Issue: #5 (claim `kilo-HP-ELITEBOOK-7051`)
-- Spec toccate: `docs/08-COPY-I18N.md` §2.1-2.15, §3, §4, §5, §7 (implementazione); `docs/11-BACKLOG.md` Story 0.6; `apps/web/src/main.tsx` (wire-up); `apps/web/package.json` (+`i18next`, `react-i18next`, `@vitest/coverage-v8`)
-- Note: typo 08§2.2 `home.days.thu` IT "Thu" → implementato "Gio" (proposta correzione in 08, DRAFT)
+- PR: **#22** (claim `kilo-HP-ELITEBOOK-7051`)
+- Spec toccate: `docs/08-COPY-I18N.md` §2.1-2.15, §3, §4, §5, §7; `docs/11-BACKLOG.md` Story 0.6; `apps/web/src/main.tsx`; `apps/web/package.json` (+`i18next`, `react-i18next`, `@vitest/coverage-v8`)
 
 ---
 
@@ -420,9 +452,7 @@ ALL PASS
 | 1.0 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge", §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati |
 | 1.1 | 2026-10-17 (Sessione 21) | **§10 Sessione 21** (refactor catena): entry PR #17 (claim `kilo-HP-ELITEBOOK-q7w3`); 4 lesson (21-1 doc-sync post-merge su main è intrinsecamente racy — soluzione: doc-sync IN PR, 21-2 GH Action può sostituire label transitions manuali, 21-3 pre-push hook cross-platform pattern pwsh/powershell fallback, 21-4 doc-sync IN PR richiede 2 commit sul branch); D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning; race condition al punto 8 (doc-sync post-merge) eliminato atomicamente |
 | 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
-| 1.3 | 2026-10-18 (Sessione 23) | **§11 Sessione 23** (fix bug pre-commit hook issue #20): entry PR #20 (claim `kilo-HP-ELITEBOOK-hc0f`); 6 lesson (23-1 typo `git diff HEAD` vs `git diff` blocca workflow, 23-2 `git ls-files --others --exclude-standard` per copertura untracked, 23-3 test bash con `eval`+repo tmp `mktemp -d`, 23-4 PowerShell call operator per invocare bash, 23-5 `core.autocrlf` sporca test `git diff`, 23-6 ogni hook nuovo deve avere test in `scripts/test-*.sh` pre-merge — proposta gate §"📝 Checklist di auto-revisione PR"); D3 fix in `.githooks/pre-commit`: `git diff --quiet` + untracked check; test `scripts/test-pre-commit-clean-check.sh` 8/8 PASS (S2 OLD=YES dimostra bug originale) |
-| 1.4 | 2026-10-18 (post-merge S23) | **Esito post-merge S23**: PR #21 merged (commit `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40`, 2026-10-18T09:54:10Z, squash da `c81a1c2`), gate D.12.1 applicato: Sessione 23 ✅ Completata, branch remoto `fix/20-pre-commit-unstaged-only-check` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-hc0f` rilasciato su #20 con applicazione `status:done` (via GH Action `auto-status-done`), issue #20 chiusa via `Closes #20`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge" e §11, changelog v1.4 (18-DEV-LOG) e v1.7 (SESSIONS) allineati, INDEX aggiornato (Roadmap S23 → ✅ COMPLETATA, §"Stato del progetto" S23 → "merged in main") |
-| 1.5 | 2026-10-18 (Story 0.6) | **§12 Story 0.6** (setup i18n): PR #22 aperta (claim `kilo-HP-ELITEBOOK-7051`, worktree dedicato); 5 problemi/lesson (0.6-1 quoting jq in PS 5.1, 0.6-2 write tool + JSON → here-string UTF-8 no BOM, 0.6-3 CLDR 46 min2 grouping su it, 0.6-4 valid-title duplicate prefix, 0.6-5 chiavi flat vs collisioni 08§2.9); 4/4 AC verificati, coverage `src/i18n` 96% |
+| 1.3 | 2026-10-18 (Story 0.5) | **§11 Story 0.5 — PWA e service worker** (issue #7, claim `kilo-HP-ELITEBOOK-3b3f`): 5 lesson (0.5-1 `getByText` ambiguità substring → `getByRole`, 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` + `setupFiles`, 0.5-3 `it.each` non preserva tuple types → `const cases` esplicito, 0.5-4 PNG generator zero-deps con `node:zlib` ~50 righe, 0.5-5 alias per `virtual:pwa-register/react` in jsdom). Pattern replicabile: setup esplicito (`test-setup.ts`) necessario per Vitest + RTL quando `globals: false`; virtual modules di `vite-plugin-pwa` vanno aliasati in test environment. Build 227.81 KB gzip 71.36 KB (budget 300 KB) |
 
 ---
 
