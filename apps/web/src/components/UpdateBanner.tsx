@@ -105,9 +105,7 @@ export function UpdateBanner({
   if (updateKind === 'patch') return null;
 
   const isMajor = updateKind === 'major';
-  const title = isMajor
-    ? 'Aggiornamento importante disponibile'
-    : 'Nuova versione disponibile';
+  const title = isMajor ? 'Aggiornamento importante disponibile' : 'Nuova versione disponibile';
   const message = isMajor
     ? `Life-Soundtrack ${currentVersionLabel} → ${nextVersionLabel} include modifiche importanti. È richiesto un riavvio.`
     : `Life-Soundtrack ${currentVersionLabel} → ${nextVersionLabel} è pronto. Aggiorna ora per le ultime funzionalità.`;

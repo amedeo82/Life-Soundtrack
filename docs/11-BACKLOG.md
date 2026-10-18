@@ -525,3 +525,16 @@ Ogni story deve avere label GitHub:
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
 | 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |
 | 1.5.0 | 2026-10-18 (post-merge Sessione 22) | **Story 0.5 PWA e service worker** ora ✅ DONE: `useAppUpdate()` + `<UpdateBanner/>` + Workbox precache + NetworkFirst `/version.json` + CacheFirst Google Fonts + manifest con icone 192/512/maskable/apple-touch (generate via `scripts/generate-pwa-icons.mjs`, zero deps); `apps/web/index.html` esteso con theme-color, manifest link, apple-touch-icon; PR #19 (aperta) chiude #7; dettagli in `18-DEV-LOG §11` |
+
+<!-- AGGREGATE-STORIES-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` leggendo `docs/state/stories/*.md`.
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+> Aggregator version: 1 (ADR-0008, S25).
+
+| Story | Stato | PR | Merge commit | Area |
+|-------|-------|----|--------------|------|
+| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
+| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+
+<!-- AGGREGATE-STORIES-END -->

@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { SemverTuple } from '../hooks/useAppUpdate';
-import {
-  classifyUpdate,
-  compareSemver,
-  formatSemver,
-  parseSemver,
-} from '../hooks/useAppUpdate';
+import { classifyUpdate, compareSemver, formatSemver, parseSemver } from '../hooks/useAppUpdate';
 
 describe('parseSemver', () => {
   it.each([

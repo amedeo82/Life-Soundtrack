@@ -11,49 +11,29 @@ const baseProps = {
 describe('UpdateBanner', () => {
   it('non si rende per update di tipo patch', () => {
     const { container } = render(
-      <UpdateBanner
-        {...baseProps}
-        updateKind="patch"
-        nextVersionLabel="1.0.1"
-      />,
+      <UpdateBanner {...baseProps} updateKind="patch" nextVersionLabel="1.0.1" />,
     );
     expect(container.firstChild).toBeNull();
   });
 
   it('mostra CTA "Più tardi" per update minor', () => {
-    render(
-      <UpdateBanner
-        {...baseProps}
-        updateKind="minor"
-        nextVersionLabel="1.1.0"
-      />,
-    );
+    render(<UpdateBanner {...baseProps} updateKind="minor" nextVersionLabel="1.1.0" />);
 
     expect(screen.getByTestId('update-banner').getAttribute('data-update-kind')).toBe('minor');
     expect(screen.getByText(/Nuova versione disponibile/)).toBeTruthy();
     // Il testo del bottone (visivamente) "Aggiorna ora" è distinto dal testo
     // del paragrafo "Aggiorna ora per le ultime funzionalità": usiamo il
     // role per essere precisi.
-    expect(
-      screen.getByRole('button', { name: /Aggiorna ora/ }),
-    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Aggiorna ora/ })).toBeTruthy();
     expect(screen.getByTestId('update-banner-dismiss')).toBeTruthy();
   });
 
   it('NON mostra "Più tardi" per update major', () => {
-    render(
-      <UpdateBanner
-        {...baseProps}
-        updateKind="major"
-        nextVersionLabel="2.0.0"
-      />,
-    );
+    render(<UpdateBanner {...baseProps} updateKind="major" nextVersionLabel="2.0.0" />);
 
     expect(screen.getByTestId('update-banner').getAttribute('data-update-kind')).toBe('major');
     expect(screen.getByText(/Aggiornamento importante/)).toBeTruthy();
-    expect(
-      screen.getByRole('button', { name: /Aggiorna e riavvia/ }),
-    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Aggiorna e riavvia/ })).toBeTruthy();
     expect(screen.queryByTestId('update-banner-dismiss')).toBeNull();
   });
 
@@ -88,13 +68,7 @@ describe('UpdateBanner', () => {
   });
 
   it('espone lo stato update via aria-live polite', () => {
-    render(
-      <UpdateBanner
-        {...baseProps}
-        updateKind="minor"
-        nextVersionLabel="1.1.0"
-      />,
-    );
+    render(<UpdateBanner {...baseProps} updateKind="minor" nextVersionLabel="1.1.0" />);
 
     const banner = screen.getByTestId('update-banner');
     expect(banner.getAttribute('role')).toBe('status');

@@ -14,13 +14,9 @@ export function App() {
       {update.needRefresh && update.updateKind && (
         <UpdateBanner
           updateKind={update.updateKind}
-          nextVersionLabel={
-            update.nextVersion ? formatSemver(update.nextVersion) : 'next'
-          }
+          nextVersionLabel={update.nextVersion ? formatSemver(update.nextVersion) : 'next'}
           currentVersionLabel={
-            update.currentVersion
-              ? formatSemver(update.currentVersion)
-              : 'current'
+            update.currentVersion ? formatSemver(update.currentVersion) : 'current'
           }
           onUpdate={update.update}
           onDismiss={update.dismiss}

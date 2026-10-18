@@ -32,8 +32,7 @@ export default mergeConfig(
         manifest: {
           name: 'Life Soundtrack',
           short_name: 'Life-Soundtrack',
-          description:
-            'La colonna sonora della tua vita, costruita localmente sui tuoi ascolti.',
+          description: 'La colonna sonora della tua vita, costruita localmente sui tuoi ascolti.',
           start_url: '/',
           scope: '/',
           display: 'standalone',

@@ -74,6 +74,9 @@ $files = @(
     "docs/17-DEV-NOTES.md",
     # Diario di sviluppo cronologico (problemi/fix/lesson per implementazione)
     "docs/18-DEV-LOG.md",
+    # Lazy-state aggregation (ADR-0008, S25): sorgenti atomiche per doc-sync fuori PR
+    "docs/state/_index.md",
+    "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",
     "docs/01-PLATFORMS.md",
@@ -95,6 +98,7 @@ $files = @(
     "docs/13-ADR/0005-sync-cloud.md",
     "docs/13-ADR/0006-multi-agent-task-claiming.md",
     "docs/13-ADR/0007-issue-state-machine.md",
+    "docs/13-ADR/0008-lazy-state-aggregation.md",
     "docs/14-GLOSSARY.md",
     "docs/15-DESIGN-SYSTEM.md",
     # Fixture (small/foundational) — i file di grandi dimensioni (medium/large/scenarios/demo-user)

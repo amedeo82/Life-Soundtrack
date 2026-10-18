@@ -69,10 +69,7 @@ export function compareSemver(a: SemverTuple, b: SemverTuple): -1 | 0 | 1 {
 }
 
 /** Classifica la differenza tra `current` e `next`. */
-export function classifyUpdate(
-  current: SemverTuple | null,
-  next: SemverTuple,
-): UpdateKind {
+export function classifyUpdate(current: SemverTuple | null, next: SemverTuple): UpdateKind {
   if (!current) return 'minor';
   if (compareSemver(next, current) <= 0) return 'patch';
   const [cmaj, cmin] = current;
