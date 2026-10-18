@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup PowerShell
-        uses: microsoft/powershell/powershell-action@v2
+        uses: actions/powershell@v1
 
       - name: Run aggregator in check mode first
         shell: pwsh
