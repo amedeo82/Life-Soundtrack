@@ -30,9 +30,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Setup PowerShell
-        uses: actions/powershell@v1
-
       - name: Run aggregator in check mode first
         shell: pwsh
         run: |

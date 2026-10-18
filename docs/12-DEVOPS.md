@@ -274,10 +274,6 @@ Aggiungere il job `bundle-check` al workflow `ci.yml`:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup PowerShell
-        uses: actions/powershell@v1
-        with:
-          pwsh: true
       - name: Verify BUNDLE.md is in sync
         shell: pwsh
         run: pwsh scripts/generate-bundle.ps1 --check
