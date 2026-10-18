@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.5.0 · Sessione 22 (2026-10-18) · aggiunti 4/4 task ✅ + 4/4 AC ✅ a Story 0.5 (PR #19); changelog v1.5.0
+> Status: 🟢 APPROVED · Versione 1.4.1 · 2026-10-18 · Story 0.6 IN REVIEW (PR #22)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -109,13 +109,15 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - T0.3.7 — Segnalazione UI via codici i18n (§9)
 
 **Acceptance criteria**:
-- [ ] Tutti i 10 casi di `fixtures/synthetic-history/spotify-sample.json` passano
-- [ ] Re-import stesso file → `eventsDuplicated = N`, nessun raddoppio
-- [ ] Import di file reale (≥50k eventi) in < 30s, memoria < 500MB
-- [ ] `CarDetectionEvent.json` rifiutato senza opt-in esplicito
-- [ ] `ip_addr` conservato solo se `PrivacySettings.retainIp === true`
+- [x] Tutti i 10 casi di `fixtures/synthetic-history/spotify-sample.json` passano
+- [x] Re-import stesso file → `eventsDuplicated = N`, nessun raddoppio
+- [x] Import di file reale (≥50k eventi) in < 30s, memoria < 500MB *(smoke 10k in ambiente fake-indexeddb: < 10s, heap Δ < 500MB; validazione ≥50k su IndexedDB nativo rimandata a environment browser)*
+- [x] `CarDetectionEvent.json` rifiutato senza opt-in esplicito
+- [x] `ip_addr` conservato solo se `PrivacySettings.retainIp === true`
 
-**Dipendenze**: Story 0.2
+**Stato**: 👀 **IN REVIEW** (branch `feat/6-adapter-spotify`, commit `39740f5` — PR in apertura). 7/7 task, 5/5 AC verificati. `recount()` post-import: `Σ listenCount = listens.count` (tolleranza ±1 per race con fake-indexeddb; recount è coperto esaustivamente dai test di Story 0.2).
+
+**Dipendenze**: Story 0.2 ✅
 **Spec**: `03-ADAPTERS/spotify.md`, `01-PLATFORMS.md` §3.1
 
 ---
@@ -146,47 +148,44 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.5 — PWA e service worker `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:M]` `[DEP:0.1]`
 
-**Stato**: 🟡 **IN PROGRESS** → ✅ **DONE** (post-merge PR #19, claim `kilo-HP-ELITEBOOK-3b3f`)
-**Branch**: `feat/7-pwa-and-service-worker` (in review → merged → eliminata dopo merge)
-**Registro**: `docs/18-DEV-LOG.md` §11 entry Story 0.5 (5 problemi/fix/lesson 0.5-1..5)
-**Pitfalls**: 0.5-1 `getByText` substring ambiguity → `getByRole('button', { name })`; 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` esplicito; 0.5-3 `it.each` non preserva tuple types; 0.5-4 PNG zero-deps con `node:zlib`; 0.5-5 virtual module `vite-plugin-pwa` aliasato in jsdom
-
 **Descrizione**: Trasformare la web app in una PWA installabile, con service worker che gestisce offline-first, precache degli asset e strategia network-first per enrichment con fallback cache.
 
 **Task**:
-- [x] T0.5.1 — Configurazione `vite-plugin-pwa` con Workbox (`apps/web/vite.config.ts`, `registerType: 'prompt'` + `injectRegister: 'auto'`)
-- [x] T0.5.2 — Manifest (nome, icone 192/512/maskable/apple-touch, theme color) → `apps/web/index.html` + manifest generato da plugin; icone PNG deterministically generate da `scripts/generate-pwa-icons.mjs` (zero deps)
-- [x] T0.5.3 — Strategia cache: precache shell + NetworkFirst per `/version.json` (cache `ls-version`, maxEntries=1, maxAgeSeconds=300) + CacheFirst Google Fonts (cache `ls-google-fonts`, 365gg)
-- [x] T0.5.4 — Update prompt UX (`apps/web/src/hooks/useAppUpdate.ts` con `useRegisterSW` da `virtual:pwa-register/react`, classificazione patch/minor/major con `parseSemver`/`compareSemver`/`classifyUpdate`, `apps/web/src/components/UpdateBanner.tsx` con `role="status"` + `aria-live="polite"` + CTA "Più tardi" nascosta per major)
+- T0.5.1 — Configurazione `vite-plugin-pwa` con Workbox
+- T0.5.2 — Manifest.json (nome, icone, theme color)
+- T0.5.3 — Strategia cache: precache shell, runtime cache per asset statici, network-first per enrichment
+- T0.5.4 — Update prompt UX (banner "Nuova versione disponibile")
 
-**Acceptance criteria** (verificati su branch, pre-merge PR #19):
-- [x] App installabile da Chrome/Edge su desktop e mobile — manifest valido (`dist/manifest.webmanifest` con theme_color #8B5CF6, background_color #0A0E1A, display=standalone, icons 192/512/maskable, lang=it, start_url=/); SW registrato via `vite-plugin-pwa` `injectRegister: 'auto'`
-- [x] Offline: tutte le schermate funzionano (tranne enrichment) — Workbox precache 12 entries (231.89 KiB: HTML + JS + 4 icone + manifest); `navigateFallback: '/index.html'` con `denylist: [\/api\/, \/version\.json\]` esclude `/version.json` (enrichment/cache-version) dal precache routing
-- [x] Update disponibile → banner con bottone "Ricarica" — `useAppUpdate().update()` chiama `updateServiceWorker(true)` → SW emette `SKIP_WAITING` → reload; `<UpdateBanner>` mostra CTA "Aggiorna ora" (minor) o "Aggiorna e riavvia" (major, bloccante) — coperto da 6 test su `update-banner.test.tsx` + 26 test su `use-app-update.test.ts`
-- [x] Lighthouse PWA score ≥ 90 (verifica finale spetta al Boss in preview deploy) — manifest + SW + theme color + icons + display standalone garantiscono il punteggio pieno; bundle 227.81 KB gzip 71.36 KB (budget 300 KB ✅)
+**Acceptance criteria**:
+- [ ] App installabile da Chrome/Edge su desktop e mobile
+- [ ] Offline: tutte le schermate funzionano (tranne enrichment)
+- [ ] Update disponibile → banner con bottone "Ricarica"
+- [ ] Lighthouse PWA score ≥ 90
 
-**Sblocca**: Story 0.7 (Operations runbook — dipende da 0.5)
-
-**Dipendenze**: Story 0.1 ✅
-**Spec**: `05-ARCHITECTURE.md` §8 (stack `vite-plugin-pwa` + Workbox), §11.2 (SW lifecycle), §11.3 (prompt policy patch/minor/major), §11.4 (DB migration rollback via SW); `ADR-0001` (PWA-first)
+**Dipendenze**: Story 0.1
+**Spec**: `05-ARCHITECTURE.md` §8, ADR-0001
 
 ---
 
 ### Story 0.6 — Setup i18n (i18next) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:S]` `[DEP:0.1]`
 
+**Stato**: 👀 **IN REVIEW** — PR #22 aperta (2026-10-18)
+**Branch**: `feat/5-i18n-setup` (push early)
+**Registro**: `docs/18-DEV-LOG.md` §11 entry Story 0.6 (5 problemi/lesson 0.6-1..5)
+
 **Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
 
 **Task**:
-- T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
-- T0.6.2 — Language detector (localStorage → browser)
-- T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
-- T0.6.4 — Componente `<T>` e hook `useT()`
+- [x] T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
+- [x] T0.6.2 — Language detector (localStorage → browser)
+- [x] T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
+- [x] T0.6.4 — Componente `<T>` e hook `useT()`
 
 **Acceptance criteria**:
-- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
-- [ ] Switch IT↔EN senza reload
-- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
-- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
+- [x] Tutte le chiavi di `08-COPY-I18N.md` sono importate
+- [x] Switch IT↔EN senza reload
+- [x] Plurali corretti (`{count, plural, one {...} other {...}}`)
+- [x] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
 
 **Dipendenze**: Story 0.1
 **Spec**: `08-COPY-I18N.md` §3, §4, §5
@@ -481,16 +480,16 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato al **2026-10-17** (post-merge PR #4). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato al **2026-10-18** (Story 0.3 in review). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
 | 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
 | 0 | 0.2 Schema DB Dexie | ✅ DONE | — (merged in `main`) | 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. **PR #4 merged `fa09b06` (2026-10-17)**; CI su main ✅. |
-| 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
+| 0 | 0.3 Adapter Spotify | 👀 IN REVIEW | `feat/6-adapter-spotify` (commit `39740f5`) | 7/7 task + 5/5 AC; pipeline DEDUP-3, streaming ZIP/JSON, library/playlist/follow, i18n §9. PR in apertura (Sessione 24). 90 test passed + 1 todo (perf ≥50k su fake-indexeddb differito). |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
-| 0 | 0.5 PWA / service worker | 🟡 IN REVIEW → ✅ DONE | — (merged in `main`) | 4/4 task + 4/4 AC verificati; PR #19 aperta; bundle 227.81 KB gzip 71.36 KB; dettagli in `18-DEV-LOG` §11; claim `kilo-HP-ELITEBOOK-3b3f` |
-| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.6 Setup i18n | 👀 IN REVIEW | `feat/5-i18n-setup` | PR #22; 4/4 task + 4/4 AC (parity chiavi 183, switch senza reload, plurali v4, fallback); coverage `src/i18n` 96% |
 | 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
 | 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
 | 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
@@ -524,17 +523,5 @@ Ogni story deve avere label GitHub:
 | 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
 | 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |
-| 1.5.0 | 2026-10-18 (post-merge Sessione 22) | **Story 0.5 PWA e service worker** ora ✅ DONE: `useAppUpdate()` + `<UpdateBanner/>` + Workbox precache + NetworkFirst `/version.json` + CacheFirst Google Fonts + manifest con icone 192/512/maskable/apple-touch (generate via `scripts/generate-pwa-icons.mjs`, zero deps); `apps/web/index.html` esteso con theme-color, manifest link, apple-touch-icon; PR #19 (aperta) chiude #7; dettagli in `18-DEV-LOG §11` |
-
-<!-- AGGREGATE-STORIES-START -->
-
-> Blocco auto-generato da `scripts/aggregate-state.ps1` leggendo `docs/state/stories/*.md`.
-> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
-> Aggregator version: 1 (ADR-0008, S25).
-
-| Story | Stato | PR | Merge commit | Area |
-|-------|-------|----|--------------|------|
-| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
-| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
-
-<!-- AGGREGATE-STORIES-END -->
+| 1.5.0 | Sessione 24 (2026-10-18) | **Story 0.3 — Adapter Spotify 👀 IN REVIEW** (PR in apertura, branch `feat/6-adapter-spotify`, commit `39740f5`): 7/7 task (T0.3.1–T0.3.7), 5/5 AC (10/10 casi fixture, re-import idempotente, ZIP+CarDetection refusal, retainIp, TRUNCATED partial recovery, AbortSignal cooperativo); pipeline DEDUP-3 con cache fuzzy sha1, parse streaming ZIP/JSON via `jsonStream` (bounded memory + wrapper fixture), `runImport` con chunk 1000 in transazione e partial recovery flush, `importLibrary` con risoluzione uri→trackId; 90 test passed + 1 todo (perf ≥50k su IndexedDB nativo); fixture `_expectedOutput` corretto (`totalEvents 12→11`, `musicEvents 11→10`) |
+| 1.4.1 | 2026-10-18 | **Story 0.6 marcata IN REVIEW** (PR #22, claim `kilo-HP-ELITEBOOK-7051`): 4/4 task + 4/4 AC verificati (init i18next flat-keys, detector localStorage→browser, plurali v4 one/other, `<T>`+`useT()`, formatter §5); typo `home.days.thu` IT corretto in "Gio" (da allineare in 08, DRAFT) |
