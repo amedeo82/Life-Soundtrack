@@ -229,9 +229,9 @@
     }
   ],
   "_expectedOutput": {
-    "_comment": "Ricalcolato in v1.1 (chiusura C6 audit). 11 eventi musicali + 1 podcast = 12 totali. DEDUP-3 unisce event #5 e #6 (stesso bucket durata 354000) → 9 Track unici musicali.",
-    "totalEvents": 12,
-    "musicEvents": 11,
+    "_comment": "Ricalcolato in v1.1 (chiusura C6 audit). 10 eventi musicali + 1 podcast = 11 totali. DEDUP-3 unisce event #5 e #6 (stesso bucket durata 354000) → 9 Track unici musicali.",
+    "totalEvents": 11,
+    "musicEvents": 10,
     "podcastEvents": 1,
     "uniqueTracks": 9,
     "_uniqueTracksDerivation": "10 music events - 1 DEDUP-3 merge (event #5 + #6) = 9 unique Tracks",
