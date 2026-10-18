@@ -25,6 +25,9 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - name: Setup PowerShell
+        uses: microsoft/powershell/powershell-action@v2
+
       - name: Installa dipendenze
         run: pnpm install --frozen-lockfile
 

@@ -275,7 +275,7 @@ Aggiungere il job `bundle-check` al workflow `ci.yml`:
     steps:
       - uses: actions/checkout@v4
       - name: Setup PowerShell
-        uses: microsoft/powershell@v1
+        uses: actions/powershell@v1
         with:
           pwsh: true
       - name: Verify BUNDLE.md is in sync
