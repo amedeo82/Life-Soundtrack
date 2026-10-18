@@ -20,6 +20,7 @@ export function App() {
           }
           onUpdate={update.update}
           onDismiss={update.dismiss}
+          requiresDbMigration={false}
         />
       )}
     </main>
