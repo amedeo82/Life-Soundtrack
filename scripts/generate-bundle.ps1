@@ -183,9 +183,9 @@ if ($Check) {
         exit 1
     }
     $existing = Get-Content $outputFile -Raw -Encoding UTF8
-    # Normalizza il timestamp in entrambi per evitare che il solo cambio di ora generi un diff
-    $existing = $existing -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00'
-    $newNormalized = $newBundle -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00'
+    # Normalizza timestamp E line endings (CRLF vs LF) per confronto deterministico
+    $existing = $existing -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00' -replace "`r`n", "`n"
+    $newNormalized = $newBundle -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00' -replace "`r`n", "`n"
     if ($existing -eq $newNormalized) {
         Write-Host "`n[OK] $outputFile e in sync con la lista corrente ($($files.Count) file)." -ForegroundColor Green
         exit 0
