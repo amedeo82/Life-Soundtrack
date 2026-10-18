@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.4.0 · Sessione 19 (2026-10-17) · aggiunti 4 stati 'status:*' post-claim (ADR-0007) alla §"Stato di una Story"
+> Status: 🟢 APPROVED · Versione 1.4.1 · 2026-10-18 · Story 0.6 IN REVIEW (PR #22)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -167,19 +167,23 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.6 — Setup i18n (i18next) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:S]` `[DEP:0.1]`
 
+**Stato**: 👀 **IN REVIEW** — PR #22 aperta (2026-10-18)
+**Branch**: `feat/5-i18n-setup` (push early)
+**Registro**: `docs/18-DEV-LOG.md` §11 entry Story 0.6 (5 problemi/lesson 0.6-1..5)
+
 **Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
 
 **Task**:
-- T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
-- T0.6.2 — Language detector (localStorage → browser)
-- T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
-- T0.6.4 — Componente `<T>` e hook `useT()`
+- [x] T0.6.1 — Init i18next con namespace per `08-COPY-I18N.md` (it/en)
+- [x] T0.6.2 — Language detector (localStorage → browser)
+- [x] T0.6.3 — Pluralizzazione ICU (`{count, plural, ...}`)
+- [x] T0.6.4 — Componente `<T>` e hook `useT()`
 
 **Acceptance criteria**:
-- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
-- [ ] Switch IT↔EN senza reload
-- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
-- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
+- [x] Tutte le chiavi di `08-COPY-I18N.md` sono importate
+- [x] Switch IT↔EN senza reload
+- [x] Plurali corretti (`{count, plural, one {...} other {...}}`)
+- [x] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
 
 **Dipendenze**: Story 0.1
 **Spec**: `08-COPY-I18N.md` §3, §4, §5
@@ -474,7 +478,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 ## Stato di avanzamento (snapshot implementazione)
 
-> Aggiornato al **2026-10-17** (post-merge PR #4). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> Aggiornato al **2026-10-18** (Story 0.6 in review, PR #22). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 | EPIC | Story | Stato | Branch | Note |
 |------|-------|-------|--------|------|
@@ -483,7 +487,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
-| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.6 Setup i18n | 👀 IN REVIEW | `feat/5-i18n-setup` | PR #22; 4/4 task + 4/4 AC (parity chiavi 183, switch senza reload, plurali v4, fallback); coverage `src/i18n` 96% |
 | 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
 | 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
 | 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
@@ -517,3 +521,4 @@ Ogni story deve avere label GitHub:
 | 1.2.5 | 2026-10-17 (post-merge) | **Doc-sync post-merge**: Story 0.2 ora ✅ DONE (PR #4 merged `fa09b06`, CI su main ✅); tabella "Stato di avanzamento" aggiornata; Story 0.3 sbloccata |
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
 | 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |
+| 1.4.1 | 2026-10-18 | **Story 0.6 marcata IN REVIEW** (PR #22, claim `kilo-HP-ELITEBOOK-7051`): 4/4 task + 4/4 AC verificati (init i18next flat-keys, detector localStorage→browser, plurali v4 one/other, `<T>`+`useT()`, formatter §5); typo `home.days.thu` IT corretto in "Gio" (da allineare in 08, DRAFT) |
