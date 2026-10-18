@@ -1,10 +1,4 @@
-import type {
-  ImportRecord,
-  LibraryItem,
-  Playlist,
-  PlaylistItem,
-  PrivacySettings,
-} from '../schema';
+import type { ImportRecord, LibraryItem, Playlist, PlaylistItem, PrivacySettings } from '../schema';
 import type { LifeSoundtrackDB } from '../db';
 import { recount } from '../db';
 import { AdapterError } from './errors';
@@ -108,18 +102,13 @@ export async function runImport(
     }
     const events = await Promise.all(buffer.splice(0).map((raw) => pipeline.normalizeEvent(raw)));
     const keys = events.map((e) => e.eventKey);
-    const intraDuplicates = keys.length - new Set(keys).size;
-    let duplicates = intraDuplicates;
-    for (const key of keys) {
-      if (seenEventKeys.has(key)) {
-        duplicates += 1;
-      } else {
-        seenEventKeys.add(key);
-      }
-    }
-    const newKeys = [...new Set(keys)];
+    const uniqueKeys = [...new Set(keys)];
+    const newKeys = uniqueKeys.filter((k) => !seenEventKeys.has(k));
     const existing = await db.listens.bulkGet(newKeys);
-    duplicates += existing.filter((e) => e !== undefined).length;
+    const trulyNewKeys = newKeys.filter((k, i) => existing[i] === undefined);
+    for (const k of trulyNewKeys) seenEventKeys.add(k);
+    record.eventsInserted += trulyNewKeys.length;
+    record.eventsDuplicated += keys.length - trulyNewKeys.length;
     const { tracks, artists, albums } = pipeline.dirtyRecords();
     await db.transaction('rw', db.listens, db.tracks, db.artists, db.albums, async () => {
       await db.listens.bulkPut(events);
@@ -128,8 +117,6 @@ export async function runImport(
       await db.albums.bulkPut(albums);
     });
     pipeline.clearDirty();
-    record.eventsInserted += events.length - duplicates;
-    record.eventsDuplicated += duplicates;
   };
 
   try {
@@ -145,12 +132,12 @@ export async function runImport(
       }
       buffer.push(step.value);
       record.eventsParsed += 1;
+      options.onProgress?.(record.eventsParsed);
+      if (options.signal?.aborted) {
+        throw new DOMException('Import cancellato', 'AbortError');
+      }
       if (buffer.length >= IMPORT_CHUNK_SIZE) {
         await flush();
-        options.onProgress?.(record.eventsParsed);
-        if (options.signal?.aborted) {
-          throw new DOMException('Import cancellato', 'AbortError');
-        }
       }
     }
     await flush();
@@ -161,7 +148,9 @@ export async function runImport(
       return finalize('partial');
     }
     if (error instanceof AdapterError && error.recoverable) {
-      // Partial recovery: il record va a `partial` con i chunk già flushati.
+      // Partial recovery: scrivi i chunk già parsati nel buffer, poi
+      // il record va a `partial` (05§4).
+      await flush();
       failure = error;
     } else {
       await finalize('failed');
@@ -186,11 +175,9 @@ export async function runImport(
 
 /** Riconosce una cancellazione cooperativa indipendentemente dal costruttore. */
 function isAbortError(error: unknown): boolean {
-  return (
-    error instanceof DOMException
-      ? error.name === 'AbortError'
-      : error instanceof Error && error.name === 'AbortError'
-  );
+  return error instanceof DOMException
+    ? error.name === 'AbortError'
+    : error instanceof Error && error.name === 'AbortError';
 }
 
 /** Esito della persistenza library. */

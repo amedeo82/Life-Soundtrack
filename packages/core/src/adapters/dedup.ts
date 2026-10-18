@@ -10,9 +10,6 @@ import { sha1Hex } from './crypto';
  * enrichment è il job `rekey()` della Story 1.4.
  */
 
-/** Rimuove le collocazioni feat./ft./with (02§5: "rimuovi feat./ft./with"). */
-const FEAT_RE = /(?:^|\s)(?:feat\.?|ft\.?|with)(?:\s|$)/gi;
-
 /**
  * Normalizza un nome per la dedup (02§5): lowercase → rimuovi feat./ft./with
  * → rimuovi i contenuti tra parentesi tonde/quadre → rimuovi punteggiatura
@@ -25,8 +22,8 @@ const FEAT_RE = /(?:^|\s)(?:feat\.?|ft\.?|with)(?:\s|$)/gi;
 export function normalizeName(input: string): string {
   return input
     .toLowerCase()
-    .replace(FEAT_RE, ' ')
     .replace(/\([^)]*\)|\[[^\]]*\]/g, ' ')
+    .replace(/(?:^|\s)(?:feat\.?|ft\.?|with).*/gi, ' ')
     .replace(/[^\p{L}\p{N}\s]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();

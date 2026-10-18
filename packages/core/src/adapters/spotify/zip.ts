@@ -28,11 +28,12 @@ function readU16(data: Uint8Array, offset: number): number {
 
 function readU32(data: Uint8Array, offset: number): number {
   return (
-    (data[offset] ?? 0) |
-    ((data[offset + 1] ?? 0) << 8) |
-    ((data[offset + 2] ?? 0) << 16) |
-    ((data[offset + 3] ?? 0) << 24)
-  ) >>> 0;
+    ((data[offset] ?? 0) |
+      ((data[offset + 1] ?? 0) << 8) |
+      ((data[offset + 2] ?? 0) << 16) |
+      ((data[offset + 3] ?? 0) << 24)) >>>
+    0
+  );
 }
 
 /** True se il blob inizia con una firma ZIP nota. */
@@ -65,7 +66,6 @@ export async function listZipEntries(input: Blob): Promise<string[]> {
   }
   const entryCount = readU16(tail, eocd + 10);
   const cdSize = readU32(tail, eocd + 12);
-  const cdOffset = readU32(tail, eocd + 16);
   const cdStart = tailStart + eocd - cdSize;
   if (cdStart < 0 || cdStart + cdSize > input.size) {
     throw new AdapterError('INVALID_FORMAT', 'ZIP con central directory fuori dal file');
@@ -94,18 +94,16 @@ export async function listZipEntries(input: Blob): Promise<string[]> {
  */
 export function extractZipEntry(zipBytes: Uint8Array, name: string): Promise<Uint8Array | null> {
   return new Promise((resolve, reject) => {
-    unzip(
-      zipBytes,
-      { filter: (file) => file.name === name },
-      (err, data) => {
-        if (err) {
-          reject(new AdapterError('TRUNCATED', `ZIP corrotto durante l'estrazione di ${name}`, {
+    unzip(zipBytes, { filter: (file) => file.name === name }, (err, data) => {
+      if (err) {
+        reject(
+          new AdapterError('TRUNCATED', `ZIP corrotto durante l'estrazione di ${name}`, {
             recoverable: true,
-          }));
-          return;
-        }
-        resolve(data[name] ?? null);
-      },
-    );
+          }),
+        );
+        return;
+      }
+      resolve(data[name] ?? null);
+    });
   });
 }

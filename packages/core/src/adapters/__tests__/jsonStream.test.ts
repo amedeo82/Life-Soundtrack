@@ -63,15 +63,17 @@ describe('JsonArrayScanner', () => {
     const out = scanner.push('[{"a":1},{"b":');
     expect(out).toEqual([{ a: 1 }]);
     expect(() => scanner.end()).toThrow(AdapterError);
+    let caughtError: unknown;
     try {
       scanner.end();
     } catch (error) {
-      expect(error).toBeInstanceOf(AdapterError);
-      const adapterError = error as AdapterError;
-      expect(adapterError.code).toBe('TRUNCATED');
-      expect(adapterError.recoverable).toBe(true);
-      expect(adapterError.partialEvents).toBe(1);
+      caughtError = error;
     }
+    expect(caughtError).toBeInstanceOf(AdapterError);
+    const adapterError = caughtError as AdapterError;
+    expect(adapterError.code).toBe('TRUNCATED');
+    expect(adapterError.recoverable).toBe(true);
+    expect(adapterError.partialEvents).toBe(1);
   });
 
   it('elemento oltre la soglia di sicurezza ⇒ TRUNCATED', () => {

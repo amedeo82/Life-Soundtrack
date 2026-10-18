@@ -1,14 +1,8 @@
-import type {
-  Album,
-  Artist,
-  ListenEvent,
-  PrivacySettings,
-  Track,
-} from '../schema';
+import type { Album, Artist, ListenEvent, PrivacySettings, Track } from '../schema';
 import type { LifeSoundtrackDB } from '../db';
 import type { RawListenEvent } from './types';
 import { sha1Hex, uuid } from './crypto';
-import { canonicalKey, normalizeName } from './dedup';
+import { canonicalKey, durationBucketMs, normalizeName } from './dedup';
 
 /**
  * Pipeline di normalizzazione adapter → core — `05-ARCHITECTURE.md` §3.1.
@@ -94,9 +88,15 @@ export class NormalizationPipeline {
   /** Entità sporche correnti come record pronti per il `bulkPut`. */
   dirtyRecords(): { tracks: Track[]; artists: Artist[]; albums: Album[] } {
     return {
-      tracks: [...this.dirtyTracks].map((key) => this.tracks.get(key)).filter((t) => t !== undefined),
-      artists: [...this.dirtyArtists].map((key) => this.artists.get(key)).filter((a) => a !== undefined),
-      albums: [...this.dirtyAlbums].map((key) => this.albums.get(key)).filter((a) => a !== undefined),
+      tracks: [...this.dirtyTracks]
+        .map((key) => this.tracks.get(key))
+        .filter((t) => t !== undefined),
+      artists: [...this.dirtyArtists]
+        .map((key) => this.artists.get(key))
+        .filter((a) => a !== undefined),
+      albums: [...this.dirtyAlbums]
+        .map((key) => this.albums.get(key))
+        .filter((a) => a !== undefined),
     };
   }
 
@@ -265,7 +265,7 @@ export class NormalizationPipeline {
     const material = [
       raw.sourceTrackName ?? '',
       raw.sourceArtistName ?? '',
-      raw.sourceDurationMs,
+      durationBucketMs(raw.sourceDurationMs ?? 0),
       raw.isrc,
       raw.mbid,
     ].join('|');
@@ -274,7 +274,7 @@ export class NormalizationPipeline {
       key = canonicalKey({
         name: raw.sourceTrackName ?? '',
         artistPrincipal: raw.sourceArtistName ?? '',
-        durationMs: raw.sourceDurationMs,
+        durationMs: durationBucketMs(raw.sourceDurationMs ?? 0),
         isrc: raw.isrc,
         mbid: raw.mbid,
       });
