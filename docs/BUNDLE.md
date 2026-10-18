@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-18 21:49
+> Data: 2026-10-18 21:52
 > Totale file: 38
 
 
@@ -833,7 +833,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Esito post-merge**: PR #19 merged `0ebe8dad10e348a63a04c83d9b1484767e4a0013` (2026-10-18T15:29:28Z), CI ✅, GH Action `auto-status-done` ha applicato `status:done` a #7, branch `feat/7-pwa-and-service-worker` eliminata (policy §♻️), claim `kilo-HP-ELITEBOOK-3b3f` rilasciato con comment `release:` (merge commit SHA incluso). Bundle 291 KB gzip 91 KB (budget 300 KB ✅). 33/33 test PWA + 32/32 test i18n (PR #22) = 65/65 test web ✅.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^25.x` + `react-i18next@^15.x` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico**: tutte le difese S19 + S20 + S21 + S23 + S24 sono live e in use da ≥1 agente (2026-10-18T15:09Z): Story 0.6 i18n (#5, PR #22) **merged** in main; Story 0.5 PWA (#7, PR #19) in risoluzione conflitti (cherry-pick `44c79d1` su `5235c88` con S23+S24 pre-integrate da agenti paralleli). Story 0.3 Adapter Spotify (#6) resta l'unica `agent-ready` libera + WIP stashato di 21 file di `kilo-HP-ELITEBOOK-jdtz` (issue `needs-spec` #23 aperta per decisione Boss). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) richiede 0.2 ✅ + 0.5 ✅ + 0.6 ✅ — tutti in attesa di Story 0.3 + 0.5 (PWA). Pending Boss: (1) merge di PR #19 dopo questo commit, (2) decisione su issue #23 (rilascio claim #6 + adozione stash).
+- **Prossimo step tecnico**: tutte le difese S19 + S20 + S21 + S23 + S24 sono live e in use da ≥1 agente (2026-10-18T15:09Z): Story 0.6 i18n (#5, PR #22) **merged** in main; Story 0.5 PWA (#7, PR #19) **merged** in main (PR #19, commit `0ebe8dad`); Story 0.3 Adapter Spotify (#6) **merged** in main (PR #28, merge commit `3dc9654`). Story 0.4 (UI import) ora sbloccata (dipende da 0.3 ✅), Story 0.7 (Operations runbook) ora sbloccata (dipende da 0.2 ✅ + 0.5 ✅ + 0.6 ✅). Da aprire: issue `agent-ready` per Story 0.4 e Story 0.7; verifica finale Lighthouse PWA score ≥ 90 in preview deploy (dipendenza esterna dal flusso CI).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -7014,10 +7014,10 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - T0.6.4 — Componente `<T>` e hook `useT()`
 
 **Acceptance criteria**:
-- [ ] Tutte le chiavi di `08-COPY-I18N.md` sono importate
-- [ ] Switch IT↔EN senza reload
-- [ ] Plurali corretti (`{count, plural, one {...} other {...}}`)
-- [ ] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
+- [x] Tutte le chiavi di `08-COPY-I18N.md` sono importate
+- [x] Switch IT↔EN senza reload
+- [x] Plurali corretti (`{count, plural, one {...} other {...}}`)
+- [x] Lingua fallback se chiave mancante (no crash, no `{{key}}`)
 
 **Dipendenze**: Story 0.1
 **Spec**: `08-COPY-I18N.md` §3, §4, §5
@@ -7321,7 +7321,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | 0 | 0.3 Adapter Spotify | ⬚ TODO (sbloccata) | — | sbloccata da 0.2 ✅; issue `agent-ready` da aprire |
 | 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
 | 0 | 0.5 PWA / service worker | 🟡 IN REVIEW → ✅ DONE | — (merged in `main`) | 4/4 task + 4/4 AC verificati; PR #19 aperta; bundle 227.81 KB gzip 71.36 KB; dettagli in `18-DEV-LOG` §11; claim `kilo-HP-ELITEBOOK-3b3f` |
-| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
+| 0 | 0.6 Setup i18n | ✅ DONE | — | merged in `main` (PR #22, squash `06812d4` su `5235c88`, 2026-10-18T17:02Z +0200); 4/4 AC verificati, coverage 96% |
 | 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
 | 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
 | 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
