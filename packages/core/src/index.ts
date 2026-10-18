@@ -1,4 +1,31 @@
 export {
+  AdapterError,
+  type AdapterErrorCode,
+  type CanonicalKeyInput,
+  canonicalKey,
+  durationBucketMs,
+  IMPORT_CHUNK_SIZE,
+  importLibrary,
+  type ImportOptions,
+  type ImportSummary,
+  JsonArrayScanner,
+  type LibrarySnapshot,
+  type LibrarySummary,
+  normalizeName,
+  NormalizationPipeline,
+  type ParseOptions,
+  type PlatformAdapter,
+  type RawLibraryRef,
+  type RawListenEvent,
+  type RawPlaylistItemRef,
+  runImport,
+  sha1Hex,
+  sha256Hex,
+  uuid,
+} from './adapters';
+export { SpotifyAdapter } from './adapters/spotify';
+
+export {
   consoleSink,
   createLogger,
   type LogEntry,
