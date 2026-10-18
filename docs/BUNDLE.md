@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-18 20:45
+> Data: 2026-10-18 21:56
 > Totale file: 38
 
 
@@ -813,17 +813,17 @@ Apache License
 | 19 | 📦 Macchina di stati delle issue (status:* post-claim — ADR-0007) | ✅ COMPLETATA |
 | 20 | 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist) | ✅ COMPLETATA |
 | 21 | 🔗 Refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) | ✅ COMPLETATA |
-| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟡 In Review (PR #19, claim `kilo-HP-ELITEBOOK-3b3f`) |
+| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | ✅ COMPLETATA (PR #19 merged `0ebe8dad`, 2026-10-18T15:29:28Z) |
 | 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | ✅ COMPLETATA (PR #21 merged `8a48e24`, 2026-10-18T09:54:10Z) |
 | 24 | 🌐 Implementazione Story 0.6 i18n setup (i18next) | ✅ COMPLETATA (PR #22 merged `5235c88`, 2026-10-18T17:02Z +0200) |
 
-## Stato del progetto (post Sessione 22, PR #19 aperta 2026-10-18)
-- **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.4.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
+## Stato del progetto (post Sessione 24, PR #22 mergata 2026-10-18)
+- **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.5.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
 - **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟢 **Fase 0 tecnica: 3/7 story completate** — Story 0.1 (scaffold monorepo) merged (PR #2, squash `c0fb0a4`); Story 0.2 (schema DB e layer Dexie) merged in `main` (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅): 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms); **Story 0.5 (PWA e service worker) implementata** (PR #19, claim `kilo-HP-ELITEBOOK-3b3f`, Sessione 22): `vite-plugin-pwa@^2.0.0` + Workbox (precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts); `useAppUpdate()` + `<UpdateBanner>` con prompt policy patch/minor/major (CTA "Più tardi" nascosta per major); manifest con icone 192/512/maskable/apple-touch generate da `scripts/generate-pwa-icons.mjs` (zero-deps, `node:zlib`); bundle 227.81 KB gzip 71.36 KB (budget 300 KB ✅); 33/33 test verdi; 4/4 AC verificati. Gate D.12.1 applicato nel branch (INDEX/SESSIONS/BACKLOG/18-DEV-LOG/BUNDLE allineati). Pending Boss: review PR #19 (merge in `main` → `status:done` automatico via GH Action + story 0.7 sbloccata).
+- **Implementazione**: 🟢 **Fase 0 tecnica: 5/7 story completate** — Story 0.1 (scaffold monorepo) merged (PR #2, squash `c0fb0a4`); Story 0.2 (schema DB e layer Dexie) merged in `main` (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅): 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms); Story 0.3 (Adapter Spotify) merged in `main` (PR #28, merge commit `3dc9654`, CI ✅): 90 passati / 1 todo (perf ≥50k `it.todo` su browser nativo); **Story 0.5 (PWA e service worker)** merged in `main` (PR #19, merge commit `0ebe8dad`, 2026-10-18T15:29:28Z, claim `kilo-HP-ELITEBOOK-3b3f`): `vite-plugin-pwa@^2.0.0` + Workbox (precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts); `useAppUpdate()` + `<UpdateBanner>` con prompt policy patch/minor/major (CTA "Più tardi" nascosta per major); manifest con icone 192/512/maskable/apple-touch generate da `scripts/generate-pwa-icons.mjs` (zero-deps, `node:zlib`); bundle 291 KB gzip 91 KB (budget 300 KB ✅); 33/33 test verdi; 4/4 AC verificati; Gate D.12.1 applicato nel branch. **Story 0.6 (i18n setup)** merged in `main` (PR #22, squash `06812d4` su `5235c88`, 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0`; `<T>` + `useT()` + `formatter.ts` (ICU plural) + `detector.ts` (localStorage→browser); IT/EN 185+185 voci; 8/8 test verdi; coverage 96%. Gate D.12.1 applicato nel branch. Story 0.4 (UI import) in attesa di 0.3 ✅; Story 0.7 (Operations runbook) in attesa di 0.2 ✅ + 0.5 ✅ + 0.6 ✅ → ora sbloccata.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
