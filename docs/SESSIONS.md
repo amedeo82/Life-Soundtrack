@@ -5,6 +5,91 @@
 
 ---
 
+## Sessione 23 — 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20)
+
+**Data**: 2026-10-18
+**Stato**: 🟡 In progress (claim `kilo-HP-ELITEBOOK-hc0f` su issue #20; PR pendente)
+**Trigger**: il Boss segnala che il check pre-commit introdotto in S21 D.21.3 blocca ogni commit normale, costringendo all'uso di `--no-verify` (documentato in AGENTS.md §"🪝 Pre-commit hook" §"Bypass (emergenza)"). Tutti gli agenti (S22 incluso) hanno lavorato in `--no-verify` fin dalla merge di PR #18.
+
+### Diagnosi
+
+Il check in `.githooks/pre-commit:17` (S21, commit `6fa1a8e`):
+
+```bash
+if ! git diff --quiet HEAD 2>/dev/null || ! git diff --cached --quiet HEAD 2>/dev/null; then
+```
+
+- `git diff HEAD` = working tree **+ staged** vs HEAD → non-quiet se ci sono modifiche staged
+- `git diff --cached HEAD` = staged vs HEAD → non-quiet se ci sono modifiche staged
+
+**Conseguenza**: durante il caso normale `git add . && git commit`, entrambi i rami sono non-quiet → check fallisce → commit bloccato. Esattamente il sintomo riportato dal Boss.
+
+L'intento D3 (F5 stash collision mitigation) era: "working tree sporco = potenziale stash non committato". Il check corretto è `git diff` (no args = working tree vs index = **unstaged tracked only**), NON `git diff HEAD`.
+
+### Attività svolte
+
+- **Issue #20** aperta con label `bug`, `area:devops`, `priority:important`, `size:S` + assignee `amedeo82`; body documenta problema, fix proposto, 4 AC, 8 scenari di test
+- **Claim (ADR-0006)**: `gh issue edit 20 --add-label in-progress` + `gh issue comment 20 --body "claim: kilo-HP-ELITEBOOK-hc0f (UTC 2026-10-18T09:00:14Z)"`; ID GitHub `6247976214`, vincitore (un solo claim)
+- **Branch + push early (D.20.2)**: `git checkout -b fix/20-pre-commit-unstaged-only-check`, immediato `git push -u origin fix/20-pre-commit-unstaged-only-check`
+- **Fix `.githooks/pre-commit`** (S23 fix): sostituito il check con due componenti ortogonali:
+  - `git diff --quiet 2>/dev/null` → modifiche unstaged tracked (working tree vs index)
+  - `git ls-files --others --exclude-standard 2>/dev/null` → file untracked rispettando `.gitignore`
+- **Test `scripts/test-pre-commit-clean-check.sh`** (nuovo, ~90 righe bash): 8 scenari controllati in repo temporaneo (`mktemp -d` + `git init`); confronta espressione FIXED vs BUGGY per dimostrare il bug originale
+- **Doc-sync IN PR (D21.1)**: `.githooks/README.md` sezione "Failure mode coperti" estesa con F5 parziale e nota di scope (NO staged); `docs/INDEX.md` Sessione 23 in roadmap + §"Stato del progetto" entry; `docs/SESSIONS.md` questa entry + changelog v1.6; `docs/18-DEV-LOG.md` §11 entry Sessione 23 (6 lesson learned); `docs/BUNDLE.md` auto-regen via pre-push hook (D4); `scripts/generate-bundle.ps1` `$files` aggiornato per includere `scripts/test-pre-commit-clean-check.sh`
+
+### Test verification
+
+8/8 scenari passati con check FIXED; check BUGGY blocca correttamente S2 (the user-reported bug):
+
+```
+S1 clean working tree, no staged, no unstaged     | expected=no  | NEW=no  (OK) | OLD=no  (info)
+S2 staged changes only (NORMAL COMMIT FLOW)       | expected=no  | NEW=no  (OK) | OLD=yes (info)
+S3 unstaged changes only                          | expected=yes | NEW=yes (OK) | OLD=yes (info)
+S4 both staged and unstaged changes               | expected=yes | NEW=yes (OK) | OLD=yes (info)
+S5 brand new untracked file (unstaged)            | expected=yes | NEW=yes (OK) | OLD=no  (info)
+S6 brand new file staged (git add)                | expected=no  | NEW=no  (OK) | OLD=yes (info)
+S7 modifica a file tracked ma NON staged          | expected=yes | NEW=yes (OK) | OLD=yes (info)
+S8 piffero: solo differenza in mode (chmod)       | expected=no  | NEW=no  (OK) | OLD=yes (info)
+---
+Pass: 8   Fail: 0   ALL PASS
+```
+
+S2 (the user-reported bug): OLD=YES = bug, NEW=NO = corretto. **Esattamente lo scenario `git add && git commit`** che il Boss faceva e che veniva bloccato.
+
+### Decisioni prese
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.23.1 | Check `git diff --quiet` (no args) come cuore della fix | `git diff HEAD` mescola staged + working tree e blocca ogni commit; `git diff` è la correzione minimale a 1 riga |
+| D.23.2 | Aggiungere `git ls-files --others --exclude-standard` per copertura untracked | `git diff` copre solo tracked. F5 stash collision include anche `git stash -u` (untracked). Rispetta `.gitignore` per default |
+| D.23.3 | Test bash `scripts/test-pre-commit-clean-check.sh` con 8 scenari in repo tmp | Test del solo check expression (no commit reale per evitare recursive hook); `mktemp -d` per isolamento; confronto OLD vs NEW per rendere il bug visibile |
+| D.23.4 | Lesson 23-6: ogni nuovo check in `.githooks/*` deve avere un test in `scripts/test-*.sh` prima del merge | D3 era concettualmente giusto ma `git diff HEAD` invece di `git diff` è typo invisibile senza test; aggiungibile come gate §"📝 Checklist di auto-revisione PR" (proposta per S24) |
+| D.23.5 | Doc-sync IN PR (D21.1) e via pre-push auto-regen BUNDLE (D4) | Continuità del protocollo S21; nessun commit separato su `main` per la doc-sync |
+
+### Documenti aggiornati (doc-sync IN PR, D21.1)
+
+- `.githooks/pre-commit` (D3 fix)
+- `.githooks/README.md` (§"Failure mode coperti" + nota F5)
+- `scripts/test-pre-commit-clean-check.sh` (**nuovo**, ~90 righe bash)
+- `docs/INDEX.md` (Roadmap S23 + §"Stato del progetto" S23 entry)
+- `docs/SESSIONS.md` (questa entry + changelog v1.6)
+- `docs/18-DEV-LOG.md` (§11 S23 + 6 lesson 23-1..6)
+- `docs/BUNDLE.md` (auto-regen via pre-push D4)
+- `scripts/generate-bundle.ps1` (`$files` include `scripts/test-pre-commit-clean-check.sh`)
+
+### Prossimi step
+
+1. Aprire PR per #20 → merge in `main` (auto-BUNDLE-regen via pre-push hook D4)
+2. Rilascio claim: `release: kilo-HP-ELITEBOOK-hc0f — PR mergata` su #20 al merge; GH Action `auto-status-done` applicherà `status:done`
+3. Eliminazione branch `fix/20-pre-commit-unstaged-only-check` (policy §♻️)
+4. Le 3 issue `agent-ready` ancora aperte (#5 Story 0.6 i18n, #6 Story 0.3 Adapter Spotify, #7 Story 0.5 PWA in review via PR #19) tornano claimabili con il check aggiustato
+
+### Esito post-merge (placeholder `<da-compilare>` — appendere post-PR-merge)
+
+PR #20 (da compilare: merge commit SHA, CI status, eventuali drift). Gate D.12.1 applicato: INDEX, SESSIONS, 18-DEV-LOG allineati; BUNDLE rigenerato exit 0; branch remoto eliminato (policy §♻️); claim `kilo-HP-ELITEBOOK-hc0f` rilasciato con merge commit SHA; GH Action `auto-status-done` applica `status:done` automaticamente.
+
+---
+
 ## Sessione 0 — 🔒 Consolidamento + Bootstrap
 
 **Data**: ottobre 2026
@@ -762,6 +847,7 @@ PR #18 (merge commit `6c0f79b`, 2026-10-17T18:00:26Z) portata in `main`: 8 file 
 | 1.3 | 2026-10-17 (post-merge S20) | **Esito post-merge S20**: PR #16 merged (commit `506c86a`, 2026-10-17T15:24:31Z), gate D.12.1 applicato: Sessione 20 ✅ Completata, branch remoto `feat/15-parallel-safety` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-r9p2` rilasciato su #15 con applicazione `status:done`, issue #15 chiusa via `Closes #15`. Placeholder `<da-compilare>` sostituito in §"Esito post-merge" e §"Link utili" del §9 (18-DEV-LOG), §"Prossimi step" checkbox-ate, changelog v1.0 (18-DEV-LOG) e v1.3 (SESSIONS) allineati, INDEX aggiornato (Roadmap S20 → ✅ COMPLETATA, §"Stato del progetto" S20 → "merged in main") |
 | 1.4 | 2026-10-17 (Sessione 21) | **Aggiunta Sessione 21** (refactor catena multi-agente): GH Action `auto-status-done` (nuovo `.github/workflows/`) automatizza le label transitions post-merge; pre-commit hook esteso con working tree clean check (D3); pre-push hook nuovo con BUNDLE auto-regen (D4) + base-stale warning (D5); `AGENTS.md` v1.6 con nuova §"📤 Post-merge actions" + §"🚀 Primo task" step 6 semplificato (GH Action applica status:done) + §"Checklist di sincronizzazione" aggiornata (doc-sync preferito IN PR, no race su main). Elimina il race condition al punto 8 della catena precedente (doc-sync post-merge su `main`). 4 lesson learned in 18-DEV-LOG §10 (21-1 doc-sync racy, 21-2 GH Action per label, 21-3 pre-push cross-platform, 21-4 2 commit pattern) |
 | 1.5 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17 con comment `release:` (commit SHA incluso). **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end. Placeholder `<da-compilare>` sostituito in §"Esito post-merge" e §10 (18-DEV-LOG), §"Stato" → "Completata", §"Prossimi step" → checkboxes; changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati, INDEX aggiornato (Roadmap S21 → ✅ COMPLETATA, §"Stato del progetto" S21 → "merged in main", Prossimo step → "tutte le difese S19+S20+S21 live") |
+| 1.6 | 2026-10-18 (Sessione 23) | **Aggiunta Sessione 23 — fix bug pre-commit hook** (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 (D.21.3, commit `6fa1a8e`) usava `git diff --quiet HEAD` (working tree + staged vs HEAD) invece di `git diff --quiet` (unstaged-only), bloccando ogni `git commit` normale. Fix: 2 espressioni ortogonali `git diff --quiet` (unstaged tracked) + `git ls-files --others --exclude-standard` (untracked rispettando .gitignore). Test `scripts/test-pre-commit-clean-check.sh` (nuovo, 8 scenari tutti passati; S2 OLD=YES dimostra il bug originale). `.githooks/README.md` estesa con F5 parziale. 5 decisioni D.23.1-D.23.5 + 6 lesson learned (23-1 typo `git diff HEAD` blocca workflow, 23-2 untracked via ls-files, 23-3 test bash con `eval`+repo tmp, 23-4 PowerShell call operator bash, 23-5 autocrlf sporca test, 23-6 ogni hook nuovo deve avere test in `scripts/test-*.sh` pre-merge). Branch `fix/20-pre-commit-unstaged-only-check` con PR pendente |
 
 ---
 

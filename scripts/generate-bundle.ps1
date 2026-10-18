@@ -101,6 +101,10 @@ $files = @(
     # sono generati da scripts/generate-fixtures.mjs su richiesta, e NON inclusi nel bundle
     # (vedi 10-TESTING §3.5). Lo script generator è incluso.
     "scripts/generate-fixtures.mjs",
+    # Test script per il check D3 di .githooks/pre-commit (Sessione 23 / issue #20).
+    # Bash portabile (funziona su WSL, Git Bash, Linux, macOS) — NON incluso nel pre-push hook
+    # perché eseguito solo in dev/CI; il check è cross-platform.
+    "scripts/test-pre-commit-clean-check.sh",
     "fixtures/synthetic-history/spotify-sample.json",
     "fixtures/db-seed/minimal.json"
 )

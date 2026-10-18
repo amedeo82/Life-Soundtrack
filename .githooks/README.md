@@ -38,6 +38,7 @@ Usare il bypass solo in caso di emergenza (cherry-pick, hotfix, fix urgente). Do
 
 - **F1**: commit accidentale su `main` → abort
 - **F7**: commit su branch dopo merge (l'agente dimentica di fare `git checkout main && git pull`) → abort
+- **F5** (parziale): modifiche unstaged o file untracked nella working tree prima del commit → abort. **Importante**: il check rileva solo **unstaged tracked** (`git diff`) e **untracked non esclusi da .gitignore** (`git ls-files --others --exclude-standard`). Le **staged changes** sono il payload del commit e passano il check. Fix Sessione 23 / issue #20.
 
 ## Failure mode NON coperti (vedi AGENTS.md §"🛡️ Hardening multi-agente")
 
