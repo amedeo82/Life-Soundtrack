@@ -399,17 +399,24 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 
 ## 📝 Checklist di auto-revisione PR
 
+> **Template GitHub**: il file `.github/pull_request_template.md` (introdotto in Sessione 27, issue #51, P2) rende questa checklist interattiva in GitHub. Le caselle non spuntate sono blocker per il merge.
+>
+> **Branch protection**: il Boss applichera (post-merge #51) `branch protection` su `main` che richiede review Boss + CI verde. Vedi §"📤 Post-merge actions" → "Branch protection Boss-only".
+
 - [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
+- [ ] **Lavoro eseguito in worktree dedicata**: `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow")
 - [ ] Il codice rispetta lo schema dati (`02-DATA-SCHEMA.md`)
 - [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
 - [ ] Ho usato i fixture di `fixtures/synthetic-history/`
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
-- [ ] `pnpm run lint` e `pnpm run test` passano in locale
+- [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
+- [ ] **NON ho modificato direttamente** `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: solo `docs/state/<propria>/*`)
 - [ ] **Il body della PR include `Closes #N`** (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub lo usa per chiudere automaticamente l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
+- [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
 

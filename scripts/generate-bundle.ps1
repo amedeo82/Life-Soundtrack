@@ -121,6 +121,11 @@ $files = @(
     ".githooks/pre-push",
     ".githooks/post-checkout",
     ".githooks/README.md",
+    # GitHub config (issue #51, P2 PR template + branch protection):
+    # template PR interattivo, CODEOWNERS per review obbligatoria, workflow CI esteso.
+    ".github/pull_request_template.md",
+    ".github/CODEOWNERS",
+    ".github/workflows/ci.yml",
     "fixtures/synthetic-history/spotify-sample.json",
     "fixtures/db-seed/minimal.json"
 )

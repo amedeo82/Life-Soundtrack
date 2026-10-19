@@ -126,9 +126,11 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/22-pwa.md` | ✅ migrata da SESSIONS.md | entry S22 |
 | `state/sessions/23-fix-hook.md` | ✅ migrata | entry S23 (issue #20) |
 | `state/sessions/24-i18n.md` | ✅ migrata | entry S24 (issue #5 / Story 0.6) |
+| `state/sessions/27-worktree-default.md` | ✅ migrata | entry S27 (issue #53, worktree-as-default) |
+| `state/sessions/28-pr-template-and-branch-protection.md` | ✅ migrata | entry S28 (issue #51, PR template + branch protection) |
 | `state/stories/0.5-pwa.md` | ✅ migrata | da Story 0.5 BACKLOG + 18-DEV-LOG §11 |
 | `state/stories/0.6-i18n.md` | ✅ migrata | da Story 0.6 BACKLOG + 18-DEV-LOG §12 |
-| Sessioni 0..21 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
+| Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1..0.4, 0.7+ | ⬚ TODO (migration incrementale) | restano in `docs/11-BACKLOG.md` legacy fino a V2 |
 
 Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
