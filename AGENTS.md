@@ -231,6 +231,66 @@ Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni doc
 
 **Perché è importante**: con il workflow parallelo (più agenti su più issue contemporaneamente, vedi `11-BACKLOG.md` §"Priorità di lavorazione"), i branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma in fase di review.
 
+## 🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*
+
+`git stash drop` è **irreversibile** e **non protegge** dagli errori di conteggio degli indici: dopo ogni `drop` gli altri indici si ricompattano automaticamente (`stash@{1}` può diventare `stash@{0}`), e un calcolo mentale affrettato può portare a droppare stash fuori perimetro. **Lezione operativa D.26.1 (Sessione 26, 2026-10-19, issue #42)**: drop di 5 stash quando ne erano previsti 3, perché mancava uno snapshot testuale pre-drop. Danno zero (contenuto già in `main` via commit successivi), ma la procedura va formalizzata per evitare recidive.
+
+**Quando si applica**: solo se si intende droppare uno o più stash. NON sostituisce §"♻️ Pulizia branch post-merge" né §"🪝 Pre-commit hook"; è complementare.
+
+**Chi esegue**: l'agente che decide l'housekeeping (dopo conferma esplicita del Boss su una issue `needs-spec`, vedi §"Cosa NON puoi decidere autonomamente").
+
+**Procedura conservativa obbligatoria**:
+
+```powershell
+# 1. SNAPSHOT TESTUALE PRIMA di qualsiasi drop (irreversibile)
+git stash list --format='%gd | hash:%H | %gs' | Tee-Object -FilePath stash-snapshot.txt
+
+# 2. STIMA il numero di stash che dropperai e CONFRONTA con lo snapshot
+$expected = 3   # AD ESEMPIO: numero previsto di stash da droppare
+$actual = (git stash list | Measure-Object -Line).Lines
+if ($expected -ne $actual) { throw "Discrepanza conteggio stash: previsto=$expected reale=$actual" }
+
+# 3. DROP uno alla volta, verificando l'hash tra un drop e il successivo
+git stash drop 'stash@{0}'   # leggi l'hash nell'output ("Dropped stash@{0} (<hash>)")
+git stash list               # RILEGGERE prima del prossimo drop
+
+# 4. Se uno stash è dubbio o fuori perimetro, ESTRAILO prima con git show <hash>
+git show <hash> --format='%s' --name-only   # ispeziona cosa c'è dentro
+
+# 5. PULIZIA post-drop
+git remote prune origin
+```
+
+**Protezione extra per stash da preservare**:
+
+```powershell
+# Se uno stash contiene lavoro che potrebbe servire, PRIMA di droppare gli altri, etichettalo:
+git tag stash-preserve/<subject> <stash-hash>
+git stash drop 'stash@{N}'                                # droppa gli altri
+git show stash-preserve/<subject>                         # ... il preservato sopravvive come tag
+```
+
+**Recovery dopo drop errato** (entro 30 giorni, finché `gc` non gira):
+
+```powershell
+# Gli stash droppati diventano "dangling commit" visibili con:
+git fsck --no-reflogs --full | Select-String 'dangling commit'
+
+# Ogni dangling commit è un ex-stash. Recuperalo con:
+git stash store -m "recovered: <subject>" <dangling-hash>   # ricrea uno stash
+# oppure
+git checkout <dangling-hash> -- 0                          # ricrea i file modificati in un working tree separato
+```
+
+**Auto-check pre-drop** (mette in sicurezza l'azione):
+
+```powershell
+git fsck --no-reflogs --full --unreachable 2>&1 | Select-String 'dangling commit' | Measure-Object -Line
+# Se >0 dopo il drop, hai candidati per recovery (vedi sopra)
+```
+
+**Perché è importante**: il drop errato non è reversibile senza `git fsck` + reflog, e anche in quel caso solo entro la finestra di `gc` (default 30 giorni). Lo snapshot testuale + drop incrementale sono l'equivalente per gli stash di quello che `git branch -d` (vs `-D`) fa per i branch: una rete di sicurezza.
+
 ## 🪝 Pre-commit hook
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
@@ -458,4 +518,4 @@ Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: Sessione 21 (2026-10-17) — v1.6: refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
+*Ultimo aggiornamento: Sessione 26 (2026-10-19) — v1.7: nuova sezione §"🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*" (D.26.1, lezione operativa issue #42: drop di 5 stash quando ne erano previsti 3; procedura conservativa con snapshot testuale, drop incrementale, recovery via `git fsck` + `git tag stash-preserve/*`); ultima: v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
