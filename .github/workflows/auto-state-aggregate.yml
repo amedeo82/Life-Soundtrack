@@ -71,14 +71,20 @@ jobs:
         run: |
           git config user.name "kilo-bot[bot]"
           git config user.email "kilo-bot@kilo.local"
-          git add docs/SESSIONS.md docs/11-BACKLOG.md scripts/aggregate-state.ps1 docs/state/ 2>$null
-          git diff --cached --quiet && (Write-Host "Nothing to commit"; exit 0)
-          git commit -m "chore(state): auto-aggregate from docs/state/ (ADR-0008)" \
-                       -m "Triggered by .github/workflows/auto-state-aggregate.yml on push to main." \
-                       -m "Source: docs/state/sessions/*.md + docs/state/stories/*.md (frontmatter)." \
-                       -m "Target blocks:" \
-                       -m "  - docs/SESSIONS.md: <!-- AGGREGATE-SESSIONS-{START,END} -->" \
-                       -m "  - docs/11-BACKLOG.md: <!-- AGGREGATE-STORIES-{START,END} -->" \
-                       -m "" \
+          # Issue #60 fix: PowerShell parse error su `git diff --cached --quiet && (Write-Host; exit 0)`.
+          # Sintassi bash, non valida in pwsh 7+ su Linux. Riscritta con if + early exit.
+          # Anche `2>$null` (bash) sostituito con `2>&1 | Out-Null` (PowerShell).
+          git add docs/SESSIONS.md docs/11-BACKLOG.md scripts/aggregate-state.ps1 docs/state/ 2>&1 | Out-Null
+          if (git diff --cached --quiet) {
+            Write-Host "Nothing to commit (staged diff is empty)"
+            exit 0
+          }
+          git commit -m "chore(state): auto-aggregate from docs/state/ (ADR-0008)" `
+                       -m "Triggered by .github/workflows/auto-state-aggregate.yml on push to main." `
+                       -m "Source: docs/state/sessions/*.md + docs/state/stories/*.md (frontmatter)." `
+                       -m "Target blocks:" `
+                       -m "  - docs/SESSIONS.md: <!-- AGGREGATE-SESSIONS-{START,END} -->" `
+                       -m "  - docs/11-BACKLOG.md: <!-- AGGREGATE-STORIES-{START,END} -->" `
+                       -m "" `
                        -m "Skips if aggregator output already in sync."
           git push origin main
