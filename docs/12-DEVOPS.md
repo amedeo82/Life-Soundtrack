@@ -314,6 +314,49 @@ Il confronto `--check` normalizza sia la riga `> Data:` (timestamp) sia i line e
 
 Il check continua a rilevare drift reali (file aggiunti/rimossi, contenuto modificato).
 
+### 9.8 Semantica come gate CI
+
+Il flag `--check` ha **semantica di fail-fast gate CI** (decisione cristallizzata in S32, issue #41 — formalizzazione dell'opzione A di `gh issue #10` chiusa in S17):
+
+| Esito del check | Exit code | Significato | Comportamento CI |
+|-----------------|-----------|-------------|------------------|
+| BUNDLE.md in sync con `$files` + contenuto identico | **0** | OK | Job `bundle-check` ✅ → merge abilitato |
+| File dichiarati in `$files` non esistono su disco | **2** | Drift strutturale | CI rosso (marker `[FAIL] N file dichiarati non esistono`) |
+| BUNDLE.md assente | **1** | Prima esecuzione | CI rosso (marker `[FAIL] docs/BUNDLE.md non esiste`) |
+| BUNDLE.md presente ma disallineato (contenuto, file list) | **1** | Drift di contenuto | CI rosso con dettaglio file aggiunti/rimossi |
+
+**Garanzie semantiche** (vincolanti per gli agenti):
+
+1. **Determinismo cross-platform**: il check passa identico su Windows (CRLF) e Linux/macOS (LF). La normalizzazione `CRLF → LF` è obbligatoria prima del `Compare-Object`.
+2. **Determinismo cross-tempo**: il check passa anche se lanciato a minuti/ore diverse dall'ultima rigenerazione, purché il contenuto sia semanticamente identico. La riga `> Data: ...` viene normalizzata a `> Data: 0000-00-00 00:00` prima del confronto.
+3. **Zero falsi positivi**: il check non fallisce MAI per sola differenza di timestamp o line endings.
+4. **Rilevamento drift reale**: ogni drift di `$files` (aggiunta/rimozione di file in scope) o di contenuto (modifica a un file incluso) viene rilevato con messaggio esplicito ("Da aggiungere al bundle: …", "Da rimuovere dal bundle: …", "Lista file identica, ma contenuto cambiato").
+5. **Fail-fast**: `--check` NON modifica mai `BUNDLE.md`; per la rigenerazione serve il flag di default (senza `--check`).
+
+**Integrazione CI** (`.github/workflows/ci.yml`):
+
+```yaml
+- name: Bundle in sync
+  run: pwsh scripts/generate-bundle.ps1 --check
+```
+
+Il job `bundle-check` è un **CI gate bloccante**: PR con BUNDLE.md non in sync non possono essere mergate finché l'agente non rigenera il bundle nella stessa PR (o, in emergenza, con `--no-verify` documentando la ragione).
+
+**Procedura di recovery** (per l'agente che vede il CI rosso):
+
+```powershell
+# 1. Rigenera localmente
+pwsh scripts/generate-bundle.ps1
+
+# 2. Verifica sync
+pwsh scripts/generate-bundle.ps1 --check    # deve uscire 0
+
+# 3. Committa nella stessa PR
+git add docs/BUNDLE.md scripts/generate-bundle.ps1
+git commit -m "chore(bundle): rigenera BUNDLE.md post-modifiche docs"
+git push
+```
+
 ---
 
 ## Changelog
