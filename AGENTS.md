@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.6 — Sessione 21 (2026-10-17)
+> Versione 1.9 — Sessione 30 (2026-10-19)
 
 ---
 
@@ -367,9 +367,13 @@ Uso: `pwsh scripts/safe-branch-switch.ps1 <branch> [-h|--help]`
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
 
-- `main` (solo per admin / doc-sync)
+- `main` (solo per GH Action auto-commits: `kilo-bot[bot]` con `auto-status-done` o `auto-state-aggregate`; vietato per agenti umani)
 - `docs/<desc>` (branch di documentazione)
 - `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
+
+### Eccezione `main` chiarita
+
+Il pattern `main` e ammesso dal hook **esclusivamente** per i commit automatici delle GH Action (identity `kilo-bot[bot]`). Gli agenti umani NON devono committare direttamente su `main` per nessuna ragione (vedi §"📤 Post-merge actions" → "Regola fondamentale — NO commit su main"). Il doc-sync (rigenerazione SESSIONS/BACKLOG/INDEX/BUNDLE) e gestito automaticamente dall'auto-state-aggregate workflow, che usa il bot identity.
 
 ### Setup
 
@@ -529,34 +533,64 @@ git push
 
 1. Leggi questo file
 2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — una issue è libera se non ha `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
-3. Crea branch `feat/<issue>-<descrizione>`
-4. Leggi la specifica del task e implementa con test
-5. Apri PR (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
-6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done`; tu fai `release:` comment + **branch cleanup obbligatorio (locale e remoto)** (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge") (vedi §"📦 Macchina a stati delle issue (status:*)")
+3. **Crea una worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4.
+4. Leggi la specifica del task e implementa con test (nella worktree)
+5. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
+6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done` + GH Action `auto-state-aggregate` rigenera SESSIONS/BACKLOG/INDEX/BUNDLE; tu fai `release:` comment + **branch cleanup obbligatorio (locale e remoto)** + `git worktree remove --force ../ls-<N>-<slug>` (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
 ## 📤 Post-merge actions
 
-Dopo che il Boss mergia la PR, le azioni post-merge sono **solo a livello di issue** (no commit su `main`, no race con altri agenti):
+Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
-1. **GitHub Action `auto-status-done`** (vedi `.github/workflows/auto-status-done.yml`) applica automaticamente `status:done` all'issue chiusa dalla PR. Rimuove anche `in-progress` e `status:in-review`. **Niente da fare manualmente per le label**.
-   2. **Tu devi**:
-      - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
-      - Cancellare il branch remoto: `git push origin --delete <branch>`
-      - Cancellare il branch locale corrispondente: `git branch -d <branch>` (solo se è stato mergato in `main`)
-      - Pulire i ref remoti obsoleti: `git remote prune origin`
-3. **Niente commit su `main`**: il doc-sync finale (con PR number e merge commit) è già nel branch PR (vedi §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge"). L'eccezione "follow-up su main" è sconsigliata: crea race con altri agenti.
+### Livello 1 — Automazioni GH Action (no intervento manuale)
 
-Vedi §"🛡️ Hardening multi-agente" (Sessione 21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue) elimina le race condition.
+1. **GH Action `auto-status-done`** (vedi `.github/workflows/auto-status-done.yml`, introdotto S19/D2): applica automaticamente `status:done` all'issue chiusa dalla PR (via `Closes #N`). Rimuove anche `in-progress` e `status:in-review`. **Niente da fare manualmente per le label**.
+2. **GH Action `auto-state-aggregate`** (vedi `.github/workflows/auto-state-aggregate.yml`, introdotto S25/ADR-0008, fixato S30/#58+#61): triggerato dal push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1`. Esegue `pwsh scripts/aggregate-state.ps1`, rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2, dopo merge di #56), e committa automaticamente il diff. Questo elimina i conflitti drift su file globali (D.21.1, D.26.3, P7 di v1.9).
 
-## 🔄 Lazy-state aggregation (D.24.x)
+### Livello 2 — Issue (release + label)
 
-Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di merge ricorrenti generati dal doc-sync IN PR su file globali (`docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`). Vedi `docs/13-ADR/0008-lazy-state-aggregation.md` per la spec completa.
+3. **Tu devi**:
+   - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
+   - Cancellare il branch remoto: `git push origin --delete <branch>`
+   - Cancellare il branch locale corrispondente: `git branch -d <branch>` (solo se è stato mergato in `main`)
+   - Pulire i ref remoti obsoleti: `git remote prune origin`
+   - Se hai usato una worktree (vedi §"🌳 Worktree workflow"): rimuoverla con `git worktree remove --force ../ls-<N>-<slug>`
 
-### Regola d'oro (vincolante per tutti gli agenti da S25 in poi)
+### Livello 3 — Verifica (post-merge sanity check)
 
-**Le PR di implementazione **NON** toccano direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/INDEX.md`.** Modificano invece solo:
+4. **Verifica statale post-merge** (sostituisce l'ex "Verifica statale post-merge" v1.7):
+     ```powershell
+     # 4a. Aggregator in sync (post GH Action auto-state-aggregate)
+     pwsh scripts/aggregate-state.ps1 --check
+     # 4b. Bundle in sync
+     pwsh scripts/generate-bundle.ps1 --check
+     # 4c. Nessun branch remoto merged-orfano
+     git branch -r --merged origin/main | Select-String -NotMatch 'main$|HEAD'
+     ```
+   Se uno qualsiasi fallisce, **intervieni**:
+   - (4a) drift su SESSIONS/BACKLOG/INDEX/BUNDLE → `pwsh scripts/aggregate-state.ps1` localmente + commit (doc-sync di emergenza; il workflow dovrebbe averlo gia fatto)
+   - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
+   - (4c) branch orfani → `git push origin --delete <branch>` + `git branch -d <branch>` (vedi §"♻️ Pulizia branch post-merge")
+
+### Regola fondamentale — NO commit su `main`
+
+**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `auto-state-aggregate`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
+
+Vedi §"🛡️ Hardening multi-agente" (S21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
+
+## 🔄 Lazy-state aggregation (D.24.x + D.29.x + D.30.x)
+
+Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di merge ricorrenti generati dal doc-sync IN PR su file globali. Vedi `docs/13-ADR/0008-lazy-state-aggregation.md` per la spec completa.
+
+**V2** (Sessione 29, issue #52): estensione a `docs/INDEX.md` (status + roadmap) e `docs/BUNDLE.md` (inventory). I 5 file globali sono ora tutti aggregator-managed.
+
+**Robustezza** (Sessione 30, issue #58+#60): fix CRLF in `StringBuilder.AppendLine` + workflow `auto-state-aggregate` step 6 parse error. Garantito LF-only output + workflow end-to-end funzionante.
+
+### Regola d'oro (vincolante per tutti gli agenti da S25 in poi, estesa V2 da S29)
+
+**Le PR di implementazione **NON** toccano direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md`.** Modificano invece solo:
 
 - I file nelle rispettive aree tecniche (`apps/*`, `packages/*`, `scripts/*`, ...)
 - I file in `docs/state/sessions/<N>-<slug>.md` (se la PR documenta una sessione)
@@ -564,9 +598,19 @@ Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di 
 
 I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `auto-state-aggregate.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
 
+### Target V1 + V2
+
+| File | Blocchi gestiti | Versione |
+|------|----------------|----------|
+| `docs/SESSIONS.md` | `<!-- AGGREGATE-SESSIONS-{START,END} -->` | V1 |
+| `docs/11-BACKLOG.md` | `<!-- AGGREGATE-STORIES-{START,END} -->` | V1 |
+| `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-STATUS-{START,END} -->` | V2 |
+| `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->` | V2 |
+| `docs/BUNDLE.md` | `<!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->` | V2 |
+
 ### Eccezione
 
-La PR di introduzione S25 (`#24` / `feat/24-lazy-state-aggregation`) è l'unica che tocca direttamente `INDEX/SESSIONS/BACKLOG` (necessario per inserire i marker `<!-- AGGREGATE-* -->` e fare la migration iniziale delle 3 sessioni + 2 story seed). Dopo S25, vietato modificare i blocchi globali a mano.
+Le PR di introduzione V1 (`#24`, S25) e V2 (`#52`, S29) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
 
 ### Pattern `state/`
 
@@ -588,11 +632,21 @@ pwsh scripts/aggregate-state.ps1 --dry-run    # preview senza scrivere
 pwsh scripts/aggregate-state.ps1              # scrivi (idempotente)
 ```
 
-CI gate consigliato: aggiungere `pwsh scripts/aggregate-state.ps1 --check` al workflow quality (lo stesso che esegue `generate-bundle.ps1 --check`). Se la PR modifica solo `docs/state/`, lo script esce 0 e non blocca. Se per errore un agente modifica `SESSIONS.md` o `BACKLOG.md` direttamente, lo script rileva drift e fallisce.
+CI gate bloccante in `.github/workflows/ci.yml` (introdotto in #51). Se la PR modifica solo `docs/state/`, lo script esce 0 e non blocca. Se per errore un agente modifica direttamente `SESSIONS.md`, `BACKLOG.md`, `INDEX.md` o `BUNDLE.md`, lo script rileva drift e fallisce.
 
-### Checklist PR aggiuntiva (D.24.x)
+### GH Action auto-state-aggregate (post-merge auto-commit)
 
-- [ ] **NON** ho modificato direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
+Dopo ogni push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1`, la GH Action:
+1. Esegue `pwsh scripts/aggregate-state.ps1 --check` (rileva drift)
+2. Esegue `pwsh scripts/aggregate-state.ps1` (applica i blocchi corretti)
+3. Rileva il diff con `git diff --name-only`
+4. Se modificato, committa e pusha con bot identity `kilo-bot[bot]`
+
+Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` sul diff step + `if (git diff --cached --quiet)` syntax fix PowerShell + `-replace CRLF, LF` in tutti gli script di write.
+
+### Checklist PR aggiuntiva (D.24.x + D.29.x + D.30.x)
+
+- [ ] **NON** ho modificato direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
 - [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
 - [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
 - [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
@@ -600,16 +654,17 @@ CI gate consigliato: aggiungere `pwsh scripts/aggregate-state.ps1 --check` al wo
 
 ## 🛡️ Session start checklist
 
-Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti 4 check per catturare precocemente i failure mode del parallelismo:
+Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti **5 check** per catturare precocemente i failure mode del parallelismo:
 
 ```powershell
 git status                          # working tree clean? (F3, F5)
 git branch --show-current           # sul branch giusto? (F1)
 git fetch origin && git status -uno # main stale? (F4)
 gh issue view <N> --jq .state       # issue ancora nostra e aperta? (F7)
+git worktree list                   # non in worktree di un altro agente? (F8, post-#54)
 ```
 
-Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
 
 ## 📞 Contatti
 
@@ -620,4 +675,13 @@ Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: Sessione 26 (2026-10-19) — v1.7: nuova sezione §"🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*" (D.26.1, lezione operativa issue #42: drop di 5 stash quando ne erano previsti 3; procedura conservativa con snapshot testuale, drop incrementale, recovery via `git fsck` + `git tag stash-preserve/*`); §"⚠️ Trappola specifica: stash mirato `git stash push -- <paths>`" (D.26.2: persi 3 file di Story 0.7 per drop di stash mirato; recovery via `git show <hash>:<path>`); §"📦 D.26.3 Bundle regeneration obbligatoria in stessa PR" (lesson learned: modifica `AGENTS.md` senza rigenerare `BUNDLE.md` → CI fail; procedura con snippet `pwsh scripts/generate-bundle.ps1` + `git commit --amend`); §"🔀 Transizioni tra branch *(safety obbligatoria)*" (D.26.4: 3 failure mode E3/E4/E5 emersi durante post-merge PR #44; checklist pre-transizione + nuovo `.githooks/post-checkout` advisory + tabella operazioni pericolose; cross-ref issue #45 DATA-LOSS e issue #46 difese; issue #47 worktree opzionale riapre S20 D.20.1); ultima: v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
+*Ultimo aggiornamento: Sessione 30 (2026-10-19) — v1.9: cleanup completo del workflow (issue #60 + audit v1.9); dettagli:
+- §"🚀 Primo task" step 3 aggiornato: worktree setup via `setup-worktree.ps1 <N>` invece di `git checkout -b` (post-#53); step 6 aggiornato per riflettere il 3-livello post-merge (auto-status-done + auto-state-aggregate + agent release)
+- §"📤 Post-merge actions" completamente ristrutturato in 3 livelli (automatizzazioni GH Action / issue / verifica) con regola "NO commit su main" piu esplicita; aggiunto il check del auto-state-aggregate (prima mancante)
+- §"🔄 Lazy-state aggregation" aggiornato a v1.9: include V2 (5 target) + robustness section (S30 fix CRLF + workflow parse error); aggiunto il dettaglio del GH Action auto-state-aggregate (prima implicito)
+- §"🛡️ Session start checklist" estesa a 5 check: aggiunto `git worktree list` (F8, post-#53)
+- §"🪝 Pre-commit hook" pattern `main` chiarito: solo GH Action con identity `kilo-bot[bot]`, vietato per agenti umani
+- Footer v1.7 → v1.9: changelog cumulativo di S27 (worktree), S28 (PR template + CODEOWNERS), S29 (ADR-0008 V2), S30 (CRLF + workflow fix)
+- Cross-ref consolidati: `auto-state-aggregate.yml` esplicitamente referenziato in Post-merge + Lazy-state sections (prima implicito)
+
+*Precedente v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*

@@ -129,6 +129,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/27-worktree-default.md` | ✅ migrata | entry S27 (issue #53, worktree-as-default) |
 | `state/sessions/28-pr-template-and-branch-protection.md` | ✅ migrata | entry S28 (issue #51, PR template + branch protection) |
 | `state/sessions/30-crlf-and-workflow-fix.md` | ✅ migrata | entry S30 (issue #58, CRLF + workflow if:always) |
+| `state/sessions/31-agents-md-cleanup.md` | ✅ migrata | entry S31 (cleanup AGENTS.md v1.9, audit workflow) |
 | `state/stories/0.5-pwa.md` | ✅ migrata | da Story 0.5 BACKLOG + 18-DEV-LOG §11 |
 | `state/stories/0.6-i18n.md` | ✅ migrata | da Story 0.6 BACKLOG + 18-DEV-LOG §12 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
