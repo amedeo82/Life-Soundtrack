@@ -291,6 +291,26 @@ git fsck --no-reflogs --full --unreachable 2>&1 | Select-String 'dangling commit
 
 **Perché è importante**: il drop errato non è reversibile senza `git fsck` + reflog, e anche in quel caso solo entro la finestra di `gc` (default 30 giorni). Lo snapshot testuale + drop incrementale sono l'equivalente per gli stash di quello che `git branch -d` (vs `-D`) fa per i branch: una rete di sicurezza.
 
+### ⚠️ Trappola specifica: `git stash push -- <paths>` *(stash mirato)*
+
+Il pattern `git stash push -m "..." -- <path1> <path2> ...` salva **solo** i path elencati. È particolarmente fragile perché:
+
+1. **Nasconde la complessità**: l'output di `git stash list` non distingue tra stash completi (`-u`) e stash mirati (path specifici). Un operatore successivo potrebbe credere che lo stash contenga "tutto" il working tree.
+2. **Droppabile per errore**: se l'operatore dimentica che esiste uno stash mirato e fa `git stash drop 'stash@{0}'` "per pulire", perde solo quei 3 file (o quanti siano) senza che il comando protesti.
+3. **Recovery più complessa**: lo stash mirato ha 2 parent commits (working tree + index), uno dei quali è HEAD; l'altro contiene solo i path. `git stash store` non lo ricrea perfettamente — serve `git show <parent-hash>:<path>` per estrarre i singoli file.
+
+**Lezione operativa D.26.2 (Sessione 26, 2026-10-19, durante estensione di PR #44)**: l'agente ha creato `git stash push -m 'wip-story-0.7-preserve-before-docs' -- packages/core/src/db/index.ts packages/core/src/db/__tests__/maintenance.test.ts packages/core/src/db/maintenance.ts` (3 path), poi ha droppato quello stash credendo fosse un interim step. **Persi 3 file** di Story 0.7 per ~10 minuti. Recovery immediata via `git show <stash-hash>:<path>` sui parent commit (ancora nella gc-window di 30gg).
+
+**Regola d'oro**: preferire SEMPRE `git stash push -u` (con `-u` per includere untracked) salvo casi eccezzionali documentati. Se devi usare uno stash mirato, **etichettalo con un prefisso riconoscibile**:
+
+```powershell
+# Pattern sicuro per stash mirato
+git tag stash-preserve/<subject> <hash>      # taggare SUBITO dopo il push
+git stash push -u -m 'MIRATO: <descrizione esplicita>' -- <paths>   # il prefisso "MIRATO:" nel subject aiuta `git stash list`
+```
+
+Inoltre, prima di droppare uno stash mirato, **estrarre sempre i path con `git show <hash>:<path>` come rete di sicurezza** (anche se pensi che sia obsoleto).
+
 ## 🪝 Pre-commit hook
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
