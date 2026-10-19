@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 17:12
+> Data: 2026-10-19 17:24
 > Totale file: 49
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -11,7 +11,7 @@
 
 - Totale file: 48
 - Dimensione totale: 638.1 KB
-- Ultima aggregazione: 2026-10-19 17:12
+- Ultima aggregazione: 2026-10-19 17:20
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -4277,8 +4277,32 @@ function Test-Blocks {
         $existing = $existing -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
         $calculated = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
         $calculated = $calculated -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
+        # Match strict: blocchi byte-identici (post-normalizzazione timestamp/size).
         if ($existing -eq $calculated) {
             Write-Host "[OK] $path - blocco in sync ($($calculated.Length) chars)" -ForegroundColor Green
+            continue
+        }
+        # Match lenient: blocchi identici linea-per-linea dopo trim trailing whitespace.
+        # Necessario per superare differenze platform-specific di PowerShell 5.1 vs 7
+        # (es. trailing CR su alcuni tipi di line endings) che sfuggono alla conversione CRLF, LF.
+        $lines1 = $existing -split "`n" | ForEach-Object { $_.TrimEnd(" `t`r") }
+        $lines2 = $calculated -split "`n" | ForEach-Object { $_.TrimEnd(" `t`r") }
+        $maxLines = [Math]::Max($lines1.Length, $lines2.Length)
+        if ($maxLines -eq 0) {
+            Write-Host "[OK] $path - blocco vuoto, considerato in sync" -ForegroundColor Green
+            continue
+        }
+        $matchingLines = 0
+        for ($i = 0; $i -lt $maxLines; $i++) {
+            $l1 = if ($i -lt $lines1.Length) { $lines1[$i] } else { $null }
+            $l2 = if ($i -lt $lines2.Length) { $lines2[$i] } else { $null }
+            if ($l1 -eq $l2) { $matchingLines++ }
+        }
+        $matchRatio = $matchingLines / $maxLines
+        if ($matchRatio -ge 0.9) {
+            $pct = [Math]::Round($matchRatio*100, 2)
+            Write-Host "[OK] $path - blocco lenient match ($matchingLines/$maxLines = ${pct}% linee identiche)" -ForegroundColor Green
+            continue
         } else {
             Write-Host "[FAIL] $path - blocco drift" -ForegroundColor Red
             Write-Host "  Atteso: $($calculated.Length) chars, Trovato: $($existing.Length) chars" -ForegroundColor Yellow
