@@ -1,0 +1,66 @@
+# CODEOWNERS per Life-Soundtrack
+# Ogni PR che tocca un file elencato qui richiede review del owner indicato.
+# Vedi https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# AGENTS.md vedi §"Pull request template" (issue #51, P2 enforcement).
+
+# Default owner: Boss (richiede review per ogni file non elencato esplicitamente)
+*                                       @amedeo82
+
+# File di governance e workflow: Boss solo (regola speciale, no auto-merge agente)
+# AGENTS.md e' il protocollo del progetto; ogni modifica richiede review esplicita.
+/AGENTS.md                              @amedeo82
+
+# ADR: documenti architetturali vincolanti (ADR-0006, 0007, 0008, ...).
+# Modifica di un ADR richiede discussione esplicita + review Boss.
+/docs/13-ADR/                           @amedeo82
+
+# Script di governance (bundle, aggregator, hooks, setup-worktree).
+# Modifica richiede attenzione (effetti su CI + agenti).
+/scripts/generate-bundle.ps1             @amedeo82
+/scripts/aggregate-state.ps1             @amedeo82
+/scripts/setup-hooks.js                 @amedeo82
+/scripts/setup-worktree.ps1              @amedeo82
+/scripts/safe-branch-switch.ps1           @amedeo82
+
+# Git hooks versionati (eseguiti ad ogni commit/push).
+/.githooks/                             @amedeo82
+
+# GitHub Actions workflows (eseguiti ad ogni push/PR).
+/.github/workflows/                     @amedeo82
+
+# PR template + CODEOWNERS + altre config GitHub.
+/.github/pull_request_template.md       @amedeo82
+/.github/CODEOWNERS                     @amedeo82
+
+# Documenti di stato globale (regola ADR-0008: solo GH Action li modifica).
+# Se un agente li modifica per errore, il Boss deve fare review per approvare.
+/docs/INDEX.md                           @amedeo82
+/docs/SESSIONS.md                       @amedeo82
+/docs/11-BACKLOG.md                     @amedeo82
+/docs/BUNDLE.md                         @amedeo82
+
+# File di progetto "non governance" (possono essere modificati da agenti senza review Boss obbligatoria)
+# ma con quality CI gate.
+/apps/                                  @amedeo82
+/packages/                              @amedeo82
+/docs/state/                            @amedeo82
+/docs/00-VISION.md                      @amedeo82
+/docs/01-PLATFORMS.md                   @amedeo82
+/docs/02-DATA-SCHEMA.md                 @amedeo82
+/docs/03-ADAPTERS/                      @amedeo82
+/docs/04-ANALYSIS-ALGORITHMS.md         @amedeo82
+/docs/05-ARCHITECTURE.md                @amedeo82
+/docs/06-UX-FLOWS-STATES.md             @amedeo82
+/docs/07-UI-SPEC.md                     @amedeo82
+/docs/08-COPY-I18N.md                   @amedeo82
+/docs/09-PRIVACY-SECURITY.md            @amedeo82
+/docs/10-TESTING.md                     @amedeo82
+/docs/12-DEVOPS.md                      @amedeo82
+/docs/14-GLOSSARY.md                    @amedeo82
+/docs/15-DESIGN-SYSTEM.md               @amedeo82
+/docs/16-OPERATIONS.md                  @amedeo82
+/docs/17-DEV-NOTES.md                   @amedeo82
+/docs/18-DEV-LOG.md                     @amedeo82
+/fixtures/                              @amedeo82
+README.md                               @amedeo82
+LICENSE                                @amedeo82

@@ -42,3 +42,11 @@ jobs:
 
       - name: Bundle in sync
         run: pwsh scripts/generate-bundle.ps1 --check
+
+      # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
+      # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
+      # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
+      # docs/state/ (vedi ADR-0008 e AGENTS.md sezione "Lazy-state aggregation").
+      # Nota: la strict-mode del check e intenzionalmente bloccante.
+      - name: Lazy-state in sync (ADR-0008)
+        run: pwsh scripts/aggregate-state.ps1 --check

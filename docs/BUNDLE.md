@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 12:45
-> Totale file: 43
+> Data: 2026-10-19 15:16
+> Totale file: 46
 
 
 ===== FILE: AGENTS.md =====
@@ -408,17 +408,24 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 
 ## 📝 Checklist di auto-revisione PR
 
+> **Template GitHub**: il file `.github/pull_request_template.md` (introdotto in Sessione 27, issue #51, P2) rende questa checklist interattiva in GitHub. Le caselle non spuntate sono blocker per il merge.
+>
+> **Branch protection**: il Boss applichera (post-merge #51) `branch protection` su `main` che richiede review Boss + CI verde. Vedi §"📤 Post-merge actions" → "Branch protection Boss-only".
+
 - [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
+- [ ] **Lavoro eseguito in worktree dedicata**: `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow")
 - [ ] Il codice rispetta lo schema dati (`02-DATA-SCHEMA.md`)
 - [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
 - [ ] Ho usato i fixture di `fixtures/synthetic-history/`
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
-- [ ] `pnpm run lint` e `pnpm run test` passano in locale
+- [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
+- [ ] **NON ho modificato direttamente** `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: solo `docs/state/<propria>/*`)
 - [ ] **Il body della PR include `Closes #N`** (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub lo usa per chiudere automaticamente l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
+- [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
 
@@ -9876,6 +9883,196 @@ Usare il bypass solo in caso di emergenza (cherry-pick, hotfix, fix urgente). Do
 - **F3**: file conflict in working copy (richiede worktree, scelta NO)
 - **F5**: stash collision (mitigato indirettamente da `git status` clean check nella session-start checklist)
 - **F8**: force push accidentale (mitigato da "no force push" in AGENTS.md §"🌳 Git workflow")
+
+
+
+===== FILE: .github/pull_request_template.md =====
+
+## Issue
+
+- Issue: #
+- Tipo: [ ] story (adazione #N)  [ ] bug fix  [ ] docs  [ ] refactor  [ ] infra
+
+## Checklist di auto-revisione
+
+L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le caselle non spuntate sono blocker per il merge.
+
+### Documentazione letta
+
+- [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
+- [ ] Ho letto la specifica della story (link nell'issue)
+
+### Codice e test
+
+- [ ] `pnpm run lint` passa in locale
+- [ ] `pnpm run typecheck` passa in locale
+- [ ] `pnpm run test` passa in locale (no test saltati senza motivo)
+- [ ] `pnpm run build` passa in locale
+- [ ] Coverage rispettata per area modificata (vedi `docs/10-TESTING.md`)
+
+### Documentazione di stato (ADR-0008 V1 + V2)
+
+- [ ] **NON** ho modificato direttamente `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/BUNDLE.md` (regola ADR-0008: solo `docs/state/<propria>/*`)
+- [ ] Se ho cambiato uno di questi file per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
+- [ ] `pwsh scripts/generate-bundle.ps1 --check` exit 0
+- [ ] `pwsh scripts/aggregate-state.ps1 --check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
+
+### Issue tracking
+
+- [ ] Body PR include `Closes #N` (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub auto-close al merge
+- [ ] PR rimossa label `agent-ready` dall'issue + aggiunta `status:in-review` (vedi §"📦 Macchina a stati delle issue" in AGENTS.md)
+- [ ] Se l'issue aveva label `in-progress`, il comment `release:` verra postato dopo il merge (vedi §"📤 Post-merge actions")
+
+### Git workflow
+
+- [ ] Branch name: `feat/<N>-<desc>` o `fix/<N>-<desc>` (NO `main` direttamente)
+- [ ] Lavoro eseguito in worktree dedicata: `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" in AGENTS.md)
+- [ ] Working tree pulito (no modifiche tracked non committate, vedi pre-commit hook D3)
+- [ ] Push early: il branch e stato pushato subito dopo `git checkout -b` (D.20.2)
+- [ ] Commit messages: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
+
+## Test eseguiti
+
+- Comando: `...`
+- Risultato: [ ] PASS / [ ] FAIL
+- Acceptance criteria verificati: (linkare al backlog Story AC o alla sezione AC nell'issue)
+
+## Decisioni e lesson learned
+
+- Decisioni (D.X.Y) introdotte in questa PR: (vedi `docs/state/sessions/<N>-<slug>.md`)
+- Lesson learned: (vedi `docs/18-DEV-LOG.md` sezione pertinente)
+
+## Note reviewer
+
+- Rischio: (es. "modifica a DB index → migration test E2E richiesto")
+- Blocker noti: (es. "richiede merge di PR #54 prima")
+- File di governance toccati (richiede review Boss): [ ] `AGENTS.md` [ ] ADR/* [ ] `scripts/*` [ ] `.github/workflows/*`
+
+
+===== FILE: .github/CODEOWNERS =====
+
+# CODEOWNERS per Life-Soundtrack
+# Ogni PR che tocca un file elencato qui richiede review del owner indicato.
+# Vedi https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# AGENTS.md vedi §"Pull request template" (issue #51, P2 enforcement).
+
+# Default owner: Boss (richiede review per ogni file non elencato esplicitamente)
+*                                       @amedeo82
+
+# File di governance e workflow: Boss solo (regola speciale, no auto-merge agente)
+# AGENTS.md e' il protocollo del progetto; ogni modifica richiede review esplicita.
+/AGENTS.md                              @amedeo82
+
+# ADR: documenti architetturali vincolanti (ADR-0006, 0007, 0008, ...).
+# Modifica di un ADR richiede discussione esplicita + review Boss.
+/docs/13-ADR/                           @amedeo82
+
+# Script di governance (bundle, aggregator, hooks, setup-worktree).
+# Modifica richiede attenzione (effetti su CI + agenti).
+/scripts/generate-bundle.ps1             @amedeo82
+/scripts/aggregate-state.ps1             @amedeo82
+/scripts/setup-hooks.js                 @amedeo82
+/scripts/setup-worktree.ps1              @amedeo82
+/scripts/safe-branch-switch.ps1           @amedeo82
+
+# Git hooks versionati (eseguiti ad ogni commit/push).
+/.githooks/                             @amedeo82
+
+# GitHub Actions workflows (eseguiti ad ogni push/PR).
+/.github/workflows/                     @amedeo82
+
+# PR template + CODEOWNERS + altre config GitHub.
+/.github/pull_request_template.md       @amedeo82
+/.github/CODEOWNERS                     @amedeo82
+
+# Documenti di stato globale (regola ADR-0008: solo GH Action li modifica).
+# Se un agente li modifica per errore, il Boss deve fare review per approvare.
+/docs/INDEX.md                           @amedeo82
+/docs/SESSIONS.md                       @amedeo82
+/docs/11-BACKLOG.md                     @amedeo82
+/docs/BUNDLE.md                         @amedeo82
+
+# File di progetto "non governance" (possono essere modificati da agenti senza review Boss obbligatoria)
+# ma con quality CI gate.
+/apps/                                  @amedeo82
+/packages/                              @amedeo82
+/docs/state/                            @amedeo82
+/docs/00-VISION.md                      @amedeo82
+/docs/01-PLATFORMS.md                   @amedeo82
+/docs/02-DATA-SCHEMA.md                 @amedeo82
+/docs/03-ADAPTERS/                      @amedeo82
+/docs/04-ANALYSIS-ALGORITHMS.md         @amedeo82
+/docs/05-ARCHITECTURE.md                @amedeo82
+/docs/06-UX-FLOWS-STATES.md             @amedeo82
+/docs/07-UI-SPEC.md                     @amedeo82
+/docs/08-COPY-I18N.md                   @amedeo82
+/docs/09-PRIVACY-SECURITY.md            @amedeo82
+/docs/10-TESTING.md                     @amedeo82
+/docs/12-DEVOPS.md                      @amedeo82
+/docs/14-GLOSSARY.md                    @amedeo82
+/docs/15-DESIGN-SYSTEM.md               @amedeo82
+/docs/16-OPERATIONS.md                  @amedeo82
+/docs/17-DEV-NOTES.md                   @amedeo82
+/docs/18-DEV-LOG.md                     @amedeo82
+/fixtures/                              @amedeo82
+README.md                               @amedeo82
+LICENSE                                @amedeo82
+
+
+===== FILE: .github/workflows/ci.yml =====
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installa dipendenze
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Bundle in sync
+        run: pwsh scripts/generate-bundle.ps1 --check
+
+      # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
+      # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
+      # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
+      # docs/state/ (vedi ADR-0008 e AGENTS.md sezione "Lazy-state aggregation").
+      # Nota: la strict-mode del check e intenzionalmente bloccante.
+      - name: Lazy-state in sync (ADR-0008)
+        run: pwsh scripts/aggregate-state.ps1 --check
 
 
 
