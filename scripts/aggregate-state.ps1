@@ -134,33 +134,33 @@ function Build-Block-Sessions {
         return '_Nessuna sessione migrata in docs/state/sessions/._'
     }
     $sb = New-Object System.Text.StringBuilder
-    [void]$sb.AppendLine($markerSessionsStart)
-    [void]$sb.AppendLine("")
-    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` leggendo `' + 'docs/state/sessions/*.md' + '`.')
-    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
-    [void]$sb.AppendLine("> Aggregator version: 1 (ADR-0008, S25).")
-    [void]$sb.AppendLine("")
+    [void]$sb.Append($markerSessionsStart + "`n")
+    [void]$sb.Append("" + "`n")
+    [void]$sb.Append('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` leggendo `' + 'docs/state/sessions/*.md' + '`.' + "`n")
+    [void]$sb.Append('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.' + "`n")
+    [void]$sb.Append("> Aggregator version: 1 (ADR-0008, S25)." + "`n")
+    [void]$sb.Append("" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
         $parsed  = Parse-Frontmatter $content
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
-        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "⬚" }
+        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "â¬š" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
-        [void]$sb.AppendLine("### Sessione $($parsed.Frontmatter['number']) - $title")
-        [void]$sb.AppendLine("")
-        [void]$sb.AppendLine("- **Data**: $date")
-        [void]$sb.AppendLine("- **Stato**: $state")
-        [void]$sb.AppendLine("- **PR**: #$pr")
-        [void]$sb.AppendLine("- **Claim**: $($b + $claim + $b)")
-        [void]$sb.AppendLine("")
-        [void]$sb.AppendLine('```')
-        [void]$sb.AppendLine($parsed.Body.TrimEnd())
-        [void]$sb.AppendLine('```')
-        [void]$sb.AppendLine("")
+        [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
+        [void]$sb.Append("" + "`n")
+        [void]$sb.Append("- **Data**: $date" + "`n")
+        [void]$sb.Append("- **Stato**: $state" + "`n")
+        [void]$sb.Append("- **PR**: #$pr" + "`n")
+        [void]$sb.Append("- **Claim**: $($b + $claim + $b)" + "`n")
+        [void]$sb.Append("" + "`n")
+        [void]$sb.Append('```' + "`n")
+        [void]$sb.Append($parsed.Body.TrimEnd() + "`n")
+        [void]$sb.Append('```' + "`n")
+        [void]$sb.Append("" + "`n")
     }
-    [void]$sb.AppendLine($markerSessionsEnd)
+    [void]$sb.Append($markerSessionsEnd + "`n")
     return $sb.ToString().TrimEnd([char]10, [char]13)
 }
 
@@ -170,14 +170,14 @@ function Build-Block-Stories {
         return '_Nessuna story migrata in docs/state/stories/._'
     }
     $sb = New-Object System.Text.StringBuilder
-    [void]$sb.AppendLine($markerStoriesStart)
-    [void]$sb.AppendLine("")
-    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` leggendo `' + 'docs/state/stories/*.md' + '`.')
-    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
-    [void]$sb.AppendLine("> Aggregator version: 1 (ADR-0008, S25).")
-    [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("| Story | Stato | PR | Merge commit | Area |")
-    [void]$sb.AppendLine("|-------|-------|----|--------------|------|")
+    [void]$sb.Append($markerStoriesStart + "`n")
+    [void]$sb.Append("" + "`n")
+    [void]$sb.Append('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` leggendo `' + 'docs/state/stories/*.md' + '`.' + "`n")
+    [void]$sb.Append('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.' + "`n")
+    [void]$sb.Append("> Aggregator version: 1 (ADR-0008, S25)." + "`n")
+    [void]$sb.Append("" + "`n")
+    [void]$sb.Append("| Story | Stato | PR | Merge commit | Area |" + "`n")
+    [void]$sb.Append("|-------|-------|----|--------------|------|" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
         $parsed  = Parse-Frontmatter $content
@@ -187,10 +187,10 @@ function Build-Block-Stories {
         $area = if ($parsed.Frontmatter['area']) { $parsed.Frontmatter['area'] } else { "?" }
         $pr = if ($parsed.Frontmatter['pr']) { "#$($parsed.Frontmatter['pr'])" } else { "-" }
         $mc = if ($parsed.Frontmatter['merged_commit']) { ($b + $parsed.Frontmatter['merged_commit'] + $b) } else { "-" }
-        [void]$sb.AppendLine("| $id - $title | $status | $pr | $mc | $area |")
+        [void]$sb.Append("| $id - $title | $status | $pr | $mc | $area |" + "`n")
     }
-    [void]$sb.AppendLine("")
-    [void]$sb.AppendLine($markerStoriesEnd)
+    [void]$sb.Append("" + "`n")
+    [void]$sb.Append($markerStoriesEnd + "`n")
     return $sb.ToString().TrimEnd([char]10, [char]13)
 }
 
@@ -232,6 +232,10 @@ function Apply-Blocks {
         if ($DryRun) {
             Write-Host "[DRY] $path - $($calculated.Length) chars calcolati" -ForegroundColor Cyan
         } else {
+            # Issue #58: WriteAllText con UTF-8 no BOM. Il -replace CRLF, LF e
+            # l'uso di Append(... + "`n") invece di AppendLine garantiscono LF uniforme
+            # su Windows (che altrimenti userebbe CRLF default).
+            $new = $new -replace "`r`n", "`n"
             $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
             [System.IO.File]::WriteAllText((Join-Path $repoRoot $path), $new, $utf8NoBom)
             Write-Host "[WRITE] $path - $($calculated.Length) chars applicati" -ForegroundColor Green

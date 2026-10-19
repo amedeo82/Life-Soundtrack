@@ -37,6 +37,11 @@ jobs:
           pwsh scripts/aggregate-state.ps1 --check
           if ($LASTEXITCODE -ne 0) {
             Write-Host "::warning::Aggregator reported drift (exit=$LASTEXITCODE). Proceeding with auto-apply."
+          }
+          # Issue #58 fix: explicit exit 0 after warning. Without this, GitHub
+          # marks the step as 'failure' (exit 1 from pwsh), which (combined with
+          # missing if: always() on the diff step) prevented the auto-commit.
+          exit 0
 
       - name: Apply aggregator
         if: always()
@@ -46,6 +51,7 @@ jobs:
           pwsh scripts/aggregate-state.ps1
 
       - name: Check git diff
+        if: always()  # Issue #58 fix: must run even if check step reports drift
         id: diff
         shell: pwsh
         run: |
