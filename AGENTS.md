@@ -540,6 +540,68 @@ git push
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
+## 🌳 Worktree workflow
+
+Da Sessione 27 (issue #53, PR #54), ogni agente lavora in una **worktree isolata** invece di una working copy condivisa. Questo elimina per costruzione i failure mode E3/E4/E5 che hanno causato il DATA-LOSS documentato in issue #45 (vedi D.26.4 in SESSIONS.md).
+
+### Perché worktree
+
+- **Isolamento fisico**: il WIP di un agente non è toccabile dalle operazioni di un altro agente (`git checkout main`, `git reset --hard`, ecc.). Vedi issue #45.
+- **Nessuna contesa su file locali**: più agenti su issue diverse lavorano in directory separate senza interferenze.
+- **Cleanup esplicito**: `git worktree remove --force ../ls-<N>-<slug>` dopo il merge.
+
+### Flusso operativo
+
+```powershell
+# PRIMA di lavorare sulla issue, crea la worktree:
+pwsh scripts/setup-worktree.ps1 53
+# Output: cd ../ls-53-worktree-default + gh claim command
+
+cd ../ls-53-worktree-default
+# claim (ADR-0006):
+gh issue edit 53 --add-label in-progress
+gh issue comment 53 --body "claim: kilo-HP-ELITEBOOK-xxxx (UTC ...) — worktree: C:\..\ls-53-..."
+
+# lavora nel branch feat/53-worktree-default (pushato automaticamente da setup-worktree.ps1)
+# ... scrivi codice, test, AGENTS.md updates ...
+git add -A
+git commit -m "feat: ..."
+git push  # hook pre-push: BUNDLE auto-regen se docs/ hai cambiato
+
+# apri PR (Closes #N nel body)
+gh pr create --base main --head feat/53-worktree-default --title "..." --body "Closes #53 ..."
+```
+
+### Parametri di `setup-worktree.ps1`
+
+| Parametro | Default | Note |
+|---|---|---|
+| `-IssueNumber` (pos 0) | obbligatorio | numero issue da claimare |
+| `-Slug` | derivato dal titolo | kebab-case, max 40 char |
+| `-BaseBranch` | `origin/main` | branch da cui creare la worktree |
+| `-BranchName` | `feat/<N>-<slug>` o `fix/<N>-<slug>` | nome del branch di lavoro |
+| `-WorktreePath` | `../ls-<N>-<slug>` | path della worktree |
+| `-SkipGhCheck` | off | salta validazione `gh` (per test) |
+| `-NoPush` | off | non eseguire push early (D.20.2) |
+
+### Validazioni applicate
+
+Lo script fallisce (exit code 2-7) se:
+- L'issue non esiste o non è `agent-ready` o ha `in-progress` o `status:*`
+- Il branch base non esiste (fetch non eseguito)
+- Il path della worktree è già esistente
+- `git worktree add` fallisce
+
+Vedi `scripts/test-setup-worktree.sh` per gli scenari coperti (8 test).
+
+### Backward compatibility
+
+Il vecchio flusso `git checkout -b feat/<N>-<slug>` su main è **deprecato** ma ancora funzionante (nessuna enforcement nel pre-push). Tuttavia:
+
+- ⚠️ **NON È RACCOMANDATO** per lavoro parallelo (causa esattamente i failure mode E3/E4/E5)
+- Le difese advisory (`.githooks/post-checkout` + `scripts/safe-branch-switch.ps1`) restano in piedi come safety net ma sono **ridondanti** se la worktree è usata correttamente
+- Vedi §"⚠️ Deprecazione" per il piano di rimozione
+
 ## 📤 Post-merge actions
 
 Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:

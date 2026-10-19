@@ -116,6 +116,11 @@ $files = @(
     # StringBuilder.AppendLine aggiunge CRLF su Windows e che il fix
     # (Append + "n" esplicito) produce LF-only.
     "scripts/test-appendline-lf-fix.ps1",
+    # Setup-worktree script (Sessione 27 / issue #53): crea worktree isolata per claim
+    # dell'agente, secondo ADR-0006 + D.20.2 push early. Default path ../ls-<N>-<slug>.
+    "scripts/setup-worktree.ps1",
+    # Test per setup-worktree.ps1 (8 scenari bash, mock gh in tmpdir).
+    "scripts/test-setup-worktree.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",

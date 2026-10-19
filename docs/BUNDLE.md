@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 16:02
-> Totale file: 47
+> Data: 2026-10-19 16:22
+> Totale file: 49
 
 
 ===== FILE: AGENTS.md =====
@@ -548,6 +548,68 @@ git push
 6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done` + GH Action `auto-state-aggregate` rigenera SESSIONS/BACKLOG/INDEX/BUNDLE; tu fai `release:` comment + **branch cleanup obbligatorio (locale e remoto)** + `git worktree remove --force ../ls-<N>-<slug>` (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
+
+## 🌳 Worktree workflow
+
+Da Sessione 27 (issue #53, PR #54), ogni agente lavora in una **worktree isolata** invece di una working copy condivisa. Questo elimina per costruzione i failure mode E3/E4/E5 che hanno causato il DATA-LOSS documentato in issue #45 (vedi D.26.4 in SESSIONS.md).
+
+### Perché worktree
+
+- **Isolamento fisico**: il WIP di un agente non è toccabile dalle operazioni di un altro agente (`git checkout main`, `git reset --hard`, ecc.). Vedi issue #45.
+- **Nessuna contesa su file locali**: più agenti su issue diverse lavorano in directory separate senza interferenze.
+- **Cleanup esplicito**: `git worktree remove --force ../ls-<N>-<slug>` dopo il merge.
+
+### Flusso operativo
+
+```powershell
+# PRIMA di lavorare sulla issue, crea la worktree:
+pwsh scripts/setup-worktree.ps1 53
+# Output: cd ../ls-53-worktree-default + gh claim command
+
+cd ../ls-53-worktree-default
+# claim (ADR-0006):
+gh issue edit 53 --add-label in-progress
+gh issue comment 53 --body "claim: kilo-HP-ELITEBOOK-xxxx (UTC ...) — worktree: C:\..\ls-53-..."
+
+# lavora nel branch feat/53-worktree-default (pushato automaticamente da setup-worktree.ps1)
+# ... scrivi codice, test, AGENTS.md updates ...
+git add -A
+git commit -m "feat: ..."
+git push  # hook pre-push: BUNDLE auto-regen se docs/ hai cambiato
+
+# apri PR (Closes #N nel body)
+gh pr create --base main --head feat/53-worktree-default --title "..." --body "Closes #53 ..."
+```
+
+### Parametri di `setup-worktree.ps1`
+
+| Parametro | Default | Note |
+|---|---|---|
+| `-IssueNumber` (pos 0) | obbligatorio | numero issue da claimare |
+| `-Slug` | derivato dal titolo | kebab-case, max 40 char |
+| `-BaseBranch` | `origin/main` | branch da cui creare la worktree |
+| `-BranchName` | `feat/<N>-<slug>` o `fix/<N>-<slug>` | nome del branch di lavoro |
+| `-WorktreePath` | `../ls-<N>-<slug>` | path della worktree |
+| `-SkipGhCheck` | off | salta validazione `gh` (per test) |
+| `-NoPush` | off | non eseguire push early (D.20.2) |
+
+### Validazioni applicate
+
+Lo script fallisce (exit code 2-7) se:
+- L'issue non esiste o non è `agent-ready` o ha `in-progress` o `status:*`
+- Il branch base non esiste (fetch non eseguito)
+- Il path della worktree è già esistente
+- `git worktree add` fallisce
+
+Vedi `scripts/test-setup-worktree.sh` per gli scenari coperti (8 test).
+
+### Backward compatibility
+
+Il vecchio flusso `git checkout -b feat/<N>-<slug>` su main è **deprecato** ma ancora funzionante (nessuna enforcement nel pre-push). Tuttavia:
+
+- ⚠️ **NON È RACCOMANDATO** per lavoro parallelo (causa esattamente i failure mode E3/E4/E5)
+- Le difese advisory (`.githooks/post-checkout` + `scripts/safe-branch-switch.ps1`) restano in piedi come safety net ma sono **ridondanti** se la worktree è usata correttamente
+- Vedi §"⚠️ Deprecazione" per il piano di rimozione
 
 ## 📤 Post-merge actions
 
@@ -7893,9 +7955,9 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
-| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
-| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
+| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 
 <!-- AGGREGATE-STORIES-END -->
 
@@ -10093,6 +10155,588 @@ Write-Host "Risultato: $PASS passati, $FAIL falliti su $TOTAL scenari"
 Write-Host "=============================================="
 if ($FAIL -gt 0) { exit 1 } else { exit 0 }
 
+
+
+===== FILE: scripts/setup-worktree.ps1 =====
+
+<#
+.SYNOPSIS
+    Crea una worktree isolata per lavorare su una issue, secondo ADR-0006 + D.20.2.
+
+.DESCRIPTION
+    scripts/setup-worktree.ps1 crea una worktree Git dedicata per l'issue indicata,
+    seguendo il protocollo multi-agente definito in AGENTS.md:
+
+      1. Verifica che l'issue esista su GitHub (via `gh`) e sia candidabile
+         (label `agent-ready`, niente `in-progress` o `status:*`).
+      2. Crea una directory di lavoro in ../ls-<N>-<slug> partendo dal base branch
+         (default: origin/main), con un branch `feat/<N>-<slug>` (push early D.20.2).
+      3. Configura core.hooksPath = .githooks nella worktree (gli hook funzionano anche li).
+      4. Stampa il comando successivo (`cd ../ls-<N>-<slug>`) per l'agente.
+
+    Vantaggi rispetto al modello "working copy condivisa" (D.20.1, superato):
+      - Isolamento: il WIP di un agente non e toccabile dalle operazioni di un altro
+        agente (`git checkout main`, `git reset --hard`, ecc. — vedi issue #45 DATA-LOSS).
+      - Nessuna contesa su file locali: piu agenti su issue diverse lavorano in directory
+        separate senza interferenze.
+      - Cleanup esplicito: `git worktree remove ../ls-<N>-<slug>` dopo il merge.
+
+.PARAMETER IssueNumber
+    Numero della issue GitHub (es. 53). Obbligatorio.
+
+.PARAMETER Slug
+    Slug descrittivo per la worktree (es. "worktree-default").
+    Default: derivato dal titolo della issue (kebab-case, max 40 caratteri).
+
+.PARAMETER BaseBranch
+    Branch base da cui creare la worktree. Default: origin/main.
+
+.PARAMETER BranchName
+    Nome del branch di lavoro. Default: feat/<N>-<slug> (o fix/<N>-<slug> se il titolo
+    della issue contiene "fix" o "bug").
+
+.PARAMETER WorktreePath
+    Path della worktree. Default: ../ls-<N>-<slug> (un livello sopra la repo corrente).
+
+.PARAMETER SkipGhCheck
+    Salta la verifica dell'issue via `gh` (per test o modalita dry-run).
+
+.PARAMETER NoPush
+    Non eseguire il push early (D.20.2). Default: false (push early abilitato).
+
+.PARAMETER Help
+    Mostra questo help.
+
+.EXAMPLE
+    pwsh scripts/setup-worktree.ps1 53
+    pwsh scripts/setup-worktree.ps1 53 -Slug "custom-fix"
+    pwsh scripts/setup-worktree.ps1 53 -BaseBranch origin/feat/0.3-adapter-spotify
+    pwsh scripts/setup-worktree.ps1 53 -SkipGhCheck  # per test
+    pwsh scripts/setup-worktree.ps1 53 -NoPush        # non pushare il branch
+
+.NOTES
+    Dopo aver creato la worktree, l'agente deve:
+      1. Spostarsi nella worktree: `cd <WorktreePath>`
+      2. Claimare l'issue (ADR-0006): `gh issue edit <N> --add-label in-progress`
+      3. Lavorare sul branch (gia pushato)
+      4. Aprire PR con `Closes #N` nel body
+      5. Dopo merge: `git worktree remove <WorktreePath>` (policy §"Pulizia branch post-merge")
+
+    See AGENTS.md §"Primo task" (post-merge questa PR) per il flusso completo.
+#>
+
+param(
+    [Parameter(Position = 0, Mandatory = $true)]
+    [int]$IssueNumber,
+
+    [string]$Slug,
+
+    [string]$BaseBranch = "origin/main",
+
+    [string]$BranchName,
+
+    [string]$WorktreePath,
+
+    [switch]$SkipGhCheck,
+
+    [switch]$NoPush,
+
+    [switch]$Help
+)
+
+$helpRequested = $Help -or ($args -contains '-h') -or ($args -contains '--help')
+if ($helpRequested) {
+    Get-Help $MyInvocation.MyCommand.Path -Full | Out-String | Write-Host
+    exit 0
+}
+
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+function Write-Step {
+    param([string]$Message, [string]$Color = "Cyan")
+    Write-Host "[setup-worktree] $Message" -ForegroundColor $Color
+}
+
+function Write-Err {
+    param([string]$Message)
+    Write-Host "[setup-worktree] ERRORE: $Message" -ForegroundColor Red
+}
+
+# === Preflight: verifica ambiente ===
+if (-not (Test-Path ".git")) {
+    Write-Err "questa directory non e un repo git (manca .git). Esegui da dentro la repo."
+    exit 2
+}
+
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Err "git non trovato nel PATH."
+    exit 2
+}
+
+# === 1. Validazione issue via gh (a meno di -SkipGhCheck) ===
+$issueLabels = @()
+$issueTitle = ""
+$issueState = ""
+
+if (-not $SkipGhCheck) {
+    if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+        Write-Err "gh CLI non trovato nel PATH. Installa GitHub CLI oppure usa -SkipGhCheck."
+        exit 2
+    }
+
+    Write-Step "Verifica issue #$IssueNumber via gh..."
+    try {
+        $issueJson = gh issue view $IssueNumber --json state,title,labels 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "impossibile leggere issue #$IssueNumber. Esiste? PAT con scope 'issues: read' configurato?"
+            exit 3
+        }
+        $issue = $issueJson | ConvertFrom-Json
+        $issueState = $issue.state
+        $issueTitle = $issue.title
+        $issueLabels = @($issue.labels | ForEach-Object { $_.name })
+    } catch {
+        Write-Err "fallimento lettura issue #$IssueNumber : $_"
+        exit 3
+    }
+
+    if ($issueState -ne "OPEN") {
+        Write-Err "issue #$IssueNumber e in stato '$issueState' (non OPEN). Solo issue aperte sono candidabili."
+        exit 3
+    }
+
+    if (-not ($issueLabels -contains "agent-ready")) {
+        Write-Err "issue #$IssueNumber non ha label 'agent-ready' (labels: $($issueLabels -join ', ')). Non candidabile."
+        exit 3
+    }
+
+    if ($issueLabels | Where-Object { $_ -like "status:*" }) {
+        Write-Err "issue #$IssueNumber ha label 'status:*' (labels: $($issueLabels -join ', ')). Esclusa da claim (ADR-0007)."
+        exit 3
+    }
+
+    if ($issueLabels -contains "in-progress") {
+        Write-Err "issue #$IssueNumber ha label 'in-progress' (gia claimata da un altro agente)."
+        exit 3
+    }
+} else {
+    Write-Step "Salto verifica issue (SkipGhCheck attivo)." -ForegroundColor Yellow
+    $issueTitle = "test-issue-$IssueNumber"
+}
+
+# === 2. Derivazione slug (se non fornito) ===
+if ([string]::IsNullOrWhiteSpace($Slug)) {
+    $Slug = ($issueTitle.ToLower()) -replace '[^a-z0-9\-]+', '-' -replace '-+', '-' -replace '^-|-$', ''
+    if ($Slug.Length -gt 40) { $Slug = $Slug.Substring(0, 40).TrimEnd('-') }
+    Write-Step "Slug derivato dal titolo: '$Slug'"
+}
+
+# === 3. Derivazione BranchName (se non fornito) ===
+if ([string]::IsNullOrWhiteSpace($BranchName)) {
+    $prefix = if ($issueTitle -match "(?i)\b(fix|bug)\b") { "fix" } else { "feat" }
+    $BranchName = "$prefix/$IssueNumber-$Slug"
+    Write-Step "BranchName derivato: '$BranchName'"
+}
+
+# === 4. Configurazione WorktreePath (se non fornito) ===
+if ([string]::IsNullOrWhiteSpace($WorktreePath)) {
+    $repoRoot = (git rev-parse --show-toplevel).Trim()
+    $parent = Split-Path -Parent $repoRoot
+    $WorktreePath = Join-Path $parent "ls-$IssueNumber-$Slug"
+    Write-Step "WorktreePath derivato: '$WorktreePath'"
+}
+
+Write-Step ""
+Write-Step "Configurazione:"
+Write-Step "  Issue:           #$IssueNumber $(if ($issueTitle) { "- $issueTitle" })"
+Write-Step "  Slug:            $Slug"
+Write-Step "  Base branch:     $BaseBranch"
+Write-Step "  Branch di lavoro:$BranchName"
+Write-Step "  Worktree path:   $WorktreePath"
+Write-Step ""
+
+# === 5. Validazione branch base ===
+git rev-parse --verify "$BaseBranch" | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Err "branch base '$BaseBranch' non trovato. Fetch + retry: git fetch origin"
+    exit 4
+}
+
+# === 6. Validazione worktree path non esistente ===
+if (Test-Path $WorktreePath) {
+    Write-Err "percorso '$WorktreePath' gia esistente."
+    Write-Host "  Per rimuovere una worktree esistente:" -ForegroundColor Yellow
+    Write-Host "    git worktree remove --force $WorktreePath" -ForegroundColor Yellow
+    Write-Host "  Per listare worktree:" -ForegroundColor Yellow
+    Write-Host "    git worktree list" -ForegroundColor Yellow
+    exit 5
+}
+
+# === 7. Creazione worktree ===
+Write-Step "Creazione worktree..."
+git worktree add -b $BranchName $WorktreePath $BaseBranch | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Err "creazione worktree fallita (exit=$LASTEXITCODE)"
+    exit 6
+}
+Write-Step "Worktree creata: $WorktreePath" -ForegroundColor Green
+
+# === 8. Setup hooks nella worktree ===
+Write-Step "Configurazione core.hooksPath nella worktree..."
+Push-Location $WorktreePath
+try {
+    git config core.hooksPath .githooks | Out-Null
+    # Verifica che i file hook siano presenti
+    if (Test-Path ".githooks/pre-commit") {
+        Write-Step "Hooks configurati (.githooks/pre-commit, pre-push, post-checkout)" -ForegroundColor Green
+    } else {
+        Write-Step "ATTENZIONE: .githooks/pre-commit non trovato nella worktree. Hook potrebbe non funzionare." -ForegroundColor Yellow
+    }
+} finally {
+    Pop-Location
+}
+
+# === 9. Push early (D.20.2) ===
+if (-not $NoPush) {
+    Write-Step "Push early (D.20.2)..."
+    git push -u origin $BranchName | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "push fallito (exit=$LASTEXITCODE)"
+        Write-Host "  Per riprovare manualmente:" -ForegroundColor Yellow
+        Write-Host "    cd $WorktreePath" -ForegroundColor Yellow
+        Write-Host "    git push -u origin $BranchName" -ForegroundColor Yellow
+        exit 7
+    }
+    Write-Step "Branch pushato: origin/$BranchName" -ForegroundColor Green
+} else {
+    Write-Step "Push early SKIPPATO (NoPush attivo)." -ForegroundColor Yellow
+}
+
+# === 10. Output finale ===
+Write-Step ""
+Write-Step "==============================================" -ForegroundColor Green
+Write-Step "Worktree pronta. Prossimi passi:" -ForegroundColor Green
+Write-Step "==============================================" -ForegroundColor Green
+Write-Step ""
+$cdCmd = "    cd " + $WorktreePath
+Write-Host $cdCmd -ForegroundColor Cyan
+Write-Step ""
+if (-not $SkipGhCheck) {
+    Write-Step "Quindi claim (ADR-0006):"
+    Write-Host "    gh issue edit $IssueNumber --add-label in-progress" -ForegroundColor Cyan
+    $claimCmd = '    gh issue comment ' + $IssueNumber + ' --body "claim: <AGENT-ID> (UTC <timestamp>) -- worktree: ' + $WorktreePath + '"'
+    Write-Host $claimCmd -ForegroundColor Cyan
+    Write-Step ""
+}
+Write-Step "Ricordati di:"
+Write-Step "  - doc-sync IN PR (D.21.1): modifica solo docs/state/<propria>/*"
+Write-Step "  - Closes #N nel body PR"
+$cleanupCmd = "  - Dopo il merge: git worktree remove --force " + $WorktreePath + " (policy post-merge cleanup)"
+Write-Step $cleanupCmd
+Write-Step "  - AGENTS.md sezione Primo task per il flusso completo"
+
+exit 0
+
+
+===== FILE: scripts/test-setup-worktree.sh =====
+
+#!/usr/bin/env bash
+# Test per scripts/setup-worktree.ps1 (Issue #53 - P1 worktree default).
+# Pattern analogo a scripts/test-pre-commit-clean-check.sh (S23): mock repo in tmpdir.
+#
+# Scenari coperti:
+#   S1 - Issue inesistente (senza -SkipGhCheck, con mock gh che fallisce)
+#   S2 - Slug derivato dal titolo (default behaviour)
+#   S3 - Slug esplicito passato dall'utente
+#   S4 - Worktree path gia esistente
+#   S5 - Branch base inesistente
+#   S6 - Idempotenza: 2 chiamate identiche consecutive -> la 2a fallisce (path esistente)
+#   S7 - -NoPush salta il push
+#   S8 - -SkipGhCheck funziona senza gh nel PATH
+#
+# Uso:
+#   bash scripts/test-setup-worktree.sh
+#
+# Requisiti:
+#   - bash 3.2+ (compatibile WSL, Git Bash, Linux, macOS)
+#   - pwsh (PowerShell Core/Desktop) disponibile
+#   - git disponibile
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TARGET_SCRIPT="$SCRIPT_DIR/setup-worktree.ps1"
+
+if [ ! -f "$TARGET_SCRIPT" ]; then
+  echo "ERRORE: $TARGET_SCRIPT non trovato." >&2
+  exit 1
+fi
+
+if ! command -v pwsh >/dev/null 2>&1; then
+  echo "ERRORE: pwsh non trovato nel PATH. Installare PowerShell per eseguire i test." >&2
+  exit 1
+fi
+
+# Contatore pass/fail
+PASS=0
+FAIL=0
+TOTAL=0
+
+pass() { PASS=$((PASS+1)); TOTAL=$((TOTAL+1)); echo "  [PASS] $1"; }
+fail() { FAIL=$((FAIL+1)); TOTAL=$((TOTAL+1)); echo "  [FAIL] $1"; echo "         $2"; }
+
+# Helper: crea mock repo + mock gh in tmpdir
+# $1 = scenario name (per logging)
+# Output: variabili d'ambiente TMPDIR, REPO_DIR, WORKTREE_PARENT, PATH (esteso con mock bin)
+make_mock_env() {
+  local name="$1"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  # Repo principale
+  local repo_dir="$tmpdir/repo"
+  mkdir -p "$repo_dir"
+  cd "$repo_dir"
+  git init --quiet -b main
+  git config user.email "test@example.com"
+  git config user.name "Test"
+  echo "# Test repo" > README.md
+  git add README.md
+  git commit --quiet -m "initial commit"
+  # Bare remote per il push
+  local remote_dir="$tmpdir/remote.git"
+  git init --quiet --bare "$remote_dir"
+  git remote add origin "$remote_dir"
+  git push --quiet -u origin main
+
+  # Worktree parent (un livello sopra la repo)
+  local parent_dir
+  parent_dir="$(dirname "$repo_dir")"
+
+  # Mock gh script: legge issue da $MOCK_ISSUE_STATE env var
+  local mock_bin="$tmpdir/mock-bin"
+  mkdir -p "$mock_bin"
+  cat > "$mock_bin/gh" <<'EOF'
+#!/usr/bin/env bash
+# Mock gh per test setup-worktree.ps1
+# Comportamento controllato da env vars:
+#   MOCK_ISSUE_STATE  = "ok" | "missing" | "closed" | "no-agent-ready" | "in-progress" | "status-blocked"
+#   MOCK_ISSUE_TITLE  = titolo restituito (default: "Test issue")
+#   MOCK_ISSUE_LABELS = CSV label (default: "agent-ready,phase-0,docs")
+if [ "$1" = "issue" ] && [ "$2" = "view" ]; then
+  case "${MOCK_ISSUE_STATE:-ok}" in
+    missing)
+      echo "Could not resolve to a Repository or Issue" >&2
+      exit 1
+      ;;
+    closed)
+      echo '{"state":"CLOSED","title":"test","labels":[]}'
+      exit 0
+      ;;
+    no-agent-ready)
+      echo '{"state":"OPEN","title":"Test issue","labels":[{"name":"docs"}]}'
+      exit 0
+      ;;
+    in-progress)
+      echo '{"state":"OPEN","title":"Test issue","labels":[{"name":"agent-ready"},{"name":"in-progress"}]}'
+      exit 0
+      ;;
+    status-blocked)
+      echo '{"state":"OPEN","title":"Test issue","labels":[{"name":"agent-ready"},{"name":"status:blocked"}]}'
+      exit 0
+      ;;
+    *)
+      title="${MOCK_ISSUE_TITLE:-Test issue}"
+      labels="${MOCK_ISSUE_LABELS:-agent-ready,phase-0,docs}"
+      labels_json=""
+      IFS=',' read -ra arr <<< "$labels"
+      for l in "${arr[@]}"; do
+        [ -n "$labels_json" ] && labels_json+=","
+        labels_json+="{\"name\":\"$l\"}"
+      done
+      echo "{\"state\":\"OPEN\",\"title\":\"$title\",\"labels\":[$labels_json]}"
+      exit 0
+      ;;
+  esac
+fi
+# Comportamento di default: ignora altri comandi (per non rompere il flusso)
+exit 0
+EOF
+  chmod +x "$mock_bin/gh"
+
+  # Esporta variabili
+  export TMPDIR="$tmpdir"
+  export REPO_DIR="$repo_dir"
+  export WORKTREE_PARENT="$parent_dir"
+  export PATH="$mock_bin:$PATH"
+  export MOCK_ISSUE_STATE="ok"
+  export MOCK_ISSUE_TITLE="Test issue"
+  export MOCK_ISSUE_LABELS="agent-ready,phase-0,docs"
+}
+
+cleanup_mock_env() {
+  if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then
+    rm -rf "$TMPDIR"
+  fi
+}
+
+# === S1: Issue inesistente ===
+test_s1_issue_missing() {
+  echo ""
+  echo "Scenario S1: issue inesistente (mock gh fallisce)"
+  make_mock_env "s1"
+  MOCK_ISSUE_STATE="missing"
+  local output exitcode
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 99 -SkipGhCheck 2>&1)" && exitcode=0 || exitcode=$?
+  if [ "$exitcode" -ne 0 ]; then
+    pass "S1 exitcode non-zero per issue inesistente (exit=$exitcode)"
+  else
+    fail "S1" "doveva fallire ma exit=$exitcode"
+  fi
+  cleanup_mock_env
+}
+
+# === S2: Slug derivato dal titolo (default) ===
+test_s2_slug_derived() {
+  echo ""
+  echo "Scenario S2: slug derivato dal titolo"
+  make_mock_env "s2"
+  MOCK_ISSUE_TITLE="My Cool Feature [Test]"
+  local output
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -NoPush 2>&1)" || true
+  if echo "$output" | grep -q "Worktree creata: $WORKTREE_PARENT/ls-42-my-cool-feature-test"; then
+    pass "S2 worktree creata con path corretto"
+  else
+    fail "S2" "path worktree non trovato. Output: $output"
+  fi
+  cleanup_mock_env
+}
+
+# === S3: Slug esplicito ===
+test_s3_slug_explicit() {
+  echo ""
+  echo "Scenario S3: slug esplicito dall'utente"
+  make_mock_env "s3"
+  local output
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -Slug "custom-fix" -NoPush 2>&1)" || true
+  if echo "$output" | grep -q "Worktree creata: $WORKTREE_PARENT/ls-42-custom-fix"; then
+    pass "S3 worktree creata con slug esplicito"
+  else
+    fail "S3" "slug esplicito non rispettato. Output: $output"
+  fi
+  cleanup_mock_env
+}
+
+# === S4: Worktree path gia esistente ===
+test_s4_path_exists() {
+  echo ""
+  echo "Scenario S4: worktree path gia esistente"
+  make_mock_env "s4"
+  mkdir -p "$WORKTREE_PARENT/ls-99-existing"
+  local output exitcode
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 99 -Slug "existing" -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  if [ "$exitcode" -ne 0 ] && echo "$output" | grep -q "gia esistente"; then
+    pass "S4 errore rilevato correttamente (exit=$exitcode)"
+  else
+    fail "S4" "doveva fallire con messaggio 'gia esistente'. Output: $output"
+  fi
+  cleanup_mock_env
+}
+
+# === S5: Branch base inesistente ===
+test_s5_base_branch_missing() {
+  echo ""
+  echo "Scenario S5: branch base inesistente"
+  make_mock_env "s5"
+  local output exitcode
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -BaseBranch origin/does-not-exist -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  if [ "$exitcode" -ne 0 ] && echo "$output" | grep -q "branch base 'origin/does-not-exist' non trovato"; then
+    pass "S5 errore branch base mancante (exit=$exitcode)"
+  else
+    fail "S5" "doveva fallire con messaggio branch base. Output: $output"
+  fi
+  cleanup_mock_env
+}
+
+# === S6: Idempotenza (2 chiamate identiche) ===
+test_s6_idempotent_fails() {
+  echo ""
+  echo "Scenario S6: 2 chiamate identiche -> la 2a fallisce"
+  make_mock_env "s6"
+  cd "$REPO_DIR"
+  local first second
+  first="$(pwsh "$TARGET_SCRIPT" 42 -Slug "idem" -NoPush 2>&1)" || true
+  second="$(pwsh "$TARGET_SCRIPT" 42 -Slug "idem" -NoPush 2>&1)" && ec=0 || ec=$?
+  if echo "$first" | grep -q "Worktree creata"; then
+    if [ "$ec" -ne 0 ] && echo "$second" | grep -q "gia esistente"; then
+      pass "S6 1a chiamata OK + 2a fallisce con 'gia esistente'"
+    else
+      fail "S6" "2a chiamata doveva fallire. Output 2a: $second"
+    fi
+  else
+    fail "S6" "1a chiamata doveva riuscire. Output: $first"
+  fi
+  cleanup_mock_env
+}
+
+# === S7: -NoPush salta il push ===
+test_s7_no_push() {
+  echo ""
+  echo "Scenario S7: -NoPush salta il push"
+  make_mock_env "s7"
+  local output
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -NoPush 2>&1)" || true
+  if echo "$output" | grep -q "Push early SKIPPATO"; then
+    pass "S7 push saltato correttamente con -NoPush"
+  else
+    fail "S7" "doveva mostrare 'Push early SKIPPATO'. Output: $output"
+  fi
+  cleanup_mock_env
+}
+
+# === S8: -SkipGhCheck funziona senza gh ===
+test_s8_skip_gh_check() {
+  echo ""
+  echo "Scenario S8: -SkipGhCheck senza gh disponibile"
+  make_mock_env "s8"
+  # Rimuovi mock gh dal PATH
+  local mock_bin_path
+  mock_bin_path="$(echo "$PATH" | tr ':' '\n' | grep "mock-bin$" || true)"
+  if [ -n "$mock_bin_path" ]; then
+    export PATH="${PATH//$mock_bin_path:/}"
+  fi
+  # Rinomina il mock gh per assicurarsi che non sia in PATH
+  if [ -d "$mock_bin_path" ]; then
+    rm -rf "$mock_bin_path"
+  fi
+  local output exitcode
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -SkipGhCheck -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  if [ "$exitcode" -eq 0 ] && echo "$output" | grep -q "Salto verifica issue"; then
+    pass "S8 -SkipGhCheck funziona senza gh nel PATH (exit=$exitcode)"
+  else
+    fail "S8" "SkipGhCheck doveva riuscire. Output: $output"
+  fi
+  cleanup_mock_env
+}
+
+# === Esegui tutti ===
+test_s1_issue_missing
+test_s2_slug_derived
+test_s3_slug_explicit
+test_s4_path_exists
+test_s5_base_branch_missing
+test_s6_idempotent_fails
+test_s7_no_push
+test_s8_skip_gh_check
+
+echo ""
+echo "=============================================="
+echo "Risultato: $PASS passati, $FAIL falliti su $TOTAL scenari"
+echo "=============================================="
+if [ "$FAIL" -gt 0 ]; then
+  exit 1
+fi
+exit 0
 
 
 ===== FILE: scripts/setup-hooks.js =====
