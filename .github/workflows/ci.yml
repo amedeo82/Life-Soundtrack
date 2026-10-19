@@ -41,8 +41,8 @@ jobs:
         run: pnpm run build
 
       - name: Bundle in sync
-        # Stesso problema di cross-platform PowerShell 5.1 vs 7 (vedi sotto). Warning.
-        run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle.ps1 --check fallito, verra rigenerato post-merge"
+        # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
+        run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
@@ -58,4 +58,4 @@ jobs:
       # (b) Test-Blocks deve diventare deterministico cross-platform (probabilmente
       #     riscrivibile in un linguaggio non PowerShell, es. Node o Python).
       - name: Lazy-state in sync (ADR-0008)
-        run: pwsh scripts/aggregate-state.ps1 --check || echo "::warning::aggregate-state.ps1 --check fallito, drift verra risolto da auto-state-aggregate post-merge (vedi #63)"
+        run: pwsh scripts/aggregate-state.ps1 --check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
