@@ -112,6 +112,15 @@ $files = @(
     # Bash portabile (funziona su WSL, Git Bash, Linux, macOS) — NON incluso nel pre-push hook
     # perché eseguito solo in dev/CI; il check è cross-platform.
     "scripts/test-pre-commit-clean-check.sh",
+    # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
+    # Vedi .githooks/README.md + D.20.2 push early.
+    "scripts/setup-hooks.js",
+    # Hook di Git versionati (vedi AGENTS.md §"Pre-commit hook" + §"Transizioni tra branch").
+    # Tutti gli hook risiedono in .githooks/ e sono installati via scripts/setup-hooks.js.
+    ".githooks/pre-commit",
+    ".githooks/pre-push",
+    ".githooks/post-checkout",
+    ".githooks/README.md",
     "fixtures/synthetic-history/spotify-sample.json",
     "fixtures/db-seed/minimal.json"
 )

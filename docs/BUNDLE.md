@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 11:37
-> Totale file: 38
+> Data: 2026-10-19 12:45
+> Totale file: 43
 
 
 ===== FILE: AGENTS.md =====
@@ -320,6 +320,48 @@ git stash push -u -m 'MIRATO: <descrizione esplicita>' -- <paths>   # il prefiss
 
 Inoltre, prima di droppare uno stash mirato, **estrarre sempre i path con `git show <hash>:<path>` come rete di sicurezza** (anche se pensi che sia obsoleto).
 
+## 🔀 Transizioni tra branch *(safety obbligatoria)*
+
+Le **transizioni tra branch** (`git checkout <branch>`, `git pull origin <branch>`, `git reset --hard`) eseguite con working tree sporco di modifiche tracked possono **distruggere lavoro non committato** appartenente all'operatore corrente o ad agenti paralleli. La categoria di failure mode (E3/E4/E5) e' emersa chiaramente in Sessione 26 (issue #45, DATA-LOSS post-merge PR #44): `git reset --hard` ha eliminato `M packages/core/src/db/index.ts` di un altro agente perche' il working tree era sporco e il check pre-reset non esisteva.
+
+**Regola d'oro**: prima di una qualsiasi transizione distruttiva, **verificare che il working tree tracked sia pulito**. Se sporco, **salvare con `git stash push -u`** (includendo untracked).
+
+### Checklist pre-transizione
+
+```powershell
+# PRIMA di `git checkout main` o `git pull origin <branch>` o `git reset --hard`:
+$dirtyTracked = git status --porcelain | Select-String '^.[^\\?]'   # righe tracked (ignora untracked)
+if ($dirtyTracked) {
+    Write-Host "Working tree sporco con modifiche TRACKED:" -ForegroundColor Yellow
+    $dirtyTracked | ForEach-Object { Write-Host "  $_" }
+    throw "Salva con 'git stash push -u -m <subject>' PRIMA della transizione (vedi D.26.4)"
+}
+
+# Dopo la transizione, verifica untracked preservati:
+git status --short   # se vedi '??' di file dell'altro agente, ripristinali dal suo stash
+```
+
+### Esempi di transizioni pericolose
+
+| Operazione | Rischio | Mitigazione |
+|------------|---------|-------------|
+| `git reset --hard origin/<branch>` con working tree tracked dirty | **Distrugge WIP tracked** (E3) | Stash -u prima; controlla `git status --porcelain` |
+| `git pull origin main` su branch non-main | **Inquina il branch con commit main** (E4) | Lavora in worktree separata, oppure `git rebase` esplicito |
+| `git checkout main` con WIP tracked | **Porta via il WIP** (E5) | Stash -u prima; verifica post-checkout |
+| `git checkout -b <new>` con WIP tracked | Il WIP resta tracked e viene portato | Stash -u prima; oppure accetta (e' esplicito) |
+
+### Post-checkout hook (advisory)
+
+Il file `.githooks/post-checkout` (nuovo, vedi D.26.4) rileva `git checkout <branch>` con working tree tracked dirty e **stampa un warning** (advisory, non blocca). Setup automatico via `scripts/setup-hooks.js` (postinstall) — non richiede configurazione manuale. Bypass: `LIFE_SOUNDTRACK_SKIP_HOOKS=1 git checkout ...`.
+
+**Limitazione nota**: l'hook e' post-checkout (interviene DOPO che il branch e' cambiato), non pre-checkout. Non puo' bloccare l'azione; solo avvisare. Per bloccarla serve una `worktree` separata (vedi issue #47).
+
+### Lezione operativa D.26.4 (Sessione 26, 2026-10-19)
+
+**Errore E3 + E4 + E5 in sequenza** durante post-merge PR #44: l'agente ha eseguito `git checkout main` (porta via WIP), poi `git pull` su main (allinea OK), poi `git reset --hard origin/feat/39-operations-runbook` per riallineare il branch dopo averlo inquinato con i commit della PR. Il reset ha eliminato `M packages/core/src/db/index.ts` (WIP dell'altro agente Story 0.7). Recovery impossibile (no stash, no dangling blob significativo). Issue di tracking: #45 (DATA-LOSS).
+
+**Costo evitabile**: ~10 minuti di data loss + tempo di re-issue + confusione operativa.
+
 ## 🪝 Pre-commit hook
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
@@ -570,7 +612,7 @@ Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: Sessione 26 (2026-10-19) — v1.7: nuova sezione §"🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*" (D.26.1, lezione operativa issue #42: drop di 5 stash quando ne erano previsti 3; procedura conservativa con snapshot testuale, drop incrementale, recovery via `git fsck` + `git tag stash-preserve/*`); §"⚠️ Trappola specifica: stash mirato `git stash push -- <paths>`" (D.26.2: persi 3 file di Story 0.7 per drop di stash mirato; recovery via `git show <hash>:<path>`); §"📦 D.26.3 Bundle regeneration obbligatoria in stessa PR" (lesson learned: modifica `AGENTS.md` senza rigenerare `BUNDLE.md` → CI fail; procedura con snippet `pwsh scripts/generate-bundle.ps1` + `git commit --amend`); ultima: v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
+*Ultimo aggiornamento: Sessione 26 (2026-10-19) — v1.7: nuova sezione §"🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*" (D.26.1, lezione operativa issue #42: drop di 5 stash quando ne erano previsti 3; procedura conservativa con snapshot testuale, drop incrementale, recovery via `git fsck` + `git tag stash-preserve/*`); §"⚠️ Trappola specifica: stash mirato `git stash push -- <paths>`" (D.26.2: persi 3 file di Story 0.7 per drop di stash mirato; recovery via `git show <hash>:<path>`); §"📦 D.26.3 Bundle regeneration obbligatoria in stessa PR" (lesson learned: modifica `AGENTS.md` senza rigenerare `BUNDLE.md` → CI fail; procedura con snippet `pwsh scripts/generate-bundle.ps1` + `git commit --amend`); §"🔀 Transizioni tra branch *(safety obbligatoria)*" (D.26.4: 3 failure mode E3/E4/E5 emersi durante post-merge PR #44; checklist pre-transizione + nuovo `.githooks/post-checkout` advisory + tabella operazioni pericolose; cross-ref issue #45 DATA-LOSS e issue #46 difese; issue #47 worktree opzionale riapre S20 D.20.1); ultima: v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
 
 
 ===== FILE: README.md =====
@@ -9531,6 +9573,299 @@ else
   echo "FAILURES"
   exit 1
 fi
+
+
+
+===== FILE: scripts/setup-hooks.js =====
+
+#!/usr/bin/env node
+// scripts/setup-hooks.js — configura `core.hooksPath` per il workflow agenti.
+// Eseguito come `postinstall` in package.json. Idempotente e non-fatal.
+
+import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const repoRoot = resolve(__dirname, '..');
+
+const gitDir = resolve(repoRoot, '.git');
+const hooksDir = resolve(repoRoot, '.githooks');
+
+if (!existsSync(gitDir)) {
+  console.log('[setup-hooks] .git non trovato, skip (CI o build container?)');
+  process.exit(0);
+}
+
+if (!existsSync(hooksDir)) {
+  console.log('[setup-hooks] .githooks/ non trovato, skip');
+  process.exit(0);
+}
+
+try {
+  execSync('git config core.hooksPath .githooks', { stdio: 'inherit', cwd: repoRoot });
+  console.log('[setup-hooks] OK: git config core.hooksPath .githooks');
+} catch (err) {
+  console.warn('[setup-hooks] WARN: git non disponibile. Eseguire manualmente dopo il clone:');
+  console.warn('  git config core.hooksPath .githooks');
+}
+
+process.exit(0);
+
+
+
+===== FILE: .githooks/pre-commit =====
+
+#!/usr/bin/env bash
+# Pre-commit hook: verifica che il branch corrente sia valido per il workflow agenti.
+# Previene commit accidentali su branch non conformi alla naming convention.
+# (D3) Aggiunto check working tree clean per mitigare F5 stash collision.
+#
+# Setup: git config core.hooksPath .githooks
+# Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
+
+set -e
+
+# Skip se variabile d'ambiente disattivata
+if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+  exit 0
+fi
+
+# Check 1 (D3): working tree senza modifiche UNSTAGED (F5 stash collision mitigation)
+# Componenti del check:
+#   - `git diff --quiet`              = unstaged tracked changes (working tree vs index)
+#   - `git ls-files --others ...`     = untracked files (esclude .gitignore)
+# NON usare `git diff HEAD` per il primo confronto: includerebbe anche le staged
+# changes e bloccherebbe ogni commit normale. Vedi fix Sessione 23 / issue #20.
+if ! git diff --quiet 2>/dev/null \
+   || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+  echo "[pre-commit] ERRORE: working tree ha modifiche non committate (unstaged o untracked)."
+  echo "  Le STAGED changes sono OK (sono il payload del commit);"
+  echo "  ma UNSTAGED modifications o file untracked inquinano la working copy"
+  echo "  e abilitano F5 stash collision."
+  echo ""
+  echo "  Risolvi con:"
+  echo "    git add -A && git commit -m 'fix: wip'   # includi tutto"
+  echo "    # oppure"
+  echo "    git stash push -u -m 'wip'               # metti da parte (include untracked)"
+  echo "    git stash pop                            # recupera dopo il commit"
+  echo ""
+  echo "  Bypass emergenza (solo cherry-pick/hotfix): git commit --no-verify"
+  exit 1
+fi
+
+current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+if [ -z "$current_branch" ]; then
+  echo "[pre-commit] ERRORE: detached HEAD. Crea un branch prima di committare:"
+  echo "  git checkout -b feat/<N>-<desc>  (o fix/<N>-<desc> o docs/<desc>)"
+  exit 1
+fi
+
+# Pattern ammessi:
+# - main (per admin / doc-sync)
+# - docs/* (per branch di documentazione senza issue number)
+# - feat/<N>-* o fix/<N>-* (per issue con numero)
+if [[ "$current_branch" =~ ^main$ ]] \
+   || [[ "$current_branch" =~ ^docs/.+ ]] \
+   || [[ "$current_branch" =~ ^feat/[0-9]+-.+ ]] \
+   || [[ "$current_branch" =~ ^fix/[0-9]+-.+ ]]; then
+  exit 0
+fi
+
+echo "[pre-commit] ERRORE: branch '$current_branch' non matcha il pattern del workflow agenti."
+echo "  Pattern ammessi:"
+echo "    - main                  (solo per admin/doc-sync)"
+echo "    - docs/<desc>           (branch di documentazione)"
+echo "    - feat/<N>-<desc>       (feature legata a issue #N)"
+echo "    - fix/<N>-<desc>        (bugfix legato a issue #N)"
+echo ""
+echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
+echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
+exit 1
+
+
+
+===== FILE: .githooks/pre-push =====
+
+#!/usr/bin/env bash
+# Pre-push hook:
+# 1. BUNDLE auto-regen se `docs/` e' cambiato (D4, G4 mitigation)
+# 2. Base-stale warning se il branch e' > 5 commit dietro origin/main (D5, G3 mitigation)
+#
+# Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
+# Bypass: git push --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git push ...)
+
+set -e
+
+if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+  exit 0
+fi
+
+remote="$1"
+remote_branch="$2"
+
+# Sanity check: se remote/branch non passati, skip silente
+if [ -z "$remote" ] || [ -z "$remote_branch" ]; then
+  exit 0
+fi
+
+# Check 1: BUNDLE auto-regen (D4) se docs/ e' cambiato
+changed_docs=$(git diff --name-only "origin/${remote_branch}...HEAD" 2>/dev/null | grep -E '^docs/' | grep -v '^docs/BUNDLE.md$' || true)
+
+if [ -n "$changed_docs" ]; then
+  echo "[pre-push] docs/ modificato rispetto a origin/${remote_branch}. Rigenero BUNDLE.md..."
+
+  regen_ok=0
+  if command -v pwsh >/dev/null 2>&1; then
+    if pwsh scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+      echo "[pre-push] BUNDLE.md rigenerato con pwsh"
+      regen_ok=1
+    fi
+  elif command -v powershell >/dev/null 2>&1; then
+    if powershell -ExecutionPolicy Bypass -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+      echo "[pre-push] BUNDLE.md rigenerato con powershell"
+      regen_ok=1
+    fi
+  fi
+
+  if [ "$regen_ok" -eq 0 ]; then
+    echo "[pre-push] WARN: BUNDLE.md non rigenerato (pwsh/powershell non disponibili o script fallito)."
+    echo "[pre-push] Aggiungi manualmente: pwsh scripts/generate-bundle.ps1"
+  else
+    # Se BUNDLE.md e' cambiato, committalo
+    if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
+      git add docs/BUNDLE.md
+      if ! git diff --cached --quiet docs/BUNDLE.md 2>/dev/null; then
+        if git commit --no-verify -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/"; then
+          echo "[pre-push] BUNDLE.md committato"
+        else
+          echo "[pre-push] WARN: commit di BUNDLE.md fallito. Aggiungi manualmente."
+        fi
+      fi
+    fi
+  fi
+fi
+
+# Check 2: base-stale warning (D5)
+if git fetch origin --quiet 2>/dev/null; then
+  behind=$(git rev-list --count "HEAD..origin/${remote_branch}" 2>/dev/null || echo 0)
+  if [ "$behind" -gt 5 ]; then
+    echo ""
+    echo "[pre-push] WARN: il branch e' $behind commit dietro origin/${remote_branch}."
+    echo "  Considera rebase prima del merge:"
+    echo "    git fetch origin && git rebase origin/${remote_branch}"
+    echo "  (non blocca il push; solo un warning per mitigare F4 base stale)"
+    echo ""
+  fi
+fi
+
+exit 0
+
+
+
+===== FILE: .githooks/post-checkout =====
+
+#!/usr/bin/env bash
+# post-checkout hook: warning su transizioni tra branch con working tree dirty.
+# Mitiga failure mode E3/E4/E5 (Sessione 26, vedi AGENTS.md §"Transizioni tra branch").
+#
+# Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
+# Bypass: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git checkout ...
+#
+# Limitazione: questo hook e' ADVISORY (exit 0 anche in caso di warning). Non blocca
+# il checkout. Lo scopo e' ricordare all'operatore di salvare il WIP tracked PRIMA
+# di operazioni distruttive (`git reset --hard`, `git pull origin <branch>`, ecc.).
+
+set -e
+
+prev_head="$1"
+new_head="$2"
+branch_flag="$3"
+
+# Skip su file checkout (branch_flag = 0). Vogliamo agire solo sui branch checkout.
+if [ "$branch_flag" != "1" ]; then
+  exit 0
+fi
+
+# Bypass esplicito via env var
+if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+  exit 0
+fi
+
+# Rileva modifiche tracked (staged + unstaged) rispetto a HEAD.
+# `git diff --quiet HEAD` ritorna 0 se working tree == HEAD, 1 altrimenti.
+if ! git diff --quiet HEAD 2>/dev/null; then
+  echo ""
+  echo "[post-checkout] \033[33mWARN\033[0m: working tree ha modifiche tracked (staged o unstaged) dopo il checkout."
+  echo "  Rischio (Sessione 26 E3/E4/E5):"
+  echo "    - 'git reset --hard' o 'git pull' possono DISTRUGGERE queste modifiche"
+  echo "    - vedi issue #45 (DATA-LOSS: index.ts perso durante post-merge PR #44)"
+  echo ""
+  echo "  RACCOMANDAZIONE: prima di operazioni distruttive, salva con"
+  echo "    git stash push -u -m 'wip-<context>'   # include untracked"
+  echo "    <operazione distruttiva>"
+  echo "    git stash pop"
+  echo ""
+  echo "  Bypass (emergenza): LIFE_SOUNDTRACK_SKIP_HOOKS=1 git checkout ..."
+  echo ""
+fi
+
+exit 0
+
+
+
+===== FILE: .githooks/README.md =====
+
+# `.githooks/` — Git hooks per il workflow agenti
+
+Questi hook sono committati nel repo e propagati a tutti gli agenti che lavorano sul progetto. Servono a far rispettare la convenzione di branching anche in assenza di worktree (vedi `AGENTS.md` §"🛡️ Hardening multi-agente").
+
+## Setup (una tantum per clone)
+
+### Automatico (consigliato)
+
+Il setup è automatico via `postinstall` di `package.json`. Dopo `pnpm install`, eseguire `git config core.hooksPath .githooks` viene tentato automaticamente (non-fatal se git non disponibile).
+
+### Manuale (fallback)
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Da quel momento tutti i commit passano attraverso `pre-commit`.
+
+## Hook attivi
+
+- **`pre-commit`**: verifica che il branch corrente sia valido per il workflow. Pattern ammessi:
+  - `main` (solo per admin / doc-sync)
+  - `docs/<desc>` (branch di documentazione)
+  - `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
+  
+  Se il branch non matcha, il commit viene abortito con un messaggio esplicativo.
+
+## Bypass (emergenza)
+
+```bash
+git commit --no-verify                           # salta il pre-commit una volta
+LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...     # salta via env var (CI, cherry-pick)
+```
+
+Usare il bypass solo in caso di emergenza (cherry-pick, hotfix, fix urgente). Documentare la ragione nel messaggio di commit.
+
+## Failure mode coperti
+
+- **F1**: commit accidentale su `main` → abort
+- **F7**: commit su branch dopo merge (l'agente dimentica di fare `git checkout main && git pull`) → abort
+- **F5** (parziale): modifiche unstaged o file untracked nella working tree prima del commit → abort. **Importante**: il check rileva solo **unstaged tracked** (`git diff`) e **untracked non esclusi da .gitignore** (`git ls-files --others --exclude-standard`). Le **staged changes** sono il payload del commit e passano il check. Fix Sessione 23 / issue #20.
+
+## Failure mode NON coperti (vedi AGENTS.md §"🛡️ Hardening multi-agente")
+
+- **F3**: file conflict in working copy (richiede worktree, scelta NO)
+- **F5**: stash collision (mitigato indirettamente da `git status` clean check nella session-start checklist)
+- **F8**: force push accidentale (mitigato da "no force push" in AGENTS.md §"🌳 Git workflow")
 
 
 

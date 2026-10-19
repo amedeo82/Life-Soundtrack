@@ -311,6 +311,48 @@ git stash push -u -m 'MIRATO: <descrizione esplicita>' -- <paths>   # il prefiss
 
 Inoltre, prima di droppare uno stash mirato, **estrarre sempre i path con `git show <hash>:<path>` come rete di sicurezza** (anche se pensi che sia obsoleto).
 
+## 🔀 Transizioni tra branch *(safety obbligatoria)*
+
+Le **transizioni tra branch** (`git checkout <branch>`, `git pull origin <branch>`, `git reset --hard`) eseguite con working tree sporco di modifiche tracked possono **distruggere lavoro non committato** appartenente all'operatore corrente o ad agenti paralleli. La categoria di failure mode (E3/E4/E5) e' emersa chiaramente in Sessione 26 (issue #45, DATA-LOSS post-merge PR #44): `git reset --hard` ha eliminato `M packages/core/src/db/index.ts` di un altro agente perche' il working tree era sporco e il check pre-reset non esisteva.
+
+**Regola d'oro**: prima di una qualsiasi transizione distruttiva, **verificare che il working tree tracked sia pulito**. Se sporco, **salvare con `git stash push -u`** (includendo untracked).
+
+### Checklist pre-transizione
+
+```powershell
+# PRIMA di `git checkout main` o `git pull origin <branch>` o `git reset --hard`:
+$dirtyTracked = git status --porcelain | Select-String '^.[^\\?]'   # righe tracked (ignora untracked)
+if ($dirtyTracked) {
+    Write-Host "Working tree sporco con modifiche TRACKED:" -ForegroundColor Yellow
+    $dirtyTracked | ForEach-Object { Write-Host "  $_" }
+    throw "Salva con 'git stash push -u -m <subject>' PRIMA della transizione (vedi D.26.4)"
+}
+
+# Dopo la transizione, verifica untracked preservati:
+git status --short   # se vedi '??' di file dell'altro agente, ripristinali dal suo stash
+```
+
+### Esempi di transizioni pericolose
+
+| Operazione | Rischio | Mitigazione |
+|------------|---------|-------------|
+| `git reset --hard origin/<branch>` con working tree tracked dirty | **Distrugge WIP tracked** (E3) | Stash -u prima; controlla `git status --porcelain` |
+| `git pull origin main` su branch non-main | **Inquina il branch con commit main** (E4) | Lavora in worktree separata, oppure `git rebase` esplicito |
+| `git checkout main` con WIP tracked | **Porta via il WIP** (E5) | Stash -u prima; verifica post-checkout |
+| `git checkout -b <new>` con WIP tracked | Il WIP resta tracked e viene portato | Stash -u prima; oppure accetta (e' esplicito) |
+
+### Post-checkout hook (advisory)
+
+Il file `.githooks/post-checkout` (nuovo, vedi D.26.4) rileva `git checkout <branch>` con working tree tracked dirty e **stampa un warning** (advisory, non blocca). Setup automatico via `scripts/setup-hooks.js` (postinstall) — non richiede configurazione manuale. Bypass: `LIFE_SOUNDTRACK_SKIP_HOOKS=1 git checkout ...`.
+
+**Limitazione nota**: l'hook e' post-checkout (interviene DOPO che il branch e' cambiato), non pre-checkout. Non puo' bloccare l'azione; solo avvisare. Per bloccarla serve una `worktree` separata (vedi issue #47).
+
+### Lezione operativa D.26.4 (Sessione 26, 2026-10-19)
+
+**Errore E3 + E4 + E5 in sequenza** durante post-merge PR #44: l'agente ha eseguito `git checkout main` (porta via WIP), poi `git pull` su main (allinea OK), poi `git reset --hard origin/feat/39-operations-runbook` per riallineare il branch dopo averlo inquinato con i commit della PR. Il reset ha eliminato `M packages/core/src/db/index.ts` (WIP dell'altro agente Story 0.7). Recovery impossibile (no stash, no dangling blob significativo). Issue di tracking: #45 (DATA-LOSS).
+
+**Costo evitabile**: ~10 minuti di data loss + tempo di re-issue + confusione operativa.
+
 ## 🪝 Pre-commit hook
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
@@ -561,4 +603,4 @@ Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: Sessione 26 (2026-10-19) — v1.7: nuova sezione §"🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*" (D.26.1, lezione operativa issue #42: drop di 5 stash quando ne erano previsti 3; procedura conservativa con snapshot testuale, drop incrementale, recovery via `git fsck` + `git tag stash-preserve/*`); §"⚠️ Trappola specifica: stash mirato `git stash push -- <paths>`" (D.26.2: persi 3 file di Story 0.7 per drop di stash mirato; recovery via `git show <hash>:<path>`); §"📦 D.26.3 Bundle regeneration obbligatoria in stessa PR" (lesson learned: modifica `AGENTS.md` senza rigenerare `BUNDLE.md` → CI fail; procedura con snippet `pwsh scripts/generate-bundle.ps1` + `git commit --amend`); ultima: v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
+*Ultimo aggiornamento: Sessione 26 (2026-10-19) — v1.7: nuova sezione §"🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*" (D.26.1, lezione operativa issue #42: drop di 5 stash quando ne erano previsti 3; procedura conservativa con snapshot testuale, drop incrementale, recovery via `git fsck` + `git tag stash-preserve/*`); §"⚠️ Trappola specifica: stash mirato `git stash push -- <paths>`" (D.26.2: persi 3 file di Story 0.7 per drop di stash mirato; recovery via `git show <hash>:<path>`); §"📦 D.26.3 Bundle regeneration obbligatoria in stessa PR" (lesson learned: modifica `AGENTS.md` senza rigenerare `BUNDLE.md` → CI fail; procedura con snippet `pwsh scripts/generate-bundle.ps1` + `git commit --amend`); §"🔀 Transizioni tra branch *(safety obbligatoria)*" (D.26.4: 3 failure mode E3/E4/E5 emersi durante post-merge PR #44; checklist pre-transizione + nuovo `.githooks/post-checkout` advisory + tabella operazioni pericolose; cross-ref issue #45 DATA-LOSS e issue #46 difese; issue #47 worktree opzionale riapre S20 D.20.1); ultima: v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
