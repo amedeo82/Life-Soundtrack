@@ -57,6 +57,29 @@
 | [`../fixtures/demo-user.json`](../fixtures/demo-user.json) | Dataset demo per modalità "Scopri come funziona" (06-UX §2.14) |
 
 ## Roadmap Sessioni di Progettazione
+
+<!-- AGGREGATE-INDEX-ROADMAP-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+| Sessione | Nome | Stato | PR |
+|----------|------|-------|----|
+| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | #19 |
+| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | #21 |
+| 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | #22 |
+| 27 | Adozione worktree come default per agenti paralleli | 🟡 | - |
+| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟡 | - |
+| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟡 | - |
+| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟡 | - |
+| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
+
+> Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
+
+<!-- AGGREGATE-INDEX-ROADMAP-END -->
+
+### Sessioni legacy 0-21 (pre ADR-0008)
+
 | Sessione | Nome | Stato |
 |----------|------|-------|
 | 0 | 🔒 Consolidamento + Bootstrap | ✅ COMPLETATA |
@@ -79,11 +102,26 @@
 | 19 | 📦 Macchina di stati delle issue (status:* post-claim — ADR-0007) | ✅ COMPLETATA |
 | 20 | 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist) | ✅ COMPLETATA |
 | 21 | 🔗 Refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) | ✅ COMPLETATA |
-| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | ✅ COMPLETATA (PR #19 merged `0ebe8dad`, 2026-10-18T15:29:28Z) |
-| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | ✅ COMPLETATA (PR #21 merged `8a48e24`, 2026-10-18T09:54:10Z) |
-| 24 | 🌐 Implementazione Story 0.6 i18n setup (i18next) | ✅ COMPLETATA (PR #22 merged `5235c88`, 2026-10-18T17:02Z +0200) |
 
-## Stato del progetto (post Sessione 24, PR #22 mergata 2026-10-18)
+> Migration V2.1 (issue future): le sessioni legacy 0-21 verranno migrate in `docs/state/sessions/` per essere incluse nel blocco aggregator. Fino ad allora, le entry legacy restano in questa tabella statica.
+
+## Stato del progetto
+
+<!-- AGGREGATE-INDEX-STATUS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+- Sessioni migrate in state/sessions: **8**
+- Stories migrate in state/stories: **3** (done: 3)
+- Ultima sessione migrata: **S31** - AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9)
+- Stories done: 0.6, 0.5, 0.3
+
+> Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
+
+<!-- AGGREGATE-INDEX-STATUS-END -->
+
+### Dettaglio (legacy, post Sessione 24, PR #22 mergata 2026-10-18)
 - **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.5.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
 - **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
 - **Documenti TODO**: 0

@@ -1,8 +1,30 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 16:22
+> Data: 2026-10-19 16:34
 > Totale file: 49
+
+<!-- AGGREGATE-BUNDLE-INVENTORY-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
+> Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
+
+- Totale file: 48
+- Dimensione totale: 628 KB
+- Ultima aggregazione: 2026-10-19 16:34
+- Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
+
+| Categoria | File |
+|-----------|------|
+| docs/ | 29 |
+| scripts/ | 8 |
+| fixtures/ | 1 |
+| .githooks/ | 4 |
+| .github/ | 3 |
+| root/ | 3 |
+
+<!-- AGGREGATE-BUNDLE-INVENTORY-END -->
+
 
 
 ===== FILE: AGENTS.md =====
@@ -1079,6 +1101,29 @@ Apache License
 | [`../fixtures/demo-user.json`](../fixtures/demo-user.json) | Dataset demo per modalità "Scopri come funziona" (06-UX §2.14) |
 
 ## Roadmap Sessioni di Progettazione
+
+<!-- AGGREGATE-INDEX-ROADMAP-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+| Sessione | Nome | Stato | PR |
+|----------|------|-------|----|
+| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | #19 |
+| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | #21 |
+| 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | #22 |
+| 27 | Adozione worktree come default per agenti paralleli | 🟡 | - |
+| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟡 | - |
+| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟡 | - |
+| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟡 | - |
+| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
+
+> Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
+
+<!-- AGGREGATE-INDEX-ROADMAP-END -->
+
+### Sessioni legacy 0-21 (pre ADR-0008)
+
 | Sessione | Nome | Stato |
 |----------|------|-------|
 | 0 | 🔒 Consolidamento + Bootstrap | ✅ COMPLETATA |
@@ -1101,11 +1146,26 @@ Apache License
 | 19 | 📦 Macchina di stati delle issue (status:* post-claim — ADR-0007) | ✅ COMPLETATA |
 | 20 | 🛡️ Hardening multi-agente (push early + pre-commit hook + session checklist) | ✅ COMPLETATA |
 | 21 | 🔗 Refactor catena multi-agente (doc-sync IN PR + auto-status:done + hook extensions) | ✅ COMPLETATA |
-| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | ✅ COMPLETATA (PR #19 merged `0ebe8dad`, 2026-10-18T15:29:28Z) |
-| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | ✅ COMPLETATA (PR #21 merged `8a48e24`, 2026-10-18T09:54:10Z) |
-| 24 | 🌐 Implementazione Story 0.6 i18n setup (i18next) | ✅ COMPLETATA (PR #22 merged `5235c88`, 2026-10-18T17:02Z +0200) |
 
-## Stato del progetto (post Sessione 24, PR #22 mergata 2026-10-18)
+> Migration V2.1 (issue future): le sessioni legacy 0-21 verranno migrate in `docs/state/sessions/` per essere incluse nel blocco aggregator. Fino ad allora, le entry legacy restano in questa tabella statica.
+
+## Stato del progetto
+
+<!-- AGGREGATE-INDEX-STATUS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+- Sessioni migrate in state/sessions: **8**
+- Stories migrate in state/stories: **3** (done: 3)
+- Ultima sessione migrata: **S31** - AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9)
+- Stories done: 0.6, 0.5, 0.3
+
+> Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
+
+<!-- AGGREGATE-INDEX-STATUS-END -->
+
+### Dettaglio (legacy, post Sessione 24, PR #22 mergata 2026-10-18)
 - **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.5.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
 - **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
 - **Documenti TODO**: 0
@@ -2301,6 +2361,73 @@ Story 0.6 "i18n setup" completata e mergiata. Stack adottato: `i18next@^25.x` + 
 PR #22 merged `5235c88` (2026-10-18T17:02Z +0200). Branch `feat/5-i18n-setup` eliminata. GH Action `auto-status-done` applica `status:done` a #5.
 ```
 
+### Sessione 27 - Adozione worktree come default per agenti paralleli
+
+- **Data**: 2026-10-19
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-56535750`
+
+```
+
+# Sessione 27 — Adozione worktree come default per agenti paralleli
+
+## Sintesi
+
+Inversione di D.20.1 (S20): la worktree diventa il **default** per ogni agente che claima una issue, non più un'opzione. La worktree elimina per costruzione i failure mode E3/E4/E5 (DATA-LOSS documentato in issue #45) che le difese hook/.githooks/post-checkout + scripts/safe-branch-switch.ps1 mitigavano solo parzialmente.
+
+Implementazione:
+- `scripts/setup-worktree.ps1` (nuovo, ~270 righe PowerShell): crea worktree in `../ls-<N>-<slug>` da `origin/main`, push early (D.20.2), configura `core.hooksPath`
+- `scripts/test-setup-worktree.sh` (nuovo, ~190 righe bash): 8 scenari (issue missing, slug derivato/esplicito, path esistente, branch base mancante, idempotenza, -NoPush, -SkipGhCheck)
+- `AGENTS.md` v1.8: nuova sezione "🌳 Worktree workflow"; §"🚀 Primo task" step 3 aggiornato
+
+## Claim
+
+- Claim `kilo-HP-ELITEBOOK-56535750` (UTC 2026-10-19T13:08:00Z) su issue #53
+- Push early `feat/53-worktree-default` (D.20.2)
+- Branch protetto: pre-commit hook D3 unstaged-only
+
+## Decisioni (D.27.x)
+
+| # | Decisione | Motivazione |
+|---|---|---|
+| D.27.1 | Worktree come default (inversione D.20.1) | Issue #45 (DATA-LOSS) ha dimostrato che hook advisory non bastano; serve isolamento fisico della working copy |
+| D.27.2 | Script `setup-worktree.ps1` invece di documentare `git worktree add` | Idempotente, validazioni strutturate (issue candidate, branch base, path duplicato), output user-friendly |
+| D.27.3 | Slug derivato dal titolo issue (kebab-case, max 40 char) | Auto-discovery: l'agente non deve inventare lo slug; max 40 char evita nomi eccessivi |
+| D.27.4 | Branch `fix/<N>-<slug>` se titolo contiene "fix" o "bug" | Convenzione pre-commit hook; minimizza friction |
+| D.27.5 | Worktree path = `../ls-<N>-<slug>` (un livello sopra la repo) | Stessa convenzione di S20 "worktree-pool"; visibile e pulito |
+| D.27.6 | Configurazione `core.hooksPath` nella worktree | Gli hook (.githooks/pre-commit, pre-push, post-checkout) funzionano anche nella worktree |
+| D.27.7 | `-SkipGhCheck` per i test | I test non possono dipendere da gh autenticato; il flag permette dry-run |
+| D.27.8 | Mantieni `.githooks/post-checkout` + `scripts/safe-branch-switch.ps1` come advisory | Non-breaking change per agenti che non usano worktree; safety net ridondante ma utile |
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 27-1 | `2>&1` su `git worktree add` causa `$LASTEXITCODE` ambiguo in PowerShell 5.1 | ✅ risolto (`| Out-Null` invece di `2>&1`) |
+| 27-2 | Backtick in stringa doppia PowerShell = escape char (rompe il parse) | ✅ risolto (rimozione backtick o concatenazione variabili) |
+| 27-3 | `pwsh` (PowerShell Core) non disponibile in questo env | ⚠️ test eseguibile solo in CI; documentato in PR |
+| 27-4 | `bash -n` non funziona senza WSL installato | ⚠️ test eseguibile solo in CI; script sintassi verificata via reading |
+
+## Documenti aggiornati
+
+- `AGENTS.md` v1.8: nuova sezione "🌳 Worktree workflow"; §"🚀 Primo task" step 3-6 aggiornati
+- `scripts/setup-worktree.ps1` (nuovo, ~270 righe)
+- `scripts/test-setup-worktree.sh` (nuovo, 8 scenari bash)
+- `scripts/generate-bundle.ps1` `$files` include i 2 nuovi script
+- Issue #47 (riapertura D.20.1): cross-ref "superseded by #53" (chiusura post-merge)
+- Issue #45 (DATA-LOSS): cross-ref "mitigazione strutturale in corso" (commento di stato)
+
+## File NON modificati (per backward compatibility)
+
+- `.githooks/post-checkout` (S26 D.26.4) — resta come safety net advisory
+- `scripts/safe-branch-switch.ps1` (S26) — resta come wrapper opzionale per chi non usa worktree
+
+## Esito post-merge (placeholder)
+
+PR #54 (TBD) merged. Branch `feat/53-worktree-default` eliminata (policy §♻️). Claim `kilo-HP-ELITEBOOK-56535750` rilasciato con `release:` + merge SHA. GH Action `auto-status-done` applica `status:done` a #53. Issue #47 chiusa come `wontdo` con cross-ref a #53. Issue #45 commento di stato aggiornato ("mitigazione strutturale completata").
+```
+
 ### Sessione 28 - GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N)
 
 - **Data**: 2026-10-19
@@ -2380,6 +2507,78 @@ Vedi [GitHub docs: Managing branch protection rules](https://docs.github.com/en/
 ## Esito post-merge (placeholder)
 
 PR #55 (TBD) merged. Branch `feat/51-pr-template-and-branch-protection` eliminata (policy §♻️). Claim `kilo-HP-ELITEBOOK-56535750` rilasciato con `release:` + merge SHA. GH Action `auto-status-done` applica `status:done` a #51. Issue #41 (chiusura semantica bundle-check) cross-ref "risolto da #51".
+```
+
+### Sessione 29 - ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md
+
+- **Data**: 2026-10-19
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-56535750`
+
+```
+
+# Sessione 29 — ADR-0008 V2: lazy-state aggregation estesa a INDEX + BUNDLE
+
+## Sintesi
+
+Estensione di ADR-0008 (V1, S25) per coprire `docs/INDEX.md` (status + roadmap) e `docs/BUNDLE.md` (inventory). V2 chiude gli ultimi due file di stato globali che ancora causavano conflitti drift nelle PR parallele.
+
+Implementazione:
+- `scripts/aggregate-state.ps1` (esteso, +200 righe): 3 nuovi blocchi marcati + 3 funzioni Build-Block-*
+- `docs/INDEX.md` (modificato): 2 blocchi `AGGREGATE-INDEX-STATUS-*` e `AGGREGATE-INDEX-ROADMAP-*`; sessioni legacy 0-21 spostate in sottosezione "### Sessioni legacy"
+- `docs/BUNDLE.md` (auto-aggiornato): blocco `AGGREGATE-BUNDLE-INVENTORY-*` in cima
+- `scripts/generate-bundle.ps1` (esteso): preserva il blocco aggregator quando rigenera BUNDLE.md
+- `.github/workflows/auto-state-aggregate.yml` (esteso): trigger paths include `docs/INDEX.md` e `docs/BUNDLE.md`; commit message aggiornato per V2
+- `AGENTS.md` v1.8: §"🔄 Lazy-state aggregation" estesa con V2 (target table aggiornata, eccezione V2 introdotta)
+
+## Claim
+
+- Claim `kilo-HP-ELITEBOOK-56535750` (UTC 2026-10-19T13:45:00Z) su issue #52
+- Push early `feat/52-adr-0008-v2-index-bundle` (D.20.2)
+- Branch protetto: pre-commit hook D3 unstaged-only
+
+## Decisioni (D.29.x)
+
+| # | Decisione | Motivazione |
+|---|---|---|
+| D.29.1 | 3 nuovi blocchi marcati (INDEX-STATUS, INDEX-ROADMAP, BUNDLE-INVENTORY) | V1 copriva 2/4 file globali; V2 chiude la copertura |
+| D.29.2 | Aggregator genera INDEX-ROADMAP da `state/sessions/*.md` frontmatter (migrated only) | Sessioni legacy 0-21 restano in tabella statica (migration V2.1 future) |
+| D.29.3 | Aggregator genera BUNDLE-INVENTORY parsando `$files` da generate-bundle.ps1 | Single source of truth per la lista file; auto-discovery |
+| D.29.4 | generate-bundle.ps1 preserva blocco aggregator | generate-bundle rigenera BUNDLE.md da zero ma deve rispettare l'edit aggregator; nuova logica di preservazione |
+| D.29.5 | Ordine di esecuzione: aggregate-state DOPO generate-bundle | Il blocco inventory riflette il file count DOPO la rigenerazione |
+| D.29.6 | Backward compat: `aggregate-state.ps1 --check` su 5 target (4 V1 + 3 nuovi) | Estensione trasparente, nessuna migrazione richiesta per PR esistenti |
+| D.29.7 | Blocchi INDEX spostano le sessioni legacy in sottosezione "Sessioni legacy 0-21" | Separa migrated (block) da legacy (static) senza perdere info |
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 29-1 | generate-bundle.ps1 sovrascrive il blocco AGGREGATE-BUNDLE-INVENTORY (se rigenera) | ✅ risolto (logica di preservazione in Build-Bundle wrapper) |
+| 29-2 | Ordine aggregate-state vs generate-bundle: aggregator per primo viene perso al rigenera | ✅ risolto (ordine documentato + D.29.5) |
+
+## Documenti aggiornati
+
+- `scripts/aggregate-state.ps1` (esteso, +200 righe)
+- `scripts/generate-bundle.ps1` (esteso, logica preservazione blocco)
+- `docs/INDEX.md` (modificato: 2 blocchi aggregator + sottosezione legacy)
+- `docs/BUNDLE.md` (auto-aggiornato: blocco inventory in cima)
+- `docs/11-BACKLOG.md` (auto-aggiornato dall'aggregator: V1 blocco)
+- `docs/SESSIONS.md` (auto-aggiornato dall'aggregator: V1 blocco, no drift)
+- `AGENTS.md` v1.8: §"🔄 Lazy-state aggregation" estesa
+- `.github/workflows/auto-state-aggregate.yml` (trigger paths esteso, commit message V2)
+- `docs/state/sessions/29-adr-0008-v2.md` (questo file, nuovo)
+- `docs/state/_index.md` (migration table aggiornata: S29 aggiunta)
+
+## File NON modificati (per backward compatibility)
+
+- `AGENTS.md` sezione "Worktree workflow" (introdotta in #53, gia presente)
+- `AGENTS.md` §"📝 Checklist di auto-revisione PR" (introdotta in #51, gia presente)
+- `.githooks/*` (invariati; pre-commit D3 + pre-push D4/D5 gia attivi)
+
+## Esito post-merge (placeholder)
+
+PR #56 (TBD) merged. Branch `feat/52-adr-0008-v2-index-bundle` eliminata (policy §♻️). Claim `kilo-HP-ELITEBOOK-56535750` rilasciato con `release:` + merge SHA. GH Action `auto-state-aggregate.yml` esegue aggregator e committa eventuali drift. GH Action `auto-status-done` applica `status:done` a #52. Issue #41 (chiusura semantica bundle-check) cross-ref "risolta indirettamente da #52 (V2 aggregator gestisce BUNDLE inventory)".
 ```
 
 ### Sessione 30 - Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58)
@@ -3513,14 +3712,22 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 <#
 .SYNOPSIS
     Aggrega lo stato atomico dalle sources docs/state/* nei file docs/ globali
-    (SESSIONS.md, 11-BACKLOG.md "Stato di avanzamento").
+    (SESSIONS.md, 11-BACKLOG.md, INDEX.md, BUNDLE.md).
 
 .DESCRIPTION
-    Script di aggregazione "lazy-state" introdotto con ADR-0008 (S25, PR #24).
-    Risolve i conflitti di merge ricorrenti su PR aperte a lungo: invece di N
-    agenti paralleli che modificano direttamente INDEX/SESSIONS/BACKLOG (causa
-    conflitti D.21.1), ogni agente modifica solo la propria cartella docs/state/
-    e questo script rigenera i blocchi marcati.
+    Script di aggregazione "lazy-state" introdotto con ADR-0008 (S25, PR #24) e
+    esteso a V2 con issue #52 (P3). Risolve i conflitti di merge ricorrenti su
+    PR aperte a lungo: invece di N agenti paralleli che modificano direttamente
+    INDEX/SESSIONS/BACKLOG (causa conflitti D.21.1), ogni agente modifica solo
+    la propria cartella docs/state/ e questo script rigenera i blocchi marcati.
+
+    V1 (ADR-0008 S25):
+      - docs/SESSIONS.md: AGGREGATE-SESSIONS-* (sessioni migrate)
+      - docs/11-BACKLOG.md: AGGREGATE-STORIES-* (story migrate)
+
+    V2 (issue #52 S29):
+      - docs/INDEX.md: AGGREGATE-INDEX-STATUS-* + AGGREGATE-INDEX-ROADMAP-*
+      - docs/BUNDLE.md: AGGREGATE-BUNDLE-INVENTORY-*
 
     Modalita d'uso:
       (default)        Scrive i blocchi aggregati nei marker designati (idempotente)
@@ -3530,7 +3737,7 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
       --help           Mostra questo help
 
 .EXAMPLE
-    pwsh scripts/aggregate-state.ps1                 # aggiorna SESSIONS.md + 11-BACKLOG.md
+    pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2
     pwsh scripts/aggregate-state.ps1 --check         # CI gate: --check exit 0
     pwsh scripts/aggregate-state.ps1 --dry-run       # preview senza scrivere
     pwsh scripts/aggregate-state.ps1 --list           # audit: cosa verrebbe letto/scritto?
@@ -3538,7 +3745,7 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 .NOTES
     ## Blocchi marcati (regex-based)
 
-    In `docs/SESSIONS.md` (o qualunque file *.md passato per --target):
+    In `docs/SESSIONS.md`:
         <!-- AGGREGATE-SESSIONS-START -->
         ... righe rigenerate dallo script ...
         <!-- AGGREGATE-SESSIONS-END -->
@@ -3548,6 +3755,21 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
         ... tabella rigenerata da state/stories/*.md frontmatter ...
         <!-- AGGREGATE-STORIES-END -->
 
+    In `docs/INDEX.md` (sezione "Stato del progetto"):
+        <!-- AGGREGATE-INDEX-STATUS-START -->
+        ... bullet list stato aggregato ...
+        <!-- AGGREGATE-INDEX-STATUS-END -->
+
+    In `docs/INDEX.md` (sezione "Roadmap Sessioni"):
+        <!-- AGGREGATE-INDEX-ROADMAP-START -->
+        ... tabella sessioni migrate ...
+        <!-- AGGREGATE-INDEX-ROADMAP-END -->
+
+    In `docs/BUNDLE.md` (in cima):
+        <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
+        ... inventario file + timestamp ...
+        <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
+
     ## Idempotenza
 
     Rieseguire lo script con le stesse sources produce lo stesso output (modulo
@@ -3555,9 +3777,9 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
     ## Manutenzione
 
-    Quando aggiungi un nuovo blocco aggregato (es. in docs/INDEX.md "Stato del
-    progetto"), aggiungi i marker e una nuova funzione Build-Block-* qui sotto,
-    quindi aggiorna il dispatcher Apply-Blocks / Test-Blocks.
+    Quando aggiungi un nuovo blocco aggregato, aggiungi i marker e una nuova
+    funzione Build-Block-* qui sotto, quindi aggiorna il dispatcher
+    Apply-Blocks / Test-Blocks.
 
     Vedi: docs/13-ADR/0008-lazy-state-aggregation.md
           docs/state/_index.md
@@ -3586,14 +3808,23 @@ $lt = [char]60    # '<'
 $gt = [char]62    # '>'
 $b = [char]96     # '`' (backtick) — serve a emettere `path` in markdown
 $bangs = '!--'
-$markerSessionsStart = "${lt}${bangs} AGGREGATE-SESSIONS-START --${gt}"
-$markerSessionsEnd   = "${lt}${bangs} AGGREGATE-SESSIONS-END --${gt}"
-$markerStoriesStart  = "${lt}${bangs} AGGREGATE-STORIES-START --${gt}"
-$markerStoriesEnd    = "${lt}${bangs} AGGREGATE-STORIES-END --${gt}"
+$markerSessionsStart       = "${lt}${bangs} AGGREGATE-SESSIONS-START --${gt}"
+$markerSessionsEnd         = "${lt}${bangs} AGGREGATE-SESSIONS-END --${gt}"
+$markerStoriesStart        = "${lt}${bangs} AGGREGATE-STORIES-START --${gt}"
+$markerStoriesEnd          = "${lt}${bangs} AGGREGATE-STORIES-END --${gt}"
+$markerIndexStatusStart    = "${lt}${bangs} AGGREGATE-INDEX-STATUS-START --${gt}"
+$markerIndexStatusEnd      = "${lt}${bangs} AGGREGATE-INDEX-STATUS-END --${gt}"
+$markerIndexRoadmapStart   = "${lt}${bangs} AGGREGATE-INDEX-ROADMAP-START --${gt}"
+$markerIndexRoadmapEnd     = "${lt}${bangs} AGGREGATE-INDEX-ROADMAP-END --${gt}"
+$markerBundleInventoryStart = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-START --${gt}"
+$markerBundleInventoryEnd   = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-END --${gt}"
 
 $targets = @(
-    @{ Path = "docs/SESSIONS.md";   Start = $markerSessionsStart; End = $markerSessionsEnd },
-    @{ Path = "docs/11-BACKLOG.md"; Start = $markerStoriesStart;  End = $markerStoriesEnd  }
+    @{ Path = "docs/SESSIONS.md";   Start = $markerSessionsStart;        End = $markerSessionsEnd },
+    @{ Path = "docs/11-BACKLOG.md"; Start = $markerStoriesStart;         End = $markerStoriesEnd },
+    @{ Path = "docs/INDEX.md";      Start = $markerIndexStatusStart;     End = $markerIndexStatusEnd },
+    @{ Path = "docs/INDEX.md";      Start = $markerIndexRoadmapStart;    End = $markerIndexRoadmapEnd },
+    @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd }
 )
 
 # === Helpers ===
@@ -3708,9 +3939,141 @@ function Build-Block-Stories {
 
 function Get-Calculated-Block {
     param([string]$Start, [string]$End)
-    if ($Start -eq $markerSessionsStart) { return Build-Block-Sessions }
-    if ($Start -eq $markerStoriesStart)  { return Build-Block-Stories  }
+    if ($Start -eq $markerSessionsStart)        { return Build-Block-Sessions }
+    if ($Start -eq $markerStoriesStart)         { return Build-Block-Stories  }
+    if ($Start -eq $markerIndexStatusStart)     { return Build-Block-IndexStatus }
+    if ($Start -eq $markerIndexRoadmapStart)    { return Build-Block-IndexRoadmap }
+    if ($Start -eq $markerBundleInventoryStart) { return Build-Block-BundleInventory }
     throw "Unknown marker: $Start"
+}
+
+function Build-Block-IndexStatus {
+    $sessions = @(Get-StateSessionFiles)
+    $stories  = @(Get-StateStoryFiles)
+    $sessionCount = $sessions.Count
+    $storyCount = $stories.Count
+
+    # Latest migrated session
+    $latestSession = $null
+    if ($sessionCount -gt 0) { $latestSession = $sessions[-1] }
+    $latestSessionInfo = ""
+    if ($latestSession) {
+        $content = Get-Content -LiteralPath $latestSession.Path -Raw -Encoding UTF8
+        $parsed = Parse-Frontmatter $content
+        $n = $parsed.Frontmatter['number']
+        $t = $parsed.Frontmatter['title']
+        $latestSessionInfo = "Ultima sessione migrata: **S$n** - $t"
+    }
+
+    # Stories per status
+    $doneStories = @()
+    foreach ($f in $stories) {
+        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $p = Parse-Frontmatter $c
+        if ($p.Frontmatter['status'] -eq 'done') {
+            $doneStories += $p.Frontmatter['id']
+        }
+    }
+
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine($markerIndexStatusStart)
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
+    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("- Sessioni migrate in state/sessions: **$sessionCount**")
+    [void]$sb.AppendLine("- Stories migrate in state/stories: **$storyCount** (done: $($doneStories.Count))")
+    if ($latestSessionInfo) {
+        [void]$sb.AppendLine("- $latestSessionInfo")
+    }
+    if ($doneStories.Count -gt 0) {
+        [void]$sb.AppendLine("- Stories done: $($doneStories -join ', ')")
+    }
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine('> Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.')
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine($markerIndexStatusEnd)
+    return $sb.ToString().TrimEnd([char]10, [char]13)
+}
+
+function Build-Block-IndexRoadmap {
+    $files = Get-StateSessionFiles
+    if ($files.Count -eq 0) {
+        return '_Nessuna sessione migrata in docs/state/sessions/._'
+    }
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine($markerIndexRoadmapStart)
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
+    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("| Sessione | Nome | Stato | PR |")
+    [void]$sb.AppendLine("|----------|------|-------|----|")
+    foreach ($f in $files) {
+        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $parsed  = Parse-Frontmatter $content
+        $n = $parsed.Frontmatter['number']
+        $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
+        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
+        $pr = if ($parsed.Frontmatter['pr'] -and $parsed.Frontmatter['pr'] -ne '0') { "#$($parsed.Frontmatter['pr'])" } else { "-" }
+        [void]$sb.AppendLine("| $n | $title | $state | $pr |")
+    }
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine('> Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.')
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine($markerIndexRoadmapEnd)
+    return $sb.ToString().TrimEnd([char]10, [char]13)
+}
+
+function Build-Block-BundleInventory {
+    # Parse the bundle script's $files array
+    $bundleScript = Join-Path $repoRoot "scripts/generate-bundle.ps1"
+    $files = @()
+    if (Test-Path $bundleScript) {
+        $content = Get-Content -LiteralPath $bundleScript -Raw -Encoding UTF8
+        # Extract lines like:    "AGENTS.md",
+        $matches = [regex]::Matches($content, '(?m)^\s*"([^"]+)",\s*$')
+        foreach ($m in $matches) { $files += $m.Groups[1].Value }
+    }
+
+    # Categorize files
+    $categories = @{ 'docs/' = 0; 'scripts/' = 0; 'fixtures/' = 0; '.githooks/' = 0; '.github/' = 0; 'root/' = 0 }
+    $totalSize = 0
+    foreach ($f in $files) {
+        $matched = $false
+        foreach ($cat in @('docs/', 'scripts/', 'fixtures/', '.githooks/', '.github/')) {
+            if ($f.StartsWith($cat)) { $categories[$cat]++; $matched = $true; break }
+        }
+        if (-not $matched) { $categories['root/']++ }
+        $fullPath = Join-Path $repoRoot $f
+        if (Test-Path $fullPath) {
+            $size = (Get-Item $fullPath).Length
+            $totalSize += $size
+        }
+    }
+
+    $totalKB = [math]::Round($totalSize / 1KB, 1)
+    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm'
+
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine($markerBundleInventoryStart)
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
+    [void]$sb.AppendLine('> Il contenuto del bundle (sezioni FILE) e generato da `' + 'scripts/generate-bundle.ps1' + '` separatamente.')
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("- Totale file: $($files.Count)")
+    [void]$sb.AppendLine("- Dimensione totale: $totalKB KB")
+    [void]$sb.AppendLine("- Ultima aggregazione: $timestamp")
+    [void]$sb.AppendLine("- Generatori: `'scripts/aggregate-state.ps1`' (V2) + `'scripts/generate-bundle.ps1`' (content)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("| Categoria | File |")
+    [void]$sb.AppendLine("|-----------|------|")
+    foreach ($cat in @('docs/', 'scripts/', 'fixtures/', '.githooks/', '.github/', 'root/')) {
+        [void]$sb.AppendLine("| $cat | $($categories[$cat]) |")
+    }
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine($markerBundleInventoryEnd)
+    return $sb.ToString().TrimEnd([char]10, [char]13)
 }
 
 function Find-Block {
@@ -7955,9 +8318,9 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
-| 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
-| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
+| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
 

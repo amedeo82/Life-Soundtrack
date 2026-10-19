@@ -1,90 +1,26 @@
-name: auto-state-aggregate
-
-# Rigenera i blocchi aggregati in docs/SESSIONS.md + docs/11-BACKLOG.md (e futuri
-# target) dopo un merge su `main`. Risolve la classe di conflitti di merge
-# ricorrenti quando più agenti paralleli fanno doc-sync IN PR (D.21.1):
-# invece di N PR che modificano direttamente i file globali, ogni PR modifica
-# solo docs/state/ e la GH Action lo aggrega automaticamente su `main`.
-#
-# Non-bloccante: se l'aggregator fallisce, il workflow logga un warning ma
-# lascia il merge andare. Lo stato può essere riallineato manualmente.
-# Pattern analogo: auto-status-done.yml (S19/D2).
-
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/state/**/*.md'
-      - 'scripts/aggregate-state.ps1'
-
-jobs:
-  aggregate:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          # Necessario per il push finale
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      - name: Run aggregator in check mode first
-        shell: pwsh
-        run: |
-          Write-Host "::group::Pre-merge check (--check)"
-          pwsh scripts/aggregate-state.ps1 --check
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "::warning::Aggregator reported drift (exit=$LASTEXITCODE). Proceeding with auto-apply."
-          }
-          # Issue #58 fix: explicit exit 0 after warning. Without this, GitHub
-          # marks the step as 'failure' (exit 1 from pwsh), which (combined with
-          # missing if: always() on the diff step) prevented the auto-commit.
-          exit 0
-
-      - name: Apply aggregator
-        if: always()
-        shell: pwsh
-        run: |
-          Write-Host "::group::Applying aggregator (default write mode)"
-          pwsh scripts/aggregate-state.ps1
-
-      - name: Check git diff
-        if: always()  # Issue #58 fix: must run even if check step reports drift
-        id: diff
-        shell: pwsh
-        run: |
-          $diff = git diff --name-only
-          if ($diff) {
-            Write-Host "Files modified by aggregator:"
-            $diff | ForEach-Object { Write-Host "  - $_" }
-            "modified=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          } else {
-            Write-Host "No diff: aggregator output is already in sync."
-            "modified=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          }
-
-      - name: Commit and push
+- name: Commit and push
         if: steps.diff.outputs.modified == 'true'
         shell: pwsh
         run: |
           git config user.name "kilo-bot[bot]"
           git config user.email "kilo-bot@kilo.local"
-          # Issue #60 fix: PowerShell parse error su `git diff --cached --quiet && (Write-Host; exit 0)`.
-          # Sintassi bash, non valida in pwsh 7+ su Linux. Riscritta con if + early exit.
-          # Anche `2>$null` (bash) sostituito con `2>&1 | Out-Null` (PowerShell).
-          git add docs/SESSIONS.md docs/11-BACKLOG.md scripts/aggregate-state.ps1 docs/state/ 2>&1 | Out-Null
+          # V2 (issue #52) + PowerShell parse fix (issue #60) merged during rebase #53 → #62 → #52.
+          # V2: include INDEX.md + BUNDLE.md in git add + commit message.
+          # #60: PowerShell syntax (2>&1 | Out-Null, if (...) {...}, backtick line continuation).
+          git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md scripts/aggregate-state.ps1 docs/state/ 2>&1 | Out-Null
           if (git diff --cached --quiet) {
             Write-Host "Nothing to commit (staged diff is empty)"
             exit 0
           }
-          git commit -m "chore(state): auto-aggregate from docs/state/ (ADR-0008)" `
+          git commit -m "chore(state): auto-aggregate from docs/state/ (ADR-0008 V2)" `
                        -m "Triggered by .github/workflows/auto-state-aggregate.yml on push to main." `
                        -m "Source: docs/state/sessions/*.md + docs/state/stories/*.md (frontmatter)." `
-                       -m "Target blocks:" `
+                       -m "Target blocks (V2):" `
                        -m "  - docs/SESSIONS.md: <!-- AGGREGATE-SESSIONS-{START,END} -->" `
                        -m "  - docs/11-BACKLOG.md: <!-- AGGREGATE-STORIES-{START,END} -->" `
+                       -m "  - docs/INDEX.md: <!-- AGGREGATE-INDEX-STATUS-{START,END} -->" `
+                       -m "  - docs/INDEX.md: <!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->" `
+                       -m "  - docs/BUNDLE.md: <!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->" `
                        -m "" `
                        -m "Skips if aggregator output already in sync."
           git push origin main
