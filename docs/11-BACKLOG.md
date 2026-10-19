@@ -534,8 +534,8 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
-| 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
-| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
+| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 
 <!-- AGGREGATE-STORIES-END -->

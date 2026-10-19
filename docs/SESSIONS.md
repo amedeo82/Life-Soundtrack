@@ -1318,6 +1318,78 @@ Vedi [GitHub docs: Managing branch protection rules](https://docs.github.com/en/
 PR #55 (TBD) merged. Branch `feat/51-pr-template-and-branch-protection` eliminata (policy §♻️). Claim `kilo-HP-ELITEBOOK-56535750` rilasciato con `release:` + merge SHA. GH Action `auto-status-done` applica `status:done` a #51. Issue #41 (chiusura semantica bundle-check) cross-ref "risolto da #51".
 ```
 
+### Sessione 29 - ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md
+
+- **Data**: 2026-10-19
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-56535750`
+
+```
+
+# Sessione 29 — ADR-0008 V2: lazy-state aggregation estesa a INDEX + BUNDLE
+
+## Sintesi
+
+Estensione di ADR-0008 (V1, S25) per coprire `docs/INDEX.md` (status + roadmap) e `docs/BUNDLE.md` (inventory). V2 chiude gli ultimi due file di stato globali che ancora causavano conflitti drift nelle PR parallele.
+
+Implementazione:
+- `scripts/aggregate-state.ps1` (esteso, +200 righe): 3 nuovi blocchi marcati + 3 funzioni Build-Block-*
+- `docs/INDEX.md` (modificato): 2 blocchi `AGGREGATE-INDEX-STATUS-*` e `AGGREGATE-INDEX-ROADMAP-*`; sessioni legacy 0-21 spostate in sottosezione "### Sessioni legacy"
+- `docs/BUNDLE.md` (auto-aggiornato): blocco `AGGREGATE-BUNDLE-INVENTORY-*` in cima
+- `scripts/generate-bundle.ps1` (esteso): preserva il blocco aggregator quando rigenera BUNDLE.md
+- `.github/workflows/auto-state-aggregate.yml` (esteso): trigger paths include `docs/INDEX.md` e `docs/BUNDLE.md`; commit message aggiornato per V2
+- `AGENTS.md` v1.8: §"🔄 Lazy-state aggregation" estesa con V2 (target table aggiornata, eccezione V2 introdotta)
+
+## Claim
+
+- Claim `kilo-HP-ELITEBOOK-56535750` (UTC 2026-10-19T13:45:00Z) su issue #52
+- Push early `feat/52-adr-0008-v2-index-bundle` (D.20.2)
+- Branch protetto: pre-commit hook D3 unstaged-only
+
+## Decisioni (D.29.x)
+
+| # | Decisione | Motivazione |
+|---|---|---|
+| D.29.1 | 3 nuovi blocchi marcati (INDEX-STATUS, INDEX-ROADMAP, BUNDLE-INVENTORY) | V1 copriva 2/4 file globali; V2 chiude la copertura |
+| D.29.2 | Aggregator genera INDEX-ROADMAP da `state/sessions/*.md` frontmatter (migrated only) | Sessioni legacy 0-21 restano in tabella statica (migration V2.1 future) |
+| D.29.3 | Aggregator genera BUNDLE-INVENTORY parsando `$files` da generate-bundle.ps1 | Single source of truth per la lista file; auto-discovery |
+| D.29.4 | generate-bundle.ps1 preserva blocco aggregator | generate-bundle rigenera BUNDLE.md da zero ma deve rispettare l'edit aggregator; nuova logica di preservazione |
+| D.29.5 | Ordine di esecuzione: aggregate-state DOPO generate-bundle | Il blocco inventory riflette il file count DOPO la rigenerazione |
+| D.29.6 | Backward compat: `aggregate-state.ps1 --check` su 5 target (4 V1 + 3 nuovi) | Estensione trasparente, nessuna migrazione richiesta per PR esistenti |
+| D.29.7 | Blocchi INDEX spostano le sessioni legacy in sottosezione "Sessioni legacy 0-21" | Separa migrated (block) da legacy (static) senza perdere info |
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 29-1 | generate-bundle.ps1 sovrascrive il blocco AGGREGATE-BUNDLE-INVENTORY (se rigenera) | ✅ risolto (logica di preservazione in Build-Bundle wrapper) |
+| 29-2 | Ordine aggregate-state vs generate-bundle: aggregator per primo viene perso al rigenera | ✅ risolto (ordine documentato + D.29.5) |
+
+## Documenti aggiornati
+
+- `scripts/aggregate-state.ps1` (esteso, +200 righe)
+- `scripts/generate-bundle.ps1` (esteso, logica preservazione blocco)
+- `docs/INDEX.md` (modificato: 2 blocchi aggregator + sottosezione legacy)
+- `docs/BUNDLE.md` (auto-aggiornato: blocco inventory in cima)
+- `docs/11-BACKLOG.md` (auto-aggiornato dall'aggregator: V1 blocco)
+- `docs/SESSIONS.md` (auto-aggiornato dall'aggregator: V1 blocco, no drift)
+- `AGENTS.md` v1.8: §"🔄 Lazy-state aggregation" estesa
+- `.github/workflows/auto-state-aggregate.yml` (trigger paths esteso, commit message V2)
+- `docs/state/sessions/29-adr-0008-v2.md` (questo file, nuovo)
+- `docs/state/_index.md` (migration table aggiornata: S29 aggiunta)
+
+## File NON modificati (per backward compatibility)
+
+- `AGENTS.md` sezione "Worktree workflow" (introdotta in #53, gia presente)
+- `AGENTS.md` §"📝 Checklist di auto-revisione PR" (introdotta in #51, gia presente)
+- `.githooks/*` (invariati; pre-commit D3 + pre-push D4/D5 gia attivi)
+
+## Esito post-merge (placeholder)
+
+PR #56 (TBD) merged. Branch `feat/52-adr-0008-v2-index-bundle` eliminata (policy §♻️). Claim `kilo-HP-ELITEBOOK-56535750` rilasciato con `release:` + merge SHA. GH Action `auto-state-aggregate.yml` esegue aggregator e committa eventuali drift. GH Action `auto-status-done` applica `status:done` a #52. Issue #41 (chiusura semantica bundle-check) cross-ref "risolta indirettamente da #52 (V2 aggregator gestisce BUNDLE inventory)".
+```
+
 ### Sessione 30 - Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58)
 
 - **Data**: 2026-10-19
