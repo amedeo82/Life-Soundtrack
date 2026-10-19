@@ -112,6 +112,10 @@ $files = @(
     # Bash portabile (funziona su WSL, Git Bash, Linux, macOS) — NON incluso nel pre-push hook
     # perché eseguito solo in dev/CI; il check è cross-platform.
     "scripts/test-pre-commit-clean-check.sh",
+    # Test per fix AppendLine LF (issue #58): 5 scenari pwsh, verificano che
+    # StringBuilder.AppendLine aggiunge CRLF su Windows e che il fix
+    # (Append + "n" esplicito) produce LF-only.
+    "scripts/test-appendline-lf-fix.ps1",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",
@@ -226,6 +230,9 @@ if ($Check) {
 
 # === Default: scrivi BUNDLE.md ===
 # Usa UTF-8 senza BOM per stabilita cross-platform e per --check deterministico.
+# FORZA LF (issue #58): WriteAllText con UTF-8 no BOM usa line endings OS-default
+# (CRLF su Windows, LF su Linux/macOS). Git memorizza LF. -replace CRLF, LF normalizza.
+$newBundle = $newBundle -replace "`r`n", "`n"
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 $outPath = if (Test-Path $outputFile) { (Resolve-Path $outputFile).Path } else { Join-Path (Get-Location) $outputFile }
 [System.IO.File]::WriteAllText($outPath, $newBundle, $utf8NoBom)
