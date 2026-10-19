@@ -282,7 +282,7 @@ function Build-Block-IndexStatus {
     [void]$sb.AppendLine('> Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.')
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerIndexStatusEnd)
-    return $sb.ToString().TrimEnd([char]10, [char]13)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
 function Build-Block-IndexRoadmap {
@@ -311,7 +311,7 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine('> Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.')
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerIndexRoadmapEnd)
-    return $sb.ToString().TrimEnd([char]10, [char]13)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
 function Build-Block-BundleInventory {
@@ -362,7 +362,7 @@ function Build-Block-BundleInventory {
     }
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerBundleInventoryEnd)
-    return $sb.ToString().TrimEnd([char]10, [char]13)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
 function Find-Block {

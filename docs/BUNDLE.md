@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 16:34
+> Data: 2026-10-19 16:38
 > Totale file: 49
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 48
-- Dimensione totale: 628 KB
-- Ultima aggregazione: 2026-10-19 16:34
+- Dimensione totale: 628.1 KB
+- Ultima aggregazione: 2026-10-19 16:38
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -3993,7 +3993,7 @@ function Build-Block-IndexStatus {
     [void]$sb.AppendLine('> Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.')
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerIndexStatusEnd)
-    return $sb.ToString().TrimEnd([char]10, [char]13)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
 function Build-Block-IndexRoadmap {
@@ -4022,7 +4022,7 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine('> Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.')
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerIndexRoadmapEnd)
-    return $sb.ToString().TrimEnd([char]10, [char]13)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
 function Build-Block-BundleInventory {
@@ -4073,7 +4073,7 @@ function Build-Block-BundleInventory {
     }
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerBundleInventoryEnd)
-    return $sb.ToString().TrimEnd([char]10, [char]13)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
 function Find-Block {
