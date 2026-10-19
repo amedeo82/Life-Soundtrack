@@ -347,6 +347,16 @@ Il file `.githooks/post-checkout` (nuovo, vedi D.26.4) rileva `git checkout <bra
 
 **Limitazione nota**: l'hook e' post-checkout (interviene DOPO che il branch e' cambiato), non pre-checkout. Non puo' bloccare l'azione; solo avvisare. Per bloccarla serve una `worktree` separata (vedi issue #47).
 
+### Script di supporto: `scripts/safe-branch-switch.ps1`
+
+Oltre all'hook `.githooks/post-checkout` (advisory), e' disponibile lo script
+`scripts/safe-branch-switch.ps1` che wrappa `git checkout <branch>` con lo stesso
+safety check (stash `-u` automatico su tracked dirty + verifica post-checkout degli
+untracked). Puo' essere usato come alternativa advisory all'hook post-checkout, o in
+sua assenza, prima di qualunque transizione distruttiva tra branch.
+
+Uso: `pwsh scripts/safe-branch-switch.ps1 <branch> [-h|--help]`
+
 ### Lezione operativa D.26.4 (Sessione 26, 2026-10-19)
 
 **Errore E3 + E4 + E5 in sequenza** durante post-merge PR #44: l'agente ha eseguito `git checkout main` (porta via WIP), poi `git pull` su main (allinea OK), poi `git reset --hard origin/feat/39-operations-runbook` per riallineare il branch dopo averlo inquinato con i commit della PR. Il reset ha eliminato `M packages/core/src/db/index.ts` (WIP dell'altro agente Story 0.7). Recovery impossibile (no stash, no dangling blob significativo). Issue di tracking: #45 (DATA-LOSS).
