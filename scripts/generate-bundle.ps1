@@ -76,6 +76,7 @@ $files = @(
     "docs/18-DEV-LOG.md",
     # Lazy-state aggregation (ADR-0008, S25): sorgenti atomiche per doc-sync fuori PR
     "docs/state/_index.md",
+    "docs/state/stories/0.7-operations-runbook.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",
@@ -101,6 +102,7 @@ $files = @(
     "docs/13-ADR/0008-lazy-state-aggregation.md",
     "docs/14-GLOSSARY.md",
     "docs/15-DESIGN-SYSTEM.md",
+    "docs/16-OPERATIONS.md",
     # Fixture (small/foundational) — i file di grandi dimensioni (medium/large/scenarios/demo-user)
     # sono generati da scripts/generate-fixtures.mjs su richiesta, e NON inclusi nel bundle
     # (vedi 10-TESTING §3.5). Lo script generator è incluso.

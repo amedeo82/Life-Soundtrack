@@ -181,5 +181,12 @@
   "insight.memory.return": "You hadn't listened to {{artist}} for {{months}} months",
   "insight.memory.seasonal": "Like every {{month}}, the {{genre}} period is back",
   "insight.disclaimer": "This insight is derived automatically from your listening data. It is not a diagnosis.",
-  "insight.disclaimerShort": "Auto-generated"
+  "insight.disclaimerShort": "Auto-generated",
+  "settings.maintenance.title": "Database maintenance",
+  "settings.maintenance.statusCritical": "Critical — read-only mode",
+  "settings.maintenance.statusOk": "OK",
+  "settings.maintenance.lastFastCheck": "Last boot check: {{ok}} (schema v{{version}}, {{ms}} ms)",
+  "settings.maintenance.runButton": "Run maintenance",
+  "settings.maintenance.retryButton": "Retry",
+  "settings.maintenance.rollbackButton": "Restore previous SW"
 }
