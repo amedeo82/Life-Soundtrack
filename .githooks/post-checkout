@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# post-checkout hook: warning su transizioni tra branch con working tree dirty.
+# Mitiga failure mode E3/E4/E5 (Sessione 26, vedi AGENTS.md §"Transizioni tra branch").
+#
+# Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
+# Bypass: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git checkout ...
+#
+# Limitazione: questo hook e' ADVISORY (exit 0 anche in caso di warning). Non blocca
+# il checkout. Lo scopo e' ricordare all'operatore di salvare il WIP tracked PRIMA
+# di operazioni distruttive (`git reset --hard`, `git pull origin <branch>`, ecc.).
+
+set -e
+
+prev_head="$1"
+new_head="$2"
+branch_flag="$3"
+
+# Skip su file checkout (branch_flag = 0). Vogliamo agire solo sui branch checkout.
+if [ "$branch_flag" != "1" ]; then
+  exit 0
+fi
+
+# Bypass esplicito via env var
+if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+  exit 0
+fi
+
+# Rileva modifiche tracked (staged + unstaged) rispetto a HEAD.
+# `git diff --quiet HEAD` ritorna 0 se working tree == HEAD, 1 altrimenti.
+if ! git diff --quiet HEAD 2>/dev/null; then
+  echo ""
+  echo "[post-checkout] \033[33mWARN\033[0m: working tree ha modifiche tracked (staged o unstaged) dopo il checkout."
+  echo "  Rischio (Sessione 26 E3/E4/E5):"
+  echo "    - 'git reset --hard' o 'git pull' possono DISTRUGGERE queste modifiche"
+  echo "    - vedi issue #45 (DATA-LOSS: index.ts perso durante post-merge PR #44)"
+  echo ""
+  echo "  RACCOMANDAZIONE: prima di operazioni distruttive, salva con"
+  echo "    git stash push -u -m 'wip-<context>'   # include untracked"
+  echo "    <operazione distruttiva>"
+  echo "    git stash pop"
+  echo ""
+  echo "  Bypass (emergenza): LIFE_SOUNDTRACK_SKIP_HOOKS=1 git checkout ..."
+  echo ""
+fi
+
+exit 0
