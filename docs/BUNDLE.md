@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 17:02
+> Data: 2026-10-19 17:12
 > Totale file: 49
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 48
-- Dimensione totale: 637.2 KB
-- Ultima aggregazione: 2026-10-19 17:02
+- Dimensione totale: 638.1 KB
+- Ultima aggregazione: 2026-10-19 17:12
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -4267,7 +4267,16 @@ function Test-Blocks {
             $drift = $true
             continue
         }
-        $existing = $found.Block
+        $existing = $found.Block -replace "`r`n", "`n"
+        # Normalizza anche il timestamp "Ultima aggregazione: ..." e la "Dimensione totale: ..." (analogia
+        # a generate-bundle.ps1 --check che normalizza "> Data: .+$"): il check deve essere deterministico
+        # attraverso run successive. La dimensione totale varia anche per modifiche al codice
+        # dell'aggregator stesso (aggregate-state.ps1 + generate-bundle.ps1 sono in $files), quindi
+        # non può essere usata come fingerprint del bundle.
+        $existing = $existing -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        $existing = $existing -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
+        $calculated = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        $calculated = $calculated -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
         if ($existing -eq $calculated) {
             Write-Host "[OK] $path - blocco in sync ($($calculated.Length) chars)" -ForegroundColor Green
         } else {
