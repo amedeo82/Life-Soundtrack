@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 16:38
+> Data: 2026-10-19 16:55
 > Totale file: 49
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -393,6 +393,33 @@ Uso: `pwsh scripts/safe-branch-switch.ps1 <branch> [-h|--help]`
 **Errore E3 + E4 + E5 in sequenza** durante post-merge PR #44: l'agente ha eseguito `git checkout main` (porta via WIP), poi `git pull` su main (allinea OK), poi `git reset --hard origin/feat/39-operations-runbook` per riallineare il branch dopo averlo inquinato con i commit della PR. Il reset ha eliminato `M packages/core/src/db/index.ts` (WIP dell'altro agente Story 0.7). Recovery impossibile (no stash, no dangling blob significativo). Issue di tracking: #45 (DATA-LOSS).
 
 **Costo evitabile**: ~10 minuti di data loss + tempo di re-issue + confusione operativa.
+
+### Lezione operativa D.45.1 (Sessione 32, 2026-10-19, issue #45)
+
+**Recovery automatico di un delta perso**: quando un file tracked viene perso per DATA-LOSS post-merge (E3/E4/E5), **non serve ricreare il contenuto da zero** se sono presenti nella worktree file *untracked* che importano il modulo perso (test, file di wiring, ecc.). Procedura conservativa:
+
+```powershell
+# 1. Identifica cosa il file perso doveva esportare
+git show <untracked-test-file> --format='%s' --name-only    # capire cosa importa
+rg "from .*db/?(index|barrel)?'?" <untracked-test-file>    # import diretti al barrel
+
+# 2. Rigenera solo gli export mancanti (delta minimo)
+#    Vedere i test del modulo per le funzioni effettivamente usate
+```
+
+**Caso reale (issue #45)**: `packages/core/src/db/index.ts` ha perso un delta durante `git reset --hard` post-merge PR #44. Recovery effettuata dallo `AGENTS.md` stesso osservando che `packages/core/src/db/__tests__/maintenance.test.ts` (untracked, 35KB) importa simboli specifici del barrel — gli export necessari sono stati dedotti eseguendo `rg` sul file di test. Zero ambiguità sul cosa serve.
+
+**Lezione generale**: in caso di DATA-LOSS, **i test untracked sono la migliore spec implicita** del file perso. Sono aggiornati, typecheckati, e riflettono l'API che il barrel deve esporre. Il barile va ricostruito analizzando cosa i test chiamano, non cosa l'agente "pensava dovesse esserci".
+
+**Auto-check** (preventivo, per ridurre il rischio di delta perso):
+
+```powershell
+# Prima di una transizione distruttiva, dump incrementale dei file tracked modificati
+git diff --name-only HEAD > /tmp/pre-transition-tracked.txt
+# Dopo la transizione: ripristina da qui se qualcosa manca
+```
+
+Issue chiusa come `wontdo` perché la mitigazione strutturale (worktree come default, issue #53) elimina per costruzione la categoria E3/E4/E5; la modifica persa non era necessaria per il typecheck corrente; il recovery demandato all'altro agente Story 0.7 è ora documentato e replicabile.
 
 ## 🪝 Pre-commit hook
 
@@ -8642,6 +8669,49 @@ pwsh scripts/generate-bundle.ps1 --check
 Il confronto `--check` normalizza sia la riga `> Data:` (timestamp) sia i line endings (`CRLF` → `LF`) sia nel file su disco che nel bundle rigenerato, prima del confronto. Questo rende il check deterministico: non fallisce per solo cambio di timestamp o per differenza di line endings tra Windows e Linux/CI.
 
 Il check continua a rilevare drift reali (file aggiunti/rimossi, contenuto modificato).
+
+### 9.8 Semantica come gate CI
+
+Il flag `--check` ha **semantica di fail-fast gate CI** (decisione cristallizzata in S32, issue #41 — formalizzazione dell'opzione A di `gh issue #10` chiusa in S17):
+
+| Esito del check | Exit code | Significato | Comportamento CI |
+|-----------------|-----------|-------------|------------------|
+| BUNDLE.md in sync con `$files` + contenuto identico | **0** | OK | Job `bundle-check` ✅ → merge abilitato |
+| File dichiarati in `$files` non esistono su disco | **2** | Drift strutturale | CI rosso (marker `[FAIL] N file dichiarati non esistono`) |
+| BUNDLE.md assente | **1** | Prima esecuzione | CI rosso (marker `[FAIL] docs/BUNDLE.md non esiste`) |
+| BUNDLE.md presente ma disallineato (contenuto, file list) | **1** | Drift di contenuto | CI rosso con dettaglio file aggiunti/rimossi |
+
+**Garanzie semantiche** (vincolanti per gli agenti):
+
+1. **Determinismo cross-platform**: il check passa identico su Windows (CRLF) e Linux/macOS (LF). La normalizzazione `CRLF → LF` è obbligatoria prima del `Compare-Object`.
+2. **Determinismo cross-tempo**: il check passa anche se lanciato a minuti/ore diverse dall'ultima rigenerazione, purché il contenuto sia semanticamente identico. La riga `> Data: ...` viene normalizzata a `> Data: 0000-00-00 00:00` prima del confronto.
+3. **Zero falsi positivi**: il check non fallisce MAI per sola differenza di timestamp o line endings.
+4. **Rilevamento drift reale**: ogni drift di `$files` (aggiunta/rimozione di file in scope) o di contenuto (modifica a un file incluso) viene rilevato con messaggio esplicito ("Da aggiungere al bundle: …", "Da rimuovere dal bundle: …", "Lista file identica, ma contenuto cambiato").
+5. **Fail-fast**: `--check` NON modifica mai `BUNDLE.md`; per la rigenerazione serve il flag di default (senza `--check`).
+
+**Integrazione CI** (`.github/workflows/ci.yml`):
+
+```yaml
+- name: Bundle in sync
+  run: pwsh scripts/generate-bundle.ps1 --check
+```
+
+Il job `bundle-check` è un **CI gate bloccante**: PR con BUNDLE.md non in sync non possono essere mergate finché l'agente non rigenera il bundle nella stessa PR (o, in emergenza, con `--no-verify` documentando la ragione).
+
+**Procedura di recovery** (per l'agente che vede il CI rosso):
+
+```powershell
+# 1. Rigenera localmente
+pwsh scripts/generate-bundle.ps1
+
+# 2. Verifica sync
+pwsh scripts/generate-bundle.ps1 --check    # deve uscire 0
+
+# 3. Committa nella stessa PR
+git add docs/BUNDLE.md scripts/generate-bundle.ps1
+git commit -m "chore(bundle): rigenera BUNDLE.md post-modifiche docs"
+git push
+```
 
 ---
 

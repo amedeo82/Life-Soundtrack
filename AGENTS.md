@@ -363,6 +363,33 @@ Uso: `pwsh scripts/safe-branch-switch.ps1 <branch> [-h|--help]`
 
 **Costo evitabile**: ~10 minuti di data loss + tempo di re-issue + confusione operativa.
 
+### Lezione operativa D.45.1 (Sessione 32, 2026-10-19, issue #45)
+
+**Recovery automatico di un delta perso**: quando un file tracked viene perso per DATA-LOSS post-merge (E3/E4/E5), **non serve ricreare il contenuto da zero** se sono presenti nella worktree file *untracked* che importano il modulo perso (test, file di wiring, ecc.). Procedura conservativa:
+
+```powershell
+# 1. Identifica cosa il file perso doveva esportare
+git show <untracked-test-file> --format='%s' --name-only    # capire cosa importa
+rg "from .*db/?(index|barrel)?'?" <untracked-test-file>    # import diretti al barrel
+
+# 2. Rigenera solo gli export mancanti (delta minimo)
+#    Vedere i test del modulo per le funzioni effettivamente usate
+```
+
+**Caso reale (issue #45)**: `packages/core/src/db/index.ts` ha perso un delta durante `git reset --hard` post-merge PR #44. Recovery effettuata dallo `AGENTS.md` stesso osservando che `packages/core/src/db/__tests__/maintenance.test.ts` (untracked, 35KB) importa simboli specifici del barrel — gli export necessari sono stati dedotti eseguendo `rg` sul file di test. Zero ambiguità sul cosa serve.
+
+**Lezione generale**: in caso di DATA-LOSS, **i test untracked sono la migliore spec implicita** del file perso. Sono aggiornati, typecheckati, e riflettono l'API che il barrel deve esporre. Il barile va ricostruito analizzando cosa i test chiamano, non cosa l'agente "pensava dovesse esserci".
+
+**Auto-check** (preventivo, per ridurre il rischio di delta perso):
+
+```powershell
+# Prima di una transizione distruttiva, dump incrementale dei file tracked modificati
+git diff --name-only HEAD > /tmp/pre-transition-tracked.txt
+# Dopo la transizione: ripristina da qui se qualcosa manca
+```
+
+Issue chiusa come `wontdo` perché la mitigazione strutturale (worktree come default, issue #53) elimina per costruzione la categoria E3/E4/E5; la modifica persa non era necessaria per il typecheck corrente; il recovery demandato all'altro agente Story 0.7 è ora documentato e replicabile.
+
 ## 🪝 Pre-commit hook
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
