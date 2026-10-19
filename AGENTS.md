@@ -231,6 +231,86 @@ Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni doc
 
 **Perché è importante**: con il workflow parallelo (più agenti su più issue contemporaneamente, vedi `11-BACKLOG.md` §"Priorità di lavorazione"), i branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma in fase di review.
 
+## 🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*
+
+`git stash drop` è **irreversibile** e **non protegge** dagli errori di conteggio degli indici: dopo ogni `drop` gli altri indici si ricompattano automaticamente (`stash@{1}` può diventare `stash@{0}`), e un calcolo mentale affrettato può portare a droppare stash fuori perimetro. **Lezione operativa D.26.1 (Sessione 26, 2026-10-19, issue #42)**: drop di 5 stash quando ne erano previsti 3, perché mancava uno snapshot testuale pre-drop. Danno zero (contenuto già in `main` via commit successivi), ma la procedura va formalizzata per evitare recidive.
+
+**Quando si applica**: solo se si intende droppare uno o più stash. NON sostituisce §"♻️ Pulizia branch post-merge" né §"🪝 Pre-commit hook"; è complementare.
+
+**Chi esegue**: l'agente che decide l'housekeeping (dopo conferma esplicita del Boss su una issue `needs-spec`, vedi §"Cosa NON puoi decidere autonomamente").
+
+**Procedura conservativa obbligatoria**:
+
+```powershell
+# 1. SNAPSHOT TESTUALE PRIMA di qualsiasi drop (irreversibile)
+git stash list --format='%gd | hash:%H | %gs' | Tee-Object -FilePath stash-snapshot.txt
+
+# 2. STIMA il numero di stash che dropperai e CONFRONTA con lo snapshot
+$expected = 3   # AD ESEMPIO: numero previsto di stash da droppare
+$actual = (git stash list | Measure-Object -Line).Lines
+if ($expected -ne $actual) { throw "Discrepanza conteggio stash: previsto=$expected reale=$actual" }
+
+# 3. DROP uno alla volta, verificando l'hash tra un drop e il successivo
+git stash drop 'stash@{0}'   # leggi l'hash nell'output ("Dropped stash@{0} (<hash>)")
+git stash list               # RILEGGERE prima del prossimo drop
+
+# 4. Se uno stash è dubbio o fuori perimetro, ESTRAILO prima con git show <hash>
+git show <hash> --format='%s' --name-only   # ispeziona cosa c'è dentro
+
+# 5. PULIZIA post-drop
+git remote prune origin
+```
+
+**Protezione extra per stash da preservare**:
+
+```powershell
+# Se uno stash contiene lavoro che potrebbe servire, PRIMA di droppare gli altri, etichettalo:
+git tag stash-preserve/<subject> <stash-hash>
+git stash drop 'stash@{N}'                                # droppa gli altri
+git show stash-preserve/<subject>                         # ... il preservato sopravvive come tag
+```
+
+**Recovery dopo drop errato** (entro 30 giorni, finché `gc` non gira):
+
+```powershell
+# Gli stash droppati diventano "dangling commit" visibili con:
+git fsck --no-reflogs --full | Select-String 'dangling commit'
+
+# Ogni dangling commit è un ex-stash. Recuperalo con:
+git stash store -m "recovered: <subject>" <dangling-hash>   # ricrea uno stash
+# oppure
+git checkout <dangling-hash> -- 0                          # ricrea i file modificati in un working tree separato
+```
+
+**Auto-check pre-drop** (mette in sicurezza l'azione):
+
+```powershell
+git fsck --no-reflogs --full --unreachable 2>&1 | Select-String 'dangling commit' | Measure-Object -Line
+# Se >0 dopo il drop, hai candidati per recovery (vedi sopra)
+```
+
+**Perché è importante**: il drop errato non è reversibile senza `git fsck` + reflog, e anche in quel caso solo entro la finestra di `gc` (default 30 giorni). Lo snapshot testuale + drop incrementale sono l'equivalente per gli stash di quello che `git branch -d` (vs `-D`) fa per i branch: una rete di sicurezza.
+
+### ⚠️ Trappola specifica: `git stash push -- <paths>` *(stash mirato)*
+
+Il pattern `git stash push -m "..." -- <path1> <path2> ...` salva **solo** i path elencati. È particolarmente fragile perché:
+
+1. **Nasconde la complessità**: l'output di `git stash list` non distingue tra stash completi (`-u`) e stash mirati (path specifici). Un operatore successivo potrebbe credere che lo stash contenga "tutto" il working tree.
+2. **Droppabile per errore**: se l'operatore dimentica che esiste uno stash mirato e fa `git stash drop 'stash@{0}'` "per pulire", perde solo quei 3 file (o quanti siano) senza che il comando protesti.
+3. **Recovery più complessa**: lo stash mirato ha 2 parent commits (working tree + index), uno dei quali è HEAD; l'altro contiene solo i path. `git stash store` non lo ricrea perfettamente — serve `git show <parent-hash>:<path>` per estrarre i singoli file.
+
+**Lezione operativa D.26.2 (Sessione 26, 2026-10-19, durante estensione di PR #44)**: l'agente ha creato `git stash push -m 'wip-story-0.7-preserve-before-docs' -- packages/core/src/db/index.ts packages/core/src/db/__tests__/maintenance.test.ts packages/core/src/db/maintenance.ts` (3 path), poi ha droppato quello stash credendo fosse un interim step. **Persi 3 file** di Story 0.7 per ~10 minuti. Recovery immediata via `git show <stash-hash>:<path>` sui parent commit (ancora nella gc-window di 30gg).
+
+**Regola d'oro**: preferire SEMPRE `git stash push -u` (con `-u` per includere untracked) salvo casi eccezzionali documentati. Se devi usare uno stash mirato, **etichettalo con un prefisso riconoscibile**:
+
+```powershell
+# Pattern sicuro per stash mirato
+git tag stash-preserve/<subject> <hash>      # taggare SUBITO dopo il push
+git stash push -u -m 'MIRATO: <descrizione esplicita>' -- <paths>   # il prefisso "MIRATO:" nel subject aiuta `git stash list`
+```
+
+Inoltre, prima di droppare uno stash mirato, **estrarre sempre i path con `git show <hash>:<path>` come rete di sicurezza** (anche se pensi che sia obsoleto).
+
 ## 🪝 Pre-commit hook
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
@@ -337,6 +417,29 @@ Se l'output elenca branch `feat/*` o `fix/*` (oltre a `main` e `HEAD`), eliminar
 3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
 
 Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
+
+### 📦 D.26.3 — Bundle regeneration obbligatoria in stessa PR *(lesson learned)*
+
+**Regola**: ogni PR che modifica il **contenuto** di uno qualsiasi dei file elencati in `$files` (`docs/`, `AGENTS.md`, `README.md`, `fixtures/` foundational, `scripts/*`, `LICENSE`) **deve rigenerare `docs/BUNDLE.md` nello stesso commit** (o in un commit di follow-up immediato prima del merge), per evitare il fail di `pwsh scripts/generate-bundle.ps1 --check` in CI.
+
+**Perché è importante**: il check del bundle è un **CI gate bloccante** (vedi `docs/12-DEVOPS.md §9` + §"📝 Checklist di auto-revisione PR" riga "BUNDLE check exit 0"). Una PR che modifica `AGENTS.md` senza rigenerare `BUNDLE.md` fallirà la pipeline quality anche se il codice di per sé è corretto, costringendo a un commit di fix che prolunga il ciclo di review.
+
+**Procedura consigliata** (snippet per ogni PR docs):
+
+```powershell
+# Dopo aver modificato qualsiasi file in scope del bundle:
+pwsh scripts/generate-bundle.ps1 --check   # verifica locale: deve uscire 0
+
+# Se esce != 0:
+pwsh scripts/generate-bundle.ps1            # rigenera
+git add docs/BUNDLE.md
+git commit --amend                          # o commit separato nella stessa PR
+git push
+```
+
+**Lezione operativa D.26.3 (Sessione 26, 2026-10-19, durante estensione di PR #44)**: l'agente ha modificato `AGENTS.md` (v1.6 → v1.7, D.26.1 + D.26.2) senza rigenerare `docs/BUNDLE.md`. La 1a run di CI quality è fallita con `pwsh scripts/generate-bundle.ps1 --check` → `docs/BUNDLE.md non è in sync`. Fix richiesto: 3° commit della PR ha rigenerato il bundle (+8139 byte) e portato la pipeline a verde. **Costo evitabile**: ~5 minuti di review extra + rumore nella history della PR.
+
+**Auto-check pre-push** (rafforzativo di D.4): il pre-push hook di `.githooks/pre-push` esegue già `generate-bundle.ps1 --check` e blocca il push se drift. Se bypassi il hook con `LIFE_SOUNDTRACK_SKIP_HOOKS=1` (emergenza), esegui manualmente il check prima del merge.
 
 ## 🗺️ Struttura del repository
 
@@ -458,4 +561,4 @@ Tutti e 4 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: Sessione 21 (2026-10-17) — v1.6: refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
+*Ultimo aggiornamento: Sessione 26 (2026-10-19) — v1.7: nuova sezione §"🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*" (D.26.1, lezione operativa issue #42: drop di 5 stash quando ne erano previsti 3; procedura conservativa con snapshot testuale, drop incrementale, recovery via `git fsck` + `git tag stash-preserve/*`); §"⚠️ Trappola specifica: stash mirato `git stash push -- <paths>`" (D.26.2: persi 3 file di Story 0.7 per drop di stash mirato; recovery via `git show <hash>:<path>`); §"📦 D.26.3 Bundle regeneration obbligatoria in stessa PR" (lesson learned: modifica `AGENTS.md` senza rigenerare `BUNDLE.md` → CI fail; procedura con snippet `pwsh scripts/generate-bundle.ps1` + `git commit --amend`); ultima: v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
