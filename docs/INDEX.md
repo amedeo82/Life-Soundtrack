@@ -120,7 +120,7 @@
 - Sessioni migrate in state/sessions: **13**
 - Stories migrate in state/stories: **4** (done: 3)
 - Ultima sessione migrata: **S36** - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
-- Stories done: 0.6, 0.3, 0.5
+- Stories done: 0.3, 0.5, 0.6
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
