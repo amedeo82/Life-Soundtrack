@@ -117,7 +117,7 @@
 - Sessioni migrate in state/sessions: **10**
 - Stories migrate in state/stories: **3** (done: 3)
 - Ultima sessione migrata: **S33** - Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch)
-- Stories done: 0.6, 0.5, 0.3
+- Stories done: 0.3, 0.5, 0.6
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
