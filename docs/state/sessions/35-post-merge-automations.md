@@ -2,9 +2,9 @@
 number: 35
 title: "Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)"
 date: 2026-10-20
-state: 🟡
+state: 🟢
 branch: fix/73-post-merge-automations
-pr: 0
+pr: 74
 claim: kilo-HP-ELITEBOOK-post-merge-review
 cross_refs: [51, 63, 66, 68, 69, 70, 73]
 tags: [docs, devops, automation, post-merge, adr-0006, adr-0007]

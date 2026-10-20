@@ -68,16 +68,17 @@
 | 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | #19 |
 | 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | #21 |
 | 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | #22 |
-| 27 | Adozione worktree come default per agenti paralleli | 🟡 | - |
-| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟡 | - |
-| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟡 | - |
-| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟡 | - |
-| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
-| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟡 | - |
-| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
-| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟡 | - |
-| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟡 | - |
-| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟡 | - |
+| 27 | Adozione worktree come default per agenti paralleli | 🟢 | #54 |
+| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟢 | #55 |
+| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟢 | #56 |
+| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟢 | #59 |
+| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟢 | #62 |
+| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟢 | #63 |
+| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟢 | #69 |
+| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟢 | #72 |
+| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
+| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
+| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -117,10 +118,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **13**
-- Stories migrate in state/stories: **4** (done: 3)
-- Ultima sessione migrata: **S36** - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
-- Stories done: 0.3, 0.5, 0.6
+- Sessioni migrate in state/sessions: **14**
+- Stories migrate in state/stories: **5** (done: 5)
+- Ultima sessione migrata: **S37** - Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending)
+- Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 

@@ -2,9 +2,9 @@
 number: 31
 title: "AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9)"
 date: 2026-10-19
-state: 🟡
+state: 🟢
 branch: docs/agents-md-v2-cleanup
-pr: 0
+pr: 62
 claim: kilo-HP-ELITEBOOK-56535750
 cross_refs: [60, 51, 52, 53, 58]
 tags: [docs, governance, cleanup, workflow]
