@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 14:04
+> Data: 2026-10-20 15:56
 > Totale file: 56
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -11,7 +11,7 @@
 
 - Totale file: 55
 - Dimensione totale: 751.4 KB
-- Ultima aggregazione: 2026-10-20 12:39
+- Ultima aggregazione: 2026-10-20 15:48
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1332,7 +1332,7 @@ Apache License
 - Sessioni migrate in state/sessions: **13**
 - Stories migrate in state/stories: **4** (done: 3)
 - Ultima sessione migrata: **S36** - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
-- Stories done: 0.6, 0.3, 0.5
+- Stories done: 0.3, 0.5, 0.6
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -4631,7 +4631,12 @@ function Get-StateStoryFiles {
             Path = $_.FullName
             Base = $_.BaseName
         }
-    } | Sort-Object { [version]$Id  }
+    # NB: serve `$_.Id` esplicito, NON `$Id` shorthand. Con `[version]` come
+    # primo token, la forma abbreviata non viene espansa da PowerShell 5.1:
+    # tutti gli item hanno sort key `$null`, l'ordine degenera a quello di
+    # `Get-ChildItem` (filesystem-dipendente). Vedi issue #79 e il gate
+    # `scripts/test-aggregate-determinism.sh` (T1+T2).
+    } | Sort-Object { [version]$_.Id }
 }
 
 function Parse-Frontmatter {
@@ -9104,10 +9109,10 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
-| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
-| 0.7 - Operations runbook + manutenzione DB | in-progress | #39 | - | devops |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
+| 0.7 - Operations runbook + manutenzione DB | in-progress | #39 | - | devops |
 
 <!-- AGGREGATE-STORIES-END -->
 
@@ -13119,8 +13124,13 @@ echo "Risultati: $pass passati, $fail falliti"
 #
 # Protegge i bug chiusi in issue #70, scoperti durante il post-merge della PR #69:
 #
-#   T1  ordinamento story per VALORE (0.3 < 0.5 < 0.6), non per ordine di filesystem
+# T1  ordinamento story per VALORE (0.3 < 0.5 < 0.6), non per ordine di filesystem
 #   T2  l'ordinamento non dipende dall'ordine di creazione dei file
+#      La combinazione di T1+T2 e' il regression test per issue #79: la forma
+#      abbreviata `$Id` in `Sort-Object { [version]$Id }` non viene espansa come
+#      `$_.Id` quando il primo token e' un cast `[version]`; tutti gli item hanno
+#      sort key `$null` e l'ordine degenera a quello di `Get-ChildItem`. Con il fix
+#      `$_.Id` il sort produce ordine numerico indipendente dal filesystem.
 #   T3  idempotenza byte-identica: due run consecutivi non producono alcun diff
 #       (il timestamp "Ultima aggregazione" viene riusato)
 #   T4  round-trip: dopo la scrittura, --check deve uscire 0

@@ -139,7 +139,12 @@ function Get-StateStoryFiles {
             Path = $_.FullName
             Base = $_.BaseName
         }
-    } | Sort-Object { [version]$Id  }
+    # NB: serve `$_.Id` esplicito, NON `$Id` shorthand. Con `[version]` come
+    # primo token, la forma abbreviata non viene espansa da PowerShell 5.1:
+    # tutti gli item hanno sort key `$null`, l'ordine degenera a quello di
+    # `Get-ChildItem` (filesystem-dipendente). Vedi issue #79 e il gate
+    # `scripts/test-aggregate-determinism.sh` (T1+T2).
+    } | Sort-Object { [version]$_.Id }
 }
 
 function Parse-Frontmatter {
