@@ -11,7 +11,7 @@
 
 - Totale file: 51
 - Dimensione totale: 713.8 KB
-- Ultima aggregazione: 2026-10-20 11:47
+- Ultima aggregazione: 2026-10-20 10:14
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
