@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-19 18:23
+> Data: 2026-10-20 13:47
 > Totale file: 51
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,14 +9,14 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 48
-- Dimensione totale: 628.1 KB
-- Ultima aggregazione: 2026-10-19 16:38
+- Totale file: 50
+- Dimensione totale: 639.7 KB
+- Ultima aggregazione: 2026-10-20 13:46
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 29 |
+| docs/ | 31 |
 | scripts/ | 8 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
@@ -1157,9 +1157,9 @@ Apache License
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **8**
-- Stories migrate in state/stories: **3** (done: 3)
+- Stories migrate in state/stories: **4** (done: 3)
 - Ultima sessione migrata: **S31** - AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9)
-- Stories done: 0.6, 0.5, 0.3
+- Stories done: 0.6, 0.3, 0.5
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -4208,7 +4208,12 @@ function Test-Blocks {
             continue
         }
         $existing = $found.Block
-        if ($existing -eq $calculated) {
+        # Normalizza i timestamp mutabili (es. "Ultima aggregazione") prima del
+        # confronto, per garantire idempotenza del --check (analogo al fix
+        # S30/S31 applicato su generate-bundle.ps1 per la riga "> Data:").
+        $existingNorm = $existing -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        $calculatedNorm = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        if ($existingNorm -eq $calculatedNorm) {
             Write-Host "[OK] $path - blocco in sync ($($calculated.Length) chars)" -ForegroundColor Green
         } else {
             Write-Host "[FAIL] $path - blocco drift" -ForegroundColor Red
@@ -8389,8 +8394,9 @@ Ogni story deve avere label GitHub:
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
-| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.7 - Operations runbook + manutenzione DB | in-progress | #39 | - | devops |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
+| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 
 <!-- AGGREGATE-STORIES-END -->
 
