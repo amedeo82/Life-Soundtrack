@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 53
-- Dimensione totale: 747.2 KB
-- Ultima aggregazione: 2026-10-20 13:11
+- Dimensione totale: 744.9 KB
+- Ultima aggregazione: 2026-10-20 11:17
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
