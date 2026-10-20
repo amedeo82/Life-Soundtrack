@@ -330,9 +330,18 @@ function Build-Block-BundleInventory {
         foreach ($m in $matches) { $files += $m.Groups[1].Value }
     }
 
+    # Issue #86 (opzione A): la "Dimensione totale" e calcolata sullo stato pre-write
+    # dell'aggregator (questo script misura i file _prima_ di riscrivere SESSIONS/INDEX/
+    # BACKLOG/BUNDLE), quindi oscilla di 1-2 run dopo ogni merge. Escludiamo i 4 file
+    # aggregator-managed dal calcolo della dimensione: il totale cosi ottenuto e stabile
+    # e coincidente con la somma reale dei rimanenti file. Conteggi per categoria
+    # invariati (i 4 file sono ancora inclusi nel `Totale file` e nelle sottocategorie).
+    $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md')
+
     # Categorize files
     $categories = @{ 'docs/' = 0; 'scripts/' = 0; 'fixtures/' = 0; '.githooks/' = 0; '.github/' = 0; 'root/' = 0 }
     $totalSize = 0
+    $excludedSizeFiles = 0
     foreach ($f in $files) {
         $matched = $false
         foreach ($cat in @('docs/', 'scripts/', 'fixtures/', '.githooks/', '.github/')) {
@@ -342,7 +351,11 @@ function Build-Block-BundleInventory {
         $fullPath = Join-Path $repoRoot $f
         if (Test-Path $fullPath) {
             $size = (Get-Item $fullPath).Length
-            $totalSize += $size
+            if ($aggregatorManaged -contains $f) {
+                $excludedSizeFiles++
+            } else {
+                $totalSize += $size
+            }
         }
     }
 
@@ -355,8 +368,12 @@ function Build-Block-BundleInventory {
     [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
     [void]$sb.AppendLine('> Il contenuto del bundle (sezioni FILE) e generato da `' + 'scripts/generate-bundle.ps1' + '` separatamente.')
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("- Totale file: $($files.Count)")
-    [void]$sb.AppendLine("- Dimensione totale: $totalKB KB")
+    [void]$sb.AppendLine("- Totale file: $($files.Count) (incluso $excludedSizeFiles file aggregator-managed)")
+    $excludedNote = if ($excludedSizeFiles -gt 0) {
+        $excludedNames = ($files | Where-Object { $aggregatorManaged -contains $_ }) -join ', '
+        " (esclusi dal calcolo: $excludedNames)"
+    } else { " (nessuno escluso dal calcolo: i 4 file aggregator-managed non sono in `$files)" }
+    [void]$sb.AppendLine("- Dimensione totale: $totalKB KB$excludedNote")
     [void]$sb.AppendLine("- Ultima aggregazione: $timestamp")
     [void]$sb.AppendLine("- Generatori: `'scripts/aggregate-state.ps1`' (V2) + `'scripts/generate-bundle.ps1`' (content)")
     [void]$sb.AppendLine("")

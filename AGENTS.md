@@ -830,9 +830,10 @@ L'aggregator è la linfa dorsale del workflow parallelo: se produce output diver
 | **Ordinamento per valore** (sessioni per `Number`, story per `[version]$Id`, tie-break su `Base`) | L'ordine di enumerazione del filesystem non è garantito: senza sort per valore lo stesso input produceva `0.3,0.5,0.6` su Linux e `0.6,0.5,0.3` su Windows | T1, T2, T6 |
 | **Idempotenza byte-identica** (il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro) | Senza questo, ogni run produceva un diff e `auto-state-aggregate` committava a vuoto su `main` | T3 |
 | **Degradazione invece di crash** su file `state/` malformati (`Get-Frontmatter`) | Un singolo file corrotto faceva crashare l'intera aggregazione, bloccando anche il workflow post-merge | T5 (più il guard `Get-Frontmatter`) |
+| **`Dimensione totale` indipendente dai file riscritti dall'aggregator** (issue #86, opt A): i 4 file aggregator-managed (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`) sono esclusi dal calcolo della taglia nel blocco BUNDLE inventory, perche' vengono misurati **prima** della riscrittura e oscillano di 1-2 run dopo ogni merge | Senza esclusione: `--check` su main appena mergato segnalava "blocco drift" con blocchi della stessa lunghezza e contenuto identico (rumore puro). Il drift era in `766.6 KB` vs `764.2 KB` su main = 2.4 KB = drift dei 4 file aggregator-managed tra due run consecutivi | T7 (3 assert) |
 
 ```bash
-bash scripts/test-aggregate-determinism.sh    # 9 assert, gate bloccante in CI
+bash scripts/test-aggregate-determinism.sh    # 12 assert, gate bloccante in CI
 ```
 
 **Se tocchi `scripts/aggregate-state.ps1`, il test è bloccante**: eseguilo prima di aprire la PR. Il gate `--check` resta warning-only in CI per incompatibilità residue PS 5.1 vs 7 (issue #63, risolto strutturalmente da #66); il test di determinismo copre invece la stessa classe di bug in modo affidabile, perché confronta l'output **dentro la stessa piattaforma**.
@@ -881,7 +882,9 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.13 — residui post-merge e base stale (issue #76, Sessione 36). Chiusi due buchi: `post-merge.ps1 -Check` non guardava i branch **locali** (due orfani sopravvissuti indisturbati), e `setup-worktree.ps1` non faceva mai `fetch` prima di validare `-BaseBranch origin/main` (base stale **silenziosa**).
+*Ultimo aggiornamento: v1.14 — 'Dimensione totale' inventory esclude i file aggregator-managed (issue #86, opt A). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata escludendo i 4 file che l'aggregator stesso riscrive (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`): misurati pre-write oscillavano di 1-2 run dopo ogni merge producendo `--check drift` con blocchi di uguale lunghezza e contenuto identico (rumore puro). I conteggi per categoria e `Totale file` restano invariati; il blocco inventory dichiara esplicitamente i file esclusi. `scripts/test-aggregate-determinism.sh` esteso con T7 (3 assert → 12 totali) come regression dedicata.
+
+*Precedente v1.13 — residui post-merge e base stale (issue #76, Sessione 36). Chiusi due buchi: `post-merge.ps1 -Check` non guardava i branch **locali** (due orfani sopravvissuti indisturbati), e `setup-worktree.ps1` non faceva mai `fetch` prima di validare `-BaseBranch origin/main` (base stale **silenziosa**).
 - `post-merge.ps1 -Check`: nuova classe di residui "branch LOCALE orfano", con garanzia anti-perdita (0 commit unici **E** non checked-out in nessuna worktree)
 - `setup-worktree.ps1`: `git fetch` prima della validazione del branch base, flag `-SkipFetch`, avviso esplicito quando la base può essere stale, e funzione `Write-Warn` che **mancava** (bug runtime)
 - `scripts/test-issue-76-residue.sh` (nuovo, 9 assert) + gate bloccante in CI; copre il caso di sicurezza: un branch con lavoro non pushato **non deve mai** essere segnalato come orfano

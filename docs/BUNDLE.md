@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 18:12
+> Data: 2026-10-20 18:46
 > Totale file: 57
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,9 +9,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 56
-- Dimensione totale: 764.2 KB
-- Ultima aggregazione: 2026-10-20 16:17
+- Totale file: 56 (incluso 3 file aggregator-managed)
+- Dimensione totale: 554.2 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-20 18:45
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -861,9 +861,10 @@ L'aggregator è la linfa dorsale del workflow parallelo: se produce output diver
 | **Ordinamento per valore** (sessioni per `Number`, story per `[version]$Id`, tie-break su `Base`) | L'ordine di enumerazione del filesystem non è garantito: senza sort per valore lo stesso input produceva `0.3,0.5,0.6` su Linux e `0.6,0.5,0.3` su Windows | T1, T2, T6 |
 | **Idempotenza byte-identica** (il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro) | Senza questo, ogni run produceva un diff e `auto-state-aggregate` committava a vuoto su `main` | T3 |
 | **Degradazione invece di crash** su file `state/` malformati (`Get-Frontmatter`) | Un singolo file corrotto faceva crashare l'intera aggregazione, bloccando anche il workflow post-merge | T5 (più il guard `Get-Frontmatter`) |
+| **`Dimensione totale` indipendente dai file riscritti dall'aggregator** (issue #86, opt A): i 4 file aggregator-managed (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`) sono esclusi dal calcolo della taglia nel blocco BUNDLE inventory, perche' vengono misurati **prima** della riscrittura e oscillano di 1-2 run dopo ogni merge | Senza esclusione: `--check` su main appena mergato segnalava "blocco drift" con blocchi della stessa lunghezza e contenuto identico (rumore puro). Il drift era in `766.6 KB` vs `764.2 KB` su main = 2.4 KB = drift dei 4 file aggregator-managed tra due run consecutivi | T7 (3 assert) |
 
 ```bash
-bash scripts/test-aggregate-determinism.sh    # 9 assert, gate bloccante in CI
+bash scripts/test-aggregate-determinism.sh    # 12 assert, gate bloccante in CI
 ```
 
 **Se tocchi `scripts/aggregate-state.ps1`, il test è bloccante**: eseguilo prima di aprire la PR. Il gate `--check` resta warning-only in CI per incompatibilità residue PS 5.1 vs 7 (issue #63, risolto strutturalmente da #66); il test di determinismo copre invece la stessa classe di bug in modo affidabile, perché confronta l'output **dentro la stessa piattaforma**.
@@ -912,7 +913,9 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.13 — residui post-merge e base stale (issue #76, Sessione 36). Chiusi due buchi: `post-merge.ps1 -Check` non guardava i branch **locali** (due orfani sopravvissuti indisturbati), e `setup-worktree.ps1` non faceva mai `fetch` prima di validare `-BaseBranch origin/main` (base stale **silenziosa**).
+*Ultimo aggiornamento: v1.14 — 'Dimensione totale' inventory esclude i file aggregator-managed (issue #86, opt A). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata escludendo i 4 file che l'aggregator stesso riscrive (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`): misurati pre-write oscillavano di 1-2 run dopo ogni merge producendo `--check drift` con blocchi di uguale lunghezza e contenuto identico (rumore puro). I conteggi per categoria e `Totale file` restano invariati; il blocco inventory dichiara esplicitamente i file esclusi. `scripts/test-aggregate-determinism.sh` esteso con T7 (3 assert → 12 totali) come regression dedicata.
+
+*Precedente v1.13 — residui post-merge e base stale (issue #76, Sessione 36). Chiusi due buchi: `post-merge.ps1 -Check` non guardava i branch **locali** (due orfani sopravvissuti indisturbati), e `setup-worktree.ps1` non faceva mai `fetch` prima di validare `-BaseBranch origin/main` (base stale **silenziosa**).
 - `post-merge.ps1 -Check`: nuova classe di residui "branch LOCALE orfano", con garanzia anti-perdita (0 commit unici **E** non checked-out in nessuna worktree)
 - `setup-worktree.ps1`: `git fetch` prima della validazione del branch base, flag `-SkipFetch`, avviso esplicito quando la base può essere stale, e funzione `Write-Warn` che **mancava** (bug runtime)
 - `scripts/test-issue-76-residue.sh` (nuovo, 9 assert) + gate bloccante in CI; copre il caso di sicurezza: un branch con lavoro non pushato **non deve mai** essere segnalato come orfano
@@ -5004,9 +5007,18 @@ function Build-Block-BundleInventory {
         foreach ($m in $matches) { $files += $m.Groups[1].Value }
     }
 
+    # Issue #86 (opzione A): la "Dimensione totale" e calcolata sullo stato pre-write
+    # dell'aggregator (questo script misura i file _prima_ di riscrivere SESSIONS/INDEX/
+    # BACKLOG/BUNDLE), quindi oscilla di 1-2 run dopo ogni merge. Escludiamo i 4 file
+    # aggregator-managed dal calcolo della dimensione: il totale cosi ottenuto e stabile
+    # e coincidente con la somma reale dei rimanenti file. Conteggi per categoria
+    # invariati (i 4 file sono ancora inclusi nel `Totale file` e nelle sottocategorie).
+    $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md')
+
     # Categorize files
     $categories = @{ 'docs/' = 0; 'scripts/' = 0; 'fixtures/' = 0; '.githooks/' = 0; '.github/' = 0; 'root/' = 0 }
     $totalSize = 0
+    $excludedSizeFiles = 0
     foreach ($f in $files) {
         $matched = $false
         foreach ($cat in @('docs/', 'scripts/', 'fixtures/', '.githooks/', '.github/')) {
@@ -5016,7 +5028,11 @@ function Build-Block-BundleInventory {
         $fullPath = Join-Path $repoRoot $f
         if (Test-Path $fullPath) {
             $size = (Get-Item $fullPath).Length
-            $totalSize += $size
+            if ($aggregatorManaged -contains $f) {
+                $excludedSizeFiles++
+            } else {
+                $totalSize += $size
+            }
         }
     }
 
@@ -5029,8 +5045,12 @@ function Build-Block-BundleInventory {
     [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
     [void]$sb.AppendLine('> Il contenuto del bundle (sezioni FILE) e generato da `' + 'scripts/generate-bundle.ps1' + '` separatamente.')
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("- Totale file: $($files.Count)")
-    [void]$sb.AppendLine("- Dimensione totale: $totalKB KB")
+    [void]$sb.AppendLine("- Totale file: $($files.Count) (incluso $excludedSizeFiles file aggregator-managed)")
+    $excludedNote = if ($excludedSizeFiles -gt 0) {
+        $excludedNames = ($files | Where-Object { $aggregatorManaged -contains $_ }) -join ', '
+        " (esclusi dal calcolo: $excludedNames)"
+    } else { " (nessuno escluso dal calcolo: i 4 file aggregator-managed non sono in `$files)" }
+    [void]$sb.AppendLine("- Dimensione totale: $totalKB KB$excludedNote")
     [void]$sb.AppendLine("- Ultima aggregazione: $timestamp")
     [void]$sb.AppendLine("- Generatori: `'scripts/aggregate-state.ps1`' (V2) + `'scripts/generate-bundle.ps1`' (content)")
     [void]$sb.AppendLine("")
@@ -13319,6 +13339,11 @@ echo "Risultati: $pass passati, $fail falliti"
 #   T4  round-trip: dopo la scrittura, --check deve uscire 0
 #   T5  il fallback del campo `state` mancante e' ASCII (niente sequenze mojibake)
 #   T6  l'ordinamento sessioni e' per numero, con tie-break stabile
+#   T7  "Dimensione totale" del blocco BUNDLE inventory non dipende dai 4 file
+#       aggregator-managed (issue #86, opt A): dopo aver aggiunto 200 righe a
+#       SESSIONS.md, la `Dimensione totale` deve restare identica al baseline.
+#       Include anche: il blocco inventory dichiara l'esclusione esplicita
+#       ("escluso"/"esclusi dal calcolo") e --check resta exit 0 dopo la modifica.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -13530,6 +13555,59 @@ echo "=== T6: ordinamento sessioni per numero ==="
   NUMS="$(session_numbers_in_roadmap "$D")"
   EXPECTED_N="30 32 33 "
   if [ "$NUMS" = "$EXPECTED_N" ]; then ok "sessioni ordinate per numero: $NUMS"; else ng "ordine sessioni inatteso: '$NUMS' invece di '$EXPECTED_N'"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "=== T7: 'Dimensione totale' non dipende dai file riscritti dall'aggregator (issue #86) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"
+  # Aggiunge un generate-bundle.ps1 minimale con 4 file (3 docs/ + 1 root) cosi
+  # l'aggregator ha qualcosa da misurare e il blocco inventory e significativo.
+  cat > "$D/scripts/generate-bundle.ps1" <<'EOF'
+# mock
+$files = @(
+    "README.md",
+    "docs/00-VISION.md",
+    "docs/01-PLATFORMS.md",
+    "docs/SESSIONS.md"
+)
+EOF
+  echo "seed" > "$D/README.md"
+  echo "vision" > "$D/docs/00-VISION.md"
+  echo "plat" > "$D/docs/01-PLATFORMS.md"
+  cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+
+  # Baseline: cattura la riga "Dimensione totale:" corrente in docs/BUNDLE.md.
+  BASELINE_TOTAL="$(grep '^- Dimensione totale:' docs/BUNDLE.md | head -1)"
+
+  # Simula una crescita realistica di SESSIONS.md (~ 4 KB) come quella che produrrebbe
+  # l'aggregator in un run "di settling" (post-merge). SESSIONS.md e uno dei 4 file
+  # aggregator-managed; la dimensione deve restare invariata per costruzione.
+  for _ in $(seq 1 200); do echo 'filler line added by T7 (simulates post-merge drift)'; done >> docs/SESSIONS.md
+
+  run_agg >/dev/null 2>&1
+  AFTER_TOTAL="$(grep '^- Dimensione totale:' docs/BUNDLE.md | head -1)"
+
+  if [ "$BASELINE_TOTAL" = "$AFTER_TOTAL" ]; then
+    ok "Dimensione totale invariata dopo +200 righe in SESSIONS.md: $BASELINE_TOTAL"
+  else
+    ng "Dimensione totale cambiata: '$BASELINE_TOTAL' -> '$AFTER_TOTAL' (drift su SESSIONS.md non escluso)"
+  fi
+
+  # Il blocco inventory deve dichiarare l'esclusione esplicita (singolare o plurale).
+  # NB: 'escluso' (singolare) vs 'esclusi' (plurale). La regex deve accettare entrambi.
+  if grep -Eq -e 'esclusi dal calcolo' -e 'escluso dal calcolo' docs/BUNDLE.md; then
+    ok "blocco inventory dichiara l'esclusione: $(grep -oE 'esclus[oi] dal calcolo[^)]*' docs/BUNDLE.md | head -1)"
+  else
+    ng "blocco inventory non dichiara i file esclusi"
+  fi
+
+  # Round-trip --check dopo la manipolazione di SESSIONS.md.
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "--check exit 0 dopo T7"; else ng "--check exit $rc dopo T7"; echo "$out" | tail -8; fi
 
   cd /; rm -rf "$D"
 }

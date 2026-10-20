@@ -15,6 +15,11 @@
 #   T4  round-trip: dopo la scrittura, --check deve uscire 0
 #   T5  il fallback del campo `state` mancante e' ASCII (niente sequenze mojibake)
 #   T6  l'ordinamento sessioni e' per numero, con tie-break stabile
+#   T7  "Dimensione totale" del blocco BUNDLE inventory non dipende dai 4 file
+#       aggregator-managed (issue #86, opt A): dopo aver aggiunto 200 righe a
+#       SESSIONS.md, la `Dimensione totale` deve restare identica al baseline.
+#       Include anche: il blocco inventory dichiara l'esclusione esplicita
+#       ("escluso"/"esclusi dal calcolo") e --check resta exit 0 dopo la modifica.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -226,6 +231,59 @@ echo "=== T6: ordinamento sessioni per numero ==="
   NUMS="$(session_numbers_in_roadmap "$D")"
   EXPECTED_N="30 32 33 "
   if [ "$NUMS" = "$EXPECTED_N" ]; then ok "sessioni ordinate per numero: $NUMS"; else ng "ordine sessioni inatteso: '$NUMS' invece di '$EXPECTED_N'"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "=== T7: 'Dimensione totale' non dipende dai file riscritti dall'aggregator (issue #86) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"
+  # Aggiunge un generate-bundle.ps1 minimale con 4 file (3 docs/ + 1 root) cosi
+  # l'aggregator ha qualcosa da misurare e il blocco inventory e significativo.
+  cat > "$D/scripts/generate-bundle.ps1" <<'EOF'
+# mock
+$files = @(
+    "README.md",
+    "docs/00-VISION.md",
+    "docs/01-PLATFORMS.md",
+    "docs/SESSIONS.md"
+)
+EOF
+  echo "seed" > "$D/README.md"
+  echo "vision" > "$D/docs/00-VISION.md"
+  echo "plat" > "$D/docs/01-PLATFORMS.md"
+  cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+
+  # Baseline: cattura la riga "Dimensione totale:" corrente in docs/BUNDLE.md.
+  BASELINE_TOTAL="$(grep '^- Dimensione totale:' docs/BUNDLE.md | head -1)"
+
+  # Simula una crescita realistica di SESSIONS.md (~ 4 KB) come quella che produrrebbe
+  # l'aggregator in un run "di settling" (post-merge). SESSIONS.md e uno dei 4 file
+  # aggregator-managed; la dimensione deve restare invariata per costruzione.
+  for _ in $(seq 1 200); do echo 'filler line added by T7 (simulates post-merge drift)'; done >> docs/SESSIONS.md
+
+  run_agg >/dev/null 2>&1
+  AFTER_TOTAL="$(grep '^- Dimensione totale:' docs/BUNDLE.md | head -1)"
+
+  if [ "$BASELINE_TOTAL" = "$AFTER_TOTAL" ]; then
+    ok "Dimensione totale invariata dopo +200 righe in SESSIONS.md: $BASELINE_TOTAL"
+  else
+    ng "Dimensione totale cambiata: '$BASELINE_TOTAL' -> '$AFTER_TOTAL' (drift su SESSIONS.md non escluso)"
+  fi
+
+  # Il blocco inventory deve dichiarare l'esclusione esplicita (singolare o plurale).
+  # NB: 'escluso' (singolare) vs 'esclusi' (plurale). La regex deve accettare entrambi.
+  if grep -Eq -e 'esclusi dal calcolo' -e 'escluso dal calcolo' docs/BUNDLE.md; then
+    ok "blocco inventory dichiara l'esclusione: $(grep -oE 'esclus[oi] dal calcolo[^)]*' docs/BUNDLE.md | head -1)"
+  else
+    ng "blocco inventory non dichiara i file esclusi"
+  fi
+
+  # Round-trip --check dopo la manipolazione di SESSIONS.md.
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "--check exit 0 dopo T7"; else ng "--check exit $rc dopo T7"; echo "$out" | tail -8; fi
 
   cd /; rm -rf "$D"
 }
