@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.12 — Sessione 35 (2026-10-20)
+> Versione 1.13 — Sessione 36 (2026-10-20)
 
 ---
 
@@ -225,6 +225,8 @@ pwsh scripts/post-merge.ps1 -Branch feat/53-worktree-default -DryRun
 # audit read-only dei residui: exit 14 se c'è da pulire, 0 se è pulito
 pwsh scripts/post-merge.ps1 -Check
 ```
+
+L'audit segnala quattro classi di residuo: `main` locale indietro, branch **remoti** merged, worktree attive, e branch **locali** orfani. Un branch locale è orfano solo se ha **zero commit unici** rispetto a `origin/main` **e** non è checked-out in nessuna worktree: un branch con anche un solo commit non pushato non viene mai segnalato, perché il costo di un falso positivo (perdita di lavoro) è incomparabile con quello di un falso negativo. Il `-Check` è read-only: stampa il `git branch -d` suggerito senza eseguirlo.
 
 Lo script è **idempotente**: rieseguirlo su un branch già eliminato esce 0 senza errori. Stampa inoltre il comando esatto per il commento `release:` sull'issue.
 
@@ -879,7 +881,13 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.12 — automazioni post-merge (issue #73, Sessione 35). Chiusi tre buchi della catena post-merge: `auto-status-done` non rimuoveva `agent-ready` (violazione della mutua esclusività di ADR-0007, con il rischio concreto che un altro agent claimasse un lavoro già completato); il commento `release:` era un passo manuale; la cancellazione del branch remoto era manuale. Aggiunti `auto-branch-cleanup` e `stale-claim-sweeper` (TTL 12h di ADR-0006, advisory).
+*Ultimo aggiornamento: v1.13 — residui post-merge e base stale (issue #76, Sessione 36). Chiusi due buchi: `post-merge.ps1 -Check` non guardava i branch **locali** (due orfani sopravvissuti indisturbati), e `setup-worktree.ps1` non faceva mai `fetch` prima di validare `-BaseBranch origin/main` (base stale **silenziosa**).
+- `post-merge.ps1 -Check`: nuova classe di residui "branch LOCALE orfano", con garanzia anti-perdita (0 commit unici **E** non checked-out in nessuna worktree)
+- `setup-worktree.ps1`: `git fetch` prima della validazione del branch base, flag `-SkipFetch`, avviso esplicito quando la base può essere stale, e funzione `Write-Warn` che **mancava** (bug runtime)
+- `scripts/test-issue-76-residue.sh` (nuovo, 9 assert) + gate bloccante in CI; copre il caso di sicurezza: un branch con lavoro non pushato **non deve mai** essere segnalato come orfano
+- Nota: l'allineamento di `main` in post-merge **esisteva già** (passi 2-3 di `post-merge.ps1`); il buco era altrove, nella creazione della worktree
+
+*Precedente v1.12 — automazioni post-merge (issue #73, Sessione 35). `auto-status-done` ora rimuove anche `agent-ready` (ADR-0007) e emette il `release:` automatico; aggiunti `auto-branch-cleanup` e `stale-claim-sweeper` (TTL ADR-0006, advisory); `scripts/validate-workflows.mjs` in CI.*
 - §"📤 Post-merge actions" Livello 1 riscritto come tabella dei 4 workflow con trigger, effetti e motivazione; Livello 2 ridotto alla sola pulizia git locale
 - §"♻️ Pulizia branch post-merge": dichiarato esplicitamente cosa è automatico (ref remoto) e cosa resta all'agente (worktree + branch locale)
 - `scripts/validate-workflows.mjs` (nuovo) + gate bloccante in CI: un errore JS in un workflow si scoprirebbe altrimenti solo a runtime, dopo il merge

@@ -76,6 +76,10 @@ param(
 
     [string]$WorktreePath,
 
+    [string]$Remote = "origin",
+
+    [switch]$SkipFetch,
+
     [switch]$SkipGhCheck,
 
     [switch]$NoPush,
@@ -100,6 +104,11 @@ function Write-Step {
 function Write-Err {
     param([string]$Message)
     Write-Host "[setup-worktree] ERRORE: $Message" -ForegroundColor Red
+}
+
+function Write-Warn {
+    param([string]$Message)
+    Write-Host "[setup-worktree]   WARN $Message" -ForegroundColor Yellow
 }
 
 # === Preflight: verifica ambiente ===
@@ -195,11 +204,40 @@ Write-Step "  Branch di lavoro:$BranchName"
 Write-Step "  Worktree path:   $WorktreePath"
 Write-Step ""
 
-# === 5. Validazione branch base ===
+# === 5. Fetch + validazione branch base ===
+# Issue #76: `-BaseBranch` di default e' `origin/main`, cioe' un remote-tracking
+# ref LOCALE. Senza fetch, se quel ref esiste ma e' stale, la worktree nasce su
+# una base vecchia senza alcun avviso, e l'agente lavora su un branch che non
+# contiene i merge recenti (il danno emerge al merge, quando e' piu' costoso).
+# Il fetch fallito non e' fatale: e' un avviso, non un errore.
+$fetchOk = $true
+if (-not $SkipFetch) {
+    Write-Step "Fetch di $Remote prima di validare il branch base (issue #76)..."
+    $global:LASTEXITCODE = 0
+    git fetch $Remote --prune 2>&1 | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkGray }
+    if ($LASTEXITCODE -ne 0) {
+        $fetchOk = $false
+        Write-Warn "fetch di '$Remote' fallito: la base '$BaseBranch' potrebbe essere stale. Procedo."
+        Write-Host "[setup-worktree]   Se il branch base non esiste, esegui manualmente: git fetch $Remote" -ForegroundColor Cyan
+    } else {
+        Write-Step "Fetch completato." -ForegroundColor Green
+    }
+} else {
+    $fetchOk = $false
+    Write-Step "Fetch SKIPPATO (SkipFetch attivo)." -ForegroundColor Yellow
+}
+
 git rev-parse --verify "$BaseBranch" | Out-Null
 if ($LASTEXITCODE -ne 0) {
-    Write-Err "branch base '$BaseBranch' non trovato. Fetch + retry: git fetch origin"
+    Write-Err "branch base '$BaseBranch' non trovato. Fetch + retry: git fetch $Remote"
     exit 4
+}
+
+# Se il fetch e' stato saltato o fallito e la base punta al remote, la base
+# PUO' essere stale: si avvisa esplicitamente invece di lasciarlo scoprire al merge.
+if (-not $fetchOk -and $BaseBranch -like "$Remote/*") {
+    Write-Warn "attendere, '$BaseBranch' non e' stato aggiornato: la base PUO' essere stale."
+    Write-Host "[setup-worktree]   Verifica con: git fetch $Remote ; git log --oneline $BaseBranch -1" -ForegroundColor Cyan
 }
 
 # === 6. Validazione worktree path non esistente ===
