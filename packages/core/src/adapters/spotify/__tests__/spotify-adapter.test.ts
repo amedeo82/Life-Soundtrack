@@ -66,7 +66,13 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     expect(await db.artists.count()).toBe(3);
     // 10 album: il DEDUP-3 fonda le track #5+#6 ma conserva entrambi gli
     // album sorgenti (Greatest Hits + Greatest Hits Remaster).
-    expect(await db.albums.count()).toBe(10);
+    // 9 album: uno per Track. DEDUP-3 su #4+#5 fonde i due ListenEvent sullo
+    // stesso Track (issue #75), ma l'`albumId` di quel Track resta quello del
+    // primo evento (`Greatest Hits`): il secondo album (`Greatest Hits Remaster`)
+    // non viene creato perché il guard `!track.albumId` salta la risoluzione.
+    // Senza il fix della race, si sarebbero creati 10 album (uno per ciascuno
+    // dei due eventi DEDUP-3) — coerente con la corsa precedente.
+    expect(await db.albums.count()).toBe(9);
 
     // E6 (caso 7): 1 episodio podcast escluso
     expect(summary.warningCounts['adapter.spotify.warn.podcastSkipped']).toBe(1);
@@ -94,12 +100,16 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     expect(await db.listens.filter((l) => l.incognito === true).count()).toBe(1);
 
     // E4/DEDUP-3 (caso 5): #5+#6 fusi ⇒ track "Bohemian Rhapsody" bucket 354000
-    // con 2 ascolti; le altre due varianti restano tracce distinte.
+    // con 2 ascolti (entrambi i ListenEvent persistono, deduplica il Track);
+    // le altre due varianti restano tracce distinte.
     const bohemia = await db.tracks.filter((t) => t.name === 'Bohemian Rhapsody').toArray();
     expect(bohemia).toHaveLength(3);
     const merged = bohemia.find((t) => t.durationMs === 354_000);
     expect(merged).toBeDefined();
-    expect(await db.listens.where('trackId').equals(merged!.id).count()).toBe(1); // DEDUP-3 fonda la track ma i due eventi restano su righe distincte
+    // I due ListenEvent della coppia DEDUP-3 puntano **allo stesso** Track.id:
+    // la corsa tra `Promise.all` di `normalizeEvent` (issue #75) avrebbe potuto
+    // creare due Track distinti se la pipeline non deduplichi l'inflight.
+    expect(await db.listens.where('trackId').equals(merged!.id).count()).toBe(2);
 
     // startedAt = ts - ms_played (§5)
     const first = await db.listens.get('spotify:4u7EnebtmKWzUH433cf5Qv@1710534600000');
@@ -110,8 +120,10 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     expect(first!.ip).toBeNull();
     expect(first!.deviceDetail).toBe('Android OS 13 (samsung, SM-S911B)');
 
-    // Contatori denormalizzati ricalcolati (recount)
-    expect(merged!.listenCount).toBe(1);
+    // Contatori denormalizzati ricalcolati (recount): `merged` ha 2 ListenEvent
+    // che lo puntano (entrambi gli eventi DEDUP-3), dunque `listenCount` deve
+    // essere 2 dopo `recount()` (che somma per `trackId`, non per `canonicalKey`).
+    expect(merged!.listenCount).toBe(2);
   });
 
   it('caso 2: re-import dello stesso file è idempotente (eventKey unico)', async () => {
@@ -261,8 +273,39 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     await recount(db);
     const tracks = await db.tracks.toArray();
     const totalListens = tracks.reduce((sum, t) => sum + t.listenCount, 0);
-    expect(totalListens).toBe(9);
-    const queen = await db.artists.filter((a) => a.name === 'Queen').first();
-    expect(queen!.listenCount).toBe(1);
+    // 10 ListenEvent, ognuno punta alla propria track (DEDUP-3 fonde #4+#5 in
+    // un singolo Track con 2 listen): 10 = 1+1+1+1+2+1+1+1+1. `totalListens`
+    // è la somma su `tracks.listenCount`, NON `db.listens.count()`.
+    expect(totalListens).toBe(10);
+    // Tutti gli ascolti sono stati persistiti (1 podcast escluso dall'adapter).
+    expect(await db.listens.count()).toBe(10);
+    // 8 eventi Queen (10 totale − 1 Q&DB − 1 Some Pop): dopo il recap della
+    // pipeline (issue #75, race condition su Promise.all di normalizeEvent),
+    // gli 8 eventi condividono **un solo** artista "Queen" nel DB e si
+    // distribuiscono su 7 Track distinti (DEDUP-3 su Bohemian Rhapsody 354s).
+    const queenRows = await db.artists.where('name').equals('Queen').toArray();
+    expect(queenRows, 'un solo artista Queen deve sopravvivere al recap').toHaveLength(1);
+    const queen = queenRows[0]!;
+    const queenTracks = await db.tracks.where('artistId').equals(queen.id).toArray();
+    expect(queenTracks).toHaveLength(7);
+    // DEDUP-3 fonda davvero i due eventi Bohemian Rhapsody 354s: il track
+    // fuso deve avere durationMs=354000 e 2 listen puntano ad esso.
+    const mergedBohemia = queenTracks.find((t) => t.durationMs === 354_000);
+    expect(mergedBohemia, 'Track fuso DEDUP-3 deve esistere').toBeDefined();
+    expect(await db.listens.where('trackId').equals(mergedBohemia!.id).count()).toBe(2);
+    // I 6 track Queen non fusi hanno 1 listen ciascuno.
+    const unmerged = queenTracks.filter((t) => t.durationMs !== 354_000);
+    for (const t of unmerged) {
+      expect(await db.listens.where('trackId').equals(t.id).count()).toBe(1);
+    }
+    // Somma coerente: 8 (2 del fuso + 6 × 1 dei non fusi) = totale Queen.
+    expect(queen.listenCount).toBe(8);
+    // Verifica globale: somma tracks.reduce = totale listens e artist.lc
+    // corrisponde alla somma per artistaId.
+    const queenListens = await db.listens
+      .where('trackId')
+      .anyOf(queenTracks.map((t) => t.id))
+      .count();
+    expect(queen.listenCount).toBe(queenListens);
   });
 });
