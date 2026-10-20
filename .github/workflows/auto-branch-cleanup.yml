@@ -1,0 +1,84 @@
+name: auto-branch-cleanup
+
+# Elimina il branch remoto della PR appena mergiata.
+#
+# Motivatione (issue #73): la procedura canonica post-merge in AGENTS.md
+# richiede `git push origin --delete <branch>`, ma e' il passo piu' spesso
+# dimenticato. I branch stale sono la principale fonte di errori "ho lavorato
+# sul branch sbagliato" e di conflitti fantasma in review (vedi AGENTS.md
+# sezione "Pulizia branch post-merge"). Questo workflow replica il checkbox
+# "Delete branch when merging" di GitHub.
+#
+# Guard (l'eliminazione e' distruttiva, quindi ogni caso ambiguo = skip):
+#   - mai `main`, `release/*`, `hotfix/*`
+#   - mai un branch usato come BASE di un'altra PR aperta
+#   - mai un branch di un fork (solo head.repo == base.repo)
+#   - solo branch `feat/*`, `fix/*`, `docs/*` (pattern del workflow agenti)
+#   - idempotente: se il ref non esiste gia', nessun errore
+#
+# Non tocca i branch LOCALI ne le worktree: restano responsabilita' dell'agente
+# che le possiede (vedi scripts/post-merge.ps1).
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged head branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = pr.head.ref;
+            const headRepo = pr.head.repo && pr.head.repo.full_name;
+
+            // Solo branch del repo di default: mai toccare i fork.
+            if (headRepo !== `${owner}/${repo}`) {
+              core.info(`Skipped: head belongs to fork '${headRepo}'.`);
+              return;
+            }
+
+            // Branch protetti.
+            if (branch === 'main' || /^(release|hotfix)\//.test(branch)) {
+              core.info(`Skipped: protected branch '${branch}'.`);
+              return;
+            }
+
+            // Solo i pattern del workflow agenti.
+            if (!/^(feat|fix|docs)\/[0-9A-Za-z._-]+$/.test(branch)) {
+              core.info(`Skipped: '${branch}' does not match feat/*, fix/* or docs/*.`);
+              return;
+            }
+
+            // Non eliminare se e' la base di un'altra PR aperta.
+            const dependents = await github.paginate(github.rest.pulls.list, {
+              owner, repo, state: 'open', base: branch, per_page: 100,
+            });
+            if (dependents.length > 0) {
+              core.info(
+                `Skipped: '${branch}' is the base of ${dependents.length} open PR(s): ` +
+                dependents.map(p => `#${p.number}`).join(', ')
+              );
+              return;
+            }
+
+            try {
+              await github.rest.git.deleteRef({ owner, repo, ref: `heads/${branch}` });
+              core.info(`Deleted remote branch '${branch}'.`);
+            } catch (e) {
+              if (e.status === 422 || e.status === 404) {
+                core.info(`Branch '${branch}' already gone (idempotent).`);
+              } else {
+                core.warning(`Failed to delete '${branch}': ${e.message}`);
+              }
+            }

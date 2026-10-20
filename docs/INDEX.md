@@ -35,7 +35,7 @@
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.11 | Protocollo per agenti (Sessione 34: determinismo e idempotenza dell'aggregator [issue #70] — ordinamento per valore, timestamp riusato, `Get-Frontmatter` null-safe, lenient match reso visibile + `--strict`, gate bloccante `test-aggregate-determinism.sh`; Sessione 33: §"♻️ Pulizia branch post-merge" come procedura canonica 8 passi + `scripts/post-merge.ps1` + `scripts/test-post-merge.sh`; Sessione 30: cleanup workflow v1.9; Sessione 27: §"🌳 Worktree workflow" + §"📤 Post-merge actions"; Sessione 26: §"🧹 Pulizia stash post-housekeeping" + §"🔀 Transizioni tra branch" + D.26.x; Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge" — originariamente introdotta) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.12 | Protocollo per agenti (Sessione 35: automazioni post-merge [issue #73] — `auto-status-done` rimuove anche `agent-ready` [ADR-0007] + `release:` automatico, nuovi `auto-branch-cleanup` e `stale-claim-sweeper` [TTL ADR-0006], `scripts/validate-workflows.mjs` in CI; Sessione 34: determinismo e idempotenza dell'aggregator [issue #70]; Sessione 33: §"♻️ Pulizia branch post-merge" come procedura canonica 8 passi + `scripts/post-merge.ps1` + `scripts/test-post-merge.sh`; Sessione 30: cleanup workflow v1.9; Sessione 27: §"🌳 Worktree workflow" + §"📤 Post-merge actions"; Sessione 26: §"🧹 Pulizia stash post-housekeeping" + §"🔀 Transizioni tra branch" + D.26.x; Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge" — originariamente introdotta) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -76,6 +76,7 @@
 | 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟡 | - |
 | 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
 | 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟡 | - |
+| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -115,9 +116,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **11**
+- Sessioni migrate in state/sessions: **12**
 - Stories migrate in state/stories: **3** (done: 3)
-- Ultima sessione migrata: **S34** - Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante
+- Ultima sessione migrata: **S35** - Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)
 - Stories done: 0.3, 0.5, 0.6
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.

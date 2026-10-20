@@ -1,11 +1,23 @@
 name: auto-status-done
 
 # Trigger al merge di una PR. Applica `status:done` a tutte le issue
-# chiuse dalla PR (Closes/Fixes/Resolves nel body). Rimuove anche
-# `in-progress` e `status:in-review`.
+# chiuse dalla PR (Closes/Fixes/Resolves nel body) e completa la
+# transizione di stato secondo ADR-0007:
 #
-# Failure mode: se l'action fallisce, l'issue resta in `status:in-review`
-# (visibile e recuperabile manualmente). L'action NON blocca il merge.
+#   agent-ready / in-progress / status:in-review  ->  status:done
+#
+# Issue #73: prima venivano rimossi solo `in-progress` e `status:in-review`.
+# Se un agente apriva la PR dimenticando di rimuovere `agent-ready`, al merge
+# l'issue restava con `agent-ready + status:done`: stato non previsto dalla
+# macchina a stati (che li vuole mutuamente esclusivi) e, peggio, l'issue
+# rimaneva nella query dei candidati, quindi un altro agente poteva claimare
+# un lavoro gia' completato.
+#
+# Issue #73: emette anche il commento `release:` che AGENTS.md rende
+# obbligatorio. L'agent-id viene estratto dall'ultimo commento `claim:` dell'issue,
+# cosi' il rilascio del claim non dipende da un passo manuale.
+#
+# Idempotente: un rerun non duplica label ne' commenti.
 
 on:
   pull_request:
@@ -13,11 +25,12 @@ on:
 
 jobs:
   apply-status-done:
-    # Esegui solo se la PR è stata mergiata (non solo chiusa)
+    # Esegui solo se la PR e' stata mergiata (non solo chiusa)
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      pull-requests: read
     steps:
       - name: Parse linked issues and apply status:done
         uses: actions/github-script@v7
@@ -25,6 +38,8 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const body = pr.body || '';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
             // Regex per "Closes #N", "Fixes #N", "Resolves #N" (case-insensitive)
             const regex = /(?:Closes|Fixes|Resolves)\s+#(\d+)/gi;
@@ -38,42 +53,79 @@ jobs:
 
             core.info(`Found ${issueNumbers.length} linked issue(s): ${issueNumbers.map(n => '#' + n).join(', ')}`);
 
+            // Etichette da rimuovere per completare la transizione ADR-0007.
+            // `agent-ready` e' inclusa: lasciarla insieme a `status:done` viola
+            // la mutua esclusivita' e mantiene l'issue tra i candidati al claim.
+            const labelsToRemove = ['agent-ready', 'in-progress', 'status:in-review'];
+            const mergeSha = pr.merge_commit_sha;
+            const prNumber = pr.number;
+
+            async function findAgentId(issueNumber) {
+              // Ultimo commento `claim:` = claim attivo (non ancora rilasciato).
+              try {
+                const comments = await github.paginate(github.rest.issues.listComments, {
+                  owner, repo, issue_number: issueNumber, per_page: 100,
+                });
+                const claim = comments
+                  .filter(c => (c.body || '').startsWith('claim:'))
+                  .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+                  .pop();
+                if (!claim) return null;
+                // "claim: <AGENT-ID> (UTC ...) -- worktree: ..." -> <AGENT-ID>
+                const m = (claim.body || '').match(/^claim:\s*(\S+)/i);
+                return m ? m[1] : null;
+              } catch (e) {
+                core.warning(`  Cannot read comments of #${issueNumber}: ${e.message}`);
+                return null;
+              }
+            }
+
             for (const issueNumber of issueNumbers) {
               try {
-                // Rimuovi `in-progress` (se presente, ignora se non esiste)
-                try {
-                  await github.rest.issues.removeLabel({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: issueNumber,
-                    name: 'in-progress',
-                  });
-                  core.info(`  Removed 'in-progress' from #${issueNumber}`);
-                } catch (e) {
-                  // Ignora: label probabilmente non presente
+                for (const label of labelsToRemove) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner, repo, issue_number: issueNumber, name: label,
+                    });
+                    core.info(`  Removed '${label}' from #${issueNumber}`);
+                  } catch (e) {
+                    // Ignora: label probabilmente non presente
+                  }
                 }
 
-                // Rimuovi `status:in-review` (se presente, ignora se non esiste)
-                try {
-                  await github.rest.issues.removeLabel({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: issueNumber,
-                    name: 'status:in-review',
-                  });
-                  core.info(`  Removed 'status:in-review' from #${issueNumber}`);
-                } catch (e) {
-                  // Ignora: label probabilmente non presente
-                }
-
-                // Aggiungi `status:done`
                 await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issueNumber,
-                  labels: ['status:done'],
+                  owner, repo, issue_number: issueNumber, labels: ['status:done'],
                 });
                 core.info(`  Added 'status:done' to #${issueNumber}`);
+
+                // Commento `release:` idempotente: salta se esiste gia' per questa PR.
+                const agentId = await findAgentId(issueNumber);
+                const marker = `PR #${prNumber} merged`;
+                const existing = await github.paginate(github.rest.issues.listComments, {
+                  owner, repo, issue_number: issueNumber, per_page: 100,
+                });
+                if (existing.some(c => (c.body || '').includes(marker))) {
+                  core.info(`  Release comment already present on #${issueNumber}, skipping.`);
+                  continue;
+                }
+
+                const who = agentId || '<AGENT-ID>';
+                const when = pr.merged_at || new Date().toISOString();
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: issueNumber,
+                  body: [
+                    `release: ${who} - PR #${prNumber} merged (${mergeSha}) - ${when}`,
+                    '',
+                    `Transitioni applicate automaticamente da \`auto-status-done.yml\`:`,
+                    `- \`agent-ready\`, \`in-progress\`, \`status:in-review\` -> \`status:done\` (ADR-0007)`,
+                    '',
+                    'Residui post-merge (branch/worktree):',
+                    '```powershell',
+                    `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber ${issueNumber}`,
+                    '```',
+                  ].join('\n'),
+                });
+                core.info(`  Posted release comment on #${issueNumber}`);
               } catch (err) {
                 core.warning(`Failed to apply status:done to #${issueNumber}: ${err.message}`);
               }

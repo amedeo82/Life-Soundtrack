@@ -127,9 +127,14 @@ $files = @(
     # prune). Test associato con 9 scenari (T1..T9) su repo temporanei.
     "scripts/post-merge.ps1",
     "scripts/test-post-merge.sh",
-    # Test di regressione per il determinismo dell'aggregator (issue #70): ordinamento
+# Test di regressione per il determinismo dell'aggregator (issue #70): ordinamento
     # per valore, idempotenza byte-identica, round-trip --check. Gate bloccante in CI.
     "scripts/test-aggregate-determinism.sh",
+    # Validatore dei workflow GitHub Actions (Sessione 35 / issue #73): estrae i
+    # blocchi `script:` di github-script e ne verifica la sintassi JS con node,
+    # emulando il wrapper async reale. Gate bloccante in CI: un errore JS in un
+    # workflow si scoprirebbe altrimenti solo a runtime, dopo il merge.
+    "scripts/validate-workflows.mjs",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",
