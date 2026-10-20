@@ -121,6 +121,12 @@ $files = @(
     "scripts/setup-worktree.ps1",
     # Test per setup-worktree.ps1 (8 scenari bash, mock gh in tmpdir).
     "scripts/test-setup-worktree.sh",
+    # Procedura canonica post-merge (Sessione 33 / Sessione 32 review): script che
+    # automatizza i 7 passi di AGENTS.md §"Pulizia branch post-merge" (zero-WIP,
+    # worktree, fetch, allineamento main, verifica merge, delete remoto, delete locale,
+    # prune). Test associato con 9 scenari (T1..T9) su repo temporanei.
+    "scripts/post-merge.ps1",
+    "scripts/test-post-merge.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",

@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 09:50
-> Totale file: 49
+> Data: 2026-10-20 11:04
+> Totale file: 51
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 48
-- Dimensione totale: 638.1 KB
-- Ultima aggregazione: 2026-10-19 17:20
+- Totale file: 50
+- Dimensione totale: 690 KB
+- Ultima aggregazione: 2026-10-20 11:04
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 29 |
-| scripts/ | 8 |
+| scripts/ | 10 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
 | .github/ | 3 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.9 — Sessione 30 (2026-10-19)
+> Versione 1.10 — Sessione 33 (2026-10-20)
 
 ---
 
@@ -223,44 +223,117 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 - **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina di stati delle issue (status:*)")
 - **Push early obbligatorio**: dopo `git checkout -b feat/<N>-<desc>`, eseguire `git push -u origin <branch>` (anche con zero commit). Visibilità + backup + anti-collision. Vedi §"🪝 Pre-commit hook" per il setup / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 
-## ♻️ Pulizia branch post-merge *(obbligatoria)*
+## ♻️ Pulizia branch post-merge — procedura canonica *(vincolante)*
 
-Dopo che una PR è stata mergata e verificata in `main`, il branch remoto `feat/*` o `fix/*` non serve più e **deve essere eliminato** per evitare accumulo di ref stale, drift tra agenti paralleli e confusione su "qual è la source of truth".
+Dopo il merge di una PR su `main` l'agente che ha mergiato (o, in mancanza, il reviewer) esegue **una sola procedura**, automatizzata in `scripts/post-merge.ps1` e testata in `scripts/test-post-merge.sh`.
 
-**Chi esegue**: l'agente che ha mergato la PR (o, in mancanza, il reviewer al momento del merge). Se l'agente usa una worktree, deve anche rimuovere la worktree locale (`git worktree remove`).
+**L'ordine è parte della procedura**: allineare `main` e smontare la worktree *prima* di eliminare i branch. La sequenza inversa produce `not fully merged`, branch orfani, falsi "non mergato" e working tree su branch già eliminato.
 
-**Comandi minimi** (eseguire sul repo locale dopo il merge):
+### Ordine obbligatorio (8 passi)
+
+| # | Passo | Operazione | Failure mode prevenuto |
+|---|-------|------------|------------------------|
+| 0 | Zero-WIP guard | `git status --porcelain` filtrato sulle righe tracked: se sporco, `stash push -u` o stop (exit 10) | E3/E4/E5 — transizione distruttiva con lavoro non committato (issue #45) |
+| 1 | Worktree **prima** del delete locale | `git worktree remove --force <path>` (auto-rilevata da `git worktree list`) | `git branch -d` fallisce se il branch è checked-out in una worktree |
+| 2 | Fetch | `git fetch origin --prune` | `origin/main` non contiene il merge commit: ogni check successivo mente |
+| 3 | Allineamento `main` | `git checkout main` + `git merge --ff-only origin/main` | E4 (branch inquinato), F7 (lavorare da main stale), `not fully merged` |
+| 4 | Verifica merge | `gh pr list --head <branch> --state merged` (autorevole) **oppure** `git merge-base --is-ancestor <branch> origin/main` | cancellazione di un branch **non** mergato → perdita di lavoro |
+| 5 | Delete remoto | `git push origin --delete <branch>` | branch orfano su `origin` |
+| 6 | Delete locale | `git branch -d <branch>`; se rifiutato (merge squash), `-D` **solo se** `git cherry main <branch>` non rileva contenuto nuovo | perdita di contenuto nei merge squash/rebase |
+| 7 | Prune + audit | `git remote prune origin`, `git worktree prune`, `post-merge.ps1 -Check` | ref stale e worktree zombie che inquinano i check dei sessioni successive |
+
+### Esecuzione (comando unico)
 
 ```powershell
-# 1. Conferma che il branch è mergato in main
-git branch -r --merged main
-# (deve mostrare il branch tra gli elencati)
+# dalla working copy principale — NON da dentro la worktree (lo script lo rifiuta, exit 15)
+pwsh scripts/post-merge.ps1 -Branch feat/53-worktree-default -IssueNumber 53
 
-# 2. Elimina il branch remoto
-git push origin --delete feat/<issue-number>-<descrizione>
+# anteprima, nessuna modifica
+pwsh scripts/post-merge.ps1 -Branch feat/53-worktree-default -DryRun
 
-# 3. Elimina il branch locale corrispondente (obbligatorio se mergato in main)
-git branch -d feat/<issue-number>-<descrizione>
-
-# 4. Pulisci ref remote stale nella tua working copy
-git remote prune origin
+# audit read-only dei residui: exit 14 se c'è da pulire, 0 se è pulito
+pwsh scripts/post-merge.ps1 -Check
 ```
+
+Lo script è **idempotente**: rieseguirlo su un branch già eliminato esce 0 senza errori. Stampa inoltre il comando esatto per il commento `release:` sull'issue.
+
+### Equivalente manuale (solo se lo script non è disponibile)
+
+```powershell
+# 0. zero-WIP: se `git status --porcelain` mostra righe tracked, STAI FERMO (o stash -u)
+# 1. worktree PRIMA (obbligatorio se il branch è checked-out li)
+git worktree list                      # individuare la worktree del branch
+git worktree remove --force ../ls-<N>-<slug>
+
+# 2. fetch: senza questo, `origin/main` non contiene il merge commit
+git fetch origin --prune
+
+# 3. allineare main (prima di qualunque delete)
+git checkout main
+git merge --ff-only origin/main         # MAI `git pull` e MAI `git reset --hard`
+
+# 4. verificare il merge CONTRO origin/main (non contro il main locale)
+git merge-base --is-ancestor <branch> origin/main
+#    oppure, se il merge è squash (l'antenato non coincide): gh pr list --head <branch> --state merged
+
+# 5. eliminare il remoto
+git push origin --delete <branch>
+
+# 6. eliminare il locale (solo dopo il passo 4)
+git branch -d <branch>                 # se rifiutato: git cherry main <branch> per capire perché
+
+# 7. prune
+git remote prune origin
+git worktree prune
+```
+
+### Regole di sicurezza (non negoziabili)
+
+- **Mai** `git push --delete` o `git branch -D` prima del passo 4. Nel dubbio: `-Check` + `gh pr list`.
+- **Mai** eseguire la procedura da dentro la worktree: lì il branch è checked-out, quindi `git branch -d` fallisce e `git checkout main` può essere rifiutato perché `main` è già checked-out nella working copy principale. Lo script esce 15 e stampa il path corretto.
+- **Mai** con WIP non committato in gioco: `-Stash` salva e prosegue, altrimenti stop (exit 10) con zero azioni distruttive.
+- Se `main` locale diverge da `origin/main`: **nessun reset**, nessun force, nessuna perdita. Uscita 11 e risoluzione manuale esplicita.
+- `-AllowUnmerged` è una via di fuga: solo con giustifica scritta nel PR o nell'issue.
+- `-Force` è una via di fuga: solo per cherry-pick/hotfix, mai di routine.
+
+### Exit code (utili a hook e CI)
+
+| Code | Significato | Azione richiesta |
+|------|-------------|------------------|
+| 0 | ok, oppure audit pulito | — |
+| 2 | errore di ambiente o parametri invalidi | correggi invocazione |
+| 10 | WIP non committato rilevato, **nessuna azione eseguita** | `-Stash` o stash manuale |
+| 11 | `main` locale divergente, **nessuna azione distruttiva** | risolvi a mano (mai reset automatico) |
+| 12 | merge non verificato, **branch preservato** | `-IssueNumber <N>` o `-AllowUnmerged` con giustifica |
+| 13 | `git branch -d` rifiutato con contenuto non in base | ispeziona `git cherry`, poi `-D` **solo se** il lavoro è altrove |
+| 14 | `-Check`: residui post-merge presenti | esegui la procedura sui branch elencati |
+| 15 | eseguito da dentro una worktree | rilancia dalla working copy principale |
+
+### Copertura dei test
+
+```bash
+bash scripts/test-post-merge.sh    # 9 scenari su repo git temporanei (T1..T9)
+```
+
+| Scenario | Cosa dimostra |
+|----------|--------------|
+| T1 | merge commit + worktree: `main` allineato, worktree smontata, branch eliminati |
+| T2b | HEAD sul branch da eliminare (caso peggiore): `main` allineata comunque |
+| T3 | branch non mergato: exit 12, branch e remoto **preservati** |
+| T4 | WIP tracked: exit 10, zero azioni distruttive; con `-Stash` procedura completa |
+| T5 | merge squash: fail chiusa senza evidenza, poi `-AllowUnmerged` con fallback `git cherry` |
+| T6 | `main` divergente: exit 11, branch non toccato |
+| T7 | audit `-Check`: exit 14 con residui, exit 0 dopo la pulizia |
+| T8 | idempotenza della procedura |
+| T9 | esecuzione da dentro la worktree: exit 15, branch intatto |
 
 **Eccezioni** (NON eliminare):
 
 - Branch di release (`release/*`, `hotfix/*` di una versione pubblicata ancora supportata)
-- Branch usato come base da un'altra PR aperta (verificare con `git branch -r --no-merged main`)
+- Branch usato come base da un'altra PR aperta (verificare con `git branch -r --no-merged origin/main`)
 - Branch di lavoro abbandonato ma ancora citato in una issue `blocked` o `needs-spec`
 
-**Auto-check** (sostituisce o integra la "Verifica statale post-merge"):
-
-```powershell
-git branch -r --merged main | Select-String -NotMatch 'main$|HEAD'
-```
-
-Se restituisce uno o più branch, **sono da eliminare** (a meno di eccezioni documentate sopra). Gate minimo: **nessun branch remoto mergato deve restare in `origin`** salvo eccezioni.
-
-**Perché è importante**: con il workflow parallelo (più agenti su più issue contemporaneamente, vedi `11-BACKLOG.md` §"Priorità di lavorazione"), i branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma in fase di review.
+**Perché è importante**: con il workflow parallelo (più agenti su più issue contemporaneamente, vedi `11-BACKLOG.md` §"Priorità di lavorazione"), i branch stale sono la principale fonte di errori "ho lavorato sul branch sbagliato" e di conflitti fantasma in fase di review. I check vanno fatti **sempre** contro `origin/main`: il `main` locale è stale per definizione dopo un merge fatto dall'interfaccia GitHub, e un `main` locale stale trasforma ogni verifica in un falso negativo.
 
 ## 🧹 Pulizia stash post-housekeeping *(obbligatoria se si droppano stash)*
 
@@ -512,10 +585,10 @@ Se esce con exit ≠ 0, rigenerare il bundle e committarlo nella stessa PR.
 **Auto-check post-merge** (subito dopo il merge, prima di considerare chiusa l'operazione):
 
 ```powershell
-git branch -r --merged main | Select-String -NotMatch 'main$|HEAD'
+pwsh scripts/post-merge.ps1 -Check          # audit read-only: residui post-merge (exit 14 con sporco, 0 pulito)
 ```
 
-Se l'output elenca branch `feat/*` o `fix/*` (oltre a `main` e `HEAD`), eliminarli con `git push origin --delete <branch>` (vedi §"♻️ Pulizia branch post-merge").
+Se l'audit elenca worktree attive o branch `feat/*` / `fix/*` merged-orfani, eseguire la procedura canonica (§"♻️ Pulizia branch post-merge"). **Mai** confrontare contro il `main` locale: dopo un merge via GitHub UI il `main` locale è stale e ogni check diverge (vedi Tabella F7 nell'errore E3/E4/E5 del D.26.4).
 
 **Verifica statale post-merge** (opzionale ma consigliata per il reviewer): dopo il merge, aprire `docs/INDEX.md` e `docs/11-BACKLOG.md` e confermare che lo "Stato del progetto" rifletta `git log --oneline -5 main`. Se diverge, aprire una PR `docs:` immediata di riallineamento (è esattamente quello che è successo in Sessione 12, vedi `SESSIONS.md`).
 
@@ -585,7 +658,9 @@ git push
     └── scripts/                 ← utility
         ├── generate-bundle.ps1      ← snapshot docs in BUNDLE.md
         ├── generate-fixtures.mjs    ← generator deterministico dei fixture (10-TESTING §3.5)
-        └── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
+        ├── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
+        ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
+        └── test-post-merge.sh      ← 9 scenari (T1..T9) su repo temporanei che coprono E3/E4/E5/F7 + squash
 
 ## 🚀 Primo task di un agente
 
@@ -594,7 +669,7 @@ git push
 3. **Crea una worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4.
 4. Leggi la specifica del task e implementa con test (nella worktree)
 5. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
-6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done` + GH Action `auto-state-aggregate` rigenera SESSIONS/BACKLOG/INDEX/BUNDLE; tu fai `release:` comment + **branch cleanup obbligatorio (locale e remoto)** + `git worktree remove --force ../ls-<N>-<slug>` (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge")
+6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done` + GH Action `auto-state-aggregate` rigenera SESSIONS/BACKLOG/INDEX/BUNDLE; tu fai `release:` comment + **procedura canonica post-merge** (`pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` dalla working copy principale: allinea `main`, smonta la worktree, elimina i branch locale e remoto) (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge")
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -660,6 +735,10 @@ Il vecchio flusso `git checkout -b feat/<N>-<slug>` su main è **deprecato** ma 
 - Le difese advisory (`.githooks/post-checkout` + `scripts/safe-branch-switch.ps1`) restano in piedi come safety net ma sono **ridondanti** se la worktree è usata correttamente
 - Vedi §"⚠️ Deprecazione" per il piano di rimozione
 
+### Cleanup della worktree (post-merge)
+
+La worktree va rimossa **dalla working copy principale**, mai da dentro se stessa: `scripts/post-merge.ps1` esegue il cleanup completo (worktree → `main` → branch) ed esce 15 se invocato da dentro una worktree (§"♻️ Pulizia branch post-merge").
+
 ## 📤 Post-merge actions
 
 Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
@@ -673,10 +752,8 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 3. **Tu devi**:
    - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
-   - Cancellare il branch remoto: `git push origin --delete <branch>`
-   - Cancellare il branch locale corrispondente: `git branch -d <branch>` (solo se è stato mergato in `main`)
-   - Pulire i ref remoti obsoleti: `git remote prune origin`
-   - Se hai usato una worktree (vedi §"🌳 Worktree workflow"): rimuoverla con `git worktree remove --force ../ls-<N>-<slug>`
+   - **Eseguire la procedura canonica** di §"♻️ Pulizia branch post-merge" (in pratica: `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>`), che si occupa nell'ordine corretto di worktree → fetch → allineamento `main` → verifica merge → delete remoto → delete locale → prune
+   - Lo script stampa a video il comando esatto `gh issue comment <N> --body "release: ..."` da usare; copiarlo e rilanciarlo
 
 ### Livello 3 — Verifica (post-merge sanity check)
 
@@ -686,13 +763,13 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
      pwsh scripts/aggregate-state.ps1 --check
      # 4b. Bundle in sync
      pwsh scripts/generate-bundle.ps1 --check
-     # 4c. Nessun branch remoto merged-orfano
-     git branch -r --merged origin/main | Select-String -NotMatch 'main$|HEAD'
+     # 4c. Nessun residuo post-merge (worktree attive, branch merged, main locale stale)
+     pwsh scripts/post-merge.ps1 -Check    # exit 14 se c'e' da pulire, 0 se pulito
      ```
    Se uno qualsiasi fallisce, **intervieni**:
    - (4a) drift su SESSIONS/BACKLOG/INDEX/BUNDLE → `pwsh scripts/aggregate-state.ps1` localmente + commit (doc-sync di emergenza; il workflow dovrebbe averlo gia fatto)
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
-   - (4c) branch orfani → `git push origin --delete <branch>` + `git branch -d <branch>` (vedi §"♻️ Pulizia branch post-merge")
+   - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
 
 ### Regola fondamentale — NO commit su `main`
 
@@ -786,6 +863,8 @@ git worktree list                   # non in worktree di un altro agente? (F8, p
 
 Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
 
+**Opzionale (se si ritorna dopo un merge di un altro agente)**: audit dei residui post-merge prima di iniziare lavoro nuovo — exit 14 indica branch/worktree merged-orfani da pulire con `pwsh scripts/post-merge.ps1 -Check` (vedi §"♻️ Pulizia branch post-merge").
+
 ## 📞 Contatti
 
 - Project owner: `@amedeo82`
@@ -795,7 +874,14 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: Sessione 30 (2026-10-19) — v1.9: cleanup completo del workflow (issue #60 + audit v1.9); dettagli:
+*Ultimo aggiornamento: v1.10 — procedura canonica post-merge (bug review: mancava l'aggiornamento di `main` prima della cancellazione dei branch e l'ordine worktree→fetch→allineamento non era prescritto). Dettagli:
+- Nuovo `scripts/post-merge.ps1` e `scripts/test-post-merge.sh` (9 scenari T1..T9)
+- §"♻️ Pulizia branch post-merge" completamente ristrutturata in 8 passi ordinati (zero-WIP → worktree → fetch → allineamento main → verifica merge → delete remoto → delete locale → prune) con tabella dei failure mode E/F + eccezioni + exit code
+- §"📤 Post-merge actions" Livello 2/3, §"📝 Checklist di sincronizzazione" auto-check post-merge, §"🚀 Primo task" step 6 aggiornati per riferirsi al nuovo script
+- §"🛡️ Session start checklist": aggiunto audit post-merge opzionale (`post-merge.ps1 -Check`)
+- Bug fix nell'analogia condivisa: `git branch -r --merged main` (che usava il main locale stale) sostituito da check contro `origin/main`
+
+*Precedente v1.9 Sessione 30 (2026-10-19) — cleanup completo del workflow (issue #60 + audit v1.9); dettagli:
 - §"🚀 Primo task" step 3 aggiornato: worktree setup via `setup-worktree.ps1 <N>` invece di `git checkout -b` (post-#53); step 6 aggiornato per riflettere il 3-livello post-merge (auto-status-done + auto-state-aggregate + agent release)
 - §"📤 Post-merge actions" completamente ristrutturato in 3 livelli (automatizzazioni GH Action / issue / verifica) con regola "NO commit su main" piu esplicita; aggiunto il check del auto-state-aggregate (prima mancante)
 - §"🔄 Lazy-state aggregation" aggiornato a v1.9: include V2 (5 target) + robustness section (S30 fix CRLF + workflow parse error); aggiunto il dettaglio del GH Action auto-state-aggregate (prima implicito)
@@ -1106,7 +1192,7 @@ Apache License
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.6 | Protocollo per agenti (Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.10 | Protocollo per agenti (Sessione 33: §"♻️ Pulizia branch post-merge" ristrutturata in procedura canonica 8 passi + `scripts/post-merge.ps1` automatizzato + `scripts/test-post-merge.sh` 9 scenari T1..T9; Sessione 30: cleanup workflow v1.9; Sessione 27: §"🌳 Worktree workflow" + §"📤 Post-merge actions"; Sessione 26: §"🧹 Pulizia stash post-housekeeping" + §"🔀 Transizioni tra branch" + D.26.x; Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge" — originariamente introdotta) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -1145,6 +1231,7 @@ Apache License
 | 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟡 | - |
 | 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
 | 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟡 | - |
+| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1184,9 +1271,9 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **9**
+- Sessioni migrate in state/sessions: **10**
 - Stories migrate in state/stories: **3** (done: 3)
-- Ultima sessione migrata: **S32** - Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza
+- Ultima sessione migrata: **S33** - Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch)
 - Stories done: 0.6, 0.5, 0.3
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2922,6 +3009,144 @@ git status --porcelain                       # 4 file modificati (AGENTS.md, 12-
 - **#47** → worktree opzionale: superseded da #53 (DONE) + AGENTS.md v1.9 §"🌳 Worktree workflow"
 - **#53** → mitigation strutturale per #47+#45 (worktree come default)
 - **#10** → originaria segnalazione non-determinismo, chiusa S17; opzione A ora §9.8
+```
+
+### Sessione 33 - Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch)
+
+- **Data**: 2026-10-20
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
+
+```
+
+# Sessione 33 — Procedura canonica post-merge
+
+## Sintesi
+
+Il Boss, durante una review, ha identificato un gap critico in `AGENTS.md` §"♻️ Pulizia branch post-merge": **la procedura non aggiornava `main` prima di eliminare i branch**, e usava `git branch -r --merged main` (locale, stale) invece di `origin/main` (fonte di verità post-merge via GitHub UI). Risultato: `git branch -d` rifiutava con `not fully merged`, `git checkout main` poteva fallire, le worktree rimanevano registrate.
+
+Questa sessione sostituisce le 4 istruzioni manuali con una procedura canonica **automatizzata e testata**:
+
+- **`scripts/post-merge.ps1`** — 7 passi con safety guard (zero-WIP, worktree prima, fetch, allineamento main, verifica merge robusta al squash, delete locale con fallback `git cherry`, prune)
+- **`scripts/test-post-merge.sh`** — 9 scenari (T1..T9) su repo git temporanei: merge commit + worktree, HEAD sul branch, WIP, squash, main divergente, audit, idempotenza, exec da worktree
+
+## Trigger
+
+Review Boss: *"secondo me manca un passaggio, dopo il merge della pr su main manca l'aggiornamento del main prima della eliminazione dei branch locali e remoti usati per creare la pr. verifica e dimmi se mi sbaglio"*. Verifica confermava il gap, più 2 difetti correlati:
+
+1. `git branch -d` confronta contro **HEAD** (non contro main); con main stale o con il branch ancora checked-out → rifiuto
+2. `git branch -r --merged main` confronta contro il **main locale**, stale dopo un merge via GitHub UI → falso negativo
+3. (flusso worktree) `git branch -d` fallisce sempre finché la worktree non è stata smontata, ma l'elenco metteva `branch -d` **prima** di `worktree remove`
+
+## Claim
+
+Issue **#68** creata per questo lavoro (non esisteva una story `agent-ready` dedicata: è un bug di governance del workflow, segnalato dal Boss in review).
+
+- Claim `kilo-HP-ELITEBOOK-post-merge-review` (comment ID `6287410309`, 2026-10-20T09:03:08Z, unico claim → vincitore per unanimità)
+- Branch `docs/33-post-merge-procedure` in worktree `../ls-33-post-merge-procedure` (creata da `origin/main` = `1edf8a8`, merge PR #67)
+- Working copy principale lasciata intatta: era su `feat/66-aggregate-state-nodejs` (lavoro di un altro agente), quindi le modifiche sono state spostate in worktree **prima** di ogni commit — questo evita la categoria E3/E4/E5 (vedi D.26.4)
+
+## Decisioni (D.33.x)
+
+| # | Decisione | Motivazione |
+|---|---|---|
+| D.33.1 | Script + test invece di sola prosa | "Procedura di lavoro completa e corretta che impedisca rotture" → automazione + 9 scenari su repo temporanei > checklist testuale |
+| D.33.2 | Script da working copy principale, exit 15 se da worktree | Refuse invece di improvise (evita `git branch -d` su branch checked-out) |
+| D.33.3 | Verifica merge via `gh pr list` come fonte autorevole, fallback `git merge-base` ancestrale, advisory `git branch -r --merged` | Il fallback ancestrale mente sui merge squash; gh API è robusta a qualsiasi strategy |
+| D.33.4 | Fallback `git cherry <base> <branch>` per `git branch -d` rifiutato | Con squash il branch non è antenato di base, ma se `git cherry` non rileva `+`, allora il contenuto è già in base → `-D` sicuro |
+| D.33.5 | Test in bash con `pwsh/powershell` come dipendenza | Coerente con gli altri test del repo (`test-safe-branch-switch.sh`, `test-setup-worktree.sh`) |
+| D.33.6 | Zero-WIP guard al passo 0 | Defensive contro E3/E4/E5 (story #45); `-Stash` salva, altrimenti stop con exit 10 |
+| D.33.7 | `-Check` come audit read-only, exit 14 con residui | Gate CI/CLI: rileva branch merged-orfani, worktree attive, main locale stale |
+| D.33.8 | `-AllowUnmerged` come via di fuga documentata, non default | Fail-closed: meglio chiedere conferma scritta che perdere un branch con contenuto nuovo |
+
+## Modifiche
+
+### 1. `AGENTS.md` (v1.9 → v1.10)
+- **§"♻️ Pulizia branch post-merge"**: completamente ristrutturata come procedura canonica vincolante
+  - Tabella 8 passi (zero-WIP → worktree → fetch → allineamento main → verifica merge → delete remoto → delete locale → prune) con failure mode E/F
+  - Sottosezione "Esecuzione (comando unico)" con `pwsh scripts/post-merge.ps1 -Branch ... -IssueNumber ...`
+  - "Equivalente manuale" (preservato per ambienti senza pwsh)
+  - "Regole di sicurezza" + tabella exit code
+  - "Copertura dei test" (T1..T9)
+- **§"📤 Post-merge actions" Livello 2/3**: ora puntano allo script
+- **§"📝 Checklist auto-check post-merge"**: `git branch -r --merged main` (stale!) → `post-merge.ps1 -Check`
+- **§"🚀 Primo task" step 6**: reference al nuovo script
+- **§"🌳 Worktree workflow"**: subsection "Cleanup della worktree (post-merge)" — spiega exit 15
+- **§"🛡️ Session start checklist"**: aggiunto audit opzionale (`post-merge.ps1 -Check`)
+- **Repo structure tree**: aggiunti i 2 nuovi script
+- **Footer changelog**: aggiornato a v1.10
+
+### 2. `scripts/post-merge.ps1` (nuovo, 510 righe)
+- Comment-based help con `.EXAMPLE` x3 e tabella exit code
+- Helper `Invoke-Git`/`Invoke-Exe` (exit code driven, nessun `throw` su stderr nativo)
+- 7 passi + audit `-Check`
+- Link a `gh` come fonte autorevole quando disponibile
+
+### 3. `scripts/test-post-merge.sh` (nuovo, 9 scenari su repo `git init` temporanei)
+- T1, T2b: main allineato + worktree rimossa + branch eliminati
+- T3: branch non mergato preservato (exit 12)
+- T4: WIP tracked → exit 10; con `-Stash` → exit 0 + stash creato
+- T5: merge squash → exit 12 senza verifica, exit 0 con `-AllowUnmerged` + fallback cherry
+- T6: main locale divergente → exit 11, branch intatto
+- T7: `-Check` exit 14 con residui, exit 0 a residuo zero
+- T8: idempotenza della procedura
+- T9: esecuzione da dentro la worktree → exit 15
+
+### 4. `scripts/generate-bundle.ps1` ($files)
+- Aggiunto `scripts/post-merge.ps1` e `scripts/test-post-merge.sh` (51 file totali)
+
+### 5. `docs/BUNDLE.md` (rigenerato)
+- Include v1.10 di AGENTS.md + i 2 nuovi script
+- `pwsh scripts/generate-bundle.ps1 --check` exit 0
+
+### 6. `docs/13-ADR/` + nuovo ADR (TBD)
+- L'eventuale decisione "post-merge script vs procedura manuale" può essere promossa a ADR retrospettiva; per ora documentata in questa sessione
+
+## Verifica (D.12.1 pre-merge)
+
+```powershell
+bash scripts/test-post-merge.sh                  # 29/29 PASS
+pwsh scripts/post-merge.ps1 -Check               # exit 14 con 3 worktree attive altrove (atteso)
+pwsh scripts/post-merge.ps1 -Branch feat/66 -DryRun  # elenca i passi senza modificare
+pwsh scripts/generate-bundle.ps1 --check         # exit 0
+pwsh scripts/aggregate-state.ps1 --check         # exit 0
+git status --porcelain                            # M AGENTS.md, M docs/BUNDLE.md, ?? scripts/{post-merge.ps1,test-post-merge.sh}
+```
+
+## Conflitti potenziali
+
+| File | Rischio | Risoluzione |
+|---|---|---|
+| `AGENTS.md` | Conflitto con `feat/66-aggregate-state-nodejs` (parallela) | Branch non mergato, rischio basso; Boss decide sequenza merge |
+| `docs/BUNDLE.md` | Auto-regen post-merge (V2) | Standard |
+| `scripts/post-merge.ps1` + `test-post-merge.sh` | Nuovi, nessuna PR aperta li tocca | OK |
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 33-1 | `git branch -d` confronta contro HEAD, non contro main | ✅ fixato: script forza `git checkout main` + `merge --ff-only origin/main` PRIMA di step 6 |
+| 33-2 | `git branch -r --merged main` usa main locale stale | ✅ fixato: script e docs ora `origin/main` |
+| 33-3 | Worktree non rimossa prima di `branch -d` | ✅ fixato: passo 1 sposta `worktree remove` prima del passo 6 |
+| 33-4 | Merge squash → `branch -d` rifiutato con contenuto già in base | ✅ fixato: fallback `git cherry` + `-D` condizionato |
+| 33-5 | Script eseguibile da worktree → `branch -d` fallisce | ✅ fixato: refuse esplicito (exit 15) con comando corretto stampato |
+| 33-6 | Main divergente → `merge --ff-only` rifiutato, agent potrebbe forzare reset | ✅ fixato: exit 11 esplicito, nessuna azione distruttiva |
+| 33-7 | WIP dirty durante la procedura → rischio E3/E4/E5 (story #45) | ✅ fixato: zero-WIP guard al passo 0 con exit 10; `-Stash` per recupero |
+| 33-8 | Esecuzione non idempotente (eseguito 2×) | ✅ fixato: test T8 esplicito |
+
+## Note reviewer
+
+- Script `pwsh` (compatibile 5.1+ e 7+). Test in bash con fallback automatico: usa `pwsh` se presente, altrimenti `powershell`.
+- File di scope del bundle: dopo la modifica a `scripts/generate-bundle.ps1 $files`, `docs/BUNDLE.md` rigenerato in sync.
+- **Issue #68**: creata in questa sessione, claim attivo, chiusa dalla PR via `Closes #68`.
+- Working copy principale intatta: nessuna modifica lasciata sul branch di altri agenti.
+
+## Cross-refs
+
+- **Issue #65** (ultima PR mergata + audit v1.9): il contesto "sessioni di governance"
+- **Story #39** (`feat/39-story-0-7-operations-runbook-manutenzion`): la worktree attiva è sua, NON toccata da questa sessione
+- **Story #40** (`feat/40-story-0-4-ui-import-onboarding-benvenuto`): altra worktree attiva, NON toccata
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -11306,6 +11531,802 @@ if [ "$FAIL" -gt 0 ]; then
   exit 1
 fi
 exit 0
+
+
+===== FILE: scripts/post-merge.ps1 =====
+
+<#
+.SYNOPSIS
+    Procedura canonica post-merge: allinea `main`, verifica il merge, elimina branch/worktree locali e remoti.
+
+.DESCRIPTION
+    scripts/post-merge.ps1 esegue l'unica procedura di cleanup post-merge ammessa dal repo
+    (AGENTS.md sezione "Pulizia branch post-merge"), in modo idempotente e difensivo.
+
+    Ordine obbligatorio dei passi (ognuno e' una difesa contro una classe di errore nota):
+
+      0. Zero-WIP guard        -> evita E3/E4/E5 (transizioni distruttive con working tree sporco)
+      1. Worktree PRIMA       -> `git branch -d` fallisce se il branch e' checked-out in una worktree
+      2. fetch --prune        -> `origin/main` deve contenere il merge commit, altrimenti i check mentono
+      3. allineamento `main`   -> `git checkout main` + `git merge --ff-only origin/main`
+      4. verifica merge       -> contro `origin/main` e/o via `gh` (robusta al merge squash)
+      5. delete remoto        -> `git push origin --delete <branch>`
+      6. delete locale        -> `git branch -d` con fallback `git cherry` per merge squash
+      7. prune + audit        -> `git remote prune`, `git worktree prune`, `--check` finale
+
+    Lo script NON esegue mai operazioni distruttive irreversibili su dati non committati:
+    in assenza di -Stash/-Force si ferma con exit 10 se trova lavoro non committato.
+
+.PARAMETER Branch
+    Branch della PR mergata (es. feat/53-worktree-default). Obbligatorio salvo il solo uso di -Check.
+
+.PARAMETER IssueNumber
+    Numero della issue associata. Se `gh` e' disponibile, viene usato per verificare in modo
+    autorevole (via GitHub API) che esista una PR MERGED con questa head, e per stampare il
+    merge commit SHA da usare nel commento `release:`.
+
+.PARAMETER WorktreePath
+    Percorso della worktree da rimuovere (default ../ls-<N>-<slug>). Se omesso, viene
+    auto-rilevato da `git worktree list`.
+
+.PARAMETER Remote
+    Nome del remote. Default: origin.
+
+.PARAMETER BaseBranch
+    Branch base su cui la PR e' stata mergata. Default: main.
+
+.PARAMETER Check
+    Modalita' audit: non modifica nulla, elenca i branch/worktree stale e le deriva' stato.
+    Exit 1 se c'e' qualcosa da pulire, 0 se tutto e' pulito. Usabile come gate locale/CI.
+
+.PARAMETER DryRun
+    Stampa i comandi che verrebbero eseguiti senza eseguirli.
+
+.PARAMETER Stash
+    Se il working tree ha modifiche tracked, esegue `git stash push -u` invece di abortire.
+
+.PARAMETER Force
+    Procede anche con WIP non committato (NON consigliato) e con `git branch -D` quando
+    `git branch -d` viene rifiutato ma il contenuto risulta gia' in base.
+
+.PARAMETER AllowUnmerged
+    Salta la verifica di merge (solo con giustifica scritta: merge manuale, PR chiusa senza
+    merge, rollback). Il default e' fallire: cancellare un branch non mergato perde lavoro.
+
+.PARAMETER SkipPrune
+    Salta `git remote prune` / `git worktree prune` (solo debug).
+
+.PARAMETER Help
+    Mostra questo help.
+
+.EXAMPLE
+    pwsh scripts/post-merge.ps1 -Branch feat/53-worktree-default -IssueNumber 53 -WorktreePath ../ls-53-worktree-default
+
+.EXAMPLE
+    pwsh scripts/post-merge.ps1 -Branch feat/49-safe-branch-switch -DryRun
+
+.EXAMPLE
+    pwsh scripts/post-merge.ps1 -Check
+    # audit: exit 1 se ci sono branch merged-orfani, worktree attive, o main locale stale
+
+.NOTES
+    Exit code:
+      0  successo (o audit pulito)
+      2  errore di ambiente (non repo git, git mancante, parametri invalidi)
+      10 WIP non committato rilevato (fix: -Stash, oppure stash manuale)
+      11 `main` locale non allineabile a `origin/main` (divergente): nessuna azione distruttiva
+      12 merge non verificato (branch non e' un antenato di origin/main e nessuna PR merged trovata)
+      13 `git branch -d` rifiutato e contenuto non riconosciuto come gia' presente in base
+      14 `-Check` ha trovato residui post-merge da pulire
+      15 esecuzione tentata da dentro una worktree invece che dalla working copy principale
+
+    Compatibilita': PowerShell 5.1+ (Windows PowerShell) e PowerShell 7+.
+#>
+
+param(
+    [Parameter(Position = 0)]
+    [string]$Branch,
+
+    [int]$IssueNumber,
+
+    [string]$WorktreePath,
+
+    [string]$Remote = "origin",
+
+    [string]$BaseBranch = "main",
+
+    [switch]$Check,
+
+    [switch]$DryRun,
+
+    [switch]$Stash,
+
+    [switch]$Force,
+
+    [switch]$AllowUnmerged,
+
+    [switch]$SkipPrune,
+
+    [switch]$Help
+)
+
+$helpRequested = $Help -or ($args -contains '-h') -or ($args -contains '--help')
+if ($helpRequested) {
+    Get-Help $MyInvocation.MyCommand.Path -Full | Out-String | Write-Host
+    exit 0
+}
+
+# Continue: gli errori dei comandi nativi (git/gh) arrivano come ErrorRecord su stderr e
+# vengono gestiti tramite gli exit code, non tramite le eccezioni PowerShell.
+$ErrorActionPreference = "Continue"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+function Write-Step { param([string]$Message, [string]$Color = "Cyan"); Write-Host "[post-merge] $Message" -ForegroundColor $Color }
+function Write-Ok   { param([string]$Message); Write-Host "[post-merge]   OK   $Message" -ForegroundColor Green }
+function Write-Warn { param([string]$Message); Write-Host "[post-merge]   WARN $Message" -ForegroundColor Yellow }
+function Write-Err  { param([string]$Message); Write-Host "[post-merge]   ERR  $Message" -ForegroundColor Red }
+function Write-Cmd  { param([string]$Message); Write-Host "[post-merge]   >    $Message" -ForegroundColor DarkGray }
+
+function Invoke-Git {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$GitArgs,
+        [switch]$AllowFail,
+        [switch]$Quiet
+    )
+
+    $cmd = ($GitArgs -join ' ')
+    if (-not $Quiet) { Write-Cmd "git $cmd" }
+
+    if ($script:DryRun) {
+        return [pscustomobject]@{ ExitCode = 0; Output = ""; Lines = @() }
+    }
+
+    $global:LASTEXITCODE = 0
+    $raw = & git @GitArgs 2>&1
+    $code = $LASTEXITCODE
+    $text = (($raw | Out-String) -replace "`r", "").Trim()
+    $lines = @()
+    if ($text) { $lines = @($text -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }
+
+    if ($code -ne 0 -and -not $AllowFail) {
+        throw "git $cmd -> exit $code`n$text"
+    }
+
+    return [pscustomobject]@{ ExitCode = $code; Output = $text; Lines = $lines }
+}
+
+function Invoke-Exe {
+    param(
+        [Parameter(Mandatory = $true)][string]$Exe,
+        [string[]]$ExeArgs = @(),
+        [switch]$AllowFail
+    )
+
+    if ($script:DryRun) { return [pscustomobject]@{ ExitCode = 0; Output = "" } }
+
+    $global:LASTEXITCODE = 0
+    $raw = & $Exe @ExeArgs 2>&1
+    $code = $LASTEXITCODE
+    $text = (($raw | Out-String) -replace "`r", "").Trim()
+
+    if ($code -ne 0 -and -not $AllowFail) {
+        throw "$Exe $($ExeArgs -join ' ') -> exit $code`n$text"
+    }
+
+    return [pscustomobject]@{ ExitCode = $code; Output = $text }
+}
+
+function Get-TrackedDirty {
+    $res = Invoke-Git -GitArgs @("status", "--porcelain") -Quiet
+    # Una riga tracked e' qualsiasi riga che non inizia con '??' (untracked).
+    return @($res.Lines | Where-Object { $_ -notmatch '^\?\?' })
+}
+
+function Get-Worktrees {
+    $res = Invoke-Git -GitArgs @("worktree", "list", "--porcelain") -Quiet -AllowFail
+    $items = @()
+    $cur = $null
+    foreach ($line in $res.Lines) {
+        if ($line -like "worktree *") {
+            $cur = [pscustomobject]@{ Path = $line.Substring(9); Branch = $null; Main = ($items.Count -eq 0) }
+            $items += $cur
+        } elseif ($line -like "branch refs/heads/*" -and $null -ne $cur) {
+            $cur.Branch = $line.Substring(18)
+        }
+    }
+    return $items
+}
+
+function Normalize-Path {
+    param([string]$Path)
+    if (-not $Path) { return "" }
+    return ($Path -replace '\\', '/').TrimEnd('/').ToLowerInvariant()
+}
+
+# === Preflight ===
+if (-not (Test-Path ".git")) {
+    Write-Err "questa directory non e' un repo git (manca .git). Esegui da dentro la repo."
+    exit 2
+}
+
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Err "git non trovato nel PATH."
+    exit 2
+}
+
+if (-not $Check -and [string]::IsNullOrWhiteSpace($Branch)) {
+    Write-Err "specificare -Branch <branch> (oppure usare -Check per l'audit)."
+    Write-Host "Uso: pwsh scripts/post-merge.ps1 -Branch feat/53-x [-IssueNumber 53] [-DryRun] [-Check]" -ForegroundColor Cyan
+    exit 2
+}
+
+$script:DryRun = [bool]$DryRun
+$repoRoot = (Invoke-Git -GitArgs @("rev-parse", "--show-toplevel") -Quiet).Output
+if ($script:DryRun) { $repoRoot = (Get-Location).Path }
+$currentBranch = (Invoke-Git -GitArgs @("branch", "--show-current") -Quiet).Output
+if ($script:DryRun) { $currentBranch = (git branch --show-current).Trim() }
+
+Write-Step "repo=$repoRoot branch=$currentBranch base=$BaseBranch remote=$Remote"
+
+# Guard: la procedura gira SEMPRE dalla working copy principale. Da dentro una worktree
+# il branch non puo' essere cancellato (`git branch -d` fallisce: branch checked out) e
+# `git checkout main` puo' fallire (main gia' checked-out altrove): refuse instead of improvise.
+$worktrees = Get-Worktrees
+$mainWorktree = $worktrees | Where-Object { $_.Main } | Select-Object -First 1
+$isLinkedWorktree = $null -ne $mainWorktree -and (Normalize-Path $mainWorktree.Path) -ne (Normalize-Path $repoRoot)
+
+if ($isLinkedWorktree) {
+    if ($Check) {
+        Write-Warn "esecuzione da dentro una worktree: l'audit puo' segnalare falsi positivi (vedi la worktree corrente)"
+    } else {
+        Write-Err "questa e' una worktree collegata, non la working copy principale."
+        Write-Host "[post-merge]   La procedura post-merge va eseguita dalla working copy principale, altrimenti:" -ForegroundColor Yellow
+        Write-Host "[post-merge]     - git branch -d fallisce (branch checked-out nella worktree)" -ForegroundColor DarkGray
+        Write-Host "[post-merge]     - git checkout main puo' fallire (main checked-out nella working copy principale)" -ForegroundColor DarkGray
+        Write-Host "[post-merge]   Rilancia da:" -ForegroundColor Yellow
+        Write-Host "[post-merge]     pwsh scripts/post-merge.ps1 -Branch $Branch -WorktreePath <worktree> $(if ($IssueNumber -gt 0) { "-IssueNumber $IssueNumber" })" -ForegroundColor Cyan
+        Write-Host "[post-merge]   (cwd: $($mainWorktree.Path))" -ForegroundColor Cyan
+        exit 15
+    }
+}
+
+# =====================================================================
+# MODALITA' CHECK - audit read-only
+# =====================================================================
+if ($Check) {
+    Write-Step "AUDIT post-merge (read-only)"
+    $residui = 0
+
+    Invoke-Git -GitArgs @("fetch", $Remote, "--prune") -Quiet -AllowFail | Out-Null
+
+    # (a) main locale stale
+    $behind = (Invoke-Git -GitArgs @("rev-list", "--count", "$BaseBranch..$Remote/$BaseBranch") -Quiet -AllowFail).Output
+    if ($behind -and $behind -ne "0") {
+        Write-Warn "$BaseBranch locale e' $behind commit indietro rispetto a $Remote/$BaseBranch"
+        Write-Host "[post-merge]         git checkout $BaseBranch ; git merge --ff-only $Remote/$BaseBranch" -ForegroundColor DarkGray
+        $residui++
+    } else {
+        Write-Ok "$BaseBranch locale allineato a $Remote/$BaseBranch"
+    }
+
+    # (b) branch remoti merged-orfani (advisory: ancestry-based, vale solo per merge non-squash)
+    $mergedRemote = (Invoke-Git -GitArgs @("branch", "-r", "--merged", "$Remote/$BaseBranch") -Quiet -AllowFail).Lines
+    $stale = @($mergedRemote | Where-Object { $_ -match "^\s*$Remote/(feat|fix)/" })
+    foreach ($b in $stale) {
+        Write-Warn "branch merged-orfano: $($b.Trim())"
+        $residui++
+    }
+
+    # (c) worktree attive
+    $worktrees = Get-Worktrees
+    foreach ($wt in $worktrees) {
+        if ($wt.Path -ne $repoRoot) {
+            Write-Warn "worktree attiva: $($wt.Path) (branch=$($wt.Branch))"
+            $residui++
+        }
+    }
+
+    if ($residui -eq 0) {
+        Write-Ok "nessun residuo post-merge"
+        exit 0
+    }
+
+    Write-Step "residui rilevati: $residui (vedi AGENTS.md sezione 'Pulizia branch post-merge')" -ForegroundColor Yellow
+    exit 14
+}
+
+# =====================================================================
+# PROCEDURA CANONICA
+# =====================================================================
+
+# --- PASSO 0: zero-WIP guard (E3/E4/E5) ---
+Write-Step "0/7 Zero-WIP guard"
+$dirty = Get-TrackedDirty
+if ($dirty.Count -gt 0) {
+    if ($Stash) {
+        $subject = "pre-post-merge $Branch ($(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ'))"
+        Write-Warn "WIP tracked rilevato ($($dirty.Count) file): eseguo git stash push -u"
+        Invoke-Git -GitArgs @("stash", "push", "-u", "-m", $subject) | Out-Null
+        Write-Ok "stash creato: $subject (recuperabile con git stash pop)"
+    } elseif ($Force) {
+        Write-Warn "WIP tracked presente ($($dirty.Count) file) ma -Force attivo: procedo senza stash (rischio DATA-LOSS)"
+        $dirty | ForEach-Object { Write-Host "[post-merge]         $_" -ForegroundColor DarkGray }
+    } else {
+        Write-Err "WIP non committato rilevato: la procedura si ferma (E3/E4/E5)."
+        $dirty | ForEach-Object { Write-Host "[post-merge]         $_" -ForegroundColor DarkGray }
+        Write-Host "[post-merge]   Risolvi con una di queste:" -ForegroundColor Yellow
+        $stamp = Get-Date -Format 'yyyy-MM-dd'
+        Write-Host "[post-merge]     pwsh scripts/post-merge.ps1 -Branch $Branch -Stash" -ForegroundColor Cyan
+        Write-Host "[post-merge]     git stash push -u -m wip-$stamp" -ForegroundColor Cyan
+        exit 10
+    }
+} else {
+    Write-Ok "working tree pulito (nessun tracked dirty)"
+}
+
+# --- PASSO 1: worktree PRIMA (git branch -d fallisce se il branch e' checked-out li) ---
+Write-Step "1/7 Worktree"
+$targetWt = $worktrees | Where-Object { $_.Branch -eq $Branch -and -not $_.Main } | Select-Object -First 1
+
+if ($targetWt) {
+    $wtPath = if ($WorktreePath) { $WorktreePath } else { $targetWt.Path }
+    $wtDirty = @()
+    if (-not $script:DryRun -and (Test-Path -LiteralPath $wtPath)) {
+        $global:LASTEXITCODE = 0
+        $raw = & git -C $wtPath status --porcelain 2>&1
+        $wtDirty = @(($raw | Out-String) -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -notmatch '^\?\?' })
+    }
+
+    if ($wtDirty.Count -gt 0 -and -not $Force) {
+        Write-Err "worktree '$wtPath' ha modifiche non committate: non la rimuovo (potrebbe contenere WIP)."
+        $wtDirty | ForEach-Object { Write-Host "[post-merge]         $_" -ForegroundColor DarkGray }
+        Write-Host "[post-merge]   Se il lavoro e' gia' stato pushato/commitato altrove, usa -Force." -ForegroundColor Yellow
+        exit 10
+    }
+
+    Write-Warn "branch '$Branch' e' checked-out nella worktree '$wtPath': la rimuovo PRIMA del delete locale"
+    Invoke-Git -GitArgs @("worktree", "remove", "--force", $wtPath) | Out-Null
+    Write-Ok "worktree rimossa: $wtPath"
+} elseif ($WorktreePath -and (Test-Path -LiteralPath $WorktreePath)) {
+    Write-Step "rimozione worktree esplicita: $WorktreePath"
+    Invoke-Git -GitArgs @("worktree", "remove", "--force", $WorktreePath) | Out-Null
+} else {
+    Write-Ok "nessuna worktree associata a '$Branch'"
+}
+
+# --- PASSO 2: fetch (origin/main deve contenere il merge commit) ---
+Write-Step "2/7 Fetch"
+Invoke-Git -GitArgs @("fetch", $Remote, "--prune") | Out-Null
+Write-Ok "refs aggiornate da $Remote (prune incluso)"
+
+# --- PASSO 3: allineamento main (checkout + merge --ff-only, mai pull) ---
+Write-Step "3/7 Allineamento $BaseBranch"
+
+Invoke-Git -GitArgs @("rev-parse", "--verify", "refs/heads/$BaseBranch") -Quiet -AllowFail | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Warn "$BaseBranch locale non esiste: lo creo da $Remote/$BaseBranch"
+    Invoke-Git -GitArgs @("checkout", "-b", $BaseBranch, "$Remote/$BaseBranch") | Out-Null
+}
+
+if ($currentBranch -ne $BaseBranch) {
+    Write-Step "checkout $BaseBranch (da '$currentBranch')"
+    Invoke-Git -GitArgs @("checkout", $BaseBranch) | Out-Null
+}
+
+$ff = Invoke-Git -GitArgs @("merge", "--ff-only", "$Remote/$BaseBranch") -AllowFail -Quiet
+if ($ff.ExitCode -ne 0) {
+    $counts = (Invoke-Git -GitArgs @("rev-list", "--left-right", "--count", "$BaseBranch...$Remote/$BaseBranch") -Quiet -AllowFail).Output
+    Write-Err "$BaseBranch locale non e' fast-forwardable verso $Remote/$BaseBranch (divergente o locale avanti)."
+    Write-Host "[post-merge]         ahead/behind: $counts" -ForegroundColor DarkGray
+    Write-Host "[post-merge]   Nessuna azione distruttiva eseguita. Risolvi manualmente:" -ForegroundColor Yellow
+    Write-Host "[post-merge]     git log --oneline --left-right $BaseBranch...$Remote/$BaseBranch" -ForegroundColor Cyan
+    exit 11
+}
+$head = (Invoke-Git -GitArgs @("rev-parse", "--short", "HEAD") -Quiet).Output
+Write-Ok "$BaseBranch allineato a $Remote/$BaseBranch (HEAD=$head)"
+
+$aheadCount = (Invoke-Git -GitArgs @("rev-list", "--count", "$Remote/$BaseBranch..$BaseBranch") -Quiet -AllowFail).Output
+if ($aheadCount -and $aheadCount -ne "0") {
+    Write-Warn "$BaseBranch locale ha $aheadCount commit non presenti in $Remote/$BaseBranch (commit locale non pushato)."
+    Write-Host "[post-merge]         Se non e' intenzionale, il prossimo lavoro partira' da una base sbagliata." -ForegroundColor DarkGray
+}
+
+# --- PASSO 4: verifica merge ---
+Write-Step "4/7 Verifica merge di '$Branch'"
+
+$mergeCommitOid = $null
+$verified = $false
+$verifySource = ""
+
+# (a) fonte autorevole: GitHub API (robusta a squash/rebase/merge-commit)
+if ($IssueNumber -gt 0 -and (Get-Command gh -ErrorAction SilentlyContinue)) {
+    Write-Step "verifica via gh (PR merged con head='$Branch')"
+    $gh = Invoke-Exe -Exe "gh" -ExeArgs @("pr", "list", "--head", $Branch, "--state", "merged", "--json", "number,mergeCommit,mergedAt", "--limit", "1") -AllowFail
+    if ($gh.ExitCode -eq 0 -and $gh.Output) {
+        try {
+            $prs = @($gh.Output | ConvertFrom-Json)
+            if ($prs.Count -gt 0) {
+                $verified = $true
+                $verifySource = "gh: PR #$($prs[0].number) merged il $($prs[0].mergedAt)"
+                $mergeCommitOid = $prs[0].mergeCommit.oid
+            }
+        } catch {
+            Write-Warn "output gh non parsabile: $($_.Exception.Message)"
+        }
+    }
+}
+
+# (b) fallback: ancestralita' (vale solo per merge non-squash)
+if (-not $verified) {
+    $localExists = (Invoke-Git -GitArgs @("rev-parse", "--verify", "--quiet", "refs/heads/$Branch") -Quiet -AllowFail).ExitCode -eq 0
+    $remoteExists = (Invoke-Git -GitArgs @("rev-parse", "--verify", "--quiet", "refs/remotes/$Remote/$Branch") -Quiet -AllowFail).ExitCode -eq 0
+
+    if ($localExists -or $remoteExists) {
+        $ref = if ($localExists) { $Branch } else { "$Remote/$Branch" }
+        $anc = Invoke-Git -GitArgs @("merge-base", "--is-ancestor", $ref, "$Remote/$BaseBranch") -AllowFail -Quiet
+        if ($anc.ExitCode -eq 0) {
+            $verified = $true
+            $verifySource = "git merge-base --is-ancestor $ref $Remote/$BaseBranch"
+        }
+    } else {
+        $verified = $true
+        $verifySource = "branch gia' assente localmente e su $Remote (nessun lavoro da perdere)"
+    }
+}
+
+if (-not $verified) {
+    if ($AllowUnmerged) {
+        Write-Warn "merge NON verificato ma -AllowUnmerged attivo: procedo (documenta la giustifica nel PR/issue)"
+    } else {
+        Write-Err "non riesco a verificare che '$Branch' sia mergato in $Remote/$BaseBranch."
+        Write-Host "[post-merge]   Se la PR e' stata mergata con SQUASH, l'antenato non coincide: usa -IssueNumber <N>" -ForegroundColor Yellow
+        Write-Host "[post-merge]   (la verifica via GitHub API e' l'unica affidabile in quel caso)." -ForegroundColor Yellow
+        Write-Host "[post-merge]   Se il merge e' avvenuto ma non e' ancora pushato: git fetch $Remote --prune" -ForegroundColor Cyan
+        Write-Host "[post-merge]   Solo con giustifica scritta: -AllowUnmerged" -ForegroundColor Cyan
+        exit 12
+    }
+} else {
+    Write-Ok "merge verificato ($verifySource)"
+}
+
+if ($mergeCommitOid) {
+    Write-Ok "merge commit: $mergeCommitOid"
+}
+
+# Advisory: `git branch -r --merged origin/main` NON elenca i branch squash-merged.
+$inMergedList = (Invoke-Git -GitArgs @("branch", "-r", "--merged", "$Remote/$BaseBranch") -Quiet -AllowFail).Lines |
+    Where-Object { $_.Trim() -eq "$Remote/$Branch" }
+if ($inMergedList) {
+    Write-Ok "presente nell'elenco git branch -r --merged $Remote/$BaseBranch"
+} else {
+    Write-Warn "non elencato da git branch -r --merged $Remote/$BaseBranch (normale se il merge e' squash)"
+}
+
+# --- PASSO 5: delete remoto ---
+Write-Step "5/7 Delete remoto"
+$delRemote = Invoke-Git -GitArgs @("push", $Remote, "--delete", $Branch) -AllowFail
+if ($delRemote.ExitCode -ne 0) {
+    if ($delRemote.Output -match "remote ref does not exist|unable to delete") {
+        Write-Ok "$Remote/$Branch gia' assente (idempotente)"
+    } else {
+        Write-Err "delete remoto fallito: $($delRemote.Output)"
+        exit 13
+    }
+} else {
+    Write-Ok "$Remote/$Branch eliminato"
+}
+
+# --- PASSO 6: delete locale ---
+Write-Step "6/7 Delete locale"
+$localRef = Invoke-Git -GitArgs @("rev-parse", "--verify", "--quiet", "refs/heads/$Branch") -Quiet -AllowFail
+if ($localRef.ExitCode -ne 0) {
+    Write-Ok "$Branch non esiste piu' in locale (idempotente)"
+} else {
+    $delLocal = Invoke-Git -GitArgs @("branch", "-d", $Branch) -AllowFail
+    if ($delLocal.ExitCode -eq 0) {
+        Write-Ok "$Branch eliminato in locale (branch -d, merge sicuro)"
+    } else {
+        # Caso squash/rebase: i commit non sono antenati di base, ma il contenuto puo' esserci gia'.
+        $cherry = (Invoke-Git -GitArgs @("cherry", $BaseBranch, $Branch) -Quiet -AllowFail).Lines
+        $plusLines = @($cherry | Where-Object { $_ -match '^\+' })
+        if ($cherry.Count -eq 0 -or $plusLines.Count -eq 0) {
+            Write-Warn "git branch -d rifiutato (merge squash/rebase), ma git cherry $BaseBranch $Branch non rileva contenuto nuovo: uso -D"
+            Invoke-Git -GitArgs @("branch", "-D", $Branch) | Out-Null
+            Write-Ok "$Branch eliminato in locale (branch -D, contenuto gia' in $BaseBranch)"
+        } elseif ($Force) {
+            Write-Warn "-Force attivo: elimino $Branch anche se git cherry rileva $($plusLines.Count) commit non presenti in $BaseBranch"
+            Invoke-Git -GitArgs @("branch", "-D", $Branch) | Out-Null
+        } else {
+            Write-Err "git branch -d rifiutato e git cherry rileva $($plusLines.Count) commit NON presenti in $BaseBranch."
+            $plusDump = ($plusLines -join "`n")
+            Write-Host "[post-merge]         $plusDump" -ForegroundColor DarkGray
+            Write-Host "[post-merge]   Il branch NON e' stato perso. Ispeziona e poi scegli:" -ForegroundColor Yellow
+            Write-Host "[post-merge]     git log --oneline $BaseBranch..$Branch" -ForegroundColor Cyan
+            Write-Host "[post-merge]     git branch -D $Branch    # solo se il lavoro e' altrove" -ForegroundColor Cyan
+            exit 13
+        }
+    }
+}
+
+# --- PASSO 7: prune + riepilogo ---
+Write-Step "7/7 Prune e riepilogo"
+if (-not $SkipPrune) {
+    Invoke-Git -GitArgs @("remote", "prune", $Remote) -Quiet | Out-Null
+    Invoke-Git -GitArgs @("worktree", "prune") -Quiet | Out-Null
+    Write-Ok "ref remoti e worktree stale ripuliti"
+}
+
+if ($IssueNumber -gt 0) {
+    Write-Step ""
+    Write-Host "[post-merge] ==============================================" -ForegroundColor Green
+    Write-Host "[post-merge] Post-merge PR #${IssueNumber}: branch '$Branch' eliminato" -ForegroundColor Green
+    Write-Host "[post-merge] ==============================================" -ForegroundColor Green
+    $sha = if ($mergeCommitOid) { $mergeCommitOid } else { "<merge-commit-sha>" }
+    Write-Host "[post-merge]   gh issue comment $IssueNumber --body `"release: <AGENT-ID> - PR mergata ($sha)`"" -ForegroundColor Cyan
+    Write-Host "[post-merge]   pwsh scripts/aggregate-state.ps1 --check    # stato doc (exit 0 = in sync)" -ForegroundColor Cyan
+    Write-Host "[post-merge]   pwsh scripts/generate-bundle.ps1 --check   # bundle (exit 0 = in sync)" -ForegroundColor Cyan
+} else {
+    Write-Step ""
+    Write-Host "[post-merge] Branch '$Branch' eliminato (locale + remoto). Ricorda il commento release: sull'issue." -ForegroundColor Green
+}
+
+exit 0
+
+
+===== FILE: scripts/test-post-merge.sh =====
+
+#!/usr/bin/env bash
+# Test per scripts/post-merge.ps1 — procedura canonica post-merge.
+#
+# Copre i failure mode che la procedura deve impedire:
+#   T1 main non aggiornato dopo il merge (il buco segnalato in review)
+#   T2 worktree ancora registrata quando si tenta `git branch -d`
+#   T3 cancellazione di un branch NON mergato (perdita di lavoro)
+#   T4 WIP non committato durante una transizione distruttiva (E3/E4/E5)
+#   T5 merge squash: `git branch -d` rifiutato, fallback `git cherry`
+#   T6 main locale divergente: nessuna azione distruttiva
+#   T7 audit -Check: segnala i residui, esce pulito quando tutto e' pulito
+#   T8 idempotenza della procedura
+#
+# Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT="$SCRIPT_DIR/post-merge.ps1"
+
+if command -v pwsh >/dev/null 2>&1; then
+  PS="pwsh"
+elif command -v powershell >/dev/null 2>&1; then
+  PS="powershell"
+else
+  echo "[SKIP] pwsh/powershell non disponibili: impossibile eseguire post-merge.ps1"
+  exit 0
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "[SKIP] git non disponibile"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+run_ps() {
+  "$PS" -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
+  return $?
+}
+
+branch_exists_locally() { git rev-parse --verify --quiet "refs/heads/$1" >/dev/null 2>&1; }
+branch_exists_remotely() { git ls-remote --exit-code origin "$1" >/dev/null 2>&1; }
+
+# Repo con origin bare: main + feat/x. Con WORKTREE=1 crea anche ../wt su feat/x.
+make_repo() {
+  local d="$1" use_wt="${2:-0}"
+  mkdir -p "$d"
+  (
+    cd "$d" || exit 1
+    git init -q --bare origin.git
+    git init -q -b main work
+    cd work || exit 1
+    git config user.email "t@t.local"
+    git config user.name "Test"
+    git config commit.gpgsign false
+    git config core.autocrlf false
+    printf 'initial\n' > file.txt
+    git add file.txt >/dev/null 2>&1
+    git commit -q -m "chore: initial"
+    git remote add origin "$d/origin.git"
+    git push -q -u origin main
+    git checkout -q -b feat/x
+    printf 'feature work\n' > file.txt
+    git commit -q -am "feat: work on x"
+    git push -q -u origin feat/x
+    if [ "$use_wt" = "1" ]; then
+      git checkout -q main
+      git worktree add "$d/wt" feat/x >/dev/null
+    fi
+  )
+}
+
+# Simula il merge della PR: main riceve un merge commit e lo pusha.
+do_merge_commit() {
+  git checkout -q main
+  git merge -q --no-ff feat/x -m "Merge pull request #1 from t/feat/x"
+  git push -q origin main
+}
+
+drop_worktree() { git worktree remove --force "$1/wt" >/dev/null 2>&1; }
+
+echo "=== T1+T2: merge commit + worktree (procedura completa) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+  MERGE_SHA="$(git rev-parse origin/main)"
+
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "exit 0"; else ng "exit $rc"; echo "$out" | tail -20; fi
+
+  # T1: main LOCALE deve contenere il merge commit (era il buco della procedura)
+  LOCAL_SHA="$(git rev-parse main)"
+  if [ "$LOCAL_SHA" = "$MERGE_SHA" ]; then ok "main locale allineato a origin/main"; else ng "main locale non allineato ($LOCAL_SHA != $MERGE_SHA)"; fi
+
+  # T2: worktree rimossa PRIMA del delete locale
+  if [ ! -d "$D/wt" ]; then ok "worktree rimossa dal filesystem"; else ng "worktree ancora presente"; fi
+  if git worktree list | grep -q "$D/wt"; then ng "worktree ancora in worktree list"; else ok "worktree deregistrata"; fi
+  if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+  if branch_exists_remotely feat/x; then ng "branch remoto ancora presente"; else ok "branch remoto eliminato"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T2b: HEAD sul branch da eliminare (caso peggiore, senza worktree) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  do_merge_commit
+  MERGE_SHA="$(git rev-parse origin/main)"
+
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "exit 0 con HEAD su feat/x"; else ng "exit $rc"; echo "$out" | tail -20; fi
+  if [ "$(git rev-parse main)" = "$MERGE_SHA" ]; then ok "main allineato nonostante HEAD su feat/x"; else ng "main non allineato"; fi
+  if [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ]; then ok "HEAD riportato su main"; else ng "HEAD non riportato su main"; fi
+  if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: branch NON mergato (non deve perdere lavoro) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  drop_worktree "$D"
+  git checkout -q main   # feat/x esiste ma NON e' mergato
+
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 12 ]; then ok "exit 12 (merge non verificato)"; else ng "exit $rc invece di 12"; echo "$out" | tail -10; fi
+  if branch_exists_locally feat/x; then ok "branch preservato"; else ng "branch perso"; fi
+  if branch_exists_remotely feat/x; then ok "remoto preservato"; else ng "remoto eliminato"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4: WIP non committato ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+  printf 'wip non committato\n' >> file.txt   # dirty TRACKED
+
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 10 ]; then ok "exit 10 su WIP tracked"; else ng "exit $rc invece di 10"; echo "$out" | tail -10; fi
+  if branch_exists_remotely feat/x; then ok "nessuna azione distruttiva col WIP presente"; else ng "ramo cancellato col WIP presente"; fi
+  if [ -d "$D/wt" ]; then ok "worktree non rimossa col WIP"; else ng "worktree rimossa col WIP"; fi
+
+  out="$(run_ps -Branch feat/x -Stash)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "exit 0 con -Stash"; else ng "exit $rc con -Stash"; echo "$out" | tail -10; fi
+  if [ -n "$(git stash list)" ]; then ok "stash creato"; else ng "nessuno stash creato"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T5: merge squash (git branch -d rifiutato, fallback git cherry) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  # Simula squash: su main viene ricreato lo stesso contenuto con un commit diverso.
+  drop_worktree "$D"
+  git checkout -q main
+  git merge -q --squash feat/x >/dev/null 2>&1
+  git commit -q -m "feat: work on x (#1)"
+  git push -q origin main
+
+  # Senza -AllowUnmerged e senza gh: la procedura deve fallire chiusa (fail-safe)
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 12 ]; then ok "fail chiusa su squash non verificabile (exit 12)"; else ng "exit $rc invece di 12"; echo "$out" | tail -10; fi
+
+  # Con -AllowUnmerged: elimina usando l'evidenza di `git cherry`
+  out="$(run_ps -Branch feat/x -AllowUnmerged)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "exit 0 con -AllowUnmerged"; else ng "exit $rc con -AllowUnmerged"; echo "$out" | tail -20; fi
+  if branch_exists_locally feat/x; then ng "branch locale ancora presente dopo squash"; else ok "branch locale eliminato dopo squash"; fi
+  if branch_exists_remotely feat/x; then ng "branch remoto ancora presente dopo squash"; else ok "branch remoto eliminato dopo squash"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T6: main locale divergente (nessuna azione distruttiva) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  do_merge_commit
+  drop_worktree "$D"
+  git checkout -q main
+
+  # Clone concorrente: porta avanti origin/main con un commit diverso.
+  git clone -q "$D/origin.git" "$D/clone2"
+  (
+    cd "$D/clone2" || exit 1
+    git config user.email "t2@t.local"; git config user.name "Test2"
+    printf 'altro\n' > other.txt
+    git add other.txt >/dev/null 2>&1
+    git commit -q -m "chore: concurrent commit"
+    git push -q origin main
+  )
+
+  # Commit locale su main: ora i due main divergono davvero.
+  printf 'divergent\n' > other.txt
+  git add other.txt >/dev/null 2>&1
+  git commit -q -m "chore: divergent local commit"
+  git fetch -q origin
+
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 11 ]; then ok "exit 11 su main divergente"; else ng "exit $rc invece di 11"; echo "$out" | tail -10; fi
+  if branch_exists_locally feat/x; then ok "branch non toccato"; else ng "branch eliminato su main divergente"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T7: audit -Check ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  do_merge_commit
+  drop_worktree "$D"
+  git checkout -q main
+  git merge -q --ff-only origin/main >/dev/null 2>&1
+
+  out="$(run_ps -Check)"; rc=$?
+  if [ $rc -eq 14 ]; then ok "exit 14 con residui (feat/x merged)"; else ng "exit $rc invece di 14"; echo "$out" | tail -10; fi
+
+  run_ps -Branch feat/x >/dev/null 2>&1
+  out="$(run_ps -Check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "exit 0 a residuo zero"; else ng "exit $rc invece di 0 dopo cleanup"; echo "$out" | tail -10; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T8: idempotenza (seconda esecuzione sul branch gia' rimosso) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+  run_ps -Branch feat/x >/dev/null 2>&1
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "seconda esecuzione idempotente (exit 0)"; else ng "exit $rc su seconda esecuzione"; echo "$out" | tail -10; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T9: esecuzione da dentro la worktree (deve rifiutarsi) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+  cd "$D/wt" || exit 1
+
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  if [ $rc -eq 15 ]; then ok "exit 15 da dentro la worktree"; else ng "exit $rc invece di 15"; echo "$out" | tail -10; fi
+  if branch_exists_locally feat/x; then ok "branch intatto"; else ng "branch eliminato da dentro la worktree"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
 
 
 ===== FILE: scripts/setup-hooks.js =====
