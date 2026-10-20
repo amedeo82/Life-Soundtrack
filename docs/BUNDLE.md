@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 11:04
-> Totale file: 51
+> Data: 2026-10-20 12:08
+> Totale file: 52
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 50
-- Dimensione totale: 690 KB
-- Ultima aggregazione: 2026-10-20 09:11
+- Totale file: 51
+- Dimensione totale: 703.3 KB
+- Ultima aggregazione: 2026-10-20 12:08
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 29 |
-| scripts/ | 10 |
+| scripts/ | 11 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
 | .github/ | 3 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.10 — Sessione 33 (2026-10-20)
+> Versione 1.12 — Sessione 35 (2026-10-20)
 
 ---
 
@@ -226,6 +226,8 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 ## ♻️ Pulizia branch post-merge — procedura canonica *(vincolante)*
 
 Dopo il merge di una PR su `main` l'agente che ha mergiato (o, in mancanza, il reviewer) esegue **una sola procedura**, automatizzata in `scripts/post-merge.ps1` e testata in `scripts/test-post-merge.sh`.
+
+**Cosa è già automatico** (livello 1, vedi §"📤 Post-merge actions"): il branch **remoto** viene eliminato da `auto-branch-cleanup`, le label dell'issue sono transizionate da `auto-status-done` e il commento `release:` viene pubblicato automaticamente. **Cosa resta all'agente**: rimuovere la worktree e il branch **locale**, e verificare.
 
 **L'ordine è parte della procedura**: allineare `main` e smontare la worktree *prima* di eliminare i branch. La sequenza inversa produce `not fully merged`, branch orfani, falsi "non mergato" e working tree su branch già eliminato.
 
@@ -745,15 +747,30 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### Livello 1 — Automazioni GH Action (no intervento manuale)
 
-1. **GH Action `auto-status-done`** (vedi `.github/workflows/auto-status-done.yml`, introdotto S19/D2): applica automaticamente `status:done` all'issue chiusa dalla PR (via `Closes #N`). Rimuove anche `in-progress` e `status:in-review`. **Niente da fare manualmente per le label**.
-2. **GH Action `auto-state-aggregate`** (vedi `.github/workflows/auto-state-aggregate.yml`, introdotto S25/ADR-0008, fixato S30/#58+#61): triggerato dal push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1`. Esegue `pwsh scripts/aggregate-state.ps1`, rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2, dopo merge di #56), e committa automaticamente il diff. Questo elimina i conflitti drift su file globali (D.21.1, D.26.3, P7 di v1.9).
+Dopo il merge di una PR su `main` girano **quattro** workflow. Tre scattano sul `pull_request: closed` e uno è pianificato.
+
+| Workflow | Trigger | Cosa fa |
+|----------|---------|---------|
+| `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
+| `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]` |
+| `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
+
+Dettagli e motivazioni:
+
+1. **`auto-status-done` e la mutua esclusività (ADR-0007)**: prima rimuoveva solo `in-progress` e `status:in-review`. Un agente che apriva la PR dimenticando di togliere `agent-ready` lasciava l'issue con `agent-ready + status:done` — stato non previsto dalla macchina a stati, e l'issue restava nella query dei candidati, quindi **un altro agente poteva claimare un lavoro già completato**. Ora rimuove tutte e tre.
+
+2. **Il commento `release:` è automatico**: prima era un passo manuale e il più spesso dimenticato. Il workflow legge l'ultimo commento `claim:` dell'issue, ne estrae l'agent-id e posta `release: <AGENT-ID> - PR #N merged (<sha>)`. Idempotente: se il commento esiste già per quella PR, salta.
+
+3. **`auto-branch-cleanup`** replica il checkbox "Delete branch when merging" di GitHub. Elimina **solo il ref remoto**: branch locali e worktree restano responsabilità dell'agente che le possiede (vedi `scripts/post-merge.ps1`).
+
+4. **`stale-claim-sweeper`** applica il TTL di 12h di ADR-0006, che era documentato ma non controllato da nulla. Non rimuove la label di proposito: un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer. Segnala e lascia decidere.
+
+I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che estrae i blocchi `script:` di `github-script` e ne verifica la sintassi JS emulando il wrapper async reale: senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
 
 ### Livello 2 — Issue (release + label)
 
-3. **Tu devi**:
-   - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
-   - **Eseguire la procedura canonica** di §"♻️ Pulizia branch post-merge" (in pratica: `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>`), che si occupa nell'ordine corretto di worktree → fetch → allineamento `main` → verifica merge → delete remoto → delete locale → prune
-   - Lo script stampa a video il comando esatto `gh issue comment <N> --body "release: ..."` da usare; copiarlo e rilanciarlo
+3. **Non devi più fare niente su GitHub**: il livello 1 ha già applicato `status:done`, rimosso `agent-ready`/`in-progress`/`status:in-review` e pubblicato il commento `release:` con l'agent-id e il merge commit SHA. Resta solo la pulizia git locale.
 
 ### Livello 3 — Verifica (post-merge sanity check)
 
@@ -874,7 +891,12 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.10 — procedura canonica post-merge (bug review: mancava l'aggiornamento di `main` prima della cancellazione dei branch e l'ordine worktree→fetch→allineamento non era prescritto). Dettagli:
+*Ultimo aggiornamento: v1.12 — automazioni post-merge (issue #73, Sessione 35). Chiusi tre buchi della catena post-merge: `auto-status-done` non rimuoveva `agent-ready` (violazione della mutua esclusività di ADR-0007, con il rischio concreto che un altro agent claimasse un lavoro già completato); il commento `release:` era un passo manuale; la cancellazione del branch remoto era manuale. Aggiunti `auto-branch-cleanup` e `stale-claim-sweeper` (TTL 12h di ADR-0006, advisory).
+- §"📤 Post-merge actions" Livello 1 riscritto come tabella dei 4 workflow con trigger, effetti e motivazione; Livello 2 ridotto alla sola pulizia git locale
+- §"♻️ Pulizia branch post-merge": dichiarato esplicitamente cosa è automatico (ref remoto) e cosa resta all'agente (worktree + branch locale)
+- `scripts/validate-workflows.mjs` (nuovo) + gate bloccante in CI: un errore JS in un workflow si scoprirebbe altrimenti solo a runtime, dopo il merge
+
+*Precedente v1.10 — procedura canonica post-merge (Sessione 33, review Boss): mancava l'aggiornamento di `main` prima del delete branch.*
 - Nuovo `scripts/post-merge.ps1` e `scripts/test-post-merge.sh` (9 scenari T1..T9)
 - §"♻️ Pulizia branch post-merge" completamente ristrutturata in 8 passi ordinati (zero-WIP → worktree → fetch → allineamento main → verifica merge → delete remoto → delete locale → prune) con tabella dei failure mode E/F + eccezioni + exit code
 - §"📤 Post-merge actions" Livello 2/3, §"📝 Checklist di sincronizzazione" auto-check post-merge, §"🚀 Primo task" step 6 aggiornati per riferirsi al nuovo script
@@ -1192,7 +1214,7 @@ Apache License
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.10 | Protocollo per agenti (Sessione 33: §"♻️ Pulizia branch post-merge" ristrutturata in procedura canonica 8 passi + `scripts/post-merge.ps1` automatizzato + `scripts/test-post-merge.sh` 9 scenari T1..T9; Sessione 30: cleanup workflow v1.9; Sessione 27: §"🌳 Worktree workflow" + §"📤 Post-merge actions"; Sessione 26: §"🧹 Pulizia stash post-housekeeping" + §"🔀 Transizioni tra branch" + D.26.x; Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge" — originariamente introdotta) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.12 | Protocollo per agenti (Sessione 35: automazioni post-merge [issue #73] — `auto-status-done` rimuove anche `agent-ready` [ADR-0007] + `release:` automatico, nuovi `auto-branch-cleanup` e `stale-claim-sweeper` [TTL ADR-0006], `scripts/validate-workflows.mjs` in CI; Sessione 34: determinismo e idempotenza dell'aggregator [issue #70]; Sessione 33: §"♻️ Pulizia branch post-merge" come procedura canonica 8 passi + `scripts/post-merge.ps1` + `scripts/test-post-merge.sh`; Sessione 30: cleanup workflow v1.9; Sessione 27: §"🌳 Worktree workflow" + §"📤 Post-merge actions"; Sessione 26: §"🧹 Pulizia stash post-housekeeping" + §"🔀 Transizioni tra branch" + D.26.x; Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge" — originariamente introdotta) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -1232,6 +1254,7 @@ Apache License
 | 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
 | 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟡 | - |
 | 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
+| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1271,9 +1294,9 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **10**
+- Sessioni migrate in state/sessions: **11**
 - Stories migrate in state/stories: **3** (done: 3)
-- Ultima sessione migrata: **S33** - Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch)
+- Ultima sessione migrata: **S35** - Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)
 - Stories done: 0.6, 0.5, 0.3
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -3147,6 +3170,94 @@ git status --porcelain                            # M AGENTS.md, M docs/BUNDLE.m
 - **Issue #65** (ultima PR mergata + audit v1.9): il contesto "sessioni di governance"
 - **Story #39** (`feat/39-story-0-7-operations-runbook-manutenzion`): la worktree attiva è sua, NON toccata da questa sessione
 - **Story #40** (`feat/40-story-0-4-ui-import-onboarding-benvenuto`): altra worktree attiva, NON toccata
+```
+
+### Sessione 35 - Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)
+
+- **Data**: 2026-10-20
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
+
+```
+
+# Sessione 35 — Automazioni post-merge
+
+## Sintesi
+
+La catena post-merge dipendeva da tre passi manuali che gli agenti dimenticano, e aveva un buco che rompeva un invariante documentato. Questa sessione chiude i tre passi con automazioni conservative (guard esplicite, idempotenti, mai distruttive su casi ambigui) e aggiunge un validatore che intercetta gli errori JS dei workflow **prima** del merge.
+
+## Trigger
+
+Il project owner, dopo il merge di #69: *"controlla anche le azioni automatiche che avvengono dopo il merge della pr, controlla se è possibile automatizzare altro per evitare errori, controlla gli step post merge della pr e gli step di risoluzione della issue"*.
+
+## I 4 buchi trovati
+
+| # | Buco | Conseguenza |
+|---|------|-------------|
+| 1 | `auto-status-done` non rimuoveva `agent-ready` | al merge l'issue restava `agent-ready + status:done`: stato **non previsto** dalla macchina a stati (che li vuole mutuamente esclusivi, ADR-0007) e, soprattutto, l'issue **restava nella query dei candidati**: un altro agente poteva claimare un lavoro già completato |
+| 2 | Commento `release:` manuale | passo obbligatorio in AGENTS.md, ma saltato di frequente → rilascio della claim non tracciato, TTL 12h ambiguo |
+| 3 | Cancellazione del branch remoto manuale | è il passo post-merge più dimenticato; i branch stale sono la principale fonte di "ho lavorato sul branch sbagliato" |
+| 4 | TTL 12h di ADR-0006 mai applicato | le claim stantie restavano `in-progress` indefinitamente e bloccavano la candidatura |
+
+## Decisioni (D.35.x)
+
+| # | Decisione | Motivazione |
+|---|---|---|
+| D.35.1 | `auto-status-done` rimuove `agent-ready` insieme alle altre | ripristina l'invariante ADR-0007 ed evita la ri-candidatura di lavoro completato |
+| D.35.2 | Il `release:` automatico estrae l'agent-id dal commento `claim:` | l'informazione esiste già sull'issue; non serve inventare un canale nuovo |
+| D.35.3 | `release:` idempotente (marker `PR #N merged` già presente → skip) | un rerun del workflow non deve duplicare commenti |
+| D.35.4 | `auto-branch-cleanup` elimina **solo il ref remoto** | branch locali e worktree sono possesso dell'agente: il bot non deve toccare il filesystem di nessuno |
+| D.35.5 | Guard di `auto-branch-cleanup`: skip su `main`/`release/*`/`hotfix/*`, su fork, su branch fuori pattern, e su branch usato come base di un'altra PR aperta | l'eliminazione è distruttiva: ogni caso ambiguo deve essere skip, non "probabilmente va bene" |
+| D.35.6 | `stale-claim-sweeper` è **advisory**: commenta, non rimuove la label | un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer; il rilascio spetta a chi subentra (`stale-release:`) |
+| D.35.7 | Validatore dei workflow in CI | un errore JS in un `github-script` si scopre a runtime, **dopo** il merge: troppo tardi |
+| D.35.8 | Il validatore emula il wrapper async di `github-script` | senza, i `return` a livello top-level (usati per gli early-exit dei guard) venivano segnalati come errori: falso positivo che avrebbe fatto ignorare il gate |
+
+## Modifiche
+
+1. **`.github/workflows/auto-status-done.yml`** — `labelsToRemove` esteso a `agent-ready`; estrazione agent-id dall'ultimo claim; commento `release:` idempotente con istruzioni per la cleanup locale
+2. **`.github/workflows/auto-branch-cleanup.yml`** (nuovo) — eliminazione del branch remoto post-merge con 5 guard
+3. **`.github/workflows/stale-claim-sweeper.yml`** (nuovo) — cron giornaliero 07:00 UTC + `workflow_dispatch`; rileva claim >12h usando l'ultimo commento `claim|release|stale-release|progress` (non `updated_at`, che si muove anche per commenti non di claim); segnala anche le claim già rilasciate con label ancora presente
+4. **`scripts/validate-workflows.mjs`** (nuovo) — estrae i blocchi `script: |` dai `.yml`, avvolge il codice come fa `github-script`, esegue `node --check`; segnala anche tab nell'indentazione YAML (illegali)
+5. **`.github/workflows/ci.yml`** — step bloccante "Workflow Actions validi (issue #73)"
+6. **`AGENTS.md`** v1.10 → v1.12 — Livello 1 riscritto come tabella dei 4 workflow con trigger/effetto/motivazione; Livello 2 ridotto alla pulizia git locale; §"♻️" dichiara cosa è automatico e cosa resta all'agente
+7. **`scripts/generate-bundle.ps1`** — `$files` += `scripts/validate-workflows.mjs`
+8. `docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/INDEX.md` rigenerati
+
+## Verifica
+
+```bash
+node scripts/validate-workflows.mjs .github/workflows   → 3 blocchi script, 0 fallimenti
+pwsh scripts/generate-bundle.ps1 --check               → exit 0
+pwsh scripts/aggregate-state.ps1 --check               → exit 0
+```
+
+Le API Actions usate sono state verificate a mano: `github.core.notice` / `github.core.summary` **non esistono** (esistono `core.notice` / `core.summary`) — errore corretto prima del commit. Permissions esplicite: `contents: write` + `pull-requests: read` per il cleanup, `issues: write` per gli altri.
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 35-1 | Un workflow può essere "verde" e violare un invariante: `auto-status-done` passava da 3 sessioni senza che nessuno notasse la `agent-ready` residua | ✅ rimossa. **Regola**: ogni label elencata in una macchina a stati va rimossa da chi applica le transizioni, non solo "aggiunta" |
+| 35-2 | Gli early-exit dei guard (`return` top-level) sono illegali in JS ma validi dentro il wrapper di `github-script` | ✅ validatore che emula il wrapper. **Regola**: i validatori statici devono replicare il contesto di esecuzione reale |
+| 35-3 | `github.core.*` non esiste: `github` è l'Octokit, `core` è `@actions/core` | ✅ corretto. Lo scopo del validatore è proprio prendere questi errori prima del merge |
+| 35-4 | `updated_at` non è "ultima attività della claim": basta un commento non di claim per farlo avanzare | ✅ lo sweeper usa l'ultimo commento `claim|release|stale-release|progress` |
+| 35-5 | Automatizzare il `release:` evita anche che l'agent-id venga scritto a mano e sbagliato | ✅ estratto dalla claim |
+
+## Note reviewer
+
+- **Conflitto atteso in `AGENTS.md`** se la PR #72 (v1.11) viene mergiata per prima: entrambe toccano header e footer. Risolvere tenendo `v1.12` e la entry `v1.11` come "Precedente".
+- Nessun file JS/TS applicativo toccato: `lint`/`typecheck`/`test`/`build` invariati (`validate-workflows.mjs` è tooling CI come gli altri `scripts/*.mjs`).
+- Worktree isolata: la working copy principale era occupata su `feat/66-aggregate-state-nodejs`.
+
+## Cross-refs
+
+- **#73** — issue di questo lavoro (chiusa dalla PR)
+- **#70** — determinismo aggregator (Sessione 34): insieme a questa PR chiude il ciclo "parallelismo senza errori"
+- **#68 / #69** — Sessione 33, dove il drift è stato scoperto e da cui sono nate entrambe le sessioni
+- **ADR-0006** — TTL 12h delle claim, ora applicato da `stale-claim-sweeper`
+- **ADR-0007** — macchina a stati, mutua esclusività `agent-ready` ∩ `status:*` = ∅, ora garantita dall'azione
+- **#66** — rewrite Node.js dell'aggregator, da mantenere coerente con le garanzie di #70
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -12329,6 +12440,77 @@ echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]
 
 
+===== FILE: scripts/validate-workflows.mjs =====
+
+// Estrae i blocchi `script:` dai workflow e li syntax-checka con node.
+// Uso: node scripts/validate-workflows.mjs [dir]
+// Serve a catturare errori JS nei workflow github-script prima del push,
+// dato che non esiste un runner GitHub Actions locale.
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+
+const dir = process.argv[2] || '.github/workflows';
+let failures = 0;
+let checked = 0;
+
+for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
+  const full = join(dir, file);
+  const text = readFileSync(full, 'utf8');
+
+  // Tab usati per l'indentazione sono illegali in YAML.
+  const tabLine = text.split('\n').findIndex(l => /^\s*\t/.test(l)) + 1;
+  if (tabLine > 0) {
+    console.error(`[FAIL] ${file}: tab nell'indentazione alla riga ${tabLine}`);
+    failures++;
+  }
+
+  // Estrae i blocchi scalari `script: |` e ne verifica la sintassi JS.
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^(\s*)script:\s*\|\s*$/);
+    if (!m) continue;
+    const baseIndent = m[1].length;
+    const body = [];
+    for (let j = i + 1; j < lines.length; j++) {
+      const line = lines[j];
+      if (line.trim() === '') { body.push(''); continue; }
+      const indent = line.match(/^\s*/)[0].length;
+      if (indent <= baseIndent) break;   // uscita dal blocco scalare
+      body.push(line.slice(baseIndent + 2));
+    }
+    // github-script avvolge il codice in una arrow function async, quindi
+    // `return` a livello top-level e' legale. Emuliamo lo stesso wrapper,
+    // altrimenti lo syntax-check produce falsi positivi.
+    const js = body.join('\n');
+    const wrapped = [
+      '// github-script wrapper (emulato)',
+      'async function __githubScript({ github, context, core, io, exec, glob, require }) {',
+      js,
+      '}',
+      'export default __githubScript;',
+    ].join('\n');
+    checked++;
+    const { writeFileSync, unlinkSync } = await import('node:fs');
+    const tmp = join(tmpdir(), `wf-check-${file}-${i}.mjs`);
+    writeFileSync(tmp, wrapped, 'utf8');
+    try {
+      execFileSync(process.execPath, ['--check', tmp], { stdio: 'pipe' });
+      console.log(`[OK] ${file}: blocco script alla riga ${i + 1} (${js.split('\n').length} righe JS) sintatticamente valido`);
+    } catch (e) {
+      console.error(`[FAIL] ${file}: script alla riga ${i + 1} non valido:\n${e.stderr?.toString() || e.message}`);
+      failures++;
+    } finally {
+      try { unlinkSync(tmp); } catch { /* noop */ }
+    }
+  }
+}
+
+console.log(`\nWorkflow: ${checked} blocchi script verificati, ${failures} fallimenti.`);
+process.exit(failures === 0 ? 0 : 1);
+
+
 ===== FILE: scripts/setup-hooks.js =====
 
 #!/usr/bin/env node
@@ -12802,6 +12984,12 @@ jobs:
       - name: Bundle in sync
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
+
+      # Issue #73: nessun runner Actions locale, quindi un errore di sintassi JS
+      # dentro un blocco `script:` di github-script si scoprirebbe solo dopo il push
+      # (il workflow fallisce a runtime, a merge avvenuto). Questo check lo intercetta prima.
+      - name: Workflow Actions validi (issue #73)
+        run: node scripts/validate-workflows.mjs .github/workflows
 
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,

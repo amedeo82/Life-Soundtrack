@@ -1,0 +1,93 @@
+name: stale-claim-sweeper
+
+# Applica il TTL di 12h definito in ADR-0006, che era documentato ma non
+# mai controllato da nessuna automazione: una claim `in-progress` senza
+# attivita' resta indefinitamente e blocca la candidatura di quell'issue.
+#
+# Scopo: rendere VISIBILI le claim stantie, non toglierle. Il rilascio resta
+# una decisione dell'agente che subentra (che deve prima commentare
+# `stale-release:` come da ADR-0006). Rimuovere la label automaticamente
+# farebbe perdere la claim a un agente che sta lavorando da piu' di 12h su un
+# task pesante, ricominciando lavoro gia' fatto.
+#
+# E' advisory: commenta e basta, non blocca nulla.
+
+on:
+  schedule:
+    # Ogni giorno alle 07:00 UTC (~09:00 Europe/Rome)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report stale claims (ADR-0006 TTL 12h)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const TTL_HOURS = 12;
+            const now = Date.now();
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', labels: 'in-progress', per_page: 100,
+            });
+
+            if (issues.length === 0) {
+              core.info('No in-progress claims. Nothing to sweep.');
+              return;
+            }
+
+            core.info(`Found ${issues.length} issue(s) with 'in-progress'.`);
+
+            const stale = [];
+            for (const issue of issues) {
+              // updated_at non basta: un commento non di claim puo' averlo mosso.
+              // Si usa l'ultimo commento che dichiara/rilascia la claim.
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: issue.number, per_page: 100,
+              });
+              const claimComments = comments
+                .filter(c => /^\s*(claim|release|stale-release|progress)\s*:/i.test(c.body || ''))
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+              const last = claimComments[claimComments.length - 1];
+              const lastActivity = last ? new Date(last.created_at) : new Date(issue.created_at);
+              const ageHours = (now - lastActivity.getTime()) / 3600000;
+
+              const ownerId = (last && (last.body || '').match(/claim:\s*(\S+)/i) || [])[1] || 'unknown';
+              const released = last && /^\s*(release|stale-release)\s*:/i.test(last.body || '');
+
+              if (!released && ageHours > TTL_HOURS) {
+                stale.push({ n: issue.number, t: issue.title, h: ageHours.toFixed(1), a: ownerId });
+              } else if (released) {
+                // Claim rilasciata ma label ancora presente: segnalalo, non rimuovere.
+                core.info(`#${issue.number}: label 'in-progress' presente ma claim rilasciata.`);
+              }
+            }
+
+            if (stale.length === 0) {
+              core.info(`All claims active within ${TTL_HOURS}h. Nothing stale.`);
+              return;
+            }
+
+            const lines = stale.map(s => `- #${s.n} — ${s.h}h senza attività (agent: \`${s.a}\`) — ${s.t}`);
+            await core.summary
+              .addHeading('Claim stantie (ADR-0006, TTL 12h)', 3)
+              .addList(lines)
+              .write();
+
+            await core.notice(
+              `${stale.length} claim stantie rilevate. ` +
+              `Rilevamento: workflow 'stale-claim-sweeper'. Le label non vengono rimosse: ` +
+              `rilascio e decisione dell'agente che subentra (commentare \`stale-release:\` prima di procedere).`
+            );
+            core.info(`${stale.length} stale claim(s) found.`);
+            for (const s of stale) {
+              core.info(`  #${s.n} (${s.h}h, agent ${s.a})`);
+            }

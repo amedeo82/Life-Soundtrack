@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.10 — Sessione 33 (2026-10-20)
+> Versione 1.12 — Sessione 35 (2026-10-20)
 
 ---
 
@@ -195,6 +195,8 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 ## ♻️ Pulizia branch post-merge — procedura canonica *(vincolante)*
 
 Dopo il merge di una PR su `main` l'agente che ha mergiato (o, in mancanza, il reviewer) esegue **una sola procedura**, automatizzata in `scripts/post-merge.ps1` e testata in `scripts/test-post-merge.sh`.
+
+**Cosa è già automatico** (livello 1, vedi §"📤 Post-merge actions"): il branch **remoto** viene eliminato da `auto-branch-cleanup`, le label dell'issue sono transizionate da `auto-status-done` e il commento `release:` viene pubblicato automaticamente. **Cosa resta all'agente**: rimuovere la worktree e il branch **locale**, e verificare.
 
 **L'ordine è parte della procedura**: allineare `main` e smontare la worktree *prima* di eliminare i branch. La sequenza inversa produce `not fully merged`, branch orfani, falsi "non mergato" e working tree su branch già eliminato.
 
@@ -714,15 +716,30 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### Livello 1 — Automazioni GH Action (no intervento manuale)
 
-1. **GH Action `auto-status-done`** (vedi `.github/workflows/auto-status-done.yml`, introdotto S19/D2): applica automaticamente `status:done` all'issue chiusa dalla PR (via `Closes #N`). Rimuove anche `in-progress` e `status:in-review`. **Niente da fare manualmente per le label**.
-2. **GH Action `auto-state-aggregate`** (vedi `.github/workflows/auto-state-aggregate.yml`, introdotto S25/ADR-0008, fixato S30/#58+#61): triggerato dal push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1`. Esegue `pwsh scripts/aggregate-state.ps1`, rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2, dopo merge di #56), e committa automaticamente il diff. Questo elimina i conflitti drift su file globali (D.21.1, D.26.3, P7 di v1.9).
+Dopo il merge di una PR su `main` girano **quattro** workflow. Tre scattano sul `pull_request: closed` e uno è pianificato.
+
+| Workflow | Trigger | Cosa fa |
+|----------|---------|---------|
+| `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
+| `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]` |
+| `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
+
+Dettagli e motivazioni:
+
+1. **`auto-status-done` e la mutua esclusività (ADR-0007)**: prima rimuoveva solo `in-progress` e `status:in-review`. Un agente che apriva la PR dimenticando di togliere `agent-ready` lasciava l'issue con `agent-ready + status:done` — stato non previsto dalla macchina a stati, e l'issue restava nella query dei candidati, quindi **un altro agente poteva claimare un lavoro già completato**. Ora rimuove tutte e tre.
+
+2. **Il commento `release:` è automatico**: prima era un passo manuale e il più spesso dimenticato. Il workflow legge l'ultimo commento `claim:` dell'issue, ne estrae l'agent-id e posta `release: <AGENT-ID> - PR #N merged (<sha>)`. Idempotente: se il commento esiste già per quella PR, salta.
+
+3. **`auto-branch-cleanup`** replica il checkbox "Delete branch when merging" di GitHub. Elimina **solo il ref remoto**: branch locali e worktree restano responsabilità dell'agente che le possiede (vedi `scripts/post-merge.ps1`).
+
+4. **`stale-claim-sweeper`** applica il TTL di 12h di ADR-0006, che era documentato ma non controllato da nulla. Non rimuove la label di proposito: un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer. Segnala e lascia decidere.
+
+I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che estrae i blocchi `script:` di `github-script` e ne verifica la sintassi JS emulando il wrapper async reale: senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
 
 ### Livello 2 — Issue (release + label)
 
-3. **Tu devi**:
-   - Postare un comment `release: <AGENT-ID> — <motivo: PR mergata / rifiutata / abbandono / spec cambiata>` con dentro il merge commit SHA (letto da `gh pr view --json mergeCommit --jq .oid`)
-   - **Eseguire la procedura canonica** di §"♻️ Pulizia branch post-merge" (in pratica: `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>`), che si occupa nell'ordine corretto di worktree → fetch → allineamento `main` → verifica merge → delete remoto → delete locale → prune
-   - Lo script stampa a video il comando esatto `gh issue comment <N> --body "release: ..."` da usare; copiarlo e rilanciarlo
+3. **Non devi più fare niente su GitHub**: il livello 1 ha già applicato `status:done`, rimosso `agent-ready`/`in-progress`/`status:in-review` e pubblicato il commento `release:` con l'agent-id e il merge commit SHA. Resta solo la pulizia git locale.
 
 ### Livello 3 — Verifica (post-merge sanity check)
 
@@ -843,7 +860,12 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.10 — procedura canonica post-merge (bug review: mancava l'aggiornamento di `main` prima della cancellazione dei branch e l'ordine worktree→fetch→allineamento non era prescritto). Dettagli:
+*Ultimo aggiornamento: v1.12 — automazioni post-merge (issue #73, Sessione 35). Chiusi tre buchi della catena post-merge: `auto-status-done` non rimuoveva `agent-ready` (violazione della mutua esclusività di ADR-0007, con il rischio concreto che un altro agent claimasse un lavoro già completato); il commento `release:` era un passo manuale; la cancellazione del branch remoto era manuale. Aggiunti `auto-branch-cleanup` e `stale-claim-sweeper` (TTL 12h di ADR-0006, advisory).
+- §"📤 Post-merge actions" Livello 1 riscritto come tabella dei 4 workflow con trigger, effetti e motivazione; Livello 2 ridotto alla sola pulizia git locale
+- §"♻️ Pulizia branch post-merge": dichiarato esplicitamente cosa è automatico (ref remoto) e cosa resta all'agente (worktree + branch locale)
+- `scripts/validate-workflows.mjs` (nuovo) + gate bloccante in CI: un errore JS in un workflow si scoprirebbe altrimenti solo a runtime, dopo il merge
+
+*Precedente v1.10 — procedura canonica post-merge (Sessione 33, review Boss): mancava l'aggiornamento di `main` prima del delete branch.*
 - Nuovo `scripts/post-merge.ps1` e `scripts/test-post-merge.sh` (9 scenari T1..T9)
 - §"♻️ Pulizia branch post-merge" completamente ristrutturata in 8 passi ordinati (zero-WIP → worktree → fetch → allineamento main → verifica merge → delete remoto → delete locale → prune) con tabella dei failure mode E/F + eccezioni + exit code
 - §"📤 Post-merge actions" Livello 2/3, §"📝 Checklist di sincronizzazione" auto-check post-merge, §"🚀 Primo task" step 6 aggiornati per riferirsi al nuovo script

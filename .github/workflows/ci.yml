@@ -44,6 +44,12 @@ jobs:
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
+      # Issue #73: nessun runner Actions locale, quindi un errore di sintassi JS
+      # dentro un blocco `script:` di github-script si scoprirebbe solo dopo il push
+      # (il workflow fallisce a runtime, a merge avvenuto). Questo check lo intercetta prima.
+      - name: Workflow Actions validi (issue #73)
+        run: node scripts/validate-workflows.mjs .github/workflows
+
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
       # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
