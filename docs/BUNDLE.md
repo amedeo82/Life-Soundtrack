@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 15:56
+> Data: 2026-10-20 17:41
 > Totale file: 56
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 55
-- Dimensione totale: 752.1 KB
-- Ultima aggregazione: 2026-10-20 15:27
+- Dimensione totale: 754.5 KB
+- Ultima aggregazione: 2026-10-20 17:30
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -4674,7 +4674,7 @@ function Build-Block-Sessions {
         $parsed  = Parse-Frontmatter $content
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
-        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "â¬š" }
+        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
         [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
