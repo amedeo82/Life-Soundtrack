@@ -182,7 +182,7 @@ function Build-Block-Sessions {
         $parsed  = Parse-Frontmatter $content
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
-        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "â¬š" }
+        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
         [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
