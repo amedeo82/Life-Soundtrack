@@ -9,6 +9,27 @@ import { closeAllDbs, freshDb, makeListen } from './helpers';
  * i tempi e renderebbe l'asserzione AC un artefatto, non una misura del layer DB.
  */
 
+/**
+ * Esegue `fn` per `rounds` iterazioni raccogliendo i tempi, applica outlier
+ * rejection (scarta min e max per eliminare cold-start residuo e spike runner
+ * CI) e restituisce il best-of-(N-2) dei rimanenti.
+ *
+ * Issue #80: sostituisce il best-of-3 fisso, che su ubuntu-latest poteva
+ * sfiorare il budget AC anche nel caso felice per varianza del runner.
+ */
+async function bench(fn: () => Promise<unknown>, rounds = 5): Promise<number> {
+  const times: number[] = [];
+  for (let i = 0; i < rounds; i += 1) {
+    const t0 = performance.now();
+    await fn();
+    times.push(performance.now() - t0);
+  }
+  times.sort((a, b) => a - b);
+  times.shift(); // rimuovi min (cold-start / JIT residuo)
+  times.pop(); // rimuovi max (spike runner CI)
+  return Math.min(...times);
+}
+
 afterEach(closeAllDbs);
 
 describe('performance', () => {
@@ -31,22 +52,17 @@ describe('performance', () => {
       }),
     );
 
-    // Minimo di 3 round (prassi micro-benchmark): misura lo steady-state del
-    // layer DB ed esclude il rumore del primo round sulla macchina/CI.
-    let best = Number.POSITIVE_INFINITY;
     let count = 0;
-    for (let round = 0; round < 3; round += 1) {
-      const t0 = performance.now();
+    const elapsed = await bench(async () => {
       await putListens(db, events);
       count = await countListens(db);
-      best = Math.min(best, performance.now() - t0);
-      if (round < 2) await db.listens.clear();
-    }
+      await db.listens.clear();
+    }, 5);
 
     expect(count).toBe(10_000);
     // AC Story 0.2: "Test con 10.000 ListenEvent in < 500ms"
-    expect(best).toBeLessThan(500);
-  });
+    expect(elapsed).toBeLessThan(500);
+  }, 30000);
 
   it('query indicizzata per day su 10.000 eventi in < 100ms', async () => {
     const db = freshDb('ls-perf-query');
@@ -58,17 +74,13 @@ describe('performance', () => {
     );
     await putListens(db, events);
 
-    // Minimo di 3 round: metodologia identica al test AC precedente.
-    let best = Number.POSITIVE_INFINITY;
     let size = 0;
-    for (let round = 0; round < 3; round += 1) {
-      const t0 = performance.now();
+    const elapsed = await bench(async () => {
       const dayEvents = await listListensByDay(db, '2024-01-01');
-      best = Math.min(best, performance.now() - t0);
       size = dayEvents.length;
-    }
+    }, 5);
 
     expect(size).toBe(5_000);
-    expect(best).toBeLessThan(100);
-  });
+    expect(elapsed).toBeLessThan(100);
+  }, 30000);
 });
