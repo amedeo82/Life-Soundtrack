@@ -283,8 +283,32 @@ if ($Check) {
     # (c) worktree attive
     $worktrees = Get-Worktrees
     foreach ($wt in $worktrees) {
-        if ($wt.Path -ne $repoRoot) {
+        if ((Normalize-Path $wt.Path) -ne (Normalize-Path $repoRoot)) {
             Write-Warn "worktree attiva: $($wt.Path) (branch=$($wt.Branch))"
+            $residui++
+        }
+    }
+
+    # (d) branch LOCALI orfani (issue #76)
+    # Un branch locale e' orfano se: (1) segue il pattern del workflow agenti,
+    # (2) non e' il branch base, (3) non e' checked-out in nessuna worktree
+    # (altrimenti e' lavoro attivo di un agente), (4) ha ZERO commit unici
+    # rispetto a origin/main -> tutto il suo contenuto e' gia' merged.
+    # Il check su (4) e' la garanzia: un branch con anche un solo commit non
+    # presente in main e' lavoro in corso e NON viene mai segnalato.
+    $checkedOut = @($worktrees | Where-Object { $_.Branch } | ForEach-Object { $_.Branch })
+    $localBranches = (Invoke-Git -GitArgs @("for-each-ref", "--format=%(refname:short)", "refs/heads") -Quiet -AllowFail).Lines
+    foreach ($lb in $localBranches) {
+        if ($lb -eq $BaseBranch) { continue }
+        if ($lb -notmatch '^(feat|fix|docs)/[0-9A-Za-z._-]+$') { continue }
+        if ($checkedOut -contains $lb) {
+            Write-Host "[post-merge]   OK   branch '$lb' in uso (worktree attiva): non e' orfano" -ForegroundColor Green
+            continue
+        }
+        $unique = (Invoke-Git -GitArgs @("rev-list", "--count", "$Remote/$BaseBranch..$lb") -Quiet -AllowFail).Output
+        if ($unique -eq "0") {
+            Write-Warn "branch LOCALE orfano: $lb (0 commit unici, non checked-out)"
+            Write-Host "[post-merge]         git branch -d $lb" -ForegroundColor DarkGray
             $residui++
         }
     }

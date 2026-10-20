@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 12:18
-> Totale file: 53
+> Data: 2026-10-20 13:11
+> Totale file: 54
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 52
-- Dimensione totale: 726.9 KB
-- Ultima aggregazione: 2026-10-20 10:27
+- Totale file: 53
+- Dimensione totale: 747.2 KB
+- Ultima aggregazione: 2026-10-20 13:11
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 29 |
-| scripts/ | 12 |
+| scripts/ | 13 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
 | .github/ | 3 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.12 — Sessione 35 (2026-10-20)
+> Versione 1.13 — Sessione 36 (2026-10-20)
 
 ---
 
@@ -256,6 +256,8 @@ pwsh scripts/post-merge.ps1 -Branch feat/53-worktree-default -DryRun
 # audit read-only dei residui: exit 14 se c'è da pulire, 0 se è pulito
 pwsh scripts/post-merge.ps1 -Check
 ```
+
+L'audit segnala quattro classi di residuo: `main` locale indietro, branch **remoti** merged, worktree attive, e branch **locali** orfani. Un branch locale è orfano solo se ha **zero commit unici** rispetto a `origin/main` **e** non è checked-out in nessuna worktree: un branch con anche un solo commit non pushato non viene mai segnalato, perché il costo di un falso positivo (perdita di lavoro) è incomparabile con quello di un falso negativo. Il `-Check` è read-only: stampa il `git branch -d` suggerito senza eseguirlo.
 
 Lo script è **idempotente**: rieseguirlo su un branch già eliminato esce 0 senza errori. Stampa inoltre il comando esatto per il commento `release:` sull'issue.
 
@@ -910,7 +912,13 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.12 — automazioni post-merge (issue #73, Sessione 35). Chiusi tre buchi della catena post-merge: `auto-status-done` non rimuoveva `agent-ready` (violazione della mutua esclusività di ADR-0007, con il rischio concreto che un altro agent claimasse un lavoro già completato); il commento `release:` era un passo manuale; la cancellazione del branch remoto era manuale. Aggiunti `auto-branch-cleanup` e `stale-claim-sweeper` (TTL 12h di ADR-0006, advisory).
+*Ultimo aggiornamento: v1.13 — residui post-merge e base stale (issue #76, Sessione 36). Chiusi due buchi: `post-merge.ps1 -Check` non guardava i branch **locali** (due orfani sopravvissuti indisturbati), e `setup-worktree.ps1` non faceva mai `fetch` prima di validare `-BaseBranch origin/main` (base stale **silenziosa**).
+- `post-merge.ps1 -Check`: nuova classe di residui "branch LOCALE orfano", con garanzia anti-perdita (0 commit unici **E** non checked-out in nessuna worktree)
+- `setup-worktree.ps1`: `git fetch` prima della validazione del branch base, flag `-SkipFetch`, avviso esplicito quando la base può essere stale, e funzione `Write-Warn` che **mancava** (bug runtime)
+- `scripts/test-issue-76-residue.sh` (nuovo, 9 assert) + gate bloccante in CI; copre il caso di sicurezza: un branch con lavoro non pushato **non deve mai** essere segnalato come orfano
+- Nota: l'allineamento di `main` in post-merge **esisteva già** (passi 2-3 di `post-merge.ps1`); il buco era altrove, nella creazione della worktree
+
+*Precedente v1.12 — automazioni post-merge (issue #73, Sessione 35). `auto-status-done` ora rimuove anche `agent-ready` (ADR-0007) e emette il `release:` automatico; aggiunti `auto-branch-cleanup` e `stale-claim-sweeper` (TTL ADR-0006, advisory); `scripts/validate-workflows.mjs` in CI.*
 - §"📤 Post-merge actions" Livello 1 riscritto come tabella dei 4 workflow con trigger, effetti e motivazione; Livello 2 ridotto alla sola pulizia git locale
 - §"♻️ Pulizia branch post-merge": dichiarato esplicitamente cosa è automatico (ref remoto) e cosa resta all'agente (worktree + branch locale)
 - `scripts/validate-workflows.mjs` (nuovo) + gate bloccante in CI: un errore JS in un workflow si scoprirebbe altrimenti solo a runtime, dopo il merge
@@ -1281,6 +1289,7 @@ Apache License
 | 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
 | 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟡 | - |
 | 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟡 | - |
+| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1320,9 +1329,9 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **12**
+- Sessioni migrate in state/sessions: **13**
 - Stories migrate in state/stories: **3** (done: 3)
-- Ultima sessione migrata: **S35** - Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)
+- Ultima sessione migrata: **S36** - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
 - Stories done: 0.3, 0.5, 0.6
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -3379,6 +3388,121 @@ Le API Actions usate sono state verificate a mano: `github.core.notice` / `githu
 - **ADR-0006** — TTL 12h delle claim, ora applicato da `stale-claim-sweeper`
 - **ADR-0007** — macchina a stati, mutua esclusività `agent-ready` ∩ `status:*` = ∅, ora garantita dall'azione
 - **#66** — rewrite Node.js dell'aggregator, da mantenere coerente con le garanzie di #70
+```
+
+### Sessione 36 - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
+
+- **Data**: 2026-10-20
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
+
+```
+
+# Sessione 36 — Residui post-merge e base stale
+
+## Sintesi
+
+Due buchi di housekeeping trovati durante la pulizia post-sessione. Il primo è un buco **nel mio stesso script**: `post-merge.ps1 -Check` non guardava i branch locali, quindi due orfani sopravvissuti non erano mai stati segnalati. Il secondo è più sottile e più pericoloso: **`setup-worktree.ps1` non faceva mai fetch**, quindi un agente poteva costruire una worktree su una base stale senza accorgersene.
+
+## Trigger
+
+Il project owner, dopo la chiusura di #66: *"apri la issue e correggi, poi controlla anche che post merge della PR l'agente che esegue le verifiche esegua anche il download del main aggiornato in locale in modo da tenere aggiornato il branch locale ed allineato al branch remoto main se necessario, tu che dici? potrebbe essere utile oppure gli agenti prelevano da remoto per creare il worktree?"*
+
+## La domanda del project owner: risposta
+
+La proposta ("il post-merge allinei `main` con `origin/main`") **è già implementata**: `post-merge.ps1` esegue al passo 2 `git fetch origin --prune` e al passo 3 `git checkout main` + `git merge --ff-only origin/main`. L'audit finale di ogni sessione lo conferma con `main locale allineato a origin/main`.
+
+Il limite è che lo script **rifiuta di eseguire da dentro una worktree** (exit 15): se la working copy principale è occupata da un altro agente su un branch di feature, l'allineamento non avviene ed è corretto che non avvenga — forzarlo produrrebbe conflitti con l'altro agente.
+
+Quindi **no**: gli agenti non prelevano da remoto quando creano la worktree. `setup-worktree.ps1` usa `-BaseBranch origin/main`, cioè un **remote-tracking ref locale**, e lo valida con `git rev-parse --verify` senza mai fare fetch:
+
+- ref **esistente ma stale** → worktree su base vecchia, **nessun avviso** (caso pericoloso, silenzioso)
+- ref **inesistente** → errore con istruzione manuale "Fetch + retry"
+
+Il `AGENTS.md` §"Session start checklist" ha `git fetch origin` come check #3, ma è un controllo umano: se l'agente lo salta, niente lo ferma. Il buco quindi va chiuso **dove la base stale può entrare**, cioè nella creazione della worktree — non forzando l'allineamento di `main` in un caso in cui è legittimamente impossibile.
+
+## I 2 fix
+
+### 1. `post-merge.ps1 -Check`: branch locali orfani
+
+Un branch locale è orfano se soddisfa **tutti** questi criteri:
+
+| # | Criterio | Perché |
+|---|----------|--------|
+| 1 | pattern `feat/*`, `fix/*`, `docs/*` | il workflow agenti |
+| 2 | non è il branch base | `main` non è un orfano |
+| 3 | **non** è checked-out in nessuna worktree | altrimenti è lavoro attivo di un agente |
+| 4 | **0 commit unici** rispetto a `origin/main` | garanzia assoluta: tutto il contenuto è già merged |
+
+Il criterio 4 è la garanzia di sicurezza: un branch con anche **un solo** commit non presente in `main` non viene mai segnalato. Il `-Check` resta read-only e stampa il comando `git branch -d <branch>` senza eseguirlo.
+
+### 2. `setup-worktree.ps1`: fetch prima di validare la base
+
+- `git fetch $Remote --prune` prima di validare `-BaseBranch`
+- `-SkipFetch` per i test e gli ambienti offline
+- fetch fallito → **avviso, non errore**: è più grave di oggi, non meno
+- se il fetch è saltato o fallito e la base punta al remote → avviso esplicito "la base PUO' essere stale"
+- aggiunta la funzione `Write-Warn`, che **mancava** dallo script
+
+## Decisioni (D.36.x)
+
+| # | Decisione | Motivazione |
+|---|---|---|
+| D.36.1 | Orfano = 0 commit unici **E** non checked-out | il criterio sui commit unici è la garanzia anti-perdita: è preferibile un falso *negativo* (orfano non segnalato) a un falso *positivo* (lavoro perso) |
+| D.36.2 | `-Check` resta read-only, stampa il comando senza eseguirlo | l'audit informa, la decisione resta dell'agente |
+| D.36.3 | Fetch in `setup-worktree`, non allineamento forzato di `main` | `main` locale non è sempre allineabile (working copy occupata); la base della worktree invece dipende **solo** dal ref remoto |
+| D.36.4 | Fetch fallito = warning, non exit | non deve rendere lo script più fragile di prima |
+| D.36.5 | Aggiunto `-SkipFetch` | i test non devono dipendere dalla rete |
+| D.36.6 | Nessuna modifica a `test-setup-worktree.sh` | provato il fallback a Windows PowerShell: espone bug **preesistenti** dell'harness (mock `gh` + PATH, tmpdir rimosso da S1 e riusato da S2). Portabilità fuori scope: si è preferito non lasciare la suite rotta |
+
+## Modifiche
+
+1. `scripts/post-merge.ps1` — sezione (d) in `-Check`: rilevamento branch locali orfani
+2. `scripts/setup-worktree.ps1` — `git fetch` prima della validazione base + `-SkipFetch` + funzione `Write-Warn`
+3. `scripts/test-issue-76-residue.sh` (nuovo, 9 assert) — T1 orfano rilevato, **T2 lavoro non pushato MAI segnalato**, T3 branch in uso non è orfano, T4 `-SkipFetch` avvisa, T5 fetch eseguito
+4. `.github/workflows/ci.yml` — step bloccante "Residui post-merge (issue #76)"
+5. `scripts/generate-bundle.ps1` — `$files` += `scripts/test-issue-76-residue.sh`
+
+## Verifica
+
+```bash
+bash scripts/test-issue-76-residue.sh   → 9/9 PASS
+```
+
+Casi di sicurezza verificati esplicitamente, perché sono quelli che costano:
+
+| Scenario | Risultato atteso | Ottenuto |
+|---|---|---|
+| branch con 0 commit unici, non checked-out | segnalato come orfano | ✅ |
+| branch con **1 commit non pushato** | **mai** segnalato | ✅ |
+| branch vuoto ma checked-out in worktree | non orfano, etichettato "in uso" | ✅ |
+| `-Check` | read-only, nessuna modifica | ✅ |
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 36-1 | `post-merge.ps1 -Check` guardava solo i branch **remoti**: due orfani locali sopravvissuti indisturbati | ✅ aggiunto il controllo sui locali |
+| 36-2 | `setup-worktree.ps1` usa `origin/main` **senza fetch**: base stale silenziosa | ✅ fetch prima della validazione + avviso se saltato |
+| 36-3 | `Write-Warn` non esisteva in `setup-worktree.ps1` (solo `Write-Step`/`Write-Err`) → errore a runtime | ✅ aggiunta; trovata **solo eseguendo** il test |
+| 36-4 | `$LASTEXITCODE` usato dopo comandi intermedi non è affidabile | ✅ variabile `$fetchOk` esplicita |
+| 36-5 | Un test "negativo" mal costruito dà una falsa accusa | ✅ verificato due volte prima di riportare un bug: il primo test aveva un commit mai creato |
+| 36-6 | Un branch di test con lo stesso nome di uno esistente fa fallire `checkout -b` in silenzione, e il commit finisce su HEAD **detached** e viene perso al checkout successivo | ✅ usati nomi univoci e verificato `git rev-list --count` prima di trarre conclusioni |
+| 36-7 | Il fallback a Windows PowerShell in `test-setup-worktree.sh` scopre bug preesistenti dell'harness | ✅ revert: preferito non lasciare la suite rotta per uno scope secondario |
+
+## Note reviewer
+
+- Due bug **miai** commessi durante il lavoro e intercettati prima del commit: il commit di test finito su `main` (riparato con `reset --soft`, mai `--hard`, per non distruggere le modifiche non committate — E3/E4/E5), e la funzione `Write-Warn` mancante.
+- Nessun file JS/TS applicativo toccato: `lint`/`typecheck`/`test`/`build` invariati.
+- `main` locale verificato allineato a `origin/main` prima e dopo i test.
+
+## Cross-refs
+
+- **#76** — issue di questo lavoro (chiusa dalla PR)
+- **#69** — procedura canonica post-merge: nasce lì `post-merge.ps1`, di cui questo lavoro chiude il buco sui branch locali
+- **#73** — automazioni post-merge: il `-Check` è il completamento di `stale-claim-sweeper` e `auto-branch-cleanup`, che coprono solo i branch **remoti**
+- **#75** — test flaky `spotify-adapter`, aperto nella sessione precedente
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -11344,6 +11468,10 @@ param(
 
     [string]$WorktreePath,
 
+    [string]$Remote = "origin",
+
+    [switch]$SkipFetch,
+
     [switch]$SkipGhCheck,
 
     [switch]$NoPush,
@@ -11368,6 +11496,11 @@ function Write-Step {
 function Write-Err {
     param([string]$Message)
     Write-Host "[setup-worktree] ERRORE: $Message" -ForegroundColor Red
+}
+
+function Write-Warn {
+    param([string]$Message)
+    Write-Host "[setup-worktree]   WARN $Message" -ForegroundColor Yellow
 }
 
 # === Preflight: verifica ambiente ===
@@ -11463,11 +11596,40 @@ Write-Step "  Branch di lavoro:$BranchName"
 Write-Step "  Worktree path:   $WorktreePath"
 Write-Step ""
 
-# === 5. Validazione branch base ===
+# === 5. Fetch + validazione branch base ===
+# Issue #76: `-BaseBranch` di default e' `origin/main`, cioe' un remote-tracking
+# ref LOCALE. Senza fetch, se quel ref esiste ma e' stale, la worktree nasce su
+# una base vecchia senza alcun avviso, e l'agente lavora su un branch che non
+# contiene i merge recenti (il danno emerge al merge, quando e' piu' costoso).
+# Il fetch fallito non e' fatale: e' un avviso, non un errore.
+$fetchOk = $true
+if (-not $SkipFetch) {
+    Write-Step "Fetch di $Remote prima di validare il branch base (issue #76)..."
+    $global:LASTEXITCODE = 0
+    git fetch $Remote --prune 2>&1 | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkGray }
+    if ($LASTEXITCODE -ne 0) {
+        $fetchOk = $false
+        Write-Warn "fetch di '$Remote' fallito: la base '$BaseBranch' potrebbe essere stale. Procedo."
+        Write-Host "[setup-worktree]   Se il branch base non esiste, esegui manualmente: git fetch $Remote" -ForegroundColor Cyan
+    } else {
+        Write-Step "Fetch completato." -ForegroundColor Green
+    }
+} else {
+    $fetchOk = $false
+    Write-Step "Fetch SKIPPATO (SkipFetch attivo)." -ForegroundColor Yellow
+}
+
 git rev-parse --verify "$BaseBranch" | Out-Null
 if ($LASTEXITCODE -ne 0) {
-    Write-Err "branch base '$BaseBranch' non trovato. Fetch + retry: git fetch origin"
+    Write-Err "branch base '$BaseBranch' non trovato. Fetch + retry: git fetch $Remote"
     exit 4
+}
+
+# Se il fetch e' stato saltato o fallito e la base punta al remote, la base
+# PUO' essere stale: si avvisa esplicitamente invece di lasciarlo scoprire al merge.
+if (-not $fetchOk -and $BaseBranch -like "$Remote/*") {
+    Write-Warn "attendere, '$BaseBranch' non e' stato aggiornato: la base PUO' essere stale."
+    Write-Host "[setup-worktree]   Verifica con: git fetch $Remote ; git log --oneline $BaseBranch -1" -ForegroundColor Cyan
 }
 
 # === 6. Validazione worktree path non esistente ===
@@ -12133,8 +12295,32 @@ if ($Check) {
     # (c) worktree attive
     $worktrees = Get-Worktrees
     foreach ($wt in $worktrees) {
-        if ($wt.Path -ne $repoRoot) {
+        if ((Normalize-Path $wt.Path) -ne (Normalize-Path $repoRoot)) {
             Write-Warn "worktree attiva: $($wt.Path) (branch=$($wt.Branch))"
+            $residui++
+        }
+    }
+
+    # (d) branch LOCALI orfani (issue #76)
+    # Un branch locale e' orfano se: (1) segue il pattern del workflow agenti,
+    # (2) non e' il branch base, (3) non e' checked-out in nessuna worktree
+    # (altrimenti e' lavoro attivo di un agente), (4) ha ZERO commit unici
+    # rispetto a origin/main -> tutto il suo contenuto e' gia' merged.
+    # Il check su (4) e' la garanzia: un branch con anche un solo commit non
+    # presente in main e' lavoro in corso e NON viene mai segnalato.
+    $checkedOut = @($worktrees | Where-Object { $_.Branch } | ForEach-Object { $_.Branch })
+    $localBranches = (Invoke-Git -GitArgs @("for-each-ref", "--format=%(refname:short)", "refs/heads") -Quiet -AllowFail).Lines
+    foreach ($lb in $localBranches) {
+        if ($lb -eq $BaseBranch) { continue }
+        if ($lb -notmatch '^(feat|fix|docs)/[0-9A-Za-z._-]+$') { continue }
+        if ($checkedOut -contains $lb) {
+            Write-Host "[post-merge]   OK   branch '$lb' in uso (worktree attiva): non e' orfano" -ForegroundColor Green
+            continue
+        }
+        $unique = (Invoke-Git -GitArgs @("rev-list", "--count", "$Remote/$BaseBranch..$lb") -Quiet -AllowFail).Output
+        if ($unique -eq "0") {
+            Write-Warn "branch LOCALE orfano: $lb (0 commit unici, non checked-out)"
+            Write-Host "[post-merge]         git branch -d $lb" -ForegroundColor DarkGray
             $residui++
         }
     }
@@ -12634,6 +12820,133 @@ echo "=== T9: esecuzione da dentro la worktree (deve rifiutarsi) ==="
   if [ $rc -eq 15 ]; then ok "exit 15 da dentro la worktree"; else ng "exit $rc invece di 15"; echo "$out" | tail -10; fi
   if branch_exists_locally feat/x; then ok "branch intatto"; else ng "branch eliminato da dentro la worktree"; fi
 
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
+
+
+===== FILE: scripts/test-issue-76-residue.sh =====
+
+#!/usr/bin/env bash
+# Test per i fix di issue #76:
+#   (1) post-merge.ps1 -Check rileva i branch LOCALI orfani
+#   (2) setup-worktree.ps1 esegue il fetch prima di validare il branch base
+#
+# Copre i tre casi che contano:
+#   T1  branch locale con 0 commit unici e non checked-out -> ORFANO (segnalato)
+#   T2  branch locale con >=1 commit unico               -> NONorfano (mai segnalato: non si perde lavoro)
+#   T3  branch con 0 commit unici ma checked-out in una worktree -> NON orfano (lavoro attivo)
+#   T4  setup-worktree.ps1 -SkipFetch avvisa che la base puo' essere stale
+#   T5  setup-worktree.ps1 esegue il fetch prima di validare la base
+#
+# Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+POST_MERGE="$SCRIPT_DIR/post-merge.ps1"
+SETUP_WT="$SCRIPT_DIR/setup-worktree.ps1"
+
+if command -v pwsh >/dev/null 2>&1; then
+  PS="pwsh"
+elif command -v powershell >/dev/null 2>&1; then
+  PS="powershell"
+else
+  echo "[SKIP] pwsh/powershell non disponibili"
+  exit 0
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "[SKIP] git non disponibile"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+# Repo temporaneo con origin bare e 2 commit su main.
+make_repo() {
+  local d="$1"
+  mkdir -p "$d/origin.git"
+  git init -q --bare "$d/origin.git"
+  git init -q -b main "$d/work"
+  (
+    cd "$d/work" || exit 1
+    git config user.email "t@t.local"; git config user.name "Test"
+    git config commit.gpgsign false; git config core.autocrlf false
+    printf 'a\n' > f.txt; git add f.txt; git commit -q -m "c1"
+    git remote add origin "$d/origin.git"; git push -q -u origin main
+    printf 'b\n' >> f.txt; git commit -q -am "c2"; git push -q origin main
+    cp "$POST_MERGE" scripts_post_merge.ps1 2>/dev/null || true
+    mkdir -p scripts && cp "$POST_MERGE" scripts/post-merge.ps1 && cp "$SETUP_WT" scripts/setup-worktree.ps1
+    git add -A >/dev/null 2>&1; git commit -q -m "add scripts" >/dev/null 2>&1; git push -q origin main
+  )
+}
+
+run_check() {
+  (cd "$1" && "$PS" -NoProfile -ExecutionPolicy Bypass -File scripts/post-merge.ps1 -Check 2>&1)
+}
+
+echo "=== T1: branch locale orfano (0 commit unici, non checked-out) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  git branch feat/80-orfano main
+
+  out="$(run_check "$D/work")"
+  if echo "$out" | grep -q "branch LOCALE orfano: feat/80-orfano"; then ok "orfano rilevato"; else ng "orfano NON rilevato"; echo "$out" | tail -5; fi
+  if echo "$out" | grep -q "git branch -d feat/80-orfano"; then ok "comando di cleanup suggerito"; else ng "manca il comando suggerito"; fi
+  git branch --list "feat/80-orfano" >/dev/null 2>&1 && [ -n "$(git branch --list 'feat/80-orfano')" ] && ok "-Check resta read-only (branch non toccato)" || ng "-Check ha modificato qualcosa"
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T2: branch con lavoro non pushato NON deve essere segnalato ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  git checkout -q -b feat/81-lavoro
+  printf 'lavoro\n' > nuovo.txt; git add nuovo.txt; git commit -q --no-verify -m "feat: lavoro non pushato"
+  git checkout -q main
+
+  out="$(run_check "$D/work")"
+  if echo "$out" | grep -q "feat/81-lavoro"; then ng "lavoro non pushato segnalato come orfano (PERDITA LAVORO)"; echo "$out" | tail -6; else ok "lavoro non pushato NON segnalato (corretto)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: branch vuoto ma checked-out in una worktree NON e' orfano ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+  git branch feat/82-inuso main
+  git worktree add "$D/wt" feat/82-inuso >/dev/null 2>&1
+
+  out="$(run_check "$D/work")"
+  if echo "$out" | grep -q "branch LOCALE orfano: feat/82-inuso"; then ng "branch in uso segnalato come orfano"; else ok "branch checked-out NON segnalato (corretto)"; fi
+  if echo "$out" | grep -q "feat/82-inuso' in uso"; then ok "mostrato come 'in uso (worktree attiva)'"; else ng "manca l'etichetta 'in uso'"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4+T5: setup-worktree.ps1 fetch ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D/work" || exit 1
+
+  # T5: con fetch (percorso normale)
+  out="$("$PS" -NoProfile -ExecutionPolicy Bypass -File scripts/setup-worktree.ps1 90 -Slug "fetch-on" -SkipGhCheck -NoPush 2>&1)"
+  if echo "$out" | grep -q "Fetch di origin prima di validare"; then ok "fetch eseguito prima della validazione"; else ng "fetch non eseguito"; echo "$out" | tail -5; fi
+  if echo "$out" | grep -q "Fetch completato"; then ok "fetch completato senza errori"; else ng "fetch non completato"; fi
+
+  # T4: con -SkipFetch deve avvisare che la base puo' essere stale
+  out="$("$PS" -NoProfile -ExecutionPolicy Bypass -File scripts/setup-worktree.ps1 90 -Slug "fetch-off" -SkipGhCheck -SkipFetch -NoPush 2>&1)"
+  if echo "$out" | grep -q "PUO' essere stale"; then ok "con -SkipFetch avvisa della base potenzialmente stale"; else ng "nessun avviso stale con -SkipFetch"; echo "$out" | tail -5; fi
+
+  # cleanup delle worktree create dai due setup (path derivato dal cwd del repo di prova)
+  git worktree remove --force "$(pwd)/../ls-90-fetch-on" >/dev/null 2>&1
+  git worktree remove --force "$(pwd)/../ls-90-fetch-off" >/dev/null 2>&1
+  git worktree prune >/dev/null 2>&1
   cd /; rm -rf "$D"
 }
 
@@ -13436,6 +13749,13 @@ jobs:
       # (il workflow fallisce a runtime, a merge avvenuto). Questo check lo intercetta prima.
       - name: Workflow Actions validi (issue #73)
         run: node scripts/validate-workflows.mjs .github/workflows
+
+      # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
+      # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
+      # (orfano -> segnalato) sia quello di sicurezza (lavoro non pushato -> MAI
+      # segnalato): un falso positivo qui perderebbe lavoro, quindi va bloccato.
+      - name: Residui post-merge (issue #76)
+        run: bash scripts/test-issue-76-residue.sh
 
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,

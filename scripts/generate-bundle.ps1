@@ -127,6 +127,11 @@ $files = @(
     # prune). Test associato con 9 scenari (T1..T9) su repo temporanei.
     "scripts/post-merge.ps1",
     "scripts/test-post-merge.sh",
+    # Test dei residui post-merge (Sessione 36 / issue #76): rilevamento dei branch
+    # LOCALI orfani in post-merge.ps1 -Check (incluso il caso di sicurezza: un branch
+    # con lavoro non pushato non deve MAI essere segnalato) e fetch obbligatorio in
+    # setup-worktree.ps1 prima di validare il branch base. Gate bloccante in CI.
+    "scripts/test-issue-76-residue.sh",
 # Test di regressione per il determinismo dell'aggregator (issue #70): ordinamento
     # per valore, idempotenza byte-identica, round-trip --check. Gate bloccante in CI.
     "scripts/test-aggregate-determinism.sh",
