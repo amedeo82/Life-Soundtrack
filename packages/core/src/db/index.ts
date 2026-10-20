@@ -42,3 +42,28 @@ export {
  * Ricalcolo contatori denormalizzati `listenCount` (11-BACKLOG T0.2.4, 02§7 MIG-4).
  */
 export { recount } from './recount';
+
+/**
+ * Promozione `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:` e unione duplicati
+ * (11-BACKLOG T0.7.3, Story 1.4 Dedup promozione).
+ */
+export { rekey, type RekeyReport } from './rekey';
+
+/**
+ * Rimozione track e artisti orfani non referenziati da `listens` né da `library`
+ * (11-BACKLOG T0.7.3, 05§12.1).
+ */
+export { orphanCleanup, type OrphanCleanupReport } from './orphan-cleanup';
+
+/**
+ * Smoke test DB al boot (`fastCheck`) e controllo quota (`quotaCheck`)
+ * (11-BACKLOG T0.7.4, 05§12.1, §5 read-only mode).
+ */
+export {
+  fastCheck,
+  quotaCheck,
+  runHealthCheck,
+  type FastCheckResult,
+  type QuotaCheckResult,
+  type DbHealthState,
+} from './health';

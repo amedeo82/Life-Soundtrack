@@ -21,7 +21,6 @@
     Modalita d'uso:
       (default)        Scrive i blocchi aggregati nei marker designati (idempotente)
       --check          Confronta lo stato calcolato con i marker esistenti; exit 0 se allineato, 1 se drift
-      --strict          Con --check: fallisce anche sui match "lenient" (drift <10% di righe). Default: warn
       --dry-run        Calcola ma non scrive; stampa il diff previsto
       --list           Lista i file sorgente e i blocchi target
       --help           Mostra questo help
@@ -29,7 +28,6 @@
 .EXAMPLE
     pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2
     pwsh scripts/aggregate-state.ps1 --check         # CI gate: --check exit 0
-    pwsh scripts/aggregate-state.ps1 --check --strict # CI gate severo: nessun drift tollerato
     pwsh scripts/aggregate-state.ps1 --dry-run       # preview senza scrivere
     pwsh scripts/aggregate-state.ps1 --list           # audit: cosa verrebbe letto/scritto?
 
@@ -63,18 +61,8 @@
 
     ## Idempotenza
 
-    Rieseguire lo script con le stesse sources produce lo stesso output, byte per byte.
-    Il timestamp "- Ultima aggregazione:" del blocco BUNDLE-INVENTORY viene riusato dalla
-    funzione Sync-AggregationTimestamp quando il resto del blocco non cambia (issue #70):
-    senza questo, ogni run produceva un diff e il workflow auto-state-aggregate committava
-    a vuoto. Verificato da scripts/test-aggregate-determinism.sh.
-
-    ## Determinismo cross-platform (issue #70)
-
-    L'ordinamento di sessioni e story e' per VALORE (Number / [version]Id con tie-break su
-    Base), mai per ordine di enumerazione del filesystem: questo garantisce output identico
-    tra PowerShell 5.1 (Windows) e PowerShell 7 (Linux/CI), requisito per il workflow
-    parallelo con agenti.
+    Rieseguire lo script con le stesse sources produce lo stesso output (modulo
+    timestamp nel footer, che viene normalizzato a 0000-00-00 in --check).
 
     ## Manutenzione
 
@@ -91,7 +79,6 @@ param(
     [switch]$Check,
     [switch]$DryRun,
     [switch]$List,
-    [switch]$Strict,
     [switch]$Help
 )
 
@@ -140,8 +127,7 @@ function Get-StateSessionFiles {
             Path   = $_.FullName
             Base   = $_.BaseName
         }
-    # Issue #70: tie-break esplicito su Base per determinismo assoluto a parita' di numero.
-    } | Sort-Object Number, Base
+    } | Sort-Object Number
 }
 
 function Get-StateStoryFiles {
@@ -153,13 +139,7 @@ function Get-StateStoryFiles {
             Path = $_.FullName
             Base = $_.BaseName
         }
-    # BUG FIX (issue #70): `$Id` invece di `$_.Id`. PowerShell e' case-insensitive,
-    # quindi `$Id` risolveva nella variabile `$id` lasciata dalla ForEach-Object
-    # precedente (ultimo file enumerato), non nella proprieta' dell'oggetto: tutte
-    # le chiavi di ordinamento erano uguali e l'ordine finale dipendeva
-    # dall'enumerazione del filesystem (0.3,0.5,0.6 su Linux vs 0.6,0.5,0.3 su
-    # Windows). Ora l'ordinamento e' per valore, quindi identico su ogni piattaforma.
-    } | Sort-Object { [version]$_.Id }, Base
+    } | Sort-Object { [version]$Id  }
 }
 
 function Parse-Frontmatter {
@@ -180,20 +160,6 @@ function Parse-Frontmatter {
     return [PSCustomObject]@{ Frontmatter = $fm; Body = $body }
 }
 
-# Issue #70: Parse-Frontmatter restituisce $null su file malformati. Tutti i
-# Build-Block-* dereferenziavano direttamente `$parsed.Frontmatter['x']`, quindi un
-# singolo file state/corrotto faceva crashare l'intera aggregazione (e con essa il
-# workflow post-merge). Qui si degrada a valori di default con warning.
-function Get-Frontmatter {
-    param([string]$Content, [string]$Path)
-    $parsed = Parse-Frontmatter $Content
-    if ($null -eq $parsed) {
-        Write-Host "[WARN] $Path - frontmatter non valido o assente: uso valori di default" -ForegroundColor Yellow
-        return [PSCustomObject]@{ Frontmatter = @{}; Body = $Content }
-    }
-    return $parsed
-}
-
 function Build-Block-Sessions {
     $files = Get-StateSessionFiles
     if ($files.Count -eq 0) {
@@ -208,14 +174,10 @@ function Build-Block-Sessions {
     [void]$sb.Append("" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed  = Parse-Frontmatter $content
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
-        # BUG FIX (issue #70): il fallback era la sequenza di byte corrotta
-        # C3 A2 C2 AC C5 A1 (doppia codifica di un emoji), che finiva in
-        # SESSIONS.md per ogni state file privo del campo `state`. Ora ASCII,
-        # coerente con il fallback "?" usato in Build-Block-IndexRoadmap.
-        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
+        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "â¬š" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
         [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
@@ -250,7 +212,7 @@ function Build-Block-Stories {
     [void]$sb.Append("|-------|-------|----|--------------|------|" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed  = Parse-Frontmatter $content
         $id = if ($parsed.Frontmatter['id']) { $parsed.Frontmatter['id'] } else { $f.Base }
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { "?" }
         $status = if ($parsed.Frontmatter['status']) { $parsed.Frontmatter['status'] } else { "?" }
@@ -286,7 +248,7 @@ function Build-Block-IndexStatus {
     $latestSessionInfo = ""
     if ($latestSession) {
         $content = Get-Content -LiteralPath $latestSession.Path -Raw -Encoding UTF8
-        $parsed = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed = Parse-Frontmatter $content
         $n = $parsed.Frontmatter['number']
         $t = $parsed.Frontmatter['title']
         $latestSessionInfo = "Ultima sessione migrata: **S$n** - $t"
@@ -296,7 +258,7 @@ function Build-Block-IndexStatus {
     $doneStories = @()
     foreach ($f in $stories) {
         $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Get-Frontmatter -Content $c -Path $f.Path
+        $p = Parse-Frontmatter $c
         if ($p.Frontmatter['status'] -eq 'done') {
             $doneStories += $p.Frontmatter['id']
         }
@@ -338,7 +300,7 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine("|----------|------|-------|----|")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed  = Parse-Frontmatter $content
         $n = $parsed.Frontmatter['number']
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
@@ -412,39 +374,6 @@ function Find-Block {
     return @{ StartIndex = $sIdx; EndIndex = $eIdx + $End.Length; Block = $Content.Substring($sIdx, $eIdx - $sIdx + $End.Length) }
 }
 
-# BUG FIX (issue #70): il blocco BUNDLE-INVENTORY contiene "- Ultima aggregazione: <ora>".
-# Scrivendolo a ogni run, Apply-Blocks produceva SEMPRE un diff, quindi il workflow
-# auto-state-aggregate committava a ogni push su main anche senza modifiche reali
-# (commit-rumore: 8c63ed9). Qui, se il blocco e' identico a quello esistente tranne
-# il timestamp, si riusa il timestamp gia' presente: la scrittura diventa un no-op
-# e `git diff` resta vuoto.
-function Sync-AggregationTimestamp {
-    param([string]$Existing, [string]$Calculated)
-    if ([string]::IsNullOrEmpty($Existing)) { return $Calculated }
-
-    $tsPattern = '^- Ultima aggregazione: '
-    $norm = {
-        param([string]$text)
-        ($text -replace "`r`n", "`n") -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: <TS>'
-    }
-    if ((& $norm $Existing) -ne (& $norm $Calculated)) { return $Calculated }
-
-    $existingTs = $null
-    foreach ($line in (($Existing -replace "`r`n", "`n") -split "`n")) {
-        if ($line.StartsWith($tsPattern)) { $existingTs = $line }
-    }
-    if (-not $existingTs) { return $Calculated }
-
-    $lines = (($Calculated -replace "`r`n", "`n") -split "`n")
-    for ($i = 0; $i -lt $lines.Length; $i++) {
-        if ($lines[$i].StartsWith($tsPattern)) {
-            $lines[$i] = $existingTs
-            return ($lines -join "`n")
-        }
-    }
-    return $Calculated
-}
-
 function Apply-Blocks {
     foreach ($t in $targets) {
         $path = $t.Path
@@ -462,9 +391,6 @@ function Apply-Blocks {
             $separator = [char]10 + [char]10
             $new = $content.TrimEnd() + $separator + $calculated
         } else {
-            # Issue #70: riusa il timestamp esistente quando il blocco non cambia
-            # altro, cosi' la scrittura e' un no-op (nessun commit-rumore).
-            $calculated = Sync-AggregationTimestamp -Existing $found.Block -Calculated $calculated
             $new = $content.Substring(0, $found.StartIndex) + $calculated + $content.Substring($found.EndIndex)
         }
         if ($DryRun) {
@@ -500,49 +426,14 @@ function Test-Blocks {
             $drift = $true
             continue
         }
-        $existing = $found.Block -replace "`r`n", "`n"
-        # Normalizza anche il timestamp "Ultima aggregazione: ..." e la "Dimensione totale: ..." (analogia
-        # a generate-bundle.ps1 --check che normalizza "> Data: .+$"): il check deve essere deterministico
-        # attraverso run successive. La dimensione totale varia anche per modifiche al codice
-        # dell'aggregator stesso (aggregate-state.ps1 + generate-bundle.ps1 sono in $files), quindi
-        # non può essere usata come fingerprint del bundle.
-        $existing = $existing -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
-        $existing = $existing -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
-        $calculated = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
-        $calculated = $calculated -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
-        # Match strict: blocchi byte-identici (post-normalizzazione timestamp/size).
-        if ($existing -eq $calculated) {
+        $existing = $found.Block
+        # Normalizza i timestamp mutabili (es. "Ultima aggregazione") prima del
+        # confronto, per garantire idempotenza del --check (analogo al fix
+        # S30/S31 applicato su generate-bundle.ps1 per la riga "> Data:").
+        $existingNorm = $existing -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        $calculatedNorm = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        if ($existingNorm -eq $calculatedNorm) {
             Write-Host "[OK] $path - blocco in sync ($($calculated.Length) chars)" -ForegroundColor Green
-            continue
-        }
-        # Match lenient: blocchi identici linea-per-linea dopo trim trailing whitespace.
-        # Necessario per superare differenze platform-specific di PowerShell 5.1 vs 7
-        # (es. trailing CR su alcuni tipi di line endings) che sfuggono alla conversione CRLF, LF.
-        $lines1 = $existing -split "`n" | ForEach-Object { $_.TrimEnd(" `t`r") }
-        $lines2 = $calculated -split "`n" | ForEach-Object { $_.TrimEnd(" `t`r") }
-        $maxLines = [Math]::Max($lines1.Length, $lines2.Length)
-        if ($maxLines -eq 0) {
-            Write-Host "[OK] $path - blocco vuoto, considerato in sync" -ForegroundColor Green
-            continue
-        }
-        $matchingLines = 0
-        for ($i = 0; $i -lt $maxLines; $i++) {
-            $l1 = if ($i -lt $lines1.Length) { $lines1[$i] } else { $null }
-            $l2 = if ($i -lt $lines2.Length) { $lines2[$i] } else { $null }
-            if ($l1 -eq $l2) { $matchingLines++ }
-        }
-        $matchRatio = $matchingLines / $maxLines
-        if ($matchRatio -ge 0.9) {
-            $pct = [Math]::Round($matchRatio*100, 2)
-            # Issue #70: il fallback lenient NASCONDEVA il drift di ordinamento story
-            # (12/13 = 92.31% => "[OK]"). Ora e' visibile come [WARN], e fallisce con -Strict.
-            Write-Host "[WARN] $path - blocco lenient match ($matchingLines/$maxLines = ${pct}% linee identiche)" -ForegroundColor Yellow
-            Write-Host "  Drift non bloccante: ordine/righe divergenti. Rigenera con 'pwsh scripts/aggregate-state.ps1'." -ForegroundColor DarkGray
-            if ($Strict) {
-                Write-Host "[FAIL] $path - drift in strict mode" -ForegroundColor Red
-                $drift = $true
-            }
-            continue
         } else {
             Write-Host "[FAIL] $path - blocco drift" -ForegroundColor Red
             Write-Host "  Atteso: $($calculated.Length) chars, Trovato: $($existing.Length) chars" -ForegroundColor Yellow

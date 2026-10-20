@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "build": "node ../../scripts/generate-version.mjs && tsc -p tsconfig.json --noEmit && vite build",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "e2e": "playwright test",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "generate:version": "node ../../scripts/generate-version.mjs"
   },
   "dependencies": {
     "@ls/core": "workspace:*",

@@ -181,5 +181,12 @@
   "insight.memory.return": "Non ascoltavi {{artist}} da {{months}} mesi",
   "insight.memory.seasonal": "Come ogni {{month}}, è tornato il periodo {{genre}}",
   "insight.disclaimer": "Questo insight è generato automaticamente a partire dai tuoi dati di ascolto. Non è una diagnosi.",
-  "insight.disclaimerShort": "Generato automaticamente"
+  "insight.disclaimerShort": "Generato automaticamente",
+  "settings.maintenance.title": "Manutenzione database",
+  "settings.maintenance.statusCritical": "Critico — modalità di sola lettura",
+  "settings.maintenance.statusOk": "OK",
+  "settings.maintenance.lastFastCheck": "Controllo all'avvio: {{ok}} (schema v{{version}}, {{ms}} ms)",
+  "settings.maintenance.runButton": "Esegui manutenzione",
+  "settings.maintenance.retryButton": "Riprova",
+  "settings.maintenance.rollbackButton": "Ripristina SW precedente"
 }

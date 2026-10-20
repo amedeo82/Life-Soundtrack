@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 13:11
-> Totale file: 54
+> Data: 2026-10-20 14:04
+> Totale file: 56
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 53
-- Dimensione totale: 744.9 KB
-- Ultima aggregazione: 2026-10-20 11:17
+- Totale file: 55
+- Dimensione totale: 751.4 KB
+- Ultima aggregazione: 2026-10-20 14:04
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 29 |
+| docs/ | 31 |
 | scripts/ | 13 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
@@ -1247,7 +1247,7 @@ Apache License
 |------|-------|-------------|
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.12 | Protocollo per agenti (Sessione 35: automazioni post-merge [issue #73] — `auto-status-done` rimuove anche `agent-ready` [ADR-0007] + `release:` automatico, nuovi `auto-branch-cleanup` e `stale-claim-sweeper` [TTL ADR-0006], `scripts/validate-workflows.mjs` in CI; Sessione 34: determinismo e idempotenza dell'aggregator [issue #70]; Sessione 33: §"♻️ Pulizia branch post-merge" come procedura canonica 8 passi + `scripts/post-merge.ps1` + `scripts/test-post-merge.sh`; Sessione 30: cleanup workflow v1.9; Sessione 27: §"🌳 Worktree workflow" + §"📤 Post-merge actions"; Sessione 26: §"🧹 Pulizia stash post-housekeeping" + §"🔀 Transizioni tra branch" + D.26.x; Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge" — originariamente introdotta) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.6 | Protocollo per agenti (Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -1330,9 +1330,9 @@ Apache License
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **13**
-- Stories migrate in state/stories: **3** (done: 3)
+- Stories migrate in state/stories: **4** (done: 3)
 - Ultima sessione migrata: **S36** - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
-- Stories done: 0.3, 0.5, 0.6
+- Stories done: 0.6, 0.3, 0.5
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -4418,6 +4418,76 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
 
 
+===== FILE: docs/state/stories/0.7-operations-runbook.md =====
+
+---
+id: "0.7"
+title: "Operations runbook + manutenzione DB"
+phase: 0
+area: devops
+status: in-progress
+priority: I
+depends_on: ["0.2", "0.5"]
+branch: feat/39-story-0-7-operations-runbook-manutenzion
+pr: 39
+---
+
+## Descrizione
+
+Documentare in dettaglio le operazioni di update management (`05§11`) e DB maintenance (`05§12`) nel nuovo file `docs/16-OPERATIONS.md`. Includere runbook per l'operatore (sviluppatore che mantiene il progetto) su diagnosi e remediation di problemi noti.
+
+Spec di riferimento:
+- `docs/05-ARCHITECTURE.md` §11 (App update management) e §12 (Database maintenance)
+- `docs/02-DATA-SCHEMA.md` §7 (migrazioni MIG-1..4)
+- `docs/10-TESTING.md` §4 (test strategy)
+
+## Task
+
+- [x] T0.7.1 — Creare `docs/16-OPERATIONS.md` con §1 Update playbook, §2 Maintenance playbook, §3 Migrazioni schema, §4 Diagnosi & remediation
+- [x] T0.7.2 — Hook `useAppUpdate()` già coperto da Story 0.5 (PR #19); verifica policy patch/minor/major (`05§11.3`)
+- [x] T0.7.3 — `recount()` (già coperto da Story 0.2) + implementare `rekey()`, `orphanCleanup()` in `@ls/core/db` con test
+- [x] T0.7.4 — Implementare `fastCheck()` + `quotaCheck()` con logging strutturato
+- [x] T0.7.5 — Settings → Manutenzione: UI per `indexRebuild`/`compact` manuale e contatore `lastMaintenance` (MaintenancePanel, placeholder pronto per wiring DB provider)
+- [x] T0.7.6 — Version manifest: build script `scripts/generate-version.mjs` che genera `public/version.json` da `package.json` + `git rev-parse HEAD`
+
+## Acceptance criteria
+
+- [x] `16-OPERATIONS.md` esiste e referenzia `05§11` e `05§12`
+- [x] Tutte le funzioni di manutenzione hanno test unitari ≥ 80% coverage (`packages/core/db/` = 95.34%)
+- [x] `fastCheck` eseguito al boot; failure → read-only mode + banner (`DBCriticalBanner`, `useDbHealth`)
+- [x] Update soft (minor) mostra banner; update major mostra modal (`isBlockingUpdate` + `requiresDbMigration`)
+- [x] Migrazione DB v1→v2 simulata in test passa senza perdita dati (db.test.ts migrazioni esistenti + operations.test.ts integrazione)
+- [x] Rollback SW in caso di migration failure (`rollbackServiceWorker`, `DBCriticalBanner`)
+
+## Lesson learned
+
+- Claim precedente su issue #39 abbandonato (WIX stashato su `feat/39-operations-runbook`, spostato su issue 49): rimosso `in-progress` e ri-claimato.
+- `Button` in `@ls/ui` non espone prop `disabled`: gestita lato chiamante.
+- `navigator.storage.estimate()` restituisce `quota`/`usage` opzionali: gestiti con `?? null` per typecheck strict.
+
+## Documenti aggiornati
+
+- `docs/16-OPERATIONS.md` (nuovo)
+- `packages/core/src/db/rekey.ts` (nuovo)
+- `packages/core/src/db/orphan-cleanup.ts` (nuovo)
+- `packages/core/src/db/health.ts` (nuovo)
+- `packages/core/src/db/index.ts` (export nuove funzioni)
+- `packages/core/src/db/__tests__/operations.test.ts` (nuovo)
+- `scripts/generate-version.mjs` (nuovo)
+- `apps/web/package.json` (script build + generate:version)
+- `apps/web/src/App.tsx` (wiring fastCheck/read-only/major modal)
+- `apps/web/src/hooks/useDbHealth.ts` (nuovo)
+- `apps/web/src/lib/versionManifest.ts` (nuovo)
+- `apps/web/src/lib/swRollback.ts` (nuovo)
+- `apps/web/src/components/MaintenancePanel.tsx` (nuovo)
+- `apps/web/src/components/DBCriticalBanner.tsx` (nuovo)
+- `apps/web/src/i18n/locales/en.json` (+ stringhe manutenzione)
+- `apps/web/src/i18n/locales/it.json` (+ stringhe manutenzione)
+- `scripts/generate-bundle.ps1` (`docs/16-OPERATIONS.md` aggiunto a `$files`)
+- `docs/BUNDLE.md` (rigenerato)
+
+
+
 ===== FILE: scripts/aggregate-state.ps1 =====
 
 <#
@@ -4443,7 +4513,6 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
     Modalita d'uso:
       (default)        Scrive i blocchi aggregati nei marker designati (idempotente)
       --check          Confronta lo stato calcolato con i marker esistenti; exit 0 se allineato, 1 se drift
-      --strict          Con --check: fallisce anche sui match "lenient" (drift <10% di righe). Default: warn
       --dry-run        Calcola ma non scrive; stampa il diff previsto
       --list           Lista i file sorgente e i blocchi target
       --help           Mostra questo help
@@ -4451,7 +4520,6 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 .EXAMPLE
     pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2
     pwsh scripts/aggregate-state.ps1 --check         # CI gate: --check exit 0
-    pwsh scripts/aggregate-state.ps1 --check --strict # CI gate severo: nessun drift tollerato
     pwsh scripts/aggregate-state.ps1 --dry-run       # preview senza scrivere
     pwsh scripts/aggregate-state.ps1 --list           # audit: cosa verrebbe letto/scritto?
 
@@ -4485,18 +4553,8 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
     ## Idempotenza
 
-    Rieseguire lo script con le stesse sources produce lo stesso output, byte per byte.
-    Il timestamp "- Ultima aggregazione:" del blocco BUNDLE-INVENTORY viene riusato dalla
-    funzione Sync-AggregationTimestamp quando il resto del blocco non cambia (issue #70):
-    senza questo, ogni run produceva un diff e il workflow auto-state-aggregate committava
-    a vuoto. Verificato da scripts/test-aggregate-determinism.sh.
-
-    ## Determinismo cross-platform (issue #70)
-
-    L'ordinamento di sessioni e story e' per VALORE (Number / [version]Id con tie-break su
-    Base), mai per ordine di enumerazione del filesystem: questo garantisce output identico
-    tra PowerShell 5.1 (Windows) e PowerShell 7 (Linux/CI), requisito per il workflow
-    parallelo con agenti.
+    Rieseguire lo script con le stesse sources produce lo stesso output (modulo
+    timestamp nel footer, che viene normalizzato a 0000-00-00 in --check).
 
     ## Manutenzione
 
@@ -4513,7 +4571,6 @@ param(
     [switch]$Check,
     [switch]$DryRun,
     [switch]$List,
-    [switch]$Strict,
     [switch]$Help
 )
 
@@ -4562,8 +4619,7 @@ function Get-StateSessionFiles {
             Path   = $_.FullName
             Base   = $_.BaseName
         }
-    # Issue #70: tie-break esplicito su Base per determinismo assoluto a parita' di numero.
-    } | Sort-Object Number, Base
+    } | Sort-Object Number
 }
 
 function Get-StateStoryFiles {
@@ -4575,13 +4631,7 @@ function Get-StateStoryFiles {
             Path = $_.FullName
             Base = $_.BaseName
         }
-    # BUG FIX (issue #70): `$Id` invece di `$_.Id`. PowerShell e' case-insensitive,
-    # quindi `$Id` risolveva nella variabile `$id` lasciata dalla ForEach-Object
-    # precedente (ultimo file enumerato), non nella proprieta' dell'oggetto: tutte
-    # le chiavi di ordinamento erano uguali e l'ordine finale dipendeva
-    # dall'enumerazione del filesystem (0.3,0.5,0.6 su Linux vs 0.6,0.5,0.3 su
-    # Windows). Ora l'ordinamento e' per valore, quindi identico su ogni piattaforma.
-    } | Sort-Object { [version]$_.Id }, Base
+    } | Sort-Object { [version]$Id  }
 }
 
 function Parse-Frontmatter {
@@ -4602,20 +4652,6 @@ function Parse-Frontmatter {
     return [PSCustomObject]@{ Frontmatter = $fm; Body = $body }
 }
 
-# Issue #70: Parse-Frontmatter restituisce $null su file malformati. Tutti i
-# Build-Block-* dereferenziavano direttamente `$parsed.Frontmatter['x']`, quindi un
-# singolo file state/corrotto faceva crashare l'intera aggregazione (e con essa il
-# workflow post-merge). Qui si degrada a valori di default con warning.
-function Get-Frontmatter {
-    param([string]$Content, [string]$Path)
-    $parsed = Parse-Frontmatter $Content
-    if ($null -eq $parsed) {
-        Write-Host "[WARN] $Path - frontmatter non valido o assente: uso valori di default" -ForegroundColor Yellow
-        return [PSCustomObject]@{ Frontmatter = @{}; Body = $Content }
-    }
-    return $parsed
-}
-
 function Build-Block-Sessions {
     $files = Get-StateSessionFiles
     if ($files.Count -eq 0) {
@@ -4630,14 +4666,10 @@ function Build-Block-Sessions {
     [void]$sb.Append("" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed  = Parse-Frontmatter $content
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
-        # BUG FIX (issue #70): il fallback era la sequenza di byte corrotta
-        # C3 A2 C2 AC C5 A1 (doppia codifica di un emoji), che finiva in
-        # SESSIONS.md per ogni state file privo del campo `state`. Ora ASCII,
-        # coerente con il fallback "?" usato in Build-Block-IndexRoadmap.
-        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
+        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "â¬š" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
         [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
@@ -4672,7 +4704,7 @@ function Build-Block-Stories {
     [void]$sb.Append("|-------|-------|----|--------------|------|" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed  = Parse-Frontmatter $content
         $id = if ($parsed.Frontmatter['id']) { $parsed.Frontmatter['id'] } else { $f.Base }
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { "?" }
         $status = if ($parsed.Frontmatter['status']) { $parsed.Frontmatter['status'] } else { "?" }
@@ -4708,7 +4740,7 @@ function Build-Block-IndexStatus {
     $latestSessionInfo = ""
     if ($latestSession) {
         $content = Get-Content -LiteralPath $latestSession.Path -Raw -Encoding UTF8
-        $parsed = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed = Parse-Frontmatter $content
         $n = $parsed.Frontmatter['number']
         $t = $parsed.Frontmatter['title']
         $latestSessionInfo = "Ultima sessione migrata: **S$n** - $t"
@@ -4718,7 +4750,7 @@ function Build-Block-IndexStatus {
     $doneStories = @()
     foreach ($f in $stories) {
         $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Get-Frontmatter -Content $c -Path $f.Path
+        $p = Parse-Frontmatter $c
         if ($p.Frontmatter['status'] -eq 'done') {
             $doneStories += $p.Frontmatter['id']
         }
@@ -4760,7 +4792,7 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine("|----------|------|-------|----|")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
+        $parsed  = Parse-Frontmatter $content
         $n = $parsed.Frontmatter['number']
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
@@ -4834,39 +4866,6 @@ function Find-Block {
     return @{ StartIndex = $sIdx; EndIndex = $eIdx + $End.Length; Block = $Content.Substring($sIdx, $eIdx - $sIdx + $End.Length) }
 }
 
-# BUG FIX (issue #70): il blocco BUNDLE-INVENTORY contiene "- Ultima aggregazione: <ora>".
-# Scrivendolo a ogni run, Apply-Blocks produceva SEMPRE un diff, quindi il workflow
-# auto-state-aggregate committava a ogni push su main anche senza modifiche reali
-# (commit-rumore: 8c63ed9). Qui, se il blocco e' identico a quello esistente tranne
-# il timestamp, si riusa il timestamp gia' presente: la scrittura diventa un no-op
-# e `git diff` resta vuoto.
-function Sync-AggregationTimestamp {
-    param([string]$Existing, [string]$Calculated)
-    if ([string]::IsNullOrEmpty($Existing)) { return $Calculated }
-
-    $tsPattern = '^- Ultima aggregazione: '
-    $norm = {
-        param([string]$text)
-        ($text -replace "`r`n", "`n") -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: <TS>'
-    }
-    if ((& $norm $Existing) -ne (& $norm $Calculated)) { return $Calculated }
-
-    $existingTs = $null
-    foreach ($line in (($Existing -replace "`r`n", "`n") -split "`n")) {
-        if ($line.StartsWith($tsPattern)) { $existingTs = $line }
-    }
-    if (-not $existingTs) { return $Calculated }
-
-    $lines = (($Calculated -replace "`r`n", "`n") -split "`n")
-    for ($i = 0; $i -lt $lines.Length; $i++) {
-        if ($lines[$i].StartsWith($tsPattern)) {
-            $lines[$i] = $existingTs
-            return ($lines -join "`n")
-        }
-    }
-    return $Calculated
-}
-
 function Apply-Blocks {
     foreach ($t in $targets) {
         $path = $t.Path
@@ -4884,9 +4883,6 @@ function Apply-Blocks {
             $separator = [char]10 + [char]10
             $new = $content.TrimEnd() + $separator + $calculated
         } else {
-            # Issue #70: riusa il timestamp esistente quando il blocco non cambia
-            # altro, cosi' la scrittura e' un no-op (nessun commit-rumore).
-            $calculated = Sync-AggregationTimestamp -Existing $found.Block -Calculated $calculated
             $new = $content.Substring(0, $found.StartIndex) + $calculated + $content.Substring($found.EndIndex)
         }
         if ($DryRun) {
@@ -4922,49 +4918,14 @@ function Test-Blocks {
             $drift = $true
             continue
         }
-        $existing = $found.Block -replace "`r`n", "`n"
-        # Normalizza anche il timestamp "Ultima aggregazione: ..." e la "Dimensione totale: ..." (analogia
-        # a generate-bundle.ps1 --check che normalizza "> Data: .+$"): il check deve essere deterministico
-        # attraverso run successive. La dimensione totale varia anche per modifiche al codice
-        # dell'aggregator stesso (aggregate-state.ps1 + generate-bundle.ps1 sono in $files), quindi
-        # non può essere usata come fingerprint del bundle.
-        $existing = $existing -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
-        $existing = $existing -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
-        $calculated = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
-        $calculated = $calculated -replace '(?m)^- Dimensione totale: .+$', '- Dimensione totale: 0.0 KB'
-        # Match strict: blocchi byte-identici (post-normalizzazione timestamp/size).
-        if ($existing -eq $calculated) {
+        $existing = $found.Block
+        # Normalizza i timestamp mutabili (es. "Ultima aggregazione") prima del
+        # confronto, per garantire idempotenza del --check (analogo al fix
+        # S30/S31 applicato su generate-bundle.ps1 per la riga "> Data:").
+        $existingNorm = $existing -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        $calculatedNorm = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        if ($existingNorm -eq $calculatedNorm) {
             Write-Host "[OK] $path - blocco in sync ($($calculated.Length) chars)" -ForegroundColor Green
-            continue
-        }
-        # Match lenient: blocchi identici linea-per-linea dopo trim trailing whitespace.
-        # Necessario per superare differenze platform-specific di PowerShell 5.1 vs 7
-        # (es. trailing CR su alcuni tipi di line endings) che sfuggono alla conversione CRLF, LF.
-        $lines1 = $existing -split "`n" | ForEach-Object { $_.TrimEnd(" `t`r") }
-        $lines2 = $calculated -split "`n" | ForEach-Object { $_.TrimEnd(" `t`r") }
-        $maxLines = [Math]::Max($lines1.Length, $lines2.Length)
-        if ($maxLines -eq 0) {
-            Write-Host "[OK] $path - blocco vuoto, considerato in sync" -ForegroundColor Green
-            continue
-        }
-        $matchingLines = 0
-        for ($i = 0; $i -lt $maxLines; $i++) {
-            $l1 = if ($i -lt $lines1.Length) { $lines1[$i] } else { $null }
-            $l2 = if ($i -lt $lines2.Length) { $lines2[$i] } else { $null }
-            if ($l1 -eq $l2) { $matchingLines++ }
-        }
-        $matchRatio = $matchingLines / $maxLines
-        if ($matchRatio -ge 0.9) {
-            $pct = [Math]::Round($matchRatio*100, 2)
-            # Issue #70: il fallback lenient NASCONDEVA il drift di ordinamento story
-            # (12/13 = 92.31% => "[OK]"). Ora e' visibile come [WARN], e fallisce con -Strict.
-            Write-Host "[WARN] $path - blocco lenient match ($matchingLines/$maxLines = ${pct}% linee identiche)" -ForegroundColor Yellow
-            Write-Host "  Drift non bloccante: ordine/righe divergenti. Rigenera con 'pwsh scripts/aggregate-state.ps1'." -ForegroundColor DarkGray
-            if ($Strict) {
-                Write-Host "[FAIL] $path - drift in strict mode" -ForegroundColor Red
-                $drift = $true
-            }
-            continue
         } else {
             Write-Host "[FAIL] $path - blocco drift" -ForegroundColor Red
             Write-Host "  Atteso: $($calculated.Length) chars, Trovato: $($existing.Length) chars" -ForegroundColor Yellow
@@ -9143,9 +9104,10 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
+| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
+| 0.7 - Operations runbook + manutenzione DB | in-progress | #39 | - | devops |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
-| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 
 <!-- AGGREGATE-STORIES-END -->
 
@@ -10290,6 +10252,201 @@ Motion reduction rispettata (`prefers-reduced-motion`).
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: scala Display 48/56/64 documentata (M11) con tabella di utilizzo; micro-interazioni con riferimento ai token `motion.*`; TOUR.md rinviato a Sessione 10 (V2) |
+
+
+===== FILE: docs/16-OPERATIONS.md =====
+
+# 16 — Operations runbook + manutenzione DB
+
+> Status: 🟢 APPROVED (Story 0.7, PR #39)
+> Spec di riferimento: `05-ARCHITECTURE.md` §11 (App update management), §12 (Database maintenance); `02-DATA-SCHEMA.md` §7 (migrazioni MIG-1..4).
+
+Questo runbook è destinato all'operatore (sviluppatore che mantiene il progetto) e documenta in dettaglio le operazioni di **update management** e **manutenzione del database locale** (IndexedDB via Dexie), incluse diagnosi e remediation di problemi noti.
+
+---
+
+## §1 — Update playbook (05§11)
+
+Le PWA richiedono un ciclo di aggiornamento **esplicito e controllato** perché l'utente non scarica attivamente una nuova versione: il Service Worker aggiorna la cache in background e l'utente può restare bloccato su una versione vecchia (anche con cache buggate).
+
+### 1.1 Version manifest
+
+L'app pubblica un `version.json` su `/version.json` con:
+
+```json
+{
+  "version": "0.1.0",
+  "buildHash": "<git rev-parse HEAD>",
+  "releasedAt": "2026-10-19T...Z",
+  "minSchemaVersion": 3
+}
+```
+
+- `version`: versione dal `package.json` di `apps/web`.
+- `buildHash`: commit SHA corrente (`git rev-parse HEAD`).
+- `releasedAt`: timestamp ISO di generazione.
+- `minSchemaVersion`: versione minima di schema DB che il client sa gestire (02-DATA-SCHEMA.md §10 v1.2).
+
+Il manifest è generato in fase di build dallo script `scripts/generate-version.mjs` (richiamato dallo script `build` di `apps/web`):
+
+```
+"build": "node ../../scripts/generate-version.mjs && tsc -p tsconfig.json --noEmit && vite build"
+```
+
+Il client confronta a ogni boot la versione cached con quella del manifest per decidere se mostrare il banner di update (05-ARCHITECTURE.md §11.1).
+
+### 1.2 Service Worker update lifecycle
+
+Gestito da Workbox (`vite-plugin-pwa`):
+
+1. **Install**: SW nuovo scarica i precached assets in `tempCache`.
+2. **Waiting**: SW nuovo aspetta che tutte le tab del SW vecchio siano chiuse.
+3. **Activate**: SW nuovo prende il controllo, pulisce `oldCaches`.
+4. **Clients claim**: il SW nuovo si annuncia via `clients.claim()` solo se la versione è **soft-compatible** (minor/patch); per major → attende chiusura tab.
+
+### 1.3 Prompt policy (05§11.3)
+
+| Tipo cambio | Comportamento |
+|-------------|---------------|
+| **Patch** (es. 1.0.0 → 1.0.1) | Auto-apply al prossimo boot, nessun prompt |
+| **Minor** (es. 1.0.0 → 1.1.0) | Banner soft: "Nuova versione disponibile" con CTA "Aggiorna ora" / "Più tardi" |
+| **Major** (es. 1.x → 2.x) | **Modal bloccante** se c'è una migrazione DB; altrimenti banner come minor |
+
+Il prompt è gestito dall'hook `useAppUpdate()` in `@ls/web/hooks`, che ascolta `serviceWorker.controllerchange` e il custom event `ls:update-available`. La decisione "modal bloccante" è presa da `isBlockingUpdate()` (`@ls/web/lib/versionManifest`) che confronta `updateKind === 'major'` con `currentDbVersion < minSchemaVersion`.
+
+### 1.4 Migrazione DB tra versioni (05§11.4)
+
+Quando una nuova versione di `02-DATA-SCHEMA.md` viene rilasciata:
+
+1. Confronta `currentDbVersion` (letto da `db.verno`) con `expectedDbVersion` (build-time constant).
+2. Se `currentDbVersion < expectedDbVersion`: esegue le funzioni di upgrade di Dexie (`02§7` MIG-1..4) in sequenza.
+3. Se l'upgrade fallisce: rollback all'ultima versione funzionante via SW + banner "Ripristino versione precedente" (solo per failure di migrazione, NON per failure di feature).
+
+---
+
+## §2 — Maintenance playbook (05§12)
+
+Operazioni di manutenzione che il client deve supportare per garantire salute del DB locale nel tempo. Sono **non-bloccanti** per l'utente: girano in background, con throttling, e notificano l'utente solo se rilevano problemi.
+
+### 2.1 Operazioni standard
+
+| Operazione | Quando | Cosa fa | Costo | Stato |
+|------------|--------|---------|-------|-------|
+| `recount()` | Dopo ogni import + settimanale | Ricalcola `listenCount` denormalizzati su tracks/artists | O(n listens) | ✅ attivo (Story 0.2) |
+| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati | O(n tracks) | ✅ Story 0.7 |
+| `orphanCleanup()` | Mensile | Rimuove `tracks`/`artists` non referenziati da `listens` né da `library` | O(n tracks) | ✅ Story 0.7 |
+| `indexRebuild()` | Manuale + dopo migrazione | Ricostruisce indici Dexie se corrotti | Lock lungo | ⬚ futuro |
+| `fastCheck()` | Ad ogni boot (dev/prod) | Smoke test: DB apribile, schema version corretto, indici funzionanti | < 100ms | ✅ Story 0.7 |
+| `quotaCheck()` | Settimanale | `navigator.storage.estimate()` → warning se > 80% | < 50ms | ✅ Story 0.7 |
+| `compact()` | Manuale (utente) | Compaction `IDBObjectStore` se supportato | Variabile | ⬚ futuro |
+
+### 2.2 Scheduling
+
+- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`) — `recount` attivo (Story 0.2), `rekey` attivo (Story 0.7).
+- **Scheduled**: `orphanCleanup`, `quotaCheck` via Web Worker in `requestIdleCallback`, max 5 min/giorno (cumulativo con `05§7.1`) — Story 0.7.
+- **Manuale**: `indexRebuild`, `compact` da pulsante in Settings → "Manutenzione DB" (raro) — ⬚ futuro.
+- **Boot**: `fastCheck` sempre; se fallisce, l'app entra in read-only mode (`05§5`) — Story 0.7.
+
+### 2.3 Health monitoring (no telemetry, D.A.1)
+
+- I risultati di `fastCheck` / `quotaCheck` sono loggati in `core/logger` localmente (schema `{level, module, msg, ctx}`, nessun PII).
+- L'utente vede un badge "Tutto ok" o un banner "Spazio in esaurimento" in Settings → Manutenzione.
+- Un contatore anonimo `lastMaintenance: { recount, rekey, orphan, fastCheck }` è mostrato all'utente per trasparenza.
+- **Nessun dato** viene inviato a server (coerente con ADR-0002).
+
+### 2.4 API esposte (`@ls/core/db`)
+
+```ts
+import { rekey, orphanCleanup, recount, fastCheck, quotaCheck, runHealthCheck } from '@ls/core/db';
+```
+
+- `rekey(db)` → `{ promoted, merged, listenedMoved }`
+- `orphanCleanup(db)` → `{ tracksRemoved, artistsRemoved }`
+- `recount(db)` → `Promise<void>` (già attivo da Story 0.2)
+- `fastCheck(db, expectedSchemaVersion)` → `FastCheckResult { ok, schemaVersion, error, durationMs }`
+- `quotaCheck()` → `QuotaCheckResult { ok, quota, usage, fillRatio, warning }`
+- `runHealthCheck(db, expectedSchemaVersion)` → `DbHealthState { fastCheck, quotaCheck, status }`
+
+---
+
+## §3 — Migrazioni schema (02§7, MIG-1..4)
+
+Le migrazioni sono definite in `02-DATA-SCHEMA.md §7`. Regole di processo:
+
+1. **Mai drop di tabelle utente** (MIG-1).
+2. Ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)` con **funzione di upgrade testata** (10-TESTING.md §4.3).
+3. Le tabelle derivate (`sessions`, `insights`) sono **ricostruibili** con `recompute()` (MIG-2).
+4. I parametri di analisi cambiano `derivedVersion` (MIG-3).
+5. I contatori denormalizzati sono ricalcolabili con `recount()` (MIG-4).
+
+Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollback automatico. L'utente vede un banner "Aggiornamento DB non riuscito, ripristino versione precedente" (05§11.4).
+
+Schema attuale: **versione 3** (v1 → v2 aggiunge `searchQueries`; v2 → v3 aggiunge `artworkUrl` nullable su `tracks` e `albums`).
+
+---
+
+## §4 — Diagnosi & remediation
+
+### 4.1 fastCheck fallisce (read-only mode)
+
+**Sintomi**: banner persistente "Errore critico, ricarica l'app" (`error.dbCritical`), app in read-only mode (nessuna scrittura accettata).
+
+**Diagnosi**:
+1. Aprire DevTools → Console: cercare `[ls:db:health] fastCheck fallito`.
+2. Verificare `fastCheck.schemaVersion`: se < `expectedSchemaVersion` (3), serve una migrazione DB.
+3. Verificare l'errore: `DB non aperto` (IndexedDB non disponibile, modalità privata Safari) o errore di schema/indici.
+
+**Remediation**:
+- Se serve migrazione: ricaricare l'app per permettere l'upgrade automatico di Dexie; se l'upgrade fallisce, il SW effettua il rollback alla versione precedente.
+- Se IndexedDB non disponibile: l'utente deve uscire dalla modalità privata o liberare spazio (`quotaCheck` > 80%).
+
+### 4.2 Spazio IndexedDB in esaurimento (quotaCheck > 80%)
+
+**Sintomi**: banner "Spazio IndexedDB in esaurimento: X% utilizzato" in Settings → Manutenzione.
+
+**Diagnosi**: `navigator.storage.estimate()` → `fillRatio > 0.8`.
+
+**Remediation**:
+- L'utente può usare `compact()` (quando disponibile) o cancellare dati non necessari.
+- L'operatore può verificare quali tabelle occupano più spazio (tracks, listens).
+
+### 4.3 Migrazione DB fallita
+
+**Sintomi**: banner "Aggiornamento DB non riuscito, ripristino versione precedente".
+
+**Diagnosi**: errore durante `db.version(n).upgrade(...)`; Dexie fa rollback automatico della transazione.
+
+**Remediation**:
+- Il SW ripristina la versione precedente dell'app.
+- L'operatore investiga la funzione di upgrade fallita (vedere `02§7` e i test di migrazione in `packages/core/src/db/__tests__/db.test.ts`).
+
+### 4.4 Duplicati dopo enrichment (canonicalKey fuzzy)
+
+**Sintomi**: stessa traccia presente due volte con `canonicalKey` diverso (`fuzzy:*` vs `isrc:*` o `mbid:*`).
+
+**Diagnosi**: query su `tracks` con stesso `isrc` o `mbid` e `canonicalKey` diversi.
+
+**Remediation**: eseguire `rekey()` che promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:` e unisce i duplicati aggregando `listenCount` e riorientando i `listens.trackId`.
+
+---
+
+## Acceptance criteria (Story 0.7)
+
+- [x] `16-OPERATIONS.md` esiste e referenzia `05§11` e `05§12`.
+- [x] Tutte le funzioni di manutenzione hanno test unitari (≥ 80% coverage su `packages/core/db/`).
+- [x] `fastCheck` eseguito al boot; failure → read-only mode + banner.
+- [x] Update soft (minor) mostra banner; update major mostra modal (quando `requiresDbMigration`).
+- [x] Migrazione DB v1→v2 simulata in test passa senza perdita dati.
+- [x] Rollback SW in caso di migration failure (test E2E, `rollbackServiceWorker`).
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | 2026-10-19 | Prima versione (Story 0.7, PR #39): §1 Update playbook, §2 Maintenance playbook, §3 Migrazioni, §4 Diagnosi & remediation; API `@ls/core/db` (rekey, orphanCleanup, fastCheck, quotaCheck, runHealthCheck); script `scripts/generate-version.mjs`. |
+
 
 
 ===== FILE: scripts/generate-fixtures.mjs =====
