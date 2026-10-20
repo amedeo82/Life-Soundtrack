@@ -4,7 +4,7 @@ title: "Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale
 date: 2026-10-20
 state: 🟡
 branch: docs/84-doc-sync-state-reale
-pr: 0
+pr: 85
 claim: kilo-HP-ELITEBOOK-52q4
 cross_refs: [40, 43, 64, 71, 84]
 tags: [docs, state, adr-0008, housekeeping]

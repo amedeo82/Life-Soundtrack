@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 18:09
+> Data: 2026-10-20 18:12
 > Totale file: 57
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -11,7 +11,7 @@
 
 - Totale file: 56
 - Dimensione totale: 764.2 KB
-- Ultima aggregazione: 2026-10-20 18:09
+- Ultima aggregazione: 2026-10-20 18:12
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1290,7 +1290,7 @@ Apache License
 | 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟢 | #72 |
 | 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
 | 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
-| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | - |
+| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -3510,7 +3510,7 @@ Casi di sicurezza verificati esplicitamente, perché sono quelli che costano:
 
 - **Data**: 2026-10-20
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #85
 - **Claim**: `kilo-HP-ELITEBOOK-52q4`
 
 ```

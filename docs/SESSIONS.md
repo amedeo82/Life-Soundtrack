@@ -2145,7 +2145,7 @@ Casi di sicurezza verificati esplicitamente, perché sono quelli che costano:
 
 - **Data**: 2026-10-20
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #85
 - **Claim**: `kilo-HP-ELITEBOOK-52q4`
 
 ```
