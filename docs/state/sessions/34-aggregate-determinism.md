@@ -2,9 +2,9 @@
 number: 34
 title: "Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante"
 date: 2026-10-20
-state: 🟡
+state: 🟢
 branch: fix/69-aggregate-determinism
-pr: 0
+pr: 72
 claim: kilo-HP-ELITEBOOK-post-merge-review
 cross_refs: [63, 66, 68, 69, 70]
 tags: [docs, devops, determinism, bugfix, ci]

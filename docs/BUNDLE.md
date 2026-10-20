@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 17:41
-> Totale file: 56
+> Data: 2026-10-20 18:12
+> Totale file: 57
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 55
-- Dimensione totale: 754.5 KB
-- Ultima aggregazione: 2026-10-20 17:30
+- Totale file: 56
+- Dimensione totale: 764.2 KB
+- Ultima aggregazione: 2026-10-20 18:12
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 31 |
+| docs/ | 32 |
 | scripts/ | 13 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
@@ -1280,16 +1280,17 @@ Apache License
 | 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | #19 |
 | 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | #21 |
 | 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | #22 |
-| 27 | Adozione worktree come default per agenti paralleli | 🟡 | - |
-| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟡 | - |
-| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟡 | - |
-| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟡 | - |
-| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
-| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟡 | - |
-| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
-| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟡 | - |
-| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟡 | - |
-| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟡 | - |
+| 27 | Adozione worktree come default per agenti paralleli | 🟢 | #54 |
+| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟢 | #55 |
+| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟢 | #56 |
+| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟢 | #59 |
+| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟢 | #62 |
+| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟢 | #63 |
+| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟢 | #69 |
+| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟢 | #72 |
+| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
+| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
+| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1329,10 +1330,10 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **13**
-- Stories migrate in state/stories: **4** (done: 3)
-- Ultima sessione migrata: **S36** - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
-- Stories done: 0.3, 0.5, 0.6
+- Sessioni migrate in state/sessions: **14**
+- Stories migrate in state/stories: **5** (done: 5)
+- Ultima sessione migrata: **S37** - Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending)
+- Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2537,8 +2538,8 @@ PR #22 merged `5235c88` (2026-10-18T17:02Z +0200). Branch `feat/5-i18n-setup` el
 ### Sessione 27 - Adozione worktree come default per agenti paralleli
 
 - **Data**: 2026-10-19
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #54
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2604,8 +2605,8 @@ PR #54 (TBD) merged. Branch `feat/53-worktree-default` eliminata (policy §♻�
 ### Sessione 28 - GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N)
 
 - **Data**: 2026-10-19
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #55
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2685,8 +2686,8 @@ PR #55 (TBD) merged. Branch `feat/51-pr-template-and-branch-protection` eliminat
 ### Sessione 29 - ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md
 
 - **Data**: 2026-10-19
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #56
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2757,8 +2758,8 @@ PR #56 (TBD) merged. Branch `feat/52-adr-0008-v2-index-bundle` eliminata (policy
 ### Sessione 30 - Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58)
 
 - **Data**: 2026-10-19
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #59
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2843,8 +2844,8 @@ PR #59 (TBD) merged. Branch `fix/58-crlf-and-workflow` eliminata (policy §♻�
 ### Sessione 31 - AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9)
 
 - **Data**: 2026-10-19
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #62
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2970,8 +2971,8 @@ Liberazione claim `kilo-HP-ELITEBOOK-56535750` con `release:` + merge SHA. Branc
 ### Sessione 32 - Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza
 
 - **Data**: 2026-10-19
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #63
 - **Claim**: `kilo-HP-ELITEBOOK-cumulativo`
 
 ```
@@ -3072,8 +3073,8 @@ git status --porcelain                       # 4 file modificati (AGENTS.md, 12-
 ### Sessione 33 - Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch)
 
 - **Data**: 2026-10-20
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #69
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3210,8 +3211,8 @@ git status --porcelain                            # M AGENTS.md, M docs/BUNDLE.m
 ### Sessione 34 - Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante
 
 - **Data**: 2026-10-20
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #72
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3305,8 +3306,8 @@ Idempotenza verificata sul repo reale: due run consecutivi producono `git diff` 
 ### Sessione 35 - Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)
 
 - **Data**: 2026-10-20
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #74
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3393,8 +3394,8 @@ Le API Actions usate sono state verificate a mano: `github.core.notice` / `githu
 ### Sessione 36 - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
 
 - **Data**: 2026-10-20
-- **Stato**: 🟡
-- **PR**: #0
+- **Stato**: 🟢
+- **PR**: #77
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3503,6 +3504,94 @@ Casi di sicurezza verificati esplicitamente, perché sono quelli che costano:
 - **#69** — procedura canonica post-merge: nasce lì `post-merge.ps1`, di cui questo lavoro chiude il buco sui branch locali
 - **#73** — automazioni post-merge: il `-Check` è il completamento di `stale-claim-sweeper` e `auto-branch-cleanup`, che coprono solo i branch **remoti**
 - **#75** — test flaky `spotify-adapter`, aperto nella sessione precedente
+```
+
+### Sessione 37 - Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending)
+
+- **Data**: 2026-10-20
+- **Stato**: 🟡
+- **PR**: #85
+- **Claim**: `kilo-HP-ELITEBOOK-52q4`
+
+```
+
+# Sessione 37 — Doc-sync dello stato reale
+
+## Sintesi
+
+Sessione di sola documentazione. `docs/state/` non rifletteva la realtà dei merge: i gate `aggregate-state.ps1 --check` e `generate-bundle.ps1 --check` erano verdi (exit 0) perché l'agregatore è coerente con i suoi sorgenti, ma i sorgenti stessi erano sbagliati. Il drift è quindi **semantico**, non tecnico: non lo intercetta nessun gate automatico, serve l'auditing umano (o di un agente) contro GitHub.
+
+## Trigger
+
+Il project owner ha chiesto "qual è lo step da completare per procedere con lo sviluppo?". La lettura della documentazione (`README.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md`) suggeriva Story 0.4 come prossima story da implementare. Il confronto con GitHub e con il codebase ha smentito la documentazione.
+
+## Drift trovato
+
+Confronto `docs/state/` contro GitHub e contro il filesystem, su `main` = `23d32c9`:
+
+| Elemento | In `docs/state/` | Realtà verificata |
+|---|---|---|
+| Story 0.4 (UI import) | **assente** | merged PR #71 `0a8e83f` (2026-10-20T10:34:53Z) |
+| Story 0.7 (Operations runbook) | `status: in-progress`, `pr: 39` | merged PR #64 `b44420b` (2026-10-20T12:38:56Z) |
+| Sessioni 27-36 | `state: 🟡`, `pr: 0` | tutte merged: PR #54, #55, #56, #59, #62, #63, #69, #72, #74, #77 |
+| Issue aperte su GitHub | — | **zero** (tutte chiuse, incluse #40 con `status:done`) |
+
+Il codice di Story 0.4 esiste ed è completo: `apps/web/src/onboarding/` con `OnboardingRouter.tsx`, `PlatformCard.tsx` (5 stati), `DropZone.tsx`, `PrivacySettings.ts` (4 toggle) e 3 file di test.
+
+Cause identificate:
+
+1. **PR #71 non ha creato il suo state file.** La regola di ADR-0008 impone che una PR di implementazione crei/aggiorni `docs/state/stories/<id>-<slug>.md`; senza quel file l'agregatore non ha nulla da elencare. L'aggregatore è coerente, semplicemente non sa della story.
+2. **`pr:` ambiguo in Story 0.7.** Il campo conteneva `39`, che è il numero dell'**issue** (`Story 0.7 — issue #39`), non della PR (#64). Lo stato non era stato aggiornato a valle del merge, quindi la story restava `in-progress` a mesi di distanza dal merge di fatto.
+3. **Sessioni 27-36 mai chiuse.** Tutte create con `pr: 0` e `state: 🟡` (merge pendente) e mai aggiornate dopo il merge. Le sessioni 22-24, che hanno avuto il doc-sync completo, sono 🟢.
+
+## Modifiche
+
+1. `docs/state/stories/0.4-ui-import.md` (**nuovo**) — `status: done`, `pr: 71`, `merged_commit` e `merged_date` reali, task/AC/test dalla PR #71
+2. `docs/state/stories/0.7-operations-runbook.md` — frontmatter `status: done`, `pr: 64` (era `in-progress`/`39`), `merged_commit`, `merged_date`, `size`, `spec_refs`; aggiunta sezione "Stato attuale"
+3. `docs/state/sessions/27..36` — `state: 🟡 → 🟢` e `pr: 0 → <N>` con i 10 numeri di PR verificati via `gh pr list --state merged --head <branch>`
+4. `docs/state/_index.md` — tabella di migration allineata (0.4 aggiunta; 0.1/0.2 restano legacy)
+5. `docs/state/sessions/37-doc-sync-state-reale.md` (**nuovo**) — questa entry
+6. `scripts/generate-bundle.ps1` — `$files` += `docs/state/stories/0.4-ui-import.md`
+
+## Decisioni (D.37.x)
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.37.1 | Riconciliare lo stato **da GitHub**, non dai documenti | `gh pr list --state merged --head <branch>` è l'autorità: il branch è la chiave che collega sessione/storia alla PR, ed è univoco |
+| D.37.2 | Non modificare la tabella legacy "Stato di avanzamento" di `11-BACKLOG.md` | è fuori dai marcatori `AGGREGATE-*`, quindi non è nel perimetro dell'agregatore; la regola ADR-0008 vieta alle PR di toccare i file globali. Dichiarata come gap aperto |
+| D.37.3 | Aggiungere a `$files` solo `0.4-ui-import.md` | la checklist impone di registrare i **propri** file nuovi; allargare l'inventore a 0.3/0.5/0.6 e alle 13 sessioni è una decisione separata (impatto sulla dimensione del bundle) |
+| D.37.4 | Sessione 37 dichiarata `🟡` con `pr: 0` | lo schema dice `🟡 = merge pendente`: al momento della scrittura la PR non esiste ancora. Il `pr:` viene riempito con un commit successivo, dopo `gh pr create` |
+
+## Gap aperti (non risolti qui)
+
+- **Tabella legacy "Stato di avanzamento"** in `docs/11-BACKLOG.md`: dichiara ancora 0.4 `⬚ TODO` e 0.6 `⬚ TODO`, entrambe in realtà `done`. È fuori dal perimetro dell'aggregatore: allinearla richiede o un'estensione dell'aggregator, o un'eccezione esplicita alla regola ADR-0008.
+- **Inventario `$files` incompleto**: `0.3`, `0.5`, `0.6` e tutte le sessioni sono fuori dal bundle pur essendo sorgenti atomiche. Il bundle da solo è quindi un handoff incompleto (vedi D.37.3).
+- **Nessun gate intercetta questo drift**: `aggregate-state --check` verifica coerenza aggregator↔sorgenti, non correttezza dei sorgenti rispetto alla realtà. Un audit periodico `docs/state/` vs `gh pr list` è l'unica difesa.
+
+## Verifica
+
+- `scripts/aggregate-state.ps1 --check` → exit 0
+- `scripts/generate-bundle.ps1 --check` → exit 0
+- `bash scripts/test-aggregate-determinism.sh` → **non eseguito in locale**: `bash` non è disponibile su questa macchina (stub WSL senza distribuzione). Il gate è comunque bloccante in CI e gira su ogni PR
+- Nessun file applicativo (`.ts`/`.tsx`) toccato: `lint`/`typecheck`/`test`/`build` non sono impattati
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 37-1 | Un gate verde non implica uno stato corretto: `aggregate-state --check` confronta l'agregatore con i suoi sorgenti, non i sorgenti con GitHub | ✅ il drift è emerso solo confrontando `gh pr list` con i frontmatter |
+| 37-2 | `pr:` senza contratto esplicito si riempie col numero dell'issue invece che della PR | ✅ D.37.1: `gh pr list --head <branch>` come unica fonte |
+| 37-3 | Il campo `state:` di una sessione va aggiornato al merge, non all'apertura della PR | ✅ le 10 sessioni erano tutte `🟡` post-merge |
+| 37-4 | `[char]0x1F7E1` in PowerShell 5.1 fallisce: i codepoint > 0xFFFF sono surrogate pair | ✅ usato `[System.Text.Encoding]::UTF8.GetString(byte[])` |
+| 37-5 | Scrivere con `Set-Content -Encoding UTF8` in PS 5.1 aggiunge il BOM e può introdurre CRLF, violando `.gitattributes` (`eol=lf`) | ✅ usato `[System.IO.File]::WriteAllText` con `UTF8Encoding($false)`, verificato 0 CRLF e assenza di BOM |
+| 37-6 | `setup-worktree.ps1` valida che l'issue non abbia `in-progress`, quindi impone worktree→claim, mentre `AGENTS.md` §"Primo task" li mette nell'ordine opposto | ⚠️ incoerenza documentale non risolta qui; risolta con `-SkipGhCheck` + claim già validato a mano |
+
+## Cross-refs
+
+- **#84** — issue di questo lavoro (chiusa dalla PR)
+- **#71 / #40** — PR e issue di Story 0.4, la story mancante
+- **#64 / #39** — PR e issue di Story 0.7, lo stato stale
+- **#43** — `needs-spec` sulla promozione dei doc di design, chiusa `wontdo` perché superata dai fatti (Story 0.4 implementata comunque su spec DRAFT)
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -4401,8 +4490,11 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/31-agents-md-cleanup.md` | ✅ migrata | entry S31 (cleanup AGENTS.md v1.9, audit workflow) |
 | `state/stories/0.5-pwa.md` | ✅ migrata | da Story 0.5 BACKLOG + 18-DEV-LOG §11 |
 | `state/stories/0.6-i18n.md` | ✅ migrata | da Story 0.6 BACKLOG + 18-DEV-LOG §12 |
+| `state/stories/0.4-ui-import.md` | ✅ migrata | da PR #71 (Sessione 37, issue #84) |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
-| Stories 0.1..0.4, 0.7+ | ⬚ TODO (migration incrementale) | restano in `docs/11-BACKLOG.md` legacy fino a V2 |
+| Stories 0.1, 0.2 + 1.x+ | ⬚ TODO (migration incrementale) | restano in `docs/11-BACKLOG.md` legacy fino a V2 |
+
+> **Nota (Sessione 37, issue #84)**: le 7 story della Fase 0 sono tutte `done` e le 5 con state file sono 0.3, 0.4, 0.5, 0.6, 0.7. Restano senza state file le story 0.1 e 0.2 (entrambe `done`, migration incrementale).
 
 Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
@@ -4425,11 +4517,18 @@ id: "0.7"
 title: "Operations runbook + manutenzione DB"
 phase: 0
 area: devops
-status: in-progress
+status: done
 priority: I
+size: M
 depends_on: ["0.2", "0.5"]
 branch: feat/39-story-0-7-operations-runbook-manutenzion
-pr: 39
+pr: 64
+merged_commit: b44420beb9ec95ea16ec47305ac4873f41b1a15b
+merged_date: 2026-10-20T12:38:56Z
+spec_refs:
+  - docs/05-ARCHITECTURE.md §11, §12
+  - docs/02-DATA-SCHEMA.md §7
+  - docs/10-TESTING.md §4
 ---
 
 ## Descrizione
@@ -4486,6 +4585,89 @@ Spec di riferimento:
 - `scripts/generate-bundle.ps1` (`docs/16-OPERATIONS.md` aggiunto a `$files`)
 - `docs/BUNDLE.md` (rigenerato)
 
+## Stato attuale
+
+PR #64 mergata in `main` il 2026-10-20T12:38:56Z (merge commit `b44420beb9ec95ea16ec47305ac4873f41b1a15b`), issue #39 chiusa con `status:done`.
+
+Il frontmatter riportava ancora `status: in-progress` e `pr: 39` dopo il merge: il numero nell'originale `pr:` era il numero dell'**issue** (#39), non della PR, e lo stato non era stato aggiornato a valle del merge. Entrambi i campi sono stati corretti in issue #84, insieme alla creazione del file di stato mancante della Story 0.4.
+
+Con questa story chiude la Fase 0 tecnica: 0.1-0.7 sono tutte `done`.
+
+
+
+===== FILE: docs/state/stories/0.4-ui-import.md =====
+
+---
+id: "0.4"
+title: "UI import (onboarding)"
+phase: 0
+area: ui
+status: done
+priority: B
+size: M
+branch: feat/40-story-0-4-ui-import-onboarding-benvenuto
+pr: 71
+merged_commit: 0a8e83f2aaf90cb61862e0737417eb7ec8b63881
+merged_date: 2026-10-20T10:34:53Z
+claim: kilo-HP-EliteBook-jxoa2aja
+depends_on: ["0.3"]
+spec_refs:
+  - docs/06-UX-FLOWS-STATES.md
+  - docs/07-UI-SPEC.md §2.5
+  - docs/15-DESIGN-SYSTEM.md
+  - docs/08-COPY-I18N.md §9
+  - docs/02-DATA-SCHEMA.md §3.8
+---
+
+## Descrizione
+
+Schermate di onboarding ① Benvenuto → ② Privacy → ③ Import → ④ Processing → Rivelazione, con `PlatformCard` a 5 stati canonici e orchestrazione dell'import su `SpotifyAdapter`. Modulo `apps/web/src/onboarding/`.
+
+## Task
+
+- [x] T0.4.1 — `DropZone` (134 righe) + `PlatformCard` (162 righe) con i 5 stati `empty` / `validating` / `parsing` / `done` / `error`
+- [x] T0.4.2 — Schermata Benvenuto + Privacy (4 toggle `PrivacySettings`, persistenza localStorage chiave `ls:privacy`)
+- [x] T0.4.3 — Schermata Import con validazione file e CTA "Importa tutto" disabilitata senza file validi
+- [x] T0.4.4 — Schermata Processing con progress e counter live
+- [x] T0.4.5 — Integrazione con `SpotifyAdapter` via `ImportOrchestrator` (detect + import, `AbortSignal`, `onProgress`)
+
+## Acceptance criteria — verificate in PR #71
+
+- [x] Drag&drop ZIP/JSON Spotify → import orchestrato con progress
+- [x] File errato → messaggio umano localizzato (es. "Questo file sembra di Apple Music, non di Spotify") + bottone Riprova
+- [x] Privacy screen mostra i 4 toggle (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`) con default `false` (nessun consenso implicito)
+- [x] Nessun dato persistito prima del click "Importa tutto" (CTA disabilitata, `canImport` gate)
+- [x] `PlatformCard`: 5 stati resi con `role="button"` + `aria-describedby` + regione `aria-live="polite"` per il messaggio di stato
+
+## Test
+
+12 test nuovi dedicati, 78 test verdi su `@ls/web`:
+
+| File | Test | Copertura |
+|------|------|-----------|
+| `onboarding/__tests__/PlatformCard.test.tsx` | 7 | `it.each` sui 5 stati + errore con bottone Riprova + badge `done` con conteggio |
+| `onboarding/__tests__/ImportScreen.test.tsx` | 3 | CTA disabilitata senza file, `onDrop` con piattaforma+file, errore `fileTooLarge` |
+| `onboarding/__tests__/PrivacyScreen.test.tsx` | 1 | 4 toggle + CTA + claim "I tuoi dati, solo tuoi" |
+| `__tests__/app.test.tsx` | 1 | mount della schermata di benvenuto |
+
+## Note
+
+- Le spec di riferimento `15-DESIGN-SYSTEM.md` e `07-UI-SPEC.md` erano 🟡 DRAFT al momento dell'implementazione. La `needs-spec` #43 (promozione DRAFT→APPROVED) è stata chiusa `wontdo` il 2026-10-20 **perché superata dai fatti**: la story è stata comunque implementata e mergata. La promozione dei documenti a 🟢 APPROVED resta una decisione aperta del Boss.
+- `carDetectionConsent` è il nome del campo in `PrivacySettings` (chiave toggle `toggle-carDetectionConsent`), non `carDetection`: allineato a `02-DATA-SCHEMA.md §3.8`.
+- `PrivacySettings.scrobbleHubs` resta `[]` per default: nessun invio a servizi esterni senza consenso esplicito.
+
+## Documenti aggiornati
+
+- `apps/web/src/onboarding/` (nuovo: `DropZone.tsx`, `OnboardingRouter.tsx`, `PlatformCard.tsx`, `PrivacySettings.ts`, `types.ts`, `onboarding.css`)
+- `apps/web/src/onboarding/__tests__/` (nuovo: 3 file di test)
+- `apps/web/src/App.tsx` + `apps/web/src/__tests__/app.test.tsx` (entry point onboarding)
+- `apps/web/src/i18n/index.ts` (namespace onboarding)
+
+## Stato attuale
+
+PR #71 mergata in `main` (merge commit `0a8e83f2aaf90cb61862e0737417eb7ec8b63881`), issue #40 chiusa con `status:done`. Questo file è stato creato in issue #84: la story era merged ma assente da `docs/state/`, quindi l'aggregatore non la elencava nel backlog.
+
+Sblocca: nessuna story di Fase 0 (era l'ultima). Le prossime story sono EPIC 1 (1.1-1.5), EPIC 2 (2.1-2.4) ed EPIC 4 (4.1-4.3).
 
 
 ===== FILE: scripts/aggregate-state.ps1 =====
@@ -9110,9 +9292,10 @@ Ogni story deve avere label GitHub:
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
+| 0.4 - UI import (onboarding) | done | #71 | `0a8e83f2aaf90cb61862e0737417eb7ec8b63881` | ui |
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
-| 0.7 - Operations runbook + manutenzione DB | in-progress | #39 | - | devops |
+| 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
 
 <!-- AGGREGATE-STORIES-END -->
 

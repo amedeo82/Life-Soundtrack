@@ -132,8 +132,11 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/31-agents-md-cleanup.md` | ✅ migrata | entry S31 (cleanup AGENTS.md v1.9, audit workflow) |
 | `state/stories/0.5-pwa.md` | ✅ migrata | da Story 0.5 BACKLOG + 18-DEV-LOG §11 |
 | `state/stories/0.6-i18n.md` | ✅ migrata | da Story 0.6 BACKLOG + 18-DEV-LOG §12 |
+| `state/stories/0.4-ui-import.md` | ✅ migrata | da PR #71 (Sessione 37, issue #84) |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
-| Stories 0.1..0.4, 0.7+ | ⬚ TODO (migration incrementale) | restano in `docs/11-BACKLOG.md` legacy fino a V2 |
+| Stories 0.1, 0.2 + 1.x+ | ⬚ TODO (migration incrementale) | restano in `docs/11-BACKLOG.md` legacy fino a V2 |
+
+> **Nota (Sessione 37, issue #84)**: le 7 story della Fase 0 sono tutte `done` e le 5 con state file sono 0.3, 0.4, 0.5, 0.6, 0.7. Restano senza state file le story 0.1 e 0.2 (entrambe `done`, migration incrementale).
 
 Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 

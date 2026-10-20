@@ -77,6 +77,7 @@ $files = @(
     # Lazy-state aggregation (ADR-0008, S25): sorgenti atomiche per doc-sync fuori PR
     "docs/state/_index.md",
     "docs/state/stories/0.7-operations-runbook.md",
+    "docs/state/stories/0.4-ui-import.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",

@@ -2,9 +2,9 @@
 number: 30
 title: "Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58)"
 date: 2026-10-19
-state: 🟡
+state: 🟢
 branch: fix/58-crlf-and-workflow
-pr: 0
+pr: 59
 claim: kilo-HP-ELITEBOOK-56535750
 closes_issue: 58
 cross_refs: [35, 45]

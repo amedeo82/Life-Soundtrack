@@ -2,9 +2,9 @@
 number: 33
 title: "Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch)"
 date: 2026-10-20
-state: 🟡
+state: 🟢
 branch: docs/33-post-merge-procedure
-pr: 0
+pr: 69
 claim: kilo-HP-ELITEBOOK-post-merge-review
 cross_refs: [39, 40, 65, 68]
 tags: [docs, post-merge, hard-procedure, git-workflow]

@@ -2,9 +2,9 @@
 number: 32
 title: "Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza"
 date: 2026-10-19
-state: 🟡
+state: 🟢
 branch: docs/41-45-47-issue-cleanup
-pr: 0
+pr: 63
 claim: kilo-HP-ELITEBOOK-cumulativo
 cross_refs: [41, 45, 47, 53, 10]
 tags: [docs, cleanup, issue-cleanup, wontdo]
