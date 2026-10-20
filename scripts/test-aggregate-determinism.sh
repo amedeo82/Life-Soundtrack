@@ -3,8 +3,13 @@
 #
 # Protegge i bug chiusi in issue #70, scoperti durante il post-merge della PR #69:
 #
-#   T1  ordinamento story per VALORE (0.3 < 0.5 < 0.6), non per ordine di filesystem
+# T1  ordinamento story per VALORE (0.3 < 0.5 < 0.6), non per ordine di filesystem
 #   T2  l'ordinamento non dipende dall'ordine di creazione dei file
+#      La combinazione di T1+T2 e' il regression test per issue #79: la forma
+#      abbreviata `$Id` in `Sort-Object { [version]$Id }` non viene espansa come
+#      `$_.Id` quando il primo token e' un cast `[version]`; tutti gli item hanno
+#      sort key `$null` e l'ordine degenera a quello di `Get-ChildItem`. Con il fix
+#      `$_.Id` il sort produce ordine numerico indipendente dal filesystem.
 #   T3  idempotenza byte-identica: due run consecutivi non producono alcun diff
 #       (il timestamp "Ultima aggregazione" viene riusato)
 #   T4  round-trip: dopo la scrittura, --check deve uscire 0
