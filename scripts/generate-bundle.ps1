@@ -127,6 +127,9 @@ $files = @(
     # prune). Test associato con 9 scenari (T1..T9) su repo temporanei.
     "scripts/post-merge.ps1",
     "scripts/test-post-merge.sh",
+    # Test di regressione per il determinismo dell'aggregator (issue #70): ordinamento
+    # per valore, idempotenza byte-identica, round-trip --check. Gate bloccante in CI.
+    "scripts/test-aggregate-determinism.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",
