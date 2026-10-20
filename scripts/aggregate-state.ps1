@@ -350,7 +350,20 @@ function Build-Block-BundleInventory {
         if (-not $matched) { $categories['root/']++ }
         $fullPath = Join-Path $repoRoot $f
         if (Test-Path $fullPath) {
-            $size = (Get-Item $fullPath).Length
+            # Issue #88: usare la dimensione del contenuto normalizzato a LF invece
+            # di (Get-Item).Length, perche' con `core.autocrlf=true` su Windows 14
+            # file di testo vengono serviti CRLF sul disco e il check su origin/main
+            # (committed LF) generava un drift spurio cross-platform (~2.3 KB).
+            # Il valore cosi ottenuto coincide con `git cat-file -s HEAD:<file>` ed e
+            # quindi identico su Windows / Linux / macOS.
+            $fileText = Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+            if ($null -ne $fileText) {
+                $lfText = $fileText -replace "`r`n", "`n"
+                $size = [System.Text.Encoding]::UTF8.GetByteCount($lfText)
+            } else {
+                # File binario o illeggibile come UTF-8: usa la dimensione raw.
+                $size = (Get-Item $fullPath).Length
+            }
             if ($aggregatorManaged -contains $f) {
                 $excludedSizeFiles++
             } else {

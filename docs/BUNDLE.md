@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 18:46
+> Data: 2026-10-20 19:07
 > Totale file: 57
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 56 (incluso 3 file aggregator-managed)
-- Dimensione totale: 554.2 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-20 16:52
+- Dimensione totale: 558.8 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-20 19:07
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -862,9 +862,10 @@ L'aggregator è la linfa dorsale del workflow parallelo: se produce output diver
 | **Idempotenza byte-identica** (il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro) | Senza questo, ogni run produceva un diff e `auto-state-aggregate` committava a vuoto su `main` | T3 |
 | **Degradazione invece di crash** su file `state/` malformati (`Get-Frontmatter`) | Un singolo file corrotto faceva crashare l'intera aggregazione, bloccando anche il workflow post-merge | T5 (più il guard `Get-Frontmatter`) |
 | **`Dimensione totale` indipendente dai file riscritti dall'aggregator** (issue #86, opt A): i 4 file aggregator-managed (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`) sono esclusi dal calcolo della taglia nel blocco BUNDLE inventory, perche' vengono misurati **prima** della riscrittura e oscillano di 1-2 run dopo ogni merge | Senza esclusione: `--check` su main appena mergato segnalava "blocco drift" con blocchi della stessa lunghezza e contenuto identico (rumore puro). Il drift era in `766.6 KB` vs `764.2 KB` su main = 2.4 KB = drift dei 4 file aggregator-managed tra due run consecutivi | T7 (3 assert) |
+| **`Dimensione totale` coerente cross-platform** (issue #88): il calcolo normalizza CRLF->LF via `Get-Content -Raw` + `GetByteCount(($text -replace "`r`n","`n"))`, in modo che la dimensione sia la stessa su Windows (`core.autocrlf=true`, 14 file CRLF sul disco) e su Linux (LF committed). Senza normalizzazione, `--check` su Windows mostrava un drift spurio di ~2.3 KB rispetto a origin/main | Conseguenza dell'autocrlf Windows: la dimensione su disco (CRLF) divergeva dai byte committed (LF) per ognuno dei 14 file di testo con EOL conversion abilitata; il `Get-Item .Length` riportava i byte CRLF. Il fix trasforma l'aggregator in cross-platform-deterministic, chiudendo la radice del warning `#63` (PS 5.1 vs 7 incompatibilita residue) per il blocco BUNDLE | T8 (3 assert) |
 
 ```bash
-bash scripts/test-aggregate-determinism.sh    # 12 assert, gate bloccante in CI
+bash scripts/test-aggregate-determinism.sh    # 15 assert, gate bloccante in CI
 ```
 
 **Se tocchi `scripts/aggregate-state.ps1`, il test è bloccante**: eseguilo prima di aprire la PR. Il gate `--check` resta warning-only in CI per incompatibilità residue PS 5.1 vs 7 (issue #63, risolto strutturalmente da #66); il test di determinismo copre invece la stessa classe di bug in modo affidabile, perché confronta l'output **dentro la stessa piattaforma**.
@@ -913,7 +914,9 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.14 — 'Dimensione totale' inventory esclude i file aggregator-managed (issue #86, opt A). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata escludendo i 4 file che l'aggregator stesso riscrive (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`): misurati pre-write oscillavano di 1-2 run dopo ogni merge producendo `--check drift` con blocchi di uguale lunghezza e contenuto identico (rumore puro). I conteggi per categoria e `Totale file` restano invariati; il blocco inventory dichiara esplicitamente i file esclusi. `scripts/test-aggregate-determinism.sh` esteso con T7 (3 assert → 12 totali) come regression dedicata.
+*Ultimo aggiornamento: v1.15 — 'Dimensione totale' inventory normalizzata CRLF->LF (issue #88, follow-up di #86). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata sul contenuto decodificato normalizzato a LF invece che sui raw byte del file: `Get-Content -Raw -Encoding UTF8` + `[System.Text.Encoding]::UTF8.GetByteCount(($text -replace "`r`n","`n"))`. Conseguenza: la dimensione coincide con `git cat-file -s HEAD:<file>` su qualsiasi piattaforma, e `aggregate-state.ps1 --check` su Windows (dove 14 file di testo sono `core.autocrlf=true` → CRLF sul disco) non segnala piu un drift spurio di ~2.3 KB rispetto a origin/main (committed LF). `scripts/test-aggregate-determinism.sh` esteso con T8 (3 assert → 15 totali) come regression dedicata; il warning `#63` (PS 5.1 vs 7 incompatibilita residue) resta solo per eventuali altri blocchi.
+
+*Precedente v1.14 — 'Dimensione totale' inventory esclude i file aggregator-managed (issue #86, opt A).
 
 *Precedente v1.13 — residui post-merge e base stale (issue #76, Sessione 36). Chiusi due buchi: `post-merge.ps1 -Check` non guardava i branch **locali** (due orfani sopravvissuti indisturbati), e `setup-worktree.ps1` non faceva mai `fetch` prima di validare `-BaseBranch origin/main` (base stale **silenziosa**).
 - `post-merge.ps1 -Check`: nuova classe di residui "branch LOCALE orfano", con garanzia anti-perdita (0 commit unici **E** non checked-out in nessuna worktree)
@@ -5027,7 +5030,20 @@ function Build-Block-BundleInventory {
         if (-not $matched) { $categories['root/']++ }
         $fullPath = Join-Path $repoRoot $f
         if (Test-Path $fullPath) {
-            $size = (Get-Item $fullPath).Length
+            # Issue #88: usare la dimensione del contenuto normalizzato a LF invece
+            # di (Get-Item).Length, perche' con `core.autocrlf=true` su Windows 14
+            # file di testo vengono serviti CRLF sul disco e il check su origin/main
+            # (committed LF) generava un drift spurio cross-platform (~2.3 KB).
+            # Il valore cosi ottenuto coincide con `git cat-file -s HEAD:<file>` ed e
+            # quindi identico su Windows / Linux / macOS.
+            $fileText = Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+            if ($null -ne $fileText) {
+                $lfText = $fileText -replace "`r`n", "`n"
+                $size = [System.Text.Encoding]::UTF8.GetByteCount($lfText)
+            } else {
+                # File binario o illeggibile come UTF-8: usa la dimensione raw.
+                $size = (Get-Item $fullPath).Length
+            }
             if ($aggregatorManaged -contains $f) {
                 $excludedSizeFiles++
             } else {
@@ -13344,6 +13360,12 @@ echo "Risultati: $pass passati, $fail falliti"
 #       SESSIONS.md, la `Dimensione totale` deve restare identica al baseline.
 #       Include anche: il blocco inventory dichiara l'esclusione esplicita
 #       ("escluso"/"esclusi dal calcolo") e --check resta exit 0 dopo la modifica.
+#   T8  "Dimensione totale" e coerente cross-platform: il calcolo normalizza
+#       CRLF->LF (issue #88) cosi il valore e identico su Windows (dove 14
+#       file di testo sono CRLF sul disco con core.autocrlf=true) e su Linux
+#       (LF committed). Setup: file README.md con line endings miste LF+CRLF
+#       nel working tree; totale calcolato == dimensione LF committed; --
+#       check stabile dopo il toggle dei line endings.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -13608,6 +13630,64 @@ EOF
   # Round-trip --check dopo la manipolazione di SESSIONS.md.
   out="$(run_agg --check)"; rc=$?
   if [ $rc -eq 0 ]; then ok "--check exit 0 dopo T7"; else ng "--check exit $rc dopo T7"; echo "$out" | tail -8; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "=== T8: 'Dimensione totale' normalizza CRLF->LF (issue #88, cross-platform) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"
+  # Scenario minimale: un file README.md (root/) e due file docs/.
+  cat > "$D/scripts/generate-bundle.ps1" <<'PSEOF'
+$files = @(
+    "README.md",
+    "docs/LF.md",
+    "docs/CRLF.md"
+)
+PSEOF
+  cd "$D" || exit 1
+  # 10 righe LF per ogni file (committed state).
+  for _ in $(seq 1 10); do echo 'line on LF'; done > README.md
+  for _ in $(seq 1 10); do echo 'line on LF'; done > docs/LF.md
+  for _ in $(seq 1 10); do echo 'line on LF'; done > docs/CRLF.md
+  git add -A >/dev/null 2>&1; git commit -q -m "baseline LF" >/dev/null 2>&1
+
+  # Baseline: tutto LF.
+  run_agg >/dev/null 2>&1
+  BASELINE_TOTAL="$(grep '^- Dimensione totale:' docs/BUNDLE.md | head -1 | sed 's/.*: //')"
+
+  # Toggle di un file a CRLF (simula il checkout Windows con core.autocrlf=true).
+  # Il contenuto semantico resta lo stesso ma i raw bytes cambiano.
+  for _ in $(seq 1 10); do printf 'line on LF\r\n'; done > README.md
+  run_agg >/dev/null 2>&1
+  AFTER_TOTAL="$(grep '^- Dimensione totale:' docs/BUNDLE.md | head -1 | sed 's/.*: //')"
+
+  if [ "$BASELINE_TOTAL" = "$AFTER_TOTAL" ]; then
+    ok "Dimensione totale stabile dopo toggle CRLF/LF su README.md: $BASELINE_TOTAL"
+  else
+    ng "Dimensione totale cambiata con CRLF: '$BASELINE_TOTAL' -> '$AFTER_TOTAL' (drift cross-platform)"
+  fi
+
+  # Round-trip --check dopo il toggle.
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "--check exit 0 dopo toggle CRLF"; else ng "--check exit $rc dopo toggle CRLF"; echo "$out" | tail -8; fi
+
+  # Sanity: i raw byte DEVONO essere diversi quando il file e LF vs CRLF, altrimenti
+  # il test e' nullo. Misuriamo in un file separato (non toccato dal toggle prima)
+  # per evitare interferenze con lo stato gia mutato di README.md.
+  SANITY_LF=$(mktemp)
+  SANITY_CRLF=$(mktemp)
+  for _ in $(seq 1 10); do echo 'line on LF' >> $SANITY_LF; done
+  for _ in $(seq 1 10); do printf 'line on LF\r\n' >> $SANITY_CRLF; done
+  RAW_LF=$(wc -c < $SANITY_LF)
+  RAW_CRLF=$(wc -c < $SANITY_CRLF)
+  rm -f $SANITY_LF $SANITY_CRLF
+  if [ "$RAW_LF" != "$RAW_CRLF" ]; then
+    ok "byte-count raw LF/CRLF distinto (LF=$RAW_LF vs CRLF=$RAW_CRLF): il fix lavora sul contenuto, non sui raw bytes"
+  else
+    ng "byte-count raw identico: il test non distingue LF/CRLF"
+  fi
 
   cd /; rm -rf "$D"
 }
