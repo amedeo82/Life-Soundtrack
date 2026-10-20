@@ -73,6 +73,11 @@
 | 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟡 | - |
 | 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟡 | - |
 | 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
+| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟡 | - |
+| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
+| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟡 | - |
+| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟡 | - |
+| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -112,9 +117,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **8**
+- Sessioni migrate in state/sessions: **13**
 - Stories migrate in state/stories: **4** (done: 3)
-- Ultima sessione migrata: **S31** - AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9)
+- Ultima sessione migrata: **S36** - Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)
 - Stories done: 0.6, 0.3, 0.5
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
