@@ -1735,7 +1735,11 @@ Review Boss: *"secondo me manca un passaggio, dopo il merge della pr su main man
 
 ## Claim
 
-Lavoro di review-governance: nessuna story `agent-ready` tocca direttamente la procedura post-merge. Effettuato nella working copy principale (attenzione: altro agente attivo su `feat/66-aggregate-state-nodejs`); modifiche restano `M AGENTS.md` + `??` su `scripts/post-merge.ps1`, `scripts/test-post-merge.sh`. Boss deciderà il veicolo di landing (PR dedicata o merge con flusso esistente).
+Issue **#68** creata per questo lavoro (non esisteva una story `agent-ready` dedicata: è un bug di governance del workflow, segnalato dal Boss in review).
+
+- Claim `kilo-HP-ELITEBOOK-post-merge-review` (comment ID `6287410309`, 2026-10-20T09:03:08Z, unico claim → vincitore per unanimità)
+- Branch `docs/33-post-merge-procedure` in worktree `../ls-33-post-merge-procedure` (creata da `origin/main` = `1edf8a8`, merge PR #67)
+- Working copy principale lasciata intatta: era su `feat/66-aggregate-state-nodejs` (lavoro di un altro agente), quindi le modifiche sono state spostate in worktree **prima** di ogni commit — questo evita la categoria E3/E4/E5 (vedi D.26.4)
 
 ## Decisioni (D.33.x)
 
@@ -1829,7 +1833,8 @@ git status --porcelain                            # M AGENTS.md, M docs/BUNDLE.m
 
 - Script `pwsh` (compatibile 5.1+ e 7+). Test in bash con fallback automatico: usa `pwsh` se presente, altrimenti `powershell`.
 - File di scope del bundle: dopo la modifica a `scripts/generate-bundle.ps1 $files`, `docs/BUNDLE.md` rigenerato in sync.
-- Stato sessione `🟡` (merge pendente): nessuna PR aperta in questo momento. Boss decide se landare come PR dedicata (preferibile) o merge cumulativo.
+- **Issue #68**: creata in questa sessione, claim attivo, chiusa dalla PR via `Closes #68`.
+- Working copy principale intatta: nessuna modifica lasciata sul branch di altri agenti.
 
 ## Cross-refs
 
