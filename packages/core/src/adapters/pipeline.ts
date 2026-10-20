@@ -26,6 +26,23 @@ export class NormalizationPipeline {
   private readonly eventKeyHashes = new Map<string, Promise<string>>();
   private readonly canonicalKeys = new Map<string, Promise<string>>();
 
+  /**
+   * Memoizzazione per le risoluzioni asincrone (resolveTrack/resolveArtist/
+   * resolveAlbum). La sessione di import flusha i buffer in parallelo via
+   * `Promise.all`, quindi più `normalizeEvent` con la stessa chiave canonica
+   * (es. eventi DEDUP-3 su Queen + Bohemian Rhapsody) vengono normalizzati
+   * in concorrenza: la cache sincrona non basta a deduplicare gli `await`
+   * di `db.tracks.get`, e senza inflight la stessa entità veniva creata N
+   * volte (un artista Queen per ogni evento parallelo, due Track distinti
+   * per la stessa canonicalKey, vedi issue #75). Senza inflight, l'ultima
+   * `Map.set` vinceva, lasciando le altre occorrenze con id orfani mai
+   * sommati dal `recount()` — l'apparente "flaky test" era in realtà una
+   * corsa deterministica ma non idfempotente.
+   */
+  private readonly inflightTracks = new Map<string, Promise<Track>>();
+  private readonly inflightArtists = new Map<string, Promise<Artist>>();
+  private readonly inflightAlbums = new Map<string, Promise<Album>>();
+
   /** Entità toccate dall'ultimo flush (la sessione le scrive in transazione). */
   readonly dirtyTracks = new Set<string>();
   readonly dirtyArtists = new Set<string>();
@@ -123,7 +140,17 @@ export class NormalizationPipeline {
     return `${raw.platform}:${await hash}`;
   }
 
-  /** Risolve il `trackId` via DEDUP 02§5 (cache → DB → creazione). */
+  /**
+   * Risolve il `trackId` via DEDUP 02§5 (cache → DB → creazione).
+   *
+   * Per gli eventi con la stessa `canonicalKey` (DEDUP-3) che arrivano in
+   * concorrenza da `Promise.all` in `importSession.flush()`, la cache
+   * sincrona + il check `db.tracks.get` non bastano a deduplicare: tutte le
+   * chiamate passano il `get` e cadono nel ramo "crea nuovo", generando
+   * track con id distinti. La memoizzazione `inflightTracks` (Promise<T>
+   * per chiave) garantisce che la prima chiamata risolve la creazione e le
+   * altre ri-usano lo stesso `Track` (vedi issue #75).
+   */
   private async resolveTrack(raw: RawListenEvent, timestamp: number): Promise<Track> {
     const key = await this.canonicalKeyFor(raw);
     const cached = this.tracks.get(key);
@@ -132,6 +159,37 @@ export class NormalizationPipeline {
       this.dirtyTracks.add(key);
       return cached;
     }
+    const inflight = this.inflightTracks.get(key);
+    if (inflight) {
+      const track = await inflight;
+      this.mergeTrack(track, raw, timestamp);
+      this.dirtyTracks.add(key);
+      return track;
+    }
+    const creation = this.createOrFetchTrack(key, raw, timestamp);
+    this.inflightTracks.set(key, creation);
+    try {
+      const track = await creation;
+      this.mergeTrack(track, raw, timestamp);
+      this.tracks.set(key, track);
+      this.dirtyTracks.add(key);
+      this.trackCount += 1;
+      return track;
+    } finally {
+      this.inflightTracks.delete(key);
+    }
+  }
+
+  /**
+   * Slow path di `resolveTrack`: guarda DB, crea nuovo se manca, risolve
+   * artista+album. Estratto come Promise<T> per essere memoizzato dalla
+   * cache `inflightTracks`.
+   */
+  private async createOrFetchTrack(
+    key: string,
+    raw: RawListenEvent,
+    timestamp: number,
+  ): Promise<Track> {
     const existing = await this.db.tracks.get(key);
     const track: Track =
       existing ??
@@ -162,10 +220,6 @@ export class NormalizationPipeline {
       // Proxy durata catalogo: `ms_played` (spotify.md §3.1.1).
       track.durationMs = raw.sourceDurationMs;
     }
-    this.mergeTrack(track, raw, timestamp);
-    this.tracks.set(key, track);
-    this.dirtyTracks.add(key);
-    this.trackCount += 1;
     return track;
   }
 
@@ -190,6 +244,13 @@ export class NormalizationPipeline {
   /**
    * Risolve l'artista per nome normalizzato (cache di sessione) con lookup
    * DB per nome esatto sul miss cross-import (re-import dello stesso file).
+   *
+   * Memoizzazione chiave → Promise<Artist> per evitare che più eventi
+   * Queen paralleli (da `Promise.all` in `importSession.flush()`) creino
+   * artisti distinti con lo stesso nome (issue #75): senza inflight, la
+   * cache sincrona non protegge il gap tra `db.artists.get` e il set,
+   * e l'ultimo `Map.set` vince, lasciando tracks con id orfani che
+   * `recount()` non saprebbe più sommare sull'artista reale.
    */
   private async resolveArtist(raw: RawListenEvent, currentId: string): Promise<string> {
     const rawName = raw.sourceArtistName ?? 'Unknown';
@@ -199,39 +260,67 @@ export class NormalizationPipeline {
       this.dirtyArtists.add(key);
       return cached.id;
     }
+    const inflight = this.inflightArtists.get(key);
+    if (inflight) {
+      const artist = await inflight;
+      this.dirtyArtists.add(key);
+      return artist.id;
+    }
+    const fetch = this.fetchOrCreateArtist(raw, currentId, rawName);
+    this.inflightArtists.set(key, fetch);
+    try {
+      const artist = await fetch;
+      this.artists.set(key, artist);
+      this.dirtyArtists.add(key);
+      return artist.id;
+    } finally {
+      this.inflightArtists.delete(key);
+    }
+  }
+
+  /** Slow path di `resolveArtist`: DB lookup per id, fallback per nome, o creazione. */
+  private async fetchOrCreateArtist(
+    raw: RawListenEvent,
+    currentId: string,
+    rawName: string,
+  ): Promise<Artist> {
     if (currentId) {
       const known = await this.db.artists.get(currentId);
       if (known) {
-        this.artists.set(key, known);
-        this.dirtyArtists.add(key);
-        return known.id;
+        return known;
       }
     }
     const byName = await this.db.artists.where('name').equals(rawName).first();
     if (byName) {
-      this.artists.set(key, byName);
-      this.dirtyArtists.add(key);
-      return byName.id;
+      return byName;
     }
     if (currentId) {
       // Artista non trovato né in cache né per nome, ma la track già lo
       // referenzia: conserva il riferimento esistente.
-      return currentId;
+      return {
+        id: currentId,
+        name: rawName,
+        mbid: null,
+        genres: [],
+        platformIds: {},
+        listenCount: 0,
+      } satisfies Artist;
     }
-    const artist: Artist = {
+    return {
       id: uuid(),
       name: rawName,
       mbid: null,
       genres: [],
       platformIds: {},
       listenCount: 0,
-    };
-    this.artists.set(key, artist);
-    this.dirtyArtists.add(key);
-    return artist.id;
+    } satisfies Artist;
   }
 
-  /** Risolve l'album per artista + nome normalizzato (cache → DB → creazione). */
+  /**
+   * Risolve l'album per artista + nome normalizzato (cache → DB → creazione).
+   * Stessa memoizzazione chiave → Promise<Album> di `resolveArtist` per
+   * evitare la race condition su Promise.all (issue #75).
+   */
   private async resolveAlbum(raw: RawListenEvent, artistId: string): Promise<string> {
     const rawName = raw.sourceAlbumName ?? '';
     const key = `${artistId}|${normalizeName(rawName)}`;
@@ -240,12 +329,39 @@ export class NormalizationPipeline {
       this.dirtyAlbums.add(key);
       return cached.id;
     }
+    const inflight = this.inflightAlbums.get(key);
+    if (inflight) {
+      const album = await inflight;
+      this.dirtyAlbums.add(key);
+      return album.id;
+    }
+    const fetch = this.fetchOrCreateAlbum(raw, artistId, rawName);
+    this.inflightAlbums.set(key, fetch);
+    try {
+      const album = await fetch;
+      this.albums.set(key, album);
+      this.dirtyAlbums.add(key);
+      return album.id;
+    } finally {
+      this.inflightAlbums.delete(key);
+    }
+  }
+
+  /** Slow path di `resolveAlbum`: lookup DB name+artist, o creazione. */
+  private async fetchOrCreateAlbum(
+    raw: RawListenEvent,
+    artistId: string,
+    rawName: string,
+  ): Promise<Album> {
     const byName = await this.db.albums
       .where('name')
       .equals(rawName)
       .filter((a) => a.artistId === artistId)
       .first();
-    const album: Album = byName ?? {
+    if (byName) {
+      return byName;
+    }
+    return {
       id: uuid(),
       name: rawName,
       artistId,
@@ -254,10 +370,7 @@ export class NormalizationPipeline {
       releaseDate: null,
       artworkUrl: null,
       platformIds: {},
-    };
-    this.albums.set(key, album);
-    this.dirtyAlbums.add(key);
-    return album.id;
+    } satisfies Album;
   }
 
   /** `canonicalKey` 02§5 con cache dei digest (DEDUP-3 su 50k eventi). */
