@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 12:08
-> Totale file: 52
+> Data: 2026-10-20 12:18
+> Totale file: 53
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 51
-- Dimensione totale: 703.3 KB
-- Ultima aggregazione: 2026-10-20 12:08
+- Totale file: 52
+- Dimensione totale: 726.9 KB
+- Ultima aggregazione: 2026-10-20 12:18
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 29 |
-| scripts/ | 11 |
+| scripts/ | 12 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
 | .github/ | 3 |
@@ -554,6 +554,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
 - [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (9/9) — **gate bloccante in CI**
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
 
@@ -842,11 +843,28 @@ Esempi: `docs/state/sessions/22-pwa.md`, `docs/state/stories/0.5-pwa.md`. Schema
 ```powershell
 pwsh scripts/aggregate-state.ps1 --list       # audit: cosa verrebbe letto/scritto
 pwsh scripts/aggregate-state.ps1 --check      # CI gate: --check exit 0 = in sync
+pwsh scripts/aggregate-state.ps1 --check --strict  # fallisce anche sul drift "lenient"
 pwsh scripts/aggregate-state.ps1 --dry-run    # preview senza scrivere
-pwsh scripts/aggregate-state.ps1              # scrivi (idempotente)
+pwsh scripts/aggregate-state.ps1              # scrivi (idempotente: 0 diff se nulla e' cambiato)
 ```
 
 CI gate bloccante in `.github/workflows/ci.yml` (introdotto in #51). Se la PR modifica solo `docs/state/`, lo script esce 0 e non blocca. Se per errore un agente modifica direttamente `SESSIONS.md`, `BACKLOG.md`, `INDEX.md` o `BUNDLE.md`, lo script rileva drift e fallisce.
+
+### Determinismo e idempotenza *(vincolante — issue #70)*
+
+L'aggregator è la linfa dorsale del workflow parallelo: se produce output diverso a parità di input, due agenti su piattaforme diverse generano drift opposti e conflitti ricorrenti proprio sui file globali. Tre garanzie, ciascuna coperta da un test:
+
+| Garanzia | Perché | Test |
+|----------|--------|------|
+| **Ordinamento per valore** (sessioni per `Number`, story per `[version]$Id`, tie-break su `Base`) | L'ordine di enumerazione del filesystem non è garantito: senza sort per valore lo stesso input produceva `0.3,0.5,0.6` su Linux e `0.6,0.5,0.3` su Windows | T1, T2, T6 |
+| **Idempotenza byte-identica** (il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro) | Senza questo, ogni run produceva un diff e `auto-state-aggregate` committava a vuoto su `main` | T3 |
+| **Degradazione invece di crash** su file `state/` malformati (`Get-Frontmatter`) | Un singolo file corrotto faceva crashare l'intera aggregazione, bloccando anche il workflow post-merge | T5 (più il guard `Get-Frontmatter`) |
+
+```bash
+bash scripts/test-aggregate-determinism.sh    # 9 assert, gate bloccante in CI
+```
+
+**Se tocchi `scripts/aggregate-state.ps1`, il test è bloccante**: eseguilo prima di aprire la PR. Il gate `--check` resta warning-only in CI per incompatibilità residue PS 5.1 vs 7 (issue #63, risolto strutturalmente da #66); il test di determinismo copre invece la stessa classe di bug in modo affidabile, perché confronta l'output **dentro la stessa piattaforma**.
 
 ### GH Action auto-state-aggregate (post-merge auto-commit)
 
@@ -864,6 +882,7 @@ Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` s
 - [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
 - [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
 - [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (determinismo + idempotenza, issue #70)
 - [ ] Se ho aggiunto un nuovo file in `docs/state/` o `scripts/aggregate-state.ps1`, ho aggiornato `scripts/generate-bundle.ps1` `$files` + rigenerato `BUNDLE.md`
 
 ## 🛡️ Session start checklist
@@ -896,7 +915,13 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 - §"♻️ Pulizia branch post-merge": dichiarato esplicitamente cosa è automatico (ref remoto) e cosa resta all'agente (worktree + branch locale)
 - `scripts/validate-workflows.mjs` (nuovo) + gate bloccante in CI: un errore JS in un workflow si scoprirebbe altrimenti solo a runtime, dopo il merge
 
-*Precedente v1.10 — procedura canonica post-merge (Sessione 33, review Boss): mancava l'aggiornamento di `main` prima del delete branch.*
+*Precedente v1.11 — determinismo e idempotenza dell'aggregator (issue #70, Sessione 34). Cinque cause corrette: `$Id` invece di `$_.Id` nell'ordinamento story (output divergente Linux vs Windows), timestamp non-idempotente (commit-rumore su `main`), fallback mojibake per il campo `state`, crash su file `state/` malformati, e lenient match che mascherava il drift come `[OK]`. Aggiunto `scripts/test-aggregate-determinism.sh` (9 assert) come gate bloccante in CI.
+- §"🔄 Lazy-state aggregation": nuova sottosezione "Determinismo e idempotenza" con tabella delle 3 garanzie e relativi test
+- `--strict` aggiunto ad `aggregate-state.ps1` (il lenient match ora emette `[WARN]` visibile invece di `[OK]`)
+- `Get-Frontmatter`: degrada a default con warning invece di crashare su frontmatter malformato
+- Checklist PR: nuovo item bloccante se si tocca `scripts/aggregate-state.ps1`
+
+*Precedente v1.10 — procedura canonica post-merge (Sessione 33, review Boss): mancava l'aggiornamento di `main` prima del delete branch. §"♻️ Pulizia branch post-merge" ristrutturata in 8 passi vincolanti + `scripts/post-merge.ps1` (fail-closed, idempotente) + `scripts/test-post-merge.sh` (9 scenari).
 - Nuovo `scripts/post-merge.ps1` e `scripts/test-post-merge.sh` (9 scenari T1..T9)
 - §"♻️ Pulizia branch post-merge" completamente ristrutturata in 8 passi ordinati (zero-WIP → worktree → fetch → allineamento main → verifica merge → delete remoto → delete locale → prune) con tabella dei failure mode E/F + eccezioni + exit code
 - §"📤 Post-merge actions" Livello 2/3, §"📝 Checklist di sincronizzazione" auto-check post-merge, §"🚀 Primo task" step 6 aggiornati per riferirsi al nuovo script
@@ -1254,6 +1279,7 @@ Apache License
 | 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟡 | - |
 | 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟡 | - |
 | 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟡 | - |
+| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟡 | - |
 | 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
@@ -1294,10 +1320,10 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **11**
+- Sessioni migrate in state/sessions: **12**
 - Stories migrate in state/stories: **3** (done: 3)
 - Ultima sessione migrata: **S35** - Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)
-- Stories done: 0.6, 0.5, 0.3
+- Stories done: 0.3, 0.5, 0.6
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -3172,6 +3198,101 @@ git status --porcelain                            # M AGENTS.md, M docs/BUNDLE.m
 - **Story #40** (`feat/40-story-0-4-ui-import-onboarding-benvenuto`): altra worktree attiva, NON toccata
 ```
 
+### Sessione 34 - Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante
+
+- **Data**: 2026-10-20
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
+
+```
+
+# Sessione 34 — Determinismo e idempotenza dell'aggregator
+
+## Sintesi
+
+Durante la verifica post-merge della PR #69 (Sessione 33) è emerso che `aggregate-state.ps1 --check` **falliva su `main`**, nonostante CI fosse verde. L'indagine ha trovato **cinque cause** in una sola PR, delle quali due bloccavano il workflow parallelo e una rendeva impossibile notare il drift.
+
+Il risultato è un aggregator con tre garanzie esplicite (ordinamento per valore, idempotenza byte-identica, degradazione invece di crash), ciascuna coperta da un test, e un **gate bloccante in CI** che prima non esisteva.
+
+## Trigger
+
+Il project owner, dopo il merge della PR #69: *"risolvi il bug in modo da evitare questi problemi e rendere il flusso di lavoro degli agenti di coding eseguibile in parallelo senza errori e problemi di merge, senza dimenticare di eseguire azioni. controlla anche le azioni automatiche che avvengono dopo il mio merge della pr, controlla se è possibile automatizzare altro per evitare errori, controlla gli step post merge della pr e gli step di risoluzione della issue"*.
+
+## Le 5 cause
+
+| # | Causa | Impatto |
+|---|-------|---------|
+| 1 | `Sort-Object { [version]$Id }` invece di `$_.Id` (riga 142). PowerShell è case-insensitive: `$Id` risolveva la variabile `$id` della `ForEach-Object` precedente, non la proprietà. Chiavi di sort tutte uguali → ordine dipendente dal filesystem | `0.3,0.5,0.6` su Linux vs `0.6,0.5,0.3` su Windows: **due agenti su piattaforme diverse producono drift opposti → conflitti sui file globali** |
+| 2 | `- Ultima aggregazione: <ora>` riscritto a ogni run | `Apply-Blocks` produceva sempre un diff → `auto-state-aggregate` committava a vuoto (`8c63ed9`) |
+| 3 | Fallback del campo `state` = byte corrotti `C3 A2 C2 AC C5 A1` (doppia codifica di 🟡) | scriveva caratteri sporchi in `SESSIONS.md` per ogni state file senza `state:` |
+| 4 | `Test-Blocks` lenient match ≥90% dichiarava `[OK]` | il drift di riordino (12/13 = 92.31%) passava come verde: **era il motivo per cui la causa #1 non era mai stata notata** |
+| 5 | `Parse-Frontmatter` → `$null` su file malformati, dereferenziato senza guard in tutti i `Build-Block-*` | **un singolo file `state/` corrotto crashava l'intera aggregazione**, bloccando anche il workflow post-merge |
+
+## Decisioni (D.34.x)
+
+| # | Decisione | Motivazione |
+|---|---|---|
+| D.34.1 | Ordinamento per valore con tie-break esplicito su `Base` | Il filesystem non garantisce ordine; il tie-break rende il sort totale anche a parità di numero/versione |
+| D.34.2 | `Sync-AggregationTimestamp`: riusa il timestamp esistente se il resto del blocco è identico | Rende la scrittura un vero no-op. Alternativa scartata: timestamp derivato dal commit, perché in locale con modifiche non committate sarebbe ambiguo |
+| D.34.3 | `Get-Frontmatter`: degrada a default con `[WARN]` invece di crashare | Un file malformato non deve fermare l'aggregazione di tutti gli altri; l'errore resta visibile |
+| D.34.4 | Lenient match da `[OK]` → `[WARN]`, con `--strict` opt-in | Rende il drift visibile senza cambiare il comportamento di CI (che dipende ancora da #63/#66). `--strict` dà il gate severo a chi lo vuole |
+| D.34.5 | Gate bloccante in CI = test di determinismo, **non** `--check` | Il test confronta l'output *dentro la stessa piattaforma*, quindi è deterministico e può fallire in modo utile; `--check` confronta output prodotto su piattaforme diverse e resta warning finché #63 non è risolto |
+| D.34.6 | Non toccato `auto-state-aggregate.yml` oltre al commento sul commit vuoto | Il push su `main` del bot è un'azione separata, trattata in Sessione 35 (automazioni post-merge) |
+
+## Modifiche
+
+1. **`scripts/aggregate-state.ps1`**
+   - `Sort-Object { [version]$_.Id }, Base` e `Sort-Object Number, Base`
+   - `Get-Frontmatter` (null-safe) usato da tutti i `Build-Block-*`
+   - `Sync-AggregationTimestamp` + chiamata in `Apply-Blocks`
+   - fallback `"?"` al posto dei byte mojibake
+   - lenient match → `[WARN]`, più flag `--strict`
+   - help aggiornato (`.NOTES` su idempotenza e determinismo)
+2. **`scripts/test-aggregate-determinism.sh`** (nuovo, 9 assert su repo temporanei): T1/T2 ordinamento per valore e indipendenza dall'ordine di creazione, T3 idempotenza byte-identica, T4 round-trip `--check`, T5 fallback ASCII, T6 ordinamento sessioni. Fail-fast sul setup per evitare falsi positivi su fixture vuote
+3. **`.github/workflows/ci.yml`**: step bloccante "Aggregator deterministico (issue #70)"; commenti dei gate warning aggiornati con la root cause e i riferimenti a #63/#66
+4. **`AGENTS.md`** v1.10 → v1.11: sottosezione "Determinismo e idempotenza" con tabella garanzie→test, item bloccante nelle 2 checklist PR, `--strict` documentato, header e footer
+5. **`scripts/generate-bundle.ps1`**: `$files` += `scripts/test-aggregate-determinism.sh` (52 file)
+6. **`docs/BUNDLE.md`**, `docs/SESSIONS.md`, `docs/INDEX.md`: rigenerati
+
+## Verifica
+
+```bash
+bash scripts/test-aggregate-determinism.sh   → 9/9 PASS
+bash scripts/test-post-merge.sh             → 29/29 PASS (nessuna regressione)
+pwsh scripts/aggregate-state.ps1 --check    → exit 0 (prima: exit 1 su main)
+pwsh scripts/generate-bundle.ps1 --check    → exit 0 (52 file)
+```
+
+Idempotenza verificata sul repo reale: due run consecutivi producono `git diff` vuoto.
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 34-1 | `Sort-Object { [version]$Id }`: in PowerShell `$Id` dentro uno scriptblock non è la proprietà dell'oggetto | ✅ corretto in `$_.Id`. **Regola**: in `Sort-Object`/`Where-Object` usare sempre `$_.Prop` |
+| 34-2 | Un check "lenient" che dichiara `[OK]` è peggio di nessun check: nasconde il drift | ✅ ora `[WARN]` + `--strict`. **Regola**: la tolleranza deve essere visibile |
+| 34-3 | Il CI verde non dimostra l'assenza di drift: i gate erano `\|\| echo "::warning::"` | ✅ aggiunto un gate bloccante che *può* fallire (determinismo intra-piattaforma) |
+| 34-4 | Un valore "di default" con caratteri non-ASCII è una bomba a orologeria | ✅ fallback ASCII; da preferire `"?"` a un emoji per i default |
+| 34-5 | Dereferenziare il risultato di un parser senza guard trasforma 1 file rotto in un outage di pipeline | ✅ `Get-Frontmatter` con degradazione + `[WARN]` |
+| 34-6 | Un test con fixture che falliscono silenziosamente dà falsi positivi | ✅ fail-fast nel setup della suite (conta i file creati) |
+| 34-7 | `scripts/aggregate-state.ps1` è in `$files` di `generate-bundle`: ogni modifica al suo contenuto cambia `Dimensione totale` e quindi il blocco BUNDLE | ✅ comportamento corretto (il guard timestamp lo distingue dal rumore puro) |
+
+## Note reviewer
+
+- La modifica a `scripts/aggregate-state.ps1` èchirurgica e **sovrappone parzialmente al rewrite Node.js previsto da #66**: il merge deve preservare le tre garanzie in tabella, pena perdita del gate di CI.
+- Test eseguibili anche senza `pwsh` (fallback a Windows PowerShell); in CI su ubuntu gira con `pwsh`.
+- Nessun file JS/TS toccato → `lint`/`typecheck`/`test`/`build` invariati.
+- Worktree isolata: la working copy principale era occupata su `feat/66-aggregate-state-nodejs`.
+
+## Cross-refs
+
+- **#70** — issue di questo lavoro (chiusa dalla PR)
+- **#63** — allineamento byte-per-byte PS 5.1 vs 7: resta aperto: motivo dei gate `--check` warning-only
+- **#66** — rewrite Node.js dell'agregator: deve preservare il determinismo
+- **#69 / #68** — PR e issue della Sessione 33 (procedura post-merge), dove il bug è stato scoperto
+```
+
 ### Sessione 35 - Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)
 
 - **Data**: 2026-10-20
@@ -4198,6 +4319,7 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
     Modalita d'uso:
       (default)        Scrive i blocchi aggregati nei marker designati (idempotente)
       --check          Confronta lo stato calcolato con i marker esistenti; exit 0 se allineato, 1 se drift
+      --strict          Con --check: fallisce anche sui match "lenient" (drift <10% di righe). Default: warn
       --dry-run        Calcola ma non scrive; stampa il diff previsto
       --list           Lista i file sorgente e i blocchi target
       --help           Mostra questo help
@@ -4205,6 +4327,7 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 .EXAMPLE
     pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2
     pwsh scripts/aggregate-state.ps1 --check         # CI gate: --check exit 0
+    pwsh scripts/aggregate-state.ps1 --check --strict # CI gate severo: nessun drift tollerato
     pwsh scripts/aggregate-state.ps1 --dry-run       # preview senza scrivere
     pwsh scripts/aggregate-state.ps1 --list           # audit: cosa verrebbe letto/scritto?
 
@@ -4238,8 +4361,18 @@ Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
     ## Idempotenza
 
-    Rieseguire lo script con le stesse sources produce lo stesso output (modulo
-    timestamp nel footer, che viene normalizzato a 0000-00-00 in --check).
+    Rieseguire lo script con le stesse sources produce lo stesso output, byte per byte.
+    Il timestamp "- Ultima aggregazione:" del blocco BUNDLE-INVENTORY viene riusato dalla
+    funzione Sync-AggregationTimestamp quando il resto del blocco non cambia (issue #70):
+    senza questo, ogni run produceva un diff e il workflow auto-state-aggregate committava
+    a vuoto. Verificato da scripts/test-aggregate-determinism.sh.
+
+    ## Determinismo cross-platform (issue #70)
+
+    L'ordinamento di sessioni e story e' per VALORE (Number / [version]Id con tie-break su
+    Base), mai per ordine di enumerazione del filesystem: questo garantisce output identico
+    tra PowerShell 5.1 (Windows) e PowerShell 7 (Linux/CI), requisito per il workflow
+    parallelo con agenti.
 
     ## Manutenzione
 
@@ -4256,6 +4389,7 @@ param(
     [switch]$Check,
     [switch]$DryRun,
     [switch]$List,
+    [switch]$Strict,
     [switch]$Help
 )
 
@@ -4304,7 +4438,8 @@ function Get-StateSessionFiles {
             Path   = $_.FullName
             Base   = $_.BaseName
         }
-    } | Sort-Object Number
+    # Issue #70: tie-break esplicito su Base per determinismo assoluto a parita' di numero.
+    } | Sort-Object Number, Base
 }
 
 function Get-StateStoryFiles {
@@ -4316,7 +4451,13 @@ function Get-StateStoryFiles {
             Path = $_.FullName
             Base = $_.BaseName
         }
-    } | Sort-Object { [version]$Id  }
+    # BUG FIX (issue #70): `$Id` invece di `$_.Id`. PowerShell e' case-insensitive,
+    # quindi `$Id` risolveva nella variabile `$id` lasciata dalla ForEach-Object
+    # precedente (ultimo file enumerato), non nella proprieta' dell'oggetto: tutte
+    # le chiavi di ordinamento erano uguali e l'ordine finale dipendeva
+    # dall'enumerazione del filesystem (0.3,0.5,0.6 su Linux vs 0.6,0.5,0.3 su
+    # Windows). Ora l'ordinamento e' per valore, quindi identico su ogni piattaforma.
+    } | Sort-Object { [version]$_.Id }, Base
 }
 
 function Parse-Frontmatter {
@@ -4337,6 +4478,20 @@ function Parse-Frontmatter {
     return [PSCustomObject]@{ Frontmatter = $fm; Body = $body }
 }
 
+# Issue #70: Parse-Frontmatter restituisce $null su file malformati. Tutti i
+# Build-Block-* dereferenziavano direttamente `$parsed.Frontmatter['x']`, quindi un
+# singolo file state/corrotto faceva crashare l'intera aggregazione (e con essa il
+# workflow post-merge). Qui si degrada a valori di default con warning.
+function Get-Frontmatter {
+    param([string]$Content, [string]$Path)
+    $parsed = Parse-Frontmatter $Content
+    if ($null -eq $parsed) {
+        Write-Host "[WARN] $Path - frontmatter non valido o assente: uso valori di default" -ForegroundColor Yellow
+        return [PSCustomObject]@{ Frontmatter = @{}; Body = $Content }
+    }
+    return $parsed
+}
+
 function Build-Block-Sessions {
     $files = Get-StateSessionFiles
     if ($files.Count -eq 0) {
@@ -4351,10 +4506,14 @@ function Build-Block-Sessions {
     [void]$sb.Append("" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
-        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "â¬š" }
+        # BUG FIX (issue #70): il fallback era la sequenza di byte corrotta
+        # C3 A2 C2 AC C5 A1 (doppia codifica di un emoji), che finiva in
+        # SESSIONS.md per ogni state file privo del campo `state`. Ora ASCII,
+        # coerente con il fallback "?" usato in Build-Block-IndexRoadmap.
+        $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
         [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
@@ -4389,7 +4548,7 @@ function Build-Block-Stories {
     [void]$sb.Append("|-------|-------|----|--------------|------|" + "`n")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
         $id = if ($parsed.Frontmatter['id']) { $parsed.Frontmatter['id'] } else { $f.Base }
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { "?" }
         $status = if ($parsed.Frontmatter['status']) { $parsed.Frontmatter['status'] } else { "?" }
@@ -4425,7 +4584,7 @@ function Build-Block-IndexStatus {
     $latestSessionInfo = ""
     if ($latestSession) {
         $content = Get-Content -LiteralPath $latestSession.Path -Raw -Encoding UTF8
-        $parsed = Parse-Frontmatter $content
+        $parsed = Get-Frontmatter -Content $content -Path $f.Path
         $n = $parsed.Frontmatter['number']
         $t = $parsed.Frontmatter['title']
         $latestSessionInfo = "Ultima sessione migrata: **S$n** - $t"
@@ -4435,7 +4594,7 @@ function Build-Block-IndexStatus {
     $doneStories = @()
     foreach ($f in $stories) {
         $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Parse-Frontmatter $c
+        $p = Get-Frontmatter -Content $c -Path $f.Path
         if ($p.Frontmatter['status'] -eq 'done') {
             $doneStories += $p.Frontmatter['id']
         }
@@ -4477,7 +4636,7 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine("|----------|------|-------|----|")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-Frontmatter -Content $content -Path $f.Path
         $n = $parsed.Frontmatter['number']
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
@@ -4551,6 +4710,39 @@ function Find-Block {
     return @{ StartIndex = $sIdx; EndIndex = $eIdx + $End.Length; Block = $Content.Substring($sIdx, $eIdx - $sIdx + $End.Length) }
 }
 
+# BUG FIX (issue #70): il blocco BUNDLE-INVENTORY contiene "- Ultima aggregazione: <ora>".
+# Scrivendolo a ogni run, Apply-Blocks produceva SEMPRE un diff, quindi il workflow
+# auto-state-aggregate committava a ogni push su main anche senza modifiche reali
+# (commit-rumore: 8c63ed9). Qui, se il blocco e' identico a quello esistente tranne
+# il timestamp, si riusa il timestamp gia' presente: la scrittura diventa un no-op
+# e `git diff` resta vuoto.
+function Sync-AggregationTimestamp {
+    param([string]$Existing, [string]$Calculated)
+    if ([string]::IsNullOrEmpty($Existing)) { return $Calculated }
+
+    $tsPattern = '^- Ultima aggregazione: '
+    $norm = {
+        param([string]$text)
+        ($text -replace "`r`n", "`n") -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: <TS>'
+    }
+    if ((& $norm $Existing) -ne (& $norm $Calculated)) { return $Calculated }
+
+    $existingTs = $null
+    foreach ($line in (($Existing -replace "`r`n", "`n") -split "`n")) {
+        if ($line.StartsWith($tsPattern)) { $existingTs = $line }
+    }
+    if (-not $existingTs) { return $Calculated }
+
+    $lines = (($Calculated -replace "`r`n", "`n") -split "`n")
+    for ($i = 0; $i -lt $lines.Length; $i++) {
+        if ($lines[$i].StartsWith($tsPattern)) {
+            $lines[$i] = $existingTs
+            return ($lines -join "`n")
+        }
+    }
+    return $Calculated
+}
+
 function Apply-Blocks {
     foreach ($t in $targets) {
         $path = $t.Path
@@ -4568,6 +4760,9 @@ function Apply-Blocks {
             $separator = [char]10 + [char]10
             $new = $content.TrimEnd() + $separator + $calculated
         } else {
+            # Issue #70: riusa il timestamp esistente quando il blocco non cambia
+            # altro, cosi' la scrittura e' un no-op (nessun commit-rumore).
+            $calculated = Sync-AggregationTimestamp -Existing $found.Block -Calculated $calculated
             $new = $content.Substring(0, $found.StartIndex) + $calculated + $content.Substring($found.EndIndex)
         }
         if ($DryRun) {
@@ -4637,7 +4832,14 @@ function Test-Blocks {
         $matchRatio = $matchingLines / $maxLines
         if ($matchRatio -ge 0.9) {
             $pct = [Math]::Round($matchRatio*100, 2)
-            Write-Host "[OK] $path - blocco lenient match ($matchingLines/$maxLines = ${pct}% linee identiche)" -ForegroundColor Green
+            # Issue #70: il fallback lenient NASCONDEVA il drift di ordinamento story
+            # (12/13 = 92.31% => "[OK]"). Ora e' visibile come [WARN], e fallisce con -Strict.
+            Write-Host "[WARN] $path - blocco lenient match ($matchingLines/$maxLines = ${pct}% linee identiche)" -ForegroundColor Yellow
+            Write-Host "  Drift non bloccante: ordine/righe divergenti. Rigenera con 'pwsh scripts/aggregate-state.ps1'." -ForegroundColor DarkGray
+            if ($Strict) {
+                Write-Host "[FAIL] $path - drift in strict mode" -ForegroundColor Red
+                $drift = $true
+            }
             continue
         } else {
             Write-Host "[FAIL] $path - blocco drift" -ForegroundColor Red
@@ -8817,9 +9019,9 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
-| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
-| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
+| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 
 <!-- AGGREGATE-STORIES-END -->
 
@@ -12440,6 +12642,240 @@ echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]
 
 
+===== FILE: scripts/test-aggregate-determinism.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per scripts/aggregate-state.ps1 — determinismo e idempotenza.
+#
+# Protegge i bug chiusi in issue #70, scoperti durante il post-merge della PR #69:
+#
+#   T1  ordinamento story per VALORE (0.3 < 0.5 < 0.6), non per ordine di filesystem
+#   T2  l'ordinamento non dipende dall'ordine di creazione dei file
+#   T3  idempotenza byte-identica: due run consecutivi non producono alcun diff
+#       (il timestamp "Ultima aggregazione" viene riusato)
+#   T4  round-trip: dopo la scrittura, --check deve uscire 0
+#   T5  il fallback del campo `state` mancante e' ASCII (niente sequenze mojibake)
+#   T6  l'ordinamento sessioni e' per numero, con tie-break stabile
+#
+# I test girano su repo temporanei con i propri file state/, quindi non toccano
+# il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT="$SCRIPT_DIR/aggregate-state.ps1"
+
+if command -v pwsh >/dev/null 2>&1; then
+  PS="pwsh"
+elif command -v powershell >/dev/null 2>&1; then
+  PS="powershell"
+else
+  echo "[SKIP] pwsh/powershell non disponibili: impossibile eseguire aggregate-state.ps1"
+  exit 0
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "[SKIP] git non disponibile"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+run_agg() {
+  "$PS" -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
+  return $?
+}
+
+# Repo temporaneo con docs/state/ minimale + file target con i marker vuoti.
+# $1 = dir, $2 = "asc" | "desc" (ordine di creazione dei file story)
+make_repo() {
+  local d="$1" order="${2:-asc}"
+  mkdir -p "$d/docs/state/sessions" "$d/docs/state/stories" "$d/scripts"
+  cp "$SCRIPT" "$d/scripts/aggregate-state.ps1"
+  (
+    cd "$d" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"
+    git config user.name "Test"
+    git config commit.gpgsign false
+
+    if [ "$order" = "asc" ]; then
+      write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+      write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
+      write_story 0.6 "i18n" "Setup i18n" done "#22" "ui"
+    else
+      write_story 0.6 "i18n" "Setup i18n" done "#22" "ui"
+      write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
+      write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+    fi
+
+    write_session 30 "trenta" "Sessione trenta" "?"
+    write_session 32 "trentadue" "Sessione trentadue" "?"
+    write_session 33 "trentatre" "Sessione trentatre" "?"
+
+    # Fail-fast: se i sorgenti non esistono, i test darebbero falsi positivi.
+    local n
+    n=$(ls docs/state/stories/*.md 2>/dev/null | wc -l)
+    [ "$n" -eq 3 ] || { echo "SETUP ERRATO: trovati $n file story invece di 3" >&2; exit 1; }
+    n=$(ls docs/state/sessions/*.md 2>/dev/null | wc -l)
+    [ "$n" -eq 3 ] || { echo "SETUP ERRATO: trovati $n file session invece di 3" >&2; exit 1; }
+  )
+}
+
+write_story() {
+  cat > "docs/state/stories/$1-$2.md" <<EOF
+---
+id: "$1"
+title: "$3"
+status: $4
+pr: $5
+area: $6
+merged_commit: "abc1234"
+---
+EOF
+}
+
+write_session() {
+  cat > "docs/state/sessions/$1-$2.md" <<EOF
+---
+number: $1
+title: "$3"
+date: 2026-10-20
+state: $4
+pr: 0
+---
+Body della sessione $1.
+EOF
+}
+
+# File target con i 5 marker vuoti.
+make_targets() {
+  mkdir -p "$1/docs"
+  {
+    printf '# SESSIONS\n\n<!-- AGGREGATE-SESSIONS-START -->\n<!-- AGGREGATE-SESSIONS-END -->\n'
+    printf '# BACKLOG\n\n<!-- AGGREGATE-STORIES-START -->\n<!-- AGGREGATE-STORIES-END -->\n'
+    printf '# INDEX\n\n<!-- AGGREGATE-INDEX-STATUS-START -->\n<!-- AGGREGATE-INDEX-STATUS-END -->\n'
+    printf '<!-- AGGREGATE-INDEX-ROADMAP-START -->\n<!-- AGGREGATE-INDEX-ROADMAP-END -->\n'
+    printf '# BUNDLE\n\n<!-- AGGREGATE-BUNDLE-INVENTORY-START -->\n<!-- AGGREGATE-BUNDLE-INVENTORY-END -->\n'
+  } > "$1/docs/targets.md"
+  cp "$1/docs/targets.md" "$1/docs/SESSIONS.md"
+  cp "$1/docs/targets.md" "$1/docs/11-BACKLOG.md"
+  cp "$1/docs/targets.md" "$1/docs/INDEX.md"
+  cp "$1/docs/targets.md" "$1/docs/BUNDLE.md"
+  rm -f "$1/docs/targets.md"
+}
+
+story_ids_in_backlog() {
+  sed -n '/AGGREGATE-STORIES-START/,/AGGREGATE-STORIES-END/p' "$1/docs/11-BACKLOG.md" \
+    | grep -o '| [0-9][0-9.]* - ' | sed 's/| //; s/ - //' | tr '\n' ' '
+}
+
+session_numbers_in_roadmap() {
+  sed -n '/AGGREGATE-INDEX-ROADMAP-START/,/AGGREGATE-INDEX-ROADMAP-END/p' "$1/docs/INDEX.md" \
+    | grep -o '^| [0-9][0-9]* |' | tr -d '| ' | tr '\n' ' '
+}
+
+echo "=== T1+T2: ordinamento story per VALORE, indipendente dalla creazione ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+
+  run_agg >/dev/null 2>&1
+  ORDER="$(story_ids_in_backlog "$D")"
+  EXPECTED="0.3 0.5 0.6 "
+  if [ "$ORDER" = "$EXPECTED" ]; then ok "ordine stories ascendente (creazione asc): $ORDER"; else ng "ordine inatteso (asc): '$ORDER' invece di '$EXPECTED'"; fi
+
+  cd /; rm -rf "$D"
+
+  D="$(mktemp -d)"; make_repo "$D" desc; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  ORDER="$(story_ids_in_backlog "$D")"
+  if [ "$ORDER" = "$EXPECTED" ]; then ok "ordine stories identico con creazione inversa: $ORDER"; else ng "ordine dipende dalla creazione: '$ORDER' invece di '$EXPECTED'"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: idempotenza byte-identica (nessun commit-rumore) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+
+  run_agg >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "baseline" >/dev/null 2>&1
+  FIRST_TS="$(grep '^- Ultima aggregazione:' docs/BUNDLE.md)"
+
+  sleep 1
+  run_agg >/dev/null 2>&1
+  if git diff --quiet; then ok "secondo run: nessun diff (git diff vuoto)"; else ng "secondo run ha prodotto un diff (commit-rumore)"; git diff --stat; fi
+
+  SECOND_TS="$(grep '^- Ultima aggregazione:' docs/BUNDLE.md)"
+  if [ "$FIRST_TS" = "$SECOND_TS" ]; then ok "timestamp riusato ($FIRST_TS)"; else ng "timestamp cambiato: '$FIRST_TS' -> '$SECOND_TS'"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4: round-trip --check dopo la scrittura ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "--check exit 0 dopo la scrittura"; else ng "--check exit $rc dopo la scrittura"; echo "$out" | tail -8; fi
+
+  if echo "$out" | grep -q '\[WARN\]'; then
+    ng "--check segnala drift lenient dopo la propria scrittura"
+    echo "$out" | grep '\[WARN\]'
+  else
+    ok "nessun drift lenient auto-generato"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T5: fallback ASCII del campo state mancante ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"
+  cat > "$D/docs/state/sessions/34-senza-state.md" <<'EOF'
+---
+number: 34
+title: "Sessione senza campo state"
+date: 2026-10-20
+pr: 0
+---
+Body senza campo state.
+EOF
+  cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+
+  if grep -q 'Ã¢Â¬Å¡' docs/SESSIONS.md; then
+    ng "SESSIONS.md contiene il fallback mojibake"
+  else
+    ok "nessun fallback mojibake in SESSIONS.md"
+  fi
+
+  FALLBACK_LINE="$(sed -n '/Sessione 34/,+6p' docs/SESSIONS.md | grep 'Stato' | head -1)"
+  if echo "$FALLBACK_LINE" | grep -q '?'; then ok "fallback ASCII presente: $FALLBACK_LINE"; else ng "fallback inatteso: '$FALLBACK_LINE'"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T6: ordinamento sessioni per numero ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" desc; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+
+  NUMS="$(session_numbers_in_roadmap "$D")"
+  EXPECTED_N="30 32 33 "
+  if [ "$NUMS" = "$EXPECTED_N" ]; then ok "sessioni ordinate per numero: $NUMS"; else ng "ordine sessioni inatteso: '$NUMS' invece di '$EXPECTED_N'"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
+
+
 ===== FILE: scripts/validate-workflows.mjs =====
 
 // Estrae i blocchi `script:` dai workflow e li syntax-checka con node.
@@ -12985,6 +13421,16 @@ jobs:
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
+# Issue #70: gate BLOCCANTE per il determinismo dell'aggregator.
+      # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
+      # ordinamento per valore): il risultato non dipende dalla piattaforma, quindi
+      # questo test puo' fallire in modo utile, a differenza dei check --check sopra
+      # (che confrontano output prodotto su piattaforme diverse).
+      # Prima di questo gate il bug di ordinamento (`$Id` invece di `$_.Id`) e il
+      # timestamp non-idempotente restavano invisibili e producevano drift su main.
+      - name: Aggregator deterministico (issue #70)
+        run: bash scripts/test-aggregate-determinism.sh
+
       # Issue #73: nessun runner Actions locale, quindi un errore di sintassi JS
       # dentro un blocco `script:` di github-script si scoprirebbe solo dopo il push
       # (il workflow fallisce a runtime, a merge avvenuto). Questo check lo intercetta prima.
@@ -12998,12 +13444,15 @@ jobs:
       # Nota: la strict-mode del check e intenzionalmente bloccante in teoria, ma
       # PowerShell 5.1 (Windows dev) vs PowerShell 7 (Linux CI) producono output
       # byte-diversi per casi specifici non riproducibili localmente. Tracking: #63.
+      #
+      # Issue #70: la causa root era il determinismo (ordinamento `$Id` invece di
+      # `$_.Id` + timestamp non-idempotente), ora risolta e coperta dal gate
+      # bloccante "Aggregator deterministico" qui sopra. Rimane warning per non
+      # bloccare finche' il fix di #63 (riscrittura cross-platform) non e' merged.
       # Workaround temporaneo: warning non-bloccante. Fix completo richiede:
-      # (a) workflow .github/workflows/auto-state-aggregate.yml attualmente corrotto in
-      #     92c319e di #56 (file troncato a frammento di step), impedisce la rigenerazione
-      #     post-merge;
-      # (b) Test-Blocks deve diventare deterministico cross-platform (probabilmente
-      #     riscrivibile in un linguaggio non PowerShell, es. Node o Python).
+      # (a) issue #66: riscrittura di scripts/aggregate-state.ps1 in Node.js
+      #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
+      # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
       - name: Lazy-state in sync (ADR-0008)
         run: pwsh scripts/aggregate-state.ps1 --check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
 

@@ -44,6 +44,16 @@ jobs:
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
+# Issue #70: gate BLOCCANTE per il determinismo dell'aggregator.
+      # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
+      # ordinamento per valore): il risultato non dipende dalla piattaforma, quindi
+      # questo test puo' fallire in modo utile, a differenza dei check --check sopra
+      # (che confrontano output prodotto su piattaforme diverse).
+      # Prima di questo gate il bug di ordinamento (`$Id` invece di `$_.Id`) e il
+      # timestamp non-idempotente restavano invisibili e producevano drift su main.
+      - name: Aggregator deterministico (issue #70)
+        run: bash scripts/test-aggregate-determinism.sh
+
       # Issue #73: nessun runner Actions locale, quindi un errore di sintassi JS
       # dentro un blocco `script:` di github-script si scoprirebbe solo dopo il push
       # (il workflow fallisce a runtime, a merge avvenuto). Questo check lo intercetta prima.
@@ -57,11 +67,14 @@ jobs:
       # Nota: la strict-mode del check e intenzionalmente bloccante in teoria, ma
       # PowerShell 5.1 (Windows dev) vs PowerShell 7 (Linux CI) producono output
       # byte-diversi per casi specifici non riproducibili localmente. Tracking: #63.
+      #
+      # Issue #70: la causa root era il determinismo (ordinamento `$Id` invece di
+      # `$_.Id` + timestamp non-idempotente), ora risolta e coperta dal gate
+      # bloccante "Aggregator deterministico" qui sopra. Rimane warning per non
+      # bloccare finche' il fix di #63 (riscrittura cross-platform) non e' merged.
       # Workaround temporaneo: warning non-bloccante. Fix completo richiede:
-      # (a) workflow .github/workflows/auto-state-aggregate.yml attualmente corrotto in
-      #     92c319e di #56 (file troncato a frammento di step), impedisce la rigenerazione
-      #     post-merge;
-      # (b) Test-Blocks deve diventare deterministico cross-platform (probabilmente
-      #     riscrivibile in un linguaggio non PowerShell, es. Node o Python).
+      # (a) issue #66: riscrittura di scripts/aggregate-state.ps1 in Node.js
+      #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
+      # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
       - name: Lazy-state in sync (ADR-0008)
         run: pwsh scripts/aggregate-state.ps1 --check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"

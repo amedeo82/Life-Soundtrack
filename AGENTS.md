@@ -523,6 +523,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
 - [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (9/9) — **gate bloccante in CI**
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
 
@@ -811,11 +812,28 @@ Esempi: `docs/state/sessions/22-pwa.md`, `docs/state/stories/0.5-pwa.md`. Schema
 ```powershell
 pwsh scripts/aggregate-state.ps1 --list       # audit: cosa verrebbe letto/scritto
 pwsh scripts/aggregate-state.ps1 --check      # CI gate: --check exit 0 = in sync
+pwsh scripts/aggregate-state.ps1 --check --strict  # fallisce anche sul drift "lenient"
 pwsh scripts/aggregate-state.ps1 --dry-run    # preview senza scrivere
-pwsh scripts/aggregate-state.ps1              # scrivi (idempotente)
+pwsh scripts/aggregate-state.ps1              # scrivi (idempotente: 0 diff se nulla e' cambiato)
 ```
 
 CI gate bloccante in `.github/workflows/ci.yml` (introdotto in #51). Se la PR modifica solo `docs/state/`, lo script esce 0 e non blocca. Se per errore un agente modifica direttamente `SESSIONS.md`, `BACKLOG.md`, `INDEX.md` o `BUNDLE.md`, lo script rileva drift e fallisce.
+
+### Determinismo e idempotenza *(vincolante — issue #70)*
+
+L'aggregator è la linfa dorsale del workflow parallelo: se produce output diverso a parità di input, due agenti su piattaforme diverse generano drift opposti e conflitti ricorrenti proprio sui file globali. Tre garanzie, ciascuna coperta da un test:
+
+| Garanzia | Perché | Test |
+|----------|--------|------|
+| **Ordinamento per valore** (sessioni per `Number`, story per `[version]$Id`, tie-break su `Base`) | L'ordine di enumerazione del filesystem non è garantito: senza sort per valore lo stesso input produceva `0.3,0.5,0.6` su Linux e `0.6,0.5,0.3` su Windows | T1, T2, T6 |
+| **Idempotenza byte-identica** (il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro) | Senza questo, ogni run produceva un diff e `auto-state-aggregate` committava a vuoto su `main` | T3 |
+| **Degradazione invece di crash** su file `state/` malformati (`Get-Frontmatter`) | Un singolo file corrotto faceva crashare l'intera aggregazione, bloccando anche il workflow post-merge | T5 (più il guard `Get-Frontmatter`) |
+
+```bash
+bash scripts/test-aggregate-determinism.sh    # 9 assert, gate bloccante in CI
+```
+
+**Se tocchi `scripts/aggregate-state.ps1`, il test è bloccante**: eseguilo prima di aprire la PR. Il gate `--check` resta warning-only in CI per incompatibilità residue PS 5.1 vs 7 (issue #63, risolto strutturalmente da #66); il test di determinismo copre invece la stessa classe di bug in modo affidabile, perché confronta l'output **dentro la stessa piattaforma**.
 
 ### GH Action auto-state-aggregate (post-merge auto-commit)
 
@@ -833,6 +851,7 @@ Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` s
 - [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
 - [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
 - [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (determinismo + idempotenza, issue #70)
 - [ ] Se ho aggiunto un nuovo file in `docs/state/` o `scripts/aggregate-state.ps1`, ho aggiornato `scripts/generate-bundle.ps1` `$files` + rigenerato `BUNDLE.md`
 
 ## 🛡️ Session start checklist
@@ -865,7 +884,13 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 - §"♻️ Pulizia branch post-merge": dichiarato esplicitamente cosa è automatico (ref remoto) e cosa resta all'agente (worktree + branch locale)
 - `scripts/validate-workflows.mjs` (nuovo) + gate bloccante in CI: un errore JS in un workflow si scoprirebbe altrimenti solo a runtime, dopo il merge
 
-*Precedente v1.10 — procedura canonica post-merge (Sessione 33, review Boss): mancava l'aggiornamento di `main` prima del delete branch.*
+*Precedente v1.11 — determinismo e idempotenza dell'aggregator (issue #70, Sessione 34). Cinque cause corrette: `$Id` invece di `$_.Id` nell'ordinamento story (output divergente Linux vs Windows), timestamp non-idempotente (commit-rumore su `main`), fallback mojibake per il campo `state`, crash su file `state/` malformati, e lenient match che mascherava il drift come `[OK]`. Aggiunto `scripts/test-aggregate-determinism.sh` (9 assert) come gate bloccante in CI.
+- §"🔄 Lazy-state aggregation": nuova sottosezione "Determinismo e idempotenza" con tabella delle 3 garanzie e relativi test
+- `--strict` aggiunto ad `aggregate-state.ps1` (il lenient match ora emette `[WARN]` visibile invece di `[OK]`)
+- `Get-Frontmatter`: degrada a default con warning invece di crashare su frontmatter malformato
+- Checklist PR: nuovo item bloccante se si tocca `scripts/aggregate-state.ps1`
+
+*Precedente v1.10 — procedura canonica post-merge (Sessione 33, review Boss): mancava l'aggiornamento di `main` prima del delete branch. §"♻️ Pulizia branch post-merge" ristrutturata in 8 passi vincolanti + `scripts/post-merge.ps1` (fail-closed, idempotente) + `scripts/test-post-merge.sh` (9 scenari).
 - Nuovo `scripts/post-merge.ps1` e `scripts/test-post-merge.sh` (9 scenari T1..T9)
 - §"♻️ Pulizia branch post-merge" completamente ristrutturata in 8 passi ordinati (zero-WIP → worktree → fetch → allineamento main → verifica merge → delete remoto → delete locale → prune) con tabella dei failure mode E/F + eccezioni + exit code
 - §"📤 Post-merge actions" Livello 2/3, §"📝 Checklist di sincronizzazione" auto-check post-merge, §"🚀 Primo task" step 6 aggiornati per riferirsi al nuovo script
