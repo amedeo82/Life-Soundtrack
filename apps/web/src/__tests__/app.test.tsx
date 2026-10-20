@@ -1,10 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import { expect, it } from 'vitest';
 import { App } from '../App';
+import { I18nextProvider } from 'react-i18next';
+import { i18n } from '../i18n';
 
-it('monta la shell della app', () => {
-  render(<App />);
+it('monta lo schermo di benvenuto dell\'onboarding', async () => {
+  await i18n.changeLanguage('it');
+  render(
+    <I18nextProvider i18n={i18n}>
+      <App />
+    </I18nextProvider>,
+  );
 
-  expect(screen.getByRole('heading', { name: 'Life-Soundtrack' })).toBeTruthy();
-  expect(screen.getByTestId('platforms').textContent).toContain('spotify');
+  expect(screen.getByText(/La colonna sonora della tua vita/i)).toBeTruthy();
+  expect(screen.getByTestId('welcome-cta')).toBeTruthy();
 });
