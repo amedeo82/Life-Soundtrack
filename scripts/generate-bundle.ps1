@@ -79,6 +79,7 @@ $files = @(
     "docs/state/stories/0.7-operations-runbook.md",
     "docs/state/stories/0.4-ui-import.md",
     "docs/state/sessions/38-doc-sync-legacy.md",
+    "docs/state/sessions/41-geo-context-spec.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",
@@ -104,9 +105,11 @@ $files = @(
     "docs/13-ADR/0006-multi-agent-task-claiming.md",
     "docs/13-ADR/0007-issue-state-machine.md",
     "docs/13-ADR/0008-lazy-state-aggregation.md",
+    "docs/13-ADR/0009-local-ip-geolocation.md",
     "docs/14-GLOSSARY.md",
     "docs/15-DESIGN-SYSTEM.md",
     "docs/16-OPERATIONS.md",
+    "docs/19-GEO-CONTEXT.md",
     # Fixture (small/foundational) — i file di grandi dimensioni (medium/large/scenarios/demo-user)
     # sono generati da scripts/generate-fixtures.mjs su richiesta, e NON inclusi nel bundle
     # (vedi 10-TESTING §3.5). Lo script generator è incluso.

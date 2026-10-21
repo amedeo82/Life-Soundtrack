@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 14:37
-> Totale file: 60
+> Data: 2026-10-21 15:06
+> Totale file: 63
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 59 (incluso 3 file aggregator-managed)
-- Dimensione totale: 617.4 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 12:53
+- Totale file: 62 (incluso 3 file aggregator-managed)
+- Dimensione totale: 650.5 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 15:06
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 35 |
+| docs/ | 38 |
 | scripts/ | 13 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
@@ -1295,10 +1295,11 @@ Apache License
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 38 (v1.6.0) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 29 (0001-0008) | Architecture Decision Records (0001-0003, 0005-0008; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 41 (0001-0009) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 37 (Story 0.7, PR #64) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`) |
+| 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟡 DRAFT | Sessione 41 | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
@@ -1352,7 +1353,8 @@ Apache License
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
 | 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
 | 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
-| 40 | Specifica adapter Apple Music (Story 1.2) | 🟡 | - |
+| 40 | Specifica adapter Apple Music (Story 1.2) | 🟡 | #100 |
+| 41 | Geo & contesto di ascolto: specifica e ADR | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1392,9 +1394,9 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **17**
+- Sessioni migrate in state/sessions: **18**
 - Stories migrate in state/stories: **5** (done: 5)
-- Ultima sessione migrata: **S40** - Specifica adapter Apple Music (Story 1.2)
+- Ultima sessione migrata: **S41** - Geo & contesto di ascolto: specifica e ADR
 - Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -1406,7 +1408,7 @@ Apache License
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
 - **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.0, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 7 ADR in `13-ADR/` (0001-0003, 0005-0008)
-- **Documenti DRAFT**: 11 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v0.6
+- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v0.6, `19` introdotto in Sessione 41
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -1420,7 +1422,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 40): EPIC 1 (Fase 1 — Import core). Spec adapter **YouTube Music 🟢 APPROVED** (S39, PR #97) e **Apple Music scritta** (S40, issue #98, `03-ADAPTERS/apple-music.md` 🟡 DRAFT — promozione a 🟢 al merge); resta da scrivere la specifica **Last.fm / ListenBrainz** (Story 1.3), poi i fixture in `fixtures/synthetic-history/` e le issue `agent-ready` per 1.1/1.2/1.3 (parallele). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
+- **Prossimo step tecnico** (aggiornato alla Sessione 41): EPIC 1 (Fase 1 — Import core): spec adapter **YouTube Music 🟢 APPROVED** (S39, PR #97) e **Apple Music scritta** (S40, issue #98, `03-ADAPTERS/apple-music.md` 🟡 DRAFT — promozione a 🟢 al merge); resta da scrivere la specifica **Last.fm / ListenBrainz** (Story 1.3), poi i fixture in `fixtures/synthetic-history/` e le issue `agent-ready` per 1.1/1.2/1.3 (parallele). In parallelo, la **ratifica delle specifiche Geo & contesto**: la Sessione 41 ha scritto `19-GEO-CONTEXT.md` 🟡 DRAFT (L0 paese / L1 contesto dedotto / L2 città stimata, toggle per-campo con override per import, nastro contesto) e `13-ADR/0009` 🟡 DRAFT (geolocalizzazione IP locale, DB-IP Lite CC BY); la ratifica richiede la risoluzione dei 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -3818,7 +3820,7 @@ E.YT.1 (nomi localizzati → detection strutturale), E.YT.2 (video rimossi → s
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #100
 - **Claim**: `kilo-HP-ELITEBOOK-osfm`
 
 ```
@@ -3878,6 +3880,85 @@ E.AP.1 (event stream ≠ ascolti → 1 riga ≥30s = 1 evento + riconciliazione)
 - **#98** — issue di questo lavoro (spec Apple Music, Story 1.2)
 - **#96 / PR #97** — spec YT Music (🟢 APPROVED in questa PR)
 - Prossima: spec Last.fm + ListenBrainz (Story 1.3, due file separati)
+```
+
+### Sessione 41 - Geo & contesto di ascolto: specifica e ADR
+
+- **Data**: 2026-10-21
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `-`
+
+```
+
+# Sessione 41 — Geo & contesto di ascolto
+
+## Sintesi
+
+Il project owner ha chiesto di arricchire il progetto con i dati geo presenti nelle piattaforme di streaming e nei log, per ottenere un diario di ascolto che dica "cosa stavo ascoltando, dove, su che dispositivo", con la granularità lasciata alla scelta dell'utente durante l'import.
+
+L'analisi ha rilevato che `country`, `ip` e `deviceType`/`deviceDetail` sono **già** nello schema APPROVED e **già** popolati dall'adapter Spotify (`adapters/spotify/mapEvent.ts:167-170`), scritti dalla pipeline (`adapters/pipeline.ts:90-93`) e **mai letti** da nessuna UI o analisi. Il 60% del diario era quindi già in DB e sprecato.
+
+La stessa analisi ha circoscritto il perimetro reale: **solo Spotify** espone contesto (`conn_country`, `ip_addr`, `platform`); YouTube Music ha `locationInfos` ma lo scarta al parse; Apple, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz, Plex e Navidrome non espongono nulla (edge case **E9**). Nessuna fonte contiene città o coordinate. Il diario sarà quindi asimmetrico, e questo va dichiarato all'utente invece che mascherato.
+
+Il Boss ha scelto: perimetro **L0 + L1 + L2** (paese, contesto dedotto, città via IP), **pannello per-campo con override per singolo import**, **`locationInfos` di YouTube riattivato** dietro toggle, e **nastro contesto senza mappa**. Queste scelte sono tracciate in `19-GEO-CONTEXT.md` (🟡 DRAFT) e `13-ADR/0009-local-ip-geolocation.md` (🟡 DRAFT). Issue di tracking: **#99** (`needs-spec`).
+
+## Trigger
+
+Richiesta del Boss: "arricchire il progetto con i dati geo presenti nelle piattaforme e forniti nei logs… una funzionalità che dica cosa stavo ascoltando, dove lo ascoltavo, su che dispositivo… il livello di dettaglio e la scelta se mostrarle/importarle oppure no lasciata all'utente durante l'import". L'analisi e le 4 decisioni di perimetro sono state chiuse prima della stesura.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.41.1 | Perimetro "dove" = L0 (paese) + L1 (contesto dedotto) + L2 (città stimata dall'IP) | Scelta del Boss. L0 e L1 sono gratuiti e robusti; L2 è dichiaratamente un diacritico |
+| D.41.2 | Il contesto non sta su `ListenEvent` ma su un'entità **derivata** `ContextPeriod` (tabella `contexts`, ricalcolabile con `recompute()`) | MIG-2: i dati ricostruibili non si mettono nella tabella calda da 200k+ righe. `country`/`city` restano sull'evento perché derivati al parse e non ricostruibili |
+| D.41.3 | La città si deriva **dentro la pipeline, prima dello scarto dell'IP** (`pipeline.ts:92`), e in DB finisce solo il campo derivato | Con il default `retainIp = false` una derivazione post-persistenza non produrrebbe mai nulla; questa scelta mantiene la minimizzazione e allinea `02` §3.8 con `09` §3.2 |
+| D.41.4 | Geolocalizzazione IP **locale** con DB-IP Lite City (CC BY 4.0, MMDB embedded) | GeoLite2 **non è ridistribuibile** in un prodotto Apache-2.0 ( serve la Commercial Redistribution License a pagamento e vincola downstream). DB-IP Lite non richiede account ed è ridistribuibile con semplice attribuzione. Nessuna egress → `09` §3.2 resta letteralmente vero |
+| D.41.5 | `city` è **sempre** un dato stimato: `cityConfidence`, soglia di scarto sotto 0.6, copy "circa X", correggibile dall'utente (`citySource = 'manual'`) | Accuratezza free tier: `country` >95%, `city` 70-78% e sugli IP mobili spesso risolve all'HQ dell'operatore. Presentare la città come fatto produrrebbe storie false |
+| D.41.6 | Toggle per-campo (`retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext`) con **override per singolo import** | Scelta del Boss. `deviceDetail` è la stringa grezza del provider (identificativa) → default `false`; `city` è stimata → default `false` |
+| D.41.7 | **Revoca di D.39.8**: `locationInfos` di YouTube Music letti solo se il toggle `ytLocationInfos` è attivo (default `false`) | La motivazione originale ("nessun toggle dedicato nello schema → scarto incondizionato") cessa di valere: il toggle dedicato è ciò che `19` §7.1 introduce. Da recepire in `03-ADAPTERS/youtube-music.md` v2 |
+| D.41.8 | Classificatore di contesto **deterministico e versionato**, non ML; `commute` a confidence 0.4 (sotto la soglia 0.5) e quindi non aggregato; nessun `outdoors` | Coerente con `04-ANALYSIS-ALGORITHMS` (ricalcolabile, ispezionabile, testabile). Il clustering ML renderebbe `derivedVersion` non-deterministico; `outdoors` non è distinguibile da `home` con questi dati |
+| D.41.9 | Visualizzazione = **nastro contesto** sotto le EraBand, nessuna mappa | Scelta del Boss e coerente con la scala reale dei dati (paese, talvolta città). Una mappa richiederebbe MapLibre/Leaflet + tile online: uscita di rete in un'app local-first per un dato che non regge la scala cartografica |
+
+## Edge case nuovi catalogati
+
+E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/100.64/10 → geolocalizzazione impossibile: è il caso più frequente su rete mobile)**, E13 (cambio paese → `travel`, non errore), E14 (nessun cluster dominante → `unknown`, non aggregato), E15 (re-import con toggle diversi → i campi già persistiti non sono azzerati).
+
+## Contraddizioni sanate (o segnalate)
+
+- `02-DATA-SCHEMA.md` §3.8 ("`country` sempre derivato e conservato" indipendentemente dai toggle) **vs** `09-PRIVACY-SECURITY.md` §4 ("Paese di connessione" con base di liceità *consenso esplicito*). La proposta risolve in favore di `02` (che è APPROVED) con `retainCountry` a `true`, e allinea `09`. **La riga resta bloccata finché il Boss non conferma il default** (`19` §12 punto 1).
+- `06-UX-FLOWS-STATES.md` §2.2 dichiara "3 toggle" mentre il codice ne implementa 4 (`OnboardingRouter.tsx:253`) — preesistente, da allineare in `06` v2 insieme al pannello per-campo.
+
+## Verifica
+
+- `scripts/generate-bundle.ps1 --check` → exit 0 (dopo rigenerazione con `$files` esteso)
+- `scripts/aggregate-state.ps1 --check` → exit 0 (dopo rigenerazione con la nuova Sessione 41)
+- Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Lesson learned
+
+| # | Osservazione |
+|---|--------------|
+| 41-1 | `pwsh` (PowerShell 7) non è installato su questa macchina: gli script repo vanno invocati con `& .\scripts\<nome>.ps1` dentro Windows PowerShell 5.1 — conferma della lesson 39-1. **Attenzione al doppio trattino**: in PS 5.1 `generate-bundle.ps1 --check` **non viene riconosciuto come switch** e ricade silenziosamente in modalità *genera*, riscrivendo `docs/BUNDLE.md` invece di verificarlo (stesso effetto per `aggregate-state.ps1 --check`). La forma corretta è `-Check`: verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output |
+| 41-2 | In PowerShell 5.1 una here-string passata come `--body` a `gh` viene spezzata in più argomenti: scrivere il body su file temporaneo e usare `--body-file` — conferma e generalizzazione della lesson 39-2 |
+| 41-3 | Quando si aggiungono file in `docs/`, `INDEX.md` (tabelle + §"Dettaglio (legacy)": conteggi APPROVED/DRAFT e "Prossimo step tecnico"), `scripts/generate-bundle.ps1` `$files` e `docs/BUNDLE.md` vanno aggiornati **nella stessa PR**: i conteggi dei documenti sono legacy section e il gate `--check` non li copre, quindi il drift sarebbe silenzioso |
+| 41-4 | **Collisione di numerazione fra agenti paralleli**: questa sessione era inizialmente la 40; l'agente su #98 l'ha assegnata alla spec Apple Music e la sua PR (#100) è stata mergiata *mentre* questa sessione scriveva i documenti. Nessun gate lo rileva: `aggregate-state.ps1` ordina per `number` e il tie-break produce **due righe "Sessione 40"** in `SESSIONS.md`, senza errore. Prima di allocare un numero di sessione: `git fetch origin` + `git ls-tree origin/main docs/state/sessions/`; se l'ultimo numero è occupato, prendere il successivo e rinumerare **prima** del push |
+
+## Documenti aggiornati
+
+- `docs/19-GEO-CONTEXT.md` (**nuovo**, 🟡 DRAFT) — la specifica
+- `docs/13-ADR/0009-local-ip-geolocation.md` (**nuovo**, 🟡 DRAFT) — la decisione architetturale
+- `docs/INDEX.md` — riga `19` + riga `13` (0001-0009) + conteggi DRAFT e "Prossimo step tecnico"
+- `scripts/generate-bundle.ps1` — `$files` con i 2 nuovi documenti e la Sessione 41
+- `docs/BUNDLE.md` — rigenerato
+- `docs/state/sessions/41-geo-context-spec.md` (**nuovo**) — questa entry
+
+## Cross-refs
+
+- **#99** — issue di questo lavoro (`needs-spec`): tiene il perimetro, i vincoli e i 10 cantieri
+- **`11-BACKLOG.md`** — le story 1.6 / 4.4 / 3.4 non sono ancora state create: la loro numerazione è proposta in `19` §11 e va ratificata con il backlog (Sessione 43)
+- Prossime sessioni: 42 (`02` v1.3 + `03-ADAPTERS/youtube-music.md` v2 + `09` + `01`), 43 (`04` + `06`/`07`/`08` + backlog)
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -5046,6 +5127,90 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 - **#90** — issue di questo lavoro (chiusa dalla PR, dopo audit retroattivo: la keyword era dentro la checklist)
 - **#92** — resa esplicita la keyword di chiusura (lesson 38-6)
 - **#84 / #85** — S37: riconciliazione di `docs/state/`; il gap chiuso qui è il primo dei "Gap aperti" di quella sessione
+
+
+===== FILE: docs/state/sessions/41-geo-context-spec.md =====
+
+---
+number: 41
+title: "Geo & contesto di ascolto: specifica e ADR"
+date: 2026-10-21
+state: 🟡
+branch: docs/41-geo-context-spec
+pr: 0
+claim: ""
+cross_refs: [99]
+tags: [docs, spec, geo, privacy, phase-1]
+---
+
+# Sessione 41 — Geo & contesto di ascolto
+
+## Sintesi
+
+Il project owner ha chiesto di arricchire il progetto con i dati geo presenti nelle piattaforme di streaming e nei log, per ottenere un diario di ascolto che dica "cosa stavo ascoltando, dove, su che dispositivo", con la granularità lasciata alla scelta dell'utente durante l'import.
+
+L'analisi ha rilevato che `country`, `ip` e `deviceType`/`deviceDetail` sono **già** nello schema APPROVED e **già** popolati dall'adapter Spotify (`adapters/spotify/mapEvent.ts:167-170`), scritti dalla pipeline (`adapters/pipeline.ts:90-93`) e **mai letti** da nessuna UI o analisi. Il 60% del diario era quindi già in DB e sprecato.
+
+La stessa analisi ha circoscritto il perimetro reale: **solo Spotify** espone contesto (`conn_country`, `ip_addr`, `platform`); YouTube Music ha `locationInfos` ma lo scarta al parse; Apple, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz, Plex e Navidrome non espongono nulla (edge case **E9**). Nessuna fonte contiene città o coordinate. Il diario sarà quindi asimmetrico, e questo va dichiarato all'utente invece che mascherato.
+
+Il Boss ha scelto: perimetro **L0 + L1 + L2** (paese, contesto dedotto, città via IP), **pannello per-campo con override per singolo import**, **`locationInfos` di YouTube riattivato** dietro toggle, e **nastro contesto senza mappa**. Queste scelte sono tracciate in `19-GEO-CONTEXT.md` (🟡 DRAFT) e `13-ADR/0009-local-ip-geolocation.md` (🟡 DRAFT). Issue di tracking: **#99** (`needs-spec`).
+
+## Trigger
+
+Richiesta del Boss: "arricchire il progetto con i dati geo presenti nelle piattaforme e forniti nei logs… una funzionalità che dica cosa stavo ascoltando, dove lo ascoltavo, su che dispositivo… il livello di dettaglio e la scelta se mostrarle/importarle oppure no lasciata all'utente durante l'import". L'analisi e le 4 decisioni di perimetro sono state chiuse prima della stesura.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.41.1 | Perimetro "dove" = L0 (paese) + L1 (contesto dedotto) + L2 (città stimata dall'IP) | Scelta del Boss. L0 e L1 sono gratuiti e robusti; L2 è dichiaratamente un diacritico |
+| D.41.2 | Il contesto non sta su `ListenEvent` ma su un'entità **derivata** `ContextPeriod` (tabella `contexts`, ricalcolabile con `recompute()`) | MIG-2: i dati ricostruibili non si mettono nella tabella calda da 200k+ righe. `country`/`city` restano sull'evento perché derivati al parse e non ricostruibili |
+| D.41.3 | La città si deriva **dentro la pipeline, prima dello scarto dell'IP** (`pipeline.ts:92`), e in DB finisce solo il campo derivato | Con il default `retainIp = false` una derivazione post-persistenza non produrrebbe mai nulla; questa scelta mantiene la minimizzazione e allinea `02` §3.8 con `09` §3.2 |
+| D.41.4 | Geolocalizzazione IP **locale** con DB-IP Lite City (CC BY 4.0, MMDB embedded) | GeoLite2 **non è ridistribuibile** in un prodotto Apache-2.0 ( serve la Commercial Redistribution License a pagamento e vincola downstream). DB-IP Lite non richiede account ed è ridistribuibile con semplice attribuzione. Nessuna egress → `09` §3.2 resta letteralmente vero |
+| D.41.5 | `city` è **sempre** un dato stimato: `cityConfidence`, soglia di scarto sotto 0.6, copy "circa X", correggibile dall'utente (`citySource = 'manual'`) | Accuratezza free tier: `country` >95%, `city` 70-78% e sugli IP mobili spesso risolve all'HQ dell'operatore. Presentare la città come fatto produrrebbe storie false |
+| D.41.6 | Toggle per-campo (`retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext`) con **override per singolo import** | Scelta del Boss. `deviceDetail` è la stringa grezza del provider (identificativa) → default `false`; `city` è stimata → default `false` |
+| D.41.7 | **Revoca di D.39.8**: `locationInfos` di YouTube Music letti solo se il toggle `ytLocationInfos` è attivo (default `false`) | La motivazione originale ("nessun toggle dedicato nello schema → scarto incondizionato") cessa di valere: il toggle dedicato è ciò che `19` §7.1 introduce. Da recepire in `03-ADAPTERS/youtube-music.md` v2 |
+| D.41.8 | Classificatore di contesto **deterministico e versionato**, non ML; `commute` a confidence 0.4 (sotto la soglia 0.5) e quindi non aggregato; nessun `outdoors` | Coerente con `04-ANALYSIS-ALGORITHMS` (ricalcolabile, ispezionabile, testabile). Il clustering ML renderebbe `derivedVersion` non-deterministico; `outdoors` non è distinguibile da `home` con questi dati |
+| D.41.9 | Visualizzazione = **nastro contesto** sotto le EraBand, nessuna mappa | Scelta del Boss e coerente con la scala reale dei dati (paese, talvolta città). Una mappa richiederebbe MapLibre/Leaflet + tile online: uscita di rete in un'app local-first per un dato che non regge la scala cartografica |
+
+## Edge case nuovi catalogati
+
+E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/100.64/10 → geolocalizzazione impossibile: è il caso più frequente su rete mobile)**, E13 (cambio paese → `travel`, non errore), E14 (nessun cluster dominante → `unknown`, non aggregato), E15 (re-import con toggle diversi → i campi già persistiti non sono azzerati).
+
+## Contraddizioni sanate (o segnalate)
+
+- `02-DATA-SCHEMA.md` §3.8 ("`country` sempre derivato e conservato" indipendentemente dai toggle) **vs** `09-PRIVACY-SECURITY.md` §4 ("Paese di connessione" con base di liceità *consenso esplicito*). La proposta risolve in favore di `02` (che è APPROVED) con `retainCountry` a `true`, e allinea `09`. **La riga resta bloccata finché il Boss non conferma il default** (`19` §12 punto 1).
+- `06-UX-FLOWS-STATES.md` §2.2 dichiara "3 toggle" mentre il codice ne implementa 4 (`OnboardingRouter.tsx:253`) — preesistente, da allineare in `06` v2 insieme al pannello per-campo.
+
+## Verifica
+
+- `scripts/generate-bundle.ps1 --check` → exit 0 (dopo rigenerazione con `$files` esteso)
+- `scripts/aggregate-state.ps1 --check` → exit 0 (dopo rigenerazione con la nuova Sessione 41)
+- Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Lesson learned
+
+| # | Osservazione |
+|---|--------------|
+| 41-1 | `pwsh` (PowerShell 7) non è installato su questa macchina: gli script repo vanno invocati con `& .\scripts\<nome>.ps1` dentro Windows PowerShell 5.1 — conferma della lesson 39-1. **Attenzione al doppio trattino**: in PS 5.1 `generate-bundle.ps1 --check` **non viene riconosciuto come switch** e ricade silenziosamente in modalità *genera*, riscrivendo `docs/BUNDLE.md` invece di verificarlo (stesso effetto per `aggregate-state.ps1 --check`). La forma corretta è `-Check`: verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output |
+| 41-2 | In PowerShell 5.1 una here-string passata come `--body` a `gh` viene spezzata in più argomenti: scrivere il body su file temporaneo e usare `--body-file` — conferma e generalizzazione della lesson 39-2 |
+| 41-3 | Quando si aggiungono file in `docs/`, `INDEX.md` (tabelle + §"Dettaglio (legacy)": conteggi APPROVED/DRAFT e "Prossimo step tecnico"), `scripts/generate-bundle.ps1` `$files` e `docs/BUNDLE.md` vanno aggiornati **nella stessa PR**: i conteggi dei documenti sono legacy section e il gate `--check` non li copre, quindi il drift sarebbe silenzioso |
+| 41-4 | **Collisione di numerazione fra agenti paralleli**: questa sessione era inizialmente la 40; l'agente su #98 l'ha assegnata alla spec Apple Music e la sua PR (#100) è stata mergiata *mentre* questa sessione scriveva i documenti. Nessun gate lo rileva: `aggregate-state.ps1` ordina per `number` e il tie-break produce **due righe "Sessione 40"** in `SESSIONS.md`, senza errore. Prima di allocare un numero di sessione: `git fetch origin` + `git ls-tree origin/main docs/state/sessions/`; se l'ultimo numero è occupato, prendere il successivo e rinumerare **prima** del push |
+
+## Documenti aggiornati
+
+- `docs/19-GEO-CONTEXT.md` (**nuovo**, 🟡 DRAFT) — la specifica
+- `docs/13-ADR/0009-local-ip-geolocation.md` (**nuovo**, 🟡 DRAFT) — la decisione architetturale
+- `docs/INDEX.md` — riga `19` + riga `13` (0001-0009) + conteggi DRAFT e "Prossimo step tecnico"
+- `scripts/generate-bundle.ps1` — `$files` con i 2 nuovi documenti e la Sessione 41
+- `docs/BUNDLE.md` — rigenerato
+- `docs/state/sessions/41-geo-context-spec.md` (**nuovo**) — questa entry
+
+## Cross-refs
+
+- **#99** — issue di questo lavoro (`needs-spec`): tiene il perimetro, i vincoli e i 10 cantieri
+- **`11-BACKLOG.md`** — le story 1.6 / 4.4 / 3.4 non sono ancora state create: la loro numerazione è proposta in `19` §11 e va ratificata con il backlog (Sessione 43)
+- Prossime sessioni: 42 (`02` v1.3 + `03-ADAPTERS/youtube-music.md` v2 + `09` + `01`), 43 (`04` + `06`/`07`/`08` + backlog)
 
 
 ===== FILE: scripts/aggregate-state.ps1 =====
@@ -11159,6 +11324,86 @@ L'eccezione "PR di introduzione policy" si applica **solo a questa PR** (PR #24 
 
 
 
+===== FILE: docs/13-ADR/0009-local-ip-geolocation.md =====
+
+# ADR-0009 — Geolocalizzazione IP locale e derivazione in pipeline
+
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 41
+
+## Contesto
+
+`19-GEO-CONTEXT.md` §3 definisce tre livelli di contesto geografico. Il livello **L2 (città)** richiede di risolvere un indirizzo IP in una città, e si scontra con due constraint non negoziabili del progetto:
+
+1. **Local-first** (`ADR-0002`): nessun server centrale, nessuna egress di dati dell'utente.
+2. **Minimizzazione** (`09-PRIVACY-SECURITY.md` §3.2): "Dati di dispositivo e contesto" sono nell'elenco di ciò che **non esce mai dal dispositivo**.
+
+Inoltre `02-DATA-SCHEMA.md` §3.8 azzera `ListenEvent.ip` al termine dell'import quando `retainIp` è `false` (default). Se la città venisse derivata dopo la persistenza, con il default dell'app **non sarebbe mai derivabile**. La derivazione deve quindi avvenire **dentro la pipeline, prima** dello scarto (`adapters/pipeline.ts:92`).
+
+Resta la domanda: **dove vive il database IP→città, e chi lo interroga?**
+
+## Decisione
+
+**Geolocalizzazione IP interamente locale, con database MMDB embedded nell'applicazione, interrogato in-process durante l'import.**
+
+- **Sorgente dati: DB-IP Lite City** (formato MaxMind `.mmdb`), licenza **CC BY 4.0**.
+- **Nessuna egress**: nessuna richiesta di rete, nessuna chiave API, nessun account.
+- **Nessuna persistenza dell'IP** derivata dal lookup: l'IP resta un input effimero; in DB finisce solo il campo derivato (`city`, `citySource`, `cityConfidence`), e l'IP solo se `retainIp` è attivo.
+- **Il lookup è parte della normalizzazione** dell'adapter, non un arricchimento asincrono: `city` è disponibile nello stesso momento in cui l'evento viene scritto.
+- **La città è sempre un dato stimato**: `cityConfidence` esplicito, soglia di scarto sotto 0.6, copy "circa X", correggibile dall'utente con `citySource = 'manual'`.
+
+Il carico del DB sul bundle della PWA e la sua freschezza sono il principale costo di questa scelta e restano un **punto aperto** (§"Punti aperti").
+
+## Motivazioni
+
+- **Non c'è alternativa locale credibile.** `GeoLite2` di MaxMind è il free tier più diffuso, ma è la scelta sbagliata per un progetto open source: la GeoLite EULA vieta la ridistribuzione del database in un prodotto senza una **Commercial Redistribution License** a pagamento, e lega chi la riceve agli stessi vincoli — incompatibile con Apache-2.0.
+- **DB-IP Lite è realmente ridistribuibile** (CC BY 4.0): l'unico onere è l'attribuzione, che è una riga in `⑭ Impostazioni` e nel footer di about. Nessun account, nessun `license key`, aggiornamento mensile.
+- **Formato compatibile**: MMDB è lo standard di fatto e lo stesso reader funziona con GeoLite2 o IPinfo se l'utente vuole sostituirlo. Il codice di lookup non è legato al fornitore.
+- **Nessun dato esce dal dispositivo**: la promessa di `09` §3.2 resta vera letteralmente, e il §7 della privacy policy non deve cambiare.
+- **Costo di esercizio nullo**: nessuna chiave da ruotare, nessuna quota, nessun costo per utente — coerente con il business model open-source puro (D.10.x).
+- **Coerenza con il principio "normalizza presto"** (`ADR-0003`): il dato viene derivato al parse, non in un secondo momento, quindi il `Listens` è completo e autosufficiente.
+
+## Alternative considerate
+
+| # | Alternativa | Esito | Motivo |
+|---|---|---|---|
+| **A1** | **API di geolocalizzazione remota** (ip-api.com, ipinfo, MaxMind GeoIP2 Web Service) | ❌ scartata | Invia l'IP dell'utente a un terzo: viola `09` §3.2 e `ADR-0002`, aggiunge un costo per utente e una dipendenza di disponibilità. Per un lookup offline e per 200k eventi anche le prestazioni sono insufficienti |
+| **A2** | **MaxMind GeoLite2 embedded** | ❌ scartata | Licenza non consente la ridistribuzione in un prodotto Apache-2.0 senza licenza commerciale a pagamento che vincola downstream |
+| **A3** | **MaxMind GeoLite2 scaricato al primo uso** (con account + license key) | ⚠️ **fallback** | Tecnicamente legittimo e più accurato, ma impone a ogni utente un account MaxMind prima di poter usare la funzione. Tenuto come via di fuga se la dimensione embedded (punto aperto 2) risultasse inaccettabile |
+| **A4** | **Solo `country` (L0), nessuna città** | ❌ scartata | Scelta del Boss: il perimetro comprende L2. resta però il fallback operativo se L2 venisse abbandonato — in tal caso il progetto continua a funzionare con `country` + contesto dedotto |
+| **A5** | **Derivazione lato server (batch)** | ❌ scartata | Contraria ad `ADR-0002`, e costerebbe il vantaggio privacy per cui L2 esiste |
+| **A6** | **DB ospitato dall'utente (path custom)** | ⚠️ supportata | Prevista come opzione avanzata: l'utente può puntare a un proprio `.mmdb`. Copre l'utente enterprise/privacy che non vuole il DB embedded |
+
+## Conseguenze
+
+- **Positive**: nessuna egress, nessun costo, nessun account, funziona offline e in PWA, dato derivato e non identificativo, provider sostituibile (MMDB).
+- **Negative**:
+  - **Dimensione del bundle**: un DB City Lite è ordini di grandezza più grande di un Country Lite (pochi MB): va misurato in uno spike prima della ratifica.
+  - **Freschezza mensile**: le allocazioni di blocchi IP cambiano; il DB invecchia tra una release e l'altra.Va esposto il *build date* del MMDB nella UI e la sua staleness è un fatto visibile, non un dettaglio nascosto.
+  - **Accuratezza**: vedi `19-GEO-CONTEXT.md` §6.2 — `country` > 95%, `city` 70-78% e spesso errata su IP mobili (CGNAT e HQ operatore). L'ADR accetta questo limite **a condizione** che il dato resti dichiaratamente stimato.
+  - **Attribuzione CC BY**: va esposta in `⑭ Impostazioni` e nel repository (NOTICE/LICENSE).
+- **Mitigazioni**: `cityConfidence` + soglia 0.6 + copy "circa" + correzione manuale (`19` §6.3); `country` resta il dato su cui poggia il nastro (`19` §8.2).
+
+## Punti aperti
+
+1. **Embedded vs download-on-demand** — misurare la taglia reale del `.mmdb` City Lite e il suo impatto sul budget di bundle (Story 0.5 ha fissato un budget di 300 KB / 91 KB gzip: un DB di decine di MB lo sfonda necessariamente, e va deciso se entra nel bundle, in un asset scaricato a runtime, o in una build separata). **La misura manca**: la decisione va presa dopo uno spike, non prima.
+2. **Soglia `cityConfidence`** — 0.6 è un valore ragionato, non misurato su dati reali.
+3. **Aggiornamento del DB** — con A3/A6 l'utente può portare un DB più recente; va deciso se l'app offre un check di freschezza del build date e cosa dice quando il DB ha più di 60 giorni.
+
+## Collegamenti
+
+- `ADR-0002` local-first · `ADR-0003` normalizzazione early
+- `19-GEO-CONTEXT.md` §6 (derivazione), §7 (toggle), §8 (UX)
+- `02-DATA-SCHEMA.md` §3.8 (toggle), §8 (GPS mai raccolte)
+- `09-PRIVACY-SECURITY.md` §3.2 (cosa non esce dal dispositivo)
+- `01-PLATFORMS.md` §5 (E11, E12)
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|---|---|---|
+| 0.1 | Sessione 41 | Prima stesura: DB-IP Lite embedded, derivazione in pipeline, alternative A1-A6, punti aperti su dimensione e freschezza |
+
+
 ===== FILE: docs/14-GLOSSARY.md =====
 
 # 14 — Glossario di Dominio
@@ -11586,6 +11831,288 @@ Schema attuale: **versione 3** (v1 → v2 aggiunge `searchQueries`; v2 → v3 ag
 |----------|------|-----------|
 | 0.1 | 2026-10-19 | Prima versione (Story 0.7, PR #39): §1 Update playbook, §2 Maintenance playbook, §3 Migrazioni, §4 Diagnosi & remediation; API `@ls/core/db` (rekey, orphanCleanup, fastCheck, quotaCheck, runHealthCheck); script `scripts/generate-version.mjs`. |
 
+
+
+===== FILE: docs/19-GEO-CONTEXT.md =====
+
+# 19 — Geo & Contesto di ascolto
+
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 41 (2026-10-21)
+> Da ratificare in: `02-DATA-SCHEMA.md` v1.3 (🟢 APPROVED), `09-PRIVACY-SECURITY.md`, `04-ANALYSIS-ALGORITHMS.md`
+> Decisione architetturale collegata: [`13-ADR/0009-local-ip-geolocation.md`](13-ADR/0009-local-ip-geolocation.md)
+
+---
+
+## 1. Il problema
+
+La domanda "cosa stavo ascoltando, **dove** e **su che dispositivo**?" è già mezzo risolta nel database e completamente inutilizzata.
+
+`ListenEvent` ha tre campi di contesto (`02-DATA-SCHEMA.md` §3.2), l'adapter Spotify li popola (`spotify/mapEvent.ts:167-170`), la pipeline li scrive (`adapters/pipeline.ts:90-93`) — e **nessun altro li legge**: non la UI, non le analisi, nessun insight. Sono dati già raccolti, già conservati localmente, già conformi alla privacy-by-design, che non producono nulla.
+
+Questo documento definisce come trasformarli in un "diario di ascolto" leggibile, e dove il perimetro va tracciato.
+
+## 2. Cosa c'è nelle fonti (vincolo hard)
+
+| Piattaforma | Paese | IP | Dispositivo | Note |
+|---|:---:|:---:|:---:|---|
+| **Spotify** | ✅ `conn_country` | ✅ `ip_addr` | ✅ `platform` | unica fonte di contesto |
+| **YouTube Music** | ⚠️ `locationInfos` | ❌ | ❌ | scartato al parse da `youtube-music.md` §7 (D.39.8) |
+| **Apple Music** | ❌ | ❌ | ❌ | edge case **E9**: nessun campo contestuale |
+| **Deezer / Tidal / SoundCloud** | ❌ | ❌ | ❌ | nessun contesto |
+| **Last.fm / ListenBrainz** | ❌ | ❌ | ❌ | nessun contesto |
+| **Plex / Navidrome** | ❌ | ❌ | ❌ | nessun contesto |
+
+Tre conseguenze che la spec deve dichiarare apertamente, perché determinano le aspettative di prodotto:
+
+1. **Il diario sarà asimmetrico.** Per un utente Spotify è ricco; per un utente Apple/Last.fm sarà quasi vuoto ("ascoltavo musica, non so dove"). Nessuna quantità di algoritmi può colmare un campo che il provider non esporta.
+2. **Il livello di dettaglio massimo è il paese.** Non esistono città né coordinate nelle fonti. La città (L2) può solo essere *stimata* dall'IP, con l'accuratezza e i limiti descritti in §8 e in ADR-0009.
+3. **Nessun dato di posizione GPS.** `02-DATA-SCHEMA.md` §8 ("Coordinate GPS: mai raccolte") resta vincolante e non viene toccato: qui non si raccoglie nulla dal dispositivo, si *deduce* da dati che il provider ha già esportato.
+
+## 3. Architettura a tre livelli
+
+| Livello | Cosa | Origine del dato | Costo | Rischio |
+|---|---|---|:---:|:---:|
+| **L0** | Paese di connessione | `conn_country` (direttamente dall'export) | ~0 | basso (>95% accurate) |
+| **L1** | Contesto dedotto (casa / lavoro / in auto / viaggio) | pattern su paese + ora locale + dispositivo + ricorrenza | ~0 (CPU locale) | medio (è un'inferenza) |
+| **L2** | Città stimata | geolocalizzazione locale dell'IP | medio (DB ~decine di MB, lookup per evento) | alto (accuratezza scarsa su IP mobili) |
+
+**L0 e L1 sono il prodotto; L2 è il condimento.** Il diario deve reggere anche se l'utente tiene L2 disattivato — ed è il default.
+
+## 4. Modello dati proposto (delta su `02-DATA-SCHEMA.md` v1.3)
+
+### 4.1 Campi aggiunti a `ListenEvent`
+
+Solo campi **non derivabili**. Tutto ciò che è ricostruibile dagli eventi non si mette nella tabella calda (200k+ righe): va in una tabella derivata (§4.3), come da MIG-2.
+
+| Campo | Tipo | Origine | Note |
+|---|---|---|---|
+| `city` | `string \| null` | L2, derivata a import dal campo `ip` | mai mostrata come fatto |
+| `citySource` | `'dbip-lite' \| 'manual' \| null` | provenance | `"circa Parigi"` se non-manual, `"Parigi"` se corretta a mano |
+| `cityConfidence` | `number \| null` | 0..1 | sotto soglia → `city = null` (vedi §8) |
+
+`country`, `deviceType`, `deviceDetail` **esistono già** e non vengono rinominati: cambiano solo le regole di retention (§6).
+
+### 4.2 `city` non è un campo GPS
+
+Non è una coordinata, non è un punto sulla mappa, non permette di localizzare un singolo ascolto con precisione superiore alla scala città (e su IP mobili spesso nemmeno quella). È una **derivazione granulare di un campo già presente nell'export GDPR** dell'utente. La riga "Coordinate GPS: mai raccolte" di `02` §8 resta vera e va mantenuta.
+
+### 4.3 Entità derivata: `ContextPeriod`
+
+Il contesto non sta sull'evento (si ripeterebbe identico su migliaia di righe): sta su un **periodo**, ricostruibile con `recompute()`.
+
+```ts
+export const CONTEXT_KINDS = [
+  'home',        // cluster ricorrente, sera/notte/mattino presto
+  'work',        // cluster ricorrente, orario lavorativo, device desktop/web
+  'commute',     // sessioni brevi fuori dal cluster dominante
+  'car',         // deviceType='car' o pattern di ascolto in viaggio (richiede consenso)
+  'travel',      // paese diverso dal paese di riferimento
+  'away',        // periodo senza dati di paese (es. solo ascolti YouTube/Apple)
+  'unknown',     // segnali insufficienti: NON si indovina
+] as const;
+
+export interface ContextPeriod {
+  id: string;
+  startTime: number;          // unix ms UTC
+  endTime: number;            // unix ms UTC
+  kind: ContextKind;
+  country: string | null;
+  city: string | null;
+  eventCount: number;
+  deviceTypes: DeviceType[];
+  /** 0..1 — sotto 0.5 il periodo resta `unknown` e non viene aggregato */
+  confidence: number;
+  /** hash dei parametri dell'algoritmo (MIG-3) */
+  derivedVersion: string;
+  /** verdetto utente: stesso modello di `Insight.status` */
+  status: 'pending' | 'confirmed' | 'corrected' | 'dismissed';
+  userLabel: string | null;   // "Casa di mia madre", "Parigi, aprile"
+  createdAt: number;
+}
+```
+
+`userLabel` è il punto in cui il diario diventa personale: l'algoritmo propone, l'utente batte le spalle.
+
+## 5. L1 — Classificatore di contesto
+
+Algoritmo **deterministico e versionato**, non ML: same reasoni di `04-ANALYSIS-ALGORITHMS.md` (ricalcolabile, ispezionabile, testabile con fixture).
+
+### 5.1 Segnali
+
+| Segnale | Sorgente | Peso |
+|---|---|---|
+| `country` | `ListenEvent.country` | alto (viaggio) |
+| ora locale | `startedAt` in `userTimezone` (IANA) | medio-alto |
+| `deviceType` | `ListenEvent.deviceType` | medio |
+| durata sessione | derivata (MIG-2) | medio |
+| ricorrenza settimanale | conteggio eventi per (ora, device, paese) | alto per home/work |
+
+### 5.2 Regole (ordine di valutazione, prima che vince)
+
+| # | Condizione | `kind` | Confidenza base |
+|---|---|---|:---:|
+| R1 | nessun `country` e nessun `deviceType` utile | `unknown` | — |
+| R2 | `deviceType = 'car'` (da `CarPlay`/`Android Auto`) | `car` | 0.9 |
+| R3 | paese ≠ paese di riferimento (moda su 90gg) per ≥ 3 giorni | `travel` | 0.9 |
+| R4 | paese = riferimento, stessa fascia oraria (banda 2h) + stesso `deviceType`, ≥ 60% delle settimane | `home` | 0.7 |
+| R5 | paese = riferimento, ore 09-18 feriali + `deviceType ∈ {desktop, web}` + ricorrenza ≥ 50% | `work` | 0.6 |
+| R6 | `deviceType = mobile` + durata < 25min + fuori dai cluster R4/R5 | `commute` | 0.4 ⚠️ |
+| R7 | nessuna delle precedenti | `unknown` | — |
+
+**R6 è deliberatamente sotto la soglia**: "ascoltavo qualcosa mentre andavo a lavoro" non è deducibile da 4 segnali deboli. Sta a 0.4, quindi non viene aggregato come periodo e non compare nel nastro. Se l'utente lo conferma manualmente, il `status` passa a `confirmed` e il periodo viene mantenuto con la label data.
+
+### 5.3 Soglie e fallback
+
+- `confidence < 0.5` → il periodo **non viene aggregato** (E14).
+- Il paese di riferimento = moda dei `country` degli ultimi 90 giorni con almeno 30 eventi; altrimenti il paese più frequente dell'intero storico.
+- `userTimezone` deve essere persistito a livello app: oggi esiste solo dentro `PatternPayload.userTimezone` (`02` §4), che è un campo derivato — serve una sua copia nelle impostazioni per non dipendere dal ricalcolo.
+- `car` **inferito** (non da `deviceType='car'`) richiede `PrivacySettings.carDetectionConsent` (`02` §3.8). `car` **mappato** dalla stringa `platform` è dato grezzo e non richiede consenso.
+
+### 5.4 Cosa NON facciamo
+
+- **Nessun `outdoors`**: non è distinguibile da `home` con questi dati. Inventare l'etichetta produrrebbe storie false.
+- **Nessun clustering non supervisionato**: i cluster variano tra esecuzioni e rendono `derivedVersion` non-deterministico.
+- **Nessuna inferenza di device oltre `deviceType`**: la stringa grezza resta un dato, non un contesto.
+
+## 6. L2 — Città stimata
+
+### 6.1 Dove avviene la derivazione
+
+**Dentro la pipeline di import, prima che l'IP venga azzerato** (`adapters/pipeline.ts:92`):
+
+```
+record.ip_addr ──► deriveCity(ip) ──► city / citySource / cityConfidence
+                        │
+                        └──► ListenEvent.ip ──► null (salvo retainIp)
+```
+
+Il campo derivato entra nel DB; l'IP no. È la stessa logica di minimizzazione che già vale per `country` (derivato, conservato, IP scartato), estesa a un livello più fine. Il risultato è che l'opzione "città" **non costa nulla in termini di esposizione dell'IP**.
+
+### 6.2 Perché la città non può essere trattata come il paese
+
+Dati pubblici sui free tier di geolocalizzazione IP:
+
+| Campo | Accuratezza free tier |
+|---|---|
+| `country` | **> 95%** ovunque |
+| `city` | ~70-78% in Nord America ed Europa occidentale, peggio altrove |
+
+E soprattutto: **gli IP mobili risolvono spesso all'HQ dell'operatore**, non alla posizione reale dell'utente. Per un'app musicale il caso dominante è proprio l'ascolto da smartphone via rete mobile. Su quel traffico la città è spesso semplicemente sbagliata.
+
+Conseguenze di progetto, non rimandabili:
+
+1. `city` **non è mai presentata come fatto**: la UI mostra sempre `citySource !== 'manual'` → "circa *X*" e il valore è confidenza-esplicita.
+2. `cityConfidence < 0.6` → `city = null`, con warning `cityLowConfidence` (E11).
+3. Il nastro contesto mostra **il paese**; la città è un dettaglio del dettaglio.
+4. Il `ContextPeriod` resta valido anche senza `city`: `travel` si basa sul paese, che è affidabile.
+
+### 6.3 Provenance e correzione
+
+`citySource = 'manual'` + `userLabel` implementano la correzione: se l'utente scrive "Parigi, aprile 2019", il valore non viene più sovrascritto dai ricalcoli e la UI smette di dire "circa".
+
+## 7. Toggle e override per import
+
+### 7.1 Toggle globali (`PrivacySettings`, `02` §3.8 — proposta v1.3)
+
+| Toggle | Default | Governa | Motivazione del default |
+|---|:---:|---|---|
+| `retainIp` | `false` | persistenza dell'IP | invariato (`02` §3.8) |
+| `retainCountry` | **`true`** | persistenza di `country` | è il cuore del prodotto ed è già conservato oggi: metterlo a `false` sarebbe una regressione di feature, non un rafforzamento della privacy |
+| `retainCity` | `false` | derivazione + persistenza di `city` | dato stimato, accuratezza scarsa, più sensibile del paese → **opt-in** |
+| `retainDeviceType` | `true` | persistenza di `deviceType` | 8 valori granulari, nessun identificativo |
+| `retainDeviceDetail` | `false` | persistenza di `deviceDetail` | è la **stringa grezza** del provider (`"iPhone di Mario"`): dato identificante, opt-in |
+| `deriveContext` | `true` | classificazione L1 | non raccoglie nulla di nuovo: opera su dati già conservati |
+| `carDetectionConsent` | `false` | inferenza `car` | invariato (`02` §3.8) |
+
+⚠️ **Il default di `retainCountry` è la decisione più sensibile di questo documento** e va confermata dal Boss: `09-PRIVACY-SECURITY.md` §4 classifica oggi "Paese di connessione" come dato personale con base di liceità **consenso esplicito**, mentre `02` §3.8 lo conserva comunque. Il proposta risolve la contraddizione in favore di `02` (che è APPROVED) e allinea `09`; l'alternativa è invertire la scelta e metterlo a `false`. Finché non è deciso, la riga resta **bloccata** in `02` v1.3.
+
+### 7.2 Override per singolo import
+
+Il pannello di scelta durante l'import non modifica le impostazioni globali: produce un override valido **per quella sessione di import**, perché l'utente potrebbe voler conservare il paese oggi e l'IP domani.
+
+```ts
+export interface ImportFieldSelection {
+  country: boolean;
+  city: boolean;
+  deviceType: boolean;
+  deviceDetail: boolean;
+  ip: boolean;
+  deriveContext: boolean;
+  ytLocationInfos: boolean;   // default scartato, vedi §9
+}
+```
+
+**Valore effettivo** per un campo = `override[campo] ?? PrivacySettings[campoMappato]`. L'override ha la precedenza ed è mostrato attivamente nella UI (chip "solo per questo import") per non lasciare il dubbio su quale legge sia in vigore.
+
+Il pannello mostra l'anteprima del fallout: *"disattivando Paese, ~12.400 eventi su 45.000 perderanno il paese"*. Un toggle che cambia retroattivamente dati già importati va detto, non applicato in silenzio.
+
+## 8. UX
+
+### 8.1 Pannello "Cosa importare" (schermata ③)
+
+1. **Livello globale**, aperto dal bottone "Cosa importare" prima di "Importa tutto": una riga per campo, con default, conteggio eventi coinvolti e spiegazione in una riga.
+2. **Override per card**: icona ingranaggio sulla `PlatformCard` per un sotto-pannello limitato a quella piattaforma (es. "usa `locationInfos` di YouTube solo per questo file").
+3. Lo stato selezionato è serializzato nell'`ImportRecord`, così l'utente può ricostruire a posteriori cosa ha scelto.
+
+### 8.2 Nastro contesto (schermata ⑦, Timeline)
+
+Una striscia orizzontale sotto le `EraBand`, sincronizzata con lo zoom:
+
+- un segmento per `ContextPeriod`, **colore per `kind`**, etichetta paese (+ "circa città" solo se `citySource = 'dbip-lite'`);
+- sotto il segmento: pips dei `deviceType` presenti;
+- click → schermata ⑧ con dettaglio del periodo, elenco eventi, e azioni utente (`confirmed` / etichetta / `dismissed`);
+- filtro per `kind`, paese, dispositivo;
+- **nessuna mappa**: nessuna dipendenza MapLibre/Leaflet, nessun tile online, nessun placeholder cartografico — la scala disponibile (paese, talvolta città) non giustifica una mappa e un tile implicherebbe uscita di rete.
+
+### 8.3 Copy
+
+`08-COPY-I18N.md` riceverà chiavi con la forma `settings.privacy.*` (già esistenti per `retainIp`) e `timeline.context.*`. Regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza** ("circa", "~"), il paese mai.
+
+## 9. YouTube `locationInfos` — revoca di D.39.8
+
+La Sessione 39 (issue #96, PR #97) ha deciso lo scarto incondizionato di `locationInfos`. Questa sessione **revoca** quella decisione: il campo viene letto solo se `ytLocationInfos` è attivo (default `false`), e in quel caso concorre con `conn_country`/`ip` per la derivazione L0/L2 secondo la stessa catena degli altri campi.
+
+La motivazione originale (D.39.8: "nessun toggle dedicato nello schema → scarto incondizionato") cessa di valere: il toggle dedicato è esattamente ciò che `19-GEO-CONTEXT.md` §7.1 introduce. La revoca è formalizzata come **D.41.x** e comporta la modifica di `03-ADAPTERS/youtube-music.md` §7 in una sessione successiva.
+
+## 10. Edge case nuovi
+
+| # | Caso | Comportamento | Warning |
+|---|---|---|:---:|
+| **E11** | IP non risolvibile nel DB locale | `city = null`, `country` resta | `cityUnresolved` |
+| **E12** | IP riservato o CGNAT (RFC1918, 100.64/10, link-local) | **nessuna** geolocalizzazione possibile | `citySkipped` |
+| **E13** | Cambio paese improvviso | `travel`, non errore | `countryShift` |
+| **E14** | Nessun cluster dominante | `unknown`, `confidence` bassa, non aggregato | `contextAmbiguous` |
+| **E15** | Re-import con toggle diversi | I campi già persistiti **non** vengono azzerati; il contesto si ricalcola solo con `recompute()` esplicito | `contextStale` |
+
+**E12 è il caso più frequente del progetto**: le reti mobili usano CGNAT per decine di milioni di indirizzi, e quegli IP non sono geolocalizzabili per definizione. Va detto all'utente nella schermata di import, non scoperto dopo.
+
+E1..E10 restano invariati (§5 `01-PLATFORMS.md`); E11..E15 si aggiungono a catalogo in `01-PLATFORMS.md` §5.
+
+## 11. Impatto sui documenti
+
+| Documento | Modifica | Sessione |
+|---|---|:--:|
+| `13-ADR/0009-local-ip-geolocation.md` | **nuovo** — scelta del DB e del modello di derivazione | 41 |
+| `02-DATA-SCHEMA.md` | v1.3: `city`/`citySource`/`cityConfidence`, `ContextPeriod`, tabella `contexts`, toggle, migrazione Dexie v2→v3 | 42 |
+| `03-ADAPTERS/youtube-music.md` | v2: revoca D.39.8, `locationInfos` dietro toggle | 42 |
+| `09-PRIVACY-SECURITY.md` | risolvere la contraddizione su `country`; inventariare `city` e `ContextPeriod`; §3.1 data flow con la derivazione | 42 |
+| `01-PLATFORMS.md` | E11..E15 + matrice disponibilità geo | 42 |
+| `04-ANALYSIS-ALGORITHMS.md` | Context Classifier (§5) come algoritmo di Fase 2 | 43 |
+| `06-UX-FLOWS-STATES.md` / `07-UI-SPEC.md` | pannello ③ e nastro ⑦ | 43 |
+| `08-COPY-I18N.md` | chiavi `timeline.context.*` | 43 |
+| `11-BACKLOG.md` | Story 1.6 (fondazione geo), 4.4 (DB IP→città), 3.4 (nastro contesto) | 43 |
+
+## 12. Punti aperti (bloccano la ratifica)
+
+1. **Default di `retainCountry`** — `true` (§7.1) o `false`? La proposta è `true`; la decisione scioglie la contraddizione `02` §3.8 ↔ `09` §4.
+2. **DB geo embedded o scaricato al primo uso?** — ADR-0009 §"Punti aperti". Un DB City Lite è ordini di grandezza più grosso di un Country Lite (pochi MB): va misurato prima di scegliere, per non inflazionare il bundle della PWA.
+3. **Soglia di aggregazione 0.5 e regola R6 a 0.4** — sono numeri ragionati, non misurati. Lo spike li calibra su un fixture realistico.
+
+## 13. Changelog
+
+| Versione | Data | Modifiche |
+|---|---|---|
+| 0.1 | Sessione 41 (2026-10-21) | Prima stesura: L0/L1/L2, tassonomia `ContextKind`, classificatore deterministico, modello dei toggle + override per import, nastro contesto, revoca di D.39.8, edge case E11..E15 |
 
 
 ===== FILE: scripts/generate-fixtures.mjs =====
