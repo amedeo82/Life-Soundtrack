@@ -1,4 +1,4 @@
-import type { Album, Artist, ListenEvent, PrivacySettings, Track } from '../schema';
+import type { Album, Artist, DeviceType, ListenEvent, PrivacySettings, Track } from '../schema';
 import type { LifeSoundtrackDB } from '../db';
 import type { RawListenEvent } from './types';
 import { sha1Hex, uuid } from './crypto';
@@ -13,6 +13,26 @@ import { canonicalKey, durationBucketMs, normalizeName } from './dedup';
  * di sessione (upsert per PK `canonicalKey`/`id`) e scritte a chunk dalla
  * sessione di import (`importSession.ts`).
  */
+
+/**
+ * Gate di consenso `carDetectionConsent` (02-DATA-SCHEMA.md §3.8).
+ *
+ * La spec dichiara che il consenso dedicated copre gli eventi
+ * `deviceType='car'` e nomina esplicitamente i segnali da cui sono
+ * rilevati (Bluetooth auto, CarPlay, Android Auto, power profile):
+ * senza opt-in, la classificazione auto non viene persistita e il
+ * valore degrada a `unknown`. Il segnale utile si perde — è il
+ * comportamento dichiarato, coerente con la minimizzazione di `02` §3.8.
+ *
+ * `deviceDetail` NON è coinvolto: resta la stringa grezza del provider
+ * (dato già presente nell'export e governato dal suo consenso). La
+ * demozione avviene in scrittura, mai sull'`RawListenEvent`: la pipeline
+ * resta platform-agnostic e la regola vive in un solo punto per tutti
+ * gli adapter futuri (issue #109).
+ */
+export function applyCarConsent(deviceType: DeviceType, consent: boolean): DeviceType {
+  return consent || deviceType !== 'car' ? deviceType : 'unknown';
+}
 
 /** Cache di sessione per la risoluzione DEDUP (05§3.1 step 3). */
 export class NormalizationPipeline {
@@ -87,7 +107,7 @@ export class NormalizationPipeline {
       incognito: raw.incognito,
       reasonStart: raw.reasonStart,
       reasonEnd: raw.reasonEnd,
-      deviceType: raw.deviceType,
+      deviceType: applyCarConsent(raw.deviceType, this.privacy.carDetectionConsent),
       deviceDetail: raw.deviceDetail,
       ip: this.privacy.retainIp ? raw.ip : null,
       country: raw.country,

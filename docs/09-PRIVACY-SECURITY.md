@@ -1,6 +1,6 @@
 # 09 — Privacy & Security
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 6
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 6
 > ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
 > (§7) DEVE essere revisionata da un professionista legale qualificato prima
 > del lancio pubblico. Questo documento non costituisce consulenza legale.
@@ -100,7 +100,7 @@ Definire:
 | Cronologia ascolti (brano, artista, timestamp, durata) | Dati personali | Export utente | Sì (locale) | Consenso esplicito (art. 6.1.a) |
 | Paese di connessione | Dati personali | Derivato da IP | Sì (locale) | Consenso esplicito |
 | Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
-| Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale) | Consenso esplicito |
+| Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale), `car` solo se `carDetectionConsent` | Consenso esplicito |
 | Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
 | Playlist e libreria | Dati personali | Export utente | Sì (locale) | Consenso esplicito |
 | Ricerche effettuate | Dati personali | Export Spotify | Sì (locale, opzionale) | Consenso esplicito |
@@ -286,4 +286,5 @@ email).
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
+| 0.2 | 2026-10-21 (issue #109) | §4: la riga "Tipo dispositivo" dichiara che `car` viene persistito solo con `carDetectionConsent` attivo — il gate è applicato in scrittura dalla pipeline core (`applyCarConsent`), come già previsto da `02` §3.8 |
 | 0.1 | Sessione 6 | Prima versione completa |
