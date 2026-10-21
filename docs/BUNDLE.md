@@ -9,15 +9,15 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 62 (incluso 3 file aggregator-managed)
-- Dimensione totale: 665.5 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 17:12
+- Totale file: 63 (incluso 3 file aggregator-managed)
+- Dimensione totale: 676.6 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 15:23
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 38 |
-| scripts/ | 13 |
+| scripts/ | 14 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
 | .github/ | 3 |
