@@ -238,10 +238,20 @@ Prima di rendere il repository pubblico o il sito accessibile, verificare:
 
 ```powershell
 pwsh scripts/generate-bundle.ps1           # genera docs/BUNDLE.md (default)
-pwsh scripts/generate-bundle.ps1 --check   # verifica che BUNDLE.md sia in sync; exit 0/1 (CI-friendly)
-pwsh scripts/generate-bundle.ps1 --list    # stampa la lista dei file inclusi (audit)
-pwsh scripts/generate-bundle.ps1 --help    # help completo
+pwsh scripts/generate-bundle.ps1 -Check    # verifica che BUNDLE.md sia in sync; exit 0/1 (CI-friendly)
+pwsh scripts/generate-bundle.ps1 -List     # stampa la lista dei file inclusi (audit)
+pwsh scripts/generate-bundle.ps1 -Help     # help completo
 ```
+
+> ⚠️ **PowerShell 5.1 + doppio trattino `--` (issue #104)**: usare sempre `-Check` /
+> `-List` / `-Help` (singolo trattino), **MAI** `--check` / `--list`. In Windows
+> PowerShell 5.1 il call operator `&` interpreta `--check` come fine-dei-parametri
+> + token posizionale `check`: `[switch]$Check` non si lega e lo script ricadeva
+> silenziosamente in modalità WRITING (riscrittura di `BUNDLE.md` + exit 0 = fail-open,
+> vedi §9.7b). Lo script ora esce **2** con messaggio esplicito se vede un flag
+> `--*`, ma è più semplice usare la sintassi corretta direttamente. Vale anche per
+> `scripts/aggregate-state.ps1 -Check` (stesso guard applicato). In PowerShell 7
+> (`pwsh`) `--check` viene normalizzato a `-Check` quindi non si vede il bug.
 
 ### 9.2 Quando aggiornare lo script
 
@@ -276,7 +286,7 @@ Aggiungere il job `bundle-check` al workflow `ci.yml`:
       - uses: actions/checkout@v4
       - name: Verify BUNDLE.md is in sync
         shell: pwsh
-        run: pwsh scripts/generate-bundle.ps1 --check
+run: pwsh scripts/generate-bundle.ps1 -Check
 ```
 
 Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
@@ -291,7 +301,7 @@ Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
 1. Modifica un file in docs/ o fixtures/
 2. (se hai aggiunto/rimosso file) modifica $files in scripts/generate-bundle.ps1
 3. Esegui: pwsh scripts/generate-bundle.ps1
-4. (opzionale) verifica: pwsh scripts/generate-bundle.ps1 --check
+4. (opzionale) verifica: pwsh scripts/generate-bundle.ps1 -Check
 5. Committa docs/, fixtures/ e scripts/generate-bundle.ps1 + docs/BUNDLE.md nella stessa PR
 ```
 
@@ -299,24 +309,46 @@ Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
 
 ```powershell
 # Stato corrente
-pwsh scripts/generate-bundle.ps1 --list
+pwsh scripts/generate-bundle.ps1 -List
 
 # Rigenera
 pwsh scripts/generate-bundle.ps1
 
 # Verifica sync (CI parity)
-pwsh scripts/generate-bundle.ps1 --check
+pwsh scripts/generate-bundle.ps1 -Check
 ```
 
-### 9.7 Determinismo del `--check`
+### 9.7 Determinismo del `-Check`
 
-Il confronto `--check` normalizza sia la riga `> Data:` (timestamp) sia i line endings (`CRLF` → `LF`) sia nel file su disco che nel bundle rigenerato, prima del confronto. Questo rende il check deterministico: non fallisce per solo cambio di timestamp o per differenza di line endings tra Windows e Linux/CI.
+Il confronto `-Check` normalizza sia la riga `> Data:` (timestamp) sia i line endings (`CRLF` → `LF`) sia nel file su disco che nel bundle rigenerato, prima del confronto. Questo rende il check deterministico: non fallisce per solo cambio di timestamp o per differenza di line endings tra Windows e Linux/CI.
 
 Il check continua a rilevare drift reali (file aggiunti/rimossi, contenuto modificato).
 
+### 9.7b Fail-closed sui flag sconosciuti (issue #104)
+
+In aggiunta al determinismo, lo script è **fail-closed** sui flag sconosciuti. In
+Windows PowerShell 5.1, con `& script.ps1 --check`, il call operator interpreta
+`--check` come fine-dei-parametri + token posizionale `check`: `[switch]$Check`
+non si lega e lo script ricadeva **silenziosamente** in modalità WRITING (riscrittura
+di `BUNDLE.md` + exit 0 = fail-open). Un agente che credeva di star verificando
+la sincronizzazione in realtà la stava creando (vedi lesson 40-1 e 41-1 in
+`docs/SESSIONS.md`).
+
+Il guard in cima allo script rileva qualsiasi `--*` (o `-*`) passato non legato
+a uno switch noto e:
+
+- esce con codice **2** (errore di parametro, distinto da drift = 1),
+- scrive un messaggio esplicito che mostra la forma ERRATO (`--check`) e quella
+  CORRETTO (`-Check`).
+
+Lo stesso guard è applicato a `scripts/aggregate-state.ps1 -Check`: un fail-silently
+lì è ancora peggio (l'aggregator scrive 4 file globali, drift invisibile su
+`main`). Test di regressione in `scripts/test-bundle-check-idempotent.sh` (5+1 scenari
+bash su repo temporanei, gate bloccante in CI via `.github/workflows/ci.yml`).
+
 ### 9.8 Semantica come gate CI
 
-Il flag `--check` ha **semantica di fail-fast gate CI** (decisione cristallizzata in S32, issue #41 — formalizzazione dell'opzione A di `gh issue #10` chiusa in S17):
+Il flag `-Check` ha **semantica di fail-fast gate CI** (decisione cristallizzata in S32, issue #41 — formalizzazione dell'opzione A di `gh issue #10` chiusa in S17):
 
 | Esito del check | Exit code | Significato | Comportamento CI |
 |-----------------|-----------|-------------|------------------|
@@ -348,8 +380,8 @@ Il job `bundle-check` è un **CI gate bloccante**: PR con BUNDLE.md non in sync 
 # 1. Rigenera localmente
 pwsh scripts/generate-bundle.ps1
 
-# 2. Verifica sync
-pwsh scripts/generate-bundle.ps1 --check    # deve uscire 0
+# 2. Verifica sync (singolo trattino, vedi §9.7b)
+pwsh scripts/generate-bundle.ps1 -Check     # deve uscire 0
 
 # 3. Committa nella stessa PR
 git add docs/BUNDLE.md scripts/generate-bundle.ps1

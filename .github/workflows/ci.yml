@@ -42,7 +42,18 @@ jobs:
 
       - name: Bundle in sync
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
-        run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
+        run: pwsh scripts/generate-bundle.ps1 -Check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
+
+# Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
+      # In PowerShell 5.1 con `&`, `--check` veniva interpretato come
+      # fine-dei-parametri + token posizionale, lasciando $Check=false e facendo
+      # ricadere lo script in modalita' WRITING (riscrittura silenziosa di BUNDLE.md,
+      # exit 0 = fail-open). Il test verifica che il guard ora esce 2 e non
+      # modifica BUNDLE.md; usa la sintassi a singolo trattino per invocare pwsh
+      # (la sintassi `--check` e' il caso coperto dal test stesso, eseguito nei
+      # repo temporanei del file di test).
+      - name: Bundle check fail-closed (issue #104)
+        run: bash scripts/test-bundle-check-idempotent.sh
 
 # Issue #70: gate BLOCCANTE per il determinismo dell'aggregator.
       # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
@@ -84,4 +95,4 @@ jobs:
       #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
       # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
       - name: Lazy-state in sync (ADR-0008)
-        run: pwsh scripts/aggregate-state.ps1 --check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+        run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"

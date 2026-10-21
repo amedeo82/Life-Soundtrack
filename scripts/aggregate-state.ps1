@@ -82,6 +82,28 @@ param(
     [switch]$Help
 )
 
+# === Fail-closed param guard (issue #104) ===
+# Vedi la nota in scripts/generate-bundle.ps1: in PS 5.1 con `&`,
+# `--check` viene interpretato come fine-dei-parametri + token posizionale
+# `check` che NON si lega a $Check. Senza questo guard lo script ricade
+# silenziosamente in modalita' default e aggiora i blocchi aggregati
+# mentre l'utente pensa di star solo verificando. Stessa logica applicata
+# a tutti gli script con switch di gate: un --check fail-silently su un
+# aggregator che scrive SESSIONS/BACKLOG/INDEX/BUNDLE e' anche peggio che
+# sul bundle, perche' puo' "verificare" con successo uno stato che lo
+# stesso check ha appena creato.
+$flagLike = @()
+foreach ($a in @($args)) { if ($a -is [string] -and $a -match '^-') { $flagLike += $a } }
+foreach ($u in @($MyInvocation.UnboundArguments)) { if ($u -is [string] -and $u -match '^-') { $flagLike += $u } }
+if ($flagLike.Count -gt 0) {
+    Write-Host "[FAIL] Parametro sconosciuto: $($flagLike -join ' ')" -ForegroundColor Red
+    Write-Host "PowerShell 5.1 non mappa '--' su '-': usare il trattino singolo." -ForegroundColor Yellow
+    Write-Host "  ERRATO:   scripts/aggregate-state.ps1 --check" -ForegroundColor Yellow
+    Write-Host "  CORRETTO: scripts/aggregate-state.ps1 -Check" -ForegroundColor Green
+    Write-Host "Vedi issue #104 e AGENTS.md §Lazy-state aggregation." -ForegroundColor Yellow
+    exit 2
+}
+
 if ($Help) {
     Get-Help $MyInvocation.MyCommand.Path -Full | Out-String | Write-Host
     exit 0

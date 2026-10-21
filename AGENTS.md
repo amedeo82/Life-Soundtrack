@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.18 — Sessione 38 (2026-10-21)
+> Versione 1.19 — Sessione 41 (2026-10-21)
 
 ---
 
@@ -541,8 +541,8 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] **Il body della PR contiene la keyword di chiusura come riga nuda e una sola volta** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick, fuori dalle checklist e senza ripetizioni**, così GitHub chiude l'issue al merge e `auto-status-done` non transiziona issue non collegate (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
-- [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
-- [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
+- [ ] `pwsh scripts/generate-bundle.ps1 -Check` esce con exit code 0
+- [ ] `pwsh scripts/aggregate-state.ps1 -Check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
 - [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (9/9) — **gate bloccante in CI**
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
@@ -572,7 +572,7 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 **Auto-check**: prima del merge, eseguire localmente
 
 ```powershell
-pwsh scripts/generate-bundle.ps1 --check   # exit 0 = documentazione in sync
+pwsh scripts/generate-bundle.ps1 -Check    # exit 0 = documentazione in sync
 ```
 
 Se esce con exit ≠ 0, rigenerare il bundle e committarlo nella stessa PR.
@@ -596,20 +596,20 @@ Se l'audit elenca worktree attive o branch `feat/*` / `fix/*` merged-orfani, ese
    - Aggiungi il path all'array `$files` rispettando l'ordine di `docs/INDEX.md`
    - Esegui `pwsh scripts/generate-bundle.ps1` per rigenerare
    - Committa `scripts/generate-bundle.ps1` e `docs/BUNDLE.md` nella stessa PR
-
 2. **Verifica che il bundle sia allineato** (in CI e in locale):
-   ```powershell
-   pwsh scripts/generate-bundle.ps1 --check
-   ```
-   Exit code 0 = in sync, 1 = da rigenerare, 2 = file dichiarati mancanti.
 
+   ```powershell
+   pwsh scripts/generate-bundle.ps1 -Check
+   ```
+
+   Exit code 0 = in sync, 1 = da rigenerare, 2 = file dichiarati mancanti o parametro sconosciuto (issue #104).
 3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
 
 Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
 
 ### 📦 D.26.3 — Bundle regeneration obbligatoria in stessa PR *(lesson learned)*
 
-**Regola**: ogni PR che modifica il **contenuto** di uno qualsiasi dei file elencati in `$files` (`docs/`, `AGENTS.md`, `README.md`, `fixtures/` foundational, `scripts/*`, `LICENSE`) **deve rigenerare `docs/BUNDLE.md` nello stesso commit** (o in un commit di follow-up immediato prima del merge), per evitare il fail di `pwsh scripts/generate-bundle.ps1 --check` in CI.
+**Regola**: ogni PR che modifica il **contenuto** di uno qualsiasi dei file elencati in `$files` (`docs/`, `AGENTS.md`, `README.md`, `fixtures/` foundational, `scripts/*`, `LICENSE`) **deve rigenerare `docs/BUNDLE.md` nello stesso commit** (o in un commit di follow-up immediato prima del merge), per evitare il fail di `pwsh scripts/generate-bundle.ps1 -Check` in CI.
 
 **Perché è importante**: il check del bundle è un **CI gate bloccante** (vedi `docs/12-DEVOPS.md §9` + §"📝 Checklist di auto-revisione PR" riga "BUNDLE check exit 0"). Una PR che modifica `AGENTS.md` senza rigenerare `BUNDLE.md` fallirà la pipeline quality anche se il codice di per sé è corretto, costringendo a un commit di fix che prolunga il ciclo di review.
 
@@ -617,7 +617,7 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 
 ```powershell
 # Dopo aver modificato qualsiasi file in scope del bundle:
-pwsh scripts/generate-bundle.ps1 --check   # verifica locale: deve uscire 0
+pwsh scripts/generate-bundle.ps1 -Check    # verifica locale: deve uscire 0
 
 # Se esce != 0:
 pwsh scripts/generate-bundle.ps1            # rigenera
@@ -626,9 +626,9 @@ git commit --amend                          # o commit separato nella stessa PR
 git push
 ```
 
-**Lezione operativa D.26.3 (Sessione 26, 2026-10-19, durante estensione di PR #44)**: l'agente ha modificato `AGENTS.md` (v1.6 → v1.7, D.26.1 + D.26.2) senza rigenerare `docs/BUNDLE.md`. La 1a run di CI quality è fallita con `pwsh scripts/generate-bundle.ps1 --check` → `docs/BUNDLE.md non è in sync`. Fix richiesto: 3° commit della PR ha rigenerato il bundle (+8139 byte) e portato la pipeline a verde. **Costo evitabile**: ~5 minuti di review extra + rumore nella history della PR.
+**Lezione operativa D.26.3 (Sessione 26, 2026-10-19, durante estensione di PR #44)**: l'agente ha modificato `AGENTS.md` (v1.6 → v1.7, D.26.1 + D.26.2) senza rigenerare `docs/BUNDLE.md`. La 1a run di CI quality è fallita con `pwsh scripts/generate-bundle.ps1 -Check` → `docs/BUNDLE.md non è in sync`. Fix richiesto: 3° commit della PR ha rigenerato il bundle (+8139 byte) e portato la pipeline a verde. **Costo evitabile**: ~5 minuti di review extra + rumore nella history della PR.
 
-**Auto-check pre-push** (rafforzativo di D.4): il pre-push hook di `.githooks/pre-push` esegue già `generate-bundle.ps1 --check` e blocca il push se drift. Se bypassi il hook con `LIFE_SOUNDTRACK_SKIP_HOOKS=1` (emergenza), esegui manualmente il check prima del merge.
+**Auto-check pre-push** (rafforzativo di D.4): il pre-push hook di `.githooks/pre-push` esegue già `generate-bundle.ps1 -Check` e blocca il push se drift. Se bypassi il hook con `LIFE_SOUNDTRACK_SKIP_HOOKS=1` (emergenza), esegui manualmente il check prima del merge.
 
 ## 🗺️ Struttura del repository
 
@@ -770,9 +770,9 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
 4. **Verifica statale post-merge** (sostituisce l'ex "Verifica statale post-merge" v1.7):
      ```powershell
      # 4a. Aggregator in sync (post GH Action auto-state-aggregate)
-     pwsh scripts/aggregate-state.ps1 --check
+     pwsh scripts/aggregate-state.ps1 -Check
      # 4b. Bundle in sync
-     pwsh scripts/generate-bundle.ps1 --check
+     pwsh scripts/generate-bundle.ps1 -Check
      # 4c. Nessun residuo post-merge (worktree attive, branch merged, main locale stale)
      pwsh scripts/post-merge.ps1 -Check    # exit 14 se c'e' da pulire, 0 se pulito
      ```
@@ -852,10 +852,9 @@ Esempi: `docs/state/sessions/22-pwa.md`, `docs/state/stories/0.5-pwa.md`. Schema
 ### Aggregator
 
 ```powershell
-pwsh scripts/aggregate-state.ps1 --list       # audit: cosa verrebbe letto/scritto
-pwsh scripts/aggregate-state.ps1 --check      # CI gate: --check exit 0 = in sync
-pwsh scripts/aggregate-state.ps1 --check --strict  # fallisce anche sul drift "lenient"
-pwsh scripts/aggregate-state.ps1 --dry-run    # preview senza scrivere
+pwsh scripts/aggregate-state.ps1 -List        # audit: cosa verrebbe letto/scritto
+pwsh scripts/aggregate-state.ps1 -Check       # CI gate: -Check exit 0 = in sync
+pwsh scripts/aggregate-state.ps1 -DryRun      # preview senza scrivere
 pwsh scripts/aggregate-state.ps1              # scrivi (idempotente: 0 diff se nulla e' cambiato)
 ```
 
@@ -882,7 +881,7 @@ bash scripts/test-aggregate-determinism.sh    # 15 assert, gate bloccante in CI
 ### GH Action auto-state-aggregate (post-merge auto-commit)
 
 Dopo ogni push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1`, la GH Action:
-1. Esegue `pwsh scripts/aggregate-state.ps1 --check` (rileva drift)
+1. Esegue `pwsh scripts/aggregate-state.ps1 -Check` (rileva drift)
 2. Esegue `pwsh scripts/aggregate-state.ps1` (applica i blocchi corretti)
 3. Rileva il diff con `git diff --name-only`
 4. Se modificato, committa e pusha con bot identity `kilo-bot[bot]`
@@ -895,7 +894,7 @@ Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` s
 - [ ] Ho allineato le **sezioni legacy** dei file globali che la mia PR rende false (vedi §"Chi può scrivere cosa nei file globali")
 - [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
 - [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
-- [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
+- [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 -Check` localmente: exit 0
 - [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (determinismo + idempotenza, issue #70)
 - [ ] Se ho aggiunto un nuovo file in `docs/state/` o `scripts/aggregate-state.ps1`, ho aggiornato `scripts/generate-bundle.ps1` `$files` + rigenerato `BUNDLE.md`
 
@@ -924,7 +923,13 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.18 — la keyword di chiusura transiziona **solo** issue realmente collegate (Sessione 38, issue #94). `auto-status-done.yml` matchava `Closes #N` **ovunque** nel body: la PR #93, che *citava* la keyword nella descrizione, ha applicato `status:done` e un commento `release:` spurio all'issue #90 (commento rimosso a mano). La regex è ora ancorata alla riga (`/^[ \t]*(?:Closes|Fixes|Resolves)[ \t]+#(\d+)[ \t]*$/gim`): transiziona solo una riga che è *esattamente* la keyword + numero. §"Chiusura al merge" e il PR template dicono ora di scrivere la keyword **una sola volta**, nuda, e di spezzarla (`` `Closes` #N ``) quando serve citarla.
+*Ultimo aggiornamento: v1.19 — fail-closed dei gate `-Check` (Sessione 41, issue #104). In Windows PowerShell 5.1, `& script.ps1 --check` veniva interpretato dal call operator come fine-dei-parametri + token posizionale `check`, lasciando `[switch]$Check=false` e facendo ricadere gli script gate (`scripts/generate-bundle.ps1`, `scripts/aggregate-state.ps1`) silenziosamente in modalità WRITING con exit 0 = **fail-open**. Rilevato due volte nella stessa giornata (lesson 40-1 su #98 e lesson 41-1 di S41): l'agente pensava di star verificando la sincronizzazione e in realtà la stava creando. Ora:
+- entrambi gli script hanno un guard in cima che intercetta qualsiasi `--*` / `-*` non legato a uno switch noto ed esce **2** con messaggio "ERRATO: `--check` / CORRETTO: `-Check`", rendendo l'errore visibile invece di silente
+- tutti gli esempi di `pwsh scripts/* --check` in questo file (e in `docs/12-DEVOPS.md §9`, `.github/pull_request_template.md`, `.github/workflows/ci.yml`, workflow `auto-state-aggregate.yml`) sono ora `pwsh scripts/* -Check` con singolo trattino
+- nuovo `scripts/test-bundle-check-idempotent.sh` (5+1 scenari bash su repo temporanei) come regression test bloccante in CI
+- nuova sottosezione `docs/12-DEVOPS.md §9.7b` con la spiegazione del bug e del guard, e callout in `§9.1`
+
+*Precedente v1.18 — la keyword di chiusura transiziona **solo** issue realmente collegate (Sessione 38, issue #94). `auto-status-done.yml` matchava `Closes #N` **ovunque** nel body: la PR #93, che *citava* la keyword nella descrizione, ha applicato `status:done` e un commento `release:` spurio all'issue #90 (commento rimosso a mano). La regex è ora ancorata alla riga (`/^[ \t]*(?:Closes|Fixes|Resolves)[ \t]+#(\d+)[ \t]*$/gim`): transiziona solo una riga che è *esattamente* la keyword + numero. §"Chiusura al merge" e il PR template dicono ora di scrivere la keyword **una sola volta**, nuda, e di spezzarla (`` `Closes` #N ``) quando serve citarla.
 
 *Precedente v1.17 — keyword di chiusura `Closes #N` resa inequivocabile (Sessione 38, issue #92). Con PR #91 la keyword era comparsa dentro una casella di checklist del body: GitHub non la riconosce e l'issue #90 è rimasta `OPEN` dopo il merge, nonostante la checklist fosse spuntata. Ora §"Chiusura al merge" mostra la keyword come riga nuda, vieta backtick e checklist, e include un auto-check; il PR template espone il campo `Closes #` in posizione che GitHub legge.
 

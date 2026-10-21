@@ -41,6 +41,8 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 
 Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lavorare sul codice, leggi **`AGENTS.md`** come primo file, poi segui l'ordine di lettura lì indicato. Per dettagli sull'implementazione corrente, leggi `docs/17-DEV-NOTES.md` (pitfalls consolidati) e `docs/18-DEV-LOG.md` (registro cronologico per story).
 
+> ⚠️ **PowerShell 5.1 (Windows senza `pwsh`)**: i gate `scripts/*.ps1 -Check` richiedono il **singolo trattino**. `--check` esce 2 a partire da issue #104; vedi `docs/12-DEVOPS.md §9.7b`.
+
 ## 📜 Licenza
 
 [Apache-2.0](LICENSE) — vedi decisione D.A.10 dell'audit del 2026-10-15. Open-source puro, nessuna monetizzazione (D.A.9).

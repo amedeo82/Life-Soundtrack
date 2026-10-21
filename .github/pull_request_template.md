@@ -34,8 +34,9 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 - [ ] Se ho cambiato un blocco aggregato per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
 - [ ] **Ho allineato le sezioni legacy** dei file globali che questa PR rende false: conteggi/versione/"Prossimo step tecnico" in `docs/INDEX.md`, tabella "roadmap delle story non ancora completate" e righe `**Stato**:` in `docs/11-BACKLOG.md` (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali")
 - [ ] Se ho aggiunto o rimosso un file in `docs/`, ho aggiornato la tabella documenti di `docs/INDEX.md` e l'array `$files` di `scripts/generate-bundle.ps1`
-- [ ] `pwsh scripts/generate-bundle.ps1 --check` exit 0
-- [ ] `pwsh scripts/aggregate-state.ps1 --check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
+- [ ] `pwsh scripts/generate-bundle.ps1 -Check` exit 0
+- [ ] `pwsh scripts/aggregate-state.ps1 -Check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
+- [ ] **NOTA**: `--check` (doppio trattino) esce ora 2 in PowerShell 5.1 (issue #104). Usare sempre `-Check`.
 
 ### Issue tracking
 
