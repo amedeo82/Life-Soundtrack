@@ -4,7 +4,7 @@ title: "Specifica adapter Apple Music (Story 1.2)"
 date: 2026-10-21
 state: 🟡
 branch: feat/98-apple-music-adapter-spec
-pr: 0
+pr: 100
 claim: kilo-HP-ELITEBOOK-osfm
 cross_refs: [98]
 tags: [docs, adapter, apple-music, spec, phase-1]

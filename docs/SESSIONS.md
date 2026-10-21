@@ -2387,7 +2387,7 @@ E.YT.1 (nomi localizzati → detection strutturale), E.YT.2 (video rimossi → s
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #100
 - **Claim**: `kilo-HP-ELITEBOOK-osfm`
 
 ```
