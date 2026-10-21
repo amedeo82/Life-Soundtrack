@@ -17,6 +17,15 @@ on:
       - 'docs/state/**/*.md'
       - 'scripts/aggregate-state.ps1'
 
+# Companion di auto-bundle.yml: condividono il group post-merge-main con
+# cancel-in-progress: false, cosi' le due rigenerazioni (blocchi AGGREGATE-*
+# vs sezioni FILE di BUNDLE.md) sono serializzate. Vedi auto-bundle.yml per
+# il caso d'uso che ha motivato questa aggiunta (issue #115, follow-up di
+# PR #113).
+concurrency:
+  group: post-merge-main
+  cancel-in-progress: false
+
 jobs:
   aggregate:
     runs-on: ubuntu-latest

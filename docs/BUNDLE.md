@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 17:48
-> Totale file: 64
+> Data: 2026-10-21 17:57
+> Totale file: 65
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.20 — Sessione 41 (2026-10-21)
+> Versione 1.21 — Sessione 41 (2026-10-21)
 
 ---
 
@@ -771,13 +771,14 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### Livello 1 — Automazioni GH Action (no intervento manuale)
 
-Dopo il merge di una PR su `main` girano **quattro** workflow. Tre scattano sul `pull_request: closed` e uno è pianificato.
+Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; quattro PR-chiusi + due su push a main con concurrency group condiviso). Tre scattano sul `pull_request: closed` e due sono push-trigger serializzati.
 
 | Workflow | Trigger | Cosa fa |
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
-| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]` |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml` |
+| `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
 Dettagli e motivazioni:
@@ -971,7 +972,15 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.20 — rilevamento collisioni di numero di sessione (Sessione 41, issue #105). Il pre-check esistente in `docs/state/_index.md` (zero-padded a 2 cifre) era una convenzione "best effort" ma non impediva a due agenti paralleli di scegliere lo stesso `N` (lesson 41-4: S41 con S40 dell'altro agente). L'aggregator ordinava per `Number` + tie-break `Base` e produceva in SESSIONS.md / INDEX-roadmap due righe "Sessione N" indistinguibili e formalmente "in sync" con se stesse → `-Check` usciva 0 = fail-open. Aggiunti:
+*Ultimo aggiornamento: v1.21 — auto-bundle workflow post-merge (Sessione 41, issue #115 follow-up di PR #113). Il drift `docs/BUNDLE.md` (sezioni `===== FILE:`) rilevato dopo il merge di PR #112 era strutturalmente non prevenuto: `auto-state-aggregate.yml` aggiorna solo i blocchi `<!-- AGGREGATE-* -->` per design, e nessuna workflow rigenerava il contenuto FILE di `BUNDLE.md` post-merge. Aggiunti:
+- `.github/workflows/auto-bundle.yml` (nuovo, ~100 righe): trigger su push a main con paths che coprono `$files` + `scripts/generate-bundle.ps1` stesso. Esegue `pwsh scripts/generate-bundle.ps1`, skippa il commit via guard `git diff --quiet docs/BUNDLE.md` (idempotente), committa e pusha con `kilo-bot[bot]`
+- `.github/workflows/auto-state-aggregate.yml`: aggiunto blocco `concurrency: { group: post-merge-main, cancel-in-progress: false }` per serializzare le due workflow (evita race su push di `BUNDLE.md`)
+- `.github/CODEOWNERS`: aggiunto `/.github/workflows/auto-bundle.yml @amedeo82` alla sezione workflows
+- `generate-bundle.ps1` `$files`: aggiunto `.github/workflows/auto-bundle.yml` (coerenza: il workflow è incluso nel proprio bundle)
+- `docs/12-DEVOPS.md` §9.8b: nuova sottosezione "auto-bundle.yml (issue #115)" con sintesi del workflow, motivazione storica, lezione D.116.1; §9.8 aggiornato per cross-riferimento; changelog 0.3 con riepilogo
+- AGENTS.md v1.20 → v1.21, footer cumulativo v1.21 con sintesi del fix
+
+*Precedente v1.20 — rilevamento collisioni di numero di sessione (Sessione 41, issue #105). Il pre-check esistente in `docs/state/_index.md` (zero-padded a 2 cifre) era una convenzione "best effort" ma non impediva a due agenti paralleli di scegliere lo stesso `N` (lesson 41-4: S41 con S40 dell'altro agente). L'aggregator ordinava per `Number` + tie-break `Base` e produceva in SESSIONS.md / INDEX-roadmap due righe "Sessione N" indistinguibili e formalmente "in sync" con se stesse → `-Check` usciva 0 = fail-open. Aggiunti:
 - `scripts/aggregate-state.ps1`: nuova funzione `Find-DuplicateSessionNumbers` consumata da `Apply-Blocks` (WARN visibile ma scrive, perche' il drift a quel punto e' gia' su `main` e serve rinumerazione manuale) e `Test-Blocks` (FAIL + exit 1, fail-closed); `--list` evidenzia i duplicati
 - `scripts/test-aggregate-determinism.sh` T9 (5 assert, scenario "copia 32-issue-cleanup-cumulativo.md come 32-dup-test.md"): --check esce non-zero, il messaggio cita `Number=32` e i path di entrambi i file, -List mostra il WARN, apply-mode WARN+scrittura, dopo rimozione del duplicato --check torna a exit 0
 - `docs/state/_index.md`: nuova sottosezione vincolante "Allocazione del numero di sessione" con procedura di pre-check (`git fetch` + `git ls-tree origin/main docs/state/sessions/` + `Measure-Object -Maximum + 1`), incluse storia del caso reale e note di difesa in profondita' (controllo anche sui file locali non ancora pushati)
@@ -10982,6 +10991,8 @@ Il flag `-Check` ha **semantica di fail-fast gate CI** (decisione cristallizzata
 
 Il job `bundle-check` è un **CI gate bloccante**: PR con BUNDLE.md non in sync non possono essere mergate finché l'agente non rigenera il bundle nella stessa PR (o, in emergenza, con `--no-verify` documentando la ragione).
 
+**Workflow automatico post-merge** (introdotto da issue #115, follow-up di PR #113): il workflow `.github/workflows/auto-bundle.yml` rigenera automaticamente `docs/BUNDLE.md` dopo ogni push a `main` che tocca `$files` o il bundle script stesso. Companion di `auto-state-aggregate.yml` (che gestisce i blocchi `<!-- AGGREGATE-* -->`); entrambi condividono il concurrency group `post-merge-main` con `cancel-in-progress: false` per serializzare le due rigenerazioni ed evitare race sul push di `BUNDLE.md`. Idempotente via guard `git diff --quiet docs/BUNDLE.md`.
+
 **Procedura di recovery** (per l'agente che vede il CI rosso):
 
 ```powershell
@@ -10997,6 +11008,35 @@ git commit -m "chore(bundle): rigenera BUNDLE.md post-modifiche docs"
 git push
 ```
 
+### 9.8b `auto-bundle.yml` (issue #115)
+
+Issue #115 e' un follow-up del drift BUNDLE.md che si e' verificato su `origin/main` dopo il merge di PR #112 (issue #105): PR #111 (issue #104) aveva aggiunto `scripts/test-bundle-check-idempotent.sh` al `$files` + rigenerato `BUNDLE.md` nella stessa PR (64 file), ma il workflow `auto-state-aggregate` post-merge aggiorna SOLO il blocco `<!-- AGGREGATE-BUNDLE-INVENTORY -->` in cima a `BUNDLE.md`, NON le sezioni `===== FILE: ... =====` che leggono l'array `$files`. Il rebase di PR #112 (issue #105) ha ereditato una versione di `BUNDLE.md` pre-rebase con 63 markers e `-Check` su main e' uscito 1.
+
+`auto-bundle.yml` chiude la classe di bug definitivamente:
+
+```yaml
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/generate-bundle.ps1'
+      - 'AGENTS.md'  - 'README.md'  - 'LICENSE'
+      - 'docs/**'  - 'scripts/**'  - '.githooks/**'
+      - '.github/**'  - 'fixtures/**'
+concurrency:
+  group: post-merge-main   # serializza con auto-state-aggregate.yml
+  cancel-in-progress: false
+```
+
+**Caratteristiche**:
+
+- Trigger: solo quando `$files` cambia (o un file coperto da esso). Push che tocca solo `apps/`, `packages/` ecc. NON fanno scattare il workflow.
+- Idempotente: `git diff --quiet docs/BUNDLE.md` skippa il commit se la rigenerazione non produce un diff reale.
+- Self-healing: chiude il drift anche se l'agente dimentica di rigenerare `BUNDLE.md` nella PR.
+- Compagna auto-state-aggregate: le due workflow partono entrambe sui push a main con paths `docs/**`, si serializzano via concurrency group ed evitano race sul push di `BUNDLE.md`.
+
+**Lezione operativa D.116.1**: durante un rebase con conflitti su `BUNDLE.md`, NON prendere `theirs/ours` ciecamente. Rigenerare SEMPRE `BUNDLE.md` con `pwsh scripts/generate-bundle.ps1` dopo il rebase (lo script riflette lo stato aggiornato di `$files` post-rebase).
+
 ---
 
 ## Changelog
@@ -11005,6 +11045,7 @@ git push
 |----------|------|-----------|
 | 0.1 | Sessione 8 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10); **nuovo §9 "Bundle script maintenance"** con comandi, convenzioni, CI check, workflow dev (post-review del bundle) |
+| 0.3 | Sessione 41 (2026-10-21) | **§9.8b auto-bundle.yml** (issue #115 follow-up di PR #113): nuovo workflow `.github/workflows/auto-bundle.yml` che rigenera automaticamente `docs/BUNDLE.md` (contenuto FILE) dopo ogni push a main che tocca `$files` o i file coperti da esso. Companion di `auto-state-aggregate.yml` (che gestisce solo i blocchi `AGGREGATE-*`); serializzate via concurrency group `post-merge-main`. Chiude strutturalmente la classe di drift "BUNDLE.md non in sync post-merge" identificata dal rebasing di PR #112. **§9.7b fail-closed su flag** (issue #104): `pwsh scripts/* --check` esce 2 in PS 5.1 (doppio trattino non mappato su switch), `-Check` (singolo) continua a funzionare. Tutti gli esempi del file ora usano `-Check`. |
 
 
 
@@ -15489,7 +15530,7 @@ ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 # (BUNDLE.md e' il file che NON deve essere mai riscritto in check mode).
 make_repo() {
   local d="$1"
-  mkdir -p "$d/docs"
+  mkdir -p "$d/docs" "$d/scripts"
   cp "$SCRIPT" "$d/scripts/generate-bundle.ps1"
   (
     cd "$d" || exit 1
@@ -16132,7 +16173,11 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 /.githooks/                             @amedeo82
 
 # GitHub Actions workflows (eseguiti ad ogni push/PR).
+# Modifica richiede attenzione (effetti su CI + agenti).
+# auto-bundle.yml: companion di auto-state-aggregate per rigenerare
+# docs/BUNDLE.md post-merge (issue #115 follow-up di PR #113).
 /.github/workflows/                     @amedeo82
+/.github/workflows/auto-bundle.yml      @amedeo82
 
 # PR template + CODEOWNERS + altre config GitHub.
 /.github/pull_request_template.md       @amedeo82
@@ -16278,6 +16323,156 @@ jobs:
       # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
       - name: Lazy-state in sync (ADR-0008)
         run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+
+
+
+===== FILE: .github/workflows/auto-bundle.yml =====
+
+name: auto-bundle
+
+# Rigenera il contenuto FILE di docs/BUNDLE.md (===== FILE: ... =====) dopo un
+# merge su `main`. Companion a auto-state-aggregate.yml, che gestisce solo i
+# blocchi <!-- AGGREGATE-* -->. Insieme mantengono BUNDLE.md in sync con tutte
+# le sue zone senza intervento manuale.
+#
+# Caso storico (chiusura issue #115): PR #111 (issue #104) ha aggiunto
+# scripts/test-bundle-check-idempotent.sh al $files + rigenerato BUNDLE.md
+# nella stessa PR (64 file). Il workflow auto-state-aggregate post-merge ha
+# aggiornato solo il blocco inventario, NON le sezioni FILE. Il rebase +
+# merge di PR #112 (issue #105) ha ereditato una versione di BUNDLE.md con
+# 63 markers (manca il test), e `pwsh scripts/generate-bundle.ps1 -Check`
+# su main usciva 1 rompendo il gate CI quality. Risolto da PR #113
+# (rigenerato manualmente), ma la classe di bug resta: lo stesso pattern
+# si ripresenta ogni volta che $files o un file coperto da esso cambia
+# senza un commit di rigenerazione nella stessa PR.
+#
+# Questo workflow chiude strutturalmente la classe: dopo un merge che tocca
+# i path in $files (o il bundle script stesso), BUNDLE.md viene rigenerato
+# automaticamente. Il guard `git diff --quiet docs/BUNDLE.md` rende l'azione
+# idempotente (commit solo se la rigenerazione produce un diff reale).
+#
+# Companion (non-bloccante): se auto-state-aggregate corre in parallelo sullo
+# stesso push, condividono il concurrency group `post-merge-main` (con
+# cancel-in-progress: false). In questo modo le due rigenerazioni sono
+# serializzate: la seconda parte solo dopo che la prima ha pushato. Senza
+# la serializzazione, le due workflow potrebbero fare commit di BUNDLE.md
+# in concorrenza e una delle due fallirebbe il push (non-fast-forward).
+#
+# Non-bloccante: se `pwsh scripts/generate-bundle.ps1` fallisce (per
+# esempio powershell mancante o file $files inaccessibili), il workflow
+# logga un warning ma lascia il merge andare. Lo stato puo' essere
+# riallineato manualmente con `pwsh scripts/generate-bundle.ps1`.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # === Trigger paths: tutto cio' che $files in generate-bundle.ps1 copre ===
+      # Quando il bundle script stesso cambia, il $files array potrebbe essere
+      # cambiato -> rigenerare BUNDLE.md per riflettere la nuova membership.
+      - 'scripts/generate-bundle.ps1'
+      # === Documenti root ===
+      - 'AGENTS.md'
+      - 'README.md'
+      - 'LICENSE'
+      # === Tutti i docs (comprende 00-VISION.md, SESSIONS.md, INDEX.md,
+      # 13-ADR/, state/, ecc.). Sovrappone parzialmente con auto-state-aggregate
+      # (docs/state/**) ma i due workflow sono complementari. ===
+      - 'docs/**'
+      # === Script di utility (vari sono in $files) ===
+      - 'scripts/**'
+      # === Hook Git versionati ===
+      - '.githooks/**'
+      # === Configurazione GitHub (CODEOWNERS, PR template, CI workflow stesso
+      # sono in $files) ===
+      - '.github/**'
+      # === Dataset di test ===
+      - 'fixtures/**'
+
+# Serialize with auto-state-aggregate: stesso grupo, no cancel-in-progress
+# (le nuove run restano in coda dietro a quella in corso).
+concurrency:
+  group: post-merge-main
+  cancel-in-progress: false
+
+jobs:
+  regen-bundle:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # necessario per il push finale
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      # Sync con origin/main PRIMA della rigenerazione: se auto-state-aggregate
+      # ha pushato prima di noi, abbiamo bisogno del suo commit per applicare
+      # correttamente il BUNDLE. fetch-depth: 0 lo permette (history completa).
+      - name: Sync con origin/main
+        shell: pwsh
+        run: |
+          git fetch origin main
+          git rebase origin/main
+          if ($LASTEXITCODE -ne 0) {
+            # Rebase fallito (es. conflitto nel working copy): fallback a reset
+            # hard. Il bundle script non lascia dirty state, quindi safe.
+            Write-Host "::warning::Rebase fallito, fallback a git reset --hard origin/main"
+            git reset --hard origin/main
+          }
+
+      - name: Rigenera BUNDLE.md
+        shell: pwsh
+        run: |
+          Write-Host "::group::Regenerate BUNDLE.md"
+          pwsh scripts/generate-bundle.ps1
+
+      # Guard idempotente: se la rigenerazione non produce un diff reale,
+      # salta il commit. Evita commit-vuoto su push che non hanno cambiato
+      # il contenuto effettivo di BUNDLE (es. aggiornamenti di metadata).
+      - name: Verifica diff su docs/BUNDLE.md
+        if: always()
+        id: diff
+        shell: pwsh
+        run: |
+          if (Test-Path docs/BUNDLE.md) {
+            $diffLines = git diff --name-only docs/BUNDLE.md
+          } else {
+            $diffLines = "absent"
+          }
+          if ($diffLines) {
+            Write-Host "BUNDLE.md modificato dalla rigenerazione:"
+            git diff --stat docs/BUNDLE.md
+            "modified=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          } else {
+            Write-Host "BUNDLE.md gia' in sync: nessun commit necessario"
+            "modified=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+
+      - name: Commit e push
+        if: steps.diff.outputs.modified == 'true'
+        shell: pwsh
+        run: |
+          git config user.name "kilo-bot[bot]"
+          git config user.email "kilo-bot@kilo.local"
+          git add docs/BUNDLE.md
+          if (git diff --cached --quiet) {
+            Write-Host "Nothing to commit (staged diff vuoto)"
+            exit 0
+          }
+          git commit -m "chore(bundle): auto-regen BUNDLE.md dopo merge di PR su main" `
+                       -m "Triggered by .github/workflows/auto-bundle.yml on push to main." `
+                       -m "Source: scripts/generate-bundle.ps1 (rigenera $files da docs/globale)." `
+                       -m "Target: docs/BUNDLE.md (contenuto FILE: ===== FILE: foo.md =====)." `
+                       -m "" `
+                       -m "Questo workflow chiude la classe di drift BUNDLE.md identificata da PR #113:" `
+                       -m "quando \$files o un file coperto da esso cambia, BUNDLE.md viene rigenerato" `
+                       -m "automaticamente senza richiedere rigenerazione manuale nella stessa PR." `
+                       -m "" `
+                       -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
+                       -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-main."
+          git push origin main
 
 
 

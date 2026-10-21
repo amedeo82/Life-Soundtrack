@@ -193,6 +193,10 @@ $files = @(
     ".github/pull_request_template.md",
     ".github/CODEOWNERS",
     ".github/workflows/ci.yml",
+    # Workflow post-merge che rigenera il contenuto FILE di docs/BUNDLE.md
+    # quando $files o un file coperto da esso cambia (issue #115 follow-up
+    # di PR #113). Companion di auto-state-aggregate.yml.
+    ".github/workflows/auto-bundle.yml",
     "fixtures/synthetic-history/spotify-sample.json",
     "fixtures/db-seed/minimal.json"
 )
