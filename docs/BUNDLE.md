@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 17:13
-> Totale file: 63
+> Data: 2026-10-21 17:34
+> Totale file: 64
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -11,7 +11,7 @@
 
 - Totale file: 63 (incluso 3 file aggregator-managed)
 - Dimensione totale: 676.6 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 15:23
+- Ultima aggregazione: 2026-10-21 17:34
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1072,6 +1072,8 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 ## 🤝 Come contribuire
 
 Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lavorare sul codice, leggi **`AGENTS.md`** come primo file, poi segui l'ordine di lettura lì indicato. Per dettagli sull'implementazione corrente, leggi `docs/17-DEV-NOTES.md` (pitfalls consolidati) e `docs/18-DEV-LOG.md` (registro cronologico per story).
+
+> ⚠️ **PowerShell 5.1 (Windows senza `pwsh`)**: i gate `scripts/*.ps1 -Check` richiedono il **singolo trattino**. `--check` esce 2 a partire da issue #104; vedi `docs/12-DEVOPS.md §9.7b`.
 
 ## 📜 Licenza
 
@@ -10844,10 +10846,20 @@ Prima di rendere il repository pubblico o il sito accessibile, verificare:
 
 ```powershell
 pwsh scripts/generate-bundle.ps1           # genera docs/BUNDLE.md (default)
-pwsh scripts/generate-bundle.ps1 --check   # verifica che BUNDLE.md sia in sync; exit 0/1 (CI-friendly)
-pwsh scripts/generate-bundle.ps1 --list    # stampa la lista dei file inclusi (audit)
-pwsh scripts/generate-bundle.ps1 --help    # help completo
+pwsh scripts/generate-bundle.ps1 -Check    # verifica che BUNDLE.md sia in sync; exit 0/1 (CI-friendly)
+pwsh scripts/generate-bundle.ps1 -List     # stampa la lista dei file inclusi (audit)
+pwsh scripts/generate-bundle.ps1 -Help     # help completo
 ```
+
+> ⚠️ **PowerShell 5.1 + doppio trattino `--` (issue #104)**: usare sempre `-Check` /
+> `-List` / `-Help` (singolo trattino), **MAI** `--check` / `--list`. In Windows
+> PowerShell 5.1 il call operator `&` interpreta `--check` come fine-dei-parametri
+> + token posizionale `check`: `[switch]$Check` non si lega e lo script ricadeva
+> silenziosamente in modalità WRITING (riscrittura di `BUNDLE.md` + exit 0 = fail-open,
+> vedi §9.7b). Lo script ora esce **2** con messaggio esplicito se vede un flag
+> `--*`, ma è più semplice usare la sintassi corretta direttamente. Vale anche per
+> `scripts/aggregate-state.ps1 -Check` (stesso guard applicato). In PowerShell 7
+> (`pwsh`) `--check` viene normalizzato a `-Check` quindi non si vede il bug.
 
 ### 9.2 Quando aggiornare lo script
 
@@ -10882,7 +10894,7 @@ Aggiungere il job `bundle-check` al workflow `ci.yml`:
       - uses: actions/checkout@v4
       - name: Verify BUNDLE.md is in sync
         shell: pwsh
-        run: pwsh scripts/generate-bundle.ps1 --check
+run: pwsh scripts/generate-bundle.ps1 -Check
 ```
 
 Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
@@ -10897,7 +10909,7 @@ Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
 1. Modifica un file in docs/ o fixtures/
 2. (se hai aggiunto/rimosso file) modifica $files in scripts/generate-bundle.ps1
 3. Esegui: pwsh scripts/generate-bundle.ps1
-4. (opzionale) verifica: pwsh scripts/generate-bundle.ps1 --check
+4. (opzionale) verifica: pwsh scripts/generate-bundle.ps1 -Check
 5. Committa docs/, fixtures/ e scripts/generate-bundle.ps1 + docs/BUNDLE.md nella stessa PR
 ```
 
@@ -10905,24 +10917,46 @@ Se il check fallisce, il messaggio indica esattamente cosa è cambiato:
 
 ```powershell
 # Stato corrente
-pwsh scripts/generate-bundle.ps1 --list
+pwsh scripts/generate-bundle.ps1 -List
 
 # Rigenera
 pwsh scripts/generate-bundle.ps1
 
 # Verifica sync (CI parity)
-pwsh scripts/generate-bundle.ps1 --check
+pwsh scripts/generate-bundle.ps1 -Check
 ```
 
-### 9.7 Determinismo del `--check`
+### 9.7 Determinismo del `-Check`
 
-Il confronto `--check` normalizza sia la riga `> Data:` (timestamp) sia i line endings (`CRLF` → `LF`) sia nel file su disco che nel bundle rigenerato, prima del confronto. Questo rende il check deterministico: non fallisce per solo cambio di timestamp o per differenza di line endings tra Windows e Linux/CI.
+Il confronto `-Check` normalizza sia la riga `> Data:` (timestamp) sia i line endings (`CRLF` → `LF`) sia nel file su disco che nel bundle rigenerato, prima del confronto. Questo rende il check deterministico: non fallisce per solo cambio di timestamp o per differenza di line endings tra Windows e Linux/CI.
 
 Il check continua a rilevare drift reali (file aggiunti/rimossi, contenuto modificato).
 
+### 9.7b Fail-closed sui flag sconosciuti (issue #104)
+
+In aggiunta al determinismo, lo script è **fail-closed** sui flag sconosciuti. In
+Windows PowerShell 5.1, con `& script.ps1 --check`, il call operator interpreta
+`--check` come fine-dei-parametri + token posizionale `check`: `[switch]$Check`
+non si lega e lo script ricadeva **silenziosamente** in modalità WRITING (riscrittura
+di `BUNDLE.md` + exit 0 = fail-open). Un agente che credeva di star verificando
+la sincronizzazione in realtà la stava creando (vedi lesson 40-1 e 41-1 in
+`docs/SESSIONS.md`).
+
+Il guard in cima allo script rileva qualsiasi `--*` (o `-*`) passato non legato
+a uno switch noto e:
+
+- esce con codice **2** (errore di parametro, distinto da drift = 1),
+- scrive un messaggio esplicito che mostra la forma ERRATO (`--check`) e quella
+  CORRETTO (`-Check`).
+
+Lo stesso guard è applicato a `scripts/aggregate-state.ps1 -Check`: un fail-silently
+lì è ancora peggio (l'aggregator scrive 4 file globali, drift invisibile su
+`main`). Test di regressione in `scripts/test-bundle-check-idempotent.sh` (5+1 scenari
+bash su repo temporanei, gate bloccante in CI via `.github/workflows/ci.yml`).
+
 ### 9.8 Semantica come gate CI
 
-Il flag `--check` ha **semantica di fail-fast gate CI** (decisione cristallizzata in S32, issue #41 — formalizzazione dell'opzione A di `gh issue #10` chiusa in S17):
+Il flag `-Check` ha **semantica di fail-fast gate CI** (decisione cristallizzata in S32, issue #41 — formalizzazione dell'opzione A di `gh issue #10` chiusa in S17):
 
 | Esito del check | Exit code | Significato | Comportamento CI |
 |-----------------|-----------|-------------|------------------|
@@ -10954,8 +10988,8 @@ Il job `bundle-check` è un **CI gate bloccante**: PR con BUNDLE.md non in sync 
 # 1. Rigenera localmente
 pwsh scripts/generate-bundle.ps1
 
-# 2. Verifica sync
-pwsh scripts/generate-bundle.ps1 --check    # deve uscire 0
+# 2. Verifica sync (singolo trattino, vedi §9.7b)
+pwsh scripts/generate-bundle.ps1 -Check     # deve uscire 0
 
 # 3. Committa nella stessa PR
 git add docs/BUNDLE.md scripts/generate-bundle.ps1
@@ -15400,6 +15434,236 @@ echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]
 
 
+===== FILE: scripts/test-bundle-check-idempotent.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per scripts/generate-bundle.ps1 — fail-closed sui flag sconosciuti (issue #104).
+#
+# Protegge il bug chiuso in issue #104: in Windows PowerShell 5.1 con `&`
+# (call operator, NON `pwsh -File`), `--check` viene interpretato come
+# fine-dei-parametri + token posizionale `check` che NON si lega a `[switch]$Check`.
+# Lo script ricadeva silenziosamente in modalita' default (WRITING), riscrivendo
+# docs/BUNDLE.md e restituendo exit 0 = fail-open. Un agente che credeva di
+# star verificando la sincronizzazione in realta' la stava creando.
+#
+# Scenari coperti:
+#   T1   `--check` (doppio trattino, pattern fail-open) esce 2 senza scrivere BUNDLE.md
+#   T2   `--list`  (doppio trattino su altro switch) esce 2 senza scrivere
+#   T3   `--bogus` (flag completamente sconosciuto) esce 2 senza scrivere
+#   T4   `-Check` (singolo trattino, sintassi attesa) entra in modalita' check:
+#        non scrive BUNDLE.md e lo stato di exit dipende solo dal --check interno (0 oppure 1)
+#   T5   senza argomenti: default SCRIVE BUNDLE.md ed esce 0 (regression: il fail-closed
+#        guard non rompe il flusso normale di lavoro)
+#
+# Funziona sia con `pwsh` sia con Windows PowerShell 5.1 (`powershell`). Per essere il
+# piu' possibile rappresentativo del bug, i test T1-T3 vengono eseguiti due volte:
+# una via `--check` con `& ... --check` (chiamata col call operator, che e' il
+# trigger del bug in PS 5.1) e una via `powershell -File ... --check` (dove pwsh
+# normalizza a `-Check` e lo script si comporta correttamente). Il guard deve
+# essere non-op nel secondo caso ma deve intercettare il primo.
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT="$SCRIPT_DIR/generate-bundle.ps1"
+
+if command -v pwsh >/dev/null 2>&1; then
+  PS="pwsh"
+elif command -v powershell >/dev/null 2>&1; then
+  PS="powershell"
+else
+  echo "[SKIP] pwsh/powershell non disponibili: impossibile eseguire generate-bundle.ps1"
+  exit 0
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "[SKIP] git non disponibile"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+# Repo temporaneo con un sottoinsieme minimale dei file in $files
+# (BUNDLE.md e' il file che NON deve essere mai riscritto in check mode).
+make_repo() {
+  local d="$1"
+  mkdir -p "$d/docs"
+  cp "$SCRIPT" "$d/scripts/generate-bundle.ps1"
+  (
+    cd "$d" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"
+    git config user.name "Test"
+    git config commit.gpgsign false
+    echo "x" > AGENTS.md
+    echo "y" > README.md
+    echo "z" > LICENSE
+    echo "i" > docs/INDEX.md
+    git add -A
+    git commit -q -m "seed" >/dev/null 2>&1
+  )
+}
+
+run_via_amp() {
+  # Invocazione con call operator `&` — il path fail-open dell'issue #104.
+  "$PS" -NoProfile -Command "& '$1' $2" 2>&1
+  return $?
+}
+
+run_via_file() {
+  # Invocazione con `pwsh -File` — pwsh normalizza --foo a -foo, qui non si vede
+  # il bug: serve solo per confermare che il guard non rompe la modalita' canonica CI.
+  "$PS" -NoProfile -File "$1" $2 2>&1
+  return $?
+}
+
+# Misura il mtime (in secondi dalla epoch) di docs/BUNDLE.md, ritorna vuoto se assente.
+bundle_mtime() {
+  local path="$1/docs/BUNDLE.md"
+  if [ ! -f "$path" ]; then echo ""; return; fi
+  # wc -c e' cross-platform e sufficiente per rilevare un rewrite del contenuto.
+  wc -c < "$path" | tr -d ' '
+}
+
+echo "=== T1: --check via & NON scrive BUNDLE.md ed esce 2 (il bugfix) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+
+  # Genera un BUNDLE.md iniziale via flag-less default.
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "seed bundle" >/dev/null 2>&1
+  SIZE0=$(bundle_mtime "$D")
+  HEAD0=$(git -C "$D" rev-parse HEAD 2>/dev/null)
+
+  out=$(run_via_amp "$D/scripts/generate-bundle.ps1" --check)
+  ec=$?
+  if [ $ec -eq 2 ]; then ok "exit 2 (parameter error)"; else ng "exit $ec (atteso 2): $(echo "$out" | tail -3)"; fi
+
+  SIZE1=$(bundle_mtime "$D")
+  if [ "$SIZE0" = "$SIZE1" ] && [ -n "$SIZE0" ]; then
+    ok "BUNDLE.md non riscritto (size invariata: $SIZE0 byte)"
+  elif [ -z "$SIZE1" ]; then
+    ng "BUNDLE.md sparito (size era $SIZE0 -> vuoto)"
+  else
+    ng "BUNDLE.md RISCITTO (size $SIZE0 -> $SIZE1, fail-open!)"
+  fi
+
+  if echo "$out" | grep -q "PowerShell 5.1 non mappa -- su -"; then
+    ok "messaggio fail-closed presente e spiega il fix"
+  else
+    ng "messaggio mancante: l'utente non sa come correggere"
+  fi
+
+  if echo "$out" | grep -q "ERRATO:.*--check"; then
+    ok "mostra la forma ERRATO (--check)"
+  else
+    ng "manca la forma ERRATO"
+  fi
+
+  if echo "$out" | grep -q "CORRETTO:.*-Check"; then
+    ok "mostra la forma CORRETTO (-Check)"
+  else
+    ng "manca la forma CORRETTO"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T2: --list via & NON scrive ed esce 2 ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "seed" >/dev/null 2>&1
+  SIZE0=$(bundle_mtime "$D")
+
+  out=$(run_via_amp "$D/scripts/generate-bundle.ps1" --list); ec=$?
+  if [ $ec -eq 2 ]; then ok "exit 2"; else ng "exit $ec"; fi
+  SIZE1=$(bundle_mtime "$D")
+  if [ "$SIZE0" = "$SIZE1" ]; then ok "BUNDLE.md invariato"; else ng "BUNDLE.md riscritto ($SIZE0 -> $SIZE1)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: --bogus (flag completamente sconosciuto) via & NON scrive ed esce 2 ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "seed" >/dev/null 2>&1
+  SIZE0=$(bundle_mtime "$D")
+
+  out=$(run_via_amp "$D/scripts/generate-bundle.ps1" --bogus); ec=$?
+  if [ $ec -eq 2 ]; then ok "exit 2"; else ng "exit $ec"; fi
+  SIZE1=$(bundle_mtime "$D")
+  if [ "$SIZE0" = "$SIZE1" ]; then ok "BUNDLE.md invariato"; else ng "BUNDLE.md riscritto ($SIZE0 -> $SIZE1)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4: -Check (singolo trattino) FUNZIONA, esce 0 se in sync ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  # Scrivi un BUNDLE.md "in sync" come baseline: prima il default write poi verifica.
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "seed" >/dev/null 2>&1
+  SIZE0=$(bundle_mtime "$D")
+  HEAD0=$(git -C "$D" rev-parse HEAD 2>/dev/null)
+
+  out=$(run_via_amp "$D/scripts/generate-bundle.ps1" -Check); ec=$?
+  if [ $ec -eq 0 ]; then ok "exit 0 quando in sync"; else ng "exit $ec (atteso 0; out: $(echo "$out" | tail -3))"; fi
+  SIZE1=$(bundle_mtime "$D")
+  if [ "$SIZE0" = "$SIZE1" ]; then ok "BUNDLE.md non riscritto"; else ng "BUNDLE.md riscritto durante --check ($SIZE0 -> $SIZE1)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T5: senza argomenti SCRIVE il bundle (regression: il guard non rompe il default) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  if [ -f "$D/docs/BUNDLE.md" ]; then
+    ng "BUNDLE.md gia presente prima della run default"
+  else
+    ok "BUNDLE.md assente (precondizione)"
+  fi
+
+  out=$(run_via_amp "$D/scripts/generate-bundle.ps1" ""); ec=$?
+  if [ $ec -eq 0 ]; then ok "default-mode exit 0"; else ng "default-mode exit $ec"; fi
+  if [ -f "$D/docs/BUNDLE.md" ]; then
+    ok "BUNDLE.md creato (default-mode preservato)"
+  else
+    ng "BUNDLE.md NON creato: il guard ha rotto il flusso di lavoro"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T6: --check via pwsh -File (modalita' CI canonica) esce 0 senza scrivere ==="
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "seed" >/dev/null 2>&1
+  SIZE0=$(bundle_mtime "$D")
+
+  out=$(run_via_file "$D/scripts/generate-bundle.ps1" --check); ec=$?
+  # Con `-File`, pwsh normalizza `--check` a `-Check` PRIMA di passarlo allo script,
+  # quindi NON si attiva il guard fail-closed: --check deve comportarsi come atteso
+  # ed uscire 0 (in sync) senza scrivere. Su PS 5.1 con `-File` il comportamento
+  # e' analogo (Pwsh.Host layer normalizza). Questo scenario conferma che il guard
+  # non rompe il path CI standard.
+  if [ $ec -eq 0 ]; then ok "exit 0 via -File (CI canonico)"; else ng "exit $ec via -File: $(echo "$out" | tail -3)"; fi
+  SIZE1=$(bundle_mtime "$D")
+  if [ "$SIZE0" = "$SIZE1" ]; then ok "BUNDLE.md invariato"; else ng "BUNDLE.md riscritto via -File: regression del guard"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
+
+
+
 ===== FILE: scripts/validate-workflows.mjs =====
 
 // Estrae i blocchi `script:` dai workflow e li syntax-checka con node.
@@ -15954,7 +16218,18 @@ jobs:
 
       - name: Bundle in sync
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
-        run: pwsh scripts/generate-bundle.ps1 --check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
+        run: pwsh scripts/generate-bundle.ps1 -Check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
+
+# Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
+      # In PowerShell 5.1 con `&`, `--check` veniva interpretato come
+      # fine-dei-parametri + token posizionale, lasciando $Check=false e facendo
+      # ricadere lo script in modalita' WRITING (riscrittura silenziosa di BUNDLE.md,
+      # exit 0 = fail-open). Il test verifica che il guard ora esce 2 e non
+      # modifica BUNDLE.md; usa la sintassi a singolo trattino per invocare pwsh
+      # (la sintassi `--check` e' il caso coperto dal test stesso, eseguito nei
+      # repo temporanei del file di test).
+      - name: Bundle check fail-closed (issue #104)
+        run: bash scripts/test-bundle-check-idempotent.sh
 
 # Issue #70: gate BLOCCANTE per il determinismo dell'aggregator.
       # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
@@ -15996,7 +16271,7 @@ jobs:
       #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
       # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
       - name: Lazy-state in sync (ADR-0008)
-        run: pwsh scripts/aggregate-state.ps1 --check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+        run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
 
 
 
