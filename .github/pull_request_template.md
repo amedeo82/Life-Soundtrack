@@ -22,8 +22,10 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 
 ### Documentazione di stato (ADR-0008 V1 + V2)
 
-- [ ] **NON** ho modificato direttamente `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/BUNDLE.md` (regola ADR-0008: solo `docs/state/<propria>/*`)
-- [ ] Se ho cambiato uno di questi file per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
+- [ ] **NON** ho modificato i blocchi `<!-- AGGREGATE-* -->` di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
+- [ ] Se ho cambiato un blocco aggregato per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
+- [ ] **Ho allineato le sezioni legacy** dei file globali che questa PR rende false: conteggi/versione/"Prossimo step tecnico" in `docs/INDEX.md`, tabella "roadmap delle story non ancora completate" e righe `**Stato**:` in `docs/11-BACKLOG.md` (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali")
+- [ ] Se ho aggiunto o rimosso un file in `docs/`, ho aggiornato la tabella documenti di `docs/INDEX.md` e l'array `$files` di `scripts/generate-bundle.ps1`
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` exit 0
 - [ ] `pwsh scripts/aggregate-state.ps1 --check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
 
@@ -36,7 +38,7 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 ### Git workflow
 
 - [ ] Branch name: `feat/<N>-<desc>` o `fix/<N>-<desc>` (NO `main` direttamente)
-- [ ] Lavoro eseguito in worktree dedicata: `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" in AGENTS.md)
+- [ ] Worktree creata **prima** del claim: `pwsh scripts/setup-worktree.ps1 <N>` (lo script rifiuta un'issue già `in-progress`), poi claim con `in-progress` + commento `claim:` (vedi §"🌳 Worktree workflow" e §"🎫 Presa in carico delle story" in AGENTS.md)
 - [ ] Working tree pulito (no modifiche tracked non committate, vedi pre-commit hook D3)
 - [ ] Push early: il branch e stato pushato subito dopo `git checkout -b` (D.20.2)
 - [ ] Commit messages: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)

@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-20 19:07
-> Totale file: 57
+> Data: 2026-10-21 10:56
+> Totale file: 58
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 56 (incluso 3 file aggregator-managed)
-- Dimensione totale: 558.8 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-20 17:16
+- Totale file: 57 (incluso 3 file aggregator-managed)
+- Dimensione totale: 571.6 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 10:56
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 32 |
+| docs/ | 33 |
 | scripts/ | 13 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.13 — Sessione 36 (2026-10-20)
+> Versione 1.16 — Sessione 38 (2026-10-21)
 
 ---
 
@@ -550,7 +550,8 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
-- [ ] **NON ho modificato direttamente** `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: solo `docs/state/<propria>/*`)
+- [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
+- [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
 - [ ] **Il body della PR include `Closes #N`** (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub lo usa per chiudere automaticamente l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
@@ -566,9 +567,10 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 
 | Cosa è cambiato nella PR | File da aggiornare |
 |---|---|
-| Stato di una story (es. ⬚→🟡, 🟡→✅, ✅→⬚) | `docs/11-BACKLOG.md` (sezione Story + tabella "Stato di avanzamento") |
-| Stato di una story | `docs/INDEX.md` (§"Stato del progetto" e roadmap sessioni) |
-| Stato di una story / chiusura di una sessione | `docs/SESSIONS.md` (entry sessione + changelog) |
+| Stato di una story (es. ⬚→🟡, 🟡→✅, ✅→⬚) | `docs/state/stories/<id>-<slug>.md` (fonte) + `docs/11-BACKLOG.md` (rimuoverla dalla tabella "roadmap" e aggiornare la riga `**Stato**:` della sezione Story) |
+| Stato di una story | `docs/INDEX.md` §"Dettaglio (legacy)" (conteggi, "Prossimo step tecnico") — i blocchi `AGGREGATE-*` si aggiornano da soli |
+| Chiusura di una sessione | `docs/state/sessions/<N>-<slug>.md` (fonte) + `docs/SESSIONS.md` (blocco aggregato, automatico) |
+| Aggiunta/rimozione di un documento in `docs/` | `docs/INDEX.md` §"Documenti fondamentali" / "Documenti di supporto" + `scripts/generate-bundle.ps1` (`$files`) |
 | Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) + **eliminare il branch remoto** (vedi §"♻️ Pulizia branch post-merge") |
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
@@ -576,6 +578,8 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Issue chiusa al merge | `status:done` applicato (vedi §"📦 Macchina a stati delle issue (status:*)"); rimozione `agent-ready` |
 
 **Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
+
+**Perché la tabella distingue aggregato da legacy**: i blocchi `AGGREGATE-*` si aggiornano da soli post-merge, quindi chiederne la modifica manuale crea solo drift e fallisce il gate `--check`. Le sezioni legacy non hanno un generatore: se un agente le ignora, invecchiano senza che nessun gate se ne accorga (è successo tra S22 e S38, issue #84 e #90). Vedi §"Chi può scrivere cosa nei file globali".
 
 **Doc-sync nel branch (preferito, vedi Sessione 21 D.21.1)**: il doc-sync finale (con PR number e merge commit hash) va committato nel branch della PR, NON come commit separato su `main` (vedi §"📤 Post-merge actions"). L'eccezione "commit di follow-up immediatamente successivo" è declassata a fallback sconsigliato per race con altri agenti in parallelo.
 
@@ -670,11 +674,11 @@ git push
 ## 🚀 Primo task di un agente
 
 1. Leggi questo file
-2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — una issue è libera se non ha `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
-3. **Crea una worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4.
-4. Leggi la specifica del task e implementa con test (nella worktree)
-5. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
-6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done` + GH Action `auto-state-aggregate` rigenera SESSIONS/BACKLOG/INDEX/BUNDLE; tu fai `release:` comment + **procedura canonica post-merge** (`pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` dalla working copy principale: allinea `main`, smonta la worktree, elimina i branch locale e remoto) (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge")
+2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
+3. **Crea la worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4. **Attenzione**: lo script valida che l'issue non abbia già `in-progress`, quindi va eseguito **prima** del claim (o con `-SkipGhCheck` se hai già claimato tu).
+4. **Claima** l'issue (ADR-0006): `gh issue edit <N> --add-label in-progress` + commento `claim: <AGENT-ID> (UTC <timestamp>)`, poi **riverifica** (vince chi ha il commento con ID GitHub più basso)
+5. Leggi la specifica del task e implementa con test (nella worktree)
+6. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -815,6 +819,25 @@ Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di 
 
 I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `auto-state-aggregate.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
 
+### Chi può scrivere cosa nei file globali *(D.38.1 — vincolante, Sessione 38)*
+
+La regola sopra vieta di toccare i **file** globali. Ma questi file contengono due tipi di contenuto con regole diverse, ed è proprio questa ambiguità a lasciare le sezioni legacy invecchiare in silenzio (drift corretto in Sessione 38, issue #90: `11-BACKLOG.md` dichiarava 0.4/0.6/0.7 `⬚ TODO` mesi dopo il merge).
+
+| Tipo di contenuto | Dove si trova | Chi lo scrive | Regola |
+|---|---|---|---|
+| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 --check` fallisce (gate CI) e `auto-state-aggregate` sovrascrive il diff |
+| **Sezioni legacy** | tutto il resto: prosa, tabelle statiche, changelog, `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" di `11-BACKLOG.md`, `18-DEV-LOG.md` | **l'agente**, nella stessa PR che cambia i fatti che dichiarano | **Allinearle è obbligatorio**, non facoltativo: se la sezione dichiara uno stato, un conteggio, una versione o un riferimento che la tua PR cambia, aggiornala in quella PR |
+
+**Non è un allargamento di ADR-0008**: i blocchi aggregati restano vietati. La regola riguarda le sezioni legacy, che non hanno alcun generatore e quindi nessuno le aggiorna al posto tuo.
+
+Esempi di obbligo concreto:
+
+- cambi lo stato di una story → **rimuovila** dalla tabella "roadmap delle story non ancora completate" in `11-BACKLOG.md`, aggiorna la riga `**Stato**:` della sua sezione Story, e crea/aggiorna `docs/state/stories/<id>-<slug>.md`
+- mergi una sessione → aggiorna il bullet "Prossimo step tecnico" e i contatori di `INDEX.md` §"Dettaglio (legacy)" se citano issue chiuse
+- aggiungi o rimuovi un documento in `docs/` → aggiorna la tabella "Documenti fondamentali" / "Documenti di supporto" di `INDEX.md`
+
+**Anti-pattern ricorrente**: duplicare in una sezione legacy un dato che un blocco aggregato già fornisce. Ogni duplicazione è una seconda fonte di verità che invecchia. Se il dato è già in un blocco `AGGREGATE-*`, **mettici un puntatore, non una copia**.
+
 ### Target V1 + V2
 
 | File | Blocchi gestiti | Versione |
@@ -882,7 +905,8 @@ Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` s
 
 ### Checklist PR aggiuntiva (D.24.x + D.29.x + D.30.x)
 
-- [ ] **NON** ho modificato direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
+- [ ] **NON** ho modificato i blocchi `<!-- AGGREGATE-* -->` di `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
+- [ ] Ho allineato le **sezioni legacy** dei file globali che la mia PR rende false (vedi §"Chi può scrivere cosa nei file globali")
 - [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
 - [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
 - [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
@@ -914,7 +938,12 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.15 — 'Dimensione totale' inventory normalizzata CRLF->LF (issue #88, follow-up di #86). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata sul contenuto decodificato normalizzato a LF invece che sui raw byte del file: `Get-Content -Raw -Encoding UTF8` + `[System.Text.Encoding]::UTF8.GetByteCount(($text -replace "`r`n","`n"))`. Conseguenza: la dimensione coincide con `git cat-file -s HEAD:<file>` su qualsiasi piattaforma, e `aggregate-state.ps1 --check` su Windows (dove 14 file di testo sono `core.autocrlf=true` → CRLF sul disco) non segnala piu un drift spurio di ~2.3 KB rispetto a origin/main (committed LF). `scripts/test-aggregate-determinism.sh` esteso con T8 (3 assert → 15 totali) come regression dedicata; il warning `#63` (PS 5.1 vs 7 incompatibilita residue) resta solo per eventuali altri blocchi.
+*Ultimo aggiornamento: v1.16 — ownership *blocchi aggregati vs sezioni legacy* nei file globali (Sessione 38, issue #90). La regola "NON modificare `docs/INDEX.md`, `SESSIONS.md`, `11-BACKLOG.md`, `BUNDLE.md`" era applicata all'intero file, così le sezioni legacy non aggregate (prose, tabelle statiche, "Prossimo step tecnico") invecchiavano senza che nessun gate se ne accorgesse: al 2026-10-21 `11-BACKLOG.md` dichiarava 0.4/0.6/0.7 `⬚ TODO` mesi dopo il loro merge, e `INDEX.md` puntava a issue già chiuse. Ora:
+- §"🔄 Lazy-state aggregation" → nuova sottosezione **"Chi può scrivere cosa nei file globali" (D.38.1)**: i blocchi `<!-- AGGREGATE-* -->` restano vietati a mano (con il perché), le sezioni legacy vanno **allineate nella stessa PR** che cambia i fatti che dichiarano, con l'anti-pattern della duplicazione
+- §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge" + §"🔄 Lazy-state aggregation → Checklist PR aggiuntiva": le tre voci "NON ho modificato direttamente …" diventano "NON ho modificato i **blocchi** `AGGREGATE-*`", con la voce nuova sull'allineamento delle sezioni legacy
+- §"🚀 Primo task": ordine worktree→claim (coerente con la validazione di `setup-worktree.ps1`, che rifiuta un'issue già `in-progress` — incoerenza segnalata in S37, lesson 37-6)
+
+*Precedente v1.15 — 'Dimensione totale' inventory normalizzata CRLF->LF (issue #88, follow-up di #86). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata sul contenuto decodificato normalizzato a LF invece che sui raw byte del file: `Get-Content -Raw -Encoding UTF8` + `[System.Text.Encoding]::UTF8.GetByteCount(($text -replace "`r`n","`n"))`. Conseguenza: la dimensione coincide con `git cat-file -s HEAD:<file>` su qualsiasi piattaforma, e `aggregate-state.ps1 --check` su Windows (dove 14 file di testo sono `core.autocrlf=true` → CRLF sul disco) non segnala piu un drift spurio di ~2.3 KB rispetto a origin/main (committed LF). `scripts/test-aggregate-determinism.sh` esteso con T8 (3 assert → 15 totali) come regression dedicata; il warning `#63` (PS 5.1 vs 7 incompatibilita residue) resta solo per eventuali altri blocchi.
 
 *Precedente v1.14 — 'Dimensione totale' inventory esclude i file aggregator-managed (issue #86, opt A).
 
@@ -952,6 +981,7 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 - Cross-ref consolidati: `auto-state-aggregate.yml` esplicitamente referenziato in Post-merge + Lazy-state sections (prima implicito)
 
 *Precedente v1.6 Sessione 21 (2026-10-17): refactor catena (D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning); nuova sezione §"📤 Post-merge actions"; §"🚀 Primo task" step 6 semplificato (GH Action automatizza label transitions); §"Checklist di sincronizzazione" aggiornata (doc-sync preferito nel branch, no race su main)*
+
 
 
 ===== FILE: README.md =====
@@ -1242,18 +1272,20 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 14 (v1.2.5) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment · v1.2.5: Story 0.2 ✅ DONE, Story 0.3 sbloccata |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 38 (v1.6.0) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 19 (0001-0007) | Architecture Decision Records (0001-0003, 0005-0007; 0006 claim agenti, 0007 macchina a stati `status:*`) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 29 (0001-0008) | Architecture Decision Records (0001-0003, 0005-0008; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
+| 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 37 (Story 0.7, PR #64) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`) |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
 |------|-------|-------------|
+| [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.6 | Protocollo per agenti (Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.16 | Protocollo per agenti (Sessione 38: ownership *blocchi aggregati vs sezioni legacy*; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -1297,6 +1329,7 @@ Apache License
 | 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
 | 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
+| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1336,22 +1369,25 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **14**
+- Sessioni migrate in state/sessions: **15**
 - Stories migrate in state/stories: **5** (done: 5)
-- Ultima sessione migrata: **S37** - Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending)
+- Ultima sessione migrata: **S38** - Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti
 - Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
 <!-- AGGREGATE-INDEX-STATUS-END -->
 
-### Dettaglio (legacy, post Sessione 24, PR #22 mergata 2026-10-18)
-- **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.5.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
-- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
+### Dettaglio (legacy — allineato alla Sessione 38, issue #90)
+
+> **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
+
+- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.0, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 7 ADR in `13-ADR/` (0001-0003, 0005-0008)
+- **Documenti DRAFT**: 11 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v0.6
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟢 **Fase 0 tecnica: 5/7 story completate** — Story 0.1 (scaffold monorepo) merged (PR #2, squash `c0fb0a4`); Story 0.2 (schema DB e layer Dexie) merged in `main` (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅): 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms); Story 0.3 (Adapter Spotify) merged in `main` (PR #28, merge commit `3dc9654`, CI ✅): 90 passati / 1 todo (perf ≥50k `it.todo` su browser nativo); **Story 0.5 (PWA e service worker)** merged in `main` (PR #19, merge commit `0ebe8dad`, 2026-10-18T15:29:28Z, claim `kilo-HP-ELITEBOOK-3b3f`): `vite-plugin-pwa@^2.0.0` + Workbox (precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts); `useAppUpdate()` + `<UpdateBanner>` con prompt policy patch/minor/major (CTA "Più tardi" nascosta per major); manifest con icone 192/512/maskable/apple-touch generate da `scripts/generate-pwa-icons.mjs` (zero-deps, `node:zlib`); bundle 291 KB gzip 91 KB (budget 300 KB ✅); 33/33 test verdi; 4/4 AC verificati; Gate D.12.1 applicato nel branch. **Story 0.6 (i18n setup)** merged in `main` (PR #22, squash `06812d4` su `5235c88`, 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0`; `<T>` + `useT()` + `formatter.ts` (ICU plural) + `detector.ts` (localStorage→browser); IT/EN 185+185 voci; 8/8 test verdi; coverage 96%. Gate D.12.1 applicato nel branch. Story 0.4 (UI import) in attesa di 0.3 ✅; Story 0.7 (Operations runbook) in attesa di 0.2 ✅ + 0.5 ✅ + 0.6 ✅ → ora sbloccata.
+- **Implementazione**: 🟢 **Fase 0 tecnica completa: 7/7 story merged** — 0.1 scaffold (PR #2 `c0fb0a4`) · 0.2 schema DB Dexie (PR #4 `fa09b06`) · 0.3 adapter Spotify (PR #28 `3dc9654`) · 0.4 UI import onboarding (PR #71 `0a8e83f`) · 0.5 PWA e service worker (PR #19 `3fa3c0d`) · 0.6 i18n (PR #22 `5235c88`) · 0.7 operations runbook (PR #64 `b44420b`). Dettaglio per story in `docs/state/stories/` (fonte di verità) e `docs/18-DEV-LOG.md`.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
@@ -1361,10 +1397,11 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico**: tutte le difese S19 + S20 + S21 + S23 + S24 sono live e in use da ≥1 agente (2026-10-18T15:09Z): Story 0.6 i18n (#5, PR #22) **merged** in main; Story 0.5 PWA (#7, PR #19) in risoluzione conflitti (cherry-pick `44c79d1` su `5235c88` con S23+S24 pre-integrate da agenti paralleli). Story 0.3 Adapter Spotify (#6) resta l'unica `agent-ready` libera + WIP stashato di 21 file di `kilo-HP-ELITEBOOK-jdtz` (issue `needs-spec` #23 aperta per decisione Boss). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) richiede 0.2 ✅ + 0.5 ✅ + 0.6 ✅ — tutti in attesa di Story 0.3 + 0.5 (PWA). Pending Boss: (1) merge di PR #19 dopo questo commit, (2) decisione su issue #23 (rilascio claim #6 + adozione stash).
+- **Prossimo step tecnico** (aggiornato alla Sessione 38): la Fase 0 è chiusa e non ci sono issue aperte su GitHub. Il prossimo blocco è la **Fase 1 (EPIC 1 — Import core)**, bloccata su un prerequisito di specifica: le Story 1.1 (YouTube Music), 1.2 (Apple Music) e 1.3 (Last.fm + ListenBrainz) possono diventare `agent-ready` solo dopo aver scritto e approvato le rispettive specifiche adapter in `docs/03-ADAPTERS/` (oggi contiene solo `SPEC-TEMPLATE.md` e `spotify.md`; `01-PLATFORMS.md` è ancora 🟡 DRAFT). Ordine: (1) spec adapter YouTube Music + Apple Music + Last.fm/ListenBrainz, (2) fixture in `fixtures/synthetic-history/` per i nuovi adapter, (3) issue `agent-ready` per 1.1/1.2/1.3 (parallele). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
+
 
 
 ===== FILE: docs/SESSIONS.md =====
@@ -3600,6 +3637,90 @@ Cause identificate:
 - **#43** — `needs-spec` sulla promozione dei doc di design, chiusa `wontdo` perché superata dai fatti (Story 0.4 implementata comunque su spec DRAFT)
 ```
 
+### Sessione 38 - Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti
+
+- **Data**: 2026-10-21
+- **Stato**: 🟡
+- **PR**: #91
+- **Claim**: `kilo-hp-elitebook-36a7`
+
+```
+
+# Sessione 38 — Allineamento della documentazione di stato legacy
+
+## Sintesi
+
+Chiusura del gap che S37 (issue #84) aveva dichiarato aperto: la tabella "Stato di avanzamento" di `docs/11-BACKLOG.md` e la sezione "Dettaglio (legacy)" di `docs/INDEX.md` dichiaravano fatti falsi (0.4/0.6/0.7 `⬚ TODO` mesi dopo il merge; "Prossimo step tecnico" che puntava a issue #19 e #23, entrambe chiuse). Oltre all'allineamento, la sessione **rimuove la causa strutturale**: la regola "NON modificare i file globali" era applicata all'intero file, vietando anche la correzione delle sezioni legacy che nessun generatore aggiorna. La nuova sottosezione di `AGENTS.md` distingue i due casi e rende l'allineamento delle sezioni legacy un obbligo di PR.
+
+## Trigger
+
+Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che cosa occorre fare adesso" per procedere con lo sviluppo. La lettura della documentazione ha rivelato che le fonti di stato consultabili (`INDEX.md`, `11-BACKLOG.md`) non riflettevano `main`: la Fase 0 risultava a 5/7 mentre le 7 story erano merged.
+
+## Drift trovato e corretto
+
+| Elemento | Prima | Dopo | Fonte di verità |
+|---|---|---|---|
+| `11-BACKLOG.md` tabella di stato | 0.4, 0.6, 0.7 `⬚ TODO`; 0.1-0.3, 0.5 con note obsolete | rimossa: la tabella elenca **solo** la roadmap EPIC 1-6 | blocco `AGGREGATE-STORIES-*` |
+| `11-BACKLOG.md` righe `**Stato**:` | presenti solo su 0.1, 0.2, 0.5 | presenti su tutte e 7 le story con PR + merge commit | `docs/state/stories/` |
+| `INDEX.md` "Dettaglio (legacy)" | "5/7 story completate", conteggi documenti errati, "Prossimo step tecnico" del 2026-10-18 con issue chiuse | 7/7, conteggi ricalcolati (7 APPROVED + 7 ADR, 11 DRAFT), prossimo step = EPIC 1 con prerequisito di specifica | `git log main` + `gh pr list` |
+| `INDEX.md` tabelle documenti | `11` a v1.2.5, `13-ADR` a 0001-0007, `AGENTS.md` a v1.6, `16-OPERATIONS.md` assente | allineate; `16-OPERATIONS.md` aggiunto; `docs/state/` aggiunto ai documenti di supporto | header dei file |
+| `AGENTS.md` | v1.13 (header fermo a S36 mentre il footer era a v1.15) | v1.16 | — |
+
+## Modifiche
+
+1. `docs/11-BACKLOG.md` — tabella "Stato di avanzamento" → "roadmap delle story non ancora completate" (EPIC 1-6), con intestazione che dichiara la fonte di verità e la regola per gli agenti; righe `**Stato**:` su 0.3, 0.4, 0.6, 0.7 e sistemata quella di 0.5; changelog v1.6.0
+2. `docs/INDEX.md` — sezione "Dettaglio (legacy)" riscritta con nota di ownership; conteggi APPROVED/DRAFT ricalcolati; "Implementazione" 7/7; "Prossimo step tecnico" aggiornato a EPIC 1; tabelle documenti allineate + `16-OPERATIONS.md` e `docs/state/`
+3. `AGENTS.md` **v1.16** — nuova sottosezione §"Chi può scrivere cosa nei file globali" (D.38.1); tre voci di checklist riformulate da "file" a "blocchi `AGGREGATE-*`" + nuova voce sull'allineamento delle sezioni legacy; tabella di sincronizzazione al merge riscritta; §"🚀 Primo task" con ordine worktree→claim
+4. `.github/pull_request_template.md` — stessa regola nella sezione "Documentazione di stato" + voce sul worktree/claim
+5. `docs/state/sessions/38-doc-sync-legacy.md` (**nuovo**) — questa entry
+6. `docs/BUNDLE.md` — rigenerato
+
+## Decisioni (D.38.x)
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.38.1 | Distinguere **blocchi aggregati** e **sezioni legacy** nei file globali, con due regole diverse | la proibizione assoluta lasciava le sezioni legacy invecchiare in silenzio; nessun gate le copre, perché non hanno generatore |
+| D.38.2 | La tabella di stato del backlog elenca **solo le story non completate** | duplicare in una sezione legacy ciò che il blocco aggregato già fornisce crea una seconda fonte di verità che invecchia — è la causa diretta del drift |
+| D.38.3 | Allineare le righe `**Stato**:` delle sezioni Story | convenzione già presente su 0.1/0.2/0.5: le story senza riga erano indistinguibili da quelle non implementate |
+| D.38.4 | Correggere anche l'ordine worktree→claim in `AGENTS.md` | `setup-worktree.ps1` rifiuta un'issue con `in-progress`: la procedura documentata era ineffettuabile senza aggirare la validazione (lesson 37-6) |
+| D.38.5 | Sessione dichiarata `🟡` con `pr: 0` | schema dello stato: `🟡` = merge pendente; `pr:` compilato dopo `gh pr create` (stesso criterio di D.37.4) |
+| D.38.6 | I blocchi aggregati vengono **rigenerati dal generatore nella stessa PR** (non a mano), invece di lasciarli stale fino al workflow post-merge | `aggregate-state.ps1` riscrive solo le regioni tra marker: le modifiche alle sezioni legacy sono intatte. Così la checklist "exit 0" vale davvero e il reviewer legge documenti coerenti. Se in futuro il parallelismo lo rendesse sconsigliato, basta omettere la write: il GH Action `auto-state-aggregate` colma il drift al merge |
+
+## Gap chiusi
+
+- ~~Tabella legacy "Stato di avanzamento" con story stale~~ (aperto in S37, D.37.2)
+- ~~Nessun modo per gli agenti di correggere le sezioni legacy~~ (la regola li vietava esplicitamente)
+
+## Gap ancora aperti
+
+- **Nessun gate intercetta il drift semantico**: `aggregate-state --check` confronta l'agregatore con i suoi sorgenti, non i sorgenti con GitHub. L'audit `docs/state/` vs `gh pr list` resta manuale (proposto in S37, non risolto)
+- **Inventario `$files` incompleto**: `0.3`, `0.5`, `0.6` e le sessioni non sono nel bundle pur essendo sorgenti atomiche (D.37.3)
+- **Story 0.1 e 0.2** non hanno ancora un `docs/state/stories/*.md` (migration incrementale)
+
+## Verifica
+
+- `scripts/aggregate-state.ps1` → applicati 5 blocchi, poi `--check` → **exit 0** (tutti `[OK]`)
+- `scripts/generate-bundle.ps1` → rigenerato (58 file), poi `--check` → **exit 0**
+- Nessun file applicativo (`.ts`/`.tsx`) toccato e `scripts/generate-bundle.ps1` è PowerShell (non coperto da ESLint): `lint`/`typecheck`/`test`/`build` non sono impattati
+- `bash scripts/test-aggregate-determinism.sh` non eseguito in locale: `bash` non disponibile su questa macchina (stesso limite di S37); il gate è bloccante in CI e gira su ogni PR
+- Marker aggregati: verificato che nessun file contenga marker duplicati (un riferimento in prosa a `AGGREGATE-STORIES-START` faceva fallire il check perche il matching usa il primo match — lesson 38-5)
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 38-1 | Una regola assoluta ("non toccare questo file") applicata senza eccezioni trasforma gli strumenti di auto-correzione in un divieto: l'agente non può nemmeno correggere un fatto obsoleto | ✅ risolto: due regole distinte per contenuto aggregato e legacy |
+| 38-2 | Il drift più pericoloso è quello che un gate verde non intercetta | ⚠️ resta manuale: da qui l'obbligo di allineamento in PR |
+| 38-3 | `setup-worktree.ps1` e `AGENTS.md` §"Primo task" imponevano ordini opposti (prima claim, poi worktree) | ✅ documentato l'ordine reale (worktree → claim) |
+| 38-4 | Istruire un agente "non modificare i file globali" senza dire *cosa* può modificare produce PR che dichiarano fatti falsi con il massimo delle buone maniere | ✅ checklist e template ora dicono esattamente quali sezioni toccare |
+| 38-5 | Scrivere un marker aggregato completo (`<!-- AGGREGATE-X-START -->`) in una prosa **rompe il check**: il matching usa il primo match e finisce per misurare dal punto sbagliato (`Trovato: 7137 chars`) | ✅ in prosa si cita `AGGREGATE-X-*`, mai il marker per esteso |
+
+## Cross-refs
+
+- **#90** — issue di questo lavoro (chiusa dalla PR)
+- **#84 / #85** — S37: riconciliazione di `docs/state/`; il gap chiuso qui è il primo dei "Gap aperti" di quella sessione
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -4674,6 +4795,95 @@ Schermate di onboarding ① Benvenuto → ② Privacy → ③ Import → ④ Pro
 PR #71 mergata in `main` (merge commit `0a8e83f2aaf90cb61862e0737417eb7ec8b63881`), issue #40 chiusa con `status:done`. Questo file è stato creato in issue #84: la story era merged ma assente da `docs/state/`, quindi l'aggregatore non la elencava nel backlog.
 
 Sblocca: nessuna story di Fase 0 (era l'ultima). Le prossime story sono EPIC 1 (1.1-1.5), EPIC 2 (2.1-2.4) ed EPIC 4 (4.1-4.3).
+
+
+===== FILE: docs/state/sessions/38-doc-sync-legacy.md =====
+
+---
+number: 38
+title: "Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti"
+date: 2026-10-21
+state: 🟡
+branch: feat/90-docs-allineare-la-documentazione-di-stat
+pr: 91
+claim: kilo-hp-elitebook-36a7
+cross_refs: [84, 90]
+tags: [docs, state, adr-0008, housekeeping]
+---
+
+# Sessione 38 — Allineamento della documentazione di stato legacy
+
+## Sintesi
+
+Chiusura del gap che S37 (issue #84) aveva dichiarato aperto: la tabella "Stato di avanzamento" di `docs/11-BACKLOG.md` e la sezione "Dettaglio (legacy)" di `docs/INDEX.md` dichiaravano fatti falsi (0.4/0.6/0.7 `⬚ TODO` mesi dopo il merge; "Prossimo step tecnico" che puntava a issue #19 e #23, entrambe chiuse). Oltre all'allineamento, la sessione **rimuove la causa strutturale**: la regola "NON modificare i file globali" era applicata all'intero file, vietando anche la correzione delle sezioni legacy che nessun generatore aggiorna. La nuova sottosezione di `AGENTS.md` distingue i due casi e rende l'allineamento delle sezioni legacy un obbligo di PR.
+
+## Trigger
+
+Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che cosa occorre fare adesso" per procedere con lo sviluppo. La lettura della documentazione ha rivelato che le fonti di stato consultabili (`INDEX.md`, `11-BACKLOG.md`) non riflettevano `main`: la Fase 0 risultava a 5/7 mentre le 7 story erano merged.
+
+## Drift trovato e corretto
+
+| Elemento | Prima | Dopo | Fonte di verità |
+|---|---|---|---|
+| `11-BACKLOG.md` tabella di stato | 0.4, 0.6, 0.7 `⬚ TODO`; 0.1-0.3, 0.5 con note obsolete | rimossa: la tabella elenca **solo** la roadmap EPIC 1-6 | blocco `AGGREGATE-STORIES-*` |
+| `11-BACKLOG.md` righe `**Stato**:` | presenti solo su 0.1, 0.2, 0.5 | presenti su tutte e 7 le story con PR + merge commit | `docs/state/stories/` |
+| `INDEX.md` "Dettaglio (legacy)" | "5/7 story completate", conteggi documenti errati, "Prossimo step tecnico" del 2026-10-18 con issue chiuse | 7/7, conteggi ricalcolati (7 APPROVED + 7 ADR, 11 DRAFT), prossimo step = EPIC 1 con prerequisito di specifica | `git log main` + `gh pr list` |
+| `INDEX.md` tabelle documenti | `11` a v1.2.5, `13-ADR` a 0001-0007, `AGENTS.md` a v1.6, `16-OPERATIONS.md` assente | allineate; `16-OPERATIONS.md` aggiunto; `docs/state/` aggiunto ai documenti di supporto | header dei file |
+| `AGENTS.md` | v1.13 (header fermo a S36 mentre il footer era a v1.15) | v1.16 | — |
+
+## Modifiche
+
+1. `docs/11-BACKLOG.md` — tabella "Stato di avanzamento" → "roadmap delle story non ancora completate" (EPIC 1-6), con intestazione che dichiara la fonte di verità e la regola per gli agenti; righe `**Stato**:` su 0.3, 0.4, 0.6, 0.7 e sistemata quella di 0.5; changelog v1.6.0
+2. `docs/INDEX.md` — sezione "Dettaglio (legacy)" riscritta con nota di ownership; conteggi APPROVED/DRAFT ricalcolati; "Implementazione" 7/7; "Prossimo step tecnico" aggiornato a EPIC 1; tabelle documenti allineate + `16-OPERATIONS.md` e `docs/state/`
+3. `AGENTS.md` **v1.16** — nuova sottosezione §"Chi può scrivere cosa nei file globali" (D.38.1); tre voci di checklist riformulate da "file" a "blocchi `AGGREGATE-*`" + nuova voce sull'allineamento delle sezioni legacy; tabella di sincronizzazione al merge riscritta; §"🚀 Primo task" con ordine worktree→claim
+4. `.github/pull_request_template.md` — stessa regola nella sezione "Documentazione di stato" + voce sul worktree/claim
+5. `docs/state/sessions/38-doc-sync-legacy.md` (**nuovo**) — questa entry
+6. `docs/BUNDLE.md` — rigenerato
+
+## Decisioni (D.38.x)
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.38.1 | Distinguere **blocchi aggregati** e **sezioni legacy** nei file globali, con due regole diverse | la proibizione assoluta lasciava le sezioni legacy invecchiare in silenzio; nessun gate le copre, perché non hanno generatore |
+| D.38.2 | La tabella di stato del backlog elenca **solo le story non completate** | duplicare in una sezione legacy ciò che il blocco aggregato già fornisce crea una seconda fonte di verità che invecchia — è la causa diretta del drift |
+| D.38.3 | Allineare le righe `**Stato**:` delle sezioni Story | convenzione già presente su 0.1/0.2/0.5: le story senza riga erano indistinguibili da quelle non implementate |
+| D.38.4 | Correggere anche l'ordine worktree→claim in `AGENTS.md` | `setup-worktree.ps1` rifiuta un'issue con `in-progress`: la procedura documentata era ineffettuabile senza aggirare la validazione (lesson 37-6) |
+| D.38.5 | Sessione dichiarata `🟡` con `pr: 0` | schema dello stato: `🟡` = merge pendente; `pr:` compilato dopo `gh pr create` (stesso criterio di D.37.4) |
+| D.38.6 | I blocchi aggregati vengono **rigenerati dal generatore nella stessa PR** (non a mano), invece di lasciarli stale fino al workflow post-merge | `aggregate-state.ps1` riscrive solo le regioni tra marker: le modifiche alle sezioni legacy sono intatte. Così la checklist "exit 0" vale davvero e il reviewer legge documenti coerenti. Se in futuro il parallelismo lo rendesse sconsigliato, basta omettere la write: il GH Action `auto-state-aggregate` colma il drift al merge |
+
+## Gap chiusi
+
+- ~~Tabella legacy "Stato di avanzamento" con story stale~~ (aperto in S37, D.37.2)
+- ~~Nessun modo per gli agenti di correggere le sezioni legacy~~ (la regola li vietava esplicitamente)
+
+## Gap ancora aperti
+
+- **Nessun gate intercetta il drift semantico**: `aggregate-state --check` confronta l'agregatore con i suoi sorgenti, non i sorgenti con GitHub. L'audit `docs/state/` vs `gh pr list` resta manuale (proposto in S37, non risolto)
+- **Inventario `$files` incompleto**: `0.3`, `0.5`, `0.6` e le sessioni non sono nel bundle pur essendo sorgenti atomiche (D.37.3)
+- **Story 0.1 e 0.2** non hanno ancora un `docs/state/stories/*.md` (migration incrementale)
+
+## Verifica
+
+- `scripts/aggregate-state.ps1` → applicati 5 blocchi, poi `--check` → **exit 0** (tutti `[OK]`)
+- `scripts/generate-bundle.ps1` → rigenerato (58 file), poi `--check` → **exit 0**
+- Nessun file applicativo (`.ts`/`.tsx`) toccato e `scripts/generate-bundle.ps1` è PowerShell (non coperto da ESLint): `lint`/`typecheck`/`test`/`build` non sono impattati
+- `bash scripts/test-aggregate-determinism.sh` non eseguito in locale: `bash` non disponibile su questa macchina (stesso limite di S37); il gate è bloccante in CI e gira su ogni PR
+- Marker aggregati: verificato che nessun file contenga marker duplicati (un riferimento in prosa a `AGGREGATE-STORIES-START` faceva fallire il check perche il matching usa il primo match — lesson 38-5)
+
+## Lesson learned
+
+| # | Sintomo | Stato |
+|---|---------|-------|
+| 38-1 | Una regola assoluta ("non toccare questo file") applicata senza eccezioni trasforma gli strumenti di auto-correzione in un divieto: l'agente non può nemmeno correggere un fatto obsoleto | ✅ risolto: due regole distinte per contenuto aggregato e legacy |
+| 38-2 | Il drift più pericoloso è quello che un gate verde non intercetta | ⚠️ resta manuale: da qui l'obbligo di allineamento in PR |
+| 38-3 | `setup-worktree.ps1` e `AGENTS.md` §"Primo task" imponevano ordini opposti (prima claim, poi worktree) | ✅ documentato l'ordine reale (worktree → claim) |
+| 38-4 | Istruire un agente "non modificare i file globali" senza dire *cosa* può modificare produce PR che dichiarano fatti falsi con il massimo delle buone maniere | ✅ checklist e template ora dicono esattamente quali sezioni toccare |
+| 38-5 | Scrivere un marker aggregato completo (`<!-- AGGREGATE-X-START -->`) in una prosa **rompe il check**: il matching usa il primo match e finisce per misurare dal punto sbagliato (`Trovato: 7137 chars`) | ✅ in prosa si cita `AGGREGATE-X-*`, mai il marker per esteso |
+
+## Cross-refs
+
+- **#90** — issue di questo lavoro (chiusa dalla PR)
+- **#84 / #85** — S37: riconciliazione di `docs/state/`; il gap chiuso qui è il primo dei "Gap aperti" di quella sessione
 
 
 ===== FILE: scripts/aggregate-state.ps1 =====
@@ -8793,7 +9003,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.5.0 · Sessione 22 (2026-10-18) · aggiunti 4/4 task ✅ + 4/4 AC ✅ a Story 0.5 (PR #19); changelog v1.5.0
+> Status: 🟢 APPROVED · Versione 1.6.0 · Sessione 38 (2026-10-21, issue #90) · allineamento tabella di stato legacy (fonte di verità = blocco `AGGREGATE-STORIES-*`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -8890,6 +9100,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.3 — Adapter Spotify base `[PHASE-0]` `[AREA:adapter]` `[PRI:B]` `[SIZE:L]` `[DEP:0.2]`
 
+**Stato**: ✅ **DONE** — merged in `main` (PR #28, merge commit `3dc9654`, 2026-10-18)
+
 **Descrizione**: Implementare l'adapter Spotify completo secondo `03-ADAPTERS/spotify.md`.
 
 **Task**:
@@ -8915,6 +9127,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.4 — UI import (onboarding) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:M]` `[DEP:0.3]`
 
+**Stato**: ✅ **DONE** — merged in `main` (PR #71, merge commit `0a8e83f`, 2026-10-20)
+
 **Descrizione**: Schermate ① Benvenuto → ② Privacy → ③ Import → ④ Processing.
 
 **Task**:
@@ -8939,7 +9153,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.5 — PWA e service worker `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:M]` `[DEP:0.1]`
 
-**Stato**: 🟡 **IN PROGRESS** → ✅ **DONE** (post-merge PR #19, claim `kilo-HP-ELITEBOOK-3b3f`)
+**Stato**: ✅ **DONE** (post-merge PR #19, merge commit `3fa3c0d`, 2026-10-18) · 4/4 task + 4/4 AC · bundle 291 KB gzip 91 KB (budget 300 KB) · claim `kilo-HP-ELITEBOOK-3b3f`
 **Branch**: `feat/7-pwa-and-service-worker` (in review → merged → eliminata dopo merge)
 **Registro**: `docs/18-DEV-LOG.md` §11 entry Story 0.5 (5 problemi/fix/lesson 0.5-1..5)
 **Pitfalls**: 0.5-1 `getByText` substring ambiguity → `getByRole('button', { name })`; 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` esplicito; 0.5-3 `it.each` non preserva tuple types; 0.5-4 PNG zero-deps con `node:zlib`; 0.5-5 virtual module `vite-plugin-pwa` aliasato in jsdom
@@ -8967,6 +9181,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.6 — Setup i18n (i18next) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:S]` `[DEP:0.1]`
 
+**Stato**: ✅ **DONE** — merged in `main` (PR #22, merge commit `5235c88`, 2026-10-18)
+
 **Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
 
 **Task**:
@@ -8987,6 +9203,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 ---
 
 ### Story 0.7 — Operations runbook + manutenzione `[PHASE-0]` `[AREA:devops]` `[PRI:I]` `[SIZE:M]` `[DEP:0.2, 0.5]`
+
+**Stato**: ✅ **DONE** — merged in `main` (PR #64, merge commit `b44420b`, 2026-10-20) · runbook pubblicato in `docs/16-OPERATIONS.md`
 
 **Descrizione**: Documentare in dettaglio le operazioni di update management (`05§11`) e DB maintenance (`05§12`) nel nuovo file `docs/16-OPERATIONS.md`. Includere runbook per l'operatore (sviluppatore che mantiene il progetto) su diagnosi e remediation di problemi noti.
 
@@ -9272,26 +9490,29 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 **Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
-## Stato di avanzamento (snapshot implementazione)
+## Stato di avanzamento — roadmap delle story non ancora completate
 
-> Aggiornato al **2026-10-17** (post-merge PR #4). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> **La fonte di verità per le story completate è il blocco aggregato `AGGREGATE-STORIES-*` in fondo a questo file**, generato da `scripts/aggregate-state.ps1` a partire da `docs/state/stories/*.md` (ADR-0008).
+>
+> Questa tabella elenca **solo le story ancora da implementare**. Non duplicare qui le story già `done`: la duplicazione è stata la causa del drift corretto in Sessione 38 (issue #90), che dichiarava 0.4/0.6/0.7 come `⬚ TODO` mesi dopo il loro merge.
+>
+> **Regola per gli agenti**: quando una story passa a `done`, si rimuove da questa tabella e si aggiorna (o si crea) il suo `docs/state/stories/<id>-<slug>.md` — l'aggregatore farà comparire la story nel blocco aggregato al merge. Non modificare mai a mano il blocco aggregato.
 
-| EPIC | Story | Stato | Branch | Note |
-|------|-------|-------|--------|------|
-| 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
-| 0 | 0.2 Schema DB Dexie | ✅ DONE | — (merged in `main`) | 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. **PR #4 merged `fa09b06` (2026-10-17)**; CI su main ✅. |
-| 0 | 0.3 Adapter Spotify | ✅ DONE | #28 | merged PR #28 `3dc9654` (main, 2026-10-18) |
-| 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
-| 0 | 0.5 PWA / service worker | 🟡 IN REVIEW → ✅ DONE | — (merged in `main`) | 4/4 task + 4/4 AC verificati; PR #19 aperta; bundle 227.81 KB gzip 71.36 KB; dettagli in `18-DEV-LOG` §11; claim `kilo-HP-ELITEBOOK-3b3f` |
-| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
-| 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
-| 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
-| 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
-| 1 | 1.5 Scrobbling hub | ⬚ TODO | — | — |
-| 2-3 | 2.x, 3.x analisi + UI | ⬚ TODO | — | dipendono da 0.2 |
-| 4 | 4.x enrichment | ⬚ TODO | — | dipendono da 0.2 |
-| 5 | 5.x privacy | ⬚ TODO | — | — |
-| 6 | 6.1 Upgrade stack | ⬚ SCHEDULED (post-impl) | — | D.10.2: solo a implementazione conclusa |
+| EPIC | Story | Stato | Note |
+|------|-------|-------|------|
+| 1 | 1.1 Adapter YouTube Music | ⬚ TODO | 0.3 ✅ — **spec adapter mancante** in `docs/03-ADAPTERS/`: blocca `agent-ready` (vedi `01-PLATFORMS.md` §3.2) |
+| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec adapter mancante (`01-PLATFORMS.md` §3.3) |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8) |
+| 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
+| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
+| 5 | 5.x privacy | ⬚ TODO | — |
+| 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
+
+**EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
+
+> **Aggiornato al 2026-10-21** (Sessione 38, issue #90). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
@@ -9318,6 +9539,7 @@ Ogni story deve avere label GitHub:
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
 | 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |
 | 1.5.0 | 2026-10-18 (post-merge Sessione 22) | **Story 0.5 PWA e service worker** ora ✅ DONE: `useAppUpdate()` + `<UpdateBanner/>` + Workbox precache + NetworkFirst `/version.json` + CacheFirst Google Fonts + manifest con icone 192/512/maskable/apple-touch (generate via `scripts/generate-pwa-icons.mjs`, zero deps); `apps/web/index.html` esteso con theme-color, manifest link, apple-touch-icon; PR #19 (aperta) chiude #7; dettagli in `18-DEV-LOG §11` |
+| 1.6.0 | Sessione 38 (2026-10-21, issue #90) | **Allineamento della documentazione di stato legacy** (chiude il gap aperto in Sessione 38 di S37, D.37.2): la tabella "Stato di avanzamento" non duplica più le story `done` (fonte di verità = blocco `AGGREGATE-STORIES-*`) ed elenca solo la roadmap EPIC 1-6; allineate le righe `**Stato**` delle sezioni Story 0.3, 0.4, 0.5, 0.6, 0.7 (prima mancanti o stale); `AGENTS.md` v1.16 introduce la regola di ownership *blocchi aggregati vs sezioni legacy* |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -14087,8 +14309,10 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 
 ### Documentazione di stato (ADR-0008 V1 + V2)
 
-- [ ] **NON** ho modificato direttamente `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/BUNDLE.md` (regola ADR-0008: solo `docs/state/<propria>/*`)
-- [ ] Se ho cambiato uno di questi file per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
+- [ ] **NON** ho modificato i blocchi `<!-- AGGREGATE-* -->` di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
+- [ ] Se ho cambiato un blocco aggregato per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
+- [ ] **Ho allineato le sezioni legacy** dei file globali che questa PR rende false: conteggi/versione/"Prossimo step tecnico" in `docs/INDEX.md`, tabella "roadmap delle story non ancora completate" e righe `**Stato**:` in `docs/11-BACKLOG.md` (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali")
+- [ ] Se ho aggiunto o rimosso un file in `docs/`, ho aggiornato la tabella documenti di `docs/INDEX.md` e l'array `$files` di `scripts/generate-bundle.ps1`
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` exit 0
 - [ ] `pwsh scripts/aggregate-state.ps1 --check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
 
@@ -14101,7 +14325,7 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 ### Git workflow
 
 - [ ] Branch name: `feat/<N>-<desc>` o `fix/<N>-<desc>` (NO `main` direttamente)
-- [ ] Lavoro eseguito in worktree dedicata: `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" in AGENTS.md)
+- [ ] Worktree creata **prima** del claim: `pwsh scripts/setup-worktree.ps1 <N>` (lo script rifiuta un'issue già `in-progress`), poi claim con `in-progress` + commento `claim:` (vedi §"🌳 Worktree workflow" e §"🎫 Presa in carico delle story" in AGENTS.md)
 - [ ] Working tree pulito (no modifiche tracked non committate, vedi pre-commit hook D3)
 - [ ] Push early: il branch e stato pushato subito dopo `git checkout -b` (D.20.2)
 - [ ] Commit messages: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
