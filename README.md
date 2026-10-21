@@ -14,21 +14,20 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 
 ## 🏗️ Stato del progetto
 
-**Fase 0 tecnica avviata** (2026-10-16). Il monorepo esiste ed è operativo; le feature di prodotto arriveranno con le story 0.2+.
+EPIC 0 (Fase 0 tecnica) è completo 7/7: monorepo + toolchain + schema DB + adapter Spotify + UI import + PWA + i18n + operations runbook. Lo **stato globale** corrente è gestito dai blocchi aggregati di `docs/INDEX.md` (`<!-- AGGREGATE-INDEX-STATUS-* -->`) e di `docs/11-BACKLOG.md` (`<!-- AGGREGATE-STORIES-* -->`) — quelli, e non questo README, sono la **fonte di verità** per `status`, conteggi e roadmap. La sezione `11-BACKLOG.md` §"Stato di avanzamento — roadmap delle story non ancora completate" elenca cosa manca.
 
-**Cosa c'è oggi** (branch `feat/0.1-monorepo-setup`):
-- Monorepo Turborepo: `apps/web` (@ls/web), `packages/core` (@ls/core), `packages/ui` (@ls/ui), `packages/config` (@ls/config)
-- Toolchain: pnpm 9, Node 20+, TypeScript 5.6+, ESLint 9, Prettier 3, Vitest 3, Playwright 1.49+
-- CI GitHub Actions (lint + typecheck + test + build)
-- Scaffold minimo: Logger in `@ls/core`, PlatformId enum, componente Button in `@ls/ui`, App skeleton in `@ls/web`
-- Documentazione completa + spec per tutte le story 0.2-6.1
+### Prossima story
 
-**Prossima sbloccata**: Story 0.2 (Schema DB Dexie) — vedi `docs/11-BACKLOG.md`.
+<!-- AGGREGATE-NEXT-STEP-START -->
 
-**Storico**:
-- S0-S9: progettazione completa (audit 2026-10-15 chiude 9 incongruenze critiche + 13 medie)
-- S10: policy versioni toolchain (D.10.1/D.10.2, upgrade a fine implementazione)
-- S11: implementazione Story 0.1 (scaffold monorepo + toolchain), 8 problemi risolti documentati in `18-DEV-LOG.md`
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+**Prossima story da implementare**: **1.1** â€” Adapter YouTube Music (priority `I`, vedi `docs/11-BACKLOG.md`).
+
+Sorgente: `docs/state/stories/1.1-adapter-youtube-music.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` Â§"PrioritÃ  di lavorazione per agenti").
+
+<!-- AGGREGATE-NEXT-STEP-END -->
 
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)

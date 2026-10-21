@@ -172,13 +172,19 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/28-pr-template-and-branch-protection.md` | ✅ migrata | entry S28 (issue #51, PR template + branch protection) |
 | `state/sessions/30-crlf-and-workflow-fix.md` | ✅ migrata | entry S30 (issue #58, CRLF + workflow if:always) |
 | `state/sessions/31-agents-md-cleanup.md` | ✅ migrata | entry S31 (cleanup AGENTS.md v1.9, audit workflow) |
+| `state/stories/0.1-monorepo-setup.md` | ✅ migrata | da Story 0.1 BACKLOG + 18-DEV-LOG §4 (issue #127, ADR-0008 V3) |
+| `state/stories/0.2-schema-db-dexie.md` | ✅ migrata | da Story 0.2 BACKLOG + 18-DEV-LOG §6 (issue #127, ADR-0008 V3) |
 | `state/stories/0.5-pwa.md` | ✅ migrata | da Story 0.5 BACKLOG + 18-DEV-LOG §11 |
 | `state/stories/0.6-i18n.md` | ✅ migrata | da Story 0.6 BACKLOG + 18-DEV-LOG §12 |
 | `state/stories/0.4-ui-import.md` | ✅ migrata | da PR #71 (Sessione 37, issue #84) |
+| `state/stories/1.1-adapter-youtube-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.1" (issue #127, ADR-0008 V3): prima non-done, alimenta il blocco `AGGREGATE-NEXT-STEP-*` del README |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
-| Stories 0.1, 0.2 + 1.x+ | ⬚ TODO (migration incrementale) | restano in `docs/11-BACKLOG.md` legacy fino a V2 |
+| Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
+| Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 ha uno state file minimale per `AGGREGATE-NEXT-STEP-*`; le altre seguono con claim `agent-ready` |
 
-> **Nota (Sessione 37, issue #84)**: le 7 story della Fase 0 sono tutte `done` e le 5 con state file sono 0.3, 0.4, 0.5, 0.6, 0.7. Restano senza state file le story 0.1 e 0.2 (entrambe `done`, migration incrementale).
+> **Nota (Sessione 37, issue #84)**: le 7 story della Fase 0 sono tutte `done` e 6/7 hanno state file (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 — la 0.7 e 0.5/0.6/0.4 sono pre-V3, 0.1/0.2 aggiunte con issue #127, ADR-0008 V3, per alimentare il blocco `AGGREGATE-NEXT-STEP-*` del README).
+>
+> Story 1.1 ha il primo state file di una story non-done: serve ad alimentare il blocco `AGGREGATE-NEXT-STEP-*` introdotto con ADR-0008 V3 (issue #127). Le altre 1.x+ seguiranno il pattern "crea lo state file al primo claim `agent-ready`" (migration incrementale).
 
 Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
