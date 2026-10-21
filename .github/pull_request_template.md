@@ -1,7 +1,13 @@
 ## Issue
 
+Closes #
+
 - Issue: #
 - Tipo: [ ] story (adazione #N)  [ ] bug fix  [ ] docs  [ ] refactor  [ ] infra
+
+<!-- La riga "Closes #N" qui sopra DEVE restare nuda (niente backtick, niente casella di
+     checklist): solo così GitHub chiude l'issue al merge. Vedi AGENTS.md
+     §"Chiusura al merge: campo Closes #N (obbligatorio)". -->
 
 ## Checklist di auto-revisione
 
@@ -31,7 +37,7 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 
 ### Issue tracking
 
-- [ ] Body PR include `Closes #N` (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub auto-close al merge
+- [ ] Body PR contiene la keyword di chiusura come **riga nuda** (`Closes #N`, non dentro backtick né checklist) — GitHub auto-close al merge
 - [ ] PR rimossa label `agent-ready` dall'issue + aggiunta `status:in-review` (vedi §"📦 Macchina a stati delle issue" in AGENTS.md)
 - [ ] Se l'issue aveva label `in-progress`, il comment `release:` verra postato dopo il merge (vedi §"📤 Post-merge actions")
 
