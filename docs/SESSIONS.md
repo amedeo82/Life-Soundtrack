@@ -2320,7 +2320,7 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #97
 - **Claim**: `kilo-HP-ELITEBOOK-guck`
 
 ```

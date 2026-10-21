@@ -4,7 +4,7 @@ title: "Specifica adapter YouTube Music (Story 1.1)"
 date: 2026-10-21
 state: 🟡
 branch: feat/96-ytmusic-adapter-spec
-pr: 0
+pr: 97
 claim: kilo-HP-ELITEBOOK-guck
 cross_refs: [96]
 tags: [docs, adapter, youtube-music, spec, phase-1]

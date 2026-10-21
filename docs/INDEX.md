@@ -82,7 +82,7 @@
 | 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
 | 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
-| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | - |
+| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 

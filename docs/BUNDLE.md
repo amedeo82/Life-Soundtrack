@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 13:16
+> Data: 2026-10-21 13:34
 > Totale file: 59
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -11,7 +11,7 @@
 
 - Totale file: 58 (incluso 3 file aggregator-managed)
 - Dimensione totale: 594.4 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 13:16
+- Ultima aggregazione: 2026-10-21 13:34
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1351,7 +1351,7 @@ Apache License
 | 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
 | 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
-| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | - |
+| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -3750,7 +3750,7 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #97
 - **Claim**: `kilo-HP-ELITEBOOK-guck`
 
 ```
