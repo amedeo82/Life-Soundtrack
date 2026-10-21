@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 16:12
+> Data: 2026-10-21 16:17
 > Totale file: 65
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -15548,12 +15548,39 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
-# Repo temporaneo con un sottoinsieme minimale dei file in $files
+# Estrae l'array $files da generate-bundle.ps1 e crea stub vuoti per ogni entry.
+# Necessario perche' generate-bundle.ps1 ha un check di "missing files" che esce 2
+# se l'$files contiene path non esistenti (test fixture-repo deve avere TUTTI i file
+# o il check fallirebbe per motivi sbagliati). D.117.4.
+seed_repo_files() {
+  local d="$1"
+  # Estrai i path tra virgolette dentro $files. Formato PowerShell:
+  #     "docs/INDEX.md",
+  #     "scripts/generate-bundle.ps1",
+  # Cattura sia le entry con virgola finale (lista) sia l'ultima senza.
+  grep -oE '^[[:space:]]*"([^"]+)"' "$SCRIPT" | sed -E 's/^[[:space:]]*"([^"]+)".*/\1/' | while read -r f; do
+    mkdir -p "$d/$(dirname "$f")"
+    touch "$d/$f"
+  done
+  # NB: NON sovrascrivere scripts/generate-bundle.ps1 qui. Il file e' gia'
+  # stato copiato in $d/scripts/generate-bundle.ps1 da make_repo prima della
+  # chiamata a seed_repo_files, e verra' eventualmente sovrascritto da make_repo
+  # stesso dopo (echo "x" etc.). Lasciare il contenuto originale del test source
+  # invariato in questa fase.
+  :
+}
+
+# Repo temporaneo con tutti i file in $files + il script da testare
 # (BUNDLE.md e' il file che NON deve essere mai riscritto in check mode).
 make_repo() {
   local d="$1"
   mkdir -p "$d/docs" "$d/scripts"
   cp "$SCRIPT" "$d/scripts/generate-bundle.ps1"
+  # Inietta stub per ciascun path in $files di generate-bundle.ps1, cosi'
+  # Test-Path($\file) ritorna true e lo script entra in --check mode
+  # invece di uscire 2 per "missing files" (issue #117, D.117.4).
+  # NON tocca scripts/generate-bundle.ps1 (gia' copiato sopra).
+  seed_repo_files "$d"
   (
     cd "$d" || exit 1
     git init -q -b main
