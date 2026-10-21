@@ -16,7 +16,7 @@
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 2 | SPEC-TEMPLATE + Spotify (altri TBD) |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 39 | SPEC-TEMPLATE + Spotify (🟢) + YouTube Music (🟡 DRAFT, S39) — Apple, Last.fm, ListenBrainz TBD |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 9 (v1.0) | Architettura tecnica generale |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
@@ -82,6 +82,7 @@
 | 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
 | 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
+| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -121,9 +122,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **15**
+- Sessioni migrate in state/sessions: **16**
 - Stories migrate in state/stories: **5** (done: 5)
-- Ultima sessione migrata: **S38** - Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti
+- Ultima sessione migrata: **S39** - Specifica adapter YouTube Music (Story 1.1)
 - Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -149,7 +150,7 @@
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 38): la Fase 0 è chiusa e non ci sono issue aperte su GitHub. Il prossimo blocco è la **Fase 1 (EPIC 1 — Import core)**, bloccata su un prerequisito di specifica: le Story 1.1 (YouTube Music), 1.2 (Apple Music) e 1.3 (Last.fm + ListenBrainz) possono diventare `agent-ready` solo dopo aver scritto e approvato le rispettive specifiche adapter in `docs/03-ADAPTERS/` (oggi contiene solo `SPEC-TEMPLATE.md` e `spotify.md`; `01-PLATFORMS.md` è ancora 🟡 DRAFT). Ordine: (1) spec adapter YouTube Music + Apple Music + Last.fm/ListenBrainz, (2) fixture in `fixtures/synthetic-history/` per i nuovi adapter, (3) issue `agent-ready` per 1.1/1.2/1.3 (parallele). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
+- **Prossimo step tecnico** (aggiornato alla Sessione 39): EPIC 1 (Fase 1 — Import core). La spec adapter **YouTube Music è stata scritta** (S39, issue #96, `03-ADAPTERS/youtube-music.md` 🟡 DRAFT — promozione a 🟢 al merge); restano da scrivere le specifiche **Apple Music** (Story 1.2) e **Last.fm / ListenBrainz** (Story 1.3), poi i fixture in `fixtures/synthetic-history/` e le issue `agent-ready` per 1.1/1.2/1.3 (parallele). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

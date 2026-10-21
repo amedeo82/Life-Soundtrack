@@ -57,9 +57,10 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 
 ### 3.2 YouTube Music 🇺🇸 (dominante in EU) — Tier S
 
-- **Accesso storico**: Google Takeout ("YouTube and YouTube Music") → JSON/HTML
-- **Campi**: `time`, `title`, `titleUrl`, `products`, `details.name` (canale/artista), `details.url`, `locationInfo` (opzionale)
-- **Limiti**: cronologia unificata video+musica (serve filtro); nessun campo skip/shuffle/dispositivo
+- **Spec adapter**: `03-ADAPTERS/youtube-music.md` (Sessione 39)
+- **Accesso storico**: Google Takeout ("YouTube and YouTube Music") → JSON (l'HTML non è supportato dall'adapter)
+- **Campi**: `header` ("YouTube Music"/"YouTube"), `time`, `title`, `titleUrl`, `subtitles[]` (canale/artista), `products`, `details[]`, `locationInfos` (opzionale)
+- **Limiti**: cronologia unificata video+musica (serve filtro, E6); nessun campo durata/skip/shuffle/dispositivo; nomi file/cartelle Takeout localizzati
 - **Scrobbling**: sì (scrobbler dedicati)
 
 ### 3.3 Apple Music 🇺🇸 (molto diffusa in EU) — Tier A
@@ -158,3 +159,4 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: E1 validata in S2 (riferimento `03-ADAPTERS/spotify.md`); chiarita distinzione `PlatformId` (sorgenti) vs `scrobbleHubs` (Subsonic/Roon/Maloja) (M4) |
+| 0.3 | Sessione 39 (2026-10-21) | §3.2 allineato al formato Takeout verificato (header, subtitles, nomi localizzati, assenza durata); cross-ref spec adapter `03-ADAPTERS/youtube-music.md` (issue #96) |
