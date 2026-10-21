@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 20:04
+> Data: 2026-10-21 22:27
 > Totale file: 65
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 64 (incluso 3 file aggregator-managed)
-- Dimensione totale: 696.6 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 22:01
+- Dimensione totale: 710.1 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 22:27
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1055,21 +1055,20 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 
 ## 🏗️ Stato del progetto
 
-**Fase 0 tecnica avviata** (2026-10-16). Il monorepo esiste ed è operativo; le feature di prodotto arriveranno con le story 0.2+.
+EPIC 0 (Fase 0 tecnica) è completo 7/7: monorepo + toolchain + schema DB + adapter Spotify + UI import + PWA + i18n + operations runbook. Lo **stato globale** corrente è gestito dai blocchi aggregati di `docs/INDEX.md` (`<!-- AGGREGATE-INDEX-STATUS-* -->`) e di `docs/11-BACKLOG.md` (`<!-- AGGREGATE-STORIES-* -->`) — quelli, e non questo README, sono la **fonte di verità** per `status`, conteggi e roadmap. La sezione `11-BACKLOG.md` §"Stato di avanzamento — roadmap delle story non ancora completate" elenca cosa manca.
 
-**Cosa c'è oggi** (branch `feat/0.1-monorepo-setup`):
-- Monorepo Turborepo: `apps/web` (@ls/web), `packages/core` (@ls/core), `packages/ui` (@ls/ui), `packages/config` (@ls/config)
-- Toolchain: pnpm 9, Node 20+, TypeScript 5.6+, ESLint 9, Prettier 3, Vitest 3, Playwright 1.49+
-- CI GitHub Actions (lint + typecheck + test + build)
-- Scaffold minimo: Logger in `@ls/core`, PlatformId enum, componente Button in `@ls/ui`, App skeleton in `@ls/web`
-- Documentazione completa + spec per tutte le story 0.2-6.1
+### Prossima story
 
-**Prossima sbloccata**: Story 0.2 (Schema DB Dexie) — vedi `docs/11-BACKLOG.md`.
+<!-- AGGREGATE-NEXT-STEP-START -->
 
-**Storico**:
-- S0-S9: progettazione completa (audit 2026-10-15 chiude 9 incongruenze critiche + 13 medie)
-- S10: policy versioni toolchain (D.10.1/D.10.2, upgrade a fine implementazione)
-- S11: implementazione Story 0.1 (scaffold monorepo + toolchain), 8 problemi risolti documentati in `18-DEV-LOG.md`
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+**Prossima story da implementare**: **1.1** â€” Adapter YouTube Music (priority `I`, vedi `docs/11-BACKLOG.md`).
+
+Sorgente: `docs/state/stories/1.1-adapter-youtube-music.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` Â§"PrioritÃ  di lavorazione per agenti").
+
+<!-- AGGREGATE-NEXT-STEP-END -->
 
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)
@@ -1429,9 +1428,9 @@ Apache License
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **18** (merge: 18)
-- Stories migrate in state/stories: **5** (done: 5)
+- Stories migrate in state/stories: **8** (done: 7)
 - Ultima sessione migrata: **S41** - Geo & contesto di ascolto: specifica e ADR
-- Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -4940,13 +4939,19 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/28-pr-template-and-branch-protection.md` | ✅ migrata | entry S28 (issue #51, PR template + branch protection) |
 | `state/sessions/30-crlf-and-workflow-fix.md` | ✅ migrata | entry S30 (issue #58, CRLF + workflow if:always) |
 | `state/sessions/31-agents-md-cleanup.md` | ✅ migrata | entry S31 (cleanup AGENTS.md v1.9, audit workflow) |
+| `state/stories/0.1-monorepo-setup.md` | ✅ migrata | da Story 0.1 BACKLOG + 18-DEV-LOG §4 (issue #127, ADR-0008 V3) |
+| `state/stories/0.2-schema-db-dexie.md` | ✅ migrata | da Story 0.2 BACKLOG + 18-DEV-LOG §6 (issue #127, ADR-0008 V3) |
 | `state/stories/0.5-pwa.md` | ✅ migrata | da Story 0.5 BACKLOG + 18-DEV-LOG §11 |
 | `state/stories/0.6-i18n.md` | ✅ migrata | da Story 0.6 BACKLOG + 18-DEV-LOG §12 |
 | `state/stories/0.4-ui-import.md` | ✅ migrata | da PR #71 (Sessione 37, issue #84) |
+| `state/stories/1.1-adapter-youtube-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.1" (issue #127, ADR-0008 V3): prima non-done, alimenta il blocco `AGGREGATE-NEXT-STEP-*` del README |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
-| Stories 0.1, 0.2 + 1.x+ | ⬚ TODO (migration incrementale) | restano in `docs/11-BACKLOG.md` legacy fino a V2 |
+| Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
+| Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 ha uno state file minimale per `AGGREGATE-NEXT-STEP-*`; le altre seguono con claim `agent-ready` |
 
-> **Nota (Sessione 37, issue #84)**: le 7 story della Fase 0 sono tutte `done` e le 5 con state file sono 0.3, 0.4, 0.5, 0.6, 0.7. Restano senza state file le story 0.1 e 0.2 (entrambe `done`, migration incrementale).
+> **Nota (Sessione 37, issue #84)**: le 7 story della Fase 0 sono tutte `done` e 6/7 hanno state file (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 — la 0.7 e 0.5/0.6/0.4 sono pre-V3, 0.1/0.2 aggiunte con issue #127, ADR-0008 V3, per alimentare il blocco `AGGREGATE-NEXT-STEP-*` del README).
+>
+> Story 1.1 ha il primo state file di una story non-done: serve ad alimentare il blocco `AGGREGATE-NEXT-STEP-*` introdotto con ADR-0008 V3 (issue #127). Le altre 1.x+ seguiranno il pattern "crea lo state file al primo claim `agent-ready`" (migration incrementale).
 
 Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
@@ -5446,13 +5451,20 @@ $markerIndexRoadmapStart   = "${lt}${bangs} AGGREGATE-INDEX-ROADMAP-START --${gt
 $markerIndexRoadmapEnd     = "${lt}${bangs} AGGREGATE-INDEX-ROADMAP-END --${gt}"
 $markerBundleInventoryStart = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-START --${gt}"
 $markerBundleInventoryEnd   = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-END --${gt}"
+# V3 (ADR-0008 V3, issue #127): blocco "Prossima story" sul README.md per
+# prevenire il drift della stringa "Prossima sbloccata" (chiuse con story 0.2
+# gia' nel 2026-10-17, vedi PR #4). La stringa e' ora derivata da
+# `docs/state/stories/*.md` (frontmatter `status`).
+$markerNextStepStart       = "${lt}${bangs} AGGREGATE-NEXT-STEP-START --${gt}"
+$markerNextStepEnd         = "${lt}${bangs} AGGREGATE-NEXT-STEP-END --${gt}"
 
 $targets = @(
     @{ Path = "docs/SESSIONS.md";   Start = $markerSessionsStart;        End = $markerSessionsEnd },
     @{ Path = "docs/11-BACKLOG.md"; Start = $markerStoriesStart;         End = $markerStoriesEnd },
     @{ Path = "docs/INDEX.md";      Start = $markerIndexStatusStart;     End = $markerIndexStatusEnd },
     @{ Path = "docs/INDEX.md";      Start = $markerIndexRoadmapStart;    End = $markerIndexRoadmapEnd },
-    @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd }
+    @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd },
+    @{ Path = "README.md";          Start = $markerNextStepStart;        End = $markerNextStepEnd }
 )
 
 # === Helpers ===
@@ -5544,7 +5556,17 @@ function Parse-Frontmatter {
 function Build-Block-Sessions {
     $files = Get-StateSessionFiles
     if ($files.Count -eq 0) {
-        return '_Nessuna sessione migrata in docs/state/sessions/._'
+        # NB: il placeholder DEVE essere compreso tra i marker, altrimenti la
+        # prima esecuzione "strippa" i marker vuoti dal file target e il successivo
+        # --check fallisce con "marker assente" (visto per la prima volta durante
+        # T10, issue #127, dove docs/state/sessions/ era vuoto). Mantenere i
+        # marker sempre presenti garantisce idempotenza su qualsiasi stato
+        # iniziale del repository.
+        $sb = New-Object System.Text.StringBuilder
+        [void]$sb.AppendLine($markerSessionsStart)
+        [void]$sb.AppendLine('_Nessuna sessione migrata in `docs/state/sessions/`._')
+        [void]$sb.AppendLine($markerSessionsEnd)
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
     }
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.Append($markerSessionsStart + "`n")
@@ -5587,7 +5609,12 @@ function Build-Block-Sessions {
 function Build-Block-Stories {
     $files = Get-StateStoryFiles
     if ($files.Count -eq 0) {
-        return '_Nessuna story migrata in docs/state/stories/._'
+        # Placeholder compreso tra i marker (vedi nota in Build-Block-Sessions).
+        $sb = New-Object System.Text.StringBuilder
+        [void]$sb.AppendLine($markerStoriesStart)
+        [void]$sb.AppendLine('_Nessuna story migrata in `docs/state/stories/`._')
+        [void]$sb.AppendLine($markerStoriesEnd)
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
     }
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.Append($markerStoriesStart + "`n")
@@ -5621,6 +5648,7 @@ function Get-Calculated-Block {
     if ($Start -eq $markerIndexStatusStart)     { return Build-Block-IndexStatus }
     if ($Start -eq $markerIndexRoadmapStart)    { return Build-Block-IndexRoadmap }
     if ($Start -eq $markerBundleInventoryStart) { return Build-Block-BundleInventory }
+    if ($Start -eq $markerNextStepStart)        { return Build-Block-NextStep }
     throw "Unknown marker: $Start"
 }
 
@@ -5686,7 +5714,12 @@ function Build-Block-IndexStatus {
 function Build-Block-IndexRoadmap {
     $files = Get-StateSessionFiles
     if ($files.Count -eq 0) {
-        return '_Nessuna sessione migrata in docs/state/sessions/._'
+        # Placeholder compreso tra i marker (vedi Build-Block-Sessions).
+        $sb = New-Object System.Text.StringBuilder
+        [void]$sb.AppendLine($markerIndexRoadmapStart)
+        [void]$sb.AppendLine('_Nessuna sessione migrata in `docs/state/sessions/`._')
+        [void]$sb.AppendLine($markerIndexRoadmapEnd)
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
     }
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.AppendLine($markerIndexRoadmapStart)
@@ -5791,6 +5824,68 @@ function Build-Block-BundleInventory {
     }
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerBundleInventoryEnd)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+}
+
+# === V3 (ADR-0008 V3, issue #127) ===
+# Blocco "Prossima story" sul README.md: sostituisce la stringa manuale
+# "Prossima sbloccata" che era andata in drift silenzioso (Story 0.2 chiuse
+# gia' con PR #4 merge `fa09b06` 2026-10-17 ma il README continuava a
+# dichiararla come prossima). Sorgente di verita' = `docs/state/stories/*.md`
+# (frontmatter `status`). L'aggregator:
+#   1. elenca tutti i file in docs/state/stories/
+#   2. filtra quelli con status != done (incluse le entry mancanti, trattate come todo)
+#   3. ordina per Id via `[version]` (tie-break su Base) per determinismo
+#   4. emette il primo id come prossima story + l'elenco dei successivi
+# Fallback graceful: se non ci sono entry non-done, emette un messaggio esplicito.
+function Build-Block-NextStep {
+    $files = @(Get-StateStoryFiles)
+    $candidates = New-Object System.Collections.Generic.List[object]
+    foreach ($f in $files) {
+        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $p = Parse-Frontmatter $c
+        if ($null -eq $p) { continue }
+        $status = $p.Frontmatter['status']
+        if ($status -eq 'done') { continue }
+        $priority = if ($p.Frontmatter['priority']) { $p.Frontmatter['priority'] } else { 'I' }
+        $id = if ($p.Frontmatter['id']) { $p.Frontmatter['id'] } else { $f.Base }
+        $title = if ($p.Frontmatter['title']) { $p.Frontmatter['title'] } else { $f.Base }
+        [void]$candidates.Add([PSCustomObject]@{
+            Id       = $id
+            Title    = $title
+            Priority = $priority
+            Base     = $f.Base
+        })
+    }
+    # NB: `Sort-Object { [version]$_.Id }` e' obbligatorio per il determinismo
+    # cross-platform (Windows vs Linux enumerano docs/state/stories/ in ordine
+    # diverso senza sort per valore). Tie-break su Base (gia' univoco qui
+    # perche' i path sono distinti). Vedi issue #70 + T1/T2 del test.
+    $sorted = @($candidates | Sort-Object { [version]$_.Id })
+
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine($markerNextStepStart)
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V3, ADR-0008, issue #127).')
+    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
+    [void]$sb.AppendLine('')
+    if ($sorted.Count -eq 0) {
+        [void]$sb.AppendLine('_Nessuna story non-done migrata in `' + 'docs/state/stories/' + '`._')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('Vedi `' + 'docs/11-BACKLOG.md' + '` per la roadmap completa e `' + 'docs/state/_index.md' + '` per la procedura di migration.')
+    } else {
+        $top = $sorted[0]
+        [void]$sb.AppendLine('**Prossima story da implementare**: **' + $top.Id + '** — ' + $top.Title + ' (priority `' + $top.Priority + '`, vedi `' + 'docs/11-BACKLOG.md' + '`).')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('Sorgente: `' + 'docs/state/stories/' + $top.Base + '.md' + '`. Issue candidabile: filtra con `' + 'gh issue list --label agent-ready --state open' + '` (vedi `' + 'docs/11-BACKLOG.md' + '` §"Priorità di lavorazione per agenti").')
+        if ($sorted.Count -gt 1) {
+            $restIds = (($sorted | Select-Object -Skip 1) | ForEach-Object { "$($_.Id)" }) -join ', '
+            [void]$sb.AppendLine('')
+            [void]$sb.AppendLine('Altre non-done in ordine di priorita backlog (id): ' + $restIds + '.')
+        }
+    }
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine($markerNextStepEnd)
     return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
@@ -10637,11 +10732,14 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
+| 0.1 - Setup monorepo e toolchain | done | #2 | `c0fb0a4` | devops |
+| 0.2 - Schema DB e layer Dexie | done | #4 | `fa09b06` | db |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 | 0.4 - UI import (onboarding) | done | #71 | `0a8e83f2aaf90cb61862e0737417eb7ec8b63881` | ui |
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
+| 1.1 - Adapter YouTube Music | todo | #0 | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
 
@@ -11597,9 +11695,22 @@ L'eccezione "PR di introduzione policy" si applica **solo a questa PR** (PR #24 
 4. Estensione aggregator: blocco `<!-- AGGREGATE-DEVLOG-INDEX -->` in `docs/18-DEV-LOG.md` "Indice sintomi per sintomo"
 5. Deprecation policy: rimuovere i file legacy una volta completata la migration
 
+### V3 — blocco "Prossima story" sul README.md (issue #127, 2026-10-21)
+
+Caso speciale del pattern ADR-0008: invece di estendere un altro file globale, V3 usa l'aggregator per gestire **una singola stringa narrativa** del `README.md` che era andata in drift silenzioso (la frase "**Prossima sbloccata**: Story 0.2" sopravviveva mesi dopo che Story 0.2 era stata chiudata con PR #4, perché nessun gate CI la rileggesse).
+
+1. `scripts/aggregate-state.ps1`: nuova funzione `Build-Block-NextStep` che legge `docs/state/stories/*.md` (frontmatter `status`), ordina per `[version]$Id` (tie-break su `Base`, determinismo via issue #70) e restituisce la prima story non-done come "prossima". Marker nuovi: `<!-- AGGREGATE-NEXT-STEP-{START,END} -->` in `README.md`.
+2. Pattern di idempotenza rinforzato: i placeholder "Nessuna ... migrata" di `Build-Block-Sessions`/`Build-Block-Stories`/`Build-Block-IndexRoadmap` ora includono i marker (V1 li ometteva — fix scoperto via T10, bug latente che faceva fallire il check dopo la prima esecuzione).
+3. `scripts/test-aggregate-determinism.sh` T10 (6 nuovi assert): pick deterministico, indipendenza dall'ordine di creazione filesystem, fallback graceful, idempotenza byte-identica.
+4. Migration: `state/stories/0.1-monorepo-setup.md`, `0.2-schema-db-dexie.md` (entrambe `done`) + `1.1-adapter-youtube-music.md` (prima non-done, alimenta il blocco).
+5. Regola di ownership ADR-0008 estesa: il blocco NEXT-STEP del `README.md` segue la stessa policy "mai a mano, solo aggregator" dei blocchi V1+V2.
+
+Perché è V3 e non un'eccezione one-shot: il pattern è identico ("marker + Build function + target"), la copertura di test è garantita dal `aggregate-state.ps1 --check` (gate CI esistente), e zero overhead per il workflow agenti.
+
 ## Riferimenti
 
 - **Issue #24** — contenitore del lavoro, claim `kilo-HP-ELITEBOOK-hjoe`
+- **Issue #127** — V3 (issue specifica, claim `kilo-HP-ELITEBOOK-rnd7k3`)
 - **AGENTS.md** §"📤 Post-merge actions" → §"🔄 Lazy-state aggregation (D.24.x)" (aggiornato)
 - **AGENTS.md** §"📝 Checklist di auto-revisione PR" — campo "Se ho aggiunto file in docs/state/, NON modifico direttamente docs/SESSIONS.md o BACKLOG.md"
 - **AGENTS.md** §"🔖 Sistema di issue e label" — nessuna label nuova richiesta
@@ -11615,6 +11726,7 @@ L'eccezione "PR di introduzione policy" si applica **solo a questa PR** (PR #24 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | Sessione 25 (2026-10-18) | Primo rilascio: directory `docs/state/` con 3 sessioni + 2 story migrate, aggregator PowerShell deterministico, GH Action `auto-state-aggregate.yml`, policy in `AGENTS.md`. Approvazione Boss ricevuta via issue #24 + comando "procediamo con D" |
+| 1.1 | Sessione 41 (2026-10-21) | **V3 — blocco `AGGREGATE-NEXT-STEP-*` sul `README.md`** (issue #127). L'aggregator gestisce ora anche la stringa "Prossima sbloccata" per prevenire il drift silenzioso (Story 0.2 era done da PR #4 ma il README continuava a dichiararla come prossima). Aggiunti: `Build-Block-NextStep`, marker `AGGREGATE-NEXT-STEP-{START,END}`, target `README.md`, determinismo via `[version]$Id` con fallback graceful, 6 nuovi assert in `test-aggregate-determinism.sh` (T10). Bug latente V1 chiuso: i placeholder "Nessuna ... migrata" ora includono i marker di inizio/fine (riscontrato in T10 quando `docs/state/sessions/` era vuoto). Migration: `state/stories/0.1-*`, `0.2-*`, `1.1-*`. Policy ADR-0008 estesa: `README.md` segue la regola "mai a mano" come gli altri 4 file globali. |
 
 
 
@@ -15107,6 +15219,11 @@ echo "Risultati: $pass passati, $fail falliti"
 #       emette il messaggio `[FAIL] N numeri di sessione duplicati` con i path
 #       di entrambi i file coinvolti ed esce con codice non-zero. -List mostra
 #       lo stesso WARN. Risolvibile rinominando uno dei due file.
+#   T10 NEXT-STEP block (ADR-0008 V3, issue #127): il blocco `AGGREGATE-NEXT-STEP-*`
+#       sul README.md e deterministico + idempotente: pick del primo id non-done per
+#       ordinamento [version] (indipendente dall'ordine di creazione dei file),
+#       fallback graceful quando non ci sono story non-done, --check exit 0 dopo
+#       write. Previene il drift della stringa "Prossima sbloccata" del README.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -15201,7 +15318,8 @@ Body della sessione $1.
 EOF
 }
 
-# File target con i 5 marker vuoti.
+# File target con i 5 marker vuoti (V1+V2) + il marker AGGREGATE-NEXT-STEP-* nel
+# README.md (introdotto con ADR-0008 V3, issue #127).
 make_targets() {
   mkdir -p "$1/docs"
   {
@@ -15216,6 +15334,16 @@ make_targets() {
   cp "$1/docs/targets.md" "$1/docs/INDEX.md"
   cp "$1/docs/targets.md" "$1/docs/BUNDLE.md"
   rm -f "$1/docs/targets.md"
+
+  # README.md e' gestito dall'aggregator dal V3 (issue #127).
+  # Deve esistere perche' --check fallisce altrimenti con "README.md non esiste".
+  cat > "$1/README.md" <<'EOF'
+# README
+
+<!-- AGGREGATE-NEXT-STEP-START -->
+vecchio contenuto
+<!-- AGGREGATE-NEXT-STEP-END -->
+EOF
 }
 
 story_ids_in_backlog() {
@@ -15501,6 +15629,93 @@ echo "=== T9: collisione di Number tra session file (issue #105) ==="
   out1="$(run_agg --check)"; rc1=$?
   if [ $rc1 -eq 0 ]; then ok "dopo rimozione duplicato: --check exit 0"; else ng "dopo rimozione: --check exit $rc1"; fi
 
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
+{
+  # Helper: repo con 3 stories done + 2 non-done (1.1 = prossima attesa).
+  make_repo_with_status() {
+    local d="$1"
+    mkdir -p "$d/docs/state/sessions" "$d/docs/state/stories" "$d/scripts"
+    cp "$SCRIPT" "$d/scripts/aggregate-state.ps1"
+    (
+      cd "$d" || exit 1
+      git init -q -b main
+      git config user.email "t@t.local"
+      git config user.name "Test"
+      git config commit.gpgsign false
+
+      write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+      write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
+      write_story 0.7 "ops-runbook" "Operations runbook" done "#64" "devops"
+      write_story 1.1 "adapter-youtube-music" "Adapter YouTube Music" todo "" "adapter"
+      write_story 1.2 "adapter-apple-music" "Adapter Apple Music" todo "" "adapter"
+    )
+  }
+
+  # Estrae l'id story raccomandato dal blocco NEXT-STEP del README.md.
+  next_step_id_in_readme() {
+    sed -n '/AGGREGATE-NEXT-STEP-START/,/AGGREGATE-NEXT-STEP-END/p' "$1/README.md" \
+      | grep -oE '\*\*[0-9]+\.[0-9]+\*\*' | head -1 | tr -d '*'
+  }
+
+  # --- Sub-test 10a: pick deterministico (ordine creazione ascendente) ---
+  D="$(mktemp -d)"; make_repo_with_status "$D"; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  PICK="$(next_step_id_in_readme "$D")"
+  if [ "$PICK" = "1.1" ]; then ok "NEXT-STEP sceglie 1.1 (primo non-done per [version]Id)"; else ng "NEXT-STEP inatteso: '$PICK' invece di '1.1'"; fi
+
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "NEXT-STEP: --check exit 0 dopo la scrittura"; else ng "NEXT-STEP: --check exit $rc"; echo "$out" | tail -8; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10b: indipendente dall'ordine di creazione ---
+  D="$(mktemp -d)"
+  mkdir -p "$D/docs/state/sessions" "$D/docs/state/stories" "$D/scripts"
+  cp "$SCRIPT" "$D/scripts/aggregate-state.ps1"
+  (
+    cd "$D" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Ordine INVERSO: 1.2 prima di 1.1 (scenario "filesystem-dipendente")
+    write_story 1.2 "adapter-apple-music" "Adapter Apple Music" todo "" "adapter"
+    write_story 1.1 "adapter-youtube-music" "Adapter YouTube Music" todo "" "adapter"
+    write_story 0.7 "ops-runbook" "Operations runbook" done "#64" "devops"
+    write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+  )
+  make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  PICK="$(next_step_id_in_readme "$D")"
+  if [ "$PICK" = "1.1" ]; then ok "NEXT-STEP indipendente da ordine creazione (ancora 1.1)"; else ng "NEXT-STEP ordine-dipendente: '$PICK' invece di '1.1'"; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10c: fallback graceful (tutte done) ---
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  if grep -q 'Nessuna story non-done migrata' README.md; then
+    ok "NEXT-STEP fallback: messaggio esplicito quando tutte le story sono done"
+  else
+    ng "NEXT-STEP fallback mancante: emette contenuto fuorviante invece del fallback"
+  fi
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "NEXT-STEP fallback: --check exit 0"; else ng "NEXT-STEP fallback: --check exit $rc"; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10d: idempotenza byte-identica ---
+  D="$(mktemp -d)"; make_repo_with_status "$D"; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  FIRST_HASH="$(git hash-object README.md)"
+
+  sleep 1
+  run_agg >/dev/null 2>&1
+  SECOND_HASH="$(git hash-object README.md)"
+  if [ "$FIRST_HASH" = "$SECOND_HASH" ]; then
+    ok "NEXT-STEP idempotente: hash README.md invariato tra due run"
+  else
+    ng "NEXT-STEP non idempotente: $FIRST_HASH -> $SECOND_HASH"
+  fi
   cd /; rm -rf "$D"
 }
 

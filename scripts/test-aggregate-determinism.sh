@@ -30,6 +30,11 @@
 #       emette il messaggio `[FAIL] N numeri di sessione duplicati` con i path
 #       di entrambi i file coinvolti ed esce con codice non-zero. -List mostra
 #       lo stesso WARN. Risolvibile rinominando uno dei due file.
+#   T10 NEXT-STEP block (ADR-0008 V3, issue #127): il blocco `AGGREGATE-NEXT-STEP-*`
+#       sul README.md e deterministico + idempotente: pick del primo id non-done per
+#       ordinamento [version] (indipendente dall'ordine di creazione dei file),
+#       fallback graceful quando non ci sono story non-done, --check exit 0 dopo
+#       write. Previene il drift della stringa "Prossima sbloccata" del README.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -124,7 +129,8 @@ Body della sessione $1.
 EOF
 }
 
-# File target con i 5 marker vuoti.
+# File target con i 5 marker vuoti (V1+V2) + il marker AGGREGATE-NEXT-STEP-* nel
+# README.md (introdotto con ADR-0008 V3, issue #127).
 make_targets() {
   mkdir -p "$1/docs"
   {
@@ -139,6 +145,16 @@ make_targets() {
   cp "$1/docs/targets.md" "$1/docs/INDEX.md"
   cp "$1/docs/targets.md" "$1/docs/BUNDLE.md"
   rm -f "$1/docs/targets.md"
+
+  # README.md e' gestito dall'aggregator dal V3 (issue #127).
+  # Deve esistere perche' --check fallisce altrimenti con "README.md non esiste".
+  cat > "$1/README.md" <<'EOF'
+# README
+
+<!-- AGGREGATE-NEXT-STEP-START -->
+vecchio contenuto
+<!-- AGGREGATE-NEXT-STEP-END -->
+EOF
 }
 
 story_ids_in_backlog() {
@@ -424,6 +440,93 @@ echo "=== T9: collisione di Number tra session file (issue #105) ==="
   out1="$(run_agg --check)"; rc1=$?
   if [ $rc1 -eq 0 ]; then ok "dopo rimozione duplicato: --check exit 0"; else ng "dopo rimozione: --check exit $rc1"; fi
 
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
+{
+  # Helper: repo con 3 stories done + 2 non-done (1.1 = prossima attesa).
+  make_repo_with_status() {
+    local d="$1"
+    mkdir -p "$d/docs/state/sessions" "$d/docs/state/stories" "$d/scripts"
+    cp "$SCRIPT" "$d/scripts/aggregate-state.ps1"
+    (
+      cd "$d" || exit 1
+      git init -q -b main
+      git config user.email "t@t.local"
+      git config user.name "Test"
+      git config commit.gpgsign false
+
+      write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+      write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
+      write_story 0.7 "ops-runbook" "Operations runbook" done "#64" "devops"
+      write_story 1.1 "adapter-youtube-music" "Adapter YouTube Music" todo "" "adapter"
+      write_story 1.2 "adapter-apple-music" "Adapter Apple Music" todo "" "adapter"
+    )
+  }
+
+  # Estrae l'id story raccomandato dal blocco NEXT-STEP del README.md.
+  next_step_id_in_readme() {
+    sed -n '/AGGREGATE-NEXT-STEP-START/,/AGGREGATE-NEXT-STEP-END/p' "$1/README.md" \
+      | grep -oE '\*\*[0-9]+\.[0-9]+\*\*' | head -1 | tr -d '*'
+  }
+
+  # --- Sub-test 10a: pick deterministico (ordine creazione ascendente) ---
+  D="$(mktemp -d)"; make_repo_with_status "$D"; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  PICK="$(next_step_id_in_readme "$D")"
+  if [ "$PICK" = "1.1" ]; then ok "NEXT-STEP sceglie 1.1 (primo non-done per [version]Id)"; else ng "NEXT-STEP inatteso: '$PICK' invece di '1.1'"; fi
+
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "NEXT-STEP: --check exit 0 dopo la scrittura"; else ng "NEXT-STEP: --check exit $rc"; echo "$out" | tail -8; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10b: indipendente dall'ordine di creazione ---
+  D="$(mktemp -d)"
+  mkdir -p "$D/docs/state/sessions" "$D/docs/state/stories" "$D/scripts"
+  cp "$SCRIPT" "$D/scripts/aggregate-state.ps1"
+  (
+    cd "$D" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Ordine INVERSO: 1.2 prima di 1.1 (scenario "filesystem-dipendente")
+    write_story 1.2 "adapter-apple-music" "Adapter Apple Music" todo "" "adapter"
+    write_story 1.1 "adapter-youtube-music" "Adapter YouTube Music" todo "" "adapter"
+    write_story 0.7 "ops-runbook" "Operations runbook" done "#64" "devops"
+    write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+  )
+  make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  PICK="$(next_step_id_in_readme "$D")"
+  if [ "$PICK" = "1.1" ]; then ok "NEXT-STEP indipendente da ordine creazione (ancora 1.1)"; else ng "NEXT-STEP ordine-dipendente: '$PICK' invece di '1.1'"; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10c: fallback graceful (tutte done) ---
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  if grep -q 'Nessuna story non-done migrata' README.md; then
+    ok "NEXT-STEP fallback: messaggio esplicito quando tutte le story sono done"
+  else
+    ng "NEXT-STEP fallback mancante: emette contenuto fuorviante invece del fallback"
+  fi
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -eq 0 ]; then ok "NEXT-STEP fallback: --check exit 0"; else ng "NEXT-STEP fallback: --check exit $rc"; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10d: idempotenza byte-identica ---
+  D="$(mktemp -d)"; make_repo_with_status "$D"; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  FIRST_HASH="$(git hash-object README.md)"
+
+  sleep 1
+  run_agg >/dev/null 2>&1
+  SECOND_HASH="$(git hash-object README.md)"
+  if [ "$FIRST_HASH" = "$SECOND_HASH" ]; then
+    ok "NEXT-STEP idempotente: hash README.md invariato tra due run"
+  else
+    ng "NEXT-STEP non idempotente: $FIRST_HASH -> $SECOND_HASH"
+  fi
   cd /; rm -rf "$D"
 }
 

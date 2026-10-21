@@ -140,9 +140,22 @@ L'eccezione "PR di introduzione policy" si applica **solo a questa PR** (PR #24 
 4. Estensione aggregator: blocco `<!-- AGGREGATE-DEVLOG-INDEX -->` in `docs/18-DEV-LOG.md` "Indice sintomi per sintomo"
 5. Deprecation policy: rimuovere i file legacy una volta completata la migration
 
+### V3 — blocco "Prossima story" sul README.md (issue #127, 2026-10-21)
+
+Caso speciale del pattern ADR-0008: invece di estendere un altro file globale, V3 usa l'aggregator per gestire **una singola stringa narrativa** del `README.md` che era andata in drift silenzioso (la frase "**Prossima sbloccata**: Story 0.2" sopravviveva mesi dopo che Story 0.2 era stata chiudata con PR #4, perché nessun gate CI la rileggesse).
+
+1. `scripts/aggregate-state.ps1`: nuova funzione `Build-Block-NextStep` che legge `docs/state/stories/*.md` (frontmatter `status`), ordina per `[version]$Id` (tie-break su `Base`, determinismo via issue #70) e restituisce la prima story non-done come "prossima". Marker nuovi: `<!-- AGGREGATE-NEXT-STEP-{START,END} -->` in `README.md`.
+2. Pattern di idempotenza rinforzato: i placeholder "Nessuna ... migrata" di `Build-Block-Sessions`/`Build-Block-Stories`/`Build-Block-IndexRoadmap` ora includono i marker (V1 li ometteva — fix scoperto via T10, bug latente che faceva fallire il check dopo la prima esecuzione).
+3. `scripts/test-aggregate-determinism.sh` T10 (6 nuovi assert): pick deterministico, indipendenza dall'ordine di creazione filesystem, fallback graceful, idempotenza byte-identica.
+4. Migration: `state/stories/0.1-monorepo-setup.md`, `0.2-schema-db-dexie.md` (entrambe `done`) + `1.1-adapter-youtube-music.md` (prima non-done, alimenta il blocco).
+5. Regola di ownership ADR-0008 estesa: il blocco NEXT-STEP del `README.md` segue la stessa policy "mai a mano, solo aggregator" dei blocchi V1+V2.
+
+Perché è V3 e non un'eccezione one-shot: il pattern è identico ("marker + Build function + target"), la copertura di test è garantita dal `aggregate-state.ps1 --check` (gate CI esistente), e zero overhead per il workflow agenti.
+
 ## Riferimenti
 
 - **Issue #24** — contenitore del lavoro, claim `kilo-HP-ELITEBOOK-hjoe`
+- **Issue #127** — V3 (issue specifica, claim `kilo-HP-ELITEBOOK-rnd7k3`)
 - **AGENTS.md** §"📤 Post-merge actions" → §"🔄 Lazy-state aggregation (D.24.x)" (aggiornato)
 - **AGENTS.md** §"📝 Checklist di auto-revisione PR" — campo "Se ho aggiunto file in docs/state/, NON modifico direttamente docs/SESSIONS.md o BACKLOG.md"
 - **AGENTS.md** §"🔖 Sistema di issue e label" — nessuna label nuova richiesta
@@ -158,3 +171,4 @@ L'eccezione "PR di introduzione policy" si applica **solo a questa PR** (PR #24 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 1.0 | Sessione 25 (2026-10-18) | Primo rilascio: directory `docs/state/` con 3 sessioni + 2 story migrate, aggregator PowerShell deterministico, GH Action `auto-state-aggregate.yml`, policy in `AGENTS.md`. Approvazione Boss ricevuta via issue #24 + comando "procediamo con D" |
+| 1.1 | Sessione 41 (2026-10-21) | **V3 — blocco `AGGREGATE-NEXT-STEP-*` sul `README.md`** (issue #127). L'aggregator gestisce ora anche la stringa "Prossima sbloccata" per prevenire il drift silenzioso (Story 0.2 era done da PR #4 ma il README continuava a dichiararla come prossima). Aggiunti: `Build-Block-NextStep`, marker `AGGREGATE-NEXT-STEP-{START,END}`, target `README.md`, determinismo via `[version]$Id` con fallback graceful, 6 nuovi assert in `test-aggregate-determinism.sh` (T10). Bug latente V1 chiuso: i placeholder "Nessuna ... migrata" ora includono i marker di inizio/fine (riscontrato in T10 quando `docs/state/sessions/` era vuoto). Migration: `state/stories/0.1-*`, `0.2-*`, `1.1-*`. Policy ADR-0008 estesa: `README.md` segue la regola "mai a mano" come gli altri 4 file globali. |

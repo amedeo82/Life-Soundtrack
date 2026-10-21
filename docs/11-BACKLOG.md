@@ -548,10 +548,13 @@ Ogni story deve avere label GitHub:
 
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
+| 0.1 - Setup monorepo e toolchain | done | #2 | `c0fb0a4` | devops |
+| 0.2 - Schema DB e layer Dexie | done | #4 | `fa09b06` | db |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 | 0.4 - UI import (onboarding) | done | #71 | `0a8e83f2aaf90cb61862e0737417eb7ec8b63881` | ui |
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
+| 1.1 - Adapter YouTube Music | todo | #0 | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->

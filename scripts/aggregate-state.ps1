@@ -129,13 +129,20 @@ $markerIndexRoadmapStart   = "${lt}${bangs} AGGREGATE-INDEX-ROADMAP-START --${gt
 $markerIndexRoadmapEnd     = "${lt}${bangs} AGGREGATE-INDEX-ROADMAP-END --${gt}"
 $markerBundleInventoryStart = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-START --${gt}"
 $markerBundleInventoryEnd   = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-END --${gt}"
+# V3 (ADR-0008 V3, issue #127): blocco "Prossima story" sul README.md per
+# prevenire il drift della stringa "Prossima sbloccata" (chiuse con story 0.2
+# gia' nel 2026-10-17, vedi PR #4). La stringa e' ora derivata da
+# `docs/state/stories/*.md` (frontmatter `status`).
+$markerNextStepStart       = "${lt}${bangs} AGGREGATE-NEXT-STEP-START --${gt}"
+$markerNextStepEnd         = "${lt}${bangs} AGGREGATE-NEXT-STEP-END --${gt}"
 
 $targets = @(
     @{ Path = "docs/SESSIONS.md";   Start = $markerSessionsStart;        End = $markerSessionsEnd },
     @{ Path = "docs/11-BACKLOG.md"; Start = $markerStoriesStart;         End = $markerStoriesEnd },
     @{ Path = "docs/INDEX.md";      Start = $markerIndexStatusStart;     End = $markerIndexStatusEnd },
     @{ Path = "docs/INDEX.md";      Start = $markerIndexRoadmapStart;    End = $markerIndexRoadmapEnd },
-    @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd }
+    @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd },
+    @{ Path = "README.md";          Start = $markerNextStepStart;        End = $markerNextStepEnd }
 )
 
 # === Helpers ===
@@ -227,7 +234,17 @@ function Parse-Frontmatter {
 function Build-Block-Sessions {
     $files = Get-StateSessionFiles
     if ($files.Count -eq 0) {
-        return '_Nessuna sessione migrata in docs/state/sessions/._'
+        # NB: il placeholder DEVE essere compreso tra i marker, altrimenti la
+        # prima esecuzione "strippa" i marker vuoti dal file target e il successivo
+        # --check fallisce con "marker assente" (visto per la prima volta durante
+        # T10, issue #127, dove docs/state/sessions/ era vuoto). Mantenere i
+        # marker sempre presenti garantisce idempotenza su qualsiasi stato
+        # iniziale del repository.
+        $sb = New-Object System.Text.StringBuilder
+        [void]$sb.AppendLine($markerSessionsStart)
+        [void]$sb.AppendLine('_Nessuna sessione migrata in `docs/state/sessions/`._')
+        [void]$sb.AppendLine($markerSessionsEnd)
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
     }
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.Append($markerSessionsStart + "`n")
@@ -270,7 +287,12 @@ function Build-Block-Sessions {
 function Build-Block-Stories {
     $files = Get-StateStoryFiles
     if ($files.Count -eq 0) {
-        return '_Nessuna story migrata in docs/state/stories/._'
+        # Placeholder compreso tra i marker (vedi nota in Build-Block-Sessions).
+        $sb = New-Object System.Text.StringBuilder
+        [void]$sb.AppendLine($markerStoriesStart)
+        [void]$sb.AppendLine('_Nessuna story migrata in `docs/state/stories/`._')
+        [void]$sb.AppendLine($markerStoriesEnd)
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
     }
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.Append($markerStoriesStart + "`n")
@@ -304,6 +326,7 @@ function Get-Calculated-Block {
     if ($Start -eq $markerIndexStatusStart)     { return Build-Block-IndexStatus }
     if ($Start -eq $markerIndexRoadmapStart)    { return Build-Block-IndexRoadmap }
     if ($Start -eq $markerBundleInventoryStart) { return Build-Block-BundleInventory }
+    if ($Start -eq $markerNextStepStart)        { return Build-Block-NextStep }
     throw "Unknown marker: $Start"
 }
 
@@ -369,7 +392,12 @@ function Build-Block-IndexStatus {
 function Build-Block-IndexRoadmap {
     $files = Get-StateSessionFiles
     if ($files.Count -eq 0) {
-        return '_Nessuna sessione migrata in docs/state/sessions/._'
+        # Placeholder compreso tra i marker (vedi Build-Block-Sessions).
+        $sb = New-Object System.Text.StringBuilder
+        [void]$sb.AppendLine($markerIndexRoadmapStart)
+        [void]$sb.AppendLine('_Nessuna sessione migrata in `docs/state/sessions/`._')
+        [void]$sb.AppendLine($markerIndexRoadmapEnd)
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
     }
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.AppendLine($markerIndexRoadmapStart)
@@ -474,6 +502,68 @@ function Build-Block-BundleInventory {
     }
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine($markerBundleInventoryEnd)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+}
+
+# === V3 (ADR-0008 V3, issue #127) ===
+# Blocco "Prossima story" sul README.md: sostituisce la stringa manuale
+# "Prossima sbloccata" che era andata in drift silenzioso (Story 0.2 chiuse
+# gia' con PR #4 merge `fa09b06` 2026-10-17 ma il README continuava a
+# dichiararla come prossima). Sorgente di verita' = `docs/state/stories/*.md`
+# (frontmatter `status`). L'aggregator:
+#   1. elenca tutti i file in docs/state/stories/
+#   2. filtra quelli con status != done (incluse le entry mancanti, trattate come todo)
+#   3. ordina per Id via `[version]` (tie-break su Base) per determinismo
+#   4. emette il primo id come prossima story + l'elenco dei successivi
+# Fallback graceful: se non ci sono entry non-done, emette un messaggio esplicito.
+function Build-Block-NextStep {
+    $files = @(Get-StateStoryFiles)
+    $candidates = New-Object System.Collections.Generic.List[object]
+    foreach ($f in $files) {
+        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $p = Parse-Frontmatter $c
+        if ($null -eq $p) { continue }
+        $status = $p.Frontmatter['status']
+        if ($status -eq 'done') { continue }
+        $priority = if ($p.Frontmatter['priority']) { $p.Frontmatter['priority'] } else { 'I' }
+        $id = if ($p.Frontmatter['id']) { $p.Frontmatter['id'] } else { $f.Base }
+        $title = if ($p.Frontmatter['title']) { $p.Frontmatter['title'] } else { $f.Base }
+        [void]$candidates.Add([PSCustomObject]@{
+            Id       = $id
+            Title    = $title
+            Priority = $priority
+            Base     = $f.Base
+        })
+    }
+    # NB: `Sort-Object { [version]$_.Id }` e' obbligatorio per il determinismo
+    # cross-platform (Windows vs Linux enumerano docs/state/stories/ in ordine
+    # diverso senza sort per valore). Tie-break su Base (gia' univoco qui
+    # perche' i path sono distinti). Vedi issue #70 + T1/T2 del test.
+    $sorted = @($candidates | Sort-Object { [version]$_.Id })
+
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine($markerNextStepStart)
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V3, ADR-0008, issue #127).')
+    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
+    [void]$sb.AppendLine('')
+    if ($sorted.Count -eq 0) {
+        [void]$sb.AppendLine('_Nessuna story non-done migrata in `' + 'docs/state/stories/' + '`._')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('Vedi `' + 'docs/11-BACKLOG.md' + '` per la roadmap completa e `' + 'docs/state/_index.md' + '` per la procedura di migration.')
+    } else {
+        $top = $sorted[0]
+        [void]$sb.AppendLine('**Prossima story da implementare**: **' + $top.Id + '** — ' + $top.Title + ' (priority `' + $top.Priority + '`, vedi `' + 'docs/11-BACKLOG.md' + '`).')
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine('Sorgente: `' + 'docs/state/stories/' + $top.Base + '.md' + '`. Issue candidabile: filtra con `' + 'gh issue list --label agent-ready --state open' + '` (vedi `' + 'docs/11-BACKLOG.md' + '` §"Priorità di lavorazione per agenti").')
+        if ($sorted.Count -gt 1) {
+            $restIds = (($sorted | Select-Object -Skip 1) | ForEach-Object { "$($_.Id)" }) -join ', '
+            [void]$sb.AppendLine('')
+            [void]$sb.AppendLine('Altre non-done in ordine di priorita backlog (id): ' + $restIds + '.')
+        }
+    }
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine($markerNextStepEnd)
     return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
