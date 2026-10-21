@@ -187,7 +187,7 @@ Conseguenze di progetto, non rimandabili:
 | `deriveContext` | `true` | classificazione L1 | non raccoglie nulla di nuovo: opera su dati già conservati |
 | `carDetectionConsent` | `false` | classificazione `car` (mappata da `deviceType` + inferita) | invariato (`02` §3.8): senza consenso `deviceType='car'` non viene persistito (issue #109) |
 
-⚠️ **Il default di `retainCountry` è la decisione più sensibile di questo documento** e va confermata dal Boss: `09-PRIVACY-SECURITY.md` §4 classifica oggi "Paese di connessione" come dato personale con base di liceità **consenso esplicito**, mentre `02` §3.8 lo conserva comunque. Il proposta risolve la contraddizione in favore di `02` (che è APPROVED) e allinea `09`; l'alternativa è invertire la scelta e metterlo a `false`. Finché non è deciso, la riga resta **bloccata** in `02` v1.3.
+**Decisione Boss (issue #108, opzione A)**: `retainCountry` default **`true`**. La contraddizione `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED: paese derivato e conservato indipendentemente dal toggle) vs `09-PRIVACY-SECURITY.md` §4 è risolta in favore di `02`: il `country` è un dato derivato e non identificativo, non richiede consenso esplicito (il consenso esplicito è richiesto solo per `retainIp`). `09` §4 è stato allineato di conseguenza (vedi nota in `09-PRIVACY-SECURITY.md`). La riga non è più bloccata.
 
 ### 7.2 Override per singolo import
 
