@@ -2233,7 +2233,7 @@ Cause identificate:
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #91
 - **Claim**: `kilo-hp-elitebook-36a7`
 
 ```

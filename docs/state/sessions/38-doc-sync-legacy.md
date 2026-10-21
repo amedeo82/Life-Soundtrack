@@ -4,7 +4,7 @@ title: "Allineare la documentazione di stato legacy e rendere il doc-sync obblig
 date: 2026-10-21
 state: 🟡
 branch: feat/90-docs-allineare-la-documentazione-di-stat
-pr: 0
+pr: 91
 claim: kilo-hp-elitebook-36a7
 cross_refs: [84, 90]
 tags: [docs, state, adr-0008, housekeeping]

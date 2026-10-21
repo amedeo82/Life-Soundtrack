@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 10:53
+> Data: 2026-10-21 10:56
 > Totale file: 58
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -11,7 +11,7 @@
 
 - Totale file: 57 (incluso 3 file aggregator-managed)
 - Dimensione totale: 571.6 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 10:53
+- Ultima aggregazione: 2026-10-21 10:56
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1329,7 +1329,7 @@ Apache License
 | 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
 | 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
-| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | - |
+| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -3641,7 +3641,7 @@ Cause identificate:
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #91
 - **Claim**: `kilo-hp-elitebook-36a7`
 
 ```
@@ -4805,7 +4805,7 @@ title: "Allineare la documentazione di stato legacy e rendere il doc-sync obblig
 date: 2026-10-21
 state: 🟡
 branch: feat/90-docs-allineare-la-documentazione-di-stat
-pr: 0
+pr: 91
 claim: kilo-hp-elitebook-36a7
 cross_refs: [84, 90]
 tags: [docs, state, adr-0008, housekeeping]
