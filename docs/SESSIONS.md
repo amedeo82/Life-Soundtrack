@@ -2453,7 +2453,7 @@ E.AP.1 (event stream ≠ ascolti → 1 riga ≥30s = 1 evento + riconciliazione)
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #102
 - **Claim**: `-`
 
 ```
@@ -2502,6 +2502,15 @@ E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/
 - `scripts/generate-bundle.ps1 --check` → exit 0 (dopo rigenerazione con `$files` esteso)
 - `scripts/aggregate-state.ps1 --check` → exit 0 (dopo rigenerazione con la nuova Sessione 41)
 - Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Esito post-merge
+
+- PR **#102** mergata in `main` il 2026-10-21T13:35:49Z, merge commit **`856c0f5`**
+- CI: `quality` verde · `auto-branch-cleanup` verde · `auto-state-aggregate` verde (bot `c1d2ca2`)
+- `auto-status-done`: nessuna transizione, come previsto — la PR non contiene keyword di chiusura (`#99` resta `needs-spec`)
+- Procedura canonica `scripts/post-merge.ps1 -Branch docs/41-geo-context-spec` → exit 0: `main` allineato a `origin/main`, branch remoto già assente (idempotente), branch locale eliminato con `git branch -d`
+- Verifica post-merge (livello 3): `aggregate-state.ps1 -Check` exit 0 · `generate-bundle.ps1 -Check` exit 0 (63 file) · `post-merge.ps1 -Check` exit 0 (nessun residuo)
+- Risoluzione conflitto di numerazione: la PR iniziale era la **#101** su branch `docs/40-geo-context-spec`; chiusa e sostituita dalla **#102** su `docs/41-geo-context-spec` dopo che l'agente su #98 aveva mergiato la PR #100 numerando anch'egli la sua sessione come 40 (lesson 41-4)
 
 ## Lesson learned
 

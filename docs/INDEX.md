@@ -85,7 +85,7 @@
 | 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
 | 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
 | 40 | Specifica adapter Apple Music (Story 1.2) | 🟡 | #100 |
-| 41 | Geo & contesto di ascolto: specifica e ADR | 🟡 | - |
+| 41 | Geo & contesto di ascolto: specifica e ADR | 🟡 | #102 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
