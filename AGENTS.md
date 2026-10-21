@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.13 — Sessione 36 (2026-10-20)
+> Versione 1.16 — Sessione 38 (2026-10-21)
 
 ---
 
@@ -519,7 +519,8 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] JSDoc su tutte le funzioni pubbliche
 - [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
-- [ ] **NON ho modificato direttamente** `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: solo `docs/state/<propria>/*`)
+- [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
+- [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
 - [ ] **Il body della PR include `Closes #N`** (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub lo usa per chiudere automaticamente l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
@@ -535,9 +536,10 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 
 | Cosa è cambiato nella PR | File da aggiornare |
 |---|---|
-| Stato di una story (es. ⬚→🟡, 🟡→✅, ✅→⬚) | `docs/11-BACKLOG.md` (sezione Story + tabella "Stato di avanzamento") |
-| Stato di una story | `docs/INDEX.md` (§"Stato del progetto" e roadmap sessioni) |
-| Stato di una story / chiusura di una sessione | `docs/SESSIONS.md` (entry sessione + changelog) |
+| Stato di una story (es. ⬚→🟡, 🟡→✅, ✅→⬚) | `docs/state/stories/<id>-<slug>.md` (fonte) + `docs/11-BACKLOG.md` (rimuoverla dalla tabella "roadmap" e aggiornare la riga `**Stato**:` della sezione Story) |
+| Stato di una story | `docs/INDEX.md` §"Dettaglio (legacy)" (conteggi, "Prossimo step tecnico") — i blocchi `AGGREGATE-*` si aggiornano da soli |
+| Chiusura di una sessione | `docs/state/sessions/<N>-<slug>.md` (fonte) + `docs/SESSIONS.md` (blocco aggregato, automatico) |
+| Aggiunta/rimozione di un documento in `docs/` | `docs/INDEX.md` §"Documenti fondamentali" / "Documenti di supporto" + `scripts/generate-bundle.ps1` (`$files`) |
 | Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) + **eliminare il branch remoto** (vedi §"♻️ Pulizia branch post-merge") |
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
@@ -545,6 +547,8 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Issue chiusa al merge | `status:done` applicato (vedi §"📦 Macchina a stati delle issue (status:*)"); rimozione `agent-ready` |
 
 **Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
+
+**Perché la tabella distingue aggregato da legacy**: i blocchi `AGGREGATE-*` si aggiornano da soli post-merge, quindi chiederne la modifica manuale crea solo drift e fallisce il gate `--check`. Le sezioni legacy non hanno un generatore: se un agente le ignora, invecchiano senza che nessun gate se ne accorga (è successo tra S22 e S38, issue #84 e #90). Vedi §"Chi può scrivere cosa nei file globali".
 
 **Doc-sync nel branch (preferito, vedi Sessione 21 D.21.1)**: il doc-sync finale (con PR number e merge commit hash) va committato nel branch della PR, NON come commit separato su `main` (vedi §"📤 Post-merge actions"). L'eccezione "commit di follow-up immediatamente successivo" è declassata a fallback sconsigliato per race con altri agenti in parallelo.
 
@@ -639,11 +643,11 @@ git push
 ## 🚀 Primo task di un agente
 
 1. Leggi questo file
-2. Esegui il protocollo di claim (§"🎫 Presa in carico delle story"): ottieni il claim della prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — una issue è libera se non ha `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
-3. **Crea una worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4.
-4. Leggi la specifica del task e implementa con test (nella worktree)
-5. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
-6. Al merge: GH Action `auto-status-done` applica automaticamente `status:done` + GH Action `auto-state-aggregate` rigenera SESSIONS/BACKLOG/INDEX/BUNDLE; tu fai `release:` comment + **procedura canonica post-merge** (`pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` dalla working copy principale: allinea `main`, smonta la worktree, elimina i branch locale e remoto) (vedi §"📤 Post-merge actions" e §"♻️ Pulizia branch post-merge")
+2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
+3. **Crea la worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4. **Attenzione**: lo script valida che l'issue non abbia già `in-progress`, quindi va eseguito **prima** del claim (o con `-SkipGhCheck` se hai già claimato tu).
+4. **Claima** l'issue (ADR-0006): `gh issue edit <N> --add-label in-progress` + commento `claim: <AGENT-ID> (UTC <timestamp>)`, poi **riverifica** (vince chi ha il commento con ID GitHub più basso)
+5. Leggi la specifica del task e implementa con test (nella worktree)
+6. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -784,6 +788,25 @@ Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di 
 
 I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `auto-state-aggregate.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
 
+### Chi può scrivere cosa nei file globali *(D.38.1 — vincolante, Sessione 38)*
+
+La regola sopra vieta di toccare i **file** globali. Ma questi file contengono due tipi di contenuto con regole diverse, ed è proprio questa ambiguità a lasciare le sezioni legacy invecchiare in silenzio (drift corretto in Sessione 38, issue #90: `11-BACKLOG.md` dichiarava 0.4/0.6/0.7 `⬚ TODO` mesi dopo il merge).
+
+| Tipo di contenuto | Dove si trova | Chi lo scrive | Regola |
+|---|---|---|---|
+| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 --check` fallisce (gate CI) e `auto-state-aggregate` sovrascrive il diff |
+| **Sezioni legacy** | tutto il resto: prosa, tabelle statiche, changelog, `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" di `11-BACKLOG.md`, `18-DEV-LOG.md` | **l'agente**, nella stessa PR che cambia i fatti che dichiarano | **Allinearle è obbligatorio**, non facoltativo: se la sezione dichiara uno stato, un conteggio, una versione o un riferimento che la tua PR cambia, aggiornala in quella PR |
+
+**Non è un allargamento di ADR-0008**: i blocchi aggregati restano vietati. La regola riguarda le sezioni legacy, che non hanno alcun generatore e quindi nessuno le aggiorna al posto tuo.
+
+Esempi di obbligo concreto:
+
+- cambi lo stato di una story → **rimuovila** dalla tabella "roadmap delle story non ancora completate" in `11-BACKLOG.md`, aggiorna la riga `**Stato**:` della sua sezione Story, e crea/aggiorna `docs/state/stories/<id>-<slug>.md`
+- mergi una sessione → aggiorna il bullet "Prossimo step tecnico" e i contatori di `INDEX.md` §"Dettaglio (legacy)" se citano issue chiuse
+- aggiungi o rimuovi un documento in `docs/` → aggiorna la tabella "Documenti fondamentali" / "Documenti di supporto" di `INDEX.md`
+
+**Anti-pattern ricorrente**: duplicare in una sezione legacy un dato che un blocco aggregato già fornisce. Ogni duplicazione è una seconda fonte di verità che invecchia. Se il dato è già in un blocco `AGGREGATE-*`, **mettici un puntatore, non una copia**.
+
 ### Target V1 + V2
 
 | File | Blocchi gestiti | Versione |
@@ -851,7 +874,8 @@ Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` s
 
 ### Checklist PR aggiuntiva (D.24.x + D.29.x + D.30.x)
 
-- [ ] **NON** ho modificato direttamente `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
+- [ ] **NON** ho modificato i blocchi `<!-- AGGREGATE-* -->` di `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
+- [ ] Ho allineato le **sezioni legacy** dei file globali che la mia PR rende false (vedi §"Chi può scrivere cosa nei file globali")
 - [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
 - [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
 - [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
@@ -883,7 +907,12 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.15 — 'Dimensione totale' inventory normalizzata CRLF->LF (issue #88, follow-up di #86). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata sul contenuto decodificato normalizzato a LF invece che sui raw byte del file: `Get-Content -Raw -Encoding UTF8` + `[System.Text.Encoding]::UTF8.GetByteCount(($text -replace "`r`n","`n"))`. Conseguenza: la dimensione coincide con `git cat-file -s HEAD:<file>` su qualsiasi piattaforma, e `aggregate-state.ps1 --check` su Windows (dove 14 file di testo sono `core.autocrlf=true` → CRLF sul disco) non segnala piu un drift spurio di ~2.3 KB rispetto a origin/main (committed LF). `scripts/test-aggregate-determinism.sh` esteso con T8 (3 assert → 15 totali) come regression dedicata; il warning `#63` (PS 5.1 vs 7 incompatibilita residue) resta solo per eventuali altri blocchi.
+*Ultimo aggiornamento: v1.16 — ownership *blocchi aggregati vs sezioni legacy* nei file globali (Sessione 38, issue #90). La regola "NON modificare `docs/INDEX.md`, `SESSIONS.md`, `11-BACKLOG.md`, `BUNDLE.md`" era applicata all'intero file, così le sezioni legacy non aggregate (prose, tabelle statiche, "Prossimo step tecnico") invecchiavano senza che nessun gate se ne accorgesse: al 2026-10-21 `11-BACKLOG.md` dichiarava 0.4/0.6/0.7 `⬚ TODO` mesi dopo il loro merge, e `INDEX.md` puntava a issue già chiuse. Ora:
+- §"🔄 Lazy-state aggregation" → nuova sottosezione **"Chi può scrivere cosa nei file globali" (D.38.1)**: i blocchi `<!-- AGGREGATE-* -->` restano vietati a mano (con il perché), le sezioni legacy vanno **allineate nella stessa PR** che cambia i fatti che dichiarano, con l'anti-pattern della duplicazione
+- §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge" + §"🔄 Lazy-state aggregation → Checklist PR aggiuntiva": le tre voci "NON ho modificato direttamente …" diventano "NON ho modificato i **blocchi** `AGGREGATE-*`", con la voce nuova sull'allineamento delle sezioni legacy
+- §"🚀 Primo task": ordine worktree→claim (coerente con la validazione di `setup-worktree.ps1`, che rifiuta un'issue già `in-progress` — incoerenza segnalata in S37, lesson 37-6)
+
+*Precedente v1.15 — 'Dimensione totale' inventory normalizzata CRLF->LF (issue #88, follow-up di #86). La `Dimensione totale` del blocco `AGGREGATE-BUNDLE-INVENTORY-*` viene ora calcolata sul contenuto decodificato normalizzato a LF invece che sui raw byte del file: `Get-Content -Raw -Encoding UTF8` + `[System.Text.Encoding]::UTF8.GetByteCount(($text -replace "`r`n","`n"))`. Conseguenza: la dimensione coincide con `git cat-file -s HEAD:<file>` su qualsiasi piattaforma, e `aggregate-state.ps1 --check` su Windows (dove 14 file di testo sono `core.autocrlf=true` → CRLF sul disco) non segnala piu un drift spurio di ~2.3 KB rispetto a origin/main (committed LF). `scripts/test-aggregate-determinism.sh` esteso con T8 (3 assert → 15 totali) come regression dedicata; il warning `#63` (PS 5.1 vs 7 incompatibilita residue) resta solo per eventuali altri blocchi.
 
 *Precedente v1.14 — 'Dimensione totale' inventory esclude i file aggregator-managed (issue #86, opt A).
 

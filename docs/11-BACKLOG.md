@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.5.0 · Sessione 22 (2026-10-18) · aggiunti 4/4 task ✅ + 4/4 AC ✅ a Story 0.5 (PR #19); changelog v1.5.0
+> Status: 🟢 APPROVED · Versione 1.6.0 · Sessione 38 (2026-10-21, issue #90) · allineamento tabella di stato legacy (fonte di verità = blocco `AGGREGATE-STORIES-*`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -97,6 +97,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.3 — Adapter Spotify base `[PHASE-0]` `[AREA:adapter]` `[PRI:B]` `[SIZE:L]` `[DEP:0.2]`
 
+**Stato**: ✅ **DONE** — merged in `main` (PR #28, merge commit `3dc9654`, 2026-10-18)
+
 **Descrizione**: Implementare l'adapter Spotify completo secondo `03-ADAPTERS/spotify.md`.
 
 **Task**:
@@ -122,6 +124,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.4 — UI import (onboarding) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:M]` `[DEP:0.3]`
 
+**Stato**: ✅ **DONE** — merged in `main` (PR #71, merge commit `0a8e83f`, 2026-10-20)
+
 **Descrizione**: Schermate ① Benvenuto → ② Privacy → ③ Import → ④ Processing.
 
 **Task**:
@@ -146,7 +150,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.5 — PWA e service worker `[PHASE-0]` `[AREA:devops]` `[PRI:B]` `[SIZE:M]` `[DEP:0.1]`
 
-**Stato**: 🟡 **IN PROGRESS** → ✅ **DONE** (post-merge PR #19, claim `kilo-HP-ELITEBOOK-3b3f`)
+**Stato**: ✅ **DONE** (post-merge PR #19, merge commit `3fa3c0d`, 2026-10-18) · 4/4 task + 4/4 AC · bundle 291 KB gzip 91 KB (budget 300 KB) · claim `kilo-HP-ELITEBOOK-3b3f`
 **Branch**: `feat/7-pwa-and-service-worker` (in review → merged → eliminata dopo merge)
 **Registro**: `docs/18-DEV-LOG.md` §11 entry Story 0.5 (5 problemi/fix/lesson 0.5-1..5)
 **Pitfalls**: 0.5-1 `getByText` substring ambiguity → `getByRole('button', { name })`; 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` esplicito; 0.5-3 `it.each` non preserva tuple types; 0.5-4 PNG zero-deps con `node:zlib`; 0.5-5 virtual module `vite-plugin-pwa` aliasato in jsdom
@@ -174,6 +178,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 0.6 — Setup i18n (i18next) `[PHASE-0]` `[AREA:ui]` `[PRI:B]` `[SIZE:S]` `[DEP:0.1]`
 
+**Stato**: ✅ **DONE** — merged in `main` (PR #22, merge commit `5235c88`, 2026-10-18)
+
 **Descrizione**: Inizializzare la pipeline i18n con `i18next` + `react-i18next` per IT/EN, caricamento asincrono, fallback intelligente, rispetto delle stringhe definite in `08-COPY-I18N.md`.
 
 **Task**:
@@ -194,6 +200,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 ---
 
 ### Story 0.7 — Operations runbook + manutenzione `[PHASE-0]` `[AREA:devops]` `[PRI:I]` `[SIZE:M]` `[DEP:0.2, 0.5]`
+
+**Stato**: ✅ **DONE** — merged in `main` (PR #64, merge commit `b44420b`, 2026-10-20) · runbook pubblicato in `docs/16-OPERATIONS.md`
 
 **Descrizione**: Documentare in dettaglio le operazioni di update management (`05§11`) e DB maintenance (`05§12`) nel nuovo file `docs/16-OPERATIONS.md`. Includere runbook per l'operatore (sviluppatore che mantiene il progetto) su diagnosi e remediation di problemi noti.
 
@@ -479,26 +487,29 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 **Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
-## Stato di avanzamento (snapshot implementazione)
+## Stato di avanzamento — roadmap delle story non ancora completate
 
-> Aggiornato al **2026-10-17** (post-merge PR #4). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> **La fonte di verità per le story completate è il blocco aggregato `AGGREGATE-STORIES-*` in fondo a questo file**, generato da `scripts/aggregate-state.ps1` a partire da `docs/state/stories/*.md` (ADR-0008).
+>
+> Questa tabella elenca **solo le story ancora da implementare**. Non duplicare qui le story già `done`: la duplicazione è stata la causa del drift corretto in Sessione 38 (issue #90), che dichiarava 0.4/0.6/0.7 come `⬚ TODO` mesi dopo il loro merge.
+>
+> **Regola per gli agenti**: quando una story passa a `done`, si rimuove da questa tabella e si aggiorna (o si crea) il suo `docs/state/stories/<id>-<slug>.md` — l'aggregatore farà comparire la story nel blocco aggregato al merge. Non modificare mai a mano il blocco aggregato.
 
-| EPIC | Story | Stato | Branch | Note |
-|------|-------|-------|--------|------|
-| 0 | 0.1 Setup monorepo | ✅ DONE | — (merged in `main`) | Scaffold + toolchain completi (5/5 task, 5/5 AC); 9 problemi risolti in `18-DEV-LOG` §4. **PR #2 squash-merged `c0fb0a4` (2026-10-16 16:54 +0200)**. |
-| 0 | 0.2 Schema DB Dexie | ✅ DONE | — (merged in `main`) | 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k < 500ms); dettagli in `18-DEV-LOG` §6. **PR #4 merged `fa09b06` (2026-10-17)**; CI su main ✅. |
-| 0 | 0.3 Adapter Spotify | ✅ DONE | #28 | merged PR #28 `3dc9654` (main, 2026-10-18) |
-| 0 | 0.4 UI import | ⬚ TODO | — | dipende da 0.3 |
-| 0 | 0.5 PWA / service worker | 🟡 IN REVIEW → ✅ DONE | — (merged in `main`) | 4/4 task + 4/4 AC verificati; PR #19 aperta; bundle 227.81 KB gzip 71.36 KB; dettagli in `18-DEV-LOG` §11; claim `kilo-HP-ELITEBOOK-3b3f` |
-| 0 | 0.6 Setup i18n | ⬚ TODO (può partire) | — | parallelo a 0.1; nessuna dipendenza bloccante |
-| 0 | 0.7 Operations runbook | ⬚ TODO | — | dipende da 0.2 e 0.5 |
-| 1 | 1.1-1.3 altri adapter | ⬚ TODO | — | dipende da 0.3 |
-| 1 | 1.4 Dedup promozione | ⬚ TODO | — | dipende da 0.3 |
-| 1 | 1.5 Scrobbling hub | ⬚ TODO | — | — |
-| 2-3 | 2.x, 3.x analisi + UI | ⬚ TODO | — | dipendono da 0.2 |
-| 4 | 4.x enrichment | ⬚ TODO | — | dipendono da 0.2 |
-| 5 | 5.x privacy | ⬚ TODO | — | — |
-| 6 | 6.1 Upgrade stack | ⬚ SCHEDULED (post-impl) | — | D.10.2: solo a implementazione conclusa |
+| EPIC | Story | Stato | Note |
+|------|-------|-------|------|
+| 1 | 1.1 Adapter YouTube Music | ⬚ TODO | 0.3 ✅ — **spec adapter mancante** in `docs/03-ADAPTERS/`: blocca `agent-ready` (vedi `01-PLATFORMS.md` §3.2) |
+| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec adapter mancante (`01-PLATFORMS.md` §3.3) |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8) |
+| 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
+| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
+| 5 | 5.x privacy | ⬚ TODO | — |
+| 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
+
+**EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
+
+> **Aggiornato al 2026-10-21** (Sessione 38, issue #90). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
@@ -525,6 +536,7 @@ Ogni story deve avere label GitHub:
 | 1.3.0 | Sessione 18 (2026-10-17) | **Protocollo di claim per agenti paralleli (ADR-0006)**: §"Priorità di lavorazione" ora claim-first (la priorità è ordine di tentativo; si lavora la prima story *libera*); legenda 🟡 legata alla label `in-progress`; procedura operativa in `AGENTS.md` §"Presa in carico delle story (claim)" |
 | 1.4.0 | Sessione 19 (2026-10-17) | **Estensione post-claim (ADR-0007)**: aggiunti 4 stati `status:*` (done / in-review / wontdo / blocked-other) alla §"Stato di una Story"; `agent-ready` e `status:*` mutuamente esclusivi; rinvio a `AGENTS.md` §"📦 Macchina a stati delle issue" per le regole di transizione; ADR-0007 v1.0 in `docs/13-ADR/` |
 | 1.5.0 | 2026-10-18 (post-merge Sessione 22) | **Story 0.5 PWA e service worker** ora ✅ DONE: `useAppUpdate()` + `<UpdateBanner/>` + Workbox precache + NetworkFirst `/version.json` + CacheFirst Google Fonts + manifest con icone 192/512/maskable/apple-touch (generate via `scripts/generate-pwa-icons.mjs`, zero deps); `apps/web/index.html` esteso con theme-color, manifest link, apple-touch-icon; PR #19 (aperta) chiude #7; dettagli in `18-DEV-LOG §11` |
+| 1.6.0 | Sessione 38 (2026-10-21, issue #90) | **Allineamento della documentazione di stato legacy** (chiude il gap aperto in Sessione 38 di S37, D.37.2): la tabella "Stato di avanzamento" non duplica più le story `done` (fonte di verità = blocco `AGGREGATE-STORIES-*`) ed elenca solo la roadmap EPIC 1-6; allineate le righe `**Stato**` delle sezioni Story 0.3, 0.4, 0.5, 0.6, 0.7 (prima mancanti o stale); `AGENTS.md` v1.16 introduce la regola di ownership *blocchi aggregati vs sezioni legacy* |
 
 <!-- AGGREGATE-STORIES-START -->
 

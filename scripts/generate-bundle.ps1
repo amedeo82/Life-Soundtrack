@@ -78,6 +78,7 @@ $files = @(
     "docs/state/_index.md",
     "docs/state/stories/0.7-operations-runbook.md",
     "docs/state/stories/0.4-ui-import.md",
+    "docs/state/sessions/38-doc-sync-legacy.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",

@@ -24,18 +24,20 @@
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 14 (v1.2.5) | Backlog strutturato (epic → story → task) — v1.2.3: Story 0.4 PlatformCard 5 stati, Story 2.2 AC allineata, Story 4.3 Artwork enrichment · v1.2.5: Story 0.2 ✅ DONE, Story 0.3 sbloccata |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 38 (v1.6.0) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 19 (0001-0007) | Architecture Decision Records (0001-0003, 0005-0007; 0006 claim agenti, 0007 macchina a stati `status:*`) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 29 (0001-0008) | Architecture Decision Records (0001-0003, 0005-0008; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
+| 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 37 (Story 0.7, PR #64) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`) |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
 |------|-------|-------------|
+| [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.6 | Protocollo per agenti (Sessione 21: refactor catena [D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3-D5 hook extensions] + §"📤 Post-merge actions"; Sessione 20: push early + §"🛡️ Session start checklist" + §"🪝 Pre-commit hook"; Sessione 19: §"📦 Macchina a stati delle issue (status:*)" [ADR-0007] + campo `Closes #N` obbligatorio; Sessione 18: §"🎫 Presa in carico delle story" [ADR-0006]; Sessione 17: §"♻️ Pulizia branch post-merge") |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.16 | Protocollo per agenti (Sessione 38: ownership *blocchi aggregati vs sezioni legacy*; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -79,6 +81,7 @@
 | 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
 | 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
+| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -118,22 +121,25 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **14**
+- Sessioni migrate in state/sessions: **15**
 - Stories migrate in state/stories: **5** (done: 5)
-- Ultima sessione migrata: **S37** - Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending)
+- Ultima sessione migrata: **S38** - Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti
 - Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
 <!-- AGGREGATE-INDEX-STATUS-END -->
 
-### Dettaglio (legacy, post Sessione 24, PR #22 mergata 2026-10-18)
-- **Documenti APPROVED**: 9 (02 **v1.2**, 03, **05 v1.0**, 10 **v1.1**, 11 **v1.5.0**, 13-ADR ×6 (0006 + 0007 inclusi), 14)
-- **Documenti DRAFT**: 10 (00, 01, 04, 06, 07, 08, 09, 12, 15, 17, 18) — Boss ha deciso S13 di non promuoverli (D.13.8); 17 ora v0.2, 18 ora v0.6
+### Dettaglio (legacy — allineato alla Sessione 38, issue #90)
+
+> **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
+
+- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.0, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 7 ADR in `13-ADR/` (0001-0003, 0005-0008)
+- **Documenti DRAFT**: 11 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v0.6
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
-- **Implementazione**: 🟢 **Fase 0 tecnica: 5/7 story completate** — Story 0.1 (scaffold monorepo) merged (PR #2, squash `c0fb0a4`); Story 0.2 (schema DB e layer Dexie) merged in `main` (PR #4, merge commit `fa09b06`, 2026-10-17, CI ✅): 5/5 task + 5/5 AC (coverage `db/` 100%, AC 10k eventi < 500ms); Story 0.3 (Adapter Spotify) merged in `main` (PR #28, merge commit `3dc9654`, CI ✅): 90 passati / 1 todo (perf ≥50k `it.todo` su browser nativo); **Story 0.5 (PWA e service worker)** merged in `main` (PR #19, merge commit `0ebe8dad`, 2026-10-18T15:29:28Z, claim `kilo-HP-ELITEBOOK-3b3f`): `vite-plugin-pwa@^2.0.0` + Workbox (precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts); `useAppUpdate()` + `<UpdateBanner>` con prompt policy patch/minor/major (CTA "Più tardi" nascosta per major); manifest con icone 192/512/maskable/apple-touch generate da `scripts/generate-pwa-icons.mjs` (zero-deps, `node:zlib`); bundle 291 KB gzip 91 KB (budget 300 KB ✅); 33/33 test verdi; 4/4 AC verificati; Gate D.12.1 applicato nel branch. **Story 0.6 (i18n setup)** merged in `main` (PR #22, squash `06812d4` su `5235c88`, 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0`; `<T>` + `useT()` + `formatter.ts` (ICU plural) + `detector.ts` (localStorage→browser); IT/EN 185+185 voci; 8/8 test verdi; coverage 96%. Gate D.12.1 applicato nel branch. Story 0.4 (UI import) in attesa di 0.3 ✅; Story 0.7 (Operations runbook) in attesa di 0.2 ✅ + 0.5 ✅ + 0.6 ✅ → ora sbloccata.
+- **Implementazione**: 🟢 **Fase 0 tecnica completa: 7/7 story merged** — 0.1 scaffold (PR #2 `c0fb0a4`) · 0.2 schema DB Dexie (PR #4 `fa09b06`) · 0.3 adapter Spotify (PR #28 `3dc9654`) · 0.4 UI import onboarding (PR #71 `0a8e83f`) · 0.5 PWA e service worker (PR #19 `3fa3c0d`) · 0.6 i18n (PR #22 `5235c88`) · 0.7 operations runbook (PR #64 `b44420b`). Dettaglio per story in `docs/state/stories/` (fonte di verità) e `docs/18-DEV-LOG.md`.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
@@ -143,7 +149,7 @@
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico**: tutte le difese S19 + S20 + S21 + S23 + S24 sono live e in use da ≥1 agente (2026-10-18T15:09Z): Story 0.6 i18n (#5, PR #22) **merged** in main; Story 0.5 PWA (#7, PR #19) in risoluzione conflitti (cherry-pick `44c79d1` su `5235c88` con S23+S24 pre-integrate da agenti paralleli). Story 0.3 Adapter Spotify (#6) resta l'unica `agent-ready` libera + WIP stashato di 21 file di `kilo-HP-ELITEBOOK-jdtz` (issue `needs-spec` #23 aperta per decisione Boss). Story 0.4 (UI import) resta in attesa di 0.3, Story 0.7 (Operations runbook) richiede 0.2 ✅ + 0.5 ✅ + 0.6 ✅ — tutti in attesa di Story 0.3 + 0.5 (PWA). Pending Boss: (1) merge di PR #19 dopo questo commit, (2) decisione su issue #23 (rilascio claim #6 + adozione stash).
+- **Prossimo step tecnico** (aggiornato alla Sessione 38): la Fase 0 è chiusa e non ci sono issue aperte su GitHub. Il prossimo blocco è la **Fase 1 (EPIC 1 — Import core)**, bloccata su un prerequisito di specifica: le Story 1.1 (YouTube Music), 1.2 (Apple Music) e 1.3 (Last.fm + ListenBrainz) possono diventare `agent-ready` solo dopo aver scritto e approvato le rispettive specifiche adapter in `docs/03-ADAPTERS/` (oggi contiene solo `SPEC-TEMPLATE.md` e `spotify.md`; `01-PLATFORMS.md` è ancora 🟡 DRAFT). Ordine: (1) spec adapter YouTube Music + Apple Music + Last.fm/ListenBrainz, (2) fixture in `fixtures/synthetic-history/` per i nuovi adapter, (3) issue `agent-ready` per 1.1/1.2/1.3 (parallele). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
