@@ -2,7 +2,10 @@
 number: 41
 title: "Geo & contesto di ascolto: specifica e ADR"
 date: 2026-10-21
-state: 🟡
+state: 🟢
+merged: true
+merged_commit: 856c0f5
+merged_date: 2026-10-21T15:35:48+02:00
 branch: docs/41-geo-context-spec
 pr: 102
 claim: ""

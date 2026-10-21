@@ -3,6 +3,9 @@ number: 31
 title: "AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9)"
 date: 2026-10-19
 state: 🟢
+merged: true
+merged_commit: deeb245
+merged_date: 2026-10-19T16:08:28+02:00
 branch: docs/agents-md-v2-cleanup
 pr: 62
 claim: kilo-HP-ELITEBOOK-56535750

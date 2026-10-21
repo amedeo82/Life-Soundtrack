@@ -3,12 +3,13 @@ number: 23
 title: "🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20)"
 date: 2026-10-18
 state: 🟢
+merged: true
+merged_commit: 8a48e24e8c9d03c7272d1daa0e6d914b0a610f40
+merged_date: 2026-10-18T09:54:10Z
 branch: fix/20-pre-commit-unstaged-only-check
 pr: 21
 issue: 20
 claim: kilo-HP-ELITEBOOK-hc0f
-merged_commit: 8a48e24e8c9d03c7272d1daa0e6d914b0a610f40
-merged_date: 2026-10-18T09:54:10Z
 ---
 
 ## Sintesi

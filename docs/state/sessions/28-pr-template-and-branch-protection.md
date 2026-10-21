@@ -3,6 +3,9 @@ number: 28
 title: "GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N)"
 date: 2026-10-19
 state: 🟢
+merged: true
+merged_commit: 11897fb
+merged_date: 2026-10-19T15:23:07+02:00
 branch: feat/51-pr-template-and-branch-protection
 pr: 55
 claim: kilo-HP-ELITEBOOK-56535750

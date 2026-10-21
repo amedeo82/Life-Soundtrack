@@ -88,7 +88,10 @@ Storia: il caso reale e' la **Sessione 41** (2026-10-21): l'agente su #98 (spec 
 number: 22                          # numero sessione (intero)
 title: "..."                         # titolo breve della sessione
 date: 2026-10-18                     # data ISO
-state: 🟡 | 🟢                       # stato post-esito: 🟡 = merge pendente, 🟢 = chiusa
+state: 🟡 | 🟢                       # stato lavoro: 🟡 = in corso, 🟢 = chiuso (opzione C, issue #106)
+merged: true | false                 # se la PR/la sessione è stata mergiata (opzione C, issue #106)
+merged_commit: "sha"                 # merge commit SHA (post-merge, solo se merged=true)
+merged_date: "2026-10-21T15:35:48Z"  # data merge (post-merge, solo se merged=true)
 branch: feat/...                     # branch usato
 pr: 19                               # numero PR (0 se nessuna aperta)
 claim: kilo-...                      # agent-ID che ha fatto claim

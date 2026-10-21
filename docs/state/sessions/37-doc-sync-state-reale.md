@@ -2,7 +2,10 @@
 number: 37
 title: "Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending)"
 date: 2026-10-20
-state: 🟡
+state: 🟢
+merged: true
+merged_commit: 077981e
+merged_date: 2026-10-20T18:16:45+02:00
 branch: docs/84-doc-sync-state-reale
 pr: 85
 claim: kilo-HP-ELITEBOOK-52q4

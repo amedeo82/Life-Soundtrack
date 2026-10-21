@@ -3,6 +3,9 @@ number: 34
 title: "Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante"
 date: 2026-10-20
 state: 🟢
+merged: true
+merged_commit: dbd8a1b
+merged_date: 2026-10-20T12:14:25+02:00
 branch: fix/69-aggregate-determinism
 pr: 72
 claim: kilo-HP-ELITEBOOK-post-merge-review
