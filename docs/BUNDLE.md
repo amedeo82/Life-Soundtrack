@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 16:17
+> Data: 2026-10-21 18:20
 > Totale file: 65
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 64 (incluso 3 file aggregator-managed)
-- Dimensione totale: 690.6 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 18:07
+- Dimensione totale: 692.7 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 18:20
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -16298,6 +16298,16 @@ env:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
+    # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
+    # il job usa il default GitHub-managed token con scope `Contents: read`,
+    # `Metadata: read`, `Packages: read` — insufficiente per leggere le label.
+    # Aggiungiamo `issues: read` (lettura label repo) + rendiamo `contents: read`
+    # esplicito. `GH_TOKEN` viene passato via env allo step (vedi sotto).
+    permissions:
+      contents: read
+      issues: read
+      metadata: read
     steps:
       - uses: actions/checkout@v4
 
@@ -16365,6 +16375,11 @@ jobs:
       # Questo check impedisce che la tabella "Label disponibili" e le label reali
       # divergano silenziosamente (agenti che non riescono a etichettare le issue).
       - name: Label in sync con AGENTS.md (issue #110)
+        # Issue #120: `gh label list` richiede GH_TOKEN esplicito. Senza questo
+        # env lo step fallisce con `gh: To use GitHub CLI in a GitHub Actions
+        # workflow, set the GH_TOKEN environment variable.`
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/validate-labels.mjs
 
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
