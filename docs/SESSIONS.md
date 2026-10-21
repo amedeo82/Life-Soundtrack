@@ -2307,6 +2307,7 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 | 38-4 | Istruire un agente "non modificare i file globali" senza dire *cosa* può modificare produce PR che dichiarano fatti falsi con il massimo delle buone maniere | ✅ checklist e template ora dicono esattamente quali sezioni toccare |
 | 38-5 | Scrivere un marker aggregato completo (`<!-- AGGREGATE-X-START -->`) in una prosa **rompe il check**: il matching usa il primo match e finisce per misurare dal punto sbagliato (`Trovato: 7137 chars`) | ✅ in prosa si cita `AGGREGATE-X-*`, mai il marker per esteso |
 | 38-6 | La keyword di chiusura `Closes #90` era dentro una **casella di checklist** del body PR: GitHub non la riconosce, l'issue #90 è rimasta `OPEN` dopo il merge `a778add` nonostante la checklist fosse spuntata | ✅ chiusa a mano con l'audit retroattivo (ADR-0007); requisito reso esplicito in `AGENTS.md` + template (issue #92) |
+| 38-7 | La regex di `auto-status-done` matchava la keyword **ovunque nel body**: la PR #93 che *citava* `Closes #90` nella descrizione ha transizionato anche #90 (`status:done` + commento `release:` spurio, poi rimosso) | ✅ regex ancorata alla riga (issue #94): transiziona solo una riga che è esattamente la keyword + numero; per citarla si scrive `` `Closes` #N `` |
 
 ## Cross-refs
 
