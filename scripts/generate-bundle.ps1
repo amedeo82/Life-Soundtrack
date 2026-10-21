@@ -262,15 +262,22 @@ $bundleInventoryEnd   = "<!-- AGGREGATE-BUNDLE-INVENTORY-END -->"
 if (Test-Path $outputFile) {
     $existingBundle = Get-Content $outputFile -Raw -Encoding UTF8
     $sIdx = $existingBundle.IndexOf($bundleInventoryStart)
-    $eIdx = $existingBundle.IndexOf($bundleInventoryEnd, $sIdx)
-    if ($sIdx -ge 0 -and $eIdx -ge 0) {
-        $preservedBlock = $existingBundle.Substring($sIdx, $eIdx - $sIdx + $bundleInventoryEnd.Length)
-        # Inserisci il blocco preservato subito dopo l'header (dopo "> Totale file: ...").
-        $headerEnd = $newBundle.IndexOf("`n", $newBundle.IndexOf("> Totale file:"))
-        if ($headerEnd -lt 0) { $headerEnd = $newBundle.IndexOf("`n`n") + 1 }
-        if ($headerEnd -gt 0) {
-            $preservedBlockText = "`n`n" + $preservedBlock + "`n"
-            $newBundle = $newBundle.Substring(0, $headerEnd) + $preservedBlockText + $newBundle.Substring($headerEnd)
+    # Issue #117 (D.117.1): guard esplicito PRIMA della seconda IndexOf.
+    # Senza questo, se il marker AGGREGATE-BUNDLE-INVENTORY-START non e'
+    # ancora presente (es. fresh run su repo nuovo, prima che
+    # aggregate-state.ps1 abbia iniettato il blocco), $sIdx = -1 e la
+    # chiamata IndexOf(..., -1) lancia "Parameter 'startIndex' out of range".
+    if ($sIdx -ge 0) {
+        $eIdx = $existingBundle.IndexOf($bundleInventoryEnd, $sIdx)
+        if ($eIdx -ge 0) {
+            $preservedBlock = $existingBundle.Substring($sIdx, $eIdx - $sIdx + $bundleInventoryEnd.Length)
+            # Inserisci il blocco preservato subito dopo l'header (dopo "> Totale file: ...").
+            $headerEnd = $newBundle.IndexOf("`n", $newBundle.IndexOf("> Totale file:"))
+            if ($headerEnd -lt 0) { $headerEnd = $newBundle.IndexOf("`n`n") + 1 }
+            if ($headerEnd -gt 0) {
+                $preservedBlockText = "`n`n" + $preservedBlock + "`n"
+                $newBundle = $newBundle.Substring(0, $headerEnd) + $preservedBlockText + $newBundle.Substring($headerEnd)
+            }
         }
     }
 }

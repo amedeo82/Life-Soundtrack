@@ -37,6 +37,28 @@ else
   exit 0
 fi
 
+# Issue #117 (D.117.2): detection pwsh vs Windows PS 5.1.
+# Il guard fail-closed introdotto per issue #104 si attiva SOLO su Windows PS 5.1
+# call operator `&`, che interpreta `--check` come end-of-params + token posizionale.
+# Su pwsh (PS 7+) `--check` viene normalizzato a `-Check` PRIMA del param binding,
+# quindi il guard non si attiva (lo script esce 0 o 1 dal check, non 2 dall'arg).
+# I test T1-T3 verificano proprio l'uscita 2 del guard: devono skippare su pwsh.
+PS_IS_PWSH=0
+if [ "$PS" = "pwsh" ]; then
+  PS_IS_PWSH=1
+fi
+PS_5_1_AVAILABLE=0
+if [ "$PS" = "powershell" ] || command -v powershell.exe >/dev/null 2>&1; then
+  PS_5_1_AVAILABLE=1
+fi
+
+if [ "$PS_IS_PWSH" = "1" ]; then
+  echo "[INFO] Esecuzione con pwsh (PS 7+): i test T1-T3 (fail-closed su '--*') sono PROTETTIVI vs Windows PS 5.1 e saranno skippati."
+  echo "       T4 (--Check sync), T6 (--check via -File) e l'IndexOf fix restano attivi."
+else
+  echo "[INFO] Esecuzione con Windows PowerShell 5.1: tutti gli scenari del guard fail-closed eseguibili."
+fi
+
 if ! command -v git >/dev/null 2>&1; then
   echo "[SKIP] git non disponibile"
   exit 0
@@ -90,6 +112,10 @@ bundle_mtime() {
 }
 
 echo "=== T1: --check via & NON scrive BUNDLE.md ed esce 2 (il bugfix) ==="
+if [ "$PS_IS_PWSH" = "1" ]; then
+  echo "  [SKIP] T1: scenario specifico per Windows PS 5.1 call operator (issue #104). Su pwsh '--check' viene normalizzato a '-Check' prima del param binding, fail-closed guard non si attiva. Stesso test coperto per pwsh da T6 (--check via -File normalizza)."
+  echo "  [INFO] Su Windows PS 5.1 il guard fail-closed rileva '--check' ed esce 2 con messaggio 'ERRATO/CORRETTO', come nelle righe originali qui sotto."
+else
 {
   D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
 
@@ -132,8 +158,12 @@ echo "=== T1: --check via & NON scrive BUNDLE.md ed esce 2 (il bugfix) ==="
 
   cd /; rm -rf "$D"
 }
+fi
 
 echo "=== T2: --list via & NON scrive ed esce 2 ==="
+if [ "$PS_IS_PWSH" = "1" ]; then
+  echo "  [SKIP] T2: stesso motivo di T1 (Windows PS 5.1 call operator only)."
+else
 {
   D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
   run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
@@ -147,8 +177,12 @@ echo "=== T2: --list via & NON scrive ed esce 2 ==="
 
   cd /; rm -rf "$D"
 }
+fi
 
 echo "=== T3: --bogus (flag completamente sconosciuto) via & NON scrive ed esce 2 ==="
+if [ "$PS_IS_PWSH" = "1" ]; then
+  echo "  [SKIP] T3: stesso motivo di T1 (Windows PS 5.1 call operator only). Verifica analoga per pwsh: vedi --bogus coverage se aggiunto."
+else
 {
   D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
   run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
@@ -162,6 +196,7 @@ echo "=== T3: --bogus (flag completamente sconosciuto) via & NON scrive ed esce 
 
   cd /; rm -rf "$D"
 }
+fi
 
 echo "=== T4: -Check (singolo trattino) FUNZIONA, esce 0 se in sync ==="
 {
