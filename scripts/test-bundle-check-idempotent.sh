@@ -51,7 +51,7 @@ ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 # (BUNDLE.md e' il file che NON deve essere mai riscritto in check mode).
 make_repo() {
   local d="$1"
-  mkdir -p "$d/docs"
+  mkdir -p "$d/docs" "$d/scripts"
   cp "$SCRIPT" "$d/scripts/generate-bundle.ps1"
   (
     cd "$d" || exit 1

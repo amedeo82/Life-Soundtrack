@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 17:34
+> Data: 2026-10-21 17:48
 > Totale file: 64
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -16253,6 +16253,12 @@ jobs:
       # segnalato): un falso positivo qui perderebbe lavoro, quindi va bloccato.
       - name: Residui post-merge (issue #76)
         run: bash scripts/test-issue-76-residue.sh
+
+      # Issue #110: le label documentate in AGENTS.md devono esistere su GitHub.
+      # Questo check impedisce che la tabella "Label disponibili" e le label reali
+      # divergano silenziosamente (agenti che non riescono a etichettare le issue).
+      - name: Label in sync con AGENTS.md (issue #110)
+        run: node scripts/validate-labels.mjs
 
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
