@@ -36,7 +36,7 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 - [ ] Se ho aggiunto o rimosso un file in `docs/`, ho aggiornato la tabella documenti di `docs/INDEX.md` e l'array `$files` di `scripts/generate-bundle.ps1`
 - [ ] `pwsh scripts/generate-bundle.ps1 -Check` exit 0
 - [ ] `pwsh scripts/aggregate-state.ps1 -Check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
-- [ ] **NOTA**: `--check` (doppio trattino) esce ora 2 in PowerShell 5.1 (issue #104). Usare sempre `-Check`.
+- [ ] Se la PR tocca `docs/state/sessions/` o crea un nuovo `<N>-<slug>.md`, ho pre-allocato `N` con la procedura in `docs/state/_index.md` (issue #105): nessun `[FAIL] numeri di sessione duplicati` appare nell'output di `-Check`.
 
 ### Issue tracking
 

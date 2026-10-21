@@ -26,6 +26,10 @@
 #       (LF committed). Setup: file README.md con line endings miste LF+CRLF
 #       nel working tree; totale calcolato == dimensione LF committed; --
 #       check stabile dopo il toggle dei line endings.
+#   T9  collisione di `Number` tra due file di sessione (issue #105): il check
+#       emette il messaggio `[FAIL] N numeri di sessione duplicati` con i path
+#       di entrambi i file coinvolti ed esce con codice non-zero. -List mostra
+#       lo stesso WARN. Risolvibile rinominando uno dei due file.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -348,6 +352,77 @@ PSEOF
   else
     ng "byte-count raw identico: il test non distingue LF/CRLF"
   fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "=== T9: collisione di Number tra session file (issue #105) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+
+  # Snapshot dello stato "no collisioni".
+  out0="$(run_agg --check)"; rc0=$?
+  if [ $rc0 -eq 0 ]; then ok "baseline: --check exit 0 senza duplicati"; else ng "baseline --check exit $rc0"; fi
+
+  # Crea un duplicato: copia 32-trentadue.md come 32-alias-test.md (entrambi
+  # hanno Number=32 nel filename). Lo scenario reale e': due agenti paralleli
+  # scelgono entrambi "32" come nuovo numero di sessione.
+  cp docs/state/sessions/32-trentadue.md docs/state/sessions/32-alias-test.md
+
+  # --check deve emettere FAIL + exit non-zero.
+  out="$(run_agg --check)"; rc=$?
+  if [ $rc -ne 0 ]; then ok "--check exit non-zero ($rc) in presenza di duplicati"; else ng "--check exit 0 con duplicati: fail-open!"; echo "$out" | tail -8; fi
+
+  # Il messaggio [FAIL] deve nominare il Number coinvolto (32) e includere
+  # entrambi i path. Senza questo, il drift sarebbe "invisibile" come descritto
+  # nell'issue #105.
+  if echo "$out" | grep -q '\[FAIL\].*numeri di sessione duplicati'; then
+    ok "[FAIL] emette il messaggio 'numeri di sessione duplicati'"
+  else
+    ng "[FAIL] messaggio mancante: duplicati invisibili al check"
+  fi
+  if echo "$out" | grep -q 'Number=32'; then
+    ok "messaggio cita il Number=32 coinvolto"
+  else
+    ng "messaggio non cita il Number: l'agente non sa quale rinominare"
+  fi
+  if echo "$out" | grep -q '32-trentadue.md'; then
+    ok "messaggio cita il path '32-trentadue.md' (originale)"
+  else
+    ng "messaggio non cita il path originale"
+  fi
+  if echo "$out" | grep -q '32-alias-test.md'; then
+    ok "messaggio cita il path '32-alias-test.md' (duplicato)"
+  else
+    ng "messaggio non cita il path duplicato"
+  fi
+
+  # -List deve mostrare lo stesso WARN anche fuori da --check.
+  out_list="$(run_agg --list)" || true
+  if echo "$out_list" | grep -q 'numeri di sessione duplicati'; then
+    ok "-List evidenzia i duplicati con WARN"
+  else
+    ng "-List non evidenzia i duplicati"
+  fi
+
+  # Apply-mode (default write) deve continuare a SCRIVERE (il drift e' gia'
+  # su main, l'allineamento non lo risolve - serve intervento umano) ma
+  # emettere il WARN visibile.
+  out_apply="$(run_agg 2>&1)" || true
+  if echo "$out_apply" | grep -q '\[WARN\].*numeri di sessione duplicati'; then
+    ok "apply-mode emette [WARN] visibile ma continua a scrivere"
+  else
+    ng "apply-mode non emette [WARN]: drift invisibile anche qui"
+  fi
+
+  # Cleanup del duplicato: --check deve tornare a exit 0 (entrambi i file
+  # ora non sono piu' una collisione perche' rimane solo l'originale).
+  rm docs/state/sessions/32-alias-test.md
+  run_agg >/dev/null 2>&1
+  out1="$(run_agg --check)"; rc1=$?
+  if [ $rc1 -eq 0 ]; then ok "dopo rimozione duplicato: --check exit 0"; else ng "dopo rimozione: --check exit $rc1"; fi
 
   cd /; rm -rf "$D"
 }

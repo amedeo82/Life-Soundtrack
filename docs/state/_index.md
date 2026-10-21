@@ -38,6 +38,45 @@ docs/state/
 - `sessions/<N>-<slug>.md` — `N` = numero sessione (zero-padded a 2 cifre), `slug` = kebab-case del titolo
 - `stories/<id>-<slug>.md` — `id` = `0.5` / `1.2` / `2.1` (story-id), `slug` = kebab-case del titolo
 
+### Allocazione del numero di sessione *(vincolante, issue #105)*
+
+`N` in `sessions/<N>-<slug>.md` **deve essere univoco** nel momento in cui la PR viene aperta. Una collisione (due agenti paralleli scelgono lo stesso `N`) genera due righe "Sessione N" in `SESSIONS.md` + `docs/INDEX.md` (la tabella diventa formalmente in sync con se stessa ma semanticamente sbagliata) ed esce da `pwsh scripts/aggregate-state.ps1 -Check` con exit 0 = **fail-open**.
+
+**Procedura di pre-check obbligatoria prima di creare il file** (incluso il primo commit della worktree, vedi `scripts/setup-worktree.ps1` step 5):
+
+```powershell
+# 1. fetch + lookup del massimo N attualmente su origin/main
+git fetch origin
+
+$N = (git ls-tree --name-only origin/main docs/state/sessions/ |
+      Where-Object { $_ -match '^[0-9]+-' } |
+      ForEach-Object { [int]($_ -split '-')[0] } |
+      Measure-Object -Maximum).Maximum + 1
+
+# 2. sanity: lookup locale per evitare collisioni con file appena creati ma
+#    non ancora pushati (raro in pratica ma difesa in profondita)
+$NLocal = (Get-ChildItem docs/state/sessions/*.md |
+           ForEach-Object { [int]($_.BaseName -split '-')[0] } |
+           Measure-Object -Maximum).Maximum
+if ($NLocal -ge $N) { $N = $NLocal + 1 }
+
+Write-Host "Prossimo numero di sessione disponibile: $N"
+```
+
+**Difesa di seconda linea (rilevamento, non prevenzione)**: `aggregate-state.ps1` (issue #105) include `Find-DuplicateSessionNumbers`. In modalita' `-Check` se rileva due file con lo stesso `Number` emette:
+
+```
+[FAIL] 1 numeri di sessione duplicati (issue #105):
+  - Number=41:
+      docs/state/sessions/41-geo-context-spec.md
+      docs/state/sessions/41-alias.md
+  Rinumerare uno dei file (es. <N+1>-<slug>.md) e rieseguire il check.
+```
+
+…ed esce con codice 1. In modalita' default (apply) emette `[WARN]` ma continua a scrivere, perche' il drift a quel punto e' gia' su `main` e deve essere risolto da un intervento umano.
+
+Storia: il caso reale e' la **Sessione 41** (2026-10-21): l'agente su #98 (spec Apple Music) e l'agente su #99 (geo & contesto) hanno entrambi scelto `40` come numero di sessione. La PR #100 dell'altro agente e' stata mergiata mentre la #99 era in lavorazione; a meta' sessione `main` conteneva `40-apple-music-adapter-spec.md` e `40-geo-context-spec.md`. La collisione e' stata rilevata durante `git rebase` (lesson 41-4) e risolta rinumerando quest'ultimo a `41-geo-context-spec.md` + rebase manuale.
+
 ---
 
 ## Schema frontmatter
