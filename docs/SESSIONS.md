@@ -2306,10 +2306,12 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 | 38-3 | `setup-worktree.ps1` e `AGENTS.md` §"Primo task" imponevano ordini opposti (prima claim, poi worktree) | ✅ documentato l'ordine reale (worktree → claim) |
 | 38-4 | Istruire un agente "non modificare i file globali" senza dire *cosa* può modificare produce PR che dichiarano fatti falsi con il massimo delle buone maniere | ✅ checklist e template ora dicono esattamente quali sezioni toccare |
 | 38-5 | Scrivere un marker aggregato completo (`<!-- AGGREGATE-X-START -->`) in una prosa **rompe il check**: il matching usa il primo match e finisce per misurare dal punto sbagliato (`Trovato: 7137 chars`) | ✅ in prosa si cita `AGGREGATE-X-*`, mai il marker per esteso |
+| 38-6 | La keyword di chiusura `Closes #90` era dentro una **casella di checklist** del body PR: GitHub non la riconosce, l'issue #90 è rimasta `OPEN` dopo il merge `a778add` nonostante la checklist fosse spuntata | ✅ chiusa a mano con l'audit retroattivo (ADR-0007); requisito reso esplicito in `AGENTS.md` + template (issue #92) |
 
 ## Cross-refs
 
-- **#90** — issue di questo lavoro (chiusa dalla PR)
+- **#90** — issue di questo lavoro (chiusa dalla PR, dopo audit retroattivo: la keyword era dentro la checklist)
+- **#92** — resa esplicita la keyword di chiusura (lesson 38-6)
 - **#84 / #85** — S37: riconciliazione di `docs/state/`; il gap chiuso qui è il primo dei "Gap aperti" di quella sessione
 ```
 

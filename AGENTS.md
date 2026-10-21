@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.16 — Sessione 38 (2026-10-21)
+> Versione 1.17 — Sessione 38 (2026-10-21)
 
 ---
 
@@ -176,6 +176,22 @@ Il rilascio è **obbligatorio**: al merge o rifiuto della PR, in caso di abbando
 ### Chiusura al merge: campo `Closes #N` (obbligatorio)
 
 Ogni PR che risolve un'issue **deve** contenere **`Closes #N`**, **`Fixes #N`** o **`Resolves #N`** nel body. GitHub li riconosce e chiude automaticamente l'issue al merge. Vedi §"📝 Checklist di auto-revisione PR".
+
+**La keyword deve essere nuda, in una riga propria** (tipicamente subito sotto `## Issue`):
+
+```
+Closes #42
+```
+
+Non metterla **dentro backtick**, dentro una **casella di checklist**, o in una frase come "body PR include `Closes #N`": GitHub non la riconosce e l'issue resta `OPEN` dopo il merge, nonostante la checklist risulti spuntata. È successo con PR #91 (issue #90, merge `a778add`, 2026-10-21): la chiusura è stata fatta a mano con l'audit retroattivo qui sotto.
+
+**Auto-check prima di aprire la PR**:
+
+```powershell
+gh pr view <N> --json body --jq .body | Select-String '^\s*(Closes|Fixes|Resolves) #\d+'
+```
+
+Se non restituisce nulla, l'issue non verrà chiusa al merge.
 
 ### Audit retroattivo
 
@@ -521,7 +537,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
 - [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
 - [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
-- [ ] **Il body della PR include `Closes #N`** (o `Fixes #N` / `Resolves #N`) per l'issue che questa PR risolve — GitHub lo usa per chiudere automaticamente l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)")
+- [ ] **Il body della PR contiene la keyword di chiusura come riga nuda** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick e fuori dalle checklist**, così GitHub chiude l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
@@ -907,7 +923,9 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.16 — ownership *blocchi aggregati vs sezioni legacy* nei file globali (Sessione 38, issue #90). La regola "NON modificare `docs/INDEX.md`, `SESSIONS.md`, `11-BACKLOG.md`, `BUNDLE.md`" era applicata all'intero file, così le sezioni legacy non aggregate (prose, tabelle statiche, "Prossimo step tecnico") invecchiavano senza che nessun gate se ne accorgesse: al 2026-10-21 `11-BACKLOG.md` dichiarava 0.4/0.6/0.7 `⬚ TODO` mesi dopo il loro merge, e `INDEX.md` puntava a issue già chiuse. Ora:
+*Ultimo aggiornamento: v1.17 — keyword di chiusura `Closes #N` resa inequivocabile (Sessione 38, issue #92). Con PR #91 la keyword era comparsa dentro una casella di checklist del body: GitHub non la riconosce e l'issue #90 è rimasta `OPEN` dopo il merge, nonostante la checklist fosse spuntata. Ora §"Chiusura al merge" mostra la keyword come riga nuda, vieta backtick e checklist, e include un auto-check; il PR template espone il campo `Closes #` in posizione che GitHub legge.
+
+*Precedente v1.16 — ownership *blocchi aggregati vs sezioni legacy* nei file globali (Sessione 38, issue #90). La regola "NON modificare `docs/INDEX.md`, `SESSIONS.md`, `11-BACKLOG.md`, `BUNDLE.md`" era applicata all'intero file, così le sezioni legacy non aggregate (prose, tabelle statiche, "Prossimo step tecnico") invecchiavano senza che nessun gate se ne accorgesse: al 2026-10-21 `11-BACKLOG.md` dichiarava 0.4/0.6/0.7 `⬚ TODO` mesi dopo il loro merge, e `INDEX.md` puntava a issue già chiuse. Ora:
 - §"🔄 Lazy-state aggregation" → nuova sottosezione **"Chi può scrivere cosa nei file globali" (D.38.1)**: i blocchi `<!-- AGGREGATE-* -->` restano vietati a mano (con il perché), le sezioni legacy vanno **allineate nella stessa PR** che cambia i fatti che dichiarano, con l'anti-pattern della duplicazione
 - §"📝 Checklist di auto-revisione PR" + §"Checklist di sincronizzazione documentazione al merge" + §"🔄 Lazy-state aggregation → Checklist PR aggiuntiva": le tre voci "NON ho modificato direttamente …" diventano "NON ho modificato i **blocchi** `AGGREGATE-*`", con la voce nuova sull'allineamento delle sezioni legacy
 - §"🚀 Primo task": ordine worktree→claim (coerente con la validazione di `setup-worktree.ps1`, che rifiuta un'issue già `in-progress` — incoerenza segnalata in S37, lesson 37-6)
