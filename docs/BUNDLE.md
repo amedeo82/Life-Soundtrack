@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 13:34
-> Totale file: 59
+> Data: 2026-10-21 14:37
+> Totale file: 60
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 58 (incluso 3 file aggregator-managed)
-- Dimensione totale: 594.4 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 11:37
+- Totale file: 59 (incluso 3 file aggregator-managed)
+- Dimensione totale: 617.4 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 14:48
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 34 |
+| docs/ | 35 |
 | scripts/ | 13 |
 | fixtures/ | 1 |
 | .githooks/ | 4 |
@@ -1285,7 +1285,7 @@ Apache License
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 39 | SPEC-TEMPLATE + Spotify (🟢) + YouTube Music (🟡 DRAFT, S39) — Apple, Last.fm, ListenBrainz TBD |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 40 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢) + Apple Music (🟡 DRAFT, S40) — Last.fm, ListenBrainz TBD |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 9 (v1.0) | Architettura tecnica generale |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
@@ -1352,6 +1352,7 @@ Apache License
 | 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
 | 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
 | 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
+| 40 | Specifica adapter Apple Music (Story 1.2) | 🟡 | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1391,9 +1392,9 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **16**
+- Sessioni migrate in state/sessions: **17**
 - Stories migrate in state/stories: **5** (done: 5)
-- Ultima sessione migrata: **S39** - Specifica adapter YouTube Music (Story 1.1)
+- Ultima sessione migrata: **S40** - Specifica adapter Apple Music (Story 1.2)
 - Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -1419,7 +1420,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 39): EPIC 1 (Fase 1 — Import core). La spec adapter **YouTube Music è stata scritta** (S39, issue #96, `03-ADAPTERS/youtube-music.md` 🟡 DRAFT — promozione a 🟢 al merge); restano da scrivere le specifiche **Apple Music** (Story 1.2) e **Last.fm / ListenBrainz** (Story 1.3), poi i fixture in `fixtures/synthetic-history/` e le issue `agent-ready` per 1.1/1.2/1.3 (parallele). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
+- **Prossimo step tecnico** (aggiornato alla Sessione 40): EPIC 1 (Fase 1 — Import core). Spec adapter **YouTube Music 🟢 APPROVED** (S39, PR #97) e **Apple Music scritta** (S40, issue #98, `03-ADAPTERS/apple-music.md` 🟡 DRAFT — promozione a 🟢 al merge); resta da scrivere la specifica **Last.fm / ListenBrainz** (Story 1.3), poi i fixture in `fixtures/synthetic-history/` e le issue `agent-ready` per 1.1/1.2/1.3 (parallele). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -3813,6 +3814,72 @@ E.YT.1 (nomi localizzati → detection strutturale), E.YT.2 (video rimossi → s
 - Prossime: spec Apple Music (Story 1.2), spec Last.fm + ListenBrainz (Story 1.3, due file)
 ```
 
+### Sessione 40 - Specifica adapter Apple Music (Story 1.2)
+
+- **Data**: 2026-10-21
+- **Stato**: 🟡
+- **PR**: #0
+- **Claim**: `kilo-HP-ELITEBOOK-osfm`
+
+```
+
+# Sessione 40 — Specifica adapter Apple Music
+
+## Sintesi
+
+Seconda specifica dell'EPIC 1: `docs/03-ADAPTERS/apple-music.md` per la Story 1.2, compilata su `SPEC-TEMPLATE.md` v1.1. La ricerca 2026 ha rivelato che il Play Activity CSV (schema `2026.2`, ~143 colonne) è **molto più ricco** di quanto censito in `01-PLATFORMS.md` §3.3 (durata ascoltata e catalogo, End Reason Type, shuffle/offline, device, ISO Country) e allo stesso tempo ha un limite nuovo: la colonna `Artist Name` è stata **rimossa** dagli export 2026 (artista solo via `Container Artist Name` sparse o enrichment).
+
+Nella stessa PR: rettifica factuale della riga Apple in `02-DATA-SCHEMA.md` §2 (`Play Date UTC` appartiene al legacy; lo schema 2026.2 espone `Event Start/End Timestamp` — la regola "timestamp = fine ascolto" non cambia, solo il campo origine), allineamento `01-PLATFORMS.md` (§3.3, tabella §4, E9), e **promozione della spec YouTube Music a 🟢 APPROVED v1.0** (approvazione avvenuta col merge di PR #97, chiusa in S39).
+
+## Trigger
+
+Merge di PR #97 (spec YT Music APPROVED) → proseguimento del ciclo concordato: Apple Music (PR #2), poi Last.fm/ListenBrainz (PR #3), poi fixture + issue `agent-ready` per 1.1/1.2/1.3.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.40.1 | Fonti: Play Activity **+** Daily Tracks, ma il secondo SOLO come mappa candidati-artisti (regola unicità) e riconciliazione conteggi; MAI come ListenEvent | Scelta del Boss ("anche Daily Tracks"): non è joinabile per-riga con il Play Activity (nessuna chiave condivisa) → importarlo come eventi doppio-conterebbe; il suo valore è la copertura artisti ("Artista - Brano") e il segnale onesto di completezza |
+| D.40.2 | 1 riga `PLAY_END` con `Play Duration ≥ 30s` = 1 ListenEvent; `eventKey = 'apple_music:' + Event ID` (fallback sha1 per legacy); scrub `SCRUB_BEGIN` esclusi; stitching differito a job futuro | L'export è un event stream, non una lista di ascolti; l'Event ID dà idempotenza perfetta anche multi-part/multi-export; il stitching renderebbe l'idempotenza fragile tra export con bordi diversi (stesso tradeoff di YT D2) |
+| D.40.3 | Catena artista: `Artist Name` (legacy) → `Container Artist Name` (2026) → mappa Daily Tracks (brano con artista univoco) → `"Unknown"`; risoluzione completa via enrichment (Story 4.2) | `Artist Name` assente dal 2026.2; il Container Artist è l'artista del contenitore (approssimazione dichiarata); la mappa Daily Tracks entra solo con regola di unicità (mai match fuzzy) |
+| D.40.4 | Privacy: IP → regola `retainIp` (come Spotify); IP city/region/lat/long → scartati SEMPRE; country da `ISO Country`/`Store Country Name` senza passare dall'IP | L'export Apple include geolocalizzazione derivata dall'IP: più sensibile dell'IP stesso; nessun campo/toggle nello schema → scarto incondizionato (stesso approccio di YT per `locationInfos`) |
+| D.40.5 | Rettifica factuale `02§2` riga Apple + rettifica E9/tabella §4 in `01-PLATFORMS` | Il documento dichiarava campi che l'export attuale ha (e viceversa): doc-sync D.38.1 (sezioni legacy/fatti falsi); segnalato esplicitamente in review per l' APPROVED 02 |
+
+## Edge case nuovi catalogati
+
+E.AP.1 (event stream ≠ ascolti → 1 riga ≥30s = 1 evento + riconciliazione), E.AP.2 (`Artist Name` rimosso dal 2026.2 → catena fallback), E.AP.3 (legacy vs 2026.2 → tabella alias), E.AP.4 (ZIP annidato ≤5 livelli + multi-part), E.AP.5 (scrub: Play Duration = distanza jump → esclusi), E.AP.6 (album "Titolo - Single" → chiave normalizzata), E.AP.7 (radio: brani sì, idents no), E.AP.8 (snapshot → idempotenza via Event ID), E.AP.9 (~143 colonne → whitelist mapping).
+
+## Verifica
+
+- `scripts/generate-bundle.ps1 --check` → exit 0 (dopo rigenerazione con `$files` esteso)
+- `scripts/aggregate-state.ps1 --check` → exit 0 (dopo rigenerazione blocchi con la sessione 40)
+- Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Lesson learned
+
+| # | Osservazione |
+|---|--------------|
+| 40-1 | Su questa macchina (PS 5.1) gli script `--check` (`aggregate-state.ps1`, `generate-bundle.ps1`) riscrivono i file invece di solo-verificare: su `main` rigenerano l'header timestamp del BUNDLE e creano drift spurio — eseguire i writer SOLO dentro la worktree e ripristinare con `git checkout -- docs/BUNDLE.md` se capitato su main (incompatibilità PS 5.1 vs 7, issue #63) |
+| 40-2 | L'export Apple 2026 ha rimosso `Artist Name` dalle righe di play: chi pianifica import Apple deve contare su enrichment per gli artisti — bene verificare i formati REALI correnti prima di scrivere specifiche (stessa lezione di S39 con Takeout) |
+
+## Documenti aggiornati
+
+- `docs/03-ADAPTERS/apple-music.md` (**nuovo**) — la specifica
+- `docs/03-ADAPTERS/youtube-music.md` — promozione 🟢 APPROVED v1.0 (merge PR #97)
+- `docs/02-DATA-SCHEMA.md` — §2 riga Apple (factual fix) + changelog v1.3
+- `docs/01-PLATFORMS.md` — §3.3 riscritto, tabella §4 Apple, E9 rettificata, changelog 0.4
+- `docs/INDEX.md` — riga 03-ADAPTERS + "Prossimo step tecnico" (S40)
+- `docs/11-BACKLOG.md` — note righe 1.1/1.2 + changelog v1.6.2
+- `scripts/generate-bundle.ps1` — `$files` + `docs/BUNDLE.md` rigenerato
+- `docs/state/sessions/40-apple-music-adapter-spec.md` (**nuovo**) + blocchi aggregati rigenerati
+
+## Cross-refs
+
+- **#98** — issue di questo lavoro (spec Apple Music, Story 1.2)
+- **#96 / PR #97** — spec YT Music (🟢 APPROVED in questa PR)
+- Prossima: spec Last.fm + ListenBrainz (Story 1.3, due file separati)
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -5661,9 +5728,10 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 
 ### 3.3 Apple Music 🇺🇸 (molto diffusa in EU) — Tier A
 
-- **Accesso storico**: Apple Privacy Portal → "Apple Media Services" (CSV/JSON)
-- **Campi**: Song Name, Artist Name, Album Name, Play Date UTC, Media Type, Playlist Name
-- **Limiti**: nessun campo contestuale (skip/shuffle/device); API MusicKit senza audio features
+- **Spec adapter**: `03-ADAPTERS/apple-music.md` (Sessione 40)
+- **Accesso storico**: Apple Privacy Portal → "Apple Media Services information" → `Apple Music Play Activity.csv` (CSV, event stream)
+- **Campi 2026.2 (~143 colonne)**: Song Name, Album Name, Media/Play Duration (ms), Event Start/End Timestamp, End Reason Type, Shuffle Play, Offline, Device Type/OS, ISO Country, IP (con city/region/lat/long); ⚠️ `Artist Name` assente dal 2026 (solo legacy; fallback `Container Artist Name`)
+- **Limiti**: nessun ISRC/MBID/ID traccia stabile; artisti spesso Unknown (richiede enrichment); API MusicKit senza cronologia né audio features
 - **Scrobbling**: sì (scrobbler di terze parti)
 
 ### 3.4 Deezer 🇫🇷 — Tier A
@@ -5713,10 +5781,10 @@ Qobuz (export solo playlist), Bandcamp (solo acquisti), IDAGIO (classica), Boomp
 | Categoria | Spotify | YT Music | Apple | Deezer | Tidal | SoundCloud | Last.fm | ListenBrainz |
 |---|---|---|---|---|---|---|---|---|
 | Timestamp ascolto | ✅ | ✅ | ✅ | ✅ | ❌ | ️ | ✅ | ✅ |
-| Durata ascoltata | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Dispositivo | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| IP / Paese | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Skip / Shuffle / Offline | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Durata ascoltata | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Dispositivo | ✅ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| IP / Paese | ✅ | ⚠️ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Skip / Shuffle / Offline | ✅ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Ricerche | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Playlist con date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Brani salvati | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
@@ -5737,7 +5805,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | E6 | YouTube | Cronologia unifica video e musica | Falsi positivi musicali | Filtro su `products` + euristiche titolo/URL |
 | E7 | Deezer | Export GDPR storicamente lento (casi documentati di mesi) e incompleto | Storico mancante | Fallback: API + scrobbling; avviso utente |
 | E8 | SoundCloud | Export limitato a ~1000 brani; brani rimossi nel tempo | Storico troncato | Dichiarare limite all'utente; integrare con scrobbling |
-| E9 | Apple | Nessun campo contestuale | Analisi comportamentale limitata | Adattare insight disponibili |
+| E9 | Apple | Export legacy senza contesto; il Play Activity 2026.2 ha invece durata/skip/shuffle/device | Due generazioni di schema in circolazione | Adapter con alias 2026.2/legacy (`03-ADAPTERS/apple-music.md` §10); campi contestuali degradati sui legacy |
 | E10 | Tutte | Fusi orari: `ts` Spotify è UTC; Apple "Play Date UTC"; Takeout locale+UTC | Timeline sfalsata | Normalizzare tutto a UTC in fase di parse |
 
 ## 6. Strategia di integrazione MVP
@@ -5756,13 +5824,14 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: E1 validata in S2 (riferimento `03-ADAPTERS/spotify.md`); chiarita distinzione `PlatformId` (sorgenti) vs `scrobbleHubs` (Subsonic/Roon/Maloja) (M4) |
 | 0.3 | Sessione 39 (2026-10-21) | §3.2 allineato al formato Takeout verificato (header, subtitles, nomi localizzati, assenza durata); cross-ref spec adapter `03-ADAPTERS/youtube-music.md` (issue #96) |
+| 0.4 | Sessione 40 (2026-10-21, issue #98) | §3.3 riscritto sul Play Activity 2026.2 (~143 colonne: durate, End Reason Type, shuffle/offline, device, ISO Country; `Artist Name` assente); tabella §4 Apple aggiornata (durata ✅, dispositivo/IP/skip ⚠️); E9 rettificata (due generazioni di schema); cross-ref spec adapter `03-ADAPTERS/apple-music.md` |
 
 
 ===== FILE: docs/02-DATA-SCHEMA.md =====
 
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 13 (2026-10-16)
+> Status: 🟢 APPROVED · Versione 1.3 · Sessione 40 (2026-10-21)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -5781,7 +5850,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 |-------------|---------------|-----------|------------------------|
 | Spotify | `ts` | fine ascolto | `startedAt = ts - ms_played` |
 | YouTube Takeout | `time` | inizio azione | `timestamp = time + durata stimata` (durata da catalogo) |
-| Apple | `Play Date UTC` | inizio ascolto | `timestamp = playDate + durationMs` |
+| Apple | `Event End Timestamp` (Play Activity CSV) | fine segmento di ascolto | `timestamp = Event End Timestamp`, `startedAt = Event Start Timestamp`; legacy: `Play Date UTC` (inizio) → `timestamp = playDate + durationMs` |
 | Last.fm | `date` | inizio scrobble | `timestamp = date + durationMs` |
 | ListenBrainz | `listened_at` | inizio listen | `timestamp = listened_at*1000 + durationMs` |
 
@@ -6169,6 +6238,7 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: `genres: string[]` su Track/Artist (D.A.2); `carDetectionConsent` in PrivacySettings (C1); tabella `searchQueries` + interfaccia (D.A.3); `AudioFeatures.source` ripulito a `{acousticbrainz, essentia, heuristic, manual}` (D.A.6); schema Dexie portato a v2; `PatternPayload` esteso con `peakHour`, `peakDay`, `peakMonth`, `nightShare`, `weekendShare`, `userTimezone` (M6/M7) |
 | 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |
+| 1.3 | Sessione 40 (2026-10-21, issue #98) | §2: riga Apple aggiornata al formato reale dell'export (schema 2026.2: `Event Start/End Timestamp` del Play Activity CSV; `Play Date UTC` era del legacy aggregato). **Aggiornamento factuale**: nessuna modifica a interfacce (§3), regole DEDUP (§5) o schema Dexie (§6) |
 
 
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
@@ -6529,7 +6599,7 @@ Casi minimi:
 
 # Adapter YouTube Music
 
-> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 39 (2026-10-21)
+> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 40 (2026-10-21)
 > Piattaforma: YouTube Music (Google LLC)
 > Sede legale: USA
 > Tier: **S** · Priorità MVP: **sì**
@@ -6769,6 +6839,283 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.youtub
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 39 (2026-10-21) | Prima stesura (issue #96). Decisioni D1-D7 chiuse con il Boss; formato Takeout verificato su fonti 2026. Promozione a 🟢 APPROVED al merge della PR di approvazione |
+| 1.0 | Sessione 40 (2026-10-21) | 🟢 APPROVED · promozione al merge della PR #97 (approvazione Boss) — nessuna modifica di contenuto |
+
+
+
+===== FILE: docs/03-ADAPTERS/apple-music.md =====
+
+# Adapter Apple Music
+
+> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 40 (2026-10-21)
+> Piattaforma: Apple Music (Apple Inc.)
+> Sede legale: USA
+> Tier: **A** · Priorità MVP: **sì**
+> Spec collegata a: Story 1.2 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.3
+
+---
+
+## 1. Metodi di accesso
+
+| Canale | Disponibile | Formato output | Frequenza | Note |
+|--------|:-----------:|----------------|-----------|------|
+| Export GDPR | ✅ | CSV in ZIP (Apple Privacy Portal) | Manuale | "Apple Media Services information" → cartella `Apple Music Activity/` |
+| API pubblica | ❌ | — | — | MusicKit: nessun accesso alla cronologia di ascolto |
+| Scrobbling LB/L.fm | ✅ | — | Continuo | via scrobbler di terze parti; gestito da Story 1.5 |
+
+**Canale principale MVP**: Apple Privacy Portal. Non esiste alcun canale API per la cronologia di ascolto.
+
+**Cosa offre l'export 2026** (schema `2026.2`, ~143 colonne in `Apple Music Play Activity.csv`) — **molto più ricco di quanto censito in `01-PLATFORMS.md` §3.3 v0.2**: durata ascoltata (`Play Duration Milliseconds`), durata catalogo (`Media Duration In Milliseconds`), motivo fine (`End Reason Type`), shuffle/offline (`Shuffle Play`/`Offline`), dispositivo (`Device Type`, `Build Version`), Event ID stabile. **Cosa non offre**: ISRC/MBID, ID traccia stabile; la colonna `Artist Name` è **assente** negli export 2026 (presente nei legacy).
+
+## 2. Flusso di import
+
+[Stato iniziale] → [Rilevamento formato] → [Parsing streaming CSV] → [Filtro eventi (scrub/<30s/senza titolo)] → [Normalizzazione] → [Upsert DB]
+
+### 2.1 Come l'utente procura il file
+
+1. `privacy.apple.com` → **Get a copy of your data**
+2. Selezionare **"Apple Media Services information"** (le altre categorie non servono e gonfiano l'export)
+3. Confermare → attesa da 1 giorno a ~1 settimana (email con link)
+4. Scaricare **tutte le parti ZIP** se Apple divide l'archivio ("… Part 1 of N.zip")
+
+Struttura dell'archivio (i nomi sono stabili in inglese, verificato 2026):
+
+```
+<ZIP esterno>
+  Apple_Media_Services.zip          ← ZIP annidato, da espandere ricorsivamente (≤5 livelli)
+    Apple Media Activity/           ← denominazione varia per data di export
+      Apple Music Play Activity.csv                 ← log eventi (fonte primaria)
+      Apple Music - Play History Daily Tracks.csv   ← aggregato giornaliero (fonte secondaria, D1)
+      Apple Music - Track Play History.csv
+      Apple Music - Recently Played Tracks.csv
+      Apple Music Library Tracks.json.zip           ← libreria (fuori scope MVP)
+      Apple Music Likes and Dislikes.csv / …
+```
+
+### 2.2 Rilevamento formato (`detect`)
+
+- **ZIP (uno o più parti)**: fusione in memoria degli archivi, **espansione ricorsiva dei ZIP annidati** (fino a 5 livelli — Apple incapsula spesso `Apple_Media_Services.zip`), poi ricerca per **filename case-insensitive** a qualsiasi profondità:
+  - `Apple Music Play Activity.csv` → **richiesto** (fonte primaria)
+  - `Apple Music - Play History Daily Tracks.csv` → opzionale (fonte secondaria, §3.4)
+- **CSV singolo**: accettato se l'header contiene il sottoinsieme richiesto (§3.1, dopo risoluzione alias §10)
+- **Rifiuta**: altri CSV dell'archivio (es. `Click Activity`), file senza le colonne minime → `detect.fail` con guida all'utente
+- I nomi file sono **stabili in inglese** a prescindere dalla lingua dell'account (differenza chiave da Google Takeout, che localizza i path)
+
+### 2.3 Parsing
+
+- **PapaParse in streaming** (row mode): l'export può superare le 100k righe; encoding UTF-8 (BOM tollerato), delimitatore sniffed
+- **Fusione multi-part**: le righe di tutte le parti ZIP vengono trattate come un unico stream; l'idempotenza via `eventKey` deduplica le sovrapposizioni tra export ripetuti
+- **Aliasing colonne** (§10): export legacy (2015-2021, es. `Content Name`/`Artist Name`/`Store Country Name`) e 2026.2 (`Song Name`/`Artist Name` assente/`ISO Country`) mappati su campi canonici
+- **Filtro eventi** (§3.3): solo le righe candidate-ascolto diventano ListenEvent; il resto è scartato con contatori
+
+## 3. Mapping campi sorgente → unificato
+
+> **Schema di riferimento**: `02-DATA-SCHEMA.md` v1.1 — `ListenEvent` **piatto** con `trackId` come FK; i metadati del brano vivono sull'entità `Track` separata.
+>
+> **Semantica temporale**: la riga Apple di `02§2` cita `Play Date UTC` (campo dell'export legacy, assente nello schema 2026.2). L'export attuale fornisce `Event Start/End Timestamp` (ISO 8601 UTC con millisecondi): `timestamp` = **fine del segmento di ascolto**, `startedAt` = inizio. Aggiornamento factuale della riga `02§2` in questa PR (la regola `timestamp = fine ascolto` resta invariata).
+
+### 3.1 ListenEvent (top-level, piatto — vedi `02§3.2`)
+
+| Campo unificato | Campo sorgente | Tipo sorgente | Trasformazione | Note |
+|-----------------|----------------|---------------|----------------|------|
+| `eventKey` | `Event ID` | string | `'apple_music:' + Event ID` | **Stabile e univoco per riga** → idempotenza perfetta anche multi-export. Fallback (export legacy senza `Event ID`): `sha1(trackKey + '\|' + endTs + '\|' + playDuration)` |
+| `platform` | (fisso) | `PlatformId` | `'apple_music'` | — |
+| `importId` | (interno) | uuid | generato al parse | FK a `imports` |
+| `timestamp` | `Event End Timestamp` | ISO 8601 UTC | `Date.parse(endTs)` → unix ms | **Fine segmento di ascolto** (riga `PLAY_END`) |
+| `startedAt` | `Event Start Timestamp` | ISO 8601 UTC | `Date.parse(startTs)`; assente → `timestamp - durationMs` | Inizio segmento |
+| `durationMs` | `Play Duration Milliseconds` | int | diretto | Millisecondi **effettivamente ascoltati** (non la durata del brano) |
+| `trackId` | (interno) | uuid | **risolto dal core via DEDUP** (`02§5`) | adapter emette metadati §3.1.1 |
+| `completed` | `durationMs` + `Media Duration In Milliseconds` | bool | `durationMs >= mediaDuration - 5000` | Durata catalogo **presente nell'export** (a differenza di YT Music) |
+| `skipped` | `End Reason Type` + durate | bool \| null | regola §3.3 | `NATURAL_END_OF_TRACK` → false; skip espliciti → true; ignoti → soglia 80% |
+| `shuffle` | `Shuffle Play` | bool \| null | diretto | 2026.2; legacy → null |
+| `offline` | `Offline` | bool \| null | diretto | presente in entrambe le epoche |
+| `incognito` | — | — | `null` | Assente |
+| `reasonStart` | `Event Reason Hint Type` | string \| null | raw | enum Apple |
+| `reasonEnd` | `End Reason Type` | string \| null | raw | enum Apple (es. `NATURAL_END_OF_TRACK`, `MANUALLY_SELECTED_PLAYBACK_OF_A_DIFF_ITEM`, `SCRUB_BEGIN`) |
+| `deviceType` | `Device Type` / `Build Version` | `DeviceType` | mapping §3.2 | 2026.2 esplicito; legacy derivato da `Build Version` |
+| `deviceDetail` | `Device OS Name + Device OS Version` / `Build Version` | string \| null | raw | es. "iOS 18.2" / "Music/3.1 iOS/13.0 model/iPhone9,3" |
+| `ip` | `Client IP Address` | string \| null | **SOLO se `PrivacySettings.retainIp` true** | mai inviato in rete; `IP City/Region/Latitude/Longitude` scartati SEMPRE (§7, D4) |
+| `country` | `ISO Country` / `Store Country Name` | string \| null | `ISO Country` se ISO 3166-1 alpha-2 valido; altrimenti null | derivato anche se `ip` scartato; **senza passare dall'IP** |
+| `day` | (derivato) | `YYYY-MM-DD` | da `timestamp` UTC | indice critico |
+
+**Colonne mai persistite** (whitelist approach — l'export ne ha ~143): `Apple ID Number`, `Metrics Client ID`, `Metrics Bucket Id`, `Subscription User ID`, `Device Identifier` (hardware ID), `Evaluation Variant` (JSON), `IP City/Region/Latitude/Longitude`, `Referral ID`, e ogni colonna non mappata.
+
+### 3.1.1 Track (entità separata — vedi `02§3.3`)
+
+| Campo Track | Campo sorgente | Tipo sorgente | Trasformazione | Note |
+|-------------|----------------|---------------|----------------|------|
+| `name` | `Song Name` (alias: `Content Name` legacy) | string | `normalize(name)` (`02§5`); vuoto → **skip evento** con warning | — |
+| `artistId` | `Artist Name` (legacy) → `Container Artist Name` (2026) → mappa Daily Tracks (§3.4) → `"Unknown"` | string | risolto da `artists` (dedup per nome normalizzato) | Catena di fallback D3; il Container Artist è l'artista del contenitore (playlist/pagina artista), approssimazione dichiarata |
+| `albumId` | `Album Name` | string \| null | risolto da `albums` (dedup per nome+artistId); null se assente | Spesso "Titolo - Single": mantenuto raw, solo la **chiave** è normalizzata (E.AP.6) |
+| `durationMs` | `Media Duration In Milliseconds` | int \| null | diretto | **Durata catalogo** → DEDUP-3 con bucket reale (migliore di YT) |
+| `isrc` | — | — | `null` | Enrichment futuro (Story 4.2) |
+| `mbid` | — | — | `null` | Enrichment futuro |
+| `genres` | `Genre` | string[] | `[genre]` se presente (legacy); vuoto in 2026.2 | Enrichment per il resto |
+| `artworkUrl` | — | — | `null` | Enrichment (Story 4.3: cascata con iTunes Search) |
+| `platformIds` | — | — | `{}` (vuoto) | L'export non ha ID traccia stabile (`Shelf Content Identifier` inaffidabile, ~0.5% righe) |
+
+### 3.1.2 Artist / Album (entità separate — vedi `02§3.3`)
+
+L'adapter emette `{name, platformIds?}` per Artist (`platformIds` vuoto: nessun ID nell'export) e `{name, artistId, mbid: null, platformIds: {}}` per Album quando `Album Name` è presente. Il core fa upsert con dedup per nome normalizzato (Artist) o nome+artistId (Album).
+
+### 3.2 Library / Playlist (vedi `02§3.7`)
+
+**Fuori scope adapter MVP** (differite post-MVP, come YT Music):
+
+| Entità | Sorgente Takeout Apple | Blocco tecnico |
+|--------|------------------------|----------------|
+| LibraryItem `saved_track` | `Apple Music Library Tracks.json.zip` (JSON annidato in ZIP) | Fuori dagli AC della Story 1.2; formato JSON in ZIP aggiunge dipendenze di parsing |
+| Playlist / PlaylistItem | `Apple Music Library Playlists` / `Library Activity` | Identificatori interni non joinabili con il Play Activity |
+
+Segnalazione: `info.libraryDeferred`.
+
+### 3.3 Filtro eventi (edge case E.AP.1/E.AP.5) — decisione D2
+
+Il Play Activity è un **event stream** (play/pause/resume/scrub), non una lista di ascolti. Regola MVP (1 riga = 1 evento):
+
+```
+isCandidateRow(r):
+  1. r.eventType ∈ { 'PLAY_END', <assente/legacy> }         → candidata (altre tipologie: scartate)
+  2. r.endReasonType === 'SCRUB_BEGIN'                      → scartata (Play Duration = distanza di jump,
+                                                               non tempo ascoltato) + warning scrubSkipped
+  3. r.playDurationMs < 30000                               → scartata + warning shortSkipped
+     (30s: sotto-soglia, brani molto corti inclusi se quasi interi: durationMs >= mediaDuration - 5000)
+  4. r.songName vuota                                       → scartata + warning noTitleSkipped
+     (ident jingle radio, voiceover, contenuto senza titolo)
+  5. altrimenti                                             → ListenEvent
+```
+
+**Regola `skipped` derivata**:
+
+    isSkipped = endReasonType ∈ { 'MANUALLY_SELECTED_PLAYBACK_OF_A_DIFF_ITEM', 'SCRUB_BEGIN' }
+             OR (endReasonType ∈ { null, 'NOT_SPECIFIED' } AND durationMs < mediaDuration * 0.80)
+    NATURAL_END_OF_TRACK → false; valori enum ignoti → regola della soglia
+
+**Bias dichiarato (E.AP.1)**: pause/riprese generano righe PLAY_END multiple → lo stesso ascolto continuo può contare più eventi. Il stitching dei segmenti è **differito** a un job di normalizzazione futuro (fuori adapter MVP, come la correzione temporale YT); la riconciliazione Daily Tracks (§3.4) rende il bias visibile all'utente.
+
+### 3.4 Fonte secondaria: `Apple Music - Play History Daily Tracks.csv` (decisione D1)
+
+Il file è un **aggregato giornaliero** (`Date Played` YYYYMMDD o ISO, `Track Description` "Artista - Brano", `Play Duration Milliseconds`, `Play Count`). **Non è joinabile per-riga** con il Play Activity (nessuna chiave condivisa) → viene usato SOLO per:
+
+1. **Mappa candidati-artisti**: `Track Description` splittato alla **prima occorrenza di `" - "`** (con spazi) → `{songName, artistName}`; si costruisce `normalize(songName) → artistName` **solo se l'artista è univoco** per quel brano in tutto il file (in caso di ambiguità: nessuna associazione). La mappa entra nella catena di risoluzione artista di §3.1.1 (dopo `Container Artist Name`, prima di `"Unknown"`)
+2. **Riconciliazione conteggi**: `Σ(Play Count ?? 1)` su Daily Tracks vs numero di eventi importati; se lo scostamento relativo supera il 10% → warning informativo `warn.reconciliationMismatch` con entrambe le cifre (espone il bias E.AP.1 e le lacune di retention)
+
+**MAI importato come ListenEvent** (doppio conteggio con il Play Activity). La colonna `Play Count` non alimenta i contatori delle Track.
+
+## 4. Edge case noti
+
+Copia da `01-PLATFORMS.md` §5 (piattaforma Apple) + edge case specifici emersi in Sessione 40.
+
+| # | Descrizione | Impatto | Azione adapter |
+|---|-------------|---------|----------------|
+| E9 | *(retificato)* l'export 2026 HA durata/skip/shuffle/device — il limite vale solo per l'export legacy aggregato | Analisi comportamentale ora possibile | Mapping §3.1; legacy degradato via alias |
+| E10 | Fusi orari: `Event Start/End Timestamp` UTC con ms; `UTC Offset In Seconds` separato | Timeline sfalsata | Normalizzazione a UTC al parse; `day` UTC (schema) |
+| E.AP.1 | Event stream ≠ ascolti (pause/resume → righe multiple) | Conteggi sovrastimati | 1 riga ≥30s = 1 evento (D2); bias documentato; riconciliazione §3.4; stitching differito |
+| E.AP.2 | `Artist Name` **assente** nello schema 2026.2 (~143 colonne); `Container Artist Name` sparse | Artisti Unknown di massa | Catena di fallback D3 + mappa Daily Tracks + enrichment (Story 4.2) |
+| E.AP.3 | Due generazioni di schema (legacy `Content Name`/`Artist Name` vs 2026.2 `Song Name`/no artist) | Parsing errato | Tabella alias canonica (§10) con risoluzione per-preset |
+| E.AP.4 | ZIP annidato (`Apple_Media_Services.zip` dentro lo ZIP privacy) + archivio diviso in N parti | File non trovato | Espansione ricorsiva ≤5 livelli + fusione multi-part (§2.2) |
+| E.AP.5 | Righe scrub: `Play Duration` = distanza di jump | Durate assurde | Esclusione esplicita `SCRUB_BEGIN` (§3.3) |
+| E.AP.6 | `Album Name` spesso "Titolo - Single" | Album frammentati vs versioni album | Nome raw, chiave normalizzata; DEDUP via enrichment |
+| E.AP.7 | Radio: brani da stazioni da importare, idents/voiceover senza titolo | Falsi eventi | Filtro §3.3 (songName vuota → skip+warning) |
+| E.AP.8 | Ogni export è uno snapshot; re-import e parti multiple sovrappongono eventi | Duplicati | `eventKey = Event ID` idempotente |
+| E.AP.9 | ~143 colonne, molte con PII latente (ID Apple, Metrics ID, coordinate) | Leak di dati | Whitelist di mapping: solo le colonne di §3.1 entrano nel DB |
+
+## 5. Semantica temporale
+
+- `Event Start Timestamp` = inizio del segmento di ascolto; `Event End Timestamp` = **fine del segmento** (riga `PLAY_END`)
+- `timestamp` (unificato) = `Event End Timestamp` (coerente con la regola `02§2`: fine ascolto)
+- `startedAt` = `Event Start Timestamp`; assente → `timestamp - durationMs`
+- `durationMs` = `Play Duration Milliseconds` (tempo effettivo, non posizione nel brano)
+- Differenza dalla riga `02§2` corrente: `Play Date UTC` appartiene all'export legacy aggregato, non allo schema 2026.2 → riga aggiornata in questa PR (aggiornamento factuale, la regola non cambia)
+
+## 6. Dedup tracce
+
+- L'export **non fornisce ISRC né MBID** né ID traccia stabili → **DEDUP-3** (fuzzy name+artist) con **bucket reale** grazie a `Media Duration In Milliseconds` (non degradato come YT)
+- La catena di risoluzione artista (D3) riduce la frammentazione artisti; il rischio residuo è la fusione di omonime con durata simile (tradeoff `02§5` accettato)
+- Promozione post-enrichment: job `rekey()` (Story 1.4) quando MusicBrainz trova ISRC/MBID
+
+## 7. Comportamento privacy
+
+| Dato sensibile | Default | Note |
+|----------------|---------|------|
+| `Client IP Address` | scartato dopo nulla (il `country` NON deriva dall'IP) | conservato SOLO con `retainIp=true` (regola Spotify) |
+| `IP City/Region/Latitude/Longitude` | **sempre scartati** | più sensibili dell'IP stesso; nessun campo nello schema, nessun toggle → scarto incondizionato (D4) |
+| `Device Identifier` | sempre scartato | hardware ID persistente |
+| `Apple ID Number`, `Subscription User ID`, `Metrics *` | sempre scartati | identificativi account/telemetria |
+| `ISO Country` / `Store Country Name` | conservato in `country` | derivato **senza** passare dall'IP (privacy-by-design) |
+| Coordinate GPS | mai raccolte dall'adapter | — |
+
+## 8. Test — fixture attese
+
+File atteso: `fixtures/synthetic-history/apple-music-sample.csv` (**creato nella Story 1.2**, generato in modo deterministico secondo `10-TESTING.md` §3.5). Questa spec definisce i casi che il fixture deve coprire.
+
+Casi di test minimi:
+
+1. **Happy path**: 3 righe `PLAY_END` ben formate (schema 2026.2) → 3 ListenEvent, 3 track, `durationMs` reale
+2. **Idempotenza**: re-import dello stesso file → `eventsDuplicated = 3` (via `Event ID`)
+3. **Skip esplicito**: `End Reason Type = MANUALLY_SELECTED_PLAYBACK_OF_A_DIFF_ITEM` → `skipped = true`
+4. **Skip da soglia**: `End Reason Type = NOT_SPECIFIED`, `durationMs < 80% mediaDuration` → `skipped = true`
+5. **Completed**: `NATURAL_END_OF_TRACK` con `durationMs >= mediaDuration - 5000` → `completed = true`
+6. **E.AP.5 scrub**: riga `SCRUB_BEGIN` con `Play Duration` grande → scartata, warning
+7. **E.AP.1 sotto-soglia**: riga con `Play Duration < 30s` → scartata, warning
+8. **E.AP.2 artista**: riga senza `Artist Name` con `Container Artist Name` → artista dal container; senza container ma brano presente in Daily Tracks (univoco) → artista dalla mappa; altrimenti `"Unknown"`
+9. **E.AP.3 legacy**: righe con `Content Name`/`Artist Name`/`Store Country Name` → alias risolti, eventi importati
+10. **E.AP.4 ZIP**: ZIP con `Apple_Media_Services.zip` annidato + parte 2 → tutti gli eventi importati una volta sola
+11. **Privacy retainIp=false**: `ip = null`, `country` da `ISO Country`; colonne geo assenti dal DB
+12. **Privacy retainIp=true**: `ip` conservato; lat/long comunque assenti
+13. **E10 fuso**: eventi a cavallo di mezzanotte con offset locale → `day` UTC corretto
+14. **E.AP.7 radio**: riga da stazione radio con titolo → importata; ident senza titolo → scartata
+15. **Riconciliazione**: `Σ Play Count` Daily Tracks ≠ eventi (±>10%) → warning `warn.reconciliationMismatch`
+16. **DEDUP**: due righe stesso brano (segmenti diversi) → una sola Track (bucket reale)
+
+## 9. Segnalazione all'utente
+
+Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.apple_music.*` (allineato a `PlatformId`; `08§2.12` prevede già "analoghi per apple" — chiavi da aggiungere in Story 1.2):
+
+| Codice i18n | Messaggio (IT) | Quando |
+|-------------|----------------|--------|
+| `adapter.apple_music.detect.success` | "File Apple Music riconosciuto" | detect ok |
+| `adapter.apple_music.detect.fail` | "File non riconosciuto come export Apple Media Services" | detect ko |
+| `adapter.apple_music.warn.scrubSkipped` | "{count} eventi di scrubbing esclusi" | E.AP.5 |
+| `adapter.apple_music.warn.shortSkipped` | "{count} frammenti sotto i 30 secondi esclusi" | E.AP.1 |
+| `adapter.apple_music.warn.noTitleSkipped` | "{count} eventi senza titolo esclusi (jingle/ident radio)" | E.AP.7 |
+| `adapter.apple_music.warn.reconciliationMismatch` | "Riconciliazione: {daily} ascolti stimati da Apple, {events} eventi importati (pause e riprese possono contare doppio)" | §3.4 |
+| `adapter.apple_music.info.libraryDeferred` | "La libreria Apple Music non è inclusa in questo import (in arrivo)" | §3.2 |
+| `adapter.apple_music.info.complete` | "Import completato: {events} eventi, {tracks} brani unici" | fine |
+
+## 10. Note di implementazione
+
+- **PapaParse streaming** (già stack-adjacent: zero deps pesanti; row mode + `step` per grandi file); mai caricare il CSV intero
+- **Tabella alias canonica** (E.AP.3), risolta a colonna:
+
+| Canonico | 2026.2 | Legacy (2015-2021) |
+|----------|--------|---------------------|
+| songName | `Song Name` | `Content Name` |
+| artistName | *(assente)* | `Artist Name` |
+| containerArtist | `Container Artist Name` | *(assente)* |
+| albumName | `Album Name` | `Album Name` |
+| playDurationMs | `Play Duration Milliseconds` | `Play Duration Milliseconds` |
+| mediaDurationMs | `Media Duration In Milliseconds` | `Media Duration In Milliseconds` |
+| endTs / startTs | `Event End/Start Timestamp` | `Event End/Start Timestamp` |
+| endReason | `End Reason Type` | `End Reason Type` |
+| country | `ISO Country` | `Store Country Name` (solo alpha-2 accettato, altrimenti null) |
+| deviceDetail | `Device OS Name + Version` | `Build Version` |
+| eventId | `Event ID` | *(assente → sha1 fallback)* |
+
+- **Espansione ZIP**: riusare `fflate` (già dipendenza di `@ls/core` per lo ZIP Spotify); espansione ricorsiva ≤5 livelli + fusione multi-part in memoria
+- **Soglie come costanti**: `MIN_PLAY_MS = 30000`, `COMPLETION_TOLERANCE_MS = 5000`, `SKIP_RATIO = 0.80`, `RECONCILIATION_TOLERANCE = 0.10`
+- **Mappa Daily Tracks**: costruita prima del mapping Play Activity; regola unicità (un solo artista per brano normalizzato in tutto il file) — mai match fuzzy
+- **Whitelist colonne**: il mapper legge SOLO le colonne canoniche; ogni altra colonna (143 nel 2026) non lascia il parser (E.AP.9)
+- **Rate limit**: n/a (import locale, nessuna chiamata di rete)
+- **Enrichment artista completo** (iTunes Search/MusicBrainz): fuori adapter, Story 4.2/4.3
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 40 (2026-10-21) | Prima stesura (issue #98). Decisioni D1-D4 chiuse con il Boss; formato Apple 2026.2 verificato su fonti 2026. Promozione a 🟢 APPROVED al merge della PR di approvazione |
 
 
 
@@ -9844,8 +10191,8 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.1 Adapter YouTube Music | ⬚ TODO | 0.3 ✅ — spec scritta (S39, issue #96): `03-ADAPTERS/youtube-music.md` 🟡 DRAFT → `agent-ready` all'approvazione Boss |
-| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec adapter mancante (`01-PLATFORMS.md` §3.3) |
+| 1 | 1.1 Adapter YouTube Music | ⬚ TODO | 0.3 ✅ — spec 🟢 APPROVED (S39, PR #97 merged); issue `agent-ready` alla chiusura delle 3 spec |
+| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec scritta (S40, issue #98): `03-ADAPTERS/apple-music.md` 🟡 DRAFT → `agent-ready` all'approvazione Boss |
 | 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8) |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
@@ -9885,6 +10232,7 @@ Ogni story deve avere label GitHub:
 | 1.5.0 | 2026-10-18 (post-merge Sessione 22) | **Story 0.5 PWA e service worker** ora ✅ DONE: `useAppUpdate()` + `<UpdateBanner/>` + Workbox precache + NetworkFirst `/version.json` + CacheFirst Google Fonts + manifest con icone 192/512/maskable/apple-touch (generate via `scripts/generate-pwa-icons.mjs`, zero deps); `apps/web/index.html` esteso con theme-color, manifest link, apple-touch-icon; PR #19 (aperta) chiude #7; dettagli in `18-DEV-LOG §11` |
 | 1.6.0 | Sessione 38 (2026-10-21, issue #90) | **Allineamento della documentazione di stato legacy** (chiude il gap aperto in Sessione 38 di S37, D.37.2): la tabella "Stato di avanzamento" non duplica più le story `done` (fonte di verità = blocco `AGGREGATE-STORIES-*`) ed elenca solo la roadmap EPIC 1-6; allineate le righe `**Stato**` delle sezioni Story 0.3, 0.4, 0.5, 0.6, 0.7 (prima mancanti o stale); `AGENTS.md` v1.16 introduce la regola di ownership *blocchi aggregati vs sezioni legacy* |
 | 1.6.1 | Sessione 39 (2026-10-21, issue #96) | Nota Story 1.1 nella tabella roadmap: spec adapter YouTube Music scritta (`03-ADAPTERS/youtube-music.md`, 🟡 DRAFT — `agent-ready` all'approvazione Boss) |
+| 1.6.2 | Sessione 40 (2026-10-21, issue #98) | Note Story 1.1 (spec 🟢 APPROVED, PR #97) e 1.2 (spec scritta, 🟡 DRAFT) nella tabella roadmap |
 
 <!-- AGGREGATE-STORIES-START -->
 

@@ -65,9 +65,10 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 
 ### 3.3 Apple Music 🇺🇸 (molto diffusa in EU) — Tier A
 
-- **Accesso storico**: Apple Privacy Portal → "Apple Media Services" (CSV/JSON)
-- **Campi**: Song Name, Artist Name, Album Name, Play Date UTC, Media Type, Playlist Name
-- **Limiti**: nessun campo contestuale (skip/shuffle/device); API MusicKit senza audio features
+- **Spec adapter**: `03-ADAPTERS/apple-music.md` (Sessione 40)
+- **Accesso storico**: Apple Privacy Portal → "Apple Media Services information" → `Apple Music Play Activity.csv` (CSV, event stream)
+- **Campi 2026.2 (~143 colonne)**: Song Name, Album Name, Media/Play Duration (ms), Event Start/End Timestamp, End Reason Type, Shuffle Play, Offline, Device Type/OS, ISO Country, IP (con city/region/lat/long); ⚠️ `Artist Name` assente dal 2026 (solo legacy; fallback `Container Artist Name`)
+- **Limiti**: nessun ISRC/MBID/ID traccia stabile; artisti spesso Unknown (richiede enrichment); API MusicKit senza cronologia né audio features
 - **Scrobbling**: sì (scrobbler di terze parti)
 
 ### 3.4 Deezer 🇫🇷 — Tier A
@@ -117,10 +118,10 @@ Qobuz (export solo playlist), Bandcamp (solo acquisti), IDAGIO (classica), Boomp
 | Categoria | Spotify | YT Music | Apple | Deezer | Tidal | SoundCloud | Last.fm | ListenBrainz |
 |---|---|---|---|---|---|---|---|---|
 | Timestamp ascolto | ✅ | ✅ | ✅ | ✅ | ❌ | ️ | ✅ | ✅ |
-| Durata ascoltata | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Dispositivo | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| IP / Paese | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Skip / Shuffle / Offline | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Durata ascoltata | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Dispositivo | ✅ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| IP / Paese | ✅ | ⚠️ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Skip / Shuffle / Offline | ✅ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Ricerche | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Playlist con date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Brani salvati | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
@@ -141,7 +142,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | E6 | YouTube | Cronologia unifica video e musica | Falsi positivi musicali | Filtro su `products` + euristiche titolo/URL |
 | E7 | Deezer | Export GDPR storicamente lento (casi documentati di mesi) e incompleto | Storico mancante | Fallback: API + scrobbling; avviso utente |
 | E8 | SoundCloud | Export limitato a ~1000 brani; brani rimossi nel tempo | Storico troncato | Dichiarare limite all'utente; integrare con scrobbling |
-| E9 | Apple | Nessun campo contestuale | Analisi comportamentale limitata | Adattare insight disponibili |
+| E9 | Apple | Export legacy senza contesto; il Play Activity 2026.2 ha invece durata/skip/shuffle/device | Due generazioni di schema in circolazione | Adapter con alias 2026.2/legacy (`03-ADAPTERS/apple-music.md` §10); campi contestuali degradati sui legacy |
 | E10 | Tutte | Fusi orari: `ts` Spotify è UTC; Apple "Play Date UTC"; Takeout locale+UTC | Timeline sfalsata | Normalizzare tutto a UTC in fase di parse |
 
 ## 6. Strategia di integrazione MVP
@@ -160,3 +161,4 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: E1 validata in S2 (riferimento `03-ADAPTERS/spotify.md`); chiarita distinzione `PlatformId` (sorgenti) vs `scrobbleHubs` (Subsonic/Roon/Maloja) (M4) |
 | 0.3 | Sessione 39 (2026-10-21) | §3.2 allineato al formato Takeout verificato (header, subtitles, nomi localizzati, assenza durata); cross-ref spec adapter `03-ADAPTERS/youtube-music.md` (issue #96) |
+| 0.4 | Sessione 40 (2026-10-21, issue #98) | §3.3 riscritto sul Play Activity 2026.2 (~143 colonne: durate, End Reason Type, shuffle/offline, device, ISO Country; `Artist Name` assente); tabella §4 Apple aggiornata (durata ✅, dispositivo/IP/skip ⚠️); E9 rettificata (due generazioni di schema); cross-ref spec adapter `03-ADAPTERS/apple-music.md` |

@@ -1,6 +1,6 @@
 # Adapter YouTube Music
 
-> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 39 (2026-10-21)
+> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 40 (2026-10-21)
 > Piattaforma: YouTube Music (Google LLC)
 > Sede legale: USA
 > Tier: **S** · Priorità MVP: **sì**
@@ -240,3 +240,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.youtub
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 39 (2026-10-21) | Prima stesura (issue #96). Decisioni D1-D7 chiuse con il Boss; formato Takeout verificato su fonti 2026. Promozione a 🟢 APPROVED al merge della PR di approvazione |
+| 1.0 | Sessione 40 (2026-10-21) | 🟢 APPROVED · promozione al merge della PR #97 (approvazione Boss) — nessuna modifica di contenuto |
