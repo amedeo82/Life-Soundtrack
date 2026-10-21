@@ -374,6 +374,8 @@ Il flag `-Check` ha **semantica di fail-fast gate CI** (decisione cristallizzata
 
 Il job `bundle-check` è un **CI gate bloccante**: PR con BUNDLE.md non in sync non possono essere mergate finché l'agente non rigenera il bundle nella stessa PR (o, in emergenza, con `--no-verify` documentando la ragione).
 
+**Workflow automatico post-merge** (introdotto da issue #115, follow-up di PR #113): il workflow `.github/workflows/auto-bundle.yml` rigenera automaticamente `docs/BUNDLE.md` dopo ogni push a `main` che tocca `$files` o il bundle script stesso. Companion di `auto-state-aggregate.yml` (che gestisce i blocchi `<!-- AGGREGATE-* -->`); entrambi condividono il concurrency group `post-merge-main` con `cancel-in-progress: false` per serializzare le due rigenerazioni ed evitare race sul push di `BUNDLE.md`. Idempotente via guard `git diff --quiet docs/BUNDLE.md`.
+
 **Procedura di recovery** (per l'agente che vede il CI rosso):
 
 ```powershell
@@ -389,6 +391,35 @@ git commit -m "chore(bundle): rigenera BUNDLE.md post-modifiche docs"
 git push
 ```
 
+### 9.8b `auto-bundle.yml` (issue #115)
+
+Issue #115 e' un follow-up del drift BUNDLE.md che si e' verificato su `origin/main` dopo il merge di PR #112 (issue #105): PR #111 (issue #104) aveva aggiunto `scripts/test-bundle-check-idempotent.sh` al `$files` + rigenerato `BUNDLE.md` nella stessa PR (64 file), ma il workflow `auto-state-aggregate` post-merge aggiorna SOLO il blocco `<!-- AGGREGATE-BUNDLE-INVENTORY -->` in cima a `BUNDLE.md`, NON le sezioni `===== FILE: ... =====` che leggono l'array `$files`. Il rebase di PR #112 (issue #105) ha ereditato una versione di `BUNDLE.md` pre-rebase con 63 markers e `-Check` su main e' uscito 1.
+
+`auto-bundle.yml` chiude la classe di bug definitivamente:
+
+```yaml
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/generate-bundle.ps1'
+      - 'AGENTS.md'  - 'README.md'  - 'LICENSE'
+      - 'docs/**'  - 'scripts/**'  - '.githooks/**'
+      - '.github/**'  - 'fixtures/**'
+concurrency:
+  group: post-merge-main   # serializza con auto-state-aggregate.yml
+  cancel-in-progress: false
+```
+
+**Caratteristiche**:
+
+- Trigger: solo quando `$files` cambia (o un file coperto da esso). Push che tocca solo `apps/`, `packages/` ecc. NON fanno scattare il workflow.
+- Idempotente: `git diff --quiet docs/BUNDLE.md` skippa il commit se la rigenerazione non produce un diff reale.
+- Self-healing: chiude il drift anche se l'agente dimentica di rigenerare `BUNDLE.md` nella PR.
+- Compagna auto-state-aggregate: le due workflow partono entrambe sui push a main con paths `docs/**`, si serializzano via concurrency group ed evitano race sul push di `BUNDLE.md`.
+
+**Lezione operativa D.116.1**: durante un rebase con conflitti su `BUNDLE.md`, NON prendere `theirs/ours` ciecamente. Rigenerare SEMPRE `BUNDLE.md` con `pwsh scripts/generate-bundle.ps1` dopo il rebase (lo script riflette lo stato aggiornato di `$files` post-rebase).
+
 ---
 
 ## Changelog
@@ -397,3 +428,4 @@ git push
 |----------|------|-----------|
 | 0.1 | Sessione 8 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10); **nuovo §9 "Bundle script maintenance"** con comandi, convenzioni, CI check, workflow dev (post-review del bundle) |
+| 0.3 | Sessione 41 (2026-10-21) | **§9.8b auto-bundle.yml** (issue #115 follow-up di PR #113): nuovo workflow `.github/workflows/auto-bundle.yml` che rigenera automaticamente `docs/BUNDLE.md` (contenuto FILE) dopo ogni push a main che tocca `$files` o i file coperti da esso. Companion di `auto-state-aggregate.yml` (che gestisce solo i blocchi `AGGREGATE-*`); serializzate via concurrency group `post-merge-main`. Chiude strutturalmente la classe di drift "BUNDLE.md non in sync post-merge" identificata dal rebasing di PR #112. **§9.7b fail-closed su flag** (issue #104): `pwsh scripts/* --check` esce 2 in PS 5.1 (doppio trattino non mappato su switch), `-Check` (singolo) continua a funzionare. Tutti gli esempi del file ora usano `-Check`. |

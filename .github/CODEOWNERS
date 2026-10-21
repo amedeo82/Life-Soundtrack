@@ -26,7 +26,11 @@
 /.githooks/                             @amedeo82
 
 # GitHub Actions workflows (eseguiti ad ogni push/PR).
+# Modifica richiede attenzione (effetti su CI + agenti).
+# auto-bundle.yml: companion di auto-state-aggregate per rigenerare
+# docs/BUNDLE.md post-merge (issue #115 follow-up di PR #113).
 /.github/workflows/                     @amedeo82
+/.github/workflows/auto-bundle.yml      @amedeo82
 
 # PR template + CODEOWNERS + altre config GitHub.
 /.github/pull_request_template.md       @amedeo82

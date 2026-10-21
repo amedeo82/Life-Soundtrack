@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.20 — Sessione 41 (2026-10-21)
+> Versione 1.21 — Sessione 41 (2026-10-21)
 
 ---
 
@@ -740,13 +740,14 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### Livello 1 — Automazioni GH Action (no intervento manuale)
 
-Dopo il merge di una PR su `main` girano **quattro** workflow. Tre scattano sul `pull_request: closed` e uno è pianificato.
+Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; quattro PR-chiusi + due su push a main con concurrency group condiviso). Tre scattano sul `pull_request: closed` e due sono push-trigger serializzati.
 
 | Workflow | Trigger | Cosa fa |
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
-| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]` |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml` |
+| `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
 Dettagli e motivazioni:
@@ -940,7 +941,15 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.20 — rilevamento collisioni di numero di sessione (Sessione 41, issue #105). Il pre-check esistente in `docs/state/_index.md` (zero-padded a 2 cifre) era una convenzione "best effort" ma non impediva a due agenti paralleli di scegliere lo stesso `N` (lesson 41-4: S41 con S40 dell'altro agente). L'aggregator ordinava per `Number` + tie-break `Base` e produceva in SESSIONS.md / INDEX-roadmap due righe "Sessione N" indistinguibili e formalmente "in sync" con se stesse → `-Check` usciva 0 = fail-open. Aggiunti:
+*Ultimo aggiornamento: v1.21 — auto-bundle workflow post-merge (Sessione 41, issue #115 follow-up di PR #113). Il drift `docs/BUNDLE.md` (sezioni `===== FILE:`) rilevato dopo il merge di PR #112 era strutturalmente non prevenuto: `auto-state-aggregate.yml` aggiorna solo i blocchi `<!-- AGGREGATE-* -->` per design, e nessuna workflow rigenerava il contenuto FILE di `BUNDLE.md` post-merge. Aggiunti:
+- `.github/workflows/auto-bundle.yml` (nuovo, ~100 righe): trigger su push a main con paths che coprono `$files` + `scripts/generate-bundle.ps1` stesso. Esegue `pwsh scripts/generate-bundle.ps1`, skippa il commit via guard `git diff --quiet docs/BUNDLE.md` (idempotente), committa e pusha con `kilo-bot[bot]`
+- `.github/workflows/auto-state-aggregate.yml`: aggiunto blocco `concurrency: { group: post-merge-main, cancel-in-progress: false }` per serializzare le due workflow (evita race su push di `BUNDLE.md`)
+- `.github/CODEOWNERS`: aggiunto `/.github/workflows/auto-bundle.yml @amedeo82` alla sezione workflows
+- `generate-bundle.ps1` `$files`: aggiunto `.github/workflows/auto-bundle.yml` (coerenza: il workflow è incluso nel proprio bundle)
+- `docs/12-DEVOPS.md` §9.8b: nuova sottosezione "auto-bundle.yml (issue #115)" con sintesi del workflow, motivazione storica, lezione D.116.1; §9.8 aggiornato per cross-riferimento; changelog 0.3 con riepilogo
+- AGENTS.md v1.20 → v1.21, footer cumulativo v1.21 con sintesi del fix
+
+*Precedente v1.20 — rilevamento collisioni di numero di sessione (Sessione 41, issue #105). Il pre-check esistente in `docs/state/_index.md` (zero-padded a 2 cifre) era una convenzione "best effort" ma non impediva a due agenti paralleli di scegliere lo stesso `N` (lesson 41-4: S41 con S40 dell'altro agente). L'aggregator ordinava per `Number` + tie-break `Base` e produceva in SESSIONS.md / INDEX-roadmap due righe "Sessione N" indistinguibili e formalmente "in sync" con se stesse → `-Check` usciva 0 = fail-open. Aggiunti:
 - `scripts/aggregate-state.ps1`: nuova funzione `Find-DuplicateSessionNumbers` consumata da `Apply-Blocks` (WARN visibile ma scrive, perche' il drift a quel punto e' gia' su `main` e serve rinumerazione manuale) e `Test-Blocks` (FAIL + exit 1, fail-closed); `--list` evidenzia i duplicati
 - `scripts/test-aggregate-determinism.sh` T9 (5 assert, scenario "copia 32-issue-cleanup-cumulativo.md come 32-dup-test.md"): --check esce non-zero, il messaggio cita `Number=32` e i path di entrambi i file, -List mostra il WARN, apply-mode WARN+scrittura, dopo rimozione del duplicato --check torna a exit 0
 - `docs/state/_index.md`: nuova sottosezione vincolante "Allocazione del numero di sessione" con procedura di pre-check (`git fetch` + `git ls-tree origin/main docs/state/sessions/` + `Measure-Object -Maximum + 1`), incluse storia del caso reale e note di difesa in profondita' (controllo anche sui file locali non ancora pushati)
