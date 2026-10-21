@@ -6,7 +6,7 @@ export { AdapterError, type AdapterErrorCode } from './errors';
 export { sha1Hex, sha256Hex, uuid } from './crypto';
 export { canonicalKey, durationBucketMs, normalizeName, type CanonicalKeyInput } from './dedup';
 export { JsonArrayScanner, blobChunks, iterateJsonArrayElements } from './jsonStream';
-export { NormalizationPipeline } from './pipeline';
+export { NormalizationPipeline, applyCarConsent } from './pipeline';
 export {
   IMPORT_CHUNK_SIZE,
   importLibrary,

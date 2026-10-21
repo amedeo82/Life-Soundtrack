@@ -1,6 +1,6 @@
 # 19 — Geo & Contesto di ascolto
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 41 (2026-10-21)
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 41 (2026-10-21)
 > Da ratificare in: `02-DATA-SCHEMA.md` v1.3 (🟢 APPROVED), `09-PRIVACY-SECURITY.md`, `04-ANALYSIS-ALGORITHMS.md`
 > Decisione architetturale collegata: [`13-ADR/0009-local-ip-geolocation.md`](13-ADR/0009-local-ip-geolocation.md)
 
@@ -115,7 +115,7 @@ Algoritmo **deterministico e versionato**, non ML: same reasoni di `04-ANALYSIS-
 | # | Condizione | `kind` | Confidenza base |
 |---|---|---|:---:|
 | R1 | nessun `country` e nessun `deviceType` utile | `unknown` | — |
-| R2 | `deviceType = 'car'` (da `CarPlay`/`Android Auto`) | `car` | 0.9 |
+| R2 | `deviceType = 'car'` (da `CarPlay`/`Android Auto`) — solo se `carDetectionConsent` è attivo | `car` | 0.9 |
 | R3 | paese ≠ paese di riferimento (moda su 90gg) per ≥ 3 giorni | `travel` | 0.9 |
 | R4 | paese = riferimento, stessa fascia oraria (banda 2h) + stesso `deviceType`, ≥ 60% delle settimane | `home` | 0.7 |
 | R5 | paese = riferimento, ore 09-18 feriali + `deviceType ∈ {desktop, web}` + ricorrenza ≥ 50% | `work` | 0.6 |
@@ -129,7 +129,7 @@ Algoritmo **deterministico e versionato**, non ML: same reasoni di `04-ANALYSIS-
 - `confidence < 0.5` → il periodo **non viene aggregato** (E14).
 - Il paese di riferimento = moda dei `country` degli ultimi 90 giorni con almeno 30 eventi; altrimenti il paese più frequente dell'intero storico.
 - `userTimezone` deve essere persistito a livello app: oggi esiste solo dentro `PatternPayload.userTimezone` (`02` §4), che è un campo derivato — serve una sua copia nelle impostazioni per non dipendere dal ricalcolo.
-- `car` **inferito** (non da `deviceType='car'`) richiede `PrivacySettings.carDetectionConsent` (`02` §3.8). `car` **mappato** dalla stringa `platform` è dato grezzo e non richiede consenso.
+- Qualsiasi classificazione `car` — **inferita** dal pattern di ascolto **oppure** derivata da `deviceType='car'` (la stringa `platform` dell'export contiene `CarPlay`/`Android Auto`) — richiede `PrivacySettings.carDetectionConsent` (`02` §3.8). Senza consenso, `NormalizationPipeline` demuove `deviceType` a `unknown` in scrittura e `R2` non può mai scattare: il gate è applicato in `adapters/pipeline.ts` (`applyCarConsent`, issue #109), non nel classificatore. È la scelta coerente con `02` §3.8, che nomina esplicitamente CarPlay e Android Auto tra i segnali coperti dal consenso.
 
 ### 5.4 Cosa NON facciamo
 
@@ -185,7 +185,7 @@ Conseguenze di progetto, non rimandabili:
 | `retainDeviceType` | `true` | persistenza di `deviceType` | 8 valori granulari, nessun identificativo |
 | `retainDeviceDetail` | `false` | persistenza di `deviceDetail` | è la **stringa grezza** del provider (`"iPhone di Mario"`): dato identificante, opt-in |
 | `deriveContext` | `true` | classificazione L1 | non raccoglie nulla di nuovo: opera su dati già conservati |
-| `carDetectionConsent` | `false` | inferenza `car` | invariato (`02` §3.8) |
+| `carDetectionConsent` | `false` | classificazione `car` (mappata da `deviceType` + inferita) | invariato (`02` §3.8): senza consenso `deviceType='car'` non viene persistito (issue #109) |
 
 ⚠️ **Il default di `retainCountry` è la decisione più sensibile di questo documento** e va confermata dal Boss: `09-PRIVACY-SECURITY.md` §4 classifica oggi "Paese di connessione" come dato personale con base di liceità **consenso esplicito**, mentre `02` §3.8 lo conserva comunque. Il proposta risolve la contraddizione in favore di `02` (che è APPROVED) e allinea `09`; l'alternativa è invertire la scelta e metterlo a `false`. Finché non è deciso, la riga resta **bloccata** in `02` v1.3.
 
@@ -275,4 +275,5 @@ E1..E10 restano invariati (§5 `01-PLATFORMS.md`); E11..E15 si aggiungono a cata
 
 | Versione | Data | Modifiche |
 |---|---|---|
+| 0.2 | 2026-10-21 (issue #109) | Rimossa la deviazione da `02` §3.8: la distinzione "`car` mappato dalla stringa `platform` = dato grezzo, non richiede consenso". Il gate `carDetectionConsent` copre anche `deviceType='car'` derivato da CarPlay/Android Auto ed è applicato in scrittura dalla pipeline core (`applyCarConsent`); `R2` è condizionata al consenso; `deviceDetail` resta conservato. |
 | 0.1 | Sessione 41 (2026-10-21) | Prima stesura: L0/L1/L2, tassonomia `ContextKind`, classificatore deterministico, modello dei toggle + override per import, nastro contesto, revoca di D.39.8, edge case E11..E15 |
