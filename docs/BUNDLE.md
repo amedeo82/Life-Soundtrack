@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 11:08
+> Data: 2026-10-21 11:20
 > Totale file: 58
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 57 (incluso 3 file aggregator-managed)
-- Dimensione totale: 573.5 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 09:12
+- Dimensione totale: 575.4 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 11:20
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.17 — Sessione 38 (2026-10-21)
+> Versione 1.18 — Sessione 38 (2026-10-21)
 
 ---
 
@@ -208,21 +208,22 @@ Il rilascio è **obbligatorio**: al merge o rifiuto della PR, in caso di abbando
 
 Ogni PR che risolve un'issue **deve** contenere **`Closes #N`**, **`Fixes #N`** o **`Resolves #N`** nel body. GitHub li riconosce e chiude automaticamente l'issue al merge. Vedi §"📝 Checklist di auto-revisione PR".
 
-**La keyword deve essere nuda, in una riga propria** (tipicamente subito sotto `## Issue`):
+**La keyword deve comparire una sola volta nel body, nuda, in una riga propria** (tipicamente subito sotto `## Issue`):
 
 ```
 Closes #42
 ```
 
-Non metterla **dentro backtick**, dentro una **casella di checklist**, o in una frase come "body PR include `Closes #N`": GitHub non la riconosce e l'issue resta `OPEN` dopo il merge, nonostante la checklist risulti spuntata. È successo con PR #91 (issue #90, merge `a778add`, 2026-10-21): la chiusura è stata fatta a mano con l'audit retroattivo qui sotto.
+Non ripeterla **dentro backtick**, dentro una **casella di checklist**, o in una frase come "body PR include `Closes #N`": GitHub non la riconosce e l'issue resta `OPEN` dopo il merge, nonostante la checklist risulti spuntata. È successo con PR #91 (issue #90, merge `a778add`, 2026-10-21): la chiusura è stata fatta a mano con l'audit retroattivo qui sotto.
 
-**Auto-check prima di aprire la PR**:
+**Attenzione anche in senso inverso**: se la keyword compare *altrove* (in una descrizione, in una citazione), `auto-status-done.yml` la interpreta come una chiusura anche per quell'altra issue e le applica `status:done` + un commento `release:` spurio (è successo con PR #93 → issue #90, chiusa a mano dopo aver rimosso il commento). Per **citare** la keyword senza attivarla, spezzala: `` `Closes` #N `` invece di `` `Closes #N` ``.
+
+**Auto-check prima di aprire la PR** (deve restituire **esattamente una** riga):
 
 ```powershell
-gh pr view <N> --json body --jq .body | Select-String '^\s*(Closes|Fixes|Resolves) #\d+'
+$hits = @(gh pr view <N> --json body --jq .body | Select-String '^\s*(Closes|Fixes|Resolves)\s+#\d+\s*$')
+$hits.Count -eq 1   # 0 = l'issue non verra chiusa; >1 = transizioni su issue sbagliate
 ```
-
-Se non restituisce nulla, l'issue non verrà chiusa al merge.
 
 ### Audit retroattivo
 
@@ -568,7 +569,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
 - [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
 - [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
-- [ ] **Il body della PR contiene la keyword di chiusura come riga nuda** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick e fuori dalle checklist**, così GitHub chiude l'issue al merge (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
+- [ ] **Il body della PR contiene la keyword di chiusura come riga nuda e una sola volta** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick, fuori dalle checklist e senza ripetizioni**, così GitHub chiude l'issue al merge e `auto-status-done` non transiziona issue non collegate (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
@@ -954,7 +955,9 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.17 — keyword di chiusura `Closes #N` resa inequivocabile (Sessione 38, issue #92). Con PR #91 la keyword era comparsa dentro una casella di checklist del body: GitHub non la riconosce e l'issue #90 è rimasta `OPEN` dopo il merge, nonostante la checklist fosse spuntata. Ora §"Chiusura al merge" mostra la keyword come riga nuda, vieta backtick e checklist, e include un auto-check; il PR template espone il campo `Closes #` in posizione che GitHub legge.
+*Ultimo aggiornamento: v1.18 — la keyword di chiusura transiziona **solo** issue realmente collegate (Sessione 38, issue #94). `auto-status-done.yml` matchava `Closes #N` **ovunque** nel body: la PR #93, che *citava* la keyword nella descrizione, ha applicato `status:done` e un commento `release:` spurio all'issue #90 (commento rimosso a mano). La regex è ora ancorata alla riga (`/^[ \t]*(?:Closes|Fixes|Resolves)[ \t]+#(\d+)[ \t]*$/gim`): transiziona solo una riga che è *esattamente* la keyword + numero. §"Chiusura al merge" e il PR template dicono ora di scrivere la keyword **una sola volta**, nuda, e di spezzarla (`` `Closes` #N ``) quando serve citarla.
+
+*Precedente v1.17 — keyword di chiusura `Closes #N` resa inequivocabile (Sessione 38, issue #92). Con PR #91 la keyword era comparsa dentro una casella di checklist del body: GitHub non la riconosce e l'issue #90 è rimasta `OPEN` dopo il merge, nonostante la checklist fosse spuntata. Ora §"Chiusura al merge" mostra la keyword come riga nuda, vieta backtick e checklist, e include un auto-check; il PR template espone il campo `Closes #` in posizione che GitHub legge.
 
 *Precedente v1.16 — ownership *blocchi aggregati vs sezioni legacy* nei file globali (Sessione 38, issue #90). La regola "NON modificare `docs/INDEX.md`, `SESSIONS.md`, `11-BACKLOG.md`, `BUNDLE.md`" era applicata all'intero file, così le sezioni legacy non aggregate (prose, tabelle statiche, "Prossimo step tecnico") invecchiavano senza che nessun gate se ne accorgesse: al 2026-10-21 `11-BACKLOG.md` dichiarava 0.4/0.6/0.7 `⬚ TODO` mesi dopo il loro merge, e `INDEX.md` puntava a issue già chiuse. Ora:
 - §"🔄 Lazy-state aggregation" → nuova sottosezione **"Chi può scrivere cosa nei file globali" (D.38.1)**: i blocchi `<!-- AGGREGATE-* -->` restano vietati a mano (con il perché), le sezioni legacy vanno **allineate nella stessa PR** che cambia i fatti che dichiarano, con l'anti-pattern della duplicazione
@@ -1303,7 +1306,7 @@ Apache License
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.17 | Protocollo per agenti (Sessione 38: ownership *blocchi aggregati vs sezioni legacy* + keyword `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.18 | Protocollo per agenti (Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -3733,6 +3736,7 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 | 38-4 | Istruire un agente "non modificare i file globali" senza dire *cosa* può modificare produce PR che dichiarano fatti falsi con il massimo delle buone maniere | ✅ checklist e template ora dicono esattamente quali sezioni toccare |
 | 38-5 | Scrivere un marker aggregato completo (`<!-- AGGREGATE-X-START -->`) in una prosa **rompe il check**: il matching usa il primo match e finisce per misurare dal punto sbagliato (`Trovato: 7137 chars`) | ✅ in prosa si cita `AGGREGATE-X-*`, mai il marker per esteso |
 | 38-6 | La keyword di chiusura `Closes #90` era dentro una **casella di checklist** del body PR: GitHub non la riconosce, l'issue #90 è rimasta `OPEN` dopo il merge `a778add` nonostante la checklist fosse spuntata | ✅ chiusa a mano con l'audit retroattivo (ADR-0007); requisito reso esplicito in `AGENTS.md` + template (issue #92) |
+| 38-7 | La regex di `auto-status-done` matchava la keyword **ovunque nel body**: la PR #93 che *citava* `Closes #90` nella descrizione ha transizionato anche #90 (`status:done` + commento `release:` spurio, poi rimosso) | ✅ regex ancorata alla riga (issue #94): transiziona solo una riga che è esattamente la keyword + numero; per citarla si scrive `` `Closes` #N `` |
 
 ## Cross-refs
 
@@ -4900,6 +4904,7 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 | 38-4 | Istruire un agente "non modificare i file globali" senza dire *cosa* può modificare produce PR che dichiarano fatti falsi con il massimo delle buone maniere | ✅ checklist e template ora dicono esattamente quali sezioni toccare |
 | 38-5 | Scrivere un marker aggregato completo (`<!-- AGGREGATE-X-START -->`) in una prosa **rompe il check**: il matching usa il primo match e finisce per misurare dal punto sbagliato (`Trovato: 7137 chars`) | ✅ in prosa si cita `AGGREGATE-X-*`, mai il marker per esteso |
 | 38-6 | La keyword di chiusura `Closes #90` era dentro una **casella di checklist** del body PR: GitHub non la riconosce, l'issue #90 è rimasta `OPEN` dopo il merge `a778add` nonostante la checklist fosse spuntata | ✅ chiusa a mano con l'audit retroattivo (ADR-0007); requisito reso esplicito in `AGENTS.md` + template (issue #92) |
+| 38-7 | La regex di `auto-status-done` matchava la keyword **ovunque nel body**: la PR #93 che *citava* `Closes #90` nella descrizione ha transizionato anche #90 (`status:done` + commento `release:` spurio, poi rimosso) | ✅ regex ancorata alla riga (issue #94): transiziona solo una riga che è esattamente la keyword + numero; per citarla si scrive `` `Closes` #N `` |
 
 ## Cross-refs
 
@@ -14314,9 +14319,11 @@ Closes #
 - Issue: #
 - Tipo: [ ] story (adazione #N)  [ ] bug fix  [ ] docs  [ ] refactor  [ ] infra
 
-<!-- La riga "Closes #N" qui sopra DEVE restare nuda (niente backtick, niente casella di
-     checklist): solo così GitHub chiude l'issue al merge. Vedi AGENTS.md
-     §"Chiusura al merge: campo Closes #N (obbligatorio)". -->
+<!-- La riga di chiusura qui sopra DEVE restare nuda (niente backtick, niente casella di
+     checklist, una sola volta nel body): solo così GitHub chiude l'issue al merge e
+     `auto-status-done` non transiziona issue non collegate. Vedi AGENTS.md
+     §"Chiusura al merge: campo Closes #N (obbligatorio)". Per CITARE la keyword
+     senza attivarla, scrivere `Closes` #N (spaziata), mai `Closes #N`. -->
 
 ## Checklist di auto-revisione
 
@@ -14346,7 +14353,7 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 
 ### Issue tracking
 
-- [ ] Body PR contiene la keyword di chiusura come **riga nuda** (`Closes #N`, non dentro backtick né checklist) — GitHub auto-close al merge
+- [ ] La keyword di chiusura compare **una sola volta**, come **riga nuda** (non dentro backtick né checklist) — GitHub auto-close al merge e `auto-status-done` non transiziona issue non collegate
 - [ ] PR rimossa label `agent-ready` dall'issue + aggiunta `status:in-review` (vedi §"📦 Macchina a stati delle issue" in AGENTS.md)
 - [ ] Se l'issue aveva label `in-progress`, il comment `release:` verra postato dopo il merge (vedi §"📤 Post-merge actions")
 

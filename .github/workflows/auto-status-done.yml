@@ -41,8 +41,12 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Regex per "Closes #N", "Fixes #N", "Resolves #N" (case-insensitive)
-            const regex = /(?:Closes|Fixes|Resolves)\s+#(\d+)/gi;
+            // Keyword di chiusura: solo una riga che ESAATTAMENTE "Closes #N"
+            // (issue #94). La regex precedente matchava la keyword anche in prosa,
+            // backtick o checklist: una PR che *citava* `Closes #90` nella
+            // descrizione transizionava anche #90, con commento `release:` spurio.
+            // Per citare la keyword senza attivarla: scrivere `Closes` #N.
+            const regex = /^[ \t]*(?:Closes|Fixes|Resolves)[ \t]+#(\d+)[ \t]*$/gim;
             const matches = [...body.matchAll(regex)];
             const issueNumbers = [...new Set(matches.map(m => parseInt(m[1], 10)))];
 
