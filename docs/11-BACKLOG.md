@@ -497,8 +497,8 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.1 Adapter YouTube Music | ⬚ TODO | 0.3 ✅ — spec scritta (S39, issue #96): `03-ADAPTERS/youtube-music.md` 🟡 DRAFT → `agent-ready` all'approvazione Boss |
-| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec adapter mancante (`01-PLATFORMS.md` §3.3) |
+| 1 | 1.1 Adapter YouTube Music | ⬚ TODO | 0.3 ✅ — spec 🟢 APPROVED (S39, PR #97 merged); issue `agent-ready` alla chiusura delle 3 spec |
+| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec scritta (S40, issue #98): `03-ADAPTERS/apple-music.md` 🟡 DRAFT → `agent-ready` all'approvazione Boss |
 | 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8) |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
@@ -538,6 +538,7 @@ Ogni story deve avere label GitHub:
 | 1.5.0 | 2026-10-18 (post-merge Sessione 22) | **Story 0.5 PWA e service worker** ora ✅ DONE: `useAppUpdate()` + `<UpdateBanner/>` + Workbox precache + NetworkFirst `/version.json` + CacheFirst Google Fonts + manifest con icone 192/512/maskable/apple-touch (generate via `scripts/generate-pwa-icons.mjs`, zero deps); `apps/web/index.html` esteso con theme-color, manifest link, apple-touch-icon; PR #19 (aperta) chiude #7; dettagli in `18-DEV-LOG §11` |
 | 1.6.0 | Sessione 38 (2026-10-21, issue #90) | **Allineamento della documentazione di stato legacy** (chiude il gap aperto in Sessione 38 di S37, D.37.2): la tabella "Stato di avanzamento" non duplica più le story `done` (fonte di verità = blocco `AGGREGATE-STORIES-*`) ed elenca solo la roadmap EPIC 1-6; allineate le righe `**Stato**` delle sezioni Story 0.3, 0.4, 0.5, 0.6, 0.7 (prima mancanti o stale); `AGENTS.md` v1.16 introduce la regola di ownership *blocchi aggregati vs sezioni legacy* |
 | 1.6.1 | Sessione 39 (2026-10-21, issue #96) | Nota Story 1.1 nella tabella roadmap: spec adapter YouTube Music scritta (`03-ADAPTERS/youtube-music.md`, 🟡 DRAFT — `agent-ready` all'approvazione Boss) |
+| 1.6.2 | Sessione 40 (2026-10-21, issue #98) | Note Story 1.1 (spec 🟢 APPROVED, PR #97) e 1.2 (spec scritta, 🟡 DRAFT) nella tabella roadmap |
 
 <!-- AGGREGATE-STORIES-START -->
 

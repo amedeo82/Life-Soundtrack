@@ -87,6 +87,7 @@ $files = @(
     "docs/03-ADAPTERS/SPEC-TEMPLATE.md",
     "docs/03-ADAPTERS/spotify.md",
     "docs/03-ADAPTERS/youtube-music.md",
+    "docs/03-ADAPTERS/apple-music.md",
     "docs/04-ANALYSIS-ALGORITHMS.md",
     "docs/05-ARCHITECTURE.md",
     "docs/06-UX-FLOWS-STATES.md",

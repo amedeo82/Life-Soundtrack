@@ -1,6 +1,6 @@
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 13 (2026-10-16)
+> Status: 🟢 APPROVED · Versione 1.3 · Sessione 40 (2026-10-21)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -19,7 +19,7 @@
 |-------------|---------------|-----------|------------------------|
 | Spotify | `ts` | fine ascolto | `startedAt = ts - ms_played` |
 | YouTube Takeout | `time` | inizio azione | `timestamp = time + durata stimata` (durata da catalogo) |
-| Apple | `Play Date UTC` | inizio ascolto | `timestamp = playDate + durationMs` |
+| Apple | `Event End Timestamp` (Play Activity CSV) | fine segmento di ascolto | `timestamp = Event End Timestamp`, `startedAt = Event Start Timestamp`; legacy: `Play Date UTC` (inizio) → `timestamp = playDate + durationMs` |
 | Last.fm | `date` | inizio scrobble | `timestamp = date + durationMs` |
 | ListenBrainz | `listened_at` | inizio listen | `timestamp = listened_at*1000 + durationMs` |
 
@@ -407,3 +407,4 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
 | 1.1 | Sessione 9 (2026-10-15) | Audit: `genres: string[]` su Track/Artist (D.A.2); `carDetectionConsent` in PrivacySettings (C1); tabella `searchQueries` + interfaccia (D.A.3); `AudioFeatures.source` ripulito a `{acousticbrainz, essentia, heuristic, manual}` (D.A.6); schema Dexie portato a v2; `PatternPayload` esteso con `peakHour`, `peakDay`, `peakMonth`, `nightShare`, `weekendShare`, `userTimezone` (M6/M7) |
 | 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |
+| 1.3 | Sessione 40 (2026-10-21, issue #98) | §2: riga Apple aggiornata al formato reale dell'export (schema 2026.2: `Event Start/End Timestamp` del Play Activity CSV; `Play Date UTC` era del legacy aggregato). **Aggiornamento factuale**: nessuna modifica a interfacce (§3), regole DEDUP (§5) o schema Dexie (§6) |
