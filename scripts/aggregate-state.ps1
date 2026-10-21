@@ -86,9 +86,9 @@ param(
 # Vedi la nota in scripts/generate-bundle.ps1: in PS 5.1 con `&`,
 # `--check` viene interpretato come fine-dei-parametri + token posizionale
 # `check` che NON si lega a $Check. Senza questo guard lo script ricade
-# silenziosamente in modalita' default e aggiora i blocchi aggregati
+# silenziosamente in modalita' default e aggiorna i blocchi aggregati
 # mentre l'utente pensa di star solo verificando. Stessa logica applicata
-# a tutti gli script con switch di gate: un --check fail-silently su un
+# a tutti gli script con switch di gate: un -Check fail-silently su un
 # aggregator che scrive SESSIONS/BACKLOG/INDEX/BUNDLE e' anche peggio che
 # sul bundle, perche' puo' "verificare" con successo uno stato che lo
 # stesso check ha appena creato.
@@ -167,6 +167,43 @@ function Get-StateStoryFiles {
     # `Get-ChildItem` (filesystem-dipendente). Vedi issue #79 e il gate
     # `scripts/test-aggregate-determinism.sh` (T1+T2).
     } | Sort-Object { [version]$_.Id }
+}
+
+# === Issue #105 — guard anti-collisione sui numeri di sessione ===
+# Due agenti paralleli possono scegliere lo stesso `Number` per i loro file
+# `docs/state/sessions/<N>-<slug>.md` (lesson 41-4: S41 vs S40 dell'altro agente).
+# Senza un check esplicito l'aggregator ordina per `Number` e usa `Base` come
+# tie-break: il risultato e' che in SESSIONS.md e INDEX-roadmap compaiono
+# due righe "Sessione 40" senza nessun warning, e `aggregate-state.ps1 -Check`
+# esce 0 (perche' la tabella e' "in sync" con se' stessa). La collisione
+# e' solo visibile guardando i due frontmatter `number:` identici.
+#
+# Questa funzione rileva i duplicati e ritorna un array di oggetti
+# `{Number, Paths[]}` con **solo** i numeri che hanno piu' di un file.
+# L'output viene consumato sia da `Apply-Blocks` (WARN visibile in modalita'
+# default/dry-run, NON blocca perche' il drift e' gia' su `main`) che da
+# `Test-Blocks` (exit non-zero per il fail-closed del gate CI).
+#
+# NB: ritornare sempre un array (anche vuoto) - PS 5.1 unwrappa un singolo
+# oggetto in array di 1 elemento, ma `@()` resta vuoto. Per coerenza
+# normale il risultato a un `[object[]]` esplicito, cosi' `$dupes.Count`
+# funziona in modo predicibile dal chiamante.
+function Find-DuplicateSessionNumbers {
+    $files = @(Get-StateSessionFiles)
+    if ($files.Count -eq 0) { return , @() }
+    $groups = @($files | Group-Object -Property Number | Where-Object { $_.Count -gt 1 })
+    $dupes = New-Object System.Collections.Generic.List[object]
+    foreach ($g in $groups) {
+        $paths = New-Object System.Collections.Generic.List[string]
+        foreach ($f in $g.Group) {
+            [void]$paths.Add($f.Path)
+        }
+        [void]$dupes.Add([PSCustomObject]@{
+            Number = $g.Name
+            Paths  = $paths.ToArray()
+        })
+    }
+    return , $dupes.ToArray()
 }
 
 function Parse-Frontmatter {
@@ -432,6 +469,22 @@ function Find-Block {
 }
 
 function Apply-Blocks {
+    # Issue #105: avvisa SEMPRE di eventuali collisioni di `Number` tra i file
+    # state/sessions/, anche se l'applicazione dei blocchi va a buon fine (il
+    # drift e' gia' su `main`, l'allineamento non lo risolve - serve un
+    # intervento umano che rinumera uno dei due file).
+    $dupes = Find-DuplicateSessionNumbers
+    if ($dupes.Count -gt 0) {
+        Write-Host "[WARN] $($dupes.Count) numeri di sessione duplicati in docs/state/sessions/ (issue #105):" -ForegroundColor Yellow
+        foreach ($d in $dupes) {
+            Write-Host "  - Number=$($d.Number):" -ForegroundColor Yellow
+            foreach ($p in $d.Paths) {
+                Write-Host "      $p" -ForegroundColor Yellow
+            }
+        }
+        Write-Host "  Rinominare uno dei file in <N+1>-<slug>.md e rieseguire." -ForegroundColor Yellow
+    }
+
     foreach ($t in $targets) {
         $path = $t.Path
         $start = $t.Start
@@ -465,7 +518,26 @@ function Apply-Blocks {
 }
 
 function Test-Blocks {
+    # Issue #105: in --check una collisione di Number E' di per se' un drift
+    # semantico, anche se il blocco aggregato e' formalmente in sync (l'output
+    # contiene due righe "Sessione N" - sintomo del drift, non "in sync").
+    # Il check deve uscire non-zero per rendere il problema visibile al
+    # gate CI e al `auto-state-aggregate` workflow.
     $drift = $false
+
+    $dupes = Find-DuplicateSessionNumbers
+    if ($dupes.Count -gt 0) {
+        Write-Host "[FAIL] $($dupes.Count) numeri di sessione duplicati (issue #105):" -ForegroundColor Red
+        foreach ($d in $dupes) {
+            Write-Host "  - Number=$($d.Number):" -ForegroundColor Red
+            foreach ($p in $d.Paths) {
+                Write-Host "      $p" -ForegroundColor Red
+            }
+        }
+        Write-Host "  Rinumerare uno dei file (es. <N+1>-<slug>.md) e rieseguire il check." -ForegroundColor Yellow
+        $drift = $true
+    }
+
     foreach ($t in $targets) {
         $path = $t.Path
         $start = $t.Start
@@ -508,6 +580,18 @@ if ($List) {
     foreach ($f in Get-StateSessionFiles) { Write-Host "    [$($f.Number)] $($f.Base)" -ForegroundColor DarkGray }
     Write-Host "  stories/:  $stateStoriesDir"  -ForegroundColor Cyan
     foreach ($f in Get-StateStoryFiles) { Write-Host "    [$($f.Id)] $($f.Base)" -ForegroundColor DarkGray }
+    # Issue #105: --list evidenzia eventuali collisioni di Number.
+    $dupes = Find-DuplicateSessionNumbers
+    if ($dupes.Count -gt 0) {
+        Write-Host ""
+        Write-Host "[WARN] $($dupes.Count) numeri di sessione duplicati (issue #105):" -ForegroundColor Yellow
+        foreach ($d in $dupes) {
+            Write-Host "  Number=$($d.Number):" -ForegroundColor Yellow
+            foreach ($p in $d.Paths) {
+                Write-Host "    $p" -ForegroundColor Yellow
+            }
+        }
+    }
     Write-Host ""
     Write-Host "Target files (blocchi gestiti):" -ForegroundColor Cyan
     foreach ($t in $targets) { Write-Host "  $($t.Path)  markers=[$($t.Start) ... $($t.End)]" -ForegroundColor Cyan }
