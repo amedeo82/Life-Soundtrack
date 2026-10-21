@@ -57,10 +57,12 @@ Definire:
     │         ▼                                                   │
     │  [UI: timeline, ricordi, analisi]                           │
     │                                                             │
-    └─────────────────────────────────────────────────────────────┘
-                          │
-                          │ SOLO se toggle specifici ON:
-                          ▼
+     └─────────────────────────────────────────────────────────────┘
+
+**Nota (opzione A, issue #108)**: il `country` è derivato dall'IP e conservato **indipendentemente dal toggle `retainIp`** (`02` §3.8): anche quando l'IP viene scartato (`retainIp = false`), il paese resta nel DB locale come dato derivato non identificativo. Il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP stesso.
+
+                           │ SOLO se toggle specifici ON:
+                           ▼
     ┌─────────────────────────────────────────────────────────────┐
     │                    RETE (opzionale)                         │
     │                                                             │
@@ -98,12 +100,14 @@ Definire:
 | Dato | Categoria GDPR | Fonte | Persistito? | Base giuridica |
 |------|----------------|-------|-------------|----------------|
 | Cronologia ascolti (brano, artista, timestamp, durata) | Dati personali | Export utente | Sì (locale) | Consenso esplicito (art. 6.1.a) |
-| Paese di connessione | Dati personali | Derivato da IP | Sì (locale) | Consenso esplicito |
+| Paese di connessione | Dati personali (derivato, non identificativo) | Derivato da IP | Sì (locale) | Necessario al servizio — consenso solo per `retainIp` |
 | Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
 | Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale), `car` solo se `carDetectionConsent` | Consenso esplicito |
 | Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
 | Playlist e libreria | Dati personali | Export utente | Sì (locale) | Consenso esplicito |
 | Ricerche effettuate | Dati personali | Export Spotify | Sì (locale, opzionale) | Consenso esplicito |
+
+**Nota (opzione A, issue #108)**: il `country` (paese di connessione) è un **dato derivato e non identificativo**: viene derivato dall'IP al parse e conservato indipendentemente dal toggle `retainIp`, come definito in `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED). Non richiede consenso esplicito: il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP (`retainIp`) e per i trattamenti attivabili via toggle (`enrichMetadata`, `scrobbleHubs`, `syncCloud`, `carDetectionConsent`). Questo allinea `09` §4 a `02` §3.8 e scioglie la contraddizione segnalata in issue #108.
 
 **Nota sui dati derivati**: le inferenze di mood e stati emotivi possono rivelare
 caratteristiche personali profonde. Pur non essendo "categorie particolari" ex

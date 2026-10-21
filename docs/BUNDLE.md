@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 16:46
+> Data: 2026-10-21 20:31
 > Totale file: 65
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9650,10 +9650,12 @@ Definire:
     │         ▼                                                   │
     │  [UI: timeline, ricordi, analisi]                           │
     │                                                             │
-    └─────────────────────────────────────────────────────────────┘
-                          │
-                          │ SOLO se toggle specifici ON:
-                          ▼
+     └─────────────────────────────────────────────────────────────┘
+
+**Nota (opzione A, issue #108)**: il `country` è derivato dall'IP e conservato **indipendentemente dal toggle `retainIp`** (`02` §3.8): anche quando l'IP viene scartato (`retainIp = false`), il paese resta nel DB locale come dato derivato non identificativo. Il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP stesso.
+
+                           │ SOLO se toggle specifici ON:
+                           ▼
     ┌─────────────────────────────────────────────────────────────┐
     │                    RETE (opzionale)                         │
     │                                                             │
@@ -9691,12 +9693,14 @@ Definire:
 | Dato | Categoria GDPR | Fonte | Persistito? | Base giuridica |
 |------|----------------|-------|-------------|----------------|
 | Cronologia ascolti (brano, artista, timestamp, durata) | Dati personali | Export utente | Sì (locale) | Consenso esplicito (art. 6.1.a) |
-| Paese di connessione | Dati personali | Derivato da IP | Sì (locale) | Consenso esplicito |
+| Paese di connessione | Dati personali (derivato, non identificativo) | Derivato da IP | Sì (locale) | Necessario al servizio — consenso solo per `retainIp` |
 | Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
 | Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale), `car` solo se `carDetectionConsent` | Consenso esplicito |
 | Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
 | Playlist e libreria | Dati personali | Export utente | Sì (locale) | Consenso esplicito |
 | Ricerche effettuate | Dati personali | Export Spotify | Sì (locale, opzionale) | Consenso esplicito |
+
+**Nota (opzione A, issue #108)**: il `country` (paese di connessione) è un **dato derivato e non identificativo**: viene derivato dall'IP al parse e conservato indipendentemente dal toggle `retainIp`, come definito in `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED). Non richiede consenso esplicito: il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP (`retainIp`) e per i trattamenti attivabili via toggle (`enrichMetadata`, `scrobbleHubs`, `syncCloud`, `carDetectionConsent`). Questo allinea `09` §4 a `02` §3.8 e scioglie la contraddizione segnalata in issue #108.
 
 **Nota sui dati derivati**: le inferenze di mood e stati emotivi possono rivelare
 caratteristiche personali profonde. Pur non essendo "categorie particolari" ex
@@ -12286,7 +12290,7 @@ Conseguenze di progetto, non rimandabili:
 | `deriveContext` | `true` | classificazione L1 | non raccoglie nulla di nuovo: opera su dati già conservati |
 | `carDetectionConsent` | `false` | classificazione `car` (mappata da `deviceType` + inferita) | invariato (`02` §3.8): senza consenso `deviceType='car'` non viene persistito (issue #109) |
 
-⚠️ **Il default di `retainCountry` è la decisione più sensibile di questo documento** e va confermata dal Boss: `09-PRIVACY-SECURITY.md` §4 classifica oggi "Paese di connessione" come dato personale con base di liceità **consenso esplicito**, mentre `02` §3.8 lo conserva comunque. Il proposta risolve la contraddizione in favore di `02` (che è APPROVED) e allinea `09`; l'alternativa è invertire la scelta e metterlo a `false`. Finché non è deciso, la riga resta **bloccata** in `02` v1.3.
+**Decisione Boss (issue #108, opzione A)**: `retainCountry` default **`true`**. La contraddizione `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED: paese derivato e conservato indipendentemente dal toggle) vs `09-PRIVACY-SECURITY.md` §4 è risolta in favore di `02`: il `country` è un dato derivato e non identificativo, non richiede consenso esplicito (il consenso esplicito è richiesto solo per `retainIp`). `09` §4 è stato allineato di conseguenza (vedi nota in `09-PRIVACY-SECURITY.md`). La riga non è più bloccata.
 
 ### 7.2 Override per singolo import
 
