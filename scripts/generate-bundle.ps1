@@ -49,6 +49,31 @@ param(
     [switch]$Help
 )
 
+# === Fail-closed param guard (issue #104) ===
+# In Windows PowerShell 5.1, with `&`, the operator treats `--check` as the
+# end-of-parameters marker (`--`) plus the positional `check` token. The
+# positional token is silently appended to $args and never bound to $Check,
+# so the script falls through to the default WRITE mode while the user
+# believes they are running a check. Result: silent rewrite + exit 0 = fail-open.
+# PowerShell 7 (pwsh) normalises --foo to -foo before binding, so the
+# fallback only kicks in on PS 5.1 — exactly the environment issue #104 cites.
+#
+# Mitigation: scan $args and $MyInvocation.UnboundArguments for anything that
+# *looks* like an unknown switch (starts with `-` / `--`) and reject the
+# invocation with exit code 2 + a redirect to the correct single-dash form.
+# This converts the silent `--check` rewrite into a loud, actionable error.
+$flagLike = @()
+foreach ($a in @($args)) { if ($a -is [string] -and $a -match '^-') { $flagLike += $a } }
+foreach ($u in @($MyInvocation.UnboundArguments)) { if ($u -is [string] -and $u -match '^-') { $flagLike += $u } }
+if ($flagLike.Count -gt 0) {
+    Write-Host "[FAIL] Parametro sconosciuto: $($flagLike -join ' ')" -ForegroundColor Red
+    Write-Host "PowerShell 5.1 non mappa '--' su '-': usare il trattino singolo." -ForegroundColor Yellow
+    Write-Host "  ERRATO:   scripts/generate-bundle.ps1 --check" -ForegroundColor Yellow
+    Write-Host "  CORRETTO: scripts/generate-bundle.ps1 -Check" -ForegroundColor Green
+    Write-Host "Vedi issue #104 e AGENTS.md §Manutenzione del bundle script." -ForegroundColor Yellow
+    exit 2
+}
+
 if ($Help) {
     Get-Help $MyInvocation.MyCommand.Path -Full | Out-String | Write-Host
     exit 0
@@ -141,9 +166,14 @@ $files = @(
     # con lavoro non pushato non deve MAI essere segnalato) e fetch obbligatorio in
     # setup-worktree.ps1 prima di validare il branch base. Gate bloccante in CI.
     "scripts/test-issue-76-residue.sh",
-# Test di regressione per il determinismo dell'aggregator (issue #70): ordinamento
+    # Test di regressione per il determinismo dell'aggregator (issue #70): ordinamento
     # per valore, idempotenza byte-identica, round-trip --check. Gate bloccante in CI.
     "scripts/test-aggregate-determinism.sh",
+    # Test fail-closed dei flag in generate-bundle.ps1 (issue #104): in PowerShell 5.1
+    # con `&`, `--check` ricadeva silenziosamente in modalita' WRITING (fail-open)
+    # riscrivendo docs/BUNDLE.md invece di verificarla. Lo script esce ora 2 con
+    # messaggio esplicito quando `--*` viene passato per sbaglio. Gate bloccante in CI.
+    "scripts/test-bundle-check-idempotent.sh",
     # Validatore dei workflow GitHub Actions (Sessione 35 / issue #73): estrae i
     # blocchi `script:` di github-script e ne verifica la sintassi JS con node,
     # emulando il wrapper async reale. Gate bloccante in CI: un errore JS in un
