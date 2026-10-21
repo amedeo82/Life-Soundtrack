@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 15:06
+> Data: 2026-10-21 15:38
 > Totale file: 63
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 62 (incluso 3 file aggregator-managed)
-- Dimensione totale: 650.5 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 13:36
+- Dimensione totale: 651.5 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 15:38
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1354,7 +1354,7 @@ Apache License
 | 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
 | 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
 | 40 | Specifica adapter Apple Music (Story 1.2) | 🟡 | #100 |
-| 41 | Geo & contesto di ascolto: specifica e ADR | 🟡 | - |
+| 41 | Geo & contesto di ascolto: specifica e ADR | 🟡 | #102 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -3886,7 +3886,7 @@ E.AP.1 (event stream ≠ ascolti → 1 riga ≥30s = 1 evento + riconciliazione)
 
 - **Data**: 2026-10-21
 - **Stato**: 🟡
-- **PR**: #0
+- **PR**: #102
 - **Claim**: `-`
 
 ```
@@ -3935,6 +3935,15 @@ E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/
 - `scripts/generate-bundle.ps1 --check` → exit 0 (dopo rigenerazione con `$files` esteso)
 - `scripts/aggregate-state.ps1 --check` → exit 0 (dopo rigenerazione con la nuova Sessione 41)
 - Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Esito post-merge
+
+- PR **#102** mergata in `main` il 2026-10-21T13:35:49Z, merge commit **`856c0f5`**
+- CI: `quality` verde · `auto-branch-cleanup` verde · `auto-state-aggregate` verde (bot `c1d2ca2`)
+- `auto-status-done`: nessuna transizione, come previsto — la PR non contiene keyword di chiusura (`#99` resta `needs-spec`)
+- Procedura canonica `scripts/post-merge.ps1 -Branch docs/41-geo-context-spec` → exit 0: `main` allineato a `origin/main`, branch remoto già assente (idempotente), branch locale eliminato con `git branch -d`
+- Verifica post-merge (livello 3): `aggregate-state.ps1 -Check` exit 0 · `generate-bundle.ps1 -Check` exit 0 (63 file) · `post-merge.ps1 -Check` exit 0 (nessun residuo)
+- Risoluzione conflitto di numerazione: la PR iniziale era la **#101** su branch `docs/40-geo-context-spec`; chiusa e sostituita dalla **#102** su `docs/41-geo-context-spec` dopo che l'agente su #98 aveva mergiato la PR #100 numerando anch'egli la sua sessione come 40 (lesson 41-4)
 
 ## Lesson learned
 
@@ -5137,7 +5146,7 @@ title: "Geo & contesto di ascolto: specifica e ADR"
 date: 2026-10-21
 state: 🟡
 branch: docs/41-geo-context-spec
-pr: 0
+pr: 102
 claim: ""
 cross_refs: [99]
 tags: [docs, spec, geo, privacy, phase-1]
@@ -5187,6 +5196,15 @@ E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/
 - `scripts/generate-bundle.ps1 --check` → exit 0 (dopo rigenerazione con `$files` esteso)
 - `scripts/aggregate-state.ps1 --check` → exit 0 (dopo rigenerazione con la nuova Sessione 41)
 - Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Esito post-merge
+
+- PR **#102** mergata in `main` il 2026-10-21T13:35:49Z, merge commit **`856c0f5`**
+- CI: `quality` verde · `auto-branch-cleanup` verde · `auto-state-aggregate` verde (bot `c1d2ca2`)
+- `auto-status-done`: nessuna transizione, come previsto — la PR non contiene keyword di chiusura (`#99` resta `needs-spec`)
+- Procedura canonica `scripts/post-merge.ps1 -Branch docs/41-geo-context-spec` → exit 0: `main` allineato a `origin/main`, branch remoto già assente (idempotente), branch locale eliminato con `git branch -d`
+- Verifica post-merge (livello 3): `aggregate-state.ps1 -Check` exit 0 · `generate-bundle.ps1 -Check` exit 0 (63 file) · `post-merge.ps1 -Check` exit 0 (nessun residuo)
+- Risoluzione conflitto di numerazione: la PR iniziale era la **#101** su branch `docs/40-geo-context-spec`; chiusa e sostituita dalla **#102** su `docs/41-geo-context-spec` dopo che l'agente su #98 aveva mergiato la PR #100 numerando anch'egli la sua sessione come 40 (lesson 41-4)
 
 ## Lesson learned
 
