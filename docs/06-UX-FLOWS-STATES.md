@@ -1,6 +1,6 @@
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Status: 🟡 DRAFT · Versione 0.4 · Sessione 9 (audit 2026-10-15)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -34,7 +34,7 @@ Note: nessuna gestione errore (schermata statica).
 
 | Stato | Contenuto | CTA |
 |-------|-----------|-----|
-| `ready` | Shield + 3 garanzie + bottone | `i18n: onboarding.understood` → ③ |
+| `ready` | Shield + 3 garanzie (bullet) + 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`) + bottone | `i18n: onboarding.understood` → ③ |
 
 ### 2.3 ③ Import
 
@@ -218,7 +218,7 @@ Note: nessuna gestione errore (schermata statica).
 
 **Sezioni**:
 1. **Piattaforme collegate**: lista con stato (connected/disconnected) + reconnect/disconnect
-2. **Privacy**: 3 toggle + spiegazioni
+2. **Privacy**: 4 toggle (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`) + spiegazioni
 3. **Dati**: "Esporta tutto (JSON)" + "Cancella tutti i dati" (rosso, con conferma doppia)
 4. **Preferenze**: tema, lingua
 
@@ -370,3 +370,4 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: re-import esplicito come idempotente (M8) — niente blocco al doppio drop, dedup via `eventKey`; riferimento count-up al token `motion.countUp.duration` (M11) |
 | 0.3 | Sessione 13 (2026-10-16) | **M13 chiuso**: §2.3 Import ora esplicita i 5 stati della singola PlatformCard (`empty`/`validating`/`parsing`/`done`/`error`) con tabella + transizioni dettagliate. §2.14 demo-user.json ora punta a `fixtures/demo-user.json` (1 anno, 4500 eventi, flag `demoMode=true`) |
+| 0.4 | Sessione 42 (2026-10-21) | Allineamento §2.2 e §2.13 a 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`); risolto drift documentazione↔codice (issue #107) |
