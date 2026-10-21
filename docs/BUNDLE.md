@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 19:47
+> Data: 2026-10-21 22:02
 > Totale file: 65
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 64 (incluso 3 file aggregator-managed)
-- Dimensione totale: 693.9 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 18:40
+- Dimensione totale: 696.6 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-21 22:01
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1369,26 +1369,26 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-| Sessione | Nome | Stato | PR |
-|----------|------|-------|----|
-| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | #19 |
-| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | #21 |
-| 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | #22 |
-| 27 | Adozione worktree come default per agenti paralleli | 🟢 | #54 |
-| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟢 | #55 |
-| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟢 | #56 |
-| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟢 | #59 |
-| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟢 | #62 |
-| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟢 | #63 |
-| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟢 | #69 |
-| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟢 | #72 |
-| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
-| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
-| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
-| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
-| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
-| 40 | Specifica adapter Apple Music (Story 1.2) | 🟡 | #100 |
-| 41 | Geo & contesto di ascolto: specifica e ADR | 🟡 | #102 |
+| Sessione | Nome | Stato | Merged | PR |
+|----------|------|-------|--------|----|
+| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | âœ… | #19 |
+| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | âœ… | #21 |
+| 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | âœ… | #22 |
+| 27 | Adozione worktree come default per agenti paralleli | 🟢 | âœ… | #54 |
+| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟢 | âœ… | #55 |
+| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟢 | âœ… | #56 |
+| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟢 | âœ… | #59 |
+| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟢 | âœ… | #62 |
+| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟢 | âœ… | #63 |
+| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟢 | âœ… | #69 |
+| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟢 | âœ… | #72 |
+| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | âœ… | #74 |
+| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | âœ… | #77 |
+| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟢 | âœ… | #85 |
+| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟢 | âœ… | #91 |
+| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟢 | âœ… | #97 |
+| 40 | Specifica adapter Apple Music (Story 1.2) | 🟢 | âœ… | #100 |
+| 41 | Geo & contesto di ascolto: specifica e ADR | 🟢 | âœ… | #102 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1428,7 +1428,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **18**
+- Sessioni migrate in state/sessions: **18** (merge: 18)
 - Stories migrate in state/stories: **5** (done: 5)
 - Ultima sessione migrata: **S41** - Geo & contesto di ascolto: specifica e ADR
 - Stories done: 0.3, 0.4, 0.5, 0.6, 0.7
@@ -2488,7 +2488,7 @@ PR #22 merged (squash `06812d4` su `5235c88`), GH Action `auto-status-done` appl
 
 - **Data**: 2026-10-18
 - **Stato**: 🟢
-- **PR**: #19
+- **Merged**: âœ… PR #19 (0ebe8da, 2026-10-18T15:29:28Z)
 - **Claim**: `kilo-HP-ELITEBOOK-3b3f`
 
 ```
@@ -2535,7 +2535,7 @@ Prima implementazione di una PWA reale del progetto (vite-plugin-pwa@^2.0.0 + Wo
 
 - **Data**: 2026-10-18
 - **Stato**: 🟢
-- **PR**: #21
+- **Merged**: âœ… PR #21 (8a48e24e8c9d03c7272d1daa0e6d914b0a610f40, 2026-10-18T09:54:10Z)
 - **Claim**: `kilo-HP-ELITEBOOK-hc0f`
 
 ```
@@ -2588,7 +2588,7 @@ PR #21 merged `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, 
 
 - **Data**: 2026-10-18
 - **Stato**: 🟢
-- **PR**: #22
+- **Merged**: âœ… PR #22 (5235c88, 2026-10-18T17:02:00+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-7051`
 
 ```
@@ -2641,7 +2641,7 @@ PR #22 merged `5235c88` (2026-10-18T17:02Z +0200). Branch `feat/5-i18n-setup` el
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **PR**: #54
+- **Merged**: âœ… PR #54 (8bc20a4, 2026-10-19T16:24:57+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2708,7 +2708,7 @@ PR #54 (TBD) merged. Branch `feat/53-worktree-default` eliminata (policy §♻�
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **PR**: #55
+- **Merged**: âœ… PR #55 (11897fb, 2026-10-19T15:23:07+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2789,7 +2789,7 @@ PR #55 (TBD) merged. Branch `feat/51-pr-template-and-branch-protection` eliminat
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **PR**: #56
+- **Merged**: âœ… PR #56 (48a98dc, 2026-10-19T16:36:34+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2861,7 +2861,7 @@ PR #56 (TBD) merged. Branch `feat/52-adr-0008-v2-index-bundle` eliminata (policy
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **PR**: #59
+- **Merged**: âœ… PR #59 (58a42aa, 2026-10-19T15:44:47+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -2947,7 +2947,7 @@ PR #59 (TBD) merged. Branch `fix/58-crlf-and-workflow` eliminata (policy §♻�
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **PR**: #62
+- **Merged**: âœ… PR #62 (deeb245, 2026-10-19T16:08:28+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -3074,7 +3074,7 @@ Liberazione claim `kilo-HP-ELITEBOOK-56535750` con `release:` + merge SHA. Branc
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **PR**: #63
+- **Merged**: âœ… PR #63 (1c63465, 2026-10-19T18:48:17+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-cumulativo`
 
 ```
@@ -3176,7 +3176,7 @@ git status --porcelain                       # 4 file modificati (AGENTS.md, 12-
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **PR**: #69
+- **Merged**: âœ… PR #69 (397839e, 2026-10-20T11:10:53+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3314,7 +3314,7 @@ git status --porcelain                            # M AGENTS.md, M docs/BUNDLE.m
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **PR**: #72
+- **Merged**: âœ… PR #72 (dbd8a1b, 2026-10-20T12:14:25+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3409,7 +3409,7 @@ Idempotenza verificata sul repo reale: due run consecutivi producono `git diff` 
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **PR**: #74
+- **Merged**: âœ… PR #74 (f23ab14, 2026-10-20T12:26:59+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3497,7 +3497,7 @@ Le API Actions usate sono state verificate a mano: `github.core.notice` / `githu
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **PR**: #77
+- **Merged**: âœ… PR #77 (24d45b4, 2026-10-20T13:17:34+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -3611,8 +3611,8 @@ Casi di sicurezza verificati esplicitamente, perché sono quelli che costano:
 ### Sessione 37 - Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending)
 
 - **Data**: 2026-10-20
-- **Stato**: 🟡
-- **PR**: #85
+- **Stato**: 🟢
+- **Merged**: âœ… PR #85 (077981e, 2026-10-20T18:16:45+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-52q4`
 
 ```
@@ -3699,8 +3699,8 @@ Cause identificate:
 ### Sessione 38 - Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti
 
 - **Data**: 2026-10-21
-- **Stato**: 🟡
-- **PR**: #91
+- **Stato**: 🟢
+- **Merged**: âœ… PR #91 (a778add, 2026-10-21T11:00:00+02:00)
 - **Claim**: `kilo-hp-elitebook-36a7`
 
 ```
@@ -3786,8 +3786,8 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 ### Sessione 39 - Specifica adapter YouTube Music (Story 1.1)
 
 - **Data**: 2026-10-21
-- **Stato**: 🟡
-- **PR**: #97
+- **Stato**: 🟢
+- **Merged**: âœ… PR #97 (3877cd2, 2026-10-21T13:37:37+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-guck`
 
 ```
@@ -3853,8 +3853,8 @@ E.YT.1 (nomi localizzati → detection strutturale), E.YT.2 (video rimossi → s
 ### Sessione 40 - Specifica adapter Apple Music (Story 1.2)
 
 - **Data**: 2026-10-21
-- **Stato**: 🟡
-- **PR**: #100
+- **Stato**: 🟢
+- **Merged**: âœ… PR #100 (372e0a2, 2026-10-21T14:52:48+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-osfm`
 
 ```
@@ -3919,8 +3919,8 @@ E.AP.1 (event stream ≠ ascolti → 1 riga ≥30s = 1 evento + riconciliazione)
 ### Sessione 41 - Geo & contesto di ascolto: specifica e ADR
 
 - **Data**: 2026-10-21
-- **Stato**: 🟡
-- **PR**: #102
+- **Stato**: 🟢
+- **Merged**: âœ… PR #102 (856c0f5, 2026-10-21T15:35:48+02:00)
 - **Claim**: `-`
 
 ```
@@ -4856,7 +4856,10 @@ Storia: il caso reale e' la **Sessione 41** (2026-10-21): l'agente su #98 (spec 
 number: 22                          # numero sessione (intero)
 title: "..."                         # titolo breve della sessione
 date: 2026-10-18                     # data ISO
-state: 🟡 | 🟢                       # stato post-esito: 🟡 = merge pendente, 🟢 = chiusa
+state: 🟡 | 🟢                       # stato lavoro: 🟡 = in corso, 🟢 = chiuso (opzione C, issue #106)
+merged: true | false                 # se la PR/la sessione è stata mergiata (opzione C, issue #106)
+merged_commit: "sha"                 # merge commit SHA (post-merge, solo se merged=true)
+merged_date: "2026-10-21T15:35:48Z"  # data merge (post-merge, solo se merged=true)
 branch: feat/...                     # branch usato
 pr: 19                               # numero PR (0 se nessuna aperta)
 claim: kilo-...                      # agent-ID che ha fatto claim
@@ -5125,7 +5128,10 @@ Sblocca: nessuna story di Fase 0 (era l'ultima). Le prossime story sono EPIC 1 (
 number: 38
 title: "Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti"
 date: 2026-10-21
-state: 🟡
+state: 🟢
+merged: true
+merged_commit: a778add
+merged_date: 2026-10-21T11:00:00+02:00
 branch: feat/90-docs-allineare-la-documentazione-di-stat
 pr: 91
 claim: kilo-hp-elitebook-36a7
@@ -5217,7 +5223,10 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 number: 41
 title: "Geo & contesto di ascolto: specifica e ADR"
 date: 2026-10-21
-state: 🟡
+state: 🟢
+merged: true
+merged_commit: 856c0f5
+merged_date: 2026-10-21T15:35:48+02:00
 branch: docs/41-geo-context-spec
 pr: 102
 claim: ""
@@ -5552,11 +5561,18 @@ function Build-Block-Sessions {
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
+        $merged = if ($parsed.Frontmatter['merged'] -eq 'true') { $true } else { $false }
+        $merged_commit = if ($parsed.Frontmatter['merged_commit']) { $parsed.Frontmatter['merged_commit'] } else { "-" }
+        $merged_date = if ($parsed.Frontmatter['merged_date']) { $parsed.Frontmatter['merged_date'] } else { "-" }
         [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
         [void]$sb.Append("" + "`n")
         [void]$sb.Append("- **Data**: $date" + "`n")
         [void]$sb.Append("- **Stato**: $state" + "`n")
-        [void]$sb.Append("- **PR**: #$pr" + "`n")
+        if ($merged) {
+            [void]$sb.Append("- **Merged**: ✅ PR #$pr ($merged_commit, $merged_date)" + "`n")
+        } else {
+            [void]$sb.Append("- **Merged**: ❌ non ancora mergiato (PR #$pr)" + "`n")
+        }
         [void]$sb.Append("- **Claim**: $($b + $claim + $b)" + "`n")
         [void]$sb.Append("" + "`n")
         [void]$sb.Append('```' + "`n")
@@ -5614,6 +5630,16 @@ function Build-Block-IndexStatus {
     $sessionCount = $sessions.Count
     $storyCount = $stories.Count
 
+    # Sessions per merge status
+    $mergedSessions = 0
+    foreach ($f in $sessions) {
+        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $p = Parse-Frontmatter $c
+        if ($p.Frontmatter['merged'] -eq 'true') {
+            $mergedSessions++
+        }
+    }
+
     # Latest migrated session
     $latestSession = $null
     if ($sessionCount -gt 0) { $latestSession = $sessions[-1] }
@@ -5642,7 +5668,7 @@ function Build-Block-IndexStatus {
     [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
     [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("- Sessioni migrate in state/sessions: **$sessionCount**")
+    [void]$sb.AppendLine("- Sessioni migrate in state/sessions: **$sessionCount** (merge: $mergedSessions)")
     [void]$sb.AppendLine("- Stories migrate in state/stories: **$storyCount** (done: $($doneStories.Count))")
     if ($latestSessionInfo) {
         [void]$sb.AppendLine("- $latestSessionInfo")
@@ -5668,16 +5694,17 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
     [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("| Sessione | Nome | Stato | PR |")
-    [void]$sb.AppendLine("|----------|------|-------|----|")
+    [void]$sb.AppendLine("| Sessione | Nome | Stato | Merged | PR |")
+    [void]$sb.AppendLine("|----------|------|-------|--------|----|")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
         $parsed  = Parse-Frontmatter $content
         $n = $parsed.Frontmatter['number']
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
+        $merged = if ($parsed.Frontmatter['merged'] -eq 'true') { "✅" } else { "❌" }
         $pr = if ($parsed.Frontmatter['pr'] -and $parsed.Frontmatter['pr'] -ne '0') { "#$($parsed.Frontmatter['pr'])" } else { "-" }
-        [void]$sb.AppendLine("| $n | $title | $state | $pr |")
+        [void]$sb.AppendLine("| $n | $title | $state | $merged | $pr |")
     }
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine('> Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.')

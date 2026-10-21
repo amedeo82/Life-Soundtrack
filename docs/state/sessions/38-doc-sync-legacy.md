@@ -2,7 +2,10 @@
 number: 38
 title: "Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti"
 date: 2026-10-21
-state: 🟡
+state: 🟢
+merged: true
+merged_commit: a778add
+merged_date: 2026-10-21T11:00:00+02:00
 branch: feat/90-docs-allineare-la-documentazione-di-stat
 pr: 91
 claim: kilo-hp-elitebook-36a7

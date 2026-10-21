@@ -3,6 +3,9 @@ number: 36
 title: "Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76)"
 date: 2026-10-20
 state: 🟢
+merged: true
+merged_commit: 24d45b4
+merged_date: 2026-10-20T13:17:34+02:00
 branch: fix/76-post-merge-residue
 pr: 77
 claim: kilo-HP-ELITEBOOK-post-merge-review

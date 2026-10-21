@@ -2,7 +2,10 @@
 number: 40
 title: "Specifica adapter Apple Music (Story 1.2)"
 date: 2026-10-21
-state: 🟡
+state: 🟢
+merged: true
+merged_commit: 372e0a2
+merged_date: 2026-10-21T14:52:48+02:00
 branch: feat/98-apple-music-adapter-spec
 pr: 100
 claim: kilo-HP-ELITEBOOK-osfm

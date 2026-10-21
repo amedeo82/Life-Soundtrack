@@ -3,6 +3,9 @@ number: 27
 title: "Adozione worktree come default per agenti paralleli"
 date: 2026-10-19
 state: 🟢
+merged: true
+merged_commit: 8bc20a4
+merged_date: 2026-10-19T16:24:57+02:00
 branch: feat/53-worktree-default
 pr: 54
 claim: kilo-HP-ELITEBOOK-56535750

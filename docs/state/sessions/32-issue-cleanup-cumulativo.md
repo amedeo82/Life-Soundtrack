@@ -3,6 +3,9 @@ number: 32
 title: "Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza"
 date: 2026-10-19
 state: 🟢
+merged: true
+merged_commit: 1c63465
+merged_date: 2026-10-19T18:48:17+02:00
 branch: docs/41-45-47-issue-cleanup
 pr: 63
 claim: kilo-HP-ELITEBOOK-cumulativo

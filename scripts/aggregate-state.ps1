@@ -244,11 +244,18 @@ function Build-Block-Sessions {
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
         $pr = if ($parsed.Frontmatter['pr']) { $parsed.Frontmatter['pr'] } else { "-" }
         $claim = if ($parsed.Frontmatter['claim']) { $parsed.Frontmatter['claim'] } else { "-" }
+        $merged = if ($parsed.Frontmatter['merged'] -eq 'true') { $true } else { $false }
+        $merged_commit = if ($parsed.Frontmatter['merged_commit']) { $parsed.Frontmatter['merged_commit'] } else { "-" }
+        $merged_date = if ($parsed.Frontmatter['merged_date']) { $parsed.Frontmatter['merged_date'] } else { "-" }
         [void]$sb.Append("### Sessione $($parsed.Frontmatter['number']) - $title" + "`n")
         [void]$sb.Append("" + "`n")
         [void]$sb.Append("- **Data**: $date" + "`n")
         [void]$sb.Append("- **Stato**: $state" + "`n")
-        [void]$sb.Append("- **PR**: #$pr" + "`n")
+        if ($merged) {
+            [void]$sb.Append("- **Merged**: ✅ PR #$pr ($merged_commit, $merged_date)" + "`n")
+        } else {
+            [void]$sb.Append("- **Merged**: ❌ non ancora mergiato (PR #$pr)" + "`n")
+        }
         [void]$sb.Append("- **Claim**: $($b + $claim + $b)" + "`n")
         [void]$sb.Append("" + "`n")
         [void]$sb.Append('```' + "`n")
@@ -306,6 +313,16 @@ function Build-Block-IndexStatus {
     $sessionCount = $sessions.Count
     $storyCount = $stories.Count
 
+    # Sessions per merge status
+    $mergedSessions = 0
+    foreach ($f in $sessions) {
+        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $p = Parse-Frontmatter $c
+        if ($p.Frontmatter['merged'] -eq 'true') {
+            $mergedSessions++
+        }
+    }
+
     # Latest migrated session
     $latestSession = $null
     if ($sessionCount -gt 0) { $latestSession = $sessions[-1] }
@@ -334,7 +351,7 @@ function Build-Block-IndexStatus {
     [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
     [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("- Sessioni migrate in state/sessions: **$sessionCount**")
+    [void]$sb.AppendLine("- Sessioni migrate in state/sessions: **$sessionCount** (merge: $mergedSessions)")
     [void]$sb.AppendLine("- Stories migrate in state/stories: **$storyCount** (done: $($doneStories.Count))")
     if ($latestSessionInfo) {
         [void]$sb.AppendLine("- $latestSessionInfo")
@@ -360,16 +377,17 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V2, ADR-0008, issue #52).')
     [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
     [void]$sb.AppendLine("")
-    [void]$sb.AppendLine("| Sessione | Nome | Stato | PR |")
-    [void]$sb.AppendLine("|----------|------|-------|----|")
+    [void]$sb.AppendLine("| Sessione | Nome | Stato | Merged | PR |")
+    [void]$sb.AppendLine("|----------|------|-------|--------|----|")
     foreach ($f in $files) {
         $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
         $parsed  = Parse-Frontmatter $content
         $n = $parsed.Frontmatter['number']
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
+        $merged = if ($parsed.Frontmatter['merged'] -eq 'true') { "✅" } else { "❌" }
         $pr = if ($parsed.Frontmatter['pr'] -and $parsed.Frontmatter['pr'] -ne '0') { "#$($parsed.Frontmatter['pr'])" } else { "-" }
-        [void]$sb.AppendLine("| $n | $title | $state | $pr |")
+        [void]$sb.AppendLine("| $n | $title | $state | $merged | $pr |")
     }
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine('> Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.')

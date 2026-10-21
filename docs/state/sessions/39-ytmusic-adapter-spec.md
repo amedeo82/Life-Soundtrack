@@ -2,7 +2,10 @@
 number: 39
 title: "Specifica adapter YouTube Music (Story 1.1)"
 date: 2026-10-21
-state: 🟡
+state: 🟢
+merged: true
+merged_commit: 3877cd2
+merged_date: 2026-10-21T13:37:37+02:00
 branch: feat/96-ytmusic-adapter-spec
 pr: 97
 claim: kilo-HP-ELITEBOOK-guck

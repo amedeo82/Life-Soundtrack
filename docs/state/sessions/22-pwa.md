@@ -3,11 +3,12 @@ number: 22
 title: "📱 Implementazione Story 0.5 (PWA e service worker)"
 date: 2026-10-18
 state: 🟢
+merged: true
+merged_commit: 0ebe8da
+merged_date: 2026-10-18T15:29:28Z
 branch: feat/7-pwa-and-service-worker
 pr: 19
 issue: 7
-merged_commit: 0ebe8da
-merged_date: 2026-10-18T15:29:28Z
 claim: kilo-HP-ELITEBOOK-3b3f
 ---
 

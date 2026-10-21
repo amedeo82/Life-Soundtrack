@@ -3,6 +3,9 @@ number: 33
 title: "Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch)"
 date: 2026-10-20
 state: 🟢
+merged: true
+merged_commit: 397839e
+merged_date: 2026-10-20T11:10:53+02:00
 branch: docs/33-post-merge-procedure
 pr: 69
 claim: kilo-HP-ELITEBOOK-post-merge-review

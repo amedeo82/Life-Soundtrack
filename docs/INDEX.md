@@ -66,26 +66,26 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-| Sessione | Nome | Stato | PR |
-|----------|------|-------|----|
-| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | #19 |
-| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | #21 |
-| 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | #22 |
-| 27 | Adozione worktree come default per agenti paralleli | 🟢 | #54 |
-| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟢 | #55 |
-| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟢 | #56 |
-| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟢 | #59 |
-| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟢 | #62 |
-| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟢 | #63 |
-| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟢 | #69 |
-| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟢 | #72 |
-| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | #74 |
-| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | #77 |
-| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟡 | #85 |
-| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟡 | #91 |
-| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟡 | #97 |
-| 40 | Specifica adapter Apple Music (Story 1.2) | 🟡 | #100 |
-| 41 | Geo & contesto di ascolto: specifica e ADR | 🟡 | #102 |
+| Sessione | Nome | Stato | Merged | PR |
+|----------|------|-------|--------|----|
+| 22 | 📱 Implementazione Story 0.5 (PWA e service worker) | 🟢 | âœ… | #19 |
+| 23 | 🪝 Fix bug pre-commit hook (D3 staged-vs-unstaged, issue #20) | 🟢 | âœ… | #21 |
+| 24 | 🌐 Implementazione Story 0.6 i18n setup (issue #5) | 🟢 | âœ… | #22 |
+| 27 | Adozione worktree come default per agenti paralleli | 🟢 | âœ… | #54 |
+| 28 | GitHub PR template + branch protection enforcement (forza gate CI per BUNDLE, state, Closes #N) | 🟢 | âœ… | #55 |
+| 29 | ADR-0008 V2: estendere lazy-state aggregation a docs/INDEX.md e docs/BUNDLE.md | 🟢 | âœ… | #56 |
+| 30 | Fix CRLF drift in aggregator + generate-bundle + workflow if:always (issue #58) | 🟢 | âœ… | #59 |
+| 31 | AGENTS.md v1.9 cleanup completo del workflow (issue #60 + audit v1.9) | 🟢 | âœ… | #62 |
+| 32 | Cleanup cumulativo issue needs-spec non-Story (#41, #45, #47) — verifica obsolescenza | 🟢 | âœ… | #63 |
+| 33 | Procedura canonica post-merge (review: mancava l'aggiornamento di `main` prima del delete branch) | 🟢 | âœ… | #69 |
+| 34 | Determinismo e idempotenza dell'aggregator (issue #70): 5 cause + gate bloccante | 🟢 | âœ… | #72 |
+| 35 | Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73) | 🟢 | âœ… | #74 |
+| 36 | Residui post-merge: rilevare i branch locali orfani + fetch prima di creare la worktree (issue #76) | 🟢 | âœ… | #77 |
+| 37 | Reconciliare docs/state/ con i merge reali (Story 0.4 assente, 0.7 stale, sessioni 27-36 pending) | 🟢 | âœ… | #85 |
+| 38 | Allineare la documentazione di stato legacy e rendere il doc-sync obbligatorio per gli agenti | 🟢 | âœ… | #91 |
+| 39 | Specifica adapter YouTube Music (Story 1.1) | 🟢 | âœ… | #97 |
+| 40 | Specifica adapter Apple Music (Story 1.2) | 🟢 | âœ… | #100 |
+| 41 | Geo & contesto di ascolto: specifica e ADR | 🟢 | âœ… | #102 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -125,7 +125,7 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **18**
+- Sessioni migrate in state/sessions: **18** (merge: 18)
 - Stories migrate in state/stories: **5** (done: 5)
 - Ultima sessione migrata: **S41** - Geo & contesto di ascolto: specifica e ADR
 - Stories done: 0.3, 0.4, 0.5, 0.6, 0.7

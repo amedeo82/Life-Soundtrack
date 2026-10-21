@@ -3,6 +3,9 @@ number: 35
 title: "Automazioni post-merge: chiude i buchi di auto-status-done, release e cleanup (issue #73)"
 date: 2026-10-20
 state: 🟢
+merged: true
+merged_commit: f23ab14
+merged_date: 2026-10-20T12:26:59+02:00
 branch: fix/73-post-merge-automations
 pr: 74
 claim: kilo-HP-ELITEBOOK-post-merge-review
