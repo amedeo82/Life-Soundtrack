@@ -469,6 +469,39 @@ bash scripts/test-workflow-git-add-coverage.sh          # scenario negativo (gat
 
 ---
 
+### 9.8d Sync con `origin/main` dei writer di `main` (issue #140)
+
+`auto-bundle.yml` (§9.8b) e `auto-state-aggregate.yml` sono i **due workflow che pushano su `main`**. Condividono il concurrency group `post-merge-main` con `cancel-in-progress: false`, pensato per serializzarli. La serializzazione, però, **non basta**.
+
+**Il bug**: il concurrency group serializza i *run*, non i *checkout*. `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit che ha fatto scattare la run — non sulla testa corrente di `main`. Sul push di un merge entrambe le workflow scattano; quando la seconda parte dopo che la prima ha pushato:
+
+| t | `auto-bundle` | `auto-state-aggregate` |
+|---|---------------|------------------------|
+| t0 | parte, checkout di `5e2d602` | in coda (concurrency group) |
+| t1 | sync col tip, rigenera, **pusha** → `6287490` | — |
+| t2 | — | parte, checkout di **`5e2d602`** (stesso `github.sha`) |
+| t3 | — | rigenera, committa, `git push origin main` |
+| t4 | — | **`! [rejected] main -> main (non-fast-forward)`** |
+
+`auto-bundle.yml` sopravvive perché ha uno step «Sync con origin/main» (`git fetch origin main` + `git rebase origin/main`, con fallback `git reset --hard`): si riallinea al tip prima di generare. `auto-state-aggregate.yml` **non lo aveva**, ed è per definizione l'unico dei due che può trovarsi secondo.
+
+**Il fix** è lo step «Sync con origin/main» in `auto-state-aggregate.yml`, identico a quello del companion. `ref: main` sul checkout sarebbe un'alternativa valida ma si regge sull'assunzione che il primo writer a partire sia quello senza sync: il sync è idempotente e non dipende dall'ordine di scheduling.
+
+**Perché è una classe di fallimento silenzioso**: il merge è riuscito e `ci.yml` è verde, ma i blocchi aggregati sono **indietro**. Nessun gate confronta i blocchi aggregati con lo stato reale dei merge — `aggregate-state.ps1 -Check` gira sul checkout della PR, e il workflow che dovrebbe riallineare `main` è quello che fallisce. Caso concreto: il doc-sync della Story 1.2 (PR #139, merge `2e1a4cc`) non è mai arrivato su `main`, e `README.md` ha continuato ad annunciare la 1.2 come «prossima story» dopo il merge.
+
+**La difesa strutturale** è in `scripts/validate-workflows.mjs`, già gate bloccante in CI dal #73: ogni workflow che contiene `git push origin main` deve dichiarare una sincronizzazione verso `origin/main` **prima** del push. L'ordine fa parte del contratto — uno step di sync dichiarato dopo il push è sintatticamente presente e praticamente inerte, cioè la variante «sembra a posto» della stessa classe di bug. Sono accettate tre forme equivalenti (`git rebase origin/main`, `git reset --hard origin/main`, `git pull [--rebase] origin main`). Il gate **non** tassa i workflow che pushano su un branch: sono writer di branch, non di `main`, e tassarli produrrebbe falsi positivi su workflow legittimi.
+
+Il test di regressione è `scripts/test-workflow-push-sync.sh` (T1..T5, 15 assert): T2 rimuove lo step di sync da `auto-state-aggregate.yml` e verifica che il gate **esca 1** (un gate che passa sempre non è un gate, lesson 43-1), T3 verifica che una forma di sync alternativa non venga tassata, T4 che un push su branch non venga tassato, T5 che un sync **dopo** il push venga tassato.
+
+```powershell
+node scripts/validate-workflows.mjs .github/workflows   # include il gate di sync dei writer di main
+bash scripts/test-workflow-push-sync.sh                 # scenario negativo (gate bloccante in CI)
+```
+
+**Regola generale**: quando due workflow scrivono sullo stesso ref servono **due** proprietà distinte — chi pusha per primo (concurrency group) e **su quale commit** si pusha (sync). La prima senza la seconda produce `non-fast-forward` con la stessa firma di un conflitto di merge reale. In generale, ogni workflow che esegue `git push` verso un ref che altri workflow aggiornano deve allinearsi a quel ref prima di generare e prima del push.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -517,7 +550,7 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 
 ### 9.10 Gate reali di `ci.yml`
 
-Elenco dei 14 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-22 (Sessione 44, issue #135). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
+Elenco dei 15 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-22 (Sessione 45, issue #140; la Sessione 44 ne aveva verificati 14). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
 
 | # | Step | Bloccante | Issue |
 |---|------|:---------:|-------|
@@ -532,13 +565,14 @@ Elenco dei 14 step nominati del job `quality`, verificato riga per riga contro `
 | 9 | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
 | 10 | `Copertura git add vs $targets` | sì | #136 |
 | 11 | `Scope permissions: valide` | sì | **#135** |
-| 12 | `Residui post-merge` | sì | #76 |
-| 13 | `Label in sync con AGENTS.md` | sì | #110 |
-| 14 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+| 12 | **`Sync origin/main prima del push su main`** | sì | **#140** |
+| 13 | `Residui post-merge` | sì | #76 |
+| 14 | `Label in sync con AGENTS.md` | sì | #110 |
+| 15 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
 
 I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
 
-**Verifica**: i 14 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Il sub-gate `Copertura git add vs $targets` e il `Scope permissions: valide` girano entrambi dentro `validate-workflows.mjs`, che è lo step 9.
+**Verifica**: i 15 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Tre sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135) e `Sync origin/main prima del push su main` (#140).
 
 ---
 
@@ -551,3 +585,4 @@ I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 
 | 0.3 | Sessione 41 (2026-10-21) | **§9.8b auto-bundle.yml** (issue #115 follow-up di PR #113): nuovo workflow `.github/workflows/auto-bundle.yml` che rigenera automaticamente `docs/BUNDLE.md` (contenuto FILE) dopo ogni push a main che tocca `$files` o i file coperti da esso. Companion di `auto-state-aggregate.yml` (che gestisce solo i blocchi `AGGREGATE-*`); serializzate via concurrency group `post-merge-main`. Chiude strutturalmente la classe di drift "BUNDLE.md non in sync post-merge" identificata dal rebasing di PR #112. **§9.7b fail-closed su flag** (issue #104): `pwsh scripts/* --check` esce 2 in PS 5.1 (doppio trattino non mappato su switch), `-Check` (singolo) continua a funzionare. Tutti gli esempi del file ora usano `-Check`. |
 | 0.4 | Sessione 43 (2026-10-22) | **§9.8c copertura `git add` vs `$targets`** (issue #136): `auto-state-aggregate.yml` generava il blocco `AGGREGATE-NEXT-STEP-*` del `README.md` (quinto target, ADR-0008 V3 / #127) e poi lo scartava, perche' `README.md` mancava nella riga `git add`. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file: si e' manifestato solo alla prima story `todo` (1.2). Fix: una parola nella riga `git add`. Difesa strutturale: assert di copertura in `scripts/validate-workflows.mjs` (gate bloccante in CI dal #73) + test di regressione `scripts/test-workflow-git-add-coverage.sh` (T1..T4, con scenario negativo). |
 | 0.5 | Sessione 44 (2026-10-22) | **§9.9 scope `permissions:` valide** (issue #135): dal 2026-10-21T16:21Z `ci.yml` non eseguiva piu' alcun job — run creata, `jobs: 0`, `conclusion: failure`, `run_started_at == created_at` (0s), check-suite `completed` con 0 check-run, nessuna annotazione via API, `state: active` sull'API dei workflow. Causa: `metadata: read` nel blocco `permissions:` del job `quality` (commit `43d982d`, issue #120) — `metadata` non e' una scope dichiarabile della `GITHUB_TOKEN` (e' sempre concessa implicitamente, non e' fra quelle documentate), quindi GitHub rifiuta l'intero file in fase di validazione. Nessun parser YAML lo vede; la firma e' ambigua con un blocco billing, escluso perche' gli altri 5 workflow dello stesso repo sugli stessi runner erano verdi nella stessa finestra. Diagnosi: tabella `jobs` x `conclusion` dei 60 run — il salto `1 → 0` cade su `43d982d`. Fix: rimossa la riga. Difesa: validazione delle scope in `scripts/validate-workflows.mjs` (gate bloccante dal #73) + `scripts/test-workflow-permission-scopes.sh` (T1..T5, con scenario negativo). **§9.10 gate reali di `ci.yml`** (nuova): elenco autorevole dei 14 step, con bloccante/non-bloccante e issue di riferimento, verificato 1:1 contro il workflow; §2.1 ora dichiara esplicitamente di essere uno scheletro di progetto e rimanda a §9.10. |
+| 0.6 | Sessione 45 (2026-10-22) | **§9.8d sync con `origin/main` dei writer di `main`** (issue #140): `auto-state-aggregate.yml` falliva su ogni merge con `! [rejected] main -> main (non-fast-forward)` (run `39802198985`, `39803721229`). Causa: il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit; quando `auto-bundle.yml` ha gia' pushato sullo stesso merge, il secondo writer pusha da un checkout stale e viene rifiutato. Conseguenza: il meccanismo di auto-guarimento di ADR-0008 era spento e il doc-sync della Story 1.2 (PR #139) non e' mai arrivato su `main` — `README.md` continuava ad annunciarla come «prossima story». Fallimento silenzioso: merge verde, `ci.yml` verde, blocchi aggregati indietro, nessun gate che lo segnali. Fix: step «Sync con origin/main» (`git fetch` + `git rebase`, fallback `git reset --hard`), identico a quello del companion. Difesa: gate in `scripts/validate-workflows.mjs` (bloccante in CI dal #73) che richiede un sync **prima** di ogni `git push origin main` e non tassa i writer di branch + `scripts/test-workflow-push-sync.sh` (T1..T5, 15 assert, con scenario negativo e verifica dell'ordine). **§9.10** aggiornata: 15 step, con il nuovo gate in posizione 12. |

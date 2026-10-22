@@ -89,6 +89,7 @@
 | 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ❌ | #134 |
 | 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ❌ | #137 |
 | 44 | ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135) | 🟢 | ❌ | #138 |
+| 45 | auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140) | 🟢 | ❌ | #141 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -128,10 +129,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **21** (merge: 18)
-- Stories migrate in state/stories: **9** (done: 8)
-- Ultima sessione migrata: **S44** - ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1
+- Sessioni migrate in state/sessions: **22** (merge: 18)
+- Stories migrate in state/stories: **9** (done: 9)
+- Ultima sessione migrata: **S45** - auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -156,7 +157,7 @@
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 41): EPIC 1 (Fase 1 — Import core): spec adapter **YouTube Music 🟢 APPROVED** (S39, PR #97) e **Apple Music scritta** (S40, issue #98, `03-ADAPTERS/apple-music.md` 🟡 DRAFT — promozione a 🟢 al merge); resta da scrivere la specifica **Last.fm / ListenBrainz** (Story 1.3), poi i fixture in `fixtures/synthetic-history/` e le issue `agent-ready` per 1.1/1.2/1.3 (parallele). In parallelo, la **ratifica delle specifiche Geo & contesto**: la Sessione 41 ha scritto `19-GEO-CONTEXT.md` 🟡 DRAFT (L0 paese / L1 contesto dedotto / L2 città stimata, toggle per-campo con override per import, nastro contesto) e `13-ADR/0009` 🟡 DRAFT (geolocalizzazione IP locale, DB-IP Lite CC BY); la ratifica richiede la risoluzione dei 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo). Nel frattempo sono eseguibili la Story 1.4 (dedup promozione, spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED) e la Story 1.5 (scrobbling hub).
+- **Prossimo step tecnico** (aggiornato alla Sessione 45, issue #140): EPIC 1 (Fase 1 — Import core) ha i suoi primi due adapter **merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`) e **1.2 Apple Music ✅** (PR #139, `2e1a4cc`; spec 🟢 APPROVED v1.0 in `03-ADAPTERS/apple-music.md`). Il doc-sync della 1.2 era rimasto fuori da `main` perché `auto-state-aggregate.yml` falliva con `non-fast-forward`: corretto in Sessione 45, che ha anche aggiunto il gate di sync dei writer di `main` in `scripts/validate-workflows.mjs`. **Story successiva: 1.3 — Adapter Last.fm + ListenBrainz**, non ancora lavorabile perché le specifiche adapter **non esistono** (`03-ADAPTERS/` contiene solo `spotify.md`, `youtube-music.md`, `apple-music.md`; `01-PLATFORMS.md` §3.7-3.8 è 🟡 DRAFT): il percorso è aprire una issue `needs-spec`, scrivere `lastfm.md` + `listenbrainz.md` da `SPEC-TEMPLATE.md`, ottenerne la ratifica, e solo allora aprire l'issue `agent-ready` e implementare — lo stesso ciclo seguito per 1.1 (S39→S43) e 1.2 (S40→S45). Nel frattanto è eseguibile la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

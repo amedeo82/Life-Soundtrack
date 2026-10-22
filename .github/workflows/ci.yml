@@ -111,6 +111,18 @@ jobs:
       - name: Scope `permissions:` valide (issue #135)
         run: bash scripts/test-workflow-permission-scopes.sh
 
+      # Issue #140: due workflow pushano su `main` (auto-bundle + auto-state-aggregate)
+      # e condividono il concurrency group `post-merge-main`, che serializza i *run*
+      # ma non i *checkout*: senza un sync con `origin/main` prima del push, il secondo
+      # writer pusha da un checkout stale e il push viene rifiutato con
+      # `non-fast-forward`. Il fallimento e' silenzioso (il merge sembra riuscito, i
+      # blocchi aggregati restano indietro): nel caso reale ha lasciato fuori da `main`
+      # il doc-sync della Story 1.2. Il gate di sync vive in validate-workflows.mjs
+      # (run precedente); questo test ne verifica lo scenario negativo e l'ordine
+      # (sync dopo il push non protegge nessuno).
+      - name: Sync `origin/main` prima del push su main (issue #140)
+        run: bash scripts/test-workflow-push-sync.sh
+
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
       # (orfano -> segnalato) sia quello di sicurezza (lavoro non pushato -> MAI
