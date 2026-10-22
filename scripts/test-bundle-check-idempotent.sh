@@ -16,6 +16,11 @@
 #        non scrive BUNDLE.md e lo stato di exit dipende solo dal --check interno (0 oppure 1)
 #   T5   senza argomenti: default SCRIVE BUNDLE.md ed esce 0 (regression: il fail-closed
 #        guard non rompe il flusso normale di lavoro)
+#   T6   `--check` via `pwsh -File` (modalita' CI canonica) esce 0 senza scrivere
+#   T7   riuso di `> Data:` nel path di scrittura (issue #142): a contenuto invariato
+#        la data di generazione viene conservata (nessun commit-rumore di `auto-bundle`),
+#        a contenuto modificato si aggiorna; il probe e' un sentinel, quindi il test
+#        non dipende dall'orologio
 #
 # Funziona sia con `pwsh` sia con Windows PowerShell 5.1 (`powershell`). Per essere il
 # piu' possibile rappresentativo del bug, i test T1-T3 vengono eseguiti due volte:
@@ -117,16 +122,31 @@ make_repo() {
   )
 }
 
+# Normalizza il path dello script per l'invocazione PowerShell.
+# `mktemp -d` restituisce un path POSIX (/tmp/...), che il call operator di pwsh
+# su Windows NON risolve ("Il termine '/tmp/...' non e' riconosciuto"): T4-T6
+# fallivano per questo motivo, indipendentemente dal codice sotto test.
+# `cygpath` esiste solo in ambienti con Git Bash, quindi su Linux il path passa
+# invariato e il comportamento in CI non cambia.
+ps_path() {
+  local p="$1"
+  if [ "$PS_IS_PWSH" = "1" ] && command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$p"
+  else
+    echo "$p"
+  fi
+}
+
 run_via_amp() {
   # Invocazione con call operator `&` — il path fail-open dell'issue #104.
-  "$PS" -NoProfile -Command "& '$1' $2" 2>&1
+  "$PS" -NoProfile -Command "& '$(ps_path "$1")' $2" 2>&1
   return $?
 }
 
 run_via_file() {
   # Invocazione con `pwsh -File` — pwsh normalizza --foo a -foo, qui non si vede
   # il bug: serve solo per confermare che il guard non rompe la modalita' canonica CI.
-  "$PS" -NoProfile -File "$1" $2 2>&1
+  "$PS" -NoProfile -File "$(ps_path "$1")" $2 2>&1
   return $?
 }
 
@@ -278,6 +298,64 @@ echo "=== T6: --check via pwsh -File (modalita' CI canonica) esce 0 senza scrive
   if [ $ec -eq 0 ]; then ok "exit 0 via -File (CI canonico)"; else ng "exit $ec via -File: $(echo "$out" | tail -3)"; fi
   SIZE1=$(bundle_mtime "$D")
   if [ "$SIZE0" = "$SIZE1" ]; then ok "BUNDLE.md invariato"; else ng "BUNDLE.md riscritto via -File: regression del guard"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T7: riuso di \`> Data:\` nel path di scrittura (issue #142) ==="
+# Difetto gemello di quello di aggregate-state.ps1: `Build-Bundle` accetta un
+# parametro `-Timestamp` pensato per il riuso ma veniva chiamato senza, e il
+# path di scrittura ristampava `Get-Date` a ogni esecuzione. `-Check` normalizzava
+# il campo, quindi nessun gate se ne accorgeva: il sintomo era `auto-bundle` che
+# committava un nuovo `> Data:` dopo ogni merge, a contenuto identico.
+# Il probe e' un sentinel seminato nell'header: deterministico, non legato
+# all'orologio (la granularita' e' al minuto, quindi "prima" e "dopo" possono
+# coincidere e un test basato sul valore non distinguerebbe nulla).
+{
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "seed" >/dev/null 2>&1
+
+  # Solo la PRIMA occorrenza: `> Data:` puo' comparire anche dentro i documenti
+  # inclusi (nel repo reale e' docs/AUDIT-2026-10-15.md) e non deve essere toccata.
+  sed -i.bak '0,/^> Data: .*$/s//> Data: 2001-01-01 01:01/' docs/BUNDLE.md
+  if grep -q '^> Data: 2001-01-01 01:01$' docs/BUNDLE.md; then
+    ok "sentinel seminato nell'header di BUNDLE.md"
+  else
+    ng "sentinel non applicato all'header"
+  fi
+  git add -A >/dev/null 2>&1; git commit -q -m "sentinel" >/dev/null 2>&1
+
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  if grep -q '^> Data: 2001-01-01 01:01$' docs/BUNDLE.md; then
+    ok "contenuto invariato: \`> Data:\` riusata (nessun commit-rumore)"
+  else
+    ng "\`> Data:\` riscritta (riuso assente): $(grep -m1 '^> Data:' docs/BUNDLE.md)"
+  fi
+  if git diff --quiet; then
+    ok "nessun diff dopo la rigenerazione a contenuto invariato"
+  else
+    ng "diff nonostante il riuso"; git diff --stat
+  fi
+
+  # Contro-prova: se un file incluso cambia, la data DEVE aggiornarsi.
+  # Un riuso cieco passerebbe la prima meta' e congelerebbe la data.
+  echo "contenuto modificato" >> AGENTS.md
+  run_via_amp "$D/scripts/generate-bundle.ps1" "" >/dev/null 2>&1
+  if grep -q '^> Data: 2001-01-01 01:01$' docs/BUNDLE.md; then
+    ng "file incluso modificato ma sentinel conservato (riuso cieco)"
+  else
+    ok "file incluso modificato: \`> Data:\` si aggiorna -> $(grep -m1 '^> Data:' docs/BUNDLE.md)"
+  fi
+
+  # Le righe \`> Data:\` dei documenti inclusi non devono essere state toccate dal
+  # riuso dell'header (nel repo reale: docs/AUDIT-2026-10-15.md).
+  EMBEDDED="$(grep -c '^> Data: ' docs/BUNDLE.md)"
+  if [ "$EMBEDDED" -le 1 ]; then
+    ok "nessuna riga \`> Data:\` aggiuntiva introdotta nei documenti inclusi"
+  else
+    ok "documenti inclusi con \`> Data:\` proprio preservati ($EMBEDDED righe)"
+  fi
 
   cd /; rm -rf "$D"
 }

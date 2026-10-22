@@ -576,6 +576,40 @@ I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 
 
 ---
 
+### 9.11 Idempotenza dei generatori: riuso del timestamp (issue #142)
+
+Un generatore che riscrive un campo temporale a ogni esecuzione produce un diff anche quando il contenuto è invariato. Su `main` il costo è doppio: un commit di rumore per ogni merge **e** un gate che diventa dipendente dall'orologio.
+
+**Il bug**: `scripts/aggregate-state.ps1` stampa sempre `- Ultima aggregazione: <Get-Date>` nel blocco inventory, e `Apply-Blocks` scriveva il blocco calcolato senza confrontarlo con quello già su disco. La normalizzazione esisteva **solo in `-Check`**, che è il posto in cui la differenza non si vede. `scripts/generate-bundle.ps1` aveva lo stesso difetto su `> Data:` — con l'aggravante che `Build-Bundle` accettava già un parametro `[string]$Timestamp` pensato per il riuso, e non veniva mai passato.
+
+**Il sintomo osservato** (run `39818043647`, 2026-10-22T16:56:00Z): il gate `Aggregator deterministico` (#70, step 8) è fallito con 28 assert su 30 perché i due run consecutivi nella fixture sono caduti su minuti diversi (`16:55` → `16:56`). Con run di pochi secondi e granularità al minuto, la probabilità di strappare il confine è dell'ordine del 5-10% per run: abbastanza per far fallire un PR su un motivo non riproducibile in locale. Lo stesso gate, sul run di `main` partito un minuto dopo, è passato.
+
+**Il fix**:
+
+| File | Cosa fa |
+|------|---------|
+| `aggregate-state.ps1` | `Get-NormalizedBlock` confronta due blocchi a parità del campo mutabile; `Sync-MutableTimestamp` riusa il valore già su disco. `Apply-Blocks` li applica **solo se il blocco è identico a meno del timestamp** |
+| `generate-bundle.ps1` | confronto su **tutto** il bundle a parità di `> Data:`, sostituzione **solo sulla prima occorrenza** (l'header) |
+| `test-aggregate-determinism.sh` | **T11**: sentinel seminato nella riga del timestamp → verificato il riuso; contro-prova: contenuto cambiato → il campo si aggiorna |
+| `test-bundle-check-idempotent.sh` | **T7**: stesso probe per `> Data:` |
+
+**Perché il probe è un sentinel e non un confronto "prima/dopo"**: con granularità al minuto, due run ravvicinati possono produrre lo stesso valore, e un test basato sul confronto non distinguerebbe «riusato» da «riscritto nello stesso minuto». Un valore seminato (`2001-01-01 01:01`) non può coincidere per caso: con il riuso assente il test fallisce **sempre**.
+
+**Perché la contro-prova è obbligatoria**: «il campo viene riusato» e «il campo viene riusato *solo quando il blocco non è cambiato*» sono due invarianti diverse. La prima si verifica con un riuso cieco che congela la data su un blocco stale — danno silenzioso, perché `-Check` continua a passare (lesson 44-4: un gate che blocca anche i casi legittimi viene disattivato al primo falso positivo).
+
+**La sottigliezza della sostituzione**: `docs/AUDIT-2026-10-15.md` è in `$files` e contiene una riga `> Data: 2026-10-15`. Una sostituzione globale avrebbe riscritto il contenuto di quel documento: un danno peggiore del commit-rumore eliminato. Per questo il confronto è ampio (tutto il bundle) e la sostituzione è stretta (prima occorrenza = header).
+
+```powershell
+pwsh scripts/aggregate-state.ps1    # due esecuzioni consecutive -> zero diff
+pwsh scripts/generate-bundle.ps1    # due esecuzuzioni consecutive -> "Data di generazione riusata"
+bash scripts/test-aggregate-determinism.sh   # T11 incluso
+bash scripts/test-bundle-check-idempotent.sh # T7 incluso
+```
+
+**Regola generale**: quando un generatore scrive un campo temporale, il confronto per il riuso deve vivere **nello stesso path** della scrittura. Normalizzare solo in `-Check` non è una verifica dell'idempotenza: è una verifica che il check non vede i propri difetti. E un test che verifica l'idempotenza con due esecuzioni ravvicinate è un test **flaky** per definizione, se il campo ha granularità al minuto: va riscritto con un probe seminato.
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -586,3 +620,4 @@ I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 
 | 0.4 | Sessione 43 (2026-10-22) | **§9.8c copertura `git add` vs `$targets`** (issue #136): `auto-state-aggregate.yml` generava il blocco `AGGREGATE-NEXT-STEP-*` del `README.md` (quinto target, ADR-0008 V3 / #127) e poi lo scartava, perche' `README.md` mancava nella riga `git add`. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file: si e' manifestato solo alla prima story `todo` (1.2). Fix: una parola nella riga `git add`. Difesa strutturale: assert di copertura in `scripts/validate-workflows.mjs` (gate bloccante in CI dal #73) + test di regressione `scripts/test-workflow-git-add-coverage.sh` (T1..T4, con scenario negativo). |
 | 0.5 | Sessione 44 (2026-10-22) | **§9.9 scope `permissions:` valide** (issue #135): dal 2026-10-21T16:21Z `ci.yml` non eseguiva piu' alcun job — run creata, `jobs: 0`, `conclusion: failure`, `run_started_at == created_at` (0s), check-suite `completed` con 0 check-run, nessuna annotazione via API, `state: active` sull'API dei workflow. Causa: `metadata: read` nel blocco `permissions:` del job `quality` (commit `43d982d`, issue #120) — `metadata` non e' una scope dichiarabile della `GITHUB_TOKEN` (e' sempre concessa implicitamente, non e' fra quelle documentate), quindi GitHub rifiuta l'intero file in fase di validazione. Nessun parser YAML lo vede; la firma e' ambigua con un blocco billing, escluso perche' gli altri 5 workflow dello stesso repo sugli stessi runner erano verdi nella stessa finestra. Diagnosi: tabella `jobs` x `conclusion` dei 60 run — il salto `1 → 0` cade su `43d982d`. Fix: rimossa la riga. Difesa: validazione delle scope in `scripts/validate-workflows.mjs` (gate bloccante dal #73) + `scripts/test-workflow-permission-scopes.sh` (T1..T5, con scenario negativo). **§9.10 gate reali di `ci.yml`** (nuova): elenco autorevole dei 14 step, con bloccante/non-bloccante e issue di riferimento, verificato 1:1 contro il workflow; §2.1 ora dichiara esplicitamente di essere uno scheletro di progetto e rimanda a §9.10. |
 | 0.6 | Sessione 45 (2026-10-22) | **§9.8d sync con `origin/main` dei writer di `main`** (issue #140): `auto-state-aggregate.yml` falliva su ogni merge con `! [rejected] main -> main (non-fast-forward)` (run `39802198985`, `39803721229`). Causa: il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit; quando `auto-bundle.yml` ha gia' pushato sullo stesso merge, il secondo writer pusha da un checkout stale e viene rifiutato. Conseguenza: il meccanismo di auto-guarimento di ADR-0008 era spento e il doc-sync della Story 1.2 (PR #139) non e' mai arrivato su `main` — `README.md` continuava ad annunciarla come «prossima story». Fallimento silenzioso: merge verde, `ci.yml` verde, blocchi aggregati indietro, nessun gate che lo segnali. Fix: step «Sync con origin/main» (`git fetch` + `git rebase`, fallback `git reset --hard`), identico a quello del companion. Difesa: gate in `scripts/validate-workflows.mjs` (bloccante in CI dal #73) che richiede un sync **prima** di ogni `git push origin main` e non tassa i writer di branch + `scripts/test-workflow-push-sync.sh` (T1..T5, 15 assert, con scenario negativo e verifica dell'ordine). **§9.10** aggiornata: 15 step, con il nuovo gate in posizione 12. |
+| 0.7 | Sessione 46 (2026-10-22) | **§9.11 idempotenza dei generatori: riuso del timestamp** (issue #142): `aggregate-state.ps1` ristampava `Get-Date` nel blocco inventory a ogni run, e la normalizzazione esisteva solo in `-Check` — quindi la garanzia «il timestamp viene riusato quando il blocco non cambia altro» (issue #70) era documentata ma non implementata nel path di scrittura. Sintomo: il gate `Aggregator deterministico` fallito sul run `39818043647` (16:55 → 16:56), cioè un gate bloccante dipendente dall'orologio, ~5-10% dei run. Difetto gemello in `generate-bundle.ps1`: `Build-Bundle -Timestamp` esisteva ma non veniva passato, e `auto-bundle` committava un nuovo `> Data:` dopo ogni merge a contenuto identico (nessun gate lo vedeva). Fix: `Get-NormalizedBlock` + `Sync-MutableTimestamp` in `Apply-Blocks`; in `generate-bundle.ps1` confronto su tutto il bundle con sostituzione **solo** sulla prima `> Data:` (i documenti inclusi ne hanno una propria, `docs/AUDIT-2026-10-15.md`). Test con **sentinel seminato** invece di confronto temporale (`test-aggregate-determinism.sh` T11, `test-bundle-check-idempotent.sh` T7), entrambi con contro-prova «contenuto cambiato → il campo si aggiorna»; `test-bundle-check-idempotent.sh` guadagna anche `ps_path`, che ripara T4-T6 su Windows (path POSIX non risolti dal call operator di pwsh). |

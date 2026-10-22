@@ -36,6 +36,14 @@
 #       ordinamento [version] (indipendente dall'ordine di creazione dei file),
 #       fallback graceful quando non ci sono story non-done, --check exit 0 dopo
 #       write. Previene il drift della stringa "Prossima sbloccata" del README.
+#   T11 riuso del timestamp "Ultima aggregazione" (issue #142): T3 verifica
+#       l'idempotenza con due run ravvicinati, ma se i due run cadono su minuti
+#       diversi il fallimento dipende dall'OROLOGIO e non dal codice (run
+#       39818043647, 2026-10-22T16:56:00Z: 16:55 -> 16:56). T11 semina un
+#       SENTINEL nella riga del timestamp, esegue l'aggregator e verifica che il
+#       valore venga riusato: con il riuso assente fallisce sempre. La contro-prova
+#       verifica la direzione opposta (contenuto cambiato -> il timestamp si
+#       aggiorna), cosi' un riuso cieco non puo' passare.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -528,6 +536,79 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   else
     ng "NEXT-STEP non idempotente: $FIRST_HASH -> $SECOND_HASH"
   fi
+  cd /; rm -rf "$D"
+}
+
+echo "=== T11: riuso del timestamp 'Ultima aggregazione' (issue #142) ==="
+# T3 verifica l'idempotenza confrontando due run ravvicinati: se i due run
+# cadono su minuti diversi, il fallimento dipende dall'OROLOGIO e non dal
+# codice (~1 run su 10-20 in CI: run 39818043647, 2026-10-22T16:56:00Z, T3 ha
+# visto 16:55 -> 16:56). T11 rende la stessa garanzia verificabile in modo
+# deterministico: si SEMINA un valore sentinella nella riga del timestamp, si
+# esegue l'aggregator e si verifica che il valore sia stato riusato. Con il riuso
+# assente il test fallisce SEMPRE, non una volta su N.
+{
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+
+  run_agg >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "baseline" >/dev/null 2>&1
+
+  # Semina il sentinella e lo committa: da qui il baseline e' il sentinel, cosi'
+  # `git diff` misura solo quello che produce l'aggregator. Senza il commit
+  # intermedio il diff includerebbe la modifica del test e non direbbe nulla.
+  sed -i.bak 's/^- Ultima aggregazione: .*$/- Ultima aggregazione: 2001-01-01 01:01/' docs/BUNDLE.md
+  if grep -q '^- Ultima aggregazione: 2001-01-01 01:01$' docs/BUNDLE.md; then
+    ok "sentinel seminato nel blocco inventory"
+  else
+    ng "sentinel non applicato a docs/BUNDLE.md"
+  fi
+  git add -A >/dev/null 2>&1; git commit -q -m "sentinel" >/dev/null 2>&1
+
+  run_agg >/dev/null 2>&1
+  if grep -q '^- Ultima aggregazione: 2001-01-01 01:01$' docs/BUNDLE.md; then
+    ok "timestamp riusato: il valore gia' su disco e' stato conservato"
+  else
+    ng "timestamp riscritto (riuso assente in Apply-Blocks): $(grep '^- Ultima aggregazione:' docs/BUNDLE.md)"
+  fi
+  if git diff --quiet; then
+    ok "nessun diff dopo il run con riuso del timestamp"
+  else
+    ng "diff nonostante il riuso"; git diff --stat
+  fi
+
+  cd /; rm -rf "$D"
+
+  # --- Contro-prova: se il blocco cambia davvero, il timestamp DEVE aggiornarsi.
+  # Un riuso cieco (riutilizzare il valore a ogni run, senza confrontare il blocco)
+  # passerebbe la prima meta' di T11 e congelerebbe la data su un blocco stale:
+  # e' la direzione del falso positivo (lesson 44-4, un gate che blocca anche i
+  # casi legittimi viene disattivato al primo falso positivo).
+  # Il probe e' il sentinel: dopo un cambiamento di contenuto il valore non deve
+  # piu' essere il sentinel. Il confronto non passa per "l'orologio", che ha
+  # granularita' al minuto: qui si verifica che il valore sia *diverso* da quello
+  # seminato, qualunque sia il minuto in cui cadono i due run.
+  D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
+  # L'inventory calcola le dimensioni sui file di $files in generate-bundle.ps1:
+  # senza quel file il blocco non ha dipendenze dai contenuti e la contro-prova
+  # non sarebbe osservabile.
+  printf 'documento ausiliario\n' > docs/EXTRA.md
+  cat > scripts/generate-bundle.ps1 <<'EOF'
+$files = @(
+    "docs/EXTRA.md",
+)
+EOF
+  run_agg >/dev/null 2>&1
+  sed -i.bak 's/^- Ultima aggregazione: .*$/- Ultima aggregazione: 2001-01-01 01:01/' docs/BUNDLE.md
+  git add -A >/dev/null 2>&1; git commit -q -m "sentinel" >/dev/null 2>&1
+
+  head -c 4096 /dev/zero | tr '\0' 'x' >> docs/EXTRA.md
+  run_agg >/dev/null 2>&1
+  if grep -q '^- Ultima aggregazione: 2001-01-01 01:01$' docs/BUNDLE.md; then
+    ng "contenuto cambiato ma sentinel conservato (riuso cieco): il blocco non e' stato aggiornato"
+  else
+    ok "contenuto cambiato: il timestamp si aggiorna -> $(grep '^- Ultima aggregazione:' docs/BUNDLE.md)"
+  fi
+
   cd /; rm -rf "$D"
 }
 

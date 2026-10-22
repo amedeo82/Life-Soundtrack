@@ -346,6 +346,41 @@ if ($Check) {
 # FORZA LF (issue #58): WriteAllText con UTF-8 no BOM usa line endings OS-default
 # (CRLF su Windows, LF su Linux/macOS). Git memorizza LF. -replace CRLF, LF normalizza.
 $newBundle = $newBundle -replace "`r`n", "`n"
+
+# Issue #142: riuso di `> Data:` quando il bundle non cambia per il resto.
+# Difetto gemello di quello chiuso in aggregate-state.ps1: `Build-Bundle` accetta
+# gia' un parametro `-Timestamp` pensato per il riuso, ma veniva chiamato senza,
+# e il path di scrittura ristampava `Get-Date` a ogni esecuzione. `-Check`
+# normalizzava il campo, quindi il difetto non faceva fallire nessun gate:
+# si manifestava come commit a vuoto — `auto-bundle` committava un nuovo
+# `> Data:` dopo ogni merge che toccava un path di `$files`, anche quando il
+# contenuto dei file era identico.
+#
+# Il confronto usa TUTTO il bundle (a parita' di `> Data:`), cosi' che il riuso
+# scatti solo quando l'unica differenza e' la data; la sostituzione riguarda
+# invece la PRIMA riga `> Data:`, quella dell'header. I documenti inclusi che ne
+# contengono una propria (nel repo reale `docs/AUDIT-2026-10-15.md` ha
+# `> Data: 2026-10-15`) non devono essere toccati: corromperli sarebbe un danno
+# peggiore del commit-rumore che si vuole eliminare.
+if (Test-Path $outputFile) {
+    $existingBundleLF = (Get-Content $outputFile -Raw -Encoding UTF8) -replace "`r`n", "`n"
+    $oldStamp = [regex]::Match($existingBundleLF, '(?m)^> Data: (.+)$')
+    if ($oldStamp.Success) {
+        $stamp = $oldStamp.Groups[1].Value.Trim()
+        $newNorm = $newBundle -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00'
+        $oldNorm = $existingBundleLF -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00'
+        if (-not [string]::IsNullOrWhiteSpace($stamp) -and $newNorm -eq $oldNorm) {
+            $newStamp = [regex]::Match($newBundle, '(?m)^> Data: (.+)$')
+            if ($newStamp.Success) {
+                $newBundle = $newBundle.Substring(0, $newStamp.Index) +
+                             "> Data: $stamp" +
+                             $newBundle.Substring($newStamp.Index + $newStamp.Length)
+                Write-Host "Data di generazione riusata (contenuto invariato): $stamp" -ForegroundColor DarkGray
+            }
+        }
+    }
+}
+
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 $outPath = if (Test-Path $outputFile) { (Resolve-Path $outputFile).Path } else { Join-Path (Get-Location) $outputFile }
 [System.IO.File]::WriteAllText($outPath, $newBundle, $utf8NoBom)
