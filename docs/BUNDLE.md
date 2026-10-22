@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-22 17:12
+> Data: 2026-10-22 17:14
 > Totale file: 68
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 67 (incluso 4 file aggregator-managed)
-- Dimensione totale: 765 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-22 17:12
+- Dimensione totale: 765.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-22 17:14
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -927,6 +927,7 @@ Il numero `N` nel filename `docs/state/sessions/<N>-<slug>.md` deve essere univo
 ```powershell
 git fetch origin
 $N = (git ls-tree --name-only origin/main docs/state/sessions/ |
+      ForEach-Object { Split-Path $_ -Leaf } |
       Where-Object { $_ -match '^[0-9]+-' } |
       ForEach-Object { [int]($_ -split '-')[0] } |
       Measure-Object -Maximum).Maximum + 1
@@ -5337,6 +5338,7 @@ docs/state/
 git fetch origin
 
 $N = (git ls-tree --name-only origin/main docs/state/sessions/ |
+      ForEach-Object { Split-Path $_ -Leaf } |
       Where-Object { $_ -match '^[0-9]+-' } |
       ForEach-Object { [int]($_ -split '-')[0] } |
       Measure-Object -Maximum).Maximum + 1

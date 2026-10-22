@@ -896,6 +896,7 @@ Il numero `N` nel filename `docs/state/sessions/<N>-<slug>.md` deve essere univo
 ```powershell
 git fetch origin
 $N = (git ls-tree --name-only origin/main docs/state/sessions/ |
+      ForEach-Object { Split-Path $_ -Leaf } |
       Where-Object { $_ -match '^[0-9]+-' } |
       ForEach-Object { [int]($_ -split '-')[0] } |
       Measure-Object -Maximum).Maximum + 1
