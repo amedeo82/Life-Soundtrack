@@ -11,6 +11,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { type PrivacySettings } from '@core/schema';
 import { SpotifyAdapter } from '@core/adapters/spotify';
+import { YouTubeMusicAdapter } from '@core/adapters/youtube';
+import type { PlatformAdapter } from '@core/adapters';
 import { openDb } from '@core/db';
 import type { PlatformId } from '@core/schema';
 import { runImport, AdapterError } from '@core/adapters';
@@ -19,7 +21,19 @@ import { loadPrivacy, savePrivacy } from './PrivacySettings';
 import { PlatformCard } from './PlatformCard';
 import { useT } from '../i18n';
 
-const ACTIVE_PLATFORMS: PlatformId[] = ['spotify']; // solo Spotify ha adapter implementato (Story 0.3)
+/**
+ * Adapter disponibili per piattaforma (05§4): una entry solo quando
+ * l'adapter esiste (Spotify: Story 0.3; YouTube Music: Story 1.1).
+ */
+const ADAPTER_FACTORIES: Partial<Record<PlatformId, () => PlatformAdapter>> = {
+  spotify: () => new SpotifyAdapter(),
+  youtube_music: () => new YouTubeMusicAdapter(),
+};
+
+const ACTIVE_PLATFORMS: PlatformId[] = ['spotify', 'youtube_music'];
+
+const createAdapter = (platform: PlatformId): PlatformAdapter | null =>
+  ADAPTER_FACTORIES[platform]?.() ?? null;
 
 const initialState: ImportPlatformState = {
   status: 'empty' as PlatformCardStatus,
@@ -32,7 +46,9 @@ const initialState: ImportPlatformState = {
 
 export function OnboardingRouter() {
   const t = useT();
-  const [screen, setScreen] = useState<'welcome' | 'privacy' | 'import' | 'processing' | 'reveal'>('welcome');
+  const [screen, setScreen] = useState<'welcome' | 'privacy' | 'import' | 'processing' | 'reveal'>(
+    'welcome',
+  );
   const [privacy, setPrivacy] = useState<PrivacySettings>(loadPrivacy());
   const [importStates, setImportStates] = useState<Record<string, ImportPlatformState>>(
     Object.fromEntries(ACTIVE_PLATFORMS.map((p) => [p, { ...initialState }])),
@@ -86,16 +102,32 @@ export function OnboardingRouter() {
         eventsInserted: 0,
       });
 
-      const adapter = new SpotifyAdapter();
+      const adapter = createAdapter(platform);
+      if (!adapter) {
+        setPlatformState(platform, { status: 'error', error: t('error.generic') });
+        return;
+      }
       try {
         const ok = await adapter.detect(file);
         if (!ok) {
-          setPlatformState(platform, { status: 'error', error: t('adapter.spotify.detect.fail') });
+          // Errore guidato export HTML (youtube-music.md §2.2): il contratto
+          // detect è booleano, la discriminazione del formato è lato UI.
+          let errorKey = `adapter.${platform}.detect.fail`;
+          if (platform === 'youtube_music') {
+            const head = await file.slice(0, 64).text();
+            if (head.trimStart().startsWith('<')) {
+              errorKey = 'adapter.youtube_music.error.htmlExport';
+            }
+          }
+          setPlatformState(platform, { status: 'error', error: t(errorKey) });
           return;
         }
         setPlatformState(platform, { status: 'empty', error: null });
       } catch {
-        setPlatformState(platform, { status: 'error', error: t('adapter.spotify.detect.fail') });
+        setPlatformState(platform, {
+          status: 'error',
+          error: t(`adapter.${platform}.detect.fail`),
+        });
       }
     },
     [t],
@@ -122,12 +154,18 @@ export function OnboardingRouter() {
 
       try {
         const db = await ensureDb();
-        const summary = await runImport(db, new SpotifyAdapter(), file, {
+        const adapter = createAdapter(platform);
+        if (!adapter) {
+          setPlatformState(platform, { status: 'error', error: t('error.generic') });
+          failed = true;
+          break;
+        }
+        const summary = await runImport(db, adapter, file, {
           privacy,
           signal: controller.signal,
           fileName: file.name,
           onProgress: (eventsParsed) => {
-              setPlatformState(platform, { status: 'parsing', eventsParsed });
+            setPlatformState(platform, { status: 'parsing', eventsParsed });
           },
         });
 
@@ -197,11 +235,7 @@ export function OnboardingRouter() {
   }
   if (screen === 'privacy') {
     return (
-      <PrivacyScreen
-        privacy={privacy}
-        onChange={handlePrivacyChange}
-        onSave={handlePrivacySave}
-      />
+      <PrivacyScreen privacy={privacy} onChange={handlePrivacyChange} onSave={handlePrivacySave} />
     );
   }
   if (screen === 'import') {
@@ -227,11 +261,24 @@ export function WelcomeScreen({ onStart }: { onStart: () => void }) {
   return (
     <main className="onboarding-shell">
       <div className="onboarding-card">
-        <div style={{ fontSize: '2.5rem', marginBottom: 'var(--ls-spacing-md)', display: 'inline-block' }}>🎵</div>
+        <div
+          style={{
+            fontSize: '2.5rem',
+            marginBottom: 'var(--ls-spacing-md)',
+            display: 'inline-block',
+          }}
+        >
+          🎵
+        </div>
         <h2>{t('onboarding.welcome.title')}</h2>
         <p>{t('onboarding.welcome.subtitle')}</p>
         <div className="onboarding-actions">
-          <button type="button" className="btn btn-primary" onClick={onStart} data-testid="welcome-cta">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onStart}
+            data-testid="welcome-cta"
+          >
             {t('onboarding.welcome.cta')}
           </button>
         </div>
@@ -251,15 +298,39 @@ export function PrivacyScreen({
 }) {
   const t = useT();
   const toggles = [
-    { key: 'retainIp' as const, label: t('settings.privacy.retainIp'), desc: t('settings.privacy.retainIpDesc') },
-    { key: 'enrichMetadata' as const, label: t('settings.privacy.enrich'), desc: t('settings.privacy.enrichDesc') },
-    { key: 'carDetectionConsent' as const, label: t('settings.privacy.carDetection'), desc: t('settings.privacy.carDetectionDesc') },
-    { key: 'syncCloud' as const, label: t('settings.privacy.syncCloud'), desc: t('settings.privacy.syncCloudDesc') },
+    {
+      key: 'retainIp' as const,
+      label: t('settings.privacy.retainIp'),
+      desc: t('settings.privacy.retainIpDesc'),
+    },
+    {
+      key: 'enrichMetadata' as const,
+      label: t('settings.privacy.enrich'),
+      desc: t('settings.privacy.enrichDesc'),
+    },
+    {
+      key: 'carDetectionConsent' as const,
+      label: t('settings.privacy.carDetection'),
+      desc: t('settings.privacy.carDetectionDesc'),
+    },
+    {
+      key: 'syncCloud' as const,
+      label: t('settings.privacy.syncCloud'),
+      desc: t('settings.privacy.syncCloudDesc'),
+    },
   ];
   return (
     <main className="onboarding-shell">
       <div className="onboarding-card">
-        <div style={{ fontSize: '2.5rem', marginBottom: 'var(--ls-spacing-md)', display: 'inline-block' }}>🔒</div>
+        <div
+          style={{
+            fontSize: '2.5rem',
+            marginBottom: 'var(--ls-spacing-md)',
+            display: 'inline-block',
+          }}
+        >
+          🔒
+        </div>
         <h2>{t('onboarding.privacy.title')}</h2>
         <ul className="bullets">
           <li>{t('onboarding.privacy.bullet1')}</li>
@@ -282,11 +353,22 @@ export function PrivacyScreen({
             </div>
           ))}
         </div>
-        <p style={{ fontSize: '0.8rem', color: 'var(--ls-text-muted)', marginBottom: 'var(--ls-spacing-lg)' }}>
+        <p
+          style={{
+            fontSize: '0.8rem',
+            color: 'var(--ls-text-muted)',
+            marginBottom: 'var(--ls-spacing-lg)',
+          }}
+        >
           {t('onboarding.import.lock')}
         </p>
         <div className="onboarding-actions">
-          <button type="button" className="btn btn-primary" onClick={onSave} data-testid="privacy-cta">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onSave}
+            data-testid="privacy-cta"
+          >
             {t('onboarding.privacy.cta')}
           </button>
         </div>
@@ -334,7 +416,12 @@ export function ImportScreen({
         </div>
         <div className="onboarding-actions">
           {detecting ? (
-            <button type="button" className="btn btn-ghost" disabled data-testid="import-all-detecting">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled
+              data-testid="import-all-detecting"
+            >
               {t('common.loading')}
             </button>
           ) : (
@@ -363,13 +450,24 @@ export function ProcessingScreen({ total, onCancel }: { total: number; onCancel:
         <h2>{t('onboarding.processing.title')}</h2>
         <div className="processing-counters">
           <div className="row">
-            <span className="label">{t('onboarding.processing.events_other', { count: total })}</span>
-            <span className="value" data-testid="counter-events">{total}</span>
+            <span className="label">
+              {t('onboarding.processing.events_other', { count: total })}
+            </span>
+            <span className="value" data-testid="counter-events">
+              {total}
+            </span>
           </div>
         </div>
-        <p style={{ fontSize: '0.85rem', color: 'var(--ls-text-muted)' }}>{t('onboarding.import.lock')}</p>
+        <p style={{ fontSize: '0.85rem', color: 'var(--ls-text-muted)' }}>
+          {t('onboarding.import.lock')}
+        </p>
         <div className="onboarding-actions">
-          <button type="button" className="btn btn-ghost" onClick={onCancel} data-testid="processing-cancel">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={onCancel}
+            data-testid="processing-cancel"
+          >
             {t('onboarding.processing.cancel')}
           </button>
         </div>
@@ -383,12 +481,25 @@ export function RevealScreen({ events, onComplete }: { events: number; onComplet
   return (
     <main className="onboarding-shell">
       <div className="onboarding-card">
-        <div style={{ fontSize: '3rem', marginBottom: 'var(--ls-spacing-md)', display: 'inline-block' }}>✨</div>
+        <div
+          style={{
+            fontSize: '3rem',
+            marginBottom: 'var(--ls-spacing-md)',
+            display: 'inline-block',
+          }}
+        >
+          ✨
+        </div>
         <div className="reveal-number">{events}</div>
         <h2>{t('onboarding.reveal.title')}</h2>
         <p>{t('onboarding.reveal.subtitle', { years: 1, events })}</p>
         <div className="onboarding-actions">
-          <button type="button" className="btn btn-primary" onClick={onComplete} data-testid="reveal-cta">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onComplete}
+            data-testid="reveal-cta"
+          >
             {t('onboarding.reveal.cta')}
           </button>
         </div>
