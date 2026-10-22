@@ -178,13 +178,17 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/0.6-i18n.md` | ✅ migrata | da Story 0.6 BACKLOG + 18-DEV-LOG §12 |
 | `state/stories/0.4-ui-import.md` | ✅ migrata | da PR #71 (Sessione 37, issue #84) |
 | `state/stories/1.1-adapter-youtube-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.1" (issue #127, ADR-0008 V3): prima non-done, alimenta il blocco `AGGREGATE-NEXT-STEP-*` del README |
+| `state/stories/1.2-adapter-apple-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.2" (Sessione 42, issue #132, PR #134): `status: todo`, riattiva `AGGREGATE-NEXT-STEP-*` dopo il fallback dovuto al merge della 1.1 |
+| `state/sessions/42-approve-apple-music-spec.md` | ✅ creata | Sessione 42 (PR #134): approvazione spec Apple Music |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
-| Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 ha uno state file minimale per `AGGREGATE-NEXT-STEP-*`; le altre seguono con claim `agent-ready` |
+| Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
 
 > **Nota (Sessione 37, issue #84)**: le 7 story della Fase 0 sono tutte `done` e 6/7 hanno state file (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7 — la 0.7 e 0.5/0.6/0.4 sono pre-V3, 0.1/0.2 aggiunte con issue #127, ADR-0008 V3, per alimentare il blocco `AGGREGATE-NEXT-STEP-*` del README).
 >
 > Story 1.1 ha il primo state file di una story non-done: serve ad alimentare il blocco `AGGREGATE-NEXT-STEP-*` introdotto con ADR-0008 V3 (issue #127). Le altre 1.x+ seguiranno il pattern "crea lo state file al primo claim `agent-ready`" (migration incrementale).
+>
+> **Nota (Sessione 42, issue #132)**: la 1.2 anticipa il pattern — il suo state file nasce all'**approvazione della spec** (PR #134) e non al claim, perché è la story che il blocco `AGGREGATE-NEXT-STEP-*` deve indicare come prossima: senza di esso il README resta sul fallback "Nessuna story non-done migrata" per un'intera sessione dopo ogni merge. Il costo (un file da aggiornare in più se lo scope cambia) è minore del beneficio.
 
 Vedi ADR-0008 §"Piano di rollout" per la migration V2 (futuro).
 
