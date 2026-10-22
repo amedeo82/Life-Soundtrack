@@ -2680,7 +2680,7 @@ la Story 1.1 che non ha aggiunto il proprio state file a `$files`.
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #137)
 - **Claim**: `kilo-HP-ELITEBOOK-0a1b`
 
 ```
@@ -2798,7 +2798,7 @@ lo notasse. È la stessa classe di drift di #86/#88, applicata agli strumenti.
 
 ## Cross-refs
 
-- **#136** — il bug; chiuso da questa PR
+- **#136** — il bug; chiuso da PR #137
 - **#127** — ADR-0008 V3, che ha creato il blocco NEXT-STEP senza aggiornare lo staging
 - **#135** — `ci.yml` non esegue più alcun job: il gate di copertura non gira finché non è ripristinato
 - **#73** — `validate-workflows.mjs`, il file in cui è stato cablato il gate di copertura

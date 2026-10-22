@@ -7,7 +7,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: fix/136-readme-next-step-git-add
-pr: 0
+pr: 137
 claim: kilo-HP-ELITEBOOK-0a1b
 cross_refs: [127, 135, 73]
 tags: [devops, ci, adr-0008, bug]
@@ -126,7 +126,7 @@ lo notasse. È la stessa classe di drift di #86/#88, applicata agli strumenti.
 
 ## Cross-refs
 
-- **#136** — il bug; chiuso da questa PR
+- **#136** — il bug; chiuso da PR #137
 - **#127** — ADR-0008 V3, che ha creato il blocco NEXT-STEP senza aggiornare lo staging
 - **#135** — `ci.yml` non esegue più alcun job: il gate di copertura non gira finché non è ripristinato
 - **#73** — `validate-workflows.mjs`, il file in cui è stato cablato il gate di copertura

@@ -87,7 +87,7 @@
 | 40 | Specifica adapter Apple Music (Story 1.2) | 🟢 | ✅ | #100 |
 | 41 | Geo & contesto di ascolto: specifica e ADR | 🟢 | ✅ | #102 |
 | 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ❌ | #134 |
-| 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ❌ | - |
+| 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ❌ | #137 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
