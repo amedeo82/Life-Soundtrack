@@ -230,7 +230,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.1 — Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
 
-**Stato**: ✅ **DONE** — implementata su `feat/129-feat-adapter-youtube-music-story-1-1-goo` (PR in review, issue #129); spec `03-ADAPTERS/youtube-music.md` v1.0 APPROVED
+**Stato**: ✅ **DONE** — implementata su `feat/129-feat-adapter-youtube-music-story-1-1-goo` (PR #130 in review, issue #129); spec `03-ADAPTERS/youtube-music.md` v1.0 APPROVED
 
 **Descrizione**: Import da Google Takeout (formato JSON).
 
@@ -556,6 +556,6 @@ Ogni story deve avere label GitHub:
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
-| 1.1 - Adapter YouTube Music | done | #0 | - | adapter |
+| 1.1 - Adapter YouTube Music | done | #130 | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->

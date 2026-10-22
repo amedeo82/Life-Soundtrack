@@ -443,7 +443,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 **Tipo**: implementazione (`packages/core/src/adapters/youtube/`, `apps/web/src/onboarding/`); nuovo fixture + adapter factory UI + chiavi i18n
 **Branch**: `feat/129-feat-adapter-youtube-music-story-1-1-goo` (da `main` @ `b7642f7`; lavoro eseguito in worktree dedicata)
-**PR**: in review (issue #129, claim `kilo-HP-ELITEBOOK-x7q2`)
+**PR**: #130 (in review; issue #129, claim `kilo-HP-ELITEBOOK-x7q2`)
 **Data**: 2026-10-22
 **Stato**: ✅ implementazione completa — lint/typecheck/test/build verdi in locale (151 test core: 108 pre-esistenti + 43 nuovi)
 

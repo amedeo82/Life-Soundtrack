@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-22 13:12
+> Data: 2026-10-22 13:53
 > Totale file: 66
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -11,7 +11,7 @@
 
 - Totale file: 65 (incluso 4 file aggregator-managed)
 - Dimensione totale: 720.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-22 13:12
+- Ultima aggregazione: 2026-10-22 13:53
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -4745,7 +4745,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 **Tipo**: implementazione (`packages/core/src/adapters/youtube/`, `apps/web/src/onboarding/`); nuovo fixture + adapter factory UI + chiavi i18n
 **Branch**: `feat/129-feat-adapter-youtube-music-story-1-1-goo` (da `main` @ `b7642f7`; lavoro eseguito in worktree dedicata)
-**PR**: in review (issue #129, claim `kilo-HP-ELITEBOOK-x7q2`)
+**PR**: #130 (in review; issue #129, claim `kilo-HP-ELITEBOOK-x7q2`)
 **Data**: 2026-10-22
 **Stato**: ✅ implementazione completa — lint/typecheck/test/build verdi in locale (151 test core: 108 pre-esistenti + 43 nuovi)
 
@@ -10460,7 +10460,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.1 — Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
 
-**Stato**: ✅ **DONE** — implementata su `feat/129-feat-adapter-youtube-music-story-1-1-goo` (PR in review, issue #129); spec `03-ADAPTERS/youtube-music.md` v1.0 APPROVED
+**Stato**: ✅ **DONE** — implementata su `feat/129-feat-adapter-youtube-music-story-1-1-goo` (PR #130 in review, issue #129); spec `03-ADAPTERS/youtube-music.md` v1.0 APPROVED
 
 **Descrizione**: Import da Google Takeout (formato JSON).
 
@@ -10786,7 +10786,7 @@ Ogni story deve avere label GitHub:
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
-| 1.1 - Adapter YouTube Music | done | #0 | - | adapter |
+| 1.1 - Adapter YouTube Music | done | #130 | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
 
