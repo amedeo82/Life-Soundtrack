@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-22 14:45
+> Data: 2026-10-22 17:08
 > Totale file: 67
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -923,6 +923,7 @@ Il numero `N` nel filename `docs/state/sessions/<N>-<slug>.md` deve essere univo
 ```powershell
 git fetch origin
 $N = (git ls-tree --name-only origin/main docs/state/sessions/ |
+      ForEach-Object { Split-Path $_ -Leaf } |
       Where-Object { $_ -match '^[0-9]+-' } |
       ForEach-Object { [int]($_ -split '-')[0] } |
       Measure-Object -Maximum).Maximum + 1
@@ -5125,6 +5126,7 @@ docs/state/
 git fetch origin
 
 $N = (git ls-tree --name-only origin/main docs/state/sessions/ |
+      ForEach-Object { Split-Path $_ -Leaf } |
       Where-Object { $_ -match '^[0-9]+-' } |
       ForEach-Object { [int]($_ -split '-')[0] } |
       Measure-Object -Maximum).Maximum + 1
