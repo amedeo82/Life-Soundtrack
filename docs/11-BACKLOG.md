@@ -565,5 +565,6 @@ Ogni story deve avere label GitHub:
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
 | 1.1 - Adapter YouTube Music | done | #130 | `43f75291e5184144dc9d974c5003cd6ae6a7583e` | adapter |
+| 1.2 - Adapter Apple Music | todo | - | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->

@@ -86,6 +86,7 @@
 | 39 | Specifica adapter YouTube Music (Story 1.1) | 🟢 | ✅ | #97 |
 | 40 | Specifica adapter Apple Music (Story 1.2) | 🟢 | ✅ | #100 |
 | 41 | Geo & contesto di ascolto: specifica e ADR | 🟢 | ✅ | #102 |
+| 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ❌ | #134 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -125,9 +126,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **18** (merge: 18)
-- Stories migrate in state/stories: **8** (done: 8)
-- Ultima sessione migrata: **S41** - Geo & contesto di ascolto: specifica e ADR
+- Sessioni migrate in state/sessions: **19** (merge: 18)
+- Stories migrate in state/stories: **9** (done: 8)
+- Ultima sessione migrata: **S42** - Approvazione spec Apple Music (Story 1.2)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
