@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-22 18:16
+> Data: 2026-10-22 16:27
 > Totale file: 69
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
