@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-22 12:49
+> Data: 2026-10-22 14:55
 > Totale file: 66
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10460,7 +10460,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.1 — Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
 
-**Stato**: ✅ **DONE** — implementata su `feat/129-feat-adapter-youtube-music-story-1-1-goo` (PR #130 in review, issue #129); spec `03-ADAPTERS/youtube-music.md` v1.0 APPROVED
+**Stato**: ✅ **DONE** — merged in `main` (PR #130, merge commit `43f7529`, 2026-10-22) · adapter in `packages/core/src/adapters/youtube/` · fixture `fixtures/synthetic-history/youtube-sample.json`
 
 **Descrizione**: Import da Google Takeout (formato JSON).
 
