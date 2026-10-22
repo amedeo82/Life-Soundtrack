@@ -579,6 +579,36 @@ function Find-Block {
     return @{ StartIndex = $sIdx; EndIndex = $eIdx + $End.Length; Block = $Content.Substring($sIdx, $eIdx - $sIdx + $End.Length) }
 }
 
+function Get-NormalizedBlock {
+    # Issue #142: normalizza i campi mutabili (l'unico oggi e' "Ultima aggregazione")
+    # per poter confrontare due blocchi a parita' di contenuto.
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+    return ($Text -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00') -replace "`r`n", "`n"
+}
+
+function Sync-MutableTimestamp {
+    # Issue #142: riusa del valore gia' presente nel blocco su disco invece di
+    # ristamparlo a ogni run.
+    #
+    # La garanzia "il timestamp viene riusato quando il blocco non cambia altro"
+    # (issue #70, AGENTS.md -> Determinismo e idempotenza) era documentata e
+    # verificata solo in -Check, dove la normalizzazione maschera il campo: nel
+    # path di scrittura il timestamp veniva ristampato a ogni run. Con
+    # granularita' al minuto, due run ravvicinati che strappano il confine di
+    # minuto producevano un diff di una riga: era cioe' esattamente il
+    # "commit-rumore su main" che la garanzia prometteva di eliminare, e rendeva
+    # T3 di test-aggregate-determinism.sh dipendente dall'orologio.
+    param(
+        [Parameter(Mandatory)][AllowEmptyString()][string]$Calculated,
+        [Parameter(Mandatory)][AllowEmptyString()][string]$Existing
+    )
+    $m = [regex]::Match($Existing, '(?m)^- Ultima aggregazione: (.+)$')
+    if (-not $m.Success) { return $Calculated }
+    $stamp = $m.Groups[1].Value.Trim()
+    if ([string]::IsNullOrWhiteSpace($stamp)) { return $Calculated }
+    return $Calculated -replace '(?m)^- Ultima aggregazione: .+$', "- Ultima aggregazione: $stamp"
+}
+
 function Apply-Blocks {
     # Issue #105: avvisa SEMPRE di eventuali collisioni di `Number` tra i file
     # state/sessions/, anche se l'applicazione dei blocchi va a buon fine (il
@@ -612,6 +642,12 @@ function Apply-Blocks {
             $separator = [char]10 + [char]10
             $new = $content.TrimEnd() + $separator + $calculated
         } else {
+            # Issue #142: se il blocco non cambia nulla tranne il timestamp, riusa
+            # quello gia' su disco: due run consecutivi producono allora zero diff
+            # e `auto-state-aggregate` non committa a vuoto su `main`.
+            if ((Get-NormalizedBlock $found.Block) -eq (Get-NormalizedBlock $calculated)) {
+                $calculated = Sync-MutableTimestamp -Calculated $calculated -Existing $found.Block
+            }
             $new = $content.Substring(0, $found.StartIndex) + $calculated + $content.Substring($found.EndIndex)
         }
         if ($DryRun) {
@@ -670,8 +706,10 @@ function Test-Blocks {
         # Normalizza i timestamp mutabili (es. "Ultima aggregazione") prima del
         # confronto, per garantire idempotenza del --check (analogo al fix
         # S30/S31 applicato su generate-bundle.ps1 per la riga "> Data:").
-        $existingNorm = $existing -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
-        $calculatedNorm = $calculated -replace '(?m)^- Ultima aggregazione: .+$', '- Ultima aggregazione: 0000-00-00 00:00'
+        # Issue #142: la stessa normalizzazione e' ora in Get-NormalizedBlock, usata
+        # anche dal path di scrittura (Apply-Blocks) per il riuso del valore.
+        $existingNorm = Get-NormalizedBlock $existing
+        $calculatedNorm = Get-NormalizedBlock $calculated
         if ($existingNorm -eq $calculatedNorm) {
             Write-Host "[OK] $path - blocco in sync ($($calculated.Length) chars)" -ForegroundColor Green
         } else {
