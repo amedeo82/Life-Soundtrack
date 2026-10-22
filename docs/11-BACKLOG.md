@@ -243,16 +243,23 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-### Story 1.2 — Adapter Apple Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
+### Story 1.2 — Adapter Apple Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Descrizione**: Import CSV da Apple Privacy Portal.
+**Descrizione**: Import CSV da Apple Privacy Portal (export *Apple Media Services*).
 
-**Acceptance criteria**:
-- [ ] Parsing CSV robusto (PapaParse)
-- [ ] Mapping campi §3.1 Apple
-- [ ] Test con fixture
+**Acceptance criteria** (fonte: `03-ADAPTERS/apple-music.md` §8, issue #132):
+- [ ] Detection su ZIP annidato multi-part (≤5 livelli) e su CSV singolo; gli altri CSV dell'archivio rifiutati con guida all'utente
+- [ ] Parsing streaming (`papaparse` row mode, decisione **D5** §10) + tabella alias legacy/2026.2
+- [ ] Filtro eventi §3.3: scrub, sotto-soglia 30s e senza titolo scartati con warning e contatori
+- [ ] Mapping §3.1 (`eventKey = Event ID`, `completed`/`skipped`/`deviceType`/`shuffle`/`offline`) + catena di risoluzione artista D3 fino a `"Unknown"`
+- [ ] Fonte secondaria Daily Tracks: solo mappa artisti e riconciliazione, **mai** importata come `ListenEvent`
+- [ ] Privacy §7: geo e `Device Identifier` mai persistiti, `ip` solo con `retainIp`, `country` senza derivare dall'IP
+- [ ] Bias E.AP.1 dichiarato **sempre** all'utente (`info.pauseBias`), non solo sopra la soglia del 10%
+- [ ] Fixture `fixtures/synthetic-history/apple-music-sample.csv` con i 16 casi della spec §8
 
-**Spec**: `01-PLATFORMS.md` §3.3
+**Spec**: `03-ADAPTERS/apple-music.md` (v1.0, 🟢 APPROVED, Sessione 42) · `01-PLATFORMS.md` §3.3 · `03-ADAPTERS/SPEC-TEMPLATE.md`
+
+**Issue**: #132 · **Size**: `L` — ricalibrata da `M` in Sessione 42: lo scope supera quello della 1.1 per 2 fonti dati, 2 schemi di export e ZIP ricorsivo
 
 ---
 
@@ -499,7 +506,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec scritta (S40, issue #98): `03-ADAPTERS/apple-music.md` 🟡 DRAFT → `agent-ready` all'approvazione Boss |
+| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec 🟢 APPROVED v1.0 (S42, PR #134): `03-ADAPTERS/apple-music.md` · issue #132 `agent-ready` · size `L` |
 | 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8) |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
@@ -540,6 +547,7 @@ Ogni story deve avere label GitHub:
 | 1.6.0 | Sessione 38 (2026-10-21, issue #90) | **Allineamento della documentazione di stato legacy** (chiude il gap aperto in Sessione 38 di S37, D.37.2): la tabella "Stato di avanzamento" non duplica più le story `done` (fonte di verità = blocco `AGGREGATE-STORIES-*`) ed elenca solo la roadmap EPIC 1-6; allineate le righe `**Stato**` delle sezioni Story 0.3, 0.4, 0.5, 0.6, 0.7 (prima mancanti o stale); `AGENTS.md` v1.16 introduce la regola di ownership *blocchi aggregati vs sezioni legacy* |
 | 1.6.1 | Sessione 39 (2026-10-21, issue #96) | Nota Story 1.1 nella tabella roadmap: spec adapter YouTube Music scritta (`03-ADAPTERS/youtube-music.md`, 🟡 DRAFT — `agent-ready` all'approvazione Boss) |
 | 1.6.2 | Sessione 40 (2026-10-21, issue #98) | Note Story 1.1 (spec 🟢 APPROVED, PR #97) e 1.2 (spec scritta, 🟡 DRAFT) nella tabella roadmap |
+| 1.6.3 | Sessione 42 (2026-10-22, issue #132) | Story 1.2: spec 🟢 APPROVED v1.0 (PR #134), `[SIZE:M]` → `[SIZE:L]`, sezione Story riscritta con gli AC della spec §8 e `**Spec**:` che punta a `03-ADAPTERS/apple-music.md` (prima puntava solo a `01-PLATFORMS.md` §3.3, censito come più povero dell'export reale). Nota roadmap allineata. Tabella "Stato di avanzamento": la 1.2 resta `⬚ TODO` perché lo stato vive in `docs/state/stories/1.2-adapter-apple-music.md` |
 
 <!-- AGGREGATE-STORIES-START -->
 

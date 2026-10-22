@@ -1,6 +1,6 @@
 # Adapter Apple Music
 
-> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 40 (2026-10-21)
+> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 42 (2026-10-22)
 > Piattaforma: Apple Music (Apple Inc.)
 > Sede legale: USA
 > Tier: **A** · Priorità MVP: **sì**
@@ -151,7 +151,12 @@ isCandidateRow(r):
 Il file è un **aggregato giornaliero** (`Date Played` YYYYMMDD o ISO, `Track Description` "Artista - Brano", `Play Duration Milliseconds`, `Play Count`). **Non è joinabile per-riga** con il Play Activity (nessuna chiave condivisa) → viene usato SOLO per:
 
 1. **Mappa candidati-artisti**: `Track Description` splittato alla **prima occorrenza di `" - "`** (con spazi) → `{songName, artistName}`; si costruisce `normalize(songName) → artistName` **solo se l'artista è univoco** per quel brano in tutto il file (in caso di ambiguità: nessuna associazione). La mappa entra nella catena di risoluzione artista di §3.1.1 (dopo `Container Artist Name`, prima di `"Unknown"`)
-2. **Riconciliazione conteggi**: `Σ(Play Count ?? 1)` su Daily Tracks vs numero di eventi importati; se lo scostamento relativo supera il 10% → warning informativo `warn.reconciliationMismatch` con entrambe le cifre (espone il bias E.AP.1 e le lacune di retention)
+2. **Riconciliazione conteggi**: `Σ(Play Count ?? 1)` su Daily Tracks vs numero di eventi importati. Lo scarto è **sempre** dichiarato all'utente, non solo quando supera la soglia (decisione Boss, Sessione 42):
+   - scostamento relativo **> 10%** → warning `warn.reconciliationMismatch`: mostra **entrambe le cifre**, nomina la causa (E.AP.1, righe multiple per pause/riprese) e chiarisce che **non** è perdita di dati
+   - scostamento **≤ 10%** → nessun warning numerico, ma la notice `info.pauseBias` (§9) dichiara comunque il bias a fine import
+   - in **qualsiasi** esito dell'import → notice `info.pauseBias`, così il bias E.AP.1 è visibile anche quando la riconciliazione non lo intercetta
+
+   La soglia del 10% resta come **filtro del warning numerico**, non come condizione di trasparenza: il rischio dichiarato in §3.3 (lo stesso ascolto può contare più volte) non dipende dallo scarto aggregato e non può quindi essere condizionato a esso.
 
 **MAI importato come ListenEvent** (doppio conteggio con il Play Activity). La colonna `Play Count` non alimenta i contatori delle Track.
 
@@ -232,13 +237,20 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.apple_
 | `adapter.apple_music.warn.scrubSkipped` | "{count} eventi di scrubbing esclusi" | E.AP.5 |
 | `adapter.apple_music.warn.shortSkipped` | "{count} frammenti sotto i 30 secondi esclusi" | E.AP.1 |
 | `adapter.apple_music.warn.noTitleSkipped` | "{count} eventi senza titolo esclusi (jingle/ident radio)" | E.AP.7 |
-| `adapter.apple_music.warn.reconciliationMismatch` | "Riconciliazione: {daily} ascolti stimati da Apple, {events} eventi importati (pause e riprese possono contare doppio)" | §3.4 |
+| `adapter.apple_music.warn.reconciliationMismatch` | "Attenzione: il tuo export Apple conta {daily} ascolti, l'import ne ha registrati {events}. Lo scarto è previsto e non indica dati persi: ogni pausa e ripresa genera una riga nuova, quindi un singolo ascolto può essere contato più volte" | §3.4, scarto >10% |
+| `adapter.apple_music.info.pauseBias` | "Nel conteggio eventi sono incluse le pause e le riprese: per gli ascolti reali guarda il numero di brani unici" | fine import, **sempre** |
 | `adapter.apple_music.info.libraryDeferred` | "La libreria Apple Music non è inclusa in questo import (in arrivo)" | §3.2 |
 | `adapter.apple_music.info.complete` | "Import completato: {events} eventi, {tracks} brani unici" | fine |
 
 ## 10. Note di implementazione
 
-- **PapaParse streaming** (già stack-adjacent: zero deps pesanti; row mode + `step` per grandi file); mai caricare il CSV intero
+- **`papaparse` come dipendenza di `@ls/core`** (decisione **D5**, Boss, Sessione 42)
+  - *Correzione di una premessa errata della v0.1*: la versione precedente prescriveva "PapaParse streaming (zero deps pesanti; row mode + `step`)". La verifica su `packages/core/package.json` e `pnpm-lock.yaml` al 2026-10-22 ha mostrato che **`papaparse` non era una dipendenza del repo**: nessuna dichiarazione, nessuna entry nel lockfile. La v0.1 dava quindi per esistente una dipendenza mai aggiunta. `@ls/core` ha oggi una sola dipendenza runtime (`fflate`) e un unico parser streaming fatto in casa (`jsonStream.ts`, Story 1.1)
+  - *Perché la libreria e non un parser in casa*: il repo ha un precedente a favore del parser fatto a mano (`jsonStream.ts`), ma il CSV non è il JSON. Gli edge case sono quoting, `""` escape, newline dentro il campo, BOM, CRLF e delimitatore variabile: è esattamente la superficie in cui un parser scritto a mano perde righe **in silenzio**, e un export Apple reale supera agevolmente le 100k righe. La perdita silenziosa di dati è più costosa di una dipendenza da ~45 kB gzip
+  - *Modalità*: row mode con callback `step` (mai `chunk`, mai caricamento integrale) → memoria costante anche su 100k+ righe
+  - *Sorgente dei dati*: il contenuto vive dentro lo ZIP in memoria, quindi lo stream è alimentato dai chunk emessi dalla decompressione (`fflate`), **non** da un `File` su disco. `Papa.parse(file, { step })` non è utilizzabile
+  - *Fallback accettato solo per i test*: `Papa.parse(buffer, { step })` sul buffer integrale, tollerato esclusivamente sui fixture
+  - Il parsing **non** deve mai uscire dal perimetro whitelist di §3.1: le ~143 colonne dell'export non lasciano il mapper (E.AP.9), indipendentemente da come la libreria le consegna
 - **Tabella alias canonica** (E.AP.3), risolta a colonna:
 
 | Canonico | 2026.2 | Legacy (2015-2021) |
@@ -269,3 +281,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.apple_
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 40 (2026-10-21) | Prima stesura (issue #98). Decisioni D1-D4 chiuse con il Boss; formato Apple 2026.2 verificato su fonti 2026. Promozione a 🟢 APPROVED al merge della PR di approvazione |
+| 1.0 | Sessione 42 (2026-10-22) | 🟢 APPROVED · promozione al merge della PR #134 (approvazione Boss). Tre modifiche di contenuto rispetto alla v0.1: **D5** `papaparse` confermata come dipendenza estesa di `@ls/core` (la v0.1 la dava per già presente: non lo era — §10); bias **E.AP.1** dichiarato **sempre** all'utente e non più solo sopra la soglia del 10% (§3.4, §9, nuova chiave `info.pauseBias`); size della Story 1.2 `M` → `L` in `11-BACKLOG.md` (2 fonti dati, 2 schemi di export, ZIP ricorsivo) |
