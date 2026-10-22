@@ -65,6 +65,8 @@ export interface RawListenEvent {
 /** Opzioni di parse (05§4: cancellazione cooperativa via `AbortSignal`). */
 export interface ParseOptions {
   signal?: AbortSignal;
+  /** Se true, l'adapter può includere l'IP nel RawListenEvent (PrivacySettings.retainIp). */
+  retainIp?: boolean;
   /**
    * Callback per i codici di segnalazione per-evento (T0.3.7, i18n §9
    * dell'adapter, es. `adapter.spotify.warn.podcastSkipped`). Chiamato una

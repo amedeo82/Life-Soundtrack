@@ -25,6 +25,7 @@ export {
 } from './adapters';
 export { SpotifyAdapter } from './adapters/spotify';
 export { YouTubeMusicAdapter } from './adapters/youtube';
+export { AppleMusicAdapter } from './adapters/apple';
 
 export {
   consoleSink,

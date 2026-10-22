@@ -12,6 +12,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { type PrivacySettings } from '@core/schema';
 import { SpotifyAdapter } from '@core/adapters/spotify';
 import { YouTubeMusicAdapter } from '@core/adapters/youtube';
+import { AppleMusicAdapter } from '@core/adapters/apple';
 import type { PlatformAdapter } from '@core/adapters';
 import { openDb } from '@core/db';
 import type { PlatformId } from '@core/schema';
@@ -23,14 +24,15 @@ import { useT } from '../i18n';
 
 /**
  * Adapter disponibili per piattaforma (05§4): una entry solo quando
- * l'adapter esiste (Spotify: Story 0.3; YouTube Music: Story 1.1).
+ * l'adapter esiste (Spotify: Story 0.3; YouTube Music: Story 1.1; Apple Music: Story 1.2).
  */
 const ADAPTER_FACTORIES: Partial<Record<PlatformId, () => PlatformAdapter>> = {
   spotify: () => new SpotifyAdapter(),
   youtube_music: () => new YouTubeMusicAdapter(),
+  apple_music: () => new AppleMusicAdapter(),
 };
 
-const ACTIVE_PLATFORMS: PlatformId[] = ['spotify', 'youtube_music'];
+const ACTIVE_PLATFORMS: PlatformId[] = ['spotify', 'youtube_music', 'apple_music'];
 
 const createAdapter = (platform: PlatformId): PlatformAdapter | null =>
   ADAPTER_FACTORIES[platform]?.() ?? null;

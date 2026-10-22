@@ -208,6 +208,7 @@ $files = @(
     ".github/workflows/auto-bundle.yml",
     "fixtures/synthetic-history/spotify-sample.json",
     "fixtures/synthetic-history/youtube-sample.json",
+    "fixtures/synthetic-history/apple-music-sample.csv",
     "fixtures/db-seed/minimal.json"
 )
 

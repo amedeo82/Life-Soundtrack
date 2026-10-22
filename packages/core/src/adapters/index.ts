@@ -23,3 +23,31 @@ export type {
   RawListenEvent,
   RawPlaylistItemRef,
 } from './types';
+
+export { AppleMusicAdapter } from './apple';
+export {
+  detectAppleMusic,
+  parseCsvStreaming,
+  parseDailyTracksCsv,
+  buildDailyTracksArtistMap,
+  mapAppleMusicEvent,
+  normalizeColumnName,
+  ALIAS_MAP,
+  MIN_PLAY_MS,
+  COMPLETION_TOLERANCE_MS,
+  SKIP_RATIO,
+  RECONCILIATION_TOLERANCE,
+  computeCompleted,
+  computeSkipped,
+  mapDeviceType,
+  buildDeviceDetail,
+  parseTimestamp,
+  resolveCountry,
+  resolveArtistName,
+} from './apple';
+export {
+  isAppleMusicActivityRecord,
+  isAppleMusicDailyTrackRecord,
+  type AppleMusicActivityRecord,
+  type AppleMusicDailyTrackRecord,
+} from './apple';
