@@ -183,6 +183,11 @@ $files = @(
     # dell'aggregator (issue #136). T1..T4: lo scenario negativo reintroduce
     # il bug in una fixture e verifica che il gate esca 1.
     "scripts/test-workflow-git-add-coverage.sh",
+    # Test di regressione del gate sulle scope di `permissions:` (issue #135).
+    # T1..T5: lo scenario negativo reintroduce `metadata: read` — che GitHub
+    # rifiuta in fase di validazione del workflow, con 0 job e run a 0s — e
+    # verifica che il gate esca 1.
+    "scripts/test-workflow-permission-scopes.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",
