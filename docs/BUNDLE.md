@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-22 13:41
-> Totale file: 66
+> Data: 2026-10-22 16:42
+> Totale file: 67
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 65 (incluso 4 file aggregator-managed)
-- Dimensione totale: 724.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-22 13:41
+- Totale file: 66 (incluso 4 file aggregator-managed)
+- Dimensione totale: 741.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-22 16:42
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 38 |
-| scripts/ | 14 |
+| scripts/ | 15 |
 | fixtures/ | 2 |
 | .githooks/ | 4 |
 | .github/ | 4 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.21 — Sessione 41 (2026-10-21)
+> Versione 1.22 — Sessione 43 (2026-10-22)
 
 ---
 
@@ -777,7 +777,7 @@ Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; qua
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
-| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml` |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136) |
 | `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
@@ -856,7 +856,7 @@ Esempi di obbligo concreto:
 
 **Anti-pattern ricorrente**: duplicare in una sezione legacy un dato che un blocco aggregato già fornisce. Ogni duplicazione è una seconda fonte di verità che invecchia. Se il dato è già in un blocco `AGGREGATE-*`, **mettici un puntatore, non una copia**.
 
-### Target V1 + V2
+### Target V1 + V2 + V3
 
 | File | Blocchi gestiti | Versione |
 |------|----------------|----------|
@@ -865,10 +865,13 @@ Esempi di obbligo concreto:
 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-STATUS-{START,END} -->` | V2 |
 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->` | V2 |
 | `docs/BUNDLE.md` | `<!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->` | V2 |
+| `README.md` | `<!-- AGGREGATE-NEXT-STEP-{START,END} -->` | V3 (issue #127) |
+
+**Vincolante (issue #136)**: la riga `git add` di `.github/workflows/auto-state-aggregate.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
 
 ### Eccezione
 
-Le PR di introduzione V1 (`#24`, S25) e V2 (`#52`, S29) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
+Le PR di introduzione V1 (`#24`, S25), V2 (`#52`, S29) e V3 (`#127`, S42) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
 
 ### Pattern `state/`
 
@@ -972,7 +975,14 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.21 — auto-bundle workflow post-merge (Sessione 41, issue #115 follow-up di PR #113). Il drift `docs/BUNDLE.md` (sezioni `===== FILE:`) rilevato dopo il merge di PR #112 era strutturalmente non prevenuto: `auto-state-aggregate.yml` aggiorna solo i blocchi `<!-- AGGREGATE-* -->` per design, e nessuna workflow rigenerava il contenuto FILE di `BUNDLE.md` post-merge. Aggiunti:
+*Ultimo aggiornamento: v1.22 — il blocco NEXT-STEP del README non veniva committato (Sessione 43, issue #136). ADR-0008 V3 (#127) aveva aggiunto `README.md` come quinto `$targets` di `scripts/aggregate-state.ps1`, ma la riga `git add` di `auto-state-aggregate.yml` — elenco tenuto a mano, separato — era rimasta quella di V2: il blocco veniva generato e poi scartato. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file, ed e' emerso solo alla prima story `todo` (1.2, S42). Aggiunti:
+- `.github/workflows/auto-state-aggregate.yml`: `README.md` nella riga `git add` (ordine di precedenza del generatore) + blocco NEXT-STEP nell'elenco dei target del messaggio di commit + nota di-header che rimanda al gate
+- `scripts/validate-workflows.mjs`: assert di copertura fra i `$targets` dell'aggregator e la riga `git add` del workflow (accetta path letterali, directory e radice `.`) — gate bloccante in CI dal #73
+- `scripts/test-workflow-git-add-coverage.sh` (nuovo, T1..T4) + step bloccante in `ci.yml`: il test reintroduce il bug in una fixture e verifica che il gate lo intercetti
+- §"🔄 Lazy-state aggregation → Target V1 + V2 + V3": tabella dei target allineata al V3 con la regola vincolante sulla copertura; §"📤 Post-merge actions" Livello 1: riga `auto-state-aggregate` allineata
+- `docs/12-DEVOPS.md` §9.8c (nuova) + changelog 0.4: sintesi della divergenza fra i due elenchi, perchè è rimasta invisibile, e la regola generale (nuovo target ⇒ aggiornare ogni lista che lo consuma a mano + gate di confronto)
+
+*Precedente v1.21 — auto-bundle workflow post-merge (Sessione 41, issue #115 follow-up di PR #113). Il drift `docs/BUNDLE.md` (sezioni `===== FILE:`) rilevato dopo il merge di PR #112 era strutturalmente non prevenuto: `auto-state-aggregate.yml` aggiorna solo i blocchi `<!-- AGGREGATE-* -->` per design, e nessuna workflow rigenerava il contenuto FILE di `BUNDLE.md` post-merge. Aggiunti:
 - `.github/workflows/auto-bundle.yml` (nuovo, ~100 righe): trigger su push a main con paths che coprono `$files` + `scripts/generate-bundle.ps1` stesso. Esegue `pwsh scripts/generate-bundle.ps1`, skippa il commit via guard `git diff --quiet docs/BUNDLE.md` (idempotente), committa e pusha con `kilo-bot[bot]`
 - `.github/workflows/auto-state-aggregate.yml`: aggiunto blocco `concurrency: { group: post-merge-main, cancel-in-progress: false }` per serializzare le due workflow (evita race su push di `BUNDLE.md`)
 - `.github/CODEOWNERS`: aggiunto `/.github/workflows/auto-bundle.yml @amedeo82` alla sezione workflows
@@ -1064,9 +1074,9 @@ EPIC 0 (Fase 0 tecnica) è completo 7/7: monorepo + toolchain + schema DB + adap
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-_Nessuna story non-done migrata in `docs/state/stories/`._
+**Prossima story da implementare**: **1.2** — Adapter Apple Music (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
+Sorgente: `docs/state/stories/1.2-adapter-apple-music.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -1389,6 +1399,7 @@ Apache License
 | 40 | Specifica adapter Apple Music (Story 1.2) | 🟢 | ✅ | #100 |
 | 41 | Geo & contesto di ascolto: specifica e ADR | 🟢 | ✅ | #102 |
 | 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ❌ | #134 |
+| 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1428,9 +1439,9 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **19** (merge: 18)
+- Sessioni migrate in state/sessions: **20** (merge: 18)
 - Stories migrate in state/stories: **9** (done: 8)
-- Ultima sessione migrata: **S42** - Approvazione spec Apple Music (Story 1.2)
+- Ultima sessione migrata: **S43** - auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -4143,6 +4154,135 @@ la Story 1.1 che non ha aggiunto il proprio state file a `$files`.
   ListenBrainz, spec mancante → `needs-spec`)
 ```
 
+### Sessione 43 - auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136)
+
+- **Data**: 2026-10-22
+- **Stato**: 🟢
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK-0a1b`
+
+```
+
+# Sessione 43 — `auto-state-aggregate` non committa il blocco NEXT-STEP del README (issue #136)
+
+## Sintesi
+
+ADR-0008 V3 (issue #127, Sessione 42) ha aggiunto `README.md` come **quinto** file
+gestito da `scripts/aggregate-state.ps1`, con il blocco
+`<!-- AGGREGATE-NEXT-STEP-{START,END} -->` che dichiara la prossima story da
+implementare. Il generatore lo scriveva regolarmente; il workflow che doveva
+**committarlo** no.
+
+`.github/workflows/auto-state-aggregate.yml` elenca a mano i path da mettere in
+staging, e quell'elenco era rimasto quello di V2: senza `README.md`. Lo step
+"Apply aggregator" scriveva il blocco, `git diff --name-only` lo vedeva, il
+commit riusciva — ma con 4 file invece di 5, e il `README.md` modificato moriva
+nel working tree del runner. Nessun errore, nessun warning: un commit che
+riporta successo scarta silenziosamente il lavoro che aveva appena fatto.
+
+Il drift è rimasto invisibile per una ragione che vale la pena registrare: era
+**coerente per caso**. Finché esisteva una sola story `done`, il fallback
+generato (`_Nessuna story non-done migrata..._`) coincideva byte per byte con il
+testo già presente in `README.md`, quindi `aggregate-state.ps1 -Check` usciva 0 e
+non c'era alcun sintomo osservabile. Il bug si è manifestato alla prima story
+`todo` — la 1.2, creata in Sessione 42 — ed è lì che `-Check` è passato da 0 a 1
+(`README.md`: `Atteso: 542 chars, Trovato: 393 chars`).
+
+## Trigger
+
+Lettura di `README.md` durante la sessione di approvazione della spec Apple
+Music: la sezione "Prossima story" dichiarava l'assenza di story non-done mentre
+`docs/state/stories/1.2-adapter-apple-music.md` esisteva con `status: todo` e il
+blocco `AGGREGATE-STORIES-*` del backlog lo elencava correttamente. L'issue #136
+era gia' aperta con la diagnosi completa.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.43.1 | Fix di **una parola** nella riga `git add` (non riscrittura del workflow) | Il difetto era nella lista, non nel meccanismo: lo step di commit funziona, elencava un target in meno |
+| D.43.2 | Gate di copertura in `scripts/validate-workflows.mjs`, non in uno script nuovo | Il file è gia' un gate bloccante in CI (issue #73) e gia' legge i workflow: nessuna nuova dipendenza, nessun nuovo step che un agente possa dimenticare di eseguire |
+| D.43.3 | Copertura accettata per **prefisso** (path letterale, directory con `/`, radice `.`) | Un gate che pretende i path letterali spingerebbe verso `git add -A`, che l'issue scarta esplicitamente (commit del bot non prevedibile, aggreggerebbe file non correlati) |
+| D.43.4 | Test di regressione **separato** con scenario negativo | Il gate di per se' può passare sempre e sembrare verde. T2 reintroduce il bug in una fixture e verifica che il gate esca 1: è l'unico modo per dimostrare che il gate è un gate |
+
+## Difetti trovati lungo il percorso
+
+**Il drift era mascherato anche da `ci.yml` rotto** (issue #135): dal
+2026-10-21T16:21Z nessun job gira, quindi il gate di copertura — come gli altri
+— non sarebbe scattato in CI nemmeno col workflow integro. La verifica di
+questa sessione è locale (`pwsh` 7.6.7 + `node`), non CI.
+
+**Il messaggio di commit del bot elencava 5 target su 6**: la lista dei blocchi
+nel corpo del commit si era fermata a V2. Stesso drift, testo invece di path —
+corretto insieme.
+
+**`README.md` era già in `docs/BUNDLE.md` ma non nello staging del workflow**:
+i due elenchi che il repo mantiene per lo stesso file (il `$files` del bundle e
+la riga `git add`) erano già divergenti prima di questo fix, senza che nessun gate
+lo notasse. È la stessa classe di drift di #86/#88, applicata agli strumenti.
+
+## Verifica
+
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0, `[OK] auto-state-aggregate.yml: la riga git add copre tutti i 5 $targets`
+- `bash scripts/test-workflow-git-add-coverage.sh` → 8/8 (T1 reale, T2 reintroduzione del bug → exit 1, T3 nessuna riga `git add` → exit 1, T4 copertura per radice → exit 0)
+- `pwsh scripts/aggregate-state.ps1` → `README.md` riscritto con la 1.2; **seconda run identica** (nessun diff): il blocco non oscilla (AC "idempotenza")
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 su tutti e 6 i blocchi (era exit 1 su `README.md`)
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `bash scripts/test-aggregate-determinism.sh` → invariato (nessuna modifica a `aggregate-state.ps1`)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|--------------|
+| 43-1 | **Un gate che passa sempre non è un gate**: l'assert di copertura, da solo, avrebbe potuto essere scritto in modo da non coprire nulla e restare verde. Il test che reintroduce il bug è ciò che distingue un gate da un controllo cosmetico |
+| 43-2 | **Il fall-open più insidioso è quello senza sintomo**: finché l'output generato coincideva con il testo in file, `-Check` dava 0 e la lista rotta era indistinguibile da quella corretta. Un gate che verifica la *coerenza* non può vedere un target che non viene nemmeno committato: serve un gate che confronti gli elenchi |
+| 43-3 | **Un nuovo target di un generatore ha effetti a valle**: aggiungerlo richiede aggiornare, nello stesso commit, ogni lista che lo consuma a mano — staging del workflow, `$files` del bundle, tabelle documentali — e aggiungere un check che confronti le liste. È l'estensione della regola D.38.1 dagli aggregati agli strumenti |
+| 43-4 | Un diff di 4 righe che *non compare* nel commit è più difficile da notare di un diff di 400 righe: l'assenza di lavoro nel commit non è un sintomo che l'occhio o `git log --stat` segnalano |
+
+## Documenti aggiornati
+
+- `.github/workflows/auto-state-aggregate.yml` — `README.md` nella riga `git add`, blocco NEXT-STEP nel messaggio di commit, nota di-header
+- `.github/workflows/ci.yml` — step bloccante `Copertura git add vs $targets (issue #136)`
+- `.github/CODEOWNERS` — entry esplicita per `auto-state-aggregate.yml` (era coperto solo dalla regola di directory)
+- `scripts/validate-workflows.mjs` — assert di copertura `$targets` ↔ `git add`
+- `scripts/test-workflow-git-add-coverage.sh` (**nuovo**) — T1..T4 con scenario negativo
+- `scripts/generate-bundle.ps1` — `$files` += il nuovo test
+- `docs/12-DEVOPS.md` — §9.8c (nuova) + changelog 0.4
+- `AGENTS.md` — v1.21 → v1.22: tabella target allineata al V3, riga `auto-state-aggregate` del Livello 1, footer
+- `README.md` — blocco `AGGREGATE-NEXT-STEP-*` risincronizzato (non modificato a mano: rigenerato dall'aggregator)
+- `docs/BUNDLE.md` — rigenerato
+- `docs/state/sessions/43-readme-next-step-git-add.md` (**nuovo**) — questa entry
+
+## Note operative
+
+- Nessun blocco `<!-- AGGREGATE-* -->` modificato a mano: il README è stato
+  risincronizzato eseguendo `pwsh scripts/aggregate-state.ps1`, che è
+  esattamente ciò che il workflow avrebbe dovuto fare da #127. È la ripetizione
+  del pattern "doc-sync di emergenza" di AGENTS.md §"Livello 3", resa necessaria
+  dal fatto che il generatore non è mai arrivato a committarlo.
+- I diff di `docs/SESSIONS.md`, `docs/INDEX.md` e `docs/BUNDLE.md` in questa PR
+  sono **output dell'aggregator e del generatore di bundle**, non scritture
+  manuali: sono la conseguenza della nuova sessione 43 e della sincronizzazione
+  del README. Non potevano essere lasciati fuori: senza il README risincronizzato
+  `aggregate-state.ps1 -Check` resterebbe su exit 1, che è esattamente l'AC di
+  #136. L'aggregator è idempotente, quindi la run post-merge di
+  `auto-state-aggregate` produrrà zero diff.
+- **Gate assente**: i check di questa sessione sono stati eseguiti in locale.
+  Ripristinare `ci.yml` (#135) è prerequisito perché il nuovo gate sia effettivo.
+- `pnpm run lint` / `typecheck` / `test` / `build` non sono stati eseguiti: la
+  worktree non ha `node_modules` (le dipendenze vivono nella working copy
+  principale) e **nessun file applicativo è stato toccato** — la PR non contiene
+  codice in `apps/` o `packages/`.
+
+## Cross-refs
+
+- **#136** — il bug; chiuso da questa PR
+- **#127** — ADR-0008 V3, che ha creato il blocco NEXT-STEP senza aggiornare lo staging
+- **#135** — `ci.yml` non esegue più alcun job: il gate di copertura non gira finché non è ripristinato
+- **#73** — `validate-workflows.mjs`, il file in cui è stato cablato il gate di copertura
+- **#86 / #88** — stessa famiglia di elenchi tenuti in due posti diversi
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -5116,6 +5256,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/1.1-adapter-youtube-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.1" (issue #127, ADR-0008 V3): prima non-done, alimenta il blocco `AGGREGATE-NEXT-STEP-*` del README |
 | `state/stories/1.2-adapter-apple-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.2" (Sessione 42, issue #132, PR #134): `status: todo`, riattiva `AGGREGATE-NEXT-STEP-*` dopo il fallback dovuto al merge della 1.1 |
 | `state/sessions/42-approve-apple-music-spec.md` | ✅ creata | Sessione 42 (PR #134): approvazione spec Apple Music |
+| `state/sessions/43-readme-next-step-git-add.md` | ✅ creata | Sessione 43 (issue #136): fix dello staging di `README.md` in `auto-state-aggregate.yml` + gate di copertura `git add` vs `$targets` |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -11381,6 +11522,44 @@ concurrency:
 
 **Lezione operativa D.116.1**: durante un rebase con conflitti su `BUNDLE.md`, NON prendere `theirs/ours` ciecamente. Rigenerare SEMPRE `BUNDLE.md` con `pwsh scripts/generate-bundle.ps1` dopo il rebase (lo script riflette lo stato aggiornato di `$files` post-rebase).
 
+### 9.8c Copertura `git add` vs `$targets` (issue #136)
+
+Lo stesso pattern di ADR-0008 — *un dato con due fonti di verità, tenute in due posti diversi, senza un gate che le confronti* — si è manifestato **sugli strumenti** invece che sui documenti, e con un esito peggiore: il dato non era duplicato, era **scartato**.
+
+`scripts/aggregate-state.ps1` dichiara i file che gestisce in un array `$targets` (oggi 6 blocchi su 5 file):
+
+| # | File | Blocco | Introdotto da |
+|---|------|--------|----------------|
+| 1 | `docs/SESSIONS.md` | `<!-- AGGREGATE-SESSIONS-{START,END} -->` | ADR-0008 V1 (S25) |
+| 2 | `docs/11-BACKLOG.md` | `<!-- AGGREGATE-STORIES-{START,END} -->` | ADR-0008 V1 (S25) |
+| 3 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-STATUS-{START,END} -->` | ADR-0008 V2 (S29) |
+| 4 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->` | ADR-0008 V2 (S29) |
+| 5 | `docs/BUNDLE.md` | `<!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->` | ADR-0008 V2 (S29) |
+| 6 | `README.md` | `<!-- AGGREGATE-NEXT-STEP-{START,END} -->` | ADR-0008 V3 (S42, issue #127) |
+
+`.github/workflows/auto-state-aggregate.yml` deve **committare** tutti quei file, ma li elencava a mano in un secondo elenco:
+
+```yaml
+git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md scripts/aggregate-state.ps1 docs/state/
+```
+
+Quando #127 ha aggiunto `README.md` come quinto target, il workflow ha continuato a **generare** il blocco NEXT-STEP (lo step "Apply aggregator" scrive su tutti i `$targets`) e a **scartarlo** (il blocco restava dirty nel working tree del runner, fuori dallo staging). Nessun errore, nessun warning: il commit riusciva con 4 file invece di 5.
+
+**Perché è rimasto invisibile**: il blocco era rimasto coerente **per caso**. Finché l'unica story non-`done` non esisteva, il fallback generato (`_Nessuna story non-done migrata..._`) coincideva byte per byte con il testo già presente in `README.md`, quindi `aggregate-state.ps1 -Check` usciva 0 e il bug non aveva un sintomo osservabile. Il drift è emerso solo alla prima story `todo` (1.2, creata in S42): `-Check` è passato da 0 a 1 su `README.md` (`Atteso: 542 chars, Trovato: 393 chars`) senza che nessuno avesse toccato né il workflow né il README.
+
+**Il fix** è di una parola nella riga `git add` (`README.md` inserito nell'ordine di precedenza del generatore, dopo `docs/BUNDLE.md`).
+
+**La difesa strutturale** è in `scripts/validate-workflows.mjs`, che già è un gate bloccante in CI (issue #73): ora confronta i due elenchi e fallisce elencando i `$targets` non coperti dalla riga `git add`. La copertura accetta sia il path letterale sia una directory che lo contiene (`docs/state/`, `.`), così l'elenco può restare leggibile senza perdere la copertura. Il test di regressione è `scripts/test-workflow-git-add-coverage.sh` (T1..T4): verifica che il gate **esca 1** quando si reintroduce il bug — un gate che passa sempre non è un gate.
+
+```powershell
+node scripts/validate-workflows.mjs .github/workflows   # include la copertura `git add`
+bash scripts/test-workflow-git-add-coverage.sh          # scenario negativo (gate bloccante in CI)
+```
+
+**Regola generale**: quando si aggiunge un target a un generatore, va aggiornata **nello stesso commit** ogni lista che lo consuma a mano (elenco di staging del workflow, `$files` del bundle, tabelle documentali), e va aggiunto un gate che confronti le due liste. L'alternativa debole `git add -A` elimina la classe di bug ma rende il commit del bot non prevedibile (aggreggerebbe file non correlati): preferita la lista esplicita + il gate.
+
+**Nota di maskatura**: dal 2026-10-21T16:21Z `ci.yml` non esegue più alcun job (issue #135), quindi questo gate — come gli altri — non sta girando in CI. La verifica è stata fatta in locale; ripristinare #135 è prerequisito per la copertura automatica.
+
 ---
 
 ## Changelog
@@ -11390,6 +11569,7 @@ concurrency:
 | 0.1 | Sessione 8 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10); **nuovo §9 "Bundle script maintenance"** con comandi, convenzioni, CI check, workflow dev (post-review del bundle) |
 | 0.3 | Sessione 41 (2026-10-21) | **§9.8b auto-bundle.yml** (issue #115 follow-up di PR #113): nuovo workflow `.github/workflows/auto-bundle.yml` che rigenera automaticamente `docs/BUNDLE.md` (contenuto FILE) dopo ogni push a main che tocca `$files` o i file coperti da esso. Companion di `auto-state-aggregate.yml` (che gestisce solo i blocchi `AGGREGATE-*`); serializzate via concurrency group `post-merge-main`. Chiude strutturalmente la classe di drift "BUNDLE.md non in sync post-merge" identificata dal rebasing di PR #112. **§9.7b fail-closed su flag** (issue #104): `pwsh scripts/* --check` esce 2 in PS 5.1 (doppio trattino non mappato su switch), `-Check` (singolo) continua a funzionare. Tutti gli esempi del file ora usano `-Check`. |
+| 0.4 | Sessione 43 (2026-10-22) | **§9.8c copertura `git add` vs `$targets`** (issue #136): `auto-state-aggregate.yml` generava il blocco `AGGREGATE-NEXT-STEP-*` del `README.md` (quinto target, ADR-0008 V3 / #127) e poi lo scartava, perche' `README.md` mancava nella riga `git add`. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file: si e' manifestato solo alla prima story `todo` (1.2). Fix: una parola nella riga `git add`. Difesa strutturale: assert di copertura in `scripts/validate-workflows.mjs` (gate bloccante in CI dal #73) + test di regressione `scripts/test-workflow-git-add-coverage.sh` (T1..T4, con scenario negativo). |
 
 
 
@@ -16236,8 +16416,8 @@ echo "Risultati: $pass passati, $fail falliti"
 // Uso: node scripts/validate-workflows.mjs [dir]
 // Serve a catturare errori JS nei workflow github-script prima del push,
 // dato che non esiste un runner GitHub Actions locale.
-import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -16297,8 +16477,202 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
   }
 }
 
+// === Issue #136 — la riga `git add` deve coprire TUTTI i `$targets` ===
+//
+// L'elenco dei path staged dal workflow e l'array `$targets` dell'aggregator
+// descrivono lo stesso insieme di file, ma tenuti in due posti diversi senza
+// nessun check che li confronti. Issue #127 (ADR-0008 V3) ha aggiunto README.md
+// come quinto target senza aggiornare la riga `git add`: il blocco NEXT-STEP
+// veniva generato ad ogni push su `main` e poi scartato, e il drift restava
+// invisibile finche' il fallback generato coincideva per caso col testo in file.
+// Questo assert e' la difesa di seconda linea che mancava.
+const GIT_ADD_BINDINGS = [
+  { workflow: 'auto-state-aggregate.yml', script: 'scripts/aggregate-state.ps1' },
+];
+
+// Estrae i path dall'array `$targets = @( @{ Path = "..." ... } )` del Powershell.
+function extractAggregatorTargets(psText) {
+  const start = psText.indexOf('$targets = @(');
+  if (start < 0) return null;
+  const end = psText.indexOf('\n)', start);
+  if (end < 0) return null;
+  const block = psText.slice(start, end);
+  const paths = [];
+  for (const m of block.matchAll(/Path\s*=\s*"([^"]+)"/g)) paths.push(m[1]);
+  return [...new Set(paths)];
+}
+
+// Estrae i path dalla riga `git add ...` del workflow (una sola per file).
+function extractGitAddPaths(text) {
+  for (const raw of text.split('\n')) {
+    const cleaned = raw.replace(/\s*2>&1\s*\|\s*Out-Null\s*$/, '').replace(/\s*2>&1\s*$/, '');
+    const m = cleaned.match(/^\s*git add\s+(.+?)\s*$/);
+    if (!m) continue;
+    return m[1].split(/\s+/).filter(t => t && !t.startsWith('-'));
+  }
+  return null;
+}
+
+// Un target e' coperto se compare letteralmente nella lista, oppure se e' sotto
+// una directory staged (es. `docs/state/` copre `docs/state/stories/x.md`) o
+// sotto la radice (`.` copre tutto).
+function isStaged(target, staged) {
+  if (staged.includes(target)) return true;
+  return staged.some(p => p === '.' || p === './' || (p.endsWith('/') && target.startsWith(p)));
+}
+
+const repoRoot = resolve(dir, '..', '..');
+const aggregatorRoot = resolve(repoRoot, 'scripts');
+
+if (existsSync(aggregatorRoot)) {
+  for (const { workflow, script } of GIT_ADD_BINDINGS) {
+    const wfPath = join(dir, workflow);
+    if (!existsSync(wfPath)) {
+      console.error(`[FAIL] ${workflow}: assente, impossibile verificare la copertura \`git add\``);
+      failures++;
+      continue;
+    }
+    const scriptPath = join(repoRoot, script);
+    if (!existsSync(scriptPath)) {
+      console.error(`[FAIL] ${workflow}: ${script} non trovato, la copertura \`git add\` non e' verificabile`);
+      failures++;
+      continue;
+    }
+    const targets = extractAggregatorTargets(readFileSync(scriptPath, 'utf8'));
+    const staged = extractGitAddPaths(readFileSync(wfPath, 'utf8'));
+    if (!targets || targets.length === 0) {
+      console.error(`[FAIL] ${workflow}: nessun target estratto da $targets in ${script} (la forma dell'array e' cambiata?)`);
+      failures++;
+      continue;
+    }
+    if (!staged) {
+      console.error(`[FAIL] ${workflow}: nessuna riga \`git add\` trovata, i target dell'aggregator non verrebbero committati`);
+      failures++;
+      continue;
+    }
+    const missing = targets.filter(t => !isStaged(t, staged));
+    if (missing.length > 0) {
+      console.error(`[FAIL] ${workflow}: la riga \`git add\` NON copre ${missing.length}/${targets.length} $targets di ${script}:`);
+      for (const t of missing) console.error(`         mancante: ${t} (generato dal blocco aggregato, mai committato)`);
+      failures++;
+    } else {
+      console.log(`[OK] ${workflow}: la riga \`git add\` copre tutti i ${targets.length} $targets di ${script}`);
+    }
+  }
+}
+
 console.log(`\nWorkflow: ${checked} blocchi script verificati, ${failures} fallimenti.`);
 process.exit(failures === 0 ? 0 : 1);
+
+
+===== FILE: scripts/test-workflow-git-add-coverage.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per la copertura `git add` vs `$targets` dell'aggregator (issue #136).
+#
+# Difende il bug chiuso in issue #136: `auto-state-aggregate.yml` genera il blocco
+# `AGGREGATE-NEXT-STEP-*` del README.md (quinto target di scripts/aggregate-state.ps1,
+# introdotto da ADR-0008 V3 / issue #127) e poi lo scarta, perche' `README.md` non era
+# nella riga `git add`. Il blocco restava congelato allo stato in cui era quando V3 ha
+# atterrato, e il drift restava invisibile perche' il fallback generato coincideva per
+# caso col testo in file.
+#
+# La radice non era il workflow: erano due elenchi che descrivevano lo stesso insieme
+# di file tenuti in due posti diversi (riga `git add` vs array `$targets`) senza nessun
+# gate che li confrontasse. Il gate vive ora in scripts/validate-workflows.mjs (gia'
+# bloccante in CI); questo file e' il suo test di regressione: verifica che il gate
+# esce 0 sul repo vero e che **esce 1** quando si reintroduce il bug.
+#
+# Scenari coperti:
+#   T1  repo reale: `git add` copre tutti i $targets -> exit 0
+#   T2  fixture con README.md rimosso dalla riga `git add` (il bug di #136) -> exit 1,
+#       con messaggio che nomina il path mancante
+#   T3  fixture senza alcuna riga `git add` -> exit 1 (target non committati)
+#   T4  fixture che copre i target via directory staged (`git add .`) -> exit 0
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
+AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
+WORKFLOW="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[SKIP] node non disponibile: impossibile eseguire validate-workflows.mjs"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+# Repo fixture: .github/workflows/ + scripts/ con l'aggregator e il validator reali.
+# La struttura conta: validate-workflows.mjs risolve repoRoot come <dir>/../.. .
+make_fixture() {
+  local d="$1"
+  mkdir -p "$d/.github/workflows" "$d/scripts"
+  cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
+  cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
+  cp "$WORKFLOW" "$d/.github/workflows/auto-state-aggregate.yml"
+}
+
+run_validator() {
+  local d="$1"
+  node "$d/scripts/validate-workflows.mjs" "$d/.github/workflows" 2>&1
+}
+
+echo "=== T1: repo reale - la riga \`git add\` copre tutti i \$targets ==="
+out="$(node "$VALIDATOR" "$REPO_ROOT/.github/workflows" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (README.md incluso nei target e nella riga git add)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi
+if echo "$out" | grep -q "copre tutti i .* \$targets"; then ok "messaggio di copertura presente"; else ng "manca il messaggio di copertura"; fi
+
+echo "=== T2: fixture senza README.md nella riga \`git add\` (reintroduzione del bug #136) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  # Reintroduce esattamente il bug: toglie README.md dalla riga git add.
+  sed -i.bak 's#^\([[:space:]]*git add .*\) README\.md #\1 #' "$D/.github/workflows/auto-state-aggregate.yml"
+  if grep -qE '^[[:space:]]*git add .*README\.md' "$D/.github/workflows/auto-state-aggregate.yml"; then
+    ng "mutazione non applicata: README.md e' ancora nella riga git add"
+  else
+    ok "mutazione applicata (README.md rimosso dalla riga git add)"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sul target non coperto)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
+  if echo "$out" | grep -q "README.md"; then ok "il messaggio nomina il path mancante"; else ng "il messaggio non cita README.md: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: fixture senza nessuna riga \`git add\` ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  sed -i.bak '/^[[:space:]]*git add /d' "$D/.github/workflows/auto-state-aggregate.yml"
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (nessun target committato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -5)"; fi
+  if echo "$out" | grep -q "git add"; then ok "il messaggio spiega che manca la riga git add"; else ng "messaggio non esplicativo"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4: copertura via directory staged invece di path singoli ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  # `git add .` copre tutti i $targets per prefisso: il gate deve accettare la
+  # forma "directory" senza pretendere i path letterali.
+  sed -i.bak 's#^\(\s*git add \).*#\1.#' "$D/.github/workflows/auto-state-aggregate.yml"
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 0 ]; then ok "exit 0 (copertura per directory accettata)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
 
 
 ===== FILE: scripts/setup-hooks.js =====
@@ -16701,8 +17075,11 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 # Modifica richiede attenzione (effetti su CI + agenti).
 # auto-bundle.yml: companion di auto-state-aggregate per rigenerare
 # docs/BUNDLE.md post-merge (issue #115 follow-up di PR #113).
+# auto-state-aggregate.yml: la sua riga `git add` deve coprire TUTTI i
+# `$targets` di scripts/aggregate-state.ps1 (issue #136).
 /.github/workflows/                     @amedeo82
 /.github/workflows/auto-bundle.yml      @amedeo82
+/.github/workflows/auto-state-aggregate.yml @amedeo82
 
 # PR template + CODEOWNERS + altre config GitHub.
 /.github/pull_request_template.md       @amedeo82
@@ -16826,6 +17203,18 @@ jobs:
       # (il workflow fallisce a runtime, a merge avvenuto). Questo check lo intercetta prima.
       - name: Workflow Actions validi (issue #73)
         run: node scripts/validate-workflows.mjs .github/workflows
+
+      # Issue #136: la stessa classificazione del bundle, applicata agli strumenti.
+      # La riga `git add` di auto-state-aggregate.yml e l'array `$targets` di
+      # scripts/aggregate-state.ps1 descrivevano lo stesso insieme di file senza
+      # nessun gate che li confrontasse: quando ADR-0008 V3 (#127) ha aggiunto
+      # README.md come quinto target, il blocco NEXT-STEP veniva generato e poi
+      # scartato, e il drift restava invisibile. Il gate di copertura vive in
+      # validate-workflows.mjs (run precedente); questo test e' il suo scenario
+      # negativo — reintroduce il bug in una fixture e verifica che il gate lo
+      # intercetti (un gate che passa sempre non e' un gate).
+      - name: Copertura `git add` vs $targets (issue #136)
+        run: bash scripts/test-workflow-git-add-coverage.sh
 
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo

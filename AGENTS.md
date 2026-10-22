@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.21 — Sessione 41 (2026-10-21)
+> Versione 1.22 — Sessione 43 (2026-10-22)
 
 ---
 
@@ -746,7 +746,7 @@ Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; qua
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
-| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml` |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136) |
 | `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
@@ -825,7 +825,7 @@ Esempi di obbligo concreto:
 
 **Anti-pattern ricorrente**: duplicare in una sezione legacy un dato che un blocco aggregato già fornisce. Ogni duplicazione è una seconda fonte di verità che invecchia. Se il dato è già in un blocco `AGGREGATE-*`, **mettici un puntatore, non una copia**.
 
-### Target V1 + V2
+### Target V1 + V2 + V3
 
 | File | Blocchi gestiti | Versione |
 |------|----------------|----------|
@@ -834,10 +834,13 @@ Esempi di obbligo concreto:
 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-STATUS-{START,END} -->` | V2 |
 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->` | V2 |
 | `docs/BUNDLE.md` | `<!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->` | V2 |
+| `README.md` | `<!-- AGGREGATE-NEXT-STEP-{START,END} -->` | V3 (issue #127) |
+
+**Vincolante (issue #136)**: la riga `git add` di `.github/workflows/auto-state-aggregate.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
 
 ### Eccezione
 
-Le PR di introduzione V1 (`#24`, S25) e V2 (`#52`, S29) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
+Le PR di introduzione V1 (`#24`, S25), V2 (`#52`, S29) e V3 (`#127`, S42) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
 
 ### Pattern `state/`
 
@@ -941,7 +944,14 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.21 — auto-bundle workflow post-merge (Sessione 41, issue #115 follow-up di PR #113). Il drift `docs/BUNDLE.md` (sezioni `===== FILE:`) rilevato dopo il merge di PR #112 era strutturalmente non prevenuto: `auto-state-aggregate.yml` aggiorna solo i blocchi `<!-- AGGREGATE-* -->` per design, e nessuna workflow rigenerava il contenuto FILE di `BUNDLE.md` post-merge. Aggiunti:
+*Ultimo aggiornamento: v1.22 — il blocco NEXT-STEP del README non veniva committato (Sessione 43, issue #136). ADR-0008 V3 (#127) aveva aggiunto `README.md` come quinto `$targets` di `scripts/aggregate-state.ps1`, ma la riga `git add` di `auto-state-aggregate.yml` — elenco tenuto a mano, separato — era rimasta quella di V2: il blocco veniva generato e poi scartato. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file, ed e' emerso solo alla prima story `todo` (1.2, S42). Aggiunti:
+- `.github/workflows/auto-state-aggregate.yml`: `README.md` nella riga `git add` (ordine di precedenza del generatore) + blocco NEXT-STEP nell'elenco dei target del messaggio di commit + nota di-header che rimanda al gate
+- `scripts/validate-workflows.mjs`: assert di copertura fra i `$targets` dell'aggregator e la riga `git add` del workflow (accetta path letterali, directory e radice `.`) — gate bloccante in CI dal #73
+- `scripts/test-workflow-git-add-coverage.sh` (nuovo, T1..T4) + step bloccante in `ci.yml`: il test reintroduce il bug in una fixture e verifica che il gate lo intercetti
+- §"🔄 Lazy-state aggregation → Target V1 + V2 + V3": tabella dei target allineata al V3 con la regola vincolante sulla copertura; §"📤 Post-merge actions" Livello 1: riga `auto-state-aggregate` allineata
+- `docs/12-DEVOPS.md` §9.8c (nuova) + changelog 0.4: sintesi della divergenza fra i due elenchi, perchè è rimasta invisibile, e la regola generale (nuovo target ⇒ aggiornare ogni lista che lo consuma a mano + gate di confronto)
+
+*Precedente v1.21 — auto-bundle workflow post-merge (Sessione 41, issue #115 follow-up di PR #113). Il drift `docs/BUNDLE.md` (sezioni `===== FILE:`) rilevato dopo il merge di PR #112 era strutturalmente non prevenuto: `auto-state-aggregate.yml` aggiorna solo i blocchi `<!-- AGGREGATE-* -->` per design, e nessuna workflow rigenerava il contenuto FILE di `BUNDLE.md` post-merge. Aggiunti:
 - `.github/workflows/auto-bundle.yml` (nuovo, ~100 righe): trigger su push a main con paths che coprono `$files` + `scripts/generate-bundle.ps1` stesso. Esegue `pwsh scripts/generate-bundle.ps1`, skippa il commit via guard `git diff --quiet docs/BUNDLE.md` (idempotente), committa e pusha con `kilo-bot[bot]`
 - `.github/workflows/auto-state-aggregate.yml`: aggiunto blocco `concurrency: { group: post-merge-main, cancel-in-progress: false }` per serializzare le due workflow (evita race su push di `BUNDLE.md`)
 - `.github/CODEOWNERS`: aggiunto `/.github/workflows/auto-bundle.yml @amedeo82` alla sezione workflows
