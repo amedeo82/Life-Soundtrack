@@ -84,9 +84,10 @@ export function deriveCompleted(record: SpotifyStreamingRecord): boolean {
  * va moltiplicato per 1000. Restituisce il valore normalizzato a ms e un flag
  * di conversione applicata.
  */
-export function normalizeOfflineTimestamp(
-  value: number | null | undefined,
-): { valueMs: number | null; converted: boolean } {
+export function normalizeOfflineTimestamp(value: number | null | undefined): {
+  valueMs: number | null;
+  converted: boolean;
+} {
   if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
     return { valueMs: null, converted: false };
   }
@@ -154,6 +155,7 @@ export function mapSpotifyEvent(record: SpotifyStreamingRecord): SpotifyMapResul
       sourceTrackUri: uri,
       sourceTrackName: rawName,
       sourceArtistName: record.master_metadata_album_artist_name ?? null,
+      sourceArtistUri: null,
       sourceAlbumName: record.master_metadata_album_album_name ?? null,
       isrc: null,
       mbid: null,

@@ -198,6 +198,7 @@ $files = @(
     # di PR #113). Companion di auto-state-aggregate.yml.
     ".github/workflows/auto-bundle.yml",
     "fixtures/synthetic-history/spotify-sample.json",
+    "fixtures/synthetic-history/youtube-sample.json",
     "fixtures/db-seed/minimal.json"
 )
 

@@ -229,6 +229,20 @@
 | `spotify.info.complete` | Import completato: {events} eventi, {tracks} brani unici | Import complete: {events} events, {tracks} unique tracks |
 | *(analoghi per youtube, apple, deezer, tidal, soundcloud, lastfm, listenbrainz)* | | |
 
+### 2.12b `adapter.youtube_music.*` (Story 1.1 — spec `03-ADAPTERS/youtube-music.md` §9)
+
+| Key | IT | EN |
+|-----|----|----|
+| `youtube_music.detect.success` | File YouTube Music riconosciuto | YouTube Music file recognized |
+| `youtube_music.detect.fail` | File non riconosciuto come export YouTube (Google Takeout) | File not recognized as a YouTube export (Google Takeout) |
+| `youtube_music.wrongFormat` | Questo file sembra di {platform}, non di YouTube Music | This file looks like {platform}, not YouTube Music |
+| `youtube_music.error.htmlExport` | Questo è l'export HTML: riesporta da Google Takeout selezionando il formato JSON per la cronologia | This is the HTML export: re-export from Google Takeout selecting the JSON format for history |
+| `youtube_music.warn.nonMusicSkipped` | {count} eventi video non musicali esclusi | {count} non-music video events excluded |
+| `youtube_music.warn.unwatchableSkipped` | {count} eventi con metadati incompleti esclusi (video rimossi) | {count} events with incomplete metadata excluded (removed videos) |
+| `youtube_music.info.playlistsDeferred` | Le playlist non sono incluse in questo import (in arrivo) | Playlists are not included in this import (coming soon) |
+| `youtube_music.info.partialHistory` | La cronologia Google potrebbe non coprire l'intera storia dell'account | Google history may not cover your entire account lifetime |
+| `youtube_music.info.complete` | Import completato: {events} eventi, {tracks} brani unici | Import complete: {events} events, {tracks} unique tracks |
+
 ### 2.13 `error.*`
 
 | Key | IT | EN |

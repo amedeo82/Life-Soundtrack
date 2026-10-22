@@ -15,8 +15,9 @@
 #   T4  round-trip: dopo la scrittura, --check deve uscire 0
 #   T5  il fallback del campo `state` mancante e' ASCII (niente sequenze mojibake)
 #   T6  l'ordinamento sessioni e' per numero, con tie-break stabile
-#   T7  "Dimensione totale" del blocco BUNDLE inventory non dipende dai 4 file
-#       aggregator-managed (issue #86, opt A): dopo aver aggiunto 200 righe a
+#   T7  "Dimensione totale" del blocco BUNDLE inventory non dipende dai file
+#       aggregator-managed (issue #86, opt A; esteso V3 a README.md, Story 1.1):
+#       dopo aver aggiunto 200 righe a
 #       SESSIONS.md, la `Dimensione totale` deve restare identica al baseline.
 #       Include anche: il blocco inventory dichiara l'esclusione esplicita
 #       ("escluso"/"esclusi dal calcolo") e --check resta exit 0 dopo la modifica.

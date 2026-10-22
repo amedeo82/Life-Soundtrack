@@ -1,24 +1,24 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-21 20:30
-> Totale file: 65
+> Data: 2026-10-22 13:53
+> Totale file: 66
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 64 (incluso 3 file aggregator-managed)
-- Dimensione totale: 710.1 KB (esclusi dal calcolo: docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-21 22:27
+- Totale file: 65 (incluso 4 file aggregator-managed)
+- Dimensione totale: 720.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-22 13:53
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 38 |
 | scripts/ | 14 |
-| fixtures/ | 1 |
+| fixtures/ | 2 |
 | .githooks/ | 4 |
 | .github/ | 4 |
 | root/ | 3 |
@@ -1064,9 +1064,9 @@ EPIC 0 (Fase 0 tecnica) è completo 7/7: monorepo + toolchain + schema DB + adap
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **1.1** â€” Adapter YouTube Music (priority `I`, vedi `docs/11-BACKLOG.md`).
+_Nessuna story non-done migrata in `docs/state/stories/`._
 
-Sorgente: `docs/state/stories/1.1-adapter-youtube-music.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` Â§"PrioritÃ  di lavorazione per agenti").
+Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -1428,9 +1428,9 @@ Apache License
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **18** (merge: 18)
-- Stories migrate in state/stories: **8** (done: 7)
+- Stories migrate in state/stories: **8** (done: 8)
 - Ultima sessione migrata: **S41** - Geo & contesto di ascolto: specifica e ADR
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -4303,8 +4303,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.6
-> Ultima modifica: 2026-10-17 — doc-sync post-merge PR #4 (Story 0.2 merged)
+> Versione: 1.4
+> Ultima modifica: 2026-10-22 — §14 Story 1.1 (Adapter YouTube Music, issue #129)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -4351,6 +4351,9 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 | `it.each` non preserva tuple types | 0.5 | 0.5-3 | ✅ risolto (`const cases: Array<...>` esplicito) |
 | PNG generator zero-deps (`node:zlib`) | 0.5 | 0.5-4 | ✅ documentato (`scripts/generate-pwa-icons.mjs`) |
 | `virtual:pwa-register/react` in jsdom | 0.5 | 0.5-5 | ✅ risolto (alias `__mocks__/virtual-pwa-register.ts`) |
+| `TypeError: Value cannot be converted to sequence` su `new Blob(string)` | 1.1 | 1.1-1 | ✅ risolto (`new Blob([string])`) |
+| `exactOptionalPropertyTypes` rifiuta campo opzionale = `undefined` | 1.1 | 1.1-2 | ✅ risolto (`delete` sull'oggetto costruito) |
+| Detect full-stream rifiuta file troncato (perde partial recovery 05§4) | 1.1 | 1.1-3 | ✅ risolto (test strutturale sul prefisso analizzato) |
 
 ## 3. Template entry (da copiare)
 
@@ -4738,6 +4741,31 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 14. Story 1.1 — Adapter YouTube Music (Google Takeout)
+
+**Tipo**: implementazione (`packages/core/src/adapters/youtube/`, `apps/web/src/onboarding/`); nuovo fixture + adapter factory UI + chiavi i18n
+**Branch**: `feat/129-feat-adapter-youtube-music-story-1-1-goo` (da `main` @ `b7642f7`; lavoro eseguito in worktree dedicata)
+**PR**: #130 (in review; issue #129, claim `kilo-HP-ELITEBOOK-x7q2`)
+**Data**: 2026-10-22
+**Stato**: ✅ implementazione completa — lint/typecheck/test/build verdi in locale (151 test core: 108 pre-esistenti + 43 nuovi)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 1.1-1 | F | `new Blob('stringa')` lancia `TypeError: Value cannot be converted to sequence` nei test | Il costruttore `Blob` vuole un sequence di parti, non una stringa | `new Blob(['stringa'])` — stesso pattern dei test Spotify | `youtube/__tests__/detect.test.ts` |
+| 1.1-2 | F+L | `tsc` rifiuta `{ titleUrl: undefined }` su campo opzionale con `exactOptionalPropertyTypes: true` | Il flag distingue "assente" da "presente ma undefined" | Costruire l'oggetto base e usare `delete obj.titleUrl` nei test | `youtube/__tests__/map-event.test.ts` |
+| 1.1-3 | F+L | File JSON troncato: detect full-stream rifiutava (`INVALID_FORMAT`) e perdeva il partial recovery 05§4 (comportamento divergente da Spotify, che probe solo l'head) | Il test strutturale "maggioranza" richiede lo stream completo | Il catch del detect valuta il prefisso già analizzato: shape riconosciuta → detect true, il parse recupera con `TRUNCATED` recoverable | `youtube/detect.ts` (`isWatchHistoryJson`) |
+| 1.1-4 | F | `_expectedOutput` del fixture dichiarava 9 Track su 9 eventi importati | Errore di conteggio: 9 eventi − 1 merge DEDUP-3 = 8 Track | Derivazione sempre esplicita in `_expectedOutput` + assertion nel test come canone | `fixtures/synthetic-history/youtube-sample.json` |
+
+**Lesson learned sintetica**: l'adapter Takeout vive di eventi *eterogenei nello stesso file* (musica, video, like, ricerche): la classificazione va fatta in un solo punto (`classifyMusicEvent` §3.3) con categorie esplicite (`music`/`nonMusic`/`nonListen`) e warning solo per le due categorie previste dalla spec §9 — tutto il resto scarta in silenzio, così i file fuori scope (D7) non inquinano i messaggi utente.
+
+### Link utili
+
+- Branch: `feat/129-feat-adapter-youtube-music-story-1-1-goo` (post-merge → eliminare per policy §♻️)
+- Issue: **#129** (claim `kilo-HP-ELITEBOOK-x7q2`)
+- Spec toccate: `docs/03-ADAPTERS/youtube-music.md` §2-10; `docs/02-DATA-SCHEMA.md` §3/§5; `docs/08-COPY-I18N.md` §2.12b; `docs/11-BACKLOG.md` Story 1.1; `packages/core/src/adapters/` (types/pipeline/zip); `apps/web/src/onboarding/OnboardingRouter.tsx`
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -4755,6 +4783,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 1.1 | 2026-10-17 (Sessione 21) | **§10 Sessione 21** (refactor catena): entry PR #17 (claim `kilo-HP-ELITEBOOK-q7w3`); 4 lesson (21-1 doc-sync post-merge su main è intrinsecamente racy — soluzione: doc-sync IN PR, 21-2 GH Action può sostituire label transitions manuali, 21-3 pre-push hook cross-platform pattern pwsh/powershell fallback, 21-4 doc-sync IN PR richiede 2 commit sul branch); D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning; race condition al punto 8 (doc-sync post-merge) eliminato atomicamente |
 | 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
 | 1.3 | 2026-10-18 (Story 0.5) | **§11 Story 0.5 — PWA e service worker** (issue #7, claim `kilo-HP-ELITEBOOK-3b3f`): 5 lesson (0.5-1 `getByText` ambiguità substring → `getByRole`, 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` + `setupFiles`, 0.5-3 `it.each` non preserva tuple types → `const cases` esplicito, 0.5-4 PNG generator zero-deps con `node:zlib` ~50 righe, 0.5-5 alias per `virtual:pwa-register/react` in jsdom). Pattern replicabile: setup esplicito (`test-setup.ts`) necessario per Vitest + RTL quando `globals: false`; virtual modules di `vite-plugin-pwa` vanno aliasati in test environment. Build 227.81 KB gzip 71.36 KB (budget 300 KB) |
+| 1.4 | 2026-10-22 (Story 1.1) | **§14 Story 1.1 — Adapter YouTube Music** (issue #129, claim `kilo-HP-ELITEBOOK-x7q2`): 4 lesson (1.1-1 `new Blob(string)` → sequence, 1.1-2 `exactOptionalPropertyTypes` → `delete` nei test, 1.1-3 detect full-stream su troncato valuta il prefisso per il partial recovery 05§4, 1.1-4 derivazione `_expectedOutput` 9 eventi − 1 merge = 8 Track). Nuovo adapter `youtube/` (detect strutturale E.YT.1, filtro E6 §3.3, eventKey sha1(videoId\|time), privacy §7), `RawListenEvent.sourceArtistUri` + `mergeArtist` in pipeline, fixture 13 eventi, 43 test, adapter factory onboarding UI + i18n §2.12b |
 
 ---
 
@@ -5759,11 +5788,14 @@ function Build-Block-BundleInventory {
 
     # Issue #86 (opzione A): la "Dimensione totale" e calcolata sullo stato pre-write
     # dell'aggregator (questo script misura i file _prima_ di riscrivere SESSIONS/INDEX/
-    # BACKLOG/BUNDLE), quindi oscilla di 1-2 run dopo ogni merge. Escludiamo i 4 file
+    # BACKLOG/BUNDLE), quindi oscilla di 1-2 run dopo ogni merge. Escludiamo i file
     # aggregator-managed dal calcolo della dimensione: il totale cosi ottenuto e stabile
     # e coincidente con la somma reale dei rimanenti file. Conteggi per categoria
-    # invariati (i 4 file sono ancora inclusi nel `Totale file` e nelle sottocategorie).
-    $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md')
+    # invariati (i file sono ancora inclusi nel `Totale file` e nelle sottocategorie).
+    # V3 (ADR-0008 V3, issue #127): README.md e' aggregator-managed dal blocco
+    # NEXT-STEP e va escluso come gli altri (Story 1.1: senza esclusione il
+    # totale oscillava di 1 run dopo ogni cambio di stato di una story).
+    $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md', 'README.md')
 
     # Categorize files
     $categories = @{ 'docs/' = 0; 'scripts/' = 0; 'fixtures/' = 0; '.githooks/' = 0; '.github/' = 0; 'root/' = 0 }
@@ -5812,7 +5844,7 @@ function Build-Block-BundleInventory {
     $excludedNote = if ($excludedSizeFiles -gt 0) {
         $excludedNames = ($files | Where-Object { $aggregatorManaged -contains $_ }) -join ', '
         " (esclusi dal calcolo: $excludedNames)"
-    } else { " (nessuno escluso dal calcolo: i 4 file aggregator-managed non sono in `$files)" }
+    } else { " (nessuno escluso dal calcolo: i file aggregator-managed non sono in `$files)" }
     [void]$sb.AppendLine("- Dimensione totale: $totalKB KB$excludedNote")
     [void]$sb.AppendLine("- Ultima aggregazione: $timestamp")
     [void]$sb.AppendLine("- Generatori: `'scripts/aggregate-state.ps1`' (V2) + `'scripts/generate-bundle.ps1`' (content)")
@@ -9605,6 +9637,20 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `spotify.info.complete` | Import completato: {events} eventi, {tracks} brani unici | Import complete: {events} events, {tracks} unique tracks |
 | *(analoghi per youtube, apple, deezer, tidal, soundcloud, lastfm, listenbrainz)* | | |
 
+### 2.12b `adapter.youtube_music.*` (Story 1.1 — spec `03-ADAPTERS/youtube-music.md` §9)
+
+| Key | IT | EN |
+|-----|----|----|
+| `youtube_music.detect.success` | File YouTube Music riconosciuto | YouTube Music file recognized |
+| `youtube_music.detect.fail` | File non riconosciuto come export YouTube (Google Takeout) | File not recognized as a YouTube export (Google Takeout) |
+| `youtube_music.wrongFormat` | Questo file sembra di {platform}, non di YouTube Music | This file looks like {platform}, not YouTube Music |
+| `youtube_music.error.htmlExport` | Questo è l'export HTML: riesporta da Google Takeout selezionando il formato JSON per la cronologia | This is the HTML export: re-export from Google Takeout selecting the JSON format for history |
+| `youtube_music.warn.nonMusicSkipped` | {count} eventi video non musicali esclusi | {count} non-music video events excluded |
+| `youtube_music.warn.unwatchableSkipped` | {count} eventi con metadati incompleti esclusi (video rimossi) | {count} events with incomplete metadata excluded (removed videos) |
+| `youtube_music.info.playlistsDeferred` | Le playlist non sono incluse in questo import (in arrivo) | Playlists are not included in this import (coming soon) |
+| `youtube_music.info.partialHistory` | La cronologia Google potrebbe non coprire l'intera storia dell'account | Google history may not cover your entire account lifetime |
+| `youtube_music.info.complete` | Import completato: {events} eventi, {tracks} brani unici | Import complete: {events} events, {tracks} unique tracks |
+
 ### 2.13 `error.*`
 
 | Key | IT | EN |
@@ -10414,14 +10460,16 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.1 — Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
 
-**Descrizione**: Import da Google Takeout (formato JSON/HTML).
+**Stato**: ✅ **DONE** — implementata su `feat/129-feat-adapter-youtube-music-story-1-1-goo` (PR #130 in review, issue #129); spec `03-ADAPTERS/youtube-music.md` v1.0 APPROVED
+
+**Descrizione**: Import da Google Takeout (formato JSON).
 
 **Acceptance criteria**:
-- [ ] Filtro video/musica funzionante (campo `products`)
-- [ ] Gestione cronologia unificata
-- [ ] Test con fixture `youtube-sample.json`
+- [x] Filtro video/musica funzionante (campo `products`)
+- [x] Gestione cronologia unificata
+- [x] Test con fixture `youtube-sample.json`
 
-**Spec**: `01-PLATFORMS.md` §3.2 (da scrivere in dettaglio post-Sessione 3)
+**Spec**: `03-ADAPTERS/youtube-music.md` (v1.0 APPROVED, PR #97); dettagli piattaforma in `01-PLATFORMS.md` §3.2
 
 ---
 
@@ -10681,7 +10729,6 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.1 Adapter YouTube Music | ⬚ TODO | 0.3 ✅ — spec 🟢 APPROVED (S39, PR #97 merged); issue `agent-ready` alla chiusura delle 3 spec |
 | 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec scritta (S40, issue #98): `03-ADAPTERS/apple-music.md` 🟡 DRAFT → `agent-ready` all'approvazione Boss |
 | 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8) |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
@@ -10739,7 +10786,7 @@ Ogni story deve avere label GitHub:
 | 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
-| 1.1 - Adapter YouTube Music | todo | #0 | - | adapter |
+| 1.1 - Adapter YouTube Music | done | #130 | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
 
@@ -15204,8 +15251,9 @@ echo "Risultati: $pass passati, $fail falliti"
 #   T4  round-trip: dopo la scrittura, --check deve uscire 0
 #   T5  il fallback del campo `state` mancante e' ASCII (niente sequenze mojibake)
 #   T6  l'ordinamento sessioni e' per numero, con tie-break stabile
-#   T7  "Dimensione totale" del blocco BUNDLE inventory non dipende dai 4 file
-#       aggregator-managed (issue #86, opt A): dopo aver aggiunto 200 righe a
+#   T7  "Dimensione totale" del blocco BUNDLE inventory non dipende dai file
+#       aggregator-managed (issue #86, opt A; esteso V3 a README.md, Story 1.1):
+#       dopo aver aggiunto 200 righe a
 #       SESSIONS.md, la `Dimensione totale` deve restare identica al baseline.
 #       Include anche: il blocco inventory dichiara l'esclusione esplicita
 #       ("escluso"/"esclusi dal calcolo") e --check resta exit 0 dopo la modifica.
@@ -17049,6 +17097,167 @@ jobs:
     "dedupApplied": 1,
     "_dedupAppliedDerivation": "event #5 + #6 uniti in 1 Track; 1 dedup, 2 eventi collegati"
   }
+}
+
+
+===== FILE: fixtures/synthetic-history/youtube-sample.json =====
+
+{
+  "_comment": "Dataset sintetico per test adapter YouTube Music / Google Takeout (Story 1.1, Sessione 42). Copre i 12 casi minimi della spec 03-ADAPTERS/youtube-music.md par.8: happy path, idempotenza, E6 (topic channel, VEVO, products), E.YT.2 (video rimossi), E.YT.3 (prefisso localizzato), E.YT.5 (durata assente), E.YT.6 (duplicati cross-export), E10 (fusi orari), privacy (locationInfos), DEDUP (bucket 0). 13 eventi: 9 importati, 4 scartati.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 42,
+    "spec": "docs/03-ADAPTERS/youtube-music.md par.8 (v1.0 APPROVED, PR #97)",
+    "format": "Google Takeout 'YouTube and YouTube Music' -> history/watch-history.json",
+    "expectedDedupRules": "02-DATA-SCHEMA par.5: DEDUP-3 fuzzy:<sha1(normalize(name)+'|'+normalize(artistPrincipal)+'|'+durationBucketMs)>; durationBucketMs = floor(durationMs/2000)*2000. Per YouTube durationMs e' sempre 0 (E.YT.5) quindi bucket 0: il bucket non discrimina (degradazione dichiarata par.6)."
+  },
+  "_expectedOutput": {
+    "_comment": "Derivazione interna come canone (casi par.8). eventKey = 'youtube_music:' + sha1(videoId + '|' + time).",
+    "totalEvents": 13,
+    "importedEvents": 9,
+    "skippedNonMusic": 1,
+    "_skippedNonMusicDerivation": "event E6_non_music_tech (header 'YouTube' + canale generico, euristica 2e) -> warning nonMusicSkipped",
+    "skippedUnwatchable": 1,
+    "_skippedUnwatchableDerivation": "event E_YT2_removed_video (title 'Watched <url>' senza titleUrl ne' subtitles, E.YT.2) -> warning unwatchableSkipped",
+    "skippedNonListen": 2,
+    "_skippedNonListenDerivation": "event non_listen_liked + non_listen_search (par.3.3 regola 3: skip silenzioso, nessun warning)",
+    "uniqueTracks": 8,
+    "_uniqueTracksDerivation": "9 eventi importati - 1 merge DEDUP-3 (E6_topic_channel + E6_music_via_header_dedup, stesso name+artist, bucket 0) = 8 Track unici",
+    "uniqueArtists": 8,
+    "dedupApplied": 1,
+    "_dedupAppliedDerivation": "La coppia DEDUP e' unita in 1 Track (videoId diversi, 2 ListenEvent); Artist.platformIds.youtube_music = 'UC_dedup' (par.3.1.2)"
+  },
+  "events": [
+    {
+      "_case": "happy_path_music_1",
+      "header": "YouTube Music",
+      "title": "Watched Never Gonna Give You Up",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_happy_1",
+      "subtitles": [{ "name": "Rick Astley - Topic", "url": "https://www.youtube.com/channel/UC_happy_1" }],
+      "time": "2024-03-15T20:30:00Z",
+      "products": ["YouTube Music"],
+      "activityControls": ["YouTube watch history"]
+    },
+    {
+      "_case": "happy_path_music_2",
+      "header": "YouTube Music",
+      "title": "Watched Space Oddity",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_happy_2",
+      "subtitles": [{ "name": "David Bowie - Topic", "url": "https://www.youtube.com/channel/UC_happy_2" }],
+      "time": "2024-03-16T08:15:00Z",
+      "products": ["YouTube Music"],
+      "activityControls": ["YouTube watch history"]
+    },
+    {
+      "_case": "happy_path_music_3",
+      "header": "YouTube Music",
+      "title": "Watched Piano Man",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_happy_3",
+      "subtitles": [{ "name": "Billy Joel - Topic", "url": "https://www.youtube.com/channel/UC_happy_3" }],
+      "time": "2024-03-17T21:00:00Z",
+      "products": ["YouTube Music"],
+      "activityControls": ["YouTube watch history"]
+    },
+    {
+      "_case": "E6_topic_channel",
+      "_comment": "Caso 3 par.8: header 'YouTube' ma canale '- Topic' (euristica 2b) -> importato come youtube_music. Primo evento della coppia DEDUP (stesso name+artist del successivo, videoId diverso).",
+      "header": "YouTube",
+      "title": "Watched Sinfonia Della Vita",
+      "titleUrl": "https://www.youtube.com/watch?v=vid_dedup_a",
+      "subtitles": [{ "name": "Sinfonia Artist - Topic", "url": "https://www.youtube.com/channel/UC_dedup" }],
+      "time": "2024-04-01T10:00:00Z",
+      "products": ["YouTube"]
+    },
+    {
+      "_case": "E6_music_via_header_dedup",
+      "_comment": "Caso 10 par.8: stesso brano della coppia DEDUP via header 'YouTube Music' (regola 1), videoId diverso -> una sola Track (fuzzy name+artist, bucket 0), 2 ListenEvent.",
+      "header": "YouTube Music",
+      "title": "Watched Sinfonia Della Vita",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_dedup_b",
+      "subtitles": [{ "name": "Sinfonia Artist - Topic", "url": "https://www.youtube.com/channel/UC_dedup" }],
+      "time": "2024-04-02T11:30:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "E6_products_fallback",
+      "_comment": "AC 'campo products': header 'YouTube' con canale generico, salvato dalla regola 2d (products include 'YouTube Music').",
+      "header": "YouTube",
+      "title": "Watched Canzone Dal Fallback",
+      "titleUrl": "https://www.youtube.com/watch?v=vid_fallback",
+      "subtitles": [{ "name": "Fallback Channel", "url": "https://www.youtube.com/channel/UC_fallback" }],
+      "time": "2024-04-03T09:45:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "E10_timezone_midnight_crossing",
+      "_comment": "Caso 8 par.8: time con offset +02:00 -> 2024-04-30T22:30:00Z UTC; il giorno locale (2024-05-01) cambia rispetto al day UTC.",
+      "header": "YouTube Music",
+      "title": "Watched Brano A Mezzanotte",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_tz",
+      "subtitles": [{ "name": "Timezone Artist - Topic", "url": "https://www.youtube.com/channel/UC_tz" }],
+      "time": "2024-05-01T00:30:00+02:00",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "privacy_location_infos",
+      "_comment": "Caso 9 par.8: locationInfos popolato -> sempre scartato al parse (privacy par.7): country resta null, nessun dato di location persistito.",
+      "header": "YouTube Music",
+      "title": "Watched Brano Con Location",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_priv",
+      "subtitles": [{ "name": "Privacy Artist - Topic", "url": "https://www.youtube.com/channel/UC_priv" }],
+      "time": "2024-05-02T18:00:00Z",
+      "products": ["YouTube Music"],
+      "locationInfos": [
+        { "locationName": "Milano, Italia", "locationConfidence": 71.4, "source": "From Google Ads" }
+      ],
+      "details": [{ "name": "From Google Ads" }]
+    },
+    {
+      "_case": "E_YT3_localized_prefix",
+      "_comment": "Caso 11 par.8: prefisso verbo localizzato IT 'Guardato' (E.YT.3) -> name = 'Brano In Italiano'.",
+      "header": "YouTube Music",
+      "title": "Guardato Brano In Italiano",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_localized",
+      "subtitles": [{ "name": "Artista Italiano - Topic", "url": "https://www.youtube.com/channel/UC_localized" }],
+      "time": "2024-05-03T19:20:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "E6_non_music_tech",
+      "_comment": "Caso 4 par.8: header 'YouTube' + canale generico (euristica 2e) -> scartato, warning nonMusicSkipped.",
+      "header": "YouTube",
+      "title": "Watched Tutorial Docker",
+      "titleUrl": "https://www.youtube.com/watch?v=vid_tech",
+      "subtitles": [{ "name": "TechChannel", "url": "https://www.youtube.com/channel/UC_tech" }],
+      "time": "2024-03-18T12:00:00Z",
+      "products": ["YouTube"]
+    },
+    {
+      "_case": "E_YT2_removed_video",
+      "_comment": "Caso 5 par.8: title degenera in 'Watched <url>' senza titleUrl ne' subtitles (E.YT.2) -> scartato, warning unwatchableSkipped.",
+      "header": "YouTube Music",
+      "title": "Watched https://music.youtube.com/watch?v=vid_removed",
+      "time": "2024-03-19T14:00:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "non_listen_liked",
+      "_comment": "par.2.2: eventi non-ascolto ('Liked...') scartati dal filtro - senza verbo di watch ne' URL di ascolto -> skip silenzioso (regola 3).",
+      "header": "YouTube",
+      "title": "Liked Brano Che Piace",
+      "time": "2024-03-20T16:00:00Z",
+      "products": ["YouTube"]
+    },
+    {
+      "_case": "non_listen_search",
+      "_comment": "par.3.3 regola 3: header 'Search' -> NON-ASCOLTO, skip silenzioso.",
+      "header": "Search",
+      "title": "Searched for Queen",
+      "time": "2024-03-21T10:00:00Z",
+      "products": ["Search"]
+    }
+  ]
 }
 
 

@@ -23,9 +23,9 @@ EPIC 0 (Fase 0 tecnica) è completo 7/7: monorepo + toolchain + schema DB + adap
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **1.1** â€” Adapter YouTube Music (priority `I`, vedi `docs/11-BACKLOG.md`).
+_Nessuna story non-done migrata in `docs/state/stories/`._
 
-Sorgente: `docs/state/stories/1.1-adapter-youtube-music.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` Â§"PrioritÃ  di lavorazione per agenti").
+Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
