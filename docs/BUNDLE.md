@@ -11,7 +11,7 @@
 
 - Totale file: 65 (incluso 4 file aggregator-managed)
 - Dimensione totale: 720.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-22 13:53
+- Ultima aggregazione: 2026-10-22 12:48
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |

@@ -1021,7 +1021,7 @@ PR #22 merged (squash `06812d4` su `5235c88`), GH Action `auto-status-done` appl
 
 - **Data**: 2026-10-18
 - **Stato**: 🟢
-- **Merged**: âœ… PR #19 (0ebe8da, 2026-10-18T15:29:28Z)
+- **Merged**: ✅ PR #19 (0ebe8da, 2026-10-18T15:29:28Z)
 - **Claim**: `kilo-HP-ELITEBOOK-3b3f`
 
 ```
@@ -1068,7 +1068,7 @@ Prima implementazione di una PWA reale del progetto (vite-plugin-pwa@^2.0.0 + Wo
 
 - **Data**: 2026-10-18
 - **Stato**: 🟢
-- **Merged**: âœ… PR #21 (8a48e24e8c9d03c7272d1daa0e6d914b0a610f40, 2026-10-18T09:54:10Z)
+- **Merged**: ✅ PR #21 (8a48e24e8c9d03c7272d1daa0e6d914b0a610f40, 2026-10-18T09:54:10Z)
 - **Claim**: `kilo-HP-ELITEBOOK-hc0f`
 
 ```
@@ -1121,7 +1121,7 @@ PR #21 merged `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, 
 
 - **Data**: 2026-10-18
 - **Stato**: 🟢
-- **Merged**: âœ… PR #22 (5235c88, 2026-10-18T17:02:00+02:00)
+- **Merged**: ✅ PR #22 (5235c88, 2026-10-18T17:02:00+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-7051`
 
 ```
@@ -1174,7 +1174,7 @@ PR #22 merged `5235c88` (2026-10-18T17:02Z +0200). Branch `feat/5-i18n-setup` el
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **Merged**: âœ… PR #54 (8bc20a4, 2026-10-19T16:24:57+02:00)
+- **Merged**: ✅ PR #54 (8bc20a4, 2026-10-19T16:24:57+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -1241,7 +1241,7 @@ PR #54 (TBD) merged. Branch `feat/53-worktree-default` eliminata (policy §♻�
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **Merged**: âœ… PR #55 (11897fb, 2026-10-19T15:23:07+02:00)
+- **Merged**: ✅ PR #55 (11897fb, 2026-10-19T15:23:07+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -1322,7 +1322,7 @@ PR #55 (TBD) merged. Branch `feat/51-pr-template-and-branch-protection` eliminat
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **Merged**: âœ… PR #56 (48a98dc, 2026-10-19T16:36:34+02:00)
+- **Merged**: ✅ PR #56 (48a98dc, 2026-10-19T16:36:34+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -1394,7 +1394,7 @@ PR #56 (TBD) merged. Branch `feat/52-adr-0008-v2-index-bundle` eliminata (policy
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **Merged**: âœ… PR #59 (58a42aa, 2026-10-19T15:44:47+02:00)
+- **Merged**: ✅ PR #59 (58a42aa, 2026-10-19T15:44:47+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -1480,7 +1480,7 @@ PR #59 (TBD) merged. Branch `fix/58-crlf-and-workflow` eliminata (policy §♻�
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **Merged**: âœ… PR #62 (deeb245, 2026-10-19T16:08:28+02:00)
+- **Merged**: ✅ PR #62 (deeb245, 2026-10-19T16:08:28+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-56535750`
 
 ```
@@ -1607,7 +1607,7 @@ Liberazione claim `kilo-HP-ELITEBOOK-56535750` con `release:` + merge SHA. Branc
 
 - **Data**: 2026-10-19
 - **Stato**: 🟢
-- **Merged**: âœ… PR #63 (1c63465, 2026-10-19T18:48:17+02:00)
+- **Merged**: ✅ PR #63 (1c63465, 2026-10-19T18:48:17+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-cumulativo`
 
 ```
@@ -1709,7 +1709,7 @@ git status --porcelain                       # 4 file modificati (AGENTS.md, 12-
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **Merged**: âœ… PR #69 (397839e, 2026-10-20T11:10:53+02:00)
+- **Merged**: ✅ PR #69 (397839e, 2026-10-20T11:10:53+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -1847,7 +1847,7 @@ git status --porcelain                            # M AGENTS.md, M docs/BUNDLE.m
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **Merged**: âœ… PR #72 (dbd8a1b, 2026-10-20T12:14:25+02:00)
+- **Merged**: ✅ PR #72 (dbd8a1b, 2026-10-20T12:14:25+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -1942,7 +1942,7 @@ Idempotenza verificata sul repo reale: due run consecutivi producono `git diff` 
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **Merged**: âœ… PR #74 (f23ab14, 2026-10-20T12:26:59+02:00)
+- **Merged**: ✅ PR #74 (f23ab14, 2026-10-20T12:26:59+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -2030,7 +2030,7 @@ Le API Actions usate sono state verificate a mano: `github.core.notice` / `githu
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **Merged**: âœ… PR #77 (24d45b4, 2026-10-20T13:17:34+02:00)
+- **Merged**: ✅ PR #77 (24d45b4, 2026-10-20T13:17:34+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-post-merge-review`
 
 ```
@@ -2145,7 +2145,7 @@ Casi di sicurezza verificati esplicitamente, perché sono quelli che costano:
 
 - **Data**: 2026-10-20
 - **Stato**: 🟢
-- **Merged**: âœ… PR #85 (077981e, 2026-10-20T18:16:45+02:00)
+- **Merged**: ✅ PR #85 (077981e, 2026-10-20T18:16:45+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-52q4`
 
 ```
@@ -2233,7 +2233,7 @@ Cause identificate:
 
 - **Data**: 2026-10-21
 - **Stato**: 🟢
-- **Merged**: âœ… PR #91 (a778add, 2026-10-21T11:00:00+02:00)
+- **Merged**: ✅ PR #91 (a778add, 2026-10-21T11:00:00+02:00)
 - **Claim**: `kilo-hp-elitebook-36a7`
 
 ```
@@ -2320,7 +2320,7 @@ Il project owner ha chiesto un riepilogo delle piattaforme supportate e poi "che
 
 - **Data**: 2026-10-21
 - **Stato**: 🟢
-- **Merged**: âœ… PR #97 (3877cd2, 2026-10-21T13:37:37+02:00)
+- **Merged**: ✅ PR #97 (3877cd2, 2026-10-21T13:37:37+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-guck`
 
 ```
@@ -2387,7 +2387,7 @@ E.YT.1 (nomi localizzati → detection strutturale), E.YT.2 (video rimossi → s
 
 - **Data**: 2026-10-21
 - **Stato**: 🟢
-- **Merged**: âœ… PR #100 (372e0a2, 2026-10-21T14:52:48+02:00)
+- **Merged**: ✅ PR #100 (372e0a2, 2026-10-21T14:52:48+02:00)
 - **Claim**: `kilo-HP-ELITEBOOK-osfm`
 
 ```
@@ -2453,7 +2453,7 @@ E.AP.1 (event stream ≠ ascolti → 1 riga ≥30s = 1 evento + riconciliazione)
 
 - **Data**: 2026-10-21
 - **Stato**: 🟢
-- **Merged**: âœ… PR #102 (856c0f5, 2026-10-21T15:35:48+02:00)
+- **Merged**: ✅ PR #102 (856c0f5, 2026-10-21T15:35:48+02:00)
 - **Claim**: `-`
 
 ```
