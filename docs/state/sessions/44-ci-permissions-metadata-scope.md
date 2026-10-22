@@ -7,7 +7,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: fix/135-ci-permissions-metadata-scope
-pr: ""
+pr: 138
 claim: kilo-HP-ELITEBOOK-f0mj
 cross_refs: [120, 136, 73, 63, 86]
 tags: [devops, ci, bug, blocker]
@@ -17,7 +17,7 @@ tags: [devops, ci, bug, blocker]
 
 ## Sintesi
 
-Dal `2026-10-21T16:21:35Z` al merge di questa PR, ogni run di `ci.yml` è stata
+Dal `2026-10-21T16:21:35Z` al merge di PR #138, ogni run di `ci.yml` è stata
 creata e ha chiuso `failure` **in 0 secondi con 0 job**: nessun log, nessuna
 annotazione, nessuna unità di lavoro. Tutti i gate bloccanti del repository
 erano fuori esecuzione — `lint`/`typecheck`/`test`/`build`, i due check `-Check`
@@ -144,11 +144,11 @@ conteggio di scope effettivamente controllate (9 su 6 blocchi).
 **Test non eseguiti, e perché**: `bash scripts/test-bundle-check-idempotent.sh`
 (3 passati, 4 falliti) e `bash scripts/test-setup-worktree.sh` (errore `mktemp`
 annidato) falliscono **identici sul `main` della working copy principale**, senza
-le modifiche di questa PR: sono limiti dell'ambiente Windows/Git Bash (PowerShell
+le modifiche di PR #138: sono limiti dell'ambiente Windows/Git Bash (PowerShell
 5.1 e `mktemp` annidato), non regressioni.
 `pnpm run lint` / `typecheck` / `test` / `build` non sono stati eseguiti: la
 worktree non ha `node_modules` (vivono nella working copy principale) e **nessun
-file applicativo è stato toccato** — la PR non contiene codice in `apps/` o
+file applicativo è stato toccato** — PR #138 non contiene codice in `apps/` o
 `packages/`.
 
 ## Lesson learned
@@ -189,13 +189,13 @@ file applicativo è stato toccato** — la PR non contiene codice in `apps/` o
   default `test-issue-135`. Rinominato in `fix/135-…` subito dopo: la issue è un
   bug.
 - **Il ripristino di `ci.yml` è la precondizione di tutti i gate.** Fino al merge
-  di questa PR nessun controllo bloccante del repository gira, incluse le difese
+  di PR #138 nessun controllo bloccante del repository gira, incluse le difese
   di #70, #73, #76, #104, #110 e #136. Dopo il merge il primo run utile è quello
-  di `pull_request` sulla PR stessa.
+  di `pull_request` su PR #138.
 
 ## Cross-refs
 
-- **#135** — il bug; chiuso da questa PR
+- **#135** — il bug; chiuso da PR #138
 - **#120** — il commit `43d982d` che ha introdotto `metadata: read` per risolverla (la sua impostazione `issues: read` + `GH_TOKEN` è corretta ed è conservata)
 - **#73** — `validate-workflows.mjs`, il file in cui è stato cablato il gate di scope
 - **#136** — Sessione 43, il gate di copertura `git add` vs `$targets`: stesso file, stessa lezione (un gate che passa sempre non è un gate)
