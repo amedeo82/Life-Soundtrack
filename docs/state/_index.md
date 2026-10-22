@@ -180,6 +180,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/1.1-adapter-youtube-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.1" (issue #127, ADR-0008 V3): prima non-done, alimenta il blocco `AGGREGATE-NEXT-STEP-*` del README |
 | `state/stories/1.2-adapter-apple-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.2" (Sessione 42, issue #132, PR #134): `status: todo`, riattiva `AGGREGATE-NEXT-STEP-*` dopo il fallback dovuto al merge della 1.1 |
 | `state/sessions/42-approve-apple-music-spec.md` | ✅ creata | Sessione 42 (PR #134): approvazione spec Apple Music |
+| `state/sessions/43-readme-next-step-git-add.md` | ✅ creata | Sessione 43 (issue #136): fix dello staging di `README.md` in `auto-state-aggregate.yml` + gate di copertura `git add` vs `$targets` |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |

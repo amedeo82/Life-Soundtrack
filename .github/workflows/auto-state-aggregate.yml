@@ -1,10 +1,18 @@
 name: auto-state-aggregate
 
-# Rigenera i blocchi aggregati in docs/SESSIONS.md + docs/11-BACKLOG.md + docs/INDEX.md + docs/BUNDLE.md
+# Rigenera i blocchi aggregati in docs/SESSIONS.md + docs/11-BACKLOG.md + docs/INDEX.md + docs/BUNDLE.md + README.md
 # dopo un merge su `main`. Risolve la classe di conflitti di merge ricorrenti
 # quando più agenti paralleli fanno doc-sync IN PR (D.21.1): invece di N PR che
 # modificano direttamente i file globali, ogni PR modifica solo docs/state/ e la
 # GH Action lo aggrega automaticamente su `main`.
+#
+# NB (issue #136): l'elenco dei path in `git add` DEVE contenere TUTTI i `$targets`
+# di scripts/aggregate-state.ps1. La lista tenuta qui e la lista tenuta li'
+# descrivevano lo stesso insieme di file senza nessun gate che le confrontasse:
+# quando ADR-0008 V3 (issue #127) ha aggiunto README.md come quinto target, il
+# workflow ha continuato a generare il blocco NEXT-STEP e a scartarlo (mai
+# committato). Il gate e' ora `scripts/validate-workflows.mjs` (bloccante in CI,
+# vedi `docs/12-DEVOPS.md` 9.8c).
 #
 # Non-bloccante: se l'aggregator fallisce, il workflow logga un warning ma lascia
 # il merge andare. Lo stato può essere riallineato manualmente.
@@ -83,7 +91,7 @@ jobs:
           # Issue #60 fix: PowerShell parse error su `git diff --cached --quiet && (Write-Host; exit 0)`.
           # Sintassi bash, non valida in pwsh 7+ su Linux. Riscritta con if + early exit.
           # Anche `2>$null` (bash) sostituito con `2>&1 | Out-Null` (PowerShell).
-          git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md scripts/aggregate-state.ps1 docs/state/ 2>&1 | Out-Null
+          git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md scripts/aggregate-state.ps1 docs/state/ 2>&1 | Out-Null
           if (git diff --cached --quiet) {
             Write-Host "Nothing to commit (staged diff is empty)"
             exit 0
@@ -97,6 +105,7 @@ jobs:
                        -m "  - docs/INDEX.md: <!-- AGGREGATE-INDEX-STATUS-{START,END} -->" `
                        -m "  - docs/INDEX.md: <!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->" `
                        -m "  - docs/BUNDLE.md: <!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->" `
+                       -m "  - README.md: <!-- AGGREGATE-NEXT-STEP-{START,END} -->" `
                        -m "" `
                        -m "Skips if aggregator output already in sync."
           git push origin main

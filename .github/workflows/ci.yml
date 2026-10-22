@@ -81,6 +81,18 @@ jobs:
       - name: Workflow Actions validi (issue #73)
         run: node scripts/validate-workflows.mjs .github/workflows
 
+      # Issue #136: la stessa classificazione del bundle, applicata agli strumenti.
+      # La riga `git add` di auto-state-aggregate.yml e l'array `$targets` di
+      # scripts/aggregate-state.ps1 descrivevano lo stesso insieme di file senza
+      # nessun gate che li confrontasse: quando ADR-0008 V3 (#127) ha aggiunto
+      # README.md come quinto target, il blocco NEXT-STEP veniva generato e poi
+      # scartato, e il drift restava invisibile. Il gate di copertura vive in
+      # validate-workflows.mjs (run precedente); questo test e' il suo scenario
+      # negativo — reintroduce il bug in una fixture e verifica che il gate lo
+      # intercetti (un gate che passa sempre non e' un gate).
+      - name: Copertura `git add` vs $targets (issue #136)
+        run: bash scripts/test-workflow-git-add-coverage.sh
+
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
       # (orfano -> segnalato) sia quello di sicurezza (lavoro non pushato -> MAI

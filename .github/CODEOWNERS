@@ -29,8 +29,11 @@
 # Modifica richiede attenzione (effetti su CI + agenti).
 # auto-bundle.yml: companion di auto-state-aggregate per rigenerare
 # docs/BUNDLE.md post-merge (issue #115 follow-up di PR #113).
+# auto-state-aggregate.yml: la sua riga `git add` deve coprire TUTTI i
+# `$targets` di scripts/aggregate-state.ps1 (issue #136).
 /.github/workflows/                     @amedeo82
 /.github/workflows/auto-bundle.yml      @amedeo82
+/.github/workflows/auto-state-aggregate.yml @amedeo82
 
 # PR template + CODEOWNERS + altre config GitHub.
 /.github/pull_request_template.md       @amedeo82

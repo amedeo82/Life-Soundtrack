@@ -179,6 +179,10 @@ $files = @(
     # emulando il wrapper async reale. Gate bloccante in CI: un errore JS in un
     # workflow si scoprirebbe altrimenti solo a runtime, dopo il merge.
     "scripts/validate-workflows.mjs",
+    # Test di regressione del gate di copertura `git add` vs $targets
+    # dell'aggregator (issue #136). T1..T4: lo scenario negativo reintroduce
+    # il bug in una fixture e verifica che il gate esca 1.
+    "scripts/test-workflow-git-add-coverage.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",
