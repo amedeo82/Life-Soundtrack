@@ -1,0 +1,157 @@
+{
+  "_comment": "Dataset sintetico per test adapter YouTube Music / Google Takeout (Story 1.1, Sessione 42). Copre i 12 casi minimi della spec 03-ADAPTERS/youtube-music.md par.8: happy path, idempotenza, E6 (topic channel, VEVO, products), E.YT.2 (video rimossi), E.YT.3 (prefisso localizzato), E.YT.5 (durata assente), E.YT.6 (duplicati cross-export), E10 (fusi orari), privacy (locationInfos), DEDUP (bucket 0). 13 eventi: 9 importati, 4 scartati.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 42,
+    "spec": "docs/03-ADAPTERS/youtube-music.md par.8 (v1.0 APPROVED, PR #97)",
+    "format": "Google Takeout 'YouTube and YouTube Music' -> history/watch-history.json",
+    "expectedDedupRules": "02-DATA-SCHEMA par.5: DEDUP-3 fuzzy:<sha1(normalize(name)+'|'+normalize(artistPrincipal)+'|'+durationBucketMs)>; durationBucketMs = floor(durationMs/2000)*2000. Per YouTube durationMs e' sempre 0 (E.YT.5) quindi bucket 0: il bucket non discrimina (degradazione dichiarata par.6)."
+  },
+  "_expectedOutput": {
+    "_comment": "Derivazione interna come canone (casi par.8). eventKey = 'youtube_music:' + sha1(videoId + '|' + time).",
+    "totalEvents": 13,
+    "importedEvents": 9,
+    "skippedNonMusic": 1,
+    "_skippedNonMusicDerivation": "event E6_non_music_tech (header 'YouTube' + canale generico, euristica 2e) -> warning nonMusicSkipped",
+    "skippedUnwatchable": 1,
+    "_skippedUnwatchableDerivation": "event E_YT2_removed_video (title 'Watched <url>' senza titleUrl ne' subtitles, E.YT.2) -> warning unwatchableSkipped",
+    "skippedNonListen": 2,
+    "_skippedNonListenDerivation": "event non_listen_liked + non_listen_search (par.3.3 regola 3: skip silenzioso, nessun warning)",
+    "uniqueTracks": 8,
+    "_uniqueTracksDerivation": "9 eventi importati - 1 merge DEDUP-3 (E6_topic_channel + E6_music_via_header_dedup, stesso name+artist, bucket 0) = 8 Track unici",
+    "uniqueArtists": 8,
+    "dedupApplied": 1,
+    "_dedupAppliedDerivation": "La coppia DEDUP e' unita in 1 Track (videoId diversi, 2 ListenEvent); Artist.platformIds.youtube_music = 'UC_dedup' (par.3.1.2)"
+  },
+  "events": [
+    {
+      "_case": "happy_path_music_1",
+      "header": "YouTube Music",
+      "title": "Watched Never Gonna Give You Up",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_happy_1",
+      "subtitles": [{ "name": "Rick Astley - Topic", "url": "https://www.youtube.com/channel/UC_happy_1" }],
+      "time": "2024-03-15T20:30:00Z",
+      "products": ["YouTube Music"],
+      "activityControls": ["YouTube watch history"]
+    },
+    {
+      "_case": "happy_path_music_2",
+      "header": "YouTube Music",
+      "title": "Watched Space Oddity",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_happy_2",
+      "subtitles": [{ "name": "David Bowie - Topic", "url": "https://www.youtube.com/channel/UC_happy_2" }],
+      "time": "2024-03-16T08:15:00Z",
+      "products": ["YouTube Music"],
+      "activityControls": ["YouTube watch history"]
+    },
+    {
+      "_case": "happy_path_music_3",
+      "header": "YouTube Music",
+      "title": "Watched Piano Man",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_happy_3",
+      "subtitles": [{ "name": "Billy Joel - Topic", "url": "https://www.youtube.com/channel/UC_happy_3" }],
+      "time": "2024-03-17T21:00:00Z",
+      "products": ["YouTube Music"],
+      "activityControls": ["YouTube watch history"]
+    },
+    {
+      "_case": "E6_topic_channel",
+      "_comment": "Caso 3 par.8: header 'YouTube' ma canale '- Topic' (euristica 2b) -> importato come youtube_music. Primo evento della coppia DEDUP (stesso name+artist del successivo, videoId diverso).",
+      "header": "YouTube",
+      "title": "Watched Sinfonia Della Vita",
+      "titleUrl": "https://www.youtube.com/watch?v=vid_dedup_a",
+      "subtitles": [{ "name": "Sinfonia Artist - Topic", "url": "https://www.youtube.com/channel/UC_dedup" }],
+      "time": "2024-04-01T10:00:00Z",
+      "products": ["YouTube"]
+    },
+    {
+      "_case": "E6_music_via_header_dedup",
+      "_comment": "Caso 10 par.8: stesso brano della coppia DEDUP via header 'YouTube Music' (regola 1), videoId diverso -> una sola Track (fuzzy name+artist, bucket 0), 2 ListenEvent.",
+      "header": "YouTube Music",
+      "title": "Watched Sinfonia Della Vita",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_dedup_b",
+      "subtitles": [{ "name": "Sinfonia Artist - Topic", "url": "https://www.youtube.com/channel/UC_dedup" }],
+      "time": "2024-04-02T11:30:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "E6_products_fallback",
+      "_comment": "AC 'campo products': header 'YouTube' con canale generico, salvato dalla regola 2d (products include 'YouTube Music').",
+      "header": "YouTube",
+      "title": "Watched Canzone Dal Fallback",
+      "titleUrl": "https://www.youtube.com/watch?v=vid_fallback",
+      "subtitles": [{ "name": "Fallback Channel", "url": "https://www.youtube.com/channel/UC_fallback" }],
+      "time": "2024-04-03T09:45:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "E10_timezone_midnight_crossing",
+      "_comment": "Caso 8 par.8: time con offset +02:00 -> 2024-04-30T22:30:00Z UTC; il giorno locale (2024-05-01) cambia rispetto al day UTC.",
+      "header": "YouTube Music",
+      "title": "Watched Brano A Mezzanotte",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_tz",
+      "subtitles": [{ "name": "Timezone Artist - Topic", "url": "https://www.youtube.com/channel/UC_tz" }],
+      "time": "2024-05-01T00:30:00+02:00",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "privacy_location_infos",
+      "_comment": "Caso 9 par.8: locationInfos popolato -> sempre scartato al parse (privacy par.7): country resta null, nessun dato di location persistito.",
+      "header": "YouTube Music",
+      "title": "Watched Brano Con Location",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_priv",
+      "subtitles": [{ "name": "Privacy Artist - Topic", "url": "https://www.youtube.com/channel/UC_priv" }],
+      "time": "2024-05-02T18:00:00Z",
+      "products": ["YouTube Music"],
+      "locationInfos": [
+        { "locationName": "Milano, Italia", "locationConfidence": 71.4, "source": "From Google Ads" }
+      ],
+      "details": [{ "name": "From Google Ads" }]
+    },
+    {
+      "_case": "E_YT3_localized_prefix",
+      "_comment": "Caso 11 par.8: prefisso verbo localizzato IT 'Guardato' (E.YT.3) -> name = 'Brano In Italiano'.",
+      "header": "YouTube Music",
+      "title": "Guardato Brano In Italiano",
+      "titleUrl": "https://music.youtube.com/watch?v=vid_localized",
+      "subtitles": [{ "name": "Artista Italiano - Topic", "url": "https://www.youtube.com/channel/UC_localized" }],
+      "time": "2024-05-03T19:20:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "E6_non_music_tech",
+      "_comment": "Caso 4 par.8: header 'YouTube' + canale generico (euristica 2e) -> scartato, warning nonMusicSkipped.",
+      "header": "YouTube",
+      "title": "Watched Tutorial Docker",
+      "titleUrl": "https://www.youtube.com/watch?v=vid_tech",
+      "subtitles": [{ "name": "TechChannel", "url": "https://www.youtube.com/channel/UC_tech" }],
+      "time": "2024-03-18T12:00:00Z",
+      "products": ["YouTube"]
+    },
+    {
+      "_case": "E_YT2_removed_video",
+      "_comment": "Caso 5 par.8: title degenera in 'Watched <url>' senza titleUrl ne' subtitles (E.YT.2) -> scartato, warning unwatchableSkipped.",
+      "header": "YouTube Music",
+      "title": "Watched https://music.youtube.com/watch?v=vid_removed",
+      "time": "2024-03-19T14:00:00Z",
+      "products": ["YouTube Music"]
+    },
+    {
+      "_case": "non_listen_liked",
+      "_comment": "par.2.2: eventi non-ascolto ('Liked...') scartati dal filtro - senza verbo di watch ne' URL di ascolto -> skip silenzioso (regola 3).",
+      "header": "YouTube",
+      "title": "Liked Brano Che Piace",
+      "time": "2024-03-20T16:00:00Z",
+      "products": ["YouTube"]
+    },
+    {
+      "_case": "non_listen_search",
+      "_comment": "par.3.3 regola 3: header 'Search' -> NON-ASCOLTO, skip silenzioso.",
+      "header": "Search",
+      "title": "Searched for Queen",
+      "time": "2024-03-21T10:00:00Z",
+      "products": ["Search"]
+    }
+  ]
+}

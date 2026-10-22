@@ -277,12 +277,14 @@ export class NormalizationPipeline {
     const key = normalizeName(rawName);
     const cached = this.artists.get(key);
     if (cached) {
+      this.mergeArtist(cached, raw);
       this.dirtyArtists.add(key);
       return cached.id;
     }
     const inflight = this.inflightArtists.get(key);
     if (inflight) {
       const artist = await inflight;
+      this.mergeArtist(artist, raw);
       this.dirtyArtists.add(key);
       return artist.id;
     }
@@ -290,11 +292,28 @@ export class NormalizationPipeline {
     this.inflightArtists.set(key, fetch);
     try {
       const artist = await fetch;
+      this.mergeArtist(artist, raw);
       this.artists.set(key, artist);
       this.dirtyArtists.add(key);
       return artist.id;
     } finally {
       this.inflightArtists.delete(key);
+    }
+  }
+
+  /**
+   * Unisce l'id nativo della piattaforma su un Artist esistente (02§5 upsert).
+   * `sourceArtistUri` è un URI convenzionale il cui ultimo segmento è l'id
+   * nativo (stessa convenzione di `mergeTrack`): `youtube_music:channel:<id>`
+   * → `platformIds.youtube_music = <id>` (youtube-music.md §3.1.2). Spotify
+   * emette null → nessun effetto.
+   */
+  private mergeArtist(artist: Artist, raw: RawListenEvent): void {
+    if (raw.sourceArtistUri) {
+      const nativeId = raw.sourceArtistUri.split(':').pop() ?? null;
+      if (nativeId && artist.platformIds[raw.platform] !== nativeId) {
+        artist.platformIds = { ...artist.platformIds, [raw.platform]: nativeId };
+      }
     }
   }
 

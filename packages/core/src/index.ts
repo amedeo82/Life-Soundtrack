@@ -24,6 +24,7 @@ export {
   uuid,
 } from './adapters';
 export { SpotifyAdapter } from './adapters/spotify';
+export { YouTubeMusicAdapter } from './adapters/youtube';
 
 export {
   consoleSink,

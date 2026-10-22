@@ -30,6 +30,14 @@ export interface RawListenEvent {
   sourceTrackUri: string | null;
   sourceTrackName: string | null;
   sourceArtistName: string | null;
+  /**
+   * URI convenzionale dell'artista nativo, se la piattaforma lo espone
+   * (youtube-music.md §3.1.2: `youtube_music:channel:<channelId>`); il core
+   * deriva da esso `Artist.platformIds[platform]` con la stessa convenzione
+   * "ultimo segmento" di `sourceTrackUri`. null se la piattaforma non lo
+   * espone (Spotify GDPR: null).
+   */
+  sourceArtistUri: string | null;
   sourceAlbumName: string | null;
   /** ISRC nativo se la piattaforma lo espone (Spotify GDPR: null, 03-ADAPTERS/spotify.md §3.1.1). */
   isrc: string | null;
