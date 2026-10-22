@@ -437,11 +437,14 @@ function Build-Block-BundleInventory {
 
     # Issue #86 (opzione A): la "Dimensione totale" e calcolata sullo stato pre-write
     # dell'aggregator (questo script misura i file _prima_ di riscrivere SESSIONS/INDEX/
-    # BACKLOG/BUNDLE), quindi oscilla di 1-2 run dopo ogni merge. Escludiamo i 4 file
+    # BACKLOG/BUNDLE), quindi oscilla di 1-2 run dopo ogni merge. Escludiamo i file
     # aggregator-managed dal calcolo della dimensione: il totale cosi ottenuto e stabile
     # e coincidente con la somma reale dei rimanenti file. Conteggi per categoria
-    # invariati (i 4 file sono ancora inclusi nel `Totale file` e nelle sottocategorie).
-    $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md')
+    # invariati (i file sono ancora inclusi nel `Totale file` e nelle sottocategorie).
+    # V3 (ADR-0008 V3, issue #127): README.md e' aggregator-managed dal blocco
+    # NEXT-STEP e va escluso come gli altri (Story 1.1: senza esclusione il
+    # totale oscillava di 1 run dopo ogni cambio di stato di una story).
+    $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md', 'README.md')
 
     # Categorize files
     $categories = @{ 'docs/' = 0; 'scripts/' = 0; 'fixtures/' = 0; '.githooks/' = 0; '.github/' = 0; 'root/' = 0 }
@@ -490,7 +493,7 @@ function Build-Block-BundleInventory {
     $excludedNote = if ($excludedSizeFiles -gt 0) {
         $excludedNames = ($files | Where-Object { $aggregatorManaged -contains $_ }) -join ', '
         " (esclusi dal calcolo: $excludedNames)"
-    } else { " (nessuno escluso dal calcolo: i 4 file aggregator-managed non sono in `$files)" }
+    } else { " (nessuno escluso dal calcolo: i file aggregator-managed non sono in `$files)" }
     [void]$sb.AppendLine("- Dimensione totale: $totalKB KB$excludedNote")
     [void]$sb.AppendLine("- Ultima aggregazione: $timestamp")
     [void]$sb.AppendLine("- Generatori: `'scripts/aggregate-state.ps1`' (V2) + `'scripts/generate-bundle.ps1`' (content)")

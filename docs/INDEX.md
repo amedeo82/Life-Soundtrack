@@ -126,9 +126,9 @@
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **18** (merge: 18)
-- Stories migrate in state/stories: **8** (done: 7)
+- Stories migrate in state/stories: **8** (done: 8)
 - Ultima sessione migrata: **S41** - Geo & contesto di ascolto: specifica e ADR
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 

@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 0.6
-> Ultima modifica: 2026-10-17 — doc-sync post-merge PR #4 (Story 0.2 merged)
+> Versione: 1.4
+> Ultima modifica: 2026-10-22 — §14 Story 1.1 (Adapter YouTube Music, issue #129)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -49,6 +49,9 @@
 | `it.each` non preserva tuple types | 0.5 | 0.5-3 | ✅ risolto (`const cases: Array<...>` esplicito) |
 | PNG generator zero-deps (`node:zlib`) | 0.5 | 0.5-4 | ✅ documentato (`scripts/generate-pwa-icons.mjs`) |
 | `virtual:pwa-register/react` in jsdom | 0.5 | 0.5-5 | ✅ risolto (alias `__mocks__/virtual-pwa-register.ts`) |
+| `TypeError: Value cannot be converted to sequence` su `new Blob(string)` | 1.1 | 1.1-1 | ✅ risolto (`new Blob([string])`) |
+| `exactOptionalPropertyTypes` rifiuta campo opzionale = `undefined` | 1.1 | 1.1-2 | ✅ risolto (`delete` sull'oggetto costruito) |
+| Detect full-stream rifiuta file troncato (perde partial recovery 05§4) | 1.1 | 1.1-3 | ✅ risolto (test strutturale sul prefisso analizzato) |
 
 ## 3. Template entry (da copiare)
 
@@ -436,6 +439,31 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 14. Story 1.1 — Adapter YouTube Music (Google Takeout)
+
+**Tipo**: implementazione (`packages/core/src/adapters/youtube/`, `apps/web/src/onboarding/`); nuovo fixture + adapter factory UI + chiavi i18n
+**Branch**: `feat/129-feat-adapter-youtube-music-story-1-1-goo` (da `main` @ `b7642f7`; lavoro eseguito in worktree dedicata)
+**PR**: in review (issue #129, claim `kilo-HP-ELITEBOOK-x7q2`)
+**Data**: 2026-10-22
+**Stato**: ✅ implementazione completa — lint/typecheck/test/build verdi in locale (151 test core: 108 pre-esistenti + 43 nuovi)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 1.1-1 | F | `new Blob('stringa')` lancia `TypeError: Value cannot be converted to sequence` nei test | Il costruttore `Blob` vuole un sequence di parti, non una stringa | `new Blob(['stringa'])` — stesso pattern dei test Spotify | `youtube/__tests__/detect.test.ts` |
+| 1.1-2 | F+L | `tsc` rifiuta `{ titleUrl: undefined }` su campo opzionale con `exactOptionalPropertyTypes: true` | Il flag distingue "assente" da "presente ma undefined" | Costruire l'oggetto base e usare `delete obj.titleUrl` nei test | `youtube/__tests__/map-event.test.ts` |
+| 1.1-3 | F+L | File JSON troncato: detect full-stream rifiutava (`INVALID_FORMAT`) e perdeva il partial recovery 05§4 (comportamento divergente da Spotify, che probe solo l'head) | Il test strutturale "maggioranza" richiede lo stream completo | Il catch del detect valuta il prefisso già analizzato: shape riconosciuta → detect true, il parse recupera con `TRUNCATED` recoverable | `youtube/detect.ts` (`isWatchHistoryJson`) |
+| 1.1-4 | F | `_expectedOutput` del fixture dichiarava 9 Track su 9 eventi importati | Errore di conteggio: 9 eventi − 1 merge DEDUP-3 = 8 Track | Derivazione sempre esplicita in `_expectedOutput` + assertion nel test come canone | `fixtures/synthetic-history/youtube-sample.json` |
+
+**Lesson learned sintetica**: l'adapter Takeout vive di eventi *eterogenei nello stesso file* (musica, video, like, ricerche): la classificazione va fatta in un solo punto (`classifyMusicEvent` §3.3) con categorie esplicite (`music`/`nonMusic`/`nonListen`) e warning solo per le due categorie previste dalla spec §9 — tutto il resto scarta in silenzio, così i file fuori scope (D7) non inquinano i messaggi utente.
+
+### Link utili
+
+- Branch: `feat/129-feat-adapter-youtube-music-story-1-1-goo` (post-merge → eliminare per policy §♻️)
+- Issue: **#129** (claim `kilo-HP-ELITEBOOK-x7q2`)
+- Spec toccate: `docs/03-ADAPTERS/youtube-music.md` §2-10; `docs/02-DATA-SCHEMA.md` §3/§5; `docs/08-COPY-I18N.md` §2.12b; `docs/11-BACKLOG.md` Story 1.1; `packages/core/src/adapters/` (types/pipeline/zip); `apps/web/src/onboarding/OnboardingRouter.tsx`
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -453,6 +481,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 1.1 | 2026-10-17 (Sessione 21) | **§10 Sessione 21** (refactor catena): entry PR #17 (claim `kilo-HP-ELITEBOOK-q7w3`); 4 lesson (21-1 doc-sync post-merge su main è intrinsecamente racy — soluzione: doc-sync IN PR, 21-2 GH Action può sostituire label transitions manuali, 21-3 pre-push hook cross-platform pattern pwsh/powershell fallback, 21-4 doc-sync IN PR richiede 2 commit sul branch); D1 doc-sync IN PR + D2 GH Action `auto-status-done` + D3 pre-commit clean check + D4 pre-push BUNDLE auto-regen + D5 pre-push base-stale warning; race condition al punto 8 (doc-sync post-merge) eliminato atomicamente |
 | 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
 | 1.3 | 2026-10-18 (Story 0.5) | **§11 Story 0.5 — PWA e service worker** (issue #7, claim `kilo-HP-ELITEBOOK-3b3f`): 5 lesson (0.5-1 `getByText` ambiguità substring → `getByRole`, 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` + `setupFiles`, 0.5-3 `it.each` non preserva tuple types → `const cases` esplicito, 0.5-4 PNG generator zero-deps con `node:zlib` ~50 righe, 0.5-5 alias per `virtual:pwa-register/react` in jsdom). Pattern replicabile: setup esplicito (`test-setup.ts`) necessario per Vitest + RTL quando `globals: false`; virtual modules di `vite-plugin-pwa` vanno aliasati in test environment. Build 227.81 KB gzip 71.36 KB (budget 300 KB) |
+| 1.4 | 2026-10-22 (Story 1.1) | **§14 Story 1.1 — Adapter YouTube Music** (issue #129, claim `kilo-HP-ELITEBOOK-x7q2`): 4 lesson (1.1-1 `new Blob(string)` → sequence, 1.1-2 `exactOptionalPropertyTypes` → `delete` nei test, 1.1-3 detect full-stream su troncato valuta il prefisso per il partial recovery 05§4, 1.1-4 derivazione `_expectedOutput` 9 eventi − 1 merge = 8 Track). Nuovo adapter `youtube/` (detect strutturale E.YT.1, filtro E6 §3.3, eventKey sha1(videoId\|time), privacy §7), `RawListenEvent.sourceArtistUri` + `mergeArtist` in pipeline, fixture 13 eventi, 43 test, adapter factory onboarding UI + i18n §2.12b |
 
 ---
 
