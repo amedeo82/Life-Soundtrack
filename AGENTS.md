@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.22 — Sessione 43 (2026-10-22)
+> Versione 1.23 — Sessione 44 (2026-10-22)
 
 ---
 
@@ -760,7 +760,11 @@ Dettagli e motivazioni:
 
 4. **`stale-claim-sweeper`** applica il TTL di 12h di ADR-0006, che era documentato ma non controllato da nulla. Non rimuove la label di proposito: un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer. Segnala e lascia decidere.
 
-I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che estrae i blocchi `script:` di `github-script` e ne verifica la sintassi JS emulando il wrapper async reale: senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
+I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica tre controlli indipendenti sul testo dei workflow:
+
+1. **Sintassi JS dei blocchi `script:` di `github-script`**, emulando il wrapper `async` reale (issue #73): senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
+2. **Copertura `git add` vs `$targets`** dell'aggregator (issue #136): vedi §"🔄 Lazy-state aggregation → Target V1 + V2 + V3".
+3. **Scope dichiarate in `permissions:`** (issue #135): ogni chiave deve essere una scope reale della `GITHUB_TOKEN`, ogni valore `read`/`write`/`none`. Una scope inesistente — per esempio `metadata`, che è sempre concessa e **non** è dichiarabile — non produce un job che fallisce: GitHub *rifiuta il file in fase di validazione*, quindi la run viene creata con `jobs: 0` e finisce `failure` a 0 secondi, senza log e senza annotazioni via API. Il sintomo è indistinguibile da "Actions rotta per billing" ed è la ragione per cui #135 ha spento tutti i gate di `ci.yml` per ~22 ore senza che nessuno se ne accorgesse. Test di scenario negativo: `scripts/test-workflow-permission-scopes.sh`.
 
 ### Livello 2 — Issue (release + label)
 
@@ -945,7 +949,16 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.22 — il blocco NEXT-STEP del README non veniva committato (Sessione 43, issue #136). ADR-0008 V3 (#127) aveva aggiunto `README.md` come quinto `$targets` di `scripts/aggregate-state.ps1`, ma la riga `git add` di `auto-state-aggregate.yml` — elenco tenuto a mano, separato — era rimasta quella di V2: il blocco veniva generato e poi scartato. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file, ed e' emerso solo alla prima story `todo` (1.2, S42). Aggiunti:
+*Ultimo aggiornamento: v1.23 — `ci.yml` non eseguiva più alcun job (Sessione 44, issue #135). Una scope non dichiarabile dentro `permissions:` (`metadata: read`, introdotta dal commit `43d982d` per la issue #120) non produce un job che fallisce: GitHub **rifiuta il file workflow in fase di validazione**, quindi dal 2026-10-21T16:21Z ogni run di `ci.yml` — push e pull_request — veniva creata con `jobs: 0` e chiudeva `failure` a 0 secondi, senza log né annotazioni via API, con `state: active` sull'API dei workflow. Nessun parser YAML lo intercetta (`metadata` è sintatticamente lecito, è la *schema* GitHub a rifiutarlo) e la firma è ambigua con un blocco di billing: la diagnosi è arrivata dalla tabella `jobs` × `conclusion` dei 60 run (salto `1 → 0` esattamente su `43d982d`) e dalla constatazione che gli altri 5 workflow, sugli stessi runner e nella stessa finestra, erano verdi. Aggiunti:
+- `.github/workflows/ci.yml`: `metadata: read` rimossa dal blocco `permissions:` del job `quality` (una riga), commento che spiega perché `metadata` non è dichiarabile, e nuovo step bloccante `Scope permissions: valide (issue #135)`
+- `scripts/validate-workflows.mjs`: validazione delle scope di `permissions:` contro l'elenco documentato + valori `read`/`write`/`none` (`id-token` ristretto a `write|none`), con forme compatte `{}`/`read-all`/`write-all` accettate per non generare falsi positivi; il riepilogo finale riporta quante scope sono state verificate
+- `scripts/test-workflow-permission-scopes.sh` (nuovo, T1..T5): T2 reintroduce `metadata: read` in una fixture e verifica che il gate esca 1, T3 il valore inesistente, T4 la forma compatta (nessun falso positivo), T5 il typo di scope — un gate che passa sempre non è un gate (lesson 43-1)
+- `scripts/generate-bundle.ps1`: `$files` += il nuovo test
+- §"📤 Post-merge actions" Livello 1: la frase sul validatore dei workflow elencava solo il controllo JS; ora elenca i tre controlli che il file applica davvero
+- `docs/12-DEVOPS.md` §9.9 (nuova) + §9.10 (nuova, elenco autorevole dei 14 gate di `ci.yml` con bloccante/non-bloccante e issue) + nota in §2.1 che dichiara il suo YAML uno scheletro di progetto e rimanda a §9.10 + changelog 0.5
+- AGENTS.md v1.22 → v1.23, footer cumulativo v1.23
+
+*Precedente v1.22 — il blocco NEXT-STEP del README non veniva committato (Sessione 43, issue #136). ADR-0008 V3 (#127) aveva aggiunto `README.md` come quinto `$targets` di `scripts/aggregate-state.ps1`, ma la riga `git add` di `auto-state-aggregate.yml` — elenco tenuto a mano, separato — era rimasta quella di V2: il blocco veniva generato e poi scartato. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file, ed e' emerso solo alla prima story `todo` (1.2, S42). Aggiunti:
 - `.github/workflows/auto-state-aggregate.yml`: `README.md` nella riga `git add` (ordine di precedenza del generatore) + blocco NEXT-STEP nell'elenco dei target del messaggio di commit + nota di-header che rimanda al gate
 - `scripts/validate-workflows.mjs`: assert di copertura fra i `$targets` dell'aggregator e la riga `git add` del workflow (accetta path letterali, directory e radice `.`) — gate bloccante in CI dal #73
 - `scripts/test-workflow-git-add-coverage.sh` (nuovo, T1..T4) + step bloccante in `ci.yml`: il test reintroduce il bug in una fixture e verifica che il gate lo intercetti

@@ -20,6 +20,15 @@ La pipeline si attiva su ogni `push` a `main` e su ogni `pull_request`.
 
 ### 2.1 Workflow: `ci.yml`
 
+> **⚠️ Lo YAML sotto è uno scheletro di progetto, non lo stato corrente.** Il
+> workflow reale oggi è un **job singolo** `quality` su `ubuntu-latest`, con
+> `pnpm install --frozen-lockfile` e i gate elencati in [§9.10](#910-gate-reali-di-ciyml);
+> non esistono né il job `build` né `codecov/codecov-action` né
+> `actions/upload-artifact`. L'elenco autorevole dei gate è §9.10 — è stato
+> verificato riga per riga contro `.github/workflows/ci.yml` in Sessione 44
+> (issue #135, acceptance criterion "i gate elencati corrispondono a quelli
+> effettivamente in `ci.yml`").
+
 ```yaml
 name: CI/CD Pipeline
 
@@ -456,7 +465,80 @@ bash scripts/test-workflow-git-add-coverage.sh          # scenario negativo (gat
 
 **Regola generale**: quando si aggiunge un target a un generatore, va aggiornata **nello stesso commit** ogni lista che lo consuma a mano (elenco di staging del workflow, `$files` del bundle, tabelle documentali), e va aggiunto un gate che confronti le due liste. L'alternativa debole `git add -A` elimina la classe di bug ma rende il commit del bot non prevedibile (aggreggerebbe file non correlati): preferita la lista esplicita + il gate.
 
-**Nota di maskatura**: dal 2026-10-21T16:21Z `ci.yml` non esegue più alcun job (issue #135), quindi questo gate — come gli altri — non sta girando in CI. La verifica è stata fatta in locale; ripristinare #135 è prerequisito per la copertura automatica.
+**Nota di mascheratura**: dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` non eseguiva più alcun job (issue #135, `metadata: read` — scope non dichiarabile — nel blocco `permissions:`), quindi questo gate non stava girando in CI. La verifica era stata fatta in locale; **#135 è risolto in Sessione 44** e la copertura automatica è tornata attiva. Vedi §9.9.
+
+---
+
+### 9.9 Scope `permissions:` valide (issue #135)
+
+Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
+
+**Il bug**: `ci.yml` dichiarava `metadata: read` nel blocco `permissions:` del job `quality` (commit `43d982d`, issue #120). `metadata` **non è una scope dichiarabile** della `GITHUB_TOKEN`: è sempre concessa implicitamente e non è fra le scope documentate in "Workflow syntax for GitHub Actions" → `permissions`. GitHub risponde `Unexpected value 'metadata'` e scarta l'intero file.
+
+**La firma del fallimento**, che non assomiglia a nessun'altra:
+
+| Segnale | Valore |
+|---------|--------|
+| `GET /actions/runs/{id}` | `conclusion: failure`, `status: completed` |
+| `run_started_at` | identico a `created_at` → **0 secondi** |
+| `GET /actions/runs/{id}/jobs` | `total_count: 0` |
+| check-suite | esiste e finisce `completed`/`failure`, con **0 check-run** |
+| log / annotazioni | **nessuna**: non esiste un check-run a cui attaccarle |
+| `GET /actions/workflows/ci.yml` | `state: active` (la registrazione del workflow è valida) |
+| `gh run view` | *"This run likely failed because of a workflow file issue"* |
+
+**Perché nessun controllo esistente lo intercettava**:
+
+- **Nessun parser YAML lo vede.** `js-yaml`, `actionlint` incluso, accettano `metadata: read` senza errori: la chiave è sintatticamente lecita. È la *schema* GitHub a rifiutarla, non la sintassi.
+- **Le API dicono che va tutto bene.** Il workflow risulta `active`, la check-suite esiste e si chiude `completed`. Nessun endpoint segnala l'errore di validazione.
+- **La signature è ambigua.** Run creata → 0 job → fallimento immediato è anche la firma di "Actions bloccata per billing" o per quota esaurita. L'ipotesi della quota (repo privato, account GitHub Free) si reggeva su un dato reale ma era **falsa**: negli stessi minuti, sugli stessi runner e sullo stesso account, gli altri 5 workflow del repo andavano verdi (`auto-bundle` 43s, `auto-state-aggregate` 25s, `auto-status-done` 10s). Una quota esaurita o un blocco di billing fermerebbero **tutti** i workflow, non uno.
+
+**Diagnosi risolutiva** (tabella `jobs` × `conclusion` dei 60 run di `ci.yml`):
+
+| Run | Timestamp | `conclusion` | `jobs` |
+|-----|-----------|--------------|--------|
+| merge PR #119 | `2026-10-21T16:17:23Z` | failure | **1** (fallimento reale, il gate `validate-labels`) |
+| commit `43d982d` | `2026-10-21T16:21:35Z` | failure | **0** ← punto di rottura |
+
+Il salto `jobs: 1 → jobs: 0` cade esattamente sul commit che introduce `metadata: read`, e `ci.yml` è l'unico workflow del repo a dichiarare quella scope: gli altri quattro usano `permissions` a livello di job (`contents`, `issues`, `pull-requests`) e hanno continuato a girare.
+
+**Il fix** è di una riga (`metadata: read` rimossa). `metadata` non serve a nulla: era già concessa.
+
+**La difesa strutturale** è in `scripts/validate-workflows.mjs`, che già è un gate bloccante in CI (issue #73): ora valida ogni scope dichiarata in `permissions:` contro l'elenco documentato, e i valori contro `read`/`write`/`none` (con `id-token` ristretto a `write|none`). Accetta le forme compatte `{}`, `read-all`, `write-all` per non generare falsi positivi. Il test di regressione è `scripts/test-workflow-permission-scopes.sh` (T1..T5): T2 reintroduce `metadata: read` in una fixture e verifica che il gate **esca 1** — un gate che passa sempre non è un gate (lesson 43-1).
+
+```powershell
+node scripts/validate-workflows.mjs .github/workflows   # include la validazione delle scope
+bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (gate bloccante in CI)
+```
+
+**Regola generale**: una chiave di `permissions:` va verificata contro lo schema GitHub, non contro il parser YAML. In questa famiglia di errori il sintomo è *assenza di sintomo*: niente log, niente annotazioni, `state: active`, e un check che "passa" perché non è mai partito.
+
+---
+
+### 9.10 Gate reali di `ci.yml`
+
+Elenco dei 14 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-22 (Sessione 44, issue #135). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
+
+| # | Step | Bloccante | Issue |
+|---|------|:---------:|-------|
+| 1 | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
+| 2 | `Lint` | sì | — |
+| 3 | `Typecheck` | sì | — |
+| 4 | `Test` | sì | — |
+| 5 | `Build` | sì | — |
+| 6 | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
+| 7 | `Bundle check fail-closed` | sì | #104 |
+| 8 | `Aggregator deterministico` | sì | #70 |
+| 9 | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
+| 10 | `Copertura git add vs $targets` | sì | #136 |
+| 11 | `Scope permissions: valide` | sì | **#135** |
+| 12 | `Residui post-merge` | sì | #76 |
+| 13 | `Label in sync con AGENTS.md` | sì | #110 |
+| 14 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+
+I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
+
+**Verifica**: i 14 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Il sub-gate `Copertura git add vs $targets` e il `Scope permissions: valide` girano entrambi dentro `validate-workflows.mjs`, che è lo step 9.
 
 ---
 
@@ -468,3 +550,4 @@ bash scripts/test-workflow-git-add-coverage.sh          # scenario negativo (gat
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosso Sentry da §6 (D.A.1, errori loggati localmente); CSP ripulita, rimosso `https://freqblog.com` (D.A.6); Dockerfile riscritto monorepo-aware con `pnpm-workspace.yaml`; CI copertura per-package (`@ls/core`); riferimento licenza aggiornato ad Apache-2.0 (D.A.10); **nuovo §9 "Bundle script maintenance"** con comandi, convenzioni, CI check, workflow dev (post-review del bundle) |
 | 0.3 | Sessione 41 (2026-10-21) | **§9.8b auto-bundle.yml** (issue #115 follow-up di PR #113): nuovo workflow `.github/workflows/auto-bundle.yml` che rigenera automaticamente `docs/BUNDLE.md` (contenuto FILE) dopo ogni push a main che tocca `$files` o i file coperti da esso. Companion di `auto-state-aggregate.yml` (che gestisce solo i blocchi `AGGREGATE-*`); serializzate via concurrency group `post-merge-main`. Chiude strutturalmente la classe di drift "BUNDLE.md non in sync post-merge" identificata dal rebasing di PR #112. **§9.7b fail-closed su flag** (issue #104): `pwsh scripts/* --check` esce 2 in PS 5.1 (doppio trattino non mappato su switch), `-Check` (singolo) continua a funzionare. Tutti gli esempi del file ora usano `-Check`. |
 | 0.4 | Sessione 43 (2026-10-22) | **§9.8c copertura `git add` vs `$targets`** (issue #136): `auto-state-aggregate.yml` generava il blocco `AGGREGATE-NEXT-STEP-*` del `README.md` (quinto target, ADR-0008 V3 / #127) e poi lo scartava, perche' `README.md` mancava nella riga `git add`. Il drift restava invisibile finche' il fallback generato coincideva per caso col testo in file: si e' manifestato solo alla prima story `todo` (1.2). Fix: una parola nella riga `git add`. Difesa strutturale: assert di copertura in `scripts/validate-workflows.mjs` (gate bloccante in CI dal #73) + test di regressione `scripts/test-workflow-git-add-coverage.sh` (T1..T4, con scenario negativo). |
+| 0.5 | Sessione 44 (2026-10-22) | **§9.9 scope `permissions:` valide** (issue #135): dal 2026-10-21T16:21Z `ci.yml` non eseguiva piu' alcun job — run creata, `jobs: 0`, `conclusion: failure`, `run_started_at == created_at` (0s), check-suite `completed` con 0 check-run, nessuna annotazione via API, `state: active` sull'API dei workflow. Causa: `metadata: read` nel blocco `permissions:` del job `quality` (commit `43d982d`, issue #120) — `metadata` non e' una scope dichiarabile della `GITHUB_TOKEN` (e' sempre concessa implicitamente, non e' fra quelle documentate), quindi GitHub rifiuta l'intero file in fase di validazione. Nessun parser YAML lo vede; la firma e' ambigua con un blocco billing, escluso perche' gli altri 5 workflow dello stesso repo sugli stessi runner erano verdi nella stessa finestra. Diagnosi: tabella `jobs` x `conclusion` dei 60 run — il salto `1 → 0` cade su `43d982d`. Fix: rimossa la riga. Difesa: validazione delle scope in `scripts/validate-workflows.mjs` (gate bloccante dal #73) + `scripts/test-workflow-permission-scopes.sh` (T1..T5, con scenario negativo). **§9.10 gate reali di `ci.yml`** (nuova): elenco autorevole dei 14 step, con bloccante/non-bloccante e issue di riferimento, verificato 1:1 contro il workflow; §2.1 ora dichiara esplicitamente di essere uno scheletro di progetto e rimanda a §9.10. |

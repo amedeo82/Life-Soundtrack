@@ -17,14 +17,22 @@ jobs:
     runs-on: ubuntu-latest
     # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
     # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
-    # il job usa il default GitHub-managed token con scope `Contents: read`,
-    # `Metadata: read`, `Packages: read` — insufficiente per leggere le label.
-    # Aggiungiamo `issues: read` (lettura label repo) + rendiamo `contents: read`
-    # esplicito. `GH_TOKEN` viene passato via env allo step (vedi sotto).
+    # il job usa il default GitHub-managed token, che NON include lo scope
+    # `issues` — insufficiente per leggere le label. Aggiungiamo quindi
+    # `issues: read` (lettura label repo) + rendiamo `contents: read` esplicito.
+    # `GH_TOKEN` viene passato via env allo step (vedi sotto).
+    #
+    # Issue #135: `metadata: read` NON e' una scope dichiarabile. Non e' fra le
+    # scope documentate della GITHUB_TOKEN ed e' sempre concessa implicitamente:
+    # elencarla qui faceva fallire la VALIDAZIONE DEL FILE WORKFLOW, non un job —
+    # la run veniva creata, non partiva alcun job e finiva `failure` a 0s, su
+    # ogni push e su ogni pull_request dal 2026-10-21T16:21Z. Nessun `gh` check
+    # e nessun syntax-check YAML la intercetta: `js-yaml` la parse senza
+    # errori. Difesa strutturale: `scripts/validate-workflows.mjs` valida ora
+    # le scope di `permissions:` (gate bloccante dal #73).
     permissions:
       contents: read
       issues: read
-      metadata: read
     steps:
       - uses: actions/checkout@v4
 
@@ -92,6 +100,16 @@ jobs:
       # intercetti (un gate che passa sempre non e' un gate).
       - name: Copertura `git add` vs $targets (issue #136)
         run: bash scripts/test-workflow-git-add-coverage.sh
+
+      # Issue #135: una scope non valida dentro `permissions:` non produce un job
+      # che fallisce — produce un workflow che GitHub rifiuta in fase di
+      # validazione, quindi zero job e una run `failure` a 0s su ogni trigger.
+      # Il gate di scope vive in validate-workflows.mjs (run precedente); questo
+      # test e' il suo scenario negativo — reintroduce `metadata: read` in una
+      # fixture e verifica che il gate esca 1 (un gate che passa sempre non
+      # e' un gate, lesson 43-1).
+      - name: Scope `permissions:` valide (issue #135)
+        run: bash scripts/test-workflow-permission-scopes.sh
 
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
