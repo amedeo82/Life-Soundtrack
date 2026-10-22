@@ -188,6 +188,12 @@ $files = @(
     # rifiuta in fase di validazione del workflow, con 0 job e run a 0s — e
     # verifica che il gate esca 1.
     "scripts/test-workflow-permission-scopes.sh",
+    # Test di regressione del gate sul sync con origin/main dei writer di `main`
+    # (issue #140). T1..T5: lo scenario negativo rimuove lo step di sync da
+    # auto-state-aggregate.yml (il push verrebbe rifiutato come non-fast-forward
+    # quando l'altra workflow ha gia' pushato sullo stesso merge commit) e
+    # verifica che il gate esca 1; un caso verifica che l'ordine conti.
+    "scripts/test-workflow-push-sync.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",

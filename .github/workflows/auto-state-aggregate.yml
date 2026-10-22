@@ -30,6 +30,13 @@ on:
 # vs sezioni FILE di BUNDLE.md) sono serializzate. Vedi auto-bundle.yml per
 # il caso d'uso che ha motivato questa aggiunta (issue #115, follow-up di
 # PR #113).
+#
+# ATTENZIONE (issue #140): la serializzazione da sola NON basta. Il group
+# serializza i *run*, non i *checkout*: senza lo step "Sync con origin/main"
+# qui sotto, questa workflow fa checkout del `github.sha` del merge commit,
+# mentre l'altra puo' aver gia' pushato un commit sopra: `git push origin main`
+# fallisce con `non-fast-forward` e i blocchi aggregati non vengono committati.
+# Sintesi e gate di regressione: `scripts/test-workflow-push-sync.sh`.
 concurrency:
   group: post-merge-main
   cancel-in-progress: false
@@ -46,6 +53,28 @@ jobs:
           # Necessario per il push finale
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+
+      # Issue #140: questa workflow e `auto-bundle.yml` scattano sullo STESSO
+      # push a `main` e condividono il concurrency group `post-merge-main`, ma il
+      # group serializza i *run*, non i *checkout*: `actions/checkout` senza
+      # `ref:` mette il workspace sul `github.sha` del merge commit, non sulla
+      # testa corrente di `main`. Se l'altra workflow ha gia' pushato quando
+      # questa parte, `git push origin main` viene rifiutato con
+      # `! [rejected] main -> main (non-fast-forward)` (run 39803721229,
+      # 2026-10-22T15:19:20Z) e i blocchi aggregati restano indietro — cioe' il
+      # meccanismo di auto-guarimento di ADR-0008 resta spento.
+      # Lo step e' identico a quello di `auto-bundle.yml`: fetch + rebase, con
+      # fallback a `reset --hard` (l'aggregator non lascia dirty state).
+      # Gate di regressione: `scripts/test-workflow-push-sync.sh`.
+      - name: Sync con origin/main
+        shell: pwsh
+        run: |
+          git fetch origin main
+          git rebase origin/main
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::warning::Rebase fallito, fallback a git reset --hard origin/main"
+            git reset --hard origin/main
+          }
 
       - name: Run aggregator in check mode first
         shell: pwsh

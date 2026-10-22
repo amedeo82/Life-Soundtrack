@@ -13,6 +13,7 @@ let failures = 0;
 let checked = 0;
 let permissionBlocks = 0;
 let permissionScopes = 0;
+let pushers = 0;
 
 // === Issue #135 — le scope di `permissions:` devono essere dichiarabili ===
 //
@@ -31,6 +32,17 @@ const PERMISSION_RESTRICTED = new Map([['id-token', new Set(['write', 'none'])]]
 // Forme compatte ammesse al posto di un blocco mapping.
 const PERMISSION_SHORTHANDS = new Set(['{}', 'read-all', 'write-all']);
 
+// Issue #140 — forme di sincronizzazione con `origin/main` accettate come
+// difesa di un writer di `main` (spiegazione e caso reale sotto, in
+// `checkPushSync`). Devono stare prima di `git push origin main`: l'ordine fa
+// parte del contratto.
+const SYNC_FORMS = [
+  /git\s+rebase\s+origin\/main\b/,
+  /git\s+reset\s+--hard\s+origin\/main\b/,
+  /git\s+pull\s+(?:--rebase\s+)?origin\s+main\b/,
+];
+const PUSH_MAIN_RE = /^\s*git\s+push\s+origin\s+main\s*$/;
+
 for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
   const full = join(dir, file);
   const text = readFileSync(full, 'utf8');
@@ -47,6 +59,8 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
 
   // Issue #135: le scope dichiarate in `permissions:` devono essere reali.
   failures += checkPermissionScopes(lines, file);
+  // Issue #140: chi pusha su `main` deve sincronizzarsi con `origin/main` prima.
+  failures += checkPushSync(lines, file);
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^(\s*)script:\s*\|\s*$/);
     if (!m) continue;
@@ -244,5 +258,41 @@ function checkPermissionScopes(lines, file) {
   return bad;
 }
 
-console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${failures} fallimenti.`);
+// === Issue #140 — chi pusha su `main` deve sincronizzarsi con `origin/main` ===
+//
+// `auto-bundle.yml` e `auto-state-aggregate.yml` condividono il concurrency group
+// `post-merge-main` (`cancel-in-progress: false`), pensato per serializzare i due
+// writer di `main`. Ma il group serializza i *run*, non i *checkout*:
+// `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del
+// merge commit, non sulla testa corrente di `main`. Quando il secondo run parte
+// dopo che il primo ha pushato, il suo `git push origin main` viene rifiutato:
+//
+//   ! [rejected]        main -> main (non-fast-forward)
+//   hint: the tip of your current branch is behind its remote counterpart
+//
+// Il fallimento e' silenzioso dal punto di vista dello stato: il blocco aggregato
+// resta indietro, nessun gate di `ci.yml` lo segnala, e il merge sembra riuscito.
+// Caso reale: run `39803721229` (2026-10-22T15:19:20Z) e `39802198985`, con
+// conseguenza diretta sul doc-sync della Story 1.2 rimasto fuori da `main`.
+//
+// Difesa: ogni workflow che contiene `git push origin main` deve dichiarare una
+// sincronizzazione verso `origin/main` **prima** del push. L'ordine e' parte del
+// contratto: un sync dopo il push non serve a niente.
+
+function checkPushSync(lines, file) {
+  const pushAt = lines.findIndex(l => PUSH_MAIN_RE.test(l));
+  if (pushAt < 0) return 0;   // non e' un writer di `main`: niente da tassare
+  pushers++;
+  const before = lines.slice(0, pushAt).join('\n');
+  if (SYNC_FORMS.some(re => re.test(before))) {
+    console.log(`[OK] ${file}:${pushAt + 1}: \`git push origin main\` preceduto da una sincronizzazione con origin/main`);
+    return 0;
+  }
+  console.error(`[FAIL] ${file}:${pushAt + 1}: \`git push origin main\` senza sincronizzazione preventiva con \`origin/main\`.`);
+  console.error(`       Con piu' workflow che pushano su \`main\` (auto-bundle + auto-state-aggregate), il checkout di default e' il \`github.sha\` del merge commit: se l'altra ha gia' pushato, questo push viene rifiutato con \`non-fast-forward\` e i blocchi aggregati restano indietro senza che nessun gate se ne accorga.`);
+  console.error(`       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push.`);
+  return 1;
+}
+
+console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`);
 process.exit(failures === 0 ? 0 : 1);

@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> Versione 1.23 — Sessione 44 (2026-10-22)
+> **Versione 1.24 — Sessione 45 (2026-10-22)**
 
 ---
 
@@ -760,11 +760,12 @@ Dettagli e motivazioni:
 
 4. **`stale-claim-sweeper`** applica il TTL di 12h di ADR-0006, che era documentato ma non controllato da nulla. Non rimuove la label di proposito: un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer. Segnala e lascia decidere.
 
-I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica tre controlli indipendenti sul testo dei workflow:
+I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica **quattro** controlli indipendenti sul testo dei workflow:
 
 1. **Sintassi JS dei blocchi `script:` di `github-script`**, emulando il wrapper `async` reale (issue #73): senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
-2. **Copertura `git add` vs `$targets`** dell'aggregator (issue #136): vedi §"🔄 Lazy-state aggregation → Target V1 + V2 + V3".
+2. **Copertura `git add` vs `$targets`** dell'agregator (issue #136): vedi §"🔄 Lazy-state aggregation → Target V1 + V2 + V3".
 3. **Scope dichiarate in `permissions:`** (issue #135): ogni chiave deve essere una scope reale della `GITHUB_TOKEN`, ogni valore `read`/`write`/`none`. Una scope inesistente — per esempio `metadata`, che è sempre concessa e **non** è dichiarabile — non produce un job che fallisce: GitHub *rifiuta il file in fase di validazione*, quindi la run viene creata con `jobs: 0` e finisce `failure` a 0 secondi, senza log e senza annotazioni via API. Il sintomo è indistinguibile da "Actions rotta per billing" ed è la ragione per cui #135 ha spento tutti i gate di `ci.yml` per ~22 ore senza che nessuno se ne accorgesse. Test di scenario negativo: `scripts/test-workflow-permission-scopes.sh`.
+4. **Sync con `origin/main` prima del push** (issue #140): ogni workflow che contiene `git push origin main` deve aver allineato il workspace a `origin/main` **prima** del push. Il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit: quando l'altra workflow ha già pushato sullo stesso merge, il push viene rifiutato con `non-fast-forward` e i blocchi aggregati restano indietro **in silenzio** (merge verde, CI verde, stato falso). `auto-state-aggregate.yml` ne era privo ed è stato il motivo per cui il doc-sync della Story 1.2 non è mai arrivato su `main`. Test di scenario negativo: `scripts/test-workflow-push-sync.sh`.
 
 ### Livello 2 — Issue (release + label)
 
@@ -949,7 +950,18 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.23 — `ci.yml` non eseguiva più alcun job (Sessione 44, issue #135). Una scope non dichiarabile dentro `permissions:` (`metadata: read`, introdotta dal commit `43d982d` per la issue #120) non produce un job che fallisce: GitHub **rifiuta il file workflow in fase di validazione**, quindi dal 2026-10-21T16:21Z ogni run di `ci.yml` — push e pull_request — veniva creata con `jobs: 0` e chiudeva `failure` a 0 secondi, senza log né annotazioni via API, con `state: active` sull'API dei workflow. Nessun parser YAML lo intercetta (`metadata` è sintatticamente lecito, è la *schema* GitHub a rifiutarlo) e la firma è ambigua con un blocco di billing: la diagnosi è arrivata dalla tabella `jobs` × `conclusion` dei 60 run (salto `1 → 0` esattamente su `43d982d`) e dalla constatazione che gli altri 5 workflow, sugli stessi runner e nella stessa finestra, erano verdi. Aggiunti:
+*Ultimo aggiornamento: v1.24 — `auto-state-aggregate` non riusciva più a pushare su `main` (Sessione 45, issue #140). Il workflow che rigenera i blocchi `AGGREGATE-*` falliva su ogni merge con `! [rejected] main -> main (non-fast-forward)` (run `39802198985`, `39803721229`): il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit — quando `auto-bundle.yml` ha già pushato sullo stesso merge (ha uno step di sync, il companion no), il secondo writer pusha da un checkout stale. Il fallimento è **silenzioso**: merge verde, `ci.yml` verde, blocchi aggregati indietro, nessun gate che lo segnali; conseguenza diretta, il doc-sync della Story 1.2 (PR #139, merge `2e1a4cc`) era rimasto fuori da `main` e `README.md` continuava ad annunciarla come «prossima story». Aggiunti:
+- `.github/workflows/auto-state-aggregate.yml`: step «Sync con origin/main» (`git fetch origin main` + `git rebase origin/main`, fallback `git reset --hard origin/main`), identico a quello di `auto-bundle.yml`, prima di `-Check`; nota di-header che dichiara la differenza fra serializzare i run e allineare il checkout
+- `.github/workflows/ci.yml`: nuovo step bloccante `Sync origin/main prima del push su main (issue #140)`
+- `scripts/validate-workflows.mjs`: quarto controllo `checkPushSync` — ogni `git push origin main` richiede un sync **precedente** (l'ordine è parte del contratto: uno step di sync dopo il push è inerte), tre forme equivalenti accettate, i writer di branch non tassati; il riepilogo riporta quanti writer di `main` sono stati verificati
+- `scripts/test-workflow-push-sync.sh` (nuovo, T1..T5, 15 assert): T2 rimuove lo step di sync da `auto-state-aggregate.yml` e verifica che il gate esca 1, T3 una forma di sync alternativa non viene tassata, T4 un push su branch non viene tassato, T5 un sync **dopo** il push viene tassato — un gate che passa sempre non è un gate (lesson 43-1)
+- `scripts/generate-bundle.ps1`: `$files` += il nuovo test
+- `docs/12-DEVOPS.md` §9.8d (nuova) con la tabella temporale del fallimento e la regola generale (chi pusha per primo **e** su quale commit si pusha sono due proprietà distinte); §9.10 aggiornata a 15 step con il nuovo gate in posizione 12; changelog 0.6
+- `docs/state/sessions/45-auto-state-aggregate-push-sync.md` (nuova) e doc-sync di `docs/state/stories/1.2-adapter-apple-music.md` (`status: done`, `pr: 139`, `merged_commit`): senza la sorgente aggiornata l'agregator continua a dichiarare la 1.2 come `todo`
+- §"📤 Post-merge actions" Livello 1: i controlli del validatore elencati sono quattro, non tre
+- AGENTS.md v1.23 → v1.24, footer cumulativo v1.24
+
+*Precedente v1.23 — `ci.yml` non eseguiva più alcun job (Sessione 44, issue #135). Una scope non dichiarabile dentro `permissions:` (`metadata: read`, introdotta dal commit `43d982d` per la issue #120) non produce un job che fallisce: GitHub **rifiuta il file workflow in fase di validazione**, quindi dal 2026-10-21T16:21Z ogni run di `ci.yml` — push e pull_request — veniva creata con `jobs: 0` e chiudeva `failure` a 0 secondi, senza log né annotazioni via API, con `state: active` sull'API dei workflow. Nessun parser YAML lo intercetta (`metadata` è sintatticamente lecito, è la *schema* GitHub a rifiutarlo) e la firma è ambigua con un blocco di billing: la diagnosi è arrivata dalla tabella `jobs` × `conclusion` dei 60 run (salto `1 → 0` esattamente su `43d982d`) e dalla constatazione che gli altri 5 workflow, sugli stessi runner e nella stessa finestra, erano verdi. Aggiunti:
 - `.github/workflows/ci.yml`: `metadata: read` rimossa dal blocco `permissions:` del job `quality` (una riga), commento che spiega perché `metadata` non è dichiarabile, e nuovo step bloccante `Scope permissions: valide (issue #135)`
 - `scripts/validate-workflows.mjs`: validazione delle scope di `permissions:` contro l'elenco documentato + valori `read`/`write`/`none` (`id-token` ristretto a `write|none`), con forme compatte `{}`/`read-all`/`write-all` accettate per non generare falsi positivi; il riepilogo finale riporta quante scope sono state verificate
 - `scripts/test-workflow-permission-scopes.sh` (nuovo, T1..T5): T2 reintroduce `metadata: read` in una fixture e verifica che il gate esca 1, T3 il valore inesistente, T4 la forma compatta (nessun falso positivo), T5 il typo di scope — un gate che passa sempre non è un gate (lesson 43-1)

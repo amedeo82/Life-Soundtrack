@@ -245,6 +245,8 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.2 — Adapter Apple Music `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
+**Stato**: ✅ **DONE** — merged in `main` (PR #139, merge commit `2e1a4cc`, 2026-10-22) · adapter in `packages/core/src/adapters/apple/` · fixture `fixtures/synthetic-history/apple-music-sample.csv`
+
 **Descrizione**: Import CSV da Apple Privacy Portal (export *Apple Media Services*).
 
 **Acceptance criteria** (fonte: `03-ADAPTERS/apple-music.md` §8, issue #132):
@@ -506,8 +508,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.2 Adapter Apple Music | ⬚ TODO | 0.3 ✅ — spec 🟢 APPROVED v1.0 (S42, PR #134): `03-ADAPTERS/apple-music.md` · issue #132 `agent-ready` · size `L` |
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8) |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8 🟡 DRAFT): servono `03-ADAPTERS/lastfm.md` e `listenbrainz.md` |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
@@ -515,9 +516,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
-**EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
+**EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 2/5 ✅** (1.1 YouTube Music · 1.2 Apple Music). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
-> **Aggiornato al 2026-10-21** (Sessione 38, issue #90). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
+> **Aggiornato al 2026-10-22** (Sessione 45, issue #140: la 1.2 rimossa dalla roadmap perché mergata con PR #139 e il suo `**Stato**:` allineato — il doc-sync era rimasto fuori da `main`). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 Ogni story deve avere label GitHub:
 - `phase-0`/`phase-1`/`phase-2`/`phase-3`/`phase-6`
@@ -548,6 +549,7 @@ Ogni story deve avere label GitHub:
 | 1.6.1 | Sessione 39 (2026-10-21, issue #96) | Nota Story 1.1 nella tabella roadmap: spec adapter YouTube Music scritta (`03-ADAPTERS/youtube-music.md`, 🟡 DRAFT — `agent-ready` all'approvazione Boss) |
 | 1.6.2 | Sessione 40 (2026-10-21, issue #98) | Note Story 1.1 (spec 🟢 APPROVED, PR #97) e 1.2 (spec scritta, 🟡 DRAFT) nella tabella roadmap |
 | 1.6.3 | Sessione 42 (2026-10-22, issue #132) | Story 1.2: spec 🟢 APPROVED v1.0 (PR #134), `[SIZE:M]` → `[SIZE:L]`, sezione Story riscritta con gli AC della spec §8 e `**Spec**:` che punta a `03-ADAPTERS/apple-music.md` (prima puntava solo a `01-PLATFORMS.md` §3.3, censito come più povero dell'export reale). Nota roadmap allineata. Tabella "Stato di avanzamento": la 1.2 resta `⬚ TODO` perché lo stato vive in `docs/state/stories/1.2-adapter-apple-music.md` |
+| 1.6.4 | Sessione 45 (2026-10-22, issue #140) | Story 1.2 ✅ DONE (PR #139, merge `2e1a4cc`): rimossa dalla tabella roadmap e allineata la riga `**Stato**:` della sezione Story. Il doc-sync era rimasto fuori da `main` perché `auto-state-aggregate.yml` falliva con `non-fast-forward` (vedi `docs/state/sessions/45-*.md`). Nota della 1.3 aggiornata: le specifiche adapter Last.fm / ListenBrainz **non esistono** (`01-PLATFORMS.md` §3.7-3.8 è 🟡 DRAFT), quindi la 1.3 non è lavorabile finché non vengono scritte e ratificate |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -565,6 +567,6 @@ Ogni story deve avere label GitHub:
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
 | 1.1 - Adapter YouTube Music | done | #130 | `43f75291e5184144dc9d974c5003cd6ae6a7583e` | adapter |
-| 1.2 - Adapter Apple Music | todo | - | - | adapter |
+| 1.2 - Adapter Apple Music | done | #139 | `7640d83` | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
