@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 20:52
+> Data: 2026-10-26 19:58
 > Totale file: 80
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1453,7 +1453,7 @@ Apache License
 | 48 | Fix race fra i due writer di main (issue #149) | 🟡 | ❌ | #null |
 | 49 | ADR-0010 — Sorgenti remote nel contratto degli adapter | 🟢 | ✅ | #152 |
 | 50 | Spec adapter Last.fm (Story 1.3) | 🟢 | ✅ | #154 |
-| 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟡 | ❌ | #null |
+| 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟢 | ✅ | #156 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1493,7 +1493,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **28** (merge: 21)
+- Sessioni migrate in state/sessions: **28** (merge: 22)
 - Stories migrate in state/stories: **10** (done: 9)
 - Ultima sessione migrata: **S51** - Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2
@@ -5382,8 +5382,8 @@ backlog: la spec **dichiara** il codice, l'implementazione lo aggiunge.
 ### Sessione 51 - Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #null)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #156 (6ec71bbb0f900067729e0aa995115daa53070966, 2026-10-26)
 - **Claim**: `kilo-HP-ELITEBOOK-lb47`
 
 ```
@@ -5481,6 +5481,7 @@ L'issue raccoglie i deliverable delle tre specifiche:
 
 - **#144** — spec Last.fm, chiusa con `status:done` (PR #154, merge `b3130a9`)
 - **#155** — issue di implementazione della Story 1.3 (aperta in questa sessione)
+- **PR #156** — promozione della spec Last.fm a 🟢 APPROVED v1.0 + apertura di #155 (merge `6ec71bb`, 2026-10-26): è la PR che chiude questa sessione
 - `docs/03-ADAPTERS/listenbrainz.md` (🟢 v1.0) · `docs/13-ADR/0010-remote-source-adapter.md` (🟢 v1.0)
 - Prossimo passo: l'issue #155 è `agent-ready` e implementabile da un agente
 ```
