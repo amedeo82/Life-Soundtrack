@@ -236,7 +236,14 @@ export class NormalizationPipeline {
     if (raw.sourceAlbumName && !track.albumId) {
       track.albumId = await this.resolveAlbum(raw, track.artistId);
     }
-    if (track.durationMs === null && raw.sourceDurationMs > 0) {
+    if (track.durationMs === null && (raw.sourceTrackDurationMs ?? 0) > 0) {
+      // Durata **catalogo** (ListenBrainz `additional_info.duration_ms`):
+      // un hint sulla Track, non la durata dell'evento. Non entra nel
+      // bucket DEDUP-3 (che usa `sourceDurationMs` = 0 per questa
+      // piattaforma): il dato, se presente su una parte degli ascolti e
+      // assente sull'altra, non deve frammentare la Track (E.LB.2, D-LB.7).
+      track.durationMs = raw.sourceTrackDurationMs ?? null;
+    } else if (track.durationMs === null && raw.sourceDurationMs > 0) {
       // Proxy durata catalogo: `ms_played` (spotify.md §3.1.1).
       track.durationMs = raw.sourceDurationMs;
     }
@@ -256,6 +263,11 @@ export class NormalizationPipeline {
     }
     if (raw.mbid && !track.mbid) {
       track.mbid = raw.mbid;
+    }
+    // Durata catalogo come hint: arriva anche su una Track già creata da un
+    // ascolto senza `additional_info` (E.LB.2: stesso brano, bucket 0).
+    if (track.durationMs === null && (raw.sourceTrackDurationMs ?? 0) > 0) {
+      track.durationMs = raw.sourceTrackDurationMs ?? null;
     }
     track.firstSeenAt = Math.min(track.firstSeenAt, timestamp);
     track.lastSeenAt = Math.max(track.lastSeenAt, timestamp);
@@ -314,6 +326,13 @@ export class NormalizationPipeline {
       if (nativeId && artist.platformIds[raw.platform] !== nativeId) {
         artist.platformIds = { ...artist.platformIds, [raw.platform]: nativeId };
       }
+    }
+    // MBID dell'artista (Last.fm `artist.mbid`, ListenBrainz
+    // `artist_mbids[0]`): dato risolto dal server, più affidabile del MBID
+    // del brano. L'artista joinata multi-artista prende il primo MBID
+    // (02§3.3 non modella la relazione many-to-many).
+    if (raw.sourceArtistMbid && !artist.mbid) {
+      artist.mbid = raw.sourceArtistMbid;
     }
   }
 

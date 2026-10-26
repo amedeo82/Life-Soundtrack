@@ -1,0 +1,4 @@
+uts,utc_time,artist,album,track,artist_mbid,album_mbid,track_mbid
+1603186824,2020-10-20 09:40:24,Tame Impala,Lonerism,Apocalypse Dreams,mbid-artist-1,mbid-album-1,mbid-track-1
+1603187000,2020-10-20 09:43:20,Radiohead,OK Computer,Airbag,mbid-artist-2,mbid-album-2,
+1603187100,2020-10-20 09:45:00,Miles Davis,Kind of Blue,So What,,,

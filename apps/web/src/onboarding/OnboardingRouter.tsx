@@ -13,6 +13,8 @@ import { type PrivacySettings } from '@core/schema';
 import { SpotifyAdapter } from '@core/adapters/spotify';
 import { YouTubeMusicAdapter } from '@core/adapters/youtube';
 import { AppleMusicAdapter } from '@core/adapters/apple';
+import { ListenBrainzAdapter } from '@core/adapters/listenbrainz';
+import { LastfmAdapter } from '@core/adapters/lastfm';
 import type { PlatformAdapter } from '@core/adapters';
 import { openDb } from '@core/db';
 import type { PlatformId } from '@core/schema';
@@ -20,19 +22,29 @@ import { runImport, AdapterError } from '@core/adapters';
 import type { ImportPlatformState, PlatformCardStatus } from './types';
 import { loadPrivacy, savePrivacy } from './PrivacySettings';
 import { PlatformCard } from './PlatformCard';
+import { LastfmPanel } from './LastfmPanel';
 import { useT } from '../i18n';
 
 /**
  * Adapter disponibili per piattaforma (05§4): una entry solo quando
- * l'adapter esiste (Spotify: Story 0.3; YouTube Music: Story 1.1; Apple Music: Story 1.2).
+ * l'adapter esiste (Spotify: Story 0.3; YouTube Music: Story 1.1; Apple Music:
+ * Story 1.2; ListenBrainz + Last.fm: Story 1.3).
  */
 const ADAPTER_FACTORIES: Partial<Record<PlatformId, () => PlatformAdapter>> = {
   spotify: () => new SpotifyAdapter(),
   youtube_music: () => new YouTubeMusicAdapter(),
   apple_music: () => new AppleMusicAdapter(),
+  listenbrainz: () => new ListenBrainzAdapter(),
+  lastfm: () => new LastfmAdapter(),
 };
 
-const ACTIVE_PLATFORMS: PlatformId[] = ['spotify', 'youtube_music', 'apple_music'];
+const ACTIVE_PLATFORMS: PlatformId[] = [
+  'spotify',
+  'youtube_music',
+  'apple_music',
+  'listenbrainz',
+  'lastfm',
+];
 
 const createAdapter = (platform: PlatformId): PlatformAdapter | null =>
   ADAPTER_FACTORIES[platform]?.() ?? null;
@@ -249,6 +261,7 @@ export function OnboardingRouter() {
         onRetry={handleRetry}
         detecting={ACTIVE_PLATFORMS.some((p) => importStates[p]?.status === 'validating')}
         canImport={anyValid}
+        privacy={privacy}
       />
     );
   }
@@ -386,6 +399,7 @@ export function ImportScreen({
   onRetry,
   detecting,
   canImport,
+  privacy,
 }: {
   states: Record<string, ImportPlatformState>;
   onDrop: (platform: PlatformId, files: FileList) => void;
@@ -393,6 +407,7 @@ export function ImportScreen({
   onRetry?: (platform: PlatformId) => void;
   detecting: boolean;
   canImport: boolean;
+  privacy: PrivacySettings;
 }) {
   const t = useT();
   return (
@@ -415,6 +430,14 @@ export function ImportScreen({
               />
             </div>
           ))}
+          {/* Percorso API Last.fm: proxy, chiave e username sono
+              per-utente e locali (D-LF.0/D-LF.1). Senza configurazione il
+              bottone resta disabilitato e **zero richieste** partono
+              (E.LF.7); il percorso file della card sopra resta
+              disponibile. */}
+          <div style={{ marginBottom: 'var(--ls-spacing-lg)' }}>
+            <LastfmPanel privacy={privacy} />
+          </div>
         </div>
         <div className="onboarding-actions">
           {detecting ? (

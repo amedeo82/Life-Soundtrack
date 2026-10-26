@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable, type Table } from 'dexie';
+import type { AppSetting } from './settings';
 import type {
   Album,
   Artist,
@@ -60,6 +61,18 @@ export const DB_SCHEMA_V3: Record<string, string> = {
 };
 
 /**
+ * Schema Dexie versione 4 — 02-DATA-SCHEMA.md §6 (Story 1.3).
+ * Aggiunge `settings` (chiave/valore) per le **impostazioni locali** che
+ * non sono dati di ascolto: proxy Last.fm, `api_key`, username
+ * (`09-PRIVACY-SECURITY.md` §4). Migrazione non distruttiva (MIG-1): nessuna
+ * tabella esistente viene modificata e nessun dato viene perso.
+ */
+export const DB_SCHEMA_V4: Record<string, string> = {
+  ...DB_SCHEMA_V3,
+  settings: '&key',
+};
+
+/**
  * Database locale Life-Soundtrack (IndexedDB via Dexie 4).
  *
  * Le tabelle con `&x` usano x come chiave primaria unica (02§6): in particolare
@@ -80,6 +93,8 @@ export class LifeSoundtrackDB extends Dexie {
   playlists!: EntityTable<Playlist, 'id'>;
   playlistItems!: Table<PlaylistItem, [string, string]>;
   searchQueries!: EntityTable<SearchQuery, 'id'>;
+  /** Impostazioni locali (proxy, chiavi per-utente): mai nel bundle. */
+  settings!: EntityTable<AppSetting, 'key'>;
 
   constructor(name: string = DB_NAME) {
     super(name);
@@ -94,10 +109,11 @@ export class LifeSoundtrackDB extends Dexie {
         });
       tx.table('albums')
         .toCollection()
-        .modify((t) => {
-          t.artworkUrl = t.artworkUrl ?? null;
+        .modify((a) => {
+          a.artworkUrl = a.artworkUrl ?? null;
         });
     });
+    this.version(4).stores(DB_SCHEMA_V4);
   }
 }
 

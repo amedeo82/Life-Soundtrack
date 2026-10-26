@@ -41,7 +41,7 @@ const manifest = {
   version: pkg.version,
   buildHash: gitRevParse(),
   releasedAt: new Date().toISOString(),
-  minSchemaVersion: 3, // schema v3 (02-DATA-SCHEMA.md §10 v1.2, artworkUrl)
+  minSchemaVersion: 4, // schema v4 (02-DATA-SCHEMA.md §6.1, tabella settings — Story 1.3)
 };
 
 writeFileSync(outPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');

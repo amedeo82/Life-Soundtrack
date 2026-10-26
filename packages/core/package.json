@@ -25,6 +25,22 @@
       "types": "./dist/adapters/spotify/index.d.ts",
       "import": "./dist/adapters/spotify/index.js"
     },
+    "./adapters/youtube": {
+      "types": "./dist/adapters/youtube/index.d.ts",
+      "import": "./dist/adapters/youtube/index.js"
+    },
+    "./adapters/apple": {
+      "types": "./dist/adapters/apple/index.d.ts",
+      "import": "./dist/adapters/apple/index.js"
+    },
+    "./adapters/listenbrainz": {
+      "types": "./dist/adapters/listenbrainz/index.d.ts",
+      "import": "./dist/adapters/listenbrainz/index.js"
+    },
+    "./adapters/lastfm": {
+      "types": "./dist/adapters/lastfm/index.d.ts",
+      "import": "./dist/adapters/lastfm/index.js"
+    },
     "./logger": {
       "types": "./dist/logger/index.d.ts",
       "import": "./dist/logger/index.js"

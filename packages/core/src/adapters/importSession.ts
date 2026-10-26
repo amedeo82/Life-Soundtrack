@@ -4,7 +4,13 @@ import { recount } from '../db';
 import { AdapterError } from './errors';
 import { sha256Hex, uuid } from './crypto';
 import { NormalizationPipeline } from './pipeline';
-import type { LibrarySnapshot, ParseOptions, PlatformAdapter, RawListenEvent } from './types';
+import type {
+  LibrarySnapshot,
+  ParseOptions,
+  PlatformAdapter,
+  RawListenEvent,
+  RemoteSource,
+} from './types';
 
 /**
  * Sessione di import — orchestra adapter → pipeline → DB (05§3.1, 05§5).
@@ -34,6 +40,23 @@ export interface ImportSummary extends ImportRecord {
   warningCounts: Record<string, number>;
 }
 
+/** Crea il record di import (persistito subito, prima del parsing). */
+function newImportRecord(adapter: PlatformAdapter, fileName: string): ImportRecord {
+  return {
+    id: uuid(),
+    platform: adapter.platform,
+    fileName,
+    fileHash: '',
+    startedAt: Date.now(),
+    completedAt: null,
+    status: 'running',
+    eventsParsed: 0,
+    eventsInserted: 0,
+    eventsDuplicated: 0,
+    warnings: [],
+  };
+}
+
 /**
  * Esegue un import completo: detect → parse streaming → normalize → upsert
  * a chunk → recount → ImportRecord finale.
@@ -50,30 +73,7 @@ export async function runImport(
   input: Blob,
   options: ImportOptions,
 ): Promise<ImportSummary> {
-  const record: ImportRecord = {
-    id: uuid(),
-    platform: adapter.platform,
-    fileName: options.fileName ?? 'streaming-history',
-    fileHash: '',
-    startedAt: Date.now(),
-    completedAt: null,
-    status: 'running',
-    eventsParsed: 0,
-    eventsInserted: 0,
-    eventsDuplicated: 0,
-    warnings: [],
-  };
-  const warningCounts: Record<string, number> = {};
-  const countWarning = (code: string): void => {
-    warningCounts[code] = (warningCounts[code] ?? 0) + 1;
-  };
-  const finalize = async (status: ImportRecord['status']): Promise<ImportSummary> => {
-    record.status = status;
-    record.completedAt = Date.now();
-    record.warnings = Object.keys(warningCounts).sort();
-    await db.imports.put(record);
-    return { ...record, warningCounts };
-  };
+  const record = newImportRecord(adapter, options.fileName ?? 'streaming-history');
 
   // fileHash: sha256 del file (02§3.7). Lettura integrale una volta sola
   // per l'hash; il parse rilegge lo stream in modo indipendente (nessuna
@@ -87,9 +87,70 @@ export async function runImport(
     // Nessuna scrittura (05§4 recoverable false): l'esito negativo del
     // detect viaggia via `AdapterError` INVALID_FORMAT; il codice i18n
     // `adapter.spotify.detect.fail` è scelto dalla UI, non dal core.
-    await finalize('failed');
+    await finalizeImport(db, record, {}, 'failed');
     throw new AdapterError('INVALID_FORMAT', `${adapter.name}: formato non riconosciuto`);
   }
+
+  return runSession(db, adapter, record, options, (parseOptions) =>
+    adapter.parse(input, parseOptions),
+  );
+}
+
+/** Opzioni della sessione di import da sorgente remota (ADR-0010). */
+export interface RemoteImportOptions extends Omit<ImportOptions, 'fileName'> {
+  /** Nome mostrato in `ImportRecord.fileName` (default "remote-source"). */
+  fileName?: string;
+}
+
+/**
+ * Import da **sorgente remota** (`parseRemote?`, ADR-0010).
+ *
+ * Produce gli stessi `ListenEvent` del percorso file (V2): la pipeline, la
+ * dedup e il DB non distinguono le origini. Non c'è `fileHash` (l'input non
+ * è un file) e non c'è `detect()` (una sorgente remota non si "rileva": si
+ * configura).
+ */
+export async function runRemoteImport(
+  db: LifeSoundtrackDB,
+  adapter: PlatformAdapter,
+  source: RemoteSource,
+  options: RemoteImportOptions,
+): Promise<ImportSummary> {
+  if (!adapter.parseRemote) {
+    throw new AdapterError(
+      'INVALID_FORMAT',
+      `${adapter.name}: l'adapter non supporta le sorgenti remote`,
+    );
+  }
+  const record = newImportRecord(adapter, options.fileName ?? 'remote-source');
+  await db.imports.put(record);
+  return runSession(db, adapter, record, options, (parseOptions) =>
+    (adapter.parseRemote as NonNullable<PlatformAdapter['parseRemote']>)(source, parseOptions),
+  );
+}
+
+/**
+ * Cuore comune delle due sessioni: dalla sorgente di eventi grezzi al DB.
+ * Il `record` è già persistito (l'`imports` row esiste prima del parsing).
+ */
+async function runSession(
+  db: LifeSoundtrackDB,
+  adapter: PlatformAdapter,
+  record: ImportRecord,
+  options: ImportOptions,
+  createIterator: (parseOptions: ParseOptions) => AsyncIterable<RawListenEvent>,
+): Promise<ImportSummary> {
+  const warningCounts: Record<string, number> = {};
+  const countWarning = (code: string, count?: number): void => {
+    warningCounts[code] = (warningCounts[code] ?? 0) + (count ?? 1);
+  };
+  const finalize = async (status: ImportRecord['status']): Promise<ImportSummary> => {
+    record.status = status;
+    record.completedAt = Date.now();
+    record.warnings = Object.keys(warningCounts).sort();
+    await db.imports.put(record);
+    return { ...record, warningCounts };
+  };
 
   const pipeline = new NormalizationPipeline(db, record.id, options.privacy);
   const seenEventKeys = new Set<string>();
@@ -124,7 +185,7 @@ export async function runImport(
     if (options.signal) {
       parseOptions.signal = options.signal;
     }
-    const iterator = adapter.parse(input, parseOptions)[Symbol.asyncIterator]();
+    const iterator = createIterator(parseOptions)[Symbol.asyncIterator]();
     for (;;) {
       const step = await iterator.next();
       if (step.done) {
@@ -171,6 +232,20 @@ export async function runImport(
     });
   }
   return finalize('done');
+}
+
+/** Scrive il record finale con i warning raccolti. */
+async function finalizeImport(
+  db: LifeSoundtrackDB,
+  record: ImportRecord,
+  warningCounts: Record<string, number>,
+  status: ImportRecord['status'],
+): Promise<ImportSummary> {
+  record.status = status;
+  record.completedAt = Date.now();
+  record.warnings = Object.keys(warningCounts).sort();
+  await db.imports.put(record);
+  return { ...record, warningCounts };
 }
 
 /** Riconosce una cancellazione cooperativa indipendentemente dal costruttore. */

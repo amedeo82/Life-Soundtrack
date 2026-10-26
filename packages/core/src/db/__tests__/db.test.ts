@@ -6,6 +6,7 @@ import {
   DB_SCHEMA_V1,
   DB_SCHEMA_V2,
   DB_SCHEMA_V3,
+  DB_SCHEMA_V4,
   countListens,
   getAlbum,
   getArtist,
@@ -55,7 +56,7 @@ afterEach(closeAllDbs);
 // ---------------------------------------------------------------------------
 
 describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
-  it('espone tutte le 12 tabelle della spec v1.1/v1.2', async () => {
+  it('espone tutte le 13 tabelle della spec v1.1/v1.2 + settings (Story 1.3)', async () => {
     const db = freshDb('ls-schema-tables');
     await db.open();
     expect(db.tables.map((t) => t.name).sort()).toEqual(
@@ -71,6 +72,7 @@ describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
         'playlists',
         'searchQueries',
         'sessions',
+        'settings',
         'tracks',
       ].sort(),
     );
@@ -100,6 +102,7 @@ describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
       playlists: { primKey: 'id', indexes: ['platform'] },
       playlistItems: { primKey: '[playlistId+trackId]', indexes: ['playlistId', 'addedAt'] },
       searchQueries: { primKey: 'id', indexes: ['platform', 'timestamp', '[platform+normalized]'] },
+      settings: { primKey: 'key', indexes: [] },
     };
 
     for (const [table, want] of Object.entries(expected)) {
@@ -113,13 +116,15 @@ describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
     }
   });
 
-  it('dichiara la versione 3 come massima (aggiunta searchQueries v1→v2, artworkUrl v2→v3)', async () => {
+  it('dichiara la versione 4 come massima (searchQueries v1→v2, artworkUrl v2→v3, settings v3→v4)', async () => {
     const db = freshDb('ls-schema-versions');
     await db.open();
-    expect(db.verno).toBe(3);
+    expect(db.verno).toBe(4);
     expect(Object.keys(DB_SCHEMA_V2)).toContain('searchQueries');
     expect(Object.keys(DB_SCHEMA_V1)).not.toContain('searchQueries');
     expect(Object.keys(DB_SCHEMA_V3).length).toBe(Object.keys(DB_SCHEMA_V2).length);
+    expect(Object.keys(DB_SCHEMA_V4)).toContain('settings');
+    expect(Object.keys(DB_SCHEMA_V3)).not.toContain('settings');
   });
 
   it('openDb apre o crea il DB col nome di default', async () => {
@@ -157,7 +162,7 @@ describe('migrazione v1 → v2', () => {
     // 2. Riapre con lo schema corrente (v1→v2→v3): le migrazioni sono automatiche.
     const upgraded = freshDb(name);
     await upgraded.open();
-    expect(upgraded.verno).toBe(3);
+    expect(upgraded.verno).toBe(4);
     expect(await getListen(upgraded, listen.eventKey)).toEqual(listen);
     expect(await getTrack(upgraded, track.canonicalKey)).toEqual(track);
     expect(upgraded.table('searchQueries')).toBeDefined();
@@ -205,7 +210,7 @@ describe('migrazione v2 → v3', () => {
     // 2. Riapre con lo schema corrente (v3): la migrazione v2→v3 è automatica.
     const upgraded = freshDb(name);
     await upgraded.open();
-    expect(upgraded.verno).toBe(3);
+    expect(upgraded.verno).toBe(4);
 
     // 3. I dati esistenti sono preservati e artworkUrl è stato aggiunto come null.
     const storedTrack = await upgraded.table('tracks').get(track.canonicalKey);

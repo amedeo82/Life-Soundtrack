@@ -1,0 +1,49 @@
+{
+  "_comment": "Export JSON Last.fm dei tool ghan.nl (Story 1.3, Sessione 52): stessi campi del CSV a 8 colonne, nel wrapper { events: [...] }. 3 record, l'ultimo senza mbid.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 52,
+    "spec": "docs/03-ADAPTERS/lastfm.md par.8 (v1.0 APPROVED, PR #154/#156)",
+    "format": "lastfm.ghan.nl export JSON"
+  },
+  "_expectedOutput": {
+    "_comment": "3 eventi importati; il tempo viene da 'uts' (UNIX secondi UTC), l'eventKey e' normalizzata al minuto come nel percorso API.",
+    "importedEvents": 3
+  },
+  "events": [
+    {
+      "_case": "ghanl_json_1",
+      "uts": 1603186824,
+      "utc_time": "2020-10-20 09:40:24",
+      "artist": "Tame Impala",
+      "album": "Lonerism",
+      "track": "Apocalypse Dreams",
+      "artist_mbid": "mbid-artist-1",
+      "album_mbid": "mbid-album-1",
+      "track_mbid": "mbid-track-1"
+    },
+    {
+      "_case": "ghanl_json_2",
+      "uts": 1603187000,
+      "utc_time": "2020-10-20 09:43:20",
+      "artist": "Radiohead",
+      "album": "OK Computer",
+      "track": "Airbag",
+      "artist_mbid": "mbid-artist-2",
+      "album_mbid": "mbid-album-2",
+      "track_mbid": ""
+    },
+    {
+      "_case": "ghanl_json_3",
+      "uts": 1603187100,
+      "utc_time": "2020-10-20 09:45:00",
+      "artist": "Miles Davis",
+      "album": "Kind of Blue",
+      "track": "So What",
+      "artist_mbid": "",
+      "album_mbid": "",
+      "track_mbid": ""
+    }
+  ]
+}

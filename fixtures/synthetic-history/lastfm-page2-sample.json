@@ -1,0 +1,45 @@
+{
+  "_comment": "Seconda pagina della risposta API Last.fm (Story 1.3, Sessione 52): 2 track, usata per il test di paginazione e di confine (E.LF.2, E.LF.3).",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 52,
+    "spec": "docs/03-ADAPTERS/lastfm.md par.8 (v1.0 APPROVED, PR #154/#156)",
+    "format": "Last.fm API user.getRecentTracks (format=json, extended=1)"
+  },
+  "_expectedOutput": {
+    "_comment": "2 eventi importati; l'ultimo scrobble (1603187700) precede di poco il primo della pagina 1 (1603186820): il confine di pagina e' reale.",
+    "importedEvents": 2
+  },
+  "recenttracks": {
+    "@attr": {
+      "user": "ls_user",
+      "page": "2",
+      "perPage": "200",
+      "total": "94618",
+      "totalPages": "474"
+    },
+    "track": [
+      {
+        "_case": "page2_track_1",
+        "artist": { "mbid": "mbid-artist-4", "#text": "Portishead" },
+        "album": { "#text": "Dummy" },
+        "name": "Glory Box",
+        "mbid": "mbid-track-4",
+        "loved": "0",
+        "date": { "uts": "1603187400", "#text": "20 Oct 2020, 09:50" },
+        "url": "https://www.last.fm/music/Portishead/_/Glory+Box"
+      },
+      {
+        "_case": "page2_track_2",
+        "artist": { "mbid": "mbid-artist-5", "#text": "Massive Attack" },
+        "album": { "#text": "Mezzanine" },
+        "name": "Teardrop",
+        "mbid": "mbid-track-5",
+        "loved": "0",
+        "date": { "uts": "1603187700", "#text": "20 Oct 2020, 09:55" },
+        "url": "https://www.last.fm/music/Massive+Attack/_/Teardrop"
+      }
+    ]
+  }
+}
