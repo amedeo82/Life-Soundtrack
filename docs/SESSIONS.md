@@ -3344,8 +3344,8 @@ non girano: nessun file applicativo è stato toccato e la worktree non ha
 ### Sessione 47 - Spec adapter ListenBrainz + Last.fm (Story 1.3)
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #null)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #146 (6d662331e2a946cf8c54c4f2c9f533fba6f1072a, 2026-10-26)
 - **Claim**: `kilo-HP-ELITEBOOK-lb47`
 
 ```

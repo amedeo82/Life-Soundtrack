@@ -91,7 +91,7 @@
 | 44 | ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135) | 🟢 | ❌ | #138 |
 | 45 | auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140) | 🟢 | ❌ | #141 |
 | 46 | Idempotenza dell'aggregator non implementata nel path di scrittura: T3 falliva a intermittenza (issue #142) | 🟢 | ❌ | #143 |
-| 47 | Spec adapter ListenBrainz + Last.fm (Story 1.3) | 🟡 | ❌ | #null |
+| 47 | Spec adapter ListenBrainz + Last.fm (Story 1.3) | 🟢 | ✅ | #146 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -131,7 +131,7 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **24** (merge: 18)
+- Sessioni migrate in state/sessions: **24** (merge: 19)
 - Stories migrate in state/stories: **10** (done: 9)
 - Ultima sessione migrata: **S47** - Spec adapter ListenBrainz + Last.fm (Story 1.3)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2
