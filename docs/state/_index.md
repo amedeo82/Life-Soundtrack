@@ -186,6 +186,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/47-listenbrainz-lastfm-adapter-spec.md` | ✅ creata | Sessione 47 (issue #145, #144): spec adapter ListenBrainz + Last.fm, Story 1.3 perimetro corretto, Story 1.5 ridimensionata |
 | `state/sessions/48-fix-bundle-writer-ordering.md` | ✅ creata | Sessione 48 (issue #149): fix race fra i due writer di `main` — trigger `workflow_run` in `auto-bundle.yml` + quinto gate di `validate-workflows.mjs` |
 | `state/sessions/49-adr-0010-remote-source.md` | ✅ creata | Sessione 49 (issue #148): ADR-0010 — sorgenti remote nel contratto `PlatformAdapter` (`parseRemote?()` + `RemoteSource`), `05§4.1` |
+| `state/sessions/50-lastfm-adapter-spec.md` | ✅ creata | Sessione 50 (issue #144): spec adapter Last.fm — percorso API via proxy CORS + percorso file, `eventKey` al minuto |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |

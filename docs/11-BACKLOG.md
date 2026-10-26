@@ -267,7 +267,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); spec Last.fm in stesura (issue #144, `agent-ready`) — nessun blocco residuo
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v0.1 🟡 DRAFT** (issue #144, in ratifica) — nessun blocco residuo
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -286,14 +286,15 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Fixture `fixtures/synthetic-history/listenbrainz-sample.jsonl` con i 20 casi della spec §8
 
 **Acceptance criteria** (fonte: `03-ADAPTERS/lastfm.md`, issue #144):
-- [ ] Percorso API via proxy CORS configurabile dall'utente + percorso file (export di terze parti)
-- [ ] `api_key` per-utente (mai embedded nel bundle) + web auth per la `sk` (route callback in-app)
-- [ ] `eventKey` normalizzato al **minuto** su entrambi i percorsi (il re-import misto non duplica)
-- [ ] Rate limiter client-side (~5 req/s) con backoff su `11/16/29/429/5xx` e `AbortSignal`
+- [ ] Percorso API via `parseRemote?()` (ADR-0010) su proxy CORS configurato dall'utente + percorso file (export di terze parti, senza proxy)
+- [ ] `api_key` per-utente (mai embedded nel bundle); percorso **senza** `sk` operativo subito; web auth per la `sk` differito alla Story 1.5 (manca un helper md5 per `api_sig`)
+- [ ] `eventKey` normalizzato al **minuto** su tutti i percorsi (il re-import misto API+file non duplica)
+- [ ] Rate limiter client-side (~5 req/s) con backoff su `11/16/29/429/5xx` e `AbortSignal`; mappa dei 10 codici errore Last.fm → `AdapterError`
 - [x] Contratto adapter: metodo opzionale `parseRemote?()` → **ADR-0010 v1.0 🟢 APPROVED** (PR #152, merge `1b2d280`, issue #148 chiusa): estende `05§4` con `RemoteSource` e il codice errore `SOURCE_UNREACHABLE`
-- [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26)
+- [ ] Codice errore `SOURCE_UNREACHABLE` aggiunto a `packages/core/src/adapters/errors.ts` (`AdapterErrorCode` ha oggi 4 valori)
+- [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26) + 23 casi di fixture
 
-**Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (da scrivere, issue #144) · `01-PLATFORMS.md` §3.7, §3.8
+**Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 50) · `01-PLATFORMS.md` §3.7, §3.8
 
 **Issue**: #145 (ListenBrainz) · #144 (Last.fm) · **Size**: `L` — ricalibrata da `M` in Sessione 47: 2 fonti dati, 2 API, autenticazione, rate limiting, mock API e 2 percorsi per adapter
 
@@ -577,6 +578,7 @@ Ogni story deve avere label GitHub:
 | 1.6.4 | Sessione 45 (2026-10-22, issue #140) | Story 1.2 ✅ DONE (PR #139, merge `2e1a4cc`): rimossa dalla tabella roadmap e allineata la riga `**Stato**:` della sezione Story. Il doc-sync era rimasto fuori da `main` perché `auto-state-aggregate.yml` falliva con `non-fast-forward` (vedi `docs/state/sessions/45-*.md`). Nota della 1.3 aggiornata: le specifiche adapter Last.fm / ListenBrainz **non esistono** (`01-PLATFORMS.md` §3.7-3.8 è 🟡 DRAFT), quindi la 1.3 non è lavorabile finché non vengono scritte e ratificate |
 | 1.6.5 | Sessione 47 (2026-10-26, issue #145, #144) | **Story 1.3 perimetro corretto**: la descrizione "Import storico via API (paginazione completa)" era imprecisa per entrambe le piattaforme. **ListenBrainz**: il canale MVP è l'**export API** (ZIP con JSONL) — la doc prescrive l'export per lo storico completo e sconsiglia la paginazione `/listens` (che resta alla 1.5). **Last.fm**: l'export GDPR non è utilizzabile dall'app → canale API con proxy CORS e `api_key` per-utente (ToS §4.4). `[SIZE:M]` → `[SIZE:L]`. **Story 1.5 ridimensionata**: T1.5.1/T1.5.2 duplicavano la 1.3 → la 1.5 resta invio scrobble + sync continua + toggle, con il task di scrittura T1.5.6 aggiunto. Sezione Story 1.3 riscritta con gli AC delle due spec; nota roadmap allineata |
 | 1.6.6 | Sessione 47 (2026-10-26, issue #145) | **Spec ListenBrainz approvata**: `03-ADAPTERS/listenbrainz.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #146, merge `6d66233`); issue #145 chiusa con `status:done`. Decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto. Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.8 (riferimento spec), `18-DEV-LOG.md` §15 (nuova entry, v1.5) |
+| 1.6.7 | Sessione 50 (2026-10-26, issue #144) | **Spec Last.fm scritta**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT (10 sezioni, 21 edge case E.LF.1…E.LF.21, 23 casi di fixture). Perimetro confermato: nessun export utilizzabile dall'app (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy) → canale MVP = API `user.getRecentTracks` via **proxy CORS configurato dall'utente**; percorso **file** (export di terze parti) come alternativa senza proxy. Corretti due limiti: `limit` max **200** (doc ufficiale, non 1000) e `artist` è **stringa** senza `extended=1` / **oggetto** con `extended=1`; il brano in riproduzione **non ha `date`**. `eventKey` normalizzato al **minuto** su tutti i percorsi (il re-import misto API+file non duplica). Il percorso web auth per la `sk` è **differito alla Story 1.5**: `api_sig` richiede md5 e il repo espone solo SHA-1/SHA-256 (E.LF.21). Allineati: `01-PLATFORMS.md` §3.7 + tabella §4 (ISRC/MBID e "brani salvati" da ❌ a ⚠️) + E14-E18 + changelog 0.6; `02-DATA-SCHEMA.md` §2 (riga Last.fm) + §5 (sorgenti con durata non affidabile); `08-COPY-I18N.md` §2.12d; `09-PRIVACY-SECURITY.md` §4 (5 righe) + §7.2 (nota sul proxy) + changelog 0.4 |
 
 <!-- AGGREGATE-STORIES-START -->
 

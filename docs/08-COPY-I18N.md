@@ -261,6 +261,25 @@
 | `listenbrainz.info.exportNotSnapshot` | L'export di ListenBrainz è generato in modo asincronico: un import successivo può aggiungere ascolti, ma non rimuove quelli che hai cancellato sul sito | The ListenBrainz export is generated asynchronously: a later import can add listens, but does not remove the ones you deleted on the site |
 | `listenbrainz.info.complete` | Import completato: {{events}} eventi, {{tracks}} brani unici | Import complete: {{events}} events, {{tracks}} unique tracks |
 
+### 2.12d `adapter.lastfm.*` (Story 1.3 — spec `03-ADAPTERS/lastfm.md` §9)
+
+| Key | IT | EN |
+|-----|----|----|
+| `lastfm.detect.success` | Account Last.fm riconosciuto | Last.fm account recognized |
+| `lastfm.detect.fail` | Configurazione Last.fm incompleta: manca il proxy, la chiave API o il nome utente | Last.fm configuration incomplete: missing the proxy, the API key or the username |
+| `lastfm.warn.noTitleSkipped_one` | {{count}} ascolto senza titolo escluso | {{count}} listen without a title excluded |
+| `lastfm.warn.noTitleSkipped_other` | {{count}} ascolti senza titolo esclusi | {{count}} listens without a title excluded |
+| `lastfm.warn.noArtistSkipped_one` | {{count}} ascolto senza artista escluso | {{count}} listen without an artist excluded |
+| `lastfm.warn.noArtistSkipped_other` | {{count}} ascolti senza artista esclusi | {{count}} listens without an artist excluded |
+| `lastfm.warn.noDateSkipped_one` | {{count}} ascolto senza data escluso | {{count}} listen without a date excluded |
+| `lastfm.warn.noDateSkipped_other` | {{count}} ascolti senza data esclusi | {{count}} listens without a date excluded |
+| `lastfm.warn.mbidMissing_one` | {{count}} ascolto senza MusicBrainz ID: alcuni brani potrebbero non essere riconosciuti come univoci | {{count}} listen without a MusicBrainz ID: some tracks may not be recognized as unique |
+| `lastfm.warn.mbidMissing_other` | {{count}} ascolti senza MusicBrainz ID: alcuni brani potrebbero non essere riconosciuti come univoci | {{count}} listens without a MusicBrainz ID: some tracks may not be recognized as unique |
+| `lastfm.info.privateProfile` | Il tuo profilo Last.fm non mostra gli ascolti recenti: accedi con la sessione web per importarli | Your Last.fm profile does not show recent listens: sign in with the web session to import them |
+| `lastfm.info.libraryDeferred` | I tuoi brani preferiti non sono inclusi in questo import (in arrivo) | Your loved tracks are not included in this import (coming soon) |
+| `lastfm.info.proxyTrust` | Le richieste passano dal proxy che hai configurato: lui vede la tua chiave API | The requests go through the proxy you configured: it sees your API key |
+| `lastfm.info.complete` | Import completato: {{events}} eventi, {{tracks}} brani unici | Import complete: {{events}} events, {{tracks}} unique tracks |
+
 ### 2.13 `error.*`
 
 | Key | IT | EN |
