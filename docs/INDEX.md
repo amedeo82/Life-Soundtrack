@@ -97,6 +97,7 @@
 | 50 | Spec adapter Last.fm (Story 1.3) | 🟢 | ✅ | #154 |
 | 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟢 | ✅ | #156 |
 | 52 | Implementazione Story 1.3 (adapter Last.fm + ListenBrainz) | 🟢 | ✅ | #158 |
+| 53 | Story 1.4 — rekey(): promozione dedup post-enrichment | 🟡 | ❌ | #162 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -136,10 +137,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **29** (merge: 23)
-- Stories migrate in state/stories: **10** (done: 10)
-- Ultima sessione migrata: **S52** - Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3
+- Sessioni migrate in state/sessions: **30** (merge: 23)
+- Stories migrate in state/stories: **11** (done: 11)
+- Ultima sessione migrata: **S53** - Story 1.4 — rekey(): promozione dedup post-enrichment
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
