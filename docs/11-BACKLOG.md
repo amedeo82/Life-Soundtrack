@@ -267,7 +267,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); spec Last.fm in stesura (issue #144, `agent-ready`), preceduta dall'ADR-0010
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v0.1 🟡 DRAFT** (issue #148, in ratifica); spec Last.fm in stesura (issue #144, `agent-ready`), successiva all'ADR
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -290,7 +290,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] `api_key` per-utente (mai embedded nel bundle) + web auth per la `sk` (route callback in-app)
 - [ ] `eventKey` normalizzato al **minuto** su entrambi i percorsi (il re-import misto non duplica)
 - [ ] Rate limiter client-side (~5 req/s) con backoff su `11/16/29/429/5xx` e `AbortSignal`
-- [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **richiede ADR-0010** su `05§4`
+- [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **ADR-0010** (v0.1 🟡 DRAFT, issue #148): estende `05§4` con `RemoteSource`; la ratifica del Boss è il merge della PR dell'ADR
 - [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26)
 
 **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (da scrivere, issue #144) · `01-PLATFORMS.md` §3.7, §3.8

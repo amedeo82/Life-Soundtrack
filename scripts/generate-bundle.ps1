@@ -107,6 +107,7 @@ $files = @(
     "docs/state/sessions/41-geo-context-spec.md",
     "docs/state/sessions/47-listenbrainz-lastfm-adapter-spec.md",
     "docs/state/sessions/48-fix-bundle-writer-ordering.md",
+    "docs/state/sessions/49-adr-0010-remote-source.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
@@ -135,6 +136,7 @@ $files = @(
     "docs/13-ADR/0007-issue-state-machine.md",
     "docs/13-ADR/0008-lazy-state-aggregation.md",
     "docs/13-ADR/0009-local-ip-geolocation.md",
+    "docs/13-ADR/0010-remote-source-adapter.md",
     "docs/14-GLOSSARY.md",
     "docs/15-DESIGN-SYSTEM.md",
     "docs/16-OPERATIONS.md",
