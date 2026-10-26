@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 20:57
+> Data: 2026-10-26 22:01
 > Totale file: 87
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -7786,10 +7786,10 @@ L'issue raccoglie i deliverable delle tre specifiche:
 number: 52
 title: "Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4"
+merged_date: 2026-10-26
 branch: feat/155-lastfm-listenbrainz-adapter
 pr: 158
 claim: kilo-HP-ELITEBOOK-lb52
@@ -7936,7 +7936,8 @@ riga ha un solo `uts`). Dichiarato come gap noto della 1.3.
 
 ## Cross-refs
 
-- **#155** — issue di implementazione della Story 1.3 (chiusa al merge della PR)
+- **#155** — issue di implementazione della Story 1.3, chiusa con `status:done` al
+  merge della **PR #158** (`7afbf03`, 2026-10-26T20:56Z)
 - **#144** / **#145** / **#148** — issue delle spec (ListenBrainz, Last.fm, ADR-0010)
 - `docs/03-ADAPTERS/listenbrainz.md` · `docs/03-ADAPTERS/lastfm.md` — le spec consumate
 - `docs/13-ADR/0010-remote-source-adapter.md` — il contratto `parseRemote?()`
@@ -7958,8 +7959,8 @@ depends_on: ["0.3"]
 issue: 155
 branch: feat/155-lastfm-listenbrainz-adapter
 pr: 158
-merged_commit: ""
-merged_date: ""
+merged_commit: "7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4"
+merged_date: 2026-10-26
 claim: kilo-HP-ELITEBOOK-lb52
 spec_refs:
   - docs/03-ADAPTERS/listenbrainz.md
@@ -8057,8 +8058,8 @@ Elenco completo e verificabile in `listenbrainz.md` §8 (20 casi di fixture),
 
 ## Stato attuale
 
-✅ **COMPLETATA** (Sessione 52, 2026-10-26). Issue #155 chiusa con
-`status:done` al merge della PR di implementazione.
+✅ **COMPLETATA** (Sessione 52, 2026-10-26). Issue #155 chiusa con `status:done`
+al merge della **PR #158** (`7afbf03`, 2026-10-26T20:56Z).
 
 **Cosa c'è ora** (`packages/core/src/adapters/`):
 
