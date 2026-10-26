@@ -1,6 +1,6 @@
 # Adapter ListenBrainz
 
-> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 47 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 47 (2026-10-26)
 > Piattaforma: ListenBrainz (MetaBrainz, no-profit)
 > Sede legale: USA
 > Tier: **S** · Priorità MVP: **sì**
@@ -16,7 +16,7 @@
 | D-LB.4 | Percorso di import | **Opzione A**: l'utente scarica l'archivio, l'app lo importa. L'adapter è **file-only** (§2.1) |
 | D-LB.5 | User Token | Uso **solo in lettura**; **non richiesto** per l'import dell'archivio (§7) |
 
-**Decisioni aperte** (da chiudere in spec, con proposta):
+**Decisioni aperte** (chiuse in v1.0 con l'approvazione del Boss — Sessione 47, issue #145):
 
 | # | Decisione | Proposta |
 |---|-----------|----------|
@@ -341,3 +341,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listen
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 47 (2026-10-26) | Prima stesura (issue #145). Decisioni D-LB.1…D-LB.5 chiuse con il Boss; API e formato export verificati su sorgente e doc ufficiali. Correzione di una premessa errata: `recording_msid` **non** è un identificativo univoco per singolo ascolto (è un hash dei metadati) → l'`eventKey` include `listened_at` (D-LB.2). Canale di storico = **export API** (ZIP/JSONL), non paginazione `/listens`: la doc ne sconsiglia l'uso per lo storico completo e il contratto `05§4` resta invariato (D-LB.4) |
+| 1.0 | Sessione 47 (2026-10-26) | 🟢 APPROVED · promozione al merge della PR #146 (approvazione Boss) — decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto |

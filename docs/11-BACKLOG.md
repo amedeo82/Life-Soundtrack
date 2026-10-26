@@ -267,7 +267,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec in stesura (issue #145 ListenBrainz, #144 Last.fm; entrambe `agent-ready`)
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); spec Last.fm in stesura (issue #144, `agent-ready`), preceduta dall'ADR-0010
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -293,7 +293,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **richiede ADR-0010** su `05§4`
 - [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26)
 
-**Spec**: `03-ADAPTERS/listenbrainz.md` (v0.1, 🟡 DRAFT, Sessione 47) · `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 47) · `01-PLATFORMS.md` §3.7, §3.8
+**Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (da scrivere, issue #144) · `01-PLATFORMS.md` §3.7, §3.8
 
 **Issue**: #145 (ListenBrainz) · #144 (Last.fm) · **Size**: `L` — ricalibrata da `M` in Sessione 47: 2 fonti dati, 2 API, autenticazione, rate limiting, mock API e 2 percorsi per adapter
 
@@ -533,7 +533,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec in stesura (issue #145 ListenBrainz, #144 Last.fm, entrambe `agent-ready`); `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); spec Last.fm in stesura (#144, `agent-ready`) dopo ADR-0010; `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
@@ -576,6 +576,7 @@ Ogni story deve avere label GitHub:
 | 1.6.3 | Sessione 42 (2026-10-22, issue #132) | Story 1.2: spec 🟢 APPROVED v1.0 (PR #134), `[SIZE:M]` → `[SIZE:L]`, sezione Story riscritta con gli AC della spec §8 e `**Spec**:` che punta a `03-ADAPTERS/apple-music.md` (prima puntava solo a `01-PLATFORMS.md` §3.3, censito come più povero dell'export reale). Nota roadmap allineata. Tabella "Stato di avanzamento": la 1.2 resta `⬚ TODO` perché lo stato vive in `docs/state/stories/1.2-adapter-apple-music.md` |
 | 1.6.4 | Sessione 45 (2026-10-22, issue #140) | Story 1.2 ✅ DONE (PR #139, merge `2e1a4cc`): rimossa dalla tabella roadmap e allineata la riga `**Stato**:` della sezione Story. Il doc-sync era rimasto fuori da `main` perché `auto-state-aggregate.yml` falliva con `non-fast-forward` (vedi `docs/state/sessions/45-*.md`). Nota della 1.3 aggiornata: le specifiche adapter Last.fm / ListenBrainz **non esistono** (`01-PLATFORMS.md` §3.7-3.8 è 🟡 DRAFT), quindi la 1.3 non è lavorabile finché non vengono scritte e ratificate |
 | 1.6.5 | Sessione 47 (2026-10-26, issue #145, #144) | **Story 1.3 perimetro corretto**: la descrizione "Import storico via API (paginazione completa)" era imprecisa per entrambe le piattaforme. **ListenBrainz**: il canale MVP è l'**export API** (ZIP con JSONL) — la doc prescrive l'export per lo storico completo e sconsiglia la paginazione `/listens` (che resta alla 1.5). **Last.fm**: l'export GDPR non è utilizzabile dall'app → canale API con proxy CORS e `api_key` per-utente (ToS §4.4). `[SIZE:M]` → `[SIZE:L]`. **Story 1.5 ridimensionata**: T1.5.1/T1.5.2 duplicavano la 1.3 → la 1.5 resta invio scrobble + sync continua + toggle, con il task di scrittura T1.5.6 aggiunto. Sezione Story 1.3 riscritta con gli AC delle due spec; nota roadmap allineata |
+| 1.6.6 | Sessione 47 (2026-10-26, issue #145) | **Spec ListenBrainz approvata**: `03-ADAPTERS/listenbrainz.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #146, merge `6d66233`); issue #145 chiusa con `status:done`. Decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto. Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.8 (riferimento spec), `18-DEV-LOG.md` §15 (nuova entry, v1.5) |
 
 <!-- AGGREGATE-STORIES-START -->
 

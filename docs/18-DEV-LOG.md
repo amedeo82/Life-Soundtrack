@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 1.4
-> Ultima modifica: 2026-10-22 — §14 Story 1.1 (Adapter YouTube Music, issue #129)
+> Versione: 1.5
+> Ultima modifica: 2026-10-26 — §15 Story 1.3 (spec adapter ListenBrainz, issue #145)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -464,6 +464,32 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 15. Story 1.3 — Spec adapter ListenBrainz (+ perimetro Last.fm)
+
+**Tipo**: specifica (`docs/03-ADAPTERS/listenbrainz.md` v1.0 🟢 APPROVED) + correzione del perimetro della Story 1.3
+**Branch**: `feat/145-listenbrainz-adapter-spec` (da `main` @ `21c2c68`; lavoro eseguito in worktree dedicata) — **merged in `main`** (PR #146, merge `6d66233`, 2026-10-26) → branch eliminata dopo merge
+**PR**: #146 (issue #145, claim `kilo-HP-ELITEBOOK-lb47`)
+**Data**: 2026-10-26
+**Stato**: ✅ spec ListenBrainz scritta e approvata; issue #145 chiusa con `status:done`. Spec Last.fm (#144) ancora da scrivere, preceduta dall'ADR-0010
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 15-1 | P+L | L'`eventKey` proposto per ListenBrainz (`listenbrainz:<recording_msid>`) collassa **tutti** gli ascolti dello stesso brano in un solo evento | Il `recording_msid` (*"MessyBrainz ID"*) è un hash dei **metadati** (artist + track + release + tracknumber + duration), non un ID univoco per occorrenza. La dedup lato server usa la tupla `(listened_at, user_id, recording_msid)` | `eventKey = listenbrainz:<listened_at>\|<recording_msid>`. La domanda da portare a ogni chiave di dedup non è «è univoco?» ma «univoco rispetto a **cosa**?» | `03-ADAPTERS/listenbrainz.md` §3.1 (D-LB.2) |
+| 15-2 | P | `MAX_ITEMS_PER_GET` documentato come 100 | Presa dalla doc di sviluppo superata; il sorgente (`api_tools.py`, master) fissa `1000` | Quando un limite è un numero, va letto nel codice. Con rate limit 1 req/s la differenza è ~16 minuti per milione di ascolti | `01-PLATFORMS.md` §3.8 |
+| 15-3 | P+L | Il backlog descriveva la 1.3 come «import storico via API (paginazione completa)» per **entrambe** le piattaforme | La doc ListenBrainz prescrive l'export per lo storico completo e **sconsiglia esplicitamente** la paginazione `/listens`; per Last.fm l'export GDPR non è utilizzabile dall'app (manuale, incompleto) | Perimetro riscritto: ListenBrainz via export API (file-only, `05§4` intatto), Last.fm via API + proxy CORS + `api_key` per-utente. Le story aggregate per piattaforma vanno verificate una per una | `11-BACKLOG.md` §Story 1.3 |
+| 15-4 | P+L | La prima stesura dell'issue #144 dichiarava «nessun segreto da gestire» | `user.getRecentTracks` non richiede auth **per i dati pubblici**, ma gli utenti con *"Hide recent listening"* attivo hanno bisogno della `sk`; e la `api_key` non è condivisibile (ToS §4.4: *"the number of users you may serve"*) | D-LF.1 `api_key` per-utente, D-LF.2 web auth per la `sk`. Un ToS è un requisito architetturale, non un dettaglio legale | `03-ADAPTERS/lastfm.md` D-LF.1, D-LF.2 |
+| 15-5 | P | Il blocco `AGGREGATE-STORIES` mostrava `| #null | `null` | I campi `pr`/`merged_commit` del frontmatter erano `null` (stringa) invece di `""`: l'aggregator testa la verità del valore e `null` è truthy in PowerShell | Campi non ancora noti = stringa vuota. Stessa forma usata dalla 1.1 e dalla 1.2 | `docs/state/stories/1.3-adapter-lastfm-listenbrainz.md` |
+
+**Lesson learned sintetica**: una specifica di adapter è scritta contro una *descrizione* della piattaforma, non contro la piattaforma. Le tre premesse che si sono rivelate false — `recording_msid` come ID univoco, `MAX_ITEMS_PER_GET` come 100, e «paginazione completa» come canale dello storico — sono tutte verificabili in **fonti primarie** (sorgente del server, doc dell'API, ToS) e tutte avrebbero prodotto difetti silenziosi: eventi persi, AC sbagliate, e una story che dichiarava un canale di accesso inesistente.
+
+### Link utili
+
+- Branch: `feat/145-listenbrainz-adapter-spec` (post-merge → eliminata per policy §♻️)
+- Issue: **#145** (claim `kilo-HP-ELITEBOOK-lb47`, `status:done`)
+- Spec toccate: `docs/03-ADAPTERS/listenbrainz.md` (nuovo, v1.0); `docs/01-PLATFORMS.md` §3.8/§5; `docs/02-DATA-SCHEMA.md` §2/§5; `docs/08-COPY-I18N.md` §2.12c; `docs/09-PRIVACY-SECURITY.md` §4/§7.2; `docs/11-BACKLOG.md` Story 1.3 + Story 1.5
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -482,6 +508,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 1.2 | 2026-10-17 (post-merge S21) | **Esito post-merge S21**: PR #18 merged (commit `6c0f79b`, 2026-10-17T18:00:26Z), gate D.12.1 applicato: Sessione 21 ✅ Completata, branch remoto `feat/17-chain-refactor` eliminato (policy §♻️), claim `kilo-HP-ELITEBOOK-q7w3` rilasciato su #17. **🎉 Test critico SUPERATO**: GH Action `auto-status-done` ha applicato automaticamente `status:done` a #17 al merge (rimossi anche `in-progress` e `status:in-review`). La catena S21 funziona end-to-end; la race condition al punto 8 della catena precedente è eliminata. Placeholder `<da-compilare>` sostituito in §10 e §"Esito post-merge", changelog v1.2 (18-DEV-LOG) e v1.5 (SESSIONS) allineati |
 | 1.3 | 2026-10-18 (Story 0.5) | **§11 Story 0.5 — PWA e service worker** (issue #7, claim `kilo-HP-ELITEBOOK-3b3f`): 5 lesson (0.5-1 `getByText` ambiguità substring → `getByRole`, 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` + `setupFiles`, 0.5-3 `it.each` non preserva tuple types → `const cases` esplicito, 0.5-4 PNG generator zero-deps con `node:zlib` ~50 righe, 0.5-5 alias per `virtual:pwa-register/react` in jsdom). Pattern replicabile: setup esplicito (`test-setup.ts`) necessario per Vitest + RTL quando `globals: false`; virtual modules di `vite-plugin-pwa` vanno aliasati in test environment. Build 227.81 KB gzip 71.36 KB (budget 300 KB) |
 | 1.4 | 2026-10-22 (Story 1.1) | **§14 Story 1.1 — Adapter YouTube Music** (issue #129, claim `kilo-HP-ELITEBOOK-x7q2`): 4 lesson (1.1-1 `new Blob(string)` → sequence, 1.1-2 `exactOptionalPropertyTypes` → `delete` nei test, 1.1-3 detect full-stream su troncato valuta il prefisso per il partial recovery 05§4, 1.1-4 derivazione `_expectedOutput` 9 eventi − 1 merge = 8 Track). Nuovo adapter `youtube/` (detect strutturale E.YT.1, filtro E6 §3.3, eventKey sha1(videoId\|time), privacy §7), `RawListenEvent.sourceArtistUri` + `mergeArtist` in pipeline, fixture 13 eventi, 43 test, adapter factory onboarding UI + i18n §2.12b |
+| 1.5 | 2026-10-26 (Story 1.3) | **§15 Story 1.3 — Spec adapter ListenBrainz** (issue #145, claim `kilo-HP-ELITEBOOK-lb47`, PR #146 merge `6d66233`): 5 lesson (15-1 `recording_msid` non è un ID univoco per ascolto → l'`eventKey` include `listened_at`, 15-2 `MAX_ITEMS_PER_GET` = 1000 e non 100 (sorgente, non doc), 15-3 il backlog descriveva il canale di accesso in modo falso per entrambe le piattaforme, 15-4 «nessun segreto da gestire» era falso: `api_key` per-utente (ToS §4.4) + `sk` via web auth, 15-5 i campi `null` nel frontmatter rendono `#null` nel blocco aggregato). Spec `03-ADAPTERS/listenbrainz.md` v1.0 🟢 APPROVED; perimetro della 1.3 corretto e Story 1.5 ridimensionata |
 
 ---
 

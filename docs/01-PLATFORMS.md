@@ -104,7 +104,7 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - **Limiti**: nessun contesto (device/luogo/IP/paese); nessuna durata ascoltata; `duration_ms` opzionale → lo stesso brano può avere bucket DEDUP-3 diversi (vedi `02§5` "Sorgenti con durata non affidabile")
 - **Attenzione**: `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto → due ascolti dello stesso brano condividono lo stesso msid. L'identità dell'evento è la tupla `(listened_at, recording_msid)`
 - **Valore unico**: identificativi MusicBrainz/ISRC nativi → normalizzazione perfetta tra piattaforme
-- **Spec**: `03-ADAPTERS/listenbrainz.md` (v0.1, 🟡 DRAFT, Sessione 47)
+- **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47)
 
 ### 3.9 Self-hosted (Plex, Navidrome, Subsonic, Roon) — Tier S+ per nicchia
 

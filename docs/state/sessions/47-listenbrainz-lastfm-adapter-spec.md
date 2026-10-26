@@ -2,12 +2,12 @@
 number: 47
 title: "Spec adapter ListenBrainz + Last.fm (Story 1.3)"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "6d662331e2a946cf8c54c4f2c9f533fba6f1072a"
+merged_date: 2026-10-26
 branch: feat/145-listenbrainz-adapter-spec
-pr: null
+pr: 146
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [144, 145]
 tags: [docs, spec, adapter, phase-1]
