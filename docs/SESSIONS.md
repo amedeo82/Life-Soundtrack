@@ -3957,8 +3957,8 @@ L'issue raccoglie i deliverable delle tre specifiche:
 ### Sessione 52 - Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #158)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #158 (7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4, 2026-10-26)
 - **Claim**: `kilo-HP-ELITEBOOK-lb52`
 
 ```
@@ -4102,7 +4102,8 @@ riga ha un solo `uts`). Dichiarato come gap noto della 1.3.
 
 ## Cross-refs
 
-- **#155** — issue di implementazione della Story 1.3 (chiusa al merge della PR)
+- **#155** — issue di implementazione della Story 1.3, chiusa con `status:done` al
+  merge della **PR #158** (`7afbf03`, 2026-10-26T20:56Z)
 - **#144** / **#145** / **#148** — issue delle spec (ListenBrainz, Last.fm, ADR-0010)
 - `docs/03-ADAPTERS/listenbrainz.md` · `docs/03-ADAPTERS/lastfm.md` — le spec consumate
 - `docs/13-ADR/0010-remote-source-adapter.md` — il contratto `parseRemote?()`
