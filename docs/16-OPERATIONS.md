@@ -102,7 +102,7 @@ Operazioni di manutenzione che il client deve supportare per garantire salute de
 import { rekey, orphanCleanup, recount, fastCheck, quotaCheck, runHealthCheck } from '@ls/core/db';
 ```
 
-- `rekey(db)` → `{ promoted, merged, listenedMoved }`
+- `rekey(db)` → `{ tracksScanned, promoted, merged, listenedMoved, libraryRepointed, playlistItemsRepointed, featuresRepointed }` (Story 1.4: transazionale, sopravvivenza deterministica, contatori delegati a `recount()`)
 - `orphanCleanup(db)` → `{ tracksRemoved, artistsRemoved }`
 - `recount(db)` → `Promise<void>` (già attivo da Story 0.2)
 - `fastCheck(db, expectedSchemaVersion)` → `FastCheckResult { ok, schemaVersion, error, durationMs }`
@@ -188,3 +188,4 @@ Schema attuale: **versione 3** (v1 → v2 aggiunge `searchQueries`; v2 → v3 ag
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-19 | Prima versione (Story 0.7, PR #39): §1 Update playbook, §2 Maintenance playbook, §3 Migrazioni, §4 Diagnosi & remediation; API `@ls/core/db` (rekey, orphanCleanup, fastCheck, quotaCheck, runHealthCheck); script `scripts/generate-version.mjs`. |
+| 0.2 | 2026-10-26 | **§2.3**: la forma del report di `rekey(db)` è estesa (Story 1.4): `promoted`, `merged`, `listenedMoved` (Story 0.7) + `tracksScanned`, `libraryRepointed`, `playlistItemsRepointed`, `featuresRepointed`. Il job è ora transazionale, a sopravvivenza deterministica (la track più vecchia), riorienta i riferimenti non udibili e delega i contatori a `recount()` (MIG-4) |

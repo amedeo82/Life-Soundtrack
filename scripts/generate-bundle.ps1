@@ -111,7 +111,9 @@ $files = @(
     "docs/state/sessions/50-lastfm-adapter-spec.md",
     "docs/state/sessions/51-lastfm-spec-approval.md",
     "docs/state/sessions/52-story-1-3-implementation.md",
+    "docs/state/sessions/53-story-1-4-rekey.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
+    "docs/state/stories/1.4-dedup-promotion.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",

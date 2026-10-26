@@ -59,7 +59,7 @@ describe('rekey()', () => {
     expect(await db.tracks.get('fuzzy:ck-2')).toBeUndefined();
   });
 
-  it('unisce due track con stesso ISRC (fuzzy + isrc esistente) e aggrega listenCount', async () => {
+  it('unisce due track con stesso ISRC (fuzzy + isrc esistente) e ricalcola listenCount', async () => {
     const db = freshDb('ls-rekey-merge-isrc');
     const vincitrice = makeTrack({
       canonicalKey: 'isrc:ITG040000002',
@@ -85,7 +85,11 @@ describe('rekey()', () => {
     expect(report.merged).toBe(1);
     expect(report.listenedMoved).toBe(2);
     const v = await db.tracks.get('isrc:ITG040000002');
-    expect(v?.listenCount).toBe(8); // 5 + 3
+    // Il contatore denormalizzato è **ricalcolato** da `recount()` (MIG-4):
+    // la fonte di verità sono gli ascolti effettivi (2), non la somma dei
+    // contatori memorizzati (5 + 3 = 8, che non corrisponde a nessun
+    // ascolto reale).
+    expect(v?.listenCount).toBe(2);
     expect(await db.tracks.get('fuzzy:ck-3')).toBeUndefined();
     // I listen sono stati riorientati.
     expect((await db.listens.where('trackId').equals('track-vincitrice').toArray()).length).toBe(2);
