@@ -294,5 +294,138 @@ function checkPushSync(lines, file) {
   return 1;
 }
 
+// === Issue #149 — l'ordinamento fra i due writer di `main` deve essere esplicito ===
+//
+// `auto-bundle.yml` e `auto-state-aggregate.yml` condividono il concurrency group
+// `post-merge-main`, che serializza i *run* ma NON ne impone l'*ordine*: quale
+// workflow ottenga prima il lock non e' deterministico.
+//
+// L'ordine e' pero' essenziale: `auto-bundle` copia il contenuto dei file che
+// `auto-state-aggregate` modifica, quindi puo' copiare blocchi aggregati stale.
+// Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `auto-bundle` girò alle
+// 12:50:23, `auto-state-aggregate` alle 12:50:55. Il bundle copio' i blocchi
+// ANCORA VECCHI, il guard idempotente scrisse "gia' in sync" e non committò; poi
+// l'agregate committò e la copia dentro `docs/BUNDLE.md` restò stale (6 righe
+// fuori sync, drift silenzioso: il gate CI sul bundle è warning-only).
+//
+// Difesa: `auto-bundle.yml` deve dichiarare un trigger `workflow_run` su
+// `auto-state-aggregate`. `workflow_run` e' agganciato alla *conclusione* del
+// workflow, non a un push: sopravvive alla soppressione del GITHUB_TOKEN (che
+// vale solo per gli eventi `push`/`pull_request` generati dal token stesso) ed
+// e' il workaround documentato per i workflow che si innescano a vicenda.
+//
+// Il check verifica anche che il nome dichiarato in `workflows:` corrisponda
+// esattamente al campo `name:` del workflow target: una disallineazione li'
+// silenziosa (il trigger semplicemente non scatta mai).
+
+const WRITER_ORDERING = [
+  {
+    consumer: 'auto-bundle.yml',
+    producer: 'auto-state-aggregate.yml',
+    producerName: 'auto-state-aggregate',
+  },
+];
+
+// Estrae il nome logico di un workflow dal campo `name:` intestazione.
+function extractWorkflowName(text) {
+  const m = text.match(/^name:\s*(.+?)\s*$/m);
+  return m ? m[1].replace(/^["']|["']$/g, '') : null;
+}
+
+// Estrae la lista `workflows:` del blocco `workflow_run:` di un file YAML.
+// Restituisce null se il blocco non esiste.
+function extractWorkflowRunTargets(text) {
+  const lines = text.split('\n');
+  let inOn = false;
+  let onIndent = -1;
+  let inRun = false;
+  let runIndent = -1;
+  const targets = [];
+  for (const raw of lines) {
+    const indent = raw.match(/^\s*/)[0].length;
+    const trimmed = raw.trim();
+    if (!inOn) {
+      if (/^on:\s*$/.test(trimmed)) { inOn = true; onIndent = indent; }
+      continue;
+    }
+    if (indent <= onIndent && trimmed !== '' && !trimmed.startsWith('#')) {
+      // uscita dal blocco `on:`
+      inOn = false; inRun = false;
+      continue;
+    }
+    if (!inRun) {
+      if (/^workflow_run:\s*$/.test(trimmed)) { inRun = true; runIndent = indent; }
+      continue;
+    }
+    if (indent <= runIndent && trimmed !== '' && !trimmed.startsWith('#')) {
+      inRun = false;   // uscita dal blocco `workflow_run:`
+      continue;
+    }
+    const m = trimmed.match(/^workflows:\s*\[(.*)\]\s*$/);
+    if (m) {
+      for (const t of m[1].split(',')) {
+        const name = t.trim().replace(/^["']|["']$/g, '');
+        if (name) targets.push(name);
+      }
+    }
+  }
+  return targets.length > 0 ? targets : null;
+}
+
+function checkWriterOrdering(dir) {
+  let bad = 0;
+  for (const { consumer, producer, producerName } of WRITER_ORDERING) {
+    const consumerPath = join(dir, consumer);
+    const producerPath = join(dir, producer);
+    // Se il consumer non c'e' nella directory ispezionata, il check non e'
+    // applicabile: alcune fixture coprono un solo workflow (es. il test della
+    // copertura `git add` ne porta solo uno). Tassarle produrrebbe un falso
+    // positivo su un check che qui non ha niente da dire.
+    if (!existsSync(consumerPath)) {
+      console.log(`[SKIP] ${consumer}: assente dalla directory ispezionata, il check di ordinamento non e' applicabile`);
+      continue;
+    }
+    if (!existsSync(producerPath)) {
+      console.error(`[FAIL] ${consumer}: il workflow produttore ${producer} non esiste, l'ordinamento non e' verificabile`);
+      bad++;
+      continue;
+    }
+    const consumerText = readFileSync(consumerPath, 'utf8');
+    const producerText = readFileSync(producerPath, 'utf8');
+    const targets = extractWorkflowRunTargets(consumerText);
+    if (!targets) {
+      console.error(`[FAIL] ${consumer}: nessun trigger \`workflow_run:\` con \`workflows:\` trovato.`);
+      console.error(`       Senza di esso i due writer di \`main\` restano serializzati ma NON ordinati: \`${consumer}\` puo' copiare blocchi aggregati stale da \`${producer}\` (caso reale: PR #147, 2026-10-26T12:50Z, drift di 6 righe in docs/BUNDLE.md).`);
+      console.error(`       Aggiungi un blocco \`workflow_run:\` con \`workflows: ["${producerName}"]\` e \`types: [completed]\`.`);
+      bad++;
+      continue;
+    }
+    if (!targets.includes(producerName)) {
+      console.error(`[FAIL] ${consumer}: il trigger \`workflow_run:\` non include \`${producerName}\` (trovati: ${targets.join(', ') || 'nessuno'}).`);
+      console.error(`       Il bundle deve rigenerarsi DOPO che \`${producer}\` ha committato i blocchi aggregati, altrimenti copia il contenuto stale.`);
+      bad++;
+      continue;
+    }
+    // Il nome in `workflows:` deve corrispondere al `name:` reale del producer:
+    // una disallineazione non da' errore, ma il trigger semplicemente non scatta.
+    const actualName = extractWorkflowName(producerText);
+    if (actualName !== producerName) {
+      console.error(`[FAIL] ${consumer}: \`workflows: ["${producerName}"]\` non combacia con il \`name:\` reale di ${producer} ("${actualName}").`);
+      console.error(`       Il trigger \`workflow_run\` non scatterebbe MAI: silenzioso, senza errore di GitHub.`);
+      bad++;
+      continue;
+    }
+    console.log(`[OK] ${consumer}: trigger \`workflow_run\` su "${producerName}" presente e allineato al \`name:\` di ${producer}`);
+  }
+  return bad;
+}
+
+// === Issue #149 — l'ordinamento fra i due writer di `main` deve essere esplicito ===
+//
+// (la definizione di WRITER_ORDERING e di checkWriterOrdering sta piu' in basso:
+//  il check viene eseguito in fondo al file, dopo le dichiarazioni)
+
+failures += checkWriterOrdering(dir);
+
 console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`);
 process.exit(failures === 0 ? 0 : 1);

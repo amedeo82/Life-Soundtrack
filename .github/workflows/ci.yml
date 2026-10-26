@@ -123,6 +123,18 @@ jobs:
       - name: Sync `origin/main` prima del push su main (issue #140)
         run: bash scripts/test-workflow-push-sync.sh
 
+      # Issue #149: i due writer di `main` sono serializzati dal concurrency group
+      # `post-merge-main`, ma il group NON impone l'ordine. `auto-bundle` copia il
+      # contenuto dei file che `auto-state-aggregate` modifica: se gira prima,
+      # copia i blocchi aggregati stale e il guard idempotente scrive "gia' in
+      # sync" senza committare. Caso reale (PR #147, 2026-10-26T12:50Z): 6 righe
+      # di drift in docs/BUNDLE.md, silenzioso (il gate sul bundle e' warning-only).
+      # Difesa: trigger `workflow_run` in auto-bundle.yml, che sopravvive alla
+      # soppressione del GITHUB_TOKEN. Il gate vive in validate-workflows.mjs; questo
+      # test ne verifica lo scenario negativo.
+      - name: Ordinamento dei writer di `main` (issue #149)
+        run: bash scripts/test-workflow-writer-ordering.sh
+
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
       # (orfano -> segnalato) sia quello di sicurezza (lavoro non pushato -> MAI

@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 1.5
-> Ultima modifica: 2026-10-26 — §15 Story 1.3 (spec adapter ListenBrainz, issue #145)
+> Versione: 1.6
+> Ultima modifica: 2026-10-26 — §16 Issue #149 (race fra i due writer di `main`)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -490,6 +490,32 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 16. Issue #149 — Race fra i due writer di `main` (auto-bundle / auto-state-aggregate)
+
+**Tipo**: bug (toolchain) — fix strutturale
+**Branch**: `fix/149-bundle-writer-ordering` (da `main` @ `8b793c2`; lavoro in worktree dedicata)
+**PR**: #151 (issue #149, claim `kilo-HP-ELITEBOOK-lb47`)
+**Data**: 2026-10-26
+**Stato**: 🟡 PR aperta — opzione A (`workflow_run`)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 16-1 | P+L | `docs/BUNDLE.md` stale di 6 righe dopo il merge della PR #147: la copia embedded di `docs/11-BACKLOG.md` mostrava `\| 1.3 ... \| #null \|` e la Sessione 47 come «non ancora mergiata» | I due writer di `main` condividono il concurrency group `post-merge-main`, che **serializza** i run ma **non ne impone l'ordine**. `auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**: se gira prima copia i blocchi aggregati ANCORA VECCHI, il guard idempotente scrive «già in sync» e non committa; l'aggregate committa dopo e la copia resta stale | Trigger `workflow_run` su `auto-state-aggregate` in `auto-bundle.yml`: è agganciato alla **conclusione** del workflow, non a un push, quindi sopravvive alla soppressione del GITHUB_TOKEN. Con esso il bundle rigenera **sempre** dopo che l'aggregate ha committato | `.github/workflows/auto-bundle.yml`, `docs/12-DEVOPS.md` §9.8e |
+| 16-2 | P | Il drift non poteva auto-correggersi: il commit del bot toccava `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md`, `README.md` — tutti nei trigger path di `auto-bundle` — ma nessuna run partiva | Il push avviene con `secrets.GITHUB_TOKEN`, e GitHub **sopprime i workflow run innescati dal proprio GITHUB_TOKEN** (anti-ricorsione; sole eccezioni documentate: `workflow_dispatch`, `repository_dispatch`) | Il trigger `workflow_run` (16-1) aggira la soppressione. In alternativa: un PAT o `workflow_dispatch` | `docs/12-DEVOPS.md` §9.8e |
+| 16-3 | P | Il gate `checkWriterOrdering` crashava con `ReferenceError: Cannot access 'WRITER_ORDERING' before initialization` invece di emettere un `[FAIL]` | La chiamata al check era stata inserita **prima** della dichiarazione di `const WRITER_ORDERING`; in JavaScript `const` non è hoisted | Chiamata spostata in fondo al file, dopo le dichiarazioni. Il test T2 verifica comunque che il gate esca 1 quando il trigger manca | `scripts/validate-workflows.mjs` |
+| 16-4 | P | Il test di regressione non poteva girare in locale su Windows: la prima stesura manipolava la fixture con uno script Python inline | `python3` non esiste su Windows (l'alias della Microsoft Store occupa il nome e fallisce); inoltre `bash` nel `PATH` di Windows è lo stub WSL, non una shell | Fixture T2 riscritta con `sed` (disponibile in Git Bash, WSL, Linux). Nota operativa: i `scripts/test-*.sh` si esegucono in locale con `C:\Program Files\Git\bin\bash.exe` | `scripts/test-workflow-writer-ordering.sh` |
+
+**Lesson learned sintetica**: la serializzazione non è l'ordinamento. Un concurrency group con `cancel-in-progress: false` garantisce che due run non si sovrappongano — non dice *quale* parte prima. Il bug è rimasto latente finché i due workflow producevano artefatti indipendenti; è emerso quando il secondo ha cominciato a **leggere** ciò che il primo **scrive**. Sullo stesso ref si pongono quindi tre problemi distinti: *chi pusha per primo* (§9.8d, #140), *su quale commit si pusha* (#140) e *chi produce prima* (#149, questo).
+
+### Link utili
+
+- Branch: `fix/149-bundle-writer-ordering` (post-merge → eliminata per policy §♻️)
+- Issue: **#149** (claim `kilo-HP-ELITEBOOK-lb47`)
+- Diagnosi completa: `docs/12-DEVOPS.md` §9.8e
+- File toccati: `.github/workflows/auto-bundle.yml`; `.github/workflows/ci.yml`; `scripts/validate-workflows.mjs`; `scripts/test-workflow-writer-ordering.sh` (nuovo); `scripts/generate-bundle.ps1`; `docs/12-DEVOPS.md` §9.8e/§9.10; `AGENTS.md` v1.26
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -514,3 +540,4 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
 tra conversazioni AI e durante l'audit di Sessione (vedi `AGENTS.md` §"Fine di un'implementazione").*
+| 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
