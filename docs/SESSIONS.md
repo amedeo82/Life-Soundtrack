@@ -3627,8 +3627,8 @@ non con il `bash` del `PATH`.
 ### Sessione 49 - ADR-0010 — Sorgenti remote nel contratto degli adapter
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #null)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #152 (1b2d280135fc8e042881d712d0a229e9b172b531, 2026-10-26)
 - **Claim**: `kilo-HP-ELITEBOOK-lb47`
 
 ```
@@ -3710,6 +3710,18 @@ Alternativa considerata: riusare `INTERNAL` o aggiungere il caso a `TRUNCATED`
 - `pwsh scripts/aggregate-state.ps1 --check` → drift atteso (solo il blocco
   `AGGREGATE-BUNDLE-INVENTORY`: i due nuovi file della PR)
 - Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Esito post-merge
+
+Ratificato dal Boss al merge della PR #152 (`1b2d280`). Promozione a **🟢 APPROVED
+v1.0** nella PR di doc-sync successiva (stesso pattern della spec ListenBrainz,
+PR #147): **nessuna modifica di contenuto**, tranne il punto aperto 1 che era
+esplicitamente subordinate alla ratifica — `SOURCE_UNREACHABLE` con
+`recoverable: true` entra nel contratto (`05§4`).
+
+La story 1.3 ha così il suo ultimo blocco architetturale risolto: la spec
+Last.fm (#144) è ora scrivibile, perché il contratto che deve consumare è
+ratificato.
 
 ## Lesson learned
 
