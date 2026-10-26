@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 21:40
+> Data: 2026-10-26 22:45
 > Totale file: 89
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -8132,10 +8132,10 @@ riga ha un solo `uts`). Dichiarato come gap noto della 1.3.
 number: 53
 title: "Story 1.4 — rekey(): promozione dedup post-enrichment"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "471a049a1fc5c8605ca264b0c20b1ecd201ca649"
+merged_date: 2026-10-26
 branch: feat/160-rekey-dedup-promotion
 pr: 162
 claim: kilo-HP-ELITEBOOK-lb53
@@ -8265,7 +8265,8 @@ promossa e una tornata `fuzzy:`. Il bug non si vedeva nei test preesistenti
 
 ## Cross-refs
 
-- **#160** — issue della Story 1.4 (chiusa al merge della PR)
+- **#160** — issue della Story 1.4, chiusa con `status:done` al merge della
+  **PR #162** (`471a049`, 2026-10-26T21:39Z)
 - **#39** — PR della Story 0.7, che aveva creato `rekey()` (`20da75d`)
 - `docs/02-DATA-SCHEMA.md` §5 — regole DEDUP-1/2/3
 - `docs/05-ARCHITECTURE.md` §12.1 — le operazioni di manutenzione
@@ -8450,8 +8451,8 @@ depends_on: ["0.3"]
 issue: 160
 branch: feat/160-rekey-dedup-promotion
 pr: 162
-merged_commit: ""
-merged_date: ""
+merged_commit: "471a049a1fc5c8605ca264b0c20b1ecd201ca649"
+merged_date: 2026-10-26
 claim: kilo-HP-ELITEBOOK-lb53
 spec_refs:
   - docs/02-DATA-SCHEMA.md
@@ -8502,7 +8503,7 @@ manutenzione) sono 🟢 APPROVED.
 ## Stato attuale
 
 ✅ **COMPLETATA** (Sessione 53, 2026-10-26). Issue #160 chiusa con
-`status:done` al merge della PR di implementazione.
+`status:done` al merge della **PR #162** (`471a049`, 2026-10-26T21:39Z).
 
 **Cosa c'è** (`packages/core/src/db/rekey.ts`): l'implementazione esisteva
 già dalla Story 0.7 (PR #39) ma era **incompleta** rispetto a questa story, e

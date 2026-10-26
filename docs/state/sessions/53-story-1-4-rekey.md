@@ -2,10 +2,10 @@
 number: 53
 title: "Story 1.4 — rekey(): promozione dedup post-enrichment"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "471a049a1fc5c8605ca264b0c20b1ecd201ca649"
+merged_date: 2026-10-26
 branch: feat/160-rekey-dedup-promotion
 pr: 162
 claim: kilo-HP-ELITEBOOK-lb53
@@ -135,7 +135,8 @@ promossa e una tornata `fuzzy:`. Il bug non si vedeva nei test preesistenti
 
 ## Cross-refs
 
-- **#160** — issue della Story 1.4 (chiusa al merge della PR)
+- **#160** — issue della Story 1.4, chiusa con `status:done` al merge della
+  **PR #162** (`471a049`, 2026-10-26T21:39Z)
 - **#39** — PR della Story 0.7, che aveva creato `rekey()` (`20da75d`)
 - `docs/02-DATA-SCHEMA.md` §5 — regole DEDUP-1/2/3
 - `docs/05-ARCHITECTURE.md` §12.1 — le operazioni di manutenzione
