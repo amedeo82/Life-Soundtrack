@@ -2,12 +2,12 @@
 number: 49
 title: "ADR-0010 — Sorgenti remote nel contratto degli adapter"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "1b2d280135fc8e042881d712d0a229e9b172b531"
+merged_date: 2026-10-26
 branch: docs/148-adr-0010-remote-source
-pr: null
+pr: 152
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [144, 148]
 tags: [docs, adr, adapter, architecture]
@@ -90,6 +90,18 @@ Alternativa considerata: riusare `INTERNAL` o aggiungere il caso a `TRUNCATED`
 - `pwsh scripts/aggregate-state.ps1 --check` → drift atteso (solo il blocco
   `AGGREGATE-BUNDLE-INVENTORY`: i due nuovi file della PR)
 - Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Esito post-merge
+
+Ratificato dal Boss al merge della PR #152 (`1b2d280`). Promozione a **🟢 APPROVED
+v1.0** nella PR di doc-sync successiva (stesso pattern della spec ListenBrainz,
+PR #147): **nessuna modifica di contenuto**, tranne il punto aperto 1 che era
+esplicitamente subordinate alla ratifica — `SOURCE_UNREACHABLE` con
+`recoverable: true` entra nel contratto (`05§4`).
+
+La story 1.3 ha così il suo ultimo blocco architetturale risolto: la spec
+Last.fm (#144) è ora scrivibile, perché il contratto che deve consumare è
+ratificato.
 
 ## Lesson learned
 

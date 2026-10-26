@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 16:14
+> Data: 2026-10-26 17:20
 > Totale file: 77
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1384,7 +1384,7 @@ Apache License
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 38 (v1.6.0) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 48 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; **0010 remote source adapter 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 49 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 37 (Story 0.7, PR #64) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`) |
@@ -1504,7 +1504,7 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 7 ADR in `13-ADR/` (0001-0003, 0005-0008)
+- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
 - **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v0.6, `19` introdotto in Sessione 41
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
@@ -6972,12 +6972,12 @@ non con il `bash` del `PATH`.
 number: 49
 title: "ADR-0010 — Sorgenti remote nel contratto degli adapter"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "1b2d280135fc8e042881d712d0a229e9b172b531"
+merged_date: 2026-10-26
 branch: docs/148-adr-0010-remote-source
-pr: null
+pr: 152
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [144, 148]
 tags: [docs, adr, adapter, architecture]
@@ -7061,6 +7061,18 @@ Alternativa considerata: riusare `INTERNAL` o aggiungere il caso a `TRUNCATED`
   `AGGREGATE-BUNDLE-INVENTORY`: i due nuovi file della PR)
 - Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
 
+## Esito post-merge
+
+Ratificato dal Boss al merge della PR #152 (`1b2d280`). Promozione a **🟢 APPROVED
+v1.0** nella PR di doc-sync successiva (stesso pattern della spec ListenBrainz,
+PR #147): **nessuna modifica di contenuto**, tranne il punto aperto 1 che era
+esplicitamente subordinate alla ratifica — `SOURCE_UNREACHABLE` con
+`recoverable: true` entra nel contratto (`05§4`).
+
+La story 1.3 ha così il suo ultimo blocco architetturale risolto: la spec
+Last.fm (#144) è ora scrivibile, perché il contratto che deve consumare è
+ratificato.
+
 ## Lesson learned
 
 | # | Osservazione |
@@ -7126,15 +7138,12 @@ piattaforme ha prodotto due esiti diversi:
 
 ## Blocco
 
-**Nessuno per ListenBrainz**: la spec `03-ADAPTERS/listenbrainz.md` è 🟢 APPROVED
-v1.0 (PR #146, merge `6d66233`, 2026-10-26) e l'issue **#145** è chiusa con
-`status:done`.
+**Nessuno**. L'ultimo blocco architetturale della 1.3 è caduto:
 
-**Last.fm** ha un blocker architetturale: il percorso API non ha un `File` da
-passare a `parse(input: Blob)`. La decisione D-LF.8 è un metodo **opzionale**
-`parseRemote?()` su `PlatformAdapter` → richiede **ADR-0010** su `05§4` (che è
-🟢 APPROVED). L'ADR è tracciato dall'issue **#148** (`needs-spec`): va approvato
-prima dell'approvazione della spec Last.fm.
+- **ListenBrainz**: la spec `03-ADAPTERS/listenbrainz.md` è 🟢 APPROVED v1.0 (PR #146, merge `6d66233`, 2026-10-26) e l'issue **#145** è chiusa con `status:done`
+- **ADR-0010**: `docs/13-ADR/0010-remote-source-adapter.md` è 🟢 APPROVED v1.0 (PR #152, merge `1b2d280`, 2026-10-26), issue **#148** chiusa con `status:done`. Il contratto che l'adapter Last.fm deve consumare esiste: il metodo opzionale `parseRemote?()` con la struttura `RemoteSource` (`05§4.1`)
+
+Resta solo la **spec Last.fm** (#144, `agent-ready`): è il prossimo deliverable, non un blocco.
 
 ## Task
 
@@ -7148,9 +7157,9 @@ prima dell'approvazione della spec Last.fm.
       PR #146)**: 10 sezioni del template, 20 casi di fixture, 19 edge case
       (E.LB.1…E.LB.19)
 - [ ] T1.3.4 — Spec Last.fm `03-ADAPTERS/lastfm.md` v0.1 (🟡 DRAFT)
-- [ ] T1.3.5 — **ADR-0010**: estensione di `05§4` con il metodo opzionale
-      `parseRemote?()` (D-LF.8) — issue **#148** (aperta, `needs-spec`): da
-      approvare prima dell'approvazione della spec Last.fm
+- [x] T1.3.5 — **ADR-0010**: estensione di `05§4` con il metodo opzionale
+      `parseRemote?()` (D-LF.8) — **v1.0 🟢 APPROVED** (PR #152, merge `1b2d280`),
+      issue **#148** chiusa con `status:done`
 - [ ] T1.3.6 — Approvazione Boss della spec Last.fm (promozione 🟡 DRAFT → 🟢 APPROVED)
 - [ ] T1.3.7 — Issue di implementazione della 1.3 (`agent-ready`, size L)
 
@@ -7188,8 +7197,12 @@ Elenco completo e verificabile in `listenbrainz.md` §8 (20 casi di fixture),
 `feat/145-listenbrainz-adapter-spec` eliminato (remoto via `auto-branch-cleanup`,
 locale via `scripts/post-merge.ps1`).
 
-Spec **Last.fm** ancora da scrivere (#144, `agent-ready`): prima serve l'ADR-0010
-sul contratto adapter (D-LF.8).
+**ADR-0010** 🟢 APPROVED v1.0 (PR #152, merge `1b2d280`, 2026-10-26): issue #148
+chiusa con `status:done`. Il contratto `parseRemote?()` + `RemoteSource` esiste in
+`05§4.1`, col codice errore `SOURCE_UNREACHABLE`.
+
+Spec **Last.fm** ancora da scrivere (#144, `agent-ready`): è il prossimo
+deliverable della 1.3, non più bloccata da nulla.
 
 Il campo `pr`/`merged_commit` del frontmatter restano **vacuati** di proposito:
 si riferiscono alla PR di **implementazione** della story, non a quella della
@@ -7197,7 +7210,7 @@ spec (come per la 1.1, vedi `docs/state/stories/1.1-adapter-youtube-music.md`
 alla data del merge della spec).
 
 Sblocca: nessuna story è dipendente da 1.3. La 1.5 dipende dal contratto
-`parseRemote?()` (ADR-0010) per il percorso incrementale.
+`parseRemote?()` (ADR-0010, ratificato) per il percorso incrementale.
 
 
 
@@ -10746,7 +10759,7 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 > Status: 🟢 APPROVED
 > Versione: 1.1
 > Ultima modifica: Sessione 48 (2026-10-26) — §4.1 Sorgenti remote (ADR-0010)
-> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter
+> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0)
 
 ---
 
@@ -12855,7 +12868,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v0.1 🟡 DRAFT** (issue #148, in ratifica); spec Last.fm in stesura (issue #144, `agent-ready`), successiva all'ADR
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); spec Last.fm in stesura (issue #144, `agent-ready`) — nessun blocco residuo
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -12878,7 +12891,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] `api_key` per-utente (mai embedded nel bundle) + web auth per la `sk` (route callback in-app)
 - [ ] `eventKey` normalizzato al **minuto** su entrambi i percorsi (il re-import misto non duplica)
 - [ ] Rate limiter client-side (~5 req/s) con backoff su `11/16/29/429/5xx` e `AbortSignal`
-- [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **ADR-0010** (v0.1 🟡 DRAFT, issue #148): estende `05§4` con `RemoteSource`; la ratifica del Boss è il merge della PR dell'ADR
+- [x] Contratto adapter: metodo opzionale `parseRemote?()` → **ADR-0010 v1.0 🟢 APPROVED** (PR #152, merge `1b2d280`, issue #148 chiusa): estende `05§4` con `RemoteSource` e il codice errore `SOURCE_UNREACHABLE`
 - [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26)
 
 **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (da scrivere, issue #144) · `01-PLATFORMS.md` §3.7, §3.8
@@ -14493,7 +14506,7 @@ Il carico del DB sul bundle della PWA e la sua freschezza sono il principale cos
 
 # ADR-0010 — Sorgenti remote nel contratto degli adapter
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 48 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 49 (2026-10-26)
 > Issue: #148 · Story: 1.3 (Adapter Last.fm + ListenBrainz)
 
 ## Contesto
@@ -14646,7 +14659,7 @@ interface ParseOptions {
 
 ## Punti aperti
 
-1. **Codice errore dedicato per "sorgente non raggiungibile".** `AdapterError` ha oggi quattro codi (`INVALID_FORMAT`, `TRUNCATED`, `UNSUPPORTED_VERSION`, `INTERNAL`), tutti orientati al file. Un proxy assente o irraggiungibile non è nessuno di questi: `INVALID_FORMAT` mentirebbe (non è un formato). La candidate è un quinto codice (`SOURCE_UNREACHABLE`), che però tocca l'interfaccia di errore dichiarata in `05§4` — quindi è una decisione che spetta a **questo** ADR, non alla spec. **Proposta: aggiungere `SOURCE_UNREACHABLE` con `recoverable: true`.** Da ratificare dal Boss.
+1. ~~**Codice errore dedicato per "sorgente non raggiungibile"**~~ — **risolto dalla ratifica (Sessione 49)**: `SOURCE_UNREACHABLE` con `recoverable: true` entra nel contratto ed è a `05§4` nella tabella degli `AdapterError`. La motivazione resta quella dichiarata: gli altri quattro codici sono orientati al file, e riusare `INVALID_FORMAT` per un proxy irraggiungibile avrebbe dato all'utente una remediation sbagliata (correggere il file invece di configurare il proxy).
 2. **`parseLibrary?` da sorgente remota.** Lo stesso percorso che ha prodotto `parseRemote?` potrebbe servire per la libreria salvata di una piattaforma remota. L'ADR **non** lo estende: l'unico caso reale noto (Last.fm) non ha una libreria nell'API, e la 1.5 non la richiede. Si estende quando emerge un caso reale, non prima (A6).
 3. **Refresh del token OAuth.** ListenBrainz User Token e Last.fm `sk` hanno durate diverse; il `sk` dura finché l'utente non revoca, il token LB è revocabile in qualsiasi momento. Il refresh automatico richiederebbe di conservare un **refresh token** — che è un segreto di lunga durata. L'ADR presuppone che il rinnovo sia **manuale** (l'utente riapre le Impostazioni), coerente con `09-PRIVACY-SECURITY.md` §3.2. Va confermato quando la 1.5 specificherà il percorso incrementale.
 4. **Verifica end-to-end del percorso API.** L'ADR definisce il contratto, non il trasporto. Quale client HTTP usare (`fetch` nativo?), come gestire i redirect, come impostare i timeout, e se il bundle PWA può fare richieste con header custom attraverso un proxy CORS (CORS *preflight* con `Authorization` richiede che il proxy risponda correttamente a `OPTIONS`) sono dettagli della spec `03-ADAPTERS/lastfm.md` e della Story 1.3.
@@ -14667,7 +14680,8 @@ interface ParseOptions {
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
-| 0.1 | Sessione 48 (2026-10-26) | Prima stesura (issue #148). Formalizza la decisione D-LF.8 del Boss (Sessione 47): metodo opzionale `parseRemote?()` su `PlatformAdapter` con la struttura `RemoteSource`. Fissa i vincoli V1-V8, le alternative A1-A7 e quattro punti aperti. Non ancora ratificato: la ratifica del Boss è il merge di questa PR |
+| 0.1 | Sessione 48 (2026-10-26) | Prima stesura (issue #148). Formalizza la decisione D-LF.8 del Boss (Sessione 47): metodo opzionale `parseRemote?()` su `PlatformAdapter` con la struttura `RemoteSource`. Fissa i vincoli V1-V8, le alternative A1-A7 e quattro punti aperti |
+| 1.0 | Sessione 49 (2026-10-26) | 🟢 APPROVED · ratifica del Boss al merge della PR #152 (`1b2d280`) — nessuna modifica di contenuto. **Ratificato anche il punto aperto 1**: il codice errore `SOURCE_UNREACHABLE` con `recoverable: true` entra nel contratto (`05§4`), insieme alla sua riga nella tabella degli `AdapterError` |
 
 
 

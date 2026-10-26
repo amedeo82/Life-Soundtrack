@@ -1,6 +1,6 @@
 # ADR-0010 — Sorgenti remote nel contratto degli adapter
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 48 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 49 (2026-10-26)
 > Issue: #148 · Story: 1.3 (Adapter Last.fm + ListenBrainz)
 
 ## Contesto
@@ -153,7 +153,7 @@ interface ParseOptions {
 
 ## Punti aperti
 
-1. **Codice errore dedicato per "sorgente non raggiungibile".** `AdapterError` ha oggi quattro codi (`INVALID_FORMAT`, `TRUNCATED`, `UNSUPPORTED_VERSION`, `INTERNAL`), tutti orientati al file. Un proxy assente o irraggiungibile non è nessuno di questi: `INVALID_FORMAT` mentirebbe (non è un formato). La candidate è un quinto codice (`SOURCE_UNREACHABLE`), che però tocca l'interfaccia di errore dichiarata in `05§4` — quindi è una decisione che spetta a **questo** ADR, non alla spec. **Proposta: aggiungere `SOURCE_UNREACHABLE` con `recoverable: true`.** Da ratificare dal Boss.
+1. ~~**Codice errore dedicato per "sorgente non raggiungibile"**~~ — **risolto dalla ratifica (Sessione 49)**: `SOURCE_UNREACHABLE` con `recoverable: true` entra nel contratto ed è a `05§4` nella tabella degli `AdapterError`. La motivazione resta quella dichiarata: gli altri quattro codici sono orientati al file, e riusare `INVALID_FORMAT` per un proxy irraggiungibile avrebbe dato all'utente una remediation sbagliata (correggere il file invece di configurare il proxy).
 2. **`parseLibrary?` da sorgente remota.** Lo stesso percorso che ha prodotto `parseRemote?` potrebbe servire per la libreria salvata di una piattaforma remota. L'ADR **non** lo estende: l'unico caso reale noto (Last.fm) non ha una libreria nell'API, e la 1.5 non la richiede. Si estende quando emerge un caso reale, non prima (A6).
 3. **Refresh del token OAuth.** ListenBrainz User Token e Last.fm `sk` hanno durate diverse; il `sk` dura finché l'utente non revoca, il token LB è revocabile in qualsiasi momento. Il refresh automatico richiederebbe di conservare un **refresh token** — che è un segreto di lunga durata. L'ADR presuppone che il rinnovo sia **manuale** (l'utente riapre le Impostazioni), coerente con `09-PRIVACY-SECURITY.md` §3.2. Va confermato quando la 1.5 specificherà il percorso incrementale.
 4. **Verifica end-to-end del percorso API.** L'ADR definisce il contratto, non il trasporto. Quale client HTTP usare (`fetch` nativo?), come gestire i redirect, come impostare i timeout, e se il bundle PWA può fare richieste con header custom attraverso un proxy CORS (CORS *preflight* con `Authorization` richiede che il proxy risponda correttamente a `OPTIONS`) sono dettagli della spec `03-ADAPTERS/lastfm.md` e della Story 1.3.
@@ -174,4 +174,5 @@ interface ParseOptions {
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
-| 0.1 | Sessione 48 (2026-10-26) | Prima stesura (issue #148). Formalizza la decisione D-LF.8 del Boss (Sessione 47): metodo opzionale `parseRemote?()` su `PlatformAdapter` con la struttura `RemoteSource`. Fissa i vincoli V1-V8, le alternative A1-A7 e quattro punti aperti. Non ancora ratificato: la ratifica del Boss è il merge di questa PR |
+| 0.1 | Sessione 48 (2026-10-26) | Prima stesura (issue #148). Formalizza la decisione D-LF.8 del Boss (Sessione 47): metodo opzionale `parseRemote?()` su `PlatformAdapter` con la struttura `RemoteSource`. Fissa i vincoli V1-V8, le alternative A1-A7 e quattro punti aperti |
+| 1.0 | Sessione 49 (2026-10-26) | 🟢 APPROVED · ratifica del Boss al merge della PR #152 (`1b2d280`) — nessuna modifica di contenuto. **Ratificato anche il punto aperto 1**: il codice errore `SOURCE_UNREACHABLE` con `recoverable: true` entra nel contratto (`05§4`), insieme alla sua riga nella tabella degli `AdapterError` |
