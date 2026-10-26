@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 13:38
+> Data: 2026-10-26 14:21
 > Totale file: 73
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1439,7 +1439,7 @@ Apache License
 | 44 | ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135) | 🟢 | ❌ | #138 |
 | 45 | auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140) | 🟢 | ❌ | #141 |
 | 46 | Idempotenza dell'aggregator non implementata nel path di scrittura: T3 falliva a intermittenza (issue #142) | 🟢 | ❌ | #143 |
-| 47 | Spec adapter ListenBrainz + Last.fm (Story 1.3) | 🟡 | ❌ | #null |
+| 47 | Spec adapter ListenBrainz + Last.fm (Story 1.3) | 🟢 | ✅ | #146 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1479,7 +1479,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **24** (merge: 18)
+- Sessioni migrate in state/sessions: **24** (merge: 19)
 - Stories migrate in state/stories: **10** (done: 9)
 - Ultima sessione migrata: **S47** - Spec adapter ListenBrainz + Last.fm (Story 1.3)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2
@@ -4862,8 +4862,8 @@ non girano: nessun file applicativo è stato toccato e la worktree non ha
 ### Sessione 47 - Spec adapter ListenBrainz + Last.fm (Story 1.3)
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #null)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #146 (6d662331e2a946cf8c54c4f2c9f533fba6f1072a, 2026-10-26)
 - **Claim**: `kilo-HP-ELITEBOOK-lb47`
 
 ```
@@ -12618,7 +12618,7 @@ Ogni story deve avere label GitHub:
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
 | 1.1 - Adapter YouTube Music | done | #130 | `43f75291e5184144dc9d974c5003cd6ae6a7583e` | adapter |
 | 1.2 - Adapter Apple Music | done | #139 | `7640d83` | adapter |
-| 1.3 - Adapter Last.fm + ListenBrainz | in_progress | #null | `null` | adapter |
+| 1.3 - Adapter Last.fm + ListenBrainz | in_progress | - | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
 
