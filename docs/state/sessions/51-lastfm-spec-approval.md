@@ -2,12 +2,12 @@
 number: 51
 title: "Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "6ec71bbb0f900067729e0aa995115daa53070966"
+merged_date: 2026-10-26
 branch: docs/144-lastfm-spec-approval
-pr: null
+pr: 156
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [144, 155]
 tags: [docs, spec, adapter, phase-1]
@@ -106,5 +106,6 @@ L'issue raccoglie i deliverable delle tre specifiche:
 
 - **#144** — spec Last.fm, chiusa con `status:done` (PR #154, merge `b3130a9`)
 - **#155** — issue di implementazione della Story 1.3 (aperta in questa sessione)
+- **PR #156** — promozione della spec Last.fm a 🟢 APPROVED v1.0 + apertura di #155 (merge `6ec71bb`, 2026-10-26): è la PR che chiude questa sessione
 - `docs/03-ADAPTERS/listenbrainz.md` (🟢 v1.0) · `docs/13-ADR/0010-remote-source-adapter.md` (🟢 v1.0)
 - Prossimo passo: l'issue #155 è `agent-ready` e implementabile da un agente

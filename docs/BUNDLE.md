@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 17:12
+> Data: 2026-10-26 20:52
 > Totale file: 80
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1374,7 +1374,7 @@ Apache License
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 40 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢) + Apple Music (🟡 DRAFT, S40) — Last.fm, ListenBrainz TBD |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 51 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.0, S47) + Last.fm (🟢 v1.0, S50/S51) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 48 (v1.1) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
@@ -1382,7 +1382,7 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 38 (v1.6.0) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 51 (v1.6.9) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155 |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 49 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -1396,11 +1396,11 @@ Apache License
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.18 | Protocollo per agenti (Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.26 | Protocollo per agenti (Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v0.6 | Diario cronologico per story: problemi, fix, lesson learned |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.7 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -1506,8 +1506,8 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
-- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v0.6, `19` introdotto in Sessione 41
+- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.9, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
+- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v1.7, `19` introdotto in Sessione 41
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -1521,7 +1521,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 45, issue #140): EPIC 1 (Fase 1 — Import core) ha i suoi primi due adapter **merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`) e **1.2 Apple Music ✅** (PR #139, `2e1a4cc`; spec 🟢 APPROVED v1.0 in `03-ADAPTERS/apple-music.md`). Il doc-sync della 1.2 era rimasto fuori da `main` perché `auto-state-aggregate.yml` falliva con `non-fast-forward`: corretto in Sessione 45, che ha anche aggiunto il gate di sync dei writer di `main` in `scripts/validate-workflows.mjs`. **Story successiva: 1.3 — Adapter Last.fm + ListenBrainz**, non ancora lavorabile perché le specifiche adapter **non esistono** (`03-ADAPTERS/` contiene solo `spotify.md`, `youtube-music.md`, `apple-music.md`; `01-PLATFORMS.md` §3.7-3.8 è 🟡 DRAFT): il percorso è aprire una issue `needs-spec`, scrivere `lastfm.md` + `listenbrainz.md` da `SPEC-TEMPLATE.md`, ottenerne la ratifica, e solo allora aprire l'issue `agent-ready` e implementare — lo stesso ciclo seguito per 1.1 (S39→S43) e 1.2 (S40→S45). Nel frattanto è eseguibile la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 51, issue #144/#155): EPIC 1 (Fase 1 — Import core) ha i suoi primi due adapter **merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`) e **1.2 Apple Music ✅** (PR #139, `2e1a4cc`). La **Story 1.3 — Adapter Last.fm + ListenBrainz** ha ora i suoi **tre pezzi** di documentazione, tutti ratificati: spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, `6d66233`), ADR-0010 🟢 APPROVED v1.0 (PR #152, `1b2d280`), spec Last.fm 🟢 APPROVED v1.0 (PR #154, `b3130a9`; promozione documentale PR #156, `6ec71bb`). L'**issue di implementazione #155** è aperta (`agent-ready`, size L): adapter ListenBrainz file-only (export API → ZIP/JSONL) + adapter Last.fm (percorso API via proxy CORS con `parseRemote?()` + percorso file CSV/JSON), con `eventKey` normalizzato al minuto su entrambi i percorsi (D-LF.7). **Prossimo passo**: implementare la 1.3 (claim + worktree + PR sull'issue #155). Nel frattanto è eseguibile la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -6300,6 +6300,34 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 17. Story 1.3 — Spec adapter Last.fm + approvazione (Sessioni 50-51)
+
+**Tipo**: specifica (`docs/03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED) + promozione documentale + apertura dell'issue di implementazione
+**Branch**: `feat/144-lastfm-adapter-spec` (PR #154, merge `b3130a9`) e `docs/144-lastfm-spec-approval` (PR #156, merge `6ec71bb`) — entrambe merged in `main`, branch eliminati dopo merge
+**PR**: #154 (spec scritta, issue #144) · #156 (promozione a APPROVED v1.0 + apertura issue #155)
+**Data**: 2026-10-26
+**Stato**: ✅ spec Last.fm scritta e approvata; issue #144 chiusa con `status:done`; issue di implementazione #155 aperta (`agent-ready`, size L)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 17-1 | P+L | `user.getRecentTracks` accetterebbe `limit` fino a **1000**, per analogia con il limite di ListenBrainz | Il limite documentato dell'API Last.fm è **200**: la doc di sviluppo superata e l'analogia con un'altra piattaforma sono entrambe fonti sbagliate | Il limite va letto nella **doc ufficiale dell'API** dell'endpoint: 200 = 473 pagine su 94.618 scrobble | `01-PLATFORMS.md` §3.7, `03-ADAPTERS/lastfm.md` §10 |
+| 17-2 | P+L | `artist` nei recent tracks è una stringa, ma con `extended=1` diventa un oggetto `{mbid, #text}` | Lo stesso campo ha due forme a seconda dei parametri della richiesta | Un accessor unico che accetta entrambe le forme; i test coprono le due (E.LF.14) | `03-ADAPTERS/lastfm.md` §3 |
+| 17-3 | P+L | Il re-import misto API + file **duplicherebbe** ogni scrobble: l'API dà il secondo, gli export tool il minuto | Due granularità diverse per lo stesso evento | `eventKey` normalizzato al **minuto** su entrambi i percorsi (D-LF.7): il costo è dichiarato (due scrobble dello stesso brano nello stesso minuto si fondono), il beneficio è l'idempotenza del re-import | `03-ADAPTERS/lastfm.md` §3.1 (D-LF.7) |
+| 17-4 | P | Le chiavi dei due adapter hanno granularità diverse, e la dedup è **fra** i due | La normalizzazione al minuto era pensata solo per Last.fm (API vs export) | La normalizzazione è un **contratto fra i due adapter**: la Story 1.3 ha una sola issue di implementazione (#155) perché i due non sono indipendenti | `docs/state/sessions/51-lastfm-spec-approval.md` (D.51.1) |
+| 17-5 | P+L | Il percorso web auth per la `sk` richiederebbe `api_sig` = md5, e il repo espone solo SHA-1/SHA-256 via Web Crypto | La Web Crypto API non implementa md5 | Il percorso `sk` è **differito alla Story 1.5**, dove serve davvero (sync continua); la 1.3 implementa il percorso senza `sk`, che non richiede firma | `03-ADAPTERS/lastfm.md` (E.LF.21) |
+| 17-6 | P+L | Dopo il merge della PR #156 il frontmatter della sessione 51 era ancora `pr: null` / `merged: false`, e le sezioni legacy dei file globali continuavano a dichiarare «manca l'issue di implementazione» | La sessione è stata scritta **dalla stessa PR che la chiude**: i dati del merge non esistevano al momento della scrittura. E le sezioni legacy non hanno un generatore: nessun gate le vede invecchiare | Doc-sync post-merge in PR separata: il frontmatter riflette il merge reale e le sezioni legacy vengono allineate nella stessa PR (D.38.1) | `docs/state/sessions/51-lastfm-spec-approval.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md` |
+
+**Lesson learned sintetica**: una sessione che si chiude con la PR che l'ha prodotta non può conoscere il proprio esito — il frontmatter (`pr`, `merged_commit`, `merged`) viene scritto *prima* del merge. Non è un errore, è una conseguenza del doc-sync-in-PR: si risolve con una PR di doc-sync successiva, non scrivendo a mano su `main`. E la lezione complementare: le **sezioni legacy** dei file globali invecchiano in silenzio — nessun gate le vede, e qui hanno continuato a dichiarare «manca l'issue di implementazione» anche dopo che l'issue era stata aperta.
+
+### Link utili
+
+- Branch: `feat/144-lastfm-adapter-spec` (PR #154) e `docs/144-lastfm-spec-approval` (PR #156) — entrambe post-merge → eliminate per policy §♻️
+- Issue: **#144** (spec Last.fm, `status:done`) · **#155** (implementazione della Story 1.3, `agent-ready`, size L)
+- Spec toccate: `docs/03-ADAPTERS/lastfm.md` (nuovo, v1.0 🟢); `docs/01-PLATFORMS.md` §3.7/§4/§5; `docs/02-DATA-SCHEMA.md` §2/§5; `docs/08-COPY-I18N.md` §2.12d; `docs/09-PRIVACY-SECURITY.md` §3.3/§4/§7.2; `docs/11-BACKLOG.md` Story 1.3 + Story 1.5
+- Stato: `docs/state/sessions/50-lastfm-adapter-spec.md`, `docs/state/sessions/51-lastfm-spec-approval.md`
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -6319,12 +6347,13 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 1.3 | 2026-10-18 (Story 0.5) | **§11 Story 0.5 — PWA e service worker** (issue #7, claim `kilo-HP-ELITEBOOK-3b3f`): 5 lesson (0.5-1 `getByText` ambiguità substring → `getByRole`, 0.5-2 cleanup RTL con `globals: false` → `test-setup.ts` + `setupFiles`, 0.5-3 `it.each` non preserva tuple types → `const cases` esplicito, 0.5-4 PNG generator zero-deps con `node:zlib` ~50 righe, 0.5-5 alias per `virtual:pwa-register/react` in jsdom). Pattern replicabile: setup esplicito (`test-setup.ts`) necessario per Vitest + RTL quando `globals: false`; virtual modules di `vite-plugin-pwa` vanno aliasati in test environment. Build 227.81 KB gzip 71.36 KB (budget 300 KB) |
 | 1.4 | 2026-10-22 (Story 1.1) | **§14 Story 1.1 — Adapter YouTube Music** (issue #129, claim `kilo-HP-ELITEBOOK-x7q2`): 4 lesson (1.1-1 `new Blob(string)` → sequence, 1.1-2 `exactOptionalPropertyTypes` → `delete` nei test, 1.1-3 detect full-stream su troncato valuta il prefisso per il partial recovery 05§4, 1.1-4 derivazione `_expectedOutput` 9 eventi − 1 merge = 8 Track). Nuovo adapter `youtube/` (detect strutturale E.YT.1, filtro E6 §3.3, eventKey sha1(videoId\|time), privacy §7), `RawListenEvent.sourceArtistUri` + `mergeArtist` in pipeline, fixture 13 eventi, 43 test, adapter factory onboarding UI + i18n §2.12b |
 | 1.5 | 2026-10-26 (Story 1.3) | **§15 Story 1.3 — Spec adapter ListenBrainz** (issue #145, claim `kilo-HP-ELITEBOOK-lb47`, PR #146 merge `6d66233`): 5 lesson (15-1 `recording_msid` non è un ID univoco per ascolto → l'`eventKey` include `listened_at`, 15-2 `MAX_ITEMS_PER_GET` = 1000 e non 100 (sorgente, non doc), 15-3 il backlog descriveva il canale di accesso in modo falso per entrambe le piattaforme, 15-4 «nessun segreto da gestire» era falso: `api_key` per-utente (ToS §4.4) + `sk` via web auth, 15-5 i campi `null` nel frontmatter rendono `#null` nel blocco aggregato). Spec `03-ADAPTERS/listenbrainz.md` v1.0 🟢 APPROVED; perimetro della 1.3 corretto e Story 1.5 ridimensionata |
+| 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
+| 1.7 | 2026-10-26 (issue #144, #155) | **§17 Story 1.3 — Spec adapter Last.fm + approvazione** (Sessioni 50-51, claim `kilo-HP-ELITEBOOK-lb47`, PR #154 merge `b3130a9` + PR #156 merge `6ec71bb`): 6 lesson (17-1 il limite di `limit` va letto nella doc ufficiale dell'endpoint (200), non dedotto per analogia; 17-2 `artist` ha due forme a seconda di `extended=1` → accessor unico; 17-3 normalizzare l'`eventKey` al minuto su **tutti** i percorsi, se no il re-import misto API+file duplica ogni scrobble; 17-4 la normalizzazione è un contratto fra i due adapter → una sola issue (#155); 17-5 `api_sig` richiede md5, la Web Crypto non ce l'ha → web auth differito alla Story 1.5; 17-6 una sessione chiusa dalla PR che l'ha prodotta non può conoscere il proprio merge → doc-sync in PR separata, e le sezioni legacy dei file globali invecchiano in silenzio). Spec `03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED; issue #144 chiusa, issue di implementazione #155 aperta (`agent-ready`, size L) |
 
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
 tra conversazioni AI e durante l'audit di Sessione (vedi `AGENTS.md` §"Fine di un'implementazione").*
-| 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
 
 
 
@@ -7443,12 +7472,12 @@ backlog: la spec **dichiara** il codice, l'implementazione lo aggiunge.
 number: 51
 title: "Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "6ec71bbb0f900067729e0aa995115daa53070966"
+merged_date: 2026-10-26
 branch: docs/144-lastfm-spec-approval
-pr: null
+pr: 156
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [144, 155]
 tags: [docs, spec, adapter, phase-1]
@@ -7547,6 +7576,7 @@ L'issue raccoglie i deliverable delle tre specifiche:
 
 - **#144** — spec Last.fm, chiusa con `status:done` (PR #154, merge `b3130a9`)
 - **#155** — issue di implementazione della Story 1.3 (aperta in questa sessione)
+- **PR #156** — promozione della spec Last.fm a 🟢 APPROVED v1.0 + apertura di #155 (merge `6ec71bb`, 2026-10-26): è la PR che chiude questa sessione
 - `docs/03-ADAPTERS/listenbrainz.md` (🟢 v1.0) · `docs/13-ADR/0010-remote-source-adapter.md` (🟢 v1.0)
 - Prossimo passo: l'issue #155 è `agent-ready` e implementabile da un agente
 
@@ -7562,8 +7592,8 @@ area: adapter
 status: in_progress
 priority: I
 depends_on: ["0.3"]
-issue: 145
-branch: feat/145-listenbrainz-adapter-spec
+issue: 155
+branch: ""
 pr: ""
 merged_commit: ""
 merged_date: ""
@@ -7604,8 +7634,9 @@ piattaforme ha prodotto due esiti diversi:
 
 - **ListenBrainz**: la spec `03-ADAPTERS/listenbrainz.md` è 🟢 APPROVED v1.0 (PR #146, merge `6d66233`, 2026-10-26) e l'issue **#145** è chiusa con `status:done`
 - **ADR-0010**: `docs/13-ADR/0010-remote-source-adapter.md` è 🟢 APPROVED v1.0 (PR #152, merge `1b2d280`, 2026-10-26), issue **#148** chiusa con `status:done`. Il contratto che l'adapter Last.fm deve consumare esiste: il metodo opzionale `parseRemote?()` con la struttura `RemoteSource` (`05§4.1`)
+- **Last.fm**: la spec `03-ADAPTERS/lastfm.md` è 🟢 APPROVED v1.0 (PR #154, merge `b3130a9`; promozione documentale PR #156, merge `6ec71bb`, 2026-10-26) e l'issue **#144** è chiusa con `status:done`
 
-Resta solo la **spec Last.fm** (#144, `agent-ready`): è il prossimo deliverable, non un blocco.
+L'issue di implementazione **#155** è aperta (`agent-ready`, size L): è il prossimo deliverable, non un blocco.
 
 ## Task
 
@@ -7625,7 +7656,7 @@ Resta solo la **spec Last.fm** (#144, `agent-ready`): è il prossimo deliverable
       issue **#148** chiusa con `status:done`
 - [x] T1.3.6 — Approvazione Boss della spec Last.fm (promozione 🟡 DRAFT → 🟢 APPROVED
       v1.0, PR #154, merge `b3130a9`): issue #144 chiusa con `status:done`
-- [ ] T1.3.7 — Issue di implementazione della 1.3 (`agent-ready`, size L)
+- [x] T1.3.7 — Issue di implementazione della 1.3 (#155, `agent-ready`, size L): **una sola issue per i due adapter**, perché l'`eventKey` normalizzato al minuto (D-LF.7) è un contratto fra i due — un re-import misto API+file duplicherebbe ogni scrobble
 
 ## Acceptance criteria
 
@@ -7671,10 +7702,15 @@ chiusa con `status:done`.
 **La story ha i suoi tre pezzi** — spec ListenBrainz (🟢 v1.0), ADR-0010 (🟢 v1.0),
 spec Last.fm (🟢 v1.0) — ed è quindi implementabile nelle sue due parti: adapter
 ListenBrainz (file-only) e adapter Last.fm (percorso API via `parseRemote?()` +
-percorso file). Manca solo l'issue di implementazione (T1.3.7).
+percorso file).
+
+**Issue di implementazione: #155**, aperta nella Sessione 51 (`agent-ready`, size L,
+`area:adapter`, `priority:important`, `phase-1`). Una sola issue per i due adapter
+(D.51.1): l'`eventKey` normalizzato al minuto (D-LF.7) è un contratto fra i due, e la
+story è un'unità di valore (l'utente importa la sua storia), non un'unità di codice.
 
 Il campo `pr`/`merged_commit` del frontmatter restano **vacuati** di proposito:
-si riferiscono alla PR di **implementazione** della story, non a quella della
+si riferiscono alla PR di **implementazione** della story (#155), non a quella delle
 spec (come per la 1.1, vedi `docs/state/stories/1.1-adapter-youtube-music.md`
 alla data del merge della spec).
 
@@ -13794,7 +13830,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v1.0 🟢 APPROVED** (PR #154, issue #144 chiusa) — i tre pezzi della story sono pronti, manca l'issue di implementazione
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v1.0 🟢 APPROVED** (PR #154, issue #144 chiusa) — i tre pezzi della story sono pronti; **issue di implementazione #155 aperta** (`agent-ready`, size L)
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -14061,7 +14097,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); ADR-0010 🟢 APPROVED v1.0 (PR #152); spec Last.fm 🟢 APPROVED v1.0 (PR #154) — i tre pezzi pronti, manca l'issue di implementazione; `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); ADR-0010 🟢 APPROVED v1.0 (PR #152); spec Last.fm 🟢 APPROVED v1.0 (PR #154) — i tre pezzi pronti, issue di implementazione **#155** aperta (`agent-ready`, size L); `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
@@ -14106,6 +14142,8 @@ Ogni story deve avere label GitHub:
 | 1.6.5 | Sessione 47 (2026-10-26, issue #145, #144) | **Story 1.3 perimetro corretto**: la descrizione "Import storico via API (paginazione completa)" era imprecisa per entrambe le piattaforme. **ListenBrainz**: il canale MVP è l'**export API** (ZIP con JSONL) — la doc prescrive l'export per lo storico completo e sconsiglia la paginazione `/listens` (che resta alla 1.5). **Last.fm**: l'export GDPR non è utilizzabile dall'app → canale API con proxy CORS e `api_key` per-utente (ToS §4.4). `[SIZE:M]` → `[SIZE:L]`. **Story 1.5 ridimensionata**: T1.5.1/T1.5.2 duplicavano la 1.3 → la 1.5 resta invio scrobble + sync continua + toggle, con il task di scrittura T1.5.6 aggiunto. Sezione Story 1.3 riscritta con gli AC delle due spec; nota roadmap allineata |
 | 1.6.6 | Sessione 47 (2026-10-26, issue #145) | **Spec ListenBrainz approvata**: `03-ADAPTERS/listenbrainz.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #146, merge `6d66233`); issue #145 chiusa con `status:done`. Decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto. Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.8 (riferimento spec), `18-DEV-LOG.md` §15 (nuova entry, v1.5) |
 | 1.6.7 | Sessione 50 (2026-10-26, issue #144) | **Spec Last.fm scritta**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT (10 sezioni, 21 edge case E.LF.1…E.LF.21, 23 casi di fixture). Perimetro confermato: nessun export utilizzabile dall'app (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy) → canale MVP = API `user.getRecentTracks` via **proxy CORS configurato dall'utente**; percorso **file** (export di terze parti) come alternativa senza proxy. Corretti due limiti: `limit` max **200** (doc ufficiale, non 1000) e `artist` è **stringa** senza `extended=1` / **oggetto** con `extended=1`; il brano in riproduzione **non ha `date`**. `eventKey` normalizzato al **minuto** su tutti i percorsi (il re-import misto API+file non duplica). Il percorso web auth per la `sk` è **differito alla Story 1.5**: `api_sig` richiede md5 e il repo espone solo SHA-1/SHA-256 (E.LF.21). Allineati: `01-PLATFORMS.md` §3.7 + tabella §4 (ISRC/MBID e "brani salvati" da ❌ a ⚠️) + E14-E18 + changelog 0.6; `02-DATA-SCHEMA.md` §2 (riga Last.fm) + §5 (sorgenti con durata non affidabile); `08-COPY-I18N.md` §2.12d; `09-PRIVACY-SECURITY.md` §4 (5 righe) + §7.2 (nota sul proxy) + changelog 0.4 |
+| 1.6.8 | Sessione 51 (2026-10-26, issue #144) | **Spec Last.fm approvata**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #154, merge `b3130a9`); issue #144 chiusa con `status:done`. Nessuna modifica di contenuto: D-LF.0…D-LF.8 ratificate come formulate, percorso web auth confermato alla Story 1.5. **Story 1.3 completa dei suoi tre pezzi** (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0) → aperta l'issue di implementazione (#155, `agent-ready`, size L). Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.7 (riferimento spec), `docs/state/sessions/50-*` e `51-*` |
+| 1.6.9 | Sessione 51 (2026-10-26, issue #144) | **Doc-sync post-merge della PR #156** (merge `6ec71bb`): il frontmatter di `docs/state/sessions/51-*` riflette il merge reale (`pr: 156`, `merged_commit: 6ec71bb`, `state: 🟢`, `merged: true`) — era rimasto `pr: null` / `merged: false` perché la sessione è stata scritta dalla stessa PR che la chiude. Story 1.3 allineata: `issue: 155`, T1.3.7 ✅, "Stato attuale" aggiornato. Sezioni legacy riallineate: `11-BACKLOG.md` (`**Stato**:` della 1.3 + riga roadmap, che dichiaravano ancora «manca l'issue di implementazione»), `docs/INDEX.md` (riga `03-ADAPTERS/`, versioni dei documenti, "Prossimo passo tecnico"), `docs/18-DEV-LOG.md` §17 (entry delle sessioni 50-51). La riga di changelog 1.6.8 è stata riportata dentro la tabella: era stata appesa **dopo** il blocco `AGGREGATE-STORIES-*`, fuori dal suo schema |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -14127,7 +14165,6 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | in_progress | - | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
-| 1.6.8 | Sessione 51 (2026-10-26, issue #144) | **Spec Last.fm approvata**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #154, merge `b3130a9`); issue #144 chiusa con `status:done`. Nessuna modifica di contenuto: D-LF.0…D-LF.8 ratificate come formulate, percorso web auth confermato alla Story 1.5. **Story 1.3 completa dei suoi tre pezzi** (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0) → aperta l'issue di implementazione (#155, `agent-ready`, size L). Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.7 (riferimento spec), `docs/state/sessions/50-*` e `51-*` |
 
 
 
