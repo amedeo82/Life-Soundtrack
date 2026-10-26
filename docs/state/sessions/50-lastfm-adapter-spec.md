@@ -2,12 +2,12 @@
 number: 50
 title: "Spec adapter Last.fm (Story 1.3)"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "b3130a9ff7a4b7e2ffb652839243bb3d49b18c50"
+merged_date: 2026-10-26
 branch: feat/144-lastfm-adapter-spec
-pr: null
+pr: 154
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [144]
 tags: [docs, spec, adapter, phase-1]
@@ -105,7 +105,8 @@ backlog: la spec **dichiara** il codice, l'implementazione lo aggiunge.
 
 ## Cross-refs
 
-- **#144** — issue della spec Last.fm, chiusa da questa PR
+- **#144** — issue della spec Last.fm, chiusa con `status:done` (PR #154, merge `b3130a9`)
 - `docs/13-ADR/0010-remote-source-adapter.md` — il contratto che l'adapter consuma
 - `docs/03-ADAPTERS/listenbrainz.md` — la spec sorella (🟢 v1.0)
-- Prossimo passo: approvazione del Boss → promozione a v1.0 🟢 APPROVED → issue di implementazione della Story 1.3
+- Promozione a v1.0 🟢 APPROVED nella Sessione 51 (stesso pattern della spec ListenBrainz, PR #147, e dell'ADR-0010, PR #153)
+- Prossimo passo: **issue di implementazione della Story 1.3** (`agent-ready`, size L) — la story ha i suoi tre pezzi

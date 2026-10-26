@@ -267,7 +267,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v0.1 🟡 DRAFT** (issue #144, in ratifica) — nessun blocco residuo
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v1.0 🟢 APPROVED** (PR #154, issue #144 chiusa) — i tre pezzi della story sono pronti, manca l'issue di implementazione
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -294,7 +294,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Codice errore `SOURCE_UNREACHABLE` aggiunto a `packages/core/src/adapters/errors.ts` (`AdapterErrorCode` ha oggi 4 valori)
 - [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26) + 23 casi di fixture
 
-**Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 50) · `01-PLATFORMS.md` §3.7, §3.8
+**Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (v1.0, 🟢 APPROVED, Sessione 50) · `01-PLATFORMS.md` §3.7, §3.8
 
 **Issue**: #145 (ListenBrainz) · #144 (Last.fm) · **Size**: `L` — ricalibrata da `M` in Sessione 47: 2 fonti dati, 2 API, autenticazione, rate limiting, mock API e 2 percorsi per adapter
 
@@ -534,7 +534,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); spec Last.fm in stesura (#144, `agent-ready`) dopo ADR-0010; `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); ADR-0010 🟢 APPROVED v1.0 (PR #152); spec Last.fm 🟢 APPROVED v1.0 (PR #154) — i tre pezzi pronti, manca l'issue di implementazione; `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
@@ -600,3 +600,4 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | in_progress | - | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
+| 1.6.8 | Sessione 51 (2026-10-26, issue #144) | **Spec Last.fm approvata**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #154, merge `b3130a9`); issue #144 chiusa con `status:done`. Nessuna modifica di contenuto: D-LF.0…D-LF.8 ratificate come formulate, percorso web auth confermato alla Story 1.5. **Story 1.3 completa dei suoi tre pezzi** (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0) → aperta l'issue di implementazione (#155, `agent-ready`, size L). Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.7 (riferimento spec), `docs/state/sessions/50-*` e `51-*` |

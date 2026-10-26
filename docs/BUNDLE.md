@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 17:01
-> Totale file: 79
+> Data: 2026-10-26 18:06
+> Totale file: 80
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -6411,6 +6411,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/48-fix-bundle-writer-ordering.md` | ✅ creata | Sessione 48 (issue #149): fix race fra i due writer di `main` — trigger `workflow_run` in `auto-bundle.yml` + quinto gate di `validate-workflows.mjs` |
 | `state/sessions/49-adr-0010-remote-source.md` | ✅ creata | Sessione 49 (issue #148): ADR-0010 — sorgenti remote nel contratto `PlatformAdapter` (`parseRemote?()` + `RemoteSource`), `05§4.1` |
 | `state/sessions/50-lastfm-adapter-spec.md` | ✅ creata | Sessione 50 (issue #144): spec adapter Last.fm — percorso API via proxy CORS + percorso file, `eventKey` al minuto |
+| `state/sessions/51-lastfm-spec-approval.md` | ✅ creata | Sessione 51 (issue #144): promozione spec Last.fm a 🟢 APPROVED v1.0 + apertura dell'issue di implementazione della Story 1.3 (#155) |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -7217,12 +7218,12 @@ ratificato.
 number: 50
 title: "Spec adapter Last.fm (Story 1.3)"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "b3130a9ff7a4b7e2ffb652839243bb3d49b18c50"
+merged_date: 2026-10-26
 branch: feat/144-lastfm-adapter-spec
-pr: null
+pr: 154
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [144]
 tags: [docs, spec, adapter, phase-1]
@@ -7320,10 +7321,126 @@ backlog: la spec **dichiara** il codice, l'implementazione lo aggiunge.
 
 ## Cross-refs
 
-- **#144** — issue della spec Last.fm, chiusa da questa PR
+- **#144** — issue della spec Last.fm, chiusa con `status:done` (PR #154, merge `b3130a9`)
 - `docs/13-ADR/0010-remote-source-adapter.md` — il contratto che l'adapter consuma
 - `docs/03-ADAPTERS/listenbrainz.md` — la spec sorella (🟢 v1.0)
-- Prossimo passo: approvazione del Boss → promozione a v1.0 🟢 APPROVED → issue di implementazione della Story 1.3
+- Promozione a v1.0 🟢 APPROVED nella Sessione 51 (stesso pattern della spec ListenBrainz, PR #147, e dell'ADR-0010, PR #153)
+- Prossimo passo: **issue di implementazione della Story 1.3** (`agent-ready`, size L) — la story ha i suoi tre pezzi
+
+
+
+===== FILE: docs/state/sessions/51-lastfm-spec-approval.md =====
+
+---
+number: 51
+title: "Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3"
+date: 2026-10-26
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: docs/144-lastfm-spec-approval
+pr: null
+claim: kilo-HP-ELITEBOOK-lb47
+cross_refs: [144, 155]
+tags: [docs, spec, adapter, phase-1]
+---
+
+# Sessione 51 — Promozione spec Last.fm + issue di implementazione della 1.3
+
+## Sintesi
+
+Ratifica della spec `03-ADAPTERS/lastfm.md` (v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED**)
+e apertura dell'**issue di implementazione** della Story 1.3, che chiude il ciclo
+di documentazione iniziato in Sessione 47.
+
+Con questa sessione la Story 1.3 ha i suoi **tre pezzi**:
+
+| Pezzo | Stato | PR |
+|-------|-------|-----|
+| `03-ADAPTERS/listenbrainz.md` | 🟢 APPROVED v1.0 | #146 |
+| `13-ADR/0010-remote-source-adapter.md` | 🟢 APPROVED v1.0 | #152 |
+| `03-ADAPTERS/lastfm.md` | 🟢 APPROVED v1.0 | #154 |
+
+## Trigger
+
+Merge della PR #154 (`b3130a9`), ratifica del Boss.
+
+## Decisioni
+
+**D.51.1 — Una sola issue di implementazione per la Story 1.3**, non due.
+
+Il protocolto del progetto è "una story = una issue" (`AGENTS.md` §"🌳 Git workflow":
+*una PR = una issue*), e il precedente è lineare: la 1.1 (YouTube Music) → issue #129,
+la 1.2 (Apple Music) → issue #132. La 1.3 è **una** story che contiene due adapter,
+quindi una sola issue con task distinti per ciascuno.
+
+L'alternativa (due issue, una per adapter) è stata valutata perché i due adapter non
+condividono quasi nulla: ListenBrainz è file-only, Last.fm ha rete, proxy,
+autenticazione e rate limiting. Ma dividerla frammenterebbe il tracciamento: la story
+1.3 resterebbe "in corso" finché entrambe le issue non sono chiuse, e il backlog
+avrebbe due righe per una sola story. La dimensione resta `L` (già ricalibrata in
+Sessione 47): due adapter, due percorsi di import, un nuovo codice errore, un nuovo
+scanner JSONL, mock API.
+
+**D.51.2 — Il percorso web auth Last.fm resta alla Story 1.5** (E.LF.21), confermato
+dalla ratifica: `api_sig` richiede md5 e il repo espone solo SHA-1/SHA-256 via Web
+Crypto. La 1.3 implementa il percorso **senza** `sk`, che non richiede firma.
+
+## Il contenuto dell'issue di implementazione
+
+L'issue raccoglie i deliverable delle tre specifiche:
+
+**Adapter ListenBrainz** (file-only)
+- Detection su ZIP (`listens/*.jsonl` + `user.json`) e su JSONL sciolto
+- **Scanner JSONL dedicato**: il `JsonArrayScanner` esistente è uno scanner di array JSON e non va bene per JSONL. Streaming, memoria limitata a una riga, una riga malformata non abortisce lo stream
+- `eventKey = listenbrainz:<listened_at>|<recording_msid>` (D-LB.2)
+- Semantica uniforme `timestamp = startedAt = listened_at*1000`, `durationMs = 0`
+- DEDUP-1 (ISRC) e DEDUP-2 (MBID da `mbid_mapping`); bucket DEDUP-3 sempre 0
+
+**Adapter Last.fm** (API + file)
+- `parseRemote?()` (ADR-0010) su `RemoteSource`, con proxy configurato dall'utente
+- Percorso file: CSV ghan.nl (8 colonne) e lastfm-to-csv (4 colonne, senza header), JSON
+- `eventKey` normalizzato al **minuto** su tutti i percorsi (D-LF.7)
+- Token bucket ~5 req/s, backoff su `11/16/29/429/5xx`, `AbortSignal`
+- Mappa dei 10 codici errore Last.fm → `AdapterError`
+- **Aggiungere `SOURCE_UNREACHABLE`** a `packages/core/src/adapters/errors.ts` (il tipo `AdapterErrorCode` ha oggi 4 valori) — deliverable scoperto scrivendo la spec
+
+**Trasversale**
+- Codice errore `SOURCE_UNREACHABLE` in `errors.ts`
+- 5 fixture `fixtures/synthetic-history/lastfm-*` + 2 `listenbrainz-*`
+- i18n `adapter.lastfm.*` (§2.12d) e `adapter.listenbrainz.*` (§2.12c) → locale JSON
+- Settings: proxy, `api_key`, username Last.fm (locali, mai nel bundle)
+
+## Verifica
+
+- `pwsh scripts/generate-bundle.ps1 --check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 --check` → drift atteso (blocchi aggregati)
+- Nessun file applicativo toccato
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 51-1 | **Una story con due adapter non è due story.** La tentazione di dividere Last.fm e ListenBrainz in due issue di implementazione è naturale — non condividono codice, hanno complessità diverse, e il backlog le elencerebbe meglio separate. Ma la story è un'unità di **valore** (l'utente importa la sua storia), non un'unità di codice: dividerla crea due righe di backlog per un solo risultato e rende ambiguo quando la story è "fatta". Le issue si dividono per **indipendenza di lavoro**, non per diversità di implementazione — e qui l'indipendenza non c'è, perché l'`eventKey` normalizzato al minuto (D-LF.7) è un contratto **fra** i due adapter: è il Last.fm a imporre la granularità che il ListenBrainz deve rispettare |
+| 51-2 | **Un deliverable scoperto dalla specifica è un deliverable della story.** Scrivere la spec Last.fm ha rivelato che il codice `SOURCE_UNREACHABLE`, ratificato in ADR-0010, non è implementato: `errors.ts` ha ancora 4 valori in `AdapterErrorCode`. Non è un dettaglio dell'ADR (che non implementa nulla per definizione) né un bug: è lavoro che la story deve fare, e che senza la spec nessuno avrebbe elencato. La specifica è anche lo strumento che rende visibile il lavoro implicito |
+
+## Documenti aggiornati
+
+- `docs/03-ADAPTERS/lastfm.md` — 🟡 DRAFT v0.1 → **🟢 APPROVED v1.0**; changelog
+- `docs/state/sessions/50-lastfm-adapter-spec.md` — `pr: 154`, `merged_commit: b3130a9`, `state: 🟢`, `merged: true`
+- `docs/state/stories/1.3-adapter-lastfm-listenbrainz.md` — T1.3.6 completato; "Stato attuale" aggiornato
+- `docs/11-BACKLOG.md` — Story 1.3 (stato, spec), riga roadmap, changelog 1.6.8
+- `docs/01-PLATFORMS.md` — §3.7: riferimento alla spec aggiornato a v1.0 APPROVED
+- `docs/state/sessions/51-lastfm-spec-approval.md` — **nuovo**
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#144** — spec Last.fm, chiusa con `status:done` (PR #154, merge `b3130a9`)
+- **#155** — issue di implementazione della Story 1.3 (aperta in questa sessione)
+- `docs/03-ADAPTERS/listenbrainz.md` (🟢 v1.0) · `docs/13-ADR/0010-remote-source-adapter.md` (🟢 v1.0)
+- Prossimo passo: l'issue #155 è `agent-ready` e implementabile da un agente
 
 
 
@@ -7398,7 +7515,8 @@ Resta solo la **spec Last.fm** (#144, `agent-ready`): è il prossimo deliverable
 - [x] T1.3.5 — **ADR-0010**: estensione di `05§4` con il metodo opzionale
       `parseRemote?()` (D-LF.8) — **v1.0 🟢 APPROVED** (PR #152, merge `1b2d280`),
       issue **#148** chiusa con `status:done`
-- [ ] T1.3.6 — Approvazione Boss della spec Last.fm (promozione 🟡 DRAFT → 🟢 APPROVED)
+- [x] T1.3.6 — Approvazione Boss della spec Last.fm (promozione 🟡 DRAFT → 🟢 APPROVED
+      v1.0, PR #154, merge `b3130a9`): issue #144 chiusa con `status:done`
 - [ ] T1.3.7 — Issue di implementazione della 1.3 (`agent-ready`, size L)
 
 ## Acceptance criteria
@@ -7439,10 +7557,13 @@ locale via `scripts/post-merge.ps1`).
 chiusa con `status:done`. Il contratto `parseRemote?()` + `RemoteSource` esiste in
 `05§4.1`, col codice errore `SOURCE_UNREACHABLE`.
 
-Spec **Last.fm** v0.1 🟡 DRAFT (issue #144, Sessione 50): in ratifica. Con la sua
-approvazione, la 1.3 ha i suoi tre pezzi — spec ListenBrainz, ADR-0010, spec
-Last.fm — e la story diventa implementabile nelle sue due parti (adapter
-ListenBrainz file-only, adapter Last.fm con percorso API + percorso file).
+Spec **Last.fm** 🟢 APPROVED v1.0 (PR #154, merge `b3130a9`, 2026-10-26): issue #144
+chiusa con `status:done`.
+
+**La story ha i suoi tre pezzi** — spec ListenBrainz (🟢 v1.0), ADR-0010 (🟢 v1.0),
+spec Last.fm (🟢 v1.0) — ed è quindi implementabile nelle sue due parti: adapter
+ListenBrainz (file-only) e adapter Last.fm (percorso API via `parseRemote?()` +
+percorso file). Manca solo l'issue di implementazione (T1.3.7).
 
 Il campo `pr`/`merged_commit` del frontmatter restano **vacuati** di proposito:
 si riferiscono alla PR di **implementazione** della story, non a quella della
@@ -8423,7 +8544,7 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - **Campi**: `name` (titolo), `artist` (stringa con `extended=0`, oggetto `{mbid, #text}` con `extended=1`), `album` (`{mbid, #text}`), `date` (`{uts, #text}`, **inizio** dello scrobble), `loved` (solo `extended=1`), `mbid` del brano (solo `extended=1`, **frequentemente vuoto**), `image[]`, `url`, `streamable`
 - **Limiti**: nessun contesto (device/luogo/IP/paese); **nessuna durata** in `getRecentTracks` → `durationBucketMs` sempre 0; rate limit **non pubblicato** (client-side ~5 req/s, nessun header di rate limit); il brano in riproduzione (`@attr.nowplaying`) **non ha `date`**
 - **Errori**: 6 parametri · 8 operazione · 9 `sk` · 10 `api_key` · 11 offline · 13 firma · 16 temporaneo · 17 profilo non pubblico · 26 key sospesa · 29 rate limit
-- **Spec**: `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 50)
+- **Spec**: `03-ADAPTERS/lastfm.md` (v1.0, 🟢 APPROVED, Sessione 50)
 
 ### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
@@ -10188,7 +10309,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listen
 
 # Adapter Last.fm
 
-> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 50 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 51 (2026-10-26)
 > Piattaforma: Last.fm (Audioscrobbler / FM3)
 > Sede legale: UK (Bournemouth)
 > Tier: **S** (hub di scrobbling) · Priorità MVP: **sì**
@@ -10591,6 +10712,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 50 (2026-10-26) | Prima stesura (issue #144). Decisioni D-LF.0…D-LF.8 (Boss, Sessione 47) e vincoli di ADR-0010. API, limiti, error codes, flusso web auth e formati CSV verificati su fonte (doc ufficiale Last.fm, doc non ufficiale, depth.fm, multi-scrobbler). Correzione di una premessa errata della issue: `limit` **max 200** (doc ufficiale), non 1000; e il campo `date` **manca** per il brano in riproduzione. Aggiunto il percorso **ibrido** (API + file) con `eventKey` normalizzato al minuto su tutti i percorsi, per evitare duplicati al re-import misto. Dichiarati i gap: md5 per `api_sig` (rinviato a 1.5), `loved` senza campo nel modello, `album.mbid` scartato |
+| 1.0 | Sessione 51 (2026-10-26) | 🟢 APPROVED · ratifica del Boss al merge della PR #154 (`b3130a9`) — nessuna modifica di contenuto. Le decisioni D-LF.0…D-LF.8 sono ratificate come formulate; il percorso web auth per la `sk` resta **differito alla Story 1.5** (E.LF.21) |
 
 
 
@@ -13564,7 +13686,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v0.1 🟡 DRAFT** (issue #144, in ratifica) — nessun blocco residuo
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v1.0 🟢 APPROVED** (PR #154, issue #144 chiusa) — i tre pezzi della story sono pronti, manca l'issue di implementazione
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -13591,7 +13713,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Codice errore `SOURCE_UNREACHABLE` aggiunto a `packages/core/src/adapters/errors.ts` (`AdapterErrorCode` ha oggi 4 valori)
 - [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26) + 23 casi di fixture
 
-**Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 50) · `01-PLATFORMS.md` §3.7, §3.8
+**Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (v1.0, 🟢 APPROVED, Sessione 50) · `01-PLATFORMS.md` §3.7, §3.8
 
 **Issue**: #145 (ListenBrainz) · #144 (Last.fm) · **Size**: `L` — ricalibrata da `M` in Sessione 47: 2 fonti dati, 2 API, autenticazione, rate limiting, mock API e 2 percorsi per adapter
 
@@ -13831,7 +13953,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); spec Last.fm in stesura (#144, `agent-ready`) dopo ADR-0010; `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); ADR-0010 🟢 APPROVED v1.0 (PR #152); spec Last.fm 🟢 APPROVED v1.0 (PR #154) — i tre pezzi pronti, manca l'issue di implementazione; `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
@@ -13897,6 +14019,8 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | in_progress | - | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
+| 1.6.8 | Sessione 51 (2026-10-26, issue #144) | **Spec Last.fm approvata**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #154, merge `b3130a9`); issue #144 chiusa con `status:done`. Nessuna modifica di contenuto: D-LF.0…D-LF.8 ratificate come formulate, percorso web auth confermato alla Story 1.5. **Story 1.3 completa dei suoi tre pezzi** (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0) → aperta l'issue di implementazione (#155, `agent-ready`, size L). Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.7 (riferimento spec), `docs/state/sessions/50-*` e `51-*` |
+
 
 
 ===== FILE: docs/12-DEVOPS.md =====

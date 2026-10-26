@@ -109,6 +109,7 @@ $files = @(
     "docs/state/sessions/48-fix-bundle-writer-ordering.md",
     "docs/state/sessions/49-adr-0010-remote-source.md",
     "docs/state/sessions/50-lastfm-adapter-spec.md",
+    "docs/state/sessions/51-lastfm-spec-approval.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
