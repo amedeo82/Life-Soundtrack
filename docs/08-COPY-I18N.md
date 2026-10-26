@@ -243,6 +243,24 @@
 | `youtube_music.info.partialHistory` | La cronologia Google potrebbe non coprire l'intera storia dell'account | Google history may not cover your entire account lifetime |
 | `youtube_music.info.complete` | Import completato: {events} eventi, {tracks} brani unici | Import complete: {events} events, {tracks} unique tracks |
 
+### 2.12c `adapter.listenbrainz.*` (Story 1.3 — spec `03-ADAPTERS/listenbrainz.md` §9)
+
+| Key | IT | EN |
+|-----|----|----|
+| `listenbrainz.detect.success` | Archivio ListenBrainz riconosciuto | ListenBrainz archive recognized |
+| `listenbrainz.detect.fail` | File non riconosciuto come export ListenBrainz (manca la cartella `listens/`) | File not recognized as a ListenBrainz export (missing the `listens/` folder) |
+| `listenbrainz.warn.malformedSkipped_one` | {{count}} riga non leggibile esclusa | {{count}} unreadable row excluded |
+| `listenbrainz.warn.malformedSkipped_other` | {{count}} righe non leggibili escluse | {{count}} unreadable rows excluded |
+| `listenbrainz.warn.tooOldSkipped_one` | {{count}} ascolto anteriore al 2001 escluso | {{count}} listen before 2001 excluded |
+| `listenbrainz.warn.tooOldSkipped_other` | {{count}} ascolti anteriori al 2001 esclusi | {{count}} listens before 2001 excluded |
+| `listenbrainz.warn.noTitleSkipped_one` | {{count}} ascolto senza titolo escluso | {{count}} listen without a title excluded |
+| `listenbrainz.warn.noTitleSkipped_other` | {{count}} ascolti senza titolo esclusi | {{count}} listens without a title excluded |
+| `listenbrainz.warn.durationMissing_one` | {{count}} ascolto senza durata: il brano non è distinguibile dalle sue versioni alternative | {{count}} listen without a duration: the track cannot be told apart from its alternative versions |
+| `listenbrainz.warn.durationMissing_other` | {{count}} ascolti senza durata: i brani non sono distinguibili dalle loro versioni alternative | {{count}} listens without a duration: tracks cannot be told apart from their alternative versions |
+| `listenbrainz.info.libraryDeferred` | I tuoi like e le registrazioni fissate non sono inclusi in questo import (in arrivo) | Your likes and pinned recordings are not included in this import (coming soon) |
+| `listenbrainz.info.exportNotSnapshot` | L'export di ListenBrainz è generato in modo asincronico: un import successivo può aggiungere ascolti, ma non rimuove quelli che hai cancellato sul sito | The ListenBrainz export is generated asynchronously: a later import can add listens, but does not remove the ones you deleted on the site |
+| `listenbrainz.info.complete` | Import completato: {{events}} eventi, {{tracks}} brani unici | Import complete: {{events}} events, {{tracks}} unique tracks |
+
 ### 2.13 `error.*`
 
 | Key | IT | EN |
@@ -348,3 +366,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |
+| 0.3 | Sessione 47 (2026-10-26, issue #145) | Aggiunta §2.12c `adapter.listenbrainz.*` (12 chiavi, spec `03-ADAPTERS/listenbrainz.md` §9). Le varianti `_one`/`_other` seguono la convenzione i18n per i conteggi (stesso pattern di `adapter.spotify.*` e `adapter.youtube_music.*`) |

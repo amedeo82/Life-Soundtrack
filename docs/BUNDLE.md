@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-22 19:19
-> Totale file: 70
+> Data: 2026-10-26 12:36
+> Totale file: 73
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -5833,6 +5833,8 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/1.2-adapter-apple-music.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.2" (Sessione 42, issue #132, PR #134): `status: todo`, riattiva `AGGREGATE-NEXT-STEP-*` dopo il fallback dovuto al merge della 1.1 |
 | `state/sessions/42-approve-apple-music-spec.md` | ✅ creata | Sessione 42 (PR #134): approvazione spec Apple Music |
 | `state/sessions/43-readme-next-step-git-add.md` | ✅ creata | Sessione 43 (issue #136): fix dello staging di `README.md` in `auto-state-aggregate.yml` + gate di copertura `git add` vs `$targets` |
+| `state/stories/1.3-adapter-lastfm-listenbrainz.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.3" (Sessione 47, issue #145): prima non-done della 1.3, `status: in_progress` |
+| `state/sessions/47-listenbrainz-lastfm-adapter-spec.md` | ✅ creata | Sessione 47 (issue #145, #144): spec adapter ListenBrainz + Last.fm, Story 1.3 perimetro corretto, Story 1.5 ridimensionata |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -6206,6 +6208,281 @@ E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/
 - **#99** — issue di questo lavoro (`needs-spec`): tiene il perimetro, i vincoli e i 10 cantieri
 - **`11-BACKLOG.md`** — le story 1.6 / 4.4 / 3.4 non sono ancora state create: la loro numerazione è proposta in `19` §11 e va ratificata con il backlog (Sessione 43)
 - Prossime sessioni: 42 (`02` v1.3 + `03-ADAPTERS/youtube-music.md` v2 + `09` + `01`), 43 (`04` + `06`/`07`/`08` + backlog)
+
+
+===== FILE: docs/state/sessions/47-listenbrainz-lastfm-adapter-spec.md =====
+
+---
+number: 47
+title: "Spec adapter ListenBrainz + Last.fm (Story 1.3)"
+date: 2026-10-26
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/145-listenbrainz-adapter-spec
+pr: null
+claim: kilo-HP-ELITEBOOK-lb47
+cross_refs: [144, 145]
+tags: [docs, spec, adapter, phase-1]
+---
+
+# Sessione 47 — Spec adapter ListenBrainz + Last.fm (Story 1.3)
+
+## Sintesi
+
+Apertura delle due issue di spec mancanti per la Story 1.3 e stesura della spec
+ListenBrainz. La sessione ha prodotto più di quanto il backlog descrivesse: la
+formulazione originaria della 1.3 ("Import storico via API (paginazione
+completa)") era imprecisa **per entrambe** le piattaforme, e una delle due ha una
+pretesa di piattaforma (`recording_msid` come identificativo univoco) che, se
+presa per buona, avrebbe perso dati in silenzio.
+
+Il secondo risultato è architetturale: la Story 1.3, così formulata, non è
+implementabile nel perimetro dell'app. ListenBrainz ha un export API che la
+piattaforma stessa prescrive per lo storico completo e che **sconsiglia esplicitamente
+la paginazione** dell'endpoint listens; Last.fm non ha un export utilizzabile
+dall'app e la sua API non emette header CORS, quindi richiede un proxy
+configurato dall'utente e una `api_key` per-utente (i ToS vietano esplicitamente
+una key condivisa che serva più utenti).
+
+## Trigger
+
+Richiesta del Boss di aprire l'issue per la Story 1.3 e discuterne insieme il
+perimetro, a seguito del merge della Story 1.2.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.47.1 | **Story 1.5 ridimensionata**: T1.5.1 (Last.fm) e T1.5.2 (ListenBrainz) duplicavano letteralmente il recupero storico della 1.3. La 1.5 resta *invio scrobble + sync continua + toggle* e riusa gli adapter della 1.3. Aggiunto il task di scrittura T1.5.6, che mancava | Due implementazioni parallele dello stesso adapter avrebbero raddoppiato costo di review e manutenzione su una base di codice che non esiste ancora |
+| D.47.2 | **Story 1.3 `[SIZE:M]` → `[SIZE:L]`** | 2 fonti dati, 2 API, autenticazione (session key + User Token), rate limiting, mock API, 2 percorsi per adapter. Lo stesso criterio con cui la 1.2 è passata da `M` a `L` in Sessione 42 |
+| D.47.3 | **ListenBrainz: export API (ZIP/JSONL), non paginazione `/listens`** | La doc ufficiale: *"To retrieve a user's entire listening history, use the export API. Do not scrape or paginate through the user's entire history using the listens endpoint."* Il percorso `/listens` resta alla 1.5 (query incrementali). L'adapter diventa **file-only**: il contratto `05§4` non viene toccato e **non serve alcun ADR** per questa piattaforma |
+| D.47.4 | **`eventKey = listenbrainz:<listened_at>\|<recording_msid>`** — non il solo `recording_msid` | Il `recording_msid` è un hash dei **metadati**, non un ID univoco per occorrenza: *"Broadly speaking if two listens have the same track and artist name, both get the same MSID"* (MetaBrainz). La dedup lato server usa la tupla `(listened_at, user_id, recording_msid)`. La prima stesura della issue propose il solo msid → 300 ascolti dello stesso brano si sarebbero collassati in **un solo evento** |
+| D.47.5 | **Semantica temporale uniforme** per ListenBrainz: `timestamp = startedAt = listened_at*1000`, `durationMs = 0` | `additional_info.duration_ms` è **opzionale** e di durata *catalogo*: applicare alla lettera `02§2` (`timestamp = listened_at + durationMs`) produrrebbe due semantiche diverse nello stesso import (fine dell'ascolto quando il dato c'è, inizio quando manca) e sposterebbe il confine `day` per una parte degli eventi. Precedente identico: YouTube Music §5 (E.YT.5) |
+| D.47.6 | **Bucket DEDUP-3 sempre 0** per ListenBrainz; la durata va sulla `Track` come hint, fuori dal `canonicalKey` | Se la durata entrasse nel bucket, lo stesso brano presente in un ascolto con `duration_ms` e in uno senza finirebbe in **due `Track` distinte** (E.LB.2) — l'esatto opposto di ciò che la dedup persegue. La priorità DEDUP-1/2 (ISRC/MBID nativi) compensa: è l'unica fonte del perimetro con identificatori MusicBrainz |
+| D.47.7 | **Last.fm: proxy CORS configurabile dall'utente**, nessun proxy fornito dal progetto | L'API non emette `Access-Control-Allow-Origin`: dalla PWA la `fetch` è bloccata e il vincolo è aggirabile solo lato server. Nessun proxy nostro: la località dei dati resta una scelta dell'utente (ADR-0002, local-first) |
+| D.47.8 | **Last.fm: `api_key` per-utente, mai embedded nel bundle** | I ToS §4.4: i limiti possono includere *"the number of users you may serve"*; §2.6: *"You may only use APIs in conjunction with the most recent user authentication key provided to You by Last.fm"*. Una key condivisa nel bundle che serve N utenti è il caso sanzionato, e l'errore 26 (*"API Key Suspended"*) colpirebbe **tutti** gli utenti dell'app |
+| D.47.9 | **Last.fm: web auth in-app per la `sk`** | Gli utenti con *"Hide recent listening"* attivo non vedono nulla senza `sk` (`multi-scrobbler`: *"sk is required if user has 'Hide recent listening' enabled on their profile"*). Il flusso `last.fm/api/auth?cb=<route-app>` → `auth.getSession` non richiede backend: la callback è una route della PWA |
+| D.47.10 | **Last.fm: `eventKey` normalizzato al minuto** su entrambi i percorsi (API e file) | L'API dà `date.uts` al secondo, gli export tool danno la data al **minuto**: con chiavi diverse un re-import misto duplicherebbe ogni scrobble. La normalizzazione al minuto perde il caso raro di due scrobble dello stesso brano nello stesso minuto — dichiarato |
+| D.47.11 | **Last.fm: metodo opzionale `parseRemote?()` su `PlatformAdapter`** (non un'interfaccia separata) | `05§4` prevede solo `parse(input: Blob)` e il percorso API non ha un file. Un metodo opzionale lascia intatti i tre adapter esistenti. Essendo `05§4` 🟢 APPROVED, l'estensione richiede un **ADR-0010** |
+| D.47.12 | **Last.fm: percorso ibrido** (API + file da export di terze parti) | L'export GDPR di Last.fm è manuale, via email, e la community segnala export incompleti. Il percorso file copre chi non vuole/possono girare un proxy, al costo di una superficie di test doppia |
+
+## Difetti trovati lungo il percorso
+
+**`recording_msid` non è un ID univoco per singolo ascolto.** La prima stesura
+delle issue (#144, #145) proponeva `eventKey = listenbrainz:<recording_msid>`.
+La verifica su MetaBrainz ha ribaltato la premessa: il MSID è un hash dei
+metadati (artist + track + release + tracknumber + duration) e la dedup lato
+server avviene su `(listened_at, user_id, recording_msid)`. Con la chiave
+proposta, 300 ascolti dello stesso brano in momenti diversi avrebbero prodotto
+**un solo** `ListenEvent`: perdita di 299 eventi, in silenzio, senza alcun errore
+o warning. Lo stesso difetto, in forma inversa, si presenta per l'identità del
+*brano*: il MSID cambia se un client scrobbla lo stesso brano con dettagli
+diversi (un player invia `tracknumber`, un altro no) → il msid **non** va usato
+come identità di brano, solo come parte dell'`eventKey` (E.LB.13).
+
+**`MAX_ITEMS_PER_GET` = 1000, non 100.** La tabella riportava 100, desunta dalla
+doc di sviluppo superata. Il sorgente (`api_tools.py`, master) fissa
+`MAX_ITEMS_PER_GET = 1000` e `DEFAULT_ITEMS_PER_GET = 25`. Con rate limit
+1 req/s la differenza è ~16 minuti per milione di ascolti, non 2,7 ore.
+
+**L'export API di ListenBrainz *è* CORS-ok.** La doc di sviluppo non lo
+dichiara; il sorgente sì: `views/export_api.py` applica `@crossdomain` a tutti
+gli endpoint del blueprint, incluso `download_export_archive`. La scelta
+D.47.3 (opzione A, l'utente scarica) **non** è imposta da un blocco tecnico ma
+da ergonomia, rate limit e assenza di snapshot atomico. Verificare il sorgente
+prima di dichiarare un blocco CORS ha evitato di costruire una decisione
+architetturale su un presupposto errato.
+
+**Last.fm non ha un export utilizzabile dall'app.** L'export GDPR è una
+procedura manuale (richiesta via form o email a `dp3@last.fm`, attesa di giorni)
+e la community segnala incompletità (*"the dump didn't include my list of
+events"*). L'unico canale dell'app è l'API.
+
+**La `api_key` Last.fm non è condivisibile.** I ToS §4.4 elencano fra i limiti
+possibili *"the number of users you may serve"*, e l'errore 26 sospende la key
+per l'intera applicazione. La D8 della prima stesura dell'issue — «nessun
+segreto da gestire» — era semplicemente falsa: servono `api_key` **e**
+`sk`, entrambe per-utente.
+
+## Verifica
+
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (bundle rigenerato)
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
+- Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+- Fonti primarie: sorgente `listenbrainz-server` (`export_api.py`, `api_tools.py`,
+  `decorators.py`, `export.py`), doc ufficiale ListenBrainz (Core API), doc
+  Last.fm (`user.getRecentTracks`, `track.scrobble`, ToS, error codes)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|--------------|
+| 47-1 | **Un identificatore con un nome che promette unicità non è un identificatore univoco**: `recording_msid` (*"MessyBrainz ID"*) suona come un ID di registrazione ed è invece un hash dei metadati. La domanda da portare a ogni chiave di dedup non è «è univoco?» ma «**univoco rispetto a cosa?**»: qui la tupla corretta include il tempo, perché l'identità dell'evento è `(istante, canzone)` |
+| 47-2 | **La documentazione di sviluppo invecchia più in fretta del sorgente**: la stessa piattaforma ha un doc che dichiara `MAX_ITEMS_PER_GET = 100` e un sorgente che fissa `1000`. Quando un limite è un numero, va letto nel codice |
+| 47-3 | **Verificare il presupposto CORS sul sorgente, non sul doc**: la doc di sviluppo non menziona CORS per gli export; il sorgente applica `@crossdomain` a ogni endpoint. Dichiarare un blocco architetturale senza aver letto il codice rischia di costruire una decisione (un ADR, un cambio di contratto) su un presupposto errato |
+| 47-4 | **Le stesse parole nel backlog possono descrivere due realtà diverse**: «import storico via API (paginazione completa)» è corretto per Last.fm e **sbagliato** per ListenBrainz, dove la piattaforma sconsiglia la paginazione e prescrive un export. Le story aggregate per piattaforma vanno verificate una per una: la specificità costa una sessione, l'aggregazione costa dati |
+| 47-5 | **Un ToS è un requisito architetturale, non un dettaglio legale**: la clausola «the number of users you may serve» trasforma una scelta di packaging (chiave embedded vs per-utente) in una scelta di sicurezza per tutti gli utanti dell'app, con un errore API che la spegne per tutti |
+
+## Documenti aggiornati
+
+- `docs/03-ADAPTERS/listenbrainz.md` — **nuovo**, v0.1 🟡 DRAFT: 10 sezioni del
+  template, D-LB.1…D-LB.5, 20 casi di fixture, 19 edge case (E.LB.1…E.LB.19)
+- `docs/01-PLATFORMS.md` — §3.8 riscritto (export API come canale MVP, limiti
+  corretti, `recording_msid` documentato), §5 tre edge case nuovi (E11, E12,
+  E13), changelog 0.5
+- `docs/02-DATA-SCHEMA.md` — §2 riga ListenBrainz aggiornata + due deroghe
+  dichiarate (YouTube, ListenBrainz), §5 nuova sottosezione "Sorgenti con durata
+  non affidabile", changelog
+- `docs/08-COPY-I18N.md` — §2.12c `adapter.listenbrainz.*` (12 chiavi),
+  changelog 0.3
+- `docs/09-PRIVACY-SECURITY.md` — §4 tre righe (username, User Token,
+  `inserted_at`), §7.2 nota sulle credenziali di piattaforma, changelog 0.3
+- `docs/11-BACKLOG.md` — Story 1.3 riscritta (perimetro corretto, AC dalle due
+  spec, `[SIZE:L]`), Story 1.5 ridimensionata, riga roadmap 1.3, changelog 1.6.5
+- `docs/state/stories/1.3-adapter-lastfm-listenbrainz.md` — **nuovo**
+- `docs/state/sessions/47-listenbrainz-lastfm-adapter-spec.md` — **nuovo**
+- `docs/BUNDLE.md` — rigenerato
+
+## Note operative
+
+- Issue **#145** (ListenBrainz) e **#144** (Last.fm) create con `needs-spec` +
+  `docs`, poi passate a `agent-ready` dopo la chiusura delle decisioni: la
+  precedente #96/#98 usava `agent-ready` fin dall'apertura perché le decisioni
+  erano già chiuse. Lo swap è avvenuto **dopo** che le decisioni sono state prese
+  in questa sessione, non prima
+- **Nessuna keyword di chiusura nel body della PR**: chiudere #145 significherebbe
+  `status:done` su una story che non è iniziata. Si cita la keyword spezzata
+  (`` `Closes` #145 ``) per non attivare `auto-status-done`
+- Worktree: `pwsh scripts/setup-worktree.ps1 145 -Slug listenbrainz-adapter-spec
+  -BranchName feat/145-listenbrainz-adapter-spec`, poi claim su #145
+- `scripts/generate-bundle.ps1` **non** è stato toccato: i nuovi file `state/`
+  seguono la curation già in essere (solo esempi: 0.4, 0.7, S38, S41), coerente
+  con le Story 1.1 e 1.2 che non hanno aggiunto il proprio state file a `$files`
+
+## Cross-refs
+
+- **#145** — issue della spec ListenBrainz (`agent-ready`, claim preso in questa
+  sessione)
+- **#144** — issue della spec Last.fm (`agent-ready`, da prendere)
+- **ADR-0010** — da scrivere: estensione di `05§4` con il metodo opzionale
+  `parseRemote?()` (D.47.11). Prerequisito dell'approvazione della spec Last.fm
+- Prossima story lavorabile: **1.3** (Last.fm + ListenBrainz), dopo
+  approvazione delle due spec; la **1.5** dipende dall'ADR-0010 per il percorso
+  incrementale
+
+
+
+===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
+
+---
+id: "1.3"
+title: "Adapter Last.fm + ListenBrainz"
+phase: 1
+area: adapter
+status: in_progress
+priority: I
+depends_on: ["0.3"]
+issue: 145
+branch: feat/145-listenbrainz-adapter-spec
+pr: null
+merged_commit: null
+merged_date: null
+claim: kilo-HP-ELITEBOOK-lb47
+spec_refs:
+  - docs/03-ADAPTERS/listenbrainz.md
+  - docs/03-ADAPTERS/lastfm.md
+  - docs/03-ADAPTERS/SPEC-TEMPLATE.md
+  - docs/02-DATA-SCHEMA.md
+---
+
+## Descrizione
+
+Import dello storico di ascolto da **Last.fm** e **ListenBrainz** — le due
+piattaforme del perimetro che non hanno un export GDPR utilizzabile dall'app
+(`03-ADAPTERS/listenbrainz.md` §1, `03-ADAPTERS/lastfm.md` §1).
+
+Il perimetro è cambiato in Sessione 47 rispetto alla formulazione originaria del
+backlog ("Import storico via API (paginazione completa)"). La verifica delle due
+piattaforme ha prodotto due esiti diversi:
+
+- **ListenBrainz** — il canale MVP è l'**export API**: `POST /1/export/` → poll →
+  download di uno ZIP con `listens/<mese>.jsonl`. La doc ufficiale prescrive
+  l'export per lo storico completo e **sconsiglia esplicitamente** di paginare
+  `/1/user/{username}/listens` su tutto lo storico. Il percorso `/listens` resta
+  alla Story 1.5 (query incrementali). L'adapter è **file-only**: il contratto
+  `05§4` non viene toccato e **non serve alcun ADR** per questa piattaforma.
+- **Last.fm** — l'export GDPR è manuale (email, giorni) e risulta incompleto per
+  eventi → il canale è l'API `user.getRecentTracks`, che **non emette header
+  CORS**: serve un proxy configurabile dall'utente, una `api_key` **per-utente**
+  (i ToS §4.4 vietano una key condivisa che serva N utenti) e il web auth per la
+  `sk`. Il percorso file (export di terze parti) resta disponibile come
+  alternativa senza proxy.
+
+## Blocco
+
+Nessuno per la spec ListenBrainz: le decisioni D-LB.1…D-LB.5 sono chiuse (Boss,
+Sessione 47) e la spec v0.1 è scritta.
+
+**Last.fm** ha un blocker architetturale: il percorso API non ha un `File` da
+passare a `parse(input: Blob)`. La decisione D-LF.8 è un metodo **opzionale**
+`parseRemote?()` su `PlatformAdapter` → richiede **ADR-0010** su `05§4` (che è
+🟢 APPROVED). L'ADR va scritto prima dell'approvazione della spec Last.fm.
+
+## Task
+
+- [x] T1.3.1 — Verifica delle due API su fonte (sorgente `export_api.py`, doc
+      ufficiale, ToS Last.fm) e correzione di due premesse errate: il
+      `recording_msid` **non** è un ID univoco per singolo ascolto (è un hash dei
+      metadati) e l'export API è CORS-ok (`@crossdomain` su tutti gli endpoint)
+- [x] T1.3.2 — Apertura delle issue #144 (Last.fm) e #145 (ListenBrainz) con
+      `needs-spec` + `docs`; decisioni D-LF.* e D-LB.* chiuse con il Boss
+- [x] T1.3.3 — Spec ListenBrainz `03-ADAPTERS/listenbrainz.md` v0.1 (🟡 DRAFT):
+      10 sezioni del template, 20 casi di fixture, 19 edge case (E.LB.1…E.LB.19)
+- [ ] T1.3.4 — Spec Last.fm `03-ADAPTERS/lastfm.md` v0.1 (🟡 DRAFT)
+- [ ] T1.3.5 — **ADR-0010**: estensione di `05§4` con il metodo opzionale
+      `parseRemote?()` (D-LF.8) — issue separata, da aprire prima dell'approvazione
+      della spec Last.fm
+- [ ] T1.3.6 — Approvazione Boss delle due spec (promozione 🟡 DRAFT → 🟢 APPROVED)
+- [ ] T1.3.7 — Issue di implementazione della 1.3 (`agent-ready`, size L)
+
+## Acceptance criteria
+
+Elenco completo e verificabile in `listenbrainz.md` §8 (20 casi di fixture),
+`lastfm.md` §"Acceptance criteria" e nelle issue #145 / #144.
+
+- [ ] I 20 casi della spec §8 coperti da fixture su `listenbrainz-sample.jsonl`
+- [ ] Mock API per i percorsi Last.fm (paginazione, rate limit, errori 6/8/9/10/26)
+- [ ] `pnpm run lint`, `typecheck`, `test`, `build` verdi
+- [ ] Doc-sync: `01-PLATFORMS.md` §3.8 + §5 (E11-E13) + changelog,
+      `02-DATA-SCHEMA.md` §2 + §5 (sorgenti con durata non affidabile) + changelog,
+      `08-COPY-I18N.md` §2.12c, `09-PRIVACY-SECURITY.md` §4 + §7.2 + changelog,
+      `11-BACKLOG.md` (Story 1.3 riscritta, Story 1.5 ridimensionata, roadmap,
+      changelog), `scripts/generate-bundle.ps1` `$files` + BUNDLE rigenerato
+
+## Vincoli espliciti
+
+- `05§4` è 🟢 APPROVED: qualunque modifica al contratto adapter richiede un ADR
+  (**ADR-0010**), non una modifica inline
+- `02§2` è 🟢 APPROVED: la semantica temporale di ListenBrainz è una **deroga
+  dichiarata** (semantica uniforme `timestamp = startedAt = listened_at*1000`),
+  non una modifica arbitraria della regola
+- Nessuna chiamata di rete nell'adapter ListenBrainz: è file-only nella 1.3
+- Nessuna dipendenza nuova: il formato è JSONL e lo scanner è fatto in casa
+  (stessa scelta di `jsonStream.ts` per Story 1.1)
+- Il bucket DEDUP-3 di ListenBrainz è **sempre 0**: `duration_ms` è opzionale e
+  di durata catalogo, e usarlo produrrebbe due `Track` per lo stesso brano (E.LB.2)
+
+## Stato attuale
+
+🟡 IN CORSO. Spec ListenBrainz scritta (v0.1, 🟡 DRAFT) nella PR di questa
+sessione; spec Last.fm in attesa della decisione su D-LF.8/ADR-0010. Claim
+`kilo-HP-ELITEBOOK-lb47` su #145.
+
+Sblocca: nessuna story è dipendente da 1.3. La 1.5 dipende dal contratto
+`parseRemote?()` (ADR-0010) per il percorso incrementale.
+
 
 
 ===== FILE: scripts/aggregate-state.ps1 =====
@@ -7176,9 +7453,13 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 
 ### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
-- **API pubblica senza limiti restrittivi**: `/1/user/{username}/listens` paginabile
-- **Campi**: `listened_at`, `track_metadata.track_name/artist_name/release_name`, `additional_info`: **`recording_mbid`, `artist_mbids`, `release_mbid`, `isrc`, `spotify_id`, `youtube_id`, `origin_url`**
+- **Export API (canale MVP)**: `POST /1/export/` → poll → download ZIP con `listens/<mese>.jsonl`. **La doc prescrive l'export per lo storico completo** e sconsiglia esplicitamente di paginare `/1/user/{username}/listens` su tutto lo storico. Un export pending per utente, range opzionale `{start_time, end_time}`, snapshot **non atomico** (generato da dati live), valido 30 giorni
+- **API pubblica** (canale incrementale, Story 1.5): `/1/user/{username}/listens` con `count` (max 1000) e cursore `max_ts`/`min_ts`; rate limit 1 req/s (più alto con User Token valido), header `X-RateLimit-*`; User-Agent **obbligatorio**; HTTPS only; CORS abilitato
+- **Campi**: `listened_at` (**inizio** dell'ascolto), `inserted_at` (inserimento nel DB, non usato), `recording_msid`, `track_metadata.track_name/artist_name/release_name`, `additional_info`: **`recording_mbid`, `artist_mbids`, `release_mbid`, `isrc`, `duration_ms`** (opzionale, durata *catalogo*), `spotify_id`, `youtube_id`, `origin_url`; `mbid_mapping` (risoluzione server-side)
+- **Limiti**: nessun contesto (device/luogo/IP/paese); nessuna durata ascoltata; `duration_ms` opzionale → lo stesso brano può avere bucket DEDUP-3 diversi (vedi `02§5` "Sorgenti con durata non affidabile")
+- **Attenzione**: `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto → due ascolti dello stesso brano condividono lo stesso msid. L'identità dell'evento è la tupla `(listened_at, recording_msid)`
 - **Valore unico**: identificativi MusicBrainz/ISRC nativi → normalizzazione perfetta tra piattaforme
+- **Spec**: `03-ADAPTERS/listenbrainz.md` (v0.1, 🟡 DRAFT, Sessione 47)
 
 ### 3.9 Self-hosted (Plex, Navidrome, Subsonic, Roon) — Tier S+ per nicchia
 
@@ -7222,6 +7503,9 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | E8 | SoundCloud | Export limitato a ~1000 brani; brani rimossi nel tempo | Storico troncato | Dichiarare limite all'utente; integrare con scrobbling |
 | E9 | Apple | Export legacy senza contesto; il Play Activity 2026.2 ha invece durata/skip/shuffle/device | Due generazioni di schema in circolazione | Adapter con alias 2026.2/legacy (`03-ADAPTERS/apple-music.md` §10); campi contestuali degradati sui legacy |
 | E10 | Tutte | Fusi orari: `ts` Spotify è UTC; Apple "Play Date UTC"; Takeout locale+UTC | Timeline sfalsata | Normalizzare tutto a UTC in fase di parse |
+| E11 | ListenBrainz | `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto | Due ascolti dello stesso brano condividono lo stesso msid → un `eventKey` basato solo sul msid perderebbe eventi | `eventKey = listened_at + '\|' + recording_msid` (`03-ADAPTERS/listenbrainz.md` §3.1, D-LB.2) |
+| E12 | ListenBrainz | `additional_info.duration_ms` opzionale (durata *catalogo*, non ascoltata) | Lo stesso brano in bucket DEDUP-3 diversi → **due Track** per lo stesso brano | Bucket DEDUP-3 **sempre 0** per questa fonte; la durata va sulla `Track` come hint, fuori dal `canonicalKey` (`02§5`, `03-ADAPTERS/listenbrainz.md` §3.3) |
+| E13 | ListenBrainz | L'export è generato **asincronicamente da dati live**, non da uno snapshot atomico | Un re-export successivo può aggiungere eventi ma non rimuovere quelli cancellati lato server | Riconciliazione via `eventKey`; il limite è dichiarato all'utente (`info.exportNotSnapshot`) |
 
 ## 6. Strategia di integrazione MVP
 
@@ -7240,6 +7524,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.2 | Sessione 9 (2026-10-15) | Audit: E1 validata in S2 (riferimento `03-ADAPTERS/spotify.md`); chiarita distinzione `PlatformId` (sorgenti) vs `scrobbleHubs` (Subsonic/Roon/Maloja) (M4) |
 | 0.3 | Sessione 39 (2026-10-21) | §3.2 allineato al formato Takeout verificato (header, subtitles, nomi localizzati, assenza durata); cross-ref spec adapter `03-ADAPTERS/youtube-music.md` (issue #96) |
 | 0.4 | Sessione 40 (2026-10-21, issue #98) | §3.3 riscritto sul Play Activity 2026.2 (~143 colonne: durate, End Reason Type, shuffle/offline, device, ISO Country; `Artist Name` assente); tabella §4 Apple aggiornata (durata ✅, dispositivo/IP/skip ⚠️); E9 rettificata (due generazioni di schema); cross-ref spec adapter `03-ADAPTERS/apple-music.md` |
+| 0.5 | Sessione 47 (2026-10-26, issue #145) | §3.8 riscritto: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/listens` — la doc prescrive l'export per lo storico completo e ne sconsiglia la paginazione; corretti i limiti (`MAX_ITEMS_PER_GET` = 1000, non 100; rate limit 1 req/s, User-Agent obbligatorio, HTTPS only, CORS verificato sul sorgente); `recording_msid` documentato come hash dei metadati (**non** ID univoco per ascolto); `duration_ms` opzionale e di durata catalogo → E12; export non atomico → E13; cross-ref spec adapter `03-ADAPTERS/listenbrainz.md` |
 
 
 ===== FILE: docs/02-DATA-SCHEMA.md =====
@@ -7267,9 +7552,14 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | YouTube Takeout | `time` | inizio azione | `timestamp = time + durata stimata` (durata da catalogo) |
 | Apple | `Event End Timestamp` (Play Activity CSV) | fine segmento di ascolto | `timestamp = Event End Timestamp`, `startedAt = Event Start Timestamp`; legacy: `Play Date UTC` (inizio) → `timestamp = playDate + durationMs` |
 | Last.fm | `date` | inizio scrobble | `timestamp = date + durationMs` |
-| ListenBrainz | `listened_at` | inizio listen | `timestamp = listened_at*1000 + durationMs` |
+| ListenBrainz | `listened_at` | inizio listen | `timestamp = startedAt = listened_at*1000`; `durationMs` = 0 (costante) — la durata **ascoltata** è sconosciuta e `additional_info.duration_ms` (opzionale, durata catalogo) va solo sulla `Track` come hint, mai nel bucket DEDUP-3 |
 
 Regola: `timestamp` = **momento in cui l'ascolto si conclude**; `startedAt` = inizio. Le analisi temporali usano `startedAt` quando disponibile, altrimenti `timestamp`.
+
+**Deroghe dichiarate** (fonti senza durata affidabile — la regola "fine ascolto" non è applicabile):
+
+- **YouTube Takeout**: il Takeout non fornisce la durata e il catalogo non è ancora disponibile all'import → `timestamp = startedAt = time`, `durationMs = 0`. Bias dichiarato in `03-ADAPTERS/youtube-music.md` §5; ricalcolo post-enrichment come contratto.
+- **ListenBrainz**: `additional_info.duration_ms` è **opzionale** e rappresenta la durata *catalogo*, non quella ascoltata. Applicare la regola alla lettera produrrebbe due semantiche temporali diverse nello stesso import (fine dell'ascolto quando il dato c'è, inizio quando manca) e sposterebbe il confine `day` per una parte degli eventi. Si adotta una semantica **uniforme**: `timestamp = startedAt = listened_at*1000`, `durationMs = 0`. Dettagli in `03-ADAPTERS/listenbrainz.md` §5.
 
 ## 3. Interfacce TypeScript (source of truth)
 
@@ -7570,6 +7860,22 @@ Priorità per `canonicalKey`, valutata al momento dell'upsert:
 - **Contro**: può separare la stessa registrazione quando la durata differisce tra piattaforme (remaster, rounding ±1-2s)
 - **Mitigazione**: DEDUP-1/2 (ISRC/MBID) catturano comunque quelle; il bucket da 2s assorbe il rounding
 - **Rischio accettato**: registrazioni omonime con durata identica restano fuse (documentato; mitigabile in futuro con fuzzy a 3 campi: nome+artista+durata+album)
+
+### Sorgenti con durata non affidabile (documentato)
+
+Alcune fonti espongono una durata **catalogo** opzionale anziché la durata **effettivamente ascoltata**: se il dato è presente solo su una parte degli ascolti dello stesso brano, usarlo nel bucket produce **due `Track` distinte per lo stesso brano** — l'esatto opposto di ciò che la dedup persegue.
+
+**Regola**: per queste fonti il bucket DEDUP-3 è **sempre 0** e la durata va conservata sulla `Track` come dato catalogo, **fuori** dal calcolo del `canonicalKey`.
+
+| Fonte | Campo durata | Stato | Trattamento |
+|-------|--------------|-------|------------|
+| YouTube Music | — | assente | `durationMs` = 0, nessun hint (E.YT.5) |
+| ListenBrainz | `additional_info.duration_ms` | **opzionale**, durata catalogo | bucket **sempre 0**; la durata va sulla `Track` come hint (`03-ADAPTERS/listenbrainz.md` §3.1.1, D7) |
+| Last.fm | — | assente da `getRecentTracks` | `durationMs` = 0 (`03-ADAPTERS/lastfm.md` D-LF.4) |
+
+La priorità DEDUP-1/2 (ISRC/MBID) compensa: ListenBrainz espone gli identificativi nativi, quindi la maggior parte dei suoi brani non transita da DEDUP-3.
+
+**Nota**: la regola "bucket sempre 0" è una decisione di **spec adapter**, non una modifica del modello. `durationBucketMs` continua a valere `Math.floor(durationMs / 2000) * 2000` per le fonti che hanno una durata affidabile.
 
 Comportamento upsert:
 - Se esiste track con stesso canonicalKey → aggiungi platformId, aggiorna lastSeenAt e contatori
@@ -8544,6 +8850,354 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.apple_
 |----------|------|-----------|
 | 0.1 | Sessione 40 (2026-10-21) | Prima stesura (issue #98). Decisioni D1-D4 chiuse con il Boss; formato Apple 2026.2 verificato su fonti 2026. Promozione a 🟢 APPROVED al merge della PR di approvazione |
 | 1.0 | Sessione 42 (2026-10-22) | 🟢 APPROVED · promozione al merge della PR #134 (approvazione Boss). Tre modifiche di contenuto rispetto alla v0.1: **D5** `papaparse` confermata come dipendenza estesa di `@ls/core` (la v0.1 la dava per già presente: non lo era — §10); bias **E.AP.1** dichiarato **sempre** all'utente e non più solo sopra la soglia del 10% (§3.4, §9, nuova chiave `info.pauseBias`); size della Story 1.2 `M` → `L` in `11-BACKLOG.md` (2 fonti dati, 2 schemi di export, ZIP ricorsivo) |
+
+
+
+===== FILE: docs/03-ADAPTERS/listenbrainz.md =====
+
+# Adapter ListenBrainz
+
+> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 47 (2026-10-26)
+> Piattaforma: ListenBrainz (MetaBrainz, no-profit)
+> Sede legale: USA
+> Tier: **S** · Priorità MVP: **sì**
+> Spec collegata a: Story 1.3 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.8
+
+**Decisioni chiuse** (Boss, Sessione 47 — issue #145):
+
+| # | Decisione | Sintesi |
+|---|-----------|---------|
+| D-LB.1 | Canale dello storico | **Export API** (ZIP con JSONL), non paginazione `/listens` (§1, §2.1) |
+| D-LB.2 | `eventKey` | `listenbrainz:<listened_at>\|<recording_msid>` — il msid **non** è univoco per ascolto (§3.1) |
+| D-LB.3 | Semantica temporale | `timestamp = startedAt = listened_at*1000`, `durationMs = 0` — semantica **uniforme** (§5) |
+| D-LB.4 | Percorso di import | **Opzione A**: l'utente scarica l'archivio, l'app lo importa. L'adapter è **file-only** (§2.1) |
+| D-LB.5 | User Token | Uso **solo in lettura**; **non richiesto** per l'import dell'archivio (§7) |
+
+**Decisioni aperte** (da chiudere in spec, con proposta):
+
+| # | Decisione | Proposta |
+|---|-----------|----------|
+| D1 | `spotify_id` / `youtube_id` / `origin_url` | **ignorati**: nessuna dipendenza da ID di terze parti, nessuna chiamata secondaria (§3.1, E.LB.12) |
+| D2 | MBID: `additional_info` o `mbid_mapping`? | **`mbid_mapping`** (dato risolto dal server) vince in conflitto (§3.1.1, E.LB.4) |
+| D3 | Parsing JSONL | Scanner **dedicato** in `packages/core/src/adapters/`, streaming, bounded memory (§10) |
+| D4 | `duration_ms` → `Track.durationMs` | Sì, come proxy di durata catalogo; **mai** sull'evento (§3.1.1) |
+| D5 | Durata della Story 1.3 | `L` |
+| D6 | Percorso `/listens` nella 1.3 | **No**: materiale della Story 1.5 (§3.4) |
+| D7 | Bucket DEDUP-3 per questa fonte | **Sempre 0**; la durata resta un hint sulla `Track`, fuori dal `canonicalKey` (§3.3, §6, E.LB.2) |
+
+---
+
+## 1. Metodi di accesso
+
+| Canale | Disponibile | Formato output | Frequenza | Note |
+|--------|:-----------:|----------------|-----------|------|
+| Export GDPR | ✅ | ZIP con JSONL (export API ListenBrainz) | Manuale | `POST /1/export/` → poll → download; l'utente lo scarica dal sito e lo carica nell'app (D-LB.4) |
+| API pubblica | ✅ | REST JSON | Real-time | `/1/user/{username}/listens` per query incrementali — **non** per lo storico completo (D-LB.1) |
+| Scrobbling (Last.fm/Maloja) | ✅ | — | Continuo | i client scrobbano su LB; l'export è il canale di import |
+| File utente diretto | ✅ | JSONL dentro ZIP | Manuale | l'archivio export è un file → il contratto `05§4` (`parse(input: Blob)`) **non viene toccato** |
+
+**Canale principale MVP**: l'archivio export. La doc ufficiale prescrive esplicitamente il suo uso per lo storico completo:
+
+> "To retrieve a user's entire listening history, use the **export API**. **Do not scrape or paginate through the user's entire history using the listens endpoint.** Use that endpoint for recent listens, bounded queries, and incremental updates after importing an export."
+
+**Cosa offre l'export** — a differenza di Spotify, YouTube e Apple, ListenBrainz è l'unica fonte del perimetro con **identificativi MusicBrainz nativi**: `recording_mbid`, `artist_mbids[]`, `release_mbid`, `release_group_mbid` e `isrc`. Questo la rende l'unico adapter che può produrre **DEDUP-1** e **DEDUP-2** alla prima importazione, senza attendere l'enrichment, e la fonte che alimenta `rekey()` (Story 1.4) con dati reali.
+
+**Cosa non offre**: durata ascoltata (c'è `duration_ms`, ma è la durata *catalogo* del brano e solo se il client l'ha inviata), contesto (nessun dispositivo, nessun IP, nessun paese), informazioni di skip o shuffle.
+
+**CORS**: verificato sul sorgente. `listenbrainz/webserver/views/export_api.py` applica `@crossdomain` a **tutti** gli endpoint del blueprint, incluso `download_export_archive`. L'export API è quindi utilizzabile da una PWA. La scelta di non orchestrarlo dall'app (D-LB.4) è per ergonomia e rate limit, **non** per un blocco tecnico.
+
+**HTTPS only**: la doc dichiara esplicitamente *"All ListenBrainz services are only available on HTTPS!"*.
+
+**User-Agent obbligatorio**: *"Requests without a valid user agent may be blocked without further notice as collateral damage in our fight against scrapers and botnets."* Formato richiesto: `NomeApp/<version> ( url-contatto )`. Nel percorso export l'app non effettua richieste, ma il vincolo resta dichiarato per il percorso `/listens` della Story 1.5.
+
+## 2. Flusso di import
+
+[Utente scarica l'archivio] → [Rilevamento formato] → [Estrazione ZIP] → [Parsing streaming JSONL] → [Normalizzazione] → [Upsert DB]
+
+### 2.1 Come l'utente procura il file (D-LB.4, opzione A)
+
+1. `listenbrainz.org` → login con l'account MusicBrainz
+2. **Settings → Export** → richiedere l'export dei dati ascoltati
+3. Attendere: il job è asincrono lato server (stati `waiting` → `in_progress` → `completed`); l'utente riceve un'**email** quando l'archivio è pronto
+4. Scaricare lo ZIP (`export-<username>-<id>.zip`)
+
+L'utente **non** deve eseguire alcun polling dall'app: l'export resta valido **30 giorni** (`available_until` nell'oggetto export).
+
+Struttura dell'archivio (verificata sulla doc dell'export API, 2026-10-26):
+
+```
+export-<username>-<id>.zip
+  user.json                  # id e username dell'account
+  listens/<mese>.jsonl       # cronologia: un oggetto JSON per riga; i mesi senza ascolti sono omessi
+  feedback.jsonl             # love/hate (quando presente) — fuori scope MVP (E.LB.16)
+  pinned_recording.jsonl     # (quando presente) — fuori scope MVP (E.LB.16)
+```
+
+**Vincoli dell'export API** (rilevanti per la futura Story 1.5, che userà il percorso `/listens`):
+
+| Vincolo | Valore | Conseguenza per l'app |
+|---------|--------|------------------------|
+| Export pending | **uno solo per utente**, indipendentemente dal range | un secondo POST → `400` |
+| Range temporale | `POST /1/export/` con body opzionale `{start_time, end_time}` (UNIX secondi UTC, inclusivi) | un export per finestra |
+| Download | **non resumable**: un'interruzione riavvia lo stesso `export_id` | non creare un job nuovo |
+| Snapshot | *"generated asynchronously from live data, rather than an atomic snapshot"* | il re-import può vedere dati diversi → riconciliazione via `eventKey` (E.LB.15) |
+
+### 2.2 Rilevamento formato (`detect`)
+
+- **ZIP**: si legge il **central directory** (`listZipEntries` di `adapters/zip.ts`) e si cercano voci il cui path corrisponde a `listens/*.jsonl`. La presenza di **almeno un** file `listens/*.jsonl` **e** di `user.json` è il criterio di riconoscimento
+- **JSONL non impacchettato** (lo stesso contenuto estratto a mano): accettato se la **prima riga** è un oggetto JSON valido con `listened_at` e `track_metadata` — utile per il debug e per i test
+- **Rifiuta**: archivi senza `listens/*.jsonl` (es. un export parziale, o un export di un altro servizio) → `detect.fail` con guida
+- La detection è **statica** (nessuna decompressione): si legge solo il central directory, come per gli altri adapter ZIP
+
+### 2.3 Parsing
+
+- **JSONL, non JSON array**: ogni riga è un oggetto JSON indipendente. Il `JsonArrayScanner` esistente (`adapters/jsonStream.ts`) **non** è adatto: è uno scanner di array JSON. Serve uno **scanner JSONL dedicato** (D3), con memoria limitata a una riga
+- **Estrazione ZIP**: `fflate` (già dipendenza di `@ls/core` per gli ZIP Spotify/Apple), con `unzip` filtrato per entry: si estrae **un file per volta** e lo si consuma prima di passare al successivo, così la memoria di picco resta limitata a un mese di ascolti
+- **Ordine dei file**: i mesi sono in ordine cronologico ma l'adapter **non deve assumerlo** (E.LB.14: i mesi vuoti sono omessi, quindi la sequenza ha buchi). L'ordine finale degli eventi è determinato dal `listened_at`, non dalla posizione nel file
+- **Encoding**: UTF-8, senza BOM (i file generati dal server sono JSON puro). Tolleranza al BOM sul primo file, per robustezza
+
+## 3. Mapping campi sorgente → unificato
+
+> **Schema di riferimento**: `02-DATA-SCHEMA.md` v1.1 — `ListenEvent` **piatto** con `trackId` come FK; i metadati del brano vivono sull'entità `Track` separata.
+>
+> **Semantica temporale**: `listened_at` è l'**inizio** dell'ascolto (*"This should be set to playback start time of the submitted track"*), coerente con la riga `02§2`. La regola `02§2` (`timestamp = listened_at*1000 + durationMs`) **non** è applicabile letteralmente perché `duration_ms` è opzionale: quando è presente dà la fine dell'ascolto, quando è assente dà l'inizio. Applicarla alla lettera produrrebbe **due semantiche temporali diverse nello stesso import**. La scelta (D-LB.3) è una semantica **uniforme**; la riga `02§2` viene aggiornata in questa PR.
+
+### 3.1 ListenEvent (top-level, piatto — vedi `02§3.2`)
+
+| Campo unificato | Campo sorgente | Tipo sorgente | Trasformazione | Note |
+|-----------------|----------------|---------------|----------------|------|
+| `eventKey` | `listened_at` + `recording_msid` | int + uuid | `'listenbrainz:' + listened_at + '\|' + recording_msid` | **D-LB.2** — replica la tupla di dedup lato server `(listened_at, user_id, recording_msid)`. Fallback (msid assente): `sha1(recording_mbid + '\|' + listened_at)` |
+| `platform` | (fisso) | `PlatformId` | `'listenbrainz'` | — |
+| `importId` | (interno) | uuid | generato al parse | FK a `imports` |
+| `timestamp` | `listened_at` | int (UNIX s) | `listened_at * 1000` | **Inizio** dell'ascolto (D-LB.3) |
+| `startedAt` | `listened_at` | int (UNIX s) | `listened_at * 1000` | Non distinguibile da `timestamp` (stesso predecessente di E.YT.5) |
+| `durationMs` | — | — | `0` (costante) | La durata **ascoltata** è sconosciuta: `duration_ms` è la durata *catalogo* e non è sempre presente (E.LB.1, E.LB.2). `0` = "durata ignota", non "ascolto nullo" |
+| `trackId` | (interno) | uuid | **risolto dal core via DEDUP** (`02§5`) | adapter emette metadati §3.1.1 |
+| `completed` | — | — | `false` (costante) | Non calcolabile senza durata ascoltata |
+| `skipped` | — | — | `null` | Nessun segnale di interruzione in un export |
+| `shuffle` | — | — | `null` | Assente |
+| `offline` | — | — | `null` | Assente |
+| `incognito` | — | — | `null` | Assente |
+| `reasonStart` | — | — | `null` | Assente |
+| `reasonEnd` | — | — | `null` | Assente |
+| `deviceType` | — | — | `'unknown'` | Nessun campo dispositivo |
+| `deviceDetail` | `additional_info.media_player` / `additional_info.submission_client` | string \| null | raw | Il client che ha scrobbato, non il dispositivo. Conservato come stringa informativa grezza |
+| `ip` | — | — | `null` | Nessun IP nell'export; il toggle `retainIp` **non è applicabile** (niente da conservare) |
+| `country` | — | — | `null` | Nessun campo paese; l'IP non c'è, quindi nessuna derivazione possibile |
+| `day` | (derivato) | `YYYY-MM-DD` | da `timestamp` UTC | indice critico |
+
+**Campi del payload mai persistiti**: `inserted_at` (momento di inserimento nel DB — non è un tempo di ascolto), `user_name` (identifica l'account, non l'ascolto), `mbid_mapping.url_rels[]` (link verso Spotify/Deezer/Tidal), `mbid_mapping.caa_id` / `caa_release_mbid` (id Cover Art Archive), `additional_info.origin_url` / `spotify_id` / `youtube_id` (D1), `additional_info.tags[]` (tag utente, non generi), `additional_info.submission_client_version`, `additional_info.tracknumber` (il numero di traccia non è modellato in `02§3.3`).
+
+### 3.1.1 Track (entità separata — vedi `02§3.3`)
+
+| Campo Track | Campo sorgente | Tipo sorgente | Trasformazione | Note |
+|-------------|----------------|---------------|----------------|------|
+| `name` | `track_metadata.track_name` | string | `normalize(name)` (`02§5`); vuota → **skip evento** con warning | — |
+| `artistId` | `track_metadata.artist_name` | string | risolto da `artists` (dedup per nome normalizzato) | L'artista **multi-artista** è una stringa già joined dal client (es. "Artist A & Artist B"): vedi §3.1.2 |
+| `albumId` | `track_metadata.release_name` | string \| null | risolto da `albums` (dedup per nome+artistId); null se assente | — |
+| `durationMs` | `additional_info.duration_ms` | int \| null | diretto, **solo come hint** (D7) | Proxy di durata catalogo (come `ms_played` in Spotify). **Non** entra nel calcolo del `canonicalKey` |
+| `isrc` | `additional_info.isrc` | string \| null | upper-case | Se presente → **DEDUP-1** (prioritaria su DEDUP-2) |
+| `mbid` | `mbid_mapping.recording_mbid` → `additional_info.recording_mbid` | string \| null | diretto | **DEDUP-2**. D2: in caso di conflitto vince il `mbid_mapping` (dato risolto dal server) |
+| `genres` | — | — | `[]` | `additional_info.tags[]` sono tag utente, non generi: non usati. Geni via enrichment (Story 4.2) |
+| `artworkUrl` | — | — | `null` | `caa_id` non è un URL; artwork via enrichment (Story 4.3) |
+| `platformIds` | — | — | `{}` (vuoto) | Nessun ID traccia nativo: `recording_msid` è un hash dei metadati, non un ID di registrazione (E.LB.13) |
+
+### 3.1.2 Artist / Album (entità separate — vedi `02§3.3`)
+
+L'adapter emette `{name, mbid?}` per Artist e `{name, artistId, mbid: null, platformIds: {}}` per Album quando `release_name` è presente. Il core fa upsert con dedup per nome normalizzato (Artist) o nome+artistId (Album).
+
+**Artista multi-artista (E.LB.11)**: `track_metadata.artist_name` è una **singola stringa** già joinata dal client, con forme variabili (`"A & B"`, `"A feat. B"`, `"A, B"`, `"A and B"`). La regola:
+
+1. Se `mbid_mapping.artists[]` è presente, i suoi `artist_credit_name` sono le credit unità **canoniche** → l'adapter emette **una sola** Artist con nome = `join_phrase` dei credit unità (ricostruzione esatta, es. `"Artist A & Artist B"`)
+2. Altrimenti si usa `track_metadata.artist_name` **grezzo** (nessuna divisione: dividere per `&` produrrebbe artisti fantasma e frammenterebbe la dedup)
+3. Il `normalize()` di `02§5` rimuove `feat./ft./with` → `"A feat. B"` e `"A"` collassano sulla stessa chiave. È il comportamento **desiderato**: il brano è lo stesso
+
+Il `mbid` dell'artista: `mbid_mapping.artist_mbids[0]` (il primo) → `Artist.mbid`. In caso di più artisti, si emette l'artista joinata con il **primo** mbid (gli altri andrebbero in una relazione many-to-many che `02§3.3` non modella).
+
+### 3.2 Library / Playlist (vedi `02§3.7`)
+
+**Fuori scope adapter MVP**:
+
+| Entità | Sorgente | Blocco tecnico |
+|--------|----------|----------------|
+| LibraryItem `saved_track` | — | L'export non contiene la libreria salvata |
+| Playlist / PlaylistItem | — | L'export non contiene le playlist; esistono endpoint dedicati (`/1/user/{u}/playlists`) fuori scope |
+| Feedback love/hate | `feedback.jsonl` | Nessun campo love/hate in `02§3.3` (E.LB.16) |
+| Pinned recording | `pinned_recording.jsonl` | Nessun modello per i pinned (E.LB.16) |
+
+Segnalazione: `info.libraryDeferred`.
+
+### 3.3 Filtro eventi
+
+Un export contiene **solo** ascolti già validati dal server: ogni riga è un ascolto scrobbato. Non esistono righe da scartare per tipo di evento (a differenza dell'event stream Apple). Il filtro riguarda solo i **casi limite**:
+
+```
+isCandidateRow(r):
+  1. r.listened_at assente o non intero          → scartata + warning malformedSkipped
+  2. r.listened_at < LISTEN_MINIMUM_TS (1033430400, 2001-12-03) → scartata + warning tooOldSkipped
+  3. r.track_metadata assente                     → scartata + warning malformedSkipped
+  4. r.track_metadata.track_name assente o vuota  → scartata + warning noTitleSkipped
+  5. r.recording_msid assente E r.track_metadata.recording_mbid assente
+     E mbid_mapping.recording_mbid assente        → evento **senza** sourceEventId → fallback sha1 (§3.1)
+  6. altrimenti                                    → ListenEvent
+```
+
+Il punto 5 **non** scarta: un ascolto senza identificativi è comunque un ascolto valido (nome + artista bastano per DEDUP-3). L'adapter emette l'evento con `sourceEventId = null` e il core calcola il fallback SHA-1.
+
+**Bias dichiarato (E.LB.2)**: `duration_ms` è opzionale → lo stesso brano può cadere in **bucket DEDUP-3 diversi** a seconda della completezza del `additional_info` del singolo ascolto. La risposta strutturale è in D7: il bucket DEDUP-3 di ListenBrainz è **sempre 0** (il dedup primario è DEDUP-1/2 via MBID/ISRC), quindi il problema **non si manifesta**. La durata resta un dato disponibile, memorizzato sulla Track.
+
+### 3.4 Il percorso `/listens` (fuori scope della 1.3)
+
+Il percorso di query incrementale (`GET /1/user/{username}/listens?max_ts=…&count=…`) **non** è implementato nella Story 1.3:
+
+- la doc ne sconsiglia l'uso per lo storico completo
+- è materiale della **Story 1.5** (sync continua), dove il User Token è comunque necessario
+- l'adapter è progettato per essere **esteso** in quel senso senza modificare il contratto: il percorso file produce gli stessi `RawListenEvent`
+
+L'endpoint `/1/user/{username}/listens` con `MAX_ITEMS_PER_GET = 1000` e rate limit 1 req/s (più alto con token valido) è la sorgente dei dati per la 1.5.
+
+## 4. Edge case noti
+
+Copia da `01-PLATFORMS.md` §5 (piattaforma ListenBrainz) + edge case specifici emersi in Sessione 47.
+
+| # | Descrizione | Impatto | Azione adapter |
+|---|-------------|---------|----------------|
+| E.LB.1 | `additional_info` assente | Niente `duration_ms`, niente `isrc`, niente MBID | Degrado a DEDUP-3 bucket 0; `durationMs` = 0 sull'evento (E.LB.2) |
+| E.LB.2 | `duration_ms` presente solo su alcuni ascolti dello stesso brano | Due bucket DEDUP-3 diversi → **due Track** per lo stesso brano | **Non si manifesta**: il bucket DEDUP-3 di LB è sempre 0 (D7). La durata è solo hint sulla Track |
+| E.LB.3 | Token non valido / scaduto (`401`) | Le query `/listens` falliscono | `AdapterError` non recuperabile + guida al reset, **mai** retry loop. Nel percorso export (1.3) il token **non** è usato |
+| E.LB.4 | `additional_info.recording_mbid` assente ma `mbid_mapping.recording_mbid` presente | DEDUP-2 raggiungibile anche senza MBID dal client | Usare il `mbid_mapping` (D2) |
+| E.LB.5 | `429` con header `X-RateLimit-Reset-In` | Throttling | Attesa **tramite gli header**, non stimata. Non applicabile al percorso file (1.3) |
+| E.LB.6 | `count` = 0 o pagina vuota a metà storico | Loop infinito di paginazione | Stop pulito. Non applicabile al percorso file (1.3); da applicare in 1.5 |
+| E.LB.7 | Cursore `max_ts` e ultimo `listened_at` coincidenti | Loop infinito | `max_ts = ultimoTs - 1` (anti-loop). Percorso 1.5 |
+| E.LB.8 | Stesso `recording_msid` con `listened_at` diverse | Falsi duplicati se si usa il solo msid | `eventKey` = `listened_at + '\|' + recording_msid` (D-LB.2): eventi distinti, chiavi distinte |
+| E.LB.9 | `404` (username inesistente) | Import vuoto | `AdapterError` + guida. Percorso 1.5 |
+| E.LB.10 | Listen database offline (`503`) | Import parziale | `recoverable: true` con `partialEvents`. Percorso 1.5 |
+| E.LB.11 | `track_metadata` con artisti multipli | Artisti frammentati o fantasma | §3.1.2: `mbid_mapping.artists[]` se presente, altrimenti stringa grezza; mai divisione per `&` |
+| E.LB.12 | `origin_url` / `spotify_id` / `youtube_id` presenti | Tentazione di dedup cross-piattaforma via ID terzi | **Ignorati** con nota in spec (D2): nessuna chiamata di rete secondaria, nessun enrichment implicito |
+| E.LB.13 | Stesso brano scrobbato da client diversi → `recording_msid` diversi | Due eventi per lo stesso brano | **Corretto**: sono due ascolti distinti (D-LB.2 li separa). Stessa **Track** via DEDUP-1/2/3. Dichiarato: `recording_msid` non è identità di brano |
+| E.LB.14 | Mesi senza ascolti omessi dall'archivio | Sequenza di file irregolare | Il parser non assume un file per mese né un ordine cronologico (E.LB.14) |
+| E.LB.15 | Export non atomico (*"generated asynchronously from live data"*) | Il re-import vede dati diversi | Riconciliazione via `eventKey`: nessun duplicato, ma un export successivo può **aggiungere** eventi e non rimuovere quelli cancellati lato server |
+| E.LB.16 | `feedback.jsonl` / `pinned_recording.jsonl` presenti | Dati non modellati | Scartati con warning `info.libraryDeferred`; **mai** importati come `ListenEvent` |
+| E.LB.17 | `listened_at` < `LISTEN_MINIMUM_TS` (1033430400 = 2001-12-03) | Ascolti pre-2001 (import backdated) | Scartati con contatore |
+| E.LB.18 | User-Agent assente o malformato | La piattaforma può bloccare **senza preavviso** | Header statico obbligatorio, mai disattivabile (percorso 1.5) |
+| E.LB.19 | `inserted_at` molto successivo a `listened_at` (import backdated) | `inserted_at` fuorviante | `inserted_at` **mai** usato come tempo dell'evento; il tempo è `listened_at` |
+| E10 | Fusi orari | Timeline sfalsata | `listened_at` è UNIX UTC: nessun fuso da gestire; `day` derivato da `timestamp` UTC |
+
+## 5. Semantica temporale
+
+- `listened_at` = **inizio** dell'ascolto (*"This should be set to playback start time of the submitted track"*), in UNIX secondi UTC
+- `inserted_at` = momento in cui l'ascolto è stato **inserito nel database** dal server → **non** è un tempo di ascolto, **mai** usato (E.LB.19)
+- `timestamp` (unificato) = `listened_at * 1000` (D-LB.3)
+- `startedAt` = `listened_at * 1000` — indistinguibile da `timestamp`, come in YouTube Music (E.YT.5)
+- `durationMs` = `0` (costante): la durata **ascoltata** è sconosciuta. `additional_info.duration_ms` è la durata **catalogo** e va sulla `Track` come hint (D7), non sull'evento
+
+**Perché non `timestamp = listened_at + duration_ms`** (la lettera di `02§2`): `duration_ms` è **opzionale**. Con la regola letterale, un export con dati completi avrebbe eventi collocati alla **fine** dell'ascolto e un export con dati incompleti alla **fine**… no, all'**inizio**: due semantiche diverse nello stesso dataset, aggregati per ora del giorno non confrontabili, e il confine `day` spostato per una parte degli eventi.
+
+La regola `02§2` dice inoltre che *"le analisi temporali usano `startedAt` quando disponibile"*: con `startedAt` sempre valorizzato all'inizio reale, l'analisi resta corretta indipendentemente dal bias. Precedente identico: YouTube Music §5 (`timestamp = time`, `durationMs = 0`, bias dichiarato).
+
+**Bias dichiarato**: l'evento è collocato all'inizio dell'ascolto anziché alla fine; errore medio ~3-4 min, trascurabile per aggregazioni giorno/mese/era, non trascurabile per l'analisi di singolo evento.
+
+**Correzione futura** (fuori adapter MVP, contratto): quando l'enrichment (Story 4.2) popola `Track.durationMs`, un job di normalizzazione può riallineare `timestamp = startedAt + durationMs`. È possibile **senza rompere l'idempotenza** perché l'`eventKey` è derivato dai soli dati grezzi `listened_at + recording_msid` (§3.1).
+
+## 6. Dedup tracce
+
+- **DEDUP-1** (`isrc` presente) → `isrc:<ISRC upper>`: attivabile direttamente dall'export, senza attese
+- **DEDUP-2** (`recording_mbid` presente, no ISRC) → `mbid:<mbid>`: **prioritario** per questa piattaforma. La sorgente preferita è `mbid_mapping.recording_mbid` (dato risolto dal server, D2), con `additional_info.recording_mbid` come fallback
+- **DEDUP-3** (nessuno dei due) → `fuzzy:<sha1(normalize(name) + '|' + normalize(artistPrincipal) + '|' + durationBucketMs)>` con **`durationBucketMs = 0`**: il bucket non discrimina fra radio edit / album version / live di omonimi
+
+**Il bucket sempre 0 è una scelta, non un degrado** (D7): a differenza di YouTube (E.YT.5, dove la durata non esiste affatto), qui la durata **potrebbe** esistere ma non è affidabile. Usarla nel bucket produrrebbe **E.LB.2**: lo stesso brano presente in un ascolto con `duration_ms` e in uno senza finirebbe in **due `Track` distinte** — esattamente ciò che l'intero sistema di dedup vuole evitare. Preferire la Track sbagliata (una) all'evento frammentato (due).
+
+La priorità DEDUP-1/2 compensa ampiamente: è l'unica fonte del perimetro che espone gli identificativi nativi, e la maggior parte degli ascolti su un hub di scrobbling porta MBID (i client come Navidrome/Picard li inviano).
+
+- `artist_mbids[]` → `Artist.mbid`: consente la risoluzione di artisti omonimi via MBID dopo l'enrichment
+- `recording_msid` **non** è usato come identità di **brano**: è un hash dei metadati, quindi cambia se un client invia lo stesso brano con dettagli diversi (un player invia `tracknumber`, un altro no) → E.LB.13. È usato solo come parte dell'`eventKey`
+- Promozione post-enrichment: job `rekey()` (Story 1.4) quando MusicBrainz trova ISRC/MBID su un brano importato da un'altra fonte
+
+## 7. Comportamento privacy
+
+| Dato sensibile | Default | Note |
+|----------------|---------|------|
+| IP address | **non presente** nell'export | Il toggle `retainIp` non è applicabile: non c'è nulla da conservare. `ip` = `null` sempre |
+| `country` | `null` | Nessun campo paese e nessun IP → nessuna derivazione possibile |
+| Coordinate GPS | mai raccolte | — |
+| `user_name` | **mai persistito** | Identifica l'account, non l'ascolto. Esiste solo in `user.json`, che non viene importato |
+| `inserted_at` | **mai persistito** | Non è un tempo di ascolto (E.LB.19) |
+| `additional_info.media_player` / `submission_client` | conservato in `deviceDetail` | Stringa grezza del client che ha scrobbato. Non è un identificatore di persona, ma **non è** un dispositivo: dichiarato come tale in `deviceDetail` |
+| `additional_info.tags[]` | **mai persistiti** | Tag inseriti dall'utente, non generi del brano |
+| `mbid_mapping.url_rels[]` | **mai persistiti** | Link a Spotify/Deezer/Tidal: nessuna chiamata secondaria (E.LB.12) |
+| User Token | **non richiesto** per l'import dell'archivio (D-LB.4) | Se presente (percorso 1.5): storage **locale** (Dexie), mai nei log, mai nelle fixture, mai nei bundle. Usato **solo in lettura**: il token dà anche accesso in scrittura a `/1/submit-listens` e la 1.3 non scrobba |
+
+**Il file export contiene dati personali dell'utente** (l'intero storico di ascolto). Come per gli altri adapter, il file resta la fonte di verità e **non viene persistito** (ADR-0003: il payload raw non è salvato nel DB). L'app importa, scrive gli eventi normalizzati, e **non conserva l'archivio**.
+
+## 8. Test — fixture attese
+
+File atteso: `fixtures/synthetic-history/listenbrainz-sample.jsonl` (**creato nella Story 1.3**, generato in modo deterministico secondo `10-TESTING.md` §3.5).
+
+Il fixture è il **contenuto JSONL** (la concatenazione dei file `listens/<mese>.jsonl`); il test costruisce l'archivio ZIP in memoria a partire dal fixture, così il repository resta testuale e git-friendly (come per `apple-music-sample.csv`). Lo ZIP è deterministico (`fflate.zipSync` con data fissa).
+
+Convenzione `10-TESTING.md` §3.1: ogni riga porta `_case` (descrizione dello scenario) e `_expectedOutput` (valori attesi). `_case` e `_expectedOutput` **non** sono campi del payload reale: l'adapter li ignora.
+
+Casi di test minimi:
+
+1. **Happy path**: 3 righe ben formate → 3 `ListenEvent`, 3 track, `timestamp = listened_at * 1000`
+2. **Idempotenza**: re-import dello stesso archivio → `eventsDuplicated = 3` (via `eventKey` D-LB.2)
+3. **E.LB.8**: stesso `recording_msid` con `listened_at` diverse → **due** eventi distinti
+4. **E.LB.13**: stesso brano, `recording_msid` diversi (client diversi) → due eventi, **una** Track
+5. **DEDUP-1**: riga con `additional_info.isrc` → `canonicalKey` = `isrc:<ISRC>`
+6. **DEDUP-2**: riga con `mbid_mapping.recording_mbid` → `canonicalKey` = `mbid:<mbid>`; conflitto con `additional_info` → vince il mapping (D2)
+7. **E.LB.4**: riga senza MBID client ma con `mbid_mapping` → DEDUP-2 raggiunto
+8. **E.LB.11**: riga con `mbid_mapping.artists[]` (2 artisti con `join_phrase`) → **una** Artist col nome ricostruito; riga senza mapping → stringa grezza, nessuna divisione per `&`
+9. **E.LB.1 / E.LB.2**: righe con e senza `additional_info.duration_ms` → **stessa** Track (bucket 0), `durationMs` evento = 0, `Track.durationMs` popolata solo dove il dato c'è (D7)
+10. **E.LB.14**: archivio con `listens/2025-01.jsonl` e `listens/2025-03.jsonl` (febbraio assente) → tutti gli eventi importati, nessun errore
+11. **E.LB.16**: archivio con `feedback.jsonl` e `pinned_recording.jsonl` → scartati con warning, nessun `ListenEvent` in più
+12. **E.LB.17**: riga con `listened_at` < 1033430400 → scartata con contatore
+13. **Malformata**: riga senza `listened_at` o senza `track_metadata` → scartata con warning
+14. **noTitleSkipped**: riga con `track_name` vuota → scartata con warning
+15. **Senza msid**: riga senza `recording_msid` e senza MBID → importata con `sourceEventId = null` → fallback SHA-1
+16. **E.LB.19**: riga con `inserted_at` molto successivo a `listened_at` → il tempo dell'evento è `listened_at`
+17. **Privacy**: `user_name` e `inserted_at` assenti dal DB; `ip`/`country` null; `tags[]` e `url_rels[]` non persistiti
+18. **Detection**: ZIP senza `listens/*.jsonl` → `detect` ko; JSONL sciolto con prima riga valida → `detect` ok
+19. **E10**: eventi a cavallo di mezzanotte UTC → `day` UTC corretto
+20. **DEDUP-3**: due righe con lo stesso brano, nessun identificativo → una sola Track (bucket 0)
+
+## 9. Segnalazione all'utente
+
+Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listenbrainz.*` (allineato a `PlatformId`; le chiavi vanno aggiunte in `08§2.12c`):
+
+| Codice i18n | Messaggio (IT) | Quando |
+|-------------|----------------|--------|
+| `adapter.listenbrainz.detect.success` | "Archivio ListenBrainz riconosciuto" | detect ok |
+| `adapter.listenbrainz.detect.fail` | "File non riconosciuto come export ListenBrainz (manca la cartella `listens/`)" | detect ko |
+| `adapter.listenbrainz.warn.malformedSkipped` | "{count} righe non leggibili esclusi" | filtro §3.3, punto 1/3 |
+| `adapter.listenbrainz.warn.tooOldSkipped` | "{count} ascolti anteriori al 2001 esclusi" | E.LB.17 |
+| `adapter.listenbrainz.warn.noTitleSkipped` | "{count} ascolti senza titolo esclusi" | filtro §3.3, punto 4 |
+| `adapter.listenbrainz.warn.durationMissing` | "{count} ascolti senza durata: il brano non è distinguibile dalle sue versioni alternative" | E.LB.1, aggregato |
+| `adapter.listenbrainz.info.libraryDeferred` | "I tuoi like e le registrazioni fissate non sono inclusi in questo import (in arrivo)" | E.LB.16 |
+| `adapter.listenbrainz.info.exportNotSnapshot` | "L'export di ListenBrainz è generato in modo asincronico: un import successivo può aggiungere ascolti, ma non rimuove quelli che hai cancellato sul sito" | E.LB.15, fine import |
+| `adapter.listenbrainz.info.complete` | "Import completato: {events} eventi, {tracks} brani unici" | fine import |
+
+## 10. Note di implementazione
+
+- **Scanner JSONL dedicato** (D3): il `JsonArrayScanner` esistente (`adapters/jsonStream.ts`) è uno scanner di **array JSON** e non va bene per JSONL. Serve un nuovo modulo in `packages/core/src/adapters/` con:
+  - memoria limitata a **una riga** (basta un buffer incrementale finché la riga è completa)
+  - gestione di righe vuote e di un eventuale BOM sul primo file
+  - tolleranza a una riga JSON malformata: **non** deve abortire lo stream — la riga viene scartata con warning e il parsing continua (un export con una riga corrotta non deve perdere tutto lo storico)
+  - `end()` coerente: righe rimaste nel buffer senza terminatore → `AdapterError` `TRUNCATED`, `recoverable: true`
+- **Estrazione ZIP**: `fflate` (già dipendenza di `@ls/core`). Pattern degli adapter esistenti: `listZipEntries` per la detection (solo central directory, nessuna decompressione) e `extractZipEntry` per il contenuto, **un file per volta** → memoria di picco limitata a un mese di ascolti
+- **Nessuna dipendenza nuova**: a differenza di `papaparse` per Apple (D5 di `apple-music.md` v1.0), qui il formato è JSONL e lo scanner è fatto in casa — stessa scelta di `jsonStream.ts` per Story 1.1
+- **Costanti**: `LISTEN_MINIMUM_TS = 1033430400` (2001-12-03, dalla costante `LISTEN_MINIMUM_TS` del server)
+- **Nessuna chiamata di rete**: l'adapter è **file-only** nella 1.3. Nessun rate limit applicabile, nessun User-Agent, nessun token
+- **`fflate` per lo ZIP**: la ricostruzione dell'archivio in memoria nei test usa `fflate.zipSync` con date fisse → archivio deterministico
+- **Estensione futura (Story 1.5)**: il percorso `/listens` con `max_ts` produrrà gli stessi `RawListenEvent`; servirà un metodo `parseRemote?()` sul contratto adapter (`05§4`) — **decisione D-LF.8 di `03-ADAPTERS/lastfm.md`**, che richiede un ADR-0010. Finché l'ADR non esiste, la 1.5 non può implementare il percorso `/listens`
+- **Enrichment**: fuori adapter. La 1.3 produce `Track.mbid` e `Track.isrc` nativi → l'enrichment (Story 4.2) potrà arricchire i brani che restano senza identificativo
+
+---
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 47 (2026-10-26) | Prima stesura (issue #145). Decisioni D-LB.1…D-LB.5 chiuse con il Boss; API e formato export verificati su sorgente e doc ufficiali. Correzione di una premessa errata: `recording_msid` **non** è un identificativo univoco per singolo ascolto (è un hash dei metadati) → l'`eventKey` include `listened_at` (D-LB.2). Canale di storico = **export API** (ZIP/JSONL), non paginazione `/listens`: la doc ne sconsiglia l'uso per lo storico completo e il contratto `05§4` resta invariato (D-LB.4) |
 
 
 
@@ -10563,6 +11217,24 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `youtube_music.info.partialHistory` | La cronologia Google potrebbe non coprire l'intera storia dell'account | Google history may not cover your entire account lifetime |
 | `youtube_music.info.complete` | Import completato: {events} eventi, {tracks} brani unici | Import complete: {events} events, {tracks} unique tracks |
 
+### 2.12c `adapter.listenbrainz.*` (Story 1.3 — spec `03-ADAPTERS/listenbrainz.md` §9)
+
+| Key | IT | EN |
+|-----|----|----|
+| `listenbrainz.detect.success` | Archivio ListenBrainz riconosciuto | ListenBrainz archive recognized |
+| `listenbrainz.detect.fail` | File non riconosciuto come export ListenBrainz (manca la cartella `listens/`) | File not recognized as a ListenBrainz export (missing the `listens/` folder) |
+| `listenbrainz.warn.malformedSkipped_one` | {{count}} riga non leggibile esclusa | {{count}} unreadable row excluded |
+| `listenbrainz.warn.malformedSkipped_other` | {{count}} righe non leggibili escluse | {{count}} unreadable rows excluded |
+| `listenbrainz.warn.tooOldSkipped_one` | {{count}} ascolto anteriore al 2001 escluso | {{count}} listen before 2001 excluded |
+| `listenbrainz.warn.tooOldSkipped_other` | {{count}} ascolti anteriori al 2001 esclusi | {{count}} listens before 2001 excluded |
+| `listenbrainz.warn.noTitleSkipped_one` | {{count}} ascolto senza titolo escluso | {{count}} listen without a title excluded |
+| `listenbrainz.warn.noTitleSkipped_other` | {{count}} ascolti senza titolo esclusi | {{count}} listens without a title excluded |
+| `listenbrainz.warn.durationMissing_one` | {{count}} ascolto senza durata: il brano non è distinguibile dalle sue versioni alternative | {{count}} listen without a duration: the track cannot be told apart from its alternative versions |
+| `listenbrainz.warn.durationMissing_other` | {{count}} ascolti senza durata: i brani non sono distinguibili dalle loro versioni alternative | {{count}} listens without a duration: tracks cannot be told apart from their alternative versions |
+| `listenbrainz.info.libraryDeferred` | I tuoi like e le registrazioni fissate non sono inclusi in questo import (in arrivo) | Your likes and pinned recordings are not included in this import (coming soon) |
+| `listenbrainz.info.exportNotSnapshot` | L'export di ListenBrainz è generato in modo asincronico: un import successivo può aggiungere ascolti, ma non rimuove quelli che hai cancellato sul sito | The ListenBrainz export is generated asynchronously: a later import can add listens, but does not remove the ones you deleted on the site |
+| `listenbrainz.info.complete` | Import completato: {{events}} eventi, {{tracks}} brani unici | Import complete: {{events}} events, {{tracks}} unique tracks |
+
 ### 2.13 `error.*`
 
 | Key | IT | EN |
@@ -10668,6 +11340,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 |----------|------|-----------|
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |
+| 0.3 | Sessione 47 (2026-10-26, issue #145) | Aggiunta §2.12c `adapter.listenbrainz.*` (12 chiavi, spec `03-ADAPTERS/listenbrainz.md` §9). Le varianti `_one`/`_other` seguono la convenzione i18n per i conteggi (stesso pattern di `adapter.spotify.*` e `adapter.youtube_music.*`) |
 
 
 ===== FILE: docs/09-PRIVACY-SECURITY.md =====
@@ -10780,6 +11453,9 @@ Definire:
 | Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
 | Playlist e libreria | Dati personali | Export utente | Sì (locale) | Consenso esplicito |
 | Ricerche effettuate | Dati personali | Export Spotify | Sì (locale, opzionale) | Consenso esplicito |
+| Username ListenBrainz | Dati personali | Export ListenBrainz | **No** — letto da `user.json` e mai persistito | Consenso esplicito (art. 6.1.a) |
+| User Token ListenBrainz | Segreto / credenziale | Account ListenBrainz | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
+| `inserted_at` (inserimento nel DB) | Dati personali | Export ListenBrainz | **No** — non è un tempo di ascolto | — |
 
 **Nota (opzione A, issue #108)**: il `country` (paese di connessione) è un **dato derivato e non identificativo**: viene derivato dall'IP al parse e conservato indipendentemente dal toggle `retainIp`, come definito in `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED). Non richiede consenso esplicito: il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP (`retainIp`) e per i trattamenti attivabili via toggle (`enrichMetadata`, `scrobbleHubs`, `syncCloud`, `carDetectionConsent`). Questo allinea `09` §4 a `02` §3.8 e scioglie la contraddizione segnalata in issue #108.
 
@@ -10838,6 +11514,14 @@ piattaforma di streaming (Spotify, Apple Music, YouTube Music, ecc.):
 cronologia ascolti, brani, artisti, timestamp, e — se lo attivi tu — indirizzi IP.
 
 Tutti questi dati restano sul tuo dispositivo. Non li inviamo a nessun server.
+
+**Credenziali di piattaforma**: quando colleghi un account esterno (per esempio
+ListenBrainz, o Last.fm per il percorso API), la chiave di accesso che ci serve
+resta **solo sul tuo dispositivo** (IndexedDB). Non la includiamo nei log, non la
+pubblichiamo, non la condividiamo con terzi. Nella Story 1.3 il token ListenBrainz
+è usato **solo in lettura** per le query incrementali: l'app non scrobba nulla per
+conto tuo. Puoi revocarlo dalle impostazioni dell'account ListenBrainz in
+qualsiasi momento, e l'app smette di usarlo al primo errore.
 
 ### 7.3 Come li usiamo
 
@@ -10965,6 +11649,7 @@ email).
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.2 | 2026-10-21 (issue #109) | §4: la riga "Tipo dispositivo" dichiara che `car` viene persistito solo con `carDetectionConsent` attivo — il gate è applicato in scrittura dalla pipeline core (`applyCarConsent`), come già previsto da `02` §3.8 |
+| 0.3 | 2026-10-26 (issue #145) | §4: tre righe nuove per ListenBrainz (username mai persistito, User Token locale e mai nei log, `inserted_at` mai persistito). §7: nota sulla destinazione del User Token (storage locale, uso **solo in lettura** nella 1.3) |
 | 0.1 | Sessione 6 | Prima versione completa |
 
 
@@ -11407,17 +12092,37 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
+### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Descrizione**: Import storico via API (paginazione completa).
+**Stato**: 🟡 **IN CORSO** — spec in stesura (issue #145 ListenBrainz, #144 Last.fm; entrambe `agent-ready`)
 
-**Acceptance criteria**:
-- [ ] Paginazione su tutto lo storico
-- [ ] Rate limit rispettato (5 req/s per Last.fm)
-- [ ] MBID da ListenBrainz alimenta DEDUP-2
-- [ ] Test con mock API
+**Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
-**Spec**: `01-PLATFORMS.md` §3.7-3.8
+**Nota di perimetro (Sessione 47)**: la descrizione originaria era "Import storico via API (paginazione completa)" per entrambe. La verifica delle due piattaforme ha corretto il perimetro:
+
+- **ListenBrainz**: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/1/user/{username}/listens` — la documentazione ufficiale prescrive l'export per lo storico completo e **sconsiglia esplicitamente** di paginare tutto lo storico sull'endpoint listens. Il percorso `/listens` (query incrementali) resta alla Story 1.5
+- **Last.fm**: l'export GDPR non è utilizzabile dall'app (procedura manuale via email, e risulta incompleto per eventi) → il canale è l'API `user.getRecentTracks`, che richiede un **proxy CORS** configurabile dall'utente (l'API non emette header CORS) e una `api_key` **per-utente** (i ToS §4.4 vietano una key condivisa che serva N utenti)
+
+**Acceptance criteria** (fonte: `03-ADAPTERS/listenbrainz.md` §8, issue #145):
+- [ ] Detection su ZIP con `listens/*.jsonl` + `user.json`, e su JSONL sciolto
+- [ ] Parsing streaming JSONL con scanner dedicato (bounded memory, una riga malformata non abortisce lo stream)
+- [ ] `eventKey = listenbrainz:<listened_at>|<recording_msid>` (D-LB.2 — il msid **non** è univoco per ascolto)
+- [ ] Semantica temporale uniforme: `timestamp = startedAt = listened_at*1000`, `durationMs = 0`, bias dichiarato
+- [ ] DEDUP-1 (ISRC) e DEDUP-2 (MBID da `mbid_mapping`) attivati alla prima importazione; bucket DEDUP-3 sempre 0
+- [ ] `feedback.jsonl` e `pinned_recording.jsonl` scartati con warning; `user_name` e `inserted_at` mai persistiti
+- [ ] Fixture `fixtures/synthetic-history/listenbrainz-sample.jsonl` con i 20 casi della spec §8
+
+**Acceptance criteria** (fonte: `03-ADAPTERS/lastfm.md`, issue #144):
+- [ ] Percorso API via proxy CORS configurabile dall'utente + percorso file (export di terze parti)
+- [ ] `api_key` per-utente (mai embedded nel bundle) + web auth per la `sk` (route callback in-app)
+- [ ] `eventKey` normalizzato al **minuto** su entrambi i percorsi (il re-import misto non duplica)
+- [ ] Rate limiter client-side (~5 req/s) con backoff su `11/16/29/429/5xx` e `AbortSignal`
+- [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **richiede ADR-0010** su `05§4`
+- [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26)
+
+**Spec**: `03-ADAPTERS/listenbrainz.md` (v0.1, 🟡 DRAFT, Sessione 47) · `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 47) · `01-PLATFORMS.md` §3.7, §3.8
+
+**Issue**: #145 (ListenBrainz) · #144 (Last.fm) · **Size**: `L` — ricalibrata da `M` in Sessione 47: 2 fonti dati, 2 API, autenticazione, rate limiting, mock API e 2 percorsi per adapter
 
 ---
 
@@ -11439,19 +12144,24 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 **Descrizione**: Sorgente continua di ascolti tramite hub di scrobbling. Risolve il vuoto V4 dell'audit.
 
 **Task**:
-- T1.5.1 — Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)
-- T1.5.2 — Adapter ListenBrainz (recupero storico via API `/1/user/{username}/listens`)
+- T1.5.1 — ~~Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)~~ → **spostato alla Story 1.3** (Sessione 47)
+- T1.5.2 — ~~Adapter ListenBrainz (recupero storico via API `/1/user/{username}/listens`)~~ → **spostato alla Story 1.3** (Sessione 47); nella 1.5 resta il **percorso incrementale** `/listens` con cursore `max_ts`
 - T1.5.3 — Adapter Maloja self-hosted (server opzionale, scope futuro Fase 2)
 - T1.5.4 — Toggle `PrivacySettings.scrobbleHubs` per abilitare l'invio
-- T1.5.5 — Rispetto rate limit (Last.fm ~5 req/s, ListenBrainz ragionevole)
+- T1.5.5 — Rispetto rate limit (Last.fm ~5 req/s, ListenBrainz 1 req/s con User Token)
+- T1.5.6 — **Invio scrobble** verso i hub (la Story 1.5 è nata come "fonte continua" ma non aveva il task di scrittura)
+
+**Nota (Sessione 47)**: T1.5.1 e T1.5.2 duplicavano esattamente il recupero storico della Story 1.3. La 1.5 è stata **ridimensionata** a *invio scrobble + sync continua + toggle*, riusando gli adapter creati nella 1.3. La duplicazione è il motivo per cui la 1.3 è passata da `M` a `L` in un colpo solo.
 
 **Acceptance criteria**:
-- [ ] Storico completo recuperato (paginazione)
+- [ ] Sync continua incrementale (non re-import da zero): cursore `max_ts` / `min_ts`
 - [ ] MBID da ListenBrainz alimenta DEDUP-2 e genera `track.genres` via MusicBrainz lookup
 - [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura)
+- [ ] Invio scrobble funzionante verso i hub configurati
 - [ ] Test con mock API
+- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144)
 
-**Spec**: `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8
+**Spec**: `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8; `03-ADAPTERS/listenbrainz.md` §3.4
 
 ---
 
@@ -11650,9 +12360,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8 🟡 DRAFT): servono `03-ADAPTERS/lastfm.md` e `listenbrainz.md` |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec in stesura (issue #145 ListenBrainz, #144 Last.fm, entrambe `agent-ready`); `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
-| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
+| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -11692,6 +12402,7 @@ Ogni story deve avere label GitHub:
 | 1.6.2 | Sessione 40 (2026-10-21, issue #98) | Note Story 1.1 (spec 🟢 APPROVED, PR #97) e 1.2 (spec scritta, 🟡 DRAFT) nella tabella roadmap |
 | 1.6.3 | Sessione 42 (2026-10-22, issue #132) | Story 1.2: spec 🟢 APPROVED v1.0 (PR #134), `[SIZE:M]` → `[SIZE:L]`, sezione Story riscritta con gli AC della spec §8 e `**Spec**:` che punta a `03-ADAPTERS/apple-music.md` (prima puntava solo a `01-PLATFORMS.md` §3.3, censito come più povero dell'export reale). Nota roadmap allineata. Tabella "Stato di avanzamento": la 1.2 resta `⬚ TODO` perché lo stato vive in `docs/state/stories/1.2-adapter-apple-music.md` |
 | 1.6.4 | Sessione 45 (2026-10-22, issue #140) | Story 1.2 ✅ DONE (PR #139, merge `2e1a4cc`): rimossa dalla tabella roadmap e allineata la riga `**Stato**:` della sezione Story. Il doc-sync era rimasto fuori da `main` perché `auto-state-aggregate.yml` falliva con `non-fast-forward` (vedi `docs/state/sessions/45-*.md`). Nota della 1.3 aggiornata: le specifiche adapter Last.fm / ListenBrainz **non esistono** (`01-PLATFORMS.md` §3.7-3.8 è 🟡 DRAFT), quindi la 1.3 non è lavorabile finché non vengono scritte e ratificate |
+| 1.6.5 | Sessione 47 (2026-10-26, issue #145, #144) | **Story 1.3 perimetro corretto**: la descrizione "Import storico via API (paginazione completa)" era imprecisa per entrambe le piattaforme. **ListenBrainz**: il canale MVP è l'**export API** (ZIP con JSONL) — la doc prescrive l'export per lo storico completo e sconsiglia la paginazione `/listens` (che resta alla 1.5). **Last.fm**: l'export GDPR non è utilizzabile dall'app → canale API con proxy CORS e `api_key` per-utente (ToS §4.4). `[SIZE:M]` → `[SIZE:L]`. **Story 1.5 ridimensionata**: T1.5.1/T1.5.2 duplicavano la 1.3 → la 1.5 resta invio scrobble + sync continua + toggle, con il task di scrittura T1.5.6 aggiunto. Sezione Story 1.3 riscritta con gli AC delle due spec; nota roadmap allineata |
 
 <!-- AGGREGATE-STORIES-START -->
 

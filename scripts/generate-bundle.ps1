@@ -105,6 +105,8 @@ $files = @(
     "docs/state/stories/0.4-ui-import.md",
     "docs/state/sessions/38-doc-sync-legacy.md",
     "docs/state/sessions/41-geo-context-spec.md",
+    "docs/state/sessions/47-listenbrainz-lastfm-adapter-spec.md",
+    "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",
@@ -114,6 +116,7 @@ $files = @(
     "docs/03-ADAPTERS/spotify.md",
     "docs/03-ADAPTERS/youtube-music.md",
     "docs/03-ADAPTERS/apple-music.md",
+    "docs/03-ADAPTERS/listenbrainz.md",
     "docs/04-ANALYSIS-ALGORITHMS.md",
     "docs/05-ARCHITECTURE.md",
     "docs/06-UX-FLOWS-STATES.md",
