@@ -94,7 +94,8 @@
 | 47 | Spec adapter ListenBrainz + Last.fm (Story 1.3) | 🟢 | ✅ | #146 |
 | 48 | Fix race fra i due writer di main (issue #149) | 🟡 | ❌ | #null |
 | 49 | ADR-0010 — Sorgenti remote nel contratto degli adapter | 🟢 | ✅ | #152 |
-| 50 | Spec adapter Last.fm (Story 1.3) | 🟡 | ❌ | #null |
+| 50 | Spec adapter Last.fm (Story 1.3) | 🟢 | ✅ | #154 |
+| 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟡 | ❌ | #null |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -134,9 +135,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **27** (merge: 20)
+- Sessioni migrate in state/sessions: **28** (merge: 21)
 - Stories migrate in state/stories: **10** (done: 9)
-- Ultima sessione migrata: **S50** - Spec adapter Last.fm (Story 1.3)
+- Ultima sessione migrata: **S51** - Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
