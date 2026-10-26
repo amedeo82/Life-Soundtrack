@@ -2,12 +2,12 @@
 number: 52
 title: "Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)"
 date: 2026-10-26
-state: 🟢
-merged: true
+state: 🟡
+merged: false
 merged_commit: ""
 merged_date: ""
 branch: feat/155-lastfm-listenbrainz-adapter
-pr: ""
+pr: 158
 claim: kilo-HP-ELITEBOOK-lb52
 cross_refs: [155, 144, 145, 148]
 tags: [adapter, phase-1, feat]

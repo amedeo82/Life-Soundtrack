@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 21:45
+> Data: 2026-10-26 21:52
 > Totale file: 87
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -7629,12 +7629,12 @@ L'issue raccoglie i deliverable delle tre specifiche:
 number: 52
 title: "Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)"
 date: 2026-10-26
-state: 🟢
-merged: true
+state: 🟡
+merged: false
 merged_commit: ""
 merged_date: ""
 branch: feat/155-lastfm-listenbrainz-adapter
-pr: ""
+pr: 158
 claim: kilo-HP-ELITEBOOK-lb52
 cross_refs: [155, 144, 145, 148]
 tags: [adapter, phase-1, feat]
@@ -7800,7 +7800,7 @@ priority: I
 depends_on: ["0.3"]
 issue: 155
 branch: feat/155-lastfm-listenbrainz-adapter
-pr: ""
+pr: 158
 merged_commit: ""
 merged_date: ""
 claim: kilo-HP-ELITEBOOK-lb52
