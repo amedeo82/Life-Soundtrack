@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 22:01
+> Data: 2026-10-26 21:07
 > Totale file: 87
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1454,7 +1454,7 @@ Apache License
 | 49 | ADR-0010 — Sorgenti remote nel contratto degli adapter | 🟢 | ✅ | #152 |
 | 50 | Spec adapter Last.fm (Story 1.3) | 🟢 | ✅ | #154 |
 | 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟢 | ✅ | #156 |
-| 52 | Implementazione Story 1.3 (adapter Last.fm + ListenBrainz) | 🟡 | ❌ | #158 |
+| 52 | Implementazione Story 1.3 (adapter Last.fm + ListenBrainz) | 🟢 | ✅ | #158 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1494,7 +1494,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **29** (merge: 22)
+- Sessioni migrate in state/sessions: **29** (merge: 23)
 - Stories migrate in state/stories: **10** (done: 10)
 - Ultima sessione migrata: **S52** - Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3
@@ -5490,8 +5490,8 @@ L'issue raccoglie i deliverable delle tre specifiche:
 ### Sessione 52 - Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #158)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #158 (7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4, 2026-10-26)
 - **Claim**: `kilo-HP-ELITEBOOK-lb52`
 
 ```
@@ -5635,7 +5635,8 @@ riga ha un solo `uts`). Dichiarato come gap noto della 1.3.
 
 ## Cross-refs
 
-- **#155** — issue di implementazione della Story 1.3 (chiusa al merge della PR)
+- **#155** — issue di implementazione della Story 1.3, chiusa con `status:done` al
+  merge della **PR #158** (`7afbf03`, 2026-10-26T20:56Z)
 - **#144** / **#145** / **#148** — issue delle spec (ListenBrainz, Last.fm, ADR-0010)
 - `docs/03-ADAPTERS/listenbrainz.md` · `docs/03-ADAPTERS/lastfm.md` — le spec consumate
 - `docs/13-ADR/0010-remote-source-adapter.md` — il contratto `parseRemote?()`
@@ -14641,7 +14642,7 @@ Ogni story deve avere label GitHub:
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
 | 1.1 - Adapter YouTube Music | done | #130 | `43f75291e5184144dc9d974c5003cd6ae6a7583e` | adapter |
 | 1.2 - Adapter Apple Music | done | #139 | `7640d83` | adapter |
-| 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | - | adapter |
+| 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
 
