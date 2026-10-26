@@ -106,6 +106,7 @@ $files = @(
     "docs/state/sessions/38-doc-sync-legacy.md",
     "docs/state/sessions/41-geo-context-spec.md",
     "docs/state/sessions/47-listenbrainz-lastfm-adapter-spec.md",
+    "docs/state/sessions/48-fix-bundle-writer-ordering.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
@@ -197,6 +198,13 @@ $files = @(
     # quando l'altra workflow ha gia' pushato sullo stesso merge commit) e
     # verifica che il gate esca 1; un caso verifica che l'ordine conti.
     "scripts/test-workflow-push-sync.sh",
+    # Test di regressione del gate sull'ordinamento fra i due writer di `main`
+    # (issue #149). T1..T5: lo scenario negativo rimuove il trigger
+    # `workflow_run` da auto-bundle.yml (i due writer restano serializzati ma
+    # non ordinati: il bundle puo' copiare blocchi aggregati stale) e verifica
+    # che il gate esca 1; un caso verifica che il nome dichiarato nel trigger
+    # combaci con il `name:` reale del producer.
+    "scripts/test-workflow-writer-ordering.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",

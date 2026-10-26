@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 14:21
-> Totale file: 73
+> Data: 2026-10-26 16:16
+> Totale file: 75
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.25 — Sessione 46 (2026-10-22)**
+> **Versione 1.26 — Sessione 47 (2026-10-26)**
 
 ---
 
@@ -778,7 +778,7 @@ Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; qua
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
 | `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136) |
-| `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group |
+| `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group. Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
 Dettagli e motivazioni:
@@ -791,12 +791,13 @@ Dettagli e motivazioni:
 
 4. **`stale-claim-sweeper`** applica il TTL di 12h di ADR-0006, che era documentato ma non controllato da nulla. Non rimuove la label di proposito: un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer. Segnala e lascia decidere.
 
-I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica **quattro** controlli indipendenti sul testo dei workflow:
+I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica **cinque** controlli indipendenti sul testo dei workflow:
 
 1. **Sintassi JS dei blocchi `script:` di `github-script`**, emulando il wrapper `async` reale (issue #73): senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
 2. **Copertura `git add` vs `$targets`** dell'agregator (issue #136): vedi §"🔄 Lazy-state aggregation → Target V1 + V2 + V3".
 3. **Scope dichiarate in `permissions:`** (issue #135): ogni chiave deve essere una scope reale della `GITHUB_TOKEN`, ogni valore `read`/`write`/`none`. Una scope inesistente — per esempio `metadata`, che è sempre concessa e **non** è dichiarabile — non produce un job che fallisce: GitHub *rifiuta il file in fase di validazione*, quindi la run viene creata con `jobs: 0` e finisce `failure` a 0 secondi, senza log e senza annotazioni via API. Il sintomo è indistinguibile da "Actions rotta per billing" ed è la ragione per cui #135 ha spento tutti i gate di `ci.yml` per ~22 ore senza che nessuno se ne accorgesse. Test di scenario negativo: `scripts/test-workflow-permission-scopes.sh`.
 4. **Sync con `origin/main` prima del push** (issue #140): ogni workflow che contiene `git push origin main` deve aver allineato il workspace a `origin/main` **prima** del push. Il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit: quando l'altra workflow ha già pushato sullo stesso merge, il push viene rifiutato con `non-fast-forward` e i blocchi aggregati restano indietro **in silenzio** (merge verde, CI verde, stato falso). `auto-state-aggregate.yml` ne era privo ed è stato il motivo per cui il doc-sync della Story 1.2 non è mai arrivato su `main`. Test di scenario negativo: `scripts/test-workflow-push-sync.sh`.
+5. **Ordinamento fra i due writer di `main`** (issue #149): `auto-bundle.yml` deve dichiarare un trigger `workflow_run` su `auto-state-aggregate`, e il nome in `workflows:` deve combaciare con il `name:` reale del producer. Il concurrency group serializza i *run* ma **non ne impone l'ordine**, e `auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica: senza il trigger, il bundle può copiare blocchi aggregati stale (caso reale: merge della PR #147, drift di 6 righe in `docs/BUNDLE.md`, silenzioso perché il gate sul bundle è warning-only). `workflow_run` è agganciato alla *conclusione* del workflow e quindi sopravvive alla soppressione del GITHUB_TOKEN. Test di scenario negativo: `scripts/test-workflow-writer-ordering.sh`.
 
 ### Livello 2 — Issue (release + label)
 
@@ -983,7 +984,16 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.25 — l'idempotenza dell'agregator esisteva solo in `-Check` (Sessione 46, issue #142). La garanzia «il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro» (issue #70) era documentata e verificata unicamente dal check, dove la normalizzazione maschera il campo: nel path di scrittura `Get-Date` veniva ristampato a ogni run. Con granularità al minuto, due run ravvicinati che strappano il confine producevano un diff di una riga — il «commit-rumore su `main`» che la garanzia prometteva di eliminare — e `test-aggregate-determinism.sh` T3 falliva a intermittenza (run `39818043647`, 16:55 → 16:56), cioè un gate bloccante che dipendeva dall'orologio. Difetto gemello in `generate-bundle.ps1`: `Build-Bundle` accettava già un parametro `-Timestamp` mai passato, e il path di scrittura ristampava `> Data:` — nessun gate lo vedeva (`-Check` normalizzava), ma `auto-bundle` committava dopo ogni merge a contenuto identico. Aggiunti:
+*Ultimo aggiornamento: v1.26 — i due writer di `main` erano serializzati ma **non ordinati** (Sessione 47, issue #149). Il concurrency group `post-merge-main` garantisce che i due run non si sovrappongano, ma non quale dei due ottenga prima il lock: e l'ordine è essenziale, perché `auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `auto-bundle` alle 12:50:23, `auto-state-aggregate` alle 12:50:55. Il bundle copiò i blocchi aggregati ancora vecchi, il guard idempotente (`git diff --quiet`) scrisse «già in sync» e non committò nulla; l'agregate committò dopo, e la copia dentro `docs/BUNDLE.md` restò stale di 6 righe. Drift **silenzioso**: il gate CI sul bundle è warning-only, la pipeline restava verde. Il commit del bot non poteva auto-correggerlo, perché il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso (le sole eccezioni documentate sono `workflow_dispatch` e `repository_dispatch`). Aggiunti:
+- `.github/workflows/auto-bundle.yml`: trigger `workflow_run` su `auto-state-aggregate` (`types: [completed]`) — è agganciato alla **conclusione** del workflow, non a un push, quindi sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda. Con esso il bundle rigenera **sempre** una seconda volta dopo che l'aggregate ha committato: la copia embedded è allineata ai sorgente, indipendentemente dall'ordine di scheduling
+- `scripts/validate-workflows.mjs`: quinto controllo `checkWriterOrdering` — verifica che `auto-bundle.yml` dichiari il trigger `workflow_run` **e** che il nome in `workflows:` combaci con il `name:` reale del producer (una disallineazione non dà errore: il trigger semplicemente non scatterebbe mai, in silenzio)
+- `scripts/test-workflow-writer-ordering.sh` (nuovo, T1..T5, 6 assert): T2 rimuove il blocco `workflow_run:` e verifica che il gate esca 1, T3 un trigger su un altro workflow, T4 il `name:` del producer disallineato (il caso silenzioso), T5 il producer assente — un gate che passa sempre non è un gate (lesson 43-1)
+- `.github/workflows/ci.yml`: nuovo step bloccante `Ordinamento dei writer di main (issue #149)` in posizione 13
+- `scripts/generate-bundle.ps1`: `$files` += il nuovo test
+- `docs/12-DEVOPS.md` §9.8e (nuova) con la sequenza temporale del fallimento, il meccanismo della soppressione del GITHUB_TOKEN e la regola generale (quando il secondo workflow **legge** ciò che il primo **scrive**, il trigger corretto è `workflow_run`, non `push`); §9.10 aggiornata a 16 step; changelog 0.8
+- §"📤 Post-merge actions" Livello 1: la riga `auto-bundle` dichiara il doppio trigger; i controlli del validatore elencati sono cinque, non quattro
+
+*Precedente v1.25 — l'idempotenza dell'agregator esisteva solo in `-Check` (Sessione 46, issue #142). La garanzia «il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro» (issue #70) era documentata e verificata unicamente dal check, dove la normalizzazione maschera il campo: nel path di scrittura `Get-Date` veniva ristampato a ogni run. Con granularità al minuto, due run ravvicinati che strappano il confine producevano un diff di una riga — il «commit-rumore su `main`» che la garanzia prometteva di eliminare — e `test-aggregate-determinism.sh` T3 falliva a intermittenza (run `39818043647`, 16:55 → 16:56), cioè un gate bloccante che dipendeva dall'orologio. Difetto gemello in `generate-bundle.ps1`: `Build-Bundle` accettava già un parametro `-Timestamp` mai passato, e il path di scrittura ristampava `> Data:` — nessun gate lo vedeva (`-Check` normalizzava), ma `auto-bundle` committava dopo ogni merge a contenuto identico. Aggiunti:
 - `scripts/aggregate-state.ps1`: `Get-NormalizedBlock` e `Sync-MutableTimestamp`; `Apply-Blocks` confronta il blocco calcolato con quello su disco **a parità del campo mutabile** e riusa il valore esistente; `Test-Blocks` riusa la stessa funzione di normalizzazione (una sola definizione, le due copie non possono divergere)
 - `scripts/generate-bundle.ps1`: riuso di `> Data:` prima della scrittura — **confronto su tutto il bundle, sostituzione solo sulla prima occorrenza** (i documenti inclusi possono avere una riga `> Data:` propria: `docs/AUDIT-2026-10-15.md`)
 - `scripts/test-aggregate-determinism.sh`: **T11** (4 assert) — sentinel seminato nella riga del timestamp, verifica del riuso e contro-prova «contenuto cambiato → il timestamp si aggiorna». Con il riuso assente fallisce **sempre**, non una volta su N
@@ -5314,8 +5324,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 1.5
-> Ultima modifica: 2026-10-26 — §15 Story 1.3 (spec adapter ListenBrainz, issue #145)
+> Versione: 1.6
+> Ultima modifica: 2026-10-26 — §16 Issue #149 (race fra i due writer di `main`)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -5803,6 +5813,32 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 16. Issue #149 — Race fra i due writer di `main` (auto-bundle / auto-state-aggregate)
+
+**Tipo**: bug (toolchain) — fix strutturale
+**Branch**: `fix/149-bundle-writer-ordering` (da `main` @ `8b793c2`; lavoro in worktree dedicata)
+**PR**: #151 (issue #149, claim `kilo-HP-ELITEBOOK-lb47`)
+**Data**: 2026-10-26
+**Stato**: 🟡 PR aperta — opzione A (`workflow_run`)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 16-1 | P+L | `docs/BUNDLE.md` stale di 6 righe dopo il merge della PR #147: la copia embedded di `docs/11-BACKLOG.md` mostrava `\| 1.3 ... \| #null \|` e la Sessione 47 come «non ancora mergiata» | I due writer di `main` condividono il concurrency group `post-merge-main`, che **serializza** i run ma **non ne impone l'ordine**. `auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**: se gira prima copia i blocchi aggregati ANCORA VECCHI, il guard idempotente scrive «già in sync» e non committa; l'aggregate committa dopo e la copia resta stale | Trigger `workflow_run` su `auto-state-aggregate` in `auto-bundle.yml`: è agganciato alla **conclusione** del workflow, non a un push, quindi sopravvive alla soppressione del GITHUB_TOKEN. Con esso il bundle rigenera **sempre** dopo che l'aggregate ha committato | `.github/workflows/auto-bundle.yml`, `docs/12-DEVOPS.md` §9.8e |
+| 16-2 | P | Il drift non poteva auto-correggersi: il commit del bot toccava `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md`, `README.md` — tutti nei trigger path di `auto-bundle` — ma nessuna run partiva | Il push avviene con `secrets.GITHUB_TOKEN`, e GitHub **sopprime i workflow run innescati dal proprio GITHUB_TOKEN** (anti-ricorsione; sole eccezioni documentate: `workflow_dispatch`, `repository_dispatch`) | Il trigger `workflow_run` (16-1) aggira la soppressione. In alternativa: un PAT o `workflow_dispatch` | `docs/12-DEVOPS.md` §9.8e |
+| 16-3 | P | Il gate `checkWriterOrdering` crashava con `ReferenceError: Cannot access 'WRITER_ORDERING' before initialization` invece di emettere un `[FAIL]` | La chiamata al check era stata inserita **prima** della dichiarazione di `const WRITER_ORDERING`; in JavaScript `const` non è hoisted | Chiamata spostata in fondo al file, dopo le dichiarazioni. Il test T2 verifica comunque che il gate esca 1 quando il trigger manca | `scripts/validate-workflows.mjs` |
+| 16-4 | P | Il test di regressione non poteva girare in locale su Windows: la prima stesura manipolava la fixture con uno script Python inline | `python3` non esiste su Windows (l'alias della Microsoft Store occupa il nome e fallisce); inoltre `bash` nel `PATH` di Windows è lo stub WSL, non una shell | Fixture T2 riscritta con `sed` (disponibile in Git Bash, WSL, Linux). Nota operativa: i `scripts/test-*.sh` si esegucono in locale con `C:\Program Files\Git\bin\bash.exe` | `scripts/test-workflow-writer-ordering.sh` |
+
+**Lesson learned sintetica**: la serializzazione non è l'ordinamento. Un concurrency group con `cancel-in-progress: false` garantisce che due run non si sovrappongano — non dice *quale* parte prima. Il bug è rimasto latente finché i due workflow producevano artefatti indipendenti; è emerso quando il secondo ha cominciato a **leggere** ciò che il primo **scrive**. Sullo stesso ref si pongono quindi tre problemi distinti: *chi pusha per primo* (§9.8d, #140), *su quale commit si pusha* (#140) e *chi produce prima* (#149, questo).
+
+### Link utili
+
+- Branch: `fix/149-bundle-writer-ordering` (post-merge → eliminata per policy §♻️)
+- Issue: **#149** (claim `kilo-HP-ELITEBOOK-lb47`)
+- Diagnosi completa: `docs/12-DEVOPS.md` §9.8e
+- File toccati: `.github/workflows/auto-bundle.yml`; `.github/workflows/ci.yml`; `scripts/validate-workflows.mjs`; `scripts/test-workflow-writer-ordering.sh` (nuovo); `scripts/generate-bundle.ps1`; `docs/12-DEVOPS.md` §9.8e/§9.10; `AGENTS.md` v1.26
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -5827,6 +5863,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
 tra conversazioni AI e durante l'audit di Sessione (vedi `AGENTS.md` §"Fine di un'implementazione").*
+| 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
 
 
 
@@ -6018,6 +6055,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/43-readme-next-step-git-add.md` | ✅ creata | Sessione 43 (issue #136): fix dello staging di `README.md` in `auto-state-aggregate.yml` + gate di copertura `git add` vs `$targets` |
 | `state/stories/1.3-adapter-lastfm-listenbrainz.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.3" (Sessione 47, issue #145): prima non-done della 1.3, `status: in_progress` |
 | `state/sessions/47-listenbrainz-lastfm-adapter-spec.md` | ✅ creata | Sessione 47 (issue #145, #144): spec adapter ListenBrainz + Last.fm, Story 1.3 perimetro corretto, Story 1.5 ridimensionata |
+| `state/sessions/48-fix-bundle-writer-ordering.md` | ✅ creata | Sessione 48 (issue #149): fix race fra i due writer di `main` — trigger `workflow_run` in `auto-bundle.yml` + quinto gate di `validate-workflows.mjs` |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -6554,6 +6592,143 @@ segreto da gestire» — era semplicemente falsa: servono `api_key` **e**
 - Prossima story lavorabile: **1.3** (Last.fm + ListenBrainz), dopo
   approvazione delle due spec; la **1.5** dipende dall'ADR-0010 per il percorso
   incrementale
+
+
+
+===== FILE: docs/state/sessions/48-fix-bundle-writer-ordering.md =====
+
+---
+number: 48
+title: "Fix race fra i due writer di main (issue #149)"
+date: 2026-10-26
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: fix/149-bundle-writer-ordering
+pr: null
+claim: kilo-HP-ELITEBOOK-lb47
+cross_refs: [149]
+tags: [devops, bug, fix]
+---
+
+# Sessione 48 — Fix race fra i due writer di `main` (issue #149)
+
+## Sintesi
+
+Correzione strutturale della race che, nel merge della PR #147, aveva lasciato
+`docs/BUNDLE.md` stale di 6 righe. La diagnosi completa è in `docs/12-DEVOPS.md`
+§9.8e; qui il resoconto del fix.
+
+Il punto: i due writer di `main` (`auto-bundle.yml` e `auto-state-aggregate.yml`)
+condividono il concurrency group `post-merge-main`, che **serializza** i run ma
+**non ne impone l'ordine**. Finora l'ordine era irrilevante perché i due producevano
+contenuti indipendenti. Con `auto-bundle.yml` (issue #115) è tornato essenziale:
+`auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**.
+
+## Trigger
+
+Il merge della PR #147 (doc-sync della Story 1.3) ha lasciato il bundle stale. La
+diagnosi e l'issue #149 sono di questa sessione; il Boss ha scelto l'opzione A
+(trigger `workflow_run`).
+
+## Decisione
+
+**Opzione A (Boss, Sessione 48)** — `auto-bundle.yml` dichiara un secondo trigger:
+
+```yaml
+workflow_run:
+  workflows: ["auto-state-aggregate"]
+  types: [completed]
+```
+
+`workflow_run` è agganciato alla **conclusione** del workflow, non a un push:
+sopravvive alla soppressione del GITHUB_TOKEN (che vale solo per gli eventi
+`push`/`pull_request` generati dal token stesso) ed è il workaround documentato per
+i workflow che si innescano a vicenda. Con esso il bundle rigenera **sempre** una
+seconda volta dopo che l'aggregate ha committato i blocchi: la copia embedded è
+allineata ai sorgente, indipendentemente dall'ordine di scheduling.
+
+Le altre opzioni scartate (nell'issue #149): B (`workflow_dispatch` + dispatch
+esplicito), C (unificare i due writer in uno solo), D (solo gate bloccante, che non
+risolve la causa).
+
+Il trigger `push` resta invariato: da solo copre i merge che toccano i path di
+`$files` senza toccare `docs/state/**` — in quel caso `auto-state-aggregate` non
+parte e il bundle deve comunque rigenerarsi.
+
+## Il fix
+
+| File | Cosa fa |
+|------|---------|
+| `.github/workflows/auto-bundle.yml` | Aggiunge il trigger `workflow_run` su `auto-state-aggregate`, con nota di-header che spiega la meccanica |
+| `scripts/validate-workflows.mjs` | Quinto controllo `checkWriterOrdering`: verifica la presenza del trigger **e** che il nome in `workflows:` combaci con il `name:` reale del producer |
+| `scripts/test-workflow-writer-ordering.sh` | Test di regressione T1..T5 (6 assert), con scenario negativo |
+| `.github/workflows/ci.yml` | Nuovo step bloccante in posizione 13 |
+| `scripts/generate-bundle.ps1` | `$files` += il nuovo test |
+| `docs/12-DEVOPS.md` | §9.8e nuova (sequenza, meccanismo, regola generale), §9.10 a 16 step, changelog 0.8 |
+| `AGENTS.md` | v1.25 → v1.26: riga `auto-bundle` in §"📤 Post-merge actions", validatore a cinque controlli, footer cumulativo |
+
+## Difetti trovati lungo il percorso
+
+**Il gate era scritto ma mai chiamato.** La prima stesura di `checkWriterOrdering`
+inseriva la chiamata `failures += checkWriterOrdering(dir)` a metà del file, prima
+della dichiarazione di `const WRITER_ORDERING`. In JavaScript `const` non è
+hoisted: il modulo si rompeva con `ReferenceError: Cannot access
+'WRITER_ORDERING' before initialization` — un errore che **non** produce un
+`[FAIL]` del gate ma un crash dello script, e quindi nessun messaggio utile.
+Corretto spostando la chiamata in fondo al file, dopo le dichiarazioni.
+
+**Il test non poteva usare `python3`.** La prima stesura di T2 manipolava la
+fixture con uno script Python inline. Su Windows `python3` non esiste (l'alias
+della Microsoft Store occupa il nome e fallisce), quindi il test non poteva
+girare in locale. Sostituito con `sed`, disponibile in Git Bash, WSL e Linux: la
+CI gira su Ubuntu, ma il test deve essere eseguibile anche dal dev Windows.
+
+**`bash` su Windows non è WSL.** `bash` nel `PATH` di Windows è lo stub della
+Microsoft Store, che fallisce con un messaggio su WSL. Il Git Bash
+(`C:\Program Files\Git\bin\bash.exe`) è la shell utilizzabile. Nota operativa per
+i futuri agenti: i test `scripts/test-*.sh` si eseguono in locale con il Git Bash,
+non con il `bash` del `PATH`.
+
+## Verifica
+
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0 (5 controlli, 2 writer di `main`)
+- `bash scripts/test-workflow-writer-ordering.sh` → **6 ok, 0 fallimenti**
+- `bash scripts/test-workflow-push-sync.sh` → 15 passati, 0 falliti (non regresso)
+- `pwsh scripts/generate-bundle.ps1 --check` → exit 0 (74 file)
+- Rigenerazione del bundle **idempotente** (due run consecutivi → hash identico)
+- `pwsh scripts/aggregate-state.ps1 --check` → drift **atteso** sul solo blocco
+  `AGGREGATE-BUNDLE-INVENTORY` (74 file invece di 72: i due nuovi file della PR):
+  lo rigenera `auto-state-aggregate` post-merge
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 48-1 | **La serializzazione non è l'ordinamento.** Un concurrency group con `cancel-in-progress: false` garantisce che due run non si sovrappongano: non dice *quale* parte prima. Quando i due workflow producevano artefatti indipendenti la differenza era invisibile; è diventata un bug quando il secondo ha cominciato a **leggere** ciò che il primo **scrive**. La lezione è sulla forma dei dati, non sul meccanismo: due writer sullo stesso ref sono due problemi distinti (*chi pusha per primo*, §9.8d) e, quando condividono un artefatto logico, un terzo (*chi produce prima*) |
+| 48-2 | **Un commit fatto col GITHUB_TOKEN non innesca workflow.** Il push del bot toccava tutti i path di `auto-bundle` e la run non partiva: GitHub sopprime i workflow run innescati dal proprio token (anti-ricorsione; sole eccezioni documentate: `workflow_dispatch`, `repository_dispatch`). Il meccanismo di auto-guarimento era quindi spento per definizione, e il drift poteva solo essere corretto a mano. `workflow_run` aggganciato alla *conclusione* del workflow aggira la soppressione — è la leva giusta quando un workflow deve poter svegliarne un altro |
+| 48-3 | **Un gate che non gira non è un gate.** Il check era implementato ma la chiamata era finita sopra la dichiarazione: crash con `ReferenceError` invece di un `[FAIL]` leggibile. La lezione è operativa, non concettuale: un gate va eseguito **almeno una volta** su un caso che lo dovrebbe far fallire, ed è esattamente ciò che fa `test-workflow-writer-ordering.sh` T2 |
+| 48-4 | **I test di regressione devono girare dove gira il dev.** Un test che usa `python3` è green su CI Linux e non eseguibile su Windows: la copertura si applica solo metà delle volte. Gli strumenti disponibili ovunque (`sed`, `awk`, `grep`) sono preferibili a quelli comodi in un solo ambiente |
+
+## Documenti aggiornati
+
+- `.github/workflows/auto-bundle.yml` — trigger `workflow_run` + nota di-header
+- `scripts/validate-workflows.mjs` — quinto controllo `checkWriterOrdering`
+- `scripts/test-workflow-writer-ordering.sh` — **nuovo** (T1..T5, 6 assert)
+- `.github/workflows/ci.yml` — step bloccante in posizione 13
+- `scripts/generate-bundle.ps1` — `$files` += il nuovo test
+- `docs/12-DEVOPS.md` — §9.8e nuova, §9.10 a 16 step, changelog 0.8
+- `AGENTS.md` — v1.25 → v1.26, riga `auto-bundle`, validatore a cinque controlli, footer
+- `docs/state/sessions/48-fix-bundle-writer-ordering.md` — **nuovo**
+- `docs/BUNDLE.md` — rigenerato (74 file)
+
+## Cross-refs
+
+- **#149** — issue del bug strutturale, chiusa da questa PR
+- `docs/12-DEVOPS.md` §9.8e — la diagnosi completa con la sequenza temporale
+- `docs/12-DEVOPS.md` §9.8d — il problema affine del sync con `origin/main` (#140)
+- Prossima story lavorabile: **1.3** — ADR-0010 (issue #148) e spec Last.fm (issue #144)
 
 
 
@@ -13129,6 +13304,47 @@ bash scripts/test-workflow-push-sync.sh                 # scenario negativo (gat
 
 ---
 
+### 9.8e Ordinamento fra i due writer di `main` (issue #149)
+
+Il concurrency group `post-merge-main` (§9.8d) **serializza** i due writer di `main`, ma **non ne impone l'ordine**: quale workflow ottenga prima il lock non è deterministico. Finora l'ordine non importava, perché i due writer producevano contenuti indipendenti. Con `auto-bundle.yml` (issue #115) l'importa: **`auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica**.
+
+**Il bug (caso reale: merge della PR #147, 2026-10-26T12:50Z)**:
+
+```
+12:50:12  merge PR #147 → push su main
+12:50:23  auto-bundle           → rigenera, ma i blocchi sorgente sono ANCORA VECCHI
+                                  → "BUNDLE.md gia' in sync: nessun commit necessario"
+12:50:55  auto-state-aggregate  → committa i blocchi aggregati freschi
+                                  → la copia dentro BUNDLE.md resta vecchia  ✗
+```
+
+Il drift era di **6 righe** in `docs/BUNDLE.md` (riga Story 1.3 con `#null`/`null`, stato della Sessione 47 «non ancora mergiata», conteggio `merge: 18` → `19`) ed era **silenzioso**: il gate CI sul bundle è warning-only, la pipeline restava verde, e lo stato dichiarato divergeva da quello reale.
+
+**Perché non si auto-correggeva**: il commit del bot `36aeb29` aveva toccato `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md`, `README.md` — tutti nei trigger path di `auto-bundle` (`docs/**`, `README.md`). La run **non partiva**, perché il push avviene con `secrets.GITHUB_TOKEN` e GitHub **sopprime i workflow run innescati dal proprio GITHUB_TOKEN** (misura anti-ricorsione; le sole eccezioni documentate sono `workflow_dispatch` e `repository_dispatch`).
+
+**Il fix (opzione A, decisa dal Boss)**: `auto-bundle.yml` dichiara un secondo trigger
+
+```yaml
+workflow_run:
+  workflows: ["auto-state-aggregate"]
+  types: [completed]
+```
+
+`workflow_run` è agganciato alla **conclusione** del workflow, non a un push: sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda. Con questo trigger `auto-bundle` gira **sempre** una seconda volta dopo che `auto-state-aggregate` ha committato i blocchi: la copia embedded è allora allineata ai sorgente, **indipendentemente dall'ordine di scheduling**.
+
+Il trigger `push` resta: da solo copre i merge che toccano i path di `$files` senza toccare `docs/state/**` (in quel caso `auto-state-aggregate` non parte e il bundle deve comunque rigenerarsi).
+
+**Gate** (`scripts/validate-workflows.mjs`, bloccante in CI): verifica che `auto-bundle.yml` dichiari un trigger `workflow_run` su `auto-state-aggregate` **e** che il nome in `workflows:` combaci con il `name:` reale del producer — una disallineazione non dà errore, il trigger semplicemente non scatterebbe mai, in silenzio. Test di scenario negativo: `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert).
+
+```powershell
+node scripts/validate-workflows.mjs .github/workflows   # include il gate di ordinamento
+bash scripts/test-workflow-writer-ordering.sh           # scenario negativo (gate bloccante in CI)
+```
+
+**Regola generale**: quando due workflow concorrono allo **stesso artefatto logico** — non solo allo stesso ref — la serializzazione non basta: serve che il secondo consumi l'output del primo *dopo* che il primo l'ha prodotto. Il concurrency group ordina i *run*, non gli *effetti*. Se il secondo workflow **legge** ciò che il primo **scrive**, il trigger corretto è `workflow_run` (agganciato alla conclusione), non `push` (agganciato all'evento, e soppresso quando l'evento nasce da un GITHUB_TOKEN).
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -13193,13 +13409,14 @@ Elenco dei 15 step nominati del job `quality`, verificato riga per riga contro `
 | 10 | `Copertura git add vs $targets` | sì | #136 |
 | 11 | `Scope permissions: valide` | sì | **#135** |
 | 12 | **`Sync origin/main prima del push su main`** | sì | **#140** |
-| 13 | `Residui post-merge` | sì | #76 |
-| 14 | `Label in sync con AGENTS.md` | sì | #110 |
-| 15 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+| 13 | **`Ordinamento dei writer di main`** | sì | **#149** |
+| 14 | `Residui post-merge` | sì | #76 |
+| 15 | `Label in sync con AGENTS.md` | sì | #110 |
+| 16 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
 
 I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
 
-**Verifica**: i 15 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Tre sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135) e `Sync origin/main prima del push su main` (#140).
+**Verifica**: i 16 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
 
 ---
 
@@ -13248,6 +13465,7 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 0.5 | Sessione 44 (2026-10-22) | **§9.9 scope `permissions:` valide** (issue #135): dal 2026-10-21T16:21Z `ci.yml` non eseguiva piu' alcun job — run creata, `jobs: 0`, `conclusion: failure`, `run_started_at == created_at` (0s), check-suite `completed` con 0 check-run, nessuna annotazione via API, `state: active` sull'API dei workflow. Causa: `metadata: read` nel blocco `permissions:` del job `quality` (commit `43d982d`, issue #120) — `metadata` non e' una scope dichiarabile della `GITHUB_TOKEN` (e' sempre concessa implicitamente, non e' fra quelle documentate), quindi GitHub rifiuta l'intero file in fase di validazione. Nessun parser YAML lo vede; la firma e' ambigua con un blocco billing, escluso perche' gli altri 5 workflow dello stesso repo sugli stessi runner erano verdi nella stessa finestra. Diagnosi: tabella `jobs` x `conclusion` dei 60 run — il salto `1 → 0` cade su `43d982d`. Fix: rimossa la riga. Difesa: validazione delle scope in `scripts/validate-workflows.mjs` (gate bloccante dal #73) + `scripts/test-workflow-permission-scopes.sh` (T1..T5, con scenario negativo). **§9.10 gate reali di `ci.yml`** (nuova): elenco autorevole dei 14 step, con bloccante/non-bloccante e issue di riferimento, verificato 1:1 contro il workflow; §2.1 ora dichiara esplicitamente di essere uno scheletro di progetto e rimanda a §9.10. |
 | 0.6 | Sessione 45 (2026-10-22) | **§9.8d sync con `origin/main` dei writer di `main`** (issue #140): `auto-state-aggregate.yml` falliva su ogni merge con `! [rejected] main -> main (non-fast-forward)` (run `39802198985`, `39803721229`). Causa: il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit; quando `auto-bundle.yml` ha gia' pushato sullo stesso merge, il secondo writer pusha da un checkout stale e viene rifiutato. Conseguenza: il meccanismo di auto-guarimento di ADR-0008 era spento e il doc-sync della Story 1.2 (PR #139) non e' mai arrivato su `main` — `README.md` continuava ad annunciarla come «prossima story». Fallimento silenzioso: merge verde, `ci.yml` verde, blocchi aggregati indietro, nessun gate che lo segnali. Fix: step «Sync con origin/main» (`git fetch` + `git rebase`, fallback `git reset --hard`), identico a quello del companion. Difesa: gate in `scripts/validate-workflows.mjs` (bloccante in CI dal #73) che richiede un sync **prima** di ogni `git push origin main` e non tassa i writer di branch + `scripts/test-workflow-push-sync.sh` (T1..T5, 15 assert, con scenario negativo e verifica dell'ordine). **§9.10** aggiornata: 15 step, con il nuovo gate in posizione 12. |
 | 0.7 | Sessione 46 (2026-10-22) | **§9.11 idempotenza dei generatori: riuso del timestamp** (issue #142): `aggregate-state.ps1` ristampava `Get-Date` nel blocco inventory a ogni run, e la normalizzazione esisteva solo in `-Check` — quindi la garanzia «il timestamp viene riusato quando il blocco non cambia altro» (issue #70) era documentata ma non implementata nel path di scrittura. Sintomo: il gate `Aggregator deterministico` fallito sul run `39818043647` (16:55 → 16:56), cioè un gate bloccante dipendente dall'orologio, ~5-10% dei run. Difetto gemello in `generate-bundle.ps1`: `Build-Bundle -Timestamp` esisteva ma non veniva passato, e `auto-bundle` committava un nuovo `> Data:` dopo ogni merge a contenuto identico (nessun gate lo vedeva). Fix: `Get-NormalizedBlock` + `Sync-MutableTimestamp` in `Apply-Blocks`; in `generate-bundle.ps1` confronto su tutto il bundle con sostituzione **solo** sulla prima `> Data:` (i documenti inclusi ne hanno una propria, `docs/AUDIT-2026-10-15.md`). Test con **sentinel seminato** invece di confronto temporale (`test-aggregate-determinism.sh` T11, `test-bundle-check-idempotent.sh` T7), entrambi con contro-prova «contenuto cambiato → il campo si aggiorna»; `test-bundle-check-idempotent.sh` guadagna anche `ps_path`, che ripara T4-T6 su Windows (path POSIX non risolti dal call operator di pwsh). |
+| 0.8 | Sessione 47 (2026-10-26) | **§9.8e ordinamento fra i due writer di `main`** (issue #149): il concurrency group `post-merge-main` serializza i *run* ma non ne impone l'ordine*, e `auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica — quindi può copiare blocchi aggregati stale. Caso reale: merge della PR #147 (2026-10-26T12:50Z), `auto-bundle` alle 12:50:23 e `auto-state-aggregate` alle 12:50:55: il bundle copiò i blocchi vecchi, il guard idempotente scrisse «già in sync» e non committò, e il drift di 6 righe in `docs/BUNDLE.md` restò silenzioso (il gate sul bundle è warning-only). Il commit del bot non poteva auto-correggerlo: il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso. Fix (opzione A, Boss): trigger `workflow_run` su `auto-state-aggregate` in `auto-bundle.yml` — è agganciato alla *conclusione* del workflow, quindi sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda; con esso il bundle rigenera **sempre** dopo che l'aggregate ha committato. Difesa: quarto sub-gate in `scripts/validate-workflows.mjs` (verifica la presenza del trigger **e** che il nome in `workflows:` combaci con il `name:` reale del producer, altrimenti il trigger non scatterebbe mai, in silenzio) + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert, scenario negativo). **§9.10** aggiornata: 16 step, con il nuovo gate in posizione 13. |
 
 
 
@@ -18545,6 +18763,139 @@ function checkPushSync(lines, file) {
   return 1;
 }
 
+// === Issue #149 — l'ordinamento fra i due writer di `main` deve essere esplicito ===
+//
+// `auto-bundle.yml` e `auto-state-aggregate.yml` condividono il concurrency group
+// `post-merge-main`, che serializza i *run* ma NON ne impone l'*ordine*: quale
+// workflow ottenga prima il lock non e' deterministico.
+//
+// L'ordine e' pero' essenziale: `auto-bundle` copia il contenuto dei file che
+// `auto-state-aggregate` modifica, quindi puo' copiare blocchi aggregati stale.
+// Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `auto-bundle` girò alle
+// 12:50:23, `auto-state-aggregate` alle 12:50:55. Il bundle copio' i blocchi
+// ANCORA VECCHI, il guard idempotente scrisse "gia' in sync" e non committò; poi
+// l'agregate committò e la copia dentro `docs/BUNDLE.md` restò stale (6 righe
+// fuori sync, drift silenzioso: il gate CI sul bundle è warning-only).
+//
+// Difesa: `auto-bundle.yml` deve dichiarare un trigger `workflow_run` su
+// `auto-state-aggregate`. `workflow_run` e' agganciato alla *conclusione* del
+// workflow, non a un push: sopravvive alla soppressione del GITHUB_TOKEN (che
+// vale solo per gli eventi `push`/`pull_request` generati dal token stesso) ed
+// e' il workaround documentato per i workflow che si innescano a vicenda.
+//
+// Il check verifica anche che il nome dichiarato in `workflows:` corrisponda
+// esattamente al campo `name:` del workflow target: una disallineazione li'
+// silenziosa (il trigger semplicemente non scatta mai).
+
+const WRITER_ORDERING = [
+  {
+    consumer: 'auto-bundle.yml',
+    producer: 'auto-state-aggregate.yml',
+    producerName: 'auto-state-aggregate',
+  },
+];
+
+// Estrae il nome logico di un workflow dal campo `name:` intestazione.
+function extractWorkflowName(text) {
+  const m = text.match(/^name:\s*(.+?)\s*$/m);
+  return m ? m[1].replace(/^["']|["']$/g, '') : null;
+}
+
+// Estrae la lista `workflows:` del blocco `workflow_run:` di un file YAML.
+// Restituisce null se il blocco non esiste.
+function extractWorkflowRunTargets(text) {
+  const lines = text.split('\n');
+  let inOn = false;
+  let onIndent = -1;
+  let inRun = false;
+  let runIndent = -1;
+  const targets = [];
+  for (const raw of lines) {
+    const indent = raw.match(/^\s*/)[0].length;
+    const trimmed = raw.trim();
+    if (!inOn) {
+      if (/^on:\s*$/.test(trimmed)) { inOn = true; onIndent = indent; }
+      continue;
+    }
+    if (indent <= onIndent && trimmed !== '' && !trimmed.startsWith('#')) {
+      // uscita dal blocco `on:`
+      inOn = false; inRun = false;
+      continue;
+    }
+    if (!inRun) {
+      if (/^workflow_run:\s*$/.test(trimmed)) { inRun = true; runIndent = indent; }
+      continue;
+    }
+    if (indent <= runIndent && trimmed !== '' && !trimmed.startsWith('#')) {
+      inRun = false;   // uscita dal blocco `workflow_run:`
+      continue;
+    }
+    const m = trimmed.match(/^workflows:\s*\[(.*)\]\s*$/);
+    if (m) {
+      for (const t of m[1].split(',')) {
+        const name = t.trim().replace(/^["']|["']$/g, '');
+        if (name) targets.push(name);
+      }
+    }
+  }
+  return targets.length > 0 ? targets : null;
+}
+
+function checkWriterOrdering(dir) {
+  let bad = 0;
+  for (const { consumer, producer, producerName } of WRITER_ORDERING) {
+    const consumerPath = join(dir, consumer);
+    const producerPath = join(dir, producer);
+    // Se il consumer non c'e' nella directory ispezionata, il check non e'
+    // applicabile: alcune fixture coprono un solo workflow (es. il test della
+    // copertura `git add` ne porta solo uno). Tassarle produrrebbe un falso
+    // positivo su un check che qui non ha niente da dire.
+    if (!existsSync(consumerPath)) {
+      console.log(`[SKIP] ${consumer}: assente dalla directory ispezionata, il check di ordinamento non e' applicabile`);
+      continue;
+    }
+    if (!existsSync(producerPath)) {
+      console.error(`[FAIL] ${consumer}: il workflow produttore ${producer} non esiste, l'ordinamento non e' verificabile`);
+      bad++;
+      continue;
+    }
+    const consumerText = readFileSync(consumerPath, 'utf8');
+    const producerText = readFileSync(producerPath, 'utf8');
+    const targets = extractWorkflowRunTargets(consumerText);
+    if (!targets) {
+      console.error(`[FAIL] ${consumer}: nessun trigger \`workflow_run:\` con \`workflows:\` trovato.`);
+      console.error(`       Senza di esso i due writer di \`main\` restano serializzati ma NON ordinati: \`${consumer}\` puo' copiare blocchi aggregati stale da \`${producer}\` (caso reale: PR #147, 2026-10-26T12:50Z, drift di 6 righe in docs/BUNDLE.md).`);
+      console.error(`       Aggiungi un blocco \`workflow_run:\` con \`workflows: ["${producerName}"]\` e \`types: [completed]\`.`);
+      bad++;
+      continue;
+    }
+    if (!targets.includes(producerName)) {
+      console.error(`[FAIL] ${consumer}: il trigger \`workflow_run:\` non include \`${producerName}\` (trovati: ${targets.join(', ') || 'nessuno'}).`);
+      console.error(`       Il bundle deve rigenerarsi DOPO che \`${producer}\` ha committato i blocchi aggregati, altrimenti copia il contenuto stale.`);
+      bad++;
+      continue;
+    }
+    // Il nome in `workflows:` deve corrispondere al `name:` reale del producer:
+    // una disallineazione non da' errore, ma il trigger semplicemente non scatta.
+    const actualName = extractWorkflowName(producerText);
+    if (actualName !== producerName) {
+      console.error(`[FAIL] ${consumer}: \`workflows: ["${producerName}"]\` non combacia con il \`name:\` reale di ${producer} ("${actualName}").`);
+      console.error(`       Il trigger \`workflow_run\` non scatterebbe MAI: silenzioso, senza errore di GitHub.`);
+      bad++;
+      continue;
+    }
+    console.log(`[OK] ${consumer}: trigger \`workflow_run\` su "${producerName}" presente e allineato al \`name:\` di ${producer}`);
+  }
+  return bad;
+}
+
+// === Issue #149 — l'ordinamento fra i due writer di `main` deve essere esplicito ===
+//
+// (la definizione di WRITER_ORDERING e di checkWriterOrdering sta piu' in basso:
+//  il check viene eseguito in fondo al file, dopo le dichiarazioni)
+
+failures += checkWriterOrdering(dir);
+
 console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`);
 process.exit(failures === 0 ? 0 : 1);
 
@@ -19008,6 +19359,138 @@ YML
 echo ""
 echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]
+
+
+===== FILE: scripts/test-workflow-writer-ordering.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per l'ordinamento fra i due writer di `main` (issue #149).
+#
+# Difende il bug chiuso in issue #149: `auto-bundle.yml` e `auto-state-aggregate.yml`
+# condividono il concurrency group `post-merge-main` (`cancel-in-progress: false`),
+# pensato per serializzare i due writer di `main`. Ma il group serializza i *run*,
+# non ne impone l'*ordine*: quale workflow ottenga prima il lock non e' deterministico.
+#
+# L'ordine e' essenziale perche' `auto-bundle` copia il contenuto dei file che
+# `auto-state-aggregate` modifica. Se il bundle gira PRIMA, copia i blocchi
+# aggregati ANCORA VECCHI; il guard idempotente (`git diff --quiet`) scrive
+# "gia' in sync" e non committa nulla; l'agregate committa dopo, e la copia
+# dentro `docs/BUNDLE.md` resta stale.
+#
+# Sequenza del fallimento (merge della PR #147, 2026-10-26T12:50Z):
+#   12:50:23  auto-bundle           -> copia i blocchi VECCHI -> "gia' in sync", nessun commit
+#   12:50:55  auto-state-aggregate  -> committa i blocchi freschi
+#   => docs/BUNDLE.md stale di 6 righe (riga Story 1.3, Sessione 47, conteggio merge)
+#
+# Il drift e' SILENZIOSO: il gate CI sul bundle e' warning-only, la pipeline resta
+# verde, e lo stato dichiarato diverge da quello reale.
+#
+# Difesa: `auto-bundle.yml` dichiara un trigger `workflow_run` su
+# `auto-state-aggregate`. `workflow_run` e' agganciato alla *conclusione* del
+# workflow, non a un push: sopravvive alla soppressione del GITHUB_TOKEN (che vale
+# solo per gli eventi `push`/`pull_request` generati dal token stesso) ed e' il
+# workaround documentato per i workflow che si innescano a vicenda.
+#
+# Il gate vive in scripts/validate-workflows.mjs (gia' bloccante in CI dal #73);
+# questo file e' il suo test di regressione: verifica che il gate **esca 1**
+# quando si reintroduce il bug. Un gate che passa sempre non e' un gate
+# (lesson 43-1).
+#
+# Scenari coperti:
+#   T1  repo reale: il trigger `workflow_run` c'e' ed e' allineato -> exit 0
+#   T2  fixture con il blocco `workflow_run:` rimosso da auto-bundle.yml
+#       (reintroduzione del bug #149) -> exit 1, messaggio che nomina file e causa
+#   T3  fixture con `workflows:` che punta a un altro workflow -> exit 1
+#   T4  fixture con `workflows: ["auto-state-aggregate"]` ma il `name:` reale del
+#       producer cambiato -> exit 1 (il trigger non scatterebbe MAI, in silenzio)
+#   T5  fixture col producer assente -> exit 1
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
+AUTO_BUNDLE_WF="$REPO_ROOT/.github/workflows/auto-bundle.yml"
+AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+
+PASS=0
+FAIL=0
+
+ok()   { PASS=$((PASS+1)); echo "  [OK] $1"; }
+ko()   { FAIL=$((FAIL+1)); echo "  [FAIL] $1"; }
+
+# Esegue il validator su una directory di fixture.
+# $1 = directory dei workflow, $2 = exit code atteso, $3 = descrizione
+run_validator() {
+  local dir="$1" expected="$2" desc="$3"
+  local out
+  out="$(node "$VALIDATOR" "$dir" 2>&1)"
+  local code=$?
+  if [ "$code" -eq "$expected" ]; then
+    ok "$desc (exit $code come atteso)"
+    echo "$out" | grep -E '^\[FAIL\]' | sed 's/^/       /' | head -5
+  else
+    ko "$desc (exit $code, atteso $expected)"
+    echo "$out" | tail -12 | sed 's/^/       /'
+  fi
+}
+
+echo "=== Issue #149 — ordinamento fra i due writer di main ==="
+echo
+
+# --- T1: repo reale, deve passare ---
+run_validator "$REPO_ROOT/.github/workflows" 0 \
+  "T1 repo reale: trigger workflow_run presente e allineato"
+
+# --- fixture: copia dei due workflow in una dir temporanea ---
+FIXTURE_DIR="$(mktemp -d)"
+trap 'rm -rf "$FIXTURE_DIR"' EXIT
+
+# T2: rimuove il blocco `workflow_run:` da auto-bundle.yml
+mkdir -p "$FIXTURE_DIR/t2"
+cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t2/auto-bundle.yml"
+cp "$AUTO_AGGREGATE_WF" "$FIXTURE_DIR/t2/auto-state-aggregate.yml"
+# Rimuove il blocco `workflow_run:` (righe di commento di sezione incluse) e la
+# riga `types: [completed]`. Usa solo sed: python3 non e' garantito su Windows
+# (dove `bash` e' il Git Bash, non il WSL stub).
+sed -i '/^  # === Issue #149/,/^    types: \[completed\]$/d' \
+  "$FIXTURE_DIR/t2/auto-bundle.yml"
+if grep -q 'workflow_run:' "$FIXTURE_DIR/t2/auto-bundle.yml"; then
+  ko "T2 preparazione fixture: il blocco workflow_run non e' stato rimosso"
+else
+  ok "T2 preparazione fixture: blocco workflow_run rimosso"
+fi
+run_validator "$FIXTURE_DIR/t2" 1 \
+  "T2 fixture senza workflow_run: il gate segnala l'ordinamento non garantito"
+
+# T3: workflow_run che punta a un altro workflow
+mkdir -p "$FIXTURE_DIR/t3"
+cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t3/auto-bundle.yml"
+cp "$AUTO_AGGREGATE_WF" "$FIXTURE_DIR/t3/auto-state-aggregate.yml"
+sed -i 's/workflows: \["auto-state-aggregate"\]/workflows: ["altro-workflow"]/' \
+  "$FIXTURE_DIR/t3/auto-bundle.yml"
+run_validator "$FIXTURE_DIR/t3" 1 \
+  "T3 fixture con workflow_run su un altro workflow: il gate segnala l'assenza di auto-state-aggregate"
+
+# T4: il nome dichiarato non combacia con il `name:` reale del producer
+mkdir -p "$FIXTURE_DIR/t4"
+cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t4/auto-bundle.yml"
+cp "$AUTO_AGGREGATE_WF" "$FIXTURE_DIR/t4/auto-state-aggregate.yml"
+sed -i 's/^name: auto-state-aggregate$/name: auto-state-aggregate-rinominato/' \
+  "$FIXTURE_DIR/t4/auto-state-aggregate.yml"
+run_validator "$FIXTURE_DIR/t4" 1 \
+  "T4 fixture con name: del producer disallineato: il gate segnala il trigger che non scatterebbe"
+
+# T5: producer assente
+mkdir -p "$FIXTURE_DIR/t5"
+cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t5/auto-bundle.yml"
+run_validator "$FIXTURE_DIR/t5" 1 \
+  "T5 fixture senza il producer: il gate segnala l'impossibilita' di verificare"
+
+echo
+echo "=== $PASS ok, $FAIL fallimenti ==="
+[ "$FAIL" -eq 0 ] || exit 1
+exit 0
+
 
 
 ===== FILE: scripts/setup-hooks.js =====
@@ -19581,6 +20064,18 @@ jobs:
       - name: Sync `origin/main` prima del push su main (issue #140)
         run: bash scripts/test-workflow-push-sync.sh
 
+      # Issue #149: i due writer di `main` sono serializzati dal concurrency group
+      # `post-merge-main`, ma il group NON impone l'ordine. `auto-bundle` copia il
+      # contenuto dei file che `auto-state-aggregate` modifica: se gira prima,
+      # copia i blocchi aggregati stale e il guard idempotente scrive "gia' in
+      # sync" senza committare. Caso reale (PR #147, 2026-10-26T12:50Z): 6 righe
+      # di drift in docs/BUNDLE.md, silenzioso (il gate sul bundle e' warning-only).
+      # Difesa: trigger `workflow_run` in auto-bundle.yml, che sopravvive alla
+      # soppressione del GITHUB_TOKEN. Il gate vive in validate-workflows.mjs; questo
+      # test ne verifica lo scenario negativo.
+      - name: Ordinamento dei writer di `main` (issue #149)
+        run: bash scripts/test-workflow-writer-ordering.sh
+
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
       # (orfano -> segnalato) sia quello di sicurezza (lavoro non pushato -> MAI
@@ -19673,7 +20168,7 @@ on:
       # 13-ADR/, state/, ecc.). Sovrappone parzialmente con auto-state-aggregate
       # (docs/state/**) ma i due workflow sono complementari. ===
       - 'docs/**'
-      # === Script di utility (vari sono in $files) ===
+      # === Script di utility (molti sono in $files) ===
       - 'scripts/**'
       # === Hook Git versionati ===
       - '.githooks/**'
@@ -19683,7 +20178,31 @@ on:
       # === Dataset di test ===
       - 'fixtures/**'
 
-# Serialize with auto-state-aggregate: stesso grupo, no cancel-in-progress
+  # === Issue #149 — trigger `workflow_run`: il bundle rigenera DOPO l'aggregate ===
+  #
+  # Il concurrency group `post-merge-main` (piu' in basso) serializza i due
+  # writer di `main`, ma NON ne impone l'ordine: quale workflow ottenga prima
+  # il lock non e' deterministico. `auto-bundle` copia il contenuto dei file
+  # che `auto-state-aggregate` modifica: se il bundle gira PRIMA, copia i blocchi
+  # aggregati ANCORA VECCHI, il guard idempotente scrive "gia' in sync" e non
+  # committa nulla; l'aggregate committa dopo e la copia dentro BUNDLE.md resta
+  # stale. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `docs/BUNDLE.md`
+  # mostrava ancora `| 1.3 ... | #null |` e la Sessione 47 come "non mergiata".
+  #
+  # `workflow_run` e' agganciato alla CONCLUSIONE di un workflow, non a un push:
+  # sopravvive alla soppressione del GITHUB_TOKEN (che vale solo per gli eventi
+  # `push`/`pull_request` generati dal token stesso) ed e' il workaround
+  # documentato per i workflow che si innescano a vicenda
+  # (vedi `docs/12-DEVOPS.md` §9.8e).
+  #
+  # Con questo trigger, `auto-bundle` gira SEMPRE una seconda volta dopo che
+  # `auto-state-aggregate` ha committato i blocchi: la copia embedded e' allora
+  # allineata ai sorgente, indipendentemente dall'ordine di scheduling.
+  workflow_run:
+    workflows: ["auto-state-aggregate"]
+    types: [completed]
+
+# Serialize with auto-state-aggregate: stesso gruppo, no cancel-in-progress
 # (le nuove run restano in coda dietro a quella in corso).
 concurrency:
   group: post-merge-main

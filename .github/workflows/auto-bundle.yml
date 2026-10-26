@@ -49,7 +49,7 @@ on:
       # 13-ADR/, state/, ecc.). Sovrappone parzialmente con auto-state-aggregate
       # (docs/state/**) ma i due workflow sono complementari. ===
       - 'docs/**'
-      # === Script di utility (vari sono in $files) ===
+      # === Script di utility (molti sono in $files) ===
       - 'scripts/**'
       # === Hook Git versionati ===
       - '.githooks/**'
@@ -59,7 +59,31 @@ on:
       # === Dataset di test ===
       - 'fixtures/**'
 
-# Serialize with auto-state-aggregate: stesso grupo, no cancel-in-progress
+  # === Issue #149 — trigger `workflow_run`: il bundle rigenera DOPO l'aggregate ===
+  #
+  # Il concurrency group `post-merge-main` (piu' in basso) serializza i due
+  # writer di `main`, ma NON ne impone l'ordine: quale workflow ottenga prima
+  # il lock non e' deterministico. `auto-bundle` copia il contenuto dei file
+  # che `auto-state-aggregate` modifica: se il bundle gira PRIMA, copia i blocchi
+  # aggregati ANCORA VECCHI, il guard idempotente scrive "gia' in sync" e non
+  # committa nulla; l'aggregate committa dopo e la copia dentro BUNDLE.md resta
+  # stale. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `docs/BUNDLE.md`
+  # mostrava ancora `| 1.3 ... | #null |` e la Sessione 47 come "non mergiata".
+  #
+  # `workflow_run` e' agganciato alla CONCLUSIONE di un workflow, non a un push:
+  # sopravvive alla soppressione del GITHUB_TOKEN (che vale solo per gli eventi
+  # `push`/`pull_request` generati dal token stesso) ed e' il workaround
+  # documentato per i workflow che si innescano a vicenda
+  # (vedi `docs/12-DEVOPS.md` §9.8e).
+  #
+  # Con questo trigger, `auto-bundle` gira SEMPRE una seconda volta dopo che
+  # `auto-state-aggregate` ha committato i blocchi: la copia embedded e' allora
+  # allineata ai sorgente, indipendentemente dall'ordine di scheduling.
+  workflow_run:
+    workflows: ["auto-state-aggregate"]
+    types: [completed]
+
+# Serialize with auto-state-aggregate: stesso gruppo, no cancel-in-progress
 # (le nuove run restano in coda dietro a quella in corso).
 concurrency:
   group: post-merge-main
