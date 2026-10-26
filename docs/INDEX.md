@@ -15,8 +15,8 @@
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 51 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.0, S47) + Last.fm (🟢 v1.0, S50/S51) |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 52 (v1.4) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 52 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.0, S47) + Last.fm (🟢 v1.0, S50/S51) — **adapter implementati** in Sessione 52 (issue #155) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 48 (v1.1) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
@@ -24,7 +24,7 @@
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 51 (v1.6.9) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155 |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 52 (v1.6.10) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 49 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -42,7 +42,7 @@
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.7 | Diario cronologico per story: problemi, fix, lesson learned |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.8 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -148,8 +148,8 @@
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.9, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
-- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v1.7, `19` introdotto in Sessione 41
+- **Documenti APPROVED**: 7 documenti (`02` v1.4, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.10, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
+- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v1.8, `19` introdotto in Sessione 41
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -163,7 +163,7 @@
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 51, issue #144/#155): EPIC 1 (Fase 1 — Import core) ha i suoi primi due adapter **merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`) e **1.2 Apple Music ✅** (PR #139, `2e1a4cc`). La **Story 1.3 — Adapter Last.fm + ListenBrainz** ha ora i suoi **tre pezzi** di documentazione, tutti ratificati: spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, `6d66233`), ADR-0010 🟢 APPROVED v1.0 (PR #152, `1b2d280`), spec Last.fm 🟢 APPROVED v1.0 (PR #154, `b3130a9`; promozione documentale PR #156, `6ec71bb`). L'**issue di implementazione #155** è aperta (`agent-ready`, size L): adapter ListenBrainz file-only (export API → ZIP/JSONL) + adapter Last.fm (percorso API via proxy CORS con `parseRemote?()` + percorso file CSV/JSON), con `eventKey` normalizzato al minuto su entrambi i percorsi (D-LF.7). **Prossimo passo**: implementare la 1.3 (claim + worktree + PR sull'issue #155). Nel frattanto è eseguibile la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 52, issue #155): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`) e **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52): adapter ListenBrainz file-only (export API → ZIP/JSONL) e adapter Last.fm con percorso **ibrido** (API via proxy CORS con `parseRemote?()` + percorso file CSV/JSON), con `eventKey` normalizzato al minuto su entrambi i percorsi (D-LF.7). Il percorso web auth con la `sk` resta alla **Story 1.5** (E.LF.21: `api_sig` richiede md5, che il repo non espone). **Prossimo passo**: la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`) o la **Story 1.5** (scrobbling hub + sync continua, con il percorso incrementale ListenBrainz e il web auth Last.fm). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

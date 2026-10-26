@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { DbHealthState } from '@core/db';
 import { openDb, runHealthCheck, type LifeSoundtrackDB } from '@core/db';
 
-const EXPECTED_SCHEMA_VERSION = 3; // 02-DATA-SCHEMA.md §10 v1.2
+const EXPECTED_SCHEMA_VERSION = 4; // 02-DATA-SCHEMA.md §10 (v4: settings, Story 1.3)
 
 export interface UseDbHealthResult extends DbHealthState {
   /** Ri-esegue fastCheck + quotaCheck (click "Riprova" nel banner). */

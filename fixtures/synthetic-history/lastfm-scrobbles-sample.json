@@ -1,0 +1,88 @@
+{
+  "_comment": "Dataset sintetico per test adapter Last.fm (Story 1.3, Sessione 52). Copre i casi minimi della spec 03-ADAPTERS/lastfm.md par.8 lato API: happy path, paginazione, E.LF.1 (nowplaying senza date), E.LF.14 (artist stringa vs oggetto), E.LF.5 (mbid vuoto), E.LF.17 (loved), E.LF.9 (scarti). 5 track: 4 importate, 1 scartata.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 52,
+    "spec": "docs/03-ADAPTERS/lastfm.md par.8 (v1.0 APPROVED, PR #154/#156)",
+    "format": "Last.fm API user.getRecentTracks (format=json, extended=1)",
+    "expectedDedupRules": "02-DATA-SCHEMA par.5: DEDUP-2 mbid:<mbid> quando presente, altrimenti DEDUP-3 fuzzy con durationBucketMs = 0 (Last.fm non espone la durata)."
+  },
+  "_expectedOutput": {
+    "_comment": "Derivazione interna come canone (par.8). eventKey = 'lastfm:' + <YYYY-MM-DDTHH:MM> + '|' + (mbid ?? name + '|' + artist).",
+    "totalTracks": 5,
+    "importedEvents": 4,
+    "skippedNowPlaying": 1,
+    "_skippedNowPlayingDerivation": "track E_LF_1_nowplaying (@attr.nowplaying = 'true', nessun date) -> scartata in silenzio, nessun warning",
+    "uniqueTracks": 3,
+    "_uniqueTracksDerivation": "4 eventi importati: 'Apocalypse Dreams' (mbid mbid-track-1) e 'So What' (mbid vuoto -> DEDUP-3) e 'Borderline' (mbid mbid-track-3) e 'Airbag' (artist stringa, DEDUP-3): 4 brani distinti",
+    "mbidMissing": 2,
+    "_mbidMissingDerivation": "2 track senza mbid (E.LF_5_mbid_empty e E_LF_14_artist_as_string) -> un solo warning aggregato mbidMissing con count = 2"
+  },
+  "recenttracks": {
+    "@attr": {
+      "user": "ls_user",
+      "page": "1",
+      "perPage": "200",
+      "total": "94618",
+      "totalPages": "474"
+    },
+    "track": [
+      {
+        "_case": "happy_path_1_artist_object",
+        "artist": {
+          "mbid": "mbid-artist-1",
+          "#text": "Tame Impala",
+          "name": "Tame Impala",
+          "url": "https://www.last.fm/music/Tame+Impala"
+        },
+        "album": { "mbid": "mbid-album-1", "#text": "Lonerism" },
+        "name": "Apocalypse Dreams",
+        "mbid": "mbid-track-1",
+        "loved": "0",
+        "date": { "uts": "1603186824", "#text": "20 Oct 2020, 09:40" },
+        "url": "https://www.last.fm/music/Tame+Impala/_/Apocalypse+Dreams",
+        "streamable": "0",
+        "image": [
+          { "size": "small", "#text": "https://example.invalid/small.png" },
+          { "size": "large", "#text": "https://example.invalid/large.png" }
+        ]
+      },
+      {
+        "_case": "E_LF_1_nowplaying",
+        "@attr": { "nowplaying": "true" },
+        "artist": { "mbid": "mbid-artist-3", "#text": "Boards of Canada" },
+        "album": { "#text": "Music Has the Right to Children" },
+        "name": "Borderline",
+        "mbid": "mbid-track-3",
+        "loved": "0",
+        "url": "https://www.last.fm/music/Boards+of+Canada/_/Borderline"
+      },
+      {
+        "_case": "E_LF_14_artist_as_string",
+        "artist": "Radiohead",
+        "album": "OK Computer",
+        "name": "Airbag",
+        "date": { "uts": "1603187000", "#text": "20 Oct 2020, 09:43" },
+        "url": "https://www.last.fm/music/Radiohead/_/Airbag"
+      },
+      {
+        "_case": "E_LF_5_mbid_empty",
+        "artist": { "#text": "Miles Davis", "name": "Miles Davis" },
+        "album": { "#text": "Kind of Blue" },
+        "name": "So What",
+        "mbid": "",
+        "loved": "1",
+        "date": { "uts": "1603187100", "#text": "20 Oct 2020, 09:45" },
+        "url": "https://www.last.fm/music/Miles+Davis/_/So+What"
+      },
+      {
+        "_case": "E_LF_9_no_artist",
+        "artist": { "#text": "" },
+        "name": "Anonymous Track",
+        "mbid": "mbid-track-9",
+        "date": { "uts": "1603187200" }
+      }
+    ]
+  }
+}

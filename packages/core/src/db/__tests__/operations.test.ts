@@ -201,16 +201,16 @@ describe('runHealthCheck / fastCheck', () => {
     await db.open();
     registerDb(db);
 
-    const health = await runHealthCheck(db, 3);
+    const health = await runHealthCheck(db, 4);
 
     expect(health.status).toBe('ok');
     expect(health.fastCheck?.ok).toBe(true);
-    expect(health.fastCheck?.schemaVersion).toBe(3);
+    expect(health.fastCheck?.schemaVersion).toBe(4);
     expect(health.fastCheck?.error).toBeNull();
   });
 
   it("restituisce critical quando schema versione sotto l'attesa", async () => {
-    // Usiamo direttamente freshDb che apre a v3; per forzare critical
+    // Usiamo direttamente freshDb che apre a v4; per forzare critical
     // passiamo expectedSchemaVersion = 99 (non raggiunto).
     const db = freshDb('ls-health-critical');
     await db.open();

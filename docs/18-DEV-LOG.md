@@ -544,6 +544,45 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 18. Story 1.3 — Implementazione adapter Last.fm + ListenBrainz (Sessione 52)
+
+**Tipo**: implementazione (`feat`) — issue #155, claim `kilo-HP-ELITEBOOK-lb52`
+**Branch**: `feat/155-lastfm-listenbrainz-adapter` (worktree `ls-155-lastfm-listenbrainz-adapter`)
+**PR**: #158 (aperta su `main` dalla worktree)
+**Data**: 2026-10-26
+**Stato**: ✅ implementazione completa — 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi; `lint`, `typecheck`, `build` verdi
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 18-1 | P+L | Il contratto `RawListenEvent` non aveva un campo per l'MBID dell'artista: `artist.mbid` (Last.fm `artist.mbid`, ListenBrainz `artist_mbids[0]`) non poteva raggiungere l'entità `Artist`, e le due spec lo dichiarano come "dato utile e attivo" | Il buco era **invisibile** finché nessuna piattaforma del perimetro lo esponeva: è il primo dato di questo tipo | Due campi **additivi e opzionali** (`sourceArtistMbid`, `sourceTrackDurationMs`): gli altri quattro adapter non li valorizzano e il loro comportamento non cambia (V1 di ADR-0010) | `02-DATA-SCHEMA.md` §3.1, `03-ADAPTERS/listenbrainz.md` §3.1.3 |
+| 18-2 | P+L | La durata catalogo (`additional_info.duration_ms`) e la durata dell'evento erano la stessa cosa: usarne una sola faceva finire lo stesso brano in **due `Track` distinte** (una con il dato, una senza) | Il bucket DEDUP-3 usa la durata; se la durata catalogo entrasse nel bucket, la copertura parziale del dato frammenterebbe la dedup | Due campi distinti: `sourceDurationMs` (durata dell'evento, **sempre 0** per ListenBrainz e Last.fm → bucket 0) e `sourceTrackDurationMs` (durata catalogo, **solo hint** sulla `Track`) | `03-ADAPTERS/listenbrainz.md` §3.1.1, `02-DATA-SCHEMA.md` §3.1 |
+| 18-3 | P+L | Il test scritto **per la spec** ("lo stesso scrobble via API e via CSV → stesso `eventKey`") è **fallito**: la formula `mbid ?? name\|artist` della spec non può soddisfare insieme E.LF.4 ed E.LF.16/E.LF.19 | L'API espone il MBID **spesso vuoto** (E.LF.5) mentre l'export `ghan.nl` lo porta: la copertura del dato **dipende dal percorso** | `LastfmEventKeyBuilder`: il MBID entra nella chiave **solo quando disambigua** (stesso minuto, stesso nome\|artista, MBID diversi); altrimenti la chiave è `<minuto>\|<nome>\|<artista>`, che converge fra i due percorsi. Documentato in `03-ADAPTERS/lastfm.md` §3.1.0 | `03-ADAPTERS/lastfm.md` §3.1.0, `docs/state/sessions/52-*` (lesson 52-1) |
+| 18-4 | P | `skipped = null` (la spec chiede "nessun dato") non è rappresentabile: `ListenEvent.skipped` è `boolean` non nullabile | `02§3.2` modella `skipped` come booleano; l'adapter passa `null` e il core normalizza a `false` | Dichiarato, non nascosto: la semantica richiesta ("non dedurre `skipped` da `durationMs = 0`") è rispettata — il valore `false` **non** significa "saltato", significa "dato assente" | `docs/state/sessions/52-*` |
+| 18-5 | P+L | `durationMs` degli export tool è al **secondo** (riga del file `uts`), l'evento normalizzato al **minuto** (D-LF.7): due scrobble distinti nella stessa finestra di 60 s hanno la stessa chiave di riga | La normalizzazione al minuto agisce sull'evento, non sulla **riga** del file, che ha un solo `uts` | Dichiarato come gap noto: ricaricando lo stesso file la seconda riga dello stesso minuto verrebbe scartata come duplicata. Il percorso API (che ha il `uts` esatto) non soffre del limite | `docs/state/sessions/52-*` |
+| 18-6 | P+L | Lo stub di `fetch` scritto a mano rendeva impossibile verificare il **ritmo** del rate limiter e il **backoff**: un test che asserisce "nessuna eccezione" passa anche con zero rate limiting | Il test guardava il risultato, non il **comportamento** del protocollo | `TokenBucket` con orologio e sleep **iniettabili**: il test asserisce che le richieste sono *spaziate* (non solo non superate) e che un errore 9 fa **un** tentativo, non un loop. Nessuna dipendenza nuova (`msw` non serve per quattro casi) | `adapters/lastfm/api.ts`, `adapters/lastfm/__tests__/lastfm-remote.test.ts` |
+| 18-7 | P | Il detect del JSON export Last.fm falliva: il file è pretty-printed, la **prima riga** è solo `{` | Il detect leggeva la prima riga e la passava a `JSON.parse` | Nel ramo JSON il detect legge il **file intero** e ne guarda la forma (`events[]` o record ghan.nl) | `adapters/lastfm/detect.ts` |
+
+**Lesson learned sintetica**: il contratto di una piattaforma non è un formato, è una
+**griglia di formati**: lo stesso campo cambia forma (`artist` stringa o oggetto),
+lo stesso dato ha copertura diversa da un percorso all'altro (il MBID), e lo stesso
+file ha due risoluzioni temporali (secondo e minuto). Ogni implementazione di
+adapter deve quindi produrre **tre** cose, non una: la mappa dei campi, la
+normalizzazione delle forme, e la **dichiarazione esplicita** di ciò che non
+riesce a normalizzare — perché la parte non normalizzata è quella che, prima o
+poi, si manifesta come duplicato silenzioso.
+
+### Link utili
+
+- Branch: `feat/155-lastfm-listenbrainz-adapter` (worktree `ls-155-lastfm-listenbrainz-adapter`)
+- Issue: **#155** (implementazione della Story 1.3, `size:L`)
+- Spec consumate: `docs/03-ADAPTERS/listenbrainz.md` (🟢 v1.0) · `docs/03-ADAPTERS/lastfm.md` (🟢 v1.0) · `docs/13-ADR/0010-remote-source-adapter.md` (🟢 v1.0)
+- Codice nuovo: `packages/core/src/adapters/{listenbrainz,lastfm}/` · `packages/core/src/adapters/jsonlStream.ts` · `packages/core/src/db/settings.ts` · `apps/web/src/onboarding/LastfmPanel.tsx`
+- Fixture nuovi: `fixtures/synthetic-history/listenbrainz-sample.jsonl` + 5 file Last.fm
+
+---
+
+## Changelog
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -565,6 +604,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 1.5 | 2026-10-26 (Story 1.3) | **§15 Story 1.3 — Spec adapter ListenBrainz** (issue #145, claim `kilo-HP-ELITEBOOK-lb47`, PR #146 merge `6d66233`): 5 lesson (15-1 `recording_msid` non è un ID univoco per ascolto → l'`eventKey` include `listened_at`, 15-2 `MAX_ITEMS_PER_GET` = 1000 e non 100 (sorgente, non doc), 15-3 il backlog descriveva il canale di accesso in modo falso per entrambe le piattaforme, 15-4 «nessun segreto da gestire» era falso: `api_key` per-utente (ToS §4.4) + `sk` via web auth, 15-5 i campi `null` nel frontmatter rendono `#null` nel blocco aggregato). Spec `03-ADAPTERS/listenbrainz.md` v1.0 🟢 APPROVED; perimetro della 1.3 corretto e Story 1.5 ridimensionata |
 | 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
 | 1.7 | 2026-10-26 (issue #144, #155) | **§17 Story 1.3 — Spec adapter Last.fm + approvazione** (Sessioni 50-51, claim `kilo-HP-ELITEBOOK-lb47`, PR #154 merge `b3130a9` + PR #156 merge `6ec71bb`): 6 lesson (17-1 il limite di `limit` va letto nella doc ufficiale dell'endpoint (200), non dedotto per analogia; 17-2 `artist` ha due forme a seconda di `extended=1` → accessor unico; 17-3 normalizzare l'`eventKey` al minuto su **tutti** i percorsi, se no il re-import misto API+file duplica ogni scrobble; 17-4 la normalizzazione è un contratto fra i due adapter → una sola issue (#155); 17-5 `api_sig` richiede md5, la Web Crypto non ce l'ha → web auth differito alla Story 1.5; 17-6 una sessione chiusa dalla PR che l'ha prodotta non può conoscere il proprio merge → doc-sync in PR separata, e le sezioni legacy dei file globali invecchiano in silenzio). Spec `03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED; issue #144 chiusa, issue di implementazione #155 aperta (`agent-ready`, size L) |
+| 1.8 | 2026-10-26 (issue #155) | **§18 Story 1.3 — Implementazione adapter Last.fm + ListenBrainz** (Sessione 52, claim kilo-HP-ELITEBOOK-lb52, PR #158): 7 lesson (18-1 il contratto degli adapter non aveva un campo per l'MBID dell'artista: aggiunti due campi **additivi e opzionali**; 18-2 durata catalogo e durata dell'evento erano la stessa cosa: bucket DEDUP-3 sempre 0 e durata solo hint sulla Track; 18-3 la formula dell'eventKey della spec non poteva soddisfare E.LF.4 ed E.LF.16/E.LF.19 insieme — il MBID entra nella chiave solo quando disambigua; 18-4 skipped = null non è rappresentabile nel modello: dichiarato; 18-5 la normalizzazione al minuto agisce sull'evento, non sulla riga del file: gap noto; 18-6 il test di un contratto di rete deve asserire il **comportamento** (ritmo, backoff, numero di tentativi), non l'assenza di eccezioni; 18-7 il detect del JSON pretty-printed non può guardare la prima riga). 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi |
 
 ---
 

@@ -3,6 +3,15 @@ import { render, screen, act } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import { ImportScreen } from '../OnboardingRouter';
 import { i18n } from '../../i18n';
+import type { PrivacySettings } from '@core/schema';
+
+const PRIVACY_OFF: PrivacySettings = {
+  retainIp: false,
+  enrichMetadata: false,
+  carDetectionConsent: false,
+  scrobbleHubs: [],
+  syncCloud: false,
+};
 
 const renderWithI18n = (ui: React.ReactElement) =>
   render(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
@@ -29,11 +38,21 @@ describe('ImportScreen — validazione file e Importa tutto', () => {
   it('Importa tutto è disabilitata senza file validi', () => {
     renderWithI18n(
       <ImportScreen
-        states={{ spotify: { status: 'empty', file: null, error: null, eventsParsed: 0, eventsInserted: 0, uniqueTracks: 0 } }}
+        states={{
+          spotify: {
+            status: 'empty',
+            file: null,
+            error: null,
+            eventsParsed: 0,
+            eventsInserted: 0,
+            uniqueTracks: 0,
+          },
+        }}
         onDrop={onDrop}
         onImportAll={onImportAll}
         canImport={false}
         detecting={false}
+        privacy={PRIVACY_OFF}
       />,
     );
 
@@ -43,11 +62,21 @@ describe('ImportScreen — validazione file e Importa tutto', () => {
   it('dopo drop di un file valido, onDrop è invocato con piattaforma e file', () => {
     renderWithI18n(
       <ImportScreen
-        states={{ spotify: { status: 'empty', file: null, error: null, eventsParsed: 0, eventsInserted: 0, uniqueTracks: 0 } }}
+        states={{
+          spotify: {
+            status: 'empty',
+            file: null,
+            error: null,
+            eventsParsed: 0,
+            eventsInserted: 0,
+            uniqueTracks: 0,
+          },
+        }}
         onDrop={onDrop}
         onImportAll={onImportAll}
         canImport={false}
         detecting={false}
+        privacy={PRIVACY_OFF}
       />,
     );
 
@@ -75,6 +104,7 @@ describe('ImportScreen — validazione file e Importa tutto', () => {
         onImportAll={onImportAll}
         canImport={false}
         detecting={false}
+        privacy={PRIVACY_OFF}
       />,
     );
 

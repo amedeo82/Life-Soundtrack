@@ -280,6 +280,26 @@
 | `lastfm.info.proxyTrust` | Le richieste passano dal proxy che hai configurato: lui vede la tua chiave API | The requests go through the proxy you configured: it sees your API key |
 | `lastfm.info.complete` | Import completato: {{events}} eventi, {{tracks}} brani unici | Import complete: {{events}} events, {{tracks}} unique tracks |
 
+### 2.12e `settings.lastfm.*` (Story 1.3 — pannello di configurazione del proxy)
+
+Chiavi del pannello Last.fm (configurazione locale + import via API). I tre
+dati che l'utente inserisce (proxy, chiave API, username) **non** sono stringhe
+tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
+
+| Key | IT | EN |
+|-----|----|----|
+| `settings.lastfm.hint` | Per importare da Last.fm serve un proxy CORS, la tua chiave API e il tuo nome utente: restano solo su questo dispositivo. | To import from Last.fm you need a CORS proxy, your API key and your username: they stay on this device only. |
+| `settings.lastfm.proxy` | Proxy CORS (base URL) | CORS proxy (base URL) |
+| `settings.lastfm.username` | Nome utente Last.fm | Last.fm username |
+| `settings.lastfm.apiKey` | Chiave API Last.fm | Last.fm API key |
+| `settings.lastfm.save` | Salva | Save |
+| `settings.lastfm.saved` | Configurazione salvata su questo dispositivo | Configuration saved on this device |
+| `settings.lastfm.import` | Importa da Last.fm | Import from Last.fm |
+| `settings.lastfm.importing` | Import in corso... | Importing... |
+| `settings.lastfm.imported_one` | {{count}} evento importato | {{count}} event imported |
+| `settings.lastfm.imported_other` | {{count}} eventi importati | {{count}} events imported |
+| `settings.lastfm.notConfigured` | Inserisci proxy, chiave API e nome utente per abilitare l'import da Last.fm. Il percorso file resta disponibile. | Enter a proxy, an API key and a username to enable the Last.fm import. The file path stays available. |
+
 ### 2.13 `error.*`
 
 | Key | IT | EN |
@@ -386,3 +406,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |
 | 0.3 | Sessione 47 (2026-10-26, issue #145) | Aggiunta §2.12c `adapter.listenbrainz.*` (12 chiavi, spec `03-ADAPTERS/listenbrainz.md` §9). Le varianti `_one`/`_other` seguono la convenzione i18n per i conteggi (stesso pattern di `adapter.spotify.*` e `adapter.youtube_music.*`) |
+| 0.4 | Sessione 52 (2026-10-26, issue #155) | **Materializzazione** delle chiavi della Story 1.3: `adapter.listenbrainz.*` (§2.12c) e `adapter.lastfm.*` (§2.12d, 14 chiavi) sono ora nei locale `it`/`en` dell'app; aggiunta §2.12e `settings.lastfm.*` (11 chiavi) per il pannello di configurazione del proxy. I nomi delle chiavi nel materializzato sono **completti** (`adapter.listenbrainz.detect.success`): le tabelle delle sezioni omettono il prefisso `adapter.` come le altre (§2.12a/§2.12b) |

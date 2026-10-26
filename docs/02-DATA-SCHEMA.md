@@ -374,6 +374,28 @@ Migrazione v1→v2: aggiunge `searchQueries`; nessuna modifica distruttiva a tab
 
 PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&x` usano x come chiave primaria unica. `id` espliciti sono UUID generati dal core.
 
+### 6.1 Tabella `settings` (schema v4 — Story 1.3)
+
+    db.version(4).stores({
+      ...v3,
+      settings: '&key',
+    });
+
+`settings` è una tabella **chiave/valore** per le impostazioni locali che non
+sono dati di ascolto: proxy CORS Last.fm, `api_key`, username (`09§4`). Una
+riga per chiave:
+
+| Campo | Tipo | Note |
+|-------|------|------|
+| `key` | string | Chiave della voce (es. `lastfm.config`) — **PK unica** |
+| `value` | unknown | Valore JSON-serializzabile |
+| `updatedAt` | number | Data di ultima modifica (unix ms) |
+
+Migrazione **non distruttiva** (MIG-1): nessuna tabella esistente viene
+modificata e nessun dato viene perso. Le credenziali contenute qui sono
+**per-utente**: mai nel bundle, mai nei log, mai nelle fixture
+(`09-PRIVACY-SECURITY.md` §4).
+
 ## 7. Politiche di migrazione e ricalcolo
 
 - **MIG-1**: ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)`; mai drop di tabelle utente
@@ -431,3 +453,4 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.1 | Sessione 9 (2026-10-15) | Audit: `genres: string[]` su Track/Artist (D.A.2); `carDetectionConsent` in PrivacySettings (C1); tabella `searchQueries` + interfaccia (D.A.3); `AudioFeatures.source` ripulito a `{acousticbrainz, essentia, heuristic, manual}` (D.A.6); schema Dexie portato a v2; `PatternPayload` esteso con `peakHour`, `peakDay`, `peakMonth`, `nightShare`, `weekendShare`, `userTimezone` (M6/M7) |
 | 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |
 | 1.3 | Sessione 40 (2026-10-21, issue #98) | §2: riga Apple aggiornata al formato reale dell'export (schema 2026.2: `Event Start/End Timestamp` del Play Activity CSV; `Play Date UTC` era del legacy aggregato). **Aggiornamento factuale**: nessuna modifica a interfacce (§3), regole DEDUP (§5) o schema Dexie (§6) |
+| 1.4 | Sessione 52 (2026-10-26, issue #155) | §6.1 (nuova): tabella `settings` (chiave/valore) nello schema Dexie **v4** — proxy CORS Last.fm, `api_key`, username, per-utente e locali (`09§4`). Migrazione non distruttiva (MIG-1), nessuna modifica alle tabelle dati. §3.1: il contratto `RawListenEvent` riceve due campi **additivi e opzionali** — `sourceArtistMbid` (→ `Artist.mbid`, richiesto dalle spec `03-ADAPTERS/lastfm.md` §3.1.2 e `listenbrainz.md` §3.1.2) e `sourceTrackDurationMs` (durata **catalogo**, solo hint sulla `Track`: non entra nel bucket DEDUP-3, altrimenti uno stesso brano finirebbe in due `Track` distinte) |

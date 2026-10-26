@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 19:58
-> Totale file: 80
+> Data: 2026-10-26 21:45
+> Totale file: 87
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1373,8 +1373,8 @@ Apache License
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 51 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.0, S47) + Last.fm (🟢 v1.0, S50/S51) |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 52 (v1.4) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 52 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.0, S47) + Last.fm (🟢 v1.0, S50/S51) — **adapter implementati** in Sessione 52 (issue #155) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 48 (v1.1) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
@@ -1382,7 +1382,7 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 51 (v1.6.9) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155 |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 52 (v1.6.10) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 49 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -1400,7 +1400,7 @@ Apache License
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.7 | Diario cronologico per story: problemi, fix, lesson learned |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.8 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -1506,8 +1506,8 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.9, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
-- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v1.7, `19` introdotto in Sessione 41
+- **Documenti APPROVED**: 7 documenti (`02` v1.4, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.10, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
+- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v1.8, `19` introdotto in Sessione 41
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -1521,7 +1521,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 51, issue #144/#155): EPIC 1 (Fase 1 — Import core) ha i suoi primi due adapter **merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`) e **1.2 Apple Music ✅** (PR #139, `2e1a4cc`). La **Story 1.3 — Adapter Last.fm + ListenBrainz** ha ora i suoi **tre pezzi** di documentazione, tutti ratificati: spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, `6d66233`), ADR-0010 🟢 APPROVED v1.0 (PR #152, `1b2d280`), spec Last.fm 🟢 APPROVED v1.0 (PR #154, `b3130a9`; promozione documentale PR #156, `6ec71bb`). L'**issue di implementazione #155** è aperta (`agent-ready`, size L): adapter ListenBrainz file-only (export API → ZIP/JSONL) + adapter Last.fm (percorso API via proxy CORS con `parseRemote?()` + percorso file CSV/JSON), con `eventKey` normalizzato al minuto su entrambi i percorsi (D-LF.7). **Prossimo passo**: implementare la 1.3 (claim + worktree + PR sull'issue #155). Nel frattanto è eseguibile la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 52, issue #155): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`) e **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52): adapter ListenBrainz file-only (export API → ZIP/JSONL) e adapter Last.fm con percorso **ibrido** (API via proxy CORS con `parseRemote?()` + percorso file CSV/JSON), con `eventKey` normalizzato al minuto su entrambi i percorsi (D-LF.7). Il percorso web auth con la `sk` resta alla **Story 1.5** (E.LF.21: `api_sig` richiede md5, che il repo non espone). **Prossimo passo**: la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`) o la **Story 1.5** (scrobbling hub + sync continua, con il percorso incrementale ListenBrainz e il web auth Last.fm). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -6329,6 +6329,45 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 
 ---
 
+## 18. Story 1.3 — Implementazione adapter Last.fm + ListenBrainz (Sessione 52)
+
+**Tipo**: implementazione (`feat`) — issue #155, claim `kilo-HP-ELITEBOOK-lb52`
+**Branch**: `feat/155-lastfm-listenbrainz-adapter` (worktree `ls-155-lastfm-listenbrainz-adapter`)
+**PR**: #158 (aperta su `main` dalla worktree)
+**Data**: 2026-10-26
+**Stato**: ✅ implementazione completa — 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi; `lint`, `typecheck`, `build` verdi
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 18-1 | P+L | Il contratto `RawListenEvent` non aveva un campo per l'MBID dell'artista: `artist.mbid` (Last.fm `artist.mbid`, ListenBrainz `artist_mbids[0]`) non poteva raggiungere l'entità `Artist`, e le due spec lo dichiarano come "dato utile e attivo" | Il buco era **invisibile** finché nessuna piattaforma del perimetro lo esponeva: è il primo dato di questo tipo | Due campi **additivi e opzionali** (`sourceArtistMbid`, `sourceTrackDurationMs`): gli altri quattro adapter non li valorizzano e il loro comportamento non cambia (V1 di ADR-0010) | `02-DATA-SCHEMA.md` §3.1, `03-ADAPTERS/listenbrainz.md` §3.1.3 |
+| 18-2 | P+L | La durata catalogo (`additional_info.duration_ms`) e la durata dell'evento erano la stessa cosa: usarne una sola faceva finire lo stesso brano in **due `Track` distinte** (una con il dato, una senza) | Il bucket DEDUP-3 usa la durata; se la durata catalogo entrasse nel bucket, la copertura parziale del dato frammenterebbe la dedup | Due campi distinti: `sourceDurationMs` (durata dell'evento, **sempre 0** per ListenBrainz e Last.fm → bucket 0) e `sourceTrackDurationMs` (durata catalogo, **solo hint** sulla `Track`) | `03-ADAPTERS/listenbrainz.md` §3.1.1, `02-DATA-SCHEMA.md` §3.1 |
+| 18-3 | P+L | Il test scritto **per la spec** ("lo stesso scrobble via API e via CSV → stesso `eventKey`") è **fallito**: la formula `mbid ?? name\|artist` della spec non può soddisfare insieme E.LF.4 ed E.LF.16/E.LF.19 | L'API espone il MBID **spesso vuoto** (E.LF.5) mentre l'export `ghan.nl` lo porta: la copertura del dato **dipende dal percorso** | `LastfmEventKeyBuilder`: il MBID entra nella chiave **solo quando disambigua** (stesso minuto, stesso nome\|artista, MBID diversi); altrimenti la chiave è `<minuto>\|<nome>\|<artista>`, che converge fra i due percorsi. Documentato in `03-ADAPTERS/lastfm.md` §3.1.0 | `03-ADAPTERS/lastfm.md` §3.1.0, `docs/state/sessions/52-*` (lesson 52-1) |
+| 18-4 | P | `skipped = null` (la spec chiede "nessun dato") non è rappresentabile: `ListenEvent.skipped` è `boolean` non nullabile | `02§3.2` modella `skipped` come booleano; l'adapter passa `null` e il core normalizza a `false` | Dichiarato, non nascosto: la semantica richiesta ("non dedurre `skipped` da `durationMs = 0`") è rispettata — il valore `false` **non** significa "saltato", significa "dato assente" | `docs/state/sessions/52-*` |
+| 18-5 | P+L | `durationMs` degli export tool è al **secondo** (riga del file `uts`), l'evento normalizzato al **minuto** (D-LF.7): due scrobble distinti nella stessa finestra di 60 s hanno la stessa chiave di riga | La normalizzazione al minuto agisce sull'evento, non sulla **riga** del file, che ha un solo `uts` | Dichiarato come gap noto: ricaricando lo stesso file la seconda riga dello stesso minuto verrebbe scartata come duplicata. Il percorso API (che ha il `uts` esatto) non soffre del limite | `docs/state/sessions/52-*` |
+| 18-6 | P+L | Lo stub di `fetch` scritto a mano rendeva impossibile verificare il **ritmo** del rate limiter e il **backoff**: un test che asserisce "nessuna eccezione" passa anche con zero rate limiting | Il test guardava il risultato, non il **comportamento** del protocollo | `TokenBucket` con orologio e sleep **iniettabili**: il test asserisce che le richieste sono *spaziate* (non solo non superate) e che un errore 9 fa **un** tentativo, non un loop. Nessuna dipendenza nuova (`msw` non serve per quattro casi) | `adapters/lastfm/api.ts`, `adapters/lastfm/__tests__/lastfm-remote.test.ts` |
+| 18-7 | P | Il detect del JSON export Last.fm falliva: il file è pretty-printed, la **prima riga** è solo `{` | Il detect leggeva la prima riga e la passava a `JSON.parse` | Nel ramo JSON il detect legge il **file intero** e ne guarda la forma (`events[]` o record ghan.nl) | `adapters/lastfm/detect.ts` |
+
+**Lesson learned sintetica**: il contratto di una piattaforma non è un formato, è una
+**griglia di formati**: lo stesso campo cambia forma (`artist` stringa o oggetto),
+lo stesso dato ha copertura diversa da un percorso all'altro (il MBID), e lo stesso
+file ha due risoluzioni temporali (secondo e minuto). Ogni implementazione di
+adapter deve quindi produrre **tre** cose, non una: la mappa dei campi, la
+normalizzazione delle forme, e la **dichiarazione esplicita** di ciò che non
+riesce a normalizzare — perché la parte non normalizzata è quella che, prima o
+poi, si manifesta come duplicato silenzioso.
+
+### Link utili
+
+- Branch: `feat/155-lastfm-listenbrainz-adapter` (worktree `ls-155-lastfm-listenbrainz-adapter`)
+- Issue: **#155** (implementazione della Story 1.3, `size:L`)
+- Spec consumate: `docs/03-ADAPTERS/listenbrainz.md` (🟢 v1.0) · `docs/03-ADAPTERS/lastfm.md` (🟢 v1.0) · `docs/13-ADR/0010-remote-source-adapter.md` (🟢 v1.0)
+- Codice nuovo: `packages/core/src/adapters/{listenbrainz,lastfm}/` · `packages/core/src/adapters/jsonlStream.ts` · `packages/core/src/db/settings.ts` · `apps/web/src/onboarding/LastfmPanel.tsx`
+- Fixture nuovi: `fixtures/synthetic-history/listenbrainz-sample.jsonl` + 5 file Last.fm
+
+---
+
+## Changelog
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -6350,6 +6389,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 | 1.5 | 2026-10-26 (Story 1.3) | **§15 Story 1.3 — Spec adapter ListenBrainz** (issue #145, claim `kilo-HP-ELITEBOOK-lb47`, PR #146 merge `6d66233`): 5 lesson (15-1 `recording_msid` non è un ID univoco per ascolto → l'`eventKey` include `listened_at`, 15-2 `MAX_ITEMS_PER_GET` = 1000 e non 100 (sorgente, non doc), 15-3 il backlog descriveva il canale di accesso in modo falso per entrambe le piattaforme, 15-4 «nessun segreto da gestire» era falso: `api_key` per-utente (ToS §4.4) + `sk` via web auth, 15-5 i campi `null` nel frontmatter rendono `#null` nel blocco aggregato). Spec `03-ADAPTERS/listenbrainz.md` v1.0 🟢 APPROVED; perimetro della 1.3 corretto e Story 1.5 ridimensionata |
 | 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
 | 1.7 | 2026-10-26 (issue #144, #155) | **§17 Story 1.3 — Spec adapter Last.fm + approvazione** (Sessioni 50-51, claim `kilo-HP-ELITEBOOK-lb47`, PR #154 merge `b3130a9` + PR #156 merge `6ec71bb`): 6 lesson (17-1 il limite di `limit` va letto nella doc ufficiale dell'endpoint (200), non dedotto per analogia; 17-2 `artist` ha due forme a seconda di `extended=1` → accessor unico; 17-3 normalizzare l'`eventKey` al minuto su **tutti** i percorsi, se no il re-import misto API+file duplica ogni scrobble; 17-4 la normalizzazione è un contratto fra i due adapter → una sola issue (#155); 17-5 `api_sig` richiede md5, la Web Crypto non ce l'ha → web auth differito alla Story 1.5; 17-6 una sessione chiusa dalla PR che l'ha prodotta non può conoscere il proprio merge → doc-sync in PR separata, e le sezioni legacy dei file globali invecchiano in silenzio). Spec `03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED; issue #144 chiusa, issue di implementazione #155 aperta (`agent-ready`, size L) |
+| 1.8 | 2026-10-26 (issue #155) | **§18 Story 1.3 — Implementazione adapter Last.fm + ListenBrainz** (Sessione 52, claim kilo-HP-ELITEBOOK-lb52, PR #158): 7 lesson (18-1 il contratto degli adapter non aveva un campo per l'MBID dell'artista: aggiunti due campi **additivi e opzionali**; 18-2 durata catalogo e durata dell'evento erano la stessa cosa: bucket DEDUP-3 sempre 0 e durata solo hint sulla Track; 18-3 la formula dell'eventKey della spec non poteva soddisfare E.LF.4 ed E.LF.16/E.LF.19 insieme — il MBID entra nella chiave solo quando disambigua; 18-4 skipped = null non è rappresentabile nel modello: dichiarato; 18-5 la normalizzazione al minuto agisce sull'evento, non sulla riga del file: gap noto; 18-6 il test di un contratto di rete deve asserire il **comportamento** (ritmo, backoff, numero di tentativi), non l'assenza di eccezioni; 18-7 il detect del JSON pretty-printed non può guardare la prima riga). 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi |
 
 ---
 
@@ -7583,6 +7623,171 @@ L'issue raccoglie i deliverable delle tre specifiche:
 
 
 
+===== FILE: docs/state/sessions/52-story-1-3-implementation.md =====
+
+---
+number: 52
+title: "Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)"
+date: 2026-10-26
+state: 🟢
+merged: true
+merged_commit: ""
+merged_date: ""
+branch: feat/155-lastfm-listenbrainz-adapter
+pr: ""
+claim: kilo-HP-ELITEBOOK-lb52
+cross_refs: [155, 144, 145, 148]
+tags: [adapter, phase-1, feat]
+---
+
+# Sessione 52 — Implementazione Story 1.3 (adapter Last.fm + ListenBrainz)
+
+## Sintesi
+
+Implementazione della Story 1.3: i due adapter che la story prometteva, con i
+percorsi e le semantiche delle due spec 🟢 APPROVED.
+
+- **Adapter ListenBrainz** (`packages/core/src/adapters/listenbrainz/`): export
+  API in ZIP (`listens/*.jsonl` + `user.json`) o JSONL sciolto, scanner JSONL
+  dedicato (una riga in memoria, riga malformata non abortisce, `TRUNCATED`
+  recuperabile a fine stream), `eventKey = listenbrainz:<listened_at>|<recording_msid>`,
+  artista ricostruita da `mbid_mapping.artists[]` (mai divisa per `&`).
+- **Adapter Last.fm** (`packages/core/src/adapters/lastfm/`): percorso **ibrido**.
+  - **file**: CSV `ghan.nl` (8 colonne con header), CSV `lastfm-to-csv` (4 colonne
+    senza header, data al minuto) ed export JSON degli stessi tool;
+  - **API**: `parseRemote?()` (ADR-0010) con token bucket ~5 req/s, backoff
+    esponenziale, mappa dei **10 codici di errore** Last.fm, stop a
+    `@attr.totalPages`, `AbortSignal`, streaming senza accumulo.
+- **Core**: `SOURCE_UNREACHABLE` aggiunto a `AdapterErrorCode`; `RemoteSource` +
+  `parseRemote?()` nel contratto `PlatformAdapter`; `runRemoteImport()` in
+  `importSession`; due campi **additivi e opzionali** su `RawListenEvent`
+  (`sourceArtistMbid`, `sourceTrackDurationMs`).
+- **Storage**: tabella `settings` (Dexie v4) per proxy, `api_key` e username
+  Last.fm — per-utente, locali, mai nel bundle, mai nei log.
+- **UI**: pannello Last.fm nella schermata di import (config + import da API),
+  chiavi i18n `adapter.listenbrainz.*` (12) e `adapter.lastfm.*` (14) +
+  `settings.lastfm.*` (10) in `it`/`en`.
+
+**Test**: 198 nel core (di cui 47 nuovi: 7 scanner JSONL, 18 ListenBrainz,
+22 Last.fm), 81 nella web (di cui 3 nuovi sul pannello). `lint`, `typecheck`,
+`test` e `build` verdi in locale.
+
+## Trigger
+
+Issue #155 (`agent-ready`, size L): la Story 1.3 aveva i suoi tre pezzi
+documentali (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0)
+ed era quindi implementabile nelle sue due parti.
+
+## Difetti trovati lungo il percorso
+
+**Il contratto degli adapter non aveva un campo per l'MBID dell'artista.**
+Le spec §3.1.2 di entrambe le piattaforme dichiarano `artist.mbid` → `Artist.mbid`
+("dato utile e attivo, più affidabile del mbid del brano"), ma `RawListenEvent`
+(05§3.1) non ha un campo dedicato: il dato non poteva raggiungere l'entità
+`Artist`. Aggiunto `sourceArtistMbid?: string | null` — **additivo e opzionale**:
+gli altri quattro adapter non lo valorizzano e restano invariati (V1 di ADR-0010).
+
+**La durata catalogo e la durata dell'evento erano la stessa cosa.**
+ListenBrainz espone `additional_info.duration_ms` (durata **catalogo**), ma
+l'evento ha durata **0** (D-LB.7: l'ascolto non ha durata). Se la durata catalogo
+entrasse nel bucket DEDUP-3, uno stesso brano ascoltato una volta con e una volta
+senza il dato finirebbe in **due `Track` distinte** — l'esatto opposto di ciò che la
+dedup persegue. Aggiunto `sourceTrackDurationMs?: number | null`: il bucket usa
+`sourceDurationMs` (sempre 0 per ListenBrainz e Last.fm), la durata catalogo
+resta un **hint** sulla `Track`.
+
+**La formula dell'`eventKey` Last.fm della spec non soddisfa E.LF.16 ed E.LF.19.**
+La spec dichiara `lastfm:<minuto>|<mbid ?? name|artist>` e, nello stesso
+documento, che il **re-import misto** (API + file) non deve duplicare nulla. Ma
+l'API espone il MBID **spesso vuoto** (E.LF.5) mentre l'export `ghan.nl` lo porta:
+con il MBID nella chiave, lo stesso scrobble avrebbe due chiavi diverse a
+seconda del percorso. Risolto con `LastfmEventKeyBuilder`: **il MBID entra nella
+chiave solo quando serve a disambiguare** (stesso minuto, stessa coppia
+nome|artista, MBID diversi → E.LF.4); in tutti gli altri casi la chiave è
+`<minuto>|<nome>|<artista>`, che è la forma che converge fra i due percorsi.
+Documentato in `docs/03-ADAPTERS/lastfm.md` §3.1.
+
+**`skipped = null` non è rappresentabile nel modello.** La spec chiede
+`skipped = null` ("nessun dato, non dedurre da `durationMs = 0`"), ma
+`ListenEvent.skipped` è `boolean` non nullabile (02§3.2): l'adapter passa `null`
+e il core lo normalizza a `false`, come per gli altri adapter. Dichiarato, non
+nascosto.
+
+**`ListenEvent.durationMs` per gli export tool è al secondo, non al minuto.**
+I CSV `lastfm-to-csv` portano la data al minuto, l'API al secondo: la
+normalizzazione D-LF.7 risolve il *timestamp* dell'evento, ma non quello della
+**riga** del file. Diverge nel caso limite: due scrobble distinti nella stessa
+minestra di 60 s hanno timestamp diversi ma la stessa chiave di riga, quindi il
+secondo verrebbe scartato come duplicato **se il file viene ricaricato** (la
+riga ha un solo `uts`). Dichiarato come gap noto della 1.3.
+
+## Verifica
+
+- `pnpm run lint` → verde (3 task)
+- `pnpm run typecheck` → verde (3 task)
+- `pnpm --filter @ls/core exec vitest run` → **198 test verdi** (17 file)
+- `pnpm --filter @ls/web exec vitest run` → **81 test verdi** (10 file)
+- `pnpm run build` → verde (3 task)
+- `pwsh scripts/generate-bundle.ps1 --check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 --check` → drift atteso sui blocchi aggregati
+  (li rigenera `auto-state-aggregate` post-merge)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 52-1 | **Una spec 🟢 APPROVED può contenere due clausole che si contraddicono, e il test lo trova prima del review.** La formula dell'`eventKey` (`mbid ?? name|artist`) e la promessa del re-import misto senza duplicati (E.LF.16/E.LF.19) non possono valere insieme: l'API e il CSV non espongono il MBID con la stessa copertura. Il test che l'ha fatto emergere è quello scritto **per la specifica** ("lo stesso scrobble via API e via CSV → stesso `eventKey`"): un test scritto per la spec è anche il test che può smontarla. La regola: quando un test di una spec approvata fallisce, il difetto è della specifica finché non si dimostra il contrario — e allora va **dichiarato** e risolto nel codice, non aggirato |
+| 52-2 | **Un contratto che non prevede un dato è un buco che solo l'implementazione fa emergere.** `RawListenEvent` non aveva un campo per l'MBID dell'artista, e nessuna delle quattro piattaforme precedenti ne aveva bisogno: il buco era invisibile fino a Last.fm e ListenBrainz, che sono le prime a portarlo. Due campi **opzionali** lo hanno chiuso senza toccare gli adapter esistenti (V1). Il costo dell'estensione è nullo quando la forma è additiva; il costo del non estenderlo è il dato perso |
+| 52-3 | **Normalizzare al minuto non basta: bisogna normalizzare *anche* l'identità del brano.** D-LF.7 normalizza il timestamp, ma l'`eventKey` conteneva anche il MBID, la cui *copertura* dipende dal percorso. La normalizzazione va applicata all'intera parte variabile della chiave, non solo a una parte: il resto della chiave deve essere **path-independent**, altrimenti la deduplicazione vale solo dentro un percorso |
+| 52-4 | **Il test di un contratto di rete non è un test di network: è un test di forma.** Lo stub di `fetch` con orologio e sleep iniettabili rende verificabili tre cose che il mocking a mano rende fragili: il ritmo del token bucket (le richieste sono **spaziate**, non solo non superate), il backoff (l'attesa è misurabile) e l'**ordine** dei tentativi (un errore 9 fa **un** tentativo, non un loop). Nessuna dipendenza nuova: `msw` non serve per quattro casi |
+| 52-5 | **Il percorso file e il percorso API non sono due implementazioni: sono due fonti dello stesso oggetto.** Mappare entrambi sugli stessi `RawListenEvent` e far passare i due attraverso la **stessa** pipeline (V2 di ADR-0010) è ciò che rende il re-import idempotente. Il percorso file non ha bisogno di `detect()`-remoto né di `api_key`: sono due sorgenti diverse dello stesso contratto |
+
+## Documenti aggiornati
+
+- `packages/core/src/adapters/listenbrainz/` — **nuovo**: `types.ts`, `detect.ts`,
+  `mapEvent.ts`, `adapter.ts`, `index.ts`
+- `packages/core/src/adapters/lastfm/` — **nuovo**: `types.ts`, `detect.ts`,
+  `mapEvent.ts`, `eventKey.ts`, `api.ts`, `adapter.ts`, `index.ts`
+- `packages/core/src/adapters/jsonlStream.ts` — **nuovo**: scanner JSONL
+- `packages/core/src/adapters/errors.ts` — `SOURCE_UNREACHABLE`
+- `packages/core/src/adapters/types.ts` — `RemoteSource`, `parseRemote?()`,
+  `sourceArtistMbid`, `sourceTrackDurationMs`, `onWarning(code, count?)`
+- `packages/core/src/adapters/importSession.ts` — `runRemoteImport()`, sessione
+  unica file/ remota
+- `packages/core/src/adapters/pipeline.ts` — `Artist.mbid` e durata catalogo
+- `packages/core/src/db/db.ts` + `settings.ts` — schema Dexie v4 (tabella `settings`)
+- `packages/core/package.json` — subpath exports `./adapters/listenbrainz`,
+  `./adapters/lastfm`
+- `apps/web/src/onboarding/LastfmPanel.tsx` — **nuovo**; `OnboardingRouter.tsx` —
+  wiring dei due adapter e del pannello
+- `apps/web/src/i18n/locales/{it,en}.json` — 38 chiavi nuove
+- `fixtures/synthetic-history/` — **6 fixture nuovi** (ListenBrainz JSONL,
+  Last.fm API×2, CSV×2, export JSON)
+- `docs/02-DATA-SCHEMA.md` — §6: tabella `settings` (v4)
+- `docs/05-ARCHITECTURE.md` — §4: sottosezione "Sorgenti remote"
+- `docs/03-ADAPTERS/lastfm.md` — §3.1: chiave normalizzata (il MBID entra solo
+  quando disambigua)
+- `docs/03-ADAPTERS/listenbrainz.md` — nota sui campi del contratto
+- `docs/08-COPY-I18N.md` — §2.12c/§2.12d: materializzazione delle chiavi
+- `docs/09-PRIVACY-SECURITY.md` — §4: storage locale delle credenziali
+- `docs/11-BACKLOG.md` — Story 1.3 completata, changelog
+- `docs/state/stories/1.3-adapter-lastfm-listenbrainz.md` — stato 🟢
+- `docs/state/sessions/52-story-1-3-implementation.md` — **nuovo**
+- `docs/18-DEV-LOG.md` — §18
+- `scripts/generate-bundle.ps1` — `$files`: 6 fixture + la sessione 52
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#155** — issue di implementazione della Story 1.3 (chiusa al merge della PR)
+- **#144** / **#145** / **#148** — issue delle spec (ListenBrainz, Last.fm, ADR-0010)
+- `docs/03-ADAPTERS/listenbrainz.md` · `docs/03-ADAPTERS/lastfm.md` — le spec consumate
+- `docs/13-ADR/0010-remote-source-adapter.md` — il contratto `parseRemote?()`
+- Prossimo passo: **Story 1.4** (dedup promozione post-enrichment) e
+  **Story 1.5** (sync continua, percorso web auth con `sk` + md5 per `api_sig`)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -7590,15 +7795,15 @@ id: "1.3"
 title: "Adapter Last.fm + ListenBrainz"
 phase: 1
 area: adapter
-status: in_progress
+status: done
 priority: I
 depends_on: ["0.3"]
 issue: 155
-branch: ""
+branch: feat/155-lastfm-listenbrainz-adapter
 pr: ""
 merged_commit: ""
 merged_date: ""
-claim: kilo-HP-ELITEBOOK-lb47
+claim: kilo-HP-ELITEBOOK-lb52
 spec_refs:
   - docs/03-ADAPTERS/listenbrainz.md
   - docs/03-ADAPTERS/lastfm.md
@@ -7637,7 +7842,9 @@ piattaforme ha prodotto due esiti diversi:
 - **ADR-0010**: `docs/13-ADR/0010-remote-source-adapter.md` è 🟢 APPROVED v1.0 (PR #152, merge `1b2d280`, 2026-10-26), issue **#148** chiusa con `status:done`. Il contratto che l'adapter Last.fm deve consumare esiste: il metodo opzionale `parseRemote?()` con la struttura `RemoteSource` (`05§4.1`)
 - **Last.fm**: la spec `03-ADAPTERS/lastfm.md` è 🟢 APPROVED v1.0 (PR #154, merge `b3130a9`; promozione documentale PR #156, merge `6ec71bb`, 2026-10-26) e l'issue **#144** è chiusa con `status:done`
 
-L'issue di implementazione **#155** è aperta (`agent-ready`, size L): è il prossimo deliverable, non un blocco.
+L'implementazione (issue **#155**) è stata realizzata in Sessione 52: adapter
+ListenBrainz (file-only) e adapter Last.fm (percorso API via `parseRemote?()` +
+percorso file), con i test, i fixture e il doc-sync. La story è chiusa.
 
 ## Task
 
@@ -7658,16 +7865,21 @@ L'issue di implementazione **#155** è aperta (`agent-ready`, size L): è il pro
 - [x] T1.3.6 — Approvazione Boss della spec Last.fm (promozione 🟡 DRAFT → 🟢 APPROVED
       v1.0, PR #154, merge `b3130a9`): issue #144 chiusa con `status:done`
 - [x] T1.3.7 — Issue di implementazione della 1.3 (#155, `agent-ready`, size L): **una sola issue per i due adapter**, perché l'`eventKey` normalizzato al minuto (D-LF.7) è un contratto fra i due — un re-import misto API+file duplicherebbe ogni scrobble
+- [x] T1.3.8 — **Implementazione** (Sessione 52, issue #155): adapter ListenBrainz
+      (export API ZIP/JSONL) e adapter Last.fm (percorso ibrido API + file),
+      `parseRemote?()` + `RemoteSource` (ADR-0010), `SOURCE_UNREACHABLE`, tabella
+      `settings` per le credenziali per-utente, pannello Last.fm in UI, 6 fixture
+      sintetici e 47 test nuovi
 
 ## Acceptance criteria
 
 Elenco completo e verificabile in `listenbrainz.md` §8 (20 casi di fixture),
 `lastfm.md` §"Acceptance criteria" e nelle issue #145 / #144.
 
-- [ ] I 20 casi della spec §8 coperti da fixture su `listenbrainz-sample.jsonl`
-- [ ] Mock API per i percorsi Last.fm (paginazione, rate limit, errori 6/8/9/10/26)
-- [ ] `pnpm run lint`, `typecheck`, `test`, `build` verdi
-- [ ] Doc-sync: `01-PLATFORMS.md` §3.8 + §5 (E11-E13) + changelog,
+- [x] I 20 casi della spec §8 coperti da fixture su `listenbrainz-sample.jsonl`
+- [x] Mock API per i percorsi Last.fm (paginazione, rate limit, errori 6/8/9/10/26)
+- [x] `pnpm run lint`, `typecheck`, `test`, `build` verdi
+- [x] Doc-sync: `01-PLATFORMS.md` §3.8 + §5 (E11-E13) + changelog,
       `02-DATA-SCHEMA.md` §2 + §5 (sorgenti con durata non affidabile) + changelog,
       `08-COPY-I18N.md` §2.12c, `09-PRIVACY-SECURITY.md` §4 + §7.2 + changelog,
       `11-BACKLOG.md` (Story 1.3 riscritta, Story 1.5 ridimensionata, roadmap,
@@ -7688,32 +7900,49 @@ Elenco completo e verificabile in `listenbrainz.md` §8 (20 casi di fixture),
 
 ## Stato attuale
 
-🟡 IN CORSO. Spec **ListenBrainz** 🟢 APPROVED v1.0 (PR #146, merge `6d66233`,
-2026-10-26): issue #145 chiusa con `status:done`, branch
-`feat/145-listenbrainz-adapter-spec` eliminato (remoto via `auto-branch-cleanup`,
-locale via `scripts/post-merge.ps1`).
+✅ **COMPLETATA** (Sessione 52, 2026-10-26). Issue #155 chiusa con
+`status:done` al merge della PR di implementazione.
 
-**ADR-0010** 🟢 APPROVED v1.0 (PR #152, merge `1b2d280`, 2026-10-26): issue #148
-chiusa con `status:done`. Il contratto `parseRemote?()` + `RemoteSource` esiste in
-`05§4.1`, col codice errore `SOURCE_UNREACHABLE`.
+**Cosa c'è ora** (`packages/core/src/adapters/`):
 
-Spec **Last.fm** 🟢 APPROVED v1.0 (PR #154, merge `b3130a9`, 2026-10-26): issue #144
-chiusa con `status:done`.
+- **ListenBrainz** (`listenbrainz/`): export API in ZIP (`listens/*.jsonl` +
+  `user.json`) o JSONL sciolto, scanner JSONL dedicato (`jsonlStream.ts`:
+  memoria a una riga, riga malformata non abortisce lo stream, `TRUNCATED`
+  recuperabile a fine stream), `eventKey = listenbrainz:<listened_at>|<recording_msid>`,
+  artista ricostruita da `mbid_mapping.artists[]` (mai divisa per `&`), durata
+  catalogo solo come hint sulla `Track` (bucket DEDUP-3 sempre 0).
+- **Last.fm** (`lastfm/`): percorso **ibrido**. File: CSV `ghan.nl` (8 colonne
+  con header), CSV `lastfm-to-csv` (4 colonne senza header, data al minuto),
+  export JSON. API: `parseRemote?()` con token bucket ~5 req/s, backoff
+  esponenziale, i **10 codici di errore** Last.fm mappati, stop a
+  `@attr.totalPages`, `AbortSignal`, streaming senza accumulo.
+- **Core**: `SOURCE_UNREACHABLE` in `AdapterErrorCode`; `RemoteSource` +
+  `parseRemote?()` nel contratto `PlatformAdapter` (`05§4.1`); `runRemoteImport()`
+  in `importSession`; due campi additivi e opzionali su `RawListenEvent`
+  (`sourceArtistMbid`, `sourceTrackDurationMs`).
+- **Storage locale**: tabella Dexie `settings` (v4) con proxy, `api_key` e
+  username Last.fm — per-utente, mai nel bundle, mai nei log.
+- **UI**: pannello Last.fm nella schermata di import (config + import da API
+  disabilitato senza proxy/chiave/utente → zero richieste), chiavi i18n
+  `adapter.listenbrainz.*`, `adapter.lastfm.*`, `settings.lastfm.*`.
 
-**La story ha i suoi tre pezzi** — spec ListenBrainz (🟢 v1.0), ADR-0010 (🟢 v1.0),
-spec Last.fm (🟢 v1.0) — ed è quindi implementabile nelle sue due parti: adapter
-ListenBrainz (file-only) e adapter Last.fm (percorso API via `parseRemote?()` +
-percorso file).
+**Deroghe e gap dichiarati** (non silenziosi):
 
-**Issue di implementazione: #155**, aperta nella Sessione 51 (`agent-ready`, size L,
-`area:adapter`, `priority:important`, `phase-1`). Una sola issue per i due adapter
-(D.51.1): l'`eventKey` normalizzato al minuto (D-LF.7) è un contratto fra i due, e la
-story è un'unità di valore (l'utente importa la sua storia), non un'unità di codice.
+- `eventKey` Last.fm: il **MBID entra nella chiave solo quando disambigua**
+  (stesso minuto, stesso nome|artista, MBID diversi). La formula della spec
+  (`mbid ?? name|artist`) non poteva soddisfare insieme E.LF.4 ed E.LF.16/E.LF.19:
+  l'API espone il MBID spesso vuoto, l'export `ghan.nl` lo porta. Documentato in
+  `03-ADAPTERS/lastfm.md` §3.1.
+- `skipped = null` non è rappresentabile: `ListenEvent.skipped` è `boolean`
+  non nullabile (02§3.2) → il core normalizza `null` a `false`.
+- `durationMs` degli export tool è al **secondo** (riga del file), l'evento
+  normalizzato al **minuto** (D-LF.7): ricaricando lo stesso file la seconda
+  riga dello stesso minuto verrebbe scartata come duplicata.
+- Il percorso web auth con `sk` (D-LF.2) resta alla **Story 1.5** (E.LF.21:
+  `api_sig` richiede md5, che il repo non espone).
 
-Il campo `pr`/`merged_commit` del frontmatter restano **vacuati** di proposito:
-si riferiscono alla PR di **implementazione** della story (#155), non a quella delle
-spec (come per la 1.1, vedi `docs/state/stories/1.1-adapter-youtube-music.md`
-alla data del merge della spec).
+**Verifica**: 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi; `lint`,
+`typecheck`, `build` verdi; 6 fixture sintetici nuovi.
 
 Sblocca: nessuna story è dipendente da 1.3. La 1.5 dipende dal contratto
 `parseRemote?()` (ADR-0010, ratificato) per il percorso incrementale.
@@ -9151,6 +9380,28 @@ Migrazione v1→v2: aggiunge `searchQueries`; nessuna modifica distruttiva a tab
 
 PrimKey: dove non indicato con `&`, Dexie usa la prima chiave; le tabelle con `&x` usano x come chiave primaria unica. `id` espliciti sono UUID generati dal core.
 
+### 6.1 Tabella `settings` (schema v4 — Story 1.3)
+
+    db.version(4).stores({
+      ...v3,
+      settings: '&key',
+    });
+
+`settings` è una tabella **chiave/valore** per le impostazioni locali che non
+sono dati di ascolto: proxy CORS Last.fm, `api_key`, username (`09§4`). Una
+riga per chiave:
+
+| Campo | Tipo | Note |
+|-------|------|------|
+| `key` | string | Chiave della voce (es. `lastfm.config`) — **PK unica** |
+| `value` | unknown | Valore JSON-serializzabile |
+| `updatedAt` | number | Data di ultima modifica (unix ms) |
+
+Migrazione **non distruttiva** (MIG-1): nessuna tabella esistente viene
+modificata e nessun dato viene perso. Le credenziali contenute qui sono
+**per-utente**: mai nel bundle, mai nei log, mai nelle fixture
+(`09-PRIVACY-SECURITY.md` §4).
+
 ## 7. Politiche di migrazione e ricalcolo
 
 - **MIG-1**: ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)`; mai drop di tabelle utente
@@ -9208,6 +9459,7 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.1 | Sessione 9 (2026-10-15) | Audit: `genres: string[]` su Track/Artist (D.A.2); `carDetectionConsent` in PrivacySettings (C1); tabella `searchQueries` + interfaccia (D.A.3); `AudioFeatures.source` ripulito a `{acousticbrainz, essentia, heuristic, manual}` (D.A.6); schema Dexie portato a v2; `PatternPayload` esteso con `peakHour`, `peakDay`, `peakMonth`, `nightShare`, `weekendShare`, `userTimezone` (M6/M7) |
 | 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |
 | 1.3 | Sessione 40 (2026-10-21, issue #98) | §2: riga Apple aggiornata al formato reale dell'export (schema 2026.2: `Event Start/End Timestamp` del Play Activity CSV; `Play Date UTC` era del legacy aggregato). **Aggiornamento factuale**: nessuna modifica a interfacce (§3), regole DEDUP (§5) o schema Dexie (§6) |
+| 1.4 | Sessione 52 (2026-10-26, issue #155) | §6.1 (nuova): tabella `settings` (chiave/valore) nello schema Dexie **v4** — proxy CORS Last.fm, `api_key`, username, per-utente e locali (`09§4`). Migrazione non distruttiva (MIG-1), nessuna modifica alle tabelle dati. §3.1: il contratto `RawListenEvent` riceve due campi **additivi e opzionali** — `sourceArtistMbid` (→ `Artist.mbid`, richiesto dalle spec `03-ADAPTERS/lastfm.md` §3.1.2 e `listenbrainz.md` §3.1.2) e `sourceTrackDurationMs` (durata **catalogo**, solo hint sulla `Track`: non entra nel bucket DEDUP-3, altrimenti uno stesso brano finirebbe in due `Track` distinte) |
 
 
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
@@ -10262,6 +10514,26 @@ L'adapter emette `{name, mbid?}` per Artist e `{name, artistId, mbid: null, plat
 
 Il `mbid` dell'artista: `mbid_mapping.artist_mbids[0]` (il primo) → `Artist.mbid`. In caso di più artisti, si emette l'artista joinata con il **primo** mbid (gli altri andrebbero in una relazione many-to-many che `02§3.3` non modella).
 
+### 3.1.3 I due campi che il contratto non aveva (Sessione 52)
+
+`05§3.1` (`RawListenEvent`) non prevedeva due dati che questa spec richiede: senza
+di essi il valore della spec sarebbe andato perso, senza degrado.
+
+| Campo | Va a | Perché serve |
+|-------|------|--------------|
+| `sourceArtistMbid` (opzionale) | `Artist.mbid` | §3.1.2: `mbid_mapping.artist_mbids[0]` — "dato utile e attivo, più affidabile del mbid del brano" |
+| `sourceTrackDurationMs` (opzionale) | `Track.durationMs` (hint) | §3.1.1: `additional_info.duration_ms` è durata **catalogo**, non durata dell'ascolto |
+
+Il secondo è la distinzione che rende D7 implementabile: il **bucket** DEDUP-3 usa
+la durata dell'evento (`sourceDurationMs`, che per ListenBrainz è **sempre 0**),
+mentre la durata catalogo resta un hint sulla `Track`. Se la durata catalogo
+entrasse nel bucket, uno stesso brano ascoltato una volta con e una volta senza
+il dato finirebbe in **due `Track` distinte** — l'esatto opposto di ciò che la
+dedup persegue (E.LB.2).
+
+Entrambi i campi sono **additivi e opzionali**: gli altri quattro adapter non li
+valorizzano e il loro comportamento non cambia.
+
 ### 3.2 Library / Playlist (vedi `02§3.7`)
 
 **Fuori scope adapter MVP**:
@@ -10447,6 +10719,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listen
 |----------|------|-----------|
 | 0.1 | Sessione 47 (2026-10-26) | Prima stesura (issue #145). Decisioni D-LB.1…D-LB.5 chiuse con il Boss; API e formato export verificati su sorgente e doc ufficiali. Correzione di una premessa errata: `recording_msid` **non** è un identificativo univoco per singolo ascolto (è un hash dei metadati) → l'`eventKey` include `listened_at` (D-LB.2). Canale di storico = **export API** (ZIP/JSONL), non paginazione `/listens`: la doc ne sconsiglia l'uso per lo storico completo e il contratto `05§4` resta invariato (D-LB.4) |
 | 1.0 | Sessione 47 (2026-10-26) | 🟢 APPROVED · promozione al merge della PR #146 (approvazione Boss) — decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto |
+| 1.1 | Sessione 52 (2026-10-26, issue #155) | **§3.1.3 (nuova)**: i due campi che il contratto `RawListenEvent` non prevedeva e che questa spec richiede — `sourceArtistMbid` (→ `Artist.mbid`, §3.1.2) e `sourceTrackDurationMs` (durata catalogo, **solo hint** sulla `Track`: il bucket DEDUP-3 continua a usare la durata dell'evento, sempre 0, altrimenti uno stesso brano finirebbe in due `Track` distinte, E.LB.2). Entrambi **additivi e opzionali**. Nessuna modifica alle decisioni D-LB.* né alle restanti parti della spec |
 
 
 
@@ -10623,6 +10896,31 @@ Differenze che contano:
 | `day` | (derivato) | (derivato) | (derivato) | `YYYY-MM-DD` UTC, da `timestamp` |
 
 **Campi del payload mai persistiti**: `image[]` (URL copertine → artwork via MusicBrainz in Story 4.3), `url` (pagina del brano su Last.fm → `sourceTrackUri`), `streamable`, `loved` (nessun campo "loved" nel modello `02§3.3`), `artist.url`, `artist.image[]`, `album.mbid` (l'MBID dell'album non ha un campo dedicato: `Album.mbid` non esiste in `02§3.3`), `date["#text"]` (redundante con `uts`), `@attr.user` (identifica l'account, non l'ascolto).
+
+### 3.1.0 La chiave fra i due percorsi — precisazione di implementazione (Sessione 52)
+
+La formula `lastfm:<minute>|<mbid ?? name|artist>` è **corretta per un percorso**, ma
+i due percorsi non espongono il MBID con la stessa copertura: l'API lo espone
+**spesso vuoto** (E.LF.5) mentre l'export `ghan.nl` lo porta in `track_mbid`. Con il
+MBID nella chiave, lo stesso scrobble importato via API e poi via file avrebbe
+**due chiavi diverse** — cioè E.LF.16 ed E.LF.19 ("il re-import misto non
+duplica") non potrebbero valere insieme.
+
+La precisazione implementata (`LastfmEventKeyBuilder`): **il MBID entra nella
+chiave solo quando serve a disambiguare**, cioè quando nello stesso minuto la
+stessa coppia nome|artista compare con **MBID diversi** (il caso E.LF.4). In tutti
+gli altri casi la chiave è `<minuto>|<nome>|<artista>`, che è la forma che
+**converge** fra i due percorsi.
+
+| | API (`extended=1`) | file `ghan.nl` | chiave |
+|---|---|---|---|
+| stesso scrobble, mbid assente da entrambi | `mbid: ""` | `track_mbid` vuoto | `<minuto>\|<nome>\|<artista>` — **converge** |
+| stesso scrobble, mbid presente in uno solo | `mbid: X` | `track_mbid` vuoto | `<minuto>\|<nome>\|<artista>` — **converge** |
+| due registrazioni diverse, stesso nome e artista, stesso minuto | `mbid: X` e `mbid: Y` | — | `<minuto>\|X` e `<minuto>\|Y` — **disambiguati** (E.LF.4) |
+
+La perdita residua è quella già dichiarata da D-LF.7: due scrobble dello **stesso**
+brano nello stesso minuto si fondono (il MBID non li distinguerebbe comunque,
+perché è lo stesso brano).
 
 ### 3.1.1 Track (entità separata — vedi `02§3.3`)
 
@@ -10858,6 +11156,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 |----------|------|-----------|
 | 0.1 | Sessione 50 (2026-10-26) | Prima stesura (issue #144). Decisioni D-LF.0…D-LF.8 (Boss, Sessione 47) e vincoli di ADR-0010. API, limiti, error codes, flusso web auth e formati CSV verificati su fonte (doc ufficiale Last.fm, doc non ufficiale, depth.fm, multi-scrobbler). Correzione di una premessa errata della issue: `limit` **max 200** (doc ufficiale), non 1000; e il campo `date` **manca** per il brano in riproduzione. Aggiunto il percorso **ibrido** (API + file) con `eventKey` normalizzato al minuto su tutti i percorsi, per evitare duplicati al re-import misto. Dichiarati i gap: md5 per `api_sig` (rinviato a 1.5), `loved` senza campo nel modello, `album.mbid` scartato |
 | 1.0 | Sessione 51 (2026-10-26) | 🟢 APPROVED · ratifica del Boss al merge della PR #154 (`b3130a9`) — nessuna modifica di contenuto. Le decisioni D-LF.0…D-LF.8 sono ratificate come formulate; il percorso web auth per la `sk` resta **differito alla Story 1.5** (E.LF.21) |
+| 1.1 | Sessione 52 (2026-10-26, issue #155) | **§3.1.0 (nuova)**: precisazione di implementazione sulla `eventKey` — la formula `mbid ?? name|artist` non può soddisfare insieme E.LF.4 ed E.LF.16/E.LF.19, perché API ed export non espongono il MBID con la stessa copertura. Il MBID entra nella chiave **solo quando disambigua** (stesso minuto, stesso nome\|artista, MBID diversi); negli altri casi la chiave è `<minuto>\|<nome>\|<artista>`, che converge fra i due percorsi. Nessuna modifica alle decisioni D-LF.* né alle restanti parti della spec |
 
 
 
@@ -12958,6 +13257,26 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `lastfm.info.proxyTrust` | Le richieste passano dal proxy che hai configurato: lui vede la tua chiave API | The requests go through the proxy you configured: it sees your API key |
 | `lastfm.info.complete` | Import completato: {{events}} eventi, {{tracks}} brani unici | Import complete: {{events}} events, {{tracks}} unique tracks |
 
+### 2.12e `settings.lastfm.*` (Story 1.3 — pannello di configurazione del proxy)
+
+Chiavi del pannello Last.fm (configurazione locale + import via API). I tre
+dati che l'utente inserisce (proxy, chiave API, username) **non** sono stringhe
+tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
+
+| Key | IT | EN |
+|-----|----|----|
+| `settings.lastfm.hint` | Per importare da Last.fm serve un proxy CORS, la tua chiave API e il tuo nome utente: restano solo su questo dispositivo. | To import from Last.fm you need a CORS proxy, your API key and your username: they stay on this device only. |
+| `settings.lastfm.proxy` | Proxy CORS (base URL) | CORS proxy (base URL) |
+| `settings.lastfm.username` | Nome utente Last.fm | Last.fm username |
+| `settings.lastfm.apiKey` | Chiave API Last.fm | Last.fm API key |
+| `settings.lastfm.save` | Salva | Save |
+| `settings.lastfm.saved` | Configurazione salvata su questo dispositivo | Configuration saved on this device |
+| `settings.lastfm.import` | Importa da Last.fm | Import from Last.fm |
+| `settings.lastfm.importing` | Import in corso... | Importing... |
+| `settings.lastfm.imported_one` | {{count}} evento importato | {{count}} event imported |
+| `settings.lastfm.imported_other` | {{count}} eventi importati | {{count}} events imported |
+| `settings.lastfm.notConfigured` | Inserisci proxy, chiave API e nome utente per abilitare l'import da Last.fm. Il percorso file resta disponibile. | Enter a proxy, an API key and a username to enable the Last.fm import. The file path stays available. |
+
 ### 2.13 `error.*`
 
 | Key | IT | EN |
@@ -13064,6 +13383,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.1 | Sessione 5 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |
 | 0.3 | Sessione 47 (2026-10-26, issue #145) | Aggiunta §2.12c `adapter.listenbrainz.*` (12 chiavi, spec `03-ADAPTERS/listenbrainz.md` §9). Le varianti `_one`/`_other` seguono la convenzione i18n per i conteggi (stesso pattern di `adapter.spotify.*` e `adapter.youtube_music.*`) |
+| 0.4 | Sessione 52 (2026-10-26, issue #155) | **Materializzazione** delle chiavi della Story 1.3: `adapter.listenbrainz.*` (§2.12c) e `adapter.lastfm.*` (§2.12d, 14 chiavi) sono ora nei locale `it`/`en` dell'app; aggiunta §2.12e `settings.lastfm.*` (11 chiavi) per il pannello di configurazione del proxy. I nomi delle chiavi nel materializzato sono **completti** (`adapter.listenbrainz.detect.success`): le tabelle delle sezioni omettono il prefisso `adapter.` come le altre (§2.12a/§2.12b) |
 
 
 ===== FILE: docs/09-PRIVACY-SECURITY.md =====
@@ -13831,7 +14151,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v1.0 🟢 APPROVED** (PR #154, issue #144 chiusa) — i tre pezzi della story sono pronti; **issue di implementazione #155 aperta** (`agent-ready`, size L)
+**Stato**: ✅ **COMPLETATA** (Sessione 52) — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v1.0 🟢 APPROVED** (PR #152, issue #148 chiusa); **spec Last.fm v1.0 🟢 APPROVED** (PR #154, issue #144 chiusa); **implementazione** (issue #155 chiusa con `status:done`): adapter ListenBrainz (export API ZIP/JSONL) e adapter Last.fm (percorso ibrido API + file), `parseRemote?()`/`RemoteSource` (ADR-0010), `SOURCE_UNREACHABLE`, tabella `settings` per le credenziali per-utente, pannello Last.fm in UI, 6 fixture e 47 test nuovi
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -14098,7 +14418,6 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec ListenBrainz 🟢 APPROVED v1.0 (PR #146); ADR-0010 🟢 APPROVED v1.0 (PR #152); spec Last.fm 🟢 APPROVED v1.0 (PR #154) — i tre pezzi pronti, issue di implementazione **#155** aperta (`agent-ready`, size L); `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
@@ -14145,6 +14464,7 @@ Ogni story deve avere label GitHub:
 | 1.6.7 | Sessione 50 (2026-10-26, issue #144) | **Spec Last.fm scritta**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT (10 sezioni, 21 edge case E.LF.1…E.LF.21, 23 casi di fixture). Perimetro confermato: nessun export utilizzabile dall'app (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy) → canale MVP = API `user.getRecentTracks` via **proxy CORS configurato dall'utente**; percorso **file** (export di terze parti) come alternativa senza proxy. Corretti due limiti: `limit` max **200** (doc ufficiale, non 1000) e `artist` è **stringa** senza `extended=1` / **oggetto** con `extended=1`; il brano in riproduzione **non ha `date`**. `eventKey` normalizzato al **minuto** su tutti i percorsi (il re-import misto API+file non duplica). Il percorso web auth per la `sk` è **differito alla Story 1.5**: `api_sig` richiede md5 e il repo espone solo SHA-1/SHA-256 (E.LF.21). Allineati: `01-PLATFORMS.md` §3.7 + tabella §4 (ISRC/MBID e "brani salvati" da ❌ a ⚠️) + E14-E18 + changelog 0.6; `02-DATA-SCHEMA.md` §2 (riga Last.fm) + §5 (sorgenti con durata non affidabile); `08-COPY-I18N.md` §2.12d; `09-PRIVACY-SECURITY.md` §4 (5 righe) + §7.2 (nota sul proxy) + changelog 0.4 |
 | 1.6.8 | Sessione 51 (2026-10-26, issue #144) | **Spec Last.fm approvata**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #154, merge `b3130a9`); issue #144 chiusa con `status:done`. Nessuna modifica di contenuto: D-LF.0…D-LF.8 ratificate come formulate, percorso web auth confermato alla Story 1.5. **Story 1.3 completa dei suoi tre pezzi** (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0) → aperta l'issue di implementazione (#155, `agent-ready`, size L). Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.7 (riferimento spec), `docs/state/sessions/50-*` e `51-*` |
 | 1.6.9 | Sessione 51 (2026-10-26, issue #144) | **Doc-sync post-merge della PR #156** (merge `6ec71bb`): il frontmatter di `docs/state/sessions/51-*` riflette il merge reale (`pr: 156`, `merged_commit: 6ec71bb`, `state: 🟢`, `merged: true`) — era rimasto `pr: null` / `merged: false` perché la sessione è stata scritta dalla stessa PR che la chiude. Story 1.3 allineata: `issue: 155`, T1.3.7 ✅, "Stato attuale" aggiornato. Sezioni legacy riallineate: `11-BACKLOG.md` (`**Stato**:` della 1.3 + riga roadmap, che dichiaravano ancora «manca l'issue di implementazione»), `docs/INDEX.md` (riga `03-ADAPTERS/`, versioni dei documenti, "Prossimo passo tecnico"), `docs/18-DEV-LOG.md` §17 (entry delle sessioni 50-51). La riga di changelog 1.6.8 è stata riportata dentro la tabella: era stata appesa **dopo** il blocco `AGGREGATE-STORIES-*`, fuori dal suo schema |
+| 1.6.10 | Sessione 52 (2026-10-26, issue #155) | **Story 1.3 completata**: implementazione della issue #155 (adapter ListenBrainz file-only + adapter Last.fm ibrido API/file). Sezione Story 1.3 `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"** (la fonte di verità per le completate è il blocco aggregato, ADR-0008); `docs/state/stories/1.3-*` → `status: done`. Documenti allineati: `02-DATA-SCHEMA.md` §6.1 (tabella `settings`, schema Dexie v4) + §3.1 (i due campi additivi del contratto) + changelog 1.4; `03-ADAPTERS/lastfm.md` §3.1.0 (la chiave fra i due percorsi) + changelog 1.1; `03-ADAPTERS/listenbrainz.md` §3.1.3 (i due campi che il contratto non aveva) + changelog 1.1; `08-COPY-I18N.md` §2.12e (`settings.lastfm.*`) + changelog 0.4; `docs/18-DEV-LOG.md` §18; `docs/state/sessions/52-*` (nuova); `scripts/generate-bundle.ps1` `$files` (6 fixture + sessione 52); `docs/BUNDLE.md` rigenerato |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -22273,6 +22593,245 @@ evt-013,Duplicate Segment 1,Duplicate Artist,,Duplicate Album,120000,240000,2024
 evt-014,Duplicate Segment 2,Duplicate Artist,,Duplicate Album,115000,240000,2024-01-15T16:30:00.000Z,2024-01-15T16:28:05.000Z,NATURAL_END_OF_TRACK,TRACK_PLAYBACK_START,PLAY_END,false,false,iPhone,iOS 17.2 iPhone15,2,US,United States,,,,,iPhone15,2,apple-id-123,sub-456,metrics-client-1,bucket-1,,"",-18000
 evt-015,Privacy Test Song,Privacy Artist,,Privacy Album,200000,200000,2024-01-15T17:00:00.000Z,2024-01-15T16:56:40.000Z,NATURAL_END_OF_TRACK,TRACK_PLAYBACK_START,PLAY_END,false,false,iPhone,iOS 17.2 iPhone15,2,US,United States,192.168.1.1,New York,NY,40.7128,-74.0060,iPhone15,2,apple-id-123,sub-456,metrics-client-1,bucket-1,,"",-18000
 evt-016,Legacy Event,Content Name,Artist Name,Album Name,180000,180000,2024-01-15T18:00:00.000Z,2024-01-15T17:57:00.000Z,NATURAL_END_OF_TRACK,TRACK_PLAYBACK_START,PLAY_END,false,false,iPhone,iOS 17.2 iPhone15,2,US,United States,,,,,iPhone15,2,apple-id-123,sub-456,metrics-client-1,bucket-1,,"",-18000
+
+
+===== FILE: fixtures/synthetic-history/listenbrainz-sample.jsonl =====
+
+{"_case":"happy_path_1","_expectedOutput":{"eventKey":"listenbrainz:1710498600|msid-happy-1","timestamp":1710498600000,"dedup":"isrc:GBAYE0601498"},"listened_at":1710498600,"inserted_at":1710498605,"recording_msid":"msid-happy-1","user_name":"lb_user","track_metadata":{"track_name":"Space Oddity","artist_name":"David Bowie","release_name":"David Bowie"},"additional_info":{"duration_ms":259000,"isrc":"GBAYE0601498","media_player":"Navidrome","submission_client":"DSub","submission_client_version":"6.5","origin_url":"https://example.invalid/track","spotify_id":"spotify-ignored","youtube_id":"yt-ignored","tags":["user-tag"],"tracknumber":3},"mbid_mapping":{"recording_mbid":"mbid-rec-1","artist_mbids":["mbid-artist-bowie"],"artists":[{"artist_credit_name":"David Bowie","join_phrase":"","artist_mbid":"mbid-artist-bowie"}],"caa_id":12345,"caa_release_mbid":"mbid-caa-release","url_rels":[{"type":"spotify","url":"https://example.invalid/spotify"}]}}
+{"_case":"happy_path_2","_expectedOutput":{"eventKey":"listenbrainz:1710502200|msid-happy-2","timestamp":1710502200000,"dedup":"mbid:mbid-rec-2"},"listened_at":1710502200,"recording_msid":"msid-happy-2","track_metadata":{"track_name":"Apocalypse Dreams","artist_name":"Tame Impala","release_name":"Lonerism"},"mbid_mapping":{"recording_mbid":"mbid-rec-2","artist_mbids":["mbid-artist-tame"],"artists":[{"artist_credit_name":"Tame Impala","join_phrase":"","artist_mbid":"mbid-artist-tame"}]}}
+{"_case":"E_LB_8_same_msid_different_time_a","_expectedOutput":{"eventKey":"listenbrainz:1710592200|msid-shared","dedup":"fuzzy:GoldenBrown"},"listened_at":1710592200,"recording_msid":"msid-shared","track_metadata":{"track_name":"Golden Brown","artist_name":"The National","release_name":"Boxer"}}
+{"_case":"E_LB_8_same_msid_different_time_b","_expectedOutput":{"eventKey":"listenbrainz:1710592260|msid-shared","dedup":"fuzzy:GoldenBrown"},"listened_at":1710592260,"recording_msid":"msid-shared","track_metadata":{"track_name":"Golden Brown","artist_name":"The National","release_name":"Boxer"}}
+{"_case":"E_LB_13_same_track_client_a","_expectedOutput":{"eventKey":"listenbrainz:1710678600|msid-client-a","dedup":"fuzzy:Creep"},"listened_at":1710678600,"recording_msid":"msid-client-a","track_metadata":{"track_name":"Creep","artist_name":"Radiohead","release_name":"OK Computer"}}
+{"_case":"E_LB_13_same_track_client_b","_expectedOutput":{"eventKey":"listenbrainz:1710682200|msid-client-b","dedup":"fuzzy:Creep"},"listened_at":1710682200,"recording_msid":"msid-client-b","track_metadata":{"track_name":"Creep","artist_name":"Radiohead","release_name":"OK Computer"}}
+{"_case":"E_LB_4_mapping_only_mbid","_expectedOutput":{"eventKey":"listenbrainz:1710767400|msid-mapping-only","dedup":"mbid:mbid-mapping-only"},"listened_at":1710767400,"recording_msid":"msid-mapping-only","track_metadata":{"track_name":"Karma Police","artist_name":"Radiohead","release_name":"OK Computer"},"mbid_mapping":{"recording_mbid":"mbid-mapping-only"}}
+{"_case":"D2_conflict_mbid_mapping_wins","_expectedOutput":{"eventKey":"listenbrainz:1710853800|msid-conflict","dedup":"mbid:mbid-from-server"},"listened_at":1710853800,"recording_msid":"msid-conflict","track_metadata":{"track_name":"Everything In Its Right Place","artist_name":"Radiohead","release_name":"Kid A"},"additional_info":{"recording_mbid":"mbid-from-client"},"mbid_mapping":{"recording_mbid":"mbid-from-server"}}
+{"_case":"E_LB_11_multi_artist_from_mapping","_expectedOutput":{"eventKey":"listenbrainz:1710940200|msid-multi","artist":"Artist A & Artist B","artistMbid":"mbid-artist-a"},"listened_at":1710940200,"recording_msid":"msid-multi","track_metadata":{"track_name":"Walk","artist_name":"Artist A & Artist B","release_name":"Everything All The Time"},"mbid_mapping":{"artist_mbids":["mbid-artist-a","mbid-artist-b"],"artists":[{"artist_credit_name":"Artist A","join_phrase":" & ","artist_mbid":"mbid-artist-a"},{"artist_credit_name":"Artist B","join_phrase":"","artist_mbid":"mbid-artist-b"}]}}
+{"_case":"E_LB_11_raw_artist_string_not_split","_expectedOutput":{"eventKey":"listenbrainz:1711026600|msid-raw-artist","artist":"Artist C & Artist D"},"listened_at":1711026600,"recording_msid":"msid-raw-artist","track_metadata":{"track_name":"Song D","artist_name":"Artist C & Artist D","release_name":"Compilation"}}
+{"_case":"E_LB_1_no_additional_info","_expectedOutput":{"eventKey":"listenbrainz:1711113000|msid-no-info","durationMs":0,"dedup":"fuzzy:Sunrise"},"listened_at":1711113000,"recording_msid":"msid-no-info","track_metadata":{"track_name":"Sunrise","artist_name":"Sunny Side","release_name":"Sunny Side"}}
+{"_case":"E_LB_2_with_duration_same_track","_expectedOutput":{"eventKey":"listenbrainz:1711116600|msid-with-duration","durationMs":0,"trackDurationMs":215000,"dedup":"fuzzy:Sunrise"},"listened_at":1711116600,"recording_msid":"msid-with-duration","track_metadata":{"track_name":"Sunrise","artist_name":"Sunny Side","release_name":"Sunny Side"},"additional_info":{"duration_ms":215000}}
+{"_case":"E_LB_17_too_old","_expectedOutput":{"skipped":"tooOldSkipped"},"listened_at":1000000000,"recording_msid":"msid-too-old","track_metadata":{"track_name":"Ancient Track","artist_name":"Old Artist","release_name":"Old Album"}}
+{"_case":"malformed_missing_listened_at","_expectedOutput":{"skipped":"malformedSkipped"},"recording_msid":"msid-no-time","track_metadata":{"track_name":"No Time","artist_name":"Nobody","release_name":"Nowhere"}}
+{"_case":"malformed_missing_track_metadata","_expectedOutput":{"skipped":"malformedSkipped"},"listened_at":1711199400,"recording_msid":"msid-no-metadata"}
+{"_case":"no_title_skipped","_expectedOutput":{"skipped":"noTitleSkipped"},"listened_at":1711285800,"recording_msid":"msid-no-title","track_metadata":{"track_name":"","artist_name":"Nobody","release_name":"Nowhere"}}
+{"_case":"no_msid_no_mbid","_expectedOutput":{"sourceEventId":null,"dedup":"fuzzy:NoIdentifiers"},"listened_at":1711372200,"track_metadata":{"track_name":"No Identifiers","artist_name":"Anon","release_name":"Unknown"}}
+{"_case":"E_LB_19_inserted_at_far_future","_expectedOutput":{"eventKey":"listenbrainz:1711458600|msid-backdated","timestamp":1711458600000,"dedup":"isrc:GBAYE0601498"},"listened_at":1711458600,"inserted_at":1893456000,"recording_msid":"msid-backdated","track_metadata":{"track_name":"Space Oddity","artist_name":"David Bowie","release_name":"David Bowie"},"additional_info":{"isrc":"gbaYe0601498"}}
+{"_case":"privacy_fields_never_persisted","_expectedOutput":{"eventKey":"listenbrainz:1711545000|msid-privacy","ip":null,"country":null},"listened_at":1711545000,"recording_msid":"msid-privacy","user_name":"lb_user","track_metadata":{"track_name":"Privacy Track","artist_name":"Private Artist","release_name":"Private Album"},"additional_info":{"media_player":"Navidrome","tags":["private-tag"],"spotify_id":"spotify-private"},"mbid_mapping":{"url_rels":[{"type":"spotify","url":"https://example.invalid/spotify"}]}}
+{"_case":"E10_midnight_boundary_utc","_expectedOutput":{"eventKey":"listenbrainz:1711929630|msid-midnight","timestamp":1711929630000,"day":"2024-04-01"},"listened_at":1711929630,"recording_msid":"msid-midnight","track_metadata":{"track_name":"Midnight","artist_name":"Night","release_name":"Night"}}
+
+
+
+===== FILE: fixtures/synthetic-history/lastfm-scrobbles-sample.json =====
+
+{
+  "_comment": "Dataset sintetico per test adapter Last.fm (Story 1.3, Sessione 52). Copre i casi minimi della spec 03-ADAPTERS/lastfm.md par.8 lato API: happy path, paginazione, E.LF.1 (nowplaying senza date), E.LF.14 (artist stringa vs oggetto), E.LF.5 (mbid vuoto), E.LF.17 (loved), E.LF.9 (scarti). 5 track: 4 importate, 1 scartata.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 52,
+    "spec": "docs/03-ADAPTERS/lastfm.md par.8 (v1.0 APPROVED, PR #154/#156)",
+    "format": "Last.fm API user.getRecentTracks (format=json, extended=1)",
+    "expectedDedupRules": "02-DATA-SCHEMA par.5: DEDUP-2 mbid:<mbid> quando presente, altrimenti DEDUP-3 fuzzy con durationBucketMs = 0 (Last.fm non espone la durata)."
+  },
+  "_expectedOutput": {
+    "_comment": "Derivazione interna come canone (par.8). eventKey = 'lastfm:' + <YYYY-MM-DDTHH:MM> + '|' + (mbid ?? name + '|' + artist).",
+    "totalTracks": 5,
+    "importedEvents": 4,
+    "skippedNowPlaying": 1,
+    "_skippedNowPlayingDerivation": "track E_LF_1_nowplaying (@attr.nowplaying = 'true', nessun date) -> scartata in silenzio, nessun warning",
+    "uniqueTracks": 3,
+    "_uniqueTracksDerivation": "4 eventi importati: 'Apocalypse Dreams' (mbid mbid-track-1) e 'So What' (mbid vuoto -> DEDUP-3) e 'Borderline' (mbid mbid-track-3) e 'Airbag' (artist stringa, DEDUP-3): 4 brani distinti",
+    "mbidMissing": 2,
+    "_mbidMissingDerivation": "2 track senza mbid (E.LF_5_mbid_empty e E_LF_14_artist_as_string) -> un solo warning aggregato mbidMissing con count = 2"
+  },
+  "recenttracks": {
+    "@attr": {
+      "user": "ls_user",
+      "page": "1",
+      "perPage": "200",
+      "total": "94618",
+      "totalPages": "474"
+    },
+    "track": [
+      {
+        "_case": "happy_path_1_artist_object",
+        "artist": {
+          "mbid": "mbid-artist-1",
+          "#text": "Tame Impala",
+          "name": "Tame Impala",
+          "url": "https://www.last.fm/music/Tame+Impala"
+        },
+        "album": { "mbid": "mbid-album-1", "#text": "Lonerism" },
+        "name": "Apocalypse Dreams",
+        "mbid": "mbid-track-1",
+        "loved": "0",
+        "date": { "uts": "1603186824", "#text": "20 Oct 2020, 09:40" },
+        "url": "https://www.last.fm/music/Tame+Impala/_/Apocalypse+Dreams",
+        "streamable": "0",
+        "image": [
+          { "size": "small", "#text": "https://example.invalid/small.png" },
+          { "size": "large", "#text": "https://example.invalid/large.png" }
+        ]
+      },
+      {
+        "_case": "E_LF_1_nowplaying",
+        "@attr": { "nowplaying": "true" },
+        "artist": { "mbid": "mbid-artist-3", "#text": "Boards of Canada" },
+        "album": { "#text": "Music Has the Right to Children" },
+        "name": "Borderline",
+        "mbid": "mbid-track-3",
+        "loved": "0",
+        "url": "https://www.last.fm/music/Boards+of+Canada/_/Borderline"
+      },
+      {
+        "_case": "E_LF_14_artist_as_string",
+        "artist": "Radiohead",
+        "album": "OK Computer",
+        "name": "Airbag",
+        "date": { "uts": "1603187000", "#text": "20 Oct 2020, 09:43" },
+        "url": "https://www.last.fm/music/Radiohead/_/Airbag"
+      },
+      {
+        "_case": "E_LF_5_mbid_empty",
+        "artist": { "#text": "Miles Davis", "name": "Miles Davis" },
+        "album": { "#text": "Kind of Blue" },
+        "name": "So What",
+        "mbid": "",
+        "loved": "1",
+        "date": { "uts": "1603187100", "#text": "20 Oct 2020, 09:45" },
+        "url": "https://www.last.fm/music/Miles+Davis/_/So+What"
+      },
+      {
+        "_case": "E_LF_9_no_artist",
+        "artist": { "#text": "" },
+        "name": "Anonymous Track",
+        "mbid": "mbid-track-9",
+        "date": { "uts": "1603187200" }
+      }
+    ]
+  }
+}
+
+
+
+===== FILE: fixtures/synthetic-history/lastfm-page2-sample.json =====
+
+{
+  "_comment": "Seconda pagina della risposta API Last.fm (Story 1.3, Sessione 52): 2 track, usata per il test di paginazione e di confine (E.LF.2, E.LF.3).",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 52,
+    "spec": "docs/03-ADAPTERS/lastfm.md par.8 (v1.0 APPROVED, PR #154/#156)",
+    "format": "Last.fm API user.getRecentTracks (format=json, extended=1)"
+  },
+  "_expectedOutput": {
+    "_comment": "2 eventi importati; l'ultimo scrobble (1603187700) precede di poco il primo della pagina 1 (1603186820): il confine di pagina e' reale.",
+    "importedEvents": 2
+  },
+  "recenttracks": {
+    "@attr": {
+      "user": "ls_user",
+      "page": "2",
+      "perPage": "200",
+      "total": "94618",
+      "totalPages": "474"
+    },
+    "track": [
+      {
+        "_case": "page2_track_1",
+        "artist": { "mbid": "mbid-artist-4", "#text": "Portishead" },
+        "album": { "#text": "Dummy" },
+        "name": "Glory Box",
+        "mbid": "mbid-track-4",
+        "loved": "0",
+        "date": { "uts": "1603187400", "#text": "20 Oct 2020, 09:50" },
+        "url": "https://www.last.fm/music/Portishead/_/Glory+Box"
+      },
+      {
+        "_case": "page2_track_2",
+        "artist": { "mbid": "mbid-artist-5", "#text": "Massive Attack" },
+        "album": { "#text": "Mezzanine" },
+        "name": "Teardrop",
+        "mbid": "mbid-track-5",
+        "loved": "0",
+        "date": { "uts": "1603187700", "#text": "20 Oct 2020, 09:55" },
+        "url": "https://www.last.fm/music/Massive+Attack/_/Teardrop"
+      }
+    ]
+  }
+}
+
+
+
+===== FILE: fixtures/synthetic-history/lastfm-export-ghanl-sample.csv =====
+
+uts,utc_time,artist,album,track,artist_mbid,album_mbid,track_mbid
+1603186824,2020-10-20 09:40:24,Tame Impala,Lonerism,Apocalypse Dreams,mbid-artist-1,mbid-album-1,mbid-track-1
+1603187000,2020-10-20 09:43:20,Radiohead,OK Computer,Airbag,mbid-artist-2,mbid-album-2,
+1603187100,2020-10-20 09:45:00,Miles Davis,Kind of Blue,So What,,,
+
+
+
+===== FILE: fixtures/synthetic-history/lastfm-export-4col-sample.csv =====
+
+Tame Impala,Lonerism,Apocalypse Dreams,"20 Oct 2020, 09:40"
+Radiohead,OK Computer,Airbag,"20 Oct 2020, 09:43"
+Miles Davis,Kind of Blue,So What,
+
+
+
+===== FILE: fixtures/synthetic-history/lastfm-export-sample.json =====
+
+{
+  "_comment": "Export JSON Last.fm dei tool ghan.nl (Story 1.3, Sessione 52): stessi campi del CSV a 8 colonne, nel wrapper { events: [...] }. 3 record, l'ultimo senza mbid.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack adapter testing",
+    "version": "1.0",
+    "session": 52,
+    "spec": "docs/03-ADAPTERS/lastfm.md par.8 (v1.0 APPROVED, PR #154/#156)",
+    "format": "lastfm.ghan.nl export JSON"
+  },
+  "_expectedOutput": {
+    "_comment": "3 eventi importati; il tempo viene da 'uts' (UNIX secondi UTC), l'eventKey e' normalizzata al minuto come nel percorso API.",
+    "importedEvents": 3
+  },
+  "events": [
+    {
+      "_case": "ghanl_json_1",
+      "uts": 1603186824,
+      "utc_time": "2020-10-20 09:40:24",
+      "artist": "Tame Impala",
+      "album": "Lonerism",
+      "track": "Apocalypse Dreams",
+      "artist_mbid": "mbid-artist-1",
+      "album_mbid": "mbid-album-1",
+      "track_mbid": "mbid-track-1"
+    },
+    {
+      "_case": "ghanl_json_2",
+      "uts": 1603187000,
+      "utc_time": "2020-10-20 09:43:20",
+      "artist": "Radiohead",
+      "album": "OK Computer",
+      "track": "Airbag",
+      "artist_mbid": "mbid-artist-2",
+      "album_mbid": "mbid-album-2",
+      "track_mbid": ""
+    },
+    {
+      "_case": "ghanl_json_3",
+      "uts": 1603187100,
+      "utc_time": "2020-10-20 09:45:00",
+      "artist": "Miles Davis",
+      "album": "Kind of Blue",
+      "track": "So What",
+      "artist_mbid": "",
+      "album_mbid": "",
+      "track_mbid": ""
+    }
+  ]
+}
+
 
 
 ===== FILE: fixtures/db-seed/minimal.json =====

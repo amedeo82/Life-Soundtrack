@@ -157,6 +157,26 @@ L'adapter emette `{name, mbid?}` per Artist e `{name, artistId, mbid: null, plat
 
 Il `mbid` dell'artista: `mbid_mapping.artist_mbids[0]` (il primo) → `Artist.mbid`. In caso di più artisti, si emette l'artista joinata con il **primo** mbid (gli altri andrebbero in una relazione many-to-many che `02§3.3` non modella).
 
+### 3.1.3 I due campi che il contratto non aveva (Sessione 52)
+
+`05§3.1` (`RawListenEvent`) non prevedeva due dati che questa spec richiede: senza
+di essi il valore della spec sarebbe andato perso, senza degrado.
+
+| Campo | Va a | Perché serve |
+|-------|------|--------------|
+| `sourceArtistMbid` (opzionale) | `Artist.mbid` | §3.1.2: `mbid_mapping.artist_mbids[0]` — "dato utile e attivo, più affidabile del mbid del brano" |
+| `sourceTrackDurationMs` (opzionale) | `Track.durationMs` (hint) | §3.1.1: `additional_info.duration_ms` è durata **catalogo**, non durata dell'ascolto |
+
+Il secondo è la distinzione che rende D7 implementabile: il **bucket** DEDUP-3 usa
+la durata dell'evento (`sourceDurationMs`, che per ListenBrainz è **sempre 0**),
+mentre la durata catalogo resta un hint sulla `Track`. Se la durata catalogo
+entrasse nel bucket, uno stesso brano ascoltato una volta con e una volta senza
+il dato finirebbe in **due `Track` distinte** — l'esatto opposto di ciò che la
+dedup persegue (E.LB.2).
+
+Entrambi i campi sono **additivi e opzionali**: gli altri quattro adapter non li
+valorizzano e il loro comportamento non cambia.
+
 ### 3.2 Library / Playlist (vedi `02§3.7`)
 
 **Fuori scope adapter MVP**:
@@ -342,3 +362,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listen
 |----------|------|-----------|
 | 0.1 | Sessione 47 (2026-10-26) | Prima stesura (issue #145). Decisioni D-LB.1…D-LB.5 chiuse con il Boss; API e formato export verificati su sorgente e doc ufficiali. Correzione di una premessa errata: `recording_msid` **non** è un identificativo univoco per singolo ascolto (è un hash dei metadati) → l'`eventKey` include `listened_at` (D-LB.2). Canale di storico = **export API** (ZIP/JSONL), non paginazione `/listens`: la doc ne sconsiglia l'uso per lo storico completo e il contratto `05§4` resta invariato (D-LB.4) |
 | 1.0 | Sessione 47 (2026-10-26) | 🟢 APPROVED · promozione al merge della PR #146 (approvazione Boss) — decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto |
+| 1.1 | Sessione 52 (2026-10-26, issue #155) | **§3.1.3 (nuova)**: i due campi che il contratto `RawListenEvent` non prevedeva e che questa spec richiede — `sourceArtistMbid` (→ `Artist.mbid`, §3.1.2) e `sourceTrackDurationMs` (durata catalogo, **solo hint** sulla `Track`: il bucket DEDUP-3 continua a usare la durata dell'evento, sempre 0, altrimenti uno stesso brano finirebbe in due `Track` distinte, E.LB.2). Entrambi **additivi e opzionali**. Nessuna modifica alle decisioni D-LB.* né alle restanti parti della spec |

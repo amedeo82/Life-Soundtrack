@@ -4,7 +4,31 @@
  * Entry point `@ls/core/db`: classe Dexie, schema dichiarato e repository
  * di accesso ai dati. Lo schema rispecchia `02-DATA-SCHEMA.md` §6 (v1.1).
  */
-export { DB_NAME, DB_SCHEMA_V1, DB_SCHEMA_V2, DB_SCHEMA_V3, LifeSoundtrackDB, openDb } from './db';
+export {
+  DB_NAME,
+  DB_SCHEMA_V1,
+  DB_SCHEMA_V2,
+  DB_SCHEMA_V3,
+  DB_SCHEMA_V4,
+  LifeSoundtrackDB,
+  openDb,
+} from './db';
+
+/**
+ * Impostazioni locali (Story 1.3): proxy Last.fm, `api_key`, username.
+ * Storage locale (Dexie), mai nel bundle, mai nei log.
+ */
+export {
+  EMPTY_LASTFM_CONFIG,
+  LASTFM_SETTINGS_KEY,
+  getSetting,
+  isLastfmConfigured,
+  loadLastfmConfig,
+  saveLastfmConfig,
+  setSetting,
+  type AppSetting,
+  type LastfmConfig,
+} from './settings';
 
 /**
  * Repository di accesso ai dati — CRUD e query base (11-BACKLOG T0.2.3).

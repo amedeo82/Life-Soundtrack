@@ -170,6 +170,31 @@ Differenze che contano:
 
 **Campi del payload mai persistiti**: `image[]` (URL copertine → artwork via MusicBrainz in Story 4.3), `url` (pagina del brano su Last.fm → `sourceTrackUri`), `streamable`, `loved` (nessun campo "loved" nel modello `02§3.3`), `artist.url`, `artist.image[]`, `album.mbid` (l'MBID dell'album non ha un campo dedicato: `Album.mbid` non esiste in `02§3.3`), `date["#text"]` (redundante con `uts`), `@attr.user` (identifica l'account, non l'ascolto).
 
+### 3.1.0 La chiave fra i due percorsi — precisazione di implementazione (Sessione 52)
+
+La formula `lastfm:<minute>|<mbid ?? name|artist>` è **corretta per un percorso**, ma
+i due percorsi non espongono il MBID con la stessa copertura: l'API lo espone
+**spesso vuoto** (E.LF.5) mentre l'export `ghan.nl` lo porta in `track_mbid`. Con il
+MBID nella chiave, lo stesso scrobble importato via API e poi via file avrebbe
+**due chiavi diverse** — cioè E.LF.16 ed E.LF.19 ("il re-import misto non
+duplica") non potrebbero valere insieme.
+
+La precisazione implementata (`LastfmEventKeyBuilder`): **il MBID entra nella
+chiave solo quando serve a disambiguare**, cioè quando nello stesso minuto la
+stessa coppia nome|artista compare con **MBID diversi** (il caso E.LF.4). In tutti
+gli altri casi la chiave è `<minuto>|<nome>|<artista>`, che è la forma che
+**converge** fra i due percorsi.
+
+| | API (`extended=1`) | file `ghan.nl` | chiave |
+|---|---|---|---|
+| stesso scrobble, mbid assente da entrambi | `mbid: ""` | `track_mbid` vuoto | `<minuto>\|<nome>\|<artista>` — **converge** |
+| stesso scrobble, mbid presente in uno solo | `mbid: X` | `track_mbid` vuoto | `<minuto>\|<nome>\|<artista>` — **converge** |
+| due registrazioni diverse, stesso nome e artista, stesso minuto | `mbid: X` e `mbid: Y` | — | `<minuto>\|X` e `<minuto>\|Y` — **disambiguati** (E.LF.4) |
+
+La perdita residua è quella già dichiarata da D-LF.7: due scrobble dello **stesso**
+brano nello stesso minuto si fondono (il MBID non li distinguerebbe comunque,
+perché è lo stesso brano).
+
 ### 3.1.1 Track (entità separata — vedi `02§3.3`)
 
 | Campo Track | Sorgente API | Sorgente file | Note |
@@ -404,3 +429,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 |----------|------|-----------|
 | 0.1 | Sessione 50 (2026-10-26) | Prima stesura (issue #144). Decisioni D-LF.0…D-LF.8 (Boss, Sessione 47) e vincoli di ADR-0010. API, limiti, error codes, flusso web auth e formati CSV verificati su fonte (doc ufficiale Last.fm, doc non ufficiale, depth.fm, multi-scrobbler). Correzione di una premessa errata della issue: `limit` **max 200** (doc ufficiale), non 1000; e il campo `date` **manca** per il brano in riproduzione. Aggiunto il percorso **ibrido** (API + file) con `eventKey` normalizzato al minuto su tutti i percorsi, per evitare duplicati al re-import misto. Dichiarati i gap: md5 per `api_sig` (rinviato a 1.5), `loved` senza campo nel modello, `album.mbid` scartato |
 | 1.0 | Sessione 51 (2026-10-26) | 🟢 APPROVED · ratifica del Boss al merge della PR #154 (`b3130a9`) — nessuna modifica di contenuto. Le decisioni D-LF.0…D-LF.8 sono ratificate come formulate; il percorso web auth per la `sk` resta **differito alla Story 1.5** (E.LF.21) |
+| 1.1 | Sessione 52 (2026-10-26, issue #155) | **§3.1.0 (nuova)**: precisazione di implementazione sulla `eventKey` — la formula `mbid ?? name|artist` non può soddisfare insieme E.LF.4 ed E.LF.16/E.LF.19, perché API ed export non espongono il MBID con la stessa copertura. Il MBID entra nella chiave **solo quando disambigua** (stesso minuto, stesso nome\|artista, MBID diversi); negli altri casi la chiave è `<minuto>\|<nome>\|<artista>`, che converge fra i due percorsi. Nessuna modifica alle decisioni D-LF.* né alle restanti parti della spec |
