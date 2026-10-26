@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 15:36
-> Totale file: 75
+> Data: 2026-10-26 16:49
+> Totale file: 77
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1376,7 +1376,7 @@ Apache License
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 13 (v1.2) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti) |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 40 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢) + Apple Music (🟡 DRAFT, S40) — Last.fm, ListenBrainz TBD |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
-| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 9 (v1.0) | Architettura tecnica generale |
+| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 48 (v1.1) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
@@ -1384,7 +1384,7 @@ Apache License
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 38 (v1.6.0) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 41 (0001-0009) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 48 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; **0010 remote source adapter 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 37 (Story 0.7, PR #64) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`) |
@@ -1503,7 +1503,7 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.0, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 7 ADR in `13-ADR/` (0001-0003, 0005-0008)
+- **Documenti APPROVED**: 7 documenti (`02` v1.2, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.0, `14`, `16-OPERATIONS`) + 7 ADR in `13-ADR/` (0001-0003, 0005-0008)
 - **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v0.6, `19` introdotto in Sessione 41
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
@@ -6185,6 +6185,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/1.3-adapter-lastfm-listenbrainz.md` | ✅ creata | da `11-BACKLOG.md` §"Story 1.3" (Sessione 47, issue #145): prima non-done della 1.3, `status: in_progress` |
 | `state/sessions/47-listenbrainz-lastfm-adapter-spec.md` | ✅ creata | Sessione 47 (issue #145, #144): spec adapter ListenBrainz + Last.fm, Story 1.3 perimetro corretto, Story 1.5 ridimensionata |
 | `state/sessions/48-fix-bundle-writer-ordering.md` | ✅ creata | Sessione 48 (issue #149): fix race fra i due writer di `main` — trigger `workflow_run` in `auto-bundle.yml` + quinto gate di `validate-workflows.mjs` |
+| `state/sessions/49-adr-0010-remote-source.md` | ✅ creata | Sessione 49 (issue #148): ADR-0010 — sorgenti remote nel contratto `PlatformAdapter` (`parseRemote?()` + `RemoteSource`), `05§4.1` |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -6858,6 +6859,118 @@ non con il `bash` del `PATH`.
 - `docs/12-DEVOPS.md` §9.8e — la diagnosi completa con la sequenza temporale
 - `docs/12-DEVOPS.md` §9.8d — il problema affine del sync con `origin/main` (#140)
 - Prossima story lavorabile: **1.3** — ADR-0010 (issue #148) e spec Last.fm (issue #144)
+
+
+
+===== FILE: docs/state/sessions/49-adr-0010-remote-source.md =====
+
+---
+number: 49
+title: "ADR-0010 — Sorgenti remote nel contratto degli adapter"
+date: 2026-10-26
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: docs/148-adr-0010-remote-source
+pr: null
+claim: kilo-HP-ELITEBOOK-lb47
+cross_refs: [144, 148]
+tags: [docs, adr, adapter, architecture]
+---
+
+# Sessione 49 — ADR-0010: sorgenti remote nel contratto degli adapter
+
+## Sintesi
+
+Scrittura dell'ADR che estende il contratto `PlatformAdapter` con il metodo
+opzionale `parseRemote?()`, così che la Story 1.3 possa implementare l'adapter
+Last.fm, che è la prima piattaforma del perimetro **senza un file** da importare.
+
+Il blocco era reale: `05-ARCHITECTURE.md` §4 è 🟢 APPROVED e prevede solo
+`detect(input: File | Blob)` e `parse(input: File | Blob)`. Last.fm non ha un
+export utilizzabile dall'app, quindi il suo adapter non avrebbe avuto un input
+valido da passare a `parse()`.
+
+## Trigger
+
+Issue #148 (aperta in Sessione 47), sbloccata dalla decisione del Boss
+(D-LF.8: metodo opzionale, non interfaccia separata).
+
+## Decisione
+
+**Estendere `PlatformAdapter` con un metodo opzionale `parseRemote?()`** che
+consuma una nuova struttura `RemoteSource`:
+
+```typescript
+interface RemoteSource {
+  endpoint: string;
+  credentials?: { apiKey?: string; sessionKey?: string };
+  pagination?: { limit?: number; from?: number; to?: number };
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+```
+
+Otto vincoli fissati (V1-V8): il metodo è opzionale (gli adapter file-only non
+lo implementano), il percorso remoto produce **gli stessi `RawListenEvent`** del
+percorso file (pipeline riusata invariata), il payload raw non è persistito,
+nessun segreto è embedded nel bundle, nessun backend gestito dal progetto,
+`AbortSignal` per la cancellazione, il rate limiting è responsabilità dell'adapter
+(ogni piattaforma ha limiti diversi), "sorgente irraggiungibile" è un errore
+**recuperabile**.
+
+Sette alternative considerate e motivate (A1-A7): interfaccia separata, input
+union, adapter HTTP generico, materializzazione in `Blob`, backend gestito,
+estensione totale del contratto, e il fallback "solo import via file".
+
+## Il punto che merita attenzione nel review
+
+**Il codice errore `SOURCE_UNREACHABLE` tocca il contratto di errore dichiarato in
+`05§4`**, che dichiara quattro codici tutti orientati al file. Un proxy assente o
+irraggiungibile non è nessuno di quelli: `INVALID_FORMAT` mentirebbe, perché non è
+un problema di formato. La proposta dell'ADR è aggiungere un quinto codice con
+`recoverable: true` — **la ratifica di questo punto è parte del merge**.
+
+Alternativa considerata: riusare `INTERNAL` o aggiungere il caso a `TRUNCATED`
+(anch'esso orientato al file). Scartate perché renderebbero indistinguibili
+"file malformato" e "proxy rotto", che richiedono azioni opposte dall'utente
+(correggere il file vs. configurare il proxy).
+
+## File toccati
+
+| File | Cosa fa |
+|------|---------|
+| `docs/13-ADR/0010-remote-source-adapter.md` | **nuovo** — l'ADR (13 KB) |
+| `docs/05-ARCHITECTURE.md` | §4.1 "Sorgenti remote" nuova; `ParseOptions` estratto come tipo nominato; `RemoteSource` nella forma del contratto; codice `SOURCE_UNREACHABLE` nella tabella degli `AdapterError`; versione 1.0 → 1.1; changelog |
+| `docs/INDEX.md` | Riga 05 aggiornata (v1.1), riga 13 aggiornata (0001-0010), conteggio documenti APPROVED |
+| `scripts/generate-bundle.ps1` | `$files` += il nuovo ADR |
+| `docs/state/sessions/49-adr-0010-remote-source.md` | **nuovo** — questa sessione |
+| `docs/state/_index.md` | Riga della sessione 49 nella tabella di migrazione |
+| `docs/11-BACKLOG.md` | Story 1.3: la riga sul blocco ADR-0010 riflette lo stato reale |
+| `docs/BUNDLE.md` | rigenerato |
+
+## Verifica
+
+- `pwsh scripts/generate-bundle.ps1 --check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 --check` → drift atteso (solo il blocco
+  `AGGREGATE-BUNDLE-INVENTORY`: i due nuovi file della PR)
+- Nessun file applicativo toccato: `lint`/`typecheck`/`test`/`build` non impattati
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 49-1 | **Un contratto nato da un caso specifico va esteso quando emerge il secondo caso, non prima.** `parse(input: File \| Blob)` era completo per tre piattaforme su tre: la sua forma *file-only* non era un difetto, era una descrizione accurata del mondo in cui era nato. Diventa insufficiente quando compare un quarto caso — e la risposta non è rifare il contratto, ma **aggiungere il caso mancante senza rompere i precedenti**. Il metodo opzionale è la forma minima di quella aggiunta: gli adapter esistenti non vengono toccati, quindi il rischio di regressione sulle story già consegnate è zero |
+| 49-2 | **Un'estensione del contratto eredità i suoi errori.** I quattro codici di `AdapterError` erano tutti orientati al file, e il caso "proxy irraggiungibile" non ne aveva uno adatto. Reusarne uno ("`INVALID_FORMAT`") avrebbe funzionato tecnicamente e mentito semanticamente: l'utente avrebbe ricevuto "formato non valido" per un problema di rete, e la remediation sbagliata. Il codice errore è parte del contratto quanto la firma del metodo — merita la stessa attenzione |
+| 49-3 | **Estendere il contratto significa estenderne la tassonomia.** Un contratto che cresce di un caso deve crescere anche degli stati che il nuovo caso introduce (qui: una classe di errore, e il concetto stesso di "non raggiungibile" che non esisteva). Aggiungere il metodo senza la tassonomia avrebbe lasciato un buco nei casi d'errore — il tipo di buco che si scopre in produzione, non in review |
+
+## Cross-refs
+
+- **#148** — issue di questo ADR, chiusa dalla PR di questa sessione
+- **#144** — spec Last.fm, sbloccata da questo ADR
+- `docs/13-ADR/0003-adapter-pattern.md` — il pattern che l'estensione preserva
+- `docs/05-ARCHITECTURE.md` §4.1 — la sezione che l'ADR introduce
 
 
 
@@ -10527,9 +10640,9 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
-> Versione: 1.0
-> Ultima modifica: Sessione 9 (audit 2026-10-15)
-> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2)
+> Versione: 1.1
+> Ultima modifica: Sessione 48 (2026-10-26) — §4.1 Sorgenti remote (ADR-0010)
+> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter
 
 ---
 
@@ -10632,9 +10745,19 @@ Ogni adapter espone la stessa interfaccia logica:
       detect(input: File | Blob): boolean | Promise<boolean>;
       parse(
         input: File | Blob,
-        options?: { signal?: AbortSignal }
+        options?: ParseOptions
       ): AsyncIterable<RawListenEvent>;
       parseLibrary?(input: File | Blob): Promise<LibrarySnapshot>;
+      // Presente SOLO negli adapter con sorgente remota (ADR-0010)
+      parseRemote?(
+        source: RemoteSource,
+        options?: ParseOptions
+      ): AsyncIterable<RawListenEvent>;
+    }
+
+    /** Opzioni condivise dai due percorsi di parsing. */
+    interface ParseOptions {
+      signal?: AbortSignal;          // cancellazione cooperativa
     }
 
 **Regole**:
@@ -10645,10 +10768,42 @@ Ogni adapter espone la stessa interfaccia logica:
 - Ogni adapter dichiara i propri edge case in `01-PLATFORMS.md` §5
 - Output grezzo → normalizzazione UTC → `eventKey` calcolato (`§3.2`) → DEDUP (`02§5`) → upsert in Dexie
 
+### 4.1 Sorgenti remote (ADR-0010)
+
+Il contratto è nato **file-only** (i tre adapter del perimetro e ListenBrainz consumano tutti un export scaricato dall'utente). Last.fm è la prima piattaforma che non ha un export utilizzabile dall'app: l'unico canale è l'API `user.getRecentTracks`, paginata e autenticata. Il contratto cresce quindi di **un metodo opzionale**, non di una seconda interfaccia.
+
+    /** Sorgente dati remota per gli adapter che non consumano un file. */
+    interface RemoteSource {
+      endpoint: string;                // URL base dell'API, o del proxy configurato dall'utente
+      credentials?: {
+        apiKey?: string;               // chiave API per-app (es. Last.fm api_key)
+        sessionKey?: string;           // chiave di sessione (es. Last.fm sk)
+      };
+      pagination?: {
+        limit?: number;                // massimo elementi per richiesta
+        from?: number;                 // finestra temporale iniziale (unix secondi UTC)
+        to?: number;                   // finestra temporale finale (unix secondi UTC)
+      };
+      headers?: Record<string, string>; // header extra (es. User-Agent obbligatorio su ListenBrainz)
+      signal?: AbortSignal;            // cancellazione cooperativa
+    }
+
+**Regole**:
+
+- `parseRemote?` è **opzionale**: gli adapter file-only non lo implementano, e i suoi assenti non cambiano il loro comportamento
+- Il percorso remoto produce **gli stessi `RawListenEvent`** del percorso file: la pipeline di `§3.1` è **riusata invariata** (nessuna seconda implementazione della normalizzazione)
+- **Non esiste `detectRemote`**: un'API non si "rileva", si *configura*. La validazione delle credenziali avviene al primo uso e il suo fallimento è un errore recuperabile
+- Il **rate limiting è responsabilità dell'adapter**, non del core: ogni piattaforma ha limiti e semantica degli header diversi (Last.fm ~5 req/s non pubblicato, ListenBrainz 1 req/s con `X-RateLimit-*`)
+- Il payload raw **non** è persistito, come per il percorso file (`ADR-0003`): il DB locale non immagazzina 200k payload
+- Nessun segreto è embedded nel bundle: le credenziali sono **per-utente** e restano in storage locale
+- "Sorgente non raggiungibile" (proxy assente, DNS fallito, timeout) è un errore **recuperabile**: gli eventi già raccolti restano persistiti
+
+Dettagli, motivazioni e alternative scartate in `13-ADR/0010-remote-source-adapter.md`.
+
 **Errori**:
 
     class AdapterError extends Error {
-      code: 'INVALID_FORMAT' | 'TRUNCATED' | 'UNSUPPORTED_VERSION' | 'INTERNAL';
+      code: 'INVALID_FORMAT' | 'TRUNCATED' | 'UNSUPPORTED_VERSION' | 'INTERNAL' | 'SOURCE_UNREACHABLE';
       recoverable: boolean;   // se true, partialEvents è stato persistito
       partialEvents: number;  // quanti eventi validi parsati prima dell'errore
     }
@@ -10659,6 +10814,7 @@ Ogni adapter espone la stessa interfaccia logica:
 | `TRUNCATED` | File/zip corrotto a metà | `true` |
 | `UNSUPPORTED_VERSION` | Schema della piattaforma cambiato, serve aggiornare adapter | `false` |
 | `INTERNAL` | Bug dell'adapter | dipende |
+| `SOURCE_UNREACHABLE` | Sorgente remota irraggiungibile: proxy assente, DNS fallito, timeout, risposta non JSON (ADR-0010 §4.1) | `true` |
 
 `sourceEventId` (citato dalla regola `eventKey` in `02§3.2`) è opzionale e fornito dall'adapter quando la piattaforma espone un ID nativo stabile (es. Spotify `trackId` + `played_at`). In assenza, si usa lo SHA-1 di fallback.
 
@@ -10977,6 +11133,7 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 | 0.1 | Sessione 0 | Consolidamento dalle sessioni esplorative |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: §3 formato unificato riallineato a 02 (piatto, eventKey, day); §3.1 pipeline 6 step RawListenEvent→ListenEvent; §3.2 formula `eventKey`; §4 contratto esteso con `name`/`version`, `AbortSignal`, `AdapterError` con `recoverable` e `partialEvents`; §4 `detect(): boolean \| Promise<boolean>` (D.A.8); §5 allineato a Dexie v2 (12 tabelle); §5 + transazioni e read-only mode; §6 pipeline Essentia→AB→euristica (D.A.6); §6.1 trigger conditions (on-import/on-demand/scheduled); §6.2 caching policy (TTL, LRU, invalidazione); §7.1 scheduling 50ms chunk + incrementalità; §7.2 failure isolation; §7.3 versioning esplicito; §8 stack esteso: TS 5.6, Vite 6, Dexie 4, React Query 5, Tailwind 4, Recharts 2.15, D3 7, Tauri 2, Zod 3, react-hook-form, i18next, date-fns(-tz), Comlink 4, MSW, Playwright 1.5+, @vitest/coverage-v8, rollup-plugin-visualizer, core/logger; §8.1 tooling dev (ESLint 9 flat, Prettier 3, Husky, lint-staged, commitlint, TS strict); §9 + logger/ in core; §9.1 convenzioni package (`@ls/*`, exports map, lockfile unico); §9.2 regole acicliche (core/runtime-agnostic, ui solo tipi, web orchestra); §10 NFR rivisti (M13); §10.1 budget performance P95 per route; §10.2 dispositivi target (mobile-first, baseline iPhone 12/Pixel 6); §11 App update management (PWA) — version manifest, SW lifecycle Workbox, prompt policy patch/minor/major, migrazione DB tra versioni; §12 Database maintenance — recount/rekey/orphanCleanup/indexRebuild/fastCheck/quotaCheck/compact, scheduling, health monitoring locale, MIG-1..4; aggiunti fast-check, fake-indexeddb, Turborepo |
 | 1.0 | Sessione 9 (2026-10-15) | 🟢 APPROVED · Promozione a versione vincolante dopo review completa di tutte le 12 sezioni con Boss. Sblocca story 0.1 `agent-ready` |
+| 1.1 | Sessione 48 (2026-10-26) | **§4.1 Sorgenti remote (ADR-0010)**: il contratto `PlatformAdapter` era nato file-only — i tre adapter del perimetro e ListenBrainz consumano tutti un export scaricato dall'utente — ma Last.fm è la prima piattaforma senza export utilizzabile dall'app (l'unico canale è l'API `user.getRecentTracks`, paginata e autenticata). Aggiunto il metodo **opzionale** `parseRemote?(source: RemoteSource, options?): AsyncIterable<RawListenEvent>` e la struttura `RemoteSource` (endpoint, credenziali per-utente, paginazione, header extra, `AbortSignal`); `ParseOptions` estratto come tipo nominato. Vincoli: il percorso remoto produce gli stessi `RawListenEvent` del percorso file (pipeline di §3.1 riusata invariata), il rate limiting è responsabilità dell'adapter (ogni piattaforma ha limiti e semantica degli header diversi), il payload raw non è persistito, nessun segreto è embedded nel bundle, "sorgente irraggiungibile" è un errore recuperabile. Aggiunto il codice errore `SOURCE_UNREACHABLE` alla tabella degli `AdapterError` (gli altri quattro sono orientati al file e avrebbero mentito: `INVALID_FORMAT` non è un problema di formato). Nessuna modifica agli adapter esistenti: il metodo è opzionale e il loro comportamento non cambia |
 
 
 ===== FILE: docs/06-UX-FLOWS-STATES.md =====
@@ -12594,7 +12751,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); spec Last.fm in stesura (issue #144, `agent-ready`), preceduta dall'ADR-0010
+**Stato**: 🟡 **IN CORSO** — spec ListenBrainz 🟢 APPROVED v1.0 (PR #146, issue #145 chiusa); **ADR-0010 v0.1 🟡 DRAFT** (issue #148, in ratifica); spec Last.fm in stesura (issue #144, `agent-ready`), successiva all'ADR
 
 **Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
@@ -12617,7 +12774,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] `api_key` per-utente (mai embedded nel bundle) + web auth per la `sk` (route callback in-app)
 - [ ] `eventKey` normalizzato al **minuto** su entrambi i percorsi (il re-import misto non duplica)
 - [ ] Rate limiter client-side (~5 req/s) con backoff su `11/16/29/429/5xx` e `AbortSignal`
-- [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **richiede ADR-0010** su `05§4`
+- [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **ADR-0010** (v0.1 🟡 DRAFT, issue #148): estende `05§4` con `RemoteSource`; la ratifica del Boss è il merge della PR dell'ADR
 - [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26)
 
 **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47) · `03-ADAPTERS/lastfm.md` (da scrivere, issue #144) · `01-PLATFORMS.md` §3.7, §3.8
@@ -14226,6 +14383,188 @@ Il carico del DB sul bundle della PWA e la sua freschezza sono il principale cos
 | Versione | Data | Modifiche |
 |---|---|---|
 | 0.1 | Sessione 41 | Prima stesura: DB-IP Lite embedded, derivazione in pipeline, alternative A1-A6, punti aperti su dimensione e freschezza |
+
+
+===== FILE: docs/13-ADR/0010-remote-source-adapter.md =====
+
+# ADR-0010 — Sorgenti remote nel contratto degli adapter
+
+> Status: 🟡 DRAFT · Versione 0.1 · Sessione 48 (2026-10-26)
+> Issue: #148 · Story: 1.3 (Adapter Last.fm + ListenBrainz)
+
+## Contesto
+
+`05-ARCHITECTURE.md` §4 definisce il contratto `PlatformAdapter`. Ogni adapter espone:
+
+```typescript
+interface PlatformAdapter {
+  readonly platform: PlatformId;
+  readonly name: string;
+  readonly version: string;
+  detect(input: File | Blob): boolean | Promise<boolean>;
+  parse(input: File | Blob, options?: { signal?: AbortSignal }): AsyncIterable<RawListenEvent>;
+  parseLibrary?(input: File | Blob): Promise<LibrarySnapshot>;
+}
+```
+
+Il contratto è **file-only**: l'unico input è un `File` o un `Blob`. I quattro adapter esistenti (`spotify`, `youtube-music`, `apple-music`, e in arrivo `listenbrainz`) sono tutti conformi a questa forma, perché le tre piattaforme del perimetro e ListenBrainz offrono un **file** all'utente (export Takeout, export CSV, export JSON, archivio ZIP).
+
+**Last.fm è la prima piattaforma che non ha un file.** La verifica fatta per la Story 1.3 (Sessione 47) ha stabilito che:
+
+- Last.fm **non ha un export button** per gli scrobble. L'export GDPR esiste ma è una procedura **manuale e asincrona** (richiesta via form o email a `dp3@last.fm`, attesa di giorni) e la community segnala export **incompleti** (*"the dump didn't include my list of events"*).
+- L'unico canale utilizzabile dall'app è l'API `user.getRecentTracks`, che è **paginata** (`page` + `limit` ≤ 200, con `@attr.total` / `@attr.totalPages`), **autenticata** (richiede una `api_key` per-app e, per gli utenti con *"Hide recent listening"* attivo, una `sk` di sessione) e **rate-limited** (limite non pubblicato, Client-side ~5 req/s).
+
+Ne segue che l'adapter Last.fm non ha un `File | Blob` da passare a `parse()`: il suo input è una **sorgente remota** — endpoint, credenziali, parametri di paginazione, e un segnale di cancellazione.
+
+Il problema è che **`05§4` è 🟢 APPROVED**: modificarlo richiede un ADR. È esattamente il caso che questo documento risolve.
+
+### Perché il caso non è isolato
+
+La Story 1.5 (scrobbling hub) prevede la **sync continua** verso ListenBrainz via `/1/user/{username}/listens` con cursore `max_ts`: anche quella è una sorgente remota, non un file. Senza un contratto che la copra, la 1.5 dovrebbe reimplementare da capo il canale di rete, o peggio introdurre un secondo contratto parallelo.
+
+La forma del problema è quindi generale: **il progetto è passato da "import da file" a "import da sorgente"**, e il contratto degli adapter è rimasto fermo al primo caso.
+
+## Decisione
+
+**Estendere `PlatformAdapter` con un metodo opzionale `parseRemote?()`, che consuma una nuova struttura `RemoteSource`.** I quattro adapter esistenti restano intatti: il metodo è opzionale e semplicemente non esiste per loro.
+
+```typescript
+/**
+ * Sorgente dati remota per gli adapter che non consumano un file.
+ * L'adapter conosce il protocollo della piattaforma: il core fornisce
+ * solo *dove* andare e *con cosa* autenticarsi.
+ */
+interface RemoteSource {
+  /** URL base dell'API, o del proxy configurato dall'utente. */
+  endpoint: string;
+  /** Credenziali per-utente. Nessun segreto è mai embedded nel bundle. */
+  credentials?: {
+    /** Chiave API per-app (es. Last.fm `api_key`). */
+    apiKey?: string;
+    /** Chiave di sessione (es. Last.fm `sk` dal web auth). */
+    sessionKey?: string;
+  };
+  /** Parametri di paginazione, se la piattaforma li supporta. */
+  pagination?: {
+    /** Massimo elementi per richiesta. */
+    limit?: number;
+    /** Finestra temporale iniziale (unix secondi UTC). */
+    from?: number;
+    /** Finestra temporale finale (unix secondi UTC). */
+    to?: number;
+  };
+  /** Header HTTP aggiuntivi (es. User-Agent obbligatorio su ListenBrainz). */
+  headers?: Record<string, string>;
+  /** Cancellazione cooperativa dell'import. */
+  signal?: AbortSignal;
+}
+
+interface PlatformAdapter {
+  readonly platform: PlatformId;
+  readonly name: string;
+  readonly version: string;
+  detect(input: File | Blob): boolean | Promise<boolean>;
+  parse(input: File | Blob, options?: ParseOptions): AsyncIterable<RawListenEvent>;
+  parseLibrary?(input: File | Blob): Promise<LibrarySnapshot>;
+  /**
+   * Presente SOLO negli adapter con sorgente remota.
+   * Produce gli stessi RawListenEvent del percorso file: la pipeline
+   * di normalizzazione è riusata invariata.
+   */
+  parseRemote?(source: RemoteSource, options?: ParseOptions): AsyncIterable<RawListenEvent>;
+}
+
+/** Opzioni condivise dai due percorsi di parsing. */
+interface ParseOptions {
+  /** Cancellazione cooperativa. */
+  signal?: AbortSignal;
+}
+```
+
+### I vincoli che l'ADR fissa
+
+| # | Vincolo | Perché |
+|---|---------|--------|
+| **V1** | `parseRemote?` è **opzionale**: gli adapter file-only non lo implementano | I quattro adapter esistenti restano intatti, senza modifiche |
+| **V2** | Il percorso remoto produce **gli stessi `RawListenEvent`** del percorso file | La pipeline, la dedup e il DB non distinguono le origini: un import da API e uno da file producono lo stesso `ListenEvent` |
+| **V3** | Il payload raw **non** è persistito | Vale per le sorgenti remote come per i file (ADR-0003): il DB locale non immagazzina 200k payload |
+| **V4** | Nessun segreto embedded nel bundle | `api_key` e `sk` sono **per-utente** (ToS Last.fm §4.4: i limiti possono includere *"the number of users you may serve"*; §2.6: *"the most recent user authentication key provided to You by Last.fm"*) |
+| **V5** | Nessun server di backend | ADR-0002 (local-first): il proxy è **di fiducia dell'utente**, configurato da lui; il progetto non ne gestisce uno |
+| **V6** | `AbortSignal` per la cancellazione cooperativa | Un import Last.fm è un **job lungo** (1-15 minuti su uno storico medio): deve poter essere interrotto. Coerente con `05§4` |
+| **V7** | Il **rate limiting è responsabilità dell'adapter**, non del core | Le piattaforme hanno limiti diversi (Last.fm ~5 req/s non pubblicato, ListenBrainz 1 req/s) e semantica degli header diversa (`X-RateLimit-*`): la conoscenza del protocollo resta nell'adapter |
+| **V8** | "Sorgente non disponibile" è un errore **recuperabile** | Proxy assente o non raggiungibile → `recoverable: true` con `partialEvents`, non un errore fatale che fa perdere il lavoro già fatto |
+
+### Decisioni accessorie già prese (Boss, Sessione 47)
+
+| # | Decisione | Contenuto |
+|---|-----------|-----------|
+| **D-LF.0** | Proxy CORS | Base URL del proxy in Settings, default stringa vuota. Senza proxy la card Last.fm è `disabled` e **zero richieste** vengono fatte. Nessun proxy fornito dal progetto |
+| **D-LF.1** | `api_key` per-utente | L'utente registra la propria key Last.fm; non è mai embedded nel bundle (V4) |
+| **D-LF.2** | `sk` via web auth | Flusso `last.fm/api/auth?cb=<route-app>` → `auth.getSession`. La callback è una route della PWA: nessun backend |
+| **D-LF.8** | Metodo opzionale, non interfaccia separata | Decisione che questo ADR formalizza |
+
+## Motivazioni
+
+- **Un solo contratto, non due.** Il factory degli adapter (`adapters/index.ts`) resta a un tipo solo, la catena di registrazione non si sdoppia, la UI di onboarding non distingue "adapter file" da "adapter remoto". Un'interfaccia `RemotePlatformAdapter` separata costerebbe due contratti da mantenere per un solo caso d'uso reale.
+- **Il percorso file resta il caso primario.** `parse()` resta il metodo che il 95% degli import usa; il metodo opzionale è un'aggiunta, non una riscrittura. I quattro adapter esistenti non vengono toccati: **nessuna regressione possibile** sul perimetro già consegnato.
+- **La pipeline non si duplica.** V2 è la conseguenza più importante: un import da Last.fm e un import da Spotify passano attraverso **lo stesso** codice di normalizzazione, dedup e persistenza. Il rischio di due implementazioni divergenti della normalizzazione (timestamp, `eventKey`, DEDUP) è la classe di bug più costosa del progetto.
+- **Il protocollo resta nell'adapter.** V7: l'adapter conosce il rate limit della sua piattaforma, il formato del suo errore, il suo schema di paginazione. Il core conosce solo `RawListenEvent`. È la stessa separazione che `ADR-0003` (adapter pattern) ha fissato per i file.
+- **La privacy non si sposta.** V4 e V5 mantengono le due promesse già scritte in `09-PRIVACY-SECURITY.md` §3.2 e in ADR-0002: nessun segreto nel bundle, nessun backend gestito dal progetto. Il proxy è del utente, con i suoi log.
+
+## Alternative considerate
+
+| # | Alternativa | Esito | Motivo |
+|---|-------------|-------|--------|
+| **A1** | Interfaccia `RemotePlatformAdapter` separata | ❌ scartata | Due contratti da mantenere in coesistenza nel core per un solo caso d'uso reale. Il factory si sdoppia, la UI di onboarding deve trattare due tipi di adapter, e il rischio di divergenza fra le due pipeline di normalizzazione è reale |
+| **A2** | Estendere `parse()` con input union (`Blob \| RemoteSource`) | ❌ scartata | `parse()` ha oggi una semantica chiara: "leggi un file". Un input union rende il contratto ambiguo, e `detect()` non ha un equivalente naturale per una sorgente remota (non si "rileva" un'API: la si *configura*) |
+| **A3** | Adapter "HTTP generico" con mapper JSON→schema per piattaforma | ❌ scartata | Sposta la logica di piattaforma fuori dall'adapter, contro `ADR-0003` (*"ogni piattaforma è un adapter indipendente"*). Un mapper generico richiederebbe un vocabolario di campi cross-piattaforma che il progetto non ha né vuole |
+| **A4** | Materializzare le risposte API in un `Blob` e passarlo a `parse()` | ❌ scartata | Perde cancellazione, streaming e rate limiting; per 100k scrobble significa un buffer intermedio enorme in memoria — esattamente ciò che `05§4` vieta (*"mai caricare 200k eventi in memoria in un colpo"*) |
+| **A5** | Server di backend che faccia da proxy per tutti gli utenti | ❌ scartata | Contraddice ADR-0002 (local-first) e i ToS Last.fm §4.4 (una key che serve N utenti è il caso sanzionato). Introduce un costo operativo e un punto di single-point-of-failure per un progetto open source senza ricavi |
+| **A6** | Estendere la `PlatformAdapter` con **tutti** i casi (libreria, playlist, sync) in un colpo | ⚠️ **scartata per ora** | Sarebbe la risposta "completa", ma `parseLibrary?` da sorgente remota e la sync incrementale hanno semantica propria. L'ADR fissa **il minimo necessario** per sbloccare la 1.3; l'estensione a libreria e playlist resta un punto aperto (vedi sotto) |
+| **A7** | Nessuna estensione: la 1.3 importa Last.fm **solo via file** (export GDPR caricato a mano) | ⚠️ **fallback operativo** | Tecnicamente possibile e già previsto come percorso file della spec Last.fm, ma abbandona l'import in-app e rende l'API inutilizzabile. È il fallback se il Boss rifiuta l'estensione del contratto |
+
+## Conseguenze
+
+- **Positive**:
+  - La Story 1.3 diventa implementabile: l'adapter Last.fm ha un contratto su cui scrivere
+  - La Story 1.5 (sync continua ListenBrainz) eredita lo stesso contratto, senza un secondo canale di rete
+  - Nessuna modifica ai quattro adapter esistenti (V1) e alla pipeline (V2): **rischio di regressione sulle story già consegnate = zero**
+  - Il percorso file resta il default: il comportamento dell'app per le piattaforme già supportate non cambia
+- **Negative**:
+  - `05§4` cresce di un metodo, di un tipo (`RemoteSource`) e di una sottosezione: il contratto degli adapter non è più "solo file", e la semantica di `parse()` va riletta da chi lo legge
+  - `ParseOptions` viene estratto come tipo nominato: refactor puramente cosmetico, ma tocca la firma di `parse()` in tutti i punti di chiamata (la compatibilità strutturale di TypeScript li mantiene compatibili)
+  - Nasce una classe di errori specifica: "sorgente remota non raggiungibile" è diversa da "file malformato". Va deciso se `AdapterError` basta o se serve un codice dedicato (punto aperto 2)
+  - Il percorso API è un **operatore di rete**: l'app ha bisogno di gestire timeout, DNS fallito, proxy che risponde ma con HTML invece di JSON, rate limit non dichiarato. È un surface di test e di gestione errori che i quattro adapter file-only non hanno avuto
+- **Mitigazioni**:
+  - V8 (errore recuperabile) evita che un proxy rotto faccia perdere un import parziale
+  - La spec `03-ADAPTERS/lastfm.md` (§10) fissa il rate limiter, il backoff e la gestione degli errori
+  - Il percorso file della spec Last.fm resta disponibile: se il percorso API non funziona per l'utente, l'import **file** copre lo stesso storico
+
+## Punti aperti
+
+1. **Codice errore dedicato per "sorgente non raggiungibile".** `AdapterError` ha oggi quattro codi (`INVALID_FORMAT`, `TRUNCATED`, `UNSUPPORTED_VERSION`, `INTERNAL`), tutti orientati al file. Un proxy assente o irraggiungibile non è nessuno di questi: `INVALID_FORMAT` mentirebbe (non è un formato). La candidate è un quinto codice (`SOURCE_UNREACHABLE`), che però tocca l'interfaccia di errore dichiarata in `05§4` — quindi è una decisione che spetta a **questo** ADR, non alla spec. **Proposta: aggiungere `SOURCE_UNREACHABLE` con `recoverable: true`.** Da ratificare dal Boss.
+2. **`parseLibrary?` da sorgente remota.** Lo stesso percorso che ha prodotto `parseRemote?` potrebbe servire per la libreria salvata di una piattaforma remota. L'ADR **non** lo estende: l'unico caso reale noto (Last.fm) non ha una libreria nell'API, e la 1.5 non la richiede. Si estende quando emerge un caso reale, non prima (A6).
+3. **Refresh del token OAuth.** ListenBrainz User Token e Last.fm `sk` hanno durate diverse; il `sk` dura finché l'utente non revoca, il token LB è revocabile in qualsiasi momento. Il refresh automatico richiederebbe di conservare un **refresh token** — che è un segreto di lunga durata. L'ADR presuppone che il rinnovo sia **manuale** (l'utente riapre le Impostazioni), coerente con `09-PRIVACY-SECURITY.md` §3.2. Va confermato quando la 1.5 specificherà il percorso incrementale.
+4. **Verifica end-to-end del percorso API.** L'ADR definisce il contratto, non il trasporto. Quale client HTTP usare (`fetch` nativo?), come gestire i redirect, come impostare i timeout, e se il bundle PWA può fare richieste con header custom attraverso un proxy CORS (CORS *preflight* con `Authorization` richiede che il proxy risponda correttamente a `OPTIONS`) sono dettagli della spec `03-ADAPTERS/lastfm.md` e della Story 1.3.
+
+## Collegamenti
+
+- `ADR-0002` local-first (nessun backend, nessuna egress dei dati dell'utente)
+- `ADR-0003` adapter pattern (un adapter per piattaforma, normalizzazione nel core)
+- `05-ARCHITECTURE.md` §3.1 (trasformazione adapter → core), §4 (contratto, da estendere con la sottosezione "Sorgenti remote")
+- `02-DATA-SCHEMA.md` §3.2 (`ListenEvent`), §5 (DEDUP)
+- `09-PRIVACY-SECURITY.md` §3.2 (cosa non esce dal dispositivo), §4 (inventario dati personali)
+- `01-PLATFORMS.md` §3.7 (Last.fm), §4 (tabella limiti piattaforme)
+- `03-ADAPTERS/lastfm.md` — la spec che consuma questo contratto (issue #144)
+- `11-BACKLOG.md` §Story 1.3, §Story 1.5
+- Issue #148 (questo ADR), issue #144 (spec Last.fm)
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 0.1 | Sessione 48 (2026-10-26) | Prima stesura (issue #148). Formalizza la decisione D-LF.8 del Boss (Sessione 47): metodo opzionale `parseRemote?()` su `PlatformAdapter` con la struttura `RemoteSource`. Fissa i vincoli V1-V8, le alternative A1-A7 e quattro punti aperti. Non ancora ratificato: la ratifica del Boss è il merge di questa PR |
+
 
 
 ===== FILE: docs/14-GLOSSARY.md =====
