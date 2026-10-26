@@ -3,7 +3,7 @@
 > Status: 🟢 APPROVED
 > Versione: 1.1
 > Ultima modifica: Sessione 48 (2026-10-26) — §4.1 Sorgenti remote (ADR-0010)
-> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter
+> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0)
 
 ---
 
