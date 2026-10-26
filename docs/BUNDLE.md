@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 22:34
+> Data: 2026-10-26 22:37
 > Totale file: 89
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -6528,7 +6528,7 @@ poi, si manifesta come duplicato silenzioso.
 
 **Tipo**: implementazione (`feat`) — issue #160, claim `kilo-HP-ELITEBOOK-lb53`
 **Branch**: `feat/160-rekey-dedup-promotion` (worktree `ls-160-rekey-dedup-promotion`)
-**PR**: #161 (aperta su `main` dalla worktree)
+**PR**: #162 (aperta su `main` dalla worktree)
 **Data**: 2026-10-26
 **Stato**: ✅ completata — 208 test core (9 nuovi) + 81 test web verdi; `lint`, `typecheck`, `build` verdi
 
@@ -7995,7 +7995,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: feat/160-rekey-dedup-promotion
-pr: ""
+pr: 162
 claim: kilo-HP-ELITEBOOK-lb53
 cross_refs: [160, 39]
 tags: [db, phase-1, feat]
@@ -8307,7 +8307,7 @@ priority: I
 depends_on: ["0.3"]
 issue: 160
 branch: feat/160-rekey-dedup-promotion
-pr: ""
+pr: 162
 merged_commit: ""
 merged_date: ""
 claim: kilo-HP-ELITEBOOK-lb53

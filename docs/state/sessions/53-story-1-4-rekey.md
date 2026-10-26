@@ -7,7 +7,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: feat/160-rekey-dedup-promotion
-pr: ""
+pr: 162
 claim: kilo-HP-ELITEBOOK-lb53
 cross_refs: [160, 39]
 tags: [db, phase-1, feat]

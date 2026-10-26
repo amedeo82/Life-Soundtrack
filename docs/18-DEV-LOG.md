@@ -585,7 +585,7 @@ poi, si manifesta come duplicato silenzioso.
 
 **Tipo**: implementazione (`feat`) — issue #160, claim `kilo-HP-ELITEBOOK-lb53`
 **Branch**: `feat/160-rekey-dedup-promotion` (worktree `ls-160-rekey-dedup-promotion`)
-**PR**: #161 (aperta su `main` dalla worktree)
+**PR**: #162 (aperta su `main` dalla worktree)
 **Data**: 2026-10-26
 **Stato**: ✅ completata — 208 test core (9 nuovi) + 81 test web verdi; `lint`, `typecheck`, `build` verdi
 
