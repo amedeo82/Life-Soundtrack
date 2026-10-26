@@ -108,6 +108,7 @@ $files = @(
     "docs/state/sessions/47-listenbrainz-lastfm-adapter-spec.md",
     "docs/state/sessions/48-fix-bundle-writer-ordering.md",
     "docs/state/sessions/49-adr-0010-remote-source.md",
+    "docs/state/sessions/50-lastfm-adapter-spec.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
@@ -119,6 +120,7 @@ $files = @(
     "docs/03-ADAPTERS/youtube-music.md",
     "docs/03-ADAPTERS/apple-music.md",
     "docs/03-ADAPTERS/listenbrainz.md",
+    "docs/03-ADAPTERS/lastfm.md",
     "docs/04-ANALYSIS-ALGORITHMS.md",
     "docs/05-ARCHITECTURE.md",
     "docs/06-UX-FLOWS-STATES.md",

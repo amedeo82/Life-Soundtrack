@@ -92,9 +92,14 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 
 ### 3.7 Last.fm 🇬🇧 — Tier S (come hub, non sorgente)
 
-- **API pubblica gratuita**: `user.getRecentTracks` paginabile sull'intero storico, top artists/tracks/albums per periodo, weekly charts
-- **Campi**: name, artist, album, `date`, `loved`
-- **Limiti**: nessun contesto (device/luogo); solo dati scrobblati; rate limit ~5 req/s
+- **Nessun export utilizzabile dall'app**: non esiste un export button per gli scrobble; l'export GDPR è una procedura **manuale e asincrona** (email, giorni) e risulta **incompleto** per eventi. Richiede inoltre di disattivare *"Hide recent listening information"*, cioè di degradare la privacy dell'utente
+- **API `user.getRecentTracks`** (canale MVP, via proxy CORS): `user` + `api_key` obbligatori, `limit` (default 50, **max 200**), `page`, `from`/`to` (UNIX UTC), `extended` (0\|1). Risposta: `@attr.{total,totalPages,page,perPage}` + `track[]`
+- **CORS: l'API non emette `Access-Control-Allow-Origin`** → dalla PWA la fetch cross-origin è bloccata. Serve un **proxy configurato dall'utente** (D-LF.0), che il progetto non gestisce (ADR-0002)
+- **Autenticazione**: `user.getRecentTracks` **non richiede auth** per i dati pubblici. Gli utenti con *"Hide recent listening information"* attivo richiedono la `sk` (web auth: `auth.getToken` → `last.fm/api/auth` → `auth.getSession`; `api_sig` = md5 dei parametri + shared secret). Il percorso web auth è rinviato alla Story 1.5 (manca un helper md5 nel repo)
+- **Campi**: `name` (titolo), `artist` (stringa con `extended=0`, oggetto `{mbid, #text}` con `extended=1`), `album` (`{mbid, #text}`), `date` (`{uts, #text}`, **inizio** dello scrobble), `loved` (solo `extended=1`), `mbid` del brano (solo `extended=1`, **frequentemente vuoto**), `image[]`, `url`, `streamable`
+- **Limiti**: nessun contesto (device/luogo/IP/paese); **nessuna durata** in `getRecentTracks` → `durationBucketMs` sempre 0; rate limit **non pubblicato** (client-side ~5 req/s, nessun header di rate limit); il brano in riproduzione (`@attr.nowplaying`) **non ha `date`**
+- **Errori**: 6 parametri · 8 operazione · 9 `sk` · 10 `api_key` · 11 offline · 13 firma · 16 temporaneo · 17 profilo non pubblico · 26 key sospesa · 29 rate limit
+- **Spec**: `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 50)
 
 ### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
@@ -128,8 +133,8 @@ Qobuz (export solo playlist), Bandcamp (solo acquisti), IDAGIO (classica), Boomp
 | Skip / Shuffle / Offline | ✅ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Ricerche | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Playlist con date | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Brani salvati | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
-| ISRC / MBID | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Brani salvati | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
+| ISRC / MBID | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ⚠️ | ✅ |
 | Storico completo | ✅ | ✅ | ✅ | ⚠️ | ❌ | ️ | ✅ | ✅ |
 
 Legenda: ✅ completo · ⚠️ parziale · ❌ assente
@@ -151,6 +156,11 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | E11 | ListenBrainz | `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto | Due ascolti dello stesso brano condividono lo stesso msid → un `eventKey` basato solo sul msid perderebbe eventi | `eventKey = listened_at + '\|' + recording_msid` (`03-ADAPTERS/listenbrainz.md` §3.1, D-LB.2) |
 | E12 | ListenBrainz | `additional_info.duration_ms` opzionale (durata *catalogo*, non ascoltata) | Lo stesso brano in bucket DEDUP-3 diversi → **due Track** per lo stesso brano | Bucket DEDUP-3 **sempre 0** per questa fonte; la durata va sulla `Track` come hint, fuori dal `canonicalKey` (`02§5`, `03-ADAPTERS/listenbrainz.md` §3.3) |
 | E13 | ListenBrainz | L'export è generato **asincronicamente da dati live**, non da uno snapshot atomico | Un re-export successivo può aggiungere eventi ma non rimuovere quelli cancellati lato server | Riconciliazione via `eventKey`; il limite è dichiarato all'utente (`info.exportNotSnapshot`) |
+| E14 | Last.fm | Il brano in riproduzione (`@attr.nowplaying`) **non ha `date`** | Uno scrobble inesistente | Scartato; l'import ricomincia al prossimo avvio (`03-ADAPTERS/lastfm.md` E.LF.1) |
+| E15 | Last.fm | `artist` è una **stringa** senza `extended=1` e un **oggetto** `{mbid, #text}` con `extended=1` | Crash di parsing su `artist["#text"]` | L'adapter normalizza entrambe le forme in un accessor unico (`lastfm.md` E.LF.14) |
+| E16 | Last.fm | **Nessun export utilizzabile dall'app**: l'export GDPR è manuale, asincrono e incompleto, e richiede di disattivare *"Hide recent listening information"* | L'utente deve degradare la propria privacy per ottenere il file | Il canale MVP è l'API via proxy configurato dall'utente; il percorso file usa gli export di terze parti, senza degradare la privacy (`lastfm.md` §1) |
+| E17 | Last.fm | `mbid` del brano presente solo con `extended=1` e **frequentemente vuoto** | DEDUP-2 non raggiungibile su molti scrobble | Degrado a DEDUP-3 con warning aggregato; `artist.mbid` resta il contributo utile (`lastfm.md` E.LF.5) |
+| E18 | Last.fm | L'API **non emette header CORS** | La fetch cross-origin dalla PWA è bloccata | Proxy CORS configurato dall'utente in Settings, default vuoto → card `disabled` e **zero richieste** (D-LF.0) |
 
 ## 6. Strategia di integrazione MVP
 
@@ -170,3 +180,4 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.3 | Sessione 39 (2026-10-21) | §3.2 allineato al formato Takeout verificato (header, subtitles, nomi localizzati, assenza durata); cross-ref spec adapter `03-ADAPTERS/youtube-music.md` (issue #96) |
 | 0.4 | Sessione 40 (2026-10-21, issue #98) | §3.3 riscritto sul Play Activity 2026.2 (~143 colonne: durate, End Reason Type, shuffle/offline, device, ISO Country; `Artist Name` assente); tabella §4 Apple aggiornata (durata ✅, dispositivo/IP/skip ⚠️); E9 rettificata (due generazioni di schema); cross-ref spec adapter `03-ADAPTERS/apple-music.md` |
 | 0.5 | Sessione 47 (2026-10-26, issue #145) | §3.8 riscritto: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/listens` — la doc prescrive l'export per lo storico completo e ne sconsiglia la paginazione; corretti i limiti (`MAX_ITEMS_PER_GET` = 1000, non 100; rate limit 1 req/s, User-Agent obbligatorio, HTTPS only, CORS verificato sul sorgente); `recording_msid` documentato come hash dei metadati (**non** ID univoco per ascolto); `duration_ms` opzionale e di durata catalogo → E12; export non atomico → E13; cross-ref spec adapter `03-ADAPTERS/listenbrainz.md` |
+| 0.6 | Sessione 50 (2026-10-26, issue #144) | §3.7 riscritto: Last.fm **non ha un export utilizzabile dall'app** (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy dell'utente) → il canale MVP è l'API `user.getRecentTracks` via **proxy CORS configurato dall'utente** (l'API non emette `Access-Control-Allow-Origin`: dalla PWA la fetch sarebbe bloccata). Corretti i limiti (`limit` max **200**, non 1000; `artist` è stringa senza `extended=1` e oggetto con `extended=1`; il brano in riproduzione **non ha `date`**; il rate limit non è pubblicato e non ci sono header di rate limit); `mbid` del brano solo con `extended=1` e frequentemente vuoto → tabella §4 corretta da ❌ a ⚠️ per ISRC/MBID e per "brani salvati"; `loved` disponibile ma senza campo nel modello → ⚠️. Aggiunti E14-E18; cross-ref spec adapter `03-ADAPTERS/lastfm.md` |

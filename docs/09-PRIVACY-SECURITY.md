@@ -109,6 +109,11 @@ Definire:
 | Username ListenBrainz | Dati personali | Export ListenBrainz | **No** — letto da `user.json` e mai persistito | Consenso esplicito (art. 6.1.a) |
 | User Token ListenBrainz | Segreto / credenziale | Account ListenBrainz | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
 | `inserted_at` (inserimento nel DB) | Dati personali | Export ListenBrainz | **No** — non è un tempo di ascolto | — |
+| Username Last.fm | Dati personali | API Last.fm | Sì (locale, Dexie), **mai** nel bundle | Consenso esplicito (art. 6.1.a) |
+| API key Last.fm | Segreto / credenziale | API Last.fm | Sì (locale, Dexie), **mai** nel bundle, **mai** nei log | Consenso esplicito (art. 6.1.a) |
+| Shared secret Last.fm | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nel bundle, **mai** nei log | Consenso esplicito (art. 6.1.a) |
+| Session key Last.fm (`sk`) | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
+| URL del proxy Last.fm | Dati personali | API Last.fm (via proxy) | Sì (locale, Dexie), **mai** nel bundle | Consenso esplicito (art. 6.1.a) |
 
 **Nota (opzione A, issue #108)**: il `country` (paese di connessione) è un **dato derivato e non identificativo**: viene derivato dall'IP al parse e conservato indipendentemente dal toggle `retainIp`, come definito in `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED). Non richiede consenso esplicito: il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP (`retainIp`) e per i trattamenti attivabili via toggle (`enrichMetadata`, `scrobbleHubs`, `syncCloud`, `carDetectionConsent`). Questo allinea `09` §4 a `02` §3.8 e scioglie la contraddizione segnalata in issue #108.
 
@@ -175,6 +180,14 @@ pubblichiamo, non la condividiamo con terzi. Nella Story 1.3 il token ListenBrai
 è usato **solo in lettura** per le query incrementali: l'app non scrobba nulla per
 conto tuo. Puoi revocarlo dalle impostazioni dell'account ListenBrainz in
 qualsiasi momento, e l'app smette di usarlo al primo errore.
+
+**Il proxy è tuo**: per usare l'API Last.fm dalla PWA serve un proxy, perché
+l'API di Last.fm non invia le intestazioni CORS e il browser bloccherebbe la
+richiesta. Il proxy lo configuri **tu** in Impostazioni; l'app non ne gestisce
+nessuno e non ne controlla la logica. Il proxy vede le richieste che stai facendo
+verso Last.fm, **compresa la tua chiave API**: è un servizio di cui ti fidi, come
+un'estensione del browser o un client desktop. Puoi evitare del tutto questa
+esposizione usando l'import da file, che non richiede proxy.
 
 ### 7.3 Come li usiamo
 
@@ -303,4 +316,5 @@ email).
 |----------|------|-----------|
 | 0.2 | 2026-10-21 (issue #109) | §4: la riga "Tipo dispositivo" dichiara che `car` viene persistito solo con `carDetectionConsent` attivo — il gate è applicato in scrittura dalla pipeline core (`applyCarConsent`), come già previsto da `02` §3.8 |
 | 0.3 | 2026-10-26 (issue #145) | §4: tre righe nuove per ListenBrainz (username mai persistito, User Token locale e mai nei log, `inserted_at` mai persistito). §7: nota sulla destinazione del User Token (storage locale, uso **solo in lettura** nella 1.3) |
+| 0.4 | 2026-10-26 (issue #144) | §4: cinque righe nuove per Last.fm (username, API key, shared secret, session key `sk`, URL del proxy) — tutte locali (Dexie), mai nel bundle, mai nei log. §7.2: nota sul **proxy** — è di fiducia dell'utente, vede la sua API key, e l'import da file ne evita l'esposizione |
 | 0.1 | Sessione 6 | Prima versione completa |

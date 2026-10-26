@@ -20,7 +20,7 @@
 | Spotify | `ts` | fine ascolto | `startedAt = ts - ms_played` |
 | YouTube Takeout | `time` | inizio azione | `timestamp = time + durata stimata` (durata da catalogo) |
 | Apple | `Event End Timestamp` (Play Activity CSV) | fine segmento di ascolto | `timestamp = Event End Timestamp`, `startedAt = Event Start Timestamp`; legacy: `Play Date UTC` (inizio) → `timestamp = playDate + durationMs` |
-| Last.fm | `date` | inizio scrobble | `timestamp = date + durationMs` |
+| Last.fm | `date` | inizio scrobble | `timestamp = startedAt = date.uts*1000`; `durationMs` = 0 (costante) — la durata **non è disponibile** in `getRecentTracks` (esiste solo in `track.getInfo`, 1 chiamata per brano) |
 | ListenBrainz | `listened_at` | inizio listen | `timestamp = startedAt = listened_at*1000`; `durationMs` = 0 (costante) — la durata **ascoltata** è sconosciuta e `additional_info.duration_ms` (opzionale, durata catalogo) va solo sulla `Track` come hint, mai nel bucket DEDUP-3 |
 
 Regola: `timestamp` = **momento in cui l'ascolto si conclude**; `startedAt` = inizio. Le analisi temporali usano `startedAt` quando disponibile, altrimenti `timestamp`.
@@ -29,6 +29,7 @@ Regola: `timestamp` = **momento in cui l'ascolto si conclude**; `startedAt` = in
 
 - **YouTube Takeout**: il Takeout non fornisce la durata e il catalogo non è ancora disponibile all'import → `timestamp = startedAt = time`, `durationMs = 0`. Bias dichiarato in `03-ADAPTERS/youtube-music.md` §5; ricalcolo post-enrichment come contratto.
 - **ListenBrainz**: `additional_info.duration_ms` è **opzionale** e rappresenta la durata *catalogo*, non quella ascoltata. Applicare la regola alla lettera produrrebbe due semantiche temporali diverse nello stesso import (fine dell'ascolto quando il dato c'è, inizio quando manca) e sposterebbe il confine `day` per una parte degli eventi. Si adotta una semantica **uniforme**: `timestamp = startedAt = listened_at*1000`, `durationMs = 0`. Dettagli in `03-ADAPTERS/listenbrainz.md` §5.
+- **Last.fm**: `getRecentTracks` **non espone la durata** (il campo `duration` esiste solo in `track.getInfo`, una chiamata per brano — incompatibile con 50k+ scrobble). Con `durationMs = 0` la regola "fine ascolto" dà `timestamp = date` = inizio, quindi la formula **non è violata**: ne è l'istanziazione. Si adotta la semantica **uniforme** `timestamp = startedAt = date.uts*1000`, con bias dichiarato in `03-ADAPTERS/lastfm.md` §5.
 
 ## 3. Interfacce TypeScript (source of truth)
 
@@ -339,6 +340,7 @@ Alcune fonti espongono una durata **catalogo** opzionale anziché la durata **ef
 | Fonte | Campo durata | Stato | Trattamento |
 |-------|--------------|-------|------------|
 | YouTube Music | — | assente | `durationMs` = 0, nessun hint (E.YT.5) |
+| Last.fm | — | assente in `getRecentTracks` | `durationMs` = 0, nessun hint (`03-ADAPTERS/lastfm.md` §5) |
 | ListenBrainz | `additional_info.duration_ms` | **opzionale**, durata catalogo | bucket **sempre 0**; la durata va sulla `Track` come hint (`03-ADAPTERS/listenbrainz.md` §3.1.1, D7) |
 | Last.fm | — | assente da `getRecentTracks` | `durationMs` = 0 (`03-ADAPTERS/lastfm.md` D-LF.4) |
 
