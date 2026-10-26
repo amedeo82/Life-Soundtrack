@@ -581,6 +581,42 @@ poi, si manifesta come duplicato silenzioso.
 
 ---
 
+## 19. Story 1.4 — `rekey()`: promozione dedup post-enrichment (Sessione 53)
+
+**Tipo**: implementazione (`feat`) — issue #160, claim `kilo-HP-ELITEBOOK-lb53`
+**Branch**: `feat/160-rekey-dedup-promotion` (worktree `ls-160-rekey-dedup-promotion`)
+**PR**: #161 (aperta su `main` dalla worktree)
+**Data**: 2026-10-26
+**Stato**: ✅ completata — 208 test core (9 nuovi) + 81 test web verdi; `lint`, `typecheck`, `build` verdi
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 19-1 | P | `rekey()` era "già fatta" (Story 0.7, PR #39): scritta, esportata da `@ls/core/db`, descritta in `05§12.1` e `16-OPERATIONS.md` §2.3 — eppure la Story 1.4 aveva tre AC **non soddisfatti** e nessun test sul caso centrale | Il segnale "il file esiste" non è "la story è fatta": gli AC dichiarano cosa deve essere **verificabile**, e nessuno li verificava | La story è stata chiusa risolvendo i difetti (transazione, determinismo, riferimenti, ISRC, contatori) + 9 test, fra cui il caso esplicito "due track `fuzzy:` con lo stesso ISRC → una sola track" | `docs/state/stories/1.4-dedup-promotion.md` |
+| 19-2 | P+L | La fusione dei riferimenti usava `db.library.where('[platform+trackId]')` e `db.playlistItems.where('trackId')`: **nessuna delle due query esiste** nello schema Dexie (`02§6`: `library` ha `trackId` e `platform` separati; `playlistItems` ha `[playlistId+trackId]` e `playlistId`) | Il tipo del DB (`Table<LibraryItem, string>`) accetta qualsiasi stringa come indice: la coppia tipo/indice sono **contratti separati** | Le query usano solo indici esistenti (`library.where('trackId')`, `library.where('platform').filter(...)`, `playlistItems.filter(...)`). Da notare: il fallimento sarebbe avvenuto **dentro la transazione**, spezzando il DB con un job di manutenzione | `packages/core/src/db/rekey.ts`, `packages/core/src/db/db.ts` (`DB_SCHEMA_V1`) |
+| 19-3 | P | `listenCount` aggregato sommando i contatori memorizzati delle due track: `5 + 3 = 8`, mentre nel DB c'erano **2** ascolti | La somma manuale è formalmente corretta e sostanzialmente falsa: i due contatori potevano essere stale | `rekey()` delega a `recount()` (MIG-4): l'unica fonte di verità dei contatori denormalizzati. Il test della Story 0.7 che codificava la somma è stato aggiornato | `02-DATA-SCHEMA.md` §7 (MIG-4) |
+| 19-4 | P+L | Quale delle due track sopravviveva dipendeva dall'ordine di enumerazione di IndexedDB, che non è garantito | Nessun criterio di sopravvivenza era dichiarato: "chi vince" era un effetto collaterale dell'implementazione | Criterio esplicito e **deterministico**: sopravvive la track più vecchia (primo ascolto), con disambiguazione sul `canonicalKey` | `packages/core/src/db/rekey.ts` (`compareForSurvival`) |
+| 19-5 | P+L | Un crash a metà lasciava il DB con la track promossa **e** la vecchia: il brano duplicato in modo permanente e silenzioso | Il doc-commento dichiarava "ogni operazione avviene in una singola transazione Dexie (atomicità)" ma il codice non usava transazioni | L'intera operazione è in una transazione Dexie (`MIG-1`): o la promozione avviene tutta, o non avviene | `packages/core/src/db/rekey.ts` |
+
+**Lesson learned sintetica**: un job di manutenzione che **scrive** è un
+job che può **rompere**: la differenza fra "il codice gira" e "il codice è
+corretto" sta in tre dettagli che nessun `typecheck` vede — la transazione, il
+criterio di sopravvivenza, e l'origine dei contatori. Il quarto, che nessuno
+avrebbe notato, è che le query Dexie sono un contratto **a parte** dal tipo: un
+indice inesistente non è un errore di compilazione, è un crash a runtime nel
+mezzo del lavoro.
+
+### Link utili
+
+- Branch: `feat/160-rekey-dedup-promotion` (worktree `ls-160-rekey-dedup-promotion`)
+- Issue: **#160** (Story 1.4, `size:S`)
+- Codice: `packages/core/src/db/rekey.ts` · test `packages/core/src/db/__tests__/rekey.test.ts` (nuovo)
+- Spec consumate: `docs/02-DATA-SCHEMA.md` §5 · `docs/05-ARCHITECTURE.md` §12.1 · `docs/16-OPERATIONS.md` §2.3
+- Precedente: **#39** (PR della Story 0.7, che aveva creato `rekey()`)
+
+---
+
+## Changelog
+
 ## Changelog
 
 ## Changelog
@@ -605,6 +641,7 @@ poi, si manifesta come duplicato silenzioso.
 | 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
 | 1.7 | 2026-10-26 (issue #144, #155) | **§17 Story 1.3 — Spec adapter Last.fm + approvazione** (Sessioni 50-51, claim `kilo-HP-ELITEBOOK-lb47`, PR #154 merge `b3130a9` + PR #156 merge `6ec71bb`): 6 lesson (17-1 il limite di `limit` va letto nella doc ufficiale dell'endpoint (200), non dedotto per analogia; 17-2 `artist` ha due forme a seconda di `extended=1` → accessor unico; 17-3 normalizzare l'`eventKey` al minuto su **tutti** i percorsi, se no il re-import misto API+file duplica ogni scrobble; 17-4 la normalizzazione è un contratto fra i due adapter → una sola issue (#155); 17-5 `api_sig` richiede md5, la Web Crypto non ce l'ha → web auth differito alla Story 1.5; 17-6 una sessione chiusa dalla PR che l'ha prodotta non può conoscere il proprio merge → doc-sync in PR separata, e le sezioni legacy dei file globali invecchiano in silenzio). Spec `03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED; issue #144 chiusa, issue di implementazione #155 aperta (`agent-ready`, size L) |
 | 1.8 | 2026-10-26 (issue #155) | **§18 Story 1.3 — Implementazione adapter Last.fm + ListenBrainz** (Sessione 52, claim kilo-HP-ELITEBOOK-lb52, PR #158): 7 lesson (18-1 il contratto degli adapter non aveva un campo per l'MBID dell'artista: aggiunti due campi **additivi e opzionali**; 18-2 durata catalogo e durata dell'evento erano la stessa cosa: bucket DEDUP-3 sempre 0 e durata solo hint sulla Track; 18-3 la formula dell'eventKey della spec non poteva soddisfare E.LF.4 ed E.LF.16/E.LF.19 insieme — il MBID entra nella chiave solo quando disambigua; 18-4 skipped = null non è rappresentabile nel modello: dichiarato; 18-5 la normalizzazione al minuto agisce sull'evento, non sulla riga del file: gap noto; 18-6 il test di un contratto di rete deve asserire il **comportamento** (ritmo, backoff, numero di tentativi), non l'assenza di eccezioni; 18-7 il detect del JSON pretty-printed non può guardare la prima riga). 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi |
+| 1.9 | 2026-10-26 (issue #160) | **§19 Story 1.4 — `rekey()`: promozione dedup post-enrichment** (Sessione 53, claim `kilo-HP-ELITEBOOK-lb53`): 4 lesson (19-1 una funzione "già implementata" può essere una story aperta — `rekey()` esisteva dalla Story 0.7 ed era esportata e descritta in tre documenti, ma nessun test copriva il caso centrale e tre AC non erano soddisfatti; 19-2 il tipo del DB non protegge da una query sbagliata: `where('[platform+trackId]')` compila, passa il typecheck e fallisce a runtime *dentro* la transazione, spezzando il DB; 19-3 un contatore denormalizzato sommato a mano è una seconda fonte di verità (`5 + 3 = 8` con 2 ascolti reali): `recount()` (MIG-4) va delegato, non ricalcolato; 19-4 il determinismo è una proprietà del *dato*: quale delle due track sopravviveva dipendeva dall'ordine di enumerazione di IndexedDB). 9 test nuovi; 208 test core + 81 web verdi |
 
 ---
 

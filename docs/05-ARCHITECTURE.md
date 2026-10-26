@@ -1,3 +1,4 @@
+| 1.2 | Sessione 53 (2026-10-26, issue #160) | **§12.1/§12.2**: `rekey()` da "futuro (Story 0.7)" a **attivo (Story 1.4)** — la funzione esisteva dalla Story 0.7 ma non soddisfava gli acceptance criteria della story (nessuna transazione, sopravvivenza non deterministica, riferimenti `library`/`playlistItems`/`features` non riorientati, ISRC non normalizzato, contatori sommati a mano invece che delegati a `recount()`). La Sessione 53 ne ha chiuso i buchi. Nessuna modifica al resto della sezione |
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
@@ -445,7 +446,7 @@ Operazioni di manutenzione che il client deve supportare per garantire salute de
 | Operazione | Quando | Cosa fa | Costo | Fase |
 |------------|--------|---------|-------|------|
 | `recount()` | Dopo ogni import + settimanale | Ricalcola `listenCount` denormalizzati su tracks/artists | O(n listens) | attivo (Story 0.2) |
-| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati | O(n tracks) | futuro (Story 0.7) |
+| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati (transactional, sopravvivenza deterministica) | O(n tracks) | attivo (Story 1.4) |
 | `orphanCleanup()` | Mensile | Rimuove `tracks`/`artists` non referenziati da `listens` né da `library` | O(n tracks) | futuro (Story 0.7) |
 | `indexRebuild()` | Manuale + dopo migrazione | Ricostruisce indici Dexie se corrotti | Lock lungo | futuro (Story 0.7) |
 | `fastCheck()` | Ad ogni boot (in dev/prod) | Smoke test: DB apribile, schema version corretto, indici funzionanti | < 100ms | futuro (Story 0.7) |
@@ -454,7 +455,7 @@ Operazioni di manutenzione che il client deve supportare per garantire salute de
 
 ### 12.2 Scheduling
 
-- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`) — `recount` attivo (Story 0.2), `rekey` futuro (Story 0.7)
+- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`) — `recount` attivo (Story 0.2), `rekey` attivo (Story 1.4)
 - **Scheduled**: `orphanCleanup`, `quotaCheck` via Web Worker in `requestIdleCallback`, max 5 min/giorno (cumulativo con `§7.1`) — futuro (Story 0.7)
 - **Manuale**: `indexRebuild`, `compact` da pulsante in Settings → "Manutenzione DB" (raro) — futuro (Story 0.7)
 - **Boot**: `fastCheck` sempre; se fallisce, l'app entra in read-only mode (`§5`) — futuro (Story 0.7)

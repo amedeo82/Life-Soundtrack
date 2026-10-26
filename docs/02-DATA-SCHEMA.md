@@ -1,3 +1,4 @@
+| 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline |
 # 02 — Schema Dati Unificato (eseguibile)
 
 > Status: 🟢 APPROVED · Versione 1.3 · Sessione 40 (2026-10-21)
@@ -352,6 +353,34 @@ Comportamento upsert:
 - Se esiste track con stesso canonicalKey → aggiungi platformId, aggiorna lastSeenAt e contatori
 - Altrimenti crea nuova track
 - Conflitti nome: il nome visualizzato è quello della prima piattaforma importata per ordine di priorità (spotify > apple > tidal > listenbrainz > altro), salvo override utente futuro
+
+### Promozione post-enrichment: il job `rekey()` (Story 1.4)
+
+La chiave `fuzzy:` è un'**ipotesi** (nome + artista + bucket), non un'identità: due
+varianti dello stesso brano hanno due chiavi diverse. Quando l'enrichment
+MusicBrainz scopre l'ISRC o l'MBID, la chiave va **promossa** a `isrc:`/`mbid:`
+e i duplicati vanno **fusi**.
+
+`rekey()` (`packages/core/src/db/rekey.ts`, `05§12.1`, `16-OPERATIONS.md` §2.3)
+applica queste regole:
+
+- **priorità DEDUP-1 su DEDUP-2**: con ISRC e MBID presenti vince l'ISRC, che
+  è normalizzato in **maiuscole** per coincidere con la chiave che calcola la
+  pipeline (`isrc:<ISRC upper>`);
+- **atomicità**: l'operazione è interamente in una transazione Dexie (MIG-1): o
+  la promozione avviene tutta, o non avviene;
+- **sopravvivenza deterministica**: sopravvive la track **più vecchia** (primo
+  ascolto), con disambiguazione sul `canonicalKey` — l'ordine di enumerazione
+  di IndexedDB non è garantito e non deve decidere quale delle due track
+  "conta" come l'originale;
+- **riferimenti riorientati**: `listens`, `library`, `playlistItems` e
+  `features` passano alla track sopravvissuta (i duplicati in libreria e in
+  playlist sono scartati: sono insiemi);
+- **nessuna perdita**: `platformIds`, `generi` e la finestra temporale
+  (`firstSeenAt`/`lastSeenAt`) della track perdente vengono uniti a quelli della
+  sopravvissuta;
+- **contatori dalla fonte di verità**: `listenCount` è ricalcolato da
+  `recount()` (MIG-4), non sommato a mano.
 
 ## 6. Schema Dexie (IndexedDB) — versione 1
 

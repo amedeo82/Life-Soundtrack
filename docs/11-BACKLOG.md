@@ -304,10 +304,12 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: Job `rekey()` che, quando un track acquisisce ISRC/MBID via enrichment, aggiorna il `canonicalKey` da `fuzzy:...` a `isrc:...` o `mbid:...`, unendo duplicati.
 
+**Stato**: ✅ **COMPLETATA** (Sessione 53) — issue #160 chiusa con `status:done`. `rekey()` esisteva già dalla Story 0.7 (PR #39) ma era **incompleta** rispetto agli AC e senza i test: la Sessione 53 ne ha chiuso i buchi — **transazione Dexie** (atomicità, MIG-1), **sopravvivenza deterministica** (la track più vecchia), **riorientamento** di `library`/`playlistItems`/`features`, **unione** di `platformIds`/`generi`/finestra temporale, **ISRC normalizzato** in maiuscole, contatori delegati a `recount()` (MIG-4). 9 test nuovi (`packages/core/src/db/__tests__/rekey.test.ts`).
+
 **Acceptance criteria**:
-- [ ] Due track con `fuzzy:` diverso ma stesso ISRC → una sola track dopo `rekey()`
-- [ ] `listenCount` aggregato correttamente
-- [ ] `listen_events.trackId` riorientato
+- [x] Due track con `fuzzy:` diverso ma stesso ISRC → una sola track dopo `rekey()`
+- [x] `listenCount` aggregato correttamente
+- [x] `listen_events.trackId` riorientato
 
 **Spec**: `02-DATA-SCHEMA.md` §5-6
 
@@ -534,7 +536,6 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
@@ -581,6 +582,7 @@ Ogni story deve avere label GitHub:
 | 1.6.8 | Sessione 51 (2026-10-26, issue #144) | **Spec Last.fm approvata**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #154, merge `b3130a9`); issue #144 chiusa con `status:done`. Nessuna modifica di contenuto: D-LF.0…D-LF.8 ratificate come formulate, percorso web auth confermato alla Story 1.5. **Story 1.3 completa dei suoi tre pezzi** (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0) → aperta l'issue di implementazione (#155, `agent-ready`, size L). Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.7 (riferimento spec), `docs/state/sessions/50-*` e `51-*` |
 | 1.6.9 | Sessione 51 (2026-10-26, issue #144) | **Doc-sync post-merge della PR #156** (merge `6ec71bb`): il frontmatter di `docs/state/sessions/51-*` riflette il merge reale (`pr: 156`, `merged_commit: 6ec71bb`, `state: 🟢`, `merged: true`) — era rimasto `pr: null` / `merged: false` perché la sessione è stata scritta dalla stessa PR che la chiude. Story 1.3 allineata: `issue: 155`, T1.3.7 ✅, "Stato attuale" aggiornato. Sezioni legacy riallineate: `11-BACKLOG.md` (`**Stato**:` della 1.3 + riga roadmap, che dichiaravano ancora «manca l'issue di implementazione»), `docs/INDEX.md` (riga `03-ADAPTERS/`, versioni dei documenti, "Prossimo passo tecnico"), `docs/18-DEV-LOG.md` §17 (entry delle sessioni 50-51). La riga di changelog 1.6.8 è stata riportata dentro la tabella: era stata appesa **dopo** il blocco `AGGREGATE-STORIES-*`, fuori dal suo schema |
 | 1.6.10 | Sessione 52 (2026-10-26, issue #155) | **Story 1.3 completata**: implementazione della issue #155 (adapter ListenBrainz file-only + adapter Last.fm ibrido API/file). Sezione Story 1.3 `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"** (la fonte di verità per le completate è il blocco aggregato, ADR-0008); `docs/state/stories/1.3-*` → `status: done`. Documenti allineati: `02-DATA-SCHEMA.md` §6.1 (tabella `settings`, schema Dexie v4) + §3.1 (i due campi additivi del contratto) + changelog 1.4; `03-ADAPTERS/lastfm.md` §3.1.0 (la chiave fra i due percorsi) + changelog 1.1; `03-ADAPTERS/listenbrainz.md` §3.1.3 (i due campi che il contratto non aveva) + changelog 1.1; `08-COPY-I18N.md` §2.12e (`settings.lastfm.*`) + changelog 0.4; `docs/18-DEV-LOG.md` §18; `docs/state/sessions/52-*` (nuova); `scripts/generate-bundle.ps1` `$files` (6 fixture + sessione 52); `docs/BUNDLE.md` rigenerato |
+| 1.6.11 | Sessione 53 (2026-10-26, issue #160) | **Story 1.4 completata**: `rekey()` (promozione dedup post-enrichment) resa completa e testata. La funzione esisteva dalla Story 0.7 (PR #39) ma non soddisfava gli AC: ora è **transazionale** (MIG-1), a **sopravvivenza deterministica** (la track più vecchia), **riorienta** `library`/`playlistItems`/`features`, **unisce** `platformIds`/`generi`/finestra temporale, **normalizza** l'ISRC in maiuscole e delega i contatori a `recount()` (MIG-4). Sezione Story 1.4: `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"**. `docs/state/stories/1.4-dedup-promotion.md` (nuova). Documenti allineati: `05-ARCHITECTURE.md` §12.1/§12.2 (`rekey()` da "futuro" a "attivo") + changelog 1.2; `16-OPERATIONS.md` §2.3 (forma del report) + changelog 0.2; `02-DATA-SCHEMA.md` §5 (nota sul job) + changelog 1.5; `docs/INDEX.md` (righe `05`, `11`, `16`, `18-DEV-LOG`, "Prossimo passo tecnico"); `docs/18-DEV-LOG.md` §19 + changelog 1.9; `docs/state/sessions/53-story-1-4-rekey.md` (nuova); `docs/BUNDLE.md` rigenerato |
 
 <!-- AGGREGATE-STORIES-START -->
 

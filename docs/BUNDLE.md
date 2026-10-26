@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 21:07
-> Totale file: 87
+> Data: 2026-10-26 22:34
+> Totale file: 89
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1376,7 +1376,7 @@ Apache License
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 52 (v1.4) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 52 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.0, S47) + Last.fm (🟢 v1.0, S50/S51) — **adapter implementati** in Sessione 52 (issue #155) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
-| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 48 (v1.1) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010) |
+| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 53 (v1.2) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); §12.1 `rekey()` attivo (Story 1.4) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
@@ -1387,7 +1387,7 @@ Apache License
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 49 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
-| 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 37 (Story 0.7, PR #64) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`) |
+| 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
 | 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟡 DRAFT | Sessione 41 | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto |
 
 ## Documenti di supporto
@@ -1400,7 +1400,7 @@ Apache License
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.8 | Diario cronologico per story: problemi, fix, lesson learned |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.9 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -1522,7 +1522,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 52, issue #155): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged**: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`) e **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52): adapter ListenBrainz file-only (export API → ZIP/JSONL) e adapter Last.fm con percorso **ibrido** (API via proxy CORS con `parseRemote?()` + percorso file CSV/JSON), con `eventKey` normalizzato al minuto su entrambi i percorsi (D-LF.7). Il percorso web auth con la `sk` resta alla **Story 1.5** (E.LF.21: `api_sig` richiede md5, che il repo non espone). **Prossimo passo**: la **Story 1.4** (dedup promozione post-enrichment: spec `02-DATA-SCHEMA.md` §5-6 già 🟢 APPROVED, serve solo l'issue `agent-ready`) o la **Story 1.5** (scrobbling hub + sync continua, con il percorso incrementale ListenBrainz e il web auth Last.fm). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 53, issue #160): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged** e la **dedup** chiusa: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`), **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52) e **1.4 Dedup promozione post-enrichment ✅** (issue #160, Sessione 53): il job `rekey()` è ora transazionale, a sopravvivenza deterministica, riorienta i riferimenti non udibili e delega i contatori a `recount()`. Il percorso web auth con la `sk` di Last.fm resta alla **Story 1.5** (E.LF.21: `api_sig` richiede md5, che il repo non espone). **Prossimo passo**: la **Story 1.5** (scrobbling hub: invio scrobble + sync continua + toggle `scrobbleHubs`, con il percorso incrementale ListenBrainz `/listens` a cursore e l'adapter Maloja come scope Fase 2) — è `SIZE:L` e richiede una decisione sul lato **scrittura** verso i hub (ToS, rate limit condivisi, consenso) che è meglio fissare in una spec dedicata prima dell'implementazione. Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -6524,6 +6524,42 @@ poi, si manifesta come duplicato silenzioso.
 
 ---
 
+## 19. Story 1.4 — `rekey()`: promozione dedup post-enrichment (Sessione 53)
+
+**Tipo**: implementazione (`feat`) — issue #160, claim `kilo-HP-ELITEBOOK-lb53`
+**Branch**: `feat/160-rekey-dedup-promotion` (worktree `ls-160-rekey-dedup-promotion`)
+**PR**: #161 (aperta su `main` dalla worktree)
+**Data**: 2026-10-26
+**Stato**: ✅ completata — 208 test core (9 nuovi) + 81 test web verdi; `lint`, `typecheck`, `build` verdi
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 19-1 | P | `rekey()` era "già fatta" (Story 0.7, PR #39): scritta, esportata da `@ls/core/db`, descritta in `05§12.1` e `16-OPERATIONS.md` §2.3 — eppure la Story 1.4 aveva tre AC **non soddisfatti** e nessun test sul caso centrale | Il segnale "il file esiste" non è "la story è fatta": gli AC dichiarano cosa deve essere **verificabile**, e nessuno li verificava | La story è stata chiusa risolvendo i difetti (transazione, determinismo, riferimenti, ISRC, contatori) + 9 test, fra cui il caso esplicito "due track `fuzzy:` con lo stesso ISRC → una sola track" | `docs/state/stories/1.4-dedup-promotion.md` |
+| 19-2 | P+L | La fusione dei riferimenti usava `db.library.where('[platform+trackId]')` e `db.playlistItems.where('trackId')`: **nessuna delle due query esiste** nello schema Dexie (`02§6`: `library` ha `trackId` e `platform` separati; `playlistItems` ha `[playlistId+trackId]` e `playlistId`) | Il tipo del DB (`Table<LibraryItem, string>`) accetta qualsiasi stringa come indice: la coppia tipo/indice sono **contratti separati** | Le query usano solo indici esistenti (`library.where('trackId')`, `library.where('platform').filter(...)`, `playlistItems.filter(...)`). Da notare: il fallimento sarebbe avvenuto **dentro la transazione**, spezzando il DB con un job di manutenzione | `packages/core/src/db/rekey.ts`, `packages/core/src/db/db.ts` (`DB_SCHEMA_V1`) |
+| 19-3 | P | `listenCount` aggregato sommando i contatori memorizzati delle due track: `5 + 3 = 8`, mentre nel DB c'erano **2** ascolti | La somma manuale è formalmente corretta e sostanzialmente falsa: i due contatori potevano essere stale | `rekey()` delega a `recount()` (MIG-4): l'unica fonte di verità dei contatori denormalizzati. Il test della Story 0.7 che codificava la somma è stato aggiornato | `02-DATA-SCHEMA.md` §7 (MIG-4) |
+| 19-4 | P+L | Quale delle due track sopravviveva dipendeva dall'ordine di enumerazione di IndexedDB, che non è garantito | Nessun criterio di sopravvivenza era dichiarato: "chi vince" era un effetto collaterale dell'implementazione | Criterio esplicito e **deterministico**: sopravvive la track più vecchia (primo ascolto), con disambiguazione sul `canonicalKey` | `packages/core/src/db/rekey.ts` (`compareForSurvival`) |
+| 19-5 | P+L | Un crash a metà lasciava il DB con la track promossa **e** la vecchia: il brano duplicato in modo permanente e silenzioso | Il doc-commento dichiarava "ogni operazione avviene in una singola transazione Dexie (atomicità)" ma il codice non usava transazioni | L'intera operazione è in una transazione Dexie (`MIG-1`): o la promozione avviene tutta, o non avviene | `packages/core/src/db/rekey.ts` |
+
+**Lesson learned sintetica**: un job di manutenzione che **scrive** è un
+job che può **rompere**: la differenza fra "il codice gira" e "il codice è
+corretto" sta in tre dettagli che nessun `typecheck` vede — la transazione, il
+criterio di sopravvivenza, e l'origine dei contatori. Il quarto, che nessuno
+avrebbe notato, è che le query Dexie sono un contratto **a parte** dal tipo: un
+indice inesistente non è un errore di compilazione, è un crash a runtime nel
+mezzo del lavoro.
+
+### Link utili
+
+- Branch: `feat/160-rekey-dedup-promotion` (worktree `ls-160-rekey-dedup-promotion`)
+- Issue: **#160** (Story 1.4, `size:S`)
+- Codice: `packages/core/src/db/rekey.ts` · test `packages/core/src/db/__tests__/rekey.test.ts` (nuovo)
+- Spec consumate: `docs/02-DATA-SCHEMA.md` §5 · `docs/05-ARCHITECTURE.md` §12.1 · `docs/16-OPERATIONS.md` §2.3
+- Precedente: **#39** (PR della Story 0.7, che aveva creato `rekey()`)
+
+---
+
+## Changelog
+
 ## Changelog
 
 ## Changelog
@@ -6548,6 +6584,7 @@ poi, si manifesta come duplicato silenzioso.
 | 1.6 | 2026-10-26 (issue #149) | **§16 Race fra i due writer di `main`** (issue #149, claim `kilo-HP-ELITEBOOK-lb47`, PR #151): 4 lesson (16-1 il concurrency group serializza i run ma non ne impone l'ordine, e `auto-bundle` **copia** ciò che `auto-state-aggregate` **modifica** → drift di 6 righe in BUNDLE.md, silenzioso; 16-2 un commit fatto col GITHUB_TOKEN non innesca workflow, quindi il meccanismo di auto-guarimento era spento per definizione; 16-3 `const` non è hoisted: il gate era scritto ma mai chiamato → crash invece di `[FAIL]`; 16-4 i test di regressione devono girare dove gira il dev → fixture senza `python3`, `bash` su Windows è lo stub WSL). Fix: trigger `workflow_run` in `auto-bundle.yml` (opzione A, Boss) + quinto gate `checkWriterOrdering` + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert) + step bloccante in `ci.yml` posizione 13; `12-DEVOPS.md` §9.8e nuova, §9.10 a 16 step, changelog 0.8; `AGENTS.md` v1.26 |
 | 1.7 | 2026-10-26 (issue #144, #155) | **§17 Story 1.3 — Spec adapter Last.fm + approvazione** (Sessioni 50-51, claim `kilo-HP-ELITEBOOK-lb47`, PR #154 merge `b3130a9` + PR #156 merge `6ec71bb`): 6 lesson (17-1 il limite di `limit` va letto nella doc ufficiale dell'endpoint (200), non dedotto per analogia; 17-2 `artist` ha due forme a seconda di `extended=1` → accessor unico; 17-3 normalizzare l'`eventKey` al minuto su **tutti** i percorsi, se no il re-import misto API+file duplica ogni scrobble; 17-4 la normalizzazione è un contratto fra i due adapter → una sola issue (#155); 17-5 `api_sig` richiede md5, la Web Crypto non ce l'ha → web auth differito alla Story 1.5; 17-6 una sessione chiusa dalla PR che l'ha prodotta non può conoscere il proprio merge → doc-sync in PR separata, e le sezioni legacy dei file globali invecchiano in silenzio). Spec `03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED; issue #144 chiusa, issue di implementazione #155 aperta (`agent-ready`, size L) |
 | 1.8 | 2026-10-26 (issue #155) | **§18 Story 1.3 — Implementazione adapter Last.fm + ListenBrainz** (Sessione 52, claim kilo-HP-ELITEBOOK-lb52, PR #158): 7 lesson (18-1 il contratto degli adapter non aveva un campo per l'MBID dell'artista: aggiunti due campi **additivi e opzionali**; 18-2 durata catalogo e durata dell'evento erano la stessa cosa: bucket DEDUP-3 sempre 0 e durata solo hint sulla Track; 18-3 la formula dell'eventKey della spec non poteva soddisfare E.LF.4 ed E.LF.16/E.LF.19 insieme — il MBID entra nella chiave solo quando disambigua; 18-4 skipped = null non è rappresentabile nel modello: dichiarato; 18-5 la normalizzazione al minuto agisce sull'evento, non sulla riga del file: gap noto; 18-6 il test di un contratto di rete deve asserire il **comportamento** (ritmo, backoff, numero di tentativi), non l'assenza di eccezioni; 18-7 il detect del JSON pretty-printed non può guardare la prima riga). 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi |
+| 1.9 | 2026-10-26 (issue #160) | **§19 Story 1.4 — `rekey()`: promozione dedup post-enrichment** (Sessione 53, claim `kilo-HP-ELITEBOOK-lb53`): 4 lesson (19-1 una funzione "già implementata" può essere una story aperta — `rekey()` esisteva dalla Story 0.7 ed era esportata e descritta in tre documenti, ma nessun test copriva il caso centrale e tre AC non erano soddisfatti; 19-2 il tipo del DB non protegge da una query sbagliata: `where('[platform+trackId]')` compila, passa il typecheck e fallisce a runtime *dentro* la transazione, spezzando il DB; 19-3 un contatore denormalizzato sommato a mano è una seconda fonte di verità (`5 + 3 = 8` con 2 ascolti reali): `recount()` (MIG-4) va delegato, non ricalcolato; 19-4 il determinismo è una proprietà del *dato*: quale delle due track sopravviveva dipendeva dall'ordine di enumerazione di IndexedDB). 9 test nuovi; 208 test core + 81 web verdi |
 
 ---
 
@@ -7947,6 +7984,156 @@ riga ha un solo `uts`). Dichiarato come gap noto della 1.3.
 
 
 
+===== FILE: docs/state/sessions/53-story-1-4-rekey.md =====
+
+---
+number: 53
+title: "Story 1.4 — rekey(): promozione dedup post-enrichment"
+date: 2026-10-26
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/160-rekey-dedup-promotion
+pr: ""
+claim: kilo-HP-ELITEBOOK-lb53
+cross_refs: [160, 39]
+tags: [db, phase-1, feat]
+---
+
+# Sessione 53 — Story 1.4: `rekey()` (promozione dedup post-enrichment)
+
+## Sintesi
+
+Completamento e irrobustimento del job `rekey()` (`packages/core/src/db/rekey.ts`),
+che promuove la `canonicalKey` di una `Track` da `fuzzy:` a `isrc:`/`mbid:`
+quando l'enrichment MusicBrainz scopre gli identificativi, e **fuse** i
+duplicati.
+
+La funzione **esisteva già** dalla Story 0.7 (PR #39, `20da75d`) ed è già
+esportata da `@ls/core/db` e descritta in `16-OPERATIONS.md` §2.3 e
+`05-ARCHITECTURE.md` §12.1. Ma era **incompleta** rispetto agli acceptance
+criteria della story, e non aveva i test che la story chiede. La Sessione 53 ne
+ha chiuso i buchi.
+
+**Che cosa è cambiato** (dettaglio nel file di story `1.4-dedup-promotion.md`):
+
+- **Atomicità**: l'operazione è ora interamente dentro una transazione Dexie.
+  Prima non lo era, nonostante il doc-commento lo dichiarasse: un crash a metà
+  lasciava il DB con la track promossa *e* la vecchia, cioè il brano duplicato
+  in modo permanente e silenzioso.
+- **Determinismo**: sopravvive la track **più vecchia** (primo ascolto), con
+  disambiguazione sul `canonicalKey`. Prima dipendeva dall'ordine di
+  enumerazione di IndexedDB, che non è garantito (lesson 34-1: stesso input →
+  stesso output su ogni piattaforma).
+- **Riferimenti**: `library`, `playlistItems` e `features` sono riorientati
+  sulla track sopravvissuta; i duplicati (stesso brano già in libreria, già in
+  playlist) sono scartati, perché libreria e playlist sono insiemi.
+- **Nessuna perdita di dati**: `platformIds`, `genres`, `firstSeenAt`/`lastSeenAt`
+  della track perdente vengono uniti a quelli della sopravvissuta. Prima
+  sparivano: il brano "uscito" da una piattaforma perdeva la traccia di esservi
+  arrivato.
+- **ISRC normalizzato** in maiuscole: `isrc:${isrc}` senza normalizzare non
+  coincideva con la chiave che calcola la pipeline (`isrc:<ISRC upper>`, `02§5`),
+  quindi la promozione non produceva la dedup che prometteva.
+- **Contatori dalla fonte di verità**: `rekey()` non somma più i contatori
+  memorizzati ma delega a `recount()` (MIG-4). La somma manuale produceva
+  numeri che non corrispondevano a nessun ascolto reale.
+
+**Test**: 9 nuovi in `packages/core/src/db/__tests__/rekey.test.ts`, fra cui il
+caso esplicito della story (due track `fuzzy:` diverse con lo stesso ISRC →
+una sola track), che non era coperto. Corretto anche un test della Story 0.7
+che codificava la somma manuale dei contatori.
+
+## Trigger
+
+Issue #160 (`agent-ready`, size S): la Story 1.4 era la prima del backlog con
+la spec già 🟢 APPROVED (`02§5`, `05§12.1`) e la sola carenza aperta — la
+storia dichiarava AC che l'implementazione esistente non soddisfava.
+
+## Difetti trovati lungo il percorso
+
+**Un `where()` su un indice inesistente fallisce a runtime, non a compile
+time.** La prima stesura della fusione usava
+`db.library.where('[platform+trackId]')` e
+`db.playlistItems.where('trackId')`: entrambe le query sono corrette *in
+apparenza* e nessuna delle due esiste nello schema (`02§6`: `library` ha
+`trackId` e `platform` separati; `playlistItems` ha solo `[playlistId+trackId]`
+e `playlistId`). Dexie fallisce a runtime con "KeyPath ... is not indexed", e
+il fallimento sarebbe avvenuto **dentro la transazione**, proprio nel mezzo
+della fusione: il DB si sarebbe rotto per un job di manutenzione. Il controllo
+preventivo è stato leggere `DB_SCHEMA_V1` prima di scrivere le query — e la
+lezione è che **il tipo del DB non ti protegge**: `db.library` è tipizzato
+`Table<LibraryItem, string>` e accetta qualsiasi stringa come chiave di indice.
+
+**Il contatore denormalizzato e la fonte di verità erano due cose diverse.**
+La Story 0.7 aggregava `listenCount` sommando i valori memorizzati delle due
+track (5 + 3 = 8) mentre nel DB c'erano 2 ascolti. Il numero 8 non corrispondeva
+a nessun ascolto: era la somma di due numeri che a loro volta potevano essere
+stale. `02§7` (MIG-4) dice che `recount()` è l'unica fonte di verità dei
+contatori, e `rekey()` ora la delega invece di ricalcolare in proprio.
+
+**Il test che la story scriveva ("due track fuzzy con lo stesso ISRC → una
+sola track") era proprio quello che ha trovato il bug della fusione.** Nella
+prima stesura, la track promossa veniva riscritta con la **chiave vecchia**
+durante la fusione: il risultato era che il DB restava con due track, una
+promossa e una tornata `fuzzy:`. Il bug non si vedeva nei test preesistenti
+(che coprivano solo la fusione con una track già `isrc:`), perché il caso
+"promozione + fusione nella stessa esecuzione" non era mai stato eseguito.
+
+## Verifica
+
+- `pnpm run lint` → verde (3 task)
+- `pnpm run typecheck` → verde (3 task)
+- `pnpm --filter @ls/core exec vitest run` → **208 test verdi** (18 file, di cui 1 nuovo)
+- `pnpm --filter @ls/web exec vitest run` → **81 test verdi** (10 file)
+- `pnpm run build` → verde (3 task)
+- `pwsh scripts/generate-bundle.ps1 --check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 --check` → drift atteso sui blocchi aggregati
+  (li rigenera `auto-state-aggregate` post-merge)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 53-1 | **Una funzione "già implementata" può essere una story aperta.** `rekey()` era scritta, esportata e descritta in tre documenti: sembrava fatta. Ma la story ne dichiarava tre AC che l'implementazione non soddisfava, e nessun test copriva il caso centrale (due varianti fuzzy dello stesso brano). Il segnale non è "il file esiste" né "l'export c'è": è **"gli AC della story sono verificabili e qualcuno li verifica"**. Una story con AC non coperti da test è una story aperta, indipendentemente dalle righe di codice |
+| 53-2 | **Il tipo del DB non protegge da una query sbagliata.** `db.library.where('[platform+trackId]')` compila, passa il typecheck e fallisce a runtime, dentro la transazione, nel mezzo del lavoro. Gli indici Dexie sono un **contratto separato** dal tipo: va letto lo schema (`02§6`), non dedotto dall'API. Il sintomo peggiore di questo bug non sarebbe stato l'errore, ma il DB rotto da un job di manutenzione |
+| 53-3 | **Un contatore denormalizzato che si somma a mano è una seconda fonte di verità.** `5 + 3 = 8` mentre gli ascolti reali sono 2: la somma era formalmente corretta e sostanzialmente falsa. `recount()` esiste proprio per questo (MIG-4): ogni job che tocca i contatori deve **delegare**, non aggregare |
+| 53-4 | **Il determinismo è una proprietà del *dato*, non dell'algoritmo.** "Cancella e reinserisci" è un algoritmo corretto; ma *quale* delle due track sopravvive dipendeva dall'ordine in cui IndexedDB le enumerava. Il criterio ("la più vecchia vince") è una **decisione di dominio** — e va scritta nel codice, non lasciata all'osservazione del database |
+
+## Documenti aggiornati
+
+- `packages/core/src/db/rekey.ts` — transazione, determinismo, riorientamento dei
+  riferimenti, unione dei campi, ISRC normalizzato, `recount()` delegato
+- `packages/core/src/db/__tests__/rekey.test.ts` — **nuovo**: 9 test
+- `packages/core/src/db/__tests__/operations.test.ts` — il test della Story 0.7
+  aggiornato alla semantica `recount()`
+- `docs/05-ARCHITECTURE.md` — §12.1 e §12.2: `rekey()` da "futuro" a "attivo
+  (Story 1.4)"
+- `docs/16-OPERATIONS.md` — §2.3: forma del report aggiornata + changelog
+- `docs/02-DATA-SCHEMA.md` — §5: nota sul job di promozione
+- `docs/11-BACKLOG.md` — Story 1.4 completata, rimossa dalla tabella roadmap,
+  changelog 1.6.11
+- `docs/INDEX.md` — righe `05`, `11`, `16`, `18-DEV-LOG` e "Prossimo passo tecnico"
+- `docs/state/stories/1.4-dedup-promotion.md` — **nuovo**
+- `docs/state/sessions/53-story-1-4-rekey.md` — **nuovo**
+- `docs/18-DEV-LOG.md` — §19 + changelog 1.9
+- `scripts/generate-bundle.ps1` — `$files`: i due file di stato nuovi
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#160** — issue della Story 1.4 (chiusa al merge della PR)
+- **#39** — PR della Story 0.7, che aveva creato `rekey()` (`20da75d`)
+- `docs/02-DATA-SCHEMA.md` §5 — regole DEDUP-1/2/3
+- `docs/05-ARCHITECTURE.md` §12.1 — le operazioni di manutenzione
+- `docs/16-OPERATIONS.md` §2.3 — l'API `@ls/core/db`
+- Prossimo passo: **Story 1.5** (scrobbling hub + sync continua, con il percorso
+  incrementale ListenBrainz e il web auth Last.fm: `api_sig` richiede md5, che il
+  repo non espone)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -8105,6 +8292,100 @@ al merge della **PR #158** (`7afbf03`, 2026-10-26T20:56Z).
 
 Sblocca: nessuna story è dipendente da 1.3. La 1.5 dipende dal contratto
 `parseRemote?()` (ADR-0010, ratificato) per il percorso incrementale.
+
+
+
+===== FILE: docs/state/stories/1.4-dedup-promotion.md =====
+
+---
+id: "1.4"
+title: "Dedup promozione post-enrichment"
+phase: 1
+area: db
+status: done
+priority: I
+depends_on: ["0.3"]
+issue: 160
+branch: feat/160-rekey-dedup-promotion
+pr: ""
+merged_commit: ""
+merged_date: ""
+claim: kilo-HP-ELITEBOOK-lb53
+spec_refs:
+  - docs/02-DATA-SCHEMA.md
+  - docs/05-ARCHITECTURE.md
+  - docs/16-OPERATIONS.md
+---
+
+## Descrizione
+
+Job `rekey()` che, quando una `Track` acquisisce ISRC/MBID (enrichment
+MusicBrainz), **promuove** la sua `canonicalKey` da `fuzzy:...` a
+`isrc:...`/`mbid:...` e **unisce** i duplicati.
+
+Finché una piattaforma non espone ISRC/MBID, il brano vive con la chiave
+"fuzzy" (nome + artista + bucket di durata): è una **ipotesi**, non
+un'identità. Quando l'enrichment scopre l'ISRC, l'ipotesi diventa
+un'identità — e la `canonicalKey` è la **chiave primaria** della tabella
+`tracks` (`02§6`), quindi promuoverla significa cambiare la PK.
+
+I duplicati sono il caso **normale**, non l'eccezione: due varianti fuzzy
+dello stesso brano (durata diversa, nome con feat., artisti con "&" vs "e")
+hanno due chiavi diverse e, dopo l'enrichment, **la stessa** chiave `isrc:`.
+Vanno fusi, e i riferimenti riorientati sulla track sopravvissuta.
+
+## Blocco
+
+Nessuno. La spec `02§5` (regole DEDUP) e `05§12.1` (operazioni di
+manutenzione) sono 🟢 APPROVED.
+
+## Acceptance criteria
+
+- [x] Due track con `fuzzy:` diverso ma stesso ISRC → una sola track dopo `rekey()`
+- [x] `listenCount` aggregato correttamente
+- [x] `listen_events.trackId` riorientato
+- [x] Priorità DEDUP-1 su DEDUP-2: con ISRC e MBID presenti → `isrc:`
+- [x] ISRC normalizzato in maiuscole (la chiave deve coincidere con quella
+      calcolata dalla pipeline, `02§5`)
+- [x] Track senza ISRC né MBID → invariata; track già `isrc:`/`mbid:` → invariata
+- [x] `rekey()` è **idempotente**: la seconda esecuzione è un no-op
+- [x] Riferimenti non udibili (`library`, `playlistItems`, `features`) riorientati
+- [x] `platformIds`, `genres` e la finestra temporale non si perdono nella fusione
+- [x] Sopravvivenza **deterministica** (la track più vecchia), indipendente
+      dall'ordine di enumerazione di IndexedDB
+- [x] Atomicità: tutta l'operazione in una transazione Dexie (MIG-1)
+- [x] I contatori sono ricalcolati da `recount()` (MIG-4), non sommati a mano
+- [x] Test con fixture sintetici (dedup: due varianti fuzzy dello stesso brano)
+
+## Stato attuale
+
+✅ **COMPLETATA** (Sessione 53, 2026-10-26). Issue #160 chiusa con
+`status:done` al merge della PR di implementazione.
+
+**Cosa c'è** (`packages/core/src/db/rekey.ts`): l'implementazione esisteva
+già dalla Story 0.7 (PR #39) ma era **incompleta** rispetto a questa story, e
+non aveva i test. La Sessione 53 ne ha chiuso i buchi:
+
+| Difetto (prima) | Ora |
+|------------------|------|
+| Nessuna transazione: un crash a metà lasciava la DB con la PK vecchia e la nuova | Tutta l'operazione in una transazione Dexie (MIG-1) |
+| Il sopravvissuto dipendeva dall'ordine di enumerazione di IndexedDB | Sopravvive la track **più vecchia** (primo ascolto), con disambiguazione sul `canonicalKey` (lesson 34-1) |
+| `library`, `playlistItems` e `features` restavano appesi alla track eliminata | Riorientati (e i duplicati scartati: la libreria e la playlist sono insiemi) |
+| `platformIds`, `genres`, `firstSeenAt`/`lastSeenAt` della track perdente andavano persi | Unione dei campi: la track sopravvissuta conserva i propri dati e accetta quelli della perdente dove non ha già un valore |
+| `isrc:${track.isrc}` senza normalizzare → non coincideva con la chiave della pipeline (`isrc:<UPPER>`) | ISRC normalizzato in maiuscole |
+| `listenCount` sommato a mano (5 + 3 = 8, un numero che non corrispondeva a nessun ascolto) | Ricalcolato da `recount()` (MIG-4): la fonte di verità sono gli ascolti effettivi |
+
+Il report è esteso: `promoted`, `merged`, `listenedMoved` (come da Story 0.7)
++ `tracksScanned`, `libraryRepointed`, `playlistItemsRepointed`,
+`featuresRepointed`.
+
+**Test**: 9 nuovi in `packages/core/src/db/__tests__/rekey.test.ts` (il caso
+esplicito della story — due track fuzzy con lo stesso ISRC — non era coperto),
+più la correzione del test di Story 0.7 che codificava la somma manuale dei
+contatori.
+
+Sblocca: nessuna story è dipendente da 1.4. La 1.5 (sync continua) potrà
+ chiamare `rekey()` dopo l'enrichment.
 
 
 
@@ -9163,6 +9444,7 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 
 ===== FILE: docs/02-DATA-SCHEMA.md =====
 
+| 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline |
 # 02 — Schema Dati Unificato (eseguibile)
 
 > Status: 🟢 APPROVED · Versione 1.3 · Sessione 40 (2026-10-21)
@@ -9517,6 +9799,34 @@ Comportamento upsert:
 - Se esiste track con stesso canonicalKey → aggiungi platformId, aggiorna lastSeenAt e contatori
 - Altrimenti crea nuova track
 - Conflitti nome: il nome visualizzato è quello della prima piattaforma importata per ordine di priorità (spotify > apple > tidal > listenbrainz > altro), salvo override utente futuro
+
+### Promozione post-enrichment: il job `rekey()` (Story 1.4)
+
+La chiave `fuzzy:` è un'**ipotesi** (nome + artista + bucket), non un'identità: due
+varianti dello stesso brano hanno due chiavi diverse. Quando l'enrichment
+MusicBrainz scopre l'ISRC o l'MBID, la chiave va **promossa** a `isrc:`/`mbid:`
+e i duplicati vanno **fusi**.
+
+`rekey()` (`packages/core/src/db/rekey.ts`, `05§12.1`, `16-OPERATIONS.md` §2.3)
+applica queste regole:
+
+- **priorità DEDUP-1 su DEDUP-2**: con ISRC e MBID presenti vince l'ISRC, che
+  è normalizzato in **maiuscole** per coincidere con la chiave che calcola la
+  pipeline (`isrc:<ISRC upper>`);
+- **atomicità**: l'operazione è interamente in una transazione Dexie (MIG-1): o
+  la promozione avviene tutta, o non avviene;
+- **sopravvivenza deterministica**: sopravvive la track **più vecchia** (primo
+  ascolto), con disambiguazione sul `canonicalKey` — l'ordine di enumerazione
+  di IndexedDB non è garantito e non deve decidere quale delle due track
+  "conta" come l'originale;
+- **riferimenti riorientati**: `listens`, `library`, `playlistItems` e
+  `features` passano alla track sopravvissuta (i duplicati in libreria e in
+  playlist sono scartati: sono insiemi);
+- **nessuna perdita**: `platformIds`, `generi` e la finestra temporale
+  (`firstSeenAt`/`lastSeenAt`) della track perdente vengono uniti a quelli della
+  sopravvissuta;
+- **contatori dalla fonte di verità**: `listenCount` è ricalcolato da
+  `recount()` (MIG-4), non sommato a mano.
 
 ## 6. Schema Dexie (IndexedDB) — versione 1
 
@@ -12142,6 +12452,7 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 
 ===== FILE: docs/05-ARCHITECTURE.md =====
 
+| 1.2 | Sessione 53 (2026-10-26, issue #160) | **§12.1/§12.2**: `rekey()` da "futuro (Story 0.7)" a **attivo (Story 1.4)** — la funzione esisteva dalla Story 0.7 ma non soddisfava gli acceptance criteria della story (nessuna transazione, sopravvivenza non deterministica, riferimenti `library`/`playlistItems`/`features` non riorientati, ISRC non normalizzato, contatori sommati a mano invece che delegati a `recount()`). La Sessione 53 ne ha chiuso i buchi. Nessuna modifica al resto della sezione |
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
@@ -12589,7 +12900,7 @@ Operazioni di manutenzione che il client deve supportare per garantire salute de
 | Operazione | Quando | Cosa fa | Costo | Fase |
 |------------|--------|---------|-------|------|
 | `recount()` | Dopo ogni import + settimanale | Ricalcola `listenCount` denormalizzati su tracks/artists | O(n listens) | attivo (Story 0.2) |
-| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati | O(n tracks) | futuro (Story 0.7) |
+| `rekey()` | Dopo enrichment con ISRC/MBID | Promuove `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:`, unisce duplicati (transactional, sopravvivenza deterministica) | O(n tracks) | attivo (Story 1.4) |
 | `orphanCleanup()` | Mensile | Rimuove `tracks`/`artists` non referenziati da `listens` né da `library` | O(n tracks) | futuro (Story 0.7) |
 | `indexRebuild()` | Manuale + dopo migrazione | Ricostruisce indici Dexie se corrotti | Lock lungo | futuro (Story 0.7) |
 | `fastCheck()` | Ad ogni boot (in dev/prod) | Smoke test: DB apribile, schema version corretto, indici funzionanti | < 100ms | futuro (Story 0.7) |
@@ -12598,7 +12909,7 @@ Operazioni di manutenzione che il client deve supportare per garantire salute de
 
 ### 12.2 Scheduling
 
-- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`) — `recount` attivo (Story 0.2), `rekey` futuro (Story 0.7)
+- **On-trigger**: `recount` e `rekey` dopo ogni import (transazione `02§7`) — `recount` attivo (Story 0.2), `rekey` attivo (Story 1.4)
 - **Scheduled**: `orphanCleanup`, `quotaCheck` via Web Worker in `requestIdleCallback`, max 5 min/giorno (cumulativo con `§7.1`) — futuro (Story 0.7)
 - **Manuale**: `indexRebuild`, `compact` da pulsante in Settings → "Manutenzione DB" (raro) — futuro (Story 0.7)
 - **Boot**: `fastCheck` sempre; se fallisce, l'app entra in read-only mode (`§5`) — futuro (Story 0.7)
@@ -14347,10 +14658,12 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: Job `rekey()` che, quando un track acquisisce ISRC/MBID via enrichment, aggiorna il `canonicalKey` da `fuzzy:...` a `isrc:...` o `mbid:...`, unendo duplicati.
 
+**Stato**: ✅ **COMPLETATA** (Sessione 53) — issue #160 chiusa con `status:done`. `rekey()` esisteva già dalla Story 0.7 (PR #39) ma era **incompleta** rispetto agli AC e senza i test: la Sessione 53 ne ha chiuso i buchi — **transazione Dexie** (atomicità, MIG-1), **sopravvivenza deterministica** (la track più vecchia), **riorientamento** di `library`/`playlistItems`/`features`, **unione** di `platformIds`/`generi`/finestra temporale, **ISRC normalizzato** in maiuscole, contatori delegati a `recount()` (MIG-4). 9 test nuovi (`packages/core/src/db/__tests__/rekey.test.ts`).
+
 **Acceptance criteria**:
-- [ ] Due track con `fuzzy:` diverso ma stesso ISRC → una sola track dopo `rekey()`
-- [ ] `listenCount` aggregato correttamente
-- [ ] `listen_events.trackId` riorientato
+- [x] Due track con `fuzzy:` diverso ma stesso ISRC → una sola track dopo `rekey()`
+- [x] `listenCount` aggregato correttamente
+- [x] `listen_events.trackId` riorientato
 
 **Spec**: `02-DATA-SCHEMA.md` §5-6
 
@@ -14577,7 +14890,6 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
 | 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
@@ -14624,6 +14936,7 @@ Ogni story deve avere label GitHub:
 | 1.6.8 | Sessione 51 (2026-10-26, issue #144) | **Spec Last.fm approvata**: `03-ADAPTERS/lastfm.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** (PR #154, merge `b3130a9`); issue #144 chiusa con `status:done`. Nessuna modifica di contenuto: D-LF.0…D-LF.8 ratificate come formulate, percorso web auth confermato alla Story 1.5. **Story 1.3 completa dei suoi tre pezzi** (spec ListenBrainz 🟢 v1.0, ADR-0010 🟢 v1.0, spec Last.fm 🟢 v1.0) → aperta l'issue di implementazione (#155, `agent-ready`, size L). Allineati: sezione Story 1.3 (`**Stato**:` e `**Spec**:`), riga roadmap, `01-PLATFORMS.md` §3.7 (riferimento spec), `docs/state/sessions/50-*` e `51-*` |
 | 1.6.9 | Sessione 51 (2026-10-26, issue #144) | **Doc-sync post-merge della PR #156** (merge `6ec71bb`): il frontmatter di `docs/state/sessions/51-*` riflette il merge reale (`pr: 156`, `merged_commit: 6ec71bb`, `state: 🟢`, `merged: true`) — era rimasto `pr: null` / `merged: false` perché la sessione è stata scritta dalla stessa PR che la chiude. Story 1.3 allineata: `issue: 155`, T1.3.7 ✅, "Stato attuale" aggiornato. Sezioni legacy riallineate: `11-BACKLOG.md` (`**Stato**:` della 1.3 + riga roadmap, che dichiaravano ancora «manca l'issue di implementazione»), `docs/INDEX.md` (riga `03-ADAPTERS/`, versioni dei documenti, "Prossimo passo tecnico"), `docs/18-DEV-LOG.md` §17 (entry delle sessioni 50-51). La riga di changelog 1.6.8 è stata riportata dentro la tabella: era stata appesa **dopo** il blocco `AGGREGATE-STORIES-*`, fuori dal suo schema |
 | 1.6.10 | Sessione 52 (2026-10-26, issue #155) | **Story 1.3 completata**: implementazione della issue #155 (adapter ListenBrainz file-only + adapter Last.fm ibrido API/file). Sezione Story 1.3 `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"** (la fonte di verità per le completate è il blocco aggregato, ADR-0008); `docs/state/stories/1.3-*` → `status: done`. Documenti allineati: `02-DATA-SCHEMA.md` §6.1 (tabella `settings`, schema Dexie v4) + §3.1 (i due campi additivi del contratto) + changelog 1.4; `03-ADAPTERS/lastfm.md` §3.1.0 (la chiave fra i due percorsi) + changelog 1.1; `03-ADAPTERS/listenbrainz.md` §3.1.3 (i due campi che il contratto non aveva) + changelog 1.1; `08-COPY-I18N.md` §2.12e (`settings.lastfm.*`) + changelog 0.4; `docs/18-DEV-LOG.md` §18; `docs/state/sessions/52-*` (nuova); `scripts/generate-bundle.ps1` `$files` (6 fixture + sessione 52); `docs/BUNDLE.md` rigenerato |
+| 1.6.11 | Sessione 53 (2026-10-26, issue #160) | **Story 1.4 completata**: `rekey()` (promozione dedup post-enrichment) resa completa e testata. La funzione esisteva dalla Story 0.7 (PR #39) ma non soddisfava gli AC: ora è **transazionale** (MIG-1), a **sopravvivenza deterministica** (la track più vecchia), **riorienta** `library`/`playlistItems`/`features`, **unisce** `platformIds`/`generi`/finestra temporale, **normalizza** l'ISRC in maiuscole e delega i contatori a `recount()` (MIG-4). Sezione Story 1.4: `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"**. `docs/state/stories/1.4-dedup-promotion.md` (nuova). Documenti allineati: `05-ARCHITECTURE.md` §12.1/§12.2 (`rekey()` da "futuro" a "attivo") + changelog 1.2; `16-OPERATIONS.md` §2.3 (forma del report) + changelog 0.2; `02-DATA-SCHEMA.md` §5 (nota sul job) + changelog 1.5; `docs/INDEX.md` (righe `05`, `11`, `16`, `18-DEV-LOG`, "Prossimo passo tecnico"); `docs/18-DEV-LOG.md` §19 + changelog 1.9; `docs/state/sessions/53-story-1-4-rekey.md` (nuova); `docs/BUNDLE.md` rigenerato |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -16472,7 +16785,7 @@ Operazioni di manutenzione che il client deve supportare per garantire salute de
 import { rekey, orphanCleanup, recount, fastCheck, quotaCheck, runHealthCheck } from '@ls/core/db';
 ```
 
-- `rekey(db)` → `{ promoted, merged, listenedMoved }`
+- `rekey(db)` → `{ tracksScanned, promoted, merged, listenedMoved, libraryRepointed, playlistItemsRepointed, featuresRepointed }` (Story 1.4: transazionale, sopravvivenza deterministica, contatori delegati a `recount()`)
 - `orphanCleanup(db)` → `{ tracksRemoved, artistsRemoved }`
 - `recount(db)` → `Promise<void>` (già attivo da Story 0.2)
 - `fastCheck(db, expectedSchemaVersion)` → `FastCheckResult { ok, schemaVersion, error, durationMs }`
@@ -16558,6 +16871,7 @@ Schema attuale: **versione 3** (v1 → v2 aggiunge `searchQueries`; v2 → v3 ag
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-19 | Prima versione (Story 0.7, PR #39): §1 Update playbook, §2 Maintenance playbook, §3 Migrazioni, §4 Diagnosi & remediation; API `@ls/core/db` (rekey, orphanCleanup, fastCheck, quotaCheck, runHealthCheck); script `scripts/generate-version.mjs`. |
+| 0.2 | 2026-10-26 | **§2.3**: la forma del report di `rekey(db)` è estesa (Story 1.4): `promoted`, `merged`, `listenedMoved` (Story 0.7) + `tracksScanned`, `libraryRepointed`, `playlistItemsRepointed`, `featuresRepointed`. Il job è ora transazionale, a sopravvivenza deterministica (la track più vecchia), riorienta i riferimenti non udibili e delega i contatori a `recount()` (MIG-4) |
 
 
 
