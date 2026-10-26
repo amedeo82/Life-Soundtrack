@@ -1,6 +1,6 @@
 # Adapter Last.fm
 
-> Status: 🟡 DRAFT · Versione 0.1 · Ultima modifica: Sessione 50 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 51 (2026-10-26)
 > Piattaforma: Last.fm (Audioscrobbler / FM3)
 > Sede legale: UK (Bournemouth)
 > Tier: **S** (hub di scrobbling) · Priorità MVP: **sì**
@@ -403,3 +403,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 50 (2026-10-26) | Prima stesura (issue #144). Decisioni D-LF.0…D-LF.8 (Boss, Sessione 47) e vincoli di ADR-0010. API, limiti, error codes, flusso web auth e formati CSV verificati su fonte (doc ufficiale Last.fm, doc non ufficiale, depth.fm, multi-scrobbler). Correzione di una premessa errata della issue: `limit` **max 200** (doc ufficiale), non 1000; e il campo `date` **manca** per il brano in riproduzione. Aggiunto il percorso **ibrido** (API + file) con `eventKey` normalizzato al minuto su tutti i percorsi, per evitare duplicati al re-import misto. Dichiarati i gap: md5 per `api_sig` (rinviato a 1.5), `loved` senza campo nel modello, `album.mbid` scartato |
+| 1.0 | Sessione 51 (2026-10-26) | 🟢 APPROVED · ratifica del Boss al merge della PR #154 (`b3130a9`) — nessuna modifica di contenuto. Le decisioni D-LF.0…D-LF.8 sono ratificate come formulate; il percorso web auth per la `sk` resta **differito alla Story 1.5** (E.LF.21) |

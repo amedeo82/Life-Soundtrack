@@ -99,7 +99,7 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - **Campi**: `name` (titolo), `artist` (stringa con `extended=0`, oggetto `{mbid, #text}` con `extended=1`), `album` (`{mbid, #text}`), `date` (`{uts, #text}`, **inizio** dello scrobble), `loved` (solo `extended=1`), `mbid` del brano (solo `extended=1`, **frequentemente vuoto**), `image[]`, `url`, `streamable`
 - **Limiti**: nessun contesto (device/luogo/IP/paese); **nessuna durata** in `getRecentTracks` → `durationBucketMs` sempre 0; rate limit **non pubblicato** (client-side ~5 req/s, nessun header di rate limit); il brano in riproduzione (`@attr.nowplaying`) **non ha `date`**
 - **Errori**: 6 parametri · 8 operazione · 9 `sk` · 10 `api_key` · 11 offline · 13 firma · 16 temporaneo · 17 profilo non pubblico · 26 key sospesa · 29 rate limit
-- **Spec**: `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 50)
+- **Spec**: `03-ADAPTERS/lastfm.md` (v1.0, 🟢 APPROVED, Sessione 50)
 
 ### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
