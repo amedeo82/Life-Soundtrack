@@ -265,17 +265,37 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
-### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:M]` `[DEP:0.3]`
+### Story 1.3 — Adapter Last.fm + ListenBrainz `[PHASE-1]` `[AREA:adapter]` `[PRI:I]` `[SIZE:L]` `[DEP:0.3]`
 
-**Descrizione**: Import storico via API (paginazione completa).
+**Stato**: 🟡 **IN CORSO** — spec in stesura (issue #145 ListenBrainz, #144 Last.fm; entrambe `agent-ready`)
 
-**Acceptance criteria**:
-- [ ] Paginazione su tutto lo storico
-- [ ] Rate limit rispettato (5 req/s per Last.fm)
-- [ ] MBID da ListenBrainz alimenta DEDUP-2
-- [ ] Test con mock API
+**Descrizione**: Import dello storico di ascolto da Last.fm e ListenBrainz.
 
-**Spec**: `01-PLATFORMS.md` §3.7-3.8
+**Nota di perimetro (Sessione 47)**: la descrizione originaria era "Import storico via API (paginazione completa)" per entrambe. La verifica delle due piattaforme ha corretto il perimetro:
+
+- **ListenBrainz**: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/1/user/{username}/listens` — la documentazione ufficiale prescrive l'export per lo storico completo e **sconsiglia esplicitamente** di paginare tutto lo storico sull'endpoint listens. Il percorso `/listens` (query incrementali) resta alla Story 1.5
+- **Last.fm**: l'export GDPR non è utilizzabile dall'app (procedura manuale via email, e risulta incompleto per eventi) → il canale è l'API `user.getRecentTracks`, che richiede un **proxy CORS** configurabile dall'utente (l'API non emette header CORS) e una `api_key` **per-utente** (i ToS §4.4 vietano una key condivisa che serva N utenti)
+
+**Acceptance criteria** (fonte: `03-ADAPTERS/listenbrainz.md` §8, issue #145):
+- [ ] Detection su ZIP con `listens/*.jsonl` + `user.json`, e su JSONL sciolto
+- [ ] Parsing streaming JSONL con scanner dedicato (bounded memory, una riga malformata non abortisce lo stream)
+- [ ] `eventKey = listenbrainz:<listened_at>|<recording_msid>` (D-LB.2 — il msid **non** è univoco per ascolto)
+- [ ] Semantica temporale uniforme: `timestamp = startedAt = listened_at*1000`, `durationMs = 0`, bias dichiarato
+- [ ] DEDUP-1 (ISRC) e DEDUP-2 (MBID da `mbid_mapping`) attivati alla prima importazione; bucket DEDUP-3 sempre 0
+- [ ] `feedback.jsonl` e `pinned_recording.jsonl` scartati con warning; `user_name` e `inserted_at` mai persistiti
+- [ ] Fixture `fixtures/synthetic-history/listenbrainz-sample.jsonl` con i 20 casi della spec §8
+
+**Acceptance criteria** (fonte: `03-ADAPTERS/lastfm.md`, issue #144):
+- [ ] Percorso API via proxy CORS configurabile dall'utente + percorso file (export di terze parti)
+- [ ] `api_key` per-utente (mai embedded nel bundle) + web auth per la `sk` (route callback in-app)
+- [ ] `eventKey` normalizzato al **minuto** su entrambi i percorsi (il re-import misto non duplica)
+- [ ] Rate limiter client-side (~5 req/s) con backoff su `11/16/29/429/5xx` e `AbortSignal`
+- [ ] Contratto adapter: metodo opzionale `parseRemote?()` → **richiede ADR-0010** su `05§4`
+- [ ] Test con mock API (paginazione, rate limit, errori 6/8/9/10/26)
+
+**Spec**: `03-ADAPTERS/listenbrainz.md` (v0.1, 🟡 DRAFT, Sessione 47) · `03-ADAPTERS/lastfm.md` (v0.1, 🟡 DRAFT, Sessione 47) · `01-PLATFORMS.md` §3.7, §3.8
+
+**Issue**: #145 (ListenBrainz) · #144 (Last.fm) · **Size**: `L` — ricalibrata da `M` in Sessione 47: 2 fonti dati, 2 API, autenticazione, rate limiting, mock API e 2 percorsi per adapter
 
 ---
 
@@ -297,19 +317,24 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 **Descrizione**: Sorgente continua di ascolti tramite hub di scrobbling. Risolve il vuoto V4 dell'audit.
 
 **Task**:
-- T1.5.1 — Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)
-- T1.5.2 — Adapter ListenBrainz (recupero storico via API `/1/user/{username}/listens`)
+- T1.5.1 — ~~Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)~~ → **spostato alla Story 1.3** (Sessione 47)
+- T1.5.2 — ~~Adapter ListenBrainz (recupero storico via API `/1/user/{username}/listens`)~~ → **spostato alla Story 1.3** (Sessione 47); nella 1.5 resta il **percorso incrementale** `/listens` con cursore `max_ts`
 - T1.5.3 — Adapter Maloja self-hosted (server opzionale, scope futuro Fase 2)
 - T1.5.4 — Toggle `PrivacySettings.scrobbleHubs` per abilitare l'invio
-- T1.5.5 — Rispetto rate limit (Last.fm ~5 req/s, ListenBrainz ragionevole)
+- T1.5.5 — Rispetto rate limit (Last.fm ~5 req/s, ListenBrainz 1 req/s con User Token)
+- T1.5.6 — **Invio scrobble** verso i hub (la Story 1.5 è nata come "fonte continua" ma non aveva il task di scrittura)
+
+**Nota (Sessione 47)**: T1.5.1 e T1.5.2 duplicavano esattamente il recupero storico della Story 1.3. La 1.5 è stata **ridimensionata** a *invio scrobble + sync continua + toggle*, riusando gli adapter creati nella 1.3. La duplicazione è il motivo per cui la 1.3 è passata da `M` a `L` in un colpo solo.
 
 **Acceptance criteria**:
-- [ ] Storico completo recuperato (paginazione)
+- [ ] Sync continua incrementale (non re-import da zero): cursore `max_ts` / `min_ts`
 - [ ] MBID da ListenBrainz alimenta DEDUP-2 e genera `track.genres` via MusicBrainz lookup
 - [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura)
+- [ ] Invio scrobble funzionante verso i hub configurati
 - [ ] Test con mock API
+- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144)
 
-**Spec**: `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8
+**Spec**: `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8; `03-ADAPTERS/listenbrainz.md` §3.4
 
 ---
 
@@ -508,9 +533,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.3 Adapter Last.fm + ListenBrainz | ⬚ TODO | 0.3 ✅ — spec adapter mancanti (`01-PLATFORMS.md` §3.7-3.8 🟡 DRAFT): servono `03-ADAPTERS/lastfm.md` e `listenbrainz.md` |
+| 1 | 1.3 Adapter Last.fm + ListenBrainz | 🟡 IN CORSO | spec in stesura (issue #145 ListenBrainz, #144 Last.fm, entrambe `agent-ready`); `[SIZE:M]` → `[SIZE:L]`; perimetro corretto: ListenBrainz via **export API** (non paginazione), Last.fm via API + proxy CORS |
 | 1 | 1.4 Dedup promozione post-enrichment | ⬚ TODO | 0.3 ✅ — spec `02-DATA-SCHEMA.md` §5-6 🟢 APPROVED |
-| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | T1.5.3 (Maloja self-hosted) è scope Fase 2 |
+| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -550,6 +575,7 @@ Ogni story deve avere label GitHub:
 | 1.6.2 | Sessione 40 (2026-10-21, issue #98) | Note Story 1.1 (spec 🟢 APPROVED, PR #97) e 1.2 (spec scritta, 🟡 DRAFT) nella tabella roadmap |
 | 1.6.3 | Sessione 42 (2026-10-22, issue #132) | Story 1.2: spec 🟢 APPROVED v1.0 (PR #134), `[SIZE:M]` → `[SIZE:L]`, sezione Story riscritta con gli AC della spec §8 e `**Spec**:` che punta a `03-ADAPTERS/apple-music.md` (prima puntava solo a `01-PLATFORMS.md` §3.3, censito come più povero dell'export reale). Nota roadmap allineata. Tabella "Stato di avanzamento": la 1.2 resta `⬚ TODO` perché lo stato vive in `docs/state/stories/1.2-adapter-apple-music.md` |
 | 1.6.4 | Sessione 45 (2026-10-22, issue #140) | Story 1.2 ✅ DONE (PR #139, merge `2e1a4cc`): rimossa dalla tabella roadmap e allineata la riga `**Stato**:` della sezione Story. Il doc-sync era rimasto fuori da `main` perché `auto-state-aggregate.yml` falliva con `non-fast-forward` (vedi `docs/state/sessions/45-*.md`). Nota della 1.3 aggiornata: le specifiche adapter Last.fm / ListenBrainz **non esistono** (`01-PLATFORMS.md` §3.7-3.8 è 🟡 DRAFT), quindi la 1.3 non è lavorabile finché non vengono scritte e ratificate |
+| 1.6.5 | Sessione 47 (2026-10-26, issue #145, #144) | **Story 1.3 perimetro corretto**: la descrizione "Import storico via API (paginazione completa)" era imprecisa per entrambe le piattaforme. **ListenBrainz**: il canale MVP è l'**export API** (ZIP con JSONL) — la doc prescrive l'export per lo storico completo e sconsiglia la paginazione `/listens` (che resta alla 1.5). **Last.fm**: l'export GDPR non è utilizzabile dall'app → canale API con proxy CORS e `api_key` per-utente (ToS §4.4). `[SIZE:M]` → `[SIZE:L]`. **Story 1.5 ridimensionata**: T1.5.1/T1.5.2 duplicavano la 1.3 → la 1.5 resta invio scrobble + sync continua + toggle, con il task di scrittura T1.5.6 aggiunto. Sezione Story 1.3 riscritta con gli AC delle due spec; nota roadmap allineata |
 
 <!-- AGGREGATE-STORIES-START -->
 

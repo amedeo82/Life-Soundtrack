@@ -21,9 +21,14 @@
 | YouTube Takeout | `time` | inizio azione | `timestamp = time + durata stimata` (durata da catalogo) |
 | Apple | `Event End Timestamp` (Play Activity CSV) | fine segmento di ascolto | `timestamp = Event End Timestamp`, `startedAt = Event Start Timestamp`; legacy: `Play Date UTC` (inizio) → `timestamp = playDate + durationMs` |
 | Last.fm | `date` | inizio scrobble | `timestamp = date + durationMs` |
-| ListenBrainz | `listened_at` | inizio listen | `timestamp = listened_at*1000 + durationMs` |
+| ListenBrainz | `listened_at` | inizio listen | `timestamp = startedAt = listened_at*1000`; `durationMs` = 0 (costante) — la durata **ascoltata** è sconosciuta e `additional_info.duration_ms` (opzionale, durata catalogo) va solo sulla `Track` come hint, mai nel bucket DEDUP-3 |
 
 Regola: `timestamp` = **momento in cui l'ascolto si conclude**; `startedAt` = inizio. Le analisi temporali usano `startedAt` quando disponibile, altrimenti `timestamp`.
+
+**Deroghe dichiarate** (fonti senza durata affidabile — la regola "fine ascolto" non è applicabile):
+
+- **YouTube Takeout**: il Takeout non fornisce la durata e il catalogo non è ancora disponibile all'import → `timestamp = startedAt = time`, `durationMs = 0`. Bias dichiarato in `03-ADAPTERS/youtube-music.md` §5; ricalcolo post-enrichment come contratto.
+- **ListenBrainz**: `additional_info.duration_ms` è **opzionale** e rappresenta la durata *catalogo*, non quella ascoltata. Applicare la regola alla lettera produrrebbe due semantiche temporali diverse nello stesso import (fine dell'ascolto quando il dato c'è, inizio quando manca) e sposterebbe il confine `day` per una parte degli eventi. Si adotta una semantica **uniforme**: `timestamp = startedAt = listened_at*1000`, `durationMs = 0`. Dettagli in `03-ADAPTERS/listenbrainz.md` §5.
 
 ## 3. Interfacce TypeScript (source of truth)
 
@@ -324,6 +329,22 @@ Priorità per `canonicalKey`, valutata al momento dell'upsert:
 - **Contro**: può separare la stessa registrazione quando la durata differisce tra piattaforme (remaster, rounding ±1-2s)
 - **Mitigazione**: DEDUP-1/2 (ISRC/MBID) catturano comunque quelle; il bucket da 2s assorbe il rounding
 - **Rischio accettato**: registrazioni omonime con durata identica restano fuse (documentato; mitigabile in futuro con fuzzy a 3 campi: nome+artista+durata+album)
+
+### Sorgenti con durata non affidabile (documentato)
+
+Alcune fonti espongono una durata **catalogo** opzionale anziché la durata **effettivamente ascoltata**: se il dato è presente solo su una parte degli ascolti dello stesso brano, usarlo nel bucket produce **due `Track` distinte per lo stesso brano** — l'esatto opposto di ciò che la dedup persegue.
+
+**Regola**: per queste fonti il bucket DEDUP-3 è **sempre 0** e la durata va conservata sulla `Track` come dato catalogo, **fuori** dal calcolo del `canonicalKey`.
+
+| Fonte | Campo durata | Stato | Trattamento |
+|-------|--------------|-------|------------|
+| YouTube Music | — | assente | `durationMs` = 0, nessun hint (E.YT.5) |
+| ListenBrainz | `additional_info.duration_ms` | **opzionale**, durata catalogo | bucket **sempre 0**; la durata va sulla `Track` come hint (`03-ADAPTERS/listenbrainz.md` §3.1.1, D7) |
+| Last.fm | — | assente da `getRecentTracks` | `durationMs` = 0 (`03-ADAPTERS/lastfm.md` D-LF.4) |
+
+La priorità DEDUP-1/2 (ISRC/MBID) compensa: ListenBrainz espone gli identificativi nativi, quindi la maggior parte dei suoi brani non transita da DEDUP-3.
+
+**Nota**: la regola "bucket sempre 0" è una decisione di **spec adapter**, non una modifica del modello. `durationBucketMs` continua a valere `Math.floor(durationMs / 2000) * 2000` per le fonti che hanno una durata affidabile.
 
 Comportamento upsert:
 - Se esiste track con stesso canonicalKey → aggiungi platformId, aggiorna lastSeenAt e contatori

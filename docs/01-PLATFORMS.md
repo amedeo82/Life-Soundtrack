@@ -98,9 +98,13 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 
 ### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
-- **API pubblica senza limiti restrittivi**: `/1/user/{username}/listens` paginabile
-- **Campi**: `listened_at`, `track_metadata.track_name/artist_name/release_name`, `additional_info`: **`recording_mbid`, `artist_mbids`, `release_mbid`, `isrc`, `spotify_id`, `youtube_id`, `origin_url`**
+- **Export API (canale MVP)**: `POST /1/export/` → poll → download ZIP con `listens/<mese>.jsonl`. **La doc prescrive l'export per lo storico completo** e sconsiglia esplicitamente di paginare `/1/user/{username}/listens` su tutto lo storico. Un export pending per utente, range opzionale `{start_time, end_time}`, snapshot **non atomico** (generato da dati live), valido 30 giorni
+- **API pubblica** (canale incrementale, Story 1.5): `/1/user/{username}/listens` con `count` (max 1000) e cursore `max_ts`/`min_ts`; rate limit 1 req/s (più alto con User Token valido), header `X-RateLimit-*`; User-Agent **obbligatorio**; HTTPS only; CORS abilitato
+- **Campi**: `listened_at` (**inizio** dell'ascolto), `inserted_at` (inserimento nel DB, non usato), `recording_msid`, `track_metadata.track_name/artist_name/release_name`, `additional_info`: **`recording_mbid`, `artist_mbids`, `release_mbid`, `isrc`, `duration_ms`** (opzionale, durata *catalogo*), `spotify_id`, `youtube_id`, `origin_url`; `mbid_mapping` (risoluzione server-side)
+- **Limiti**: nessun contesto (device/luogo/IP/paese); nessuna durata ascoltata; `duration_ms` opzionale → lo stesso brano può avere bucket DEDUP-3 diversi (vedi `02§5` "Sorgenti con durata non affidabile")
+- **Attenzione**: `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto → due ascolti dello stesso brano condividono lo stesso msid. L'identità dell'evento è la tupla `(listened_at, recording_msid)`
 - **Valore unico**: identificativi MusicBrainz/ISRC nativi → normalizzazione perfetta tra piattaforme
+- **Spec**: `03-ADAPTERS/listenbrainz.md` (v0.1, 🟡 DRAFT, Sessione 47)
 
 ### 3.9 Self-hosted (Plex, Navidrome, Subsonic, Roon) — Tier S+ per nicchia
 
@@ -144,6 +148,9 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | E8 | SoundCloud | Export limitato a ~1000 brani; brani rimossi nel tempo | Storico troncato | Dichiarare limite all'utente; integrare con scrobbling |
 | E9 | Apple | Export legacy senza contesto; il Play Activity 2026.2 ha invece durata/skip/shuffle/device | Due generazioni di schema in circolazione | Adapter con alias 2026.2/legacy (`03-ADAPTERS/apple-music.md` §10); campi contestuali degradati sui legacy |
 | E10 | Tutte | Fusi orari: `ts` Spotify è UTC; Apple "Play Date UTC"; Takeout locale+UTC | Timeline sfalsata | Normalizzare tutto a UTC in fase di parse |
+| E11 | ListenBrainz | `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto | Due ascolti dello stesso brano condividono lo stesso msid → un `eventKey` basato solo sul msid perderebbe eventi | `eventKey = listened_at + '\|' + recording_msid` (`03-ADAPTERS/listenbrainz.md` §3.1, D-LB.2) |
+| E12 | ListenBrainz | `additional_info.duration_ms` opzionale (durata *catalogo*, non ascoltata) | Lo stesso brano in bucket DEDUP-3 diversi → **due Track** per lo stesso brano | Bucket DEDUP-3 **sempre 0** per questa fonte; la durata va sulla `Track` come hint, fuori dal `canonicalKey` (`02§5`, `03-ADAPTERS/listenbrainz.md` §3.3) |
+| E13 | ListenBrainz | L'export è generato **asincronicamente da dati live**, non da uno snapshot atomico | Un re-export successivo può aggiungere eventi ma non rimuovere quelli cancellati lato server | Riconciliazione via `eventKey`; il limite è dichiarato all'utente (`info.exportNotSnapshot`) |
 
 ## 6. Strategia di integrazione MVP
 
@@ -162,3 +169,4 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.2 | Sessione 9 (2026-10-15) | Audit: E1 validata in S2 (riferimento `03-ADAPTERS/spotify.md`); chiarita distinzione `PlatformId` (sorgenti) vs `scrobbleHubs` (Subsonic/Roon/Maloja) (M4) |
 | 0.3 | Sessione 39 (2026-10-21) | §3.2 allineato al formato Takeout verificato (header, subtitles, nomi localizzati, assenza durata); cross-ref spec adapter `03-ADAPTERS/youtube-music.md` (issue #96) |
 | 0.4 | Sessione 40 (2026-10-21, issue #98) | §3.3 riscritto sul Play Activity 2026.2 (~143 colonne: durate, End Reason Type, shuffle/offline, device, ISO Country; `Artist Name` assente); tabella §4 Apple aggiornata (durata ✅, dispositivo/IP/skip ⚠️); E9 rettificata (due generazioni di schema); cross-ref spec adapter `03-ADAPTERS/apple-music.md` |
+| 0.5 | Sessione 47 (2026-10-26, issue #145) | §3.8 riscritto: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/listens` — la doc prescrive l'export per lo storico completo e ne sconsiglia la paginazione; corretti i limiti (`MAX_ITEMS_PER_GET` = 1000, non 100; rate limit 1 req/s, User-Agent obbligatorio, HTTPS only, CORS verificato sul sorgente); `recording_msid` documentato come hash dei metadati (**non** ID univoco per ascolto); `duration_ms` opzionale e di durata catalogo → E12; export non atomico → E13; cross-ref spec adapter `03-ADAPTERS/listenbrainz.md` |
