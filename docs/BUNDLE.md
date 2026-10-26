@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 13:20
+> Data: 2026-10-26 13:38
 > Totale file: 73
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -6612,7 +6612,8 @@ v1.0 (PR #146, merge `6d66233`, 2026-10-26) e l'issue **#145** è chiusa con
 **Last.fm** ha un blocker architetturale: il percorso API non ha un `File` da
 passare a `parse(input: Blob)`. La decisione D-LF.8 è un metodo **opzionale**
 `parseRemote?()` su `PlatformAdapter` → richiede **ADR-0010** su `05§4` (che è
-🟢 APPROVED). L'ADR va scritto prima dell'approvazione della spec Last.fm.
+🟢 APPROVED). L'ADR è tracciato dall'issue **#148** (`needs-spec`): va approvato
+prima dell'approvazione della spec Last.fm.
 
 ## Task
 
@@ -6627,8 +6628,8 @@ passare a `parse(input: Blob)`. La decisione D-LF.8 è un metodo **opzionale**
       (E.LB.1…E.LB.19)
 - [ ] T1.3.4 — Spec Last.fm `03-ADAPTERS/lastfm.md` v0.1 (🟡 DRAFT)
 - [ ] T1.3.5 — **ADR-0010**: estensione di `05§4` con il metodo opzionale
-      `parseRemote?()` (D-LF.8) — issue separata, da aprire prima dell'approvazione
-      della spec Last.fm
+      `parseRemote?()` (D-LF.8) — issue **#148** (aperta, `needs-spec`): da
+      approvare prima dell'approvazione della spec Last.fm
 - [ ] T1.3.6 — Approvazione Boss della spec Last.fm (promozione 🟡 DRAFT → 🟢 APPROVED)
 - [ ] T1.3.7 — Issue di implementazione della 1.3 (`agent-ready`, size L)
 
