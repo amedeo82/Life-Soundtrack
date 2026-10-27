@@ -171,3 +171,23 @@ jobs:
       # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
       - name: Lazy-state in sync (ADR-0008)
         run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+
+      # Issue #161: il README dichiarava 8 piattaforme importabili (Deezer, Tidal,
+      # SoundCloud inesistenti) e funzionalita' non implementate (audio features,
+      # analisi, mood, ricordi), mentre i merge delle Story 1.2 e 1.3 non l'avevano
+      # toccato: nessun gate confrontava la prosa con il codice, quindi il drift era
+      # silenzioso e la pipeline restava verde. Il gate e' READ-ONLY (non genera e
+      # non scrive): confronta l'elenco delle piattaforme del README con
+      # `ACTIVE_PLATFORMS` + le classi adapter, vieta le capability non implementate
+      # fuori dalla sezione roadmap, e vieta i conteggi duplicati in prosa.
+      # Fall-closed: exit 1 = drift, exit 2 = errore di ambiente.
+      - name: Fatti del README in sync con il codice (issue #161)
+        run: node scripts/check-readme-facts.mjs
+
+      # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
+      # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
+      # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
+      # (lesson 43-1): senza questo test, un refactor del gate potrebbe renderlo
+      # fail-open senza che nessuno se ne accorga.
+      - name: Gate "fatti del README" fail-closed (issue #161)
+        run: bash scripts/test-readme-facts-gate.sh

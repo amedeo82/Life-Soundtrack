@@ -1,6 +1,6 @@
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Status: 🟡 DRAFT · Versione 0.9 · Sessione 54 (2026-10-27, issue #161) · gate "fatti del README"
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -543,6 +543,48 @@ bash scripts/test-workflow-writer-ordering.sh           # scenario negativo (gat
 
 ---
 
+### 9.8f Gate "fatti del README" (issue #161)
+
+Un gate che confronta **la prosa** con **il codice**. Il README è la prima cosa che legge chi arriva nel repository: se dichiara piattaforme e funzionalità che non esistono, il danno non è estetico — è una promessa falsa all'utente.
+
+**Il drift chiuso dall'issue #161** (rilevato il 2026-10-27, Sessione 54):
+
+| Cosa il README dichiarava | Cosa il codice diceva |
+|---|---|
+| 8 piattaforme importabili (Spotify, YouTube Music, Apple Music, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz) | 5 piattaforme in `ACTIVE_PLATFORMS`: Deezer, Tidal e SoundCloud non hanno né factory né classe adapter |
+| "Arricchisce i dati con audio features (valence, energy, danceability, BPM)" | nessun adapter di enrichment: capability dell'EPIC 4 |
+| "timeline emotiva … analisi, mood, ricordi" | nessuna analisi implementata: capability dell'EPIC 2 |
+| `EPIC 0 — Fundamentals: 7/7` in prosa | conteggio duplicato: la fonte è il blocco aggregato di `docs/INDEX.md` |
+
+La prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14) perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e **nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice**. Pipeline verde, README falso: il fallimento silenzioso.
+
+**La causa radice è di ownership, non di tooling.** `README.md` è un file **ibrido**: il blocco `<!-- AGGREGATE-NEXT-STEP-* -->` è generato da `scripts/aggregate-state.ps1`, tutto il resto è prosa scritta a mano. La regola di ownership dei file globali (D.38.1) copriva i file aggregati, non il README: nessuna tabella dichiarava chi scrive cosa, quindi nessuno se ne sentiva responsabile. La regola nuova è in `AGENTS.md` §"Ownership del `README.md`" (D.161.1).
+
+**Il gate** (`scripts/check-readme-facts.mjs`) è **read-only**:
+
+| Controllo | Fonte di verità |
+|---|---|
+| Le piattaforme dichiarate = le piattaforme attive | `ACTIVE_PLATFORMS` in `apps/web/src/onboarding/OnboardingRouter.tsx` |
+| Ogni piattaforma attiva ha una factory adapter | `ADAPTER_FACTORIES` (stesso file) |
+| Ogni factory punta a una classe che esiste | `packages/core/src/adapters/` |
+| Nessuna capability non implementata dichiarata come presente | elenco delle capability EPIC 2 / EPIC 4 |
+| Nessun conteggio duplicato in prosa | i blocchi aggregati di `docs/INDEX.md` / `docs/11-BACKLOG.md` |
+
+Exit code: 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed: un file sorgente mancante blocca, non lascia passare).
+
+**Perché non ha una modalità di scrittura**: `README.md` è già un target di `scripts/aggregate-state.ps1`. Un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dall'issue #149 (bundle e aggregato che si sovrascrivono a vicenda). Il gate **verifica**, non **genera**: l'unico scrittore resta l'agente, e il gate dice se ha sbagliato.
+
+```bash
+node scripts/check-readme-facts.mjs     # verifica
+bash scripts/test-readme-facts-gate.sh  # scenario negativo (T1..T9)
+```
+
+Il test (`scripts/test-readme-facts-gate.sh`) copre i 9 casi in cui il gate deve uscire **1** o **2**: piattaforma inesistente, piattaforma mancante, factory senza adapter, classe inesistente, capability fuori roadmap, capability dentro la roadmap (nessun falso positivo), conteggio duplicato, README mancante. Un gate che passa sempre non è un gate (lesson 43-1).
+
+**Regola generale**: una prosa che dichiara fatti verificabili dal codice è **codice**, e va verificata da un gate come il resto. Il README non è un documento di opinione: "8 piattaforme" è un'affermazione falsificabile, e il costo di non verificarla è la perdita di fiducia di chi arriva nel repository per la prima volta.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -591,7 +633,7 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 
 ### 9.10 Gate reali di `ci.yml`
 
-Elenco dei 15 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-22 (Sessione 45, issue #140; la Sessione 44 ne aveva verificati 14). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
+Elenco dei 18 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-27 (Sessione 54, issue #161; la Sessione 47 ne aveva verificati 16). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
 
 | # | Step | Bloccante | Issue |
 |---|------|:---------:|-------|
@@ -611,10 +653,12 @@ Elenco dei 15 step nominati del job `quality`, verificato riga per riga contro `
 | 14 | `Residui post-merge` | sì | #76 |
 | 15 | `Label in sync con AGENTS.md` | sì | #110 |
 | 16 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+| 17 | **`Fatti del README in sync con il codice`** (`check-readme-facts.mjs`) | sì | **#161** |
+| 18 | **`Gate "fatti del README" fail-closed`** | sì | **#161** |
 
 I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
 
-**Verifica**: i 16 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
+**Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
 
 ---
 
@@ -664,3 +708,4 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 0.6 | Sessione 45 (2026-10-22) | **§9.8d sync con `origin/main` dei writer di `main`** (issue #140): `auto-state-aggregate.yml` falliva su ogni merge con `! [rejected] main -> main (non-fast-forward)` (run `39802198985`, `39803721229`). Causa: il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit; quando `auto-bundle.yml` ha gia' pushato sullo stesso merge, il secondo writer pusha da un checkout stale e viene rifiutato. Conseguenza: il meccanismo di auto-guarimento di ADR-0008 era spento e il doc-sync della Story 1.2 (PR #139) non e' mai arrivato su `main` — `README.md` continuava ad annunciarla come «prossima story». Fallimento silenzioso: merge verde, `ci.yml` verde, blocchi aggregati indietro, nessun gate che lo segnali. Fix: step «Sync con origin/main» (`git fetch` + `git rebase`, fallback `git reset --hard`), identico a quello del companion. Difesa: gate in `scripts/validate-workflows.mjs` (bloccante in CI dal #73) che richiede un sync **prima** di ogni `git push origin main` e non tassa i writer di branch + `scripts/test-workflow-push-sync.sh` (T1..T5, 15 assert, con scenario negativo e verifica dell'ordine). **§9.10** aggiornata: 15 step, con il nuovo gate in posizione 12. |
 | 0.7 | Sessione 46 (2026-10-22) | **§9.11 idempotenza dei generatori: riuso del timestamp** (issue #142): `aggregate-state.ps1` ristampava `Get-Date` nel blocco inventory a ogni run, e la normalizzazione esisteva solo in `-Check` — quindi la garanzia «il timestamp viene riusato quando il blocco non cambia altro» (issue #70) era documentata ma non implementata nel path di scrittura. Sintomo: il gate `Aggregator deterministico` fallito sul run `39818043647` (16:55 → 16:56), cioè un gate bloccante dipendente dall'orologio, ~5-10% dei run. Difetto gemello in `generate-bundle.ps1`: `Build-Bundle -Timestamp` esisteva ma non veniva passato, e `auto-bundle` committava un nuovo `> Data:` dopo ogni merge a contenuto identico (nessun gate lo vedeva). Fix: `Get-NormalizedBlock` + `Sync-MutableTimestamp` in `Apply-Blocks`; in `generate-bundle.ps1` confronto su tutto il bundle con sostituzione **solo** sulla prima `> Data:` (i documenti inclusi ne hanno una propria, `docs/AUDIT-2026-10-15.md`). Test con **sentinel seminato** invece di confronto temporale (`test-aggregate-determinism.sh` T11, `test-bundle-check-idempotent.sh` T7), entrambi con contro-prova «contenuto cambiato → il campo si aggiorna»; `test-bundle-check-idempotent.sh` guadagna anche `ps_path`, che ripara T4-T6 su Windows (path POSIX non risolti dal call operator di pwsh). |
 | 0.8 | Sessione 47 (2026-10-26) | **§9.8e ordinamento fra i due writer di `main`** (issue #149): il concurrency group `post-merge-main` serializza i *run* ma non ne impone l'ordine*, e `auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica — quindi può copiare blocchi aggregati stale. Caso reale: merge della PR #147 (2026-10-26T12:50Z), `auto-bundle` alle 12:50:23 e `auto-state-aggregate` alle 12:50:55: il bundle copiò i blocchi vecchi, il guard idempotente scrisse «già in sync» e non committò, e il drift di 6 righe in `docs/BUNDLE.md` restò silenzioso (il gate sul bundle è warning-only). Il commit del bot non poteva auto-correggerlo: il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso. Fix (opzione A, Boss): trigger `workflow_run` su `auto-state-aggregate` in `auto-bundle.yml` — è agganciato alla *conclusione* del workflow, quindi sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda; con esso il bundle rigenera **sempre** dopo che l'aggregate ha committato. Difesa: quarto sub-gate in `scripts/validate-workflows.mjs` (verifica la presenza del trigger **e** che il nome in `workflows:` combaci con il `name:` reale del producer, altrimenti il trigger non scatterebbe mai, in silenzio) + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert, scenario negativo). **§9.10** aggiornata: 16 step, con il nuovo gate in posizione 13. |
+| 0.9 | Sessione 54 (2026-10-27) | **§9.8f gate "fatti del README"** (issue #161): il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti), audio features e analisi/mood/ricordi come feature presenti, e un conteggio di stato duplicato — la prosa era quella del bootstrap (`ebdab9d`, 2026-10-14) perché i merge delle Story 1.2 e 1.3 non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice (pipeline verde, README falso). Causa radice di **ownership**, non di tooling: `README.md` è ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) e non era in nessuna tabella di ownership; la regola nuova è in `AGENTS.md` §"Ownership del `README.md`" (D.161.1). Gate: `scripts/check-readme-facts.mjs`, **read-only** (0 = in sync, 1 = drift, 2 = errore di ambiente): confronta l'elenco delle piattaforme con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` + le classi in `packages/core/src/adapters/`, vieta le capability EPIC 2/EPIC 4 fuori dalla roadmap, vieta i conteggi duplicati in prosa. **Nessuna modalità di scrittura**: il README è già target di `aggregate-state.ps1`, e un secondo writer riprodurrebbe la race fra i writer di `main` risolta dal #149. Test di scenario negativo `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert). **§9.10** aggiornata: 18 step, con i due nuovi gate in posizione 17 e 18 (entrambi bloccanti). |

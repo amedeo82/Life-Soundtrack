@@ -112,6 +112,7 @@ $files = @(
     "docs/state/sessions/51-lastfm-spec-approval.md",
     "docs/state/sessions/52-story-1-3-implementation.md",
     "docs/state/sessions/53-story-1-4-rekey.md",
+    "docs/state/sessions/54-readme-maintenance.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.4-dedup-promotion.md",
     "scripts/aggregate-state.ps1",
@@ -213,6 +214,18 @@ $files = @(
     # che il gate esca 1; un caso verifica che il nome dichiarato nel trigger
     # combaci con il `name:` reale del producer.
     "scripts/test-workflow-writer-ordering.sh",
+    # Gate "fatti del README" (Sessione 54 / issue #161): confronta la prosa del
+    # README con il codice (ACTIVE_PLATFORMS + ADAPTER_FACTORIES + le classi in
+    # packages/core/src/adapters), vieta le capability non implementate fuori dalla
+    # sezione roadmap e vieta i conteggi duplicati in prosa. READ-ONLY: il README
+    # e' gia' target di aggregate-state.ps1, e un secondo writer riprodurrebbe la
+    # race fra i writer di main risolta dal #149. Gate bloccante in CI.
+    "scripts/check-readme-facts.mjs",
+    # Test di regressione del gate "fatti del README" (issue #161). T1..T9: lo
+    # scenario negativo reintroduce il drift in una fixture e verifica che il
+    # gate esca 1; un caso verifica che la capability nella roadmap non sia un
+    # falso positivo e uno che il file mancante dia exit 2 (errore di ambiente).
+    "scripts/test-readme-facts-gate.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",

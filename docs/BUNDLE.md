@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-26 21:49
-> Totale file: 89
+> Data: 2026-10-27 14:14
+> Totale file: 92
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.26 — Sessione 47 (2026-10-26)**
+> **Versione 1.27 — Sessione 54 (2026-10-27)**
 
 ---
 
@@ -569,6 +569,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
 - [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
 - [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
+- [ ] **Se ho toccato `README.md` o le piattaforme importabili**: la prosa del README è in sync con il codice — `node scripts/check-readme-facts.mjs` esce 0 (gate bloccante in CI, issue #161). Le capability non implementate stanno nella sezione roadmap, i conteggi non sono duplicati in prosa (vedi §"Ownership del `README.md`")
 - [ ] **Il body della PR contiene la keyword di chiusura come riga nuda e una sola volta** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick, fuori dalle checklist e senza ripetizioni**, così GitHub chiude l'issue al merge e `auto-status-done` non transiziona issue non collegate (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
@@ -588,6 +589,7 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Stato di una story | `docs/INDEX.md` §"Dettaglio (legacy)" (conteggi, "Prossimo step tecnico") — i blocchi `AGGREGATE-*` si aggiornano da soli |
 | Chiusura di una sessione | `docs/state/sessions/<N>-<slug>.md` (fonte) + `docs/SESSIONS.md` (blocco aggregato, automatico) |
 | Aggiunta/rimozione di un documento in `docs/` | `docs/INDEX.md` §"Documenti fondamentali" / "Documenti di supporto" + `scripts/generate-bundle.ps1` (`$files`) |
+| Aggiunta/rimozione di una **piattaforma importabile** o di una capability | `README.md` §"Cosa c'è oggi" / §"Roadmap" — la **prosa**, mai il blocco `AGGREGATE-NEXT-STEP-*` (vedi §"Ownership del `README.md`") |
 | Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) + **eliminare il branch remoto** (vedi §"♻️ Pulizia branch post-merge") |
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
@@ -686,7 +688,9 @@ git push
         ├── generate-fixtures.mjs    ← generator deterministico dei fixture (10-TESTING §3.5)
         ├── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
         ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
-        └── test-post-merge.sh      ← 9 scenari (T1..T9) su repo temporanei che coprono E3/E4/E5/F7 + squash
+        ├── check-readme-facts.mjs  ← gate read-only: confronta la prosa del README con il codice (issue #161)
+        ├── test-post-merge.sh      ← 9 scenari (T1..T9) su repo temporanei che coprono E3/E4/E5/F7 + squash
+        └── test-readme-facts-gate.sh ← 9 scenari (T1..T9) sul gate "fatti del README" (issue #161)
 
 ## 🚀 Primo task di un agente
 
@@ -862,6 +866,31 @@ Esempi di obbligo concreto:
 
 **Anti-pattern ricorrente**: duplicare in una sezione legacy un dato che un blocco aggregato già fornisce. Ogni duplicazione è una seconda fonte di verità che invecchia. Se il dato è già in un blocco `AGGREGATE-*`, **mettici un puntatore, non una copia**.
 
+### Ownership del `README.md` *(D.161.1 — vincolante, Sessione 54, issue #161)*
+
+`README.md` è **ibrido**: un file con due owner diversi nella stessa pagina. La confusione fra i due è la causa radice del drift chiuso dall'issue #161 — al 2026-10-27 il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti) e capability non implementate (audio features, analisi, mood, ricordi), i merge delle Story 1.2 e 1.3 non l'avevano toccato, e i 16 gate di `ci.yml` restavano verdi lo stesso.
+
+| Parte | Chi la scrive | Regola |
+|---|---|---|
+| Blocco `<!-- AGGREGATE-NEXT-STEP-* -->` | **solo** `scripts/aggregate-state.ps1`, post-merge | **Mai** a mano (V3, ADR-0008, issue #127) |
+| **Tutta la prosa** (le altre sezioni) | **l'agente**, nella stessa PR che cambia i fatti che dichiarano | Sottoposta al gate `scripts/check-readme-facts.mjs` (read-only) |
+
+**Le regole della prosa**:
+
+- L'elenco delle piattaforme importabili (sottosezione "Piattaforme importabili" dentro "Cosa c'è oggi") deve corrispondere **esattamente** a `ACTIVE_PLATFORMS` in `apps/web/src/onboarding/OnboardingRouter.tsx`; ogni piattaforma deve avere una factory in `ADAPTER_FACTORIES` e una classe adapter in `packages/core/src/adapters/`.
+- Una capability **non ancora implementata** (analisi, mood, ricordi, enrichment, audio features, valence, danceability, BPM) si dichiara **solo nella sezione roadmap**, mai come feature presente.
+- La sezione "Stato del progetto" **non duplica conteggi** (`N/M`): i conteggi vivono nei blocchi aggregati di `docs/INDEX.md` e `docs/11-BACKLOG.md`; lì si mette un **puntatore**, non una copia (è l'anti-pattern sopra, applicato al README).
+- Il blocco NEXT-STEP elenca la prima story non completata **fra quelle già migrate** in `docs/state/stories/`: non è la roadmap. La prosa del README deve rendere esplicito questo punto, perché il lettore del repository cerca lì la "prossima story".
+
+**Il gate**: `node scripts/check-readme-facts.mjs` — exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). È **bloccante in CI** (`.github/workflows/ci.yml`, step "Fatti del README in sync con il codice") e **non ha una modalità di scrittura**: è un verificatore, non un generatore. Un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dall'issue #149.
+
+```bash
+node scripts/check-readme-facts.mjs     # verifica la prosa contro il codice
+bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
+```
+
+**Quando scatta**: ogni PR che aggiunge o rimuove una piattaforma importabile, o che dichiara una capability nel README, aggiorna la prosa del README **nella stessa PR** e fa passare il gate. Una PR che cambia `ACTIVE_PLATFORMS` senza toccare il README è una PR che il gate blocca — è esattamente il drift che l'issue #161 ha chiuso.
+
 ### Target V1 + V2 + V3
 
 | File | Blocchi gestiti | Versione |
@@ -984,7 +1013,16 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.26 — i due writer di `main` erano serializzati ma **non ordinati** (Sessione 47, issue #149). Il concurrency group `post-merge-main` garantisce che i due run non si sovrappongano, ma non quale dei due ottenga prima il lock: e l'ordine è essenziale, perché `auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `auto-bundle` alle 12:50:23, `auto-state-aggregate` alle 12:50:55. Il bundle copiò i blocchi aggregati ancora vecchi, il guard idempotente (`git diff --quiet`) scrisse «già in sync» e non committò nulla; l'agregate committò dopo, e la copia dentro `docs/BUNDLE.md` restò stale di 6 righe. Drift **silenzioso**: il gate CI sul bundle è warning-only, la pipeline restava verde. Il commit del bot non poteva auto-correggerlo, perché il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso (le sole eccezioni documentate sono `workflow_dispatch` e `repository_dispatch`). Aggiunti:
+*Ultimo aggiornamento: v1.27 — la prosa del `README.md` non aveva **nessun gate** (Sessione 54, issue #161). Il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti: le classi adapter non ci sono), audio features e analisi/mood/ricordi come feature presenti (nessuna implementata), e un conteggio di stato (`EPIC 0 7/7`) che l'aggregatore ricalcola altrove; la prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14), perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice. Fallimento **silenzioso**: pipeline verde, README falso. La causa radice era di ownership: `README.md` è un file ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) ma la regola di D.38.1 copriva solo i file globali, e il README non era in nessuna tabella di ownership. Aggiunti:
+- `scripts/check-readme-facts.mjs` (nuovo): gate **read-only** che confronta la prosa del README con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` (`apps/web/src/onboarding/OnboardingRouter.tsx`) e con le classi in `packages/core/src/adapters/`; vieta le capability non implementate fuori dalla sezione roadmap; vieta i conteggi duplicati in prosa. Exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). **Nessuna modalità di scrittura**: un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dal #149
+- `scripts/test-readme-facts-gate.sh` (nuovo): 9 scenari (T1..T9) con fixture — piattaforma inesistente, piattaforma mancante, factory senza adapter, classe inesistente, capability fuori roadmap, capability nella roadmap (nessun falso positivo), conteggio duplicato, README mancante (exit 2). Un gate che passa sempre non è un gate (lesson 43-1)
+- `.github/workflows/ci.yml`: due step bloccanti — «Fatti del README in sync con il codice (issue #161)» e «Gate "fatti del README" fail-closed (issue #161)», quest'ultimo è lo scenario negativo del precedente
+- §"Ownership del `README.md`" (D.161.1, nuova): la tabella dei due owner, le quattro regole della prosa, il perimetro del gate e il fatto che scatta a ogni PR che cambia le piattaforme importabili; checklist di auto-revisione PR e tabella di sincronizzazione al merge aggiornate di conseguenza
+- `README.md`: prosa riscritta — "Cosa c'è oggi" con l'elenco delle 5 piattaforme reali, "Roadmap" separata (dove stanno i claim futuri), "Stato del progetto" ridotta a puntatori (nessun conteggio duplicato), sezioni "Sviluppo locale" e "Come contribuire"
+- `docs/12-DEVOPS.md` §9.8f (nuova) + §9.10 aggiornata a 18 step; `docs/11-BACKLOG.md` allineato (`EPIC 1 — Import core: 2/5` → `3/5`); `docs/18-DEV-LOG.md` §20; `docs/state/sessions/54-readme-maintenance.md` (nuova)
+- `scripts/generate-bundle.ps1`: `$files` += i due nuovi script; `docs/BUNDLE.md` rigenerato nella stessa PR
+
+*Precedente v1.26 — i due writer di `main` erano serializzati ma **non ordinati** (Sessione 47, issue #149). Il concurrency group `post-merge-main` garantisce che i due run non si sovrappongono, ma non quale dei due ottenga prima il lock: e l'ordine è essenziale, perché `auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `auto-bundle` alle 12:50:23, `auto-state-aggregate` alle 12:50:55. Il bundle copiò i blocchi aggregati ancora vecchi, il guard idempotente (`git diff --quiet`) scrisse «già in sync» e non committò nulla; l'agregate committò dopo, e la copia dentro `docs/BUNDLE.md` restò stale di 6 righe. Drift **silenzioso**: il gate CI sul bundle è warning-only, la pipeline restava verde. Il commit del bot non poteva auto-correggerlo, perché il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso (le sole eccezioni documentate sono `workflow_dispatch` e `repository_dispatch`). Aggiunti:
 - `.github/workflows/auto-bundle.yml`: trigger `workflow_run` su `auto-state-aggregate` (`types: [completed]`) — è agganciato alla **conclusione** del workflow, non a un push, quindi sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda. Con esso il bundle rigenera **sempre** una seconda volta dopo che l'aggregate ha committato: la copia embedded è allineata ai sorgente, indipendentemente dall'ordine di scheduling
 - `scripts/validate-workflows.mjs`: quinto controllo `checkWriterOrdering` — verifica che `auto-bundle.yml` dichiari il trigger `workflow_run` **e** che il nome in `workflows:` combaci con il `name:` reale del producer (una disallineazione non dà errore: il trigger semplicemente non scatterebbe mai, in silenzio)
 - `scripts/test-workflow-writer-ordering.sh` (nuovo, T1..T5, 6 assert): T2 rimuove il blocco `workflow_run:` e verifica che il gate esca 1, T3 un trigger su un altro workflow, T4 il `name:` del producer disallineato (il caso silenzioso), T5 il producer assente — un gate che passa sempre non è un gate (lesson 43-1)
@@ -1101,17 +1139,35 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi delle piattaforme di streaming musicale in un **diario di vita personale**: una timeline emotiva, contestuale e narrativa che racconta la storia dell'utente attraverso la musica che ha ascoltato.
 
-## ✨ Cosa fa
+## ✨ Cosa c'è oggi
 
-- Importa la cronologia di ascolto da Spotify, YouTube Music, Apple Music, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz
-- Arricchisce i dati con audio features (valence, energy, danceability, BPM)
-- Ricostruisce la tua vita musicale in **ere**, **mood**, **eventi**, **ricordi**
-- Ti permette di rivivere i periodi della tua vita attraverso la loro colonna sonora
-- **Tutto resta sul tuo dispositivo**: elaborazione locale, privacy-first, GDPR-compliant
+- Importa la cronologia di ascolto dai servizi supportati e la normalizza in un database locale (Dexie/IndexedDB)
+- **Tutto resta sul tuo dispositivo**: elaborazione locale, privacy-first
+- PWA installabile, onboarding guidato con anteprima del risultato
+- Interfaccia in italiano e inglese, strumenti di manutenzione e di purga del database
+
+### Piattaforme importabili
+
+- `spotify` — Spotify (export ZIP/JSON)
+- `youtube_music` — YouTube Music (export HTML)
+- `apple_music` — Apple Music (CSV)
+- `listenbrainz` — ListenBrainz (export API: ZIP/JSONL)
+- `lastfm` — Last.fm (file CSV/JSON, oppure API via proxy CORS con credenziali locali)
+
+## 🗺️ Roadmap
+
+Non ancora implementato — la roadmap completa, con lo stato di ogni story, è in [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md):
+
+- **Analisi** (EPIC 2): mood giornaliero, ere, eventi e ricordi
+- **Enrichment** (EPIC 4): audio features (valence, energy, danceability, BPM), artwork, generi
+- **Altre piattaforme**: Deezer, Tidal, SoundCloud ([`docs/01-PLATFORMS.md`](docs/01-PLATFORMS.md) §3.4-3.6)
+- **Scrobbling continuo** (Story 1.5): hub Last.fm / ListenBrainz / Maloja
 
 ## 🏗️ Stato del progetto
 
-EPIC 0 (Fase 0 tecnica) è completo 7/7: monorepo + toolchain + schema DB + adapter Spotify + UI import + PWA + i18n + operations runbook. Lo **stato globale** corrente è gestito dai blocchi aggregati di `docs/INDEX.md` (`<!-- AGGREGATE-INDEX-STATUS-* -->`) e di `docs/11-BACKLOG.md` (`<!-- AGGREGATE-STORIES-* -->`) — quelli, e non questo README, sono la **fonte di verità** per `status`, conteggi e roadmap. La sezione `11-BACKLOG.md` §"Stato di avanzamento — roadmap delle story non ancora completate" elenca cosa manca.
+Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) è gestito dai blocchi aggregati di [`docs/INDEX.md`](docs/INDEX.md) (`<!-- AGGREGATE-INDEX-STATUS-* -->`) e di [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md) (`<!-- AGGREGATE-STORIES-* -->`) — quelli, e non questo README, sono la **fonte di verità** per `status`, conteggi e roadmap. La sezione `11-BACKLOG.md` §"Stato di avanzamento — roadmap delle story non ancora completate" elenca cosa manca.
+
+> Le sezioni legacy dei documenti globali (stato, conteggi, versioni, riferimenti) vanno allineate nella **stessa PR** che cambia i fatti che dichiarano: vedi [`AGENTS.md`](AGENTS.md) §"Chi può scrivere cosa nei file globali".
 
 ### Prossima story
 
@@ -1126,6 +1182,8 @@ Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per l
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
+Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md`.
+
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)
 - Visione: [`docs/00-VISION.md`](docs/00-VISION.md)
@@ -1133,11 +1191,28 @@ Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per l
 - Diario implementazione: [`docs/18-DEV-LOG.md`](docs/18-DEV-LOG.md)
 - Note sviluppo: [`docs/17-DEV-NOTES.md`](docs/17-DEV-NOTES.md)
 
+## 🛠️ Sviluppo locale
+
+Requisiti: Node ≥ 20, pnpm 9 (pinnato in `packageManager`).
+
+```bash
+pnpm install          # installa il workspace e attiva i git hook
+pnpm run lint         # ESLint 9 flat config
+pnpm run typecheck    # tsc --noEmit
+pnpm run test         # Vitest
+pnpm run build        # tsc + vite build
+pnpm run e2e          # Playwright (prima volta: pnpm exec playwright install chromium)
+```
+
+Non esiste ancora uno script `dev`: per un preview locale esegui `pnpm run build` e poi `pnpm --filter @ls/web exec vite preview`.
+
+> ⚠️ **PowerShell 5.1 (Windows senza `pwsh`)**: i gate `scripts/aggregate-state.ps1 -Check` e `scripts/generate-bundle.ps1 -Check` richiedono il **singolo trattino**. Il doppio trattino (`--check`) esce 2 con il call operator `&` a partire da issue #104; vedi `docs/12-DEVOPS.md §9.7b`.
+
 ## 🤝 Come contribuire
 
 Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lavorare sul codice, leggi **`AGENTS.md`** come primo file, poi segui l'ordine di lettura lì indicato. Per dettagli sull'implementazione corrente, leggi `docs/17-DEV-NOTES.md` (pitfalls consolidati) e `docs/18-DEV-LOG.md` (registro cronologico per story).
 
-> ⚠️ **PowerShell 5.1 (Windows senza `pwsh`)**: i gate `scripts/*.ps1 -Check` richiedono il **singolo trattino**. `--check` esce 2 a partire da issue #104; vedi `docs/12-DEVOPS.md §9.7b`.
+> La prosa di questo README è verificata dal gate CI `scripts/check-readme-facts.mjs` (issue #161): l'elenco delle piattaforme deve corrispondere al codice (`ACTIVE_PLATFORMS` + adapter), le funzionalità non ancora implementate devono stare nella sezione roadmap, e la sezione stato non duplica conteggi già presenti nei blocchi aggregati.
 
 ## 📜 Licenza
 
@@ -1382,8 +1457,8 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 52 (v1.6.10) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 9 (v0.2) | CI/CD, deploy, self-hosting |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 54 (v1.6.12) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 54 (v0.9) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml` |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 49 (0001-0010) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
@@ -1396,11 +1471,11 @@ Apache License
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.26 | Protocollo per agenti (Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.27 | Protocollo per agenti (Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v1.9 | Diario cronologico per story: problemi, fix, lesson learned |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.0 | Diario cronologico per story: problemi, fix, lesson learned |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -1508,8 +1583,8 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.4, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.10, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
-- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `17` ora v0.2, `18` ora v1.8, `19` introdotto in Sessione 41
+- **Documenti APPROVED**: 7 documenti (`02` v1.4, `03-ADAPTERS/`, `05` v1.1, `10`, `11` v1.6.12, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
+- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `12` ora v0.9, `17` ora v0.2, `18` ora v2.0, `19` introdotto in Sessione 41
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -6087,8 +6162,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 1.6
-> Ultima modifica: 2026-10-26 — §16 Issue #149 (race fra i due writer di `main`)
+> Versione: 2.0
+> Ultima modifica: 2026-10-27 — §20 Issue #161 (gate "fatti del README")
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -6701,9 +6776,34 @@ mezzo del lavoro.
 
 ---
 
-## Changelog
+## 20. Issue #161 — Gate "fatti del README" (Sessione 54)
 
-## Changelog
+**Tipo**: implementazione (`feat`) — issue #161, claim `kilo-HP-ELITEBOOK-8enl`
+**Branch**: `feat/161-readme-maintenance` (worktree `ls-161-readme-maintenance`)
+**PR**: #164 (aperta su `main` dalla worktree)
+**Data**: 2026-10-27
+**Stato**: ✅ completata — gate read-only (15 check, 0 falliti), test di regressione T1..T9 (12 assert), 2 step bloccanti in `ci.yml`
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 20-1 | P | Il README dichiarava **8 piattaforme importabili** (Deezer, Tidal, SoundCloud inesistenti: nessuna factory, nessuna classe adapter) e presentava audio features (valence, energy, danceability, BPM) e analisi/mood/ricordi come feature già implementate | La prosa era quella del bootstrap (`ebdab9d`, 2026-10-14): i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README, e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice — pipeline verde, README falso | Gate read-only `scripts/check-readme-facts.mjs`: l'elenco delle piattaforme dichiarate deve corrispondere a `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` + alle classi in `packages/core/src/adapters/`; le capability non implementate si dichiarano solo nella roadmap | `scripts/check-readme-facts.mjs`, `README.md` §"Cosa c'è oggi" |
+| 20-2 | P | Lo stesso README dichiarava `EPIC 0 — Fundamentals: 7/7` **in prosa**, duplicando un dato che i blocchi aggregati già forniscono | L'anti-pattern "metti un puntatore, non una copia" (D.38.1) valeva per i file globali, non per il README: un file ibrido senza tabella di ownership, quindi senza nessuno responsabile | La sezione "Stato del progetto" del README è ridotta a puntatori; il gate vieta i conteggi `\d+/\d+` in prosa; la regola di ownership è in `AGENTS.md` §"Ownership del `README.md`" (D.161.1) | `README.md` §"Stato del progetto", `AGENTS.md` |
+| 20-3 | P+L | Il blocco NEXT-STEP del README annunciava una story "non ancora migrata" come «prossima story», ma il blocco elenca **solo** le story già migrate in `docs/state/stories/` | Il blocco è generato (`Build-Block-NextStep` legge `docs/state/stories/*.md`) e la prosa intorno non dichiarava che il suo perimetro è più stretto della roadmap | La prosa dichiara esplicitamente il perimetro del blocco; il gate **esclude** i blocchi aggregati dal controllo delle capability — il titolo di una story "Dedup promozione post-enrichment" contiene "enrichment", e un falso positivo avrebbe reso il gate insostenibile | `README.md` §"Prossima story", `scripts/aggregate-state.ps1` |
+| 20-4 | P | Il gate, alla prima esecuzione, **passava sempre**: non intercettava nessun drift | Due difetti: il parsing di `ADAPTER_FACTORIES` si fermava al primo `=` (l'annotazione di tipo `() => PlatformAdapter` ne contiene uno), e la regex della sezione "oggi" non riconosceva `Cosa c'è oggi` (apostrofo curly, `’`) | Parsing con conteggio delle graffe (`extractObjectBody`); sezione riconosciuta da `/cosa c['’][eè] oggi\|cosa fa/i`. Il gate è nato con i suoi difetti ed è stato corretto **prima** di entrare in CI | `scripts/check-readme-facts.mjs` |
+| 20-5 | P | Il test di scenario negativo T2 non falliva: la riga `deezer` era **appesa** in fondo al file, quindi finiva nella sezione "Licenza", fuori dal perimetro che il gate legge | La fixture appendeva invece di inserire: la prova falliva per il motivo sbagliato — e, per il motivo sbagliato, **passava** | T2 inserisce la riga dentro la sottosezione "Piattaforme importabili". Una prova che non prova niente è peggio di una prova assente: maschera il gate invece di proteggerlo | `scripts/test-readme-facts-gate.sh` (T2) |
+
+**Lesson learned sintetica**: la documentazione che dichiara fatti verificabili dal codice **è** codice — "8 piattaforme" è un'affermazione falsificabile, e il suo costo non è estetico. Il drift più pericoloso non è quello che un gate blocca, è quello che **nessuno guarda**: la prosa di un file che tutti aprono e nessuno aggiorna, in un repository dove i gate confrontano i *formati* ma non i *fatti*. E la lezione operativa che tiene insieme il resto: quando un artefatto ha **due owner** (un blocco generato e una prosa scritta a mano), la tabella degli owner deve esistere **prima** del gate che li confronta — senza di essa il gate verifica una cosa che nessuno si sente responsabile di correggere.
+
+### Link utili
+
+- Branch: `feat/161-readme-maintenance` (worktree `ls-161-readme-maintenance`)
+- Issue: **#161** (`size:M`, `area:devops`, `docs`)
+- Gate: `scripts/check-readme-facts.mjs` · test: `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert)
+- CI: `.github/workflows/ci.yml` — step 17 «Fatti del README in sync con il codice», step 18 «Gate "fatti del README" fail-closed»
+- Regola di ownership: `AGENTS.md` §"Ownership del `README.md`" (D.161.1) · `docs/12-DEVOPS.md` §9.8f
+- Sessione: `docs/state/sessions/54-readme-maintenance.md`
+
+---
 
 ## Changelog
 
@@ -6728,6 +6828,7 @@ mezzo del lavoro.
 | 1.7 | 2026-10-26 (issue #144, #155) | **§17 Story 1.3 — Spec adapter Last.fm + approvazione** (Sessioni 50-51, claim `kilo-HP-ELITEBOOK-lb47`, PR #154 merge `b3130a9` + PR #156 merge `6ec71bb`): 6 lesson (17-1 il limite di `limit` va letto nella doc ufficiale dell'endpoint (200), non dedotto per analogia; 17-2 `artist` ha due forme a seconda di `extended=1` → accessor unico; 17-3 normalizzare l'`eventKey` al minuto su **tutti** i percorsi, se no il re-import misto API+file duplica ogni scrobble; 17-4 la normalizzazione è un contratto fra i due adapter → una sola issue (#155); 17-5 `api_sig` richiede md5, la Web Crypto non ce l'ha → web auth differito alla Story 1.5; 17-6 una sessione chiusa dalla PR che l'ha prodotta non può conoscere il proprio merge → doc-sync in PR separata, e le sezioni legacy dei file globali invecchiano in silenzio). Spec `03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED; issue #144 chiusa, issue di implementazione #155 aperta (`agent-ready`, size L) |
 | 1.8 | 2026-10-26 (issue #155) | **§18 Story 1.3 — Implementazione adapter Last.fm + ListenBrainz** (Sessione 52, claim kilo-HP-ELITEBOOK-lb52, PR #158): 7 lesson (18-1 il contratto degli adapter non aveva un campo per l'MBID dell'artista: aggiunti due campi **additivi e opzionali**; 18-2 durata catalogo e durata dell'evento erano la stessa cosa: bucket DEDUP-3 sempre 0 e durata solo hint sulla Track; 18-3 la formula dell'eventKey della spec non poteva soddisfare E.LF.4 ed E.LF.16/E.LF.19 insieme — il MBID entra nella chiave solo quando disambigua; 18-4 skipped = null non è rappresentabile nel modello: dichiarato; 18-5 la normalizzazione al minuto agisce sull'evento, non sulla riga del file: gap noto; 18-6 il test di un contratto di rete deve asserire il **comportamento** (ritmo, backoff, numero di tentativi), non l'assenza di eccezioni; 18-7 il detect del JSON pretty-printed non può guardare la prima riga). 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi |
 | 1.9 | 2026-10-26 (issue #160) | **§19 Story 1.4 — `rekey()`: promozione dedup post-enrichment** (Sessione 53, claim `kilo-HP-ELITEBOOK-lb53`): 4 lesson (19-1 una funzione "già implementata" può essere una story aperta — `rekey()` esisteva dalla Story 0.7 ed era esportata e descritta in tre documenti, ma nessun test copriva il caso centrale e tre AC non erano soddisfatti; 19-2 il tipo del DB non protegge da una query sbagliata: `where('[platform+trackId]')` compila, passa il typecheck e fallisce a runtime *dentro* la transazione, spezzando il DB; 19-3 un contatore denormalizzato sommato a mano è una seconda fonte di verità (`5 + 3 = 8` con 2 ascolti reali): `recount()` (MIG-4) va delegato, non ricalcolato; 19-4 il determinismo è una proprietà del *dato*: quale delle due track sopravviveva dipendeva dall'ordine di enumerazione di IndexedDB). 9 test nuovi; 208 test core + 81 web verdi |
+| 2.0 | 2026-10-27 (issue #161) | **§20 Issue #161 — Gate "fatti del README"** (Sessione 54, claim `kilo-HP-ELITEBOOK-8enl`, PR #164): 5 lesson (20-1 la prosa dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti) e capability non implementate come presenti: nessuno dei 16 gate confrontava la prosa con il codice, quindi i merge delle Story 1.2 e 1.3 non avevano toccato il README e la pipeline era rimasta verde; 20-2 il conteggio `EPIC 0 — 7/7` in prosa duplicava un dato dei blocchi aggregati: l'anti-pattern "puntatore, non copia" non copriva il README, che è un file ibrido senza tabella di ownership; 20-3 il blocco NEXT-STEP elenca solo le story già migrate in `docs/state/stories/`, e la prosa non lo diceva — un gate che pretendeva la verità da un blocco generato avrebbe prodotto un falso positivo sul titolo di una story; 20-4 il gate, alla prima esecuzione, passava sempre: il parsing di `ADAPTER_FACTORIES` si fermava al primo `=` (l'annotazione di tipo ne contiene uno) e la regex non riconosceva l'apostrofo curly di "Cosa c'è oggi"; 20-5 il test di scenario negativo T2 appendeva la riga `deezer` in fondo al file, fuori dal perimetro che il gate legge: la prova passava per il motivo sbagliato, e una prova che non prova niente maschera il gate invece di proteggerlo). Gate read-only `scripts/check-readme-facts.mjs` (15 check, 0 = in sync / 1 = drift / 2 = errore di ambiente) + test `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert) + 2 step bloccanti in `ci.yml` (posizioni 17-18); regola di ownership in `AGENTS.md` §"Ownership del `README.md`" (D.161.1); `12-DEVOPS.md` §9.8f nuova + §9.10 a 18 step; rimossi i 3 heading "## Changelog" duplicati (artefatto dei merge precedenti) |
 
 ---
 
@@ -6928,6 +7029,9 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/49-adr-0010-remote-source.md` | ✅ creata | Sessione 49 (issue #148): ADR-0010 — sorgenti remote nel contratto `PlatformAdapter` (`parseRemote?()` + `RemoteSource`), `05§4.1` |
 | `state/sessions/50-lastfm-adapter-spec.md` | ✅ creata | Sessione 50 (issue #144): spec adapter Last.fm — percorso API via proxy CORS + percorso file, `eventKey` al minuto |
 | `state/sessions/51-lastfm-spec-approval.md` | ✅ creata | Sessione 51 (issue #144): promozione spec Last.fm a 🟢 APPROVED v1.0 + apertura dell'issue di implementazione della Story 1.3 (#155) |
+| `state/sessions/52-story-1-3-implementation.md` | ✅ creata | Sessione 52 (issue #155): implementazione degli adapter Last.fm + ListenBrainz (Story 1.3) |
+| `state/sessions/53-story-1-4-rekey.md` | ✅ creata | Sessione 53 (issue #160): `rekey()` — promozione dedup post-enrichment (Story 1.4) |
+| `state/sessions/54-readme-maintenance.md` | ✅ creata | Sessione 54 (issue #161): gate read-only "fatti del README" (prosa confrontata con il codice) + ownership del `README.md` (`AGENTS.md` D.161.1) |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -8275,6 +8379,124 @@ promossa e una tornata `fuzzy:`. Il bug non si vedeva nei test preesistenti
 - Prossimo passo: **Story 1.5** (scrobbling hub + sync continua, con il percorso
   incrementale ListenBrainz e il web auth Last.fm: `api_sig` richiede md5, che il
   repo non espone)
+
+
+
+===== FILE: docs/state/sessions/54-readme-maintenance.md =====
+
+---
+number: 54
+title: "Gate \"fatti del README\" — la prosa confrontata con il codice (issue #161)"
+date: 2026-10-27
+state: 🟢
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/161-readme-maintenance
+pr: 164
+claim: kilo-HP-ELITEBOOK-8enl
+cross_refs: [161, 127, 149]
+tags: [devops, docs, feat]
+---
+
+# Sessione 54 — Gate "fatti del README" (issue #161)
+
+## Sintesi
+
+Il `README.md` dichiarava **8 piattaforme importabili** (Spotify, YouTube Music,
+Apple Music, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz) mentre nel codice
+esistono **5** adapter: Deezer, Tidal e SoundCloud non hanno né factory in
+`ADAPTER_FACTORIES` né classe in `packages/core/src/adapters/`. Dichiarava inoltre
+come **presenti** audio features (valence, energy, danceability, BPM) e
+analisi/mood/ricordi, che sono capability degli EPIC 4 e 2, non ancora implementate;
+e duplicava in prosa un conteggio di stato (`EPIC 0 — Fundamentals: 7/7`) che i
+blocchi aggregati forniscono già.
+
+La prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14): i merge delle
+Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README, e nessuno dei
+16 gate di `ci.yml` confrontava la prosa con il codice. **Pipeline verde, README
+falso**: il fallimento silenzioso.
+
+La Sessione 54 chiude il drift su tre livelli: **ownership** (la regola che dice
+chi scrive cosa nel README), **gate** (il confronto automatico prosa ↔ codice) e
+**prosa** (la riscrittura del README).
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.54.1 | Il gate è **read-only**: verifica, non genera | `README.md` è già un target di `scripts/aggregate-state.ps1` (blocco `AGGREGATE-NEXT-STEP-*`). Un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dall'issue #149. Il gate dice se l'agente ha sbagliato; l'unico scrittore resta l'agente |
+| D.54.2 | Le capability non implementate sono ammesse **solo** nella sezione roadmap | La roadmap è il posto legittimo per i claim futuri: vietarla interamente renderebbe il gate insostenibile (verrebbe disattivato al primo falso positivo — lesson 44-4). Il controllo è sulla **posizione** del claim, non sulla sua presenza |
+| D.54.3 | Il gate **esclude** i blocchi aggregati dal controllo delle capability | Il titolo della story "Dedup promozione post-enrichment" contiene "enrichment": un controllo che non esclude i blocchi generati produrrebbe un falso positivo su un titolo che l'agente non ha scritto |
+| D.54.4 | La sezione "Stato del progetto" del README contiene **puntatori**, non conteggi | L'anti-pattern "metti un puntatore, non una copia" (D.38.1) valeva per i file globali ma non per il README, che ne era un caso limite: ibrido, senza tabella di ownership |
+| D.54.5 | Il gate è **bloccante** in CI, con un test di scenario negativo separato | Un gate che passa sempre non è un gate (lesson 43-1). Il test `scripts/test-readme-facts-gate.sh` reintroduce il drift in una fixture e verifica che il gate esca 1 |
+| D.54.6 | Exit code 2 per errore di ambiente, non per drift | Fail-closed esplicito: un file sorgente mancante o non parsabile blocca la pipeline invece di lasciarla passare in silenzio — la classe di fallimento "assenza di sintomo" già vista con `metadata: read` (§9.9) |
+
+## Difetti trovati lungo il percorso
+
+**Il gate, alla prima esecuzione, passava sempre.** Due difetti indipendenti: il
+parsing di `ADAPTER_FACTORIES` si fermava al primo `=` (l'annotazione di tipo
+`() => PlatformAdapter` ne contiene uno, e il pattern `[^=]*` sbagliava la fine del
+match), e la regex della sezione "oggi" non riconosceva `Cosa c'è oggi` per via
+dell'apostrofo curly (`’`). Un gate che non intercetta niente è peggio di
+nessun gate: dà la falsa sensazione che il drift sia sorvegliato.
+
+**Il test di scenario negativo T2 non falliva.** La fixture **appendeva** la riga
+`deezer` in fondo al file, quindi finiva nella sezione "Licenza", fuori dal
+perimetro che il gate legge: la prova passava per il motivo sbagliato. Una prova
+che non prova niente maschera il gate invece di proteggerlo — ed è il motivo per
+cui la correzione del test precede l'ingresso in CI.
+
+## Verifica
+
+- `node scripts/check-readme-facts.mjs` → **15 check, 0 falliti**, exit 0
+- `bash scripts/test-readme-facts-gate.sh` → **12 assert, 0 falliti** (T1..T9)
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (dopo rigenerazione)
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati
+  (li rigenera `auto-state-aggregate` post-merge)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 54-1 | **La documentazione che dichiara fatti verificabili dal codice è codice.** "8 piattaforme" è un'affermazione falsificabile, non un'opinione: il suo costo non è estetico, è la promessa falsa a chi arriva nel repository per la prima volta. Un gate che confronta i *formati* non confronta i *fatti*, e il drift più pericoloso è proprio quello che nessuno guarda |
+| 54-2 | **Quando un artefatto ha due owner, la tabella degli owner deve esistere prima del gate.** Il README era ibrido (un blocco generato + prosa scritta a mano) e non compariva in nessuna tabella di ownership: nessuno si sentiva responsabile di aggiornarlo. Il gate verifica una cosa che nessuno corregge, se prima non si sa chi la corregge |
+| 54-3 | **Un gate che passa sempre è peggio di nessun gate.** Il primo gate ha passato tutti i test perché non aveva mai intercettato un drift reale: due bug di parsing. Il test di scenario negativo (che reintroduce il drift in una fixture) è l'unico che può accorgersene — e va scritto *prima* di attivare il gate in CI, non dopo |
+| 54-4 | **Una prova che non prova niente è peggio di una prova assente.** T2 appendeva la riga fuori dal perimetro del gate: passava per il motivo sbagliato. Il falso verde di una prova è più insidioso del suo falso rosso, perché convince chi legge il report |
+| 54-5 | **Un blocco generato e una prosa hanno regole diverse, e il gate deve saperlo.** Il titolo di una story contiene parole che una capability vieta: senza l'esclusione dei blocchi aggregati il gate avrebbe prodotto un falso positivo su contenuto che l'agente non ha scritto — e un gate che blocca i casi legittimi viene disattivato al primo falso positivo |
+
+## Documenti aggiornati
+
+- `scripts/check-readme-facts.mjs` — **nuovo**: gate read-only (15 check)
+- `scripts/test-readme-facts-gate.sh` — **nuovo**: test di regressione T1..T9
+- `.github/workflows/ci.yml` — 2 step bloccanti (posizioni 17 e 18)
+- `README.md` — prosa riscritta: "Cosa c'è oggi" con le 5 piattaforme reali,
+  "Roadmap" separata, "Stato del progetto" ridotta a puntatori, "Sviluppo locale"
+  e "Come contribuire"
+- `AGENTS.md` — v1.27: §"Ownership del `README.md`" (D.161.1), checklist di
+  auto-revisione PR, tabella di sincronizzazione al merge, struttura del repository
+- `docs/12-DEVOPS.md` — §9.8f (nuova) + §9.10 a 18 step + changelog 0.9
+- `docs/11-BACKLOG.md` — conteggio EPIC 1 allineato (`2/5` → `4/5`) + changelog 1.6.12
+- `docs/18-DEV-LOG.md` — §20 (nuova) + changelog 2.0 + rimossi i 3 heading
+  "## Changelog" duplicati
+- `docs/INDEX.md` — righe `11`, `12`, `18-DEV-LOG`, `AGENTS.md` e il blocco
+  "Documenti APPROVED / DRAFT" della sezione legacy
+- `docs/state/sessions/54-readme-maintenance.md` — **nuovo**
+- `docs/state/_index.md` — riga della Sessione 54 nella tabella della migration
+- `scripts/generate-bundle.ps1` — `$files`: i due script nuovi + la sessione 54
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`)
+- **#127** — ADR-0008 V3: il blocco `AGGREGATE-NEXT-STEP-*` del README, che ha
+  reso il file ibrido
+- **#149** — la race fra i due writer di `main`: il motivo per cui il gate è
+  read-only (D.54.1)
+- `AGENTS.md` §"Ownership del `README.md`" (D.161.1) — la regola di ownership
+- `docs/12-DEVOPS.md` §9.8f — la descrizione tecnica del gate
 
 
 
@@ -14498,7 +14720,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.0 · Sessione 38 (2026-10-21, issue #90) · allineamento tabella di stato legacy (fonte di verità = blocco `AGGREGATE-STORIES-*`)
+> Status: 🟢 APPROVED · Versione 1.6.12 · Sessione 54 (2026-10-27, issue #161) · allineamento del conteggio EPIC 1 (2/5 → 4/5) nella riga di stato legacy
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -15040,8 +15262,10 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
-**EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 2/5 ✅** (1.1 YouTube Music · 1.2 Apple Music). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
+**EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 4/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
+> **Aggiornato al 2026-10-27** (Sessione 54, issue #161: il conteggio dell'EPIC 1 era fermo a `2/5` dal 2026-10-22 — la 1.3 (PR #158, merge `7afbf03`) e la 1.4 (PR #162, merge `471a049`) erano state completate senza allineare questa riga legacy. Il drift è silenzioso: i blocchi aggregati sono corretti, questa riga no. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
+>
 > **Aggiornato al 2026-10-22** (Sessione 45, issue #140: la 1.2 rimossa dalla roadmap perché mergata con PR #139 e il suo `**Stato**:` allineato — il doc-sync era rimasto fuori da `main`). Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`.
 
 Ogni story deve avere label GitHub:
@@ -15081,6 +15305,7 @@ Ogni story deve avere label GitHub:
 | 1.6.9 | Sessione 51 (2026-10-26, issue #144) | **Doc-sync post-merge della PR #156** (merge `6ec71bb`): il frontmatter di `docs/state/sessions/51-*` riflette il merge reale (`pr: 156`, `merged_commit: 6ec71bb`, `state: 🟢`, `merged: true`) — era rimasto `pr: null` / `merged: false` perché la sessione è stata scritta dalla stessa PR che la chiude. Story 1.3 allineata: `issue: 155`, T1.3.7 ✅, "Stato attuale" aggiornato. Sezioni legacy riallineate: `11-BACKLOG.md` (`**Stato**:` della 1.3 + riga roadmap, che dichiaravano ancora «manca l'issue di implementazione»), `docs/INDEX.md` (riga `03-ADAPTERS/`, versioni dei documenti, "Prossimo passo tecnico"), `docs/18-DEV-LOG.md` §17 (entry delle sessioni 50-51). La riga di changelog 1.6.8 è stata riportata dentro la tabella: era stata appesa **dopo** il blocco `AGGREGATE-STORIES-*`, fuori dal suo schema |
 | 1.6.10 | Sessione 52 (2026-10-26, issue #155) | **Story 1.3 completata**: implementazione della issue #155 (adapter ListenBrainz file-only + adapter Last.fm ibrido API/file). Sezione Story 1.3 `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"** (la fonte di verità per le completate è il blocco aggregato, ADR-0008); `docs/state/stories/1.3-*` → `status: done`. Documenti allineati: `02-DATA-SCHEMA.md` §6.1 (tabella `settings`, schema Dexie v4) + §3.1 (i due campi additivi del contratto) + changelog 1.4; `03-ADAPTERS/lastfm.md` §3.1.0 (la chiave fra i due percorsi) + changelog 1.1; `03-ADAPTERS/listenbrainz.md` §3.1.3 (i due campi che il contratto non aveva) + changelog 1.1; `08-COPY-I18N.md` §2.12e (`settings.lastfm.*`) + changelog 0.4; `docs/18-DEV-LOG.md` §18; `docs/state/sessions/52-*` (nuova); `scripts/generate-bundle.ps1` `$files` (6 fixture + sessione 52); `docs/BUNDLE.md` rigenerato |
 | 1.6.11 | Sessione 53 (2026-10-26, issue #160) | **Story 1.4 completata**: `rekey()` (promozione dedup post-enrichment) resa completa e testata. La funzione esisteva dalla Story 0.7 (PR #39) ma non soddisfava gli AC: ora è **transazionale** (MIG-1), a **sopravvivenza deterministica** (la track più vecchia), **riorienta** `library`/`playlistItems`/`features`, **unisce** `platformIds`/`generi`/finestra temporale, **normalizza** l'ISRC in maiuscole e delega i contatori a `recount()` (MIG-4). Sezione Story 1.4: `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"**. `docs/state/stories/1.4-dedup-promotion.md` (nuova). Documenti allineati: `05-ARCHITECTURE.md` §12.1/§12.2 (`rekey()` da "futuro" a "attivo") + changelog 1.2; `16-OPERATIONS.md` §2.3 (forma del report) + changelog 0.2; `02-DATA-SCHEMA.md` §5 (nota sul job) + changelog 1.5; `docs/INDEX.md` (righe `05`, `11`, `16`, `18-DEV-LOG`, "Prossimo passo tecnico"); `docs/18-DEV-LOG.md` §19 + changelog 1.9; `docs/state/sessions/53-story-1-4-rekey.md` (nuova); `docs/BUNDLE.md` rigenerato |
+| 1.6.12 | Sessione 54 (2026-10-27, issue #161) | **Conteggio EPIC 1 allineato**: la riga di stato legacy dichiarava `EPIC 1 — Import core: 2/5 ✅` dal 2026-10-22, ma la 1.3 (PR #158, merge `7afbf03`) e la 1.4 (PR #162, merge `471a049`) erano state completate senza allineare la riga → `4/5 ✅` (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment). La fonte di verità per lo stato delle story resta il blocco aggregato `AGGREGATE-STORIES-*`; questa riga è una **copia di conteggio** legacy, ed è il tipo di duplicazione che l'issue #161 ha introdotto un gate per (prosa del README confrontata con il codice). Aggiornata anche la nota "Aggiornato al …" con la provenienza del drift |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -15110,7 +15335,7 @@ Ogni story deve avere label GitHub:
 
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Status: 🟡 DRAFT · Versione 0.9 · Sessione 54 (2026-10-27, issue #161) · gate "fatti del README"
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -15653,6 +15878,48 @@ bash scripts/test-workflow-writer-ordering.sh           # scenario negativo (gat
 
 ---
 
+### 9.8f Gate "fatti del README" (issue #161)
+
+Un gate che confronta **la prosa** con **il codice**. Il README è la prima cosa che legge chi arriva nel repository: se dichiara piattaforme e funzionalità che non esistono, il danno non è estetico — è una promessa falsa all'utente.
+
+**Il drift chiuso dall'issue #161** (rilevato il 2026-10-27, Sessione 54):
+
+| Cosa il README dichiarava | Cosa il codice diceva |
+|---|---|
+| 8 piattaforme importabili (Spotify, YouTube Music, Apple Music, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz) | 5 piattaforme in `ACTIVE_PLATFORMS`: Deezer, Tidal e SoundCloud non hanno né factory né classe adapter |
+| "Arricchisce i dati con audio features (valence, energy, danceability, BPM)" | nessun adapter di enrichment: capability dell'EPIC 4 |
+| "timeline emotiva … analisi, mood, ricordi" | nessuna analisi implementata: capability dell'EPIC 2 |
+| `EPIC 0 — Fundamentals: 7/7` in prosa | conteggio duplicato: la fonte è il blocco aggregato di `docs/INDEX.md` |
+
+La prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14) perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e **nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice**. Pipeline verde, README falso: il fallimento silenzioso.
+
+**La causa radice è di ownership, non di tooling.** `README.md` è un file **ibrido**: il blocco `<!-- AGGREGATE-NEXT-STEP-* -->` è generato da `scripts/aggregate-state.ps1`, tutto il resto è prosa scritta a mano. La regola di ownership dei file globali (D.38.1) copriva i file aggregati, non il README: nessuna tabella dichiarava chi scrive cosa, quindi nessuno se ne sentiva responsabile. La regola nuova è in `AGENTS.md` §"Ownership del `README.md`" (D.161.1).
+
+**Il gate** (`scripts/check-readme-facts.mjs`) è **read-only**:
+
+| Controllo | Fonte di verità |
+|---|---|
+| Le piattaforme dichiarate = le piattaforme attive | `ACTIVE_PLATFORMS` in `apps/web/src/onboarding/OnboardingRouter.tsx` |
+| Ogni piattaforma attiva ha una factory adapter | `ADAPTER_FACTORIES` (stesso file) |
+| Ogni factory punta a una classe che esiste | `packages/core/src/adapters/` |
+| Nessuna capability non implementata dichiarata come presente | elenco delle capability EPIC 2 / EPIC 4 |
+| Nessun conteggio duplicato in prosa | i blocchi aggregati di `docs/INDEX.md` / `docs/11-BACKLOG.md` |
+
+Exit code: 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed: un file sorgente mancante blocca, non lascia passare).
+
+**Perché non ha una modalità di scrittura**: `README.md` è già un target di `scripts/aggregate-state.ps1`. Un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dall'issue #149 (bundle e aggregato che si sovrascrivono a vicenda). Il gate **verifica**, non **genera**: l'unico scrittore resta l'agente, e il gate dice se ha sbagliato.
+
+```bash
+node scripts/check-readme-facts.mjs     # verifica
+bash scripts/test-readme-facts-gate.sh  # scenario negativo (T1..T9)
+```
+
+Il test (`scripts/test-readme-facts-gate.sh`) copre i 9 casi in cui il gate deve uscire **1** o **2**: piattaforma inesistente, piattaforma mancante, factory senza adapter, classe inesistente, capability fuori roadmap, capability dentro la roadmap (nessun falso positivo), conteggio duplicato, README mancante. Un gate che passa sempre non è un gate (lesson 43-1).
+
+**Regola generale**: una prosa che dichiara fatti verificabili dal codice è **codice**, e va verificata da un gate come il resto. Il README non è un documento di opinione: "8 piattaforme" è un'affermazione falsificabile, e il costo di non verificarla è la perdita di fiducia di chi arriva nel repository per la prima volta.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -15701,7 +15968,7 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 
 ### 9.10 Gate reali di `ci.yml`
 
-Elenco dei 15 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-22 (Sessione 45, issue #140; la Sessione 44 ne aveva verificati 14). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
+Elenco dei 18 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-27 (Sessione 54, issue #161; la Sessione 47 ne aveva verificati 16). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
 
 | # | Step | Bloccante | Issue |
 |---|------|:---------:|-------|
@@ -15721,10 +15988,12 @@ Elenco dei 15 step nominati del job `quality`, verificato riga per riga contro `
 | 14 | `Residui post-merge` | sì | #76 |
 | 15 | `Label in sync con AGENTS.md` | sì | #110 |
 | 16 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+| 17 | **`Fatti del README in sync con il codice`** (`check-readme-facts.mjs`) | sì | **#161** |
+| 18 | **`Gate "fatti del README" fail-closed`** | sì | **#161** |
 
 I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
 
-**Verifica**: i 16 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
+**Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
 
 ---
 
@@ -15774,6 +16043,7 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 0.6 | Sessione 45 (2026-10-22) | **§9.8d sync con `origin/main` dei writer di `main`** (issue #140): `auto-state-aggregate.yml` falliva su ogni merge con `! [rejected] main -> main (non-fast-forward)` (run `39802198985`, `39803721229`). Causa: il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit; quando `auto-bundle.yml` ha gia' pushato sullo stesso merge, il secondo writer pusha da un checkout stale e viene rifiutato. Conseguenza: il meccanismo di auto-guarimento di ADR-0008 era spento e il doc-sync della Story 1.2 (PR #139) non e' mai arrivato su `main` — `README.md` continuava ad annunciarla come «prossima story». Fallimento silenzioso: merge verde, `ci.yml` verde, blocchi aggregati indietro, nessun gate che lo segnali. Fix: step «Sync con origin/main» (`git fetch` + `git rebase`, fallback `git reset --hard`), identico a quello del companion. Difesa: gate in `scripts/validate-workflows.mjs` (bloccante in CI dal #73) che richiede un sync **prima** di ogni `git push origin main` e non tassa i writer di branch + `scripts/test-workflow-push-sync.sh` (T1..T5, 15 assert, con scenario negativo e verifica dell'ordine). **§9.10** aggiornata: 15 step, con il nuovo gate in posizione 12. |
 | 0.7 | Sessione 46 (2026-10-22) | **§9.11 idempotenza dei generatori: riuso del timestamp** (issue #142): `aggregate-state.ps1` ristampava `Get-Date` nel blocco inventory a ogni run, e la normalizzazione esisteva solo in `-Check` — quindi la garanzia «il timestamp viene riusato quando il blocco non cambia altro» (issue #70) era documentata ma non implementata nel path di scrittura. Sintomo: il gate `Aggregator deterministico` fallito sul run `39818043647` (16:55 → 16:56), cioè un gate bloccante dipendente dall'orologio, ~5-10% dei run. Difetto gemello in `generate-bundle.ps1`: `Build-Bundle -Timestamp` esisteva ma non veniva passato, e `auto-bundle` committava un nuovo `> Data:` dopo ogni merge a contenuto identico (nessun gate lo vedeva). Fix: `Get-NormalizedBlock` + `Sync-MutableTimestamp` in `Apply-Blocks`; in `generate-bundle.ps1` confronto su tutto il bundle con sostituzione **solo** sulla prima `> Data:` (i documenti inclusi ne hanno una propria, `docs/AUDIT-2026-10-15.md`). Test con **sentinel seminato** invece di confronto temporale (`test-aggregate-determinism.sh` T11, `test-bundle-check-idempotent.sh` T7), entrambi con contro-prova «contenuto cambiato → il campo si aggiorna»; `test-bundle-check-idempotent.sh` guadagna anche `ps_path`, che ripara T4-T6 su Windows (path POSIX non risolti dal call operator di pwsh). |
 | 0.8 | Sessione 47 (2026-10-26) | **§9.8e ordinamento fra i due writer di `main`** (issue #149): il concurrency group `post-merge-main` serializza i *run* ma non ne impone l'ordine*, e `auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica — quindi può copiare blocchi aggregati stale. Caso reale: merge della PR #147 (2026-10-26T12:50Z), `auto-bundle` alle 12:50:23 e `auto-state-aggregate` alle 12:50:55: il bundle copiò i blocchi vecchi, il guard idempotente scrisse «già in sync» e non committò, e il drift di 6 righe in `docs/BUNDLE.md` restò silenzioso (il gate sul bundle è warning-only). Il commit del bot non poteva auto-correggerlo: il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso. Fix (opzione A, Boss): trigger `workflow_run` su `auto-state-aggregate` in `auto-bundle.yml` — è agganciato alla *conclusione* del workflow, quindi sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda; con esso il bundle rigenera **sempre** dopo che l'aggregate ha committato. Difesa: quarto sub-gate in `scripts/validate-workflows.mjs` (verifica la presenza del trigger **e** che il nome in `workflows:` combaci con il `name:` reale del producer, altrimenti il trigger non scatterebbe mai, in silenzio) + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert, scenario negativo). **§9.10** aggiornata: 16 step, con il nuovo gate in posizione 13. |
+| 0.9 | Sessione 54 (2026-10-27) | **§9.8f gate "fatti del README"** (issue #161): il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti), audio features e analisi/mood/ricordi come feature presenti, e un conteggio di stato duplicato — la prosa era quella del bootstrap (`ebdab9d`, 2026-10-14) perché i merge delle Story 1.2 e 1.3 non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice (pipeline verde, README falso). Causa radice di **ownership**, non di tooling: `README.md` è ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) e non era in nessuna tabella di ownership; la regola nuova è in `AGENTS.md` §"Ownership del `README.md`" (D.161.1). Gate: `scripts/check-readme-facts.mjs`, **read-only** (0 = in sync, 1 = drift, 2 = errore di ambiente): confronta l'elenco delle piattaforme con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` + le classi in `packages/core/src/adapters/`, vieta le capability EPIC 2/EPIC 4 fuori dalla roadmap, vieta i conteggi duplicati in prosa. **Nessuna modalità di scrittura**: il README è già target di `aggregate-state.ps1`, e un secondo writer riprodurrebbe la race fra i writer di `main` risolta dal #149. Test di scenario negativo `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert). **§9.10** aggiornata: 18 step, con i due nuovi gate in posizione 17 e 18 (entrambi bloccanti). |
 
 
 
@@ -21985,6 +22255,534 @@ exit 0
 
 
 
+===== FILE: scripts/check-readme-facts.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate "fatti del README" (issue #161).
+ *
+ * Il README dichiara fatti che il codice può contraddire: l'elenco delle
+ * piattaforme importabili, le funzionalita' presenti, i conteggi di stato.
+ * Finche' nessun gate confronta la prosa con il codice, il drift e' silenzioso:
+ * i merge delle Story 1.2 e 1.3 non hanno toccato `README.md`, e i 16 gate di
+ * `ci.yml` restavano verdi lo stesso (la prosa era rimasta quella del
+ * bootstrap, del 2026-10-14).
+ *
+ * Il gate e' **read-only**: non genera e non scrive nulla. Motivo: `README.md`
+ * e' gia' un target di `scripts/aggregate-state.ps1` (blocchi `AGGREGATE-*`),
+ * e un secondo writer sullo stesso file riprodurrebbe la race fra i writer di
+ * `main` risolta dall'issue #149. Qui si verifica, non si riscrive.
+ *
+ * Fonti di verita':
+ *   1. `apps/web/src/onboarding/OnboardingRouter.tsx`
+ *      - `ADAPTER_FACTORIES`: platform id -> classe adapter
+ *      - `ACTIVE_PLATFORMS`: le piattaforme che l'utente puo' davvero importare
+ *   2. `packages/core/src/adapters/`: le classi adapter devono esistere
+ *   3. `README.md`: la prosa dichiarata
+ *
+ * Uso: node scripts/check-readme-facts.mjs [--root <dir>]
+ *
+ * Exit code: 0 = in sync, 1 = drift, 2 = errore di ambiente (file mancante).
+ */
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+
+const argv = process.argv.slice(2);
+const rootIdx = argv.indexOf('--root');
+const root = resolve(rootIdx >= 0 ? argv[rootIdx + 1] : '.');
+
+const README = join(root, 'README.md');
+const ROUTER = join(root, 'apps/web/src/onboarding/OnboardingRouter.tsx');
+const ADAPTERS_DIR = join(root, 'packages/core/src/adapters');
+
+/**
+ * Funzionalita' non ancora implementate: non possono essere dichiarate come
+ * presenti dal README. Sono le capability degli EPIC 2 (analisi) e 4
+ * (enrichment), piu' il vocabolo "ricordi" che le descrive.
+ *
+ * Nota sul perimetro: `ere` non e' nella lista perche' in italiano e' una
+ * parola comune ("l'era della Fase 0") e produrrebbe falsi positivi; il
+ * concetto e' coperto da `mood` e `ricordi`.
+ */
+const FORBIDDEN_CAPABILITIES = [
+  { re: /enrichment/i, label: 'enrichment (EPIC 4)' },
+  { re: /audio features?/i, label: 'audio features (EPIC 4)' },
+  { re: /\bvalence\b/i, label: 'valence (EPIC 4)' },
+  { re: /\bdanceability\b/i, label: 'danceability (EPIC 4)' },
+  { re: /\bBPM\b/, label: 'BPM (EPIC 4)' },
+  { re: /\bmoods?\b/i, label: 'mood (EPIC 2)' },
+  { re: /\bricordi\b/i, label: 'ricordi (EPIC 2)' },
+];
+
+const SECTION_TODAY = /cosa c['\u2019][e\u00E8] oggi|cosa fa/i;
+const SECTION_PLATFORMS = /piattaforme/i;
+const SECTION_ROADMAP = /roadmap|prossimi passi|non ancora/i;
+const SECTION_STATUS = /stato del progetto/i;
+
+let failures = 0;
+let checks = 0;
+
+function fail(message) {
+  console.error(`[FAIL] ${message}`);
+  failures++;
+}
+
+function ok(message) {
+  console.log(`[OK] ${message}`);
+}
+
+function requireFile(path) {
+  if (!existsSync(path)) {
+    console.error(`[FAIL] file non trovato: ${path}`);
+    process.exit(2);
+  }
+  return readFileSync(path, 'utf8');
+}
+
+/** Cerca una classe `export class <name>` nell'albero degli adapter. */
+function findAdapterClass(className) {
+  const stack = [ADAPTERS_DIR];
+  while (stack.length > 0) {
+    const dir = stack.pop();
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(full);
+        continue;
+      }
+      if (!entry.name.endsWith('.ts')) continue;
+      const text = readFileSync(full, 'utf8');
+      if (new RegExp(`export\\s+class\\s+${className}\\b`).test(text)) return full;
+    }
+  }
+  return null;
+}
+
+/**
+ * Divide il markdown in sezioni di livello 2 (`## `). I heading di altro
+ * livello restano DENTRO la sezione: le sottosezioni (`###`) fanno parte
+ * della sezione e servono al gate (es. "Piattaforme importabili").
+ */
+function splitSections(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const sections = [];
+  let current = { heading: '(preambolo)', level: 0, lines: [] };
+  for (const line of lines) {
+    const m = /^(##)\s+(.*)$/.exec(line);
+    if (m) {
+      sections.push(current);
+      current = { heading: m[2].trim(), level: 2, lines: [] };
+      continue;
+    }
+    current.lines.push(line);
+  }
+  sections.push(current);
+  return sections;
+}
+
+/**
+ * Rimuove i blocchi auto-generati `<!-- AGGREGATE-*-START -->` … `-END -->`.
+ * Il loro contenuto non e' prosa scritta a mano: e' output di
+ * `scripts/aggregate-state.ps1`, gia' coperto dal gate dell'aggregator. Lasciarli
+ * dentro farebbe fallire il gate su una stringa che l'agente non ha scritto —
+ * per esempio il titolo di una story "Dedup promozione post-enrichment".
+ */
+function stripAggregateBlocks(text) {
+  return text.replace(
+    /<!--\s*AGGREGATE-[A-Z-]+-START\s*-->[\s\S]*?<!--\s*AGGREGATE-[A-Z-]+-END\s*-->/g,
+    '',
+  );
+}
+
+/** Corpo di una sottosezione (fino al prossimo heading di qualsiasi livello). */
+function subsectionBody(section, predicate) {
+  const lines = section.lines;
+  let start = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^(#{1,6})\s+(.*)$/.exec(lines[i]);
+    if (m && predicate.test(m[2].trim())) {
+      start = i + 1;
+      break;
+    }
+  }
+  if (start < 0) return null;
+  const body = [];
+  for (let i = start; i < lines.length; i++) {
+    if (/^#{1,6}\s+/.test(lines[i])) break;
+    body.push(lines[i]);
+  }
+  return body.join('\n');
+}
+
+// === 1. Codice: factory e piattaforme attive ===
+
+const router = requireFile(ROUTER);
+if (!existsSync(ADAPTERS_DIR)) {
+  console.error(`[FAIL] directory non trovata: ${ADAPTERS_DIR}`);
+  process.exit(2);
+}
+
+/**
+ * Estrae il corpo di un oggetto literal a partire dal nome del simbolo.
+ * Non si puo' usare `[^=]*` per arrivare all'assegnamento: l'annotazione di
+ * tipo contiene essa stessa un `=` (`() => PlatformAdapter`), e il pattern
+ * sbaglierebbe la fine del match.
+ */
+function extractObjectBody(source, symbol) {
+  const at = source.indexOf(symbol);
+  if (at < 0) return null;
+  const open = source.indexOf('{', at);
+  if (open < 0) return null;
+  let depth = 0;
+  for (let i = open; i < source.length; i++) {
+    if (source[i] === '{') depth++;
+    else if (source[i] === '}') {
+      depth--;
+      if (depth === 0) return source.slice(open + 1, i);
+    }
+  }
+  return null;
+}
+
+const factoriesBody = extractObjectBody(router, 'ADAPTER_FACTORIES');
+if (factoriesBody === null) {
+  console.error('[FAIL] ADAPTER_FACTORIES non trovato in OnboardingRouter.tsx');
+  process.exit(2);
+}
+const factories = new Map();
+for (const m of factoriesBody.matchAll(/(\w+)\s*:\s*\(\)\s*=>\s*new\s+(\w+)\s*\(/g)) {
+  factories.set(m[1], m[2]);
+}
+
+const activeBlock = /ACTIVE_PLATFORMS[^=]*=\s*\[([\s\S]*?)\];/.exec(router);
+if (!activeBlock) {
+  console.error('[FAIL] ACTIVE_PLATFORMS non trovato in OnboardingRouter.tsx');
+  process.exit(2);
+}
+const active = [...activeBlock[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+
+checks++;
+if (factories.size === 0) {
+  fail('ADAPTER_FACTORIES e vuoto: nessuna piattaforma esposta');
+} else {
+  ok(`factory adapter nel codice: ${[...factories.keys()].sort().join(', ')}`);
+}
+
+checks++;
+const orphanFactories = [...factories.keys()].filter((id) => !active.includes(id));
+if (orphanFactories.length > 0) {
+  fail(
+    `adapter implementato ma non esposto in ACTIVE_PLATFORMS: ${orphanFactories.join(', ')} ` +
+      '(oppure la UI non e ancora cablata: il README elencerebbe una piattaforma non importabile)',
+  );
+} else {
+  ok('ogni factory adapter corrisponde a una piattaforma attiva');
+}
+
+checks++;
+const missingFactories = active.filter((id) => !factories.has(id));
+if (missingFactories.length > 0) {
+  fail(`piattaforma attiva senza factory adapter: ${missingFactories.join(', ')}`);
+} else {
+  ok('ogni piattaforma attiva ha una factory adapter');
+}
+
+for (const id of active) {
+  const className = factories.get(id);
+  if (!className) continue;
+  checks++;
+  const path = findAdapterClass(className);
+  if (!path) {
+    fail(`la classe ${className} (piattaforma ${id}) non esiste in packages/core/src/adapters/`);
+  } else {
+    ok(`classe ${className} presente (${path.replace(root + '\\', '').replace(root + '/', '')})`);
+  }
+}
+
+// === 2. README: sezioni e piattaforme dichiarate ===
+
+const readme = requireFile(README);
+const sections = splitSections(readme);
+
+const todaySection = sections.find((s) => s.level === 2 && SECTION_TODAY.test(s.heading));
+const roadmapSection = sections.find((s) => s.level === 2 && SECTION_ROADMAP.test(s.heading));
+const statusSection = sections.find((s) => s.level === 2 && SECTION_STATUS.test(s.heading));
+
+checks++;
+if (!todaySection) {
+  fail(
+    'README.md: manca la sezione "Cosa c\'e oggi" (il gate non puo verificare le capability dichiarate)',
+  );
+} else {
+  ok(`sezione "oggi" trovata: ${todaySection.heading}`);
+}
+
+checks++;
+if (!roadmapSection) {
+  fail(
+    'README.md: manca la sezione roadmap: le funzionalita non implementate devono stare li, ' +
+      'dove il gate le ammette',
+  );
+} else {
+  ok(`sezione roadmap trovata: ${roadmapSection.heading}`);
+}
+
+checks++;
+if (!statusSection) {
+  fail('README.md: manca la sezione "Stato del progetto"');
+} else {
+  ok(`sezione "stato del progetto" trovata: ${statusSection.heading}`);
+}
+
+const declaredPlatforms = [];
+if (todaySection) {
+  const body = subsectionBody(todaySection, SECTION_PLATFORMS);
+  checks++;
+  if (body === null) {
+    fail(
+      'README.md: manca la sottosezione "Piattaforme ..." dentro "Cosa c\'e oggi": ' +
+        "e il punto in cui il gate legge l'elenco delle piattaforme importabili",
+    );
+  } else {
+    for (const m of body.matchAll(/`([a-z][a-z0-9_]*)`/g)) declaredPlatforms.push(m[1]);
+    const unique = [...new Set(declaredPlatforms)].sort();
+    checks++;
+    const missing = active.filter((id) => !unique.includes(id));
+    const extra = unique.filter((id) => !active.includes(id));
+    if (missing.length > 0 || extra.length > 0) {
+      fail(
+        "README.md: l'elenco delle piattaforme non corrisponde al codice" +
+          (missing.length > 0 ? ` — mancanti: ${missing.join(', ')}` : '') +
+          (extra.length > 0 ? ` — inesistenti: ${extra.join(', ')}` : '') +
+          `. Nel codice (ACTIVE_PLATFORMS): ${active.slice().sort().join(', ')}`,
+      );
+    } else {
+      ok(`README.md: piattaforme dichiarate in sync con il codice (${unique.join(', ')})`);
+    }
+  }
+}
+
+// === 3. Capability non implementate fuori dalla roadmap ===
+
+checks++;
+const offenders = [];
+for (const section of sections) {
+  if (section.level !== 2) continue;
+  if (roadmapSection && section.heading === roadmapSection.heading) continue;
+  if (SECTION_ROADMAP.test(section.heading)) continue;
+  const text = stripAggregateBlocks(section.lines.join('\n'));
+  for (const cap of FORBIDDEN_CAPABILITIES) {
+    if (cap.re.test(text)) offenders.push(`"${section.heading}" -> ${cap.label}`);
+  }
+}
+if (offenders.length > 0) {
+  fail(
+    'README.md: funzionalita non ancora implementate dichiarate come presenti: ' +
+      offenders.join(' | '),
+  );
+} else {
+  ok('README.md: nessuna capability non implementata dichiarata fuori dalla roadmap');
+}
+
+// === 4. Nessun conteggio duplicato in prosa ===
+
+checks++;
+if (statusSection) {
+  const text = stripAggregateBlocks(statusSection.lines.join('\n'));
+  const counts = [...text.matchAll(/\b(\d+)\s*\/\s*(\d+)\b/g)].map((m) => m[0]);
+  if (counts.length > 0) {
+    fail(
+      `README.md §"${statusSection.heading}": conteggi duplicati in prosa (${counts.join(', ')}). ` +
+        'I conteggi di stato vivono nei blocchi aggregati di docs/INDEX.md e docs/11-BACKLOG.md: ' +
+        'metti un puntatore, non una copia.',
+    );
+  } else {
+    ok('README.md §"stato del progetto": nessun conteggio duplicato in prosa');
+  }
+}
+
+console.log('');
+console.log(`[INFO] check-readme-facts: ${checks} check, ${failures} falliti`);
+process.exit(failures > 0 ? 1 : 0);
+
+
+
+===== FILE: scripts/test-readme-facts-gate.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per il gate "fatti del README" (issue #161).
+#
+# Difende il difetto chiuso in issue #161: `README.md` dichiarava come presenti
+# funzionalita' e piattaforme che non esistono (8 piattaforme invece di 5,
+# audio features ed analisi non implementate), e i merge delle Story 1.2 e 1.3
+# non l'hanno toccato: nessun gate confrontava la prosa del README con il
+# codice, quindi il drift era silenzioso e la pipeline restava verde.
+#
+# Il gate vive in scripts/check-readme-facts.mjs (bloccante in CI dal #161);
+# questo file e' il suo test di regressione: verifica che il gate **esca 1**
+# quando si reintroduce il drift. Un gate che passa sempre non e' un gate
+# (lesson 43-1).
+#
+# Scenari coperti:
+#   T1  repo reale: la prosa e' in sync con il codice -> exit 0
+#   T2  fixture: il README elenca una piattaforma senza adapter (`deezer`)
+#       -> exit 1, il messaggio nomina `deezer`
+#   T3  fixture: il README non elenca una piattaforma implementata (`lastfm`)
+#       -> exit 1, il messaggio nomina `lastfm`
+#   T4  fixture: la UI espone una piattaforma senza factory adapter
+#       -> exit 1
+#   T5  fixture: la factory punta a una classe che non esiste nel codice
+#       -> exit 1
+#   T6  fixture: capability non implementata (valence) dichiarata in "Cosa c'e
+#       oggi" -> exit 1
+#   T7  fixture: la stessa capability nella sezione roadmap -> exit 0
+#       (la roadmap e' il posto legittimo per i claim futuri: nessun falso
+#       positivo)
+#   T8  fixture: conteggio duplicato in prosa (7/7) dentro "Stato del progetto"
+#       -> exit 1
+#   T9  fixture: manca il file README -> exit 2 (errore di ambiente, non drift)
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+GATE="$SCRIPT_DIR/check-readme-facts.mjs"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[SKIP] node non disponibile: impossibile eseguire check-readme-facts.mjs"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+# Fixture minimale: un router con due piattaforme, due adapter nel codice e un
+# README con le tre sezioni canoniche.
+make_fixture() {
+  local d="$1"
+  mkdir -p "$d/apps/web/src/onboarding" "$d/packages/core/src/adapters/demo" \
+           "$d/packages/core/src/adapters/other"
+  cat > "$d/apps/web/src/onboarding/OnboardingRouter.tsx" <<'EOF'
+const ADAPTER_FACTORIES: Partial<Record<PlatformId, () => PlatformAdapter>> = {
+  demo: () => new DemoAdapter(),
+  other: () => new OtherAdapter(),
+};
+
+const ACTIVE_PLATFORMS: PlatformId[] = [
+  'demo',
+  'other',
+];
+EOF
+  cat > "$d/packages/core/src/adapters/demo/index.ts" <<'EOF'
+export class DemoAdapter {}
+EOF
+  cat > "$d/packages/core/src/adapters/other/index.ts" <<'EOF'
+export class OtherAdapter {}
+EOF
+  cat > "$d/README.md" <<'EOF'
+# Fixture
+
+## ✨ Cosa c'è oggi
+
+- Importa la cronologia di ascolto dai servizi supportati
+
+### Piattaforme importabili
+
+- `demo` — Demo
+- `other` — Other
+
+## 🗺️ Roadmap
+
+- **Analisi** (EPIC 2): mood, ricordi
+
+## 🏗️ Stato del progetto
+
+Lo stato globale vive nei blocchi aggregati di `docs/INDEX.md`.
+EOF
+}
+
+run_gate() {
+  node "$GATE" --root "$1" 2>&1
+}
+
+echo "=== T1: repo reale - la prosa del README e' in sync con il codice ==="
+out="$(run_gate "$REPO_ROOT")"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (README in sync con il codice)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -8)"; fi
+
+echo "=== T2: il README elenca una piattaforma senza adapter ==="
+D="$(mktemp -d)"; make_fixture "$D"
+# La riga va DENTRO la sottosezione "Piattaforme importabili": appenderla in
+# fondo al file la metterebbe nella sezione "Licenza", fuori dal perimetro che
+# il gate legge (la prova deve fallire per il motivo giusto).
+sed -i 's|^- `other` — Other$|- `other` — Other\n- `deezer` — Deezer|' "$D/README.md"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"; fi
+if echo "$out" | grep -q "deezer"; then ok "il messaggio nomina la piattaforma inesistente (deezer)"; else ng "il messaggio non cita 'deezer': $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo "=== T3: il README non elenca una piattaforma implementata ==="
+D="$(mktemp -d)"; make_fixture "$D"
+sed -i '/- `other` — Other/d' "$D/README.md"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"; fi
+if echo "$out" | grep -q "other"; then ok "il messaggio nomina la piattaforma mancante (other)"; else ng "il messaggio non cita 'other': $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo "=== T4: la UI espone una piattaforma senza factory adapter ==="
+D="$(mktemp -d)"; make_fixture "$D"
+sed -i "s/  'other',/  'other',\n  'ghost',/" "$D/apps/web/src/onboarding/OnboardingRouter.tsx"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (piattaforma attiva senza factory)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo "=== T5: la factory punta a una classe inesistente nel codice ==="
+D="$(mktemp -d)"; make_fixture "$D"
+sed -i "s/new OtherAdapter()/new MissingAdapter()/" "$D/apps/web/src/onboarding/OnboardingRouter.tsx"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (classe adapter inesistente)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"; fi
+if echo "$out" | grep -q "MissingAdapter"; then ok "il messaggio nomina la classe mancante (MissingAdapter)"; else ng "il messaggio non cita 'MissingAdapter': $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo "=== T6: capability non implementata dichiarata in 'Cosa c'e oggi' ==="
+D="$(mktemp -d)"; make_fixture "$D"
+sed -i "s/- Importa la cronologia di ascolto dai servizi supportati/- Importa la cronologia e arricchisce con valence e danceability/" "$D/README.md"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (capability non implementata dichiarata)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo "=== T7: la stessa capability nella sezione roadmap e' legittima ==="
+D="$(mktemp -d)"; make_fixture "$D"
+sed -i "s/- \*\*Analisi\*\* (EPIC 2): mood, ricordi/- **Analisi** (EPIC 2): mood, ricordi, valence/" "$D/README.md"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (nessun falso positivo sulla roadmap)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo "=== T8: conteggio duplicato in prosa dentro 'Stato del progetto' ==="
+D="$(mktemp -d)"; make_fixture "$D"
+sed -i "s|Lo stato globale vive nei blocchi aggregati di \`docs/INDEX.md\`.|EPIC 0 e' completo 7/7.|" "$D/README.md"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (conteggio duplicato in prosa)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo "=== T9: README mancante -> errore di ambiente (exit 2) ==="
+D="$(mktemp -d)"; make_fixture "$D"
+rm -f "$D/README.md"
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 2 ]; then ok "exit 2 (errore di ambiente, distinto dal drift)"; else ng "exit $ec (atteso 2): $(echo "$out" | tail -8)"; fi
+rm -rf "$D"
+
+echo ""
+echo "=== Risultato: $pass pass, $fail fail ==="
+if [ $fail -gt 0 ]; then
+  echo "[FAIL] il gate NON intercetta tutti i casi di drift: non e' un gate (lesson 43-1)"
+  exit 1
+fi
+echo "[OK] il gate intercetta tutti i casi di drift verificati"
+exit 0
+
+
+
 ===== FILE: scripts/setup-hooks.js =====
 
 #!/usr/bin/env node
@@ -22604,6 +23402,26 @@ jobs:
       # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
       - name: Lazy-state in sync (ADR-0008)
         run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+
+      # Issue #161: il README dichiarava 8 piattaforme importabili (Deezer, Tidal,
+      # SoundCloud inesistenti) e funzionalita' non implementate (audio features,
+      # analisi, mood, ricordi), mentre i merge delle Story 1.2 e 1.3 non l'avevano
+      # toccato: nessun gate confrontava la prosa con il codice, quindi il drift era
+      # silenzioso e la pipeline restava verde. Il gate e' READ-ONLY (non genera e
+      # non scrive): confronta l'elenco delle piattaforme del README con
+      # `ACTIVE_PLATFORMS` + le classi adapter, vieta le capability non implementate
+      # fuori dalla sezione roadmap, e vieta i conteggi duplicati in prosa.
+      # Fall-closed: exit 1 = drift, exit 2 = errore di ambiente.
+      - name: Fatti del README in sync con il codice (issue #161)
+        run: node scripts/check-readme-facts.mjs
+
+      # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
+      # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
+      # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
+      # (lesson 43-1): senza questo test, un refactor del gate potrebbe renderlo
+      # fail-open senza che nessuno se ne accorga.
+      - name: Gate "fatti del README" fail-closed (issue #161)
+        run: bash scripts/test-readme-facts-gate.sh
 
 
 
