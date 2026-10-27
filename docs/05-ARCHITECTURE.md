@@ -3,7 +3,7 @@
 > Status: 🟢 APPROVED
 > Versione: 1.3
 > Ultima modifica: Sessione 56 (2026-10-27) — §4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)
-> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟡 DRAFT v0.1)
+> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟢 APPROVED v1.0)
 
 ---
 

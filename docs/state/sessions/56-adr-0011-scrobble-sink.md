@@ -2,10 +2,10 @@
 number: 56
 title: "ADR-0011 — contratto di scrittura negli hub (ScrobbleSink)"
 date: 2026-10-27
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "8900c3b686e2ae9fa7271638fd0e314eb1120c88"
+merged_date: 2026-10-27
 branch: feat/168-adr-0011-scrobble-sink
 pr: 170
 claim: kilo-hp-elitebook-41xb
@@ -119,3 +119,21 @@ rende visibile la presa in carico anche quando la label non era pronta.
   propria) questo ADR replica sulla direzione opposta
 - `docs/13-ADR/0010-remote-source-adapter.md` — il contratto `parseRemote?()` che il
   percorso incrementale ListenBrainz deve implementare
+
+## Esito post-merge
+
+Ratificata dal Boss al merge della PR #170 (`8900c3b`, 2026-10-27T16:31:39Z).
+Promozione a **🟢 APPROVED v1.0** nella PR di doc-sync successiva (stesso pattern
+di ADR-0010, PR #152): **nessuna modifica di contenuto**. L'ADR chiude il punto
+aperto 1 della spec (`20§18`); restano i punti 2-5, che sono decisioni di
+**protocollo** (firma md5, finestra di candidatura, durata di catalogo ignota,
+contratto del proxy Last.fm per la scrittura) e non del contratto.
+
+Automazioni post-merge: `auto-status-done` ha applicato `status:done` all'issue
+#168 e l'ha chiusa, `auto-branch-cleanup` ha eliminato il branch remoto,
+`auto-state-aggregate` e `auto-bundle` hanno rigenerato i blocchi aggregati e il
+bundle. Worktree `ls-168-adr-0011-scrobble-sink` e branch locale eliminati con
+`scripts/post-merge.ps1` (la rimozione della worktree ha richiesto
+`rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too
+large" quando il path Windows supera i 260 caratteri — con `node_modules` installati
+dentro la worktree è il caso normale).
