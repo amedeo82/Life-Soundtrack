@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 14:14
+> Data: 2026-10-27 14:18
 > Totale file: 92
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -6780,7 +6780,7 @@ mezzo del lavoro.
 
 **Tipo**: implementazione (`feat`) — issue #161, claim `kilo-HP-ELITEBOOK-8enl`
 **Branch**: `feat/161-readme-maintenance` (worktree `ls-161-readme-maintenance`)
-**PR**: #164 (aperta su `main` dalla worktree)
+**PR**: #165 (aperta su `main` dalla worktree)
 **Data**: 2026-10-27
 **Stato**: ✅ completata — gate read-only (15 check, 0 falliti), test di regressione T1..T9 (12 assert), 2 step bloccanti in `ci.yml`
 
@@ -6828,7 +6828,7 @@ mezzo del lavoro.
 | 1.7 | 2026-10-26 (issue #144, #155) | **§17 Story 1.3 — Spec adapter Last.fm + approvazione** (Sessioni 50-51, claim `kilo-HP-ELITEBOOK-lb47`, PR #154 merge `b3130a9` + PR #156 merge `6ec71bb`): 6 lesson (17-1 il limite di `limit` va letto nella doc ufficiale dell'endpoint (200), non dedotto per analogia; 17-2 `artist` ha due forme a seconda di `extended=1` → accessor unico; 17-3 normalizzare l'`eventKey` al minuto su **tutti** i percorsi, se no il re-import misto API+file duplica ogni scrobble; 17-4 la normalizzazione è un contratto fra i due adapter → una sola issue (#155); 17-5 `api_sig` richiede md5, la Web Crypto non ce l'ha → web auth differito alla Story 1.5; 17-6 una sessione chiusa dalla PR che l'ha prodotta non può conoscere il proprio merge → doc-sync in PR separata, e le sezioni legacy dei file globali invecchiano in silenzio). Spec `03-ADAPTERS/lastfm.md` v1.0 🟢 APPROVED; issue #144 chiusa, issue di implementazione #155 aperta (`agent-ready`, size L) |
 | 1.8 | 2026-10-26 (issue #155) | **§18 Story 1.3 — Implementazione adapter Last.fm + ListenBrainz** (Sessione 52, claim kilo-HP-ELITEBOOK-lb52, PR #158): 7 lesson (18-1 il contratto degli adapter non aveva un campo per l'MBID dell'artista: aggiunti due campi **additivi e opzionali**; 18-2 durata catalogo e durata dell'evento erano la stessa cosa: bucket DEDUP-3 sempre 0 e durata solo hint sulla Track; 18-3 la formula dell'eventKey della spec non poteva soddisfare E.LF.4 ed E.LF.16/E.LF.19 insieme — il MBID entra nella chiave solo quando disambigua; 18-4 skipped = null non è rappresentabile nel modello: dichiarato; 18-5 la normalizzazione al minuto agisce sull'evento, non sulla riga del file: gap noto; 18-6 il test di un contratto di rete deve asserire il **comportamento** (ritmo, backoff, numero di tentativi), non l'assenza di eccezioni; 18-7 il detect del JSON pretty-printed non può guardare la prima riga). 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi |
 | 1.9 | 2026-10-26 (issue #160) | **§19 Story 1.4 — `rekey()`: promozione dedup post-enrichment** (Sessione 53, claim `kilo-HP-ELITEBOOK-lb53`): 4 lesson (19-1 una funzione "già implementata" può essere una story aperta — `rekey()` esisteva dalla Story 0.7 ed era esportata e descritta in tre documenti, ma nessun test copriva il caso centrale e tre AC non erano soddisfatti; 19-2 il tipo del DB non protegge da una query sbagliata: `where('[platform+trackId]')` compila, passa il typecheck e fallisce a runtime *dentro* la transazione, spezzando il DB; 19-3 un contatore denormalizzato sommato a mano è una seconda fonte di verità (`5 + 3 = 8` con 2 ascolti reali): `recount()` (MIG-4) va delegato, non ricalcolato; 19-4 il determinismo è una proprietà del *dato*: quale delle due track sopravviveva dipendeva dall'ordine di enumerazione di IndexedDB). 9 test nuovi; 208 test core + 81 web verdi |
-| 2.0 | 2026-10-27 (issue #161) | **§20 Issue #161 — Gate "fatti del README"** (Sessione 54, claim `kilo-HP-ELITEBOOK-8enl`, PR #164): 5 lesson (20-1 la prosa dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti) e capability non implementate come presenti: nessuno dei 16 gate confrontava la prosa con il codice, quindi i merge delle Story 1.2 e 1.3 non avevano toccato il README e la pipeline era rimasta verde; 20-2 il conteggio `EPIC 0 — 7/7` in prosa duplicava un dato dei blocchi aggregati: l'anti-pattern "puntatore, non copia" non copriva il README, che è un file ibrido senza tabella di ownership; 20-3 il blocco NEXT-STEP elenca solo le story già migrate in `docs/state/stories/`, e la prosa non lo diceva — un gate che pretendeva la verità da un blocco generato avrebbe prodotto un falso positivo sul titolo di una story; 20-4 il gate, alla prima esecuzione, passava sempre: il parsing di `ADAPTER_FACTORIES` si fermava al primo `=` (l'annotazione di tipo ne contiene uno) e la regex non riconosceva l'apostrofo curly di "Cosa c'è oggi"; 20-5 il test di scenario negativo T2 appendeva la riga `deezer` in fondo al file, fuori dal perimetro che il gate legge: la prova passava per il motivo sbagliato, e una prova che non prova niente maschera il gate invece di proteggerlo). Gate read-only `scripts/check-readme-facts.mjs` (15 check, 0 = in sync / 1 = drift / 2 = errore di ambiente) + test `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert) + 2 step bloccanti in `ci.yml` (posizioni 17-18); regola di ownership in `AGENTS.md` §"Ownership del `README.md`" (D.161.1); `12-DEVOPS.md` §9.8f nuova + §9.10 a 18 step; rimossi i 3 heading "## Changelog" duplicati (artefatto dei merge precedenti) |
+| 2.0 | 2026-10-27 (issue #161) | **§20 Issue #161 — Gate "fatti del README"** (Sessione 54, claim `kilo-HP-ELITEBOOK-8enl`, PR #165): 5 lesson (20-1 la prosa dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti) e capability non implementate come presenti: nessuno dei 16 gate confrontava la prosa con il codice, quindi i merge delle Story 1.2 e 1.3 non avevano toccato il README e la pipeline era rimasta verde; 20-2 il conteggio `EPIC 0 — 7/7` in prosa duplicava un dato dei blocchi aggregati: l'anti-pattern "puntatore, non copia" non copriva il README, che è un file ibrido senza tabella di ownership; 20-3 il blocco NEXT-STEP elenca solo le story già migrate in `docs/state/stories/`, e la prosa non lo diceva — un gate che pretendeva la verità da un blocco generato avrebbe prodotto un falso positivo sul titolo di una story; 20-4 il gate, alla prima esecuzione, passava sempre: il parsing di `ADAPTER_FACTORIES` si fermava al primo `=` (l'annotazione di tipo ne contiene uno) e la regex non riconosceva l'apostrofo curly di "Cosa c'è oggi"; 20-5 il test di scenario negativo T2 appendeva la riga `deezer` in fondo al file, fuori dal perimetro che il gate legge: la prova passava per il motivo sbagliato, e una prova che non prova niente maschera il gate invece di proteggerlo). Gate read-only `scripts/check-readme-facts.mjs` (15 check, 0 = in sync / 1 = drift / 2 = errore di ambiente) + test `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert) + 2 step bloccanti in `ci.yml` (posizioni 17-18); regola di ownership in `AGENTS.md` §"Ownership del `README.md`" (D.161.1); `12-DEVOPS.md` §9.8f nuova + §9.10 a 18 step; rimossi i 3 heading "## Changelog" duplicati (artefatto dei merge precedenti) |
 
 ---
 
@@ -8393,7 +8393,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: feat/161-readme-maintenance
-pr: 164
+pr: 165
 claim: kilo-HP-ELITEBOOK-8enl
 cross_refs: [161, 127, 149]
 tags: [devops, docs, feat]
@@ -8490,7 +8490,8 @@ cui la correzione del test precede l'ingresso in CI.
 
 ## Cross-refs
 
-- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`)
+- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`), chiusa dalla
+  **PR #165**
 - **#127** — ADR-0008 V3: il blocco `AGGREGATE-NEXT-STEP-*` del README, che ha
   reso il file ibrido
 - **#149** — la race fra i due writer di `main`: il motivo per cui il gate è

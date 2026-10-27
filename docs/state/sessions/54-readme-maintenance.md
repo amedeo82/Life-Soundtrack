@@ -7,7 +7,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: feat/161-readme-maintenance
-pr: 164
+pr: 165
 claim: kilo-HP-ELITEBOOK-8enl
 cross_refs: [161, 127, 149]
 tags: [devops, docs, feat]
@@ -104,7 +104,8 @@ cui la correzione del test precede l'ingresso in CI.
 
 ## Cross-refs
 
-- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`)
+- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`), chiusa dalla
+  **PR #165**
 - **#127** — ADR-0008 V3: il blocco `AGGREGATE-NEXT-STEP-*` del README, che ha
   reso il file ibrido
 - **#149** — la race fra i due writer di `main`: il motivo per cui il gate è
