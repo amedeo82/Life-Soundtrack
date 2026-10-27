@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 18:02
+> Data: 2026-10-27 17:07
 > Totale file: 98
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1535,7 +1535,7 @@ Apache License
 | 54 | Gate \"fatti del README\" — la prosa confrontata con il codice (issue #161) | 🟢 | ✅ | #165 |
 | 55 | Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle) | 🟢 | ✅ | #167 |
 | 56 | ADR-0011 — contratto di scrittura negli hub (ScrobbleSink) | 🟢 | ✅ | #170 |
-| 57 | Ratifica della spec Scrobbling hub + issue di implementazione (Story 1.5) | 🟡 | ❌ | - |
+| 57 | Ratifica della spec Scrobbling hub + issue di implementazione (Story 1.5) | 🟢 | ✅ | #174 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1575,7 +1575,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **34** (merge: 27)
+- Sessioni migrate in state/sessions: **34** (merge: 28)
 - Stories migrate in state/stories: **12** (done: 11)
 - Ultima sessione migrata: **S57** - Ratifica della spec Scrobbling hub + issue di implementazione (Story 1.5)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4
@@ -6247,8 +6247,8 @@ dentro la worktree è il caso normale).
 ### Sessione 57 - Ratifica della spec Scrobbling hub + issue di implementazione (Story 1.5)
 
 - **Data**: 2026-10-27
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #174 (4abb73ee5306a6b3a42a100ada73278b05376f7f, 2026-10-27)
 - **Claim**: `kilo-hp-elitebook-41xb`
 
 ```
@@ -6351,6 +6351,27 @@ in silenzio, perché nessun gate la confronta con il changelog.
 - `scripts/generate-bundle.ps1` — `$files`: i due file nuovi
 - `docs/BUNDLE.md` — rigenerato
 - Issue **#173** — implementazione della Story 1.5 (`agent-ready`, `size:L`)
+
+## Esito post-merge
+
+Ratificata dal Boss al merge della **PR #174** (`4abb73e`, 2026-10-27T16:59:24Z):
+`docs/20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** e l'issue **#172** è chiusa
+con `status:done`. Il doc-sync di questo frontmatter (PR number e merge commit)
+è avvenuto in una PR `docs:` successiva, perché il numero della PR non era
+noto quando il file è stato scritto (D.21.1: il doc-sync va nel branch della
+PR, ma il numero della PR si conosce solo dopo averla aperta).
+
+Automazioni post-merge: `auto-status-done` ha applicato `status:done` a #172,
+`auto-branch-cleanup` ha eliminato il branch remoto, `auto-state-aggregate` e
+`auto-bundle` hanno rigenerato i blocchi. Worktree e branch locale eliminati
+con `scripts/post-merge.ps1` (la rimozione della worktree ha richiesto
+`rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too
+large" quando il path Windows supera i 260 caratteri — con `node_modules`
+installati dentro la worktree è il caso normale).
+
+**Aperta in questa sessione**: l'**issue #173** (`agent-ready`, `size:L`),
+implementazione della Story 1.5 — 15 deliverable di `20§16`, 31 casi di test
+di `20§14.3`.
 
 ## Cross-refs
 
