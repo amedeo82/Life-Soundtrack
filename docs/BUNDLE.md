@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 16:32
+> Data: 2026-10-27 17:36
 > Totale file: 96
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1457,14 +1457,14 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 56 (v1.6.14) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 56 (v1.6.15) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 54 (v0.9) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml` |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` 🟡 DRAFT v0.1**) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
 | 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟡 DRAFT | Sessione 41 | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto |
-| 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟡 DRAFT | Sessione 55 (v0.1) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164) |
+| 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟡 DRAFT | Sessione 56 (v0.2) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164); punto aperto 1 chiuso: **ADR-0011 ratificata** (🟢 APPROVED v1.0, PR #170) |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
@@ -1476,7 +1476,7 @@ Apache License
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.2 | Diario cronologico per story: problemi, fix, lesson learned — §22: ADR-0011, il contratto di scrittura negli hub (issue #168) |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.3 | Diario cronologico per story: problemi, fix, lesson learned — §22: ADR-0011, il contratto di scrittura negli hub, e la sua ratifica (issue #168) |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -1587,8 +1587,8 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.4, `03-ADAPTERS/`, `05` v1.3, `10`, `11` v1.6.14, `14`, `16-OPERATIONS`) + 8 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010)
-- **Documenti DRAFT**: 13 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`, `20`) + ADR-0009 e ADR-0011 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `12` ora v0.9, `17` ora v0.2, `18` ora v2.2, `19` introdotto in Sessione 41, `20` introdotto in Sessione 55 (spec Story 1.5, issue #164), `0011` introdotto in Sessione 56 (contratto di scrittura `ScrobbleSink`, issue #168)
+- **Documenti APPROVED**: 7 documenti (`02` v1.4, `03-ADAPTERS/`, `05` v1.3, `10`, `11` v1.6.15, `14`, `16-OPERATIONS`) + 9 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010, 0011)
+- **Documenti DRAFT**: 13 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`, `20`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `12` ora v0.9, `17` ora v0.2, `18` ora v2.3, `19` introdotto in Sessione 41, `20` introdotto in Sessione 55 (spec Story 1.5, issue #164)
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -1602,7 +1602,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 56, issue #168): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged** e la **dedup** chiusa: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`), **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52) e **1.4 Dedup promozione post-enrichment ✅** (issue #160, Sessione 53): il job `rekey()` è ora transazionale, a sopravvivenza deterministica, riorienta i riferimenti non udibili e delega i contatori a `recount()`. La **Story 1.5** (scrobbling hub: invio scrobble + sync continua + toggle `scrobbleHubs`, con il percorso incrementale ListenBrainz `/listens` a cursore e l'adapter Maloja come scope Fase 2) ha ora la sua **spec dedicata**: `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55), che prende le cinque decisioni dell'issue #164 — hub della prima tranche (Last.fm + ListenBrainz), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso **per-hub**, coda `scrobbleOutbox` (Dexie v5) con chiave `hub|eventKey`, collocazione del documento — e ne aggiunge una che l'issue non sapeva di dover chiedere: **la PWA non osserva la riproduzione di altre app**, quindi la prima tranche è uno **specchio idempotente dello storico locale**, non uno scrobbling live (E.LF.21 resta risolto dalla scelta dell'md5 in JS puro). **Prossimo passo**: le due **ratifiche** del Boss — la spec (`20-SCROBBLING-HUB.md` v0.1 → v1.0 🟢, PR di approvazione separata come per `03-ADAPTERS/lastfm.md`) e l'**ADR-0011** (`13-ADR/0011-scrobble-sink.md` v0.1 → v1.0 🟢, scritta in Sessione 56, issue #168: decisione A1, `ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10, ratificato in `05§4.2`) → poi l'issue di implementazione della 1.5 (`agent-ready`, `size:L`, precedente #155). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 56, issue #168): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged** e la **dedup** chiusa: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`), **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52) e **1.4 Dedup promozione post-enrichment ✅** (issue #160, Sessione 53): il job `rekey()` è ora transazionale, a sopravvivenza deterministica, riorienta i riferimenti non udibili e delega i contatori a `recount()`. La **Story 1.5** (scrobbling hub: invio scrobble + sync continua + toggle `scrobbleHubs`, con il percorso incrementale ListenBrainz `/listens` a cursore e l'adapter Maloja come scope Fase 2) ha ora la sua **spec dedicata**: `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55), che prende le cinque decisioni dell'issue #164 — hub della prima tranche (Last.fm + ListenBrainz), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso **per-hub**, coda `scrobbleOutbox` (Dexie v5) con chiave `hub|eventKey`, collocazione del documento — e ne aggiunge una che l'issue non sapeva di dover chiedere: **la PWA non osserva la riproduzione di altre app**, quindi la prima tranche è uno **specchio idempotente dello storico locale**, non uno scrobbling live (E.LF.21 resta risolto dalla scelta dell'md5 in JS puro). **Prossimo passo**: la **ratifica della spec** del Boss (`20-SCROBBLING-HUB.md` v0.1 → v1.0 🟢, PR di approvazione separata come per `03-ADAPTERS/lastfm.md`: restano i punti aperti 2-5 di `20§18`) → poi l'issue di implementazione della 1.5 (`agent-ready`, `size:L`, precedente #155). Il **contratto di scrittura è ratificato**: ADR-0011 v1.0 🟢 APPROVED (PR #170, merge `8900c3b`, issue #168 chiusa) — decisione A1, `ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10 in `05§4.2`. Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -6525,8 +6525,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.2
-> Ultima modifica: 2026-10-27 — §22 Issue #168 (ADR-0011 — contratto di scrittura negli hub)
+> Versione: 2.3
+> Ultima modifica: 2026-10-27 — §22 Issue #168 (ADR-0011 ratificata 🟢 APPROVED v1.0)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -7198,10 +7198,10 @@ mezzo del lavoro.
 ## 22. Issue #168 — ADR-0011 "contratto di scrittura negli hub" (Sessione 56)
 
 **Tipo**: decisione architetturale (`docs`) — issue #168, claim `kilo-hp-elitebook-41xb`
-**Branch**: `feat/168-adr-0011-scrobble-sink` (worktree `ls-168-adr-0011-scrobble-sink`)
-**PR**: #170 (aperta su `main` dalla worktree)
+**Branch**: `feat/168-adr-0011-scrobble-sink` (worktree `ls-168-adr-0011-scrobble-sink`, rimossa post-merge)
+**PR**: #170 (aperta su `main` dalla worktree, **merged** `8900c3b` — 2026-10-27T16:31:39Z)
 **Data**: 2026-10-27
-**Stato**: ✅ completata — ADR `docs/13-ADR/0011-scrobble-sink.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) è il passo successivo, come per ADR-0010
+**Stato**: ✅ completata e **ratificata** — ADR `docs/13-ADR/0011-scrobble-sink.md` **v1.0 🟢 APPROVED** (ratifica del Boss al merge della PR #170, nessuna modifica di contenuto); `05§4.2` è la sede del contratto
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -7248,6 +7248,7 @@ mezzo del lavoro.
 | 2.0 | 2026-10-27 (issue #161) | **§20 Issue #161 — Gate "fatti del README"** (Sessione 54, claim `kilo-HP-ELITEBOOK-8enl`, PR #165): 5 lesson (20-1 la prosa dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti) e capability non implementate come presenti: nessuno dei 16 gate confrontava la prosa con il codice, quindi i merge delle Story 1.2 e 1.3 non avevano toccato il README e la pipeline era rimasta verde; 20-2 il conteggio `EPIC 0 — 7/7` in prosa duplicava un dato dei blocchi aggregati: l'anti-pattern "puntatore, non copia" non copriva il README, che è un file ibrido senza tabella di ownership; 20-3 il blocco NEXT-STEP elenca solo le story già migrate in `docs/state/stories/`, e la prosa non lo diceva — un gate che pretendeva la verità da un blocco generato avrebbe prodotto un falso positivo sul titolo di una story; 20-4 il gate, alla prima esecuzione, passava sempre: il parsing di `ADAPTER_FACTORIES` si fermava al primo `=` (l'annotazione di tipo ne contiene uno) e la regex non riconosceva l'apostrofo curly di "Cosa c'è oggi"; 20-5 il test di scenario negativo T2 appendeva la riga `deezer` in fondo al file, fuori dal perimetro che il gate legge: la prova passava per il motivo sbagliato, e una prova che non prova niente maschera il gate invece di proteggerlo). Gate read-only `scripts/check-readme-facts.mjs` (15 check, 0 = in sync / 1 = drift / 2 = errore di ambiente) + test `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert) + 2 step bloccanti in `ci.yml` (posizioni 17-18); regola di ownership in `AGENTS.md` §"Ownership del `README.md`" (D.161.1); `12-DEVOPS.md` §9.8f nuova + §9.10 a 18 step; rimossi i 3 heading "## Changelog" duplicati (artefatto dei merge precedenti) |
 | 2.1 | 2026-10-27 (issue #164) | **§21 Issue #164 — Spec Story 1.5 "Scrobbling hub"** (Sessione 55, claim `kilo-HP-ELITEBOOK-bmyx`): 4 lesson (21-1 la story descriveva una capacità che la piattaforma non ha — una PWA non osserva la riproduzione di altre app, quindi "sorgente continua di ascolti" (la formulazione di un client nativo) era irrealizzabile: la prima tranche è uno specchio idempotente dello storico locale; 21-2 la granularità al minuto è un artefatto della chiave di dedup del percorso di lettura e non una semantica dell'evento: applicarla al payload di invio avrebbe fatto perdere la distinzione fra due scrobble distinti; 21-3 la firma `api_sig` in batch ordina i nomi indicizzati **come stringhe**: `artist[10]` prima di `artist[2]`, e il difetto emerge solo con ≥ 10 elementi in un lotto; 21-4 la coda non può stare in `settings` (impostazioni, non code): serve la tabella `scrobbleOutbox` con schema Dexie v5, PK `hub\|eventKey` e scrittura write-ahead). Spec `docs/20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT: 5 decisioni dell'issue #164 + D-SH.1…D-SH.10, contratto `ScrobbleSink` (da ratificare via ADR-0011), mappa `ScrobbleError` separata da `AdapterError`, 16 edge case, 15 codici i18n, 29 casi di test, 15 deliverable di implementazione |
 | 2.2 | 2026-10-27 (issue #168) | **§22 Issue #168 — ADR-0011 "contratto di scrittura negli hub"** (Sessione 56, claim `kilo-hp-elitebook-41xb`, PR #170): 5 lesson (56-1 un ADR che dichiara **dove vive** un contratto e una spec che dichiara **cosa contiene** un protocollo non sono lo stesso atto: il primo è architetturale (`05§4` è APPROVED → serve ADR), il secondo è di protocollo (🟡 DRAFT → serve ratifica); confonderli crea un blocco — finché la spec è DRAFT, i documenti APPROVED che essa tocca (`02`, `09`, `08`) non si possono modificare, e l'ADR deve **dichiarare** l'elenco dei documenti da aggiornare senza toccarli; 56-2 la simmetria con il precedente ADR è la leva della decisione: `parseRemote?()` ha risolto "l'adapter non ha un file" con un metodo opzionale, "l'hub non è un adapter" si risolve con un'interfaccia dedicata — stessa forma, opposta direzione; 56-3 `recoverable` non è un nome neutro: la stessa bandiera booleana con due semantiche (`AdapterError` = "persistito", `ScrobbleError` = "ritentabile") è un errore di remediation, quindi la classe di errore va nominata e tipizzata per il dominio che descrive; 56-4 il payload chiuso per costruzione (dal tipo, non dalla policy) è la forma forte di una promessa di privacy: "non inviare l'IP" è una promessa che un refactor dimentica, un campo inesistente non può essere inviato; 56-5 una riga di changelog appesa fuori dalla tabella non è un difetto di formattazione: è un documento con l'header rotto — la riga della v1.2 di `05-ARCHITECTURE.md` stava **prima del titolo**, e i gate che contano le versioni non lo vedono). ADR `docs/13-ADR/0011-scrobble-sink.md` v0.1 🟡 DRAFT: decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`), vincoli V1-V10, alternative A2-A5 scartate, garanzie G-SH.1…G-SH.6 recepite dalla spec; `05§4.2` aggiunta (v1.3) |
+| 2.3 | 2026-10-27 (issue #168) | **§22 — ratifica dell'ADR-0011**: il merge della PR #170 (`8900c3b`, 2026-10-27T16:31:39Z) è la ratifica del Boss → `docs/13-ADR/0011-scrobble-sink.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**, **nessuna modifica di contenuto** (stesso pattern di ADR-0010, PR #152 → commit di promozione `90aded0`). Il punto aperto 1 della spec (`20§18`) è chiuso: restano i punti 2-5, che sono decisioni di **protocollo** e non del contratto. Doc-sync: `05-ARCHITECTURE.md` (riga degli ADR collegati: 0011 🟢 APPROVED v1.0), `docs/INDEX.md` (riga `13-ADR/`, ADR APPROVED 8 → **9**, riga `11`, "Prossimo step tecnico"), `docs/11-BACKLOG.md` (Story 1.5: dipendenza **soddisfatta**, AC `[x]`, riga roadmap, v1.6.15), `docs/state/sessions/56-*.md` (`state: 🟢`, `merged: true`, merge commit `8900c3b`), `docs/state/_index.md`, `docs/20-SCROBBLING-HUB.md` §18 punto 1. Esito post-merge: `auto-status-done` ha applicato `status:done` a #168 e chiuso l'issue, `auto-branch-cleanup` ha eliminato il branch remoto, `auto-state-aggregate` + `auto-bundle` hanno rigenerato i blocchi; worktree e branch locale eliminati con `scripts/post-merge.ps1` (la rimozione della worktree ha richiesto `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
 
 ---
 
@@ -7452,7 +7453,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/53-story-1-4-rekey.md` | ✅ creata | Sessione 53 (issue #160): `rekey()` — promozione dedup post-enrichment (Story 1.4) |
 | `state/sessions/54-readme-maintenance.md` | ✅ creata | Sessione 54 (issue #161): gate read-only "fatti del README" (prosa confrontata con il codice) + ownership del `README.md` (`AGENTS.md` D.161.1) |
 | `state/sessions/55-scrobbling-hub-spec.md` | ✅ creata | Sessione 55 (issue #164): spec della Story 1.5 "Scrobbling hub" (`docs/20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT) — contratto di scrittura `ScrobbleSink`, coda `scrobbleOutbox`, consenso per-hub |
-| `state/sessions/56-adr-0011-scrobble-sink.md` | ✅ creata | Sessione 56 (issue #168): ADR-0011 — il **contratto di scrittura** negli hub (`ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10), ratificato in `05§4.2` |
+| `state/sessions/56-adr-0011-scrobble-sink.md` | ✅ creata | Sessione 56 (issue #168): ADR-0011 — il **contratto di scrittura** negli hub (`ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10), ratificato in `05§4.2` — **merged** (PR #170, `8900c3b`), ADR 🟢 APPROVED v1.0 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -9069,10 +9070,10 @@ elementi.
 number: 56
 title: "ADR-0011 — contratto di scrittura negli hub (ScrobbleSink)"
 date: 2026-10-27
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "8900c3b686e2ae9fa7271638fd0e314eb1120c88"
+merged_date: 2026-10-27
 branch: feat/168-adr-0011-scrobble-sink
 pr: 170
 claim: kilo-hp-elitebook-41xb
@@ -9186,6 +9187,24 @@ rende visibile la presa in carico anche quando la label non era pronta.
   propria) questo ADR replica sulla direzione opposta
 - `docs/13-ADR/0010-remote-source-adapter.md` — il contratto `parseRemote?()` che il
   percorso incrementale ListenBrainz deve implementare
+
+## Esito post-merge
+
+Ratificata dal Boss al merge della PR #170 (`8900c3b`, 2026-10-27T16:31:39Z).
+Promozione a **🟢 APPROVED v1.0** nella PR di doc-sync successiva (stesso pattern
+di ADR-0010, PR #152): **nessuna modifica di contenuto**. L'ADR chiude il punto
+aperto 1 della spec (`20§18`); restano i punti 2-5, che sono decisioni di
+**protocollo** (firma md5, finestra di candidatura, durata di catalogo ignota,
+contratto del proxy Last.fm per la scrittura) e non del contratto.
+
+Automazioni post-merge: `auto-status-done` ha applicato `status:done` all'issue
+#168 e l'ha chiusa, `auto-branch-cleanup` ha eliminato il branch remoto,
+`auto-state-aggregate` e `auto-bundle` hanno rigenerato i blocchi aggregati e il
+bundle. Worktree `ls-168-adr-0011-scrobble-sink` e branch locale eliminati con
+`scripts/post-merge.ps1` (la rimozione della worktree ha richiesto
+`rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too
+large" quando il path Windows supera i 260 caratteri — con `node_modules` installati
+dentro la worktree è il caso normale).
 
 
 
@@ -13512,7 +13531,7 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 > Status: 🟢 APPROVED
 > Versione: 1.3
 > Ultima modifica: Sessione 56 (2026-10-27) — §4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)
-> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟡 DRAFT v0.1)
+> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟢 APPROVED v1.0)
 
 ---
 
@@ -15480,7 +15499,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.14 · Sessione 56 (2026-10-27, issue #168) · **ADR-0011** scritta (`docs/13-ADR/0011-scrobble-sink.md` v0.1 🟡 DRAFT): il contratto di scrittura `ScrobbleSink` è ratificato dentro `05§4.2`
+> Status: 🟢 APPROVED · Versione 1.6.15 · Sessione 56 (2026-10-27, issue #168) · **ADR-0011 ratificata** (`docs/13-ADR/0011-scrobble-sink.md` v1.0 🟢 APPROVED, PR #170, merge `8900c3b`): il contratto di scrittura `ScrobbleSink` è vincolante in `05§4.2`
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -15799,7 +15818,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: Sorgente continua di ascolti tramite hub di scrobbling. Risolve il vuoto V4 dell'audit.
 
-**Stato**: ⬚ TODO — spec scritta in `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55, issue #164): le cinque decisioni richieste dall'issue sono prese (D-SH.1…D-SH.10) e la ratifica è il passo successivo. **Contratto di scrittura scritto** in `docs/13-ADR/0011-scrobble-sink.md` v0.1 (🟡 DRAFT, Sessione 56, issue #168) e ratificato dentro `05§4.2`: la dipendenza ADR-0011 è **soddisfatta nel contenuto**, non più nella forma. **Non** implementabile finché la spec e l'ADR non sono 🟢 APPROVED (le ratifiche sono atti del Boss: PR separate, come per `03-ADAPTERS/lastfm.md` e ADR-0010).
+**Stato**: ⬚ TODO — spec scritta in `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55, issue #164): le cinque decisioni richieste dall'issue sono prese (D-SH.1…D-SH.10) e la ratifica è il passo successivo. **Contratto di scrittura ratificato**: `docs/13-ADR/0011-scrobble-sink.md` **v1.0 🟢 APPROVED** (Sessione 56, issue #168 chiusa; ratifica del Boss al merge della PR #170, `8900c3b`) e recepito in `05§4.2`: la dipendenza ADR-0011 è **soddisfatta**. **Non** implementabile finché la **spec** non è 🟢 APPROVED (i punti aperti 2-5 di `20§18` restano da decidere: ratifica del Boss in PR separata, come per `03-ADAPTERS/lastfm.md`).
 
 **Task**:
 - T1.5.1 — ~~Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)~~ → **spostato alla Story 1.3** (Sessione 47)
@@ -15819,11 +15838,11 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura) → `20§10.1` (P-SH.1, P-SH.3) · `20§15` AC-SH.1
 - [ ] Invio scrobble funzionante verso i hub configurati → `20§5`, `20§6` · `20§15` AC-SH.2, AC-SH.3
 - [ ] Test con mock API → `20§14` (29 casi, nessuna dipendenza nuova)
-- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). Il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1, issue **#168**) — **scritto** in `13-ADR/0011-scrobble-sink.md` v0.1 (🟡 DRAFT, Sessione 56), decisione A1 (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), con i vincoli V1-V10 ratificati in `05§4.2`; resta la **ratifica** (v1.0 🟢, PR di approvazione separata)
+- [x] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). Il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1, issue **#168**) — **soddisfatto**: `13-ADR/0011-scrobble-sink.md` **v1.0 🟢 APPROVED** (PR #170, merge `8900c3b`, issue #168 chiusa), decisione A1 (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli V1-V10 in `05§4.2`
 
-**Spec**: `20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT, Sessione 55) · `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8, E.LF.21; `03-ADAPTERS/listenbrainz.md` §3.4, D-LB.5 · **contratto di scrittura**: `13-ADR/0011-scrobble-sink.md` (v0.1 🟡 DRAFT, Sessione 56) → `05§4.2`
+**Spec**: `20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT, Sessione 55) · `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8, E.LF.21; `03-ADAPTERS/listenbrainz.md` §3.4, D-LB.5 · **contratto di scrittura**: `13-ADR/0011-scrobble-sink.md` (v1.0 🟢 APPROVED, Sessione 56) → `05§4.2`
 
-**Issue**: #164 (spec) · #168 (ADR-0011) · issue di implementazione: da aprire all'approvazione della spec (precedente: #155 per la Story 1.3)
+**Issue**: #164 (spec) · #168 (ADR-0011, chiusa con `status:done`) · issue di implementazione: da aprire all'approvazione della spec (precedente: #155 per la Story 1.3)
 
 ---
 
@@ -16022,7 +16041,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2. **Sessione 55 (issue #164)**: spec scritta in `20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT — le 5 decisioni dell'issue sono prese (D-SH.1…D-SH.10). **Sessione 56 (issue #168)**: **ADR-0011** scritta (`13-ADR/0011-scrobble-sink.md` v0.1 🟡 DRAFT) — decisione A1 (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli V1-V10, `05§4.2` aggiornata. Restano le due ratifiche (spec v1.0 🟢 e ADR v1.0 🟢), poi l'issue di implementazione (`agent-ready`, `size:L`) |
+| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2. **Sessione 55 (issue #164)**: spec scritta in `20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT — le 5 decisioni dell'issue sono prese (D-SH.1…D-SH.10). **Sessione 56 (issue #168)**: **ADR-0011 ratificata** (`13-ADR/0011-scrobble-sink.md` v1.0 🟢 APPROVED, PR #170, merge `8900c3b`) — decisione A1 (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli V1-V10, `05§4.2`. Resta la **ratifica della spec** (v1.0 🟢, punti aperti 2-5 di `20§18`), poi l'issue di implementazione (`agent-ready`, `size:L`) |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -16074,6 +16093,7 @@ Ogni story deve avere label GitHub:
 | 1.6.12 | Sessione 54 (2026-10-27, issue #161) | **Conteggio EPIC 1 allineato**: la riga di stato legacy dichiarava `EPIC 1 — Import core: 2/5 ✅` dal 2026-10-22, ma la 1.3 (PR #158, merge `7afbf03`) e la 1.4 (PR #162, merge `471a049`) erano state completate senza allineare la riga → `4/5 ✅` (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment). La fonte di verità per lo stato delle story resta il blocco aggregato `AGGREGATE-STORIES-*`; questa riga è una **copia di conteggio** legacy, ed è il tipo di duplicazione che l'issue #161 ha introdotto un gate per (prosa del README confrontata con il codice). Aggiornata anche la nota "Aggiornato al …" con la provenienza del drift |
 | 1.6.13 | Sessione 55 (2026-10-27, issue #164) | **Spec della Story 1.5 scritta**: `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT). Risponde alle 5 decisioni richieste dall'issue (hub della prima tranche, semantica dell'invio, consenso per-hub, coda e idempotenza, collocazione del documento) e ne aggiunge una che l'issue non sapeva di dover chiedere: **la PWA non osserva la riproduzione di altre app**, quindi la prima tranche è uno specchio idempotente dello storico locale, non uno scrobbling live. Definiti il contratto `ScrobbleSink` (da ratificare via **ADR-0011**), la mappa `ScrobbleError` (separata da `AdapterError`, orientato al parsing), i vincoli di protocollo dei due hub verificati sulle doc ufficiali, 16 edge case, 15 codici i18n, 29 casi di test e 15 deliverable di implementazione. Sezione Story 1.5 allineata (`**Stato**:` con la premessa nuova, task con i rimandi ai §, AC con i cross-ref alla spec, `**Spec**:` e `**Issue**:`); riga roadmap aggiornata. La story resta `⬚ TODO`: non è implementabile finché la spec non è 🟢 APPROVED e ADR-0011 non è ratificato |
 | 1.6.14 | Sessione 56 (2026-10-27, issue #168) | **ADR-0011 scritta**: `docs/13-ADR/0011-scrobble-sink.md` v0.1 (🟡 DRAFT) formalizza la decisione sul **contratto di scrittura** negli hub di scrobbling, che `05§4` (🟢 APPROVED) poteva recepire solo via ADR — lo stesso percorso di ADR-0010 sul lato della lettura. Decisione **A1**: l'interfaccia `ScrobbleSink` è **separata** da `PlatformAdapter` (che non cambia), con la stessa forma di `parseRemote?()`; scartate A2 (metodo `scrobble?()` su `PlatformAdapter`), A3 (nessuna astrazione), A4 (flag "write" su `RemoteSource`) e A5 (contratto bidirezionale unico). Vincoli **V1-V10**: separazione dal contratto di lettura, rate limiting per-hub **nel sink**, nessun segreto nel bundle, nessun backend, `AbortSignal`, `ScrobbleError` dedicato (`recoverable` = "si può ritentare"), `ScrobbleHubId` dedicato, payload chiuso per costruzione, protocollo ignoto al core, idempotenza locale write-ahead. `05-ARCHITECTURE.md` §4.2 aggiunta (v1.1 → **v1.3**, con la riga di changelog v1.2 della Sessione 53 riposizionata nella tabella: era stata appesa in cima al file). Sezione Story 1.5 allineata (`**Stato**:` con la dipendenza **soddisfatta nel contenuto**, AC della dipendenza, `**Spec**:` e `**Issue**:`), riga roadmap aggiornata. La story resta `⬚ TODO`: mancano le due **ratifiche** (spec v1.0 🟢 e ADR v1.0 🟢), atti del Boss in PR separate |
+| 1.6.15 | Sessione 56 (2026-10-27, issue #168) | **ADR-0011 ratificata**: il merge della PR #170 (`8900c3b`) è la ratifica del Boss → `docs/13-ADR/0011-scrobble-sink.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**, **nessuna modifica di contenuto** (stesso pattern di ADR-0010, PR #152). La decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`) e i vincoli V1-V10 diventano vincolanti: `05§4.2` è la loro sede e `05` header aggiornato. Allineati: `docs/INDEX.md` (riga `13-ADR/`, conteggio ADR APPROVED 8 → **9**, DRAFT solo 0009, riga `11`, "Prossimo step tecnico"); `docs/11-BACKLOG.md` (Story 1.5 `**Stato**:` con la dipendenza **soddisfatta**, AC della dipendenza `[x]`, `**Spec**:` e `**Issue**:`; riga roadmap; header v1.6.15); `docs/18-DEV-LOG.md` §22 (ratifica) + changelog 2.3; `docs/state/sessions/56-*.md` (frontmatter: `state: 🟢`, `merged: true`, merge commit `8900c3b`); `docs/state/_index.md`; `docs/20-SCROBBLING-HUB.md` §18 punto 1 chiuso (restano i punti 2-5). La story resta `⬚ TODO`: manca solo la **ratifica della spec** (punti aperti 2-5 di `20§18`) |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -17632,7 +17652,7 @@ interface ParseOptions {
 
 # ADR-0011 — Il contratto di scrittura negli hub di scrobbling (`ScrobbleSink`)
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 56 (2026-10-27)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 56 (2026-10-27)
 > Issue: #168 · Story: 1.5 (Scrobbling hub)
 > Spec di riferimento: [`../20-SCROBBLING-HUB.md`](../20-SCROBBLING-HUB.md) v0.1 (🟡 DRAFT, Sessione 55, issue #164) §4
 > Precedente: [`0010-remote-source-adapter.md`](0010-remote-source-adapter.md) — il percorso di **lettura** remota
@@ -17853,7 +17873,7 @@ La ratifica di questo contratto dentro `05-ARCHITECTURE.md` §4 è l'atto che qu
 
 ## Punti aperti
 
-1. ~~**Il contratto di scrittura dentro `05§4`**~~ — **risolto da questo ADR**: la decisione è A1 (interfaccia `ScrobbleSink` separata), con i vincoli V1-V10 e le alternative A2-A5 scartate. Resta la ratifica formale (v0.1 🟡 DRAFT → v1.0 🟢 APPROVED al merge della PR, come per ADR-0010).
+1. ~~**Il contratto di scrittura dentro `05§4`**~~ — **risolto da questo ADR**: la decisione è A1 (interfaccia `ScrobbleSink` separata), con i vincoli V1-V10 e le alternative A2-A5 scartate. **Ratificato dal Boss al merge della PR #170 (`8900c3b`): l'ADR passa a 🟢 APPROVED v1.0, nessuna modifica di contenuto.**
 2. **I punti aperti della spec restano aperti** e non sono risolti da questo ADR: la firma md5 (JS puro o dipendenza), la finestra di candidatura predefinita, la durata di catalogo sconosciuta, il contratto del proxy Last.fm per la scrittura (`20§18` punti 2-5). Sono decisioni della **spec**, non del contratto: l'ADR dice *dove* vive `ScrobbleSink`, non *cosa* ci mette dentro il protocollo.
 3. **Il percorso live (now playing) resta fuori perimetro.** `05§4.2` fissa il contratto di invio di scrobble storici; il "now playing" (`track.updateNowPlaying`, `playing_now`) è un'operazione diversa, con semantica diversa (non è un ascolto finito: non ha una regola di maturità). Se un giorno entra, avrà bisogno di un contratto proprio — o di un tipo di payload distinto — e l'ADR va esteso, non stirato.
 4. **Il percorso incrementale di ListenBrainz non è un sink.** La sync continua (`20§9`) va dall'hub al DB locale: è il percorso di **lettura**, e usa il contratto di ADR-0010 (`parseRemote?()`), non questo. L'ADR non crea un terzo contratto: due direzioni, due contratti, nessuna sovrapposizione.
@@ -17876,6 +17896,7 @@ La ratifica di questo contratto dentro `05-ARCHITECTURE.md` §4 è l'atto che qu
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 56 (2026-10-27, issue #168) | Prima stesura. Decide **A1**: il contratto di scrittura vive in un'interfaccia `ScrobbleSink` separata da `PlatformAdapter`, con la stessa forma di `parseRemote?()` (ADR-0010). Fissa i vincoli **V1-V10** (separazione dal contratto di lettura con riuso della forma, rate limiting per-hub nel sink, nessun segreto nel bundle, nessun backend, `AbortSignal`, `ScrobbleError` dedicato con `recoverable` = "si può ritentare", `ScrobbleHubId` dedicato, payload chiuso per costruzione, protocollo ignoto al core, idempotenza locale write-ahead) e recepisce le garanzie G-SH.1…G-SH.6 della spec. Scarta A2 (metodo `scrobble?()` su `PlatformAdapter`), A3 (nessuna astrazione), A4 (flag "write" su `RemoteSource`) e A5 (contratto bidirezionale unico). Dichiara l'elenco dei documenti da aggiornare: `05§4` in questa PR, `02§3.8`+`§6`, `09§3.3`+`§4` e `08-COPY-I18N.md` alla ratifica della spec. Quattro punti aperti: i punti 2-5 della spec (`20§18`) restano alla spec; il percorso live (now playing) resta fuori perimetro; il percorso incrementale ListenBrainz resta sul contratto di lettura |
+| 1.0 | Sessione 56 (2026-10-27, issue #168) | 🟢 APPROVED · **Ratifica del Boss al merge della PR #170** (`8900c3b`) — **nessuna modifica di contenuto**. L'ADR passa da 🟡 DRAFT v0.1 a 🟢 APPROVED v1.0: la decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`) e i vincoli V1-V10 diventano vincolanti, e `05§4.2` è la loro sede. È il punto aperto 1 della spec `20-SCROBBLING-HUB.md` (§18), che si chiude. Restano aperti i punti 2-5 della spec, che sono decisioni di **protocollo** e non del contratto |
 
 
 
@@ -18596,10 +18617,10 @@ E1..E10 restano invariati (§5 `01-PLATFORMS.md`); E11..E15 si aggiungono a cata
 
 # 20 — Scrobbling hub (invio scrobble, sync continua, toggle)
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 55 (2026-10-27)
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 55 (2026-10-27)
 > Issue: #164 · Story: 1.5 (`11-BACKLOG.md`)
-> Spec collegata a: `01-PLATFORMS.md` §3.7-3.8 · `02-DATA-SCHEMA.md` §3.8 · `03-ADAPTERS/lastfm.md` · `03-ADAPTERS/listenbrainz.md` · `13-ADR/0010-remote-source-adapter.md`
-> Da ratificare in: `05-ARCHITECTURE.md` §4 (via **ADR-0011**, vedi §18) · `02-DATA-SCHEMA.md` §3.8 e §6 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §2
+> Spec collegata a: `01-PLATFORMS.md` §3.7-3.8 · `02-DATA-SCHEMA.md` §3.8 · `03-ADAPTERS/lastfm.md` · `03-ADAPTERS/listenbrainz.md` · `13-ADR/0010-remote-source-adapter.md` · `13-ADR/0011-scrobble-sink.md` (🟢 APPROVED v1.0)
+> Da ratificare in: `05-ARCHITECTURE.md` §4 — **fatto**: il contratto di scrittura è ratificato in `05§4.2` via **ADR-0011** (v1.0 🟢 APPROVED, Sessione 56, issue #168; vedi §18 punto 1) · restano da ratificare `02-DATA-SCHEMA.md` §3.8 e §6 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §2
 > Decisione architetturale collegata: [`13-ADR/0010-remote-source-adapter.md`](13-ADR/0010-remote-source-adapter.md) (percorso **di lettura** remota — questa spec copre il percorso **di scrittura**)
 
 ---
@@ -19163,7 +19184,7 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 
 ## 18. Punti aperti (bloccano la ratifica)
 
-1. **ADR-0011 — il contratto di scrittura dentro `05§4`.** `05-ARCHITECTURE.md` §4 è 🟢 APPROVED: modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). Il contenuto dell'ADR è **già definito** da §4 di questa spec; l'ADR formalizza la decisione e le alternative (metodo su `PlatformAdapter` vs `ScrobbleSink` dedicato vs nessuna astrazione). **Issue aperta: #168** (`needs-spec`, `area:adapter`, `size:M`, `phase-1`).
+1. ~~**ADR-0011 — il contratto di scrittura dentro `05§4`.**~~ — **risolto nella Sessione 56 (issue #168, chiusa con `status:done`)**: `05-ARCHITECTURE.md` §4 è 🟢 APPROVED e modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). L'ADR è scritto in [`13-ADR/0011-scrobble-sink.md`](13-ADR/0011-scrobble-sink.md) e **ratificato dal Boss al merge della PR #170** (`8900c3b`): decisione **A1** (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli **V1-V10**, alternative A2-A5 scartate. Il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). I punti 2-5 restano aperti e sono decisioni di **protocollo**, non del contratto.
 2. **Firma md5: JS puro o dipendenza esterna.** La proposta è JS puro in `crypto.ts` (D-SH.2), per non aggiungere dipendenze a un bundle PWA. La controparte è una dipendenza mantenuta (`hash-wasm`), che aggiunge peso ma ha una garanzia di correttezza documentata. **Da ratificare.**
 3. **Finestra di candidatura predefinita.** §5 la richiede ma non la fissa: 24 h, 7 giorni o "fino all'ultimo sync"? Il default influenza sia l'uso (quanti scrobble escono) sia il costo (quante richieste). **Da ratificare.**
 4. **Durata di catalogo sconosciuta: inviare o no?** T-SH.3 dice che senza durata nota l'evento non matura (E.SH.11), il che **esclude** la maggior parte degli ascolti provenienti da Last.fm e ListenBrainz (durata `0`): alternative possibili sono usare la soglia dei 4 minuti sul tempo trascorso, o inviare comunque. **Da ratificare** — è la decisione con il maggiore impatto sul comportamento reale.
@@ -19176,6 +19197,7 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 55 (2026-10-27, issue #164) | Prima stesura. Risponde alle 5 decisioni richieste dall'issue (D-SH.1…D-SH.10): hub della prima tranche (Last.fm + ListenBrainz, Maloja Fase 2), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso per-hub indipendente dagli altri toggle, coda con tabella Dexie v5 e chiave `hub|eventKey`, collocazione del documento (`docs/20-SCROBBLING-HUB.md`). Dichiara la premessa mancante nella issue: la PWA non osserva la riproduzione di altre app, quindi la prima tranche è uno specchio dello storico locale, non uno scrobbling live. Definisce il contratto `ScrobbleSink` (da ratificare via ADR-0011), la mappa `ScrobbleError` (separata da `AdapterError`, che è orientato al parsing), i vincoli di protocollo dei due hub verificati sulle doc ufficiali, 16 edge case, 15 codici i18n, 29 casi di test e 15 deliverable di implementazione |
+| 0.2 | Sessione 56 (2026-10-27, issue #168) | **Aggiornamento di stato, non di contenuto**: il punto aperto 1 (§18) è chiuso — l'**ADR-0011** è scritta (`13-ADR/0011-scrobble-sink.md`) e **ratificata dal Boss al merge della PR #170** (`8900c3b`): decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`), vincoli V1-V10, alternative A2-A5 scartate; il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). Header aggiornato (versione 0.2, ADR collegato, percorso di ratifica residuo). Le decisioni D-SH.1…D-SH.10, i vincoli di protocollo e i punti aperti **2-5** restano quelli di v0.1: la ratifica della spec (v1.0 🟢) è ancora l'atto che manca |
 
 
 

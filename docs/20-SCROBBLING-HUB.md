@@ -1,9 +1,9 @@
 # 20 — Scrobbling hub (invio scrobble, sync continua, toggle)
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 55 (2026-10-27)
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 55 (2026-10-27)
 > Issue: #164 · Story: 1.5 (`11-BACKLOG.md`)
-> Spec collegata a: `01-PLATFORMS.md` §3.7-3.8 · `02-DATA-SCHEMA.md` §3.8 · `03-ADAPTERS/lastfm.md` · `03-ADAPTERS/listenbrainz.md` · `13-ADR/0010-remote-source-adapter.md`
-> Da ratificare in: `05-ARCHITECTURE.md` §4 (via **ADR-0011**, vedi §18) · `02-DATA-SCHEMA.md` §3.8 e §6 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §2
+> Spec collegata a: `01-PLATFORMS.md` §3.7-3.8 · `02-DATA-SCHEMA.md` §3.8 · `03-ADAPTERS/lastfm.md` · `03-ADAPTERS/listenbrainz.md` · `13-ADR/0010-remote-source-adapter.md` · `13-ADR/0011-scrobble-sink.md` (🟢 APPROVED v1.0)
+> Da ratificare in: `05-ARCHITECTURE.md` §4 — **fatto**: il contratto di scrittura è ratificato in `05§4.2` via **ADR-0011** (v1.0 🟢 APPROVED, Sessione 56, issue #168; vedi §18 punto 1) · restano da ratificare `02-DATA-SCHEMA.md` §3.8 e §6 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §2
 > Decisione architetturale collegata: [`13-ADR/0010-remote-source-adapter.md`](13-ADR/0010-remote-source-adapter.md) (percorso **di lettura** remota — questa spec copre il percorso **di scrittura**)
 
 ---
@@ -567,7 +567,7 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 
 ## 18. Punti aperti (bloccano la ratifica)
 
-1. **ADR-0011 — il contratto di scrittura dentro `05§4`.** `05-ARCHITECTURE.md` §4 è 🟢 APPROVED: modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). Il contenuto dell'ADR è **già definito** da §4 di questa spec; l'ADR formalizza la decisione e le alternative (metodo su `PlatformAdapter` vs `ScrobbleSink` dedicato vs nessuna astrazione). **Issue aperta: #168** (`needs-spec`, `area:adapter`, `size:M`, `phase-1`).
+1. ~~**ADR-0011 — il contratto di scrittura dentro `05§4`.**~~ — **risolto nella Sessione 56 (issue #168, chiusa con `status:done`)**: `05-ARCHITECTURE.md` §4 è 🟢 APPROVED e modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). L'ADR è scritto in [`13-ADR/0011-scrobble-sink.md`](13-ADR/0011-scrobble-sink.md) e **ratificato dal Boss al merge della PR #170** (`8900c3b`): decisione **A1** (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli **V1-V10**, alternative A2-A5 scartate. Il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). I punti 2-5 restano aperti e sono decisioni di **protocollo**, non del contratto.
 2. **Firma md5: JS puro o dipendenza esterna.** La proposta è JS puro in `crypto.ts` (D-SH.2), per non aggiungere dipendenze a un bundle PWA. La controparte è una dipendenza mantenuta (`hash-wasm`), che aggiunge peso ma ha una garanzia di correttezza documentata. **Da ratificare.**
 3. **Finestra di candidatura predefinita.** §5 la richiede ma non la fissa: 24 h, 7 giorni o "fino all'ultimo sync"? Il default influenza sia l'uso (quanti scrobble escono) sia il costo (quante richieste). **Da ratificare.**
 4. **Durata di catalogo sconosciuta: inviare o no?** T-SH.3 dice che senza durata nota l'evento non matura (E.SH.11), il che **esclude** la maggior parte degli ascolti provenienti da Last.fm e ListenBrainz (durata `0`): alternative possibili sono usare la soglia dei 4 minuti sul tempo trascorso, o inviare comunque. **Da ratificare** — è la decisione con il maggiore impatto sul comportamento reale.
@@ -580,3 +580,4 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 55 (2026-10-27, issue #164) | Prima stesura. Risponde alle 5 decisioni richieste dall'issue (D-SH.1…D-SH.10): hub della prima tranche (Last.fm + ListenBrainz, Maloja Fase 2), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso per-hub indipendente dagli altri toggle, coda con tabella Dexie v5 e chiave `hub|eventKey`, collocazione del documento (`docs/20-SCROBBLING-HUB.md`). Dichiara la premessa mancante nella issue: la PWA non osserva la riproduzione di altre app, quindi la prima tranche è uno specchio dello storico locale, non uno scrobbling live. Definisce il contratto `ScrobbleSink` (da ratificare via ADR-0011), la mappa `ScrobbleError` (separata da `AdapterError`, che è orientato al parsing), i vincoli di protocollo dei due hub verificati sulle doc ufficiali, 16 edge case, 15 codici i18n, 29 casi di test e 15 deliverable di implementazione |
+| 0.2 | Sessione 56 (2026-10-27, issue #168) | **Aggiornamento di stato, non di contenuto**: il punto aperto 1 (§18) è chiuso — l'**ADR-0011** è scritta (`13-ADR/0011-scrobble-sink.md`) e **ratificata dal Boss al merge della PR #170** (`8900c3b`): decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`), vincoli V1-V10, alternative A2-A5 scartate; il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). Header aggiornato (versione 0.2, ADR collegato, percorso di ratifica residuo). Le decisioni D-SH.1…D-SH.10, i vincoli di protocollo e i punti aperti **2-5** restano quelli di v0.1: la ratifica della spec (v1.0 🟢) è ancora l'atto che manca |

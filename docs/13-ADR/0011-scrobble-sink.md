@@ -1,6 +1,6 @@
 # ADR-0011 — Il contratto di scrittura negli hub di scrobbling (`ScrobbleSink`)
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 56 (2026-10-27)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 56 (2026-10-27)
 > Issue: #168 · Story: 1.5 (Scrobbling hub)
 > Spec di riferimento: [`../20-SCROBBLING-HUB.md`](../20-SCROBBLING-HUB.md) v0.1 (🟡 DRAFT, Sessione 55, issue #164) §4
 > Precedente: [`0010-remote-source-adapter.md`](0010-remote-source-adapter.md) — il percorso di **lettura** remota
@@ -221,7 +221,7 @@ La ratifica di questo contratto dentro `05-ARCHITECTURE.md` §4 è l'atto che qu
 
 ## Punti aperti
 
-1. ~~**Il contratto di scrittura dentro `05§4`**~~ — **risolto da questo ADR**: la decisione è A1 (interfaccia `ScrobbleSink` separata), con i vincoli V1-V10 e le alternative A2-A5 scartate. Resta la ratifica formale (v0.1 🟡 DRAFT → v1.0 🟢 APPROVED al merge della PR, come per ADR-0010).
+1. ~~**Il contratto di scrittura dentro `05§4`**~~ — **risolto da questo ADR**: la decisione è A1 (interfaccia `ScrobbleSink` separata), con i vincoli V1-V10 e le alternative A2-A5 scartate. **Ratificato dal Boss al merge della PR #170 (`8900c3b`): l'ADR passa a 🟢 APPROVED v1.0, nessuna modifica di contenuto.**
 2. **I punti aperti della spec restano aperti** e non sono risolti da questo ADR: la firma md5 (JS puro o dipendenza), la finestra di candidatura predefinita, la durata di catalogo sconosciuta, il contratto del proxy Last.fm per la scrittura (`20§18` punti 2-5). Sono decisioni della **spec**, non del contratto: l'ADR dice *dove* vive `ScrobbleSink`, non *cosa* ci mette dentro il protocollo.
 3. **Il percorso live (now playing) resta fuori perimetro.** `05§4.2` fissa il contratto di invio di scrobble storici; il "now playing" (`track.updateNowPlaying`, `playing_now`) è un'operazione diversa, con semantica diversa (non è un ascolto finito: non ha una regola di maturità). Se un giorno entra, avrà bisogno di un contratto proprio — o di un tipo di payload distinto — e l'ADR va esteso, non stirato.
 4. **Il percorso incrementale di ListenBrainz non è un sink.** La sync continua (`20§9`) va dall'hub al DB locale: è il percorso di **lettura**, e usa il contratto di ADR-0010 (`parseRemote?()`), non questo. L'ADR non crea un terzo contratto: due direzioni, due contratti, nessuna sovrapposizione.
@@ -244,3 +244,4 @@ La ratifica di questo contratto dentro `05-ARCHITECTURE.md` §4 è l'atto che qu
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 56 (2026-10-27, issue #168) | Prima stesura. Decide **A1**: il contratto di scrittura vive in un'interfaccia `ScrobbleSink` separata da `PlatformAdapter`, con la stessa forma di `parseRemote?()` (ADR-0010). Fissa i vincoli **V1-V10** (separazione dal contratto di lettura con riuso della forma, rate limiting per-hub nel sink, nessun segreto nel bundle, nessun backend, `AbortSignal`, `ScrobbleError` dedicato con `recoverable` = "si può ritentare", `ScrobbleHubId` dedicato, payload chiuso per costruzione, protocollo ignoto al core, idempotenza locale write-ahead) e recepisce le garanzie G-SH.1…G-SH.6 della spec. Scarta A2 (metodo `scrobble?()` su `PlatformAdapter`), A3 (nessuna astrazione), A4 (flag "write" su `RemoteSource`) e A5 (contratto bidirezionale unico). Dichiara l'elenco dei documenti da aggiornare: `05§4` in questa PR, `02§3.8`+`§6`, `09§3.3`+`§4` e `08-COPY-I18N.md` alla ratifica della spec. Quattro punti aperti: i punti 2-5 della spec (`20§18`) restano alla spec; il percorso live (now playing) resta fuori perimetro; il percorso incrementale ListenBrainz resta sul contratto di lettura |
+| 1.0 | Sessione 56 (2026-10-27, issue #168) | 🟢 APPROVED · **Ratifica del Boss al merge della PR #170** (`8900c3b`) — **nessuna modifica di contenuto**. L'ADR passa da 🟡 DRAFT v0.1 a 🟢 APPROVED v1.0: la decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`) e i vincoli V1-V10 diventano vincolanti, e `05§4.2` è la loro sede. È il punto aperto 1 della spec `20-SCROBBLING-HUB.md` (§18), che si chiude. Restano aperti i punti 2-5 della spec, che sono decisioni di **protocollo** e non del contratto |
