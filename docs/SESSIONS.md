@@ -4257,7 +4257,7 @@ promossa e una tornata `fuzzy:`. Il bug non si vedeva nei test preesistenti
 
 - **Data**: 2026-10-27
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #165)
+- **Merged**: ✅ PR #165 (c24866f8e00f04350d39da60152302645ae85376, 2026-10-27)
 - **Claim**: `kilo-HP-ELITEBOOK-8enl`
 
 ```
@@ -4318,7 +4318,9 @@ cui la correzione del test precede l'ingresso in CI.
 - `pnpm run lint` / `typecheck` / `test` / `build` → verdi
 - `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (dopo rigenerazione)
 - `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati
-  (li rigenera `auto-state-aggregate` post-merge)
+  (li rigenera `auto-state-aggregate` post-merge) — **post-merge: exit 0**, i
+  blocchi sono stati rigenerati da `auto-state-aggregate` (commit `c095d7d`) e il
+  bundle da `auto-bundle` (`1ce579d`)
 
 ## Lesson learned
 
@@ -4353,8 +4355,8 @@ cui la correzione del test precede l'ingresso in CI.
 
 ## Cross-refs
 
-- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`), chiusa dalla
-  **PR #165**
+- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`), chiusa con
+  `status:done` al merge della **PR #165** (`c24866f`, 2026-10-27T13:36:24Z)
 - **#127** — ADR-0008 V3: il blocco `AGGREGATE-NEXT-STEP-*` del README, che ha
   reso il file ibrido
 - **#149** — la race fra i due writer di `main`: il motivo per cui il gate è
