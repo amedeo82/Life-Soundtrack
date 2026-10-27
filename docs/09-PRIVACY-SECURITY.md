@@ -1,6 +1,6 @@
 # 09 — Privacy & Security
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 6
+> Status: 🟡 DRAFT · Versione 0.5 · Sessione 57 (2026-10-27)
 > ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
 > (§7) DEVE essere revisionata da un professionista legale qualificato prima
 > del lancio pubblico. Questo documento non costituisce consulenza legale.
@@ -92,7 +92,7 @@ Definire:
 | Dato | Destinazione | Trigger | Contenuto inviato |
 |------|--------------|---------|-------------------|
 | Nome brano + artista | MusicBrainz / API audio features | `enrichMetadata` ON | Solo stringhe titolo/artista, nessun dato utente |
-| Brano + timestamp ascolto | Last.fm / ListenBrainz | `scrobbleHubs` configurato | Dati di scrobbling standard (scelta utente) |
+| Brano + timestamp ascolto | Last.fm / ListenBrainz | `scrobbleHubs` configurato (consenso **per-hub**) | **Payload di scrobbling chiuso per costruzione** (`05§4.2` V8): `idempotencyKey`, `startedAt`, `durationMs` (opzionale), `recordingMbid` (opzionale), `isrc` (opzionale), `artistName`, `trackName`, `albumName` (opzionale). **Nessun** campo per contesto, device, IP o insight: non è una policy, è il *tipo* |
 | Ciphertext | Server sync (Fase 2) | `syncCloud` ON | Solo dati cifrati E2E |
 
 ## 4. Inventario dati personali trattati
@@ -114,6 +114,19 @@ Definire:
 | Shared secret Last.fm | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nel bundle, **mai** nei log | Consenso esplicito (art. 6.1.a) |
 | Session key Last.fm (`sk`) | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
 | URL del proxy Last.fm | Dati personali | API Last.fm (via proxy) | Sì (locale, Dexie), **mai** nel bundle | Consenso esplicito (art. 6.1.a) |
+| **Payload di scrobbling** | Dati personali | Ascolti locali dell'utente | Sì (locale, `scrobbleOutbox`), inviato **solo** all'hub abilitato | Consenso esplicito per-hub (art. 6.1.a) |
+| **Coda di invio** (`scrobbleOutbox`) | Dati personali (derivati dagli ascolti) | Enqueue locale | Sì (locale), **svuotata** quando l'hub viene revocato | Consenso esplicito per-hub (art. 6.1.a) |
+| User Token ListenBrainz **in scrittura** | Segreto / credenziale | Account ListenBrainz | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
+| Session key Last.fm (`sk`) **in scrittura** | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
+
+**Il percorso di scrittura è chiuso per costruzione (Story 1.5, ratificata in
+`20-SCROBBLING-HUB.md` v1.0 🟢 e `05§4.2` ADR-0011 🟢 v1.0).** Il tipo
+`ScrobblePayload` **non ha** campi per contesto, device, IP o insight: non si
+invia qualcosa che il tipo non contiene, e il `toggle retainIp` **non è
+applicabile** al percorso di scrittura (l'IP non entra nel payload). I segreti
+(`api_key`, shared secret, `sk`, User Token) restano nello `storage` locale
+dell'utente e **non** vengono mai serializzati nel payload né nei log: la coda
+`scrobbleOutbox` contiene il payload, non le credenziali.
 
 **Nota (opzione A, issue #108)**: il `country` (paese di connessione) è un **dato derivato e non identificativo**: viene derivato dall'IP al parse e conservato indipendentemente dal toggle `retainIp`, come definito in `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED). Non richiede consenso esplicito: il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP (`retainIp`) e per i trattamenti attivabili via toggle (`enrichMetadata`, `scrobbleHubs`, `syncCloud`, `carDetectionConsent`). Questo allinea `09` §4 a `02` §3.8 e scioglie la contraddizione segnalata in issue #108.
 
@@ -318,3 +331,4 @@ email).
 | 0.3 | 2026-10-26 (issue #145) | §4: tre righe nuove per ListenBrainz (username mai persistito, User Token locale e mai nei log, `inserted_at` mai persistito). §7: nota sulla destinazione del User Token (storage locale, uso **solo in lettura** nella 1.3) |
 | 0.4 | 2026-10-26 (issue #144) | §4: cinque righe nuove per Last.fm (username, API key, shared secret, session key `sk`, URL del proxy) — tutte locali (Dexie), mai nel bundle, mai nei log. §7.2: nota sul **proxy** — è di fiducia dell'utente, vede la sua API key, e l'import da file ne evita l'esposizione |
 | 0.1 | Sessione 6 | Prima versione completa |
+| 0.5 | 2026-10-27 (issue #172) | **Story 1.5 — percorso di scrittura ratificato** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED, `05§4.2` ADR-0011 🟢 v1.0): §3.3 — la riga "Brano + timestamp ascolto" dichiara il **payload esatto** e il fatto che sia **chiuso per costruzione** (nessun campo per contesto, device, IP o insight: `retainIp` non è applicabile alla scrittura); §4 — tre righe nuove (payload di scrobbling, coda `scrobbleOutbox`, User Token e `sk` **in scrittura**) e una nota che chiarisce dove stanno i segreti (storage locale, mai nel payload né nei log) e cosa succede alla coda quando il consenso viene revocato. Header allineato (era fermo a v0.2 dal Sessione 6, mentre il changelog era già alla 0.4) |
