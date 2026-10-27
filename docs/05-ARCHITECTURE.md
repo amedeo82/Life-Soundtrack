@@ -1,10 +1,9 @@
-| 1.2 | Sessione 53 (2026-10-26, issue #160) | **§12.1/§12.2**: `rekey()` da "futuro (Story 0.7)" a **attivo (Story 1.4)** — la funzione esisteva dalla Story 0.7 ma non soddisfava gli acceptance criteria della story (nessuna transazione, sopravvivenza non deterministica, riferimenti `library`/`playlistItems`/`features` non riorientati, ISRC non normalizzato, contatori sommati a mano invece che delegati a `recount()`). La Sessione 53 ne ha chiuso i buchi. Nessuna modifica al resto della sezione |
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
-> Versione: 1.1
-> Ultima modifica: Sessione 48 (2026-10-26) — §4.1 Sorgenti remote (ADR-0010)
-> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0)
+> Versione: 1.3
+> Ultima modifica: Sessione 56 (2026-10-27) — §4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)
+> ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟡 DRAFT v0.1)
 
 ---
 
@@ -179,6 +178,76 @@ Dettagli, motivazioni e alternative scartate in `13-ADR/0010-remote-source-adapt
 | `SOURCE_UNREACHABLE` | Sorgente remota irraggiungibile: proxy assente, DNS fallito, timeout, risposta non JSON (ADR-0010 §4.1) | `true` |
 
 `sourceEventId` (citato dalla regola `eventKey` in `02§3.2`) è opzionale e fornito dall'adapter quando la piattaforma espone un ID nativo stabile (es. Spotify `trackId` + `played_at`). In assenza, si usa lo SHA-1 di fallback.
+
+### 4.2 Contratto di scrittura (`ScrobbleSink`) (ADR-0011)
+
+Il contratto di `§4` descrive la **lettura** (import). La Story 1.5 chiede l'operazione opposta: **inviare** i propri ascolti ai hub di scrobbling. I due insiemi non coincidono — non ogni piattaforma scrobbla, e `maloja`/`subsonic`/`roon` sono client di scrobbling, non fonti (`01§3.9`) — quindi il contratto di scrittura è **separato**, con la stessa forma di `parseRemote?()`: una libreria dedicata, non un quinto metodo del factory.
+
+    /** Un sink di scrobbling: sa inviare ascolti a UN hub. */
+    interface ScrobbleSink {
+      readonly hub: ScrobbleHubId;
+      readonly name: string;          // es. "Last.fm"
+      readonly version: string;       // semver del client del sink
+      isConfigured(): boolean;        // credenziali presenti, proxy scrivibile
+      submit(
+        listens: ScrobblePayload[],
+        options?: { signal?: AbortSignal }
+      ): Promise<ScrobbleResult>;
+    }
+
+    /** Identificatore di un hub abilitato (NON è un PlatformId). */
+    type ScrobbleHubId = 'lastfm' | 'listenbrainz';
+
+    /** Payload: copia minima dell'ascolto, chiusa per costruzione. */
+    interface ScrobblePayload {
+      idempotencyKey: string;         // `hub|eventKey`
+      startedAt: number;              // UNIX ms UTC (→ secondi alla serializzazione)
+      durationMs?: number;            // durata catalogo, se nota
+      recordingMbid?: string;
+      isrc?: string;
+      artistName: string;
+      trackName: string;
+      albumName?: string;
+    }
+
+    interface ScrobbleResult {
+      accepted: number;               // elementi accettati dal hub
+      rejected: number;               // elementi rifiutati (errore per elemento)
+    }
+
+**Regole**:
+
+- Il contratto di scrittura è **separato** da quello di lettura, ma ne riusa la forma: `PlatformAdapter` **non cambia** e nessun adapter esistente è toccato
+- `ScrobbleHubId` è un tipo **dedicato**: `PrivacySettings.scrobbleHubs` **non** è `PlatformId[]` (`maloja`/`subsonic`/`roon` non sono piattaforme sorgente)
+- Il **payload è chiuso per costruzione**: nessun campo per contesto, device, IP o insight — il contenuto inviato è chiuso dal *tipo*, non da una policy
+- Il **rate limiting è responsabilità del sink**, non del core: Last.fm ~5 req/s (token bucket, batch ≤ 50), ListenBrainz 1 req/s guidato dagli header `X-RateLimit-*`
+- **Nessun segreto embedded nel bundle**: `api_key`, `shared secret`, `sk` e User Token sono **per-utente** e stanno in storage locale
+- **Nessun server di backend**: il proxy Last.fm è **di fiducia dell'utente**
+- **`AbortSignal`** per la cancellazione cooperativa
+- Il **protocollo vive nel sink**: endpoint, autenticazione, rate limit, formato del payload e semantica degli errori sono ignoti al core
+- L'**idempotenza è locale e verificabile**: chiave unica `hub|eventKey` sulla coda `scrobbleOutbox`, con scrittura **write-ahead** (`in_flight` prima della richiesta)
+- Il percorso **incrementale** (sync continua ListenBrainz) è un percorso di *lettura*: usa `parseRemote?()` (`§4.1`), non questo contratto
+
+**Errori**:
+
+    class ScrobbleError extends Error {
+      code: 'HUB_UNCONFIGURED' | 'AUTH_INVALID' | 'RATE_LIMITED' | 'SOURCE_UNREACHABLE' | 'PAYLOAD_REJECTED' | 'HUB_ERROR';
+      recoverable: boolean;   // true = si può ritentare lo stesso invio
+      hub: ScrobbleHubId;
+    }
+
+| `code` | Quando | `recoverable` |
+|--------|--------|---------------|
+| `HUB_UNCONFIGURED` | Credenziali assenti o hub non abilitato | `false` |
+| `AUTH_INVALID` | `sk`/token non valido, scaduto, revocato, firma rifiutata | `false` |
+| `RATE_LIMITED` | 429 o rate limit del protocollo | `true` |
+| `SOURCE_UNREACHABLE` | Rete, DNS, proxy assente o rotto, timeout | `true` |
+| `PAYLOAD_REJECTED` | Il hub ha rifiutato il contenuto (400, errore di forma) | `false` |
+| `HUB_ERROR` | Errore lato hub non classificabile | `true` |
+
+`recoverable` ha qui una **semantica diversa** da quella di `AdapterError`: in `AdapterError` significa "gli eventi validi sono stati persistiti", in `ScrobbleError` significa "**lo stesso invio può essere ritentato** senza intervento dell'utente". Un errore di autenticazione non è recuperabile: ritentare produrrebbe lo stesso errore e consumerebbe quota.
+
+Dettagli, motivazioni e alternative scartate in `13-ADR/0011-scrobble-sink.md`.
 
 ## 5. Database locale
 
@@ -496,3 +565,5 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 | 0.2 | Sessione 9 (2026-10-15) | Audit: §3 formato unificato riallineato a 02 (piatto, eventKey, day); §3.1 pipeline 6 step RawListenEvent→ListenEvent; §3.2 formula `eventKey`; §4 contratto esteso con `name`/`version`, `AbortSignal`, `AdapterError` con `recoverable` e `partialEvents`; §4 `detect(): boolean \| Promise<boolean>` (D.A.8); §5 allineato a Dexie v2 (12 tabelle); §5 + transazioni e read-only mode; §6 pipeline Essentia→AB→euristica (D.A.6); §6.1 trigger conditions (on-import/on-demand/scheduled); §6.2 caching policy (TTL, LRU, invalidazione); §7.1 scheduling 50ms chunk + incrementalità; §7.2 failure isolation; §7.3 versioning esplicito; §8 stack esteso: TS 5.6, Vite 6, Dexie 4, React Query 5, Tailwind 4, Recharts 2.15, D3 7, Tauri 2, Zod 3, react-hook-form, i18next, date-fns(-tz), Comlink 4, MSW, Playwright 1.5+, @vitest/coverage-v8, rollup-plugin-visualizer, core/logger; §8.1 tooling dev (ESLint 9 flat, Prettier 3, Husky, lint-staged, commitlint, TS strict); §9 + logger/ in core; §9.1 convenzioni package (`@ls/*`, exports map, lockfile unico); §9.2 regole acicliche (core/runtime-agnostic, ui solo tipi, web orchestra); §10 NFR rivisti (M13); §10.1 budget performance P95 per route; §10.2 dispositivi target (mobile-first, baseline iPhone 12/Pixel 6); §11 App update management (PWA) — version manifest, SW lifecycle Workbox, prompt policy patch/minor/major, migrazione DB tra versioni; §12 Database maintenance — recount/rekey/orphanCleanup/indexRebuild/fastCheck/quotaCheck/compact, scheduling, health monitoring locale, MIG-1..4; aggiunti fast-check, fake-indexeddb, Turborepo |
 | 1.0 | Sessione 9 (2026-10-15) | 🟢 APPROVED · Promozione a versione vincolante dopo review completa di tutte le 12 sezioni con Boss. Sblocca story 0.1 `agent-ready` |
 | 1.1 | Sessione 48 (2026-10-26) | **§4.1 Sorgenti remote (ADR-0010)**: il contratto `PlatformAdapter` era nato file-only — i tre adapter del perimetro e ListenBrainz consumano tutti un export scaricato dall'utente — ma Last.fm è la prima piattaforma senza export utilizzabile dall'app (l'unico canale è l'API `user.getRecentTracks`, paginata e autenticata). Aggiunto il metodo **opzionale** `parseRemote?(source: RemoteSource, options?): AsyncIterable<RawListenEvent>` e la struttura `RemoteSource` (endpoint, credenziali per-utente, paginazione, header extra, `AbortSignal`); `ParseOptions` estratto come tipo nominato. Vincoli: il percorso remoto produce gli stessi `RawListenEvent` del percorso file (pipeline di §3.1 riusata invariata), il rate limiting è responsabilità dell'adapter (ogni piattaforma ha limiti e semantica degli header diversi), il payload raw non è persistito, nessun segreto è embedded nel bundle, "sorgente irraggiungibile" è un errore recuperabile. Aggiunto il codice errore `SOURCE_UNREACHABLE` alla tabella degli `AdapterError` (gli altri quattro sono orientati al file e avrebbero mentito: `INVALID_FORMAT` non è un problema di formato). Nessuna modifica agli adapter esistenti: il metodo è opzionale e il loro comportamento non cambia |
+| 1.2 | Sessione 53 (2026-10-26, issue #160) | **§12.1/§12.2**: `rekey()` da "futuro (Story 0.7)" a **attivo (Story 1.4)** — la funzione esisteva dalla Story 0.7 ma non soddisfava gli acceptance criteria della story (nessuna transazione, sopravvivenza non deterministica, riferimenti `library`/`playlistItems`/`features` non riorientati, ISRC non normalizzato, contatori sommati a mano invece che delegati a `recount()`). La Sessione 53 ne ha chiusi i buhi. Nessuna modifica al resto della sezione. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 56, issue #168)* |
+| 1.3 | Sessione 56 (2026-10-27, issue #168) | **§4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)**: il contratto di `§4` descrive la sola **lettura** (import da file o da sorgente remota). La Story 1.5 chiede l'operazione opposta — **inviare** i propri ascolti ai hub — e i due insiemi non coincidono (non ogni piattaforma scrobbla; `maloja`/`subsonic`/`roon` sono client, non fonti). Aggiunta la sottosezione "Contratto di scrittura (`ScrobbleSink`)": l'interfaccia `ScrobbleSink` (con `hub`, `name`, `version`, `isConfigured()`, `submit()`), il tipo dedicato `ScrobbleHubId`, i tipi `ScrobblePayload` e `ScrobbleResult`, e la classe `ScrobbleError` con i sei codici (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`). Vincoli: il contratto è **separato** da quello di lettura ma ne riusa la forma (`PlatformAdapter` non cambia, nessun adapter esistente è toccato); il rate limiting è responsabilità del **sink** (Last.fm ~5 req/s, ListenBrainz 1 req/s con `X-RateLimit-*`); nessun segreto nel bundle e nessun server di backend (il proxy è dell'utente); `AbortSignal` per la cancellazione; `ScrobbleError` dedicato perché `recoverable` ha qui una semantica diversa ("si può ritentare lo stesso invio" e non "gli eventi validi sono persistiti"); `ScrobbleHubId` dedicato perché `scrobbleHubs` non è `PlatformId[]`; il payload è **chiuso per costruzione** (nessun campo per contesto, device o IP); l'idempotenza è locale e verificabile (chiave unica `hub|eventKey` sulla coda `scrobbleOutbox`, write-ahead). Il percorso incrementale ListenBrainz resta sul contratto di **lettura** (`parseRemote?()`) |
