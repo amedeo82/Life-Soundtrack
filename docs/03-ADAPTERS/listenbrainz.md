@@ -1,10 +1,10 @@
 # Adapter ListenBrainz
 
-> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 47 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.2 · Ultima modifica: Sessione 57 (2026-10-27)
 > Piattaforma: ListenBrainz (MetaBrainz, no-profit)
 > Sede legale: USA
 > Tier: **S** · Priorità MVP: **sì**
-> Spec collegata a: Story 1.3 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.8
+> Spec collegata a: Story 1.3 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.8 · **percorso di scrittura**: `20-SCROBBLING-HUB.md` v1.0 🟢 e `13-ADR/0011-scrobble-sink.md` 🟢 v1.0
 
 **Decisioni chiuse** (Boss, Sessione 47 — issue #145):
 
@@ -14,7 +14,7 @@
 | D-LB.2 | `eventKey` | `listenbrainz:<listened_at>\|<recording_msid>` — il msid **non** è univoco per ascolto (§3.1) |
 | D-LB.3 | Semantica temporale | `timestamp = startedAt = listened_at*1000`, `durationMs = 0` — semantica **uniforme** (§5) |
 | D-LB.4 | Percorso di import | **Opzione A**: l'utente scarica l'archivio, l'app lo importa. L'adapter è **file-only** (§2.1) |
-| D-LB.5 | User Token | Uso **solo in lettura**; **non richiesto** per l'import dell'archivio (§7) |
+| D-LB.5 | User Token | Uso in **lettura** (import dell'archivio, §7); **non richiesto** per l'import dell'archivio. **Esteso alla scrittura** dalla Story 1.5 (spec `20-SCROBBLING-HUB.md` v1.0 🟢): il token è necessario per `POST /1/submit-listens` e per il percorso incrementale `/1/user/{username}/listens` (C-SH.1…C-SH.3) |
 
 **Decisioni aperte** (chiuse in v1.0 con l'approvazione del Boss — Sessione 47, issue #145):
 
@@ -209,7 +209,7 @@ Il punto 5 **non** scarta: un ascolto senza identificativi è comunque un ascolt
 
 **Bias dichiarato (E.LB.2)**: `duration_ms` è opzionale → lo stesso brano può cadere in **bucket DEDUP-3 diversi** a seconda della completezza del `additional_info` del singolo ascolto. La risposta strutturale è in D7: il bucket DEDUP-3 di ListenBrainz è **sempre 0** (il dedup primario è DEDUP-1/2 via MBID/ISRC), quindi il problema **non si manifesta**. La durata resta un dato disponibile, memorizzato sulla Track.
 
-### 3.4 Il percorso `/listens` (fuori scope della 1.3)
+### 3.4 Il percorso `/listens` (fuori scope della 1.3, specificato dalla 1.5)
 
 Il percorso di query incrementale (`GET /1/user/{username}/listens?max_ts=…&count=…`) **non** è implementato nella Story 1.3:
 
@@ -218,6 +218,14 @@ Il percorso di query incrementale (`GET /1/user/{username}/listens?max_ts=…&co
 - l'adapter è progettato per essere **esteso** in quel senso senza modificare il contratto: il percorso file produce gli stessi `RawListenEvent`
 
 L'endpoint `/1/user/{username}/listens` con `MAX_ITEMS_PER_GET = 1000` e rate limit 1 req/s (più alto con token valido) è la sorgente dei dati per la 1.5.
+
+**Specificato nella Sessione 57 (issue #172)**: il percorso incrementale è
+definito in `20-SCROBBLING-HUB.md` **§9** (C-SH.1 cursore, C-SH.2 finestra,
+C-SH.3 pagina vuota, C-SH.4 `listen_type: import`), che ratifica anche il
+contratto di scrittura (`05§4.2`, ADR-0011 🟢 v1.0): la **sincronizzazione
+incrementale** è un percorso di **lettura** e usa il contratto di ADR-0010
+(`parseRemote?()`), mentre l'**invio** degli scrobble usa il contratto di
+scrittura `ScrobbleSink`. Due direzioni, due contratti.
 
 ## 4. Edge case noti
 
@@ -363,3 +371,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listen
 | 0.1 | Sessione 47 (2026-10-26) | Prima stesura (issue #145). Decisioni D-LB.1…D-LB.5 chiuse con il Boss; API e formato export verificati su sorgente e doc ufficiali. Correzione di una premessa errata: `recording_msid` **non** è un identificativo univoco per singolo ascolto (è un hash dei metadati) → l'`eventKey` include `listened_at` (D-LB.2). Canale di storico = **export API** (ZIP/JSONL), non paginazione `/listens`: la doc ne sconsiglia l'uso per lo storico completo e il contratto `05§4` resta invariato (D-LB.4) |
 | 1.0 | Sessione 47 (2026-10-26) | 🟢 APPROVED · promozione al merge della PR #146 (approvazione Boss) — decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto |
 | 1.1 | Sessione 52 (2026-10-26, issue #155) | **§3.1.3 (nuova)**: i due campi che il contratto `RawListenEvent` non prevedeva e che questa spec richiede — `sourceArtistMbid` (→ `Artist.mbid`, §3.1.2) e `sourceTrackDurationMs` (durata catalogo, **solo hint** sulla `Track`: il bucket DEDUP-3 continua a usare la durata dell'evento, sempre 0, altrimenti uno stesso brano finirebbe in due `Track` distinte, E.LB.2). Entrambi **additivi e opzionali**. Nessuna modifica alle decisioni D-LB.* né alle restanti parti della spec |
+| 1.2 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **D-LB.5** — il User Token non è più "solo in lettura": è necessario per `POST /1/submit-listens` (invio) e per il percorso incrementale `/1/user/{username}/listens` (C-SH.1…C-SH.3), resta **non richiesto** per l'import dell'archivio. **§3.4** — il percorso `/listens` è ora **specificato** in `20§9`, con la distinzione fra i due contratti: la sync incrementale è **lettura** (`parseRemote?()`, ADR-0010) e l'invio è **scrittura** (`ScrobbleSink`, `05§4.2` ADR-0011 🟢 v1.0). Header aggiornato (la versione era ferma a 1.0 dal Sessione 47, mentre il changelog era già alla 1.1) |

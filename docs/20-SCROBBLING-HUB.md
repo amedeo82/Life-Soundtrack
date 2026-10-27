@@ -1,9 +1,9 @@
 # 20 — Scrobbling hub (invio scrobble, sync continua, toggle)
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 55 (2026-10-27)
-> Issue: #164 · Story: 1.5 (`11-BACKLOG.md`)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 57 (2026-10-27)
+> Issue: #164 (spec) · #172 (decisioni aperte, chiuse alla ratifica) · Story: 1.5 (`11-BACKLOG.md`)
 > Spec collegata a: `01-PLATFORMS.md` §3.7-3.8 · `02-DATA-SCHEMA.md` §3.8 · `03-ADAPTERS/lastfm.md` · `03-ADAPTERS/listenbrainz.md` · `13-ADR/0010-remote-source-adapter.md` · `13-ADR/0011-scrobble-sink.md` (🟢 APPROVED v1.0)
-> Da ratificare in: `05-ARCHITECTURE.md` §4 — **fatto**: il contratto di scrittura è ratificato in `05§4.2` via **ADR-0011** (v1.0 🟢 APPROVED, Sessione 56, issue #168; vedi §18 punto 1) · restano da ratificare `02-DATA-SCHEMA.md` §3.8 e §6 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §2
+> Ratificato in: `05-ARCHITECTURE.md` §4.2 (via **ADR-0011** 🟢 APPROVED v1.0, Sessione 56) · `02-DATA-SCHEMA.md` §3.8 e §6.2 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §1 e §2.16
 > Decisione architetturale collegata: [`13-ADR/0010-remote-source-adapter.md`](13-ADR/0010-remote-source-adapter.md) (percorso **di lettura** remota — questa spec copre il percorso **di scrittura**)
 
 ---
@@ -41,6 +41,27 @@ L'issue chiede cinque decisioni prima di scrivere la spec. Le risposte sono qui 
 | **D-SH.8** | Rate limit | **Per-hub, nel client di scrobbling**: Last.fm ~5 req/s (token bucket, batch fino a 50 scrobble); ListenBrainz 1 req/s **guidato dagli header** `X-RateLimit-*`. Nessun rate limit condiviso fra hub, ma **un solo job seriale** sulla coda | ADR-0010 V7: il rate limiting è responsabilità dell'adapter; i due hub hanno limiti e semantica diversi, un limite globale sarebbe la media dei due |
 | **D-SH.9** | Mappa errori | **`ScrobbleError` dedicato** (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`) con `recoverable` = "si può ritentare" | `AdapterError` è orientato al **parsing** (`INVALID_FORMAT`, `TRUNCATED`, `UNSUPPORTED_VERSION`): riusarlo per un invio darebbe all'utente una remediation sbagliata — la stessa lezione di ADR-0010 §"Punti aperti" 1 |
 | **D-SH.10** | Origine degli eventi da scrobblare | Gli eventi inviati sono gli **ascolti locali** della tabella `listens`, filtrati per una **finestra di candidatura** | Una PWA non osserva la riproduzione di altre app: vedi §3, che è la premessa onesta della story |
+
+### 2.1 Le quattro decisioni chiuse alla ratifica (Sessione 57, issue #172)
+
+Alla stesura (v0.1) la spec lasciava **quattro punti aperti** (§18, punti 2-5):
+erano decisioni di **protocollo**, non di contratto — il contratto di scrittura è
+ratificato a parte (ADR-0011 🟢 v1.0). L'issue #172 le ha poste al Boss con le
+opzioni e i trade-off; qui sono chiuse **come proposte**, con la ratifica del
+Boss (merge della PR di ratifica) come atto di ratifica.
+
+| # | Decisione | Scelta | Motivazione |
+|---|-----------|--------|-------------|
+| **D-SH.11** | **Firma md5: JS puro o dipendenza esterna** | **JS puro** in `packages/core/src/adapters/crypto.ts` (`md5Hex()`), nessuna dipendenza nuova | `Web Crypto` non supporta md5; una dipendenza per ~4 KB di bundle PWA è un costo sproporzionato e il repo ha già la policy "nessuna dipendenza nuova" (`03-ADAPTERS/lastfm.md` §10). Il rischio della scrittura a mano è contenuto dai vettori RFC 1321 (caso di test n. 23 di §14.3). **Conferma D-SH.2** |
+| **D-SH.12** | **Finestra di candidatura predefinita** | **7 giorni**, con azione esplicita dell'utente per **tutta la cronologia** | Un default corto (24 h) non è uno "specchio dello storico"; un default illimitato fa uscire tutto lo storico al primo abilitamento senza che l'utente lo chieda. 7 giorni copre l'uso tipico con poche richieste; il caso "voglio tutto" è un'azione esplicita, non un default (§5, condizione 3) |
+| **D-SH.13** | **Durata di catalogo sconosciuta: inviare o no** | **Soglia dei 4 minuti sul tempo trascorso** (`now - startedAt`), **con fiducia nella fonte** per gli eventi importati da un hub | La regola precedente (T-SH.3) escludeva la **maggior parte** degli ascolti degli utenti Last.fm/ListenBrainz (durata `0`): la Story 1.5 non avrebbe nulla da inviare. La soglia dei 4 minuti mantiene un minimo di prudenza; per gli eventi **importati da un hub** la maturità è già garantita dalla fonte (Last.fm registra lo scrobble solo dopo la propria regola), quindi non si applica un secondo filtro. Il bias residuo (ascolto reale di 30 s di un brano di 4 minuti) resta **dichiarato** (§7) |
+| **D-SH.14** | **Contratto del proxy Last.fm per la scrittura** | **Dichiarazione esplicita per-hub**: nelle impostazioni, la modalità del proxy (`solo lettura` / `lettura + scrittura`), default `solo lettura`; la scrittura si attiva solo se l'utente la dichiara | Molti proxy "JSON" inoltrano **solo GET**: senza dichiarazione, l'utente scoprirebbe il limite al primo errore (E.SH.7) invece che prima (U-SH.2). La dichiarazione esplicita è coerente con il consenso **per-hub** (D-SH.4) e con `isConfigured()` |
+
+**Effetti sulle regole già scritte**: D-SH.13 modifica **T-SH.3** (§7) e i casi
+**E.SH.10** ed **E.SH.11** (§12); D-SH.12 fissa la **finestra di candidatura**
+(§5, condizione 3); D-SH.14 aggiunge la **modalità del proxy** fra gli stati di
+configurazione (§6.1, §13.1). D-SH.11 non cambia nulla: conferma D-SH.2.
+
 
 ## 3. La premessa che la story non dichiarava: l'app non è un player
 
@@ -168,7 +189,7 @@ export interface ScrobbleResult {
 |---|------------|-------------|
 | 1 | `H ∈ PrivacySettings.scrobbleHubs` | Consenso esplicito (D-SH.4) |
 | 2 | `platform` dell'ascolto **non** è un hub | Evita il loop: uno scrobble Letto da Last.fm non viene rimandato a Last.fm |
-| 3 | `timestamp` nella **finestra di candidatura** | Perimetro dichiarato (§8) |
+| 3 | `timestamp` nella **finestra di candidatura**: **7 giorni** (default, D-SH.12), o **tutta la cronologia** se l'utente lo richiede esplicitamente | Perimetro dichiarato (§8). Il default non lascia uscire uno storico che l'utente non ha chiesto; l'azione esplicita copre il caso "voglio tutto il mio storico sul profilo" |
 | 4 | `skipped !== true` | Uno skip esplicito non è un ascolto |
 | 5 | **maturato** secondo la regola del §7 | Regola Last.fm (≥ 30 s e metà durata o 4 minuti) |
 | 6 | `eventKey` assente dalla coda per H | Idempotenza locale (G-SH.1) |
@@ -191,7 +212,9 @@ export interface ScrobbleResult {
 | Rate limit | Non pubblicato; ~5 req/s misurati dai client (token bucket) | `03-ADAPTERS/lastfm.md` §10 |
 | Errori (scrittura) | 9 `sk` non valida · 10 `api_key` non valida · 13 firma non valida · 26 key sospesa · 29 rate limit · 11/16 temporanei · gli altri = richiesta malformata, **non ritentare** | doc Last.fm API (scrobbling) |
 
-**Il trasporto della scrittura è il proxy dell'utente (D-LF.0)**, ma con un contratto **esteso**: il proxy deve inoltrare una **POST con body** e rispondere con CORS. Il contratto attuale (D-LF.0, `03-ADAPTERS/lastfm.md` §10) descrive un proxy che risponde JSON a una GET. Un proxy che inoltra solo GET **non** può trasportare la scrittura: in quel caso Last.fm resta disponibile in sola lettura e l'utente riceve un avviso esplicito (E.SH.7).
+**Il trasporto della scrittura è il proxy dell'utente (D-LF.0)**, ma con un contratto **esteso**: il proxy deve inoltrare una **POST con body** e rispondere con CORS. Il contratto attuale (D-LF.0, `03-ADAPTERS/lastfm.md` §10) descrive un proxy che risponde JSON a una GET. Un proxy che inoltra solo GET **non** può trasportare la scrittura.
+
+**La modalità del proxy è dichiarata dall'utente (D-SH.14)**: nelle impostazioni, il proxy Last.fm ha una modalità — `solo lettura` (default) o `lettura + scrittura` — e l'app **non tenta** la scrittura finché l'utente non la dichiara. Un proxy che inoltra solo GET, usato in modalità `lettura + scrittura`, produce l'avviso esplicito `scrobble.warn.writeProxyMissing` (E.SH.7) e l'hub resta **solo in lettura**: zero richieste di scrittura, nessun scrobble fantasma. La dichiarazione è per-hub e reversibile in un click (U-SH.2).
 
 **La firma in un batch** è il punto più delicato del protocollo (E.SH.8): i parametri hanno nome indicizzato (`artist[0]`, `artist[1]`, …) e il server li ordina **per nome, alfabeticamente, come stringhe**. L'ordinamento lessicografico di `artist[10]` rispetto a `artist[2]` **non** coincide con l'ordinamento numerico: l'implementazione deve ordinare le **stringhe** dei nomi, non gli indici.
 
@@ -231,11 +254,11 @@ export interface ScrobbleResult {
 |---|--------|----------|
 | **T-SH.1** | `timestamp` inviato = `startedAt` dell'ascolto locale, in **secondi** UNIX UTC | Non il `timestamp` normalizzato (`= startedAt + durationMs`, che per le fonti senza durata coincide con l'inizio): l'evento inviato è l'**inizio** dell'ascolto, come le due API definiscono |
 | **T-SH.2** | Granularità **al secondo** | La normalizzazione al minuto (D-LF.7) è un artefatto della chiave di dedup del percorso di lettura: non si applica all'invio, altrimenti due scrobble distinti dello stesso brano in due minuti diversi diverebbero indistinguibili |
-| **T-SH.3** | Regola di maturità | Un ascolto è maturo quando sono soddisfatte entrambe le condizioni: durata **> 30 s** e tempo ascoltato **≥ min(metà della durata, 4 minuti)**. Con durata ignota si usa il solo criterio dei 4 minuti, e l'evento resta **non maturo** se non si può stabilire che il brano è durato più di 30 s |
-| **T-SH.4** | "Tempo ascoltato" | Nel modello locale è `durationMs` dell'evento quando noto; quando è `0` (fonti senza durata) si usa `Track.durationMs` (durata **catalogo**) come miglior stima disponibile, dichiarando il bias (§9) |
+| **T-SH.3** | Regola di maturità | Un ascolto è maturo quando sono soddisfatte entrambe le condizioni: durata **> 30 s** e tempo ascoltato **≥ min(metà della durata, 4 minuti)**. **Se la durata è ignota** (D-SH.13): si applica il solo criterio dei **4 minuti sul tempo trascorso** (`now - startedAt`), e l'evento è **maturato all'atto** se la piattaforma sorgente è un **hub** (la fonte ha già applicato la propria regola di maturità). In quest'ultimo caso la stima della durata non è necessaria. Con durata ignota e origine non-hub, l'evento resta **non maturo** |
+| **T-SH.4** | "Tempo ascoltato" | Nel modello locale è `durationMs` dell'evento quando noto; quando è `0` (fonti senza durata) si usa `Track.durationMs` (durata **catalogo**) come miglior stima disponibile; **se anche la durata di catalogo è ignota**, si usa il **tempo trascorso** (`now - startedAt`) con la soglia dei 4 minuti (D-SH.13). Per gli eventi **importati da un hub** la maturità è già garantita dalla fonte (T-SH.3) |
 | **T-SH.5** | Semantica del tempo di invio | L'invio può avvenire **in qualsiasi momento** dopo la maturità: la coda conserva il `startedAt` originale, non l'ora di invio |
 
-**Il bias dichiarato**: per gli ascolti importati da fonti senza durata (Last.fm, ListenBrainz) la maturità è stimata sulla durata di catalogo del brano. Un ascolto reale di 30 secondi di un brano di 4 minuti passerebbe la soglia "metà durata" solo se la durata di catalogo fosse nota: in quel caso l'app invierebbe uno scrobble che l'utente considera uno skip. È il prezzo di non avere il contatore di riproduzione, ed è dichiarato qui e nell'AC (§14).
+**Il bias dichiarato**: per gli ascolti importati da fonti senza durata (Last.fm, ListenBrainz) la maturità è stimata sulla durata di catalogo del brano; se anche quella è ignota si usa il tempo trascorso con la soglia dei 4 minuti (D-SH.13). Un ascolto reale di 30 secondi di un brano di 4 minuti passerebbe la soglia "metà durata" solo se la durata di catalogo fosse nota: in quel caso l'app invierebbe uno scrobble che l'utente considera uno skip. **Il caso più comune è coperto dalla fonte**: un ascolto importato da un hub è già maturo per la regola della piattaforma, e non subisce il filtro (T-SH.3). Il bias residuo riguarda gli eventi **locali** di durata ignota: è il prezzo di non avere il contatore di riproduzione, ed è dichiarato qui e nell'AC (§14).
 
 ## 8. La coda: persistenza, idempotenza, retry
 
@@ -414,8 +437,8 @@ export class ScrobbleError extends Error {
 | E.SH.7 | Proxy CORS che inoltra solo GET | Last.fm non scrivibile | Il sink è "non configurato" per la scrittura: avviso esplicito, zero richieste | `scrobble.warn.writeProxyMissing` |
 | E.SH.8 | Firma in batch con indici ≥ 10 | `api_sig` errata → errore 13 | L'ordinamento è **lessicografico sulle stringhe** dei nomi dei parametri (`artist[10]` prima di `artist[2]`), non numerico | `scrobble.error.invalidSignature` |
 | E.SH.9 | L'utente toglie l'hub dalla lista con la coda non vuota | Scrobble inviati per un hub non più autorizzato | La coda del hub viene svuotata (`dropped`); nessun invio in volo | `scrobble.info.hubDisabled` |
-| E.SH.10 | Ascolto locale senza durata nota | Maturità stimata sulla durata di catalogo | Si invia quando la stima supera la soglia; bias dichiarato (§7) | `scrobble.warn.durationEstimated` |
-| E.SH.11 | Brano di durata ignota e inferiore a 30 s | Non si può stabilire la maturità | L'evento **non** viene inviato; conteggio degli scarti | `scrobble.warn.tooShortSkipped` |
+| E.SH.10 | Ascolto locale senza durata nota | Maturità stimata sulla durata di catalogo, o sul tempo trascorso | Si invia quando la stima (o il tempo trascorso, ≥ 4 minuti) supera la soglia; bias dichiarato (§7). Per gli eventi **importati da un hub** non c'è stima: la fonte ha già applicato la regola (T-SH.3) | `scrobble.warn.durationEstimated` |
+| E.SH.11 | Brano di durata ignota, evento locale | La maturità con la durata non è stabilibile | Si applica la soglia dei **4 minuti sul tempo trascorso** (D-SH.13): l'evento **non** viene inviato se il tempo trascorso è inferiore; conteggio degli scarti. Gli eventi importati da un hub sono già maturi e non subiscono lo scarto | `scrobble.warn.tooShortSkipped` |
 | E.SH.12 | Loop: un ascolto letto da Last.fm viene rimandato a Last.fm | Scrobble ricorsivo | Il filtro esclude gli eventi con `platform` = hub | — |
 | E.SH.13 | Il payload di un lotto supera `MAX_LISTEN_PAYLOAD_SIZE` | Invio rifiutato con 400 | Il lotto viene spezzato in sotto-lotti entro i limiti documentati | `scrobble.error.payloadTooLarge` |
 | E.SH.14 | Il DB è in modalità read-only (quota esaurita) | La coda non può essere scritta | Nessun invio (la coda è la garanzia di non perdere); avviso all'utente | `scrobble.warn.dbReadOnly` |
@@ -433,7 +456,7 @@ Questa spec **non** disegna la schermata (è materia di `07-UI-SPEC.md` 🟡 DRA
 | # | Requisito | Motivazione |
 |---|-----------|-------------|
 | **U-SH.1** | Un selettore per-hub nell'area privacy, con default **vuoto** e stato **chiaro** ("nessun hub: non viene inviato nulla") | Il consenso deve essere visibile e revocabile |
-| **U-SH.2** | Per ogni hub abilitato, uno stato della configurazione (manca la `api_key` / manca il `shared secret` / manca la `sk` / manca il proxy scrivibile / manca il User Token) | `isConfigured()` va detto all'utente **prima** del primo invio, non al primo errore |
+| **U-SH.2** | Per ogni hub abilitato, uno stato della configurazione (manca la `api_key` / manca il `shared secret` / manca la `sk` / manca il proxy scrivibile / manca il User Token), e per Last.fm la **modalità dichiarata** del proxy (`solo lettura` / `lettura + scrittura`, D-SH.14) | `isConfigured()` va detto all'utente **prima** del primo invio, non al primo errore |
 | **U-SH.3** | Una vista della coda: quante righe in attesa, in volo, fallite, con l'azione "ritenta" / "scarta" | Il retry terminale e il caso E.SH.6 richiedono un'interfaccia: senza, l'utente non può chiudere `failed` |
 | **U-SH.4** | Il consenso è **per-hub** e non un interruttore globale | D-SH.4 |
 | **U-SH.5** | L'app non invia nulla finché l'utente non ha abilitato almeno un hub **e** la configurazione è completa | G-SH.3 |
@@ -484,9 +507,10 @@ Il mock è `fetch` iniettato, come in `packages/core/src/adapters/lastfm/__tests
 | 3 | **Toggle vuoto** | `scrobbleHubs: []` → **zero richieste** e zero righe in coda |
 | 4 | Hub non configurato | Credenziali assenti → zero richieste, `HUB_UNCONFIGURED` |
 | 5 | Maturità (T-SH.3) | Un ascolto sotto la soglia non entra in coda; uno sopra sì |
-| 6 | Brano sotto 30 s | Escluso (E.SH.11) |
+| 6 | Durata ignota, evento locale | Escluso sotto i 4 minuti di tempo trascorso; inviato sopra (D-SH.13, E.SH.11) |
 | 7 | `skipped: true` | Escluso |
 | 8 | Evento di piattaforma hub | Escluso (E.SH.12, anti-loop) |
+| 8b | Durata ignota, evento **importato da un hub** | **Maturo all'atto**: la fonte ha già applicato la regola (D-SH.13, T-SH.3) |
 | 9 | **Idempotenza** | Il ciclo girato due volte → una sola riga in coda, una sola richiesta |
 | 10 | Enqueue doppia della stessa chiave | La seconda è ignorata, nessun errore (G-SH.1) |
 | 11 | 429 ListenBrainz | Backoff rispettando `X-RateLimit-Reset-In`; la riga torna `pending` |
@@ -508,6 +532,8 @@ Il mock è `fetch` iniettato, come in `packages/core/src/adapters/lastfm/__tests
 | 27 | Schema Dexie v5 | Migrazione v4→v5, tabella `scrobbleOutbox` creata, indice unico su `idempotencyKey` |
 | 28 | Privacy | Nessun segreto nel bundle, nei log o nelle fixture; `ip`/`country` mai nel payload |
 | 29 | UI | Il selettore per-hub rispetta il default vuoto e la revoca (U-SH.1, U-SH.4) |
+| 30 | **Finestra di candidatura** | Un ascolto più vecchio di 7 giorni non entra in coda; con l'azione "tutta la cronologia" entra (D-SH.12) |
+| 31 | **Modalità del proxy** | In `solo lettura` (default) **zero** richieste di scrittura; in `lettura + scrittura` la POST parte; un proxy che inoltra solo GET produce l'avviso e l'hub resta in sola lettura (D-SH.14, E.SH.7) |
 
 ## 15. Criteri di accettazione della Story 1.5
 
@@ -555,25 +581,25 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 
 | Documento | Modifica | Sessione |
 |----------|----------|----------|
-| `05-ARCHITECTURE.md` | §4: nuova sottosezione "Contratto di scrittura (`ScrobbleSink`)" — **via ADR-0011** | 55 (spec) → ratifica |
-| `02-DATA-SCHEMA.md` | §3.8: `scrobbleHubs: ScrobbleHubId[]` (tipo dedicato); §6: tabella `scrobbleOutbox` (schema Dexie v5) | 55 (spec) → ratifica |
-| `09-PRIVACY-SECURITY.md` | §3.3: riga "scrobble" già presente da integrare con il payload esatto; §4: inventario (User Token in scrittura, `sk`, payload) | 55 (spec) → ratifica |
-| `08-COPY-I18N.md` | §1: namespace `scrobble`; §2: tabella dei codici (§13.2) | 55 (spec) → ratifica |
-| `03-ADAPTERS/lastfm.md` | §4 E.LF.21: risolto da D-SH.2 (md5 in JS puro); §10: contratto del proxy esteso al POST (E.SH.7) | ratifica |
-| `03-ADAPTERS/listenbrainz.md` | §3.4: il percorso `/listens` è specificato in `20-SCROBBLING-HUB.md` §9; D-LB.5: il token passa da "solo lettura" a "lettura + scrittura" | ratifica |
-| `01-PLATFORMS.md` | §3.7-3.8: rimando alla spec di scrittura | ratifica |
-| `11-BACKLOG.md` | Story 1.5: `**Stato**:` e `**Spec**:` allineati a questa spec | 55 (fatto) |
-| `docs/INDEX.md` | Riga del documento 20 nella tabella "Documenti fondamentali"; "Prossimo passo tecnico" aggiornato | 55 (fatto) |
+| `05-ARCHITECTURE.md` | §4: nuova sottosezione "Contratto di scrittura (`ScrobbleSink`)" — **via ADR-0011** | 55 (spec) → **56 (fatto)** |
+| `02-DATA-SCHEMA.md` | §3.8: `scrobbleHubs: ScrobbleHubId[]` (tipo dedicato); §6.2: tabella `scrobbleOutbox` (schema Dexie v5) | 55 (spec) → **57 (fatto)** |
+| `09-PRIVACY-SECURITY.md` | §3.3: riga "scrobble" integrata con il payload esatto; §4: inventario (User Token in scrittura, `sk`, payload) | 55 (spec) → **57 (fatto)** |
+| `08-COPY-I18N.md` | §1: namespace `scrobble`; §2.16: i 15 codici (§13.2) | 55 (spec) → **57 (fatto)** |
+| `03-ADAPTERS/lastfm.md` | §4 E.LF.21: risolto da D-SH.11 (md5 in JS puro); §10: contratto del proxy esteso al POST + modalità dichiarata (E.SH.7, D-SH.14) | **57 (fatto)** |
+| `03-ADAPTERS/listenbrainz.md` | §3.4: il percorso `/listens` è specificato in `20-SCROBBLING-HUB.md` §9; D-LB.5: il token passa da "solo lettura" a "lettura + scrittura" | **57 (fatto)** |
+| `01-PLATFORMS.md` | §3.7-3.8: rimando alla spec di scrittura | **57 (fatto)** |
+| `11-BACKLOG.md` | Story 1.5: `**Stato**:` e `**Spec**:` allineati a questa spec | 55 (fatto) → **57 (fatto)** |
+| `docs/INDEX.md` | Riga del documento 20 nella tabella "Documenti fondamentali"; "Prossimo passo tecnico" aggiornato | 55 (fatto) → **57 (fatto)** |
 
-## 18. Punti aperti (bloccano la ratifica)
+## 18. Punti aperti
 
-1. ~~**ADR-0011 — il contratto di scrittura dentro `05§4`.**~~ — **risolto nella Sessione 56 (issue #168, chiusa con `status:done`)**: `05-ARCHITECTURE.md` §4 è 🟢 APPROVED e modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). L'ADR è scritto in [`13-ADR/0011-scrobble-sink.md`](13-ADR/0011-scrobble-sink.md) e **ratificato dal Boss al merge della PR #170** (`8900c3b`): decisione **A1** (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli **V1-V10**, alternative A2-A5 scartate. Il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). I punti 2-5 restano aperti e sono decisioni di **protocollo**, non del contratto.
-2. **Firma md5: JS puro o dipendenza esterna.** La proposta è JS puro in `crypto.ts` (D-SH.2), per non aggiungere dipendenze a un bundle PWA. La controparte è una dipendenza mantenuta (`hash-wasm`), che aggiunge peso ma ha una garanzia di correttezza documentata. **Da ratificare.**
-3. **Finestra di candidatura predefinita.** §5 la richiede ma non la fissa: 24 h, 7 giorni o "fino all'ultimo sync"? Il default influenza sia l'uso (quanti scrobble escono) sia il costo (quante richieste). **Da ratificare.**
-4. **Durata di catalogo sconosciuta: inviare o no?** T-SH.3 dice che senza durata nota l'evento non matura (E.SH.11), il che **esclude** la maggior parte degli ascolti provenienti da Last.fm e ListenBrainz (durata `0`): alternative possibili sono usare la soglia dei 4 minuti sul tempo trascorso, o inviare comunque. **Da ratificare** — è la decisione con il maggiore impatto sul comportamento reale.
-5. **Contratto del proxy Last.fm per la scrittura.** D-SH.2 assume che il proxy dell'utente inoltri POST con body. Molti proxy "JSON" inoltravano solo GET. Serve decidere se la 1.5 pretende un proxy con scrittura (e come lo si dichiara nelle impostazioni) oppure se la scrittura su Last.fm è "best effort". **Da ratificare.**
+1. ~~**ADR-0011 — il contratto di scrittura dentro `05§4`.**~~ — **risolto nella Sessione 56 (issue #168, chiusa con `status:done`)**: `05-ARCHITECTURE.md` §4 è 🟢 APPROVED e modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). L'ADR è scritto in [`13-ADR/0011-scrobble-sink.md`](13-ADR/0011-scrobble-sink.md) e **ratificato dal Boss al merge della PR #170** (`8900c3b`): decisione **A1** (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli **V1-V10**, alternative A2-A5 scartate. Il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3).
+2. ~~**Firma md5: JS puro o dipendenza esterna.**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.11**, md5 in **JS puro** in `crypto.ts`, nessuna dipendenza nuova (conferma D-SH.2). §2.1.
+3. ~~**Finestra di candidatura predefinita.**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.12**, default **7 giorni** + azione esplicita per tutta la cronologia (§5, condizione 3). §2.1.
+4. ~~**Durata di catalogo sconosciuta: inviare o no?**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.13**, soglia dei **4 minuti sul tempo trascorso** + **fiducia nella fonte** per gli eventi importati da un hub (T-SH.3, T-SH.4, E.SH.10, E.SH.11). §2.1.
+5. ~~**Contratto del proxy Last.fm per la scrittura.**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.14**, **dichiarazione esplicita per-hub** della modalità del proxy (`solo lettura` / `lettura + scrittura`, default `solo lettura`); §6.1 e §13.1. §2.1.
 6. **Percorso incrementale Last.fm.** Non esiste un cursore documentato per `user.getRecentTracks` (§9): la finestra `from`/`to` sulla pagina 1 è un'alternativa plausibile, ma non è specificata. **Fuori perimetro della prima tranche** — da aprire come punto separato se il Boss lo vuole.
-7. **"Now playing" e scrobbling live.** §3 dichiara che la PWA non può osservare la riproduzione di altre app: se il perimetro della 1.5 include il "live", serve una capability nuova (bridge di sessione media, player nell'app, o companion app). **Da ratificare come scope**, non come dettaglio.
+7. **"Now playing" e scrobbling live.** §3 dichiara che la PWA non può osservare la riproduzione di altre app: se il perimetro della 1.5 include il "live", serve una capability nuova (bridge di sessione media, player nell'app, o companion app). **Fuori perimetro della prima tranche** — da aprire come punto separato se il Boss lo vuole.
 
 ## Changelog
 
@@ -581,3 +607,4 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 |----------|------|-----------|
 | 0.1 | Sessione 55 (2026-10-27, issue #164) | Prima stesura. Risponde alle 5 decisioni richieste dall'issue (D-SH.1…D-SH.10): hub della prima tranche (Last.fm + ListenBrainz, Maloja Fase 2), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso per-hub indipendente dagli altri toggle, coda con tabella Dexie v5 e chiave `hub|eventKey`, collocazione del documento (`docs/20-SCROBBLING-HUB.md`). Dichiara la premessa mancante nella issue: la PWA non osserva la riproduzione di altre app, quindi la prima tranche è uno specchio dello storico locale, non uno scrobbling live. Definisce il contratto `ScrobbleSink` (da ratificare via ADR-0011), la mappa `ScrobbleError` (separata da `AdapterError`, che è orientato al parsing), i vincoli di protocollo dei due hub verificati sulle doc ufficiali, 16 edge case, 15 codici i18n, 29 casi di test e 15 deliverable di implementazione |
 | 0.2 | Sessione 56 (2026-10-27, issue #168) | **Aggiornamento di stato, non di contenuto**: il punto aperto 1 (§18) è chiuso — l'**ADR-0011** è scritta (`13-ADR/0011-scrobble-sink.md`) e **ratificata dal Boss al merge della PR #170** (`8900c3b`): decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`), vincoli V1-V10, alternative A2-A5 scartate; il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). Header aggiornato (versione 0.2, ADR collegato, percorso di ratifica residuo). Le decisioni D-SH.1…D-SH.10, i vincoli di protocollo e i punti aperti **2-5** restano quelli di v0.1: la ratifica della spec (v1.0 🟢) è ancora l'atto che manca |
+| 1.0 | Sessione 57 (2026-10-27, issue #172) | 🟢 APPROVED · **Ratifica del Boss al merge della PR di ratifica** — le quattro decisioni aperte (§18 punti 2-5) sono chiuse **come proposte** in **D-SH.11…D-SH.14** (§2.1), con la motivazione e gli effetti: **D-SH.11** md5 in JS puro, nessuna dipendenza nuova (conferma D-SH.2); **D-SH.12** finestra di candidatura a **7 giorni** + azione esplicita per tutta la cronologia (§5, condizione 3); **D-SH.13** durata ignota → soglia dei **4 minuti sul tempo trascorso** con **fiducia nella fonte** per gli eventi importati da un hub (modifica **T-SH.3**, **T-SH.4**, **E.SH.10**, **E.SH.11**: senza di essa la Story 1.5 avrebbe escluso la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz); **D-SH.14** **modalità del proxy dichiarata** dall'utente (`solo lettura` / `lettura + scrittura`, default `solo lettura`, §6.1 e **U-SH.2**). I casi di test passano da 29 a **31** (n. 6 riscritto, 8b, 30, 31). Le garanzie G-SH.1…G-SH.6, le regole T-SH.1…T-SH.5, i 16 edge case e i 15 codici i18n restano quelli di v0.1. I punti 6-7 restano **fuori perimetro** della prima tranche |

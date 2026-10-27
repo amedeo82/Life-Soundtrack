@@ -1,8 +1,8 @@
 # 01 — Matrice Piattaforme e Dati Ottenibili
 
 > Status: 🟡 DRAFT
-> Versione: 0.2
-> Ultima modifica: Sessione 9 (audit 2026-10-15)
+> Versione: 0.7
+> Ultima modifica: Sessione 57 (2026-10-27) — rimandi al percorso di scrittura degli hub (Story 1.5 ratificata)
 > Scope: MVP europeo
 
 ---
@@ -99,7 +99,8 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - **Campi**: `name` (titolo), `artist` (stringa con `extended=0`, oggetto `{mbid, #text}` con `extended=1`), `album` (`{mbid, #text}`), `date` (`{uts, #text}`, **inizio** dello scrobble), `loved` (solo `extended=1`), `mbid` del brano (solo `extended=1`, **frequentemente vuoto**), `image[]`, `url`, `streamable`
 - **Limiti**: nessun contesto (device/luogo/IP/paese); **nessuna durata** in `getRecentTracks` → `durationBucketMs` sempre 0; rate limit **non pubblicato** (client-side ~5 req/s, nessun header di rate limit); il brano in riproduzione (`@attr.nowplaying`) **non ha `date`**
 - **Errori**: 6 parametri · 8 operazione · 9 `sk` · 10 `api_key` · 11 offline · 13 firma · 16 temporaneo · 17 profilo non pubblico · 26 key sospesa · 29 rate limit
-- **Spec**: `03-ADAPTERS/lastfm.md` (v1.0, 🟢 APPROVED, Sessione 50)
+- **Spec**: `03-ADAPTERS/lastfm.md` (v1.2, 🟢 APPROVED, Sessione 57)
+- **Scrittura (hub)**: `track.scrobble` con `sk` + `api_sig` (md5, D-SH.11) — contratto di scrittura in `13-ADR/0011-scrobble-sink.md` 🟢 v1.0, protocollo in `20-SCROBBLING-HUB.md` v1.0 🟢 §6.1. Il trasporto è il **proxy dell'utente**, che per la scrittura deve inoltrare una **POST con body**; la modalità del proxy (`solo lettura` / `lettura + scrittura`) è **dichiarata dall'utente** (D-SH.14)
 
 ### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
@@ -109,14 +110,15 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - **Limiti**: nessun contesto (device/luogo/IP/paese); nessuna durata ascoltata; `duration_ms` opzionale → lo stesso brano può avere bucket DEDUP-3 diversi (vedi `02§5` "Sorgenti con durata non affidabile")
 - **Attenzione**: `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto → due ascolti dello stesso brano condividono lo stesso msid. L'identità dell'evento è la tupla `(listened_at, recording_msid)`
 - **Valore unico**: identificativi MusicBrainz/ISRC nativi → normalizzazione perfetta tra piattaforme
-- **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47)
+- **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.2, 🟢 APPROVED, Sessione 57)
+- **Scrittura (hub)**: `POST /1/submit-listens` con User Token (`Authorization: Token …`) e `User-Agent` obbligatorio — contratto di scrittura in `13-ADR/0011-scrobble-sink.md` 🟢 v1.0, protocollo in `20-SCROBBLING-HUB.md` v1.0 🟢 §6.2. CORS abilitato: **nessun proxy** per la scrittura
 
 ### 3.9 Self-hosted (Plex, Navidrome, Subsonic, Roon) — Tier S+ per nicchia
 
 - Nessuna piattaforma commerciale: librerie personali (CD digitalizzati, acquisti, file rari)
 - Integrazione via scrobbling (Maloja, multi-scrobbler, webhook Plex→ListenBrainz)
 - **Valore unico**: copre la parte più intima della storia musicale, invisibile alle piattaforme
-- **Nota su `PlatformId`**: in `02-DATA-SCHEMA.md` le piattaforme commerciali sono in `PlatformId`; Subsonic/Roon/Maloja **non** sono piattaforme sorgente del modello, ma **hub di scrobbling** — vivono in `PrivacySettings.scrobbleHubs` (e nell'eventuale adapter Subsonic dedicato in `03-ADAPTERS/`, fuori perimetro MVP). `navidrome` è in `PlatformId` come caso particolare di Subsonic API.
+- **Nota su `PlatformId`**: in `02-DATA-SCHEMA.md` le piattaforme commerciali sono in `PlatformId`; Subsonic/Roon/Maloja **non** sono piattaforme sorgente del modello, ma **hub di scrobbling** — vivono in `PrivacySettings.scrobbleHubs`, che è una lista di **`ScrobbleHubId`**, un **tipo dedicato** distinto da `PlatformId` (`02-DATA-SCHEMA.md` §3.8, ratificato in `20-SCROBBLING-HUB.md` v1.0 🟢, D-SH.2): il toggle per-hub è verificabile a compile time e non può contenere per errore una piattaforma sorgente (e viceversa). Maloja è scope **Fase 2** (`11-BACKLOG.md`, T1.5.3). `navidrome` è in `PlatformId` come caso particolare di Subsonic API.
 
 ### 3.10 Fuori perimetro MVP (estensioni future)
 
@@ -181,3 +183,4 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.4 | Sessione 40 (2026-10-21, issue #98) | §3.3 riscritto sul Play Activity 2026.2 (~143 colonne: durate, End Reason Type, shuffle/offline, device, ISO Country; `Artist Name` assente); tabella §4 Apple aggiornata (durata ✅, dispositivo/IP/skip ⚠️); E9 rettificata (due generazioni di schema); cross-ref spec adapter `03-ADAPTERS/apple-music.md` |
 | 0.5 | Sessione 47 (2026-10-26, issue #145) | §3.8 riscritto: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/listens` — la doc prescrive l'export per lo storico completo e ne sconsiglia la paginazione; corretti i limiti (`MAX_ITEMS_PER_GET` = 1000, non 100; rate limit 1 req/s, User-Agent obbligatorio, HTTPS only, CORS verificato sul sorgente); `recording_msid` documentato come hash dei metadati (**non** ID univoco per ascolto); `duration_ms` opzionale e di durata catalogo → E12; export non atomico → E13; cross-ref spec adapter `03-ADAPTERS/listenbrainz.md` |
 | 0.6 | Sessione 50 (2026-10-26, issue #144) | §3.7 riscritto: Last.fm **non ha un export utilizzabile dall'app** (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy dell'utente) → il canale MVP è l'API `user.getRecentTracks` via **proxy CORS configurato dall'utente** (l'API non emette `Access-Control-Allow-Origin`: dalla PWA la fetch sarebbe bloccata). Corretti i limiti (`limit` max **200**, non 1000; `artist` è stringa senza `extended=1` e oggetto con `extended=1`; il brano in riproduzione **non ha `date`**; il rate limit non è pubblicato e non ci sono header di rate limit); `mbid` del brano solo con `extended=1` e frequentemente vuoto → tabella §4 corretta da ❌ a ⚠️ per ISRC/MBID e per "brani salvati"; `loved` disponibile ma senza campo nel modello → ⚠️. Aggiunti E14-E18; cross-ref spec adapter `03-ADAPTERS/lastfm.md` |
+| 0.7 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): §3.7 e §3.8 — aggiunto il rimando al **percorso di scrittura** dei due hub (contratto `13-ADR/0011-scrobble-sink.md` 🟢 v1.0): per Last.fm `track.scrobble` con `sk` + `api_sig` (md5 in JS puro, D-SH.11) e trasporto via proxy dell'utente che deve inoltrare una **POST con body**, con **modalità dichiarata** (`solo lettura` / `lettura + scrittura`, D-SH.14); per ListenBrainz `POST /1/submit-listens` con User Token, CORS abilitato e **nessun proxy**. §3.9 — la nota su `PlatformId` ora dice che `scrobbleHubs` è una lista di **`ScrobbleHubId`** (tipo dedicato, `02§3.8`) e non di `PlatformId`. Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.6) |

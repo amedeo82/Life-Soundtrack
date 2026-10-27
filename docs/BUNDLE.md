@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 16:40
-> Totale file: 96
+> Data: 2026-10-27 17:55
+> Totale file: 98
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1447,24 +1447,24 @@ Apache License
 | # | File | Stato | Ultima modifica | Descrizione |
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
-| 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 9 | Matrice piattaforme europee + campi dati |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 52 (v1.4) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter |
-| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 52 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.0, S47) + Last.fm (🟢 v1.0, S50/S51) — **adapter implementati** in Sessione 52 (issue #155) |
+| 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 57 (v0.7) | Matrice piattaforme europee + campi dati — v0.7: rimandi al percorso di **scrittura** degli hub (§3.7-3.9, Story 1.5 ratificata) |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 57 (v1.6) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter; v1.6: §3.8 `scrobbleHubs: ScrobbleHubId[]` + §6.2 tabella `scrobbleOutbox` (schema Dexie v5, Story 1.5) |
+| 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 57 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.2, S47/S57: token in scrittura, percorso incrementale) + Last.fm (🟢 v1.2, S50/S51/S57: percorso di scrittura, md5 D-SH.11, proxy D-SH.14) — **adapter implementati** in Sessione 52 (issue #155) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 56 (v1.3) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 9 (v0.2) | Tutte le stringhe UI con chiavi i18n |
-| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 6 | Privacy spec, data flow, security |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 57 (v0.5) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5) |
+| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 57 (v0.5) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 56 (v1.6.15) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 57 (v1.6.16) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173 |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 54 (v0.9) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml` |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
 | 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟡 DRAFT | Sessione 41 | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto |
-| 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟡 DRAFT | Sessione 56 (v0.2) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164); punto aperto 1 chiuso: **ADR-0011 ratificata** (🟢 APPROVED v1.0, PR #170) |
+| 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟢 APPROVED | Sessione 57 (v1.0) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164); **ratificata** (Sessione 57, issue #172): le 4 decisioni aperte chiuse (D-SH.11…D-SH.14) → issue di implementazione **#173** |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
@@ -1476,7 +1476,7 @@ Apache License
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.3 | Diario cronologico per story: problemi, fix, lesson learned — §22: ADR-0011, il contratto di scrittura negli hub, e la sua ratifica (issue #168) |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.4 | Diario cronologico per story: problemi, fix, lesson learned — §23: ratifica della spec Scrobbling hub (issue #172) |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -1587,8 +1587,8 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.4, `03-ADAPTERS/`, `05` v1.3, `10`, `11` v1.6.15, `14`, `16-OPERATIONS`) + 9 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010, 0011)
-- **Documenti DRAFT**: 13 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`, `20`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `12` ora v0.9, `17` ora v0.2, `18` ora v2.3, `19` introdotto in Sessione 41, `20` introdotto in Sessione 55 (spec Story 1.5, issue #164)
+- **Documenti APPROVED**: 7 documenti (`02` v1.6, `03-ADAPTERS/`, `05` v1.3, `10`, `11` v1.6.16, `14`, `16-OPERATIONS`) + 9 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010, 0011)
+- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `12` ora v0.9, `17` ora v0.2, `18` ora v2.4, `19` introdotto in Sessione 41; `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -1602,7 +1602,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 56, issue #168): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged** e la **dedup** chiusa: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`), **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52) e **1.4 Dedup promozione post-enrichment ✅** (issue #160, Sessione 53): il job `rekey()` è ora transazionale, a sopravvivenza deterministica, riorienta i riferimenti non udibili e delega i contatori a `recount()`. La **Story 1.5** (scrobbling hub: invio scrobble + sync continua + toggle `scrobbleHubs`, con il percorso incrementale ListenBrainz `/listens` a cursore e l'adapter Maloja come scope Fase 2) ha ora la sua **spec dedicata**: `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55), che prende le cinque decisioni dell'issue #164 — hub della prima tranche (Last.fm + ListenBrainz), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso **per-hub**, coda `scrobbleOutbox` (Dexie v5) con chiave `hub|eventKey`, collocazione del documento — e ne aggiunge una che l'issue non sapeva di dover chiedere: **la PWA non osserva la riproduzione di altre app**, quindi la prima tranche è uno **specchio idempotente dello storico locale**, non uno scrobbling live (E.LF.21 resta risolto dalla scelta dell'md5 in JS puro). **Prossimo passo**: la **ratifica della spec** del Boss (`20-SCROBBLING-HUB.md` v0.1 → v1.0 🟢, PR di approvazione separata come per `03-ADAPTERS/lastfm.md`: restano i punti aperti 2-5 di `20§18`) → poi l'issue di implementazione della 1.5 (`agent-ready`, `size:L`, precedente #155). Il **contratto di scrittura è ratificato**: ADR-0011 v1.0 🟢 APPROVED (PR #170, merge `8900c3b`, issue #168 chiusa) — decisione A1, `ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10 in `05§4.2`. Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 57, issue #172): EPIC 1 (Fase 1 — Import core) ha **tre adapter merged** e la **dedup** chiusa: **1.1 YouTube Music ✅** (PR #130, `43f7529`), **1.2 Apple Music ✅** (PR #139, `2e1a4cc`), **1.3 Last.fm + ListenBrainz ✅** (issue #155 chiusa con `status:done`, Sessione 52) e **1.4 Dedup promozione post-enrichment ✅** (issue #160, Sessione 53): il job `rekey()` è ora transazionale, a sopravvivenza deterministica, riorienta i riferimenti non udibili e delega i contatori a `recount()`. La **Story 1.5** (scrobbling hub: invio scrobble + sync continua + toggle `scrobbleHubs`, con il percorso incrementale ListenBrainz `/listens` a cursore e l'adapter Maloja come scope Fase 2) ha ora la sua **spec dedicata**: `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55), che prende le cinque decisioni dell'issue #164 — hub della prima tranche (Last.fm + ListenBrainz), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso **per-hub**, coda `scrobbleOutbox` (Dexie v5) con chiave `hub|eventKey`, collocazione del documento — e ne aggiunge una che l'issue non sapeva di dover chiedere: **la PWA non osserva la riproduzione di altre app**, quindi la prima tranche è uno **specchio idempotente dello storico locale**, non uno scrobbling live (E.LF.21 resta risolto dalla scelta dell'md5 in JS puro). **Prossimo passo**: l'**implementazione** della Story 1.5 — issue **#173** (`agent-ready`, `size:L`), con i 15 deliverable di `20§16` e i 31 casi di test di `20§14.3`. La **spec** `20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** (Sessione 57, issue #172: le 4 decisioni aperte chiuse come D-SH.11…D-SH.14) e il **contratto** di scrittura è **ADR-0011 v1.0 🟢 APPROVED** (`05§4.2`): le due dipendenze della story sono soddisfatte e la 1.5 è la **prossima story** del progetto. Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -6543,8 +6543,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.3
-> Ultima modifica: 2026-10-27 — §22 Issue #168 (ADR-0011 ratificata 🟢 APPROVED v1.0)
+> Versione: 2.4
+> Ultima modifica: 2026-10-27 — §23 Issue #172 (ratifica della spec Scrobbling hub)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -7242,6 +7242,36 @@ mezzo del lavoro.
 
 ---
 
+## 23. Issue #172 — ratifica della spec Scrobbling hub (Sessione 57)
+
+**Tipo**: decisione architetturale (`docs`) — issue #172, claim `kilo-hp-elitebook-41xb`
+**Branch**: `feat/172-scrobbling-hub-spec-approval` (worktree `ls-172-scrobbling-hub-spec-approval`)
+**PR**: #174 (aperta su `main` dalla worktree)
+**Data**: 2026-10-27
+**Stato**: ✅ completata — `docs/20-SCROBBLING-HUB.md` **v1.0 🟢 APPROVED** (le quattro decisioni aperte chiuse come **D-SH.11…D-SH.14**); issue di implementazione **#173** aperta (`agent-ready`, `size:L`)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 23-1 | P | `02-DATA-SCHEMA.md` aveva la riga di changelog **v1.5 in cima al file**, prima del titolo, e l'header fermo a `Versione: 1.3` (mentre il changelog era alla 1.4) | Stesso difetto di `05-ARCHITECTURE.md` (22-1, Sessione 56): una riga di changelog appesa fuori dalla tabella. Nessun gate confronta l'header con il changelog, e i gate che contano le versioni non guardano la prima riga del file | Riga **riposizionata** nella tabella, header alla v1.6; **scansione di tutti i `.md` di `docs/`** (prima riga che comincia con `| <version> |`): è l'**unico** altro file con il difetto | `docs/02-DATA-SCHEMA.md` §"Changelog" |
+| 23-2 | P | Cinque documenti dichiaravano nell'header una versione **più vecchia** del proprio changelog: `09` (v0.2, Sessione 6 → changelog 0.4), `08` (v0.2 → 0.4), `01` (v0.2 → 0.6), `lastfm.md` (v1.0 → 1.1), `listenbrainz.md` (v1.0 → 1.1) | L'header è un dato **copiato a mano** in un punto diverso dal changelog: due fonti di verità, e nessun gate le confronta | Header allineati in questa PR (ogni documento toccato dalla ratifica) | `docs/09`, `docs/08`, `docs/01`, `docs/03-ADAPTERS/*` |
+| 23-3 | P | La ratifica di una spec è stata trattata — per abitudine — come una promozione **senza contenuto**, ma chiudere i punti aperti **modifica regole normative** (T-SH.3, T-SH.4, E.SH.10, E.SH.11, finestra di candidatura, modalità del proxy) | La promozione precedente (ADR-0011, PR #171) **era** senza contenuto, e il pattern è stato generalizzato | Le modifiche sono **dichiarate**: §2.1 della spec elenca le quattro decisioni con motivazione ed effetti, il changelog 1.0 dice quali regole cambiano, e il §2.1 "Effetti sulle regole già scritte" le elenca una per una | `docs/20-SCROBBLING-HUB.md` §2.1 |
+| 23-4 | P | La regola di maturità **precedente** escludeva la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz (durata `0`): la Story 1.5 non avrebbe avuto nulla da inviare | La regola era difendibile a tavolino ("senza durata non si può stabilire la maturità") e **inutile nel mondo**: il filtro escludeva proprio il population target della story | **D-SH.13**: soglia dei 4 minuti sul tempo trascorso + **fiducia nella fonte** per gli eventi importati da un hub (la fonte ha già applicato la propria regola). Il bias residuo è dichiarato | `docs/20-SCROBBLING-HUB.md` §7, §12 |
+| 23-5 | P | Le issue #172 e #173 sono **nate in sequenza dentro la stessa sessione**: #172 raccoglieva le decisioni, #173 è l'implementazione | La regola d'oro impone di non lavorare una issue senza `agent-ready`; le decisioni non esistevano, quindi #172 nasceva `needs-spec` e la transizione è avvenuta **solo** con l'assegnazione esplicita del project owner | #172 transitata `needs-spec` → `agent-ready` **prima** del claim (con claim commentato e riverificato), poi chiusa con `status:done` al merge; #173 aperta `agent-ready` con i 15 deliverable e i vincoli | issue #172, #173 · `AGENTS.md` §"Presa in carico" |
+
+**Lesson learned sintetica**: **ratificare una spec non è promuoverla**. La promozione dell'ADR-0011 è stata una promozione *senza contenuto*; chiudere i punti aperti di una spec *modifica regole normative*, e la differenza va detta, perché la regola che i documenti APPROVED non si modificano sulla base di una spec DRAFT ha un senso solo se le modifiche sono **dichiarate come effetto della ratifica**. E la lezione operativa: una regola di default va giudicata su **quanti utenti reali la superano**, non su quanto è conservativa — "durata ignota → non maturo" era la regola più prudente e la meno utile.
+
+### Link utili
+
+- Branch: `feat/172-scrobbling-hub-spec-approval` (worktree `ls-172-scrobbling-hub-spec-approval`)
+- Issue: **#172** (`size:M`, `area:adapter`, `phase-1`), claim `kilo-hp-elitebook-41xb` · chiusa con `status:done` al merge della PR
+- Spec: `docs/20-SCROBBLING-HUB.md` (v1.0 🟢 APPROVED, D-SH.11…D-SH.14, 31 casi di test)
+- Contratto: `docs/13-ADR/0011-scrobble-sink.md` (v1.0 🟢 APPROVED, Sessione 56) → `05§4.2`
+- Issue di implementazione: **#173** (`agent-ready`, `size:L`)
+- Sessione: `docs/state/sessions/57-scrobbling-hub-spec-approval.md`
+- Precedenti: `#164` (spec della Story 1.5) · `#168` (ADR-0011)
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -7267,6 +7297,7 @@ mezzo del lavoro.
 | 2.1 | 2026-10-27 (issue #164) | **§21 Issue #164 — Spec Story 1.5 "Scrobbling hub"** (Sessione 55, claim `kilo-HP-ELITEBOOK-bmyx`): 4 lesson (21-1 la story descriveva una capacità che la piattaforma non ha — una PWA non osserva la riproduzione di altre app, quindi "sorgente continua di ascolti" (la formulazione di un client nativo) era irrealizzabile: la prima tranche è uno specchio idempotente dello storico locale; 21-2 la granularità al minuto è un artefatto della chiave di dedup del percorso di lettura e non una semantica dell'evento: applicarla al payload di invio avrebbe fatto perdere la distinzione fra due scrobble distinti; 21-3 la firma `api_sig` in batch ordina i nomi indicizzati **come stringhe**: `artist[10]` prima di `artist[2]`, e il difetto emerge solo con ≥ 10 elementi in un lotto; 21-4 la coda non può stare in `settings` (impostazioni, non code): serve la tabella `scrobbleOutbox` con schema Dexie v5, PK `hub\|eventKey` e scrittura write-ahead). Spec `docs/20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT: 5 decisioni dell'issue #164 + D-SH.1…D-SH.10, contratto `ScrobbleSink` (da ratificare via ADR-0011), mappa `ScrobbleError` separata da `AdapterError`, 16 edge case, 15 codici i18n, 29 casi di test, 15 deliverable di implementazione |
 | 2.2 | 2026-10-27 (issue #168) | **§22 Issue #168 — ADR-0011 "contratto di scrittura negli hub"** (Sessione 56, claim `kilo-hp-elitebook-41xb`, PR #170): 5 lesson (56-1 un ADR che dichiara **dove vive** un contratto e una spec che dichiara **cosa contiene** un protocollo non sono lo stesso atto: il primo è architetturale (`05§4` è APPROVED → serve ADR), il secondo è di protocollo (🟡 DRAFT → serve ratifica); confonderli crea un blocco — finché la spec è DRAFT, i documenti APPROVED che essa tocca (`02`, `09`, `08`) non si possono modificare, e l'ADR deve **dichiarare** l'elenco dei documenti da aggiornare senza toccarli; 56-2 la simmetria con il precedente ADR è la leva della decisione: `parseRemote?()` ha risolto "l'adapter non ha un file" con un metodo opzionale, "l'hub non è un adapter" si risolve con un'interfaccia dedicata — stessa forma, opposta direzione; 56-3 `recoverable` non è un nome neutro: la stessa bandiera booleana con due semantiche (`AdapterError` = "persistito", `ScrobbleError` = "ritentabile") è un errore di remediation, quindi la classe di errore va nominata e tipizzata per il dominio che descrive; 56-4 il payload chiuso per costruzione (dal tipo, non dalla policy) è la forma forte di una promessa di privacy: "non inviare l'IP" è una promessa che un refactor dimentica, un campo inesistente non può essere inviato; 56-5 una riga di changelog appesa fuori dalla tabella non è un difetto di formattazione: è un documento con l'header rotto — la riga della v1.2 di `05-ARCHITECTURE.md` stava **prima del titolo**, e i gate che contano le versioni non lo vedono). ADR `docs/13-ADR/0011-scrobble-sink.md` v0.1 🟡 DRAFT: decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`), vincoli V1-V10, alternative A2-A5 scartate, garanzie G-SH.1…G-SH.6 recepite dalla spec; `05§4.2` aggiunta (v1.3) |
 | 2.3 | 2026-10-27 (issue #168) | **§22 — ratifica dell'ADR-0011**: il merge della PR #170 (`8900c3b`, 2026-10-27T16:31:39Z) è la ratifica del Boss → `docs/13-ADR/0011-scrobble-sink.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**, **nessuna modifica di contenuto** (stesso pattern di ADR-0010, PR #152 → commit di promozione `90aded0`). Il punto aperto 1 della spec (`20§18`) è chiuso: restano i punti 2-5, che sono decisioni di **protocollo** e non del contratto. Doc-sync: `05-ARCHITECTURE.md` (riga degli ADR collegati: 0011 🟢 APPROVED v1.0), `docs/INDEX.md` (riga `13-ADR/`, ADR APPROVED 8 → **9**, riga `11`, "Prossimo step tecnico"), `docs/11-BACKLOG.md` (Story 1.5: dipendenza **soddisfatta**, AC `[x]`, riga roadmap, v1.6.15), `docs/state/sessions/56-*.md` (`state: 🟢`, `merged: true`, merge commit `8900c3b`), `docs/state/_index.md`, `docs/20-SCROBBLING-HUB.md` §18 punto 1. Esito post-merge: `auto-status-done` ha applicato `status:done` a #168 e chiuso l'issue, `auto-branch-cleanup` ha eliminato il branch remoto, `auto-state-aggregate` + `auto-bundle` hanno rigenerato i blocchi; worktree e branch locale eliminati con `scripts/post-merge.ps1` (la rimozione della worktree ha richiesto `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
+| 2.4 | 2026-10-27 (issue #172) | **§23 Issue #172 — ratifica della spec Scrobbling hub** (Sessione 57, claim `kilo-hp-elitebook-41xb`, PR #174): 5 lesson (23-1 la stessa classe di difetto della Sessione 56 — la riga di changelog appesa **prima del titolo** — si era riprodotta in `02-DATA-SCHEMA.md`: la scansione di tutti i `.md` di `docs/` (prima riga che comincia con `| <version> |`) è il rilevatore economico della classe; 23-2 l'header di un documento è una **seconda fonte di verità**: cinque documenti dichiaravano una versione più vecchia del proprio changelog, e nessun gate li confronta; 23-3 **ratificare una spec non è promuoverla**: chiudere i punti aperti modifica regole normative (T-SH.3, T-SH.4, E.SH.10, E.SH.11, finestra, modalità proxy) e le modifiche vanno **dichiarate**, perché la regola "i documenti APPROVED non si modificano su una spec DRAFT" ha senso solo se l'effetto è esplicito; 23-4 una regola di default va giudicata su **quanti utenti reali la superano**: "durata ignota → non maturo" era la più prudente e la meno utile (escludeva la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz) → D-SH.13 soglia dei 4 minuti + fiducia nella fonte; 23-5 issue di decisioni e issue di implementazione nate nella stessa sessione: la transizione `needs-spec` → `agent-ready` è avvenuta solo con l'assegnazione esplicita del project owner, e le due issue hanno esiti opposti — #172 chiusa con `status:done`, #173 aperta `agent-ready`). `docs/20-SCROBBLING-HUB.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le quattro decisioni chiuse come **D-SH.11…D-SH.14** (§2.1): md5 in JS puro, finestra a 7 giorni + azione esplicita, soglia dei 4 minuti con fiducia nella fonte, modalità del proxy dichiarata. Allineati i documenti che la spec tocca (`02§3.8`+`§6.2`, `09§3.3`+`§4`, `08§1`+`§2.16`, `03-ADAPTERS/lastfm.md` §4+§10, `03-ADAPTERS/listenbrainz.md` §3.4+D-LB.5, `01§3.7-3.9`), i casi di test da 29 a **31**. Aperti `docs/state/stories/1.5-scrobbling-hub.md` e l'**issue di implementazione #173** (`agent-ready`, `size:L`) |
 
 ---
 
@@ -7472,6 +7503,8 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/54-readme-maintenance.md` | ✅ creata | Sessione 54 (issue #161): gate read-only "fatti del README" (prosa confrontata con il codice) + ownership del `README.md` (`AGENTS.md` D.161.1) |
 | `state/sessions/55-scrobbling-hub-spec.md` | ✅ creata | Sessione 55 (issue #164): spec della Story 1.5 "Scrobbling hub" (`docs/20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT) — contratto di scrittura `ScrobbleSink`, coda `scrobbleOutbox`, consenso per-hub |
 | `state/sessions/56-adr-0011-scrobble-sink.md` | ✅ creata | Sessione 56 (issue #168): ADR-0011 — il **contratto di scrittura** negli hub (`ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10), ratificato in `05§4.2` — **merged** (PR #170, `8900c3b`), ADR 🟢 APPROVED v1.0 |
+| `state/sessions/57-scrobbling-hub-spec-approval.md` | ✅ creata | Sessione 57 (issue #172): **ratifica della spec `20-SCROBBLING-HUB.md`** (v1.0 🟢 APPROVED) con le quattro decisioni chiuse (D-SH.11…D-SH.14) + allineamento dei documenti toccati + apertura dell'issue di implementazione **#173** |
+| `state/stories/1.5-scrobbling-hub.md` | ✅ creata | Story 1.5 (Scrobbling hub) — ⬚ TODO, implementabile dal 2026-10-27: spec v1.0 🟢 APPROVED e ADR-0011 v1.0 🟢 APPROVED; issue di implementazione **#173** (`agent-ready`, `size:L`) |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -9226,6 +9259,132 @@ dentro la worktree è il caso normale).
 
 
 
+===== FILE: docs/state/sessions/57-scrobbling-hub-spec-approval.md =====
+
+---
+number: 57
+title: "Ratifica della spec Scrobbling hub + issue di implementazione (Story 1.5)"
+date: 2026-10-27
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/172-scrobbling-hub-spec-approval
+pr: 0
+claim: kilo-hp-elitebook-41xb
+cross_refs: [172, 164, 168, 173]
+tags: [docs, spec, adapter, phase-1]
+---
+
+# Sessione 57 — Ratifica di `20-SCROBBLING-HUB.md` (issue #172)
+
+## Sintesi
+
+Ratifica della spec della Story 1.5 (`docs/20-SCROBBLING-HUB.md`): da 🟡 DRAFT
+v0.2 a **🟢 APPROVED v1.0**, con le **quattro decisioni aperte** chiuse come
+proposte (**D-SH.11…D-SH.14**) e l'allineamento dei documenti che la spec
+tocca — atto che l'ADR-0011 aveva dichiarato e differito.
+
+A differenza della promozione dell'ADR-0011 (PR #171), qui la ratifica **non è
+una promozione senza contenuto**: chiudere i punti aperti **modifica** regole
+normative (T-SH.3, T-SH.4, E.SH.10, E.SH.11, la finestra di candidatura, la
+modalità del proxy). Le modifiche sono in §2.1 (le quattro decisioni) e nei
+punti che esse toccano.
+
+Apre anche l'**issue di implementazione #173** (`agent-ready`, `size:L`),
+come fu fatto per la Story 1.3 con #155.
+
+## Trigger
+
+Issue #172 (`needs-spec` → `agent-ready`, `size:M`, `area:adapter`), aperta a
+sua volta nella Sessione 56 quando la coda delle issue è rimasta vuota: le
+quattro decisioni di **protocollo** della spec (punti 2-5 di `20§18`) non
+esistevano, e la regola d'oro del protocollo è *non inventare*: si apre una
+issue `needs-spec` con le opzioni e si propone. Le risposte sono arrivate
+dall'assegnazione esplicita del project owner ("procediamo con il prossimo
+step"), che ha ratificato le proposte.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.57.1 | Le quattro decisioni si chiudono **come proposte** (D-SH.11…D-SH.14), non come decisioni prese in autonomia | È il pattern delle spec già ratificate: le decisioni D1-D7 della spec ListenBrainz (Sessione 47) e D1-D7 della spec Last.fm (Sessione 50) sono state "chiuse come proposte" nella spec e ratificate dal Boss al merge. La ratifica è l'atto del Boss, non una decisione dell'agente |
+| D.57.2 | **D-SH.11** — md5 in **JS puro** (`crypto.ts`), nessuna dipendenza nuova | `Web Crypto` non supporta md5; `hash-wasm` aggiungerebbe ~30 KB di wasm al bundle PWA contro ~4 KB di codice proprio; il rischio della scrittura a mano è contenuto dai vettori RFC 1321 (caso di test n. 23). Conferma D-SH.2 |
+| D.57.3 | **D-SH.12** — finestra di candidatura a **7 giorni**, con azione esplicita per tutta la cronologia | 24 h non è uno "specchio dello storico"; un default illimitato fa uscire tutto lo storico al primo abilitamento senza che l'utente lo chieda. 7 giorni copre l'uso tipico con poche richieste; il caso "voglio tutto" diventa un'azione, non un default |
+| D.57.4 | **D-SH.13** — durata ignota: soglia dei **4 minuti sul tempo trascorso**, con **fiducia nella fonte** per gli eventi importati da un hub | La regola precedente escludeva la **maggior parte** degli ascolti degli utenti Last.fm/ListenBrainz (durata `0`): la story non avrebbe nulla da inviare. La soglia dei 4 minuti mantiene un minimo di prudenza; per gli eventi importati da un hub la maturità è già garantita dalla fonte (Last.fm registra lo scrobble solo dopo la propria regola). Il bias residuo (ascolto di 30 s di un brano di 4 minuti) resta **dichiarato** |
+| D.57.5 | **D-SH.14** — **modalità del proxy dichiarata dall'utente** (`solo lettura` / `lettura + scrittura`, default `solo lettura`) | Molti proxy "JSON" inoltrano solo GET: senza dichiarazione l'utente scoprirebbe il limite al primo errore (E.SH.7) invece che prima (U-SH.2). Coerente con il consenso per-hub e con `isConfigured()` |
+| D.57.6 | I documenti 🟢 APPROVED che la spec tocca (`02`, `03-ADAPTERS/*`) vengono allineati **in questa PR**, non prima | È quanto dichiarato dall'ADR-0011 §"Documenti da aggiornare": un documento APPROVED non si modifica sulla base di una spec DRAFT. La ratifica è l'atto che li rende coerenti |
+
+## Difetti trovati lungo il percorso
+
+**`02-DATA-SCHEMA.md` aveva lo stesso header rotto di `05-ARCHITECTURE.md`** (difetto
+22-1, Sessione 56): la riga di changelog della v1.5 (Sessione 53, `rekey()`) era
+**appesa in cima al file**, prima del titolo, e l'header dichiarava `Versione: 1.3`
+mentre il changelog era già alla 1.4. È l'**unico** altro file con questo difetto:
+la scansione di tutti i `.md` di `docs/` (prima riga che comincia con `| <version> |`)
+ne ha trovato uno solo. Corretto: riga riposizionata nella tabella, header alla
+v1.6.
+
+**Tre header dichiaravano una versione più vecchia del loro changelog**:
+`09-PRIVACY-SECURITY.md` (v0.2 al Sessione 6, changelog alla 0.4),
+`08-COPY-I18N.md` (v0.2 al Sessione 9, changelog alla 0.4),
+`03-ADAPTERS/lastfm.md` (v1.0 al Sessione 51, changelog alla 1.1) e
+`03-ADAPTERS/listenbrainz.md` (v1.0 al Sessione 47, changelog alla 1.1),
+`01-PLATFORMS.md` (v0.2 al Sessione 9, changelog alla 0.6). Tutti allineati: la
+versione dichiarata nell'header è una **seconda fonte di verità** che invecchia
+in silenzio, perché nessun gate la confronta con il changelog.
+
+## Verifica
+
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati (li rigenera `auto-state-aggregate` post-merge)
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi (nessun file applicativo toccato)
+- `node scripts/check-readme-facts.mjs` → exit 0
+- Nessuna modifica ai blocchi `<!-- AGGREGATE-* -->` (ADR-0008)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 57-1 | **Ratificare una spec non è promuoverla.** La promozione dell'ADR-0011 (PR #171) è stata una promozione *senza contenuto*; chiudere i punti aperti di una spec *modifica regole normative*. Il pericolo è scambiare i due gesti: una promozione "senza modifiche" che in realtà cambia una regola would violare la regola che le specifiche DRAFT non modificano i documenti APPROVED — qui la modifica è **legittima** perché nasce dalla ratifica stessa, ma va dichiarata (cambio di T-SH.3, E.SH.10, E.SH.11, finestra e modalità proxy) e non presentata come "solo stato" |
+| 57-2 | **Una decisione di default è una decisione sul comportamento reale.** La finestra di candidatura e la soglia di maturità non sono dettagli di configurazione: determinano *quanti* scrobble escono e *quali*. La regola precedente (durata ignota → non maturo) era difendibile a tavolino e **inutile nel mondo**: escludeva la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz. Il test di una regola di maturità è "quanti utenti reali superano il filtro", non "è conservativa?" |
+| 57-3 | **La fiducia nella fonte è una forma di inferenza che va dichiarata.** Per gli eventi importati da un hub la maturità è garantita dalla fonte: dichiararlo come regola (T-SH.3) è più onesto che fingere di rivalutarla, e rende il comportamento spiegabile all'utente |
+| 57-4 | **Il default conservativo e l'esplicità non sono in contraddizione.** 7 giorni + azione "tutta la cronologia" copre entrambi i bisogni: il default non fa mai uscire uno storico non richiesto, l'azione copre il caso "voglio tutto". Un default che serve solo un caso forza la scelta fra due insoddisfacenti |
+| 57-5 | **L'header di un documento è una seconda fonte di verità.** Cinque documenti del progetto dichiaravano una versione più vecchia del proprio changelog, e `02-DATA-SCHEMA.md` aveva una riga di changelog **prima del titolo**: entrambe le cose sono invisibili a qualsiasi gate, perché i gate confrontano blocchi aggregati, non l'header con il changelog. La scansione "la prima riga del file comincia con `| <version> |`" costa un comando e trova la classe di difetto in un colpo solo |
+
+## Documenti aggiornati
+
+- `docs/20-SCROBBLING-HUB.md` — **v1.0 🟢 APPROVED**: §2.1 (D-SH.11…D-SH.14), §5
+  (finestra), §6.1 e §13.1 (modalità proxy), §7 (T-SH.3, T-SH.4, bias), §12
+  (E.SH.10, E.SH.11), §14.3 (31 casi), §17, §18, changelog 1.0
+- `docs/02-DATA-SCHEMA.md` — §3.8 (`ScrobbleHubId`), §6.2 (`scrobbleOutbox`,
+  schema v5), header v1.6, changelog 1.5 (riposizionata) + 1.6
+- `docs/09-PRIVACY-SECURITY.md` — §3.3 (payload esatto), §4 (inventario), header v0.5
+- `docs/08-COPY-I18N.md` — §1 (namespace), §2.16 (15 codici), header v0.5
+- `docs/03-ADAPTERS/lastfm.md` — §4 E.LF.21, §10 (proxy in scrittura), header v1.2
+- `docs/03-ADAPTERS/listenbrainz.md` — D-LB.5, §3.4, header v1.2
+- `docs/01-PLATFORMS.md` — §3.7, §3.8, §3.9, header v0.7
+- `docs/11-BACKLOG.md` — Story 1.5 (`**Stato**:`/AC/`**Spec**:`/`**Issue**:`),
+  riga roadmap, changelog 1.6.16
+- `docs/INDEX.md` — righe 01, 02, 08, 09, 11, 20, 13-ADR, conteggi legacy, "Prossimo step tecnico"
+- `docs/18-DEV-LOG.md` — §23 (nuova) + changelog 2.4
+- `docs/state/stories/1.5-scrobbling-hub.md` — **nuovo**
+- `docs/state/sessions/57-scrobbling-hub-spec-approval.md` — **nuovo**
+- `docs/state/_index.md` — righe della Sessione 57 e della Story 1.5
+- `scripts/generate-bundle.ps1` — `$files`: i due file nuovi
+- `docs/BUNDLE.md` — rigenerato
+- Issue **#173** — implementazione della Story 1.5 (`agent-ready`, `size:L`)
+
+## Cross-refs
+
+- **#172** — le quattro decisioni aperte (claim `kilo-hp-elitebook-41xb`): chiuse
+  alla ratifica, issue chiusa con `status:done` al merge della PR
+- **#164** — spec della Story 1.5: da cui nascono le quattro decisioni
+- **#168** — ADR-0011: il contratto di scrittura, ratificato nella Sessione 56
+- **#173** — issue di implementazione della Story 1.5, aperta in questa sessione
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -9478,6 +9637,111 @@ contatori.
 
 Sblocca: nessuna story è dipendente da 1.4. La 1.5 (sync continua) potrà
  chiamare `rekey()` dopo l'enrichment.
+
+
+
+===== FILE: docs/state/stories/1.5-scrobbling-hub.md =====
+
+---
+id: "1.5"
+title: "Scrobbling hub (invio scrobble, sync continua, toggle)"
+phase: 1
+area: adapter
+status: todo
+priority: I
+depends_on: ["1.3", "1.4"]
+issue: 173
+branch: ""
+pr: 0
+merged_commit: ""
+merged_date: ""
+claim: ""
+spec_refs:
+  - docs/20-SCROBBLING-HUB.md
+  - docs/13-ADR/0011-scrobble-sink.md
+  - docs/05-ARCHITECTURE.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/09-PRIVACY-SECURITY.md
+  - docs/08-COPY-I18N.md
+  - docs/03-ADAPTERS/lastfm.md
+  - docs/03-ADAPTERS/listenbrainz.md
+---
+
+## Descrizione
+
+La Story 1.5 è l'invio dei propri ascolti ai **hub** di scrobbling (Last.fm,
+ListenBrainz) e la **sincronizzazione continua** con essi. È la story che
+chiude il ciclo: fin qui l'app leggeva da Last.fm e ListenBrainz (Story 1.3,
+canale di **lettura**), ora scrive.
+
+La **premessa** che la story non dichiarava (scoperta alla stesura della spec):
+una PWA **non** osserva la riproduzione di altre app. La prima tranche non è
+quindi uno "scrobbling live", ma uno **specchio idempotente dello storico
+locale**: gli eventi inviati sono gli ascolti già presenti nel DB, filtrati per
+maturità e per finestra di candidatura. Il "now playing" resta **fuori
+perimetro** (`20§18` punto 7).
+
+Il perimetro si è ridimensionato in Sessione 47: il recupero storico è passato
+alla 1.3 (già implementata), e sono rimasti tre cose — **invio**, **sync
+continua** e **toggle** — più il rate limit.
+
+## Stato
+
+⬚ **TODO — implementabile dal 2026-10-27 (Sessione 57)**. La spec
+`docs/20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** e il contratto di scrittura
+`docs/13-ADR/0011-scrobble-sink.md` è **v1.0 🟢 APPROVED** (`05§4.2`). Le
+dipendenze del contratto sono tutte soddisfatte:
+
+- **ADR-0010** (`parseRemote?()`, percorso di **lettura**) — 🟢 v1.0, Sessione 49
+- **ADR-0011** (contratto di **scrittura**) — 🟢 v1.0, Sessione 56, issue #168
+- **spec della Story 1.5** — 🟢 v1.0, Sessione 57, issue #172
+
+L'issue di implementazione è **#173** (`agent-ready`, `size:L`).
+
+## Task
+
+- [ ] T1.5.6 — invio degli ascolti ai hub abilitati, con coda, retry e idempotenza
+- [ ] T1.5.2 — sync continua incrementale (cursore `max_ts` / `min_ts`)
+- [ ] T1.5.4 — toggle `scrobbleHubs` (consenso per-hub) e **modalità del proxy**
+- [ ] T1.5.5 — rate limit rispettato, per-hub, dentro il sink
+
+I 15 deliverable di `20§16` sono raccolti nell'issue #173.
+
+## Acceptance criteria
+
+- [ ] Invio funzionante verso i hub configurati (`20§5`, `20§6`; AC-SH.2, AC-SH.3)
+- [ ] Coda con retry e idempotenza: `scrobbleOutbox`, chiave `hub|eventKey`, write-ahead (`20§8`; G-SH.1, G-SH.2)
+- [ ] Toggle `scrobbleHubs` rispettato: vuoto = **zero** richieste e zero righe in coda (`20§10.1`; AC-SH.1)
+- [ ] Sync continua incrementale, non re-import da zero (`20§9`; AC-SH.6, AC-SH.7)
+- [ ] MBID da ListenBrainz alimenta DEDUP-2 e genera `track.genres` via lookup MusicBrainz (AC-SH.11)
+- [ ] Rate limit per-hub rispettato **nel sink** (V2, G-SH.5)
+- [ ] Nessun segreto nel bundle, nei log o nelle fixture (V3, G-SH.4)
+- [ ] Payload **chiuso per costruzione**: nessun campo per contesto, device, IP o insight (V8, G-SH.6)
+- [ ] Test: i **31** casi di `20§14.3`, mock API, nessuna dipendenza nuova
+
+## Vincoli da non violare
+
+- `PlatformAdapter` **non cambia**: la scrittura è un'interfaccia separata
+  (`ScrobbleSink`), non un quinto metodo del factory (ADR-0011 V1)
+- Il rate limiting è **del sink**, non del core (V2)
+- Nessun backend: il proxy è di fiducia dell'utente (V4)
+- L'idempotenza è **locale**: nessuna delle due API espone una chiave di
+  deduplica lato server (V10)
+- Il percorso incrementale è di **lettura** (`parseRemote?()`, ADR-0010): non
+  aggiungere un terzo contratto
+- Il now playing resta fuori perimetro
+
+## Documenti aggiornati
+
+- `docs/20-SCROBBLING-HUB.md` — spec v1.0 🟢 APPROVED (Sessione 57, issue #172)
+- `docs/13-ADR/0011-scrobble-sink.md` — contratto v1.0 🟢 APPROVED (Sessione 56, issue #168)
+- `docs/05-ARCHITECTURE.md` §4.2 — il contratto nella sua sede
+- `docs/02-DATA-SCHEMA.md` §3.8 e §6.2 — `ScrobbleHubId`, `scrobbleOutbox`, schema Dexie v5
+- `docs/09-PRIVACY-SECURITY.md` §3.3 e §4 — payload e inventario
+- `docs/08-COPY-I18N.md` §1 e §2.16 — i 15 codici `scrobble.*`
+- `docs/03-ADAPTERS/lastfm.md` §4 e §10 — md5 (D-SH.11), proxy in scrittura (D-SH.14)
+- `docs/03-ADAPTERS/listenbrainz.md` §3.4 e D-LB.5 — token in scrittura, percorso incrementale
+- `docs/01-PLATFORMS.md` §3.7-3.9 — rimandi al percorso di scrittura
 
 
 
@@ -10352,8 +10616,8 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 # 01 — Matrice Piattaforme e Dati Ottenibili
 
 > Status: 🟡 DRAFT
-> Versione: 0.2
-> Ultima modifica: Sessione 9 (audit 2026-10-15)
+> Versione: 0.7
+> Ultima modifica: Sessione 57 (2026-10-27) — rimandi al percorso di scrittura degli hub (Story 1.5 ratificata)
 > Scope: MVP europeo
 
 ---
@@ -10450,7 +10714,8 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - **Campi**: `name` (titolo), `artist` (stringa con `extended=0`, oggetto `{mbid, #text}` con `extended=1`), `album` (`{mbid, #text}`), `date` (`{uts, #text}`, **inizio** dello scrobble), `loved` (solo `extended=1`), `mbid` del brano (solo `extended=1`, **frequentemente vuoto**), `image[]`, `url`, `streamable`
 - **Limiti**: nessun contesto (device/luogo/IP/paese); **nessuna durata** in `getRecentTracks` → `durationBucketMs` sempre 0; rate limit **non pubblicato** (client-side ~5 req/s, nessun header di rate limit); il brano in riproduzione (`@attr.nowplaying`) **non ha `date`**
 - **Errori**: 6 parametri · 8 operazione · 9 `sk` · 10 `api_key` · 11 offline · 13 firma · 16 temporaneo · 17 profilo non pubblico · 26 key sospesa · 29 rate limit
-- **Spec**: `03-ADAPTERS/lastfm.md` (v1.0, 🟢 APPROVED, Sessione 50)
+- **Spec**: `03-ADAPTERS/lastfm.md` (v1.2, 🟢 APPROVED, Sessione 57)
+- **Scrittura (hub)**: `track.scrobble` con `sk` + `api_sig` (md5, D-SH.11) — contratto di scrittura in `13-ADR/0011-scrobble-sink.md` 🟢 v1.0, protocollo in `20-SCROBBLING-HUB.md` v1.0 🟢 §6.1. Il trasporto è il **proxy dell'utente**, che per la scrittura deve inoltrare una **POST con body**; la modalità del proxy (`solo lettura` / `lettura + scrittura`) è **dichiarata dall'utente** (D-SH.14)
 
 ### 3.8 ListenBrainz 🌐 (no-profit) — Tier S (come hub)
 
@@ -10460,14 +10725,15 @@ Definire, per ogni piattaforma di streaming nel perimetro MVP, **quali dati sono
 - **Limiti**: nessun contesto (device/luogo/IP/paese); nessuna durata ascoltata; `duration_ms` opzionale → lo stesso brano può avere bucket DEDUP-3 diversi (vedi `02§5` "Sorgenti con durata non affidabile")
 - **Attenzione**: `recording_msid` è un hash dei **metadati**, non un ID univoco per singolo ascolto → due ascolti dello stesso brano condividono lo stesso msid. L'identità dell'evento è la tupla `(listened_at, recording_msid)`
 - **Valore unico**: identificativi MusicBrainz/ISRC nativi → normalizzazione perfetta tra piattaforme
-- **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.0, 🟢 APPROVED, Sessione 47)
+- **Spec**: `03-ADAPTERS/listenbrainz.md` (v1.2, 🟢 APPROVED, Sessione 57)
+- **Scrittura (hub)**: `POST /1/submit-listens` con User Token (`Authorization: Token …`) e `User-Agent` obbligatorio — contratto di scrittura in `13-ADR/0011-scrobble-sink.md` 🟢 v1.0, protocollo in `20-SCROBBLING-HUB.md` v1.0 🟢 §6.2. CORS abilitato: **nessun proxy** per la scrittura
 
 ### 3.9 Self-hosted (Plex, Navidrome, Subsonic, Roon) — Tier S+ per nicchia
 
 - Nessuna piattaforma commerciale: librerie personali (CD digitalizzati, acquisti, file rari)
 - Integrazione via scrobbling (Maloja, multi-scrobbler, webhook Plex→ListenBrainz)
 - **Valore unico**: copre la parte più intima della storia musicale, invisibile alle piattaforme
-- **Nota su `PlatformId`**: in `02-DATA-SCHEMA.md` le piattaforme commerciali sono in `PlatformId`; Subsonic/Roon/Maloja **non** sono piattaforme sorgente del modello, ma **hub di scrobbling** — vivono in `PrivacySettings.scrobbleHubs` (e nell'eventuale adapter Subsonic dedicato in `03-ADAPTERS/`, fuori perimetro MVP). `navidrome` è in `PlatformId` come caso particolare di Subsonic API.
+- **Nota su `PlatformId`**: in `02-DATA-SCHEMA.md` le piattaforme commerciali sono in `PlatformId`; Subsonic/Roon/Maloja **non** sono piattaforme sorgente del modello, ma **hub di scrobbling** — vivono in `PrivacySettings.scrobbleHubs`, che è una lista di **`ScrobbleHubId`**, un **tipo dedicato** distinto da `PlatformId` (`02-DATA-SCHEMA.md` §3.8, ratificato in `20-SCROBBLING-HUB.md` v1.0 🟢, D-SH.2): il toggle per-hub è verificabile a compile time e non può contenere per errore una piattaforma sorgente (e viceversa). Maloja è scope **Fase 2** (`11-BACKLOG.md`, T1.5.3). `navidrome` è in `PlatformId` come caso particolare di Subsonic API.
 
 ### 3.10 Fuori perimetro MVP (estensioni future)
 
@@ -10532,14 +10798,14 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.4 | Sessione 40 (2026-10-21, issue #98) | §3.3 riscritto sul Play Activity 2026.2 (~143 colonne: durate, End Reason Type, shuffle/offline, device, ISO Country; `Artist Name` assente); tabella §4 Apple aggiornata (durata ✅, dispositivo/IP/skip ⚠️); E9 rettificata (due generazioni di schema); cross-ref spec adapter `03-ADAPTERS/apple-music.md` |
 | 0.5 | Sessione 47 (2026-10-26, issue #145) | §3.8 riscritto: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/listens` — la doc prescrive l'export per lo storico completo e ne sconsiglia la paginazione; corretti i limiti (`MAX_ITEMS_PER_GET` = 1000, non 100; rate limit 1 req/s, User-Agent obbligatorio, HTTPS only, CORS verificato sul sorgente); `recording_msid` documentato come hash dei metadati (**non** ID univoco per ascolto); `duration_ms` opzionale e di durata catalogo → E12; export non atomico → E13; cross-ref spec adapter `03-ADAPTERS/listenbrainz.md` |
 | 0.6 | Sessione 50 (2026-10-26, issue #144) | §3.7 riscritto: Last.fm **non ha un export utilizzabile dall'app** (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy dell'utente) → il canale MVP è l'API `user.getRecentTracks` via **proxy CORS configurato dall'utente** (l'API non emette `Access-Control-Allow-Origin`: dalla PWA la fetch sarebbe bloccata). Corretti i limiti (`limit` max **200**, non 1000; `artist` è stringa senza `extended=1` e oggetto con `extended=1`; il brano in riproduzione **non ha `date`**; il rate limit non è pubblicato e non ci sono header di rate limit); `mbid` del brano solo con `extended=1` e frequentemente vuoto → tabella §4 corretta da ❌ a ⚠️ per ISRC/MBID e per "brani salvati"; `loved` disponibile ma senza campo nel modello → ⚠️. Aggiunti E14-E18; cross-ref spec adapter `03-ADAPTERS/lastfm.md` |
+| 0.7 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): §3.7 e §3.8 — aggiunto il rimando al **percorso di scrittura** dei due hub (contratto `13-ADR/0011-scrobble-sink.md` 🟢 v1.0): per Last.fm `track.scrobble` con `sk` + `api_sig` (md5 in JS puro, D-SH.11) e trasporto via proxy dell'utente che deve inoltrare una **POST con body**, con **modalità dichiarata** (`solo lettura` / `lettura + scrittura`, D-SH.14); per ListenBrainz `POST /1/submit-listens` con User Token, CORS abilitato e **nessun proxy**. §3.9 — la nota su `PlatformId` ora dice che `scrobbleHubs` è una lista di **`ScrobbleHubId`** (tipo dedicato, `02§3.8`) e non di `PlatformId`. Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.6) |
 
 
 ===== FILE: docs/02-DATA-SCHEMA.md =====
 
-| 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline |
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.3 · Sessione 40 (2026-10-21)
+> Status: 🟢 APPROVED · Versione 1.6 · Sessione 57 (2026-10-27)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -10758,9 +11024,32 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       retainIp: boolean;          // default false; toggle ESPLICITO dell'utente
       enrichMetadata: boolean;    // default false; arricchimento metadati brani
       carDetectionConsent: boolean; // default false; rilevamento ascolti in auto (es. Bluetooth/Battery)
-      scrobbleHubs: PlatformId[]; // default []; hub di scrobbling scelti
+      scrobbleHubs: ScrobbleHubId[]; // default []; hub di scrobbling scelti (tipo DEDICATO — vedi sotto)
       syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2, ADR-0005)
     }
+
+**`ScrobbleHubId` è un tipo dedicato, non `PlatformId`** (ratificato dalla spec
+`20-SCROBBLING-HUB.md` v1.0 🟢, D-SH.2 e ADR-0011 🟢 v1.0 §"I vincoli", V7):
+
+    export type ScrobbleHubId = 'lastfm' | 'listenbrainz';
+
+I due insiemi **non coincidono**: i client di scrobbling (`maloja`, `subsonic`,
+`roon`) sono destinatari, non fonti (`01-PLATFORMS.md` §3.9), e `maloja` è scope
+Fase 2. Un tipo dedicato rende il toggle per-hub **verificabile a compile time**:
+aggiungere un nuovo client di scrobbling non può essere fatto per errore con un
+`PlatformId` di una piattaforma sorgente.
+
+Semantica del toggle (spec `20§5`, D-SH.4, G-SH.3):
+
+- **default `[]`** → nessun hub abilitato → **zero richieste** e zero righe in coda
+- il consenso è **per-hub** e **indipendente** dagli altri toggle: `retainIp`,
+  `enrichMetadata` e `carDetectionConsent` **non** influiscono sulla scrittura, e
+  viceversa
+- togliere un hub dalla lista **svuota la sua coda** (le righe passano a
+  `dropped`, nessun invio in volo): revocare il consenso non lascia scrobble in
+  attesa
+- la configurazione **per-hub** (credenziali, proxy scrivibile, User Token) vive in
+  `settings` (§6.1) ed è **per-utente**: mai nel bundle, mai nei log
 
 Quando `retainIp` è true:
 - `ListenEvent.ip` è conservato (string, IPv4/IPv6)
@@ -10963,6 +11252,49 @@ modificata e nessun dato viene perso. Le credenziali contenute qui sono
 **per-utente**: mai nel bundle, mai nei log, mai nelle fixture
 (`09-PRIVACY-SECURITY.md` §4).
 
+### 6.2 Tabella `scrobbleOutbox` (schema v5 — Story 1.5)
+
+La coda di invio degli scrobble **non** può stare in `settings`: `settings` è
+chiave/valore per impostazioni, e una coda ha **stato per elemento**, tentativi
+e indice unico. Serve una tabella nuova → **schema Dexie v5**
+(`20-SCROBBLING-HUB.md` §8.1, ratificato nella spec v1.0 🟢).
+
+    db.version(5).stores({
+      ...v4,
+      scrobbleOutbox: '&idempotencyKey, hub, status, createdAt, nextAttemptAt',
+    });
+
+| Campo | Tipo | Note |
+|-------|------|------|
+| `idempotencyKey` | string | **PK**: `hub\|eventKey` — unico per costruzione (G-SH.1) |
+| `hub` | `ScrobbleHubId` | indice: il ciclo lavora per hub |
+| `eventKey` | string | l'`eventKey` locale dell'ascolto (`05§3.2`) |
+| `payload` | `ScrobblePayload` | la copia che verrà inviata: serializzabile, **senza segreti** (`05§4.2`, V8) |
+| `status` | `'pending' \| 'in_flight' \| 'sent' \| 'failed' \| 'dropped'` | macchina a stati (`20§8.2`) |
+| `attempts` | number | numero di tentativi effettuati |
+| `nextAttemptAt` | number | ts (unix ms) del prossimo tentativo consentito |
+| `lastError` | `{ code, message, recoverable } \| null` | mai un segreto: solo codice e messaggio |
+| `createdAt` | number | ts di enqueue |
+| `sentAt` | number \| null | ts di conferma |
+
+**La PK è la garanzia di idempotenza**: `hub|eventKey` è univoco per
+costruzione, quindi un ascolto locale entra in coda **al massimo una volta** per
+hub (G-SH.1): il secondo `enqueue` è **ignorato**, non è un errore. Nessuna delle
+due API espone una chiave di deduplica lato server: la chiave unica locale è
+l'unica garanzia possibile (ADR-0011 🟢 v1.0, V10).
+
+**Write-ahead**: la riga passa a `in_flight` **prima** della richiesta. Se il
+processo muore fra la richiesta e la conferma, la riga resta `in_flight` e non
+viene ritentata in automatico: il caso residuo è un **doppio scrobble**
+possibile, mai una perdita (G-SH.2, E.SH.6).
+
+**Migrazione non distruttiva** (MIG-1): nessuna tabella esistente viene
+modificata e nessun dato viene perso; la tabella nasce vuota.
+
+**Cosa NON è in questa tabella**: nessun segreto (le credenziali stanno in
+`settings`), nessun contesto di ascolto, nessun IP, nessun device (il payload è
+chiuso per costruzione, `05§4.2` V8).
+
 ## 7. Politiche di migrazione e ricalcolo
 
 - **MIG-1**: ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)`; mai drop di tabelle utente
@@ -11021,6 +11353,8 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |
 | 1.3 | Sessione 40 (2026-10-21, issue #98) | §2: riga Apple aggiornata al formato reale dell'export (schema 2026.2: `Event Start/End Timestamp` del Play Activity CSV; `Play Date UTC` era del legacy aggregato). **Aggiornamento factuale**: nessuna modifica a interfacce (§3), regole DEDUP (§5) o schema Dexie (§6) |
 | 1.4 | Sessione 52 (2026-10-26, issue #155) | §6.1 (nuova): tabella `settings` (chiave/valore) nello schema Dexie **v4** — proxy CORS Last.fm, `api_key`, username, per-utente e locali (`09§4`). Migrazione non distruttiva (MIG-1), nessuna modifica alle tabelle dati. §3.1: il contratto `RawListenEvent` riceve due campi **additivi e opzionali** — `sourceArtistMbid` (→ `Artist.mbid`, richiesto dalle spec `03-ADAPTERS/lastfm.md` §3.1.2 e `listenbrainz.md` §3.1.2) e `sourceTrackDurationMs` (durata **catalogo**, solo hint sulla `Track`: non entra nel bucket DEDUP-3, altrimenti uno stesso brano finirebbe in due `Track` distinte) |
+| 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 57, issue #172)* |
+| 1.6 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **§3.8** — `scrobbleHubs` passa da `PlatformId[]` al **tipo dedicato** `ScrobbleHubId` (`'lastfm' \| 'listenbrainz'`), con la semantica del toggle (default `[]`, consenso per-hub indipendente dagli altri toggle, revoca che svuota la coda del hub, configurazione per-utente in `settings`); **§6.2 (nuova)** — tabella `scrobbleOutbox` nello schema Dexie **v5** (PK `hub\|eventKey`, indice per `hub`/`status`/`createdAt`/`nextAttemptAt`, payload senza segreti, write-ahead `in_flight`), con la garanzia di idempotenza per costruzione (G-SH.1) e il caso residuo dichiarato (doppio scrobble possibile, mai una perdita). Migrazione **non distruttiva** (MIG-1). Il tipo `ScrobblePayload` e il contratto `ScrobbleSink` sono in `05§4.2` (ADR-0011 🟢 v1.0) |
 
 
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
@@ -11918,11 +12252,11 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.apple_
 
 # Adapter ListenBrainz
 
-> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 47 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.2 · Ultima modifica: Sessione 57 (2026-10-27)
 > Piattaforma: ListenBrainz (MetaBrainz, no-profit)
 > Sede legale: USA
 > Tier: **S** · Priorità MVP: **sì**
-> Spec collegata a: Story 1.3 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.8
+> Spec collegata a: Story 1.3 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.8 · **percorso di scrittura**: `20-SCROBBLING-HUB.md` v1.0 🟢 e `13-ADR/0011-scrobble-sink.md` 🟢 v1.0
 
 **Decisioni chiuse** (Boss, Sessione 47 — issue #145):
 
@@ -11932,7 +12266,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.apple_
 | D-LB.2 | `eventKey` | `listenbrainz:<listened_at>\|<recording_msid>` — il msid **non** è univoco per ascolto (§3.1) |
 | D-LB.3 | Semantica temporale | `timestamp = startedAt = listened_at*1000`, `durationMs = 0` — semantica **uniforme** (§5) |
 | D-LB.4 | Percorso di import | **Opzione A**: l'utente scarica l'archivio, l'app lo importa. L'adapter è **file-only** (§2.1) |
-| D-LB.5 | User Token | Uso **solo in lettura**; **non richiesto** per l'import dell'archivio (§7) |
+| D-LB.5 | User Token | Uso in **lettura** (import dell'archivio, §7); **non richiesto** per l'import dell'archivio. **Esteso alla scrittura** dalla Story 1.5 (spec `20-SCROBBLING-HUB.md` v1.0 🟢): il token è necessario per `POST /1/submit-listens` e per il percorso incrementale `/1/user/{username}/listens` (C-SH.1…C-SH.3) |
 
 **Decisioni aperte** (chiuse in v1.0 con l'approvazione del Boss — Sessione 47, issue #145):
 
@@ -12127,7 +12461,7 @@ Il punto 5 **non** scarta: un ascolto senza identificativi è comunque un ascolt
 
 **Bias dichiarato (E.LB.2)**: `duration_ms` è opzionale → lo stesso brano può cadere in **bucket DEDUP-3 diversi** a seconda della completezza del `additional_info` del singolo ascolto. La risposta strutturale è in D7: il bucket DEDUP-3 di ListenBrainz è **sempre 0** (il dedup primario è DEDUP-1/2 via MBID/ISRC), quindi il problema **non si manifesta**. La durata resta un dato disponibile, memorizzato sulla Track.
 
-### 3.4 Il percorso `/listens` (fuori scope della 1.3)
+### 3.4 Il percorso `/listens` (fuori scope della 1.3, specificato dalla 1.5)
 
 Il percorso di query incrementale (`GET /1/user/{username}/listens?max_ts=…&count=…`) **non** è implementato nella Story 1.3:
 
@@ -12136,6 +12470,14 @@ Il percorso di query incrementale (`GET /1/user/{username}/listens?max_ts=…&co
 - l'adapter è progettato per essere **esteso** in quel senso senza modificare il contratto: il percorso file produce gli stessi `RawListenEvent`
 
 L'endpoint `/1/user/{username}/listens` con `MAX_ITEMS_PER_GET = 1000` e rate limit 1 req/s (più alto con token valido) è la sorgente dei dati per la 1.5.
+
+**Specificato nella Sessione 57 (issue #172)**: il percorso incrementale è
+definito in `20-SCROBBLING-HUB.md` **§9** (C-SH.1 cursore, C-SH.2 finestra,
+C-SH.3 pagina vuota, C-SH.4 `listen_type: import`), che ratifica anche il
+contratto di scrittura (`05§4.2`, ADR-0011 🟢 v1.0): la **sincronizzazione
+incrementale** è un percorso di **lettura** e usa il contratto di ADR-0010
+(`parseRemote?()`), mentre l'**invio** degli scrobble usa il contratto di
+scrittura `ScrobbleSink`. Due direzioni, due contratti.
 
 ## 4. Edge case noti
 
@@ -12281,6 +12623,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listen
 | 0.1 | Sessione 47 (2026-10-26) | Prima stesura (issue #145). Decisioni D-LB.1…D-LB.5 chiuse con il Boss; API e formato export verificati su sorgente e doc ufficiali. Correzione di una premessa errata: `recording_msid` **non** è un identificativo univoco per singolo ascolto (è un hash dei metadati) → l'`eventKey` include `listened_at` (D-LB.2). Canale di storico = **export API** (ZIP/JSONL), non paginazione `/listens`: la doc ne sconsiglia l'uso per lo storico completo e il contratto `05§4` resta invariato (D-LB.4) |
 | 1.0 | Sessione 47 (2026-10-26) | 🟢 APPROVED · promozione al merge della PR #146 (approvazione Boss) — decisioni D1-D7 chiuse come proposte, nessuna modifica di contenuto |
 | 1.1 | Sessione 52 (2026-10-26, issue #155) | **§3.1.3 (nuova)**: i due campi che il contratto `RawListenEvent` non prevedeva e che questa spec richiede — `sourceArtistMbid` (→ `Artist.mbid`, §3.1.2) e `sourceTrackDurationMs` (durata catalogo, **solo hint** sulla `Track`: il bucket DEDUP-3 continua a usare la durata dell'evento, sempre 0, altrimenti uno stesso brano finirebbe in due `Track` distinte, E.LB.2). Entrambi **additivi e opzionali**. Nessuna modifica alle decisioni D-LB.* né alle restanti parti della spec |
+| 1.2 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **D-LB.5** — il User Token non è più "solo in lettura": è necessario per `POST /1/submit-listens` (invio) e per il percorso incrementale `/1/user/{username}/listens` (C-SH.1…C-SH.3), resta **non richiesto** per l'import dell'archivio. **§3.4** — il percorso `/listens` è ora **specificato** in `20§9`, con la distinzione fra i due contratti: la sync incrementale è **lettura** (`parseRemote?()`, ADR-0010) e l'invio è **scrittura** (`ScrobbleSink`, `05§4.2` ADR-0011 🟢 v1.0). Header aggiornato (la versione era ferma a 1.0 dal Sessione 47, mentre il changelog era già alla 1.1) |
 
 
 
@@ -12288,11 +12631,11 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.listen
 
 # Adapter Last.fm
 
-> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 51 (2026-10-26)
+> Status: 🟢 APPROVED · Versione 1.2 · Ultima modifica: Sessione 57 (2026-10-27)
 > Piattaforma: Last.fm (Audioscrobbler / FM3)
 > Sede legale: UK (Bournemouth)
 > Tier: **S** (hub di scrobbling) · Priorità MVP: **sì**
-> Spec collegata a: Story 1.3 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.7, `13-ADR/0010-remote-source-adapter.md`
+> Spec collegata a: Story 1.3 (`11-BACKLOG.md`), `01-PLATFORMS.md` §3.7, `13-ADR/0010-remote-source-adapter.md` · **percorso di scrittura**: `20-SCROBBLING-HUB.md` v1.0 🟢 e `13-ADR/0011-scrobble-sink.md` 🟢 v1.0
 
 ---
 
@@ -12553,7 +12896,7 @@ Il punto 4 è specifico di Last.fm: l'API espone l'artista come oggetto `{mbid, 
 | E.LF.18 | **Percorso file**: `lastfm-to-csv` include il brano in riproduzione **senza data** (le ultime 4 colonne non hanno data) | Ultima riga senza timestamp | Rilevata come "prima riga senza data finale" → scartata con `noDateSkipped`, non letta come record malformato |
 | E.LF.19 | Lo stesso scrobble importato via API e via file in momenti diversi | Due eventi per uno stesso scrobble | Stessa `eventKey` (D-LF.7) → il core deduplica. La **prima** importazione vince: i dati dell'API sono più ricchi (mbid, artist.mbid) |
 | E.LF.20 | **Percorso file**: CSV con BOM UTF-8 iniziale | Il primo header non è riconoscibile → `detect` ko | L'adapter **rimuove il BOM** prima del rilevamento (stesso trattamento del parser CSV di Apple Music) |
-| E.LF.21 | **Percorso web auth**: `api_sig` richiede `md5(parametri + shared secret)` | Il repo espone solo SHA-1/SHA-256 via Web Crypto, che non supportano md5 | Il percorso API **senza** `sk` (D-LF.1) non richiede firma e funziona subito. Il percorso web auth (D-LF.2) è implementato nella **Story 1.5**, dove serve davvero: lì si aggiunge l'helper md5. Fino ad allora, gli utenti con "Hide recent listening" usano il **percorso file** |
+| E.LF.21 | **Percorso web auth**: `api_sig` richiede `md5(parametri + shared secret)` | Il repo espone solo SHA-1/SHA-256 via Web Crypto, che non supportano md5 | **Risolto nella Sessione 57 (D-SH.11, issue #172)**: md5 in **JS puro** in `packages/core/src/adapters/crypto.ts` (`md5Hex()`), nessuna dipendenza nuova, verificato con i vettori RFC 1321. Il percorso API **senza** `sk` (D-LF.1) continua a non richiedere firma e funziona subito; il percorso web auth (D-LF.2) resta **differito alla Story 1.5**, dove l'helper md5 diventa un deliverable (`20§16`) |
 | E20 | Fusi orari | Timeline sfalsata | `date.uts` è UNIX UTC; il CSV `utc_time` è UTC esplicito. Il CSV `lastfm-to-csv` è UTC. Nessun fuso da gestire |
 
 ## 5. Semantica temporale
@@ -12678,7 +13021,9 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 
 - **L'adapter non conosce il proxy**: riceve un base URL e ci costruisce la query. Non deve fare supposizioni sulla sua forma: il contratto minimo è *URL che restituisce il JSON di Last.fm*. Se il proxy è trasparente, l'app manda già `api_key`; se il proxy è "intelligente" (inietta la key), l'app non la manda. **L'adapter supporta entrambe le forme**: `api_key` presente → la include; assente → la omette e lascia fare al proxy.
 
-- **Costruzione dell'URL**: `new URL('/2.0/', proxyUrl)` + `searchParams` per `method`, `user`, `api_key`, `format`, `limit`, `page`, `from`, `to`, `extended`. **`api_sig`**: richiede md5 dei parametri ordinati + shared secret. Il repo non ha un helper md5 (`crypto.ts` espone solo SHA-1/SHA-256 via Web Crypto, che **non** supporta md5). La firma è un requisito del solo percorso web auth (D-LF.2): l'implementazione md5 è **rinviata** a Story 1.5 (sync continua, che richiede la `sk`), e dichiarata come gap in §4 (E.LF.21).
+- **Costruzione dell'URL**: `new URL('/2.0/', proxyUrl)` + `searchParams` per `method`, `user`, `api_key`, `format`, `limit`, `page`, `from`, `to`, `extended`. **`api_sig`**: richiede md5 dei parametri ordinati + shared secret. Il repo non ha un helper md5 (`crypto.ts` espone solo SHA-1/SHA-256 via Web Crypto, che **non** supporta md5). **Risolto nella Sessione 57 (D-SH.11)**: l'helper md5 in **JS puro** (`md5Hex()` in `packages/core/src/adapters/crypto.ts`, nessuna dipendenza nuova) è un deliverable della **Story 1.5**, insieme al percorso web auth (D-LF.2) e al sink di scrittura. La firma è un requisito del solo percorso web auth: il percorso API (D-LF.1) resta senza firma e funziona subito.
+
+- **Contratto del proxy per la **scrittura** (D-SH.14, `20§6.1`)**: il contratto del proxy di cui sopra descrive un endpoint che risponde JSON a una **GET**. Il percorso di scrittura della Story 1.5 (`track.scrobble`) usa una **POST con body** (`application/x-www-form-urlencoded`, parametri indicizzati `artist[0]`, `track[0]`, `timestamp[0]`): il proxy deve inoltrare **metodo, path e body**, e rispondere con CORS. La **modalità** del proxy (`solo lettura` / `lettura + scrittura`) è **dichiarata dall'utente** nelle impostazioni, default `solo lettura`: senza dichiarazione l'app **non tenta** la scrittura. Un proxy che inoltra solo GET, in modalità `lettura + scrittura`, produce l'avviso `scrobble.warn.writeProxyMissing` (E.SH.7) e l'hub resta in sola lettura — zero richieste di scrittura, nessun scrobble fantasma. La modalità è per-hub e reversibile in un click (U-SH.2)
 
 - **Rate limiter**: token bucket a ~5 req/s (limite non pubblicato da Last.fm: i ToS impongono un limite equo, la community misura ~5 req/s sostenibili). Backoff esponenziale su errori `11`, `16`, `29` e HTTP `429`/`5xx`. **Gli header di rate limit non esistono su Last.fm** (a differenza di ListenBrainz): il ritmo è stimato, non guidato. Dichiarato come asimmetria rispetto a `03-ADAPTERS/listenbrainz.md` §10.
 
@@ -12718,6 +13063,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 | 0.1 | Sessione 50 (2026-10-26) | Prima stesura (issue #144). Decisioni D-LF.0…D-LF.8 (Boss, Sessione 47) e vincoli di ADR-0010. API, limiti, error codes, flusso web auth e formati CSV verificati su fonte (doc ufficiale Last.fm, doc non ufficiale, depth.fm, multi-scrobbler). Correzione di una premessa errata della issue: `limit` **max 200** (doc ufficiale), non 1000; e il campo `date` **manca** per il brano in riproduzione. Aggiunto il percorso **ibrido** (API + file) con `eventKey` normalizzato al minuto su tutti i percorsi, per evitare duplicati al re-import misto. Dichiarati i gap: md5 per `api_sig` (rinviato a 1.5), `loved` senza campo nel modello, `album.mbid` scartato |
 | 1.0 | Sessione 51 (2026-10-26) | 🟢 APPROVED · ratifica del Boss al merge della PR #154 (`b3130a9`) — nessuna modifica di contenuto. Le decisioni D-LF.0…D-LF.8 sono ratificate come formulate; il percorso web auth per la `sk` resta **differito alla Story 1.5** (E.LF.21) |
 | 1.1 | Sessione 52 (2026-10-26, issue #155) | **§3.1.0 (nuova)**: precisazione di implementazione sulla `eventKey` — la formula `mbid ?? name|artist` non può soddisfare insieme E.LF.4 ed E.LF.16/E.LF.19, perché API ed export non espongono il MBID con la stessa copertura. Il MBID entra nella chiave **solo quando disambigua** (stesso minuto, stesso nome\|artista, MBID diversi); negli altri casi la chiave è `<minuto>\|<nome>\|<artista>`, che converge fra i due percorsi. Nessuna modifica alle decisioni D-LF.* né alle restanti parti della spec |
+| 1.2 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): §4 **E.LF.21** — il gap dell'helper md5 è **chiuso**: md5 in **JS puro** in `crypto.ts`, nessuna dipendenza nuova (**D-SH.11**); la firma resta un requisito del solo percorso web auth (D-LF.2), che resta differito alla Story 1.5, e il percorso API (D-LF.1) continua a funzionare senza firma. §10 — il contratto del proxy è **esteso al POST** (metodo, path e body, risposta CORS) e la **modalità** (`solo lettura` / `lettura + scrittura`) è **dichiarata dall'utente**, default `solo lettura`: senza dichiarazione non si tenta la scrittura, e un proxy che inoltra solo GET produce l'avviso `scrobble.warn.writeProxyMissing` (**D-SH.14**, E.SH.7). Header aggiornato (la versione era ferma a 1.0 dal Sessione 51, mentre il changelog era già alla 1.1) |
 
 
 
@@ -14610,7 +14956,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Status: 🟡 DRAFT · Versione 0.5 · Sessione 57 (2026-10-27)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -14637,6 +14983,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `error` | Messaggi di errore |
 | `common` | Bottoni e testi condivisi |
 | `insight` | Insight narrativi |
+| `scrobble` | Invio degli ascolti ai hub (Story 1.5 — spec `20-SCROBBLING-HUB.md` §13.2) |
 
 ## 2. Stringhe UI
 
@@ -14958,6 +15305,35 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 | `disclaimer` | Questo insight è generato automaticamente a partire dai tuoi dati di ascolto. Non è una diagnosi. | This insight is derived automatically from your listening data. It is not a diagnosis. |
 | `disclaimerShort` | Generato automaticamente | Auto-generated |
 
+### 2.16 `scrobble.*` (Story 1.5 — spec `20-SCROBBLING-HUB.md` §13.2)
+
+Namespace dell'invio degli ascolti ai hub. I 15 codici sono **vincolanti**
+(spec ratificata in v1.0 🟢): il contratto `ScrobbleSink` (`05§4.2`) e la mappa
+`ScrobbleError` decidono **quale** codice compare in **quale** caso.
+
+| Key | IT | EN |
+|-----|----|----|
+| `scrobble.info.hubEnabled` | Invio degli ascolti attivo su {hub} | Sending your listens to {hub} is on |
+| `scrobble.info.hubDisabled` | Invio degli ascolti disattivato su {hub}: la coda è stata svuotata | Sending your listens to {hub} is off: the queue has been cleared |
+| `scrobble.info.batchSent` | {count} ascolti inviati a {hub} | {count} listens sent to {hub} |
+| `scrobble.warn.hubUnreachable` | {hub} non è raggiungibile: gli invii sono in attesa | {hub} is unreachable: sends are pending |
+| `scrobble.warn.rateLimited` | {hub} ha limitato le richieste: gli invii riprenderanno più tardi | {hub} has rate-limited the requests: sends will resume later |
+| `scrobble.warn.unconfirmedSend` | {count} invii a {hub} non sono stati confermati: controlla il profilo per evitare duplicati | {count} sends to {hub} were not confirmed: check your profile to avoid duplicates |
+| `scrobble.warn.writeProxyMissing` | Il proxy configurato non inoltra le scritture: {hub} può essere solo in lettura | The configured proxy does not forward writes: {hub} can only be read |
+| `scrobble.warn.durationEstimated` | {count} ascolti inviati con durata stimata | {count} listens sent with an estimated duration |
+| `scrobble.warn.tooShortSkipped` | {count} ascolti troppo brevi esclusi | {count} too-short listens skipped |
+| `scrobble.warn.partialAccept` | {hub} ha accettato {accepted} invii su {total}: i restanti verranno ritentati | {hub} accepted {accepted} of {total} sends: the rest will be retried |
+| `scrobble.error.tokenExpired` | Il token di {hub} non è più valido: rinnovalo nelle impostazioni | The {hub} token is no longer valid: renew it in the settings |
+| `scrobble.error.sessionRevoked` | La sessione di {hub} è stata revocata: riautenticati | The {hub} session was revoked: sign in again |
+| `scrobble.error.invalidSignature` | {hub} ha rifiutato la firma della richiesta: verifica le credenziali | {hub} rejected the request signature: check your credentials |
+| `scrobble.error.payloadTooLarge` | Il lotto di invio supera il limite di {hub}: è stato suddiviso | The send batch exceeds the {hub} limit: it has been split |
+| `scrobble.error.dbReadOnly` | Il database è in sola lettura: gli invii sono sospesi | The database is read-only: sends are suspended |
+
+**Pluralizzazione**: le quattro stringhe con `{count}` (`scrobble.info.batchSent`,
+`scrobble.warn.unconfirmedSend`, `scrobble.warn.durationEstimated`,
+`scrobble.warn.tooShortSkipped`) seguono §3 — `{count, plural, one {…} other {…}}`.
+Le stringhe con `{hub}`, `{accepted}` e `{total}` sono parametri semplici.
+
 ## 3. Pluralizzazione
 
 Formato: `{count, plural, one {...} other {...}}`
@@ -15017,13 +15393,14 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |
 | 0.3 | Sessione 47 (2026-10-26, issue #145) | Aggiunta §2.12c `adapter.listenbrainz.*` (12 chiavi, spec `03-ADAPTERS/listenbrainz.md` §9). Le varianti `_one`/`_other` seguono la convenzione i18n per i conteggi (stesso pattern di `adapter.spotify.*` e `adapter.youtube_music.*`) |
 | 0.4 | Sessione 52 (2026-10-26, issue #155) | **Materializzazione** delle chiavi della Story 1.3: `adapter.listenbrainz.*` (§2.12c) e `adapter.lastfm.*` (§2.12d, 14 chiavi) sono ora nei locale `it`/`en` dell'app; aggiunta §2.12e `settings.lastfm.*` (11 chiavi) per il pannello di configurazione del proxy. I nomi delle chiavi nel materializzato sono **completti** (`adapter.listenbrainz.detect.success`): le tabelle delle sezioni omettono il prefisso `adapter.` come le altre (§2.12a/§2.12b) |
+| 0.5 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 — namespace `scrobble.*`**: §1 (tabella dei namespace) e **§2.16 (nuova)**, i **15 codici** della spec `20-SCROBBLING-HUB.md` §13.2 (ratificata in v1.0 🟢), con i testi IT ed EN. La coppia codice → caso d'uso è **vincolante**: la mappa `ScrobbleError` (`05§4.2`) decide quale codice compare in quale situazione. Nota sulla pluralizzazione delle quattro stringhe con `{count}` (§3). Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.4) |
 
 
 ===== FILE: docs/09-PRIVACY-SECURITY.md =====
 
 # 09 — Privacy & Security
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 6
+> Status: 🟡 DRAFT · Versione 0.5 · Sessione 57 (2026-10-27)
 > ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
 > (§7) DEVE essere revisionata da un professionista legale qualificato prima
 > del lancio pubblico. Questo documento non costituisce consulenza legale.
@@ -15115,7 +15492,7 @@ Definire:
 | Dato | Destinazione | Trigger | Contenuto inviato |
 |------|--------------|---------|-------------------|
 | Nome brano + artista | MusicBrainz / API audio features | `enrichMetadata` ON | Solo stringhe titolo/artista, nessun dato utente |
-| Brano + timestamp ascolto | Last.fm / ListenBrainz | `scrobbleHubs` configurato | Dati di scrobbling standard (scelta utente) |
+| Brano + timestamp ascolto | Last.fm / ListenBrainz | `scrobbleHubs` configurato (consenso **per-hub**) | **Payload di scrobbling chiuso per costruzione** (`05§4.2` V8): `idempotencyKey`, `startedAt`, `durationMs` (opzionale), `recordingMbid` (opzionale), `isrc` (opzionale), `artistName`, `trackName`, `albumName` (opzionale). **Nessun** campo per contesto, device, IP o insight: non è una policy, è il *tipo* |
 | Ciphertext | Server sync (Fase 2) | `syncCloud` ON | Solo dati cifrati E2E |
 
 ## 4. Inventario dati personali trattati
@@ -15137,6 +15514,19 @@ Definire:
 | Shared secret Last.fm | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nel bundle, **mai** nei log | Consenso esplicito (art. 6.1.a) |
 | Session key Last.fm (`sk`) | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
 | URL del proxy Last.fm | Dati personali | API Last.fm (via proxy) | Sì (locale, Dexie), **mai** nel bundle | Consenso esplicito (art. 6.1.a) |
+| **Payload di scrobbling** | Dati personali | Ascolti locali dell'utente | Sì (locale, `scrobbleOutbox`), inviato **solo** all'hub abilitato | Consenso esplicito per-hub (art. 6.1.a) |
+| **Coda di invio** (`scrobbleOutbox`) | Dati personali (derivati dagli ascolti) | Enqueue locale | Sì (locale), **svuotata** quando l'hub viene revocato | Consenso esplicito per-hub (art. 6.1.a) |
+| User Token ListenBrainz **in scrittura** | Segreto / credenziale | Account ListenBrainz | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
+| Session key Last.fm (`sk`) **in scrittura** | Segreto / credenziale | API Last.fm (web auth) | Sì (locale, Dexie), **mai** nei log, **mai** nelle fixture | Consenso esplicito (art. 6.1.a) |
+
+**Il percorso di scrittura è chiuso per costruzione (Story 1.5, ratificata in
+`20-SCROBBLING-HUB.md` v1.0 🟢 e `05§4.2` ADR-0011 🟢 v1.0).** Il tipo
+`ScrobblePayload` **non ha** campi per contesto, device, IP o insight: non si
+invia qualcosa che il tipo non contiene, e il `toggle retainIp` **non è
+applicabile** al percorso di scrittura (l'IP non entra nel payload). I segreti
+(`api_key`, shared secret, `sk`, User Token) restano nello `storage` locale
+dell'utente e **non** vengono mai serializzati nel payload né nei log: la coda
+`scrobbleOutbox` contiene il payload, non le credenziali.
 
 **Nota (opzione A, issue #108)**: il `country` (paese di connessione) è un **dato derivato e non identificativo**: viene derivato dall'IP al parse e conservato indipendentemente dal toggle `retainIp`, come definito in `02-DATA-SCHEMA.md` §3.8 (🟢 APPROVED). Non richiede consenso esplicito: il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP (`retainIp`) e per i trattamenti attivabili via toggle (`enrichMetadata`, `scrobbleHubs`, `syncCloud`, `carDetectionConsent`). Questo allinea `09` §4 a `02` §3.8 e scioglie la contraddizione segnalata in issue #108.
 
@@ -15341,6 +15731,7 @@ email).
 | 0.3 | 2026-10-26 (issue #145) | §4: tre righe nuove per ListenBrainz (username mai persistito, User Token locale e mai nei log, `inserted_at` mai persistito). §7: nota sulla destinazione del User Token (storage locale, uso **solo in lettura** nella 1.3) |
 | 0.4 | 2026-10-26 (issue #144) | §4: cinque righe nuove per Last.fm (username, API key, shared secret, session key `sk`, URL del proxy) — tutte locali (Dexie), mai nel bundle, mai nei log. §7.2: nota sul **proxy** — è di fiducia dell'utente, vede la sua API key, e l'import da file ne evita l'esposizione |
 | 0.1 | Sessione 6 | Prima versione completa |
+| 0.5 | 2026-10-27 (issue #172) | **Story 1.5 — percorso di scrittura ratificato** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED, `05§4.2` ADR-0011 🟢 v1.0): §3.3 — la riga "Brano + timestamp ascolto" dichiara il **payload esatto** e il fatto che sia **chiuso per costruzione** (nessun campo per contesto, device, IP o insight: `retainIp` non è applicabile alla scrittura); §4 — tre righe nuove (payload di scrobbling, coda `scrobbleOutbox`, User Token e `sk` **in scrittura**) e una nota che chiarisce dove stanno i segreti (storage locale, mai nel payload né nei log) e cosa succede alla coda quando il consenso viene revocato. Header allineato (era fermo a v0.2 dal Sessione 6, mentre il changelog era già alla 0.4) |
 
 
 ===== FILE: docs/10-TESTING.md =====
@@ -15517,7 +15908,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.15 · Sessione 56 (2026-10-27, issue #168) · **ADR-0011 ratificata** (`docs/13-ADR/0011-scrobble-sink.md` v1.0 🟢 APPROVED, PR #170, merge `8900c3b`): il contratto di scrittura `ScrobbleSink` è vincolante in `05§4.2`
+> Status: 🟢 APPROVED · Versione 1.6.16 · Sessione 57 (2026-10-27, issue #172) · **spec della Story 1.5 ratificata** (`docs/20-SCROBBLING-HUB.md` **v1.0 🟢 APPROVED**): la story è **implementabile**, issue di implementazione **#173** (`agent-ready`, `size:L`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -15836,7 +16227,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: Sorgente continua di ascolti tramite hub di scrobbling. Risolve il vuoto V4 dell'audit.
 
-**Stato**: ⬚ TODO — spec scritta in `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55, issue #164): le cinque decisioni richieste dall'issue sono prese (D-SH.1…D-SH.10) e la ratifica è il passo successivo. **Contratto di scrittura ratificato**: `docs/13-ADR/0011-scrobble-sink.md` **v1.0 🟢 APPROVED** (Sessione 56, issue #168 chiusa; ratifica del Boss al merge della PR #170, `8900c3b`) e recepito in `05§4.2`: la dipendenza ADR-0011 è **soddisfatta**. **Non** implementabile finché la **spec** non è 🟢 APPROVED (i punti aperti 2-5 di `20§18` restano da decidere: ratifica del Boss in PR separata, come per `03-ADAPTERS/lastfm.md`).
+**Stato**: ⬚ TODO — **implementabile dal 2026-10-27 (Sessione 57)**: spec `docs/20-SCROBBLING-HUB.md` **v1.0 🟢 APPROVED** (ratificata dal Boss al merge della PR di ratifica, issue #172 chiusa con `status:done`), con le quattro decisioni aperte chiuse come proposte (**D-SH.11…D-SH.14**: md5 in JS puro, finestra di candidatura a 7 giorni, soglia dei 4 minuti con fiducia nella fonte, modalità del proxy dichiarata). Contratto di scrittura **v1.0 🟢 APPROVED** (`13-ADR/0011-scrobble-sink.md`, Sessione 56, issue #168) e recepito in `05§4.2`: la dipendenza ADR-0011 è **soddisfatta**. Issue di implementazione aperta: **#173** (`agent-ready`, `size:L`), con i 15 deliverable di `20§16` e i 31 casi di test di `20§14.3`.
 
 **Task**:
 - T1.5.1 — ~~Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)~~ → **spostato alla Story 1.3** (Sessione 47)
@@ -15855,12 +16246,13 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] MBID da ListenBrainz alimenta DEDUP-2 e genera `track.genres` via MusicBrainz lookup → `20§15` AC-SH.11
 - [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura) → `20§10.1` (P-SH.1, P-SH.3) · `20§15` AC-SH.1
 - [ ] Invio scrobble funzionante verso i hub configurati → `20§5`, `20§6` · `20§15` AC-SH.2, AC-SH.3
-- [ ] Test con mock API → `20§14` (29 casi, nessuna dipendenza nuova)
+- [ ] Test con mock API → `20§14` (**31** casi, nessuna dipendenza nuova)
 - [x] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). Il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1, issue **#168**) — **soddisfatto**: `13-ADR/0011-scrobble-sink.md` **v1.0 🟢 APPROVED** (PR #170, merge `8900c3b`, issue #168 chiusa), decisione A1 (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli V1-V10 in `05§4.2`
+- [x] **Dipendenza**: la **spec** della story (`20-SCROBBLING-HUB.md`) deve essere 🟢 APPROVED — **soddisfatto** (v1.0 🟢, Sessione 57, issue #172): le quattro decisioni aperte sono chiuse (D-SH.11…D-SH.14) e i documenti che la spec tocca sono allineati (`02§3.8`+`§6.2`, `09§3.3`+`§4`, `08§1`+`§2.16`, `03-ADAPTERS/lastfm.md` §4+§10, `03-ADAPTERS/listenbrainz.md` §3.4+D-LB.5)
 
-**Spec**: `20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT, Sessione 55) · `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8, E.LF.21; `03-ADAPTERS/listenbrainz.md` §3.4, D-LB.5 · **contratto di scrittura**: `13-ADR/0011-scrobble-sink.md` (v1.0 🟢 APPROVED, Sessione 56) → `05§4.2`
+**Spec**: `20-SCROBBLING-HUB.md` (**v1.0 🟢 APPROVED**, Sessione 57) · `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8 e §6.2; `03-ADAPTERS/lastfm.md` D-LF.8, E.LF.21; `03-ADAPTERS/listenbrainz.md` §3.4, D-LB.5 · **contratto di scrittura**: `13-ADR/0011-scrobble-sink.md` (v1.0 🟢 APPROVED, Sessione 56) → `05§4.2`
 
-**Issue**: #164 (spec) · #168 (ADR-0011, chiusa con `status:done`) · issue di implementazione: da aprire all'approvazione della spec (precedente: #155 per la Story 1.3)
+**Issue**: #164 (spec, ratificata) · #168 (ADR-0011, chiusa con `status:done`) · #172 (decisioni aperte, chiuse alla ratifica) · **#173** (implementazione, `agent-ready`, `size:L`)
 
 ---
 
@@ -16059,7 +16451,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2. **Sessione 55 (issue #164)**: spec scritta in `20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT — le 5 decisioni dell'issue sono prese (D-SH.1…D-SH.10). **Sessione 56 (issue #168)**: **ADR-0011 ratificata** (`13-ADR/0011-scrobble-sink.md` v1.0 🟢 APPROVED, PR #170, merge `8900c3b`) — decisione A1 (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli V1-V10, `05§4.2`. Resta la **ratifica della spec** (v1.0 🟢, punti aperti 2-5 di `20§18`), poi l'issue di implementazione (`agent-ready`, `size:L`) |
+| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2. **Sessione 55 (issue #164)**: spec scritta in `20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT — le 5 decisioni dell'issue sono prese (D-SH.1…D-SH.10). **Sessione 56 (issue #168)**: **ADR-0011 ratificata** (`13-ADR/0011-scrobble-sink.md` v1.0 🟢 APPROVED, PR #170, merge `8900c3b`) — decisione A1 (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli V1-V10, `05§4.2`. **Sessione 57 (issue #172)**: **spec ratificata** (`20-SCROBBLING-HUB.md` **v1.0 🟢 APPROVED**) con le 4 decisioni chiuse (D-SH.11…D-SH.14) e i documenti toccati allineati (`02`, `09`, `08`, `03-ADAPTERS/*`) → la story è **implementabile**: issue **#173** (`agent-ready`, `size:L`, 15 deliverable, 31 casi di test) |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -16112,6 +16504,7 @@ Ogni story deve avere label GitHub:
 | 1.6.13 | Sessione 55 (2026-10-27, issue #164) | **Spec della Story 1.5 scritta**: `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT). Risponde alle 5 decisioni richieste dall'issue (hub della prima tranche, semantica dell'invio, consenso per-hub, coda e idempotenza, collocazione del documento) e ne aggiunge una che l'issue non sapeva di dover chiedere: **la PWA non osserva la riproduzione di altre app**, quindi la prima tranche è uno specchio idempotente dello storico locale, non uno scrobbling live. Definiti il contratto `ScrobbleSink` (da ratificare via **ADR-0011**), la mappa `ScrobbleError` (separata da `AdapterError`, orientato al parsing), i vincoli di protocollo dei due hub verificati sulle doc ufficiali, 16 edge case, 15 codici i18n, 29 casi di test e 15 deliverable di implementazione. Sezione Story 1.5 allineata (`**Stato**:` con la premessa nuova, task con i rimandi ai §, AC con i cross-ref alla spec, `**Spec**:` e `**Issue**:`); riga roadmap aggiornata. La story resta `⬚ TODO`: non è implementabile finché la spec non è 🟢 APPROVED e ADR-0011 non è ratificato |
 | 1.6.14 | Sessione 56 (2026-10-27, issue #168) | **ADR-0011 scritta**: `docs/13-ADR/0011-scrobble-sink.md` v0.1 (🟡 DRAFT) formalizza la decisione sul **contratto di scrittura** negli hub di scrobbling, che `05§4` (🟢 APPROVED) poteva recepire solo via ADR — lo stesso percorso di ADR-0010 sul lato della lettura. Decisione **A1**: l'interfaccia `ScrobbleSink` è **separata** da `PlatformAdapter` (che non cambia), con la stessa forma di `parseRemote?()`; scartate A2 (metodo `scrobble?()` su `PlatformAdapter`), A3 (nessuna astrazione), A4 (flag "write" su `RemoteSource`) e A5 (contratto bidirezionale unico). Vincoli **V1-V10**: separazione dal contratto di lettura, rate limiting per-hub **nel sink**, nessun segreto nel bundle, nessun backend, `AbortSignal`, `ScrobbleError` dedicato (`recoverable` = "si può ritentare"), `ScrobbleHubId` dedicato, payload chiuso per costruzione, protocollo ignoto al core, idempotenza locale write-ahead. `05-ARCHITECTURE.md` §4.2 aggiunta (v1.1 → **v1.3**, con la riga di changelog v1.2 della Sessione 53 riposizionata nella tabella: era stata appesa in cima al file). Sezione Story 1.5 allineata (`**Stato**:` con la dipendenza **soddisfatta nel contenuto**, AC della dipendenza, `**Spec**:` e `**Issue**:`), riga roadmap aggiornata. La story resta `⬚ TODO`: mancano le due **ratifiche** (spec v1.0 🟢 e ADR v1.0 🟢), atti del Boss in PR separate |
 | 1.6.15 | Sessione 56 (2026-10-27, issue #168) | **ADR-0011 ratificata**: il merge della PR #170 (`8900c3b`) è la ratifica del Boss → `docs/13-ADR/0011-scrobble-sink.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**, **nessuna modifica di contenuto** (stesso pattern di ADR-0010, PR #152). La decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`) e i vincoli V1-V10 diventano vincolanti: `05§4.2` è la loro sede e `05` header aggiornato. Allineati: `docs/INDEX.md` (riga `13-ADR/`, conteggio ADR APPROVED 8 → **9**, DRAFT solo 0009, riga `11`, "Prossimo step tecnico"); `docs/11-BACKLOG.md` (Story 1.5 `**Stato**:` con la dipendenza **soddisfatta**, AC della dipendenza `[x]`, `**Spec**:` e `**Issue**:`; riga roadmap; header v1.6.15); `docs/18-DEV-LOG.md` §22 (ratifica) + changelog 2.3; `docs/state/sessions/56-*.md` (frontmatter: `state: 🟢`, `merged: true`, merge commit `8900c3b`); `docs/state/_index.md`; `docs/20-SCROBBLING-HUB.md` §18 punto 1 chiuso (restano i punti 2-5). La story resta `⬚ TODO`: manca solo la **ratifica della spec** (punti aperti 2-5 di `20§18`) |
+| 1.6.16 | Sessione 57 (2026-10-27, issue #172) | **Spec della Story 1.5 ratificata**: `docs/20-SCROBBLING-HUB.md` passa da 🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le **quattro decisioni aperte** (`20§18` punti 2-5) chiuse come proposte in **D-SH.11…D-SH.14** (§2.1): md5 in JS puro (nessuna dipendenza nuova), finestra di candidatura a 7 giorni + azione esplicita per tutta la cronologia, durata ignota → soglia dei 4 minuti con fiducia nella fonte per gli eventi importati da un hub, modalità del proxy dichiarata dall'utente (`solo lettura` / `lettura + scrittura`). La ratifica **modifica regole normative** (T-SH.3, T-SH.4, E.SH.10, E.SH.11, la finestra, la modalità proxy): a differenza della promozione dell'ADR-0011, qui non è una promozione senza contenuto. **Allineati i documenti che la spec tocca** (atto dichiarato dall'ADR-0011 §"Documenti da aggiornare"): `02-DATA-SCHEMA.md` §3.8 (`ScrobbleHubId`) e §6.2 (`scrobbleOutbox`, schema Dexie v5), `09-PRIVACY-SECURITY.md` §3.3 e §4 (payload chiuso per costruzione, inventario), `08-COPY-I18N.md` §1 e §2.16 (i 15 codici `scrobble.*`), `03-ADAPTERS/lastfm.md` §4 (E.LF.21) e §10 (proxy in scrittura), `03-ADAPTERS/listenbrainz.md` D-LB.5 e §3.4, `01-PLATFORMS.md` §3.7-3.9. Difetti corretti: `02-DATA-SCHEMA.md` aveva la riga di changelog v1.5 **appesa in cima al file** (come `05-ARCHITECTURE.md` nella Sessione 56) e l'header fermo a v1.3; cinque documenti dichiaravano nell'header una versione più vecchia del proprio changelog — header allineati ovunque. **Issue di implementazione aperta: #173** (`agent-ready`, `size:L`). La story resta `⬚ TODO` fino al merge della PR |
 
 <!-- AGGREGATE-STORIES-START -->
 
@@ -18635,10 +19028,10 @@ E1..E10 restano invariati (§5 `01-PLATFORMS.md`); E11..E15 si aggiungono a cata
 
 # 20 — Scrobbling hub (invio scrobble, sync continua, toggle)
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 55 (2026-10-27)
-> Issue: #164 · Story: 1.5 (`11-BACKLOG.md`)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 57 (2026-10-27)
+> Issue: #164 (spec) · #172 (decisioni aperte, chiuse alla ratifica) · Story: 1.5 (`11-BACKLOG.md`)
 > Spec collegata a: `01-PLATFORMS.md` §3.7-3.8 · `02-DATA-SCHEMA.md` §3.8 · `03-ADAPTERS/lastfm.md` · `03-ADAPTERS/listenbrainz.md` · `13-ADR/0010-remote-source-adapter.md` · `13-ADR/0011-scrobble-sink.md` (🟢 APPROVED v1.0)
-> Da ratificare in: `05-ARCHITECTURE.md` §4 — **fatto**: il contratto di scrittura è ratificato in `05§4.2` via **ADR-0011** (v1.0 🟢 APPROVED, Sessione 56, issue #168; vedi §18 punto 1) · restano da ratificare `02-DATA-SCHEMA.md` §3.8 e §6 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §2
+> Ratificato in: `05-ARCHITECTURE.md` §4.2 (via **ADR-0011** 🟢 APPROVED v1.0, Sessione 56) · `02-DATA-SCHEMA.md` §3.8 e §6.2 · `09-PRIVACY-SECURITY.md` §3.3 e §4 · `08-COPY-I18N.md` §1 e §2.16
 > Decisione architetturale collegata: [`13-ADR/0010-remote-source-adapter.md`](13-ADR/0010-remote-source-adapter.md) (percorso **di lettura** remota — questa spec copre il percorso **di scrittura**)
 
 ---
@@ -18676,6 +19069,27 @@ L'issue chiede cinque decisioni prima di scrivere la spec. Le risposte sono qui 
 | **D-SH.8** | Rate limit | **Per-hub, nel client di scrobbling**: Last.fm ~5 req/s (token bucket, batch fino a 50 scrobble); ListenBrainz 1 req/s **guidato dagli header** `X-RateLimit-*`. Nessun rate limit condiviso fra hub, ma **un solo job seriale** sulla coda | ADR-0010 V7: il rate limiting è responsabilità dell'adapter; i due hub hanno limiti e semantica diversi, un limite globale sarebbe la media dei due |
 | **D-SH.9** | Mappa errori | **`ScrobbleError` dedicato** (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`) con `recoverable` = "si può ritentare" | `AdapterError` è orientato al **parsing** (`INVALID_FORMAT`, `TRUNCATED`, `UNSUPPORTED_VERSION`): riusarlo per un invio darebbe all'utente una remediation sbagliata — la stessa lezione di ADR-0010 §"Punti aperti" 1 |
 | **D-SH.10** | Origine degli eventi da scrobblare | Gli eventi inviati sono gli **ascolti locali** della tabella `listens`, filtrati per una **finestra di candidatura** | Una PWA non osserva la riproduzione di altre app: vedi §3, che è la premessa onesta della story |
+
+### 2.1 Le quattro decisioni chiuse alla ratifica (Sessione 57, issue #172)
+
+Alla stesura (v0.1) la spec lasciava **quattro punti aperti** (§18, punti 2-5):
+erano decisioni di **protocollo**, non di contratto — il contratto di scrittura è
+ratificato a parte (ADR-0011 🟢 v1.0). L'issue #172 le ha poste al Boss con le
+opzioni e i trade-off; qui sono chiuse **come proposte**, con la ratifica del
+Boss (merge della PR di ratifica) come atto di ratifica.
+
+| # | Decisione | Scelta | Motivazione |
+|---|-----------|--------|-------------|
+| **D-SH.11** | **Firma md5: JS puro o dipendenza esterna** | **JS puro** in `packages/core/src/adapters/crypto.ts` (`md5Hex()`), nessuna dipendenza nuova | `Web Crypto` non supporta md5; una dipendenza per ~4 KB di bundle PWA è un costo sproporzionato e il repo ha già la policy "nessuna dipendenza nuova" (`03-ADAPTERS/lastfm.md` §10). Il rischio della scrittura a mano è contenuto dai vettori RFC 1321 (caso di test n. 23 di §14.3). **Conferma D-SH.2** |
+| **D-SH.12** | **Finestra di candidatura predefinita** | **7 giorni**, con azione esplicita dell'utente per **tutta la cronologia** | Un default corto (24 h) non è uno "specchio dello storico"; un default illimitato fa uscire tutto lo storico al primo abilitamento senza che l'utente lo chieda. 7 giorni copre l'uso tipico con poche richieste; il caso "voglio tutto" è un'azione esplicita, non un default (§5, condizione 3) |
+| **D-SH.13** | **Durata di catalogo sconosciuta: inviare o no** | **Soglia dei 4 minuti sul tempo trascorso** (`now - startedAt`), **con fiducia nella fonte** per gli eventi importati da un hub | La regola precedente (T-SH.3) escludeva la **maggior parte** degli ascolti degli utenti Last.fm/ListenBrainz (durata `0`): la Story 1.5 non avrebbe nulla da inviare. La soglia dei 4 minuti mantiene un minimo di prudenza; per gli eventi **importati da un hub** la maturità è già garantita dalla fonte (Last.fm registra lo scrobble solo dopo la propria regola), quindi non si applica un secondo filtro. Il bias residuo (ascolto reale di 30 s di un brano di 4 minuti) resta **dichiarato** (§7) |
+| **D-SH.14** | **Contratto del proxy Last.fm per la scrittura** | **Dichiarazione esplicita per-hub**: nelle impostazioni, la modalità del proxy (`solo lettura` / `lettura + scrittura`), default `solo lettura`; la scrittura si attiva solo se l'utente la dichiara | Molti proxy "JSON" inoltrano **solo GET**: senza dichiarazione, l'utente scoprirebbe il limite al primo errore (E.SH.7) invece che prima (U-SH.2). La dichiarazione esplicita è coerente con il consenso **per-hub** (D-SH.4) e con `isConfigured()` |
+
+**Effetti sulle regole già scritte**: D-SH.13 modifica **T-SH.3** (§7) e i casi
+**E.SH.10** ed **E.SH.11** (§12); D-SH.12 fissa la **finestra di candidatura**
+(§5, condizione 3); D-SH.14 aggiunge la **modalità del proxy** fra gli stati di
+configurazione (§6.1, §13.1). D-SH.11 non cambia nulla: conferma D-SH.2.
+
 
 ## 3. La premessa che la story non dichiarava: l'app non è un player
 
@@ -18803,7 +19217,7 @@ export interface ScrobbleResult {
 |---|------------|-------------|
 | 1 | `H ∈ PrivacySettings.scrobbleHubs` | Consenso esplicito (D-SH.4) |
 | 2 | `platform` dell'ascolto **non** è un hub | Evita il loop: uno scrobble Letto da Last.fm non viene rimandato a Last.fm |
-| 3 | `timestamp` nella **finestra di candidatura** | Perimetro dichiarato (§8) |
+| 3 | `timestamp` nella **finestra di candidatura**: **7 giorni** (default, D-SH.12), o **tutta la cronologia** se l'utente lo richiede esplicitamente | Perimetro dichiarato (§8). Il default non lascia uscire uno storico che l'utente non ha chiesto; l'azione esplicita copre il caso "voglio tutto il mio storico sul profilo" |
 | 4 | `skipped !== true` | Uno skip esplicito non è un ascolto |
 | 5 | **maturato** secondo la regola del §7 | Regola Last.fm (≥ 30 s e metà durata o 4 minuti) |
 | 6 | `eventKey` assente dalla coda per H | Idempotenza locale (G-SH.1) |
@@ -18826,7 +19240,9 @@ export interface ScrobbleResult {
 | Rate limit | Non pubblicato; ~5 req/s misurati dai client (token bucket) | `03-ADAPTERS/lastfm.md` §10 |
 | Errori (scrittura) | 9 `sk` non valida · 10 `api_key` non valida · 13 firma non valida · 26 key sospesa · 29 rate limit · 11/16 temporanei · gli altri = richiesta malformata, **non ritentare** | doc Last.fm API (scrobbling) |
 
-**Il trasporto della scrittura è il proxy dell'utente (D-LF.0)**, ma con un contratto **esteso**: il proxy deve inoltrare una **POST con body** e rispondere con CORS. Il contratto attuale (D-LF.0, `03-ADAPTERS/lastfm.md` §10) descrive un proxy che risponde JSON a una GET. Un proxy che inoltra solo GET **non** può trasportare la scrittura: in quel caso Last.fm resta disponibile in sola lettura e l'utente riceve un avviso esplicito (E.SH.7).
+**Il trasporto della scrittura è il proxy dell'utente (D-LF.0)**, ma con un contratto **esteso**: il proxy deve inoltrare una **POST con body** e rispondere con CORS. Il contratto attuale (D-LF.0, `03-ADAPTERS/lastfm.md` §10) descrive un proxy che risponde JSON a una GET. Un proxy che inoltra solo GET **non** può trasportare la scrittura.
+
+**La modalità del proxy è dichiarata dall'utente (D-SH.14)**: nelle impostazioni, il proxy Last.fm ha una modalità — `solo lettura` (default) o `lettura + scrittura` — e l'app **non tenta** la scrittura finché l'utente non la dichiara. Un proxy che inoltra solo GET, usato in modalità `lettura + scrittura`, produce l'avviso esplicito `scrobble.warn.writeProxyMissing` (E.SH.7) e l'hub resta **solo in lettura**: zero richieste di scrittura, nessun scrobble fantasma. La dichiarazione è per-hub e reversibile in un click (U-SH.2).
 
 **La firma in un batch** è il punto più delicato del protocollo (E.SH.8): i parametri hanno nome indicizzato (`artist[0]`, `artist[1]`, …) e il server li ordina **per nome, alfabeticamente, come stringhe**. L'ordinamento lessicografico di `artist[10]` rispetto a `artist[2]` **non** coincide con l'ordinamento numerico: l'implementazione deve ordinare le **stringhe** dei nomi, non gli indici.
 
@@ -18866,11 +19282,11 @@ export interface ScrobbleResult {
 |---|--------|----------|
 | **T-SH.1** | `timestamp` inviato = `startedAt` dell'ascolto locale, in **secondi** UNIX UTC | Non il `timestamp` normalizzato (`= startedAt + durationMs`, che per le fonti senza durata coincide con l'inizio): l'evento inviato è l'**inizio** dell'ascolto, come le due API definiscono |
 | **T-SH.2** | Granularità **al secondo** | La normalizzazione al minuto (D-LF.7) è un artefatto della chiave di dedup del percorso di lettura: non si applica all'invio, altrimenti due scrobble distinti dello stesso brano in due minuti diversi diverebbero indistinguibili |
-| **T-SH.3** | Regola di maturità | Un ascolto è maturo quando sono soddisfatte entrambe le condizioni: durata **> 30 s** e tempo ascoltato **≥ min(metà della durata, 4 minuti)**. Con durata ignota si usa il solo criterio dei 4 minuti, e l'evento resta **non maturo** se non si può stabilire che il brano è durato più di 30 s |
-| **T-SH.4** | "Tempo ascoltato" | Nel modello locale è `durationMs` dell'evento quando noto; quando è `0` (fonti senza durata) si usa `Track.durationMs` (durata **catalogo**) come miglior stima disponibile, dichiarando il bias (§9) |
+| **T-SH.3** | Regola di maturità | Un ascolto è maturo quando sono soddisfatte entrambe le condizioni: durata **> 30 s** e tempo ascoltato **≥ min(metà della durata, 4 minuti)**. **Se la durata è ignota** (D-SH.13): si applica il solo criterio dei **4 minuti sul tempo trascorso** (`now - startedAt`), e l'evento è **maturato all'atto** se la piattaforma sorgente è un **hub** (la fonte ha già applicato la propria regola di maturità). In quest'ultimo caso la stima della durata non è necessaria. Con durata ignota e origine non-hub, l'evento resta **non maturo** |
+| **T-SH.4** | "Tempo ascoltato" | Nel modello locale è `durationMs` dell'evento quando noto; quando è `0` (fonti senza durata) si usa `Track.durationMs` (durata **catalogo**) come miglior stima disponibile; **se anche la durata di catalogo è ignota**, si usa il **tempo trascorso** (`now - startedAt`) con la soglia dei 4 minuti (D-SH.13). Per gli eventi **importati da un hub** la maturità è già garantita dalla fonte (T-SH.3) |
 | **T-SH.5** | Semantica del tempo di invio | L'invio può avvenire **in qualsiasi momento** dopo la maturità: la coda conserva il `startedAt` originale, non l'ora di invio |
 
-**Il bias dichiarato**: per gli ascolti importati da fonti senza durata (Last.fm, ListenBrainz) la maturità è stimata sulla durata di catalogo del brano. Un ascolto reale di 30 secondi di un brano di 4 minuti passerebbe la soglia "metà durata" solo se la durata di catalogo fosse nota: in quel caso l'app invierebbe uno scrobble che l'utente considera uno skip. È il prezzo di non avere il contatore di riproduzione, ed è dichiarato qui e nell'AC (§14).
+**Il bias dichiarato**: per gli ascolti importati da fonti senza durata (Last.fm, ListenBrainz) la maturità è stimata sulla durata di catalogo del brano; se anche quella è ignota si usa il tempo trascorso con la soglia dei 4 minuti (D-SH.13). Un ascolto reale di 30 secondi di un brano di 4 minuti passerebbe la soglia "metà durata" solo se la durata di catalogo fosse nota: in quel caso l'app invierebbe uno scrobble che l'utente considera uno skip. **Il caso più comune è coperto dalla fonte**: un ascolto importato da un hub è già maturo per la regola della piattaforma, e non subisce il filtro (T-SH.3). Il bias residuo riguarda gli eventi **locali** di durata ignota: è il prezzo di non avere il contatore di riproduzione, ed è dichiarato qui e nell'AC (§14).
 
 ## 8. La coda: persistenza, idempotenza, retry
 
@@ -19049,8 +19465,8 @@ export class ScrobbleError extends Error {
 | E.SH.7 | Proxy CORS che inoltra solo GET | Last.fm non scrivibile | Il sink è "non configurato" per la scrittura: avviso esplicito, zero richieste | `scrobble.warn.writeProxyMissing` |
 | E.SH.8 | Firma in batch con indici ≥ 10 | `api_sig` errata → errore 13 | L'ordinamento è **lessicografico sulle stringhe** dei nomi dei parametri (`artist[10]` prima di `artist[2]`), non numerico | `scrobble.error.invalidSignature` |
 | E.SH.9 | L'utente toglie l'hub dalla lista con la coda non vuota | Scrobble inviati per un hub non più autorizzato | La coda del hub viene svuotata (`dropped`); nessun invio in volo | `scrobble.info.hubDisabled` |
-| E.SH.10 | Ascolto locale senza durata nota | Maturità stimata sulla durata di catalogo | Si invia quando la stima supera la soglia; bias dichiarato (§7) | `scrobble.warn.durationEstimated` |
-| E.SH.11 | Brano di durata ignota e inferiore a 30 s | Non si può stabilire la maturità | L'evento **non** viene inviato; conteggio degli scarti | `scrobble.warn.tooShortSkipped` |
+| E.SH.10 | Ascolto locale senza durata nota | Maturità stimata sulla durata di catalogo, o sul tempo trascorso | Si invia quando la stima (o il tempo trascorso, ≥ 4 minuti) supera la soglia; bias dichiarato (§7). Per gli eventi **importati da un hub** non c'è stima: la fonte ha già applicato la regola (T-SH.3) | `scrobble.warn.durationEstimated` |
+| E.SH.11 | Brano di durata ignota, evento locale | La maturità con la durata non è stabilibile | Si applica la soglia dei **4 minuti sul tempo trascorso** (D-SH.13): l'evento **non** viene inviato se il tempo trascorso è inferiore; conteggio degli scarti. Gli eventi importati da un hub sono già maturi e non subiscono lo scarto | `scrobble.warn.tooShortSkipped` |
 | E.SH.12 | Loop: un ascolto letto da Last.fm viene rimandato a Last.fm | Scrobble ricorsivo | Il filtro esclude gli eventi con `platform` = hub | — |
 | E.SH.13 | Il payload di un lotto supera `MAX_LISTEN_PAYLOAD_SIZE` | Invio rifiutato con 400 | Il lotto viene spezzato in sotto-lotti entro i limiti documentati | `scrobble.error.payloadTooLarge` |
 | E.SH.14 | Il DB è in modalità read-only (quota esaurita) | La coda non può essere scritta | Nessun invio (la coda è la garanzia di non perdere); avviso all'utente | `scrobble.warn.dbReadOnly` |
@@ -19068,7 +19484,7 @@ Questa spec **non** disegna la schermata (è materia di `07-UI-SPEC.md` 🟡 DRA
 | # | Requisito | Motivazione |
 |---|-----------|-------------|
 | **U-SH.1** | Un selettore per-hub nell'area privacy, con default **vuoto** e stato **chiaro** ("nessun hub: non viene inviato nulla") | Il consenso deve essere visibile e revocabile |
-| **U-SH.2** | Per ogni hub abilitato, uno stato della configurazione (manca la `api_key` / manca il `shared secret` / manca la `sk` / manca il proxy scrivibile / manca il User Token) | `isConfigured()` va detto all'utente **prima** del primo invio, non al primo errore |
+| **U-SH.2** | Per ogni hub abilitato, uno stato della configurazione (manca la `api_key` / manca il `shared secret` / manca la `sk` / manca il proxy scrivibile / manca il User Token), e per Last.fm la **modalità dichiarata** del proxy (`solo lettura` / `lettura + scrittura`, D-SH.14) | `isConfigured()` va detto all'utente **prima** del primo invio, non al primo errore |
 | **U-SH.3** | Una vista della coda: quante righe in attesa, in volo, fallite, con l'azione "ritenta" / "scarta" | Il retry terminale e il caso E.SH.6 richiedono un'interfaccia: senza, l'utente non può chiudere `failed` |
 | **U-SH.4** | Il consenso è **per-hub** e non un interruttore globale | D-SH.4 |
 | **U-SH.5** | L'app non invia nulla finché l'utente non ha abilitato almeno un hub **e** la configurazione è completa | G-SH.3 |
@@ -19119,9 +19535,10 @@ Il mock è `fetch` iniettato, come in `packages/core/src/adapters/lastfm/__tests
 | 3 | **Toggle vuoto** | `scrobbleHubs: []` → **zero richieste** e zero righe in coda |
 | 4 | Hub non configurato | Credenziali assenti → zero richieste, `HUB_UNCONFIGURED` |
 | 5 | Maturità (T-SH.3) | Un ascolto sotto la soglia non entra in coda; uno sopra sì |
-| 6 | Brano sotto 30 s | Escluso (E.SH.11) |
+| 6 | Durata ignota, evento locale | Escluso sotto i 4 minuti di tempo trascorso; inviato sopra (D-SH.13, E.SH.11) |
 | 7 | `skipped: true` | Escluso |
 | 8 | Evento di piattaforma hub | Escluso (E.SH.12, anti-loop) |
+| 8b | Durata ignota, evento **importato da un hub** | **Maturo all'atto**: la fonte ha già applicato la regola (D-SH.13, T-SH.3) |
 | 9 | **Idempotenza** | Il ciclo girato due volte → una sola riga in coda, una sola richiesta |
 | 10 | Enqueue doppia della stessa chiave | La seconda è ignorata, nessun errore (G-SH.1) |
 | 11 | 429 ListenBrainz | Backoff rispettando `X-RateLimit-Reset-In`; la riga torna `pending` |
@@ -19143,6 +19560,8 @@ Il mock è `fetch` iniettato, come in `packages/core/src/adapters/lastfm/__tests
 | 27 | Schema Dexie v5 | Migrazione v4→v5, tabella `scrobbleOutbox` creata, indice unico su `idempotencyKey` |
 | 28 | Privacy | Nessun segreto nel bundle, nei log o nelle fixture; `ip`/`country` mai nel payload |
 | 29 | UI | Il selettore per-hub rispetta il default vuoto e la revoca (U-SH.1, U-SH.4) |
+| 30 | **Finestra di candidatura** | Un ascolto più vecchio di 7 giorni non entra in coda; con l'azione "tutta la cronologia" entra (D-SH.12) |
+| 31 | **Modalità del proxy** | In `solo lettura` (default) **zero** richieste di scrittura; in `lettura + scrittura` la POST parte; un proxy che inoltra solo GET produce l'avviso e l'hub resta in sola lettura (D-SH.14, E.SH.7) |
 
 ## 15. Criteri di accettazione della Story 1.5
 
@@ -19190,25 +19609,25 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 
 | Documento | Modifica | Sessione |
 |----------|----------|----------|
-| `05-ARCHITECTURE.md` | §4: nuova sottosezione "Contratto di scrittura (`ScrobbleSink`)" — **via ADR-0011** | 55 (spec) → ratifica |
-| `02-DATA-SCHEMA.md` | §3.8: `scrobbleHubs: ScrobbleHubId[]` (tipo dedicato); §6: tabella `scrobbleOutbox` (schema Dexie v5) | 55 (spec) → ratifica |
-| `09-PRIVACY-SECURITY.md` | §3.3: riga "scrobble" già presente da integrare con il payload esatto; §4: inventario (User Token in scrittura, `sk`, payload) | 55 (spec) → ratifica |
-| `08-COPY-I18N.md` | §1: namespace `scrobble`; §2: tabella dei codici (§13.2) | 55 (spec) → ratifica |
-| `03-ADAPTERS/lastfm.md` | §4 E.LF.21: risolto da D-SH.2 (md5 in JS puro); §10: contratto del proxy esteso al POST (E.SH.7) | ratifica |
-| `03-ADAPTERS/listenbrainz.md` | §3.4: il percorso `/listens` è specificato in `20-SCROBBLING-HUB.md` §9; D-LB.5: il token passa da "solo lettura" a "lettura + scrittura" | ratifica |
-| `01-PLATFORMS.md` | §3.7-3.8: rimando alla spec di scrittura | ratifica |
-| `11-BACKLOG.md` | Story 1.5: `**Stato**:` e `**Spec**:` allineati a questa spec | 55 (fatto) |
-| `docs/INDEX.md` | Riga del documento 20 nella tabella "Documenti fondamentali"; "Prossimo passo tecnico" aggiornato | 55 (fatto) |
+| `05-ARCHITECTURE.md` | §4: nuova sottosezione "Contratto di scrittura (`ScrobbleSink`)" — **via ADR-0011** | 55 (spec) → **56 (fatto)** |
+| `02-DATA-SCHEMA.md` | §3.8: `scrobbleHubs: ScrobbleHubId[]` (tipo dedicato); §6.2: tabella `scrobbleOutbox` (schema Dexie v5) | 55 (spec) → **57 (fatto)** |
+| `09-PRIVACY-SECURITY.md` | §3.3: riga "scrobble" integrata con il payload esatto; §4: inventario (User Token in scrittura, `sk`, payload) | 55 (spec) → **57 (fatto)** |
+| `08-COPY-I18N.md` | §1: namespace `scrobble`; §2.16: i 15 codici (§13.2) | 55 (spec) → **57 (fatto)** |
+| `03-ADAPTERS/lastfm.md` | §4 E.LF.21: risolto da D-SH.11 (md5 in JS puro); §10: contratto del proxy esteso al POST + modalità dichiarata (E.SH.7, D-SH.14) | **57 (fatto)** |
+| `03-ADAPTERS/listenbrainz.md` | §3.4: il percorso `/listens` è specificato in `20-SCROBBLING-HUB.md` §9; D-LB.5: il token passa da "solo lettura" a "lettura + scrittura" | **57 (fatto)** |
+| `01-PLATFORMS.md` | §3.7-3.8: rimando alla spec di scrittura | **57 (fatto)** |
+| `11-BACKLOG.md` | Story 1.5: `**Stato**:` e `**Spec**:` allineati a questa spec | 55 (fatto) → **57 (fatto)** |
+| `docs/INDEX.md` | Riga del documento 20 nella tabella "Documenti fondamentali"; "Prossimo passo tecnico" aggiornato | 55 (fatto) → **57 (fatto)** |
 
-## 18. Punti aperti (bloccano la ratifica)
+## 18. Punti aperti
 
-1. ~~**ADR-0011 — il contratto di scrittura dentro `05§4`.**~~ — **risolto nella Sessione 56 (issue #168, chiusa con `status:done`)**: `05-ARCHITECTURE.md` §4 è 🟢 APPROVED e modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). L'ADR è scritto in [`13-ADR/0011-scrobble-sink.md`](13-ADR/0011-scrobble-sink.md) e **ratificato dal Boss al merge della PR #170** (`8900c3b`): decisione **A1** (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli **V1-V10**, alternative A2-A5 scartate. Il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). I punti 2-5 restano aperti e sono decisioni di **protocollo**, non del contratto.
-2. **Firma md5: JS puro o dipendenza esterna.** La proposta è JS puro in `crypto.ts` (D-SH.2), per non aggiungere dipendenze a un bundle PWA. La controparte è una dipendenza mantenuta (`hash-wasm`), che aggiunge peso ma ha una garanzia di correttezza documentata. **Da ratificare.**
-3. **Finestra di candidatura predefinita.** §5 la richiede ma non la fissa: 24 h, 7 giorni o "fino all'ultimo sync"? Il default influenza sia l'uso (quanti scrobble escono) sia il costo (quante richieste). **Da ratificare.**
-4. **Durata di catalogo sconosciuta: inviare o no?** T-SH.3 dice che senza durata nota l'evento non matura (E.SH.11), il che **esclude** la maggior parte degli ascolti provenienti da Last.fm e ListenBrainz (durata `0`): alternative possibili sono usare la soglia dei 4 minuti sul tempo trascorso, o inviare comunque. **Da ratificare** — è la decisione con il maggiore impatto sul comportamento reale.
-5. **Contratto del proxy Last.fm per la scrittura.** D-SH.2 assume che il proxy dell'utente inoltri POST con body. Molti proxy "JSON" inoltravano solo GET. Serve decidere se la 1.5 pretende un proxy con scrittura (e come lo si dichiara nelle impostazioni) oppure se la scrittura su Last.fm è "best effort". **Da ratificare.**
+1. ~~**ADR-0011 — il contratto di scrittura dentro `05§4`.**~~ — **risolto nella Sessione 56 (issue #168, chiusa con `status:done`)**: `05-ARCHITECTURE.md` §4 è 🟢 APPROVED e modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). L'ADR è scritto in [`13-ADR/0011-scrobble-sink.md`](13-ADR/0011-scrobble-sink.md) e **ratificato dal Boss al merge della PR #170** (`8900c3b`): decisione **A1** (`ScrobbleSink` dedicato, separato da `PlatformAdapter`), vincoli **V1-V10**, alternative A2-A5 scartate. Il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3).
+2. ~~**Firma md5: JS puro o dipendenza esterna.**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.11**, md5 in **JS puro** in `crypto.ts`, nessuna dipendenza nuova (conferma D-SH.2). §2.1.
+3. ~~**Finestra di candidatura predefinita.**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.12**, default **7 giorni** + azione esplicita per tutta la cronologia (§5, condizione 3). §2.1.
+4. ~~**Durata di catalogo sconosciuta: inviare o no?**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.13**, soglia dei **4 minuti sul tempo trascorso** + **fiducia nella fonte** per gli eventi importati da un hub (T-SH.3, T-SH.4, E.SH.10, E.SH.11). §2.1.
+5. ~~**Contratto del proxy Last.fm per la scrittura.**~~ — **risolto nella Sessione 57 (issue #172)**: **D-SH.14**, **dichiarazione esplicita per-hub** della modalità del proxy (`solo lettura` / `lettura + scrittura`, default `solo lettura`); §6.1 e §13.1. §2.1.
 6. **Percorso incrementale Last.fm.** Non esiste un cursore documentato per `user.getRecentTracks` (§9): la finestra `from`/`to` sulla pagina 1 è un'alternativa plausibile, ma non è specificata. **Fuori perimetro della prima tranche** — da aprire come punto separato se il Boss lo vuole.
-7. **"Now playing" e scrobbling live.** §3 dichiara che la PWA non può osservare la riproduzione di altre app: se il perimetro della 1.5 include il "live", serve una capability nuova (bridge di sessione media, player nell'app, o companion app). **Da ratificare come scope**, non come dettaglio.
+7. **"Now playing" e scrobbling live.** §3 dichiara che la PWA non può osservare la riproduzione di altre app: se il perimetro della 1.5 include il "live", serve una capability nuova (bridge di sessione media, player nell'app, o companion app). **Fuori perimetro della prima tranche** — da aprire come punto separato se il Boss lo vuole.
 
 ## Changelog
 
@@ -19216,6 +19635,7 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 |----------|------|-----------|
 | 0.1 | Sessione 55 (2026-10-27, issue #164) | Prima stesura. Risponde alle 5 decisioni richieste dall'issue (D-SH.1…D-SH.10): hub della prima tranche (Last.fm + ListenBrainz, Maloja Fase 2), semantica dell'invio (un scrobble per ascolto maturato, timestamp al secondo, regola ≥ 30 s e metà durata o 4 minuti), consenso per-hub indipendente dagli altri toggle, coda con tabella Dexie v5 e chiave `hub|eventKey`, collocazione del documento (`docs/20-SCROBBLING-HUB.md`). Dichiara la premessa mancante nella issue: la PWA non osserva la riproduzione di altre app, quindi la prima tranche è uno specchio dello storico locale, non uno scrobbling live. Definisce il contratto `ScrobbleSink` (da ratificare via ADR-0011), la mappa `ScrobbleError` (separata da `AdapterError`, che è orientato al parsing), i vincoli di protocollo dei due hub verificati sulle doc ufficiali, 16 edge case, 15 codici i18n, 29 casi di test e 15 deliverable di implementazione |
 | 0.2 | Sessione 56 (2026-10-27, issue #168) | **Aggiornamento di stato, non di contenuto**: il punto aperto 1 (§18) è chiuso — l'**ADR-0011** è scritta (`13-ADR/0011-scrobble-sink.md`) e **ratificata dal Boss al merge della PR #170** (`8900c3b`): decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`), vincoli V1-V10, alternative A2-A5 scartate; il contratto è recepito in `05§4.2` (`05-ARCHITECTURE.md` v1.3). Header aggiornato (versione 0.2, ADR collegato, percorso di ratifica residuo). Le decisioni D-SH.1…D-SH.10, i vincoli di protocollo e i punti aperti **2-5** restano quelli di v0.1: la ratifica della spec (v1.0 🟢) è ancora l'atto che manca |
+| 1.0 | Sessione 57 (2026-10-27, issue #172) | 🟢 APPROVED · **Ratifica del Boss al merge della PR di ratifica** — le quattro decisioni aperte (§18 punti 2-5) sono chiuse **come proposte** in **D-SH.11…D-SH.14** (§2.1), con la motivazione e gli effetti: **D-SH.11** md5 in JS puro, nessuna dipendenza nuova (conferma D-SH.2); **D-SH.12** finestra di candidatura a **7 giorni** + azione esplicita per tutta la cronologia (§5, condizione 3); **D-SH.13** durata ignota → soglia dei **4 minuti sul tempo trascorso** con **fiducia nella fonte** per gli eventi importati da un hub (modifica **T-SH.3**, **T-SH.4**, **E.SH.10**, **E.SH.11**: senza di essa la Story 1.5 avrebbe escluso la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz); **D-SH.14** **modalità del proxy dichiarata** dall'utente (`solo lettura` / `lettura + scrittura`, default `solo lettura`, §6.1 e **U-SH.2**). I casi di test passano da 29 a **31** (n. 6 riscritto, 8b, 30, 31). Le garanzie G-SH.1…G-SH.6, le regole T-SH.1…T-SH.5, i 16 edge case e i 15 codici i18n restano quelli di v0.1. I punti 6-7 restano **fuori perimetro** della prima tranche |
 
 
 

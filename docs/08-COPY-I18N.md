@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Status: 🟡 DRAFT · Versione 0.5 · Sessione 57 (2026-10-27)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -27,6 +27,7 @@
 | `error` | Messaggi di errore |
 | `common` | Bottoni e testi condivisi |
 | `insight` | Insight narrativi |
+| `scrobble` | Invio degli ascolti ai hub (Story 1.5 — spec `20-SCROBBLING-HUB.md` §13.2) |
 
 ## 2. Stringhe UI
 
@@ -348,6 +349,35 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 | `disclaimer` | Questo insight è generato automaticamente a partire dai tuoi dati di ascolto. Non è una diagnosi. | This insight is derived automatically from your listening data. It is not a diagnosis. |
 | `disclaimerShort` | Generato automaticamente | Auto-generated |
 
+### 2.16 `scrobble.*` (Story 1.5 — spec `20-SCROBBLING-HUB.md` §13.2)
+
+Namespace dell'invio degli ascolti ai hub. I 15 codici sono **vincolanti**
+(spec ratificata in v1.0 🟢): il contratto `ScrobbleSink` (`05§4.2`) e la mappa
+`ScrobbleError` decidono **quale** codice compare in **quale** caso.
+
+| Key | IT | EN |
+|-----|----|----|
+| `scrobble.info.hubEnabled` | Invio degli ascolti attivo su {hub} | Sending your listens to {hub} is on |
+| `scrobble.info.hubDisabled` | Invio degli ascolti disattivato su {hub}: la coda è stata svuotata | Sending your listens to {hub} is off: the queue has been cleared |
+| `scrobble.info.batchSent` | {count} ascolti inviati a {hub} | {count} listens sent to {hub} |
+| `scrobble.warn.hubUnreachable` | {hub} non è raggiungibile: gli invii sono in attesa | {hub} is unreachable: sends are pending |
+| `scrobble.warn.rateLimited` | {hub} ha limitato le richieste: gli invii riprenderanno più tardi | {hub} has rate-limited the requests: sends will resume later |
+| `scrobble.warn.unconfirmedSend` | {count} invii a {hub} non sono stati confermati: controlla il profilo per evitare duplicati | {count} sends to {hub} were not confirmed: check your profile to avoid duplicates |
+| `scrobble.warn.writeProxyMissing` | Il proxy configurato non inoltra le scritture: {hub} può essere solo in lettura | The configured proxy does not forward writes: {hub} can only be read |
+| `scrobble.warn.durationEstimated` | {count} ascolti inviati con durata stimata | {count} listens sent with an estimated duration |
+| `scrobble.warn.tooShortSkipped` | {count} ascolti troppo brevi esclusi | {count} too-short listens skipped |
+| `scrobble.warn.partialAccept` | {hub} ha accettato {accepted} invii su {total}: i restanti verranno ritentati | {hub} accepted {accepted} of {total} sends: the rest will be retried |
+| `scrobble.error.tokenExpired` | Il token di {hub} non è più valido: rinnovalo nelle impostazioni | The {hub} token is no longer valid: renew it in the settings |
+| `scrobble.error.sessionRevoked` | La sessione di {hub} è stata revocata: riautenticati | The {hub} session was revoked: sign in again |
+| `scrobble.error.invalidSignature` | {hub} ha rifiutato la firma della richiesta: verifica le credenziali | {hub} rejected the request signature: check your credentials |
+| `scrobble.error.payloadTooLarge` | Il lotto di invio supera il limite di {hub}: è stato suddiviso | The send batch exceeds the {hub} limit: it has been split |
+| `scrobble.error.dbReadOnly` | Il database è in sola lettura: gli invii sono sospesi | The database is read-only: sends are suspended |
+
+**Pluralizzazione**: le quattro stringhe con `{count}` (`scrobble.info.batchSent`,
+`scrobble.warn.unconfirmedSend`, `scrobble.warn.durationEstimated`,
+`scrobble.warn.tooShortSkipped`) seguono §3 — `{count, plural, one {…} other {…}}`.
+Le stringhe con `{hub}`, `{accepted}` e `{total}` sono parametri semplici.
+
 ## 3. Pluralizzazione
 
 Formato: `{count, plural, one {...} other {...}}`
@@ -407,3 +437,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.2 | Sessione 9 (2026-10-15) | Audit: rimosse `privacy.stats`/`privacy.statsDesc` (D.A.1, rinviate a Fase 2); aggiunte `privacy.carDetection` e `privacy.syncCloud` (02 v1.1); aggiunte `insight.disclaimer` e `insight.disclaimerShort` (C9); aggiunta `adapter.spotify.warn.offlineConverted` (M2); `fileTooLarge` portato a 500MB per coerenza con 06§2.3 (M3) |
 | 0.3 | Sessione 47 (2026-10-26, issue #145) | Aggiunta §2.12c `adapter.listenbrainz.*` (12 chiavi, spec `03-ADAPTERS/listenbrainz.md` §9). Le varianti `_one`/`_other` seguono la convenzione i18n per i conteggi (stesso pattern di `adapter.spotify.*` e `adapter.youtube_music.*`) |
 | 0.4 | Sessione 52 (2026-10-26, issue #155) | **Materializzazione** delle chiavi della Story 1.3: `adapter.listenbrainz.*` (§2.12c) e `adapter.lastfm.*` (§2.12d, 14 chiavi) sono ora nei locale `it`/`en` dell'app; aggiunta §2.12e `settings.lastfm.*` (11 chiavi) per il pannello di configurazione del proxy. I nomi delle chiavi nel materializzato sono **completti** (`adapter.listenbrainz.detect.success`): le tabelle delle sezioni omettono il prefisso `adapter.` come le altre (§2.12a/§2.12b) |
+| 0.5 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 — namespace `scrobble.*`**: §1 (tabella dei namespace) e **§2.16 (nuova)**, i **15 codici** della spec `20-SCROBBLING-HUB.md` §13.2 (ratificata in v1.0 🟢), con i testi IT ed EN. La coppia codice → caso d'uso è **vincolante**: la mappa `ScrobbleError` (`05§4.2`) decide quale codice compare in quale situazione. Nota sulla pluralizzazione delle quattro stringhe con `{count}` (§3). Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.4) |

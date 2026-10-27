@@ -1,7 +1,6 @@
-| 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline |
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.3 · Sessione 40 (2026-10-21)
+> Status: 🟢 APPROVED · Versione 1.6 · Sessione 57 (2026-10-27)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -220,9 +219,32 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       retainIp: boolean;          // default false; toggle ESPLICITO dell'utente
       enrichMetadata: boolean;    // default false; arricchimento metadati brani
       carDetectionConsent: boolean; // default false; rilevamento ascolti in auto (es. Bluetooth/Battery)
-      scrobbleHubs: PlatformId[]; // default []; hub di scrobbling scelti
+      scrobbleHubs: ScrobbleHubId[]; // default []; hub di scrobbling scelti (tipo DEDICATO — vedi sotto)
       syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2, ADR-0005)
     }
+
+**`ScrobbleHubId` è un tipo dedicato, non `PlatformId`** (ratificato dalla spec
+`20-SCROBBLING-HUB.md` v1.0 🟢, D-SH.2 e ADR-0011 🟢 v1.0 §"I vincoli", V7):
+
+    export type ScrobbleHubId = 'lastfm' | 'listenbrainz';
+
+I due insiemi **non coincidono**: i client di scrobbling (`maloja`, `subsonic`,
+`roon`) sono destinatari, non fonti (`01-PLATFORMS.md` §3.9), e `maloja` è scope
+Fase 2. Un tipo dedicato rende il toggle per-hub **verificabile a compile time**:
+aggiungere un nuovo client di scrobbling non può essere fatto per errore con un
+`PlatformId` di una piattaforma sorgente.
+
+Semantica del toggle (spec `20§5`, D-SH.4, G-SH.3):
+
+- **default `[]`** → nessun hub abilitato → **zero richieste** e zero righe in coda
+- il consenso è **per-hub** e **indipendente** dagli altri toggle: `retainIp`,
+  `enrichMetadata` e `carDetectionConsent` **non** influiscono sulla scrittura, e
+  viceversa
+- togliere un hub dalla lista **svuota la sua coda** (le righe passano a
+  `dropped`, nessun invio in volo): revocare il consenso non lascia scrobble in
+  attesa
+- la configurazione **per-hub** (credenziali, proxy scrivibile, User Token) vive in
+  `settings` (§6.1) ed è **per-utente**: mai nel bundle, mai nei log
 
 Quando `retainIp` è true:
 - `ListenEvent.ip` è conservato (string, IPv4/IPv6)
@@ -425,6 +447,49 @@ modificata e nessun dato viene perso. Le credenziali contenute qui sono
 **per-utente**: mai nel bundle, mai nei log, mai nelle fixture
 (`09-PRIVACY-SECURITY.md` §4).
 
+### 6.2 Tabella `scrobbleOutbox` (schema v5 — Story 1.5)
+
+La coda di invio degli scrobble **non** può stare in `settings`: `settings` è
+chiave/valore per impostazioni, e una coda ha **stato per elemento**, tentativi
+e indice unico. Serve una tabella nuova → **schema Dexie v5**
+(`20-SCROBBLING-HUB.md` §8.1, ratificato nella spec v1.0 🟢).
+
+    db.version(5).stores({
+      ...v4,
+      scrobbleOutbox: '&idempotencyKey, hub, status, createdAt, nextAttemptAt',
+    });
+
+| Campo | Tipo | Note |
+|-------|------|------|
+| `idempotencyKey` | string | **PK**: `hub\|eventKey` — unico per costruzione (G-SH.1) |
+| `hub` | `ScrobbleHubId` | indice: il ciclo lavora per hub |
+| `eventKey` | string | l'`eventKey` locale dell'ascolto (`05§3.2`) |
+| `payload` | `ScrobblePayload` | la copia che verrà inviata: serializzabile, **senza segreti** (`05§4.2`, V8) |
+| `status` | `'pending' \| 'in_flight' \| 'sent' \| 'failed' \| 'dropped'` | macchina a stati (`20§8.2`) |
+| `attempts` | number | numero di tentativi effettuati |
+| `nextAttemptAt` | number | ts (unix ms) del prossimo tentativo consentito |
+| `lastError` | `{ code, message, recoverable } \| null` | mai un segreto: solo codice e messaggio |
+| `createdAt` | number | ts di enqueue |
+| `sentAt` | number \| null | ts di conferma |
+
+**La PK è la garanzia di idempotenza**: `hub|eventKey` è univoco per
+costruzione, quindi un ascolto locale entra in coda **al massimo una volta** per
+hub (G-SH.1): il secondo `enqueue` è **ignorato**, non è un errore. Nessuna delle
+due API espone una chiave di deduplica lato server: la chiave unica locale è
+l'unica garanzia possibile (ADR-0011 🟢 v1.0, V10).
+
+**Write-ahead**: la riga passa a `in_flight` **prima** della richiesta. Se il
+processo muore fra la richiesta e la conferma, la riga resta `in_flight` e non
+viene ritentata in automatico: il caso residuo è un **doppio scrobble**
+possibile, mai una perdita (G-SH.2, E.SH.6).
+
+**Migrazione non distruttiva** (MIG-1): nessuna tabella esistente viene
+modificata e nessun dato viene perso; la tabella nasce vuota.
+
+**Cosa NON è in questa tabella**: nessun segreto (le credenziali stanno in
+`settings`), nessun contesto di ascolto, nessun IP, nessun device (il payload è
+chiuso per costruzione, `05§4.2` V8).
+
 ## 7. Politiche di migrazione e ricalcolo
 
 - **MIG-1**: ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)`; mai drop di tabelle utente
@@ -483,3 +548,5 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.2 | Sessione 13 (2026-10-16) | **M5 audit chiuso**: `artworkUrl: string \| null` aggiunto a Track e Album (§3.3); nuova sezione §11 Artwork (fonti e popolamento: Spotify Web API → MusicBrainz Cover Art Archive → iTunes Search → placeholder gradient); pianificata migrazione non distruttiva v2→v3 (§10); Story 4.3 aggiunta al backlog per l'implementazione |
 | 1.3 | Sessione 40 (2026-10-21, issue #98) | §2: riga Apple aggiornata al formato reale dell'export (schema 2026.2: `Event Start/End Timestamp` del Play Activity CSV; `Play Date UTC` era del legacy aggregato). **Aggiornamento factuale**: nessuna modifica a interfacce (§3), regole DEDUP (§5) o schema Dexie (§6) |
 | 1.4 | Sessione 52 (2026-10-26, issue #155) | §6.1 (nuova): tabella `settings` (chiave/valore) nello schema Dexie **v4** — proxy CORS Last.fm, `api_key`, username, per-utente e locali (`09§4`). Migrazione non distruttiva (MIG-1), nessuna modifica alle tabelle dati. §3.1: il contratto `RawListenEvent` riceve due campi **additivi e opzionali** — `sourceArtistMbid` (→ `Artist.mbid`, richiesto dalle spec `03-ADAPTERS/lastfm.md` §3.1.2 e `listenbrainz.md` §3.1.2) e `sourceTrackDurationMs` (durata **catalogo**, solo hint sulla `Track`: non entra nel bucket DEDUP-3, altrimenti uno stesso brano finirebbe in due `Track` distinte) |
+| 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 57, issue #172)* |
+| 1.6 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **§3.8** — `scrobbleHubs` passa da `PlatformId[]` al **tipo dedicato** `ScrobbleHubId` (`'lastfm' \| 'listenbrainz'`), con la semantica del toggle (default `[]`, consenso per-hub indipendente dagli altri toggle, revoca che svuota la coda del hub, configurazione per-utente in `settings`); **§6.2 (nuova)** — tabella `scrobbleOutbox` nello schema Dexie **v5** (PK `hub\|eventKey`, indice per `hub`/`status`/`createdAt`/`nextAttemptAt`, payload senza segreti, write-ahead `in_flight`), con la garanzia di idempotenza per costruzione (G-SH.1) e il caso residuo dichiarato (doppio scrobble possibile, mai una perdita). Migrazione **non distruttiva** (MIG-1). Il tipo `ScrobblePayload` e il contratto `ScrobbleSink` sono in `05§4.2` (ADR-0011 🟢 v1.0) |
