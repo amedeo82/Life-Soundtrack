@@ -2,8 +2,10 @@
 number: 55
 title: "Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle)"
 date: 2026-10-27
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "eb718d589bd0575867d222d4b852c1a96c0527ba"
+merged_date: 2026-10-27
 branch: feat/164-scrobbling-hub-spec
 pr: 167
 claim: kilo-HP-ELITEBOOK-bmyx
@@ -85,10 +87,13 @@ elementi.
 
 - `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (dopo rigenerazione)
 - `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati
-  (li rigenera `auto-state-aggregate` post-merge)
-- `pnpm run lint` / `typecheck` / `test` / `build` → verdi
-- `node scripts/check-readme-facts.mjs` → exit 0 (la PR non tocca le piattaforme
-  importabili né le capability dichiarate)
+  (li rigenera `auto-state-aggregate` post-merge) — **post-merge: exit 0**
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi (208 test core + 81 web)
+- `node scripts/check-readme-facts.mjs` → exit 0 (15 check, 0 falliti)
+- CI della PR #167 → `quality` verde (2m26s); al merge: `auto-status-done` ha
+  applicato `status:done` a #164 e chiuso l'issue, `auto-state-aggregate` e
+  `auto-bundle` hanno rigenerato i blocchi (`6ddeb0b`, `99f6bc1`), `auto-branch-cleanup`
+  ha eliminato il branch remoto
 
 ## Lesson learned
 
