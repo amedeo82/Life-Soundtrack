@@ -617,5 +617,6 @@ Ogni story deve avere label GitHub:
 | 1.2 - Adapter Apple Music | done | #139 | `7640d83` | adapter |
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
+| 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | todo | #0 | - | adapter |
 
 <!-- AGGREGATE-STORIES-END -->
