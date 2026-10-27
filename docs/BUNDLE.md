@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 16:56
+> Data: 2026-10-27 16:58
 > Totale file: 94
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -8655,7 +8655,7 @@ merged: false
 branch: feat/164-scrobbling-hub-spec
 pr: 167
 claim: kilo-HP-ELITEBOOK-bmyx
-cross_refs: [164, 155, 144, 145, 148]
+cross_refs: [164, 168, 155, 144, 145, 148]
 tags: [docs, spec, adapter, privacy, phase-1]
 ---
 
@@ -8764,6 +8764,9 @@ elementi.
 
 - **#164** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-bmyx`), chiusa con
   `status:done` al merge della PR di spec
+- **#168** — issue aperta in questa sessione per **ADR-0011** (contratto di scrittura
+  `ScrobbleSink` dentro `05§4`, che è 🟢 APPROVED): è la dipendenza aperta che
+  dichiara la Story 1.5 non implementabile finché l'ADR non è ratificato
 - **#155** — implementazione della Story 1.3: i due adapter (`lastfm`,
   `listenbrainz`) che questa spec estende sul lato della scrittura
 - **#144** / **#145** — le spec dei due adapter (lettura), da cui derivano
@@ -15334,7 +15337,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura) → `20§10.1` (P-SH.1, P-SH.3) · `20§15` AC-SH.1
 - [ ] Invio scrobble funzionante verso i hub configurati → `20§5`, `20§6` · `20§15` AC-SH.2, AC-SH.3
 - [ ] Test con mock API → `20§14` (29 casi, nessuna dipendenza nuova)
-- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). **Dipendenza aperta**: il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1)
+- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). **Dipendenza aperta**: il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1, issue **#168**)
 
 **Spec**: `20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT, Sessione 55) · `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8, E.LF.21; `03-ADAPTERS/listenbrainz.md` §3.4, D-LB.5
 
@@ -17896,7 +17899,7 @@ L'issue chiede cinque decisioni prima di scrivere la spec. Le risposte sono qui 
 | **D-SH.4** | Consenso e granularità | `scrobbleHubs` è un elenco **per-hub esplicito** (default `[]`); nessun toggle globale; revoca = stop immediato + svuotamento della coda del hub; **indipendente** da `retainIp`, `enrichMetadata`, `carDetectionConsent` | `09-PRIVACY-SECURITY.md` §3.3 scrive già "brano + timestamp" come l'unico contenuto inviato; ogni hub ha credenziali proprie, quindi un consenso per-hub è il minimo comune |
 | **D-SH.5** | Coda e idempotenza | Tabella Dexie dedicata **`scrobbleOutbox`** (schema v5) con chiave unica `hub\|eventKey`; write-ahead (`in_flight` **prima** della richiesta); retry con backoff esponenziale; errori terminali senza retry | La tabella `settings` è per impostazioni, non per code (`11-BACKLOG.md` T1.5.6); l'idempotenza deve essere **locale e verificabile**, perché nessuna delle due API ha una chiave di deduplica lato server |
 | **D-SH.6** | Dove vive la spec | Documento nuovo **`docs/20-SCROBBLING-HUB.md`** (non una `03-ADAPTERS/*.md`) | L'oggetto è il **protocollo di scrittura verso più piattaforme**, non la lettura di una singola piattaforma; le due famiglie di spec restano separate |
-| **D-SH.7** | Contratto di scrittura | Interfaccia **`ScrobbleSink`** in `packages/core/src/adapters/scrobble/types.ts`, **non** un metodo su `PlatformAdapter` | `PlatformAdapter` descrive la lettura di una piattaforma; non ogni piattaforma è un hub e un hub non è una piattaforma sorgente. La ratifica in `05§4` richiede **ADR-0011** (§18) |
+| **D-SH.7** | Contratto di scrittura | Interfaccia **`ScrobbleSink`** in `packages/core/src/adapters/scrobble/types.ts`, **non** un metodo su `PlatformAdapter` | `PlatformAdapter` descrive la lettura di una piattaforma; non ogni piattaforma è un hub e un hub non è una piattaforma sorgente. La ratifica in `05§4` richiede **ADR-0011** (§18, issue **#168**) |
 | **D-SH.8** | Rate limit | **Per-hub, nel client di scrobbling**: Last.fm ~5 req/s (token bucket, batch fino a 50 scrobble); ListenBrainz 1 req/s **guidato dagli header** `X-RateLimit-*`. Nessun rate limit condiviso fra hub, ma **un solo job seriale** sulla coda | ADR-0010 V7: il rate limiting è responsabilità dell'adapter; i due hub hanno limiti e semantica diversi, un limite globale sarebbe la media dei due |
 | **D-SH.9** | Mappa errori | **`ScrobbleError` dedicato** (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`) con `recoverable` = "si può ritentare" | `AdapterError` è orientato al **parsing** (`INVALID_FORMAT`, `TRUNCATED`, `UNSUPPORTED_VERSION`): riusarlo per un invio darebbe all'utente una remediation sbagliata — la stessa lezione di ADR-0010 §"Punti aperti" 1 |
 | **D-SH.10** | Origine degli eventi da scrobblare | Gli eventi inviati sono gli **ascolti locali** della tabella `listens`, filtrati per una **finestra di candidatura** | Una PWA non osserva la riproduzione di altre app: vedi §3, che è la premessa onesta della story |
@@ -18426,7 +18429,7 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 
 ## 18. Punti aperti (bloccano la ratifica)
 
-1. **ADR-0011 — il contratto di scrittura dentro `05§4`.** `05-ARCHITECTURE.md` §4 è 🟢 APPROVED: modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). Il contenuto dell'ADR è **già definito** da §4 di questa spec; l'ADR formalizza la decisione e le alternative (metodo su `PlatformAdapter` vs `ScrobbleSink` dedicato vs nessuna astrazione). **Issue dedicata da aprire** (`needs-spec`, `area:adapter`, `size:M`).
+1. **ADR-0011 — il contratto di scrittura dentro `05§4`.** `05-ARCHITECTURE.md` §4 è 🟢 APPROVED: modificarlo richiede un ADR, come per `parseRemote?()` (ADR-0010). Il contenuto dell'ADR è **già definito** da §4 di questa spec; l'ADR formalizza la decisione e le alternative (metodo su `PlatformAdapter` vs `ScrobbleSink` dedicato vs nessuna astrazione). **Issue aperta: #168** (`needs-spec`, `area:adapter`, `size:M`, `phase-1`).
 2. **Firma md5: JS puro o dipendenza esterna.** La proposta è JS puro in `crypto.ts` (D-SH.2), per non aggiungere dipendenze a un bundle PWA. La controparte è una dipendenza mantenuta (`hash-wasm`), che aggiunge peso ma ha una garanzia di correttezza documentata. **Da ratificare.**
 3. **Finestra di candidatura predefinita.** §5 la richiede ma non la fissa: 24 h, 7 giorni o "fino all'ultimo sync"? Il default influenza sia l'uso (quanti scrobble escono) sia il costo (quante richieste). **Da ratificare.**
 4. **Durata di catalogo sconosciuta: inviare o no?** T-SH.3 dice che senza durata nota l'evento non matura (E.SH.11), il che **esclude** la maggior parte degli ascolti provenienti da Last.fm e ListenBrainz (durata `0`): alternative possibili sono usare la soglia dei 4 minuti sul tempo trascorso, o inviare comunque. **Da ratificare** — è la decisione con il maggiore impatto sul comportamento reale.

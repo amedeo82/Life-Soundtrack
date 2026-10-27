@@ -7,7 +7,7 @@ merged: false
 branch: feat/164-scrobbling-hub-spec
 pr: 167
 claim: kilo-HP-ELITEBOOK-bmyx
-cross_refs: [164, 155, 144, 145, 148]
+cross_refs: [164, 168, 155, 144, 145, 148]
 tags: [docs, spec, adapter, privacy, phase-1]
 ---
 
@@ -116,6 +116,9 @@ elementi.
 
 - **#164** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-bmyx`), chiusa con
   `status:done` al merge della PR di spec
+- **#168** — issue aperta in questa sessione per **ADR-0011** (contratto di scrittura
+  `ScrobbleSink` dentro `05§4`, che è 🟢 APPROVED): è la dipendenza aperta che
+  dichiara la Story 1.5 non implementabile finché l'ADR non è ratificato
 - **#155** — implementazione della Story 1.3: i due adapter (`lastfm`,
   `listenbrainz`) che questa spec estende sul lato della scrittura
 - **#144** / **#145** — le spec dei due adapter (lettura), da cui derivano

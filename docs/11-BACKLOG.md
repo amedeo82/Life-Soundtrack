@@ -339,7 +339,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura) → `20§10.1` (P-SH.1, P-SH.3) · `20§15` AC-SH.1
 - [ ] Invio scrobble funzionante verso i hub configurati → `20§5`, `20§6` · `20§15` AC-SH.2, AC-SH.3
 - [ ] Test con mock API → `20§14` (29 casi, nessuna dipendenza nuova)
-- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). **Dipendenza aperta**: il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1)
+- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). **Dipendenza aperta**: il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1, issue **#168**)
 
 **Spec**: `20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT, Sessione 55) · `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8, E.LF.21; `03-ADAPTERS/listenbrainz.md` §3.4, D-LB.5
 
