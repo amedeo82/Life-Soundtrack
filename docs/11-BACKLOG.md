@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.12 · Sessione 54 (2026-10-27, issue #161) · allineamento del conteggio EPIC 1 (2/5 → 4/5) nella riga di stato legacy
+> Status: 🟢 APPROVED · Versione 1.6.13 · Sessione 55 (2026-10-27, issue #164) · spec della Story 1.5 scritta in `docs/20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -319,25 +319,31 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: Sorgente continua di ascolti tramite hub di scrobbling. Risolve il vuoto V4 dell'audit.
 
+**Stato**: ⬚ TODO — spec scritta in `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT, Sessione 55, issue #164): le cinque decisioni richieste dall'issue sono prese (D-SH.1…D-SH.10) e la ratifica è il passo successivo. **Non** implementabile finché la spec non è 🟢 APPROVED e ADR-0011 (contratto di scrittura in `05§4`) non è ratificato.
+
 **Task**:
 - T1.5.1 — ~~Adapter Last.fm (recupero storico via API `user.getRecentTracks`, paginazione)~~ → **spostato alla Story 1.3** (Sessione 47)
-- T1.5.2 — ~~Adapter ListenBrainz (recupero storico via API `/1/user/{username}/listens`)~~ → **spostato alla Story 1.3** (Sessione 47); nella 1.5 resta il **percorso incrementale** `/listens` con cursore `max_ts`
-- T1.5.3 — Adapter Maloja self-hosted (server opzionale, scope futuro Fase 2)
-- T1.5.4 — Toggle `PrivacySettings.scrobbleHubs` per abilitare l'invio
-- T1.5.5 — Rispetto rate limit (Last.fm ~5 req/s, ListenBrainz 1 req/s con User Token)
-- T1.5.6 — **Invio scrobble** verso i hub (la Story 1.5 è nata come "fonte continua" ma non aveva il task di scrittura)
+- T1.5.2 — ~~Adapter ListenBrainz (recupero storico via API `/1/user/{username}/listens`)~~ → **spostato alla Story 1.3** (Sessione 47); nella 1.5 resta il **percorso incrementale** `/listens` con cursori `max_ts` (specificato in `20-SCROBBLING-HUB.md` §9, C-SH.1…C-SH.8)
+- T1.5.3 — Adapter Maloja self-hosted (server opzionale, scope futuro Fase 2) — **fuori perimetro** della prima tranche (D-SH.2)
+- T1.5.4 — Toggle `PrivacySettings.scrobbleHubs` per abilitare l'invio — **per-hub**, default `[]` (D-SH.4, `20§10.1`)
+- T1.5.5 — Rispetto rate limit (Last.fm ~5 req/s, ListenBrainz 1 req/s con User Token) — **per-hub**, nel client del sink (D-SH.8, `20§6`)
+- T1.5.6 — **Invio scrobble** verso i hub (la Story 1.5 è nata come "fonte continua" ma non aveva il task di scrittura) — contratto `ScrobbleSink` + coda `scrobbleOutbox` (`20§4`, `20§8`)
 
 **Nota (Sessione 47)**: T1.5.1 e T1.5.2 duplicavano esattamente il recupero storico della Story 1.3. La 1.5 è stata **ridimensionata** a *invio scrobble + sync continua + toggle*, riusando gli adapter creati nella 1.3. La duplicazione è il motivo per cui la 1.3 è passata da `M` a `L` in un colpo solo.
 
-**Acceptance criteria**:
-- [ ] Sync continua incrementale (non re-import da zero): cursore `max_ts` / `min_ts`
-- [ ] MBID da ListenBrainz alimenta DEDUP-2 e genera `track.genres` via MusicBrainz lookup
-- [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura)
-- [ ] Invio scrobble funzionante verso i hub configurati
-- [ ] Test con mock API
-- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144)
+**Nota (Sessione 55, issue #164)**: la spec dichiara una premessa che il backlog non riportava — **la PWA non osserva la riproduzione di altre applicazioni**, quindi la prima tranche non è uno scrobbling *live* ma uno **specchio idempotente dello storico locale** verso i hub abilitati (`20§3`). Il percorso live (now playing) è differito.
 
-**Spec**: `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8; `03-ADAPTERS/listenbrainz.md` §3.4
+**Acceptance criteria**:
+- [ ] Sync continua incrementale (non re-import da zero): cursore `max_ts` / `min_ts` → `20§9` (C-SH.1, C-SH.2) · `20§15` AC-SH.6, AC-SH.7
+- [ ] MBID da ListenBrainz alimenta DEDUP-2 e genera `track.genres` via MusicBrainz lookup → `20§15` AC-SH.11
+- [ ] Toggle `scrobbleHubs` rispettato (vuoto = nessuna scrittura) → `20§10.1` (P-SH.1, P-SH.3) · `20§15` AC-SH.1
+- [ ] Invio scrobble funzionante verso i hub configurati → `20§5`, `20§6` · `20§15` AC-SH.2, AC-SH.3
+- [ ] Test con mock API → `20§14` (29 casi, nessuna dipendenza nuova)
+- [ ] **Dipendenza**: il percorso incrementale richiede il metodo opzionale `parseRemote?()` → **ADR-0010** (Story 1.3 / issue #144) — **soddisfatto** (🟢 v1.0). **Dipendenza aperta**: il contratto di scrittura dentro `05§4` richiede **ADR-0011** (`20§18` punto 1)
+
+**Spec**: `20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT, Sessione 55) · `01-PLATFORMS.md` §3.7, §3.8; `02-DATA-SCHEMA.md` §3.8; `03-ADAPTERS/lastfm.md` D-LF.8, E.LF.21; `03-ADAPTERS/listenbrainz.md` §3.4, D-LB.5
+
+**Issue**: #164 (spec) · issue di implementazione: da aprire all'approvazione della spec (precedente: #155 per la Story 1.3)
 
 ---
 
@@ -536,7 +542,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2 |
+| 1 | 1.5 Scrobbling hub (Last.fm, ListenBrainz, Maloja) | ⬚ TODO | **Ridimensionata in Sessione 47**: T1.5.1/T1.5.2 spostati alla 1.3; resta invio scrobble + sync continua + toggle. T1.5.3 (Maloja self-hosted) è scope Fase 2. **Sessione 55 (issue #164)**: spec scritta in `20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT — le 5 decisioni dell'issue sono prese (D-SH.1…D-SH.10); resta la ratifica (v1.0 🟢) + **ADR-0011** (contratto di scrittura in `05§4`) |
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -586,6 +592,7 @@ Ogni story deve avere label GitHub:
 | 1.6.10 | Sessione 52 (2026-10-26, issue #155) | **Story 1.3 completata**: implementazione della issue #155 (adapter ListenBrainz file-only + adapter Last.fm ibrido API/file). Sezione Story 1.3 `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"** (la fonte di verità per le completate è il blocco aggregato, ADR-0008); `docs/state/stories/1.3-*` → `status: done`. Documenti allineati: `02-DATA-SCHEMA.md` §6.1 (tabella `settings`, schema Dexie v4) + §3.1 (i due campi additivi del contratto) + changelog 1.4; `03-ADAPTERS/lastfm.md` §3.1.0 (la chiave fra i due percorsi) + changelog 1.1; `03-ADAPTERS/listenbrainz.md` §3.1.3 (i due campi che il contratto non aveva) + changelog 1.1; `08-COPY-I18N.md` §2.12e (`settings.lastfm.*`) + changelog 0.4; `docs/18-DEV-LOG.md` §18; `docs/state/sessions/52-*` (nuova); `scripts/generate-bundle.ps1` `$files` (6 fixture + sessione 52); `docs/BUNDLE.md` rigenerato |
 | 1.6.11 | Sessione 53 (2026-10-26, issue #160) | **Story 1.4 completata**: `rekey()` (promozione dedup post-enrichment) resa completa e testata. La funzione esisteva dalla Story 0.7 (PR #39) ma non soddisfava gli AC: ora è **transazionale** (MIG-1), a **sopravvivenza deterministica** (la track più vecchia), **riorienta** `library`/`playlistItems`/`features`, **unisce** `platformIds`/`generi`/finestra temporale, **normalizza** l'ISRC in maiuscole e delega i contatori a `recount()` (MIG-4). Sezione Story 1.4: `**Stato**:` → ✅ COMPLETATA; **rimossa dalla tabella "roadmap delle story non ancora completate"**. `docs/state/stories/1.4-dedup-promotion.md` (nuova). Documenti allineati: `05-ARCHITECTURE.md` §12.1/§12.2 (`rekey()` da "futuro" a "attivo") + changelog 1.2; `16-OPERATIONS.md` §2.3 (forma del report) + changelog 0.2; `02-DATA-SCHEMA.md` §5 (nota sul job) + changelog 1.5; `docs/INDEX.md` (righe `05`, `11`, `16`, `18-DEV-LOG`, "Prossimo passo tecnico"); `docs/18-DEV-LOG.md` §19 + changelog 1.9; `docs/state/sessions/53-story-1-4-rekey.md` (nuova); `docs/BUNDLE.md` rigenerato |
 | 1.6.12 | Sessione 54 (2026-10-27, issue #161) | **Conteggio EPIC 1 allineato**: la riga di stato legacy dichiarava `EPIC 1 — Import core: 2/5 ✅` dal 2026-10-22, ma la 1.3 (PR #158, merge `7afbf03`) e la 1.4 (PR #162, merge `471a049`) erano state completate senza allineare la riga → `4/5 ✅` (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment). La fonte di verità per lo stato delle story resta il blocco aggregato `AGGREGATE-STORIES-*`; questa riga è una **copia di conteggio** legacy, ed è il tipo di duplicazione che l'issue #161 ha introdotto un gate per (prosa del README confrontata con il codice). Aggiornata anche la nota "Aggiornato al …" con la provenienza del drift |
+| 1.6.13 | Sessione 55 (2026-10-27, issue #164) | **Spec della Story 1.5 scritta**: `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT). Risponde alle 5 decisioni richieste dall'issue (hub della prima tranche, semantica dell'invio, consenso per-hub, coda e idempotenza, collocazione del documento) e ne aggiunge una che l'issue non sapeva di dover chiedere: **la PWA non osserva la riproduzione di altre app**, quindi la prima tranche è uno specchio idempotente dello storico locale, non uno scrobbling live. Definiti il contratto `ScrobbleSink` (da ratificare via **ADR-0011**), la mappa `ScrobbleError` (separata da `AdapterError`, orientato al parsing), i vincoli di protocollo dei due hub verificati sulle doc ufficiali, 16 edge case, 15 codici i18n, 29 casi di test e 15 deliverable di implementazione. Sezione Story 1.5 allineata (`**Stato**:` con la premessa nuova, task con i rimandi ai §, AC con i cross-ref alla spec, `**Spec**:` e `**Issue**:`); riga roadmap aggiornata. La story resta `⬚ TODO`: non è implementabile finché la spec non è 🟢 APPROVED e ADR-0011 non è ratificato |
 
 <!-- AGGREGATE-STORIES-START -->
 

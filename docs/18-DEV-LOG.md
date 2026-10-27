@@ -2,7 +2,7 @@
 
 > Status: 🟡 DRAFT
 > Versione: 2.0
-> Ultima modifica: 2026-10-27 — §20 Issue #161 (gate "fatti del README")
+> Ultima modifica: 2026-10-27 — §21 Issue #164 (spec Story 1.5 — Scrobbling hub)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -644,7 +644,32 @@ mezzo del lavoro.
 
 ---
 
-## Changelog
+## 21. Issue #164 — Spec Story 1.5 "Scrobbling hub" (Sessione 55)
+
+**Tipo**: specifica (`docs`) — issue #164, claim `kilo-HP-ELITEBOOK-bmyx`
+**Branch**: `feat/164-scrobbling-hub-spec` (worktree `ls-164-scrobbling-hub-spec`)
+**PR**: #NN (aperta su `main` dalla worktree)
+**Data**: 2026-10-27
+**Stato**: 🟡 in corso — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 sono il passo successivo
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 21-1 | P | La story descriveva una capacità che la piattaforma non ha: "sorgente continua di ascolti" e `01-PLATFORMS.md` §3.9 (app accanto a Navidrome, Plex, Roon) presuppongono un processo che osserva la riproduzione **in tempo reale** | Una **PWA non può osservare la riproduzione di altre app**: non esiste un bridge standard fra la sessione media del sistema operativo e una pagina web (`navigator.mediaSession` governa il media di *una* pagina). La formulazione del backlog era quella di un client nativo, copiata in una web app senza la domanda di fattibilità | La spec dichiara la premessa (§3): la prima tranche è uno **specchio idempotente dello storico locale** verso i hub abilitati; il percorso live (now playing) è differito e dichiarato come punto aperto | `docs/20-SCROBBLING-HUB.md` §3, §18 punto 7 |
+| 21-2 | P | La granularità del timestamp era a un passo dal essere sbagliata: la normalizzazione **al minuto** (D-LF.7) applicata al payload di invio avrebbe fatto perdere la distinzione fra due scrobble distinti dello stesso brano in due minuti diversi | Il minuto è un artefatto della **chiave di dedup** del percorso di *lettura*, non una semantica dell'evento: le due semantiche si somigliano ma hanno scopi opposti | La spec separa i due piani: `T-SH.1`/`T-SH.2` (invio al secondo, `startedAt`) contro `D-LF.7` (lettura, normalizzata) | `docs/20-SCROBBLING-HUB.md` §7 (T-SH.1, T-SH.2) |
+| 21-3 | P | La firma `api_sig` in batch è fragile oltre i 10 elementi: i parametri sono indicizzati (`artist[10]`, `artist[2]`) e il server li ordina **per nome** | L'ordinamento lessicografico delle **stringhe** dei nomi non coincide con quello numerico degli indici: su un batch da ≥ 10 scrobble la firma calcolata diversamente da quella del server viene **rifiutata** (errore 13). Un test con 2-3 elementi non lo scopre | Dichiarato come edge case **E.SH.8** con il caso di test n. 22 (batch da 50 scrobble, firma attesa) | `docs/20-SCROBBLING-HUB.md` §6.1, §12 (E.SH.8) |
+| 21-4 | P | La coda degli invii non può stare in `settings`: la tabella chiave/valore disponibile offriva la soluzione "pronta" (persistenza locale già esistente) | `settings` è per impostazioni (`02-DATA-SCHEMA.md` §6.1); una coda ha **stato per elemento, tentativi e indice unico**, e l'indice unico è *la* garanzia di idempotenza (G-SH.1) | Tabella nuova `scrobbleOutbox` (schema Dexie **v5**) con PK `hub\|eventKey`, macchina a stati `pending → in_flight → sent/failed/dropped` e scrittura **write-ahead** (E.SH.6) | `docs/20-SCROBBLING-HUB.md` §8 |
+
+**Lesson learned sintetica**: il primo esercizio di una spec non è scrivere il contratto, è verificare che il sistema sia **realizzabile** nella piattaforma scelta — una spec che descrive bene qualcosa che non esiste è il documento più pericoloso che si possa produrre, perché passa la review formale e fallisce alla prima implementazione. E il secondo esercizio è chiedersi **da dove arriva il dato**: il backlog descrive l'intenzione, la piattaforma decide la fattibilità.
+
+### Link utili
+
+- Branch: `feat/164-scrobbling-hub-spec` (worktree `ls-164-scrobbling-hub-spec`)
+- Issue: **#164** (`size:L`, `area:adapter`, `phase-1`)
+- Spec: `docs/20-SCROBBLING-HUB.md` (v0.1 🟡 DRAFT, 18 sezioni, 16 edge case, 29 casi di test, 15 deliverable)
+- Sessione: `docs/state/sessions/55-scrobbling-hub-spec.md`
+- Precedenti: `#144` (spec Last.fm) · `#145` (spec ListenBrainz) · `#148` (ADR-0010) · `#155` (implementazione 1.3)
+
+---
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
@@ -668,6 +693,7 @@ mezzo del lavoro.
 | 1.8 | 2026-10-26 (issue #155) | **§18 Story 1.3 — Implementazione adapter Last.fm + ListenBrainz** (Sessione 52, claim kilo-HP-ELITEBOOK-lb52, PR #158): 7 lesson (18-1 il contratto degli adapter non aveva un campo per l'MBID dell'artista: aggiunti due campi **additivi e opzionali**; 18-2 durata catalogo e durata dell'evento erano la stessa cosa: bucket DEDUP-3 sempre 0 e durata solo hint sulla Track; 18-3 la formula dell'eventKey della spec non poteva soddisfare E.LF.4 ed E.LF.16/E.LF.19 insieme — il MBID entra nella chiave solo quando disambigua; 18-4 skipped = null non è rappresentabile nel modello: dichiarato; 18-5 la normalizzazione al minuto agisce sull'evento, non sulla riga del file: gap noto; 18-6 il test di un contratto di rete deve asserire il **comportamento** (ritmo, backoff, numero di tentativi), non l'assenza di eccezioni; 18-7 il detect del JSON pretty-printed non può guardare la prima riga). 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi |
 | 1.9 | 2026-10-26 (issue #160) | **§19 Story 1.4 — `rekey()`: promozione dedup post-enrichment** (Sessione 53, claim `kilo-HP-ELITEBOOK-lb53`): 4 lesson (19-1 una funzione "già implementata" può essere una story aperta — `rekey()` esisteva dalla Story 0.7 ed era esportata e descritta in tre documenti, ma nessun test copriva il caso centrale e tre AC non erano soddisfatti; 19-2 il tipo del DB non protegge da una query sbagliata: `where('[platform+trackId]')` compila, passa il typecheck e fallisce a runtime *dentro* la transazione, spezzando il DB; 19-3 un contatore denormalizzato sommato a mano è una seconda fonte di verità (`5 + 3 = 8` con 2 ascolti reali): `recount()` (MIG-4) va delegato, non ricalcolato; 19-4 il determinismo è una proprietà del *dato*: quale delle due track sopravviveva dipendeva dall'ordine di enumerazione di IndexedDB). 9 test nuovi; 208 test core + 81 web verdi |
 | 2.0 | 2026-10-27 (issue #161) | **§20 Issue #161 — Gate "fatti del README"** (Sessione 54, claim `kilo-HP-ELITEBOOK-8enl`, PR #165): 5 lesson (20-1 la prosa dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti) e capability non implementate come presenti: nessuno dei 16 gate confrontava la prosa con il codice, quindi i merge delle Story 1.2 e 1.3 non avevano toccato il README e la pipeline era rimasta verde; 20-2 il conteggio `EPIC 0 — 7/7` in prosa duplicava un dato dei blocchi aggregati: l'anti-pattern "puntatore, non copia" non copriva il README, che è un file ibrido senza tabella di ownership; 20-3 il blocco NEXT-STEP elenca solo le story già migrate in `docs/state/stories/`, e la prosa non lo diceva — un gate che pretendeva la verità da un blocco generato avrebbe prodotto un falso positivo sul titolo di una story; 20-4 il gate, alla prima esecuzione, passava sempre: il parsing di `ADAPTER_FACTORIES` si fermava al primo `=` (l'annotazione di tipo ne contiene uno) e la regex non riconosceva l'apostrofo curly di "Cosa c'è oggi"; 20-5 il test di scenario negativo T2 appendeva la riga `deezer` in fondo al file, fuori dal perimetro che il gate legge: la prova passava per il motivo sbagliato, e una prova che non prova niente maschera il gate invece di proteggerlo). Gate read-only `scripts/check-readme-facts.mjs` (15 check, 0 = in sync / 1 = drift / 2 = errore di ambiente) + test `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert) + 2 step bloccanti in `ci.yml` (posizioni 17-18); regola di ownership in `AGENTS.md` §"Ownership del `README.md`" (D.161.1); `12-DEVOPS.md` §9.8f nuova + §9.10 a 18 step; rimossi i 3 heading "## Changelog" duplicati (artefatto dei merge precedenti) |
+| 2.1 | 2026-10-27 (issue #164) | **§21 Issue #164 — Spec Story 1.5 "Scrobbling hub"** (Sessione 55, claim `kilo-HP-ELITEBOOK-bmyx`): 4 lesson (21-1 la story descriveva una capacità che la piattaforma non ha — una PWA non osserva la riproduzione di altre app, quindi "sorgente continua di ascolti" (la formulazione di un client nativo) era irrealizzabile: la prima tranche è uno specchio idempotente dello storico locale; 21-2 la granularità al minuto è un artefatto della chiave di dedup del percorso di lettura e non una semantica dell'evento: applicarla al payload di invio avrebbe fatto perdere la distinzione fra due scrobble distinti; 21-3 la firma `api_sig` in batch ordina i nomi indicizzati **come stringhe**: `artist[10]` prima di `artist[2]`, e il difetto emerge solo con ≥ 10 elementi in un lotto; 21-4 la coda non può stare in `settings` (impostazioni, non code): serve la tabella `scrobbleOutbox` con schema Dexie v5, PK `hub\|eventKey` e scrittura write-ahead). Spec `docs/20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT: 5 decisioni dell'issue #164 + D-SH.1…D-SH.10, contratto `ScrobbleSink` (da ratificare via ADR-0011), mappa `ScrobbleError` separata da `AdapterError`, 16 edge case, 15 codici i18n, 29 casi di test, 15 deliverable di implementazione |
 
 ---
 
