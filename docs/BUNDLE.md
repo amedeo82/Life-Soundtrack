@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 17:06
+> Data: 2026-10-27 16:11
 > Totale file: 94
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1533,7 +1533,7 @@ Apache License
 | 52 | Implementazione Story 1.3 (adapter Last.fm + ListenBrainz) | 🟢 | ✅ | #158 |
 | 53 | Story 1.4 — rekey(): promozione dedup post-enrichment | 🟢 | ✅ | #162 |
 | 54 | Gate \"fatti del README\" — la prosa confrontata con il codice (issue #161) | 🟢 | ✅ | #165 |
-| 55 | Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle) | 🟡 | ❌ | #167 |
+| 55 | Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle) | 🟢 | ✅ | #167 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1573,7 +1573,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **32** (merge: 25)
+- Sessioni migrate in state/sessions: **32** (merge: 26)
 - Stories migrate in state/stories: **11** (done: 11)
 - Ultima sessione migrata: **S55** - Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4
@@ -5980,8 +5980,8 @@ cui la correzione del test precede l'ingresso in CI.
 ### Sessione 55 - Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle)
 
 - **Data**: 2026-10-27
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #167)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #167 (eb718d589bd0575867d222d4b852c1a96c0527ba, 2026-10-27)
 - **Claim**: `kilo-HP-ELITEBOOK-bmyx`
 
 ```
@@ -6060,10 +6060,13 @@ elementi.
 
 - `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (dopo rigenerazione)
 - `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati
-  (li rigenera `auto-state-aggregate` post-merge)
-- `pnpm run lint` / `typecheck` / `test` / `build` → verdi
-- `node scripts/check-readme-facts.mjs` → exit 0 (la PR non tocca le piattaforme
-  importabili né le capability dichiarate)
+  (li rigenera `auto-state-aggregate` post-merge) — **post-merge: exit 0**
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi (208 test core + 81 web)
+- `node scripts/check-readme-facts.mjs` → exit 0 (15 check, 0 falliti)
+- CI della PR #167 → `quality` verde (2m26s); al merge: `auto-status-done` ha
+  applicato `status:done` a #164 e chiuso l'issue, `auto-state-aggregate` e
+  `auto-bundle` hanno rigenerato i blocchi (`6ddeb0b`, `99f6bc1`), `auto-branch-cleanup`
+  ha eliminato il branch remoto
 
 ## Lesson learned
 
