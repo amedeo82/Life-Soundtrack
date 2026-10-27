@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.26 — Sessione 47 (2026-10-26)**
+> **Versione 1.27 — Sessione 54 (2026-10-27)**
 
 ---
 
@@ -538,6 +538,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
 - [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
 - [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
+- [ ] **Se ho toccato `README.md` o le piattaforme importabili**: la prosa del README è in sync con il codice — `node scripts/check-readme-facts.mjs` esce 0 (gate bloccante in CI, issue #161). Le capability non implementate stanno nella sezione roadmap, i conteggi non sono duplicati in prosa (vedi §"Ownership del `README.md`")
 - [ ] **Il body della PR contiene la keyword di chiusura come riga nuda e una sola volta** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick, fuori dalle checklist e senza ripetizioni**, così GitHub chiude l'issue al merge e `auto-status-done` non transiziona issue non collegate (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
@@ -557,6 +558,7 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Stato di una story | `docs/INDEX.md` §"Dettaglio (legacy)" (conteggi, "Prossimo step tecnico") — i blocchi `AGGREGATE-*` si aggiornano da soli |
 | Chiusura di una sessione | `docs/state/sessions/<N>-<slug>.md` (fonte) + `docs/SESSIONS.md` (blocco aggregato, automatico) |
 | Aggiunta/rimozione di un documento in `docs/` | `docs/INDEX.md` §"Documenti fondamentali" / "Documenti di supporto" + `scripts/generate-bundle.ps1` (`$files`) |
+| Aggiunta/rimozione di una **piattaforma importabile** o di una capability | `README.md` §"Cosa c'è oggi" / §"Roadmap" — la **prosa**, mai il blocco `AGGREGATE-NEXT-STEP-*` (vedi §"Ownership del `README.md`") |
 | Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) + **eliminare il branch remoto** (vedi §"♻️ Pulizia branch post-merge") |
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
@@ -655,7 +657,9 @@ git push
         ├── generate-fixtures.mjs    ← generator deterministico dei fixture (10-TESTING §3.5)
         ├── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
         ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
-        └── test-post-merge.sh      ← 9 scenari (T1..T9) su repo temporanei che coprono E3/E4/E5/F7 + squash
+        ├── check-readme-facts.mjs  ← gate read-only: confronta la prosa del README con il codice (issue #161)
+        ├── test-post-merge.sh      ← 9 scenari (T1..T9) su repo temporanei che coprono E3/E4/E5/F7 + squash
+        └── test-readme-facts-gate.sh ← 9 scenari (T1..T9) sul gate "fatti del README" (issue #161)
 
 ## 🚀 Primo task di un agente
 
@@ -831,6 +835,31 @@ Esempi di obbligo concreto:
 
 **Anti-pattern ricorrente**: duplicare in una sezione legacy un dato che un blocco aggregato già fornisce. Ogni duplicazione è una seconda fonte di verità che invecchia. Se il dato è già in un blocco `AGGREGATE-*`, **mettici un puntatore, non una copia**.
 
+### Ownership del `README.md` *(D.161.1 — vincolante, Sessione 54, issue #161)*
+
+`README.md` è **ibrido**: un file con due owner diversi nella stessa pagina. La confusione fra i due è la causa radice del drift chiuso dall'issue #161 — al 2026-10-27 il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti) e capability non implementate (audio features, analisi, mood, ricordi), i merge delle Story 1.2 e 1.3 non l'avevano toccato, e i 16 gate di `ci.yml` restavano verdi lo stesso.
+
+| Parte | Chi la scrive | Regola |
+|---|---|---|
+| Blocco `<!-- AGGREGATE-NEXT-STEP-* -->` | **solo** `scripts/aggregate-state.ps1`, post-merge | **Mai** a mano (V3, ADR-0008, issue #127) |
+| **Tutta la prosa** (le altre sezioni) | **l'agente**, nella stessa PR che cambia i fatti che dichiarano | Sottoposta al gate `scripts/check-readme-facts.mjs` (read-only) |
+
+**Le regole della prosa**:
+
+- L'elenco delle piattaforme importabili (sottosezione "Piattaforme importabili" dentro "Cosa c'è oggi") deve corrispondere **esattamente** a `ACTIVE_PLATFORMS` in `apps/web/src/onboarding/OnboardingRouter.tsx`; ogni piattaforma deve avere una factory in `ADAPTER_FACTORIES` e una classe adapter in `packages/core/src/adapters/`.
+- Una capability **non ancora implementata** (analisi, mood, ricordi, enrichment, audio features, valence, danceability, BPM) si dichiara **solo nella sezione roadmap**, mai come feature presente.
+- La sezione "Stato del progetto" **non duplica conteggi** (`N/M`): i conteggi vivono nei blocchi aggregati di `docs/INDEX.md` e `docs/11-BACKLOG.md`; lì si mette un **puntatore**, non una copia (è l'anti-pattern sopra, applicato al README).
+- Il blocco NEXT-STEP elenca la prima story non completata **fra quelle già migrate** in `docs/state/stories/`: non è la roadmap. La prosa del README deve rendere esplicito questo punto, perché il lettore del repository cerca lì la "prossima story".
+
+**Il gate**: `node scripts/check-readme-facts.mjs` — exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). È **bloccante in CI** (`.github/workflows/ci.yml`, step "Fatti del README in sync con il codice") e **non ha una modalità di scrittura**: è un verificatore, non un generatore. Un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dall'issue #149.
+
+```bash
+node scripts/check-readme-facts.mjs     # verifica la prosa contro il codice
+bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
+```
+
+**Quando scatta**: ogni PR che aggiunge o rimuove una piattaforma importabile, o che dichiara una capability nel README, aggiorna la prosa del README **nella stessa PR** e fa passare il gate. Una PR che cambia `ACTIVE_PLATFORMS` senza toccare il README è una PR che il gate blocca — è esattamente il drift che l'issue #161 ha chiuso.
+
 ### Target V1 + V2 + V3
 
 | File | Blocchi gestiti | Versione |
@@ -953,7 +982,16 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.26 — i due writer di `main` erano serializzati ma **non ordinati** (Sessione 47, issue #149). Il concurrency group `post-merge-main` garantisce che i due run non si sovrappongano, ma non quale dei due ottenga prima il lock: e l'ordine è essenziale, perché `auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `auto-bundle` alle 12:50:23, `auto-state-aggregate` alle 12:50:55. Il bundle copiò i blocchi aggregati ancora vecchi, il guard idempotente (`git diff --quiet`) scrisse «già in sync» e non committò nulla; l'agregate committò dopo, e la copia dentro `docs/BUNDLE.md` restò stale di 6 righe. Drift **silenzioso**: il gate CI sul bundle è warning-only, la pipeline restava verde. Il commit del bot non poteva auto-correggerlo, perché il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso (le sole eccezioni documentate sono `workflow_dispatch` e `repository_dispatch`). Aggiunti:
+*Ultimo aggiornamento: v1.27 — la prosa del `README.md` non aveva **nessun gate** (Sessione 54, issue #161). Il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti: le classi adapter non ci sono), audio features e analisi/mood/ricordi come feature presenti (nessuna implementata), e un conteggio di stato (`EPIC 0 7/7`) che l'aggregatore ricalcola altrove; la prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14), perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice. Fallimento **silenzioso**: pipeline verde, README falso. La causa radice era di ownership: `README.md` è un file ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) ma la regola di D.38.1 copriva solo i file globali, e il README non era in nessuna tabella di ownership. Aggiunti:
+- `scripts/check-readme-facts.mjs` (nuovo): gate **read-only** che confronta la prosa del README con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` (`apps/web/src/onboarding/OnboardingRouter.tsx`) e con le classi in `packages/core/src/adapters/`; vieta le capability non implementate fuori dalla sezione roadmap; vieta i conteggi duplicati in prosa. Exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). **Nessuna modalità di scrittura**: un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dal #149
+- `scripts/test-readme-facts-gate.sh` (nuovo): 9 scenari (T1..T9) con fixture — piattaforma inesistente, piattaforma mancante, factory senza adapter, classe inesistente, capability fuori roadmap, capability nella roadmap (nessun falso positivo), conteggio duplicato, README mancante (exit 2). Un gate che passa sempre non è un gate (lesson 43-1)
+- `.github/workflows/ci.yml`: due step bloccanti — «Fatti del README in sync con il codice (issue #161)» e «Gate "fatti del README" fail-closed (issue #161)», quest'ultimo è lo scenario negativo del precedente
+- §"Ownership del `README.md`" (D.161.1, nuova): la tabella dei due owner, le quattro regole della prosa, il perimetro del gate e il fatto che scatta a ogni PR che cambia le piattaforme importabili; checklist di auto-revisione PR e tabella di sincronizzazione al merge aggiornate di conseguenza
+- `README.md`: prosa riscritta — "Cosa c'è oggi" con l'elenco delle 5 piattaforme reali, "Roadmap" separata (dove stanno i claim futuri), "Stato del progetto" ridotta a puntatori (nessun conteggio duplicato), sezioni "Sviluppo locale" e "Come contribuire"
+- `docs/12-DEVOPS.md` §9.8f (nuova) + §9.10 aggiornata a 18 step; `docs/11-BACKLOG.md` allineato (`EPIC 1 — Import core: 2/5` → `3/5`); `docs/18-DEV-LOG.md` §20; `docs/state/sessions/54-readme-maintenance.md` (nuova)
+- `scripts/generate-bundle.ps1`: `$files` += i due nuovi script; `docs/BUNDLE.md` rigenerato nella stessa PR
+
+*Precedente v1.26 — i due writer di `main` erano serializzati ma **non ordinati** (Sessione 47, issue #149). Il concurrency group `post-merge-main` garantisce che i due run non si sovrappongono, ma non quale dei due ottenga prima il lock: e l'ordine è essenziale, perché `auto-bundle` **copia** il contenuto dei file che `auto-state-aggregate` **modifica**. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `auto-bundle` alle 12:50:23, `auto-state-aggregate` alle 12:50:55. Il bundle copiò i blocchi aggregati ancora vecchi, il guard idempotente (`git diff --quiet`) scrisse «già in sync» e non committò nulla; l'agregate committò dopo, e la copia dentro `docs/BUNDLE.md` restò stale di 6 righe. Drift **silenzioso**: il gate CI sul bundle è warning-only, la pipeline restava verde. Il commit del bot non poteva auto-correggerlo, perché il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso (le sole eccezioni documentate sono `workflow_dispatch` e `repository_dispatch`). Aggiunti:
 - `.github/workflows/auto-bundle.yml`: trigger `workflow_run` su `auto-state-aggregate` (`types: [completed]`) — è agganciato alla **conclusione** del workflow, non a un push, quindi sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda. Con esso il bundle rigenera **sempre** una seconda volta dopo che l'aggregate ha committato: la copia embedded è allineata ai sorgente, indipendentemente dall'ordine di scheduling
 - `scripts/validate-workflows.mjs`: quinto controllo `checkWriterOrdering` — verifica che `auto-bundle.yml` dichiari il trigger `workflow_run` **e** che il nome in `workflows:` combaci con il `name:` reale del producer (una disallineazione non dà errore: il trigger semplicemente non scatterebbe mai, in silenzio)
 - `scripts/test-workflow-writer-ordering.sh` (nuovo, T1..T5, 6 assert): T2 rimuove il blocco `workflow_run:` e verifica che il gate esca 1, T3 un trigger su un altro workflow, T4 il `name:` del producer disallineato (il caso silenzioso), T5 il producer assente — un gate che passa sempre non è un gate (lesson 43-1)
