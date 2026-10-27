@@ -4368,8 +4368,8 @@ cui la correzione del test precede l'ingresso in CI.
 ### Sessione 55 - Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle)
 
 - **Data**: 2026-10-27
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #167)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #167 (eb718d589bd0575867d222d4b852c1a96c0527ba, 2026-10-27)
 - **Claim**: `kilo-HP-ELITEBOOK-bmyx`
 
 ```
@@ -4448,10 +4448,13 @@ elementi.
 
 - `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (dopo rigenerazione)
 - `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati
-  (li rigenera `auto-state-aggregate` post-merge)
-- `pnpm run lint` / `typecheck` / `test` / `build` → verdi
-- `node scripts/check-readme-facts.mjs` → exit 0 (la PR non tocca le piattaforme
-  importabili né le capability dichiarate)
+  (li rigenera `auto-state-aggregate` post-merge) — **post-merge: exit 0**
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi (208 test core + 81 web)
+- `node scripts/check-readme-facts.mjs` → exit 0 (15 check, 0 falliti)
+- CI della PR #167 → `quality` verde (2m26s); al merge: `auto-status-done` ha
+  applicato `status:done` a #164 e chiuso l'issue, `auto-state-aggregate` e
+  `auto-bundle` hanno rigenerato i blocchi (`6ddeb0b`, `99f6bc1`), `auto-branch-cleanup`
+  ha eliminato il branch remoto
 
 ## Lesson learned
 
