@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 15:02
+> Data: 2026-10-27 14:22
 > Totale file: 92
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1531,7 +1531,7 @@ Apache License
 | 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟢 | ✅ | #156 |
 | 52 | Implementazione Story 1.3 (adapter Last.fm + ListenBrainz) | 🟢 | ✅ | #158 |
 | 53 | Story 1.4 — rekey(): promozione dedup post-enrichment | 🟢 | ✅ | #162 |
-| 54 | Gate \"fatti del README\" — la prosa confrontata con il codice (issue #161) | 🟢 | ❌ | #165 |
+| 54 | Gate \"fatti del README\" — la prosa confrontata con il codice (issue #161) | 🟢 | ✅ | #165 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1571,7 +1571,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **31** (merge: 24)
+- Sessioni migrate in state/sessions: **31** (merge: 25)
 - Stories migrate in state/stories: **11** (done: 11)
 - Ultima sessione migrata: **S54** - Gate \"fatti del README\" — la prosa confrontata con il codice (issue #161)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4
@@ -5867,7 +5867,7 @@ promossa e una tornata `fuzzy:`. Il bug non si vedeva nei test preesistenti
 
 - **Data**: 2026-10-27
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #165)
+- **Merged**: ✅ PR #165 (c24866f8e00f04350d39da60152302645ae85376, 2026-10-27)
 - **Claim**: `kilo-HP-ELITEBOOK-8enl`
 
 ```
@@ -5928,7 +5928,9 @@ cui la correzione del test precede l'ingresso in CI.
 - `pnpm run lint` / `typecheck` / `test` / `build` → verdi
 - `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (dopo rigenerazione)
 - `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati
-  (li rigenera `auto-state-aggregate` post-merge)
+  (li rigenera `auto-state-aggregate` post-merge) — **post-merge: exit 0**, i
+  blocchi sono stati rigenerati da `auto-state-aggregate` (commit `c095d7d`) e il
+  bundle da `auto-bundle` (`1ce579d`)
 
 ## Lesson learned
 
@@ -5963,8 +5965,8 @@ cui la correzione del test precede l'ingresso in CI.
 
 ## Cross-refs
 
-- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`), chiusa dalla
-  **PR #165**
+- **#161** — issue di questa sessione (claim `kilo-HP-ELITEBOOK-8enl`), chiusa con
+  `status:done` al merge della **PR #165** (`c24866f`, 2026-10-27T13:36:24Z)
 - **#127** — ADR-0008 V3: il blocco `AGGREGATE-NEXT-STEP-*` del README, che ha
   reso il file ibrido
 - **#149** — la race fra i due writer di `main`: il motivo per cui il gate è
