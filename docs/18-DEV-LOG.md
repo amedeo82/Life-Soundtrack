@@ -648,9 +648,9 @@ mezzo del lavoro.
 
 **Tipo**: specifica (`docs`) — issue #164, claim `kilo-HP-ELITEBOOK-bmyx`
 **Branch**: `feat/164-scrobbling-hub-spec` (worktree `ls-164-scrobbling-hub-spec`)
-**PR**: #167 (aperta su `main` dalla worktree)
+**PR**: #167 (aperta su `main` dalla worktree, **merged** `eb718d5` — 2026-10-27T16:02:57Z)
 **Data**: 2026-10-27
-**Stato**: 🟡 in corso — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 sono il passo successivo
+**Stato**: ✅ completata — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 (issue #168) sono il passo successivo
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|

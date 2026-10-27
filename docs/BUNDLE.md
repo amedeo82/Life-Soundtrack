@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 16:03
+> Data: 2026-10-27 17:06
 > Totale file: 94
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -7051,9 +7051,9 @@ mezzo del lavoro.
 
 **Tipo**: specifica (`docs`) — issue #164, claim `kilo-HP-ELITEBOOK-bmyx`
 **Branch**: `feat/164-scrobbling-hub-spec` (worktree `ls-164-scrobbling-hub-spec`)
-**PR**: #167 (aperta su `main` dalla worktree)
+**PR**: #167 (aperta su `main` dalla worktree, **merged** `eb718d5` — 2026-10-27T16:02:57Z)
 **Data**: 2026-10-27
-**Stato**: 🟡 in corso — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 sono il passo successivo
+**Stato**: ✅ completata — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 (issue #168) sono il passo successivo
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -8778,8 +8778,10 @@ cui la correzione del test precede l'ingresso in CI.
 number: 55
 title: "Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle)"
 date: 2026-10-27
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "eb718d589bd0575867d222d4b852c1a96c0527ba"
+merged_date: 2026-10-27
 branch: feat/164-scrobbling-hub-spec
 pr: 167
 claim: kilo-HP-ELITEBOOK-bmyx
@@ -8861,10 +8863,13 @@ elementi.
 
 - `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (dopo rigenerazione)
 - `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati
-  (li rigenera `auto-state-aggregate` post-merge)
-- `pnpm run lint` / `typecheck` / `test` / `build` → verdi
-- `node scripts/check-readme-facts.mjs` → exit 0 (la PR non tocca le piattaforme
-  importabili né le capability dichiarate)
+  (li rigenera `auto-state-aggregate` post-merge) — **post-merge: exit 0**
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi (208 test core + 81 web)
+- `node scripts/check-readme-facts.mjs` → exit 0 (15 check, 0 falliti)
+- CI della PR #167 → `quality` verde (2m26s); al merge: `auto-status-done` ha
+  applicato `status:done` a #164 e chiuso l'issue, `auto-state-aggregate` e
+  `auto-bundle` hanno rigenerato i blocchi (`6ddeb0b`, `99f6bc1`), `auto-branch-cleanup`
+  ha eliminato il branch remoto
 
 ## Lesson learned
 
