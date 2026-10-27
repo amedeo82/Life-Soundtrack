@@ -192,6 +192,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/53-story-1-4-rekey.md` | ✅ creata | Sessione 53 (issue #160): `rekey()` — promozione dedup post-enrichment (Story 1.4) |
 | `state/sessions/54-readme-maintenance.md` | ✅ creata | Sessione 54 (issue #161): gate read-only "fatti del README" (prosa confrontata con il codice) + ownership del `README.md` (`AGENTS.md` D.161.1) |
 | `state/sessions/55-scrobbling-hub-spec.md` | ✅ creata | Sessione 55 (issue #164): spec della Story 1.5 "Scrobbling hub" (`docs/20-SCROBBLING-HUB.md` v0.1 🟡 DRAFT) — contratto di scrittura `ScrobbleSink`, coda `scrobbleOutbox`, consenso per-hub |
+| `state/sessions/56-adr-0011-scrobble-sink.md` | ✅ creata | Sessione 56 (issue #168): ADR-0011 — il **contratto di scrittura** negli hub (`ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10), ratificato in `05§4.2` |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
