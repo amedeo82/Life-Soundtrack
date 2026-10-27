@@ -648,7 +648,7 @@ mezzo del lavoro.
 
 **Tipo**: specifica (`docs`) — issue #164, claim `kilo-HP-ELITEBOOK-bmyx`
 **Branch**: `feat/164-scrobbling-hub-spec` (worktree `ls-164-scrobbling-hub-spec`)
-**PR**: #NN (aperta su `main` dalla worktree)
+**PR**: #167 (aperta su `main` dalla worktree)
 **Data**: 2026-10-27
 **Stato**: 🟡 in corso — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 sono il passo successivo
 

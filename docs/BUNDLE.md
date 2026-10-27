@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 16:54
+> Data: 2026-10-27 16:56
 > Totale file: 94
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -6923,7 +6923,7 @@ mezzo del lavoro.
 
 **Tipo**: specifica (`docs`) — issue #164, claim `kilo-HP-ELITEBOOK-bmyx`
 **Branch**: `feat/164-scrobbling-hub-spec` (worktree `ls-164-scrobbling-hub-spec`)
-**PR**: #NN (aperta su `main` dalla worktree)
+**PR**: #167 (aperta su `main` dalla worktree)
 **Data**: 2026-10-27
 **Stato**: 🟡 in corso — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 sono il passo successivo
 
@@ -8653,7 +8653,7 @@ date: 2026-10-27
 state: 🟡
 merged: false
 branch: feat/164-scrobbling-hub-spec
-pr: 0
+pr: 167
 claim: kilo-HP-ELITEBOOK-bmyx
 cross_refs: [164, 155, 144, 145, 148]
 tags: [docs, spec, adapter, privacy, phase-1]

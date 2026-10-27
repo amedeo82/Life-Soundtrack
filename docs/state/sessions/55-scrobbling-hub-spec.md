@@ -5,7 +5,7 @@ date: 2026-10-27
 state: 🟡
 merged: false
 branch: feat/164-scrobbling-hub-spec
-pr: 0
+pr: 167
 claim: kilo-HP-ELITEBOOK-bmyx
 cross_refs: [164, 155, 144, 145, 148]
 tags: [docs, spec, adapter, privacy, phase-1]
