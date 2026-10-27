@@ -101,7 +101,7 @@
 | 53 | Story 1.4 — rekey(): promozione dedup post-enrichment | 🟢 | ✅ | #162 |
 | 54 | Gate \"fatti del README\" — la prosa confrontata con il codice (issue #161) | 🟢 | ✅ | #165 |
 | 55 | Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle) | 🟢 | ✅ | #167 |
-| 56 | ADR-0011 — contratto di scrittura negli hub (ScrobbleSink) | 🟡 | ❌ | #170 |
+| 56 | ADR-0011 — contratto di scrittura negli hub (ScrobbleSink) | 🟢 | ✅ | #170 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -141,7 +141,7 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **33** (merge: 26)
+- Sessioni migrate in state/sessions: **33** (merge: 27)
 - Stories migrate in state/stories: **11** (done: 11)
 - Ultima sessione migrata: **S56** - ADR-0011 — contratto di scrittura negli hub (ScrobbleSink)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4
