@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.7
-> Ultima modifica: 2026-10-28 — §27 Issue #179 (Story 2.4 — memory engine implementato)
+> Versione: 2.8
+> Ultima modifica: 2026-10-28 — §27 Issue #179 (Story 2.4 — memory engine merged)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -825,6 +825,10 @@ mezzo del lavoro.
 
 **Lesson learned sintetica**: una spec APPROVED che elenca un trigger in prosa e un parametro in tabella non è una contraddizione: è un invites a **dichiarare** (27-4). E il vincolo più forte del progetto — il payload chiuso di `02§4` — non era un blocco ma una **pista** su dove mettere il ranking (27-1). Il test che legge il contratto vero (i locale reali dell'app) vale più del test che lo ricopia (27-3).
 
+**Esito post-merge**: la PR #185 è **merged** in `main` il 2026-10-28T16:15:43Z (merge commit `40ad0b7`) → l'issue #179 è chiusa con `status:done`. Automazioni: `auto-status-done` (status:done + commento `release:`), `auto-branch-cleanup`, `auto-state-aggregate` (`be98fe7`), `auto-bundle` (`de15099`). Worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`).
+
+**Il blocco NEXT-STEP è ricaduto sul fallback, ed è la risposta corretta**: con la 2.4 `done` non resta nessuna story non-done e non bloccata fra quelle migrate — la 2.1 è bloccata dalle audio features (D-A.1) e 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`). Non si è creato uno state file per la 2.2 **per non far indicare al blocco una story bloccata a monte**: è esattamente il difetto che la issue #182 ha chiuso. La catena è 4.1 → 2.1 → 2.2/2.3, e il prossimo lavoro è la **spec dell'EPIC 4.1** (issue #180), che non è un'implementazione.
+
 ### Link utili
 
 - Branch: `feat/179-memory-engine` (worktree `ls-179-memory-engine`)
@@ -868,6 +872,7 @@ mezzo del lavoro.
 | 2.10 | 2026-10-28 (issue #182) | **§26 — il blocco NEXT-STEP indica solo story lavorabili** (Sessione 60, claim `kilo-hp-elitebook-41xb`, PR #183): il filtro di `Build-Block-NextStep` esclude ora `done`, **`blocked`** e **`wontdo`** — il puntatore passava dalla **2.1** (bloccata dalle audio features dell'EPIC 4.1, decisione D-A.1) alla **2.4** (Memory Engine, issue #179), la story implementabile. Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**": se il conteggio cambia, la frase che lo descrive cambia con lui. Il valore `blocked` esisteva nella macchina a stati (ADR-0007, `11-BACKLOG.md`) ma **mai** in un `docs/state/stories/*.md`: il primo file che lo usa (la 2.1, Sessione 59) ha reso visibile il disallineamento. Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i **valori** di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g nuova). Test: `scripts/test-aggregate-determinism.sh` **37 assert** (T10e e T10f nuovi, verificati in entrambe le direzioni: senza il fix 4 assert falliscono) |
 | 2.11 | 2026-10-28 (issue #182) | **§26 — esito post-merge**: la PR #183 è **merged** (`a350386`, 2026-10-28T15:26:17Z) → l'issue #182 è chiusa con `status:done` e `auto-state-aggregate` (`ab83763`) ha rigenerato il blocco NEXT-STEP del README, che ora indica la **2.4** (Memory Engine) invece della 2.1 bloccata. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 60 con `pr: 183`, `merged: true` e merge commit) |
 | 2.12 | 2026-10-28 (issue #179) | **§27 Issue #179 — Story 2.4 implementata** (Sessione 61, claim `kilo-hp-elitebook-hj59`, PR #185): 7 entry (27-1 il **ranking** non aveva dove scrivere il suo score — `MemoryPayload` (`02§4`) è chiuso: la rilevanza ordinata vive in `Insight.confidence`, il payload resta intatto; 27-2 `Insight.payload` è l'unione discriminata: `payload.text` non compila senza restringere il tipo (`memoryPayloadOf`); 27-3 i test del resolver i18n leggono i **locale reali dell'app**: una chiave spostata nell'app fallisce il test del core, non viceversa; 27-4 il **config object** versiona anche `milestoneHours` e `milestoneArtists`: le tre famiglie del trigger `04§7.2` sono implementate e i due parametri in più sono dichiarati (D.61.1); 27-5 `on_this_day` confronta anno+mese+giorno: `isSameDayMonth` (solo mese+giorno) avrebbe matchato eventi di anni diversi; 27-6 l'id dell'insight è **deterministico**: il ricalcolo è idempotente e non duplica le righe; 27-7 i **fixture di scenario** coprono mesi e i trigger dei ricordi coprono anni: il caso noto si osserva spostando "oggi" di un anno avanti). Consegnati: i 5 generatori, il ranking `baseScore × relevance × recency`, la persistenza degli insight `memory` con `derivedVersion` e rilevamento degli insight `stale` (MIG-3), l'orchestratore minimale (`04§8.1`, D-A.5) e il testo reso dal resolver i18n (D-A.4). **27 test** nuovi in `@ls/core` + **5** in `@ls/web` |
+| 2.13 | 2026-10-28 (issue #179) | **§27 — esito post-merge della Story 2.4**: la PR #185 è **merged** (`40ad0b7`, 2026-10-28T16:15:43Z) → l'issue #179 è chiusa con `status:done` e la story 2.4 è `done` con il merge commit nel frontmatter. Automazioni: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` (`be98fe7`), `auto-bundle` (`de15099`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`). Il blocco NEXT-STEP ricade sul fallback "nessuna story non-done e non bloccata migrata": è la risposta **corretta** (la 2.1 è bloccata dalle audio features dell'EPIC 4.1 e 2.2/2.3 dipendono da lei) e per questo **non** si è creato uno state file per la 2.2 — un blocco che punta a una story bloccata a monte è il difetto chiuso dalla issue #182. La catena è 4.1 → 2.1 → 2.2/2.3: il prossimo lavoro è la **spec dell'EPIC 4.1** (issue #180), non un'implementazione |
 
 ---
 
