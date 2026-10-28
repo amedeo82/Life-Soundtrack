@@ -2,12 +2,12 @@
 number: 60
 title: "Il blocco NEXT-STEP indica solo story lavorabili (issue #182)"
 date: 2026-10-28
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "a3503863e1aa76df9e59afb3a85f94c4bda77006"
+merged_date: 2026-10-28
 branch: feat/182-next-step-skip-blocked
-pr: 0
+pr: 183
 claim: kilo-hp-elitebook-41xb
 cross_refs: [182, 179, 180]
 tags: [devops, docs, phase-1]
@@ -78,7 +78,8 @@ espliciti.
 | 60-1 | **Un blocco generato che indica "cosa fare dopo" è un gate di lavoro, non un semplice riepilogo.** Il NEXT-STEP non elenca la cronologia: indica **la prossima cosa da fare**. Bastava una story `blocked` in cima alla lista per trasformarlo in un vicolo cieco — e nessuno dei gate lo segnalava, perché il gate confrontava il blocco con il calcolo, non il calcolo con la **realtà** |
 | 60-2 | **Una macchina a stati che nessuno usa produce bug di stato.** `blocked` e `wontdo` esistevano nello stato delle issue (`11-BACKLOG.md`, ADR-0007) e nei label GitHub, ma **mai** in un `docs/state/stories/*.md`: il primo file che li usa ha fatto emergere che il filtro dell'aggregator ne era ignaro. Le nuove regole vanno scoperte dai dati, non dai documenti |
 | 60-3 | **La prosa di un blocco generato è soggetta allo stesso gate dei fatti.** Il messaggio diceva "non-done" mentre la lista escludeva le bloccate: un gate che confronta i numeri ma non le frasi lascia passare una contraddizione. La regola: se il **conteggio** cambia, la **frase** che lo descrive cambia con lui (lesson 58-4, la stessa forma sotto un altro nome) |
-| 60-4 | **Il fix di uno script di governance non si committa da solo**: la PR tocca `scripts/aggregate-state.ps1`, il trigger di `auto-state-aggregate` scatta post-merge e rigenera il blocco. Committare il blocco a mano nella PR avrebbe violato ADR-0008 e creato un conflitto con il bot |
+| 60-4 | **`parseFloat` sulle versioni con due cifre le riordina**: `parseFloat("2.10")` vale `2.1`, quindi una riga di changelog `2.10` finisce **prima** di `2.5`. Il trappolo è ricomparso due volte nella stessa sessione (dev-log 2.5/2.6 e poi 2.10/2.11): il confronto va fatto **per due componenti** (`[maggiore, minore]`), non con un float. In JS e in PowerShell `2.10` non e` `2.1` — ma `2.10` come *stringa* e` `2.10`, e i due non si confrontano mai come numeri reali |
+| 60-5 | **Il fix di uno script di governance non si committa da solo**: la PR tocca `scripts/aggregate-state.ps1`, il trigger di `auto-state-aggregate` scatta post-merge e rigenera il blocco. Committare il blocco a mano nella PR avrebbe violato ADR-0008 e creato un conflitto con il bot |
 
 ## Documenti aggiornati
 
@@ -102,6 +103,23 @@ espliciti.
 - `docs/state/sessions/60-next-step-skip-blocked.md` — **nuovo**
 - `docs/state/_index.md` — riga della Sessione 60
 - `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — la sessione 60
+
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T15:26:17Z (PR #183, merge commit `a350386`).
+L'issue **#182** è chiusa con `status:done` e il blocco NEXT-STEP del README
+indica ora la **2.4** (Memory Engine, issue #179) invece della 2.1 bloccata.
+
+Automazioni post-merge: `auto-status-done` (status:done su #182),
+`auto-branch-cleanup`, `auto-state-aggregate` (`ab83763`, che ha rigenerato il
+blocco NEXT-STEP) e `auto-bundle`. Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+Il doc-sync di chiusura (frontmatter con `pr`, `merged: true` e merge commit)
+è in una PR `docs:` separata: il numero della PR si conosce solo dopo
+l'apertura, e il merge commit solo dopo il merge.
 
 ## Cross-refs
 
