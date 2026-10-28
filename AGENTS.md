@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.27 — Sessione 54 (2026-10-27)**
+> **Versione 1.28 — Sessione 60 (2026-10-28)**
 
 ---
 
@@ -849,7 +849,7 @@ Esempi di obbligo concreto:
 - L'elenco delle piattaforme importabili (sottosezione "Piattaforme importabili" dentro "Cosa c'è oggi") deve corrispondere **esattamente** a `ACTIVE_PLATFORMS` in `apps/web/src/onboarding/OnboardingRouter.tsx`; ogni piattaforma deve avere una factory in `ADAPTER_FACTORIES` e una classe adapter in `packages/core/src/adapters/`.
 - Una capability **non ancora implementata** (analisi, mood, ricordi, enrichment, audio features, valence, danceability, BPM) si dichiara **solo nella sezione roadmap**, mai come feature presente.
 - La sezione "Stato del progetto" **non duplica conteggi** (`N/M`): i conteggi vivono nei blocchi aggregati di `docs/INDEX.md` e `docs/11-BACKLOG.md`; lì si mette un **puntatore**, non una copia (è l'anti-pattern sopra, applicato al README).
-- Il blocco NEXT-STEP elenca la prima story non completata **fra quelle già migrate** in `docs/state/stories/`: non è la roadmap. La prosa del README deve rendere esplicito questo punto, perché il lettore del repository cerca lì la "prossima story".
+- Il blocco NEXT-STEP elenca la prima story **lavorabile** fra quelle già migrate in `docs/state/stories/`: non è la roadmap. Sono escluse le story `done` (completate), `blocked` (bloccate da una dipendenza esterna) e `wontdo` (scope cancellato): il blocco deve indicare **la prossima story da implementare**, non un vicolo cieco (issue #182). La prosa del README deve rendere esplicito questo punto, perché il lettore del repository cerca lì la "prossima story".
 
 **Il gate**: `node scripts/check-readme-facts.mjs` — exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). È **bloccante in CI** (`.github/workflows/ci.yml`, step "Fatti del README in sync con il codice") e **non ha una modalità di scrittura**: è un verificatore, non un generatore. Un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dall'issue #149.
 
@@ -981,6 +981,8 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 - Per ambiguità di specifica: issue `needs-spec`
 
 ---
+
+*Ultimo aggiornamento: v1.28 — il blocco NEXT-STEP del README indicava una story **bloccata** (issue #182). `scripts/aggregate-state.ps1` filtra ora anche `blocked` (STOP) e `wontdo` (NO) accanto a `done`: il blocco indica la prima story **lavorabile**, non una dipendenza esterna irrisolvibile. Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle audio features dell'EPIC 4.1 (decisione D-A.1, Sessione 59) e il puntatore era finito su di lei, mentre la story implementabile era la 2.4 (Memory Engine, issue #179). La regola è coperta da due sub-test nuovi in `scripts/test-aggregate-determinism.sh` (T10e, T10f) che **falliscono senza il fix**: un gate che passa sempre non è un gate (lesson 43-1). Il messaggio di fallback e la riga delle "altre candidate" dicono ora "non-done e non bloccate".
 
 *Ultimo aggiornamento: v1.27 — la prosa del `README.md` non aveva **nessun gate** (Sessione 54, issue #161). Il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti: le classi adapter non ci sono), audio features e analisi/mood/ricordi come feature presenti (nessuna implementata), e un conteggio di stato (`EPIC 0 7/7`) che l'aggregatore ricalcola altrove; la prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14), perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice. Fallimento **silenzioso**: pipeline verde, README falso. La causa radice era di ownership: `README.md` è un file ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) ma la regola di D.38.1 copriva solo i file globali, e il README non era in nessuna tabella di ownership. Aggiunti:
 - `scripts/check-readme-facts.mjs` (nuovo): gate **read-only** che confronta la prosa del README con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` (`apps/web/src/onboarding/OnboardingRouter.tsx`) e con le classi in `packages/core/src/adapters/`; vieta le capability non implementate fuori dalla sezione roadmap; vieta i conteggi duplicati in prosa. Exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). **Nessuna modalità di scrittura**: un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dal #149
