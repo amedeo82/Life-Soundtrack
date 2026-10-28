@@ -290,5 +290,12 @@
   "settings.scrobble.sent_other": "{{count}} listens queued",
   "settings.scrobble.noHubSelected": "No hub selected: nothing will be sent",
   "settings.scrobble.save": "Save",
-  "settings.scrobble.saved": "Configuration saved on this device"
+  "settings.scrobble.saved": "Configuration saved on this device",
+  "settings.lastfm.sharedSecret": "Shared secret (to sign the requests)",
+  "settings.lastfm.auth": "Authorize writing to Last.fm",
+  "settings.lastfm.authHint": "Open the authorization page, accept, then paste here the address of the page you were redirected to: the session key stays on this device.",
+  "settings.lastfm.authCallback": "Callback address",
+  "settings.lastfm.authConnect": "Connect the session",
+  "settings.lastfm.authSaved": "Session authorized: writing to Last.fm is enabled",
+  "settings.lastfm.authMissingToken": "There is no token in the pasted address: copy the whole redirect page address"
 }

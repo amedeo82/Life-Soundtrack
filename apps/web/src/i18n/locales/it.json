@@ -290,5 +290,12 @@
   "settings.scrobble.sent_other": "{{count}} ascolti in coda",
   "settings.scrobble.noHubSelected": "Nessun hub selezionato: nessun invio partirà",
   "settings.scrobble.save": "Salva",
-  "settings.scrobble.saved": "Configurazione salvata su questo dispositivo"
+  "settings.scrobble.saved": "Configurazione salvata su questo dispositivo",
+  "settings.lastfm.sharedSecret": "Shared secret (per la firma delle richieste)",
+  "settings.lastfm.auth": "Autorizza la scrittura su Last.fm",
+  "settings.lastfm.authHint": "Apri la pagina di autorizzazione, accetta, poi incolla qui l'indirizzo della pagina a cui sei stato reindirizzato: la chiave di sessione resta su questo dispositivo.",
+  "settings.lastfm.authCallback": "Indirizzo di callback",
+  "settings.lastfm.authConnect": "Collega la sessione",
+  "settings.lastfm.authSaved": "Sessione autorizzata: la scrittura su Last.fm è abilitata",
+  "settings.lastfm.authMissingToken": "Nell'indirizzo incollato non c'è un token: copia l'intero indirizzo della pagina di reindirizzamento"
 }

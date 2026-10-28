@@ -14,6 +14,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { LastfmAdapter } from '@core/adapters/lastfm';
+import { buildAuthTokenUrl, exchangeSessionKey, parseAuthToken } from '@core/adapters/lastfm/auth';
 import { runRemoteImport } from '@core/adapters';
 import {
   EMPTY_LASTFM_CONFIG,
@@ -41,6 +42,8 @@ export function LastfmPanel({ privacy, onImported }: LastfmPanelProps) {
   const [status, setStatus] = useState<PanelStatus>('loading');
   const [message, setMessage] = useState<string | null>(null);
   const [events, setEvents] = useState(0);
+  const [callbackUrl, setCallbackUrl] = useState('');
+  const [authDone, setAuthDone] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +108,43 @@ export function LastfmPanel({ privacy, onImported }: LastfmPanelProps) {
 
   const configured = isLastfmConfigured(config);
 
+  const handleOpenAuth = useCallback(() => {
+    if (config.apiKey.trim().length === 0) {
+      return;
+    }
+    // La redirect_uri è **registrata dall'utente** su Last.fm (D-LF.2): la PWA
+    // non fa da server (ADR-0002).
+    const redirectUri = `${window.location.origin}/`;
+    window.open(buildAuthTokenUrl(config.apiKey, redirectUri), '_blank', 'noopener');
+  }, [config]);
+
+  const handleConnectSession = useCallback(async () => {
+    const token = parseAuthToken(callbackUrl);
+    if (!token) {
+      setStatus('error');
+      setMessage(t('settings.lastfm.authMissingToken'));
+      return;
+    }
+    setStatus('loading');
+    try {
+      const session = await exchangeSessionKey(config.apiKey, token);
+      const next: LastfmConfig = {
+        ...config,
+        sessionKey: session.sessionKey,
+        username: session.username || config.username,
+      };
+      setConfig(next);
+      const db = await openDb();
+      await saveLastfmConfig(db, next);
+      setCallbackUrl('');
+      setAuthDone(true);
+      setStatus('idle');
+    } catch (error) {
+      setStatus('error');
+      setMessage(error instanceof Error ? error.message : t('error.generic'));
+    }
+  }, [callbackUrl, config, t]);
+
   return (
     <section className="platform-card" data-testid="lastfm-panel">
       <div className="platform-card__header">
@@ -151,6 +191,61 @@ export function LastfmPanel({ privacy, onImported }: LastfmPanelProps) {
         onChange={(e) => setConfig((prev) => ({ ...prev, apiKey: e.target.value }))}
         data-testid="lastfm-apikey"
       />
+
+      <label className="platform-card__instructions" htmlFor="lastfm-shared-secret">
+        {t('settings.lastfm.sharedSecret')}
+      </label>
+      <input
+        id="lastfm-shared-secret"
+        type="password"
+        className="input"
+        autoComplete="off"
+        value={config.sharedSecret}
+        onChange={(e) => setConfig((prev) => ({ ...prev, sharedSecret: e.target.value }))}
+        data-testid="lastfm-shared-secret"
+      />
+
+      <p className="platform-card__instructions">{t('settings.lastfm.authHint')}</p>
+
+      <label className="platform-card__instructions" htmlFor="lastfm-auth-callback">
+        {t('settings.lastfm.authCallback')}
+      </label>
+      <input
+        id="lastfm-auth-callback"
+        type="url"
+        className="input"
+        placeholder="https://…?token=…"
+        value={callbackUrl}
+        onChange={(e) => setCallbackUrl(e.target.value)}
+        data-testid="lastfm-auth-callback"
+      />
+
+      <div className="onboarding-actions">
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={handleOpenAuth}
+          disabled={config.apiKey.trim().length === 0}
+          data-testid="lastfm-auth-open"
+        >
+          {t('settings.lastfm.auth')}
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() => void handleConnectSession()}
+          disabled={callbackUrl.trim().length === 0}
+          data-testid="lastfm-auth-connect"
+        >
+          {t('settings.lastfm.authConnect')}
+        </button>
+      </div>
+
+      {authDone && (
+        <p className="platform-card__status" aria-live="polite" data-testid="lastfm-auth-saved">
+          {t('settings.lastfm.authSaved')}
+        </p>
+      )}
 
       <div className="onboarding-actions">
         <button
