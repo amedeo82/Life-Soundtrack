@@ -42,9 +42,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-_Nessuna story non-done migrata in `docs/state/stories/`._
+**Prossima story da implementare**: **2.1** — Mood Tracker giornaliero (priority `B`, vedi `docs/11-BACKLOG.md`).
 
-Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
+Sorgente: `docs/state/stories/2.1-mood-tracker.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+
+Altre non-done in ordine di priorita backlog (id): 2.4.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 

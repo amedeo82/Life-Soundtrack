@@ -626,5 +626,7 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | - | adapter |
+| 2.1 - Mood Tracker giornaliero | blocked | #0 | - | analysis |
+| 2.4 - Memory Engine | todo | #0 | - | analysis |
 
 <!-- AGGREGATE-STORIES-END -->
