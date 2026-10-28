@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-27 17:07
-> Totale file: 98
+> Data: 2026-10-28 14:36
+> Totale file: 100
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -26373,6 +26373,226 @@ evt-016,Legacy Event,Content Name,Artist Name,Album Name,180000,180000,2024-01-1
       }
     ]
   }
+}
+
+
+
+===== FILE: fixtures/synthetic-history/scrobble-hub-sample.json =====
+
+{
+  "_comment": "Fixture sintetico delle **risposte degli hub** per il percorso di scrittura (Story 1.5, Sessione 58, issue #173). I sink interpretano queste risposte: happy path dei due hub, accettazione parziale, gli errori mappati sulla mappa `ScrobbleError` (20§11.1) e il proxy che risponde HTML (E.SH.7, caso 18). I payload di invio sono in `scrobble-payloads-sample.json`.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack scrobble sink testing",
+    "version": "1.0",
+    "session": 58,
+    "spec": "docs/20-SCROBBLING-HUB.md v1.0 APPROVED + docs/13-ADR/0011-scrobble-sink.md v1.0 APPROVED",
+    "format": "ScrobblePayload (payload di invio) + risposte hub (mock API)",
+    "privacy": "Nessun segreto, nessun IP, nessun contesto: il payload è chiuso per costruzione (V8, G-SH.6)"
+  },
+  "_expectedOutput": {
+    "_comment": "Derivazione interna come canone.",
+    "lastfmErrorCodes": {
+      "rateLimited": 29,
+      "invalidSk": 9,
+      "invalidSignature": 13,
+      "malformed": 8
+    },
+    "_errorMapping": "29 -> RATE_LIMITED (recuperabile); 9 e 13 -> AUTH_INVALID (terminale); 8 -> PAYLOAD_REJECTED (terminale); 401/403/404 -> AUTH_INVALID; 429 -> RATE_LIMITED; 5xx -> HUB_ERROR (recuperabile)",
+    "lastfmBatchSize": 50,
+    "listenbrainzBatchSize": 1000
+  },
+  "hubResponses": {
+    "lastfm": {
+      "success": {
+        "scrobbles": {
+          "@attr": {
+            "accepted": 3,
+            "ignored": 0
+          },
+          "scrobble": [
+            {
+              "artist": {
+                "#text": "Björk",
+                "corrected": "0"
+              },
+              "track": {
+                "#text": "Jóga"
+              },
+              "album": {
+                "#text": "Homogenic"
+              },
+              "ignoredMessage": "0",
+              "albumArtistCorrected": "0",
+              "trackCorrected": "0"
+            },
+            {
+              "artist": {
+                "#text": "Tame Impala",
+                "corrected": "0"
+              },
+              "track": {
+                "#text": "Apocalypse Dreams"
+              },
+              "album": {
+                "#text": "Lonerism"
+              },
+              "ignoredMessage": "0",
+              "albumArtistCorrected": "0",
+              "trackCorrected": "0"
+            },
+            {
+              "artist": {
+                "#text": "Tame Impala",
+                "corrected": "0"
+              },
+              "track": {
+                "#text": "Borderline"
+              },
+              "album": {
+                "#text": "Lonerism"
+              },
+              "ignoredMessage": "0",
+              "albumArtistCorrected": "0",
+              "trackCorrected": "0"
+            }
+          ]
+        }
+      },
+      "partialAccept": {
+        "scrobbles": {
+          "@attr": {
+            "accepted": 2,
+            "ignored": 1
+          }
+        }
+      },
+      "errors": {
+        "rateLimited": {
+          "error": 29,
+          "message": "Rate limit exceeded"
+        },
+        "invalidSk": {
+          "error": 9,
+          "message": "Invalid session key"
+        },
+        "invalidSignature": {
+          "error": 13,
+          "message": "Invalid method signature supplied"
+        },
+        "malformed": {
+          "error": 8,
+          "message": "Operation failed"
+        }
+      },
+      "proxyHtml": "<html><body>proxy</body></html>"
+    },
+    "listenbrainz": {
+      "success": {
+        "status": "ok"
+      },
+      "errors": {
+        "unauthorized": {
+          "code": 401,
+          "error": "You need to provide a valid authorization token."
+        },
+        "rateLimited": {
+          "code": 429,
+          "error": "Rate limit exceeded"
+        },
+        "serverError": {
+          "code": 500,
+          "error": "Internal Server Error"
+        },
+        "badRequest": {
+          "code": 400,
+          "error": "Invalid JSON document"
+        }
+      },
+      "rateLimitHeaders": {
+        "X-RateLimit-Limit": "1",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "1710496800",
+        "X-RateLimit-Reset-In": "7"
+      }
+    }
+  }
+}
+
+
+
+===== FILE: fixtures/synthetic-history/scrobble-payloads-sample.json =====
+
+{
+  "_comment": "Fixture sintetico dei **payload di invio** degli scrobble (Story 1.5, Sessione 58, issue #173). Ogni elemento è un `ScrobblePayload` (05§4.2): il tipo è chiuso per costruzione (V8, G-SH.6) e non ha campi per IP, device o contesto. La chiave di idempotenza è `hub|eventKey`: unico per costruzione (G-SH.1).",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack scrobble sink testing",
+    "version": "1.0",
+    "session": 58,
+    "spec": "docs/20-SCROBBLING-HUB.md v1.0 APPROVED + docs/13-ADR/0011-scrobble-sink.md v1.0 APPROVED",
+    "format": "ScrobblePayload",
+    "privacy": "Nessun segreto, nessun IP, nessun contesto"
+  },
+  "_expectedOutput": {
+    "totalPayloads": 6,
+    "uniqueKeys": 6,
+    "_derivation": "idempotencyKey = `hub|eventKey`; ogni payload corrisponde a un ascolto locale gia' presente nel DB"
+  },
+  "payloads": [
+    {
+      "idempotencyKey": "lastfm|spotify:2024-03-15T10:30|Björk|Jóga",
+      "startedAt": 1710498600000,
+      "durationMs": 305000,
+      "recordingMbid": "mbid-joga",
+      "isrc": "ISRC001",
+      "artistName": "Björk",
+      "trackName": "Jóga",
+      "albumName": "Homogenic"
+    },
+    {
+      "idempotencyKey": "lastfm|spotify:2024-03-15T10:36|Apocalypse Dreams|Tame Impala",
+      "startedAt": 1710498960000,
+      "durationMs": 238000,
+      "recordingMbid": "mbid-apocalypse",
+      "artistName": "Tame Impala",
+      "trackName": "Apocalypse Dreams",
+      "albumName": "Lonerism"
+    },
+    {
+      "idempotencyKey": "lastfm|spotify:2024-03-15T10:41|Borderline|Tame Impala",
+      "startedAt": 1710499260000,
+      "durationMs": 217000,
+      "artistName": "Tame Impala",
+      "trackName": "Borderline",
+      "albumName": "Lonerism"
+    },
+    {
+      "idempotencyKey": "listenbrainz|listenbrainz:2024-03-15T09:02|Björk|Jóga",
+      "startedAt": 1710494520000,
+      "durationMs": 305000,
+      "recordingMbid": "mbid-joga",
+      "isrc": "ISRC001",
+      "artistName": "Björk",
+      "trackName": "Jóga",
+      "albumName": "Homogenic"
+    },
+    {
+      "idempotencyKey": "listenbrainz|listenbrainz:2024-03-15T09:08|Apocalypse Dreams|Tame Impala",
+      "startedAt": 1710496080000,
+      "durationMs": 238000,
+      "recordingMbid": "mbid-apocalypse",
+      "artistName": "Tame Impala",
+      "trackName": "Apocalypse Dreams",
+      "albumName": "Lonerism"
+    },
+    {
+      "idempotencyKey": "listenbrainz|listenbrainz:2024-03-15T09:12|Borderline|Tame Impala",
+      "startedAt": 1710496320000,
+      "durationMs": 217000,
+      "artistName": "Tame Impala",
+      "trackName": "Borderline",
+      "albumName": "Lonerism"
+    }
+  ]
 }
 
 

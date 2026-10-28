@@ -23,6 +23,7 @@ import type { ImportPlatformState, PlatformCardStatus } from './types';
 import { loadPrivacy, savePrivacy } from './PrivacySettings';
 import { PlatformCard } from './PlatformCard';
 import { LastfmPanel } from './LastfmPanel';
+import { ScrobblePanel } from './ScrobblePanel';
 import { useT } from '../i18n';
 
 /**
@@ -377,6 +378,10 @@ export function PrivacyScreen({
         >
           {t('onboarding.import.lock')}
         </p>
+        <ScrobblePanel
+          hubs={privacy.scrobbleHubs}
+          onHubsChange={(hubs) => onChange('scrobbleHubs', hubs)}
+        />
         <div className="onboarding-actions">
           <button
             type="button"

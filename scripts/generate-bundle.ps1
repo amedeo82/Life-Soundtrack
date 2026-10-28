@@ -257,6 +257,8 @@ $files = @(
     # API e i due formati CSV degli export di terze parti.
     "fixtures/synthetic-history/listenbrainz-sample.jsonl",
     "fixtures/synthetic-history/lastfm-scrobbles-sample.json",
+    "fixtures/synthetic-history/scrobble-hub-sample.json",
+    "fixtures/synthetic-history/scrobble-payloads-sample.json",
     "fixtures/synthetic-history/lastfm-page2-sample.json",
     "fixtures/synthetic-history/lastfm-export-ghanl-sample.csv",
     "fixtures/synthetic-history/lastfm-export-4col-sample.csv",

@@ -61,3 +61,26 @@ export {
   LISTENBRAINZ_DEFAULT_ENDPOINT,
 } from '../listenbrainz/scrobble';
 export { lastfmApiSignature, LASTFM_MAX_SCROBBLES_PER_REQUEST } from '../lastfm/scrobble';
+export {
+  collectCandidates,
+  enqueueEligibleListens,
+  isEligible,
+  isMature,
+  SCROBBLE_CANDIDACY_WINDOW_MS,
+  SCROBBLE_FALLBACK_THRESHOLD_MS,
+  SCROBBLE_MIN_DURATION_MS,
+  type EligibilityOptions,
+  type ResolvedScrobbleCandidate,
+  type ScrobbleCandidate,
+} from './eligibility';
+export {
+  runScrobbleCycle,
+  SCROBBLE_DEFAULT_BATCH_SIZE,
+  type ScrobbleCycleOptions,
+  type ScrobbleCycleSummary,
+} from './sender';
+export {
+  syncListenbrainzIncrementally,
+  type IncrementalSyncOptions,
+  type IncrementalSyncResult,
+} from './sync';

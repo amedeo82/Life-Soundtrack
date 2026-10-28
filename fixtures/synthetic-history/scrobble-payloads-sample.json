@@ -1,0 +1,72 @@
+{
+  "_comment": "Fixture sintetico dei **payload di invio** degli scrobble (Story 1.5, Sessione 58, issue #173). Ogni elemento è un `ScrobblePayload` (05§4.2): il tipo è chiuso per costruzione (V8, G-SH.6) e non ha campi per IP, device o contesto. La chiave di idempotenza è `hub|eventKey`: unico per costruzione (G-SH.1).",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack scrobble sink testing",
+    "version": "1.0",
+    "session": 58,
+    "spec": "docs/20-SCROBBLING-HUB.md v1.0 APPROVED + docs/13-ADR/0011-scrobble-sink.md v1.0 APPROVED",
+    "format": "ScrobblePayload",
+    "privacy": "Nessun segreto, nessun IP, nessun contesto"
+  },
+  "_expectedOutput": {
+    "totalPayloads": 6,
+    "uniqueKeys": 6,
+    "_derivation": "idempotencyKey = `hub|eventKey`; ogni payload corrisponde a un ascolto locale gia' presente nel DB"
+  },
+  "payloads": [
+    {
+      "idempotencyKey": "lastfm|spotify:2024-03-15T10:30|Björk|Jóga",
+      "startedAt": 1710498600000,
+      "durationMs": 305000,
+      "recordingMbid": "mbid-joga",
+      "isrc": "ISRC001",
+      "artistName": "Björk",
+      "trackName": "Jóga",
+      "albumName": "Homogenic"
+    },
+    {
+      "idempotencyKey": "lastfm|spotify:2024-03-15T10:36|Apocalypse Dreams|Tame Impala",
+      "startedAt": 1710498960000,
+      "durationMs": 238000,
+      "recordingMbid": "mbid-apocalypse",
+      "artistName": "Tame Impala",
+      "trackName": "Apocalypse Dreams",
+      "albumName": "Lonerism"
+    },
+    {
+      "idempotencyKey": "lastfm|spotify:2024-03-15T10:41|Borderline|Tame Impala",
+      "startedAt": 1710499260000,
+      "durationMs": 217000,
+      "artistName": "Tame Impala",
+      "trackName": "Borderline",
+      "albumName": "Lonerism"
+    },
+    {
+      "idempotencyKey": "listenbrainz|listenbrainz:2024-03-15T09:02|Björk|Jóga",
+      "startedAt": 1710494520000,
+      "durationMs": 305000,
+      "recordingMbid": "mbid-joga",
+      "isrc": "ISRC001",
+      "artistName": "Björk",
+      "trackName": "Jóga",
+      "albumName": "Homogenic"
+    },
+    {
+      "idempotencyKey": "listenbrainz|listenbrainz:2024-03-15T09:08|Apocalypse Dreams|Tame Impala",
+      "startedAt": 1710496080000,
+      "durationMs": 238000,
+      "recordingMbid": "mbid-apocalypse",
+      "artistName": "Tame Impala",
+      "trackName": "Apocalypse Dreams",
+      "albumName": "Lonerism"
+    },
+    {
+      "idempotencyKey": "listenbrainz|listenbrainz:2024-03-15T09:12|Borderline|Tame Impala",
+      "startedAt": 1710496320000,
+      "durationMs": 217000,
+      "artistName": "Tame Impala",
+      "trackName": "Borderline",
+      "albumName": "Lonerism"
+    }
+  ]
+}
