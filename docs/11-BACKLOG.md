@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.19 · Sessione 60 (2026-10-28, issue #182) · il blocco NEXT-STEP del README indica solo story **lavorabili** (esclude `done`, `blocked`, `wontdo`): dopo la ratifica della spec dell'analisi il puntatore è passato dalla 2.1 (bloccata) alla **2.4** (implementabile, issue #179)
+> Status: 🟢 APPROVED · Versione 1.6.20 · Sessione 61 (2026-10-28, issue #179) · la **Story 2.4 (Memory Engine) è implementata** e in review (PR #185): i 5 tipi di ricordo, il feed per rilevanza e la `derivedVersion` calcolata dai parametri; il testo è una stringa resa dal resolver i18n (D-A.4)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -381,12 +381,12 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.4 — Memory Engine `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
 
-**Stato**: ⬚ TODO — **implementabile dal 2026-10-28**: la spec `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED** (ratifica del 2026-10-28, issue #178) e i **trigger dei 5 tipi** sono specificati (§7.2, con le formule di `return` e `seasonal` e il criterio dei 5 brani distinti per `first_time`: decisioni **D-A.2** e **D-A.3**). I template i18n dei ricordi sono **già dichiarati** in `08-COPY-I18N.md` §2.15 (`memory.*`): il testo è una stringa **resa alla generazione** (D-A.4).
+**Stato**: 👀 **IN REVIEW — implementata nella Sessione 61** (issue #179, PR #185). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED** (ratifica del 2026-10-28, issue #178) e i **trigger dei 5 tipi** sono specificati (§7.2, con le formule di `return` e `seasonal` e il criterio dei 5 brani distinti per `first_time`: decisioni **D-A.2** e **D-A.3**). Consegnato: i 5 generatori in `packages/core/src/analysis/memory/`, il feed ordinato per rilevanza (`04§7.4`), la persistenza degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e l'insight vecchio `stale` al cambio dei parametri (MIG-3), l'orchestratore minimale (`04§8.1`). I template i18n dei ricordi sono **già dichiarati** in `08-COPY-I18N.md` §2.15 (`memory.*`): il testo è una stringa **resa alla generazione** dal resolver i18n (D-A.4). Dettagli e scelte di implementazione: `docs/state/stories/2.4-memory-engine.md`.
 
 **Acceptance criteria**:
 - [x] 5 tipi di ricordo (on_this_day, first_time, milestone, return, seasonal) — specificati in `04§7.2` (v1.0 🟢)
 - [x] Trigger documentati in `04-ANALYSIS-ALGORITHMS.md` (§7.2, ratificati)
-- [ ] Insight `memory` persistito con `derivedVersion` e feed ordinato per rilevanza (§7.4)
+- [x] Insight `memory` persistito con `derivedVersion` e feed ordinato per rilevanza (§7.4)
 
 ---
 
@@ -528,12 +528,11 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
 9. **1.4** Dedup promozione
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
-11. **2.4** analisi base (prima) — issue **#179** (`agent-ready`): il blocco NEXT-STEP del README la indica come prossima story da implementare · **2.1** dopo l'EPIC 4.1: il mood tracker ha bisogno delle audio features, che non sono implementate (D-A.1, issue #178; la 2.1 è in stato `blocked` e il blocco NEXT-STEP la esclude, issue #182)
-12. **2.2, 2.3** analisi avanzata
-13. **4.1, 4.2** enrichment
-14. **3.1, 3.2, 3.3** UI
-15. **5.1, 5.2** privacy
-16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
+11. **2.2, 2.3** analisi avanzata — la **2.4** è implementata e in review (issue #179, PR #185): il blocco NEXT-STEP del README la indica come story lavorabile finché non è `done`. **2.1** dopo l'EPIC 4.1: il mood tracker ha bisogno delle audio features, che non sono implementate (D-A.1, issue #178; la 2.1 è in stato `blocked` e il blocco NEXT-STEP la esclude, issue #182)
+12. **4.1, 4.2** enrichment — **prima la spec dell'EPIC 4.1**, che sblocca la Story 2.1 (issue #180): senza le audio features il mood tracker non produce insight (D-A.1)
+13. **3.1, 3.2, 3.3** UI
+14. **5.1, 5.2** privacy
+15. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
 **Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
@@ -605,6 +604,7 @@ Ogni story deve avere label GitHub:
 | 1.6.17 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 implementata**: la sezione Story passa a ✅ DONE e l'issue #173 (implementazione, `agent-ready`, `size:L`) è chiusa con `status:done` al merge della PR #176. Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink` (`packages/core/src/adapters/scrobble/types.ts`), registry dei sink, sink Last.fm (firma `api_sig` md5 in JS puro, batch 50, POST via proxy, mappa errori) e ListenBrainz (`POST /1/submit-listens`, `listen_type: import`, `User-Agent`, rate limit 1 req/s), tabella `scrobbleOutbox` (schema Dexie **v5**, PK `hub\|eventKey`, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con la regola di maturità **D-SH.13**, `parseRemote?()` incrementale su `/1/user/{u}/listens` con cursore persistito, percorso web auth Last.fm (token → session key), pannello UI (selettore per-hub, modalità del proxy, vista della coda) e namespace i18n `scrobble` (15 codici). **31 casi di test** della spec `20§14.3` coperti (267 test in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 dichiarata parzialmente soddisfatta**: la parte MBID → DEDUP-2 è coperta dal pipeline esistente, la parte `track.genres` via lookup MusicBrainz dipende dall'enrichment (EPIC 4, non implementato) e va aperta come issue dedicata. La riga della 1.5 è rimossa dalla roadmap delle story non completate e il conteggio legacy dell'EPIC 1 passa a **5/5** |
 | 1.6.18 | Sessione 59 (2026-10-28, issue #178) | **Spec dell'analisi ratificata**: `docs/04-ANALYSIS-ALGORITHMS.md` passa da 🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le cinque decisioni aperte chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.1** (mood tracker) **aspetta le audio features dell'EPIC 4.1** (senza valence/energy non produce insight: consegnarla sarebbe un falso verde), la **Story 2.4** (Memory Engine) è **implementabile subito**; `return` e `seasonal` sono specificati in §7.2 (D-A.2), `first_time` passa a **5 brani distinti** (D-A.3), il `text` del ricordo è una **stringa resa** con i template i18n già dichiarati in `08§2.15` (D-A.4), e l'orchestratore è **minimale ed estensibile** (D-A.5, §8.1). Allineati: `08-COPY-I18N.md` §2.15 (i template `memory.*` dichiarati vincolanti + la chiave `memory.milestone.artists`), le sezioni Story 2.1 e 2.4 e la lista di priorità degli agenti. **Issue di implementazione #179** aperta per la 2.4 (`agent-ready`, `size:M`) |
 | 1.6.19 | Sessione 60 (2026-10-28, issue #182) | **Il blocco NEXT-STEP indica solo story lavorabili**: con la Story 2.1 in stato `blocked` (dipende dalle audio features dell'EPIC 4.1, decisione D-A.1) il puntatore del README era finito su una story non implementabile, mentre la **2.4** era libera. `scripts/aggregate-state.ps1` esclude ora `done`, `blocked` e `wontdo` (restano `todo`, `in_progress`, `in_review`: sono in lavorazione, non bloccate), e il messaggio di fallback dice "non-done **e non bloccate**". Il fix **non** committa i blocchi aggregati (ADR-0008): li rigenera `auto-state-aggregate` post-merge, perché la PR tocca lo script. Test: `scripts/test-aggregate-determinism.sh` da 34 a **37 assert** (T10e, T10f nuovi, verificati in entrambe le direzioni — senza il fix falliscono). Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i valori di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g) |
+| 1.6.20 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 implementata** (Memory Engine, PR #185): il pacchetto `packages/core/src/analysis/` è nato — i **5 generatori** (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il **ranking** `baseScore × relevance × recency` (`04§7.4`), la **persistenza** degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e l'insight vecchio `stale` al cambio dei parametri (MIG-3), l'**orchestratore minimale** (`04§8.1`, D-A.5) e il **testo reso** dal resolver i18n (D-A.4: nessuna stringa italiana nel core, i template `insight.memory.*` vivono nei locale `it`/`en` dell'app). La sezione Story 2.4 passa a 👀 **IN REVIEW** e il suo terzo AC è verificato. **27 test** nuovi in `@ls/core` + **5** in `@ls/web`. Scelte dichiarate (D.61.1…D.61.7): il config object versiona **anche** `milestoneHours` e `milestoneArtists` (le tre famiglie di milestone del trigger `04§7.2`), `on_this_day` confronta anno+mese+giorno, la rilevanza ordinata vive in `Insight.confidence` (il payload `02§4` è chiuso), l'id dell'insight è deterministico (ricalcolo idempotente), il confine del giorno è UTC. La lista di priorità degli agenti mette la **spec dell'EPIC 4.1** prima della 2.1: senza le audio features il mood tracker non produce insight (D-A.1) |
 
 
 

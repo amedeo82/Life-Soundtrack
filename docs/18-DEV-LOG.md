@@ -1,8 +1,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.6
-> Ultima modifica: 2026-10-28 — §24 Issue #173 (Story 1.5 — scrobbling hub implementato)
+> Versione: 2.7
+> Ultima modifica: 2026-10-28 — §27 Issue #179 (Story 2.4 — memory engine implementato)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -805,6 +805,35 @@ mezzo del lavoro.
 - Sessione: `docs/state/sessions/60-next-step-skip-blocked.md`
 - Precedenti: **#178** (la ratifica che ha creato la prima story `blocked`) · **#179** (la 2.4, ora indicata dal blocco) · **#180** (la 2.1, bloccata)
 
+## 27. Issue #179 — Story 2.4: il Memory Engine (Sessione 61)
+
+**Tipo**: feature (`packages/core/src/analysis/`) + persistenza (`db/`) + i18n (`apps/web/`) — issue #179, claim `kilo-hp-elitebook-hj59`
+**Branch**: `feat/179-memory-engine` (worktree `ls-179-memory-engine`)
+**PR**: #185 (aperta su `main` dalla worktree)
+**Data**: 2026-10-28
+**Stato**: 🟡 in review — i 5 tipi di ricordo, il feed per rilevanza, la persistenza con `derivedVersion` e l'orchestratore minimale della tranche
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 27-1 | P+F+L | Il **ranking** del ricordo (§7.4) non aveva dove scrivere il suo score: `MemoryPayload` (`02§4`) è chiuso e non ha un campo `score` | Il primo tentativo ha portato ad **aggiungere** `score` al payload, che avrebbe violato una spec APPROVED | La rilevanza ordinata vive in `Insight.confidence` (0..1): il payload resta chiuso e il feed resta ordinabile. Un vincolo di schema che sembra un blocco spesso indica **dove** mettere la cosa | `packages/core/src/analysis/memory/engine.ts` |
+| 27-2 | P+L | `Insight.payload` è l'**unione discriminata** di `02§4`: `payload.text` non compila in TypeScript | Il test accedeva ai campi del payload senza restringere il tipo | `memoryPayloadOf(insight)` verifica il `kind` e restituisce il `MemoryPayload`: un narrowing che fallisce sul posto giusto | `packages/core/src/analysis/__tests__/helpers.ts` |
+| 27-3 | P+F+L | I test del resolver i18n potevano passare con l'app **rotta** | Copiare i template `memory.*` in una fixture del test avrebbe duplicato il contratto: la chiave spostata nell'app sarebbe rimasta verde | I test del core leggono i **locale reali dell'app** (`apps/web/src/i18n/locales/*.json`), come `db/__tests__/helpers.ts` fa con `fixtures/db-seed/`: una chiave spostata o cancellata nell'app **fallisce** il test del core | `packages/core/src/analysis/__tests__/helpers.ts` |
+| 27-4 | P+L | Il **config object** del memory engine non copriva i parametri delle tre famiglie di `milestone` | Il trigger di `04§7.2` elenca eventi, ore e artisti; il registro `04§9` ne elenca sei, e i template `.hours`/`.artists` esistono già in `08§2.15` | Le due soglie in più (`milestoneHours`, `milestoneArtists`) sono **nel config object**, quindi versionate come tutte le altre (`04§1.1`): un parametro che cambia il risultato ma non il `derivedVersion` romperebbe MIG-3. Allargamento **dichiarato** (D.61.1), non silenzioso | `packages/core/src/analysis/memory/types.ts` |
+| 27-5 | P+L | `on_this_day` poteva matchare eventi di **anni diversi** | Il pseudocodice della spec usa `isSameDayMonth`, che confronta solo mese e giorno: con `yearsAgo` diventerebbe falso | Il confronto è su **anno, mese e giorno**: la prosa del trigger dice "nella stessa data (mese+giorno) di N anni fa" | `packages/core/src/analysis/memory/onThisDay.ts` |
+| 27-6 | P+F+L | Ricalcolare gli insight dello stesso giorno poteva **duplicarli** | Un id casuale (UUID) a ogni run: ogni ricalcolo aggiungeva righe | L'id è **deterministico** (`mem-<giorno>-<kind>-<soggetto>`): il ricalcolo è idempotente per costruzione, e `replaceInsights` sostituisce il periodo in transazione | `packages/core/src/analysis/memory/engine.ts` · `packages/core/src/db/insights.ts` |
+| 27-7 | P+L | I **fixture di scenario** non producevano ricordi al giorno dell'ultimo ascolto | I tre fixture coprono **mesi** (lockdown, litigio, viaggio estivo), mentre i trigger dei ricordi coprono **anni** (anniversari) o **soglie** | Il caso noto si osserva spostando "oggi" di un anno avanti (`on_this_day`) o fermandosi sul giorno in cui la soglia è stata raggiunta (`milestone` dei 5000 ascolti del `summer-roadtrip`). Un fixture che "non produce nulla" può essere un fixture che non è mai stato guardato | `packages/core/src/analysis/__tests__/memory-scenarios.test.ts` |
+
+**Lesson learned sintetica**: una spec APPROVED che elenca un trigger in prosa e un parametro in tabella non è una contraddizione: è un invites a **dichiarare** (27-4). E il vincolo più forte del progetto — il payload chiuso di `02§4` — non era un blocco ma una **pista** su dove mettere il ranking (27-1). Il test che legge il contratto vero (i locale reali dell'app) vale più del test che lo ricopia (27-3).
+
+### Link utili
+
+- Branch: `feat/179-memory-engine` (worktree `ls-179-memory-engine`)
+- Issue: **#179** (`size:M`, `area:analysis`), claim `kilo-hp-elitebook-hj59`
+- Sessione: `docs/state/sessions/61-story-2-4-memory-engine.md`
+- Precedenti: **#178** (la ratifica della spec) · **#180** (la 2.1, bloccata dalle audio features) · #161 (il gate sui fatti del README, che la prosa di questa PR rispetta)
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -838,6 +867,7 @@ mezzo del lavoro.
 | 2.9 | 2026-10-28 (issue #178) | **§25 — esito post-merge della ratifica della spec dell'analisi**: la PR #181 è **merged** (`5f725e3`, 2026-10-28T14:28:05Z) → l'issue #178 è chiusa con `status:done` e `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED**. Doc-sync di chiusura (frontmatter della Sessione 59 con `merged: true`, merge commit e `pr: 181`, sezione "Esito post-merge"). Le issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, `needs-spec`: bloccata dalle audio features dell'EPIC 4.1) restano aperte e non transizionate: sono il lavoro di altri |
 | 2.10 | 2026-10-28 (issue #182) | **§26 — il blocco NEXT-STEP indica solo story lavorabili** (Sessione 60, claim `kilo-hp-elitebook-41xb`, PR #183): il filtro di `Build-Block-NextStep` esclude ora `done`, **`blocked`** e **`wontdo`** — il puntatore passava dalla **2.1** (bloccata dalle audio features dell'EPIC 4.1, decisione D-A.1) alla **2.4** (Memory Engine, issue #179), la story implementabile. Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**": se il conteggio cambia, la frase che lo descrive cambia con lui. Il valore `blocked` esisteva nella macchina a stati (ADR-0007, `11-BACKLOG.md`) ma **mai** in un `docs/state/stories/*.md`: il primo file che lo usa (la 2.1, Sessione 59) ha reso visibile il disallineamento. Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i **valori** di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g nuova). Test: `scripts/test-aggregate-determinism.sh` **37 assert** (T10e e T10f nuovi, verificati in entrambe le direzioni: senza il fix 4 assert falliscono) |
 | 2.11 | 2026-10-28 (issue #182) | **§26 — esito post-merge**: la PR #183 è **merged** (`a350386`, 2026-10-28T15:26:17Z) → l'issue #182 è chiusa con `status:done` e `auto-state-aggregate` (`ab83763`) ha rigenerato il blocco NEXT-STEP del README, che ora indica la **2.4** (Memory Engine) invece della 2.1 bloccata. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 60 con `pr: 183`, `merged: true` e merge commit) |
+| 2.12 | 2026-10-28 (issue #179) | **§27 Issue #179 — Story 2.4 implementata** (Sessione 61, claim `kilo-hp-elitebook-hj59`, PR #185): 7 entry (27-1 il **ranking** non aveva dove scrivere il suo score — `MemoryPayload` (`02§4`) è chiuso: la rilevanza ordinata vive in `Insight.confidence`, il payload resta intatto; 27-2 `Insight.payload` è l'unione discriminata: `payload.text` non compila senza restringere il tipo (`memoryPayloadOf`); 27-3 i test del resolver i18n leggono i **locale reali dell'app**: una chiave spostata nell'app fallisce il test del core, non viceversa; 27-4 il **config object** versiona anche `milestoneHours` e `milestoneArtists`: le tre famiglie del trigger `04§7.2` sono implementate e i due parametri in più sono dichiarati (D.61.1); 27-5 `on_this_day` confronta anno+mese+giorno: `isSameDayMonth` (solo mese+giorno) avrebbe matchato eventi di anni diversi; 27-6 l'id dell'insight è **deterministico**: il ricalcolo è idempotente e non duplica le righe; 27-7 i **fixture di scenario** coprono mesi e i trigger dei ricordi coprono anni: il caso noto si osserva spostando "oggi" di un anno avanti). Consegnati: i 5 generatori, il ranking `baseScore × relevance × recency`, la persistenza degli insight `memory` con `derivedVersion` e rilevamento degli insight `stale` (MIG-3), l'orchestratore minimale (`04§8.1`, D-A.5) e il testo reso dal resolver i18n (D-A.4). **27 test** nuovi in `@ls/core` + **5** in `@ls/web` |
 
 ---
 
