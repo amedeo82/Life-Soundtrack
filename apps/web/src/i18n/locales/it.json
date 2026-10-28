@@ -202,6 +202,8 @@
   "insight.memory.milestone.events_other": "Hai raggiunto {{count}} brani ascoltati!",
   "insight.memory.milestone.hours_one": "Hai raggiunto {{count}} ora di ascolto!",
   "insight.memory.milestone.hours_other": "Hai raggiunto {{count}} ore di ascolto!",
+  "insight.memory.milestone.artists_one": "Hai raggiunto {{count}} artista unico!",
+  "insight.memory.milestone.artists_other": "Hai raggiunto {{count}} artisti unici!",
   "insight.memory.return": "Non ascoltavi {{artist}} da {{months}} mesi",
   "insight.memory.seasonal": "Come ogni {{month}}, è tornato il periodo {{genre}}",
   "insight.disclaimer": "Questo insight è generato automaticamente a partire dai tuoi dati di ascolto. Non è una diagnosi.",
