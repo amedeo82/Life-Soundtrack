@@ -42,9 +42,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **1.5** — Scrobbling hub (invio scrobble, sync continua, toggle) (priority `I`, vedi `docs/11-BACKLOG.md`).
+_Nessuna story non-done migrata in `docs/state/stories/`._
 
-Sorgente: `docs/state/stories/1.5-scrobbling-hub.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
