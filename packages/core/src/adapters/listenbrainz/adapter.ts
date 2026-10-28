@@ -218,7 +218,8 @@ export class ListenBrainzAdapter implements PlatformAdapter {
 
     // Il cursore arriva come limite superiore della finestra; si scende di
     // un secondo per non rileggere l'evento al confine (C-SH.2).
-    let maxTs = source.pagination?.to ?? null;
+    const cursor = source.pagination?.to;
+    let maxTs = cursor === undefined ? null : cursor - 1;
     let sinceCheck = 0;
 
     for (;;) {

@@ -212,7 +212,17 @@ export class LastfmScrobbleSink implements ScrobbleSink {
     if (parsed && typeof parsed.error === 'number') {
       throw this.mapError(response.status, parsed);
     }
-    return parsed?.scrobbles?.['@attr']?.accepted ?? 0;
+    if (!parsed) {
+      // Il proxy ha risposto 200 ma non è JSON: non è un proxy Last.fm
+      // funzionante (E.SH.7, caso 18). Non è un crash di parsing: è un
+      // errore dichiarato.
+      throw new ScrobbleError(
+        'SOURCE_UNREACHABLE',
+        'Il proxy Last.fm ha risposto con un corpo non JSON: non è un proxy Last.fm utilizzabile',
+        { recoverable: true, hub: this.hub },
+      );
+    }
+    return parsed.scrobbles?.['@attr']?.accepted ?? 0;
   }
 
   /** Mappa un errore Last.fm sulla mappa `ScrobbleError` (`20§11.1`). */

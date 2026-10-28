@@ -38,11 +38,11 @@ export interface QuotaCheckResult {
  * Non modifica dati. In caso di failure l'app deve entrare in read-only mode +
  * banner persistente (gestito dal chiamante, es. `useDbHealth`).
  *
- * @param expectedSchemaVersion versione schema attesa (build-time, es. 4).
+ * @param expectedSchemaVersion versione schema attesa (build-time, es. 5).
  */
 export async function fastCheck(
   db: LifeSoundtrackDB,
-  expectedSchemaVersion: number = 4,
+  expectedSchemaVersion: number = 5,
 ): Promise<FastCheckResult> {
   const t0 = performance.now();
   try {
@@ -137,7 +137,7 @@ export interface DbHealthState {
 
 export async function runHealthCheck(
   db: LifeSoundtrackDB,
-  expectedSchemaVersion: number = 4,
+  expectedSchemaVersion: number = 5,
 ): Promise<DbHealthState> {
   const [fast, quota] = await Promise.all([fastCheck(db, expectedSchemaVersion), quotaCheck()]);
 

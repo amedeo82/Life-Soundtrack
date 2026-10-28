@@ -48,6 +48,16 @@ export interface ScrobbleCandidate {
   skipped: boolean;
 }
 
+/** Un candidato con i metadati del brano già risolti dal DB. */
+export interface ResolvedScrobbleCandidate extends ScrobbleCandidate {
+  /** Brano normalizzato (null se non trovato). */
+  track: Track | null;
+  /** Nome dell'artista (null se non trovato). */
+  artistName: string | null;
+  /** Nome dell'album (null se non presente). */
+  albumName: string | null;
+}
+
 /** Opzioni del filtro di eleggibilità. */
 export interface EligibilityOptions {
   /** Hub di destinazione. */
@@ -128,11 +138,16 @@ export function isEligible(
  *
  * La finestra è applicata **in query** (`timestamp`), il resto dei filtri in
  * memoria: sono condizioni cheap e la tabella locale è già indicizzata.
+ *
+ * I brani sono risolti con una **scansione**: la PK di `tracks` è
+ * `canonicalKey` e `id` non è indicizzato (`02§6`), quindi non esiste una
+ * query per `listen.trackId`. È lo stesso approccio di
+ * `db/orphan-cleanup.ts`.
  */
 export async function collectCandidates(
   db: LifeSoundtrackDB,
   options: EligibilityOptions,
-): Promise<ScrobbleCandidate[]> {
+): Promise<ResolvedScrobbleCandidate[]> {
   const windowMs = options.windowMs ?? SCROBBLE_CANDIDACY_WINDOW_MS;
   const windowStart = options.now - windowMs;
   const listens: ListenEvent[] =
@@ -140,52 +155,49 @@ export async function collectCandidates(
       ? await db.listens.where('timestamp').aboveOrEqual(windowStart).toArray()
       : await db.listens.toArray();
 
-  const trackIds = [...new Set(listens.map((l) => l.trackId))];
-  const tracks = await db.tracks.bulkGet(trackIds);
   const trackById = new Map<string, Track>();
-  tracks.forEach((track) => {
-    if (track) {
-      trackById.set(track.id, track);
-    }
-  });
+  for (const track of await db.tracks.toArray()) {
+    trackById.set(track.id, track);
+  }
 
-  return listens.map((listen) => ({
-    eventKey: listen.eventKey,
-    platform: listen.platform,
-    startedAt: listen.startedAt,
-    durationMs: listen.durationMs,
-    catalogDurationMs: trackById.get(listen.trackId)?.durationMs ?? null,
-    skipped: listen.skipped,
-  }));
+  const resolved: ResolvedScrobbleCandidate[] = [];
+  for (const listen of listens) {
+    const track = trackById.get(listen.trackId) ?? null;
+    const artist = track?.artistId ? await db.artists.get(track.artistId) : undefined;
+    const album = track?.albumId ? await db.albums.get(track.albumId) : undefined;
+    resolved.push({
+      eventKey: listen.eventKey,
+      platform: listen.platform,
+      startedAt: listen.startedAt,
+      durationMs: listen.durationMs,
+      catalogDurationMs: track?.durationMs ?? null,
+      skipped: listen.skipped,
+      track,
+      artistName: artist?.name ?? null,
+      albumName: album?.name ?? null,
+    });
+  }
+  return resolved;
 }
 
 /**
  * Costruisce il payload di invio per un candidato (il tipo è chiuso per
  * costruzione: nessun campo per contesto, device, IP o insight).
  */
-export async function buildPayload(
-  db: LifeSoundtrackDB,
-  candidate: ScrobbleCandidate,
+export function buildPayload(
+  candidate: ResolvedScrobbleCandidate,
   hub: ScrobbleHubId,
-): Promise<ScrobblePayload | null> {
-  const listen = await db.listens.get(candidate.eventKey);
-  if (!listen || listen.startedAt === null) {
+): ScrobblePayload | null {
+  const { track } = candidate;
+  if (!track || !candidate.artistName || candidate.startedAt === null) {
     return null;
   }
-  const track = await db.tracks.get(listen.trackId);
-  if (!track) {
-    return null;
-  }
-  const artist = track.artistId ? await db.artists.get(track.artistId) : undefined;
-  if (!artist) {
-    return null;
-  }
-  const album = track.albumId ? await db.albums.get(track.albumId) : undefined;
-  const durationMs = listen.durationMs > 0 ? listen.durationMs : (track.durationMs ?? undefined);
+  const durationMs =
+    candidate.durationMs > 0 ? candidate.durationMs : (track.durationMs ?? undefined);
   const payload: ScrobblePayload = {
     idempotencyKey: `${hub}|${candidate.eventKey}`,
-    startedAt: listen.startedAt,
-    artistName: artist.name,
+    startedAt: candidate.startedAt,
+    artistName: candidate.artistName,
     trackName: track.name,
   };
   if (durationMs !== undefined) {
@@ -197,8 +209,8 @@ export async function buildPayload(
   if (track.isrc) {
     payload.isrc = track.isrc;
   }
-  if (album) {
-    payload.albumName = album.name;
+  if (candidate.albumName) {
+    payload.albumName = candidate.albumName;
   }
   return payload;
 }
@@ -224,7 +236,7 @@ export async function enqueueEligibleListens(
     if (!isEligible(candidate, options, queuedKeys.has(candidate.eventKey))) {
       continue;
     }
-    const payload = await buildPayload(db, candidate, options.hub);
+    const payload = buildPayload(candidate, options.hub);
     if (!payload) {
       continue;
     }
