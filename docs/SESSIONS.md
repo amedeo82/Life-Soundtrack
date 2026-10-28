@@ -4771,8 +4771,8 @@ di `20§14.3`.
 ### Sessione 58 - Story 1.5 - scrobbling hub: contratto, coda, sink, UI e sync
 
 - **Data**: 2026-10-28
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #176)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #176 (bfb5946bd547fed46fb32be2638e1f5785f4b579, 2026-10-28)
 - **Claim**: `kilo-hp-elitebook-41xb`
 
 ```
@@ -4880,6 +4880,24 @@ l'array `$files` di `scripts/generate-bundle.ps1` (bundle: 98 → 100 file).
   sessione 58
 - `README.md` — la prosa: la Story 1.5 non è più "non ancora implementato"
 
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T13:56:09Z (PR #176, merge commit `bfb5946`).
+L'issue **#173** è chiusa con `status:done` e la **Story 1.5 è `done`**: il
+percorso di scrittura verso Last.fm e ListenBrainz è consegnato.
+
+Automazioni post-merge: `auto-status-done` (status:done su #173),
+`auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` e
+`auto-bundle` (blocchi rigenerati). Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+**AC-SH.11 resta parzialmente soddisfatto** (dichiarato, non nascosto): la parte
+MBID → DEDUP-2 è coperta dal pipeline esistente, la parte `track.genres` via
+lookup MusicBrainz dipende dall'enrichment (EPIC 4, non implementato) e va
+aperta come issue dedicata quando l'EPIC 4 parte.
+
 ## Cross-refs
 
 - **#173** — implementazione della Story 1.5 (claim `kilo-hp-elitebook-41xb`)
@@ -4892,8 +4910,8 @@ l'array `$files` di `scripts/generate-bundle.ps1` (bundle: 98 → 100 file).
 ### Sessione 59 - Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1
 
 - **Data**: 2026-10-28
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #181 (5f725e36be94bd1d604ea8370661577690cb954b, 2026-10-28)
 - **Claim**: `kilo-hp-elitebook-41xb`
 
 ```
@@ -4996,6 +5014,25 @@ posizione (l'ordine è storico, non cronologico).
 - `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — i tre file nuovi
 - Issue **#179** (implementazione della 2.4, `agent-ready`) e **#180** (la 2.1,
   `needs-spec`)
+
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T14:28:05Z (PR #181, merge commit `5f725e3`).
+L'issue **#178** è chiusa con `status:done` e
+`docs/04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED**: la Story 2.4 è
+implementabile (issue **#179**, `agent-ready`) e la Story 2.1 resta bloccata dalle
+audio features dell'EPIC 4.1 (issue **#180**, `needs-spec`).
+
+Automazioni post-merge: `auto-status-done` (status:done su #178),
+`auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` e
+`auto-bundle` (blocchi rigenerati). Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+Il doc-sync di chiusura (frontmatter con `pr`, `merged: true` e merge commit)
+è in una PR `docs:` separata: il numero della PR si conosce solo dopo
+l'apertura, e il merge commit solo dopo il merge.
 
 ## Cross-refs
 
