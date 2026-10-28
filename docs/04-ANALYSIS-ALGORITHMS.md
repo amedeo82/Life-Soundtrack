@@ -1,7 +1,8 @@
 # 04 — Algoritmi di Analisi
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 59 (2026-10-28)
 > Vincolante per: `packages/core/analysis/*` e relativi test
+> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12)
 
 ---
 
@@ -42,11 +43,15 @@ Se mancano `AudioFeatures` (valence/energy null), l'algoritmo:
 | Algoritmo | Config chiave | Versione iniziale |
 |-----------|---------------|-------------------|
 | Session segmentation | `gapThresholdMs` | `v1.0` |
-| Mood tracker | `weights`, `moodThresholds` | `v1.0` |
+| Mood tracker | `{weights, moodThresholds}` | `v1.0` |
 | Pattern analyzer | `bucketSize` | `v1.0` |
 | Era detector | `windowDays`, `kMin`, `kMax`, `similarityThreshold` | `v1.0` |
 | Event detector | `zScoreThreshold`, `windowDays`, `baselineDays` | `v1.0` |
 | Memory engine | `thresholds` per ogni tipo | `v1.0` |
+
+> I parametri effettivi e i loro default sono in §7.3 (memory engine) e §3.4
+> (mood tracker): questa tabella è il **registro** (quali parametri ciascun
+> algoritmo versiona), non la loro specifica.
 
 ---
 
@@ -658,27 +663,29 @@ Trigger: esiste almeno un evento nella stessa data (mese+giorno) di `N` anni fa,
             memoryKind: 'on_this_day',
             yearsAgo,
             trackId: topTrack.id,
-            text: `yearsAgo anni fa ascoltavi "${topTrack.name}" di ${topTrack.artist}`
+            artistId: topTrack.artistId,
+            text: t('memory.on_this_day', { years: yearsAgo, track: topTrack.name, artist: topTrack.artist })
           })
       return memories
 
 #### `first_time`
 
-Trigger: oggi è l'anniversario del primo ascolto di un artista significativo (≥5 brani totali).
+Trigger: oggi è l'anniversario del primo ascolto di un artista significativo (**≥5 brani distinti**, D-A.3: l'AC della Story 2.4 dice "brani", non "ascolti").
 
     function generateFirstTime(today, events):
       artistFirstListen = events.groupBy(artistId).map(artist => artist.min(startedAt))
       memories = []
-      for (artistId, firstDate) in artistFirstListen:
+      for artistId, firstDate in artistFirstListen:
         yearsAgo = yearsBetween(firstDate, today)
         if yearsAgo >= 1 AND isSameDayMonth(firstDate, today):
-          totalListens = count(events.filter(e => e.track.artistId == artistId))
-          if totalListens >= 5:
+          artistEvents = events.filter(e => e.track.artistId == artistId)
+          distinctTracks = distinct(artistEvents.map(e => e.trackId)).length
+          if distinctTracks >= firstTimeMinTracks:
             memories.push({
               memoryKind: 'first_time',
               yearsAgo,
               artistId,
-              text: `${yearsAgo} anni fa scoprivi ${artist.name}`
+              text: t('memory.first_time', { years: yearsAgo, artist })
             })
       return memories
 
@@ -701,32 +708,100 @@ Trigger: raggiungimento di soglie cumulative (1000, 5000, 10000, 50000, 100000 e
 
 #### `return`
 
-Trigger: oggi riascolti un artista/brano che non ascoltavi da ≥6 mesi.
+Trigger: oggi hai riascoltato un artista che **non ascoltavi da almeno
+`returnMinGapDays` (180) giorni** (D-A.2).
 
     function generateReturn(today, events):
-      // per ogni artista, trova il gap più lungo tra due ascolti
-      // se un gap si chiude oggi dopo ≥180gg → ricordo return
-      ...
+      memories = []
+      dayStart = startOfDay(today)
+      todayEvents = events.filter(e => e.startedAt >= dayStart)
+      for artistId in distinct(todayEvents.map(e => e.track.artistId)):
+        previous = events.filter(e => e.track.artistId == artistId && e.startedAt < dayStart)
+        if previous.length == 0: continue
+        lastSeen = max(previous).startedAt
+        gapDays = floor((dayStart - lastSeen) / 86400000)
+        if gapDays < returnMinGapDays: continue
+        firstToday = min(todayEvents.filter(e => e.track.artistId == artistId))
+        memories.push({
+          memoryKind: 'return',
+          artistId,
+          trackId: firstToday.trackId,
+          gapDays,
+          text: t('memory.return', { artist, months: floor(gapDays / 30) })
+        })
+      return memories
+
+Il "silenzio" è l'**ultimo** ascolto precedente dell'artista, non il gap più
+lungo della sua storia: il trigger è "**ti è tornato** dopo una pausa", non "una
+volta hai avuto un buco". L'artefatto è il brano di oggi (`trackId`), non il
+brano di allora: il ricordo riguarda il ritorno.
 
 #### `seasonal`
 
-Trigger: ricorrenza stagionale (ascolti un artista/genere che hai ascoltato prevalentemente in questo mese negli anni passati).
+Trigger: un artista che ascolti **prevalentemente in questo mese** (≥
+`seasonalConcentration` = 60% dei suoi ascolti negli **ultimi 12 mesi**) e che
+**quest'anno** hai riascoltato in quel mese (D-A.2).
 
     function generateSeasonal(today, events):
       currentMonth = monthOf(today)
-      // trova artisti con ≥60% degli ascolti concentrati in currentMonth
-      // se quest'anno li hai riascoltati in currentMonth → ricordo
-      ...
+      window = events.filter(e => e.startedAt >= today - 365d)
+      memories = []
+      for genre in distinct(window.flatMap(e => e.track.genres)):
+        genreEvents = window.filter(e => e.track.genres.includes(genre))
+        if genreEvents.length < seasonalMinEvents: continue
+        inMonth = genreEvents.filter(e => monthOf(e.startedAt) == currentMonth)
+        monthShare = inMonth.length / genreEvents.length
+        if monthShare < seasonalConcentration: continue
+        thisYear = inMonth.filter(e => yearOf(e.startedAt) == yearOf(today))
+        if thisYear.length == 0: continue
+        memories.push({
+          memoryKind: 'seasonal',
+          genre,
+          month: currentMonth,
+          text: t('memory.seasonal', { month: monthName(currentMonth, locale), genre })
+        })
+      return memories
+
+La concentrazione è calcolata sui **12 mesi** precedenti, non sull'intera
+storia: altrimenti un ascolto del 2019 "peserebbe" per sempre e il ricordo
+diventerebbe un fatto storico invece di una stagionalità.
+
+Il ricordo stagionale è **per genere** (non per artista): il testo ne porta il
+nome. `MemoryPayload` (`02§4`) non ha un campo `genre`, quindi l'informazione
+vive nel `text` reso — coerente con D-A.4: il payload è chiuso e il testo è la
+memoria.
 
 ### 7.3 Parametri
 
-| Parametro | Default |
-|-----------|---------|
-| `onThisDayYears` | [1, 2, 3, 5, 10] |
-| `firstTimeMinListens` | 5 |
-| `milestones` | [1000, 5000, 10000, 50000, 100000] |
-| `returnMinGapDays` | 180 |
-| `seasonalConcentration` | 0.6 |
+| Parametro | Default | Note |
+|-----------|---------|------|
+| `onThisDayYears` | [1, 2, 3, 5, 10] | |
+| `firstTimeMinTracks` | 5 | **brani distinti**, non ascolti (D-A.3) |
+| `milestones` | [1000, 5000, 10000, 50000, 100000] | |
+| `returnMinGapDays` | 180 | silenzio minimo dell'artista |
+| `seasonalConcentration` | 0.6 | quota di ascolti dell'artista nel mese corrente (finestra 12 mesi) |
+| `seasonalMinEvents` | 5 | ascolti minimi dell'artista nella finestra, per non generare ricordi da un singolo ascolto |
+
+### 7.3.1 Il testo dei ricordi
+
+Il `text` di `MemoryPayload` (`02-DATA-SCHEMA.md` §4) è una **stringa già resa**,
+non una chiave i18n (D-A.4): il ricordo è uno **snapshot** di un momento, e la
+lingua in cui è stato scritto è parte della memoria. Il **template** vive
+comunque in `08-COPY-I18N.md` §2.15, così la generazione è internazionalizzata e
+non hardcoded.
+
+Le chiavi sono **quelle già dichiarate** in `08§2.15`:
+
+| `memoryKind` | Chiave i18n | Parametri |
+|---|---|---|
+| `on_this_day` | `memory.on_this_day` | `years`, `track`, `artist` |
+| `first_time` | `memory.first_time` | `years`, `artist` |
+| `milestone` | `memory.milestone.events` / `.hours` / `.artists` | `count` |
+| `return` | `memory.return` | `artist`, `months` |
+| `seasonal` | `memory.seasonal` | `month`, `genre` |
+
+La generazione **non** scrive mai stringhe italiane inline: chi implementa
+chiama il resolver i18n con la chiave e i parametri del ricordo.
 
 ### 7.4 Ranking ricordi
 
@@ -749,6 +824,9 @@ Il feed ricordi mostra i top N score per giorno.
 ---
 
 ## 8. Pipeline orchestratore
+
+L'orchestratore è **incrementale** e **pluggabile** (D-A.5): ogni generatore è
+indipendente dagli altri e riceve gli eventi nuovi più lo stato corrente.
 
     function analyzeIncremental(newEvents, state):
       // 1. Aggiorna sessioni
@@ -776,6 +854,25 @@ Il feed ricordi mostra i top N score per giorno.
         insights: [...newDayInsights, ...newWeekInsights, ...eras, ...events, ...memories]
       }
 
+### 8.1 Perimetro di questa tranche (D-A.5)
+
+Il codice dell'orchestratore è **il contratto**; i **generatori** sono plug-in.
+La prima tranche (Story 2.4, e poi 2.1) implementa:
+
+| Generatore | Stato | Note |
+|---|---|---|
+| **Memory engine** (§7) | ✅ in questa tranche | usa solo ascolti, brani e artisti |
+| **Mood tracker** (§3) | ⛔ in attesa dell'EPIC 4.1 | senza audio features non produce insight (D-A.1, §12) |
+| Session segmentation (§2) | ⏭ differita | serve a `ListeningSession` (EPIC 2, tranche successiva) |
+| Pattern analyzer (§4) | ⏭ differita | Story 2.2 |
+| Era detector (§5) | ⏭ differita | Story 2.2 |
+| Event detector (§6) | ⏭ differita | Story 2.3 |
+
+L'orchestratore della tranche corrente chiama **solo** i generatori
+implementati: gli altri si aggiungono senza cambiarne il contratto, come i sink
+di scrobbling si sono aggiunti al registry senza modificare `PlatformAdapter`
+(ADR-0011 V1).
+
 ---
 
 ## 9. DerivedVersion registry
@@ -787,7 +884,7 @@ Il feed ricordi mostra i top N score per giorno.
 | Pattern analyzer | `{nightHours, weekendDays, minEvents}` | calcolata |
 | Era detector | `{windowDays, stepDays, similarityThreshold, minEraDays, weights}` | calcolata |
 | Event detector | `{baselineDays, windowDays, zScoreThreshold, silenceMinDays, explorationMinNewArtists, strideDays}` | calcolata |
-| Memory engine | `{onThisDayYears, firstTimeMinListens, milestones, returnMinGapDays, seasonalConcentration}` | calcolata |
+| Memory engine | `{onThisDayYears, firstTimeMinTracks, milestones, returnMinGapDays, seasonalConcentration, seasonalMinEvents}` | calcolata |
 
 Ogni volta che si cambia un parametro di default, la versione cambia e gli insight diventano `stale` → ricalcolo automatico al prossimo avvio.
 
@@ -809,9 +906,52 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 
 ---
 
+## 11. Decisioni di ratifica (Sessione 59, issue #178)
+
+Le cinque decisioni che la spec lasciava aperte sono chiuse **come proposte**,
+con la ratifica del Boss (merge della PR) come atto di ratifica. Il precedente
+è il ciclo della Story 1.5: le decisioni D1-D7 della spec ListenBrainz e le
+decisioni D-SH.11…D-SH.14 della spec Scrobbling hub sono state chiuse come
+proposte nella spec e ratificate dal merge.
+
+| # | Decisione | Scelta | Motivazione |
+|---|-----------|--------|-------------|
+| **D-A.1** | La Story 2.1 (mood) dipende dagli **audio features** (EPIC 4.1), che non sono implementate | La 2.1 **aspetta** l'EPIC 4.1; parte la **2.4** (i ricordi), che dipende solo dagli ascolti | §3.3 legge `getAudioFeatures(e.trackId)` e restituisce `null` sotto i 3 eventi con valence: senza feature il mood tracker non produce **nulla**. Consegnare la 2.1 così sarebbe un falso verde (la lezione 58-4). Un fallback su segnali inventati (opzione C) è escluso: la vision promette letture vere |
+| **D-A.2** | `return` e `seasonal` non erano specificati (pseudocodice `...`) | **Specificati** in §7.2, con `seasonalMinEvents` come nuovo parametro | L'AC della Story 2.4 chiede i **5** tipi; ridurli a 3 riscriverebbe l'AC. Le formule sono naturali: il silenzio dell'artista e la concentrazione stagionale su 12 mesi |
+| **D-A.3** | `first_time`: "≥5 brani" o "≥5 ascolti"? | **5 brani distinti** (`firstTimeMinTracks`) | L'AC dice "brani", il pseudocodice contava gli ascolti: un artista con un solo brano ascoltato 5 volte non è "significativo" |
+| **D-A.4** | Il `text` del ricordo: stringa resa o chiave i18n? | **Stringa resa** alla generazione, con il **template** i18n in `08` (`insight.memory.*`) | `MemoryPayload.text` è APPROVED e non viene toccato; il ricordo è uno **snapshot** e la lingua in cui è stato scritto è parte della memoria. La generazione resta i18n: nessuna stringa italiana inline |
+| **D-A.5** | Il perimetro dell'implementazione | **Orchestratore minimale estensibile**: solo i generatori della tranche | Le Story 2.2/2.3 hanno AC e issue proprie; implementarle qui le renderebbe implicite. Il pattern è quello del registry dei sink (ADR-0011 V1): il contratto resta, i generatori si aggiungono |
+
+**Effetti sulle regole già scritte**: D-A.2 e D-A.3 modificano **§7.2** (i due
+algoritmi mancanti e il criterio di `first_time`), D-A.3 e D-A.2 modificano
+**§7.3** e **§9** (i parametri), D-A.4 aggiunge **§7.3.1** (il testo dei
+ricordi) e un namespace in `08-COPY-I18N.md`, D-A.5 aggiunge **§8.1** (il
+perimetro della tranche).
+
+---
+
+## 12. Perimetro e dipendenze di questa versione
+
+| Storia | Stato dopo questa ratifica | Dipendenza |
+|--------|---------------------------|------------|
+| **2.4 — Memory Engine** | 🟢 **implementabile subito** | solo gli ascolti, i brani e gli artisti |
+| **2.1 — Mood Tracker** | ⛔ **in attesa** | le **audio features** (valence, energy) dell'**EPIC 4.1**, che non sono implementate: senza feature il mood tracker non può produrre insight (D-A.1) |
+
+Il codice del mood tracker (§3) **resta specificato** in questa versione: quando
+l'EPIC 4.1 porterà le features, la Story 2.1 si implementa senza altre
+decisioni. Nel frattempo l'issue della 2.1 resta aperta e **non** candidabile.
+
+**L'EPIC 4.1 ha bisogno di una spec propria** (come la Story 1.5 ebbe
+`20-SCROBBLING-HUB.md`): il provider delle audio features (Essentia.js), il suo
+costo, la privacy delle feature e il loro stoccaggio sono decisioni che non
+appartengono a `04`.
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 4 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: §4.2 `computeCircadianPattern`/`Weekly`/`Seasonal` estesi con tutti i campi `PatternPayload` (`02§4` v1.1) — `peakDay`, `peakMonth`, `weekendShare`, `userTimezone`; campi non applicabili esplicitamente `null`; §4.5 invarianti aggiornate |
+| 1.0 | Sessione 59 (2026-10-28, issue #178) | 🟢 APPROVED — **ratifica del Boss al merge della PR**: le cinque decisioni aperte (§11, D-A.1…D-A.5) sono chiuse **come proposte**. **§7.2**: `return` e `seasonal` sono specificati (il silenzio è l'ultimo ascolto precedente dell'artista; la concentrazione stagionale è calcolata su 12 mesi) e `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3); **§7.3**: i parametri allineati (`firstTimeMinTracks`, `seasonalMinEvents`) e il parametro `returnMinGapDays` dichiarato; **§7.3.1** (nuova): il `text` del ricordo è una stringa **resa** alla generazione con il template i18n `insight.memory.*` (D-A.4), non una chiave né una stringa italiana inline; **§8.1** (nuova): il perimetro della tranche — orchestratore minimale estensibile, solo i generatori implementati (D-A.5); **§9**: il registro dei parametri allineato; **§11** (nuova): le cinque decisioni con la motivazione; **§12** (nuova): il perimetro — la **Story 2.4** è implementabile subito, la **Story 2.1** aspetta le **audio features dell'EPIC 4.1** (D-A.1). Le formule, i parametri e i vinanti di §1…§10 restano quelli di v0.2, salvo le modifiche elencate |

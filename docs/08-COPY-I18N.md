@@ -327,6 +327,13 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 
 ### 2.15 `insight.*`
 
+I template degli insight: umore, eventi e **ricordi**. Le chiavi dei ricordi
+(`memory.*`) sono **vincolanti** dalla ratifica di `04-ANALYSIS-ALGORITHMS.md`
+v1.0 🟢 (§7.3.1, decisione D-A.4): il `text` del ricordo è una **stringa resa**
+alla generazione — il ricordo è uno snapshot e la lingua in cui è stato scritto
+è parte della memoria — ma il **template** è internazionalizzato, e la
+generazione non scrive mai stringhe italiane inline.
+
 | Key | IT | EN |
 |-----|----|----|
 | `mood.happy` | La tua musica è stata prevalentemente felice | Your music was mostly happy |
@@ -343,6 +350,7 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 | `memory.on_this_day` | {years} anni fa ascoltavi "{track}" di {artist} | {years} years ago you were listening to "{track}" by {artist} |
 | `memory.first_time` | {years} anni fa scoprivi {artist} | {years} years ago you discovered {artist} |
 | `memory.milestone.events` | Hai raggiunto {count} brani ascoltati! | You reached {count} tracks listened! |
+| `memory.milestone.artists` | Hai raggiunto {count} artisti unici! | You reached {count} unique artists! |
 | `memory.milestone.hours` | Hai raggiunto {count} ore di ascolto! | You reached {count} hours of listening! |
 | `memory.return` | Non ascoltavi {artist} da {months} mesi | You hadn't listened to {artist} for {months} months |
 | `memory.seasonal` | Come ogni {month}, è tornato il periodo {genre} | Like every {month}, the {genre} period is back |

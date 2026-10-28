@@ -117,9 +117,12 @@ $files = @(
     "docs/state/sessions/56-adr-0011-scrobble-sink.md",
     "docs/state/sessions/57-scrobbling-hub-spec-approval.md",
     "docs/state/sessions/58-scrobbling-hub-implementation.md",
+    "docs/state/sessions/59-epic2-analysis-ratification.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.4-dedup-promotion.md",
     "docs/state/stories/1.5-scrobbling-hub.md",
+    "docs/state/stories/2.1-mood-tracker.md",
+    "docs/state/stories/2.4-memory-engine.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",
