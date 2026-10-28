@@ -120,6 +120,7 @@ $files = @(
     "docs/state/sessions/59-epic2-analysis-ratification.md",
     "docs/state/sessions/60-next-step-skip-blocked.md",
     "docs/state/sessions/61-story-2-4-memory-engine.md",
+    "docs/state/sessions/62-epic-4-1-audio-features-spec.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.4-dedup-promotion.md",
     "docs/state/stories/1.5-scrobbling-hub.md",
@@ -160,6 +161,7 @@ $files = @(
     "docs/16-OPERATIONS.md",
     "docs/19-GEO-CONTEXT.md",
     "docs/20-SCROBBLING-HUB.md",
+    "docs/21-AUDIO-FEATURES.md",
     # Fixture (small/foundational) — i file di grandi dimensioni (medium/large/scenarios/demo-user)
     # sono generati da scripts/generate-fixtures.mjs su richiesta, e NON inclusi nel bundle
     # (vedi 10-TESTING §3.5). Lo script generator è incluso.

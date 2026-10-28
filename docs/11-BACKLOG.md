@@ -424,11 +424,15 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
 
+**Stato**: 🟡 **spec scritta** (Sessione 62, issue #187) — `docs/21-AUDIO-FEATURES.md` (v0.1 🟡 DRAFT) è la spec della pipeline: il contratto `AudioFeatureProvider`, la cascata, la mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), la normalizzazione, la privacy, lo stoccaggio e i costi reali. **Nove decisioni** (D-AF.1…D-AF.9) sono aperte e vanno ratificate; l'issue di implementazione è **#188** (label `needs-spec` fino alla ratifica). Gli AC della story sono riscritti in `21§16`.
+
 **Acceptance criteria**:
 - [ ] Cascata: cache → **Essentia.js (WASM, browser)** → **AcousticBrainz (bonus su MBID)** → **fallback euristico** (D.A.6)
 - [ ] Toggle privacy `enrichMetadata` rispettato
 - [ ] Rate limiting MusicBrainz (1 req/s)
 - [ ] `AudioFeatures.source` ∈ `{essentia, acousticbrainz, heuristic, manual}` tracciato
+
+**Spec**: `docs/21-AUDIO-FEATURES.md` (v0.1 🟡 DRAFT, Sessione 62) · `05-ARCHITECTURE.md` §6, §6.1, §6.2 · `02-DATA-SCHEMA.md` §3.4 · `04-ANALYSIS-ALGORITHMS.md` §3, §12 · issue #187 (spec) · issue #188 (implementazione)
 
 ---
 
