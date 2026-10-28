@@ -21,6 +21,18 @@ export const PLATFORM_IDS = [
 
 export type PlatformId = (typeof PLATFORM_IDS)[number];
 
+/**
+ * Hub di scrobbling abilitati — 02-DATA-SCHEMA.md §3.8, Story 1.5.
+ *
+ * Tipo **dedicato**, non `PlatformId`: i due insiemi non coincidono. Un hub è
+ * una *fonte* di scrobble; i client di scrobbling (`maloja`, `subsonic`, `roon`)
+ * sono destinatari e non piattaforme sorgente (`01-PLATFORMS.md` §3.9). Il tipo
+ * dedicato rende il toggle per-hub verificabile a compile time.
+ */
+export const SCROBBLE_HUB_IDS = ['lastfm', 'listenbrainz'] as const;
+
+export type ScrobbleHubId = (typeof SCROBBLE_HUB_IDS)[number];
+
 export const DEVICE_TYPES = [
   'mobile',
   'desktop',
@@ -251,8 +263,15 @@ export interface PrivacySettings {
   enrichMetadata: boolean;
   /** Default false; rilevamento ascolti in auto (consenso dedicato, D.2.2). */
   carDetectionConsent: boolean;
-  /** Default []; hub di scrobbling scelti. */
-  scrobbleHubs: PlatformId[];
+  /**
+   * Default []; hub di scrobbling scelti (Story 1.5).
+   *
+   * Tipo **dedicato** (`ScrobbleHubId`), non `PlatformId`: i client di
+   * scrobbling non sono piattaforme sorgente (`01-PLATFORMS.md` §3.9).
+   * Il consenso è per-hub e indipendente dagli altri toggle; togliere un hub
+   * svuota la sua coda (`20-SCROBBLING-HUB.md` §10.1).
+   */
+  scrobbleHubs: ScrobbleHubId[];
   /** Default false; sync E2E opzionale (Fase 2, ADR-0005). */
   syncCloud: boolean;
 }
