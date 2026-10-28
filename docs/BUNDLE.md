@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-28 13:56
-> Totale file: 101
+> Data: 2026-10-28 15:15
+> Totale file: 104
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1451,14 +1451,14 @@ Apache License
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 57 (v0.7) | Matrice piattaforme europee + campi dati — v0.7: rimandi al percorso di **scrittura** degli hub (§3.7-3.9, Story 1.5 ratificata) |
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 57 (v1.6) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter; v1.6: §3.8 `scrobbleHubs: ScrobbleHubId[]` + §6.2 tabella `scrobbleOutbox` (schema Dexie v5, Story 1.5) |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 57 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.2, S47/S57: token in scrittura, percorso incrementale) + Last.fm (🟢 v1.2, S50/S51/S57: percorso di scrittura, md5 D-SH.11, proxy D-SH.14) — **adapter implementati** in Sessione 52 (issue #155) |
-| 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟡 DRAFT | Sessione 9 | Algoritmi di analisi (mood, ere, eventi, ricordi) |
+| 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟢 APPROVED | Sessione 59 (v1.0) | Algoritmi di analisi (mood, ere, eventi, ricordi) — **ratificata** (Sessione 59, issue #178): i trigger dei 5 tipi di ricordo sono specificati, il perimetro della tranche è dichiarato; la Story 2.4 è implementabile, la 2.1 aspetta le audio features (EPIC 4.1) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 56 (v1.3) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 57 (v0.5) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5) |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 59 (v0.7) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04` |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 57 (v0.5) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 58 (v1.6.17) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 59 (v1.6.18) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 54 (v0.9) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml` |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -1477,7 +1477,7 @@ Apache License
 | [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.6 | Diario cronologico per story: problemi, fix, lesson learned — §24: implementazione della Story 1.5 (issue #173) |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.7 | Diario cronologico per story: problemi, fix, lesson learned — §25: ratifica della spec dell'analisi (issue #178) |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -1590,8 +1590,8 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 7 documenti (`02` v1.6, `03-ADAPTERS/`, `05` v1.3, `10`, `11` v1.6.17, `14`, `16-OPERATIONS`) + 9 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010, 0011)
-- **Documenti DRAFT**: 12 (`00`, `01`, `04`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `12` ora v0.9, `17` ora v0.2, `18` ora v2.6, `19` introdotto in Sessione 41; `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco
+- **Documenti APPROVED**: 8 documenti (`02` v1.6, `03-ADAPTERS/`, `04` v1.0, `05` v1.3, `10`, `11` v1.6.18, `14`, `16-OPERATIONS`) + 9 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010, 0011)
+- **Documenti DRAFT**: 11 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `12` ora v0.9, `17` ora v0.2, `18` ora v2.7, `19` introdotto in Sessione 41; `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: Apache-2.0
 - **Business model**: Open-source puro, no monetizzazione
@@ -1605,7 +1605,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 58, issue #173): **EPIC 1 — Import core: 5/5 ✅**. **1.1 YouTube Music** (PR #130, `43f7529`), **1.2 Apple Music** (PR #139, `2e1a4cc`), **1.3 Last.fm + ListenBrainz** (issue #155, Sessione 52), **1.4 Dedup promozione post-enrichment** (issue #160, Sessione 53) e **1.5 Scrobbling hub** (issue #173, Sessione 58): il percorso di **scrittura** verso Last.fm e ListenBrainz è consegnato — contratto `ScrobbleSink` (`ADR-0011` 🟢 v1.0), coda `scrobbleOutbox` (schema Dexie v5, chiave `hub|eventKey`), i due sink (firma md5 in JS puro, batch 50, POST via proxy; `submit-listens` con `User-Agent`), il filtro di eleggibilità con la regola di maturità D-SH.13, la sync incrementale a cursore, il pannello UI con selettore per-hub e modalità del proxy, e i **31** casi di test della spec `20-SCROBBLING-HUB.md` v1.0 🟢. **Prossimo passo**: l'**EPIC 2 — Analisi** (Story 2.1 e 2.4, analisi base): nessuna delle due ha ancora uno state file in `docs/state/stories/`, quindi la **spec** va scritta prima dell'issue di implementazione (precedente: le Story 1.2 e 1.5 hanno una spec dedicata, `03-ADAPTERS/apple.md` e `20-SCROBBLING-HUB.md`). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 59, issue #178): **EPIC 1 — Import core: 5/5 ✅** e la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED**: i trigger dei **5 tipi di ricordo** sono specificati (`return` e `seasonal` completati, `first_time` a 5 brani distinti) e i template i18n sono già dichiarati in `08§2.15`. **La Story 2.4 (Memory Engine) è implementabile**: issue **#179** (`agent-ready`, `size:M`) — il pacchetto `packages/core/src/analysis/` non esiste ancora ed è la prima implementazione dell'EPIC 2. **La Story 2.1 (Mood Tracker) è bloccata** dalle **audio features** dell'EPIC 4.1 (non implementate): issue **#180** (`needs-spec`), che chiede la spec del provider delle feature (decisione D-A.1). **Prossimo passo**: implementare la 2.4 (#179), poi scrivere la spec dell'EPIC 4.1 per sbloccare la 2.1. Restano poi le Story 2.2 (ere), 2.3 (eventi) e le tranche dell'EPIC 3 (UI). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -7561,6 +7561,31 @@ mezzo del lavoro.
 - Sessione: `docs/state/sessions/58-scrobbling-hub-implementation.md`
 - Precedenti: `#164` (spec) · `#168` (ADR-0011) · `#172` (ratifica della spec)
 
+## 25. Issue #178 — ratifica della spec dell'analisi (Sessione 59)
+
+**Tipo**: decisione architetturale (`docs`) — issue #178, claim `kilo-hp-elitebook-41xb`
+**Branch**: `feat/178-epic2-analysis-ratification` (worktree `ls-178-epic2-analysis-ratification`)
+**PR**: #181
+**Data**: 2026-10-28
+**Stato**: ✅ completata — `docs/04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED** (le cinque decisioni chiuse come **D-A.1…D-A.5**); aperte le issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, bloccata)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 25-1 | P | I **template i18n dei ricordi** esistevano già (`08§2.15`: `memory.on_this_day`, `memory.first_time`, `memory.milestone.*`, `memory.return`, `memory.seasonal`) e la prima stesura della ratifica li **rinominava** in `insight.memory.*` con parametri diversi (`gapDays` invece di `months`, `artist` invece di `genre`) | La spec del §7.2 scriveva le frasi **inline** e non guardava il namespace i18n già dichiarato: due famiglie di chiavi incompatibili, nessun gate che lo vedesse | Le formule sono state **riallineate alle chiavi esistenti** (`04§7.2`, `§7.3.1`) e `08§2.15` dichiara i template come **vincolanti**; manca solo `memory.milestone.artists` (le soglie "artisti unici" erano nella spec senza template) | `docs/04-ANALYSIS-ALGORITHMS.md` §7.2 · `docs/08-COPY-I18N.md` §2.15 |
+| 25-2 | P | Il ricordo **stagionale** era per **artista** nella spec e per **genere** nel template i18n (`memory.seasonal` = "Come ogni {month}, è tornato il periodo {genre}") | La spec §7.2 diceva "artista/genere" e il pseudocodice aveva scelto l'artista; il template diceva il genere | Decisione **D-A.7**: il ricordo stagionale è **per genere**, e l'informazione vive nel `text` reso (`MemoryPayload` non ha un campo `genre`, coerente con D-A.4) | `docs/04-ANALYSIS-ALGORITHMS.md` §7.2 |
+| 25-3 | P | La sezione dei template dei ricordi è stata prima inserita come **§2.13** in `08-COPY-I18N.md`, **in collisione** con `error.*` (§2.13) e con `insight.*` (§2.15) | Il contatore delle sezioni è stato incrementato senza verificare che esistesse già un §2.13 (le §2.12b…§2.12g mostravano già che le sotto-sezioni non sono in ordine stretto) | La sezione duplicata è stata rimossa e la nota di vincolanza è stata messa **dentro** §2.15, dove le chiavi stanno già | `docs/08-COPY-I18N.md` §2.15 |
+| 25-4 | P | La **Story 2.1** dipendeva dalle **audio features** (EPIC 4.1, non implementate) senza che nessun documento lo dicesse: il backlog dichiarava solo `DEP:0.2` | La dipendenza è **implicita** nel codice (`getAudioFeatures()` in `04§3.3`) e nessun gate confronta il backlog con gli algoritmi | La dipendenza è ora scritta in **tre** posti: `04§12`, la sezione Story 2.1 del backlog e l'issue #180 (`needs-spec`). Consegnare la 2.1 senza feature sarebbe stato un falso verde (lesson 58-4) | `docs/04-ANALYSIS-ALGORITHMS.md` §12 · `docs/11-BACKLOG.md` §Story 2.1 · issue #180 |
+
+**Lesson learned sintetica**: **una spec che ratifica non può rinominare un contratto già dichiarato** — i template i18n dei ricordi esistevano dal bootstrap, e la ratifica li avrebbe spostati su nomi nuovi: chi implementa avrebbe trovato due famiglie di chiavi incompatibili. La regola operativa è semplice e va applicata **prima** di scrivere: quando una spec ratifica, si cerca se il contratto che sta per dichiarare esiste già in un altro documento, e se esiste la spec si **allinea** a lui. E la lezione operativa sull'EPIC 2: **una story bloccata va bloccata per iscritto**: la dipendenza dalle audio features era implicita nel codice e invisibile nel backlog, e un agente che avesse preso la 2.1 avrebbe scritto un mood tracker che non produce mai nulla.
+
+### Link utili
+
+- Branch: `feat/178-epic2-analysis-ratification` (worktree `ls-178-epic2-analysis-ratification`)
+- Issue: **#178** (`size:M`, `area:analysis`, `phase-2`), claim `kilo-hp-elitebook-41xb`
+- Spec: `docs/04-ANALYSIS-ALGORITHMS.md` (v1.0 🟢 APPROVED, D-A.1…D-A.5) · Issue **#179** (Story 2.4) e **#180** (Story 2.1)
+- Sessione: `docs/state/sessions/59-epic2-analysis-ratification.md`
+- Precedenti: `#164` (spec della Story 1.5) · `#168` (ADR-0011) · `#172` (decisioni aperte)
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -7588,6 +7613,7 @@ mezzo del lavoro.
 | 2.3 | 2026-10-27 (issue #168) | **§22 — ratifica dell'ADR-0011**: il merge della PR #170 (`8900c3b`, 2026-10-27T16:31:39Z) è la ratifica del Boss → `docs/13-ADR/0011-scrobble-sink.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**, **nessuna modifica di contenuto** (stesso pattern di ADR-0010, PR #152 → commit di promozione `90aded0`). Il punto aperto 1 della spec (`20§18`) è chiuso: restano i punti 2-5, che sono decisioni di **protocollo** e non del contratto. Doc-sync: `05-ARCHITECTURE.md` (riga degli ADR collegati: 0011 🟢 APPROVED v1.0), `docs/INDEX.md` (riga `13-ADR/`, ADR APPROVED 8 → **9**, riga `11`, "Prossimo step tecnico"), `docs/11-BACKLOG.md` (Story 1.5: dipendenza **soddisfatta**, AC `[x]`, riga roadmap, v1.6.15), `docs/state/sessions/56-*.md` (`state: 🟢`, `merged: true`, merge commit `8900c3b`), `docs/state/_index.md`, `docs/20-SCROBBLING-HUB.md` §18 punto 1. Esito post-merge: `auto-status-done` ha applicato `status:done` a #168 e chiuso l'issue, `auto-branch-cleanup` ha eliminato il branch remoto, `auto-state-aggregate` + `auto-bundle` hanno rigenerato i blocchi; worktree e branch locale eliminati con `scripts/post-merge.ps1` (la rimozione della worktree ha richiesto `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
 | 2.4 | 2026-10-27 (issue #172) | **§23 Issue #172 — ratifica della spec Scrobbling hub** (Sessione 57, claim `kilo-hp-elitebook-41xb`, PR #174): 5 lesson (23-1 la stessa classe di difetto della Sessione 56 — la riga di changelog appesa **prima del titolo** — si era riprodotta in `02-DATA-SCHEMA.md`: la scansione di tutti i `.md` di `docs/` (prima riga che comincia con `| <version> |`) è il rilevatore economico della classe; 23-2 l'header di un documento è una **seconda fonte di verità**: cinque documenti dichiaravano una versione più vecchia del proprio changelog, e nessun gate li confronta; 23-3 **ratificare una spec non è promuoverla**: chiudere i punti aperti modifica regole normative (T-SH.3, T-SH.4, E.SH.10, E.SH.11, finestra, modalità proxy) e le modifiche vanno **dichiarate**, perché la regola "i documenti APPROVED non si modificano su una spec DRAFT" ha senso solo se l'effetto è esplicito; 23-4 una regola di default va giudicata su **quanti utenti reali la superano**: "durata ignota → non maturo" era la più prudente e la meno utile (escludeva la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz) → D-SH.13 soglia dei 4 minuti + fiducia nella fonte; 23-5 issue di decisioni e issue di implementazione nate nella stessa sessione: la transizione `needs-spec` → `agent-ready` è avvenuta solo con l'assegnazione esplicita del project owner, e le due issue hanno esiti opposti — #172 chiusa con `status:done`, #173 aperta `agent-ready`). `docs/20-SCROBBLING-HUB.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le quattro decisioni chiuse come **D-SH.11…D-SH.14** (§2.1): md5 in JS puro, finestra a 7 giorni + azione esplicita, soglia dei 4 minuti con fiducia nella fonte, modalità del proxy dichiarata. Allineati i documenti che la spec tocca (`02§3.8`+`§6.2`, `09§3.3`+`§4`, `08§1`+`§2.16`, `03-ADAPTERS/lastfm.md` §4+§10, `03-ADAPTERS/listenbrainz.md` §3.4+D-LB.5, `01§3.7-3.9`), i casi di test da 29 a **31**. Aperti `docs/state/stories/1.5-scrobbling-hub.md` e l'**issue di implementazione #173** (`agent-ready`, `size:L`) |
 | 2.5 | 2026-10-27 (issue #172) | **§23 — esito post-merge della ratifica**: la PR #174 è **merged** (`4abb73e`, 2026-10-27T16:59:24Z) → `docs/20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** e l'issue #172 è chiusa con `status:done`. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 57 con `pr: 174`, `merged: true` e merge commit, più la sezione "Esito post-merge"): il numero della PR non era noto quando il file è stato scritto, e D.21.1 vuole il doc-sync **nel branch della PR** — impossibile per il PR number, che si conosce solo dopo l'apertura. L'alternativa (scrivere `pr: 0` e correggere dopo) è quella scelta, ed è la ragione per cui il blocco aggregato mostrava "PR #0" per la Sessione 57. Automazioni: `auto-status-done` (status:done su #172), `auto-branch-cleanup`, `auto-state-aggregate` (`c27fc1f`), `auto-bundle` (`4002520`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
+| 2.7 | 2026-10-28 (issue #178) | **§25 Issue #178 — ratifica della spec dell'analisi** (Sessione 59, claim `kilo-hp-elitebook-41xb`, PR #181): 4 entry (25-1 i **template i18n dei ricordi esistevano già** (`08§2.15`) e la prima stesura della ratifica li **rinominava** con parametri diversi: una spec che ratifica non può rinominare un contratto già dichiarato — le formule sono state riallinate alle chiavi esistenti e `08§2.15` le dichiara vincolanti; 25-2 il ricordo **stagionale** era per artista nella spec e per genere nel template: decisione D-A.7 (per genere, con l'informazione nel `text` reso); 25-3 la sezione dei template era stata inserita come **§2.13** in collisione con `error.*`: rimossa e la nota di vincolanza messa dentro §2.15; 25-4 la **Story 2.1** dipendeva dalle **audio features** (EPIC 4.1) senza che nessun documento lo dicesse: la dipendenza è ora in `04§12`, nel backlog e nell'issue #180 — consegnare la 2.1 senza feature sarebbe stato un falso verde). `docs/04-ANALYSIS-ALGORITHMS.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le cinque decisioni chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.4** (Memory Engine) è implementabile (issue **#179**, `agent-ready`), la **Story 2.1** (Mood Tracker) aspetta le audio features dell'EPIC 4.1 (issue **#180**, `needs-spec`). Allineati `08-COPY-I18N.md` §2.15 (v0.7), `11-BACKLOG.md` (Story 2.1/2.4, priorità agenti, v1.6.18), `docs/INDEX.md` (riga 04, conteggi legacy), `docs/state/` (sessione 59 + le story 2.1 e 2.4) |
 | 2.6 | 2026-10-28 (issue #173) | **§24 Issue #173 — Story 1.5 implementata** (Sessione 58, claim `kilo-hp-elitebook-41xb`, PR #176): 6 entry (24-1 il **test di performance** misurava il **carico del runner**, non il layer DB: con tre file di test in più la suite parallela faceva superare la soglia locale di 500 ms, e la verifica decisiva fu togliere i file nuovi con la tabella già presente → il test gira ora in una **run separata**, con la soglia dell'AC invariata; 24-2 `db/health.ts` dichiarava la versione attesa 4 mentre lo schema corrente è **5** (falso "schema sotto l'attesa"); 24-3 `db.test.ts` contava 13 tabelle: `scrobbleOutbox` è la 14ª; 24-4 il tipo di dominio `ScrobbleHubId` sta in `schema/index.ts` perché il **db non deve dipendere dagli adapter** (`05§9.2` parla di package, non di moduli: il ciclo fra moduli nessun gate lo misura); 24-5 i brani si risolvono con una **scansione** (`tracks` ha PK `canonicalKey`, `id` non è indicizzato), come in `db/orphan-cleanup.ts`; 24-6 il delay di retry del protocollo è una **capacità opzionale** del sink (`retryDelayMs()`), così il contratto approvato `05§4.2` resta intatto e il protocollo resta nel sink (V9)). Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink`, registry, sink Last.fm (md5 JS puro, batch 50, POST via proxy) e ListenBrainz (`submit-listens`), coda `scrobbleOutbox` (schema Dexie v5, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con D-SH.13, `parseRemote?()` incrementale con cursore persistito, web auth Last.fm, pannello UI, namespace i18n `scrobble`; **31 casi di test** coperti (267 in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 parzialmente soddisfatto** (MBID → DEDUP-2 ✓; `track.genres` via MusicBrainz ✗ → EPIC 4) |
 
 ---
@@ -7796,7 +7822,10 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/56-adr-0011-scrobble-sink.md` | ✅ creata | Sessione 56 (issue #168): ADR-0011 — il **contratto di scrittura** negli hub (`ScrobbleSink` separato da `PlatformAdapter`, vincoli V1-V10), ratificato in `05§4.2` — **merged** (PR #170, `8900c3b`), ADR 🟢 APPROVED v1.0 |
 | `state/sessions/57-scrobbling-hub-spec-approval.md` | ✅ creata | Sessione 57 (issue #172): **ratifica della spec `20-SCROBBLING-HUB.md`** (v1.0 🟢 APPROVED) con le quattro decisioni chiuse (D-SH.11…D-SH.14) + allineamento dei documenti toccati + apertura dell'issue di implementazione **#173** — **merged** (PR #174, `4abb73e`), issue #172 chiusa con `status:done` |
 | `state/sessions/58-scrobbling-hub-implementation.md` | ✅ creata | Sessione 58 (issue #173): **implementazione della Story 1.5** — contratto `ScrobbleSink`, coda `scrobbleOutbox` (schema Dexie v5), sink Last.fm e ListenBrainz, filtro di eleggibilità (D-SH.13), sync incrementale, web auth, pannello UI e i 31 casi di test della spec |
+| `state/sessions/59-epic2-analysis-ratification.md` | ✅ creata | Sessione 59 (issue #178): **ratifica della spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md` v1.0 🟢 APPROVED) con le cinque decisioni chiuse (D-A.1…D-A.5) + apertura delle issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, bloccata dalle audio features EPIC 4.1) |
 | `state/stories/1.5-scrobbling-hub.md` | ✅ creata | Story 1.5 (Scrobbling hub) — ✅ **done** (Sessione 58, issue #173): contratto `ScrobbleSink`, coda `scrobbleOutbox`, sink Last.fm/ListenBrainz, filtro di eleggibilità, sync incrementale, pannello UI, 31 casi di test |
+| `state/stories/2.1-mood-tracker.md` | ✅ creata | Story 2.1 (Mood Tracker) — ⛔ **blocked**: senza le audio features dell'EPIC 4.1 il mood tracker non produce insight (decisione D-A.1); issue #180 (`needs-spec`) |
+| `state/stories/2.4-memory-engine.md` | ✅ creata | Story 2.4 (Memory Engine) — ⬚ TODO, **implementabile**: spec `04` v1.0 🟢 APPROVED, i trigger dei 5 tipi specificati; issue #179 (`agent-ready`, `size:M`) |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
 | Stories 1.x+ | ⬚ TODO (migration incrementale) | la 1.1 e la 1.2 hanno state file (per `AGGREGATE-NEXT-STEP-*`); la 1.2 è stata creata **all'approvazione della spec** e non al claim, eccezione motivata nella Sessione 42. La 1.3+ seguirà il pattern "crea lo state file al primo claim `agent-ready`" |
@@ -9828,6 +9857,131 @@ l'array `$files` di `scripts/generate-bundle.ps1` (bundle: 98 → 100 file).
 
 
 
+===== FILE: docs/state/sessions/59-epic2-analysis-ratification.md =====
+
+---
+number: 59
+title: "Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1"
+date: 2026-10-28
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/178-epic2-analysis-ratification
+pr: 0
+claim: kilo-hp-elitebook-41xb
+cross_refs: [178, 179, 180]
+tags: [docs, spec, analysis, phase-2]
+---
+
+# Sessione 59 — Ratifica di `04-ANALYSIS-ALGORITHMS.md` (issue #178)
+
+## Sintesi
+
+Ratifica della **spec dell'EPIC 2**: `docs/04-ANALYSIS-ALGORITHMS.md` passa da
+🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le cinque decisioni aperte chiuse come
+proposte (D-A.1…D-A.5, §11).
+
+Lo schema era **già pronto** (`02§4`: `InsightType`, `MemoryPayload`, `Insight.derivedVersion`;
+`02§6`: tabelle `sessions` e `insights`), e i fixture di scenario esistevano:
+questa ratifica non ha dovuto toccare `02`, che resta 🟢 APPROVED **v1.6**.
+
+La conseguenza operativa è la divisione delle due story dell'EPIC 2:
+
+| Storia | Esito | Issue |
+|--------|-------|-------|
+| **2.4 — Memory Engine** | ✅ **implementabile subito** | **#179** (`agent-ready`, `size:M`) |
+| **2.1 — Mood Tracker** | ⛔ **bloccata** dalle audio features (EPIC 4.1) | **#180** (`needs-spec`) |
+
+## Trigger
+
+Issue **#178** (`needs-spec` → `agent-ready`, `size:M`, `area:analysis`): aperta
+nella Sessione 58 quando la coda delle issue è rimasta vuota, con le cinque
+decisioni che la spec lasciava aperte. Il precedente è il ciclo della Story 1.5
+(issue #164 → #168 → #172 → #173).
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.59.1 | Le cinque decisioni si chiudono **come proposte** (D-A.1…D-A.5 in `04§11`) | Pattern delle spec già ratificate (D1-D7 della spec ListenBrainz, D-SH.11…14 della spec Scrobbling hub): la ratifica è l'atto del Boss, non una decisione dell'agente |
+| D.59.2 | La **Story 2.1 aspetta l'EPIC 4.1**; la **2.4 parte subito** (D-A.1) | `04§3.3` legge `getAudioFeatures(e.trackId)` e restituisce `null` sotto i 3 eventi con valence: senza feature il mood tracker non produce nulla. Consegnare la 2.1 sarebbe un falso verde (lesson 58-4) |
+| D.59.3 | `return` e `seasonal` sono **specificati** in `04§7.2` (D-A.2) | L'AC della 2.4 chiede i 5 tipi e due avevano il pseudocodice `...`: ridurli a 3 riscriverebbe l'AC |
+| D.59.4 | `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3) | L'AC dice "brani", il pseudocodice contava gli ascolti: un artista con un solo brano ascoltato 5 volte non è "significativo" |
+| D.59.5 | Il `text` del ricordo è una **stringa resa** alla generazione, con i template i18n **già dichiarati** in `08§2.15` (D-A.4) | `MemoryPayload.text` è APPROVED e non viene toccato; il ricordo è uno snapshot e la lingua in cui è stato scritto è parte della memoria. La generazione resta i18n: nessuna stringa inline |
+| D.59.6 | L'orchestratore è **minimale ed estensibile** (`04§8.1`, D-A.5) | Le Story 2.2/2.3 hanno AC e issue proprie; implementarle qui le renderebbe implicite. Pattern: il registry dei sink della Story 1.5 |
+| D.59.7 | Il ricordo stagionale è **per genere**, non per artista | I template i18n esistenti (`memory.seasonal` = "Come ogni {month}, è tornato il periodo {genre}") descrivono un **genere**: la specifica originale diceva "artista/genere". Il payload (`02§4`) non ha un campo `genre`: l'informazione vive nel testo reso |
+
+## Difetti trovati lungo il percorso
+
+**I template i18n dei ricordi esistevano già**: `08§2.15` dichiarava da tempo
+`memory.on_this_day`, `memory.first_time`, `memory.milestone.events`,
+`memory.milestone.hours`, `memory.return` e `memory.seasonal`. La prima stesura
+di `04§7.3.1` li **rinominava** (`insight.memory.*`) con parametri diversi
+(`gapDays` invece di `months`, `artist` invece di `genre`): la ratifica avrebbe
+**rotto** un contratto i18n già dichiarato. Le formule sono state riallineate
+alle chiavi esistenti e manca solo `memory.milestone.artists` (le soglie
+"artisti unici" sono nella spec §7.2 ma non avevano un template).
+
+**`08-COPY-I18N.md` aveva già un §2.13**: la sezione dei template dei ricordi
+è stata prima inserita come §2.13, in collisione con `error.*` (§2.13) e con
+`insight.*` (§2.15) che li dichiarava già. La sezione è stata rimossa e la
+nota di vincolanza è stata messa dentro §2.15, dove stanno già le chiavi.
+
+**Le sezioni legacy di `08` avevano versioni indipendenti**: `§2.12f` e `§2.12g`
+(aggiunti nella Sessione 58) stanno **dopo** il §2.16: l'ordine delle sezioni
+non è più quello delle versioni, e un lettore che cerca "l'ultima sezione
+aggiunta" la trova prima. Le sezioni esistenti hanno mantenuto la loro
+posizione (l'ordine è storico, non cronologico).
+
+## Verifica
+
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift atteso sui blocchi aggregati (la Sessione 59 e le story 2.1/2.4 li aggiornano)
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi (nessun file applicativo toccato)
+- `node scripts/check-readme-facts.mjs` → exit 0
+- Nessuna modifica ai blocchi `<!-- AGGREGATE-* -->` (ADR-0008)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 59-1 | **Una spec che ratifica non può rinominare un contratto già dichiarato.** I template i18n dei ricordi esistevano dal bootstrap (`08§2.15`): la ratifica li avrebbe spostati su nomi nuovi, e chi implementa avrebbe trovato due famiglie di chiavi incompatibili. La regola operativa: quando una spec ratifica, **prima** si cerca se il contratto che sta per dichiarare esiste già in un altro documento — e se esiste, la spec si allinea a lui |
+| 59-2 | **Uno spec non allineato non è uno spec neutro: è uno spec rotto.** Il caso dei ricordi stagionali mostra il doppio costo: la formula (artista) e il template (genere) dicevano cose diverse, e nessuno dei due gate se ne accorgeva. Le decisioni D-A.1…D-A.5 sono state scritte proprio per colmare questi buchi, e il costo è stato leggerle una per una |
+| 59-3 | **Una story bloccata va bloccata per iscritto, non per implicazione.** La 2.1 dipendeva dalle audio features (EPIC 4.1) senza che nessun documento lo dicesse: il backlog dichiarava solo `DEP:0.2`. Dopo la ratifica la dipendenza è in `04§12`, nel backlog, e nell'issue #180: un agente che la prende in carico la vede prima di scrivere codice |
+| 59-4 | **Il precedente del ciclo ratifica → implementazione è il modello del progetto.** La Story 1.5 ha avuto quattro issue (spec, ADR, decisioni, implementazione) e tre PR; l'EPIC 2 ha lo stesso schema con una spec in meno (l'ADR-0011 è servito solo perché la scrittura toccava `05§4`, che è APPROVED: qui `04` **è** la spec, e l'analysis non tocca `05§4`). Non ogni decisione architetturale ha bisogno di un ADR |
+
+## Documenti aggiornati
+
+- `docs/04-ANALYSIS-ALGORITHMS.md` — **v1.0 🟢 APPROVED**: §7.2 (`return`,
+  `seasonal`, `first_time`), §7.3 (parametri), §7.3.1 (il testo dei ricordi e le
+  chiavi), §8.1 (perimetro della tranche), §9 (registro), §11 (le decisioni),
+  §12 (perimetro e dipendenze), changelog 1.0
+- `docs/08-COPY-I18N.md` — §2.15: i template `memory.*` dichiarati **vincolanti** +
+  la chiave `memory.milestone.artists`; v0.7
+- `docs/11-BACKLOG.md` — Story 2.1 (bloccata, con la ragione) e 2.4 (implementabile),
+  lista di priorità degli agenti, header v1.6.18, changelog 1.6.18
+- `docs/INDEX.md` — riga 04 (v1.0 🟢), conteggi legacy APPROVED/DRAFT, riga 11,
+  riga 18, riga 08, "Prossimo step tecnico"
+- `docs/18-DEV-LOG.md` — §25 (nuova) + changelog 2.7
+- `docs/state/sessions/59-epic2-analysis-ratification.md` — **nuovo**
+- `docs/state/stories/2.1-mood-tracker.md` — **nuovo** (`status: blocked`,
+  issue #180)
+- `docs/state/stories/2.4-memory-engine.md` — **nuovo** (`status: todo`, issue #179)
+- `docs/state/_index.md` — righe della Sessione 59 e delle story 2.1/2.4
+- `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — i tre file nuovi
+- Issue **#179** (implementazione della 2.4, `agent-ready`) e **#180** (la 2.1,
+  `needs-spec`)
+
+## Cross-refs
+
+- **#178** — le cinque decisioni di ratifica (claim `kilo-hp-elitebook-41xb`)
+- **#179** — implementazione della Story 2.4 (Memory Engine)
+- **#180** — la Story 2.1, bloccata dalle audio features dell'EPIC 4.1
+- **#164** — il precedente del ciclo ratifica → implementazione (Story 1.5)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -10205,6 +10359,170 @@ I 15 deliverable di `20§16` sono raccolti nell'issue #173.
 - `docs/03-ADAPTERS/lastfm.md` §4 e §10 — md5 (D-SH.11), proxy in scrittura (D-SH.14)
 - `docs/03-ADAPTERS/listenbrainz.md` §3.4 e D-LB.5 — token in scrittura, percorso incrementale
 - `docs/01-PLATFORMS.md` §3.7-3.9 — rimandi al percorso di scrittura
+
+
+
+===== FILE: docs/state/stories/2.1-mood-tracker.md =====
+
+---
+id: "2.1"
+title: "Mood Tracker giornaliero"
+phase: 2
+area: analysis
+status: blocked
+priority: B
+depends_on: ["0.2", "4.1"]
+issue: 180
+branch: ""
+pr: 0
+merged_commit: ""
+merged_date: ""
+claim: ""
+spec_refs:
+  - docs/04-ANALYSIS-ALGORITHMS.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/08-COPY-I18N.md
+---
+
+## Descrizione
+
+Il **mood tracker** calcola l'umore dei periodi (giorno, settimana, mese) dalla
+valence e dall'energy media degli ascolti, e lo persiste come `Insight` di tipo
+`mood_day` / `mood_week` / `mood_month`.
+
+La formula è specificata in `docs/04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED**
+(§3): il mood è il risultato di una mappa valence×energy su 5 quadranti
+(`happy`, `sad`, `excited`, `calm`, `neutral`), con soglie e pesi configurabili
+(§3.4) e la versione degli insight calcolata dai parametri (§9).
+
+## Stato
+
+⛔ **bloccata** — dalle **audio features** dell'**EPIC 4.1**, che non sono
+implementate. `04§3.3` legge `getAudioFeatures(e.trackId)` e restituisce `null`
+sotto i 3 eventi con valence: senza feature il mood tracker non produce **alcun**
+insight. È la decisione **D-A.1**, chiusa alla ratifica della spec (issue #178,
+2026-10-28).
+
+Consegnare la story così sarebbe un falso verde: sarebbe "completata" senza
+produrre nulla (lesson 58-4 della Sessione 58 — *un AC che mescola due story non
+si può spuntare*).
+
+**Issue**: #180 (`needs-spec`) — chiede la **spec dell'EPIC 4.1** (provider delle
+feature, privacy, stoccaggio, costi), che non appartiene a `04`.
+
+Il codice resta **specificato** in `04§3`: quando l'EPIC 4.1 porterà le feature,
+la story si implementa senza altre decisioni.
+
+## Acceptance criteria
+
+- [x] Formula specificata in `04-ANALYSIS-ALGORITHMS.md` (Sessione 4; **ratificata** in v1.0 🟢 il 2026-10-28, §3.2-§3.6)
+- [ ] Insight tipo `mood_day` persistito con `derivedVersion`
+- [ ] Test su fixture con scenario noto
+
+## Cosa sblocca la story
+
+1. L'**EPIC 4.1** (audio features: valence, energy, danceability, BPM) con la sua
+   spec: il provider (Essentia.js), il costo di bundle, la privacy delle feature
+   e il loro stoccaggio sono decisioni che non appartengono a `04`
+2. Una volta disponibili le feature, l'implementazione non richiede altre
+   decisioni
+
+## Documenti collegati
+
+- `docs/04-ANALYSIS-ALGORITHMS.md` §3 (Mood Tracker) · §11 (decisione D-A.1) ·
+  §12 (perimetro e dipendenze)
+- `docs/02-DATA-SCHEMA.md` §4 (`MoodPeriodPayload`, `Insight.derivedVersion`) ·
+  §6 (tabella `insights`)
+- `docs/08-COPY-I18N.md` §2.15 — i template `mood.*`
+- `docs/11-BACKLOG.md` §Story 2.1
+
+
+
+===== FILE: docs/state/stories/2.4-memory-engine.md =====
+
+---
+id: "2.4"
+title: "Memory Engine"
+phase: 2
+area: analysis
+status: todo
+priority: B
+depends_on: ["0.2"]
+issue: 179
+branch: ""
+pr: 0
+merged_commit: ""
+merged_date: ""
+claim: ""
+spec_refs:
+  - docs/04-ANALYSIS-ALGORITHMS.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/08-COPY-I18N.md
+---
+
+## Descrizione
+
+Il **memory engine** genera i ricordi giornalieri: cinque tipologie
+(`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), ciascuna con un
+trigger documentato, e un feed ordinato per **rilevanza**.
+
+È la prima implementazione dell'EPIC 2: il pacchetto
+`packages/core/src/analysis/` non esiste ancora.
+
+## Stato
+
+⬚ **TODO — implementabile dal 2026-10-28 (Sessione 59)**. La spec
+`docs/04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED** (ratifica del
+2026-10-28, issue #178) e i **trigger dei 5 tipi** sono specificati:
+
+- `return` e `seasonal` completati (decisione **D-A.2**): il silenzio è
+  l'**ultimo** ascolto precedente dell'artista (≥ 180 giorni) e la stagionalità
+  è **per genere** con la concentrazione calcolata sugli ultimi 12 mesi
+- `first_time` a **5 brani distinti** (`firstTimeMinTracks`, decisione **D-A.3**)
+- il `text` del ricordo è una **stringa resa** con i template i18n già
+  dichiarati in `08§2.15` (`memory.*`, decisione **D-A.4**)
+- l'orchestratore è **minimale ed estensibile**: chiama solo i generatori
+  implementati (decisione **D-A.5**, `04§8.1`)
+
+Lo schema è **già pronto** e non va modificato: `02§4` dichiara
+`InsightType` (`memory`), `MemoryPayload` (`memoryKind` × 5, `trackId`,
+`artistId`, `yearsAgo`, `text`) e `Insight.derivedVersion`; `02§6` dichiara la
+tabella `insights` con l'indice su `derivedVersion` e la regola MIG-3 (gli
+insight con versione vecchia diventano `stale` e vengono ricalcolati).
+
+**Issue**: #179 (`agent-ready`, `size:M`).
+
+## Task
+
+- [ ] I 5 generatori in `packages/core/src/analysis/memory/`
+- [ ] Il ranking per rilevanza (`baseScore × relevance × recency`, `04§7.4`)
+- [ ] La persistenza degli insight `memory` con `derivedVersion` calcolata
+- [ ] Il testo reso con il resolver i18n (`memory.*`)
+- [ ] L'orchestratore minimale della tranche (`04§8.1`)
+- [ ] I template `memory.*` materializzati nei locale `it`/`en`
+
+## Acceptance criteria
+
+- [x] 5 tipi di ricordo specificati in `04§7.2` (v1.0 🟢)
+- [x] Trigger documentati in `04-ANALYSIS-ALGORITHMS.md` (§7.2, ratificati)
+- [ ] Insight `memory` persistiti con `derivedVersion`, feed ordinato per rilevanza
+
+## Vincoli
+
+- `MemoryPayload` **non** si modifica (`02§4` è APPROVED): il `text` è una
+  stringa resa, il payload non ha campi per genere o mese
+- Nessuna stringa italiana inline: il testo passa dal resolver i18n
+- Nessuna feature richiesta: la 2.4 usa solo ascolti, brani, artisti e generi
+- L'orchestratore non implementa sessioni, pattern, ere o eventi (Story 2.2/2.3)
+
+## Documenti collegati
+
+- `docs/04-ANALYSIS-ALGORITHMS.md` §7 (Memory Engine) · §7.3 (parametri) ·
+  §7.3.1 (il testo) · §7.4 (ranking) · §8.1 (perimetro) · §9 (`derivedVersion`) ·
+  §11 (decisioni D-A.1…D-A.5)
+- `docs/02-DATA-SCHEMA.md` §4 (`Insight`, `MemoryPayload`) · §6 (`insights`) · MIG-3
+- `docs/08-COPY-I18N.md` §2.15 — i template `memory.*`
+- `fixtures/scenarios/` — gli scenari per i test
 
 
 
@@ -13534,8 +13852,9 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 
 # 04 — Algoritmi di Analisi
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 9 (audit 2026-10-15)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 59 (2026-10-28)
 > Vincolante per: `packages/core/analysis/*` e relativi test
+> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12)
 
 ---
 
@@ -13576,11 +13895,15 @@ Se mancano `AudioFeatures` (valence/energy null), l'algoritmo:
 | Algoritmo | Config chiave | Versione iniziale |
 |-----------|---------------|-------------------|
 | Session segmentation | `gapThresholdMs` | `v1.0` |
-| Mood tracker | `weights`, `moodThresholds` | `v1.0` |
+| Mood tracker | `{weights, moodThresholds}` | `v1.0` |
 | Pattern analyzer | `bucketSize` | `v1.0` |
 | Era detector | `windowDays`, `kMin`, `kMax`, `similarityThreshold` | `v1.0` |
 | Event detector | `zScoreThreshold`, `windowDays`, `baselineDays` | `v1.0` |
 | Memory engine | `thresholds` per ogni tipo | `v1.0` |
+
+> I parametri effettivi e i loro default sono in §7.3 (memory engine) e §3.4
+> (mood tracker): questa tabella è il **registro** (quali parametri ciascun
+> algoritmo versiona), non la loro specifica.
 
 ---
 
@@ -14192,27 +14515,29 @@ Trigger: esiste almeno un evento nella stessa data (mese+giorno) di `N` anni fa,
             memoryKind: 'on_this_day',
             yearsAgo,
             trackId: topTrack.id,
-            text: `yearsAgo anni fa ascoltavi "${topTrack.name}" di ${topTrack.artist}`
+            artistId: topTrack.artistId,
+            text: t('memory.on_this_day', { years: yearsAgo, track: topTrack.name, artist: topTrack.artist })
           })
       return memories
 
 #### `first_time`
 
-Trigger: oggi è l'anniversario del primo ascolto di un artista significativo (≥5 brani totali).
+Trigger: oggi è l'anniversario del primo ascolto di un artista significativo (**≥5 brani distinti**, D-A.3: l'AC della Story 2.4 dice "brani", non "ascolti").
 
     function generateFirstTime(today, events):
       artistFirstListen = events.groupBy(artistId).map(artist => artist.min(startedAt))
       memories = []
-      for (artistId, firstDate) in artistFirstListen:
+      for artistId, firstDate in artistFirstListen:
         yearsAgo = yearsBetween(firstDate, today)
         if yearsAgo >= 1 AND isSameDayMonth(firstDate, today):
-          totalListens = count(events.filter(e => e.track.artistId == artistId))
-          if totalListens >= 5:
+          artistEvents = events.filter(e => e.track.artistId == artistId)
+          distinctTracks = distinct(artistEvents.map(e => e.trackId)).length
+          if distinctTracks >= firstTimeMinTracks:
             memories.push({
               memoryKind: 'first_time',
               yearsAgo,
               artistId,
-              text: `${yearsAgo} anni fa scoprivi ${artist.name}`
+              text: t('memory.first_time', { years: yearsAgo, artist })
             })
       return memories
 
@@ -14235,32 +14560,100 @@ Trigger: raggiungimento di soglie cumulative (1000, 5000, 10000, 50000, 100000 e
 
 #### `return`
 
-Trigger: oggi riascolti un artista/brano che non ascoltavi da ≥6 mesi.
+Trigger: oggi hai riascoltato un artista che **non ascoltavi da almeno
+`returnMinGapDays` (180) giorni** (D-A.2).
 
     function generateReturn(today, events):
-      // per ogni artista, trova il gap più lungo tra due ascolti
-      // se un gap si chiude oggi dopo ≥180gg → ricordo return
-      ...
+      memories = []
+      dayStart = startOfDay(today)
+      todayEvents = events.filter(e => e.startedAt >= dayStart)
+      for artistId in distinct(todayEvents.map(e => e.track.artistId)):
+        previous = events.filter(e => e.track.artistId == artistId && e.startedAt < dayStart)
+        if previous.length == 0: continue
+        lastSeen = max(previous).startedAt
+        gapDays = floor((dayStart - lastSeen) / 86400000)
+        if gapDays < returnMinGapDays: continue
+        firstToday = min(todayEvents.filter(e => e.track.artistId == artistId))
+        memories.push({
+          memoryKind: 'return',
+          artistId,
+          trackId: firstToday.trackId,
+          gapDays,
+          text: t('memory.return', { artist, months: floor(gapDays / 30) })
+        })
+      return memories
+
+Il "silenzio" è l'**ultimo** ascolto precedente dell'artista, non il gap più
+lungo della sua storia: il trigger è "**ti è tornato** dopo una pausa", non "una
+volta hai avuto un buco". L'artefatto è il brano di oggi (`trackId`), non il
+brano di allora: il ricordo riguarda il ritorno.
 
 #### `seasonal`
 
-Trigger: ricorrenza stagionale (ascolti un artista/genere che hai ascoltato prevalentemente in questo mese negli anni passati).
+Trigger: un artista che ascolti **prevalentemente in questo mese** (≥
+`seasonalConcentration` = 60% dei suoi ascolti negli **ultimi 12 mesi**) e che
+**quest'anno** hai riascoltato in quel mese (D-A.2).
 
     function generateSeasonal(today, events):
       currentMonth = monthOf(today)
-      // trova artisti con ≥60% degli ascolti concentrati in currentMonth
-      // se quest'anno li hai riascoltati in currentMonth → ricordo
-      ...
+      window = events.filter(e => e.startedAt >= today - 365d)
+      memories = []
+      for genre in distinct(window.flatMap(e => e.track.genres)):
+        genreEvents = window.filter(e => e.track.genres.includes(genre))
+        if genreEvents.length < seasonalMinEvents: continue
+        inMonth = genreEvents.filter(e => monthOf(e.startedAt) == currentMonth)
+        monthShare = inMonth.length / genreEvents.length
+        if monthShare < seasonalConcentration: continue
+        thisYear = inMonth.filter(e => yearOf(e.startedAt) == yearOf(today))
+        if thisYear.length == 0: continue
+        memories.push({
+          memoryKind: 'seasonal',
+          genre,
+          month: currentMonth,
+          text: t('memory.seasonal', { month: monthName(currentMonth, locale), genre })
+        })
+      return memories
+
+La concentrazione è calcolata sui **12 mesi** precedenti, non sull'intera
+storia: altrimenti un ascolto del 2019 "peserebbe" per sempre e il ricordo
+diventerebbe un fatto storico invece di una stagionalità.
+
+Il ricordo stagionale è **per genere** (non per artista): il testo ne porta il
+nome. `MemoryPayload` (`02§4`) non ha un campo `genre`, quindi l'informazione
+vive nel `text` reso — coerente con D-A.4: il payload è chiuso e il testo è la
+memoria.
 
 ### 7.3 Parametri
 
-| Parametro | Default |
-|-----------|---------|
-| `onThisDayYears` | [1, 2, 3, 5, 10] |
-| `firstTimeMinListens` | 5 |
-| `milestones` | [1000, 5000, 10000, 50000, 100000] |
-| `returnMinGapDays` | 180 |
-| `seasonalConcentration` | 0.6 |
+| Parametro | Default | Note |
+|-----------|---------|------|
+| `onThisDayYears` | [1, 2, 3, 5, 10] | |
+| `firstTimeMinTracks` | 5 | **brani distinti**, non ascolti (D-A.3) |
+| `milestones` | [1000, 5000, 10000, 50000, 100000] | |
+| `returnMinGapDays` | 180 | silenzio minimo dell'artista |
+| `seasonalConcentration` | 0.6 | quota di ascolti dell'artista nel mese corrente (finestra 12 mesi) |
+| `seasonalMinEvents` | 5 | ascolti minimi dell'artista nella finestra, per non generare ricordi da un singolo ascolto |
+
+### 7.3.1 Il testo dei ricordi
+
+Il `text` di `MemoryPayload` (`02-DATA-SCHEMA.md` §4) è una **stringa già resa**,
+non una chiave i18n (D-A.4): il ricordo è uno **snapshot** di un momento, e la
+lingua in cui è stato scritto è parte della memoria. Il **template** vive
+comunque in `08-COPY-I18N.md` §2.15, così la generazione è internazionalizzata e
+non hardcoded.
+
+Le chiavi sono **quelle già dichiarate** in `08§2.15`:
+
+| `memoryKind` | Chiave i18n | Parametri |
+|---|---|---|
+| `on_this_day` | `memory.on_this_day` | `years`, `track`, `artist` |
+| `first_time` | `memory.first_time` | `years`, `artist` |
+| `milestone` | `memory.milestone.events` / `.hours` / `.artists` | `count` |
+| `return` | `memory.return` | `artist`, `months` |
+| `seasonal` | `memory.seasonal` | `month`, `genre` |
+
+La generazione **non** scrive mai stringhe italiane inline: chi implementa
+chiama il resolver i18n con la chiave e i parametri del ricordo.
 
 ### 7.4 Ranking ricordi
 
@@ -14283,6 +14676,9 @@ Il feed ricordi mostra i top N score per giorno.
 ---
 
 ## 8. Pipeline orchestratore
+
+L'orchestratore è **incrementale** e **pluggabile** (D-A.5): ogni generatore è
+indipendente dagli altri e riceve gli eventi nuovi più lo stato corrente.
 
     function analyzeIncremental(newEvents, state):
       // 1. Aggiorna sessioni
@@ -14310,6 +14706,25 @@ Il feed ricordi mostra i top N score per giorno.
         insights: [...newDayInsights, ...newWeekInsights, ...eras, ...events, ...memories]
       }
 
+### 8.1 Perimetro di questa tranche (D-A.5)
+
+Il codice dell'orchestratore è **il contratto**; i **generatori** sono plug-in.
+La prima tranche (Story 2.4, e poi 2.1) implementa:
+
+| Generatore | Stato | Note |
+|---|---|---|
+| **Memory engine** (§7) | ✅ in questa tranche | usa solo ascolti, brani e artisti |
+| **Mood tracker** (§3) | ⛔ in attesa dell'EPIC 4.1 | senza audio features non produce insight (D-A.1, §12) |
+| Session segmentation (§2) | ⏭ differita | serve a `ListeningSession` (EPIC 2, tranche successiva) |
+| Pattern analyzer (§4) | ⏭ differita | Story 2.2 |
+| Era detector (§5) | ⏭ differita | Story 2.2 |
+| Event detector (§6) | ⏭ differita | Story 2.3 |
+
+L'orchestratore della tranche corrente chiama **solo** i generatori
+implementati: gli altri si aggiungono senza cambiarne il contratto, come i sink
+di scrobbling si sono aggiunti al registry senza modificare `PlatformAdapter`
+(ADR-0011 V1).
+
 ---
 
 ## 9. DerivedVersion registry
@@ -14321,7 +14736,7 @@ Il feed ricordi mostra i top N score per giorno.
 | Pattern analyzer | `{nightHours, weekendDays, minEvents}` | calcolata |
 | Era detector | `{windowDays, stepDays, similarityThreshold, minEraDays, weights}` | calcolata |
 | Event detector | `{baselineDays, windowDays, zScoreThreshold, silenceMinDays, explorationMinNewArtists, strideDays}` | calcolata |
-| Memory engine | `{onThisDayYears, firstTimeMinListens, milestones, returnMinGapDays, seasonalConcentration}` | calcolata |
+| Memory engine | `{onThisDayYears, firstTimeMinTracks, milestones, returnMinGapDays, seasonalConcentration, seasonalMinEvents}` | calcolata |
 
 Ogni volta che si cambia un parametro di default, la versione cambia e gli insight diventano `stale` → ricalcolo automatico al prossimo avvio.
 
@@ -14343,12 +14758,55 @@ Tempo di esecuzione target su laptop medio: < 5 secondi totali (incrementale dop
 
 ---
 
+## 11. Decisioni di ratifica (Sessione 59, issue #178)
+
+Le cinque decisioni che la spec lasciava aperte sono chiuse **come proposte**,
+con la ratifica del Boss (merge della PR) come atto di ratifica. Il precedente
+è il ciclo della Story 1.5: le decisioni D1-D7 della spec ListenBrainz e le
+decisioni D-SH.11…D-SH.14 della spec Scrobbling hub sono state chiuse come
+proposte nella spec e ratificate dal merge.
+
+| # | Decisione | Scelta | Motivazione |
+|---|-----------|--------|-------------|
+| **D-A.1** | La Story 2.1 (mood) dipende dagli **audio features** (EPIC 4.1), che non sono implementate | La 2.1 **aspetta** l'EPIC 4.1; parte la **2.4** (i ricordi), che dipende solo dagli ascolti | §3.3 legge `getAudioFeatures(e.trackId)` e restituisce `null` sotto i 3 eventi con valence: senza feature il mood tracker non produce **nulla**. Consegnare la 2.1 così sarebbe un falso verde (la lezione 58-4). Un fallback su segnali inventati (opzione C) è escluso: la vision promette letture vere |
+| **D-A.2** | `return` e `seasonal` non erano specificati (pseudocodice `...`) | **Specificati** in §7.2, con `seasonalMinEvents` come nuovo parametro | L'AC della Story 2.4 chiede i **5** tipi; ridurli a 3 riscriverebbe l'AC. Le formule sono naturali: il silenzio dell'artista e la concentrazione stagionale su 12 mesi |
+| **D-A.3** | `first_time`: "≥5 brani" o "≥5 ascolti"? | **5 brani distinti** (`firstTimeMinTracks`) | L'AC dice "brani", il pseudocodice contava gli ascolti: un artista con un solo brano ascoltato 5 volte non è "significativo" |
+| **D-A.4** | Il `text` del ricordo: stringa resa o chiave i18n? | **Stringa resa** alla generazione, con il **template** i18n in `08` (`insight.memory.*`) | `MemoryPayload.text` è APPROVED e non viene toccato; il ricordo è uno **snapshot** e la lingua in cui è stato scritto è parte della memoria. La generazione resta i18n: nessuna stringa italiana inline |
+| **D-A.5** | Il perimetro dell'implementazione | **Orchestratore minimale estensibile**: solo i generatori della tranche | Le Story 2.2/2.3 hanno AC e issue proprie; implementarle qui le renderebbe implicite. Il pattern è quello del registry dei sink (ADR-0011 V1): il contratto resta, i generatori si aggiungono |
+
+**Effetti sulle regole già scritte**: D-A.2 e D-A.3 modificano **§7.2** (i due
+algoritmi mancanti e il criterio di `first_time`), D-A.3 e D-A.2 modificano
+**§7.3** e **§9** (i parametri), D-A.4 aggiunge **§7.3.1** (il testo dei
+ricordi) e un namespace in `08-COPY-I18N.md`, D-A.5 aggiunge **§8.1** (il
+perimetro della tranche).
+
+---
+
+## 12. Perimetro e dipendenze di questa versione
+
+| Storia | Stato dopo questa ratifica | Dipendenza |
+|--------|---------------------------|------------|
+| **2.4 — Memory Engine** | 🟢 **implementabile subito** | solo gli ascolti, i brani e gli artisti |
+| **2.1 — Mood Tracker** | ⛔ **in attesa** | le **audio features** (valence, energy) dell'**EPIC 4.1**, che non sono implementate: senza feature il mood tracker non può produrre insight (D-A.1) |
+
+Il codice del mood tracker (§3) **resta specificato** in questa versione: quando
+l'EPIC 4.1 porterà le features, la Story 2.1 si implementa senza altre
+decisioni. Nel frattempo l'issue della 2.1 resta aperta e **non** candidabile.
+
+**L'EPIC 4.1 ha bisogno di una spec propria** (come la Story 1.5 ebbe
+`20-SCROBBLING-HUB.md`): il provider delle audio features (Essentia.js), il suo
+costo, la privacy delle feature e il loro stoccaggio sono decisioni che non
+appartengono a `04`.
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 4 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: §4.2 `computeCircadianPattern`/`Weekly`/`Seasonal` estesi con tutti i campi `PatternPayload` (`02§4` v1.1) — `peakDay`, `peakMonth`, `weekendShare`, `userTimezone`; campi non applicabili esplicitamente `null`; §4.5 invarianti aggiornate |
+| 1.0 | Sessione 59 (2026-10-28, issue #178) | 🟢 APPROVED — **ratifica del Boss al merge della PR**: le cinque decisioni aperte (§11, D-A.1…D-A.5) sono chiuse **come proposte**. **§7.2**: `return` e `seasonal` sono specificati (il silenzio è l'ultimo ascolto precedente dell'artista; la concentrazione stagionale è calcolata su 12 mesi) e `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3); **§7.3**: i parametri allineati (`firstTimeMinTracks`, `seasonalMinEvents`) e il parametro `returnMinGapDays` dichiarato; **§7.3.1** (nuova): il `text` del ricordo è una stringa **resa** alla generazione con il template i18n `insight.memory.*` (D-A.4), non una chiave né una stringa italiana inline; **§8.1** (nuova): il perimetro della tranche — orchestratore minimale estensibile, solo i generatori implementati (D-A.5); **§9**: il registro dei parametri allineato; **§11** (nuova): le cinque decisioni con la motivazione; **§12** (nuova): il perimetro — la **Story 2.4** è implementabile subito, la **Story 2.1** aspetta le **audio features dell'EPIC 4.1** (D-A.1). Le formule, i parametri e i vinanti di §1…§10 restano quelli di v0.2, salvo le modifiche elencate |
 
 
 ===== FILE: docs/05-ARCHITECTURE.md =====
@@ -15746,6 +16204,13 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 
 ### 2.15 `insight.*`
 
+I template degli insight: umore, eventi e **ricordi**. Le chiavi dei ricordi
+(`memory.*`) sono **vincolanti** dalla ratifica di `04-ANALYSIS-ALGORITHMS.md`
+v1.0 🟢 (§7.3.1, decisione D-A.4): il `text` del ricordo è una **stringa resa**
+alla generazione — il ricordo è uno snapshot e la lingua in cui è stato scritto
+è parte della memoria — ma il **template** è internazionalizzato, e la
+generazione non scrive mai stringhe italiane inline.
+
 | Key | IT | EN |
 |-----|----|----|
 | `mood.happy` | La tua musica è stata prevalentemente felice | Your music was mostly happy |
@@ -15762,6 +16227,7 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 | `memory.on_this_day` | {years} anni fa ascoltavi "{track}" di {artist} | {years} years ago you were listening to "{track}" by {artist} |
 | `memory.first_time` | {years} anni fa scoprivi {artist} | {years} years ago you discovered {artist} |
 | `memory.milestone.events` | Hai raggiunto {count} brani ascoltati! | You reached {count} tracks listened! |
+| `memory.milestone.artists` | Hai raggiunto {count} artisti unici! | You reached {count} unique artists! |
 | `memory.milestone.hours` | Hai raggiunto {count} ore di ascolto! | You reached {count} hours of listening! |
 | `memory.return` | Non ascoltavi {artist} da {months} mesi | You hadn't listened to {artist} for {months} months |
 | `memory.seasonal` | Come ogni {month}, è tornato il periodo {genre} | Like every {month}, the {genre} period is back |
@@ -16423,7 +16889,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.17 · Sessione 58 (2026-10-28, issue #173) · **Story 1.5 implementata**: contratto `ScrobbleSink`, coda `scrobbleOutbox` (schema Dexie v5), sink Last.fm/ListenBrainz, filtro di eleggibilità, sync incrementale, pannello UI e i **31** casi di test della spec
+> Status: 🟢 APPROVED · Versione 1.6.18 · Sessione 59 (2026-10-28, issue #178) · **`04-ANALYSIS-ALGORITHMS.md` ratificata** (v1.0 🟢 APPROVED): la Story **2.4** (Memory Engine) è implementabile, la **2.1** (Mood Tracker) aspetta le audio features dell'EPIC 4.1
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -16775,8 +17241,10 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.1 — Mood Tracker giornaliero `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
 
+**Stato**: ⛔ **bloccata** dalle **audio features** (EPIC 4.1, non implementate): `04§3.3` legge `getAudioFeatures(e.trackId)` e senza valence/energy non produce alcun insight (decisione **D-A.1**, issue #178, ratifica del 2026-10-28). Il codice è specificato in `04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED** (§3): quando l'EPIC 4.1 porterà le feature, la story si implementa senza altre decisioni.
+
 **Acceptance criteria**:
-- [ ] Formula specificata in `04-ANALYSIS-ALGORITHMS.md` (da scrivere Sessione 4)
+- [x] Formula specificata in `04-ANALYSIS-ALGORITHMS.md` (Sessione 4; **ratificata** in v1.0 🟢 il 2026-10-28, §3.2-§3.6)
 - [ ] Insight tipo `mood_day` persistito con `derivedVersion`
 - [ ] Test su fixture con scenario noto
 
@@ -16802,10 +17270,12 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.4 — Memory Engine `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
 
+**Stato**: ⬚ TODO — **implementabile dal 2026-10-28**: la spec `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED** (ratifica del 2026-10-28, issue #178) e i **trigger dei 5 tipi** sono specificati (§7.2, con le formule di `return` e `seasonal` e il criterio dei 5 brani distinti per `first_time`: decisioni **D-A.2** e **D-A.3**). I template i18n dei ricordi sono **già dichiarati** in `08-COPY-I18N.md` §2.15 (`memory.*`): il testo è una stringa **resa alla generazione** (D-A.4).
+
 **Acceptance criteria**:
-- [ ] 5 tipi di ricordo (on_this_day, first_time, milestone, return, seasonal)
-- [ ] Trigger documentati in `04-ANALYSIS-ALGORITHMS.md`
-- [ ] Feed ricordi ordinato per rilevanza
+- [x] 5 tipi di ricordo (on_this_day, first_time, milestone, return, seasonal) — specificati in `04§7.2` (v1.0 🟢)
+- [x] Trigger documentati in `04-ANALYSIS-ALGORITHMS.md` (§7.2, ratificati)
+- [ ] Insight `memory` persistito con `derivedVersion` e feed ordinato per rilevanza (§7.4)
 
 ---
 
@@ -16947,7 +17417,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
 9. **1.4** Dedup promozione
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
-11. **2.1, 2.4** analisi base
+11. **2.4** analisi base (prima) · **2.1** dopo l'EPIC 4.1: il mood tracker ha bisogno delle audio features, che non sono implementate (D-A.1, issue #178)
 12. **2.2, 2.3** analisi avanzata
 13. **4.1, 4.2** enrichment
 14. **3.1, 3.2, 3.3** UI
@@ -17022,6 +17492,8 @@ Ogni story deve avere label GitHub:
 | 1.6.15 | Sessione 56 (2026-10-27, issue #168) | **ADR-0011 ratificata**: il merge della PR #170 (`8900c3b`) è la ratifica del Boss → `docs/13-ADR/0011-scrobble-sink.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**, **nessuna modifica di contenuto** (stesso pattern di ADR-0010, PR #152). La decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`) e i vincoli V1-V10 diventano vincolanti: `05§4.2` è la loro sede e `05` header aggiornato. Allineati: `docs/INDEX.md` (riga `13-ADR/`, conteggio ADR APPROVED 8 → **9**, DRAFT solo 0009, riga `11`, "Prossimo step tecnico"); `docs/11-BACKLOG.md` (Story 1.5 `**Stato**:` con la dipendenza **soddisfatta**, AC della dipendenza `[x]`, `**Spec**:` e `**Issue**:`; riga roadmap; header v1.6.15); `docs/18-DEV-LOG.md` §22 (ratifica) + changelog 2.3; `docs/state/sessions/56-*.md` (frontmatter: `state: 🟢`, `merged: true`, merge commit `8900c3b`); `docs/state/_index.md`; `docs/20-SCROBBLING-HUB.md` §18 punto 1 chiuso (restano i punti 2-5). La story resta `⬚ TODO`: manca solo la **ratifica della spec** (punti aperti 2-5 di `20§18`) |
 | 1.6.16 | Sessione 57 (2026-10-27, issue #172) | **Spec della Story 1.5 ratificata**: `docs/20-SCROBBLING-HUB.md` passa da 🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le **quattro decisioni aperte** (`20§18` punti 2-5) chiuse come proposte in **D-SH.11…D-SH.14** (§2.1): md5 in JS puro (nessuna dipendenza nuova), finestra di candidatura a 7 giorni + azione esplicita per tutta la cronologia, durata ignota → soglia dei 4 minuti con fiducia nella fonte per gli eventi importati da un hub, modalità del proxy dichiarata dall'utente (`solo lettura` / `lettura + scrittura`). La ratifica **modifica regole normative** (T-SH.3, T-SH.4, E.SH.10, E.SH.11, la finestra, la modalità proxy): a differenza della promozione dell'ADR-0011, qui non è una promozione senza contenuto. **Allineati i documenti che la spec tocca** (atto dichiarato dall'ADR-0011 §"Documenti da aggiornare"): `02-DATA-SCHEMA.md` §3.8 (`ScrobbleHubId`) e §6.2 (`scrobbleOutbox`, schema Dexie v5), `09-PRIVACY-SECURITY.md` §3.3 e §4 (payload chiuso per costruzione, inventario), `08-COPY-I18N.md` §1 e §2.16 (i 15 codici `scrobble.*`), `03-ADAPTERS/lastfm.md` §4 (E.LF.21) e §10 (proxy in scrittura), `03-ADAPTERS/listenbrainz.md` D-LB.5 e §3.4, `01-PLATFORMS.md` §3.7-3.9. Difetti corretti: `02-DATA-SCHEMA.md` aveva la riga di changelog v1.5 **appesa in cima al file** (come `05-ARCHITECTURE.md` nella Sessione 56) e l'header fermo a v1.3; cinque documenti dichiaravano nell'header una versione più vecchia del proprio changelog — header allineati ovunque. **Issue di implementazione aperta: #173** (`agent-ready`, `size:L`). La story resta `⬚ TODO` fino al merge della PR |
 | 1.6.17 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 implementata**: la sezione Story passa a ✅ DONE e l'issue #173 (implementazione, `agent-ready`, `size:L`) è chiusa con `status:done` al merge della PR #176. Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink` (`packages/core/src/adapters/scrobble/types.ts`), registry dei sink, sink Last.fm (firma `api_sig` md5 in JS puro, batch 50, POST via proxy, mappa errori) e ListenBrainz (`POST /1/submit-listens`, `listen_type: import`, `User-Agent`, rate limit 1 req/s), tabella `scrobbleOutbox` (schema Dexie **v5**, PK `hub\|eventKey`, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con la regola di maturità **D-SH.13**, `parseRemote?()` incrementale su `/1/user/{u}/listens` con cursore persistito, percorso web auth Last.fm (token → session key), pannello UI (selettore per-hub, modalità del proxy, vista della coda) e namespace i18n `scrobble` (15 codici). **31 casi di test** della spec `20§14.3` coperti (267 test in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 dichiarata parzialmente soddisfatta**: la parte MBID → DEDUP-2 è coperta dal pipeline esistente, la parte `track.genres` via lookup MusicBrainz dipende dall'enrichment (EPIC 4, non implementato) e va aperta come issue dedicata. La riga della 1.5 è rimossa dalla roadmap delle story non completate e il conteggio legacy dell'EPIC 1 passa a **5/5** |
+| 1.6.18 | Sessione 59 (2026-10-28, issue #178) | **Spec dell'analisi ratificata**: `docs/04-ANALYSIS-ALGORITHMS.md` passa da 🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le cinque decisioni aperte chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.1** (mood tracker) **aspetta le audio features dell'EPIC 4.1** (senza valence/energy non produce insight: consegnarla sarebbe un falso verde), la **Story 2.4** (Memory Engine) è **implementabile subito**; `return` e `seasonal` sono specificati in §7.2 (D-A.2), `first_time` passa a **5 brani distinti** (D-A.3), il `text` del ricordo è una **stringa resa** con i template i18n già dichiarati in `08§2.15` (D-A.4), e l'orchestratore è **minimale ed estensibile** (D-A.5, §8.1). Allineati: `08-COPY-I18N.md` §2.15 (i template `memory.*` dichiarati vincolanti + la chiave `memory.milestone.artists`), le sezioni Story 2.1 e 2.4 e la lista di priorità degli agenti. **Issue di implementazione #179** aperta per la 2.4 (`agent-ready`, `size:M`) |
+
 
 <!-- AGGREGATE-STORIES-START -->
 
