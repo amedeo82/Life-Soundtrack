@@ -2,10 +2,10 @@
 number: 58
 title: "Story 1.5 - scrobbling hub: contratto, coda, sink, UI e sync"
 date: 2026-10-28
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "bfb5946bd547fed46fb32be2638e1f5785f4b579"
+merged_date: 2026-10-28
 branch: feat/173-story-1-5-scrobbling-hub
 pr: 176
 claim: kilo-hp-elitebook-41xb
@@ -115,6 +115,24 @@ l'array `$files` di `scripts/generate-bundle.ps1` (bundle: 98 → 100 file).
 - `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — i due fixture nuovi e la
   sessione 58
 - `README.md` — la prosa: la Story 1.5 non è più "non ancora implementato"
+
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T13:56:09Z (PR #176, merge commit `bfb5946`).
+L'issue **#173** è chiusa con `status:done` e la **Story 1.5 è `done`**: il
+percorso di scrittura verso Last.fm e ListenBrainz è consegnato.
+
+Automazioni post-merge: `auto-status-done` (status:done su #173),
+`auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` e
+`auto-bundle` (blocchi rigenerati). Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+**AC-SH.11 resta parzialmente soddisfatto** (dichiarato, non nascosto): la parte
+MBID → DEDUP-2 è coperta dal pipeline esistente, la parte `track.genres` via
+lookup MusicBrainz dipende dall'enrichment (EPIC 4, non implementato) e va
+aperta come issue dedicata quando l'EPIC 4 parte.
 
 ## Cross-refs
 

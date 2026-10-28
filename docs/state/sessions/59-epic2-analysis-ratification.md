@@ -2,12 +2,12 @@
 number: 59
 title: "Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1"
 date: 2026-10-28
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "5f725e36be94bd1d604ea8370661577690cb954b"
+merged_date: 2026-10-28
 branch: feat/178-epic2-analysis-ratification
-pr: 0
+pr: 181
 claim: kilo-hp-elitebook-41xb
 cross_refs: [178, 179, 180]
 tags: [docs, spec, analysis, phase-2]
@@ -111,6 +111,25 @@ posizione (l'ordine è storico, non cronologico).
 - `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — i tre file nuovi
 - Issue **#179** (implementazione della 2.4, `agent-ready`) e **#180** (la 2.1,
   `needs-spec`)
+
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T14:28:05Z (PR #181, merge commit `5f725e3`).
+L'issue **#178** è chiusa con `status:done` e
+`docs/04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED**: la Story 2.4 è
+implementabile (issue **#179**, `agent-ready`) e la Story 2.1 resta bloccata dalle
+audio features dell'EPIC 4.1 (issue **#180**, `needs-spec`).
+
+Automazioni post-merge: `auto-status-done` (status:done su #178),
+`auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` e
+`auto-bundle` (blocchi rigenerati). Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+Il doc-sync di chiusura (frontmatter con `pr`, `merged: true` e merge commit)
+è in una PR `docs:` separata: il numero della PR si conosce solo dopo
+l'apertura, e il merge commit solo dopo il merge.
 
 ## Cross-refs
 
