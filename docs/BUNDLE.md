@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-28 14:39
-> Totale file: 104
+> Data: 2026-10-28 16:16
+> Totale file: 105
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.27 — Sessione 54 (2026-10-27)**
+> **Versione 1.28 — Sessione 60 (2026-10-28)**
 
 ---
 
@@ -880,7 +880,7 @@ Esempi di obbligo concreto:
 - L'elenco delle piattaforme importabili (sottosezione "Piattaforme importabili" dentro "Cosa c'è oggi") deve corrispondere **esattamente** a `ACTIVE_PLATFORMS` in `apps/web/src/onboarding/OnboardingRouter.tsx`; ogni piattaforma deve avere una factory in `ADAPTER_FACTORIES` e una classe adapter in `packages/core/src/adapters/`.
 - Una capability **non ancora implementata** (analisi, mood, ricordi, enrichment, audio features, valence, danceability, BPM) si dichiara **solo nella sezione roadmap**, mai come feature presente.
 - La sezione "Stato del progetto" **non duplica conteggi** (`N/M`): i conteggi vivono nei blocchi aggregati di `docs/INDEX.md` e `docs/11-BACKLOG.md`; lì si mette un **puntatore**, non una copia (è l'anti-pattern sopra, applicato al README).
-- Il blocco NEXT-STEP elenca la prima story non completata **fra quelle già migrate** in `docs/state/stories/`: non è la roadmap. La prosa del README deve rendere esplicito questo punto, perché il lettore del repository cerca lì la "prossima story".
+- Il blocco NEXT-STEP elenca la prima story **lavorabile** fra quelle già migrate in `docs/state/stories/`: non è la roadmap. Sono escluse le story `done` (completate), `blocked` (bloccate da una dipendenza esterna) e `wontdo` (scope cancellato): il blocco deve indicare **la prossima story da implementare**, non un vicolo cieco (issue #182). La prosa del README deve rendere esplicito questo punto, perché il lettore del repository cerca lì la "prossima story".
 
 **Il gate**: `node scripts/check-readme-facts.mjs` — exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). È **bloccante in CI** (`.github/workflows/ci.yml`, step "Fatti del README in sync con il codice") e **non ha una modalità di scrittura**: è un verificatore, non un generatore. Un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dall'issue #149.
 
@@ -1012,6 +1012,8 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 - Per ambiguità di specifica: issue `needs-spec`
 
 ---
+
+*Ultimo aggiornamento: v1.28 — il blocco NEXT-STEP del README indicava una story **bloccata** (issue #182). `scripts/aggregate-state.ps1` filtra ora anche `blocked` (STOP) e `wontdo` (NO) accanto a `done`: il blocco indica la prima story **lavorabile**, non una dipendenza esterna irrisolvibile. Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle audio features dell'EPIC 4.1 (decisione D-A.1, Sessione 59) e il puntatore era finito su di lei, mentre la story implementabile era la 2.4 (Memory Engine, issue #179). La regola è coperta da due sub-test nuovi in `scripts/test-aggregate-determinism.sh` (T10e, T10f) che **falliscono senza il fix**: un gate che passa sempre non è un gate (lesson 43-1). Il messaggio di fallback e la riga delle "altre candidate" dicono ora "non-done e non bloccate".
 
 *Ultimo aggiornamento: v1.27 — la prosa del `README.md` non aveva **nessun gate** (Sessione 54, issue #161). Il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti: le classi adapter non ci sono), audio features e analisi/mood/ricordi come feature presenti (nessuna implementata), e un conteggio di stato (`EPIC 0 7/7`) che l'aggregatore ricalcola altrove; la prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14), perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice. Fallimento **silenzioso**: pipeline verde, README falso. La causa radice era di ownership: `README.md` è un file ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) ma la regola di D.38.1 copriva solo i file globali, e il README non era in nessuna tabella di ownership. Aggiunti:
 - `scripts/check-readme-facts.mjs` (nuovo): gate **read-only** che confronta la prosa del README con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` (`apps/web/src/onboarding/OnboardingRouter.tsx`) e con le classi in `packages/core/src/adapters/`; vieta le capability non implementate fuori dalla sezione roadmap; vieta i conteggi duplicati in prosa. Exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). **Nessuna modalità di scrittura**: un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dal #149
@@ -7742,6 +7744,29 @@ mezzo del lavoro.
 - Sessione: `docs/state/sessions/59-epic2-analysis-ratification.md`
 - Precedenti: `#164` (spec della Story 1.5) · `#168` (ADR-0011) · `#172` (decisioni aperte)
 
+## 26. Issue #182 — il blocco NEXT-STEP indica solo story lavorabili (Sessione 60)
+
+**Tipo**: tooling (`scripts/`) + documentazione — issue #182, claim `kilo-hp-elitebook-41xb`
+**Branch**: `feat/182-next-step-skip-blocked` (worktree `ls-182-next-step-skip-blocked`)
+**PR**: #183
+**Data**: 2026-10-28
+**Stato**: ✅ completata — il blocco NEXT-STEP del README indica la **2.4** (Memory Engine) invece della **2.1**, bloccata dalle audio features dell'EPIC 4.1
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 26-1 | P | Il blocco NEXT-STEP indicava la **Story 2.1**, che è **bloccata** dalle audio features dell'EPIC 4.1 (decisione D-A.1): il lettore del repository trovava un puntatore a una story non lavorabile, mentre la implementabile era la 2.4 | Il filtro di `Build-Block-NextStep` escludeva solo `done`. Il valore `blocked` esisteva nella macchina a stati (`11-BACKLOG.md`, ADR-0007) e nei label GitHub, ma **non** era mai comparso in un `docs/state/stories/*.md`: il primo file che lo usa (la 2.1, Sessione 59) ha reso visibile il disallineamento | Il filtro esclude ora `done`, `blocked` e `wontdo`; restano `todo`, `in_progress` e `in_review` (in lavorazione, non bloccate). Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**" | `scripts/aggregate-state.ps1` |
+| 26-2 | P | I **valori** di `status` non erano documentati nello schema dello state: `docs/state/_index.md` elencava gli **emoji** (🟡/⬚/👀/✅/❌/🛑) senza i valori che l'agregator confronta | Lo schema riportava `status: done` come esempio con l'elenco degli emoji; i valori ascii vivevano solo in `11-BACKLOG.md` §"Stato di una Story" | Lo schema elenca ora i sei valori: `todo` / `in_progress` / `in_review` / `done` / `blocked` / `wontdo` | `docs/state/_index.md` §"Schema frontmatter" |
+| 26-3 | P | Il blocco poteva **contraddirsi**: la prosa diceva "non-done" mentre la lista escludeva anche le bloccate | La frase del blocco generato è **prosa**, e sottoposta al gate del README solo per i fatti dichiarati nella prosa del file | La frase ora nomina il filtro ("non-done e non bloccate"): se il conteggio cambia, la frase che lo descrive cambia con lui | `scripts/aggregate-state.ps1` · `AGENTS.md` §"Ownership del `README.md`" |
+
+**Lesson learned sintetica**: un blocco generato che indica **"cosa fare dopo"** è un gate di lavoro, non un riepilogo: bastava una story `blocked` in cima alla lista per trasformarlo in un vicolo cieco, e nessun gate lo segnalava — il gate confrontava il blocco con il **calcolo**, non il calcolo con la **realtà**. E la lezione sulle macchine a stati: `blocked` e `wontdo` esistevano da prima (nei label GitHub, in ADR-0007, nello stato delle issue) ma **mai** in un file di stato: le nuove regole si scoprono dai dati, non dai documenti.
+
+### Link utili
+
+- Branch: `feat/182-next-step-skip-blocked` (worktree `ls-182-next-step-skip-blocked`)
+- Issue: **#182** (`size:S`, `area:devops`), claim `kilo-hp-elitebook-41xb`
+- Sessione: `docs/state/sessions/60-next-step-skip-blocked.md`
+- Precedenti: **#178** (la ratifica che ha creato la prima story `blocked`) · **#179** (la 2.4, ora indicata dal blocco) · **#180** (la 2.1, bloccata)
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -7770,6 +7795,7 @@ mezzo del lavoro.
 | 2.4 | 2026-10-27 (issue #172) | **§23 Issue #172 — ratifica della spec Scrobbling hub** (Sessione 57, claim `kilo-hp-elitebook-41xb`, PR #174): 5 lesson (23-1 la stessa classe di difetto della Sessione 56 — la riga di changelog appesa **prima del titolo** — si era riprodotta in `02-DATA-SCHEMA.md`: la scansione di tutti i `.md` di `docs/` (prima riga che comincia con `| <version> |`) è il rilevatore economico della classe; 23-2 l'header di un documento è una **seconda fonte di verità**: cinque documenti dichiaravano una versione più vecchia del proprio changelog, e nessun gate li confronta; 23-3 **ratificare una spec non è promuoverla**: chiudere i punti aperti modifica regole normative (T-SH.3, T-SH.4, E.SH.10, E.SH.11, finestra, modalità proxy) e le modifiche vanno **dichiarate**, perché la regola "i documenti APPROVED non si modificano su una spec DRAFT" ha senso solo se l'effetto è esplicito; 23-4 una regola di default va giudicata su **quanti utenti reali la superano**: "durata ignota → non maturo" era la più prudente e la meno utile (escludeva la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz) → D-SH.13 soglia dei 4 minuti + fiducia nella fonte; 23-5 issue di decisioni e issue di implementazione nate nella stessa sessione: la transizione `needs-spec` → `agent-ready` è avvenuta solo con l'assegnazione esplicita del project owner, e le due issue hanno esiti opposti — #172 chiusa con `status:done`, #173 aperta `agent-ready`). `docs/20-SCROBBLING-HUB.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le quattro decisioni chiuse come **D-SH.11…D-SH.14** (§2.1): md5 in JS puro, finestra a 7 giorni + azione esplicita, soglia dei 4 minuti con fiducia nella fonte, modalità del proxy dichiarata. Allineati i documenti che la spec tocca (`02§3.8`+`§6.2`, `09§3.3`+`§4`, `08§1`+`§2.16`, `03-ADAPTERS/lastfm.md` §4+§10, `03-ADAPTERS/listenbrainz.md` §3.4+D-LB.5, `01§3.7-3.9`), i casi di test da 29 a **31**. Aperti `docs/state/stories/1.5-scrobbling-hub.md` e l'**issue di implementazione #173** (`agent-ready`, `size:L`) |
 | 2.5 | 2026-10-27 (issue #172) | **§23 — esito post-merge della ratifica**: la PR #174 è **merged** (`4abb73e`, 2026-10-27T16:59:24Z) → `docs/20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** e l'issue #172 è chiusa con `status:done`. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 57 con `pr: 174`, `merged: true` e merge commit, più la sezione "Esito post-merge"): il numero della PR non era noto quando il file è stato scritto, e D.21.1 vuole il doc-sync **nel branch della PR** — impossibile per il PR number, che si conosce solo dopo l'apertura. L'alternativa (scrivere `pr: 0` e correggere dopo) è quella scelta, ed è la ragione per cui il blocco aggregato mostrava "PR #0" per la Sessione 57. Automazioni: `auto-status-done` (status:done su #172), `auto-branch-cleanup`, `auto-state-aggregate` (`c27fc1f`), `auto-bundle` (`4002520`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
 | 2.6 | 2026-10-28 (issue #173) | **§24 Issue #173 — Story 1.5 implementata** (Sessione 58, claim `kilo-hp-elitebook-41xb`, PR #176): 6 entry (24-1 il **test di performance** misurava il **carico del runner**, non il layer DB: con tre file di test in più la suite parallela faceva superare la soglia locale di 500 ms, e la verifica decisiva fu togliere i file nuovi con la tabella già presente → il test gira ora in una **run separata**, con la soglia dell'AC invariata; 24-2 `db/health.ts` dichiarava la versione attesa 4 mentre lo schema corrente è **5** (falso "schema sotto l'attesa"); 24-3 `db.test.ts` contava 13 tabelle: `scrobbleOutbox` è la 14ª; 24-4 il tipo di dominio `ScrobbleHubId` sta in `schema/index.ts` perché il **db non deve dipendere dagli adapter** (`05§9.2` parla di package, non di moduli: il ciclo fra moduli nessun gate lo misura); 24-5 i brani si risolvono con una **scansione** (`tracks` ha PK `canonicalKey`, `id` non è indicizzato), come in `db/orphan-cleanup.ts`; 24-6 il delay di retry del protocollo è una **capacità opzionale** del sink (`retryDelayMs()`), così il contratto approvato `05§4.2` resta intatto e il protocollo resta nel sink (V9)). Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink`, registry, sink Last.fm (md5 JS puro, batch 50, POST via proxy) e ListenBrainz (`submit-listens`), coda `scrobbleOutbox` (schema Dexie v5, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con D-SH.13, `parseRemote?()` incrementale con cursore persistito, web auth Last.fm, pannello UI, namespace i18n `scrobble`; **31 casi di test** coperti (267 in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 parzialmente soddisfatto** (MBID → DEDUP-2 ✓; `track.genres` via MusicBrainz ✗ → EPIC 4) |
+| 2.10 | 2026-10-28 (issue #182) | **§26 — il blocco NEXT-STEP indica solo story lavorabili** (Sessione 60, claim `kilo-hp-elitebook-41xb`, PR #183): il filtro di `Build-Block-NextStep` esclude ora `done`, **`blocked`** e **`wontdo`** — il puntatore passava dalla **2.1** (bloccata dalle audio features dell'EPIC 4.1, decisione D-A.1) alla **2.4** (Memory Engine, issue #179), la story implementabile. Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**": se il conteggio cambia, la frase che lo descrive cambia con lui. Il valore `blocked` esisteva nella macchina a stati (ADR-0007, `11-BACKLOG.md`) ma **mai** in un `docs/state/stories/*.md`: il primo file che lo usa (la 2.1, Sessione 59) ha reso visibile il disallineamento. Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i **valori** di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g nuova). Test: `scripts/test-aggregate-determinism.sh` **37 assert** (T10e e T10f nuovi, verificati in entrambe le direzioni: senza il fix 4 assert falliscono) |
 | 2.7 | 2026-10-28 (issue #178) | **§25 Issue #178 — ratifica della spec dell'analisi** (Sessione 59, claim `kilo-hp-elitebook-41xb`, PR #181): 4 entry (25-1 i **template i18n dei ricordi esistevano già** (`08§2.15`) e la prima stesura della ratifica li **rinominava** con parametri diversi: una spec che ratifica non può rinominare un contratto già dichiarato — le formule sono state riallinate alle chiavi esistenti e `08§2.15` le dichiara vincolanti; 25-2 il ricordo **stagionale** era per artista nella spec e per genere nel template: decisione D-A.7 (per genere, con l'informazione nel `text` reso); 25-3 la sezione dei template era stata inserita come **§2.13** in collisione con `error.*`: rimossa e la nota di vincolanza messa dentro §2.15; 25-4 la **Story 2.1** dipendeva dalle **audio features** (EPIC 4.1) senza che nessun documento lo dicesse: la dipendenza è ora in `04§12`, nel backlog e nell'issue #180 — consegnare la 2.1 senza feature sarebbe stato un falso verde). `docs/04-ANALYSIS-ALGORITHMS.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le cinque decisioni chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.4** (Memory Engine) è implementabile (issue **#179**, `agent-ready`), la **Story 2.1** (Mood Tracker) aspetta le audio features dell'EPIC 4.1 (issue **#180**, `needs-spec`). Allineati `08-COPY-I18N.md` §2.15 (v0.7), `11-BACKLOG.md` (Story 2.1/2.4, priorità agenti, v1.6.18), `docs/INDEX.md` (riga 04, conteggi legacy), `docs/state/` (sessione 59 + le story 2.1 e 2.4) |
 | 2.8 | 2026-10-28 (issue #173) | **§24 — esito post-merge della Story 1.5**: la PR #176 è **merged** (`bfb5946`, 2026-10-28T13:56:09Z) → l'issue #173 è chiusa con `status:done` e la story 1.5 è `done`: il percorso di scrittura verso Last.fm e ListenBrainz è consegnato. Doc-sync di chiusura (frontmatter della Sessione 58 con `merged: true` e merge commit, `merged_commit`/`merged_date` della story 1.5, §24 aggiornato). Automazioni: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` (`669cc82`), `auto-bundle` (`6388d12`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`). **AC-SH.11 resta parzialmente soddisfatto**: `track.genres` via lookup MusicBrainz dipende dall'enrichment (EPIC 4) |
 | 2.9 | 2026-10-28 (issue #178) | **§25 — esito post-merge della ratifica della spec dell'analisi**: la PR #181 è **merged** (`5f725e3`, 2026-10-28T14:28:05Z) → l'issue #178 è chiusa con `status:done` e `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED**. Doc-sync di chiusura (frontmatter della Sessione 59 con `merged: true`, merge commit e `pr: 181`, sezione "Esito post-merge"). Le issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, `needs-spec`: bloccata dalle audio features dell'EPIC 4.1) restano aperte e non transizionate: sono il lavoro di altri |
@@ -7904,7 +7930,7 @@ id: "0.5"                            # story-id (stringa con punto)
 title: "PWA e service worker"
 phase: 0                             # numero fase
 area: devops                         # area:adapter / area:devops / area:ui / area:db / ...
-status: done                         # 🟡/⬚/👀/✅/❌/🛑 (vedi 11-BACKLOG §"Stato di una Story")
+status: done                         # todo / in_progress / in_review / done / blocked / wontdo (vedi 11-BACKLOG §"Stato di una Story")
 priority: B                          # B=blocker / I=important / L=later
 depends_on: ["0.1"]                  # lista story-ids prerequisite
 branch: feat/7-pwa-and-service-worker
@@ -7981,6 +8007,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/57-scrobbling-hub-spec-approval.md` | ✅ creata | Sessione 57 (issue #172): **ratifica della spec `20-SCROBBLING-HUB.md`** (v1.0 🟢 APPROVED) con le quattro decisioni chiuse (D-SH.11…D-SH.14) + allineamento dei documenti toccati + apertura dell'issue di implementazione **#173** — **merged** (PR #174, `4abb73e`), issue #172 chiusa con `status:done` |
 | `state/sessions/58-scrobbling-hub-implementation.md` | ✅ creata | Sessione 58 (issue #173): **implementazione della Story 1.5** — contratto `ScrobbleSink`, coda `scrobbleOutbox` (schema Dexie v5), sink Last.fm e ListenBrainz, filtro di eleggibilità (D-SH.13), sync incrementale, web auth, pannello UI e i 31 casi di test della spec |
 | `state/sessions/59-epic2-analysis-ratification.md` | ✅ creata | Sessione 59 (issue #178): **ratifica della spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md` v1.0 🟢 APPROVED) con le cinque decisioni chiuse (D-A.1…D-A.5) + apertura delle issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, bloccata dalle audio features EPIC 4.1) |
+| `state/sessions/60-next-step-skip-blocked.md` | ✅ creata | Sessione 60 (issue #182): il blocco NEXT-STEP del README indica solo story **lavorabili** (esclude `done`, `blocked`, `wontdo`) — il puntatore è passato dalla 2.1 bloccata alla 2.4 implementabile |
 | `state/stories/1.5-scrobbling-hub.md` | ✅ creata | Story 1.5 (Scrobbling hub) — ✅ **done** (Sessione 58, issue #173): contratto `ScrobbleSink`, coda `scrobbleOutbox`, sink Last.fm/ListenBrainz, filtro di eleggibilità, sync incrementale, pannello UI, 31 casi di test |
 | `state/stories/2.1-mood-tracker.md` | ✅ creata | Story 2.1 (Mood Tracker) — ⛔ **blocked**: senza le audio features dell'EPIC 4.1 il mood tracker non produce insight (decisione D-A.1); issue #180 (`needs-spec`) |
 | `state/stories/2.4-memory-engine.md` | ✅ creata | Story 2.4 (Memory Engine) — ⬚ TODO, **implementabile**: spec `04` v1.0 🟢 APPROVED, i trigger dei 5 tipi specificati; issue #179 (`agent-ready`, `size:M`) |
@@ -10177,6 +10204,124 @@ l'apertura, e il merge commit solo dopo il merge.
 
 
 
+===== FILE: docs/state/sessions/60-next-step-skip-blocked.md =====
+
+---
+number: 60
+title: "Il blocco NEXT-STEP indica solo story lavorabili (issue #182)"
+date: 2026-10-28
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/182-next-step-skip-blocked
+pr: 0
+claim: kilo-hp-elitebook-41xb
+cross_refs: [182, 179, 180]
+tags: [devops, docs, phase-1]
+---
+
+# Sessione 60 — Il NEXT-STEP non deve indicare una story bloccata (issue #182)
+
+## Sintesi
+
+Il blocco `<!-- AGGREGATE-NEXT-STEP-* -->` del README indica **la prossima story da
+implementare**: con la Story 2.1 appena ratificata (Sessione 59) e **bloccata**
+dalle audio features dell'EPIC 4.1 (decisione D-A.1), il puntatore era finito su
+di lei — un vicolo cieco — mentre la story implementabile era la **2.4**
+(Memory Engine, issue #179).
+
+La correzione è in `scripts/aggregate-state.ps1`: il filtro esclude ora anche
+`blocked` (STOP) e `wontdo` (NO), oltre a `done` (già escluso). Restano elencate
+`todo`, `in_progress` e `in_review`: sono **in lavorazione**, non bloccate, e il
+blocco ricorda comunque come filtrare le candidate libere.
+
+## Trigger
+
+Issue **#182** (`agent-ready`, `size:S`, `area:devops`), aperta nella Sessione 59
+dopo la ratifica della spec dell'analisi: la ratifica aveva creato la prima story
+`blocked` del progetto (la 2.1), e la conseguenza immediata era il puntatore
+sbagliato nel README.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.60.1 | Il filtro esclude `done`, `blocked` e `wontdo` | Sono le tre condizioni in cui la story **non** è "da implementare": completata, bloccata da una dipendenza esterna, scope cancellato. Il blocco deve indicare ciò che è **lavorabile** |
+| D.60.2 | `in_progress` e `in_review` restano elencate | Sono *in lavorazione*, non bloccate: escluderle nasconderebbe il lavoro attivo. Il blocco dice comunque come filtrare le candidate libere (`gh issue list --label agent-ready --state open`) |
+| D.60.3 | Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**" | Il testo del blocco è la **prosa** del gate: se dice "non-done" e la lista esclude le bloccate, il testo mente. Il gate del README (D.161.1) vale per la prosa, non solo per i fatti |
+| D.60.4 | Il fix **non** committa i blocchi aggregati | ADR-0008: i blocchi sono scritti solo dall'aggregator. La PR tocca `scripts/aggregate-state.ps1` → il trigger di `auto-state-aggregate` scatta post-merge e rigenera il blocco NEXT-STEP. Il gate CI `-Check` è warning-only per il residuo #63 |
+| D.60.5 | Due sub-test nuovi (T10e, T10f) che **falliscono senza il fix** | Un gate che passa sempre non è un gate (lesson 43-1): il test è stato verificato in entrambe le direzioni (senza il fix: 4 assert falliti, exit 1; con il fix: 37/37) |
+
+## Difetti trovati lungo il percorso
+
+**Il blocco NEXT-STEP era una sorgente di verità parziale**: la regola "prima
+story non completata" era documentata in tre posti (`AGENTS.md`, `docs/12-DEVOPS.md`
+e il commento dello script) e nessuno dei tre ammetteva che una story potesse
+essere `blocked`: il valore esisteva già nella macchina a stati
+(`11-BACKLOG.md` §"Stato di una Story", 🛑) e **non** era mai comparso in un
+file di stato. Il primo file `state/stories/*.md` con `status: blocked` (la 2.1,
+Sessione 59) ha reso il disallineamento visibile.
+
+**I valori `status` non erano documentati nello schema**: `docs/state/_index.md`
+§"Schema frontmatter" dichiarava `status: done # 🟡/⬚/👀/✅/❌/🛑` — la lista
+degli **emoji** senza i **valori** (`todo` / `in_progress` / `in_review` / `done` /
+`blocked` / `wontdo`), che sono ciò che l'aggregator confronta. Ora i valori sono
+espliciti.
+
+## Verifica
+
+- `bash scripts/test-aggregate-determinism.sh` → **37 assert, 0 falliti** (era 34:
+  +3 dai sub-test T10e/T10f)
+- Contro-prova: senza il fix gli stessi test danno **4 falliti, exit 1**
+- `pwsh scripts/aggregate-state.ps1` (in locale) → il blocco NEXT-STEP passa da
+  **2.1** a **2.4** ✓
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `node scripts/check-readme-facts.mjs` → exit 0
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 60-1 | **Un blocco generato che indica "cosa fare dopo" è un gate di lavoro, non un semplice riepilogo.** Il NEXT-STEP non elenca la cronologia: indica **la prossima cosa da fare**. Bastava una story `blocked` in cima alla lista per trasformarlo in un vicolo cieco — e nessuno dei gate lo segnalava, perché il gate confrontava il blocco con il calcolo, non il calcolo con la **realtà** |
+| 60-2 | **Una macchina a stati che nessuno usa produce bug di stato.** `blocked` e `wontdo` esistevano nello stato delle issue (`11-BACKLOG.md`, ADR-0007) e nei label GitHub, ma **mai** in un `docs/state/stories/*.md`: il primo file che li usa ha fatto emergere che il filtro dell'aggregator ne era ignaro. Le nuove regole vanno scoperte dai dati, non dai documenti |
+| 60-3 | **La prosa di un blocco generato è soggetta allo stesso gate dei fatti.** Il messaggio diceva "non-done" mentre la lista escludeva le bloccate: un gate che confronta i numeri ma non le frasi lascia passare una contraddizione. La regola: se il **conteggio** cambia, la **frase** che lo descrive cambia con lui (lesson 58-4, la stessa forma sotto un altro nome) |
+| 60-4 | **Il fix di uno script di governance non si committa da solo**: la PR tocca `scripts/aggregate-state.ps1`, il trigger di `auto-state-aggregate` scatta post-merge e rigenera il blocco. Committare il blocco a mano nella PR avrebbe violato ADR-0008 e creato un conflitto con il bot |
+
+## Documenti aggiornati
+
+- `scripts/aggregate-state.ps1` — `Build-Block-NextStep`: il filtro esclude
+  `blocked` e `wontdo`; il messaggio di fallback e la riga delle altre candidate
+  dicono "non-done e non bloccate"; il commento di intestazione documenta la
+  regola
+- `scripts/test-aggregate-determinism.sh` — **T10e** (salta la story bloccata e
+  sceglie la prima lavorabile; la bloccata non compare fra le altre candidate) e
+  **T10f** (con sole story bloccate il fallback è esplicito); il grep di T10c
+  aggiornato al nuovo messaggio
+- `AGENTS.md` — v1.27 → **v1.28**: la regola del blocco NEXT-STEP nella sezione
+  "Ownership del `README.md`" + il footer cumulativo
+- `docs/state/_index.md` — i **valori** `status` nello schema frontmatter
+- `docs/12-DEVOPS.md` — **§9.8g** (nuova): la tabella degli stati e chi finisce
+  nel NEXT-STEP
+- `docs/18-DEV-LOG.md` — §26 (nuova) + changelog 2.8
+- `docs/11-BACKLOG.md` — la lista di priorità degli agenti (la prossima
+  candidate è la 2.4) + changelog 1.6.19
+- `docs/INDEX.md` — "Prossimo step tecnico"
+- `docs/state/sessions/60-next-step-skip-blocked.md` — **nuovo**
+- `docs/state/_index.md` — riga della Sessione 60
+- `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — la sessione 60
+
+## Cross-refs
+
+- **#182** — il blocco NEXT-STEP non deve indicare una story bloccata (claim
+  `kilo-hp-elitebook-41xb`)
+- **#179** — la Story 2.4, la candidate che il blocco indica **dopo** il fix
+- **#180** — la Story 2.1, la story bloccata che il blocco indicava **prima**
+- **#178** — la ratifica della spec dell'analisi (Sessione 59), che ha creato la
+  prima story `blocked` del progetto
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -11238,12 +11383,22 @@ function Build-Block-BundleInventory {
 # "Prossima sbloccata" che era andata in drift silenzioso (Story 0.2 chiuse
 # gia' con PR #4 merge `fa09b06` 2026-10-17 ma il README continuava a
 # dichiararla come prossima). Sorgente di verita' = `docs/state/stories/*.md`
-# (frontmatter `status`). L'aggregator:
+# (frontmatter `status`). L'agregator:
 #   1. elenca tutti i file in docs/state/stories/
 #   2. filtra quelli con status != done (incluse le entry mancanti, trattate come todo)
 #   3. ordina per Id via `[version]` (tie-break su Base) per determinismo
 #   4. emette il primo id come prossima story + l'elenco dei successivi
 # Fallback graceful: se non ci sono entry non-done, emette un messaggio esplicito.
+#
+# Issue #182: il blocco indica **la prossima story da implementare**, quindi
+# esclude anche le story che non sono lavorabili:
+#   - `blocked` (STOP): bloccata da una dipendenza esterna (es. Story 2.1,
+#     che aspetta le audio features dell'EPIC 4.1);
+#   - `wontdo` (NO): PR rifiutata o scope cancellato.
+# Restano elencate `todo` (TODO), `in_progress` (IN PROGRESS) e `in_review`
+# (IN REVIEW): sono in lavorazione, non bloccate, e il blocco ricorda comunque
+# come filtrare le candidate libere (`gh issue list --label agent-ready
+# --state open`).
 function Build-Block-NextStep {
     $files = @(Get-StateStoryFiles)
     $candidates = New-Object System.Collections.Generic.List[object]
@@ -11252,7 +11407,8 @@ function Build-Block-NextStep {
         $p = Parse-Frontmatter $c
         if ($null -eq $p) { continue }
         $status = $p.Frontmatter['status']
-        if ($status -eq 'done') { continue }
+        # Non sono "da implementare": gia' fatte, bloccate o annullate.
+        if ($status -eq 'done' -or $status -eq 'blocked' -or $status -eq 'wontdo') { continue }
         $priority = if ($p.Frontmatter['priority']) { $p.Frontmatter['priority'] } else { 'I' }
         $id = if ($p.Frontmatter['id']) { $p.Frontmatter['id'] } else { $f.Base }
         $title = if ($p.Frontmatter['title']) { $p.Frontmatter['title'] } else { $f.Base }
@@ -11276,7 +11432,7 @@ function Build-Block-NextStep {
     [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
     [void]$sb.AppendLine('')
     if ($sorted.Count -eq 0) {
-        [void]$sb.AppendLine('_Nessuna story non-done migrata in `' + 'docs/state/stories/' + '`._')
+        [void]$sb.AppendLine('_Nessuna story non-done e non bloccata migrata in `' + 'docs/state/stories/' + '`._')
         [void]$sb.AppendLine('')
         [void]$sb.AppendLine('Vedi `' + 'docs/11-BACKLOG.md' + '` per la roadmap completa e `' + 'docs/state/_index.md' + '` per la procedura di migration.')
     } else {
@@ -11287,7 +11443,7 @@ function Build-Block-NextStep {
         if ($sorted.Count -gt 1) {
             $restIds = (($sorted | Select-Object -Skip 1) | ForEach-Object { "$($_.Id)" }) -join ', '
             [void]$sb.AppendLine('')
-            [void]$sb.AppendLine('Altre non-done in ordine di priorita backlog (id): ' + $restIds + '.')
+            [void]$sb.AppendLine('Altre non-done e non bloccate in ordine di priorita backlog (id): ' + $restIds + '.')
         }
     }
     [void]$sb.AppendLine('')
@@ -17084,7 +17240,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.18 · Sessione 59 (2026-10-28, issue #178) · **`04-ANALYSIS-ALGORITHMS.md` ratificata** (v1.0 🟢 APPROVED): la Story **2.4** (Memory Engine) è implementabile, la **2.1** (Mood Tracker) aspetta le audio features dell'EPIC 4.1
+> Status: 🟢 APPROVED · Versione 1.6.19 · Sessione 60 (2026-10-28, issue #182) · il blocco NEXT-STEP del README indica solo story **lavorabili** (esclude `done`, `blocked`, `wontdo`): dopo la ratifica della spec dell'analisi il puntatore è passato dalla 2.1 (bloccata) alla **2.4** (implementabile, issue #179)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -17612,7 +17768,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
 9. **1.4** Dedup promozione
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
-11. **2.4** analisi base (prima) · **2.1** dopo l'EPIC 4.1: il mood tracker ha bisogno delle audio features, che non sono implementate (D-A.1, issue #178)
+11. **2.4** analisi base (prima) — issue **#179** (`agent-ready`): il blocco NEXT-STEP del README la indica come prossima story da implementare · **2.1** dopo l'EPIC 4.1: il mood tracker ha bisogno delle audio features, che non sono implementate (D-A.1, issue #178; la 2.1 è in stato `blocked` e il blocco NEXT-STEP la esclude, issue #182)
 12. **2.2, 2.3** analisi avanzata
 13. **4.1, 4.2** enrichment
 14. **3.1, 3.2, 3.3** UI
@@ -17688,6 +17844,8 @@ Ogni story deve avere label GitHub:
 | 1.6.16 | Sessione 57 (2026-10-27, issue #172) | **Spec della Story 1.5 ratificata**: `docs/20-SCROBBLING-HUB.md` passa da 🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le **quattro decisioni aperte** (`20§18` punti 2-5) chiuse come proposte in **D-SH.11…D-SH.14** (§2.1): md5 in JS puro (nessuna dipendenza nuova), finestra di candidatura a 7 giorni + azione esplicita per tutta la cronologia, durata ignota → soglia dei 4 minuti con fiducia nella fonte per gli eventi importati da un hub, modalità del proxy dichiarata dall'utente (`solo lettura` / `lettura + scrittura`). La ratifica **modifica regole normative** (T-SH.3, T-SH.4, E.SH.10, E.SH.11, la finestra, la modalità proxy): a differenza della promozione dell'ADR-0011, qui non è una promozione senza contenuto. **Allineati i documenti che la spec tocca** (atto dichiarato dall'ADR-0011 §"Documenti da aggiornare"): `02-DATA-SCHEMA.md` §3.8 (`ScrobbleHubId`) e §6.2 (`scrobbleOutbox`, schema Dexie v5), `09-PRIVACY-SECURITY.md` §3.3 e §4 (payload chiuso per costruzione, inventario), `08-COPY-I18N.md` §1 e §2.16 (i 15 codici `scrobble.*`), `03-ADAPTERS/lastfm.md` §4 (E.LF.21) e §10 (proxy in scrittura), `03-ADAPTERS/listenbrainz.md` D-LB.5 e §3.4, `01-PLATFORMS.md` §3.7-3.9. Difetti corretti: `02-DATA-SCHEMA.md` aveva la riga di changelog v1.5 **appesa in cima al file** (come `05-ARCHITECTURE.md` nella Sessione 56) e l'header fermo a v1.3; cinque documenti dichiaravano nell'header una versione più vecchia del proprio changelog — header allineati ovunque. **Issue di implementazione aperta: #173** (`agent-ready`, `size:L`). La story resta `⬚ TODO` fino al merge della PR |
 | 1.6.17 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 implementata**: la sezione Story passa a ✅ DONE e l'issue #173 (implementazione, `agent-ready`, `size:L`) è chiusa con `status:done` al merge della PR #176. Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink` (`packages/core/src/adapters/scrobble/types.ts`), registry dei sink, sink Last.fm (firma `api_sig` md5 in JS puro, batch 50, POST via proxy, mappa errori) e ListenBrainz (`POST /1/submit-listens`, `listen_type: import`, `User-Agent`, rate limit 1 req/s), tabella `scrobbleOutbox` (schema Dexie **v5**, PK `hub\|eventKey`, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con la regola di maturità **D-SH.13**, `parseRemote?()` incrementale su `/1/user/{u}/listens` con cursore persistito, percorso web auth Last.fm (token → session key), pannello UI (selettore per-hub, modalità del proxy, vista della coda) e namespace i18n `scrobble` (15 codici). **31 casi di test** della spec `20§14.3` coperti (267 test in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 dichiarata parzialmente soddisfatta**: la parte MBID → DEDUP-2 è coperta dal pipeline esistente, la parte `track.genres` via lookup MusicBrainz dipende dall'enrichment (EPIC 4, non implementato) e va aperta come issue dedicata. La riga della 1.5 è rimossa dalla roadmap delle story non completate e il conteggio legacy dell'EPIC 1 passa a **5/5** |
 | 1.6.18 | Sessione 59 (2026-10-28, issue #178) | **Spec dell'analisi ratificata**: `docs/04-ANALYSIS-ALGORITHMS.md` passa da 🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le cinque decisioni aperte chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.1** (mood tracker) **aspetta le audio features dell'EPIC 4.1** (senza valence/energy non produce insight: consegnarla sarebbe un falso verde), la **Story 2.4** (Memory Engine) è **implementabile subito**; `return` e `seasonal` sono specificati in §7.2 (D-A.2), `first_time` passa a **5 brani distinti** (D-A.3), il `text` del ricordo è una **stringa resa** con i template i18n già dichiarati in `08§2.15` (D-A.4), e l'orchestratore è **minimale ed estensibile** (D-A.5, §8.1). Allineati: `08-COPY-I18N.md` §2.15 (i template `memory.*` dichiarati vincolanti + la chiave `memory.milestone.artists`), le sezioni Story 2.1 e 2.4 e la lista di priorità degli agenti. **Issue di implementazione #179** aperta per la 2.4 (`agent-ready`, `size:M`) |
+| 1.6.19 | Sessione 60 (2026-10-28, issue #182) | **Il blocco NEXT-STEP indica solo story lavorabili**: con la Story 2.1 in stato `blocked` (dipende dalle audio features dell'EPIC 4.1, decisione D-A.1) il puntatore del README era finito su una story non implementabile, mentre la **2.4** era libera. `scripts/aggregate-state.ps1` esclude ora `done`, `blocked` e `wontdo` (restano `todo`, `in_progress`, `in_review`: sono in lavorazione, non bloccate), e il messaggio di fallback dice "non-done **e non bloccate**". Il fix **non** committa i blocchi aggregati (ADR-0008): li rigenera `auto-state-aggregate` post-merge, perché la PR tocca lo script. Test: `scripts/test-aggregate-determinism.sh` da 34 a **37 assert** (T10e, T10f nuovi, verificati in entrambe le direzioni — senza il fix falliscono). Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i valori di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g) |
+
 
 
 <!-- AGGREGATE-STORIES-START -->
@@ -18263,6 +18421,36 @@ bash scripts/test-workflow-writer-ordering.sh           # scenario negativo (gat
 **Regola generale**: quando due workflow concorrono allo **stesso artefatto logico** — non solo allo stesso ref — la serializzazione non basta: serve che il secondo consumi l'output del primo *dopo* che il primo l'ha prodotto. Il concurrency group ordina i *run*, non gli *effetti*. Se il secondo workflow **legge** ciò che il primo **scrive**, il trigger corretto è `workflow_run` (agganciato alla conclusione), non `push` (agganciato all'evento, e soppresso quando l'evento nasce da un GITHUB_TOKEN).
 
 ---
+
+### 9.8g Selezione del NEXT-STEP: solo story lavorabili (issue #182)
+
+Il blocco `<!-- AGGREGATE-NEXT-STEP-* -->` del README indica **la prossima story da
+implementare**. Fino alla Sessione 59 filtrava solo `done`: una story in stato
+`blocked` (STOP: bloccata da una dipendenza esterna) o `wontdo` (NO: scope
+cancellato) finiva **in cima** alla lista, e il lettore del repository trovava un
+puntatore a qualcosa che non si poteva lavorare.
+
+Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle **audio features**
+dell'EPIC 4.1, che non sono implementate (decisione D-A.1 della Sessione 59), e
+il blocco la indicava come "prossima story" mentre la story implementabile era la
+**2.4** (Memory Engine, issue #179).
+
+La regola ora applicata da `scripts/aggregate-state.ps1` (`Build-Block-NextStep`):
+
+| `status` | Nel NEXT-STEP | Perché |
+|---|---|---|
+| `todo` (TODO) | ✅ | la candidata |
+| `in_progress` (IN PROGRESS) | ✅ | in lavorazione, non bloccata |
+| `in_review` (IN REVIEW) | ✅ | PR aperta, in lavorazione |
+| `done` (DONE) | ❌ | completata |
+| `blocked` (STOP) | ❌ | dipende da una dipendenza esterna |
+| `wontdo` (NO) | ❌ | scope cancellato |
+
+Il messaggio di fallback e la riga delle altre candidate dicono ora "non-done **e non
+bloccate**". I due sub-test nuovi in `scripts/test-aggregate-determinism.sh`
+(**T10e**, **T10f**) coprono il salto della story bloccata e il fallback con
+sole story bloccate: **falliscono senza il fix** (lesson 43-1 — un gate che passa
+sempre non è un gate).
 
 ### 9.8f Gate "fatti del README" (issue #161)
 
@@ -24007,13 +24195,62 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   # --- Sub-test 10c: fallback graceful (tutte done) ---
   D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
   run_agg >/dev/null 2>&1
-  if grep -q 'Nessuna story non-done migrata' README.md; then
+  if grep -q 'Nessuna story non-done e non bloccata' README.md; then
     ok "NEXT-STEP fallback: messaggio esplicito quando tutte le story sono done"
   else
     ng "NEXT-STEP fallback mancante: emette contenuto fuorviante invece del fallback"
   fi
   out="$(run_agg --check)"; rc=$?
   if [ $rc -eq 0 ]; then ok "NEXT-STEP fallback: --check exit 0"; else ng "NEXT-STEP fallback: --check exit $rc"; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10e: le story bloccate non sono "da implementare" (issue #182) ---
+  # Una story `blocked` (STOP: dipende da una dipendenza esterna) non e' la
+  # prossima story da implementare: il blocco deve puntare alla prima lavorabile.
+  D="$(mktemp -d)"
+  mkdir -p "$D/docs/state/sessions" "$D/docs/state/stories" "$D/scripts"
+  cp "$SCRIPT" "$D/scripts/aggregate-state.ps1"
+  (
+    cd "$D" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+    write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
+    write_story 2.4 "memory-engine" "Memory Engine" todo "" "analysis"
+  )
+  make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  PICK="$(next_step_id_in_readme "$D")"
+  if [ "$PICK" = "2.4" ]; then
+    ok "NEXT-STEP salta la story blocked e sceglie la prima lavorabile (2.4)"
+  else
+    ng "NEXT-STEP non salta la story blocked: '$PICK' invece di '2.4'"
+  fi
+  if grep -q '2\.1' README.md; then
+    ng "NEXT-STEP elenca ancora la story blocked 2.1 fra le 'altre non-done'"
+  else
+    ok "NEXT-STEP non elenca la story blocked fra le altre candidate"
+  fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10f: solo story bloccate -> fallback, non un puntatore inutilizzabile ---
+  D="$(mktemp -d)"
+  mkdir -p "$D/docs/state/sessions" "$D/docs/state/stories" "$D/scripts"
+  cp "$SCRIPT" "$D/scripts/aggregate-state.ps1"
+  (
+    cd "$D" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+    write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
+  )
+  make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  if grep -q 'Nessuna story non-done e non bloccata' README.md; then
+    ok "NEXT-STEP: con solo story bloccate il fallback e' esplicito"
+  else
+    ng "NEXT-STEP: con solo story bloccate punta a una story non lavorabile"
+  fi
   cd /; rm -rf "$D"
 
   # --- Sub-test 10d: idempotenza byte-identica ---

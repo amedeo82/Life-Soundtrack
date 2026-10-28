@@ -119,7 +119,7 @@ id: "0.5"                            # story-id (stringa con punto)
 title: "PWA e service worker"
 phase: 0                             # numero fase
 area: devops                         # area:adapter / area:devops / area:ui / area:db / ...
-status: done                         # 🟡/⬚/👀/✅/❌/🛑 (vedi 11-BACKLOG §"Stato di una Story")
+status: done                         # todo / in_progress / in_review / done / blocked / wontdo (vedi 11-BACKLOG §"Stato di una Story")
 priority: B                          # B=blocker / I=important / L=later
 depends_on: ["0.1"]                  # lista story-ids prerequisite
 branch: feat/7-pwa-and-service-worker
@@ -196,6 +196,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/57-scrobbling-hub-spec-approval.md` | ✅ creata | Sessione 57 (issue #172): **ratifica della spec `20-SCROBBLING-HUB.md`** (v1.0 🟢 APPROVED) con le quattro decisioni chiuse (D-SH.11…D-SH.14) + allineamento dei documenti toccati + apertura dell'issue di implementazione **#173** — **merged** (PR #174, `4abb73e`), issue #172 chiusa con `status:done` |
 | `state/sessions/58-scrobbling-hub-implementation.md` | ✅ creata | Sessione 58 (issue #173): **implementazione della Story 1.5** — contratto `ScrobbleSink`, coda `scrobbleOutbox` (schema Dexie v5), sink Last.fm e ListenBrainz, filtro di eleggibilità (D-SH.13), sync incrementale, web auth, pannello UI e i 31 casi di test della spec |
 | `state/sessions/59-epic2-analysis-ratification.md` | ✅ creata | Sessione 59 (issue #178): **ratifica della spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md` v1.0 🟢 APPROVED) con le cinque decisioni chiuse (D-A.1…D-A.5) + apertura delle issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, bloccata dalle audio features EPIC 4.1) |
+| `state/sessions/60-next-step-skip-blocked.md` | ✅ creata | Sessione 60 (issue #182): il blocco NEXT-STEP del README indica solo story **lavorabili** (esclude `done`, `blocked`, `wontdo`) — il puntatore è passato dalla 2.1 bloccata alla 2.4 implementabile |
 | `state/stories/1.5-scrobbling-hub.md` | ✅ creata | Story 1.5 (Scrobbling hub) — ✅ **done** (Sessione 58, issue #173): contratto `ScrobbleSink`, coda `scrobbleOutbox`, sink Last.fm/ListenBrainz, filtro di eleggibilità, sync incrementale, pannello UI, 31 casi di test |
 | `state/stories/2.1-mood-tracker.md` | ✅ creata | Story 2.1 (Mood Tracker) — ⛔ **blocked**: senza le audio features dell'EPIC 4.1 il mood tracker non produce insight (decisione D-A.1); issue #180 (`needs-spec`) |
 | `state/stories/2.4-memory-engine.md` | ✅ creata | Story 2.4 (Memory Engine) — ⬚ TODO, **implementabile**: spec `04` v1.0 🟢 APPROVED, i trigger dei 5 tipi specificati; issue #179 (`agent-ready`, `size:M`) |

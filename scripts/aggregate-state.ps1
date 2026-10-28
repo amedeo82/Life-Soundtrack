@@ -513,12 +513,22 @@ function Build-Block-BundleInventory {
 # "Prossima sbloccata" che era andata in drift silenzioso (Story 0.2 chiuse
 # gia' con PR #4 merge `fa09b06` 2026-10-17 ma il README continuava a
 # dichiararla come prossima). Sorgente di verita' = `docs/state/stories/*.md`
-# (frontmatter `status`). L'aggregator:
+# (frontmatter `status`). L'agregator:
 #   1. elenca tutti i file in docs/state/stories/
 #   2. filtra quelli con status != done (incluse le entry mancanti, trattate come todo)
 #   3. ordina per Id via `[version]` (tie-break su Base) per determinismo
 #   4. emette il primo id come prossima story + l'elenco dei successivi
 # Fallback graceful: se non ci sono entry non-done, emette un messaggio esplicito.
+#
+# Issue #182: il blocco indica **la prossima story da implementare**, quindi
+# esclude anche le story che non sono lavorabili:
+#   - `blocked` (STOP): bloccata da una dipendenza esterna (es. Story 2.1,
+#     che aspetta le audio features dell'EPIC 4.1);
+#   - `wontdo` (NO): PR rifiutata o scope cancellato.
+# Restano elencate `todo` (TODO), `in_progress` (IN PROGRESS) e `in_review`
+# (IN REVIEW): sono in lavorazione, non bloccate, e il blocco ricorda comunque
+# come filtrare le candidate libere (`gh issue list --label agent-ready
+# --state open`).
 function Build-Block-NextStep {
     $files = @(Get-StateStoryFiles)
     $candidates = New-Object System.Collections.Generic.List[object]
@@ -527,7 +537,8 @@ function Build-Block-NextStep {
         $p = Parse-Frontmatter $c
         if ($null -eq $p) { continue }
         $status = $p.Frontmatter['status']
-        if ($status -eq 'done') { continue }
+        # Non sono "da implementare": gia' fatte, bloccate o annullate.
+        if ($status -eq 'done' -or $status -eq 'blocked' -or $status -eq 'wontdo') { continue }
         $priority = if ($p.Frontmatter['priority']) { $p.Frontmatter['priority'] } else { 'I' }
         $id = if ($p.Frontmatter['id']) { $p.Frontmatter['id'] } else { $f.Base }
         $title = if ($p.Frontmatter['title']) { $p.Frontmatter['title'] } else { $f.Base }
@@ -551,7 +562,7 @@ function Build-Block-NextStep {
     [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
     [void]$sb.AppendLine('')
     if ($sorted.Count -eq 0) {
-        [void]$sb.AppendLine('_Nessuna story non-done migrata in `' + 'docs/state/stories/' + '`._')
+        [void]$sb.AppendLine('_Nessuna story non-done e non bloccata migrata in `' + 'docs/state/stories/' + '`._')
         [void]$sb.AppendLine('')
         [void]$sb.AppendLine('Vedi `' + 'docs/11-BACKLOG.md' + '` per la roadmap completa e `' + 'docs/state/_index.md' + '` per la procedura di migration.')
     } else {
@@ -562,7 +573,7 @@ function Build-Block-NextStep {
         if ($sorted.Count -gt 1) {
             $restIds = (($sorted | Select-Object -Skip 1) | ForEach-Object { "$($_.Id)" }) -join ', '
             [void]$sb.AppendLine('')
-            [void]$sb.AppendLine('Altre non-done in ordine di priorita backlog (id): ' + $restIds + '.')
+            [void]$sb.AppendLine('Altre non-done e non bloccate in ordine di priorita backlog (id): ' + $restIds + '.')
         }
     }
     [void]$sb.AppendLine('')

@@ -543,6 +543,36 @@ bash scripts/test-workflow-writer-ordering.sh           # scenario negativo (gat
 
 ---
 
+### 9.8g Selezione del NEXT-STEP: solo story lavorabili (issue #182)
+
+Il blocco `<!-- AGGREGATE-NEXT-STEP-* -->` del README indica **la prossima story da
+implementare**. Fino alla Sessione 59 filtrava solo `done`: una story in stato
+`blocked` (STOP: bloccata da una dipendenza esterna) o `wontdo` (NO: scope
+cancellato) finiva **in cima** alla lista, e il lettore del repository trovava un
+puntatore a qualcosa che non si poteva lavorare.
+
+Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle **audio features**
+dell'EPIC 4.1, che non sono implementate (decisione D-A.1 della Sessione 59), e
+il blocco la indicava come "prossima story" mentre la story implementabile era la
+**2.4** (Memory Engine, issue #179).
+
+La regola ora applicata da `scripts/aggregate-state.ps1` (`Build-Block-NextStep`):
+
+| `status` | Nel NEXT-STEP | Perché |
+|---|---|---|
+| `todo` (TODO) | ✅ | la candidata |
+| `in_progress` (IN PROGRESS) | ✅ | in lavorazione, non bloccata |
+| `in_review` (IN REVIEW) | ✅ | PR aperta, in lavorazione |
+| `done` (DONE) | ❌ | completata |
+| `blocked` (STOP) | ❌ | dipende da una dipendenza esterna |
+| `wontdo` (NO) | ❌ | scope cancellato |
+
+Il messaggio di fallback e la riga delle altre candidate dicono ora "non-done **e non
+bloccate**". I due sub-test nuovi in `scripts/test-aggregate-determinism.sh`
+(**T10e**, **T10f**) coprono il salto della story bloccata e il fallback con
+sole story bloccate: **falliscono senza il fix** (lesson 43-1 — un gate che passa
+sempre non è un gate).
+
 ### 9.8f Gate "fatti del README" (issue #161)
 
 Un gate che confronta **la prosa** con **il codice**. Il README è la prima cosa che legge chi arriva nel repository: se dichiara piattaforme e funzionalità che non esistono, il danno non è estetico — è una promessa falsa all'utente.

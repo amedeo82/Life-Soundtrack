@@ -118,6 +118,7 @@ $files = @(
     "docs/state/sessions/57-scrobbling-hub-spec-approval.md",
     "docs/state/sessions/58-scrobbling-hub-implementation.md",
     "docs/state/sessions/59-epic2-analysis-ratification.md",
+    "docs/state/sessions/60-next-step-skip-blocked.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.4-dedup-promotion.md",
     "docs/state/stories/1.5-scrobbling-hub.md",

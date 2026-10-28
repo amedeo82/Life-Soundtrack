@@ -514,13 +514,62 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   # --- Sub-test 10c: fallback graceful (tutte done) ---
   D="$(mktemp -d)"; make_repo "$D" asc; make_targets "$D"; cd "$D" || exit 1
   run_agg >/dev/null 2>&1
-  if grep -q 'Nessuna story non-done migrata' README.md; then
+  if grep -q 'Nessuna story non-done e non bloccata' README.md; then
     ok "NEXT-STEP fallback: messaggio esplicito quando tutte le story sono done"
   else
     ng "NEXT-STEP fallback mancante: emette contenuto fuorviante invece del fallback"
   fi
   out="$(run_agg --check)"; rc=$?
   if [ $rc -eq 0 ]; then ok "NEXT-STEP fallback: --check exit 0"; else ng "NEXT-STEP fallback: --check exit $rc"; fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10e: le story bloccate non sono "da implementare" (issue #182) ---
+  # Una story `blocked` (STOP: dipende da una dipendenza esterna) non e' la
+  # prossima story da implementare: il blocco deve puntare alla prima lavorabile.
+  D="$(mktemp -d)"
+  mkdir -p "$D/docs/state/sessions" "$D/docs/state/stories" "$D/scripts"
+  cp "$SCRIPT" "$D/scripts/aggregate-state.ps1"
+  (
+    cd "$D" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+    write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
+    write_story 2.4 "memory-engine" "Memory Engine" todo "" "analysis"
+  )
+  make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  PICK="$(next_step_id_in_readme "$D")"
+  if [ "$PICK" = "2.4" ]; then
+    ok "NEXT-STEP salta la story blocked e sceglie la prima lavorabile (2.4)"
+  else
+    ng "NEXT-STEP non salta la story blocked: '$PICK' invece di '2.4'"
+  fi
+  if grep -q '2\.1' README.md; then
+    ng "NEXT-STEP elenca ancora la story blocked 2.1 fra le 'altre non-done'"
+  else
+    ok "NEXT-STEP non elenca la story blocked fra le altre candidate"
+  fi
+  cd /; rm -rf "$D"
+
+  # --- Sub-test 10f: solo story bloccate -> fallback, non un puntatore inutilizzabile ---
+  D="$(mktemp -d)"
+  mkdir -p "$D/docs/state/sessions" "$D/docs/state/stories" "$D/scripts"
+  cp "$SCRIPT" "$D/scripts/aggregate-state.ps1"
+  (
+    cd "$D" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
+    write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
+  )
+  make_targets "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  if grep -q 'Nessuna story non-done e non bloccata' README.md; then
+    ok "NEXT-STEP: con solo story bloccate il fallback e' esplicito"
+  else
+    ng "NEXT-STEP: con solo story bloccate punta a una story non lavorabile"
+  fi
   cd /; rm -rf "$D"
 
   # --- Sub-test 10d: idempotenza byte-identica ---
