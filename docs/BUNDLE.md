@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-28 17:22
+> Data: 2026-10-28 16:26
 > Totale file: 106
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1179,9 +1179,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **2.4** — Memory Engine (priority `B`, vedi `docs/11-BACKLOG.md`).
+_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
 
-Sorgente: `docs/state/stories/2.4-memory-engine.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -1542,7 +1542,7 @@ Apache License
 | 58 | Story 1.5 - scrobbling hub: contratto, coda, sink, UI e sync | 🟢 | ✅ | #176 |
 | 59 | Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1 | 🟢 | ✅ | #181 |
 | 60 | Il blocco NEXT-STEP indica solo story lavorabili (issue #182) | 🟢 | ✅ | #183 |
-| 61 | Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179) | 🟡 | ❌ | #185 |
+| 61 | Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179) | 🟢 | ✅ | #185 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1582,10 +1582,10 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **38** (merge: 31)
-- Stories migrate in state/stories: **14** (done: 12)
+- Sessioni migrate in state/sessions: **38** (merge: 32)
+- Stories migrate in state/stories: **14** (done: 13)
 - Ultima sessione migrata: **S61** - Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -6793,8 +6793,8 @@ l'apertura, e il merge commit solo dopo il merge.
 ### Sessione 61 - Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179)
 
 - **Data**: 2026-10-28
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #185)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #185 (40ad0b75be5efb70af17cce82531b523970059ea, 2026-10-28)
 - **Claim**: `kilo-hp-elitebook-hj59`
 
 ```
@@ -6913,6 +6913,30 @@ test usano `memoryPayloadOf(insight)`, che verifica il `kind` e restituisce il
 - **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢), Sessione 59
 - **#180** — la Story 2.1, **bloccata** dalle audio features dell'EPIC 4.1
   (D-A.1): resta la prossima candidate dopo la 2.4
+
+## Esito post-merge
+
+PR #185 **mergata** in `main` il 2026-10-28T16:15:43Z (merge commit `40ad0b7`).
+L'issue **#179** è chiusa con `status:done` e il blocco `AGGREGATE-STORIES-*`
+mostra la story come `done` con il merge commit.
+
+Automazioni post-merge: `auto-status-done` (status:done su #179 + commento
+`release:`), `auto-branch-cleanup` (branch remoto eliminato),
+`auto-state-aggregate` (`be98fe7`) e `auto-bundle` (`de15099`). Worktree e
+branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con
+prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path
+Windows lunghi con `node_modules`).
+
+Il doc-sync di chiusura (frontmatter con `merged: true` e merge commit) è in
+una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+
+**La catena dell'EPIC 2 si è fermata qui**: la 2.1 resta bloccata dalle audio
+features dell'EPIC 4.1 (D-A.1) e la 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`).
+Il blocco NEXT-STEP del README ricade quindi sul fallback "nessuna story
+non-done e non bloccata migrata" — la risposta **corretta**: non esiste una
+story implementabile finché l'EPIC 4.1 non è specificata (issue #180). Il
+puntatore è tornato a essere veritiero invece di indicare un vicolo cieco
+(lesson della issue #182).
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -18398,7 +18422,7 @@ Ogni story deve avere label GitHub:
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
 | 2.1 - Mood Tracker giornaliero | blocked | #0 | - | analysis |
-| 2.4 - Memory Engine | in_review | #185 | - | analysis |
+| 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 
 <!-- AGGREGATE-STORIES-END -->
 
