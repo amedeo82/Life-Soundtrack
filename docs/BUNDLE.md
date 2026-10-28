@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-28 15:30
+> Data: 2026-10-28 14:39
 > Totale file: 104
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1539,8 +1539,8 @@ Apache License
 | 55 | Spec Story 1.5 — Scrobbling hub (invio, sync continua, toggle) | 🟢 | ✅ | #167 |
 | 56 | ADR-0011 — contratto di scrittura negli hub (ScrobbleSink) | 🟢 | ✅ | #170 |
 | 57 | Ratifica della spec Scrobbling hub + issue di implementazione (Story 1.5) | 🟢 | ✅ | #174 |
-| 58 | Story 1.5 - scrobbling hub: contratto, coda, sink, UI e sync | 🟡 | ❌ | #176 |
-| 59 | Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1 | 🟡 | ❌ | - |
+| 58 | Story 1.5 - scrobbling hub: contratto, coda, sink, UI e sync | 🟢 | ✅ | #176 |
+| 59 | Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1 | 🟢 | ✅ | #181 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1580,7 +1580,7 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **36** (merge: 28)
+- Sessioni migrate in state/sessions: **36** (merge: 30)
 - Stories migrate in state/stories: **14** (done: 12)
 - Ultima sessione migrata: **S59** - Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5
@@ -6390,8 +6390,8 @@ di `20§14.3`.
 ### Sessione 58 - Story 1.5 - scrobbling hub: contratto, coda, sink, UI e sync
 
 - **Data**: 2026-10-28
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #176)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #176 (bfb5946bd547fed46fb32be2638e1f5785f4b579, 2026-10-28)
 - **Claim**: `kilo-hp-elitebook-41xb`
 
 ```
@@ -6499,6 +6499,24 @@ l'array `$files` di `scripts/generate-bundle.ps1` (bundle: 98 → 100 file).
   sessione 58
 - `README.md` — la prosa: la Story 1.5 non è più "non ancora implementato"
 
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T13:56:09Z (PR #176, merge commit `bfb5946`).
+L'issue **#173** è chiusa con `status:done` e la **Story 1.5 è `done`**: il
+percorso di scrittura verso Last.fm e ListenBrainz è consegnato.
+
+Automazioni post-merge: `auto-status-done` (status:done su #173),
+`auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` e
+`auto-bundle` (blocchi rigenerati). Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+**AC-SH.11 resta parzialmente soddisfatto** (dichiarato, non nascosto): la parte
+MBID → DEDUP-2 è coperta dal pipeline esistente, la parte `track.genres` via
+lookup MusicBrainz dipende dall'enrichment (EPIC 4, non implementato) e va
+aperta come issue dedicata quando l'EPIC 4 parte.
+
 ## Cross-refs
 
 - **#173** — implementazione della Story 1.5 (claim `kilo-hp-elitebook-41xb`)
@@ -6511,8 +6529,8 @@ l'array `$files` di `scripts/generate-bundle.ps1` (bundle: 98 → 100 file).
 ### Sessione 59 - Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1
 
 - **Data**: 2026-10-28
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #181 (5f725e36be94bd1d604ea8370661577690cb954b, 2026-10-28)
 - **Claim**: `kilo-hp-elitebook-41xb`
 
 ```
@@ -6615,6 +6633,25 @@ posizione (l'ordine è storico, non cronologico).
 - `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — i tre file nuovi
 - Issue **#179** (implementazione della 2.4, `agent-ready`) e **#180** (la 2.1,
   `needs-spec`)
+
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T14:28:05Z (PR #181, merge commit `5f725e3`).
+L'issue **#178** è chiusa con `status:done` e
+`docs/04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED**: la Story 2.4 è
+implementabile (issue **#179**, `agent-ready`) e la Story 2.1 resta bloccata dalle
+audio features dell'EPIC 4.1 (issue **#180**, `needs-spec`).
+
+Automazioni post-merge: `auto-status-done` (status:done su #178),
+`auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` e
+`auto-bundle` (blocchi rigenerati). Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+Il doc-sync di chiusura (frontmatter con `pr`, `merged: true` e merge commit)
+è in una PR `docs:` separata: il numero della PR si conosce solo dopo
+l'apertura, e il merge commit solo dopo il merge.
 
 ## Cross-refs
 
@@ -17672,7 +17709,7 @@ Ogni story deve avere label GitHub:
 | 1.2 - Adapter Apple Music | done | #139 | `7640d83` | adapter |
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
-| 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | - | adapter |
+| 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
 | 2.1 - Mood Tracker giornaliero | blocked | #0 | - | analysis |
 | 2.4 - Memory Engine | todo | #0 | - | analysis |
 
