@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.5 · Sessione 57 (2026-10-27)
+> Status: 🟡 DRAFT · Versione 0.6 · Sessione 58 (2026-10-28)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -378,6 +378,57 @@ Namespace dell'invio degli ascolti ai hub. I 15 codici sono **vincolanti**
 `scrobble.warn.tooShortSkipped`) seguono §3 — `{count, plural, one {…} other {…}}`.
 Le stringhe con `{hub}`, `{accepted}` e `{total}` sono parametri semplici.
 
+### 2.12f `settings.scrobble.*` (Story 1.5 — UI del pannello scrobbling)
+
+Le stringhe **di interfaccia** del pannello scrobbling (selettore per-hub, modalità
+del proxy, vista della coda) stanno nel namespace `settings`, come le altre
+chiavi di pannello (`settings.lastfm.*`); il namespace `scrobble` di §2.16
+resta quello degli **errori e degli avvisi** del percorso di scrittura.
+
+| Key | IT | EN |
+|-----|----|----|
+| `settings.scrobble.title` | Invio ai hub di scrobbling | Send to scrobbling hubs |
+| `settings.scrobble.hint` | Gli ascolti di questo dispositivo possono essere inviati ai hub che scegli: la coda resta qui, e niente esce senza il tuo consenso. | The listens on this device can be sent to the hubs you choose: the queue stays here, and nothing leaves without your consent. |
+| `settings.scrobble.hubLastfm` | Last.fm | Last.fm |
+| `settings.scrobble.hubListenbrainz` | ListenBrainz | ListenBrainz |
+| `settings.scrobble.proxyMode` | Modalità del proxy Last.fm | Last.fm proxy mode |
+| `settings.scrobble.proxyReadOnly` | Solo lettura (predefinito) | Read only (default) |
+| `settings.scrobble.proxyReadWrite` | Lettura e scrittura | Read and write |
+| `settings.scrobble.proxyHint` | La scrittura su Last.fm passa dal tuo proxy: deve inoltrare le richieste POST. | Writing to Last.fm goes through your proxy: it must forward POST requests. |
+| `settings.scrobble.queue` | Coda di invio | Send queue |
+| `settings.scrobble.queuePending` | In attesa | Pending |
+| `settings.scrobble.queueInFlight` | In corso | In flight |
+| `settings.scrobble.queueSent` | Inviati | Sent |
+| `settings.scrobble.queueFailed` | Falliti | Failed |
+| `settings.scrobble.queueEmpty` | La coda è vuota | The queue is empty |
+| `settings.scrobble.sendNow` | Invia ora | Send now |
+| `settings.scrobble.sending` | Invio in corso... | Sending... |
+| `settings.scrobble.sent_one` | {{count}} ascolto in coda | {{count}} listen queued |
+| `settings.scrobble.sent_other` | {{count}} ascolti in coda | {{count}} listens queued |
+| `settings.scrobble.noHubSelected` | Nessun hub selezionato: nessun invio partirà | No hub selected: nothing will be sent |
+| `settings.scrobble.save` | Salva | Save |
+| `settings.scrobble.saved` | Configurazione salvata su questo dispositivo | Configuration saved on this device |
+
+**Pluralizzazione**: `settings.scrobble.sent` ha le varianti `_one`/`_other`
+(§3).
+
+### 2.12g `settings.lastfm.auth*` (Story 1.5 — percorso web auth)
+
+Il **web auth** di Last.fm (D-LF.2) è l'unico percorso che produce una
+**session key**: l'utente autorizza nel browser e incolla l'indirizzo di
+callback, dal quale l'app estrae il token e lo scambia in `sk`. Le stringhe
+sono nel namespace `settings`, accanto alle altre chiavi del pannello Last.fm.
+
+| Key | IT | EN |
+|-----|----|----|
+| `settings.lastfm.sharedSecret` | Shared secret (per la firma delle richieste) | Shared secret (to sign the requests) |
+| `settings.lastfm.auth` | Autorizza la scrittura su Last.fm | Authorize writing to Last.fm |
+| `settings.lastfm.authHint` | Apri la pagina di autorizzazione, accetta, poi incolla qui l\'indirizzo della pagina a cui sei stato reindirizzato: la chiave di sessione resta su questo dispositivo. | Open the authorization page, accept, then paste here the address of the page you were redirected to: the session key stays on this device. |
+| `settings.lastfm.authCallback` | Indirizzo di callback | Callback address |
+| `settings.lastfm.authConnect` | Collega la sessione | Connect the session |
+| `settings.lastfm.authSaved` | Sessione autorizzata: la scrittura su Last.fm è abilitata | Session authorized: writing to Last.fm is enabled |
+| `settings.lastfm.authMissingToken` | Nell\'indirizzo incollato non c\'è un token: copia l\'intero indirizzo della pagina di reindirizzamento | There is no token in the pasted address: copy the whole redirect page address |
+
 ## 3. Pluralizzazione
 
 Formato: `{count, plural, one {...} other {...}}`
@@ -438,3 +489,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.3 | Sessione 47 (2026-10-26, issue #145) | Aggiunta §2.12c `adapter.listenbrainz.*` (12 chiavi, spec `03-ADAPTERS/listenbrainz.md` §9). Le varianti `_one`/`_other` seguono la convenzione i18n per i conteggi (stesso pattern di `adapter.spotify.*` e `adapter.youtube_music.*`) |
 | 0.4 | Sessione 52 (2026-10-26, issue #155) | **Materializzazione** delle chiavi della Story 1.3: `adapter.listenbrainz.*` (§2.12c) e `adapter.lastfm.*` (§2.12d, 14 chiavi) sono ora nei locale `it`/`en` dell'app; aggiunta §2.12e `settings.lastfm.*` (11 chiavi) per il pannello di configurazione del proxy. I nomi delle chiavi nel materializzato sono **completti** (`adapter.listenbrainz.detect.success`): le tabelle delle sezioni omettono il prefisso `adapter.` come le altre (§2.12a/§2.12b) |
 | 0.5 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 — namespace `scrobble.*`**: §1 (tabella dei namespace) e **§2.16 (nuova)**, i **15 codici** della spec `20-SCROBBLING-HUB.md` §13.2 (ratificata in v1.0 🟢), con i testi IT ed EN. La coppia codice → caso d'uso è **vincolante**: la mappa `ScrobbleError` (`05§4.2`) decide quale codice compare in quale situazione. Nota sulla pluralizzazione delle quattro stringhe con `{count}` (§3). Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.4) |
+| 0.6 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 — UI del percorso di scrittura**: §2.12f (nuova) le chiavi di interfaccia del pannello scrobbling (`settings.scrobble.*`: selettore per-hub, modalità del proxy, vista della coda) e §2.12g (nuova) le chiavi del percorso **web auth** Last.fm (`settings.lastfm.auth*`). Il namespace `scrobble` di §2.16 (i 15 codici di errore e avviso) è stato **materializzato** nei locale `it`/`en` dell'app, con le varianti `_one`/`_other` per le quattro stringhe con `{count}` |
