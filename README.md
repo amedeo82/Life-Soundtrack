@@ -7,6 +7,7 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 ## ✨ Cosa c'è oggi
 
 - Importa la cronologia di ascolto dai servizi supportati e la normalizza in un database locale (Dexie/IndexedDB)
+- **Invia i tuoi ascolti ai hub di scrobbling** (Last.fm, ListenBrainz): coda in locale, retry con backoff, consenso per-hub esplicito
 - **Tutto resta sul tuo dispositivo**: elaborazione locale, privacy-first
 - PWA installabile, onboarding guidato con anteprima del risultato
 - Interfaccia in italiano e inglese, strumenti di manutenzione e di purga del database
@@ -26,7 +27,7 @@ Non ancora implementato — la roadmap completa, con lo stato di ogni story, è 
 - **Analisi** (EPIC 2): mood giornaliero, ere, eventi e ricordi
 - **Enrichment** (EPIC 4): audio features (valence, energy, danceability, BPM), artwork, generi
 - **Altre piattaforme**: Deezer, Tidal, SoundCloud ([`docs/01-PLATFORMS.md`](docs/01-PLATFORMS.md) §3.4-3.6)
-- **Scrobbling continuo** (Story 1.5): hub Last.fm / ListenBrainz / Maloja
+- **Scrobbling continuo**: hub Maloja (Fase 2) — Last.fm e ListenBrainz sono già implementati (Story 1.5)
 
 ## 🏗️ Stato del progetto
 

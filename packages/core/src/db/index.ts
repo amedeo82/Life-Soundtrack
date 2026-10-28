@@ -10,6 +10,7 @@ export {
   DB_SCHEMA_V2,
   DB_SCHEMA_V3,
   DB_SCHEMA_V4,
+  DB_SCHEMA_V5,
   LifeSoundtrackDB,
   openDb,
 } from './db';
@@ -20,15 +21,52 @@ export {
  */
 export {
   EMPTY_LASTFM_CONFIG,
+  EMPTY_LISTENBRAINZ_CONFIG,
+  EMPTY_SCROBBLE_CURSOR,
   LASTFM_SETTINGS_KEY,
+  LISTENBRAINZ_SETTINGS_KEY,
+  SCROBBLE_CURSOR_LISTENBRAINZ_KEY,
   getSetting,
   isLastfmConfigured,
+  isLastfmWriteConfigured,
+  isListenbrainzWriteConfigured,
   loadLastfmConfig,
+  loadListenbrainzConfig,
+  loadScrobbleCursor,
   saveLastfmConfig,
+  saveListenbrainzConfig,
+  saveScrobbleCursor,
   setSetting,
   type AppSetting,
   type LastfmConfig,
+  type LastfmProxyMode,
+  type ListenbrainzConfig,
+  type ScrobbleCursor,
 } from './settings';
+
+/**
+ * Coda di invio degli scrobble (Story 1.5): stato, transizioni e backoff.
+ * Idempotenza per costruzione (PK `hub|eventKey`, G-SH.1).
+ */
+export {
+  SCROBBLE_MAX_ATTEMPTS,
+  SCROBBLE_RETRY_BASE_MS,
+  SCROBBLE_RETRY_CAP_MS,
+  claimScrobbles,
+  computeRetryDelayMs,
+  countScrobbleQueue,
+  enqueueScrobble,
+  listScrobbleQueue,
+  listStuckScrobbles,
+  markScrobbleFailed,
+  markScrobbleSent,
+  purgeScrobbleQueue,
+  releaseStuckScrobbles,
+  scrobbleIdempotencyKey,
+  type ScrobbleOutboxError,
+  type ScrobbleOutboxRow,
+  type ScrobbleOutboxStatus,
+} from './scrobbleOutbox';
 
 /**
  * Repository di accesso ai dati — CRUD e query base (11-BACKLOG T0.2.3).

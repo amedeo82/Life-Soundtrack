@@ -1,0 +1,138 @@
+{
+  "_comment": "Fixture sintetico delle **risposte degli hub** per il percorso di scrittura (Story 1.5, Sessione 58, issue #173). I sink interpretano queste risposte: happy path dei due hub, accettazione parziale, gli errori mappati sulla mappa `ScrobbleError` (20§11.1) e il proxy che risponde HTML (E.SH.7, caso 18). I payload di invio sono in `scrobble-payloads-sample.json`.",
+  "_metadata": {
+    "generatedFor": "Life-Soundtrack scrobble sink testing",
+    "version": "1.0",
+    "session": 58,
+    "spec": "docs/20-SCROBBLING-HUB.md v1.0 APPROVED + docs/13-ADR/0011-scrobble-sink.md v1.0 APPROVED",
+    "format": "ScrobblePayload (payload di invio) + risposte hub (mock API)",
+    "privacy": "Nessun segreto, nessun IP, nessun contesto: il payload è chiuso per costruzione (V8, G-SH.6)"
+  },
+  "_expectedOutput": {
+    "_comment": "Derivazione interna come canone.",
+    "lastfmErrorCodes": {
+      "rateLimited": 29,
+      "invalidSk": 9,
+      "invalidSignature": 13,
+      "malformed": 8
+    },
+    "_errorMapping": "29 -> RATE_LIMITED (recuperabile); 9 e 13 -> AUTH_INVALID (terminale); 8 -> PAYLOAD_REJECTED (terminale); 401/403/404 -> AUTH_INVALID; 429 -> RATE_LIMITED; 5xx -> HUB_ERROR (recuperabile)",
+    "lastfmBatchSize": 50,
+    "listenbrainzBatchSize": 1000
+  },
+  "hubResponses": {
+    "lastfm": {
+      "success": {
+        "scrobbles": {
+          "@attr": {
+            "accepted": 3,
+            "ignored": 0
+          },
+          "scrobble": [
+            {
+              "artist": {
+                "#text": "Björk",
+                "corrected": "0"
+              },
+              "track": {
+                "#text": "Jóga"
+              },
+              "album": {
+                "#text": "Homogenic"
+              },
+              "ignoredMessage": "0",
+              "albumArtistCorrected": "0",
+              "trackCorrected": "0"
+            },
+            {
+              "artist": {
+                "#text": "Tame Impala",
+                "corrected": "0"
+              },
+              "track": {
+                "#text": "Apocalypse Dreams"
+              },
+              "album": {
+                "#text": "Lonerism"
+              },
+              "ignoredMessage": "0",
+              "albumArtistCorrected": "0",
+              "trackCorrected": "0"
+            },
+            {
+              "artist": {
+                "#text": "Tame Impala",
+                "corrected": "0"
+              },
+              "track": {
+                "#text": "Borderline"
+              },
+              "album": {
+                "#text": "Lonerism"
+              },
+              "ignoredMessage": "0",
+              "albumArtistCorrected": "0",
+              "trackCorrected": "0"
+            }
+          ]
+        }
+      },
+      "partialAccept": {
+        "scrobbles": {
+          "@attr": {
+            "accepted": 2,
+            "ignored": 1
+          }
+        }
+      },
+      "errors": {
+        "rateLimited": {
+          "error": 29,
+          "message": "Rate limit exceeded"
+        },
+        "invalidSk": {
+          "error": 9,
+          "message": "Invalid session key"
+        },
+        "invalidSignature": {
+          "error": 13,
+          "message": "Invalid method signature supplied"
+        },
+        "malformed": {
+          "error": 8,
+          "message": "Operation failed"
+        }
+      },
+      "proxyHtml": "<html><body>proxy</body></html>"
+    },
+    "listenbrainz": {
+      "success": {
+        "status": "ok"
+      },
+      "errors": {
+        "unauthorized": {
+          "code": 401,
+          "error": "You need to provide a valid authorization token."
+        },
+        "rateLimited": {
+          "code": 429,
+          "error": "Rate limit exceeded"
+        },
+        "serverError": {
+          "code": 500,
+          "error": "Internal Server Error"
+        },
+        "badRequest": {
+          "code": 400,
+          "error": "Invalid JSON document"
+        }
+      },
+      "rateLimitHeaders": {
+        "X-RateLimit-Limit": "1",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "1710496800",
+        "X-RateLimit-Reset-In": "7"
+      }
+    }
+  }
+}

@@ -209,7 +209,7 @@ describe('runHealthCheck / fastCheck', () => {
 
     expect(health.status).toBe('ok');
     expect(health.fastCheck?.ok).toBe(true);
-    expect(health.fastCheck?.schemaVersion).toBe(4);
+    expect(health.fastCheck?.schemaVersion).toBe(5);
     expect(health.fastCheck?.error).toBeNull();
   });
 

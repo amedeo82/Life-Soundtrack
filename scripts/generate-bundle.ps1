@@ -116,6 +116,7 @@ $files = @(
     "docs/state/sessions/55-scrobbling-hub-spec.md",
     "docs/state/sessions/56-adr-0011-scrobble-sink.md",
     "docs/state/sessions/57-scrobbling-hub-spec-approval.md",
+    "docs/state/sessions/58-scrobbling-hub-implementation.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.4-dedup-promotion.md",
     "docs/state/stories/1.5-scrobbling-hub.md",
@@ -257,6 +258,8 @@ $files = @(
     # API e i due formati CSV degli export di terze parti.
     "fixtures/synthetic-history/listenbrainz-sample.jsonl",
     "fixtures/synthetic-history/lastfm-scrobbles-sample.json",
+    "fixtures/synthetic-history/scrobble-hub-sample.json",
+    "fixtures/synthetic-history/scrobble-payloads-sample.json",
     "fixtures/synthetic-history/lastfm-page2-sample.json",
     "fixtures/synthetic-history/lastfm-export-ghanl-sample.csv",
     "fixtures/synthetic-history/lastfm-export-4col-sample.csv",

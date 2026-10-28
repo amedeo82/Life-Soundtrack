@@ -41,6 +41,10 @@
       "types": "./dist/adapters/lastfm/index.d.ts",
       "import": "./dist/adapters/lastfm/index.js"
     },
+    "./adapters/scrobble": {
+      "types": "./dist/adapters/scrobble/index.d.ts",
+      "import": "./dist/adapters/scrobble/index.js"
+    },
     "./logger": {
       "types": "./dist/logger/index.d.ts",
       "import": "./dist/logger/index.js"
@@ -53,7 +57,7 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/perf.test.ts' && vitest run src/db/__tests__/perf.test.ts",
     "test:coverage": "vitest run --coverage --exclude src/db/__tests__/perf.test.ts --exclude src/adapters/__tests__/perf.test.ts"
   },
   "dependencies": {

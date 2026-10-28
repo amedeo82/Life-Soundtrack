@@ -19,6 +19,7 @@ export {
   type RawListenEvent,
   type RawPlaylistItemRef,
   runImport,
+  md5Hex,
   sha1Hex,
   sha256Hex,
   uuid,
@@ -26,6 +27,21 @@ export {
 export { SpotifyAdapter } from './adapters/spotify';
 export { YouTubeMusicAdapter } from './adapters/youtube';
 export { AppleMusicAdapter } from './adapters/apple';
+export {
+  enqueueEligibleListens,
+  getScrobbleSink,
+  isEligible,
+  isMature,
+  runScrobbleCycle,
+  ScrobbleError,
+  SCROBBLE_SINKS,
+  syncListenbrainzIncrementally,
+  type ScrobbleErrorCode,
+  type ScrobblePayload,
+  type ScrobbleResult,
+  type ScrobbleSink,
+  type ScrobbleSinkConfig,
+} from './adapters';
 
 export {
   consoleSink,

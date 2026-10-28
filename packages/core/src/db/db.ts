@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable, type Table } from 'dexie';
 import type { AppSetting } from './settings';
+import type { ScrobbleOutboxRow } from './scrobbleOutbox';
 import type {
   Album,
   Artist,
@@ -73,6 +74,20 @@ export const DB_SCHEMA_V4: Record<string, string> = {
 };
 
 /**
+ * Schema Dexie versione 5 — 02-DATA-SCHEMA.md §6.2 (Story 1.5).
+ * Aggiunge `scrobbleOutbox`: la **coda di invio** degli scrobble verso gli hub.
+ * La PK `idempotencyKey` (`hub|eventKey`) rende l'idempotenza **per
+ * costruzione** (G-SH.1): nessuna delle due API espone una chiave di
+ * deduplica lato server, quindi l'unica garanzia possibile è locale
+ * (`13-ADR/0011-scrobble-sink.md` V10). Migrazione non distruttiva (MIG-1):
+ * nessuna tabella esistente viene modificata e nessun dato viene perso.
+ */
+export const DB_SCHEMA_V5: Record<string, string> = {
+  ...DB_SCHEMA_V4,
+  scrobbleOutbox: '&idempotencyKey, hub, status, createdAt, nextAttemptAt',
+};
+
+/**
  * Database locale Life-Soundtrack (IndexedDB via Dexie 4).
  *
  * Le tabelle con `&x` usano x come chiave primaria unica (02§6): in particolare
@@ -95,6 +110,8 @@ export class LifeSoundtrackDB extends Dexie {
   searchQueries!: EntityTable<SearchQuery, 'id'>;
   /** Impostazioni locali (proxy, chiavi per-utente): mai nel bundle. */
   settings!: EntityTable<AppSetting, 'key'>;
+  /** Coda di invio degli scrobble (Story 1.5): PK `hub|eventKey`. */
+  scrobbleOutbox!: EntityTable<ScrobbleOutboxRow, 'idempotencyKey'>;
 
   constructor(name: string = DB_NAME) {
     super(name);
@@ -114,10 +131,11 @@ export class LifeSoundtrackDB extends Dexie {
         });
     });
     this.version(4).stores(DB_SCHEMA_V4);
+    this.version(5).stores(DB_SCHEMA_V5);
   }
 }
 
-/** Apre (o crea, se assente) il DB locale con lo schema corrente (versione 2). */
+/** Apre (o crea, se assente) il DB locale con lo schema corrente (versione 5). */
 export async function openDb(name: string = DB_NAME): Promise<LifeSoundtrackDB> {
   const db = new LifeSoundtrackDB(name);
   await db.open();

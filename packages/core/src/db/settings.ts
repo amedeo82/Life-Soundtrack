@@ -22,6 +22,27 @@ export interface AppSetting {
 /** Chiave della configurazione Last.fm. */
 export const LASTFM_SETTINGS_KEY = 'lastfm.config';
 
+/** Chiave della configurazione ListenBrainz. */
+export const LISTENBRAINZ_SETTINGS_KEY = 'listenbrainz.config';
+
+/**
+ * Chiave del cursore di sync incrementale ListenBrainz (C-SH.1).
+ *
+ * Senza persistenza ogni sync ripartirebbe da capo: il percorso incrementale
+ * deve **non** re-importare da zero (`20-SCROBBLING-HUB.md` §9).
+ */
+export const SCROBBLE_CURSOR_LISTENBRAINZ_KEY = 'scrobble.cursor.listenbrainz';
+
+/**
+ * Modalità del proxy Last.fm (D-SH.14).
+ *
+ * - `read-only` (default): il proxy inoltra solo GET → l'hub resta in sola
+ *   lettura e l'app **non tenta** la scrittura;
+ * - `read-write`: il proxy inoltra anche POST con body → la scrittura è
+ *   abilitata.
+ */
+export type LastfmProxyMode = 'read-only' | 'read-write';
+
 /**
  * Configurazione Last.fm **per-utente**.
  *
@@ -31,6 +52,12 @@ export const LASTFM_SETTINGS_KEY = 'lastfm.config';
  * - `apiKey`: chiave per-app dell'utente (D-LF.1). **Mai** embedded nel
  *   bundle, mai nei log.
  * - `username`: nome utente Last.fm (dato personale, escluso dal bundle).
+ * - `sharedSecret` e `sessionKey`: credenziali del percorso **web auth**
+ *   (D-LF.2), necessarie alla firma `api_sig` (D-SH.11). Per-utente, mai nel
+ *   bundle.
+ * - `proxyMode`: modalità dichiarata del proxy (D-SH.14). Il default
+ *   `read-only` evita che l'app tenti scritture su un proxy che non le
+ *   inoltra.
  */
 export interface LastfmConfig {
   /** Base URL del proxy CORS. */
@@ -39,6 +66,12 @@ export interface LastfmConfig {
   apiKey: string;
   /** Nome utente Last.fm. */
   username: string;
+  /** Shared secret del percorso web auth (mai nel bundle). */
+  sharedSecret: string;
+  /** Session key (`sk`) del percorso web auth (mai nel bundle). */
+  sessionKey: string;
+  /** Modalità dichiarata del proxy (D-SH.14). */
+  proxyMode: LastfmProxyMode;
 }
 
 /** Configurazione vuota (nessun proxy, nessuna chiave, nessun utente). */
@@ -46,6 +79,35 @@ export const EMPTY_LASTFM_CONFIG: LastfmConfig = {
   proxyBaseUrl: '',
   apiKey: '',
   username: '',
+  sharedSecret: '',
+  sessionKey: '',
+  proxyMode: 'read-only',
+};
+
+/** Configurazione ListenBrainz **per-utente** (User Token). */
+export interface ListenbrainzConfig {
+  /** User Token: necessario in scrittura (`POST /1/submit-listens`) e nel
+   * percorso incrementale (`/1/user/{u}/listens`). Mai nel bundle. */
+  token: string;
+}
+
+/** Configurazione ListenBrainz vuota. */
+export const EMPTY_LISTENBRAINZ_CONFIG: ListenbrainzConfig = {
+  token: '',
+};
+
+/** Cursore di sync incrementale per hub (C-SH.1). */
+export interface ScrobbleCursor {
+  /** Ultimo `listened_at` letto (unix s UTC), null se nessuna sync. */
+  maxTs: number | null;
+  /** ts (unix ms) dell'ultima sync conclusa. */
+  lastSyncedAt: number | null;
+}
+
+/** Cursore vuoto. */
+export const EMPTY_SCROBBLE_CURSOR: ScrobbleCursor = {
+  maxTs: null,
+  lastSyncedAt: null,
 };
 
 /** Legge una voce dalla tabella `settings` (null se assente). */
@@ -66,6 +128,9 @@ export async function loadLastfmConfig(db: LifeSoundtrackDB): Promise<LastfmConf
     proxyBaseUrl: stored?.proxyBaseUrl ?? '',
     apiKey: stored?.apiKey ?? '',
     username: stored?.username ?? '',
+    sharedSecret: stored?.sharedSecret ?? '',
+    sessionKey: stored?.sessionKey ?? '',
+    proxyMode: stored?.proxyMode === 'read-write' ? 'read-write' : 'read-only',
   };
 }
 
@@ -75,6 +140,47 @@ export async function saveLastfmConfig(db: LifeSoundtrackDB, config: LastfmConfi
     proxyBaseUrl: config.proxyBaseUrl.trim(),
     apiKey: config.apiKey.trim(),
     username: config.username.trim(),
+    sharedSecret: config.sharedSecret.trim(),
+    sessionKey: config.sessionKey.trim(),
+    proxyMode: config.proxyMode === 'read-write' ? 'read-write' : 'read-only',
+  });
+}
+
+/** Carica la configurazione ListenBrainz (token vuoto se assente). */
+export async function loadListenbrainzConfig(db: LifeSoundtrackDB): Promise<ListenbrainzConfig> {
+  const stored = await getSetting<Partial<ListenbrainzConfig>>(db, LISTENBRAINZ_SETTINGS_KEY);
+  return { token: stored?.token ?? '' };
+}
+
+/** Salva la configurazione ListenBrainz. */
+export async function saveListenbrainzConfig(
+  db: LifeSoundtrackDB,
+  config: ListenbrainzConfig,
+): Promise<void> {
+  await setSetting(db, LISTENBRAINZ_SETTINGS_KEY, { token: config.token.trim() });
+}
+
+/** Carica il cursore di sync incrementale ListenBrainz (C-SH.1). */
+export async function loadScrobbleCursor(
+  db: LifeSoundtrackDB,
+  key: string = SCROBBLE_CURSOR_LISTENBRAINZ_KEY,
+): Promise<ScrobbleCursor> {
+  const stored = await getSetting<Partial<ScrobbleCursor>>(db, key);
+  return {
+    maxTs: typeof stored?.maxTs === 'number' ? stored.maxTs : null,
+    lastSyncedAt: typeof stored?.lastSyncedAt === 'number' ? stored.lastSyncedAt : null,
+  };
+}
+
+/** Salva il cursore di sync incrementale. */
+export async function saveScrobbleCursor(
+  db: LifeSoundtrackDB,
+  cursor: ScrobbleCursor,
+  key: string = SCROBBLE_CURSOR_LISTENBRAINZ_KEY,
+): Promise<void> {
+  await setSetting(db, key, {
+    maxTs: cursor.maxTs,
+    lastSyncedAt: cursor.lastSyncedAt,
   });
 }
 
@@ -88,4 +194,26 @@ export function isLastfmConfigured(config: LastfmConfig): boolean {
     config.apiKey.trim().length > 0 &&
     config.username.trim().length > 0
   );
+}
+
+/**
+ * True se il percorso **di scrittura** Last.fm è utilizzabile: percorso API
+ * valorizzato, proxy dichiarato in modalità `read-write` (D-SH.14) e credenziali
+ * web auth presenti (`api_key` + `shared secret` + `sk`, D-LF.2).
+ *
+ * Senza tutti e tre gli elementi l'app **non tenta** la scrittura: zero
+ * richieste, nessun errore a runtime (P-SH.3, U-SH.2).
+ */
+export function isLastfmWriteConfigured(config: LastfmConfig): boolean {
+  return (
+    isLastfmConfigured(config) &&
+    config.proxyMode === 'read-write' &&
+    config.sharedSecret.trim().length > 0 &&
+    config.sessionKey.trim().length > 0
+  );
+}
+
+/** True se il percorso di scrittura ListenBrainz è utilizzabile (User Token). */
+export function isListenbrainzWriteConfigured(config: ListenbrainzConfig): boolean {
+  return config.token.trim().length > 0;
 }

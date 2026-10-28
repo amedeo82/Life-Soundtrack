@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import { LastfmPanel } from '../LastfmPanel';
 import { i18n } from '../../i18n';
@@ -52,5 +52,23 @@ describe('LastfmPanel — configurazione locale (E.LF.7, D-LF.0/D-LF.1)', () => 
     const apiKey = screen.getByTestId('lastfm-apikey') as HTMLInputElement;
     expect(apiKey.type).toBe('password');
     expect(apiKey.getAttribute('autocomplete')).toBe('off');
+  });
+
+  it('il percorso web auth espone shared secret e callback (D-LF.2)', () => {
+    renderPanel();
+    const secret = screen.getByTestId('lastfm-shared-secret') as HTMLInputElement;
+    expect(secret.type).toBe('password');
+    expect(screen.getByTestId('lastfm-auth-callback')).toBeTruthy();
+  });
+
+  it('senza token nel callback il collegamento fallisce con un avviso esplicito', async () => {
+    renderPanel();
+    fireEvent.change(screen.getByTestId('lastfm-auth-callback'), {
+      target: { value: 'https://app.example.org/callback?foo=bar' },
+    });
+    fireEvent.click(screen.getByTestId('lastfm-auth-connect'));
+    await waitFor(() => {
+      expect(screen.getByTestId('lastfm-error')).toBeTruthy();
+    });
   });
 });

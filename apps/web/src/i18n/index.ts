@@ -33,6 +33,7 @@ export const NAMESPACES = [
   'empty',
   'import',
   'adapter',
+  'scrobble',
   'error',
   'common',
   'insight',
