@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-28 15:40
-> Totale file: 105
+> Data: 2026-10-28 17:06
+> Totale file: 106
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1460,7 +1460,7 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 59 (v0.7) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04` |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 57 (v0.5) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 3 | Strategia di testing |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 59 (v1.6.18) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 61 (v1.6.20) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 54 (v0.9) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml` |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 1 | Glossario di dominio |
@@ -1609,7 +1609,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 59, issue #178): **EPIC 1 — Import core: 5/5 ✅** e la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED**: i trigger dei **5 tipi di ricordo** sono specificati (`return` e `seasonal` completati, `first_time` a 5 brani distinti) e i template i18n sono già dichiarati in `08§2.15`. **La Story 2.4 (Memory Engine) è implementabile**: issue **#179** (`agent-ready`, `size:M`) — il pacchetto `packages/core/src/analysis/` non esiste ancora ed è la prima implementazione dell'EPIC 2. **La Story 2.1 (Mood Tracker) è bloccata** dalle **audio features** dell'EPIC 4.1 (non implementate): issue **#180** (`needs-spec`), che chiede la spec del provider delle feature (decisione D-A.1). **Prossimo passo**: implementare la 2.4 (#179), poi scrivere la spec dell'EPIC 4.1 per sbloccare la 2.1. Restano poi le Story 2.2 (ere), 2.3 (eventi) e le tranche dell'EPIC 3 (UI). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 61, issue #179): **EPIC 1 — Import core: 5/5 ✅** e la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED**: i trigger dei **5 tipi di ricordo** sono specificati (`return` e `seasonal` completati, `first_time` a 5 brani distinti) e i template i18n sono già dichiarati in `08§2.15`. **La Story 2.4 (Memory Engine) è implementata** (issue **#179**, PR #185, 👀 in review): il pacchetto `packages/core/src/analysis/` esiste — i 5 generatori (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il feed ordinato per rilevanza (`04§7.4`), la persistenza degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4). **La Story 2.1 (Mood Tracker) è bloccata** dalle **audio features** dell'EPIC 4.1 (non implementate): issue **#180** (`needs-spec`), che chiede la spec del provider delle feature (decisione D-A.1). **Prossimo passo**: scrivere la **spec dell'EPIC 4.1** (il provider delle audio features) per sbloccare la 2.1, poi le Story 2.2 (ere) e 2.3 (eventi) e le tranche dell'EPIC 3 (UI). Resta aperta la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -7089,8 +7089,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.6
-> Ultima modifica: 2026-10-28 — §24 Issue #173 (Story 1.5 — scrobbling hub implementato)
+> Versione: 2.7
+> Ultima modifica: 2026-10-28 — §27 Issue #179 (Story 2.4 — memory engine implementato)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -7893,6 +7893,35 @@ mezzo del lavoro.
 - Sessione: `docs/state/sessions/60-next-step-skip-blocked.md`
 - Precedenti: **#178** (la ratifica che ha creato la prima story `blocked`) · **#179** (la 2.4, ora indicata dal blocco) · **#180** (la 2.1, bloccata)
 
+## 27. Issue #179 — Story 2.4: il Memory Engine (Sessione 61)
+
+**Tipo**: feature (`packages/core/src/analysis/`) + persistenza (`db/`) + i18n (`apps/web/`) — issue #179, claim `kilo-hp-elitebook-hj59`
+**Branch**: `feat/179-memory-engine` (worktree `ls-179-memory-engine`)
+**PR**: #185 (aperta su `main` dalla worktree)
+**Data**: 2026-10-28
+**Stato**: 🟡 in review — i 5 tipi di ricordo, il feed per rilevanza, la persistenza con `derivedVersion` e l'orchestratore minimale della tranche
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 27-1 | P+F+L | Il **ranking** del ricordo (§7.4) non aveva dove scrivere il suo score: `MemoryPayload` (`02§4`) è chiuso e non ha un campo `score` | Il primo tentativo ha portato ad **aggiungere** `score` al payload, che avrebbe violato una spec APPROVED | La rilevanza ordinata vive in `Insight.confidence` (0..1): il payload resta chiuso e il feed resta ordinabile. Un vincolo di schema che sembra un blocco spesso indica **dove** mettere la cosa | `packages/core/src/analysis/memory/engine.ts` |
+| 27-2 | P+L | `Insight.payload` è l'**unione discriminata** di `02§4`: `payload.text` non compila in TypeScript | Il test accedeva ai campi del payload senza restringere il tipo | `memoryPayloadOf(insight)` verifica il `kind` e restituisce il `MemoryPayload`: un narrowing che fallisce sul posto giusto | `packages/core/src/analysis/__tests__/helpers.ts` |
+| 27-3 | P+F+L | I test del resolver i18n potevano passare con l'app **rotta** | Copiare i template `memory.*` in una fixture del test avrebbe duplicato il contratto: la chiave spostata nell'app sarebbe rimasta verde | I test del core leggono i **locale reali dell'app** (`apps/web/src/i18n/locales/*.json`), come `db/__tests__/helpers.ts` fa con `fixtures/db-seed/`: una chiave spostata o cancellata nell'app **fallisce** il test del core | `packages/core/src/analysis/__tests__/helpers.ts` |
+| 27-4 | P+L | Il **config object** del memory engine non copriva i parametri delle tre famiglie di `milestone` | Il trigger di `04§7.2` elenca eventi, ore e artisti; il registro `04§9` ne elenca sei, e i template `.hours`/`.artists` esistono già in `08§2.15` | Le due soglie in più (`milestoneHours`, `milestoneArtists`) sono **nel config object**, quindi versionate come tutte le altre (`04§1.1`): un parametro che cambia il risultato ma non il `derivedVersion` romperebbe MIG-3. Allargamento **dichiarato** (D.61.1), non silenzioso | `packages/core/src/analysis/memory/types.ts` |
+| 27-5 | P+L | `on_this_day` poteva matchare eventi di **anni diversi** | Il pseudocodice della spec usa `isSameDayMonth`, che confronta solo mese e giorno: con `yearsAgo` diventerebbe falso | Il confronto è su **anno, mese e giorno**: la prosa del trigger dice "nella stessa data (mese+giorno) di N anni fa" | `packages/core/src/analysis/memory/onThisDay.ts` |
+| 27-6 | P+F+L | Ricalcolare gli insight dello stesso giorno poteva **duplicarli** | Un id casuale (UUID) a ogni run: ogni ricalcolo aggiungeva righe | L'id è **deterministico** (`mem-<giorno>-<kind>-<soggetto>`): il ricalcolo è idempotente per costruzione, e `replaceInsights` sostituisce il periodo in transazione | `packages/core/src/analysis/memory/engine.ts` · `packages/core/src/db/insights.ts` |
+| 27-7 | P+L | I **fixture di scenario** non producevano ricordi al giorno dell'ultimo ascolto | I tre fixture coprono **mesi** (lockdown, litigio, viaggio estivo), mentre i trigger dei ricordi coprono **anni** (anniversari) o **soglie** | Il caso noto si osserva spostando "oggi" di un anno avanti (`on_this_day`) o fermandosi sul giorno in cui la soglia è stata raggiunta (`milestone` dei 5000 ascolti del `summer-roadtrip`). Un fixture che "non produce nulla" può essere un fixture che non è mai stato guardato | `packages/core/src/analysis/__tests__/memory-scenarios.test.ts` |
+
+**Lesson learned sintetica**: una spec APPROVED che elenca un trigger in prosa e un parametro in tabella non è una contraddizione: è un invites a **dichiarare** (27-4). E il vincolo più forte del progetto — il payload chiuso di `02§4` — non era un blocco ma una **pista** su dove mettere il ranking (27-1). Il test che legge il contratto vero (i locale reali dell'app) vale più del test che lo ricopia (27-3).
+
+### Link utili
+
+- Branch: `feat/179-memory-engine` (worktree `ls-179-memory-engine`)
+- Issue: **#179** (`size:M`, `area:analysis`), claim `kilo-hp-elitebook-hj59`
+- Sessione: `docs/state/sessions/61-story-2-4-memory-engine.md`
+- Precedenti: **#178** (la ratifica della spec) · **#180** (la 2.1, bloccata dalle audio features) · #161 (il gate sui fatti del README, che la prosa di questa PR rispetta)
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -7926,6 +7955,7 @@ mezzo del lavoro.
 | 2.9 | 2026-10-28 (issue #178) | **§25 — esito post-merge della ratifica della spec dell'analisi**: la PR #181 è **merged** (`5f725e3`, 2026-10-28T14:28:05Z) → l'issue #178 è chiusa con `status:done` e `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED**. Doc-sync di chiusura (frontmatter della Sessione 59 con `merged: true`, merge commit e `pr: 181`, sezione "Esito post-merge"). Le issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, `needs-spec`: bloccata dalle audio features dell'EPIC 4.1) restano aperte e non transizionate: sono il lavoro di altri |
 | 2.10 | 2026-10-28 (issue #182) | **§26 — il blocco NEXT-STEP indica solo story lavorabili** (Sessione 60, claim `kilo-hp-elitebook-41xb`, PR #183): il filtro di `Build-Block-NextStep` esclude ora `done`, **`blocked`** e **`wontdo`** — il puntatore passava dalla **2.1** (bloccata dalle audio features dell'EPIC 4.1, decisione D-A.1) alla **2.4** (Memory Engine, issue #179), la story implementabile. Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**": se il conteggio cambia, la frase che lo descrive cambia con lui. Il valore `blocked` esisteva nella macchina a stati (ADR-0007, `11-BACKLOG.md`) ma **mai** in un `docs/state/stories/*.md`: il primo file che lo usa (la 2.1, Sessione 59) ha reso visibile il disallineamento. Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i **valori** di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g nuova). Test: `scripts/test-aggregate-determinism.sh` **37 assert** (T10e e T10f nuovi, verificati in entrambe le direzioni: senza il fix 4 assert falliscono) |
 | 2.11 | 2026-10-28 (issue #182) | **§26 — esito post-merge**: la PR #183 è **merged** (`a350386`, 2026-10-28T15:26:17Z) → l'issue #182 è chiusa con `status:done` e `auto-state-aggregate` (`ab83763`) ha rigenerato il blocco NEXT-STEP del README, che ora indica la **2.4** (Memory Engine) invece della 2.1 bloccata. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 60 con `pr: 183`, `merged: true` e merge commit) |
+| 2.12 | 2026-10-28 (issue #179) | **§27 Issue #179 — Story 2.4 implementata** (Sessione 61, claim `kilo-hp-elitebook-hj59`, PR #185): 7 entry (27-1 il **ranking** non aveva dove scrivere il suo score — `MemoryPayload` (`02§4`) è chiuso: la rilevanza ordinata vive in `Insight.confidence`, il payload resta intatto; 27-2 `Insight.payload` è l'unione discriminata: `payload.text` non compila senza restringere il tipo (`memoryPayloadOf`); 27-3 i test del resolver i18n leggono i **locale reali dell'app**: una chiave spostata nell'app fallisce il test del core, non viceversa; 27-4 il **config object** versiona anche `milestoneHours` e `milestoneArtists`: le tre famiglie del trigger `04§7.2` sono implementate e i due parametri in più sono dichiarati (D.61.1); 27-5 `on_this_day` confronta anno+mese+giorno: `isSameDayMonth` (solo mese+giorno) avrebbe matchato eventi di anni diversi; 27-6 l'id dell'insight è **deterministico**: il ricalcolo è idempotente e non duplica le righe; 27-7 i **fixture di scenario** coprono mesi e i trigger dei ricordi coprono anni: il caso noto si osserva spostando "oggi" di un anno avanti). Consegnati: i 5 generatori, il ranking `baseScore × relevance × recency`, la persistenza degli insight `memory` con `derivedVersion` e rilevamento degli insight `stale` (MIG-3), l'orchestratore minimale (`04§8.1`, D-A.5) e il testo reso dal resolver i18n (D-A.4). **27 test** nuovi in `@ls/core` + **5** in `@ls/web` |
 
 ---
 
@@ -10467,6 +10497,140 @@ l'apertura, e il merge commit solo dopo il merge.
 
 
 
+===== FILE: docs/state/sessions/61-story-2-4-memory-engine.md =====
+
+---
+number: 61
+title: "Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179)"
+date: 2026-10-28
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/179-memory-engine
+pr: 185
+claim: kilo-hp-elitebook-hj59
+cross_refs: [179, 178, 180]
+tags: [analysis, phase-2]
+---
+
+# Sessione 61 — Story 2.4: il Memory Engine (issue #179)
+
+## Sintesi
+
+Prima implementazione dell'**EPIC 2**: il pacchetto
+`packages/core/src/analysis/` non esisteva, e ora c'è. Il memory engine
+genera i **cinque** tipi di ricordo della spec `04-ANALYSIS-ALGORITHMS.md`
+v1.0 🟢 (§7), li ordina per **rilevanza** (§7.4) e li persiste come insight di
+tipo `memory` con la `derivedVersion` calcolata dai parametri (§9).
+
+Il testo del ricordo è una **stringa resa** (D-A.4): nel core non c'è nessuna
+stringa italiana, solo la chiave i18n (`insight.memory.*`) e i suoi parametri.
+L'app inietta il resolver (i18next), il core non conosce i18next.
+
+## Trigger
+
+Issue **#179** (`agent-ready`, `size:M`, `area:analysis`), aperta nella Sessione
+59 dopo la ratifica della spec dell'analisi (issue #178). Claim
+`kilo-hp-elitebook-hj59` (unico claim, riverificato).
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| I 5 generatori (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`) | `packages/core/src/analysis/memory/` |
+| Il ranking (`baseScore × relevance × recency`) | `packages/core/src/analysis/memory/ranking.ts` |
+| La persistenza degli insight `memory` con `derivedVersion` | `packages/core/src/analysis/` + `packages/core/src/db/insights.ts` |
+| Il testo reso dal resolver i18n | `packages/core/src/analysis/memory/i18n.ts` + `apps/web/src/i18n/translator.ts` |
+| L'orchestratore minimale della tranche | `packages/core/src/analysis/pipeline.ts` |
+| I template `memory.*` nei locale `it`/`en` | `apps/web/src/i18n/locales/{it,en}.json` |
+| I test (spec + fixture di scenario) | `packages/core/src/analysis/__tests__/` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.61.1 | Il config object contiene **anche** `milestoneHours` e `milestoneArtists` | Il trigger di `04§7.2` elenca tre famiglie di milestone (eventi, ore, artisti) e `08§2.15` dichiara i template `.events`, `.hours` e `.artists`; il registro `04§9` ne elenca sei. Le due soglie in più sono **versionate insieme** alle altre (`04§1.1`: il config contiene *tutti* i parametri): un parametro che cambia il risultato ma non il `derivedVersion` romperebbe MIG-3. È un allargamento **dichiarato** del registro, non una sostituzione: se il Boss preferisce il perimetro strettamente ratificato, basta togliere le due soglie (gli insight vecchi diventano `stale` e vengono ricalcolati) |
+| D.61.2 | `on_this_day` confronta **anno, mese e giorno** | La prosa del trigger dice "nella stessa data (mese+giorno) di N anni fa": confrontare solo mese+giorno (come suggerirebbe il nome `isSameDayMonth` del pseudocodice) matcherebbe eventi di **anni diversi** e renderebbe `yearsAgo` falso |
+| D.61.3 | `relevance` e `recency` sono definiti sul **batch del giorno** | La mediana dei `trackCount` è una statistica del batch, e il feed mostra "i top N score per giorno" (`04§7.4`): la normalizzazione è relativa ai ricordi dello stesso giorno |
+| D.61.4 | La rilevanza ordinata vive in `Insight.confidence` | `MemoryPayload` (`02§4`) è **chiuso**: non ha un campo score e non si modifica. `confidence` (0..1) è l'unico campo libero dell'insight: il suo valore è lo score normalizzato sul batch del giorno |
+| D.61.5 | L'id dell'insight è **deterministico** (`mem-<giorno>-<kind>-<soggetto>`) | Ricalcolare lo stesso giorno non deve creare un duplicato: con un UUID casuale ogni run ripetuto aggiungerebbe righe. Il ricalcolo è idempotente per costruzione |
+| D.61.6 | Il confine temporale è il **giorno UTC** | `ListenEvent.day` è 'YYYY-MM-DD' **UTC** (`02§3.2`) e `04§7` non introduce un fuso utente (il `userTimezone` compare solo nel pattern analyzer, `04§4.2`) |
+| D.61.7 | Il core **non** conosce i18next: la porta `Translator` è iniettata | `05§9`: `@ls/core/analysis` è puro TypeScript e gira nel Web Worker. L'app passa `i18n.t` (`apps/web/src/i18n/translator.ts`) |
+
+## Difetti trovati lungo il percorso
+
+**Il `text` del ricordo non può stare in un campo chiuso senza perdere il
+ranking**: `MemoryPayload` (`02§4`) non ha un campo score, e non si modifica. La
+prima implementazione aveva finito per *aggiungere* `score` al payload — che
+avrebbe violato una spec APPROVED. La soluzione è `Insight.confidence`: il
+payload resta chiuso e il feed resta ordinabile (D.61.4).
+
+**Il bundle del test leggeva i locale dell'app**: il test del resolver non può
+copiare i template in una fixture — copierebbe la chiave e perderebbe il
+contratto. I test del core leggono `apps/web/src/i18n/locales/*.json` (come
+`db/__tests__/helpers.ts` già fa con `fixtures/db-seed/`): se l'app perde una
+chiave `insight.memory.*`, il test del core fallisce.
+
+**Il bundle del bundle**: `Insight.payload` è l'unione discriminata di `02§4`,
+quindi `payload.text` non compila in TypeScript senza restringere il tipo. I
+test usano `memoryPayloadOf(insight)`, che verifica il `kind` e restituisce il
+`MemoryPayload`: un narrowing che fallisce sul posto giusto.
+
+## Verifica
+
+- `pnpm run lint` → verde
+- `pnpm run typecheck` → verde
+- `pnpm run test` → **297** test in `@ls/core` (27 nuovi) + **93** in `@ls/web`
+  (5 nuovi), tutti verdi
+- `pnpm run build` → verde
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 (nessun numero di sessione
+  duplicato: `61` pre-allocato con la procedura di `docs/state/_index.md`)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 61-1 | **Una spec APPROVED che elenca un trigger in prosa e un parametro in tabella non è una contraddizione: è un invites a dichiarare.** Il trigger dei `milestone` elenca tre famiglie, il registro dei parametri ne elenca sei. La lettura che rispetta entrambi (implementare le tre famiglie e versionare le due soglie in più) è dichiarabile; quella che ne implementa una sola nasconde il conflitto. Dichiarare l'allargamento (D.61.1) costa una riga nel doc di stato; tacere costa un `derivedVersion` che non copre un parametro |
+| 61-2 | **Il payload chiuso (`02§4`) non è un ostacolo: è una pista.** Il ranking aveva bisogno di un campo che il payload non ha; la risposta non è aprire il payload ma trovare il campo giusto fuori (`Insight.confidence`). Un vincolo di schema che sembra un blocco spesso indica *dove* mettere la cosa |
+| 61-3 | **Il test che legge il contratto vero vale più del test che lo ricopia.** I 27 test del core risolvono le chiavi `insight.memory.*` sui **locale reali dell'app**: una chiave spostata o cancellata nell'app fallisce il test del core, non viceversa. Una copia dei template nel test avrebbe passato mentre l'app era rotta |
+| 61-4 | **Il confine del giorno è una decisione, non un dettaglio.** `04§7` non parla di fuso: il codice usa il giorno UTC, coerente con `ListenEvent.day` (`02§3.2`). Dichiararlo (D.61.6) evita che il primo agente che legge il codice lo legga come un bug invece di una scelta |
+| 61-5 | **I fixture di scenario coprono mesi, i trigger dei ricordi coprono anni.** I tre fixture di `fixtures/scenarios/` (lockdown, litigio, viaggio estivo) non producono ricordi al giorno dell'ultimo ascolto: i trigger sono anniversari e soglie. Il caso noto si osserva spostando "oggi" di un anno avanti (`on_this_day`) o fermandosi sul giorno in cui la soglia è stata raggiunta (`milestone` dei 5000 ascolti del `summer-roadtrip`). Un fixture che "non produce nulla" può essere un fixture che non è mai stato guardato |
+
+## Documenti aggiornati
+
+- `packages/core/src/analysis/` — **nuovo** pacchetto: `memory/` (i 5
+  generatori, il ranking, il resolver i18n, la `derivedVersion`), `pipeline.ts`
+  (orchestratore minimale), `index.ts` (barrel)
+- `packages/core/src/db/insights.ts` — **nuovo**: persistenza degli insight,
+  rilevamento degli insight `stale` (MIG-3), `replaceInsights` transazionale
+- `packages/core/src/db/index.ts`, `packages/core/src/index.ts`,
+  `packages/core/package.json` — gli export del nuovo modulo (`@ls/core/analysis`)
+- `apps/web/src/i18n/translator.ts` — **nuovo**: l'adattatore i18next → porta
+  `Translator` del core
+- `apps/web/src/i18n/locales/{it,en}.json` — la chiave
+  `insight.memory.milestone.artists` (mancava; le altre `memory.*` esistevano già
+  da `08§2.15`)
+- `docs/state/stories/2.4-memory-engine.md` — `status: in_review`, `pr: 185`,
+  task e AC verificati, scelte di implementazione
+- `docs/state/sessions/61-story-2-4-memory-engine.md` — **nuovo**
+- `docs/11-BACKLOG.md` — sezione Story 2.4 (`**Stato**:`), lista di priorità
+  degli agenti, changelog v1.6.20
+- `docs/18-DEV-LOG.md` — §27 + changelog 2.12
+- `docs/INDEX.md` — "Prossimo passo tecnico" e la riga di `11-BACKLOG.md`
+- `scripts/generate-bundle.ps1` — `$files`: la sessione 61
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#179** — la Story 2.4 (claim `kilo-hp-elitebook-hj59`, PR #185)
+- **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢), Sessione 59
+- **#180** — la Story 2.1, **bloccata** dalle audio features dell'EPIC 4.1
+  (D-A.1): resta la prossima candidate dopo la 2.4
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -10930,15 +11094,15 @@ id: "2.4"
 title: "Memory Engine"
 phase: 2
 area: analysis
-status: todo
+status: in_review
 priority: B
 depends_on: ["0.2"]
 issue: 179
-branch: ""
-pr: 0
+branch: feat/179-memory-engine
+pr: 185
 merged_commit: ""
 merged_date: ""
-claim: ""
+claim: kilo-hp-elitebook-hj59
 spec_refs:
   - docs/04-ANALYSIS-ALGORITHMS.md
   - docs/02-DATA-SCHEMA.md
@@ -10956,41 +11120,80 @@ trigger documentato, e un feed ordinato per **rilevanza**.
 
 ## Stato
 
-⬚ **TODO — implementabile dal 2026-10-28 (Sessione 59)**. La spec
+👀 **IN REVIEW — implementata nella Sessione 61** (issue #179, PR #185). La spec
 `docs/04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED** (ratifica del
-2026-10-28, issue #178) e i **trigger dei 5 tipi** sono specificati:
+2026-10-28, issue #178).
 
-- `return` e `seasonal` completati (decisione **D-A.2**): il silenzio è
-  l'**ultimo** ascolto precedente dell'artista (≥ 180 giorni) e la stagionalità
-  è **per genere** con la concentrazione calcolata sugli ultimi 12 mesi
-- `first_time` a **5 brani distinti** (`firstTimeMinTracks`, decisione **D-A.3**)
-- il `text` del ricordo è una **stringa resa** con i template i18n già
-  dichiarati in `08§2.15` (`memory.*`, decisione **D-A.4**)
-- l'orchestratore è **minimale ed estensibile**: chiama solo i generatori
-  implementati (decisione **D-A.5**, `04§8.1`)
+Cosa è stato consegnato:
 
-Lo schema è **già pronto** e non va modificato: `02§4` dichiara
-`InsightType` (`memory`), `MemoryPayload` (`memoryKind` × 5, `trackId`,
-`artistId`, `yearsAgo`, `text`) e `Insight.derivedVersion`; `02§6` dichiara la
-tabella `insights` con l'indice su `derivedVersion` e la regola MIG-3 (gli
-insight con versione vecchia diventano `stale` e vengono ricalcolati).
+- **Il pacchetto `packages/core/src/analysis/`**: il memory engine con i **5
+  generatori** (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`),
+  ciascuno in un file proprio, con gli indici derivati (per artista, per brano)
+  costruiti **una volta** per generazione
+- **Il ranking** (`04§7.4`): `score = baseScore(memoryKind) × relevance ×
+  recency`, con `relevance = trackCount / medianTrackCount` e `recency =
+  exp(-daysAgo / 365)`; il feed è ordinato per score decrescente
+- **La persistenza** (`packages/core/src/db/insights.ts`): `putInsights`,
+  `listInsightsByType`, `listInsightsByTypeAndVersion`, `listStaleInsights` e
+  `replaceInsights` (transazionale: rimuove gli insight `stale` e sostituisce
+  quelli del periodo ricalcolato — MIG-3, 02§7)
+- **Il testo reso** (`04§7.3.1`, D-A.4): il core non contiene **nessuna**
+  stringa italiana; il motore chiama il resolver i18n con la chiave
+  `insight.memory.*` e i parametri, e l'app inietta il resolver
+  (`apps/web/src/i18n/translator.ts`)
+- **L'orchestratore minimale** (`04§8.1`, D-A.5): `AnalysisPipeline` +
+  `createMemoryGenerator`; il contratto è il plug-in, i generatori si
+  aggiungono senza modificarlo
+- **I template**: `insight.memory.milestone.artists` (mancava) materializzato nei
+  locale `it`/`en` dell'app; le altre chiavi `memory.*` esistevano già
+  (`08§2.15`)
+- **I test**: 27 nuovi in `@ls/core` (5 generatori, ranking, `derivedVersion`,
+  testo reso, pipeline, persistenza, fixture di scenario) + 5 in `@ls/web` (il
+  resolver i18n sui template reali dell'app)
 
-**Issue**: #179 (`agent-ready`, `size:M`).
+Lo schema **non è stato modificato**: `02§4` dichiara `InsightType` (`memory`),
+`MemoryPayload` (`memoryKind` × 5, `trackId`, `artistId`, `yearsAgo`, `text`) e
+`Insight.derivedVersion`; il testo è una stringa resa e il genere o il mese
+vivono nel testo (D-A.4).
 
 ## Task
 
-- [ ] I 5 generatori in `packages/core/src/analysis/memory/`
-- [ ] Il ranking per rilevanza (`baseScore × relevance × recency`, `04§7.4`)
-- [ ] La persistenza degli insight `memory` con `derivedVersion` calcolata
-- [ ] Il testo reso con il resolver i18n (`memory.*`)
-- [ ] L'orchestratore minimale della tranche (`04§8.1`)
-- [ ] I template `memory.*` materializzati nei locale `it`/`en`
+- [x] I 5 generatori in `packages/core/src/analysis/memory/`
+- [x] Il ranking per rilevanza (`baseScore × relevance × recency`, `04§7.4`)
+- [x] La persistenza degli insight `memory` con `derivedVersion` calcolata
+- [x] Il testo reso con il resolver i18n (`memory.*`)
+- [x] L'orchestratore minimale della tranche (`04§8.1`)
+- [x] I template `memory.*` materializzati nei locale `it`/`en`
 
 ## Acceptance criteria
 
 - [x] 5 tipi di ricordo specificati in `04§7.2` (v1.0 🟢)
 - [x] Trigger documentati in `04-ANALYSIS-ALGORITHMS.md` (§7.2, ratificati)
-- [ ] Insight `memory` persistiti con `derivedVersion`, feed ordinato per rilevanza
+- [x] Insight `memory` persistiti con `derivedVersion`, feed ordinato per rilevanza
+- [x] `first_time` usa **5 brani distinti** (`firstTimeMinTracks`, D-A.3)
+- [x] `return` usa l'**ultimo ascolto precedente** dell'artista
+      (`returnMinGapDays` = 180) e il testo `{months}`
+- [x] `seasonal` è **per genere**, con la concentrazione calcolata sugli ultimi
+      **12 mesi** (`seasonalConcentration` = 0.6, `seasonalMinEvents` = 5)
+- [x] Il testo è **reso** con le chiavi `memory.*` (nessuna stringa inline) e il
+      `text` persistito è una stringa
+- [x] Ogni ricordo persistito ha `derivedVersion` **calcolata** dai parametri
+      (`04§9`) e l'insight vecchio diventa `stale` al cambio dei parametri
+      (MIG-3)
+- [x] Test con i fixture di `fixtures/scenarios/` (scenario noto, risultato
+      atteso)
+- [x] `pnpm run lint` / `typecheck` / `test` / `build` verdi
+
+## Scelte di implementazione
+
+| # | Scelta | Motivazione |
+|---|--------|-------------|
+| D.61.1 | Il config object contiene **anche** `milestoneHours` ([100, 500, 1000]) e `milestoneArtists` ([100, 500]) | Il trigger di `04§7.2` elenca tre famiglie di milestone (eventi, ore, artisti) e `08§2.15` dichiara i template `.events`, `.hours` e `.artists`. Le due soglie in più sono **versionate insieme** alle altre (`04§1.1`: *"configObject contiene tutti i parametri dell'algoritmo"*): un parametro che cambia il risultato ma non il `derivedVersion` romperebbe MIG-3. `04§9` elenca i sei parametri ratificati: le due soglie in più sono un **allargamento dichiarato**, non una sostituzione |
+| D.61.2 | `on_this_day` confronta **anno, mese e giorno** | La prosa del trigger dice "nella stessa data (mese+giorno) di N anni fa": confrontare solo mese+giorno (come il nome `isSameDayMonth` del pseudocodice suggerirebbe) matcherebbe eventi di **anni diversi** e renderebbe `yearsAgo` falso |
+| D.61.3 | `relevance` e `recency` sono definiti sul **batch del giorno** | La mediana dei `trackCount` è una statistica del batch: il feed mostra "i top N score per giorno" (`04§7.4`), quindi la normalizzazione è relativa ai ricordi dello stesso giorno |
+| D.61.4 | La rilevanza ordinata vive in `Insight.confidence` | `MemoryPayload` (`02§4`) è **chiuso**: non ha un campo score, e non si modifica. `confidence` (0..1) è l'unico campo libero dell'insight: il suo valore è lo score normalizzato sul batch del giorno |
+| D.61.5 | L'id dell'insight è **deterministico** (`mem-<giorno>-<kind>-<soggetto>`) | Ricalcolare lo stesso giorno non deve creare un duplicato: con un UUID casuale ogni run ripetuto aggiungerebbe righe. Il ricalcolo è quindi idempotente per costruzione |
+| D.61.6 | Il confine temporale è il **giorno UTC** | `ListenEvent.day` è 'YYYY-MM-DD' **UTC** (02§3.2) e `04§7` non introduce un fuso utente (il `userTimezone` compare solo nel pattern analyzer, `04§4.2`) |
 
 ## Vincoli
 
@@ -17385,7 +17588,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.19 · Sessione 60 (2026-10-28, issue #182) · il blocco NEXT-STEP del README indica solo story **lavorabili** (esclude `done`, `blocked`, `wontdo`): dopo la ratifica della spec dell'analisi il puntatore è passato dalla 2.1 (bloccata) alla **2.4** (implementabile, issue #179)
+> Status: 🟢 APPROVED · Versione 1.6.20 · Sessione 61 (2026-10-28, issue #179) · la **Story 2.4 (Memory Engine) è implementata** e in review (PR #185): i 5 tipi di ricordo, il feed per rilevanza e la `derivedVersion` calcolata dai parametri; il testo è una stringa resa dal resolver i18n (D-A.4)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -17766,12 +17969,12 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.4 — Memory Engine `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
 
-**Stato**: ⬚ TODO — **implementabile dal 2026-10-28**: la spec `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED** (ratifica del 2026-10-28, issue #178) e i **trigger dei 5 tipi** sono specificati (§7.2, con le formule di `return` e `seasonal` e il criterio dei 5 brani distinti per `first_time`: decisioni **D-A.2** e **D-A.3**). I template i18n dei ricordi sono **già dichiarati** in `08-COPY-I18N.md` §2.15 (`memory.*`): il testo è una stringa **resa alla generazione** (D-A.4).
+**Stato**: 👀 **IN REVIEW — implementata nella Sessione 61** (issue #179, PR #185). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED** (ratifica del 2026-10-28, issue #178) e i **trigger dei 5 tipi** sono specificati (§7.2, con le formule di `return` e `seasonal` e il criterio dei 5 brani distinti per `first_time`: decisioni **D-A.2** e **D-A.3**). Consegnato: i 5 generatori in `packages/core/src/analysis/memory/`, il feed ordinato per rilevanza (`04§7.4`), la persistenza degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e l'insight vecchio `stale` al cambio dei parametri (MIG-3), l'orchestratore minimale (`04§8.1`). I template i18n dei ricordi sono **già dichiarati** in `08-COPY-I18N.md` §2.15 (`memory.*`): il testo è una stringa **resa alla generazione** dal resolver i18n (D-A.4). Dettagli e scelte di implementazione: `docs/state/stories/2.4-memory-engine.md`.
 
 **Acceptance criteria**:
 - [x] 5 tipi di ricordo (on_this_day, first_time, milestone, return, seasonal) — specificati in `04§7.2` (v1.0 🟢)
 - [x] Trigger documentati in `04-ANALYSIS-ALGORITHMS.md` (§7.2, ratificati)
-- [ ] Insight `memory` persistito con `derivedVersion` e feed ordinato per rilevanza (§7.4)
+- [x] Insight `memory` persistito con `derivedVersion` e feed ordinato per rilevanza (§7.4)
 
 ---
 
@@ -17913,12 +18116,11 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
 9. **1.4** Dedup promozione
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
-11. **2.4** analisi base (prima) — issue **#179** (`agent-ready`): il blocco NEXT-STEP del README la indica come prossima story da implementare · **2.1** dopo l'EPIC 4.1: il mood tracker ha bisogno delle audio features, che non sono implementate (D-A.1, issue #178; la 2.1 è in stato `blocked` e il blocco NEXT-STEP la esclude, issue #182)
-12. **2.2, 2.3** analisi avanzata
-13. **4.1, 4.2** enrichment
-14. **3.1, 3.2, 3.3** UI
-15. **5.1, 5.2** privacy
-16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
+11. **2.2, 2.3** analisi avanzata — la **2.4** è implementata e in review (issue #179, PR #185): il blocco NEXT-STEP del README la indica come story lavorabile finché non è `done`. **2.1** dopo l'EPIC 4.1: il mood tracker ha bisogno delle audio features, che non sono implementate (D-A.1, issue #178; la 2.1 è in stato `blocked` e il blocco NEXT-STEP la esclude, issue #182)
+12. **4.1, 4.2** enrichment — **prima la spec dell'EPIC 4.1**, che sblocca la Story 2.1 (issue #180): senza le audio features il mood tracker non produce insight (D-A.1)
+13. **3.1, 3.2, 3.3** UI
+14. **5.1, 5.2** privacy
+15. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
 **Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
@@ -17990,6 +18192,7 @@ Ogni story deve avere label GitHub:
 | 1.6.17 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 implementata**: la sezione Story passa a ✅ DONE e l'issue #173 (implementazione, `agent-ready`, `size:L`) è chiusa con `status:done` al merge della PR #176. Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink` (`packages/core/src/adapters/scrobble/types.ts`), registry dei sink, sink Last.fm (firma `api_sig` md5 in JS puro, batch 50, POST via proxy, mappa errori) e ListenBrainz (`POST /1/submit-listens`, `listen_type: import`, `User-Agent`, rate limit 1 req/s), tabella `scrobbleOutbox` (schema Dexie **v5**, PK `hub\|eventKey`, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con la regola di maturità **D-SH.13**, `parseRemote?()` incrementale su `/1/user/{u}/listens` con cursore persistito, percorso web auth Last.fm (token → session key), pannello UI (selettore per-hub, modalità del proxy, vista della coda) e namespace i18n `scrobble` (15 codici). **31 casi di test** della spec `20§14.3` coperti (267 test in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 dichiarata parzialmente soddisfatta**: la parte MBID → DEDUP-2 è coperta dal pipeline esistente, la parte `track.genres` via lookup MusicBrainz dipende dall'enrichment (EPIC 4, non implementato) e va aperta come issue dedicata. La riga della 1.5 è rimossa dalla roadmap delle story non completate e il conteggio legacy dell'EPIC 1 passa a **5/5** |
 | 1.6.18 | Sessione 59 (2026-10-28, issue #178) | **Spec dell'analisi ratificata**: `docs/04-ANALYSIS-ALGORITHMS.md` passa da 🟡 DRAFT v0.2 a **🟢 APPROVED v1.0**, con le cinque decisioni aperte chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.1** (mood tracker) **aspetta le audio features dell'EPIC 4.1** (senza valence/energy non produce insight: consegnarla sarebbe un falso verde), la **Story 2.4** (Memory Engine) è **implementabile subito**; `return` e `seasonal` sono specificati in §7.2 (D-A.2), `first_time` passa a **5 brani distinti** (D-A.3), il `text` del ricordo è una **stringa resa** con i template i18n già dichiarati in `08§2.15` (D-A.4), e l'orchestratore è **minimale ed estensibile** (D-A.5, §8.1). Allineati: `08-COPY-I18N.md` §2.15 (i template `memory.*` dichiarati vincolanti + la chiave `memory.milestone.artists`), le sezioni Story 2.1 e 2.4 e la lista di priorità degli agenti. **Issue di implementazione #179** aperta per la 2.4 (`agent-ready`, `size:M`) |
 | 1.6.19 | Sessione 60 (2026-10-28, issue #182) | **Il blocco NEXT-STEP indica solo story lavorabili**: con la Story 2.1 in stato `blocked` (dipende dalle audio features dell'EPIC 4.1, decisione D-A.1) il puntatore del README era finito su una story non implementabile, mentre la **2.4** era libera. `scripts/aggregate-state.ps1` esclude ora `done`, `blocked` e `wontdo` (restano `todo`, `in_progress`, `in_review`: sono in lavorazione, non bloccate), e il messaggio di fallback dice "non-done **e non bloccate**". Il fix **non** committa i blocchi aggregati (ADR-0008): li rigenera `auto-state-aggregate` post-merge, perché la PR tocca lo script. Test: `scripts/test-aggregate-determinism.sh` da 34 a **37 assert** (T10e, T10f nuovi, verificati in entrambe le direzioni — senza il fix falliscono). Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i valori di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g) |
+| 1.6.20 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 implementata** (Memory Engine, PR #185): il pacchetto `packages/core/src/analysis/` è nato — i **5 generatori** (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il **ranking** `baseScore × relevance × recency` (`04§7.4`), la **persistenza** degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e l'insight vecchio `stale` al cambio dei parametri (MIG-3), l'**orchestratore minimale** (`04§8.1`, D-A.5) e il **testo reso** dal resolver i18n (D-A.4: nessuna stringa italiana nel core, i template `insight.memory.*` vivono nei locale `it`/`en` dell'app). La sezione Story 2.4 passa a 👀 **IN REVIEW** e il suo terzo AC è verificato. **27 test** nuovi in `@ls/core` + **5** in `@ls/web`. Scelte dichiarate (D.61.1…D.61.7): il config object versiona **anche** `milestoneHours` e `milestoneArtists` (le tre famiglie di milestone del trigger `04§7.2`), `on_this_day` confronta anno+mese+giorno, la rilevanza ordinata vive in `Insight.confidence` (il payload `02§4` è chiuso), l'id dell'insight è deterministico (ricalcolo idempotente), il confine del giorno è UTC. La lista di priorità degli agenti mette la **spec dell'EPIC 4.1** prima della 2.1: senza le audio features il mood tracker non produce insight (D-A.1) |
 
 
 

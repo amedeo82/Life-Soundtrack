@@ -87,3 +87,9 @@ export async function setLanguage(lang: AppLanguage, instance: I18nInstance = i1
 
 export { useT };
 export type { TFunction } from 'i18next';
+
+/**
+ * Resolver i18n per il memory engine (04§7.3.1, D-A.4): il testo del
+ * ricordo è una stringa resa, resa dal resolver iniettato dall'app.
+ */
+export { createI18nTranslator } from './translator';

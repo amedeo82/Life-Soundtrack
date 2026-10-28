@@ -101,6 +101,21 @@ export {
 } from './repositories';
 
 /**
+ * Insight derivati (Story 2.4): persistenza, `derivedVersion` e rilevamento
+ * degli insight `stale` (MIG-3, 02§7).
+ */
+export {
+  deleteInsightsById,
+  listInsightsByType,
+  listInsightsByTypeAndVersion,
+  listStaleInsights,
+  putInsights,
+  replaceInsights,
+  type ReplaceInsightsOptions,
+  type ReplaceInsightsReport,
+} from './insights';
+
+/**
  * Ricalcolo contatori denormalizzati `listenCount` (11-BACKLOG T0.2.4, 02§7 MIG-4).
  */
 export { recount } from './recount';
