@@ -2,10 +2,10 @@
 number: 61
 title: "Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179)"
 date: 2026-10-28
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "40ad0b75be5efb70af17cce82531b523970059ea"
+merged_date: 2026-10-28
 branch: feat/179-memory-engine
 pr: 185
 claim: kilo-hp-elitebook-hj59
@@ -127,3 +127,27 @@ test usano `memoryPayloadOf(insight)`, che verifica il `kind` e restituisce il
 - **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢), Sessione 59
 - **#180** — la Story 2.1, **bloccata** dalle audio features dell'EPIC 4.1
   (D-A.1): resta la prossima candidate dopo la 2.4
+
+## Esito post-merge
+
+PR #185 **mergata** in `main` il 2026-10-28T16:15:43Z (merge commit `40ad0b7`).
+L'issue **#179** è chiusa con `status:done` e il blocco `AGGREGATE-STORIES-*`
+mostra la story come `done` con il merge commit.
+
+Automazioni post-merge: `auto-status-done` (status:done su #179 + commento
+`release:`), `auto-branch-cleanup` (branch remoto eliminato),
+`auto-state-aggregate` (`be98fe7`) e `auto-bundle` (`de15099`). Worktree e
+branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con
+prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path
+Windows lunghi con `node_modules`).
+
+Il doc-sync di chiusura (frontmatter con `merged: true` e merge commit) è in
+una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+
+**La catena dell'EPIC 2 si è fermata qui**: la 2.1 resta bloccata dalle audio
+features dell'EPIC 4.1 (D-A.1) e la 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`).
+Il blocco NEXT-STEP del README ricade quindi sul fallback "nessuna story
+non-done e non bloccata migrata" — la risposta **corretta**: non esiste una
+story implementabile finché l'EPIC 4.1 non è specificata (issue #180). Il
+puntatore è tornato a essere veritiero invece di indicare un vicolo cieco
+(lesson della issue #182).
