@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-28 15:27
+> Data: 2026-10-28 16:35
 > Totale file: 105
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -7856,7 +7856,7 @@ mezzo del lavoro.
 
 **Tipo**: tooling (`scripts/`) + documentazione — issue #182, claim `kilo-hp-elitebook-41xb`
 **Branch**: `feat/182-next-step-skip-blocked` (worktree `ls-182-next-step-skip-blocked`)
-**PR**: #183
+**PR**: #183 (aperta su `main` dalla worktree, **merged** `a350386` — 2026-10-28T15:26:17Z)
 **Data**: 2026-10-28
 **Stato**: ✅ completata — il blocco NEXT-STEP del README indica la **2.4** (Memory Engine) invece della **2.1**, bloccata dalle audio features dell'EPIC 4.1
 
@@ -7903,10 +7903,11 @@ mezzo del lavoro.
 | 2.4 | 2026-10-27 (issue #172) | **§23 Issue #172 — ratifica della spec Scrobbling hub** (Sessione 57, claim `kilo-hp-elitebook-41xb`, PR #174): 5 lesson (23-1 la stessa classe di difetto della Sessione 56 — la riga di changelog appesa **prima del titolo** — si era riprodotta in `02-DATA-SCHEMA.md`: la scansione di tutti i `.md` di `docs/` (prima riga che comincia con `| <version> |`) è il rilevatore economico della classe; 23-2 l'header di un documento è una **seconda fonte di verità**: cinque documenti dichiaravano una versione più vecchia del proprio changelog, e nessun gate li confronta; 23-3 **ratificare una spec non è promuoverla**: chiudere i punti aperti modifica regole normative (T-SH.3, T-SH.4, E.SH.10, E.SH.11, finestra, modalità proxy) e le modifiche vanno **dichiarate**, perché la regola "i documenti APPROVED non si modificano su una spec DRAFT" ha senso solo se l'effetto è esplicito; 23-4 una regola di default va giudicata su **quanti utenti reali la superano**: "durata ignota → non maturo" era la più prudente e la meno utile (escludeva la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz) → D-SH.13 soglia dei 4 minuti + fiducia nella fonte; 23-5 issue di decisioni e issue di implementazione nate nella stessa sessione: la transizione `needs-spec` → `agent-ready` è avvenuta solo con l'assegnazione esplicita del project owner, e le due issue hanno esiti opposti — #172 chiusa con `status:done`, #173 aperta `agent-ready`). `docs/20-SCROBBLING-HUB.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le quattro decisioni chiuse come **D-SH.11…D-SH.14** (§2.1): md5 in JS puro, finestra a 7 giorni + azione esplicita, soglia dei 4 minuti con fiducia nella fonte, modalità del proxy dichiarata. Allineati i documenti che la spec tocca (`02§3.8`+`§6.2`, `09§3.3`+`§4`, `08§1`+`§2.16`, `03-ADAPTERS/lastfm.md` §4+§10, `03-ADAPTERS/listenbrainz.md` §3.4+D-LB.5, `01§3.7-3.9`), i casi di test da 29 a **31**. Aperti `docs/state/stories/1.5-scrobbling-hub.md` e l'**issue di implementazione #173** (`agent-ready`, `size:L`) |
 | 2.5 | 2026-10-27 (issue #172) | **§23 — esito post-merge della ratifica**: la PR #174 è **merged** (`4abb73e`, 2026-10-27T16:59:24Z) → `docs/20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** e l'issue #172 è chiusa con `status:done`. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 57 con `pr: 174`, `merged: true` e merge commit, più la sezione "Esito post-merge"): il numero della PR non era noto quando il file è stato scritto, e D.21.1 vuole il doc-sync **nel branch della PR** — impossibile per il PR number, che si conosce solo dopo l'apertura. L'alternativa (scrivere `pr: 0` e correggere dopo) è quella scelta, ed è la ragione per cui il blocco aggregato mostrava "PR #0" per la Sessione 57. Automazioni: `auto-status-done` (status:done su #172), `auto-branch-cleanup`, `auto-state-aggregate` (`c27fc1f`), `auto-bundle` (`4002520`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
 | 2.6 | 2026-10-28 (issue #173) | **§24 Issue #173 — Story 1.5 implementata** (Sessione 58, claim `kilo-hp-elitebook-41xb`, PR #176): 6 entry (24-1 il **test di performance** misurava il **carico del runner**, non il layer DB: con tre file di test in più la suite parallela faceva superare la soglia locale di 500 ms, e la verifica decisiva fu togliere i file nuovi con la tabella già presente → il test gira ora in una **run separata**, con la soglia dell'AC invariata; 24-2 `db/health.ts` dichiarava la versione attesa 4 mentre lo schema corrente è **5** (falso "schema sotto l'attesa"); 24-3 `db.test.ts` contava 13 tabelle: `scrobbleOutbox` è la 14ª; 24-4 il tipo di dominio `ScrobbleHubId` sta in `schema/index.ts` perché il **db non deve dipendere dagli adapter** (`05§9.2` parla di package, non di moduli: il ciclo fra moduli nessun gate lo misura); 24-5 i brani si risolvono con una **scansione** (`tracks` ha PK `canonicalKey`, `id` non è indicizzato), come in `db/orphan-cleanup.ts`; 24-6 il delay di retry del protocollo è una **capacità opzionale** del sink (`retryDelayMs()`), così il contratto approvato `05§4.2` resta intatto e il protocollo resta nel sink (V9)). Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink`, registry, sink Last.fm (md5 JS puro, batch 50, POST via proxy) e ListenBrainz (`submit-listens`), coda `scrobbleOutbox` (schema Dexie v5, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con D-SH.13, `parseRemote?()` incrementale con cursore persistito, web auth Last.fm, pannello UI, namespace i18n `scrobble`; **31 casi di test** coperti (267 in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 parzialmente soddisfatto** (MBID → DEDUP-2 ✓; `track.genres` via MusicBrainz ✗ → EPIC 4) |
-| 2.10 | 2026-10-28 (issue #182) | **§26 — il blocco NEXT-STEP indica solo story lavorabili** (Sessione 60, claim `kilo-hp-elitebook-41xb`, PR #183): il filtro di `Build-Block-NextStep` esclude ora `done`, **`blocked`** e **`wontdo`** — il puntatore passava dalla **2.1** (bloccata dalle audio features dell'EPIC 4.1, decisione D-A.1) alla **2.4** (Memory Engine, issue #179), la story implementabile. Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**": se il conteggio cambia, la frase che lo descrive cambia con lui. Il valore `blocked` esisteva nella macchina a stati (ADR-0007, `11-BACKLOG.md`) ma **mai** in un `docs/state/stories/*.md`: il primo file che lo usa (la 2.1, Sessione 59) ha reso visibile il disallineamento. Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i **valori** di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g nuova). Test: `scripts/test-aggregate-determinism.sh` **37 assert** (T10e e T10f nuovi, verificati in entrambe le direzioni: senza il fix 4 assert falliscono) |
 | 2.7 | 2026-10-28 (issue #178) | **§25 Issue #178 — ratifica della spec dell'analisi** (Sessione 59, claim `kilo-hp-elitebook-41xb`, PR #181): 4 entry (25-1 i **template i18n dei ricordi esistevano già** (`08§2.15`) e la prima stesura della ratifica li **rinominava** con parametri diversi: una spec che ratifica non può rinominare un contratto già dichiarato — le formule sono state riallinate alle chiavi esistenti e `08§2.15` le dichiara vincolanti; 25-2 il ricordo **stagionale** era per artista nella spec e per genere nel template: decisione D-A.7 (per genere, con l'informazione nel `text` reso); 25-3 la sezione dei template era stata inserita come **§2.13** in collisione con `error.*`: rimossa e la nota di vincolanza messa dentro §2.15; 25-4 la **Story 2.1** dipendeva dalle **audio features** (EPIC 4.1) senza che nessun documento lo dicesse: la dipendenza è ora in `04§12`, nel backlog e nell'issue #180 — consegnare la 2.1 senza feature sarebbe stato un falso verde). `docs/04-ANALYSIS-ALGORITHMS.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le cinque decisioni chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.4** (Memory Engine) è implementabile (issue **#179**, `agent-ready`), la **Story 2.1** (Mood Tracker) aspetta le audio features dell'EPIC 4.1 (issue **#180**, `needs-spec`). Allineati `08-COPY-I18N.md` §2.15 (v0.7), `11-BACKLOG.md` (Story 2.1/2.4, priorità agenti, v1.6.18), `docs/INDEX.md` (riga 04, conteggi legacy), `docs/state/` (sessione 59 + le story 2.1 e 2.4) |
 | 2.8 | 2026-10-28 (issue #173) | **§24 — esito post-merge della Story 1.5**: la PR #176 è **merged** (`bfb5946`, 2026-10-28T13:56:09Z) → l'issue #173 è chiusa con `status:done` e la story 1.5 è `done`: il percorso di scrittura verso Last.fm e ListenBrainz è consegnato. Doc-sync di chiusura (frontmatter della Sessione 58 con `merged: true` e merge commit, `merged_commit`/`merged_date` della story 1.5, §24 aggiornato). Automazioni: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` (`669cc82`), `auto-bundle` (`6388d12`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`). **AC-SH.11 resta parzialmente soddisfatto**: `track.genres` via lookup MusicBrainz dipende dall'enrichment (EPIC 4) |
 | 2.9 | 2026-10-28 (issue #178) | **§25 — esito post-merge della ratifica della spec dell'analisi**: la PR #181 è **merged** (`5f725e3`, 2026-10-28T14:28:05Z) → l'issue #178 è chiusa con `status:done` e `04-ANALYSIS-ALGORITHMS.md` è **v1.0 🟢 APPROVED**. Doc-sync di chiusura (frontmatter della Sessione 59 con `merged: true`, merge commit e `pr: 181`, sezione "Esito post-merge"). Le issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, `needs-spec`: bloccata dalle audio features dell'EPIC 4.1) restano aperte e non transizionate: sono il lavoro di altri |
+| 2.10 | 2026-10-28 (issue #182) | **§26 — il blocco NEXT-STEP indica solo story lavorabili** (Sessione 60, claim `kilo-hp-elitebook-41xb`, PR #183): il filtro di `Build-Block-NextStep` esclude ora `done`, **`blocked`** e **`wontdo`** — il puntatore passava dalla **2.1** (bloccata dalle audio features dell'EPIC 4.1, decisione D-A.1) alla **2.4** (Memory Engine, issue #179), la story implementabile. Il messaggio di fallback e la riga delle altre candidate dicono "non-done **e non bloccate**": se il conteggio cambia, la frase che lo descrive cambia con lui. Il valore `blocked` esisteva nella macchina a stati (ADR-0007, `11-BACKLOG.md`) ma **mai** in un `docs/state/stories/*.md`: il primo file che lo usa (la 2.1, Sessione 59) ha reso visibile il disallineamento. Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i **valori** di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g nuova). Test: `scripts/test-aggregate-determinism.sh` **37 assert** (T10e e T10f nuovi, verificati in entrambe le direzioni: senza il fix 4 assert falliscono) |
+| 2.11 | 2026-10-28 (issue #182) | **§26 — esito post-merge**: la PR #183 è **merged** (`a350386`, 2026-10-28T15:26:17Z) → l'issue #182 è chiusa con `status:done` e `auto-state-aggregate` (`ab83763`) ha rigenerato il blocco NEXT-STEP del README, che ora indica la **2.4** (Memory Engine) invece della 2.1 bloccata. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 60 con `pr: 183`, `merged: true` e merge commit) |
 
 ---
 
@@ -10318,12 +10319,12 @@ l'apertura, e il merge commit solo dopo il merge.
 number: 60
 title: "Il blocco NEXT-STEP indica solo story lavorabili (issue #182)"
 date: 2026-10-28
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "a3503863e1aa76df9e59afb3a85f94c4bda77006"
+merged_date: 2026-10-28
 branch: feat/182-next-step-skip-blocked
-pr: 0
+pr: 183
 claim: kilo-hp-elitebook-41xb
 cross_refs: [182, 179, 180]
 tags: [devops, docs, phase-1]
@@ -10394,7 +10395,8 @@ espliciti.
 | 60-1 | **Un blocco generato che indica "cosa fare dopo" è un gate di lavoro, non un semplice riepilogo.** Il NEXT-STEP non elenca la cronologia: indica **la prossima cosa da fare**. Bastava una story `blocked` in cima alla lista per trasformarlo in un vicolo cieco — e nessuno dei gate lo segnalava, perché il gate confrontava il blocco con il calcolo, non il calcolo con la **realtà** |
 | 60-2 | **Una macchina a stati che nessuno usa produce bug di stato.** `blocked` e `wontdo` esistevano nello stato delle issue (`11-BACKLOG.md`, ADR-0007) e nei label GitHub, ma **mai** in un `docs/state/stories/*.md`: il primo file che li usa ha fatto emergere che il filtro dell'aggregator ne era ignaro. Le nuove regole vanno scoperte dai dati, non dai documenti |
 | 60-3 | **La prosa di un blocco generato è soggetta allo stesso gate dei fatti.** Il messaggio diceva "non-done" mentre la lista escludeva le bloccate: un gate che confronta i numeri ma non le frasi lascia passare una contraddizione. La regola: se il **conteggio** cambia, la **frase** che lo descrive cambia con lui (lesson 58-4, la stessa forma sotto un altro nome) |
-| 60-4 | **Il fix di uno script di governance non si committa da solo**: la PR tocca `scripts/aggregate-state.ps1`, il trigger di `auto-state-aggregate` scatta post-merge e rigenera il blocco. Committare il blocco a mano nella PR avrebbe violato ADR-0008 e creato un conflitto con il bot |
+| 60-4 | **`parseFloat` sulle versioni con due cifre le riordina**: `parseFloat("2.10")` vale `2.1`, quindi una riga di changelog `2.10` finisce **prima** di `2.5`. Il trappolo è ricomparso due volte nella stessa sessione (dev-log 2.5/2.6 e poi 2.10/2.11): il confronto va fatto **per due componenti** (`[maggiore, minore]`), non con un float. In JS e in PowerShell `2.10` non e` `2.1` — ma `2.10` come *stringa* e` `2.10`, e i due non si confrontano mai come numeri reali |
+| 60-5 | **Il fix di uno script di governance non si committa da solo**: la PR tocca `scripts/aggregate-state.ps1`, il trigger di `auto-state-aggregate` scatta post-merge e rigenera il blocco. Committare il blocco a mano nella PR avrebbe violato ADR-0008 e creato un conflitto con il bot |
 
 ## Documenti aggiornati
 
@@ -10418,6 +10420,23 @@ espliciti.
 - `docs/state/sessions/60-next-step-skip-blocked.md` — **nuovo**
 - `docs/state/_index.md` — riga della Sessione 60
 - `scripts/generate-bundle.ps1` + `docs/BUNDLE.md` — la sessione 60
+
+## Esito post-merge
+
+Mergiata dal Boss il 2026-10-28T15:26:17Z (PR #183, merge commit `a350386`).
+L'issue **#182** è chiusa con `status:done` e il blocco NEXT-STEP del README
+indica ora la **2.4** (Memory Engine, issue #179) invece della 2.1 bloccata.
+
+Automazioni post-merge: `auto-status-done` (status:done su #182),
+`auto-branch-cleanup`, `auto-state-aggregate` (`ab83763`, che ha rigenerato il
+blocco NEXT-STEP) e `auto-bundle`. Worktree e branch locale eliminati con
+`scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git
+worktree remove` fallisce con "Result too large" su path Windows lunghi con
+`node_modules`).
+
+Il doc-sync di chiusura (frontmatter con `pr`, `merged: true` e merge commit)
+è in una PR `docs:` separata: il numero della PR si conosce solo dopo
+l'apertura, e il merge commit solo dopo il merge.
 
 ## Cross-refs
 
