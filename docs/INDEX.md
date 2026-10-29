@@ -108,7 +108,7 @@
 | 59 | Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1 | 🟢 | ✅ | #181 |
 | 60 | Il blocco NEXT-STEP indica solo story lavorabili (issue #182) | 🟢 | ✅ | #183 |
 | 61 | Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179) | 🟢 | ✅ | #185 |
-| 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #189 |
+| 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
