@@ -42,9 +42,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
+**Prossima story da implementare**: **4.1** — Pipeline audio features (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
+Sorgente: `docs/state/stories/4.1-audio-features.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 

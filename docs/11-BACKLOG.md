@@ -644,5 +644,6 @@ Ogni story deve avere label GitHub:
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
 | 2.1 - Mood Tracker giornaliero | blocked | #0 | - | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
+| 4.1 - Pipeline audio features | todo | #0 | - | enrichment |
 
 <!-- AGGREGATE-STORIES-END -->

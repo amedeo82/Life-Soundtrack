@@ -5321,13 +5321,23 @@ puntatore è tornato a essere veritiero invece di indicare un vicolo cieco
 ### Sessione 62 - Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187)
 
 - **Data**: 2026-10-28
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #189 (87d4d7d66765386ef336742129deb493833e161d, 2026-10-28T17:02:41Z)
 - **Claim**: `kilo-hp-elitebook-hj59`
 
 ```
 
 # Sessione 62 — La spec dell'EPIC 4.1: la pipeline audio features (issue #187)
+
+> **Ratificata**: la spec è stata promossa a **v1.0 🟢 APPROVED** dalla **PR di
+> ratifica** (doc-sync di Sessione 62, branch `docs/187-session-62-ratifica`) e le nove
+> decisioni **D-AF.1…D-AF.9** sono chiuse come proposte. La **v0.1 🟡 DRAFT** era
+> stata merged dalla PR #189 (`87d4d7d`, 2026-10-28T17:02:41Z).
+> Il frontmatter registra il merge della **stesura** (PR #189): il doc-sync di chiusura
+> aggiornerà `pr` e `merged_commit` con la PR di ratifica (come per le Sessioni 57, 59 e 61). L'issue di implementazione **#188** è `agent-ready`.
+> Il doc-sync di ratifica (branch `docs/187-session-62-ratifica`) allinea i
+> documenti che la spec tocca: `05` (v1.4), `08` (v0.8), `09` (v0.6), `10`
+> (v1.1), `11` (v1.6.22), `12` (v1.0), `14` (v1.1) e `docs/state/stories/4.1-audio-features.md`.
 
 ## Sintesi
 
@@ -5343,13 +5353,18 @@ CSP, lo stoccaggio, i costi **misurati**, i test e gli acceptance criteria
 riscritti della Story 4.1. Apre **nove decisioni** (D-AF.1…D-AF.9) da
 chiudere alla ratifica.
 
+La spec è poi stata **ratificata** al merge della PR di ratifica (la v0.1 🟡
+DRAFT era stata merged dalla PR #189, `87d4d7d`, 2026-10-28T17:02:41Z): le nove
+decisioni sono chiuse come proposte e vincolanti, il documento passa a **v1.0 🟢
+APPROVED** e l'issue di implementazione **#188** diventa **`agent-ready`**.
+
 ## Trigger
 
 Issue **#180** (mood tracker, `needs-spec`): chiede *"l'issue dell'EPIC 4.1
 (audio features) con la sua spec: provider, privacy, stoccaggio, costi"* e la
 decisione su *quando* implementare la 2.1. Aperti **#187** (la spec, da
-lavorare in questa sessione) e **#188** (l'implementazione della Story 4.1,
-`needs-spec` fino alla ratifica).
+lavorare in questa sessione) e **#188** (l'implementazione della Story 4.1:
+`needs-spec` fino alla ratifica, poi **`agent-ready`**).
 
 ## Le cinque premesse che la story non dichiarava
 
@@ -5377,7 +5392,7 @@ opinioni:
    (§2.5). Misurati oggi: WASM 2,69 MB (tarball npm) + backbone MusicNN
    3,19 MB + TFJS. Il WASM non può stare nel bundle iniziale né nel precache.
 
-## Decisioni proposte (D-AF.1…D-AF.9)
+## Decisioni proposte (D-AF.1…D-AF.9) — poi ratificate
 
 | # | Decisione | Proposta |
 |---|-----------|----------|
@@ -5444,6 +5459,8 @@ roadmap).
 
 ## Documenti aggiornati
 
+*Stesura della spec (PR #189, `87d4d7d`)*
+
 - `docs/21-AUDIO-FEATURES.md` — **nuovo** (v0.1 🟡 DRAFT): la spec della
   pipeline audio features, con 9 decisioni aperte
 - `docs/INDEX.md` — la riga del nuovo documento nella tabella dei documenti
@@ -5453,11 +5470,32 @@ roadmap).
 - `docs/BUNDLE.md` — rigenerato
 - `docs/state/sessions/62-epic-4-1-audio-features-spec.md` — **nuovo**
 
+*Doc-sync di ratifica (branch `docs/187-session-62-ratifica`)*
+
+- `docs/21-AUDIO-FEATURES.md` — **v1.0 🟢 APPROVED**: le nove decisioni sono
+  chiuse come proposte, §18 (impatto sui documenti) e i deliverable
+  `T4.1.11`/`T4.1.12` sono allineati alla realtà
+- `docs/05-ARCHITECTURE.md` — **v1.4**: §6 (la fonte dell'audio, DEAM, il
+  fallback che non alimenta il mood tracker), §8, §9 (il core senza React)
+- `docs/09-PRIVACY-SECURITY.md` — **v0.6**: inventario e testi pubblici
+- `docs/10-TESTING.md` — **v1.1**: §8, i mock delle API esterne
+- `docs/12-DEVOPS.md` — **v1.0**: §2.1, la CSP con i due host
+- `docs/14-GLOSSARY.md` — **v1.1**: la voce `Audio features`
+- `docs/08-COPY-I18N.md` — **v0.8**: §1 e **§2.17** (namespace `enrichment.*`)
+- `docs/11-BACKLOG.md` — **v1.6.22**: Story 4.1 implementabile, gli 11 AC, la
+  lista di priorità
+- `docs/INDEX.md` — riga `21`, conteggi legacy, "Prossimo step tecnico"
+- `docs/18-DEV-LOG.md` — **§28** (5 entry) e changelog 2.14
+- `docs/state/stories/4.1-audio-features.md` — **nuovo** (`status: todo`)
+- `docs/state/_index.md` — la riga del nuovo state file
+- `scripts/generate-bundle.ps1` — `$files`: il nuovo state file
+- `docs/BUNDLE.md` — rigenerato
+
 ## Cross-refs
 
 - **#187** — la spec (claim `kilo-hp-elitebook-hj59`), chiusa da questa PR
-- **#188** — l'implementazione della Story 4.1 (`needs-spec` fino alla
-  ratifica della spec)
+- **#188** — l'implementazione della Story 4.1: `needs-spec` fino alla
+  ratifica della spec, poi **`agent-ready`**
 - **#180** — la Story 2.1: la catena 4.1 → 2.1 → 2.2/2.3 è quella dichiarata
   nella lista di priorità degli agenti (`11§Priorità`)
 - **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢), da cui
