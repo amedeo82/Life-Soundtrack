@@ -42,9 +42,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **4.1** — Pipeline audio features (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **2.1** — Mood Tracker giornaliero (priority `B`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/4.1-audio-features.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/2.1-mood-tracker.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+
+Altre non-done e non bloccate in ordine di priorita backlog (id): 4.1.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
