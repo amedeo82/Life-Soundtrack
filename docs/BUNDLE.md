@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-29 16:09
+> Data: 2026-10-29 17:13
 > Totale file: 109
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1468,7 +1468,7 @@ Apache License
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
 | 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟡 DRAFT | Sessione 41 | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto |
 | 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟢 APPROVED | Sessione 57 (v1.0) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164); **ratificata** (Sessione 57, issue #172): le 4 decisioni aperte chiuse (D-SH.11…D-SH.14) → issue di implementazione **#173** |
-| 21 | [`21-AUDIO-FEATURES.md`](21-AUDIO-FEATURES.md) | 🟢 APPROVED | Sessione 62 (v1.0) | **Pipeline audio features (Story 4.1)**: contratto `AudioFeatureProvider`, cascata cache → Essentia.js (WASM) → AcousticBrainz → euristico, mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), normalizzazione DEAM [1,9] → [0,1], privacy e CSP, stoccaggio e invalidazione, costi reali misurati — **ratificata** (Sessione 62, issue #187): le 9 decisioni D-AF.1…D-AF.9 sono chiuse come proposte → issue di implementazione **#188** (`agent-ready`) |
+| 21 | [`21-AUDIO-FEATURES.md`](21-AUDIO-FEATURES.md) | 🟢 APPROVED | Sessione 62 (v1.0) | **Pipeline audio features (Story 4.1)**: contratto `AudioFeatureProvider`, cascata cache → Essentia.js (WASM) → AcousticBrainz → euristico, mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), normalizzazione DEAM [1,9] → [0,1], privacy e CSP, stoccaggio e invalidazione, costi reali misurati — **ratificata** (Sessione 62, issue #187, PR #190 `b1dd83e`): le 9 decisioni D-AF.1…D-AF.9 sono chiuse come proposte → issue di implementazione **#188** (`agent-ready`) |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
@@ -1612,7 +1612,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 62, issue #187): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e la **Story 2.4 (Memory Engine) è completata** (issue **#179**, PR #185, merge `40ad0b7`): il pacchetto `packages/core/src/analysis/` esiste — i 5 generatori (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il feed ordinato per rilevanza (`04§7.4`), la persistenza degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4). **La spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` **v1.0 🟢 APPROVED**, Sessione 62, issue #187): le nove decisioni D-AF.1…D-AF.9 sono chiuse come proposte — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice sta in `packages/core/src/enrichment/` **senza React** (D-AF.5) e la CSP ha **due host in più** (D-AF.9). **Prossimo passo**: **implementare la Story 4.1** (issue **#188**, `agent-ready`, `size:L`) — la pipeline delle audio features: cascata, provider Essentia.js e AcousticBrainz, fallback euristico, privacy, stoccaggio. È il primo anello della catena **4.1 → 2.1 → 2.2/2.3**: la **Story 2.1 (Mood Tracker)** resta bloccata finché le feature non esistono (decisione D-A.1, issue **#180** `needs-spec`), e 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`). Restano poi le tranche dell'EPIC 3 (UI) e la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo step tecnico** (aggiornato alla Sessione 62, issue #187): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e la **Story 2.4 (Memory Engine) è completata** (issue **#179**, PR #185, merge `40ad0b7`): il pacchetto `packages/core/src/analysis/` esiste — i 5 generatori (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il feed ordinato per rilevanza (`04§7.4`), la persistenza degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4). **La spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` **v1.0 🟢 APPROVED**, Sessione 62, issue #187, PR #190 `b1dd83e`): le nove decisioni D-AF.1…D-AF.9 sono chiuse come proposte — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice sta in `packages/core/src/enrichment/` **senza React** (D-AF.5) e la CSP ha **due host in più** (D-AF.9). **Prossimo passo**: **implementare la Story 4.1** (issue **#188**, `agent-ready`, `size:L`) — la pipeline delle audio features: cascata, provider Essentia.js e AcousticBrainz, fallback euristico, privacy, stoccaggio. È il primo anello della catena **4.1 → 2.1 → 2.2/2.3**: la **Story 2.1 (Mood Tracker)** resta bloccata finché le feature non esistono (decisione D-A.1, issue **#180** `needs-spec`), e 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`). Restano poi le tranche dell'EPIC 3 (UI) e la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -8264,9 +8264,9 @@ mezzo del lavoro.
 
 **Tipo**: decisione architetturale (`docs`) — issue #187, claim `kilo-hp-elitebook-hj59`
 **Branch**: `docs/187-session-62-ratifica` (worktree `ls-187-doc-sync`)
-**PR**: doc-sync di ratifica su `main` dalla worktree `ls-187-doc-sync` (la **v0.1 🟡 DRAFT** era stata merged dalla PR #189, `87d4d7d` — 2026-10-28T17:02:41Z; la **ratifica a v1.0 🟢** è l'atto di questa PR)
+**PR**: **#190** (doc-sync di ratifica, branch `docs/187-session-62-ratifica`, dalla worktree `ls-187-doc-sync`) — merged il 2026-10-29T16:09:16Z, merge commit `b1dd83e` (la **v0.1 🟡 DRAFT** era stata merged dalla PR #189, `87d4d7d` — 2026-10-28T17:02:41Z)
 **Data**: 2026-10-28
-**Stato**: ✅ completata — `docs/21-AUDIO-FEATURES.md` **v1.0 🟢 APPROVED** (le nove decisioni chiuse come **D-AF.1…D-AF.9**); aperta l'issue **#188** (Story 4.1, `agent-ready`)
+**Stato**: ✅ completata e **merged** — la PR #190 è stata merged in `main` il 2026-10-29T16:09:16Z (merge commit `b1dd83e`): `docs/21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (le nove decisioni chiuse come **D-AF.1…D-AF.9**); aperta l'issue **#188** (Story 4.1, `agent-ready`)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -8275,6 +8275,8 @@ mezzo del lavoro.
 | 28-3 | P | La riga di changelog **1.4** di `05-ARCHITECTURE.md` era stata inserita **prima** della 1.3, con una riga vuota in mezzo | La tabella dei changelog è in ordine di versione crescente: l'inserimento "dopo l'ultima riga nota" ha messo la 1.4 dove stava la 1.3 | La 1.4 è stata spostata **dopo** la 1.3. Stessa classe della lezione 56-5 (una riga di changelog fuori dalla tabella è un documento con l'header rotto): l'ordine della tabella è parte del formato | `docs/05-ARCHITECTURE.md` §Changelog |
 | 28-4 | P | Dopo la ratifica, tre documenti **dichiaravano fatti falsi**: l'inventario privacy (`09§4`) nominava solo MusicBrainz, la CSP (`12§2.1`) ammetteva solo MusicBrainz e la riga dei mock (`10§8`) nominava **FreqBlog / Musicae**, due provider mai esistiti | La v0.1 della spec rimandava l'allineamento di `09`, `12`, `10` e `08` all'implementazione: era una scelta ragionevole **prima** della ratifica, ma dopo il merge le decisioni D-AF.1 e D-AF.9 sono **vincolanti** e i documenti che le negano sono falsi | L'allineamento è avvenuto **alla ratifica**, per la regola di `AGENTS.md` §"Chi può scrivere cosa nei file globali" (una sezione che dichiara un fatto cambiato va allineata nella stessa PR); la colonna «Quando» di `21§18` è stata allineata alla realtà e i deliverable `T4.1.11`/`T4.1.12` dichiarano il confine fra i documenti (fatto) e il codice (fixture, CSP applicata al bundle, locale) | `docs/21-AUDIO-FEATURES.md` §18 · `AGENTS.md` §"Chi può scrivere cosa nei file globali" |
 | 28-5 | P | La riga legacy "**Documenti APPROVED: 8**" di `docs/INDEX.md` era sbagliata dal Sessione 57: mancava `20`, già APPROVED v1.0 | La riga è una **copia di conteggio** legacy: nessun generatore la aggiorna e nessun gate la confronta con lo stato reale | La riga dichiara ora i **10** documenti APPROVED (`02`, `03-ADAPTERS/`, `04`, `05`, `10`, `11`, `14`, `16-OPERATIONS`, `20`, `21`) con le versioni correnti. Il conteggio delle story resta nei blocchi aggregati: lì si mette un puntatore, non una copia | `docs/INDEX.md` §"Dettaglio (legacy)" |
+
+**Esito post-merge**: la PR #190 è **merged** (`b1dd83e`, 2026-10-29T16:09:16Z). Automazioni: `auto-state-aggregate` (`124a39b`), `auto-bundle` (`9838237`), `auto-status-done`, `auto-branch-cleanup`. L'issue #187 resta chiusa con `status:done` e l'issue **#188** è `agent-ready` con il body riallineato alla spec (gli 11 AC di `21§16`). Il blocco NEXT-STEP del README punta alla **4.1**: è il primo anello della catena 4.1 → 2.1 → 2.2/2.3.
 
 **Lesson learned sintetica**: **ratificare una spec non è promuoverla: è un atto che rende falsi i documenti che la contraddicono** (28-4). La v0.1 rimandava l'allineamento dei documenti all'implementazione, e la decisione era sensata finché le decisioni non erano vincolanti; dopo il merge, l'inventario privacy e la CSP che escludevano i due host nuovi non erano "in attesa di aggiornamento", erano **falsi**, e nessun gate lo segnalava. La lezione operativa è che la ratifica va trattata come una **PR di allineamento**, non come un cambio di un header: l'elenco dei documenti toccati è la metà del lavoro. E la lezione piccola ma ripetuta: un riferimento a una sezione (`08§2.16`) va verificato **contro il file** (28-1) — era un numero di sessione, non di sezione, scambiato per abitudine.
 
@@ -8324,6 +8326,7 @@ mezzo del lavoro.
 | 2.12 | 2026-10-28 (issue #179) | **§27 Issue #179 — Story 2.4 implementata** (Sessione 61, claim `kilo-hp-elitebook-hj59`, PR #185): 7 entry (27-1 il **ranking** non aveva dove scrivere il suo score — `MemoryPayload` (`02§4`) è chiuso: la rilevanza ordinata vive in `Insight.confidence`, il payload resta intatto; 27-2 `Insight.payload` è l'unione discriminata: `payload.text` non compila senza restringere il tipo (`memoryPayloadOf`); 27-3 i test del resolver i18n leggono i **locale reali dell'app**: una chiave spostata nell'app fallisce il test del core, non viceversa; 27-4 il **config object** versiona anche `milestoneHours` e `milestoneArtists`: le tre famiglie del trigger `04§7.2` sono implementate e i due parametri in più sono dichiarati (D.61.1); 27-5 `on_this_day` confronta anno+mese+giorno: `isSameDayMonth` (solo mese+giorno) avrebbe matchato eventi di anni diversi; 27-6 l'id dell'insight è **deterministico**: il ricalcolo è idempotente e non duplica le righe; 27-7 i **fixture di scenario** coprono mesi e i trigger dei ricordi coprono anni: il caso noto si osserva spostando "oggi" di un anno avanti). Consegnati: i 5 generatori, il ranking `baseScore × relevance × recency`, la persistenza degli insight `memory` con `derivedVersion` e rilevamento degli insight `stale` (MIG-3), l'orchestratore minimale (`04§8.1`, D-A.5) e il testo reso dal resolver i18n (D-A.4). **27 test** nuovi in `@ls/core` + **5** in `@ls/web` |
 | 2.13 | 2026-10-28 (issue #179) | **§27 — esito post-merge della Story 2.4**: la PR #185 è **merged** (`40ad0b7`, 2026-10-28T16:15:43Z) → l'issue #179 è chiusa con `status:done` e la story 2.4 è `done` con il merge commit nel frontmatter. Automazioni: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` (`be98fe7`), `auto-bundle` (`de15099`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`). Il blocco NEXT-STEP ricade sul fallback "nessuna story non-done e non bloccata migrata": è la risposta **corretta** (la 2.1 è bloccata dalle audio features dell'EPIC 4.1 e 2.2/2.3 dipendono da lei) e per questo **non** si è creato uno state file per la 2.2 — un blocco che punta a una story bloccata a monte è il difetto chiuso dalla issue #182. La catena è 4.1 → 2.1 → 2.2/2.3: il prossimo lavoro è la **spec dell'EPIC 4.1** (issue #180), non un'implementazione |
 | 2.14 | 2026-10-28 (issue #187) | **§28 Issue #187 — ratifica della spec dell'EPIC 4.1** (Sessione 62, claim `kilo-hp-elitebook-hj59`; la v0.1 🟡 era stata merged dalla PR #189, `87d4d7d`: la **ratifica a v1.0 🟢** è l'atto di questa PR): 5 entry (28-1 la spec dichiarava che il namespace `enrichment.*` andasse in `08§2.16`, ma §2.16 è `scrobble.*` della Story 1.5: il namespace è **§2.17** e i riferimenti sono stati corretti in `21` §14, §18, header e changelog; 28-2 `08-COPY-I18N.md` era disallineato con se stesso (header v0.6, changelog 0.6, `INDEX` che dichiarava v0.7 dal Sessione 59): riga 0.7 recuperata, nuova riga 0.8, header a v0.8; 28-3 la riga 1.4 di `05-ARCHITECTURE.md` era stata inserita **prima** della 1.3: spostata dopo; 28-4 dopo la ratifica tre documenti dichiaravano **fatti falsi** (l'inventario `09§4`, la CSP `12§2.1`, la riga dei mock `10§8`): l'allineamento è avvenuto **alla ratifica**, come prescrive `AGENTS.md` §"Chi può scrivere cosa nei file globali", e i deliverable `T4.1.11`/`T4.1.12` dichiarano il confine fra i documenti (fatto) e il codice (fixture, CSP applicata al bundle, locale); 28-5 la riga legacy "Documenti APPROVED: 8" di `docs/INDEX.md` era sbagliata dal Sessione 57 (mancava `20`): ora 10, con `21`). `docs/21-AUDIO-FEATURES.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** con le nove decisioni chiuse come proposte (**D-AF.1…D-AF.9**): la fonte dell'audio è il preview di 30 s dell'**iTunes Search API**, il modello valence/energy è **DEAM**, l'euristico **non** alimenta il mood tracker, il codice sta in `core` **senza React**, il rate limit di AcousticBrainz si legge dagli header, la CSP ha due host in più. Allineati `05` (v1.4), `08` (v0.8, `08§2.17`), `09` (v0.6), `10` (v1.1), `11` (v1.6.22, Story 4.1 implementabile), `12` (v1.0), `14` (v1.1), `docs/INDEX.md` (riga `21`, conteggi legacy, "Prossimo step tecnico") e `docs/state/` (sessione 62 + la story 4.1). Issue di implementazione **#188** aperta `agent-ready` |
+| 2.15 | 2026-10-29 (issue #187) | **§28 — esito post-merge della ratifica**: la PR #190 è **merged** (`b1dd83e`, 2026-10-29T16:09:16Z) → l'issue #187 resta chiusa con `status:done` e l'issue di implementazione **#188** è `agent-ready` con il body riallineato alla spec (gli 11 AC di `21§16`). Automazioni: `auto-state-aggregate` (`124a39b`), `auto-bundle` (`9838237`), `auto-status-done`, `auto-branch-cleanup` (branch remoto eliminato). Il blocco NEXT-STEP del README ricade sulla **Story 4.1**: è la risposta **corretta** (la 2.1 resta bloccata dalle audio features, D-A.1) e la catena 4.1 → 2.1 → 2.2/2.3 riparte. Il doc-sync di chiusura (frontmatter con `pr: 190` e merge commit) è in una PR `docs:` separata: il merge commit si conosce solo dopo il merge |
 
 ---
 
@@ -8534,6 +8537,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/59-epic2-analysis-ratification.md` | ✅ creata | Sessione 59 (issue #178): **ratifica della spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md` v1.0 🟢 APPROVED) con le cinque decisioni chiuse (D-A.1…D-A.5) + apertura delle issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, bloccata dalle audio features EPIC 4.1) |
 | `state/sessions/60-next-step-skip-blocked.md` | ✅ creata | Sessione 60 (issue #182): il blocco NEXT-STEP del README indica solo story **lavorabili** (esclude `done`, `blocked`, `wontdo`) — il puntatore è passato dalla 2.1 bloccata alla 2.4 implementabile |
 | `state/sessions/61-story-2-4-memory-engine.md` | ✅ creata | Sessione 61 (issue #179): **implementazione della Story 2.4** (Memory Engine) — i 5 generatori, il ranking per rilevanza, la persistenza degli insight `memory` con `derivedVersion` (MIG-3) e l'orchestratore minimale; PR #185 (merge `40ad0b7`) |
+| `state/sessions/62-epic-4-1-audio-features-spec.md` | ✅ creata | Sessione 62 (issue #187): **spec e ratifica dell'EPIC 4.1** (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED) con le nove decisioni chiuse (D-AF.1…D-AF.9) + allineamento dei documenti toccati + apertura dell'issue di implementazione **#188** (`agent-ready`) — **merged** (PR #190, `b1dd83e`), issue #187 chiusa con `status:done` |
 | `state/stories/1.5-scrobbling-hub.md` | ✅ creata | Story 1.5 (Scrobbling hub) — ✅ **done** (Sessione 58, issue #173): contratto `ScrobbleSink`, coda `scrobbleOutbox`, sink Last.fm/ListenBrainz, filtro di eleggibilità, sync incrementale, pannello UI, 31 casi di test |
 | `state/stories/2.1-mood-tracker.md` | ✅ creata | Story 2.1 (Mood Tracker) — ⛔ **blocked**: senza le audio features dell'EPIC 4.1 il mood tracker non produce insight (decisione D-A.1); issue #180 (`needs-spec`) |
 | `state/stories/2.4-memory-engine.md` | ✅ creata | Story 2.4 (Memory Engine) — ✅ **done** (Sessione 61, issue #179, PR #185, merge `40ad0b7`): i 5 tipi di ricordo (`04§7.2`), il feed per rilevanza (`04§7.4`), la `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4) |
@@ -11033,10 +11037,10 @@ title: "Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stocc
 date: 2026-10-28
 state: 🟢
 merged: true
-merged_commit: "87d4d7d66765386ef336742129deb493833e161d"
-merged_date: "2026-10-28T17:02:41Z"
-branch: feat/187-audio-features-spec
-pr: 189
+merged_commit: "b1dd83ecea987e3e6fd1e99e4e8a83cec922cf69"
+merged_date: 2026-10-29
+branch: docs/187-session-62-ratifica
+pr: 190
 claim: kilo-hp-elitebook-hj59
 cross_refs: [187, 188, 180, 178]
 tags: [enrichment, phase-2, spec]
@@ -11048,8 +11052,8 @@ tags: [enrichment, phase-2, spec]
 > ratifica** (doc-sync di Sessione 62, branch `docs/187-session-62-ratifica`) e le nove
 > decisioni **D-AF.1…D-AF.9** sono chiuse come proposte. La **v0.1 🟡 DRAFT** era
 > stata merged dalla PR #189 (`87d4d7d`, 2026-10-28T17:02:41Z).
-> Il frontmatter registra il merge della **stesura** (PR #189): il doc-sync di chiusura
-> aggiornerà `pr` e `merged_commit` con la PR di ratifica (come per le Sessioni 57, 59 e 61). L'issue di implementazione **#188** è `agent-ready`.
+> Il frontmatter registra il merge della **PR di ratifica** (#190, `b1dd83e`): la v0.1
+> 🟡 DRAFT era stata merged dalla PR #189 (`87d4d7d`, 2026-10-28T17:02:41Z). L'issue di implementazione **#188** è `agent-ready`.
 > Il doc-sync di ratifica (branch `docs/187-session-62-ratifica`) allinea i
 > documenti che la spec tocca: `05` (v1.4), `08` (v0.8), `09` (v0.6), `10`
 > (v1.1), `11` (v1.6.22), `12` (v1.0), `14` (v1.1) e `docs/state/stories/4.1-audio-features.md`.
@@ -11068,10 +11072,10 @@ CSP, lo stoccaggio, i costi **misurati**, i test e gli acceptance criteria
 riscritti della Story 4.1. Apre **nove decisioni** (D-AF.1…D-AF.9) da
 chiudere alla ratifica.
 
-La spec è poi stata **ratificata** al merge della PR di ratifica (la v0.1 🟡
-DRAFT era stata merged dalla PR #189, `87d4d7d`, 2026-10-28T17:02:41Z): le nove
-decisioni sono chiuse come proposte e vincolanti, il documento passa a **v1.0 🟢
-APPROVED** e l'issue di implementazione **#188** diventa **`agent-ready`**.
+La spec è poi stata **ratificata** al merge della **PR #190** (`b1dd83e`,
+2026-10-29T16:09:16Z), che ha promosso la v0.1 🟡 DRAFT (merged dalla PR #189, `87d4d7d`) a
+**v1.0 🟢 APPROVED**: le nove decisioni sono chiuse come proposte e vincolanti e
+l'issue di implementazione **#188** diventa **`agent-ready`**.
 
 ## Trigger
 
@@ -11185,7 +11189,7 @@ roadmap).
 - `docs/BUNDLE.md` — rigenerato
 - `docs/state/sessions/62-epic-4-1-audio-features-spec.md` — **nuovo**
 
-*Doc-sync di ratifica (branch `docs/187-session-62-ratifica`)*
+*Doc-sync di ratifica (PR #190, `b1dd83e`, 2026-10-29)*
 
 - `docs/21-AUDIO-FEATURES.md` — **v1.0 🟢 APPROVED**: le nove decisioni sono
   chiuse come proposte, §18 (impatto sui documenti) e i deliverable
@@ -11208,13 +11212,29 @@ roadmap).
 
 ## Cross-refs
 
-- **#187** — la spec (claim `kilo-hp-elitebook-hj59`), chiusa da questa PR
+- **#187** — la spec (claim `kilo-hp-elitebook-hj59`): chiusa dalla PR #189 e
+  ratificata dalla PR #190
 - **#188** — l'implementazione della Story 4.1: `needs-spec` fino alla
   ratifica della spec, poi **`agent-ready`**
 - **#180** — la Story 2.1: la catena 4.1 → 2.1 → 2.2/2.3 è quella dichiarata
   nella lista di priorità degli agenti (`11§Priorità`)
 - **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢), da cui
   `04§12` discende l'obbligo di questa spec
+
+## Esito post-merge
+
+PR #190 **merged** in `main` il 2026-10-29T16:09:16Z (merge commit `b1dd83e`).
+L'issue **#187** è chiusa con `status:done` e l'issue di implementazione **#188**
+è `agent-ready` con il body riallineato alla spec (gli 11 AC di `21§16`).
+
+Automazioni post-merge: `auto-state-aggregate` (`124a39b`) e `auto-bundle`
+(`9838237`), più `auto-status-done` e `auto-branch-cleanup` (branch remoto
+eliminato). Il blocco `AGGREGATE-STORIES-*` mostra la story 4.1 come `todo` con
+l'issue #188: è il primo anello della catena 4.1 → 2.1 → 2.2/2.3 e il blocco
+NEXT-STEP del README punta a essa.
+
+Il doc-sync di chiusura (frontmatter con `pr: 190` e il merge commit) è in una
+PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 
 
 
@@ -11869,7 +11889,7 @@ HTTP e lo stato per la UI.
 ## Stato
 
 ⬚ **da implementare** — la spec è **ratificata** (`docs/21-AUDIO-FEATURES.md`
-v1.0 🟢 APPROVED, Sessione 62, issue #187): le nove
+v1.0 🟢 APPROVED, Sessione 62, issue #187, PR #190 `b1dd83e`): le nove
 decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e vincolanti.
 
 **Issue**: #188 (`agent-ready`, `size:L`, `area:enrichment`, `phase-2`) — la
@@ -18353,7 +18373,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.22 · Sessione 62 (2026-10-28, issue #187) · la **spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, ratificata al merge della PR di ratifica): le nove decisioni D-AF.1…D-AF.9 sono chiuse, gli AC della Story 4.1 sono riscritti (`21§16`) e l'issue di implementazione **#188** è `agent-ready` → la catena 4.1 → 2.1 → 2.2/2.3 riparte dalla Story 4.1
+> Status: 🟢 APPROVED · Versione 1.6.22 · Sessione 62 (2026-10-28, issue #187) · la **spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, PR #190 `b1dd83e`): le nove decisioni D-AF.1…D-AF.9 sono chiuse, gli AC della Story 4.1 sono riscritti (`21§16`) e l'issue di implementazione **#188** è `agent-ready` → la catena 4.1 → 2.1 → 2.2/2.3 riparte dalla Story 4.1
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -18777,7 +18797,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
 
-**Stato**: 🟢 **spec ratificata** (Sessione 62, issue #187; ratifica al merge della PR di ratifica) — `docs/21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED) è la spec della pipeline: il contratto `AudioFeatureProvider`, la cascata, la mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), la normalizzazione, la privacy, lo stoccaggio e i costi reali. Le **nove decisioni** (D-AF.1…D-AF.9) sono **chiuse come proposte e ratificate**: la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice vive in `packages/core/src/enrichment/` **senza React** (D-AF.5), il rate limit di AcousticBrainz è **letto dagli header** (D-AF.6) e la CSP ha **due host in più** (D-AF.9). L'issue di implementazione è **#188** (`agent-ready`): la story è **implementabile**. Gli AC sono riscritti in `21§16` (11 criteri verificabili) e valgono da ora.
+**Stato**: 🟢 **spec ratificata** (Sessione 62, issue #187; ratificata dalla PR #190 `b1dd83e`, 2026-10-29) — `docs/21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED) è la spec della pipeline: il contratto `AudioFeatureProvider`, la cascata, la mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), la normalizzazione, la privacy, lo stoccaggio e i costi reali. Le **nove decisioni** (D-AF.1…D-AF.9) sono **chiuse come proposte e ratificate**: la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice vive in `packages/core/src/enrichment/` **senza React** (D-AF.5), il rate limit di AcousticBrainz è **letto dagli header** (D-AF.6) e la CSP ha **due host in più** (D-AF.9). L'issue di implementazione è **#188** (`agent-ready`): la story è **implementabile**. Gli AC sono riscritti in `21§16` (11 criteri verificabili) e valgono da ora.
 
 **Acceptance criteria** (riscritti in `21§16`):
 - [ ] La cascata è **cache → Essentia.js → AcousticBrainz → euristico**, con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete" (`05§6.1`)
@@ -18971,7 +18991,7 @@ Ogni story deve avere label GitHub:
 | 1.6.19 | Sessione 60 (2026-10-28, issue #182) | **Il blocco NEXT-STEP indica solo story lavorabili**: con la Story 2.1 in stato `blocked` (dipende dalle audio features dell'EPIC 4.1, decisione D-A.1) il puntatore del README era finito su una story non implementabile, mentre la **2.4** era libera. `scripts/aggregate-state.ps1` esclude ora `done`, `blocked` e `wontdo` (restano `todo`, `in_progress`, `in_review`: sono in lavorazione, non bloccate), e il messaggio di fallback dice "non-done **e non bloccate**". Il fix **non** committa i blocchi aggregati (ADR-0008): li rigenera `auto-state-aggregate` post-merge, perché la PR tocca lo script. Test: `scripts/test-aggregate-determinism.sh` da 34 a **37 assert** (T10e, T10f nuovi, verificati in entrambe le direzioni — senza il fix falliscono). Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i valori di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g) |
 | 1.6.20 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 implementata** (Memory Engine, PR #185): il pacchetto `packages/core/src/analysis/` è nato — i **5 generatori** (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il **ranking** `baseScore × relevance × recency` (`04§7.4`), la **persistenza** degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e l'insight vecchio `stale` al cambio dei parametri (MIG-3), l'**orchestratore minimale** (`04§8.1`, D-A.5) e il **testo reso** dal resolver i18n (D-A.4: nessuna stringa italiana nel core, i template `insight.memory.*` vivono nei locale `it`/`en` dell'app). La sezione Story 2.4 passa a 👀 **IN REVIEW** e il suo terzo AC è verificato. **27 test** nuovi in `@ls/core` + **5** in `@ls/web`. Scelte dichiarate (D.61.1…D.61.7): il config object versiona **anche** `milestoneHours` e `milestoneArtists` (le tre famiglie di milestone del trigger `04§7.2`), `on_this_day` confronta anno+mese+giorno, la rilevanza ordinata vive in `Insight.confidence` (il payload `02§4` è chiuso), l'id dell'insight è deterministico (ricalcolo idempotente), il confine del giorno è UTC. La lista di priorità degli agenti mette la **spec dell'EPIC 4.1** prima della 2.1: senza le audio features il mood tracker non produce insight (D-A.1) |
 | 1.6.21 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 completata** (Memory Engine, PR #185, merge `40ad0b7`): la sezione Story passa a ✅ DONE. Il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata" — **risposta corretta**, non una regressione: la 2.1 resta bloccata dalle audio features dell'EPIC 4.1 (D-A.1) e 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`), quindi **non esiste** una story implementabile finché l'EPIC 4.1 non è specificata (issue #180). Per questo la lista di priorità degli agenti mette la **spec dell'EPIC 4.1 al primo posto** e dichiara la catena 4.1 → 2.1 → 2.2/2.3: il puntatore è tornato veritiero invece di indicare un vicolo cieco (lesson della issue #182). Non si è creato uno state file per la 2.2: il blocco avrebbe indicato una story bloccata a monte — lo stesso difetto che la issue #182 ha chiuso |
-| 1.6.22 | Sessione 62 (2026-10-28, issue #187) | **Spec dell'EPIC 4.1 ratificata**: `docs/21-AUDIO-FEATURES.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0** (ratifica al merge della PR di ratifica): le **nove decisioni** (D-AF.1…D-AF.9) sono chiuse come proposte e ratificate — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), la licenza dell'app passa ad **AGPL-3.0** per `essentia.js` (D-AF.2: atto del Boss sul file `LICENSE`, non applicato qui), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice vive in `packages/core/src/enrichment/` **senza React** (D-AF.5), il rate limit di AcousticBrainz è **letto dagli header** (D-AF.6), trigger e budget restano quelli di `05§6.1` (D-AF.7), il `source` delle feature derivate resta `acousticbrainz` (D-AF.8) e la CSP ha **due host in più** (D-AF.9). La sezione **Story 4.1** passa a **implementabile**: `**Stato**:` 🟢, i **4 AC** originali (di cui uno ambiguo) sostituiti dagli **11 AC** riscritti di `21§16`, `**Spec**:` aggiornata. Issue di implementazione **#188**: `needs-spec` → **`agent-ready`**. Allineati i documenti che la spec tocca: `05` (v1.4), `09` (v0.6), `10` (v1.1), `12` (v1.0), `14` (v1.1), `08` (v0.8: il namespace `enrichment.*` in §2.17) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). La **lista di priorità** degli agenti mette la **4.1** al primo posto dell'EPIC 2 e la 2.1 dopo la 4.1 *implementata*: la catena 4.1 → 2.1 → 2.2/2.3 riparte |
+| 1.6.22 | Sessione 62 (2026-10-28, issue #187) | **Spec dell'EPIC 4.1 ratificata**: `docs/21-AUDIO-FEATURES.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0** (ratificata dalla PR #190 `b1dd83e`, 2026-10-29T16:09:16Z): le **nove decisioni** (D-AF.1…D-AF.9) sono chiuse come proposte e ratificate — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), la licenza dell'app passa ad **AGPL-3.0** per `essentia.js` (D-AF.2: atto del Boss sul file `LICENSE`, non applicato qui), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice vive in `packages/core/src/enrichment/` **senza React** (D-AF.5), il rate limit di AcousticBrainz è **letto dagli header** (D-AF.6), trigger e budget restano quelli di `05§6.1` (D-AF.7), il `source` delle feature derivate resta `acousticbrainz` (D-AF.8) e la CSP ha **due host in più** (D-AF.9). La sezione **Story 4.1** passa a **implementabile**: `**Stato**:` 🟢, i **4 AC** originali (di cui uno ambiguo) sostituiti dagli **11 AC** riscritti di `21§16`, `**Spec**:` aggiornata. Issue di implementazione **#188**: `needs-spec` → **`agent-ready`**. Allineati i documenti che la spec tocca: `05` (v1.4), `09` (v0.6), `10` (v1.1), `12` (v1.0), `14` (v1.1), `08` (v0.8: il namespace `enrichment.*` in §2.17) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). La **lista di priorità** degli agenti mette la **4.1** al primo posto dell'EPIC 2 e la 2.1 dopo la 4.1 *implementata*: la catena 4.1 → 2.1 → 2.2/2.3 riparte |
 
 
 
@@ -22155,7 +22175,7 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 > Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
 > Spec collegata a: `04-ANALYSIS-ALGORITHMS.md` §3, §11, §12 · `05-ARCHITECTURE.md` §6, §6.1, §6.2, §9, §10 · `02-DATA-SCHEMA.md` §3.4, §3.8, §6 · `09-PRIVACY-SECURITY.md` §3, §4, §7.4, §10 · `10-TESTING.md` §2, §7, §8 · `12-DEVOPS.md` §2.1
 > Precedente di struttura: `20-SCROBBLING-HUB.md` (una spec di protocollo, non un adapter)
-> **Ratificata in**: `05-ARCHITECTURE.md` §6, §8, §9 (v1.4) · `10-TESTING.md` §8 (v1.1) · `14-GLOSSARY.md` (v1.1) · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (v0.6) · `12-DEVOPS.md` §2.1 (v1.0) · `08-COPY-I18N.md` §2.17 (v0.8) — le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e ratificate **al merge della PR di ratifica** (Sessione 62, issue #187)
+> **Ratificata in**: `05-ARCHITECTURE.md` §6, §8, §9 (v1.4) · `10-TESTING.md` §8 (v1.1) · `14-GLOSSARY.md` (v1.1) · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (v0.6) · `12-DEVOPS.md` §2.1 (v1.0) · `08-COPY-I18N.md` §2.17 (v0.8) — le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e ratificate **al merge della PR #190** (`b1dd83e`, 2026-10-29)
 > Decisioni ratificate: **D-AF.1 … D-AF.9** (§3)
 
 ---
@@ -22343,9 +22363,9 @@ UI, prima del download (consenso informato, §10).
 Il precedente di `20-SCROBBLING-HUB.md` chiude le decisioni "come proposte"
 nella spec e le ratifica con il merge. Le nove decisioni qui sotto seguono lo
 stesso statuto: **chiuse come proposte** nella v0.1 🟡 DRAFT, **ratificate**
-al merge della **PR di ratifica** (issue #187, Sessione 62), che promuove la spec
-a **v1.0 🟢 APPROVED** (la v0.1 🟡 DRAFT era stata merged dalla PR #189,
-`87d4d7d`, 2026-10-28T17:02:41Z).
+al merge della **PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z), che ha promosso la spec a
+**v1.0 🟢 APPROVED** (la v0.1 🟡 DRAFT era stata merged dalla PR #189, `87d4d7d`,
+2026-10-28T17:02:41Z).
 
 | # | Decisione | Scelta ratificata | Motivazione |
 |---|-----------|-------------------|-------------|
@@ -23106,7 +23126,7 @@ versione riscritta, verificabile:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-28 (Sessione 62, issue #187) | Prima stesura. Definisce il contratto `AudioFeatureProvider`, la cascata (`05§6`), la mappatura dei campi di `AudioFeatures` per ogni provider, la normalizzazione DEAM [1,9] → [0,1], la separazione fra feature misurate/derivate/stimate, il contratto con il layer di analisi (`getAudioFeatures` filtrato per sorgente), la privacy e la CSP, lo stoccaggio e l'invalidazione, i costi reali misurati (WASM ~2,7 MB + backbone ~3,2 MB + TFJS), i 14 casi di test minimi e gli AC riscritti della Story 4.1. Apre **9 decisioni** (D-AF.1…D-AF.9) da chiudere alla ratifica. Verificati in data: la morte di Spotify `audio_features` per le nuove app (27/11/2024, con restrizioni 2026), l'API di AcousticBrainz viva ma con sole classi `mood_*` (nessuna `valence`/`energy`), l'anteprima di 30 s dell'iTunes Search API senza autenticazione, la licenza AGPL-3.0 di `essentia.js` contro Apache-2.0 dell'app, il rate limit di AcousticBrainz letto dagli header (`Limit: 100`, `Reset-In: 2` il 28/10/2026) |
-| 1.0 | 2026-10-28 (Sessione 62, issue #187) | **Ratificata**: da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**. Le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e **ratificate al merge della PR di ratifica**. La stessa PR allinea i documenti che la spec tocca: `05§6`, `05§8` e `05§9` (v1.4), `10§8` (v1.1, la riga dei mock reali), `14-GLOSSARY.md` (v1.1, la voce **Audio features** con la distinzione *misurata / derivata / stimata*), `09§3.1`, `09§3.3`, `09§4`, `09§7.4` (v0.6, le righe mancanti dell'inventario e la rimozione di FreqBlog), `12§2.1` (v1.0, la CSP con i due host) e `08§2.17` (v0.8, il namespace `enrichment.*` con le 8 chiavi); `11-BACKLOG.md` Story 4.1 (v1.6.22, gli AC riscritti di §16 e la riga `**Stato**:`) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). **§18**: la colonna «Quando» è allineata alla realtà (l'allineamento dei documenti che la spec tocca è alla ratifica, non all'implementazione: vedi la nota sotto la tabella) e i deliverable `T4.1.11` e `T4.1.12` dichiarano il confine fra ciò che la ratifica fa (i documenti) e ciò che resta all'implementazione (i fixture, la CSP applicata al bundle, i locale). **Riferimenti corretti**: il namespace `enrichment.*` sta in `08§2.17` (la v0.1 indicava `08§2.16`, che è il namespace `scrobble.*` della Story 1.5). L'issue **#188** (implementazione della Story 4.1) passa da `needs-spec` a **`agent-ready`**: la spec è APPROVED e gli AC sono verificabili. **Il cambio di licenza (D-AF.2) non è applicato qui**: è un atto del Boss sul file `LICENSE` |
+| 1.0 | 2026-10-28 (Sessione 62, issue #187, PR #190 `b1dd83e`) | **Ratificata**: da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**. Le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e **ratificate al merge della PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z). La stessa PR allinea i documenti che la spec tocca: `05§6`, `05§8` e `05§9` (v1.4), `10§8` (v1.1, la riga dei mock reali), `14-GLOSSARY.md` (v1.1, la voce **Audio features** con la distinzione *misurata / derivata / stimata*), `09§3.1`, `09§3.3`, `09§4`, `09§7.4` (v0.6, le righe mancanti dell'inventario e la rimozione di FreqBlog), `12§2.1` (v1.0, la CSP con i due host) e `08§2.17` (v0.8, il namespace `enrichment.*` con le 8 chiavi); `11-BACKLOG.md` Story 4.1 (v1.6.22, gli AC riscritti di §16 e la riga `**Stato**:`) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). **§18**: la colonna «Quando» è allineata alla realtà (l'allineamento dei documenti che la spec tocca è alla ratifica, non all'implementazione: vedi la nota sotto la tabella) e i deliverable `T4.1.11` e `T4.1.12` dichiarano il confine fra ciò che la ratifica fa (i documenti) e ciò che resta all'implementazione (i fixture, la CSP applicata al bundle, i locale). **Riferimenti corretti**: il namespace `enrichment.*` sta in `08§2.17` (la v0.1 indicava `08§2.16`, che è il namespace `scrobble.*` della Story 1.5). L'issue **#188** (implementazione della Story 4.1) passa da `needs-spec` a **`agent-ready`**: la spec è APPROVED e gli AC sono verificabili. **Il cambio di licenza (D-AF.2) non è applicato qui**: è un atto del Boss sul file `LICENSE` |
 
 
 
