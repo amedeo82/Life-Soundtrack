@@ -121,6 +121,7 @@ $files = @(
     "docs/state/sessions/60-next-step-skip-blocked.md",
     "docs/state/sessions/61-story-2-4-memory-engine.md",
     "docs/state/sessions/62-epic-4-1-audio-features-spec.md",
+    "docs/state/sessions/63-story-2-1-mood-tracker.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.4-dedup-promotion.md",
     "docs/state/stories/1.5-scrobbling-hub.md",
