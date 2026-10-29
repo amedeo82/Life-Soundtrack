@@ -126,6 +126,7 @@ $files = @(
     "docs/state/stories/1.5-scrobbling-hub.md",
     "docs/state/stories/2.1-mood-tracker.md",
     "docs/state/stories/2.4-memory-engine.md",
+    "docs/state/stories/4.1-audio-features.md",
     "scripts/aggregate-state.ps1",
     # Documenti fondamentali (docs/INDEX.md §Documenti fondamentali, ordine 00..15)
     "docs/00-VISION.md",

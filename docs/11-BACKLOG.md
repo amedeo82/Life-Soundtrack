@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.21 · Sessione 61 (2026-10-28, issue #179) · la **Story 2.4 (Memory Engine) è completata** (PR #185, merge `40ad0b7`): i 5 tipi di ricordo, il feed per rilevanza e la `derivedVersion` calcolata dai parametri; il testo è una stringa resa dal resolver i18n (D-A.4). Con la 2.4 chiusa la catena dell'EPIC 2 si ferma alla **spec dell'EPIC 4.1** (issue #180), che sblocca 2.1 → 2.2/2.3
+> Status: 🟢 APPROVED · Versione 1.6.22 · Sessione 62 (2026-10-28, issue #187) · la **spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, ratificata al merge della PR di ratifica): le nove decisioni D-AF.1…D-AF.9 sono chiuse, gli AC della Story 4.1 sono riscritti (`21§16`) e l'issue di implementazione **#188** è `agent-ready` → la catena 4.1 → 2.1 → 2.2/2.3 riparte dalla Story 4.1
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -424,15 +424,22 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
 
-**Stato**: 🟡 **spec scritta** (Sessione 62, issue #187) — `docs/21-AUDIO-FEATURES.md` (v0.1 🟡 DRAFT) è la spec della pipeline: il contratto `AudioFeatureProvider`, la cascata, la mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), la normalizzazione, la privacy, lo stoccaggio e i costi reali. **Nove decisioni** (D-AF.1…D-AF.9) sono aperte e vanno ratificate; l'issue di implementazione è **#188** (label `needs-spec` fino alla ratifica). Gli AC della story sono riscritti in `21§16`.
+**Stato**: 🟢 **spec ratificata** (Sessione 62, issue #187; ratifica al merge della PR di ratifica) — `docs/21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED) è la spec della pipeline: il contratto `AudioFeatureProvider`, la cascata, la mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), la normalizzazione, la privacy, lo stoccaggio e i costi reali. Le **nove decisioni** (D-AF.1…D-AF.9) sono **chiuse come proposte e ratificate**: la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice vive in `packages/core/src/enrichment/` **senza React** (D-AF.5), il rate limit di AcousticBrainz è **letto dagli header** (D-AF.6) e la CSP ha **due host in più** (D-AF.9). L'issue di implementazione è **#188** (`agent-ready`): la story è **implementabile**. Gli AC sono riscritti in `21§16` (11 criteri verificabili) e valgono da ora.
 
-**Acceptance criteria**:
-- [ ] Cascata: cache → **Essentia.js (WASM, browser)** → **AcousticBrainz (bonus su MBID)** → **fallback euristico** (D.A.6)
-- [ ] Toggle privacy `enrichMetadata` rispettato
-- [ ] Rate limiting MusicBrainz (1 req/s)
-- [ ] `AudioFeatures.source` ∈ `{essentia, acousticbrainz, heuristic, manual}` tracciato
+**Acceptance criteria** (riscritti in `21§16`):
+- [ ] La cascata è **cache → Essentia.js → AcousticBrainz → euristico**, con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete" (`05§6.1`)
+- [ ] `PrivacySettings.enrichMetadata` è rispettato in **tutte** le forme: zero uscite, zero scritture, zero letture della cache (`21§10.4`)
+- [ ] Il rate limiting è applicato a **MusicBrainz** (1 req/s) e ad **AcousticBrainz** (letto dagli header `X-RateLimit-*`, senza costanti hard-coded) (`21§7.2`, D-AF.6)
+- [ ] `AudioFeatures.source` ∈ `{essentia, acousticbrainz, heuristic, manual}` è tracciato e **le feature derivate sono dichiarate** come derivate (`21§7.3`, D-AF.8)
+- [ ] `valence` ed `energy` sono in [0,1] **per costruzione** e l'invariante di `10§7` è verificato da un test property-based (`21§6.2`)
+- [ ] Il layer di analisi legge **solo** le feature misurate o manuali: il fallback euristico non alimenta il mood tracker (`21§12`, D-AF.4)
+- [ ] Il WASM e i modelli **non** sono nel bundle iniziale né nel precache: download su richiesta, cache browser, versionamento (`21§6.5`)
+- [ ] La pipeline è **idempotente** e **interrompibile**: due esecuzioni non producono righe duplicate; un job interrotto non lascia righe parziali (`21§11.3`, T-AF.14)
+- [ ] Il consumo di rete è limitato ai **due host** dichiarati, con la CSP allineata (`21§10.2`)
+- [ ] L'inventario dati di `09§4` ha le righe delle audio features e delle query di ricerca (`21§10.3`)
+- [ ] I test coprono i 14 casi minimi (`21§15.3`) con i mock delle API esterne, **mai** chiamate reali (`21§15.2`)
 
-**Spec**: `docs/21-AUDIO-FEATURES.md` (v0.1 🟡 DRAFT, Sessione 62) · `05-ARCHITECTURE.md` §6, §6.1, §6.2 · `02-DATA-SCHEMA.md` §3.4 · `04-ANALYSIS-ALGORITHMS.md` §3, §12 · issue #187 (spec) · issue #188 (implementazione)
+**Spec**: `docs/21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED, Sessione 62) · `05-ARCHITECTURE.md` §6, §6.1, §6.2 · `02-DATA-SCHEMA.md` §3.4 · `04-ANALYSIS-ALGORITHMS.md` §3, §12 · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 · `12-DEVOPS.md` §2.1 · `08-COPY-I18N.md` §2.17 · issue #187 (spec, ratificata) · issue #188 (implementazione, `agent-ready`)
 
 ---
 
@@ -532,8 +539,8 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
 9. **1.4** Dedup promozione
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
-11. **spec dell'EPIC 4.1** (issue #180, `needs-spec`) — **prima di ogni altra story dell'EPIC 2**: senza le audio features non c'è valence/energy, e quindi la **2.1** (mood tracker) non produce insight (D-A.1), la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare. Il backlog dichiara 2.2 e 2.3 dipendenti dalla 2.1 (`[DEP:2.1]`): la catena è 4.1 → 2.1 → 2.2/2.3
-12. **2.1** mood tracker — dopo la spec dell'EPIC 4.1
+11. **4.1** pipeline audio features (issue #188, `agent-ready`) — la **spec è ratificata** (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). **Prima di ogni altra story dell'EPIC 2**: senza le audio features non c'è valence/energy, e quindi la **2.1** (mood tracker) non produce insight (D-A.1), la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare. Il backlog dichiara 2.2 e 2.3 dipendenti dalla 2.1 (`[DEP:2.1]`): la catena è 4.1 → 2.1 → 2.2/2.3
+12. **2.1** mood tracker — dopo la 4.1 **implementata** (la spec ratificata sblocca la 2.1 solo quando le feature esistono: l'issue #180 resta `needs-spec` fino al merge della 4.1)
 13. **2.2, 2.3** analisi avanzata — dopo la 2.1
 14. **3.1, 3.2, 3.3** UI
 15. **5.1, 5.2** privacy
@@ -552,7 +559,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
-| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1**: spec ratificata (`21` v1.0 🟢), issue #188 `agent-ready` |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
@@ -611,6 +618,7 @@ Ogni story deve avere label GitHub:
 | 1.6.19 | Sessione 60 (2026-10-28, issue #182) | **Il blocco NEXT-STEP indica solo story lavorabili**: con la Story 2.1 in stato `blocked` (dipende dalle audio features dell'EPIC 4.1, decisione D-A.1) il puntatore del README era finito su una story non implementabile, mentre la **2.4** era libera. `scripts/aggregate-state.ps1` esclude ora `done`, `blocked` e `wontdo` (restano `todo`, `in_progress`, `in_review`: sono in lavorazione, non bloccate), e il messaggio di fallback dice "non-done **e non bloccate**". Il fix **non** committa i blocchi aggregati (ADR-0008): li rigenera `auto-state-aggregate` post-merge, perché la PR tocca lo script. Test: `scripts/test-aggregate-determinism.sh` da 34 a **37 assert** (T10e, T10f nuovi, verificati in entrambe le direzioni — senza il fix falliscono). Allineati `AGENTS.md` (v1.28), `docs/state/_index.md` (i valori di `status` nello schema), `docs/12-DEVOPS.md` (§9.8g) |
 | 1.6.20 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 implementata** (Memory Engine, PR #185): il pacchetto `packages/core/src/analysis/` è nato — i **5 generatori** (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il **ranking** `baseScore × relevance × recency` (`04§7.4`), la **persistenza** degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e l'insight vecchio `stale` al cambio dei parametri (MIG-3), l'**orchestratore minimale** (`04§8.1`, D-A.5) e il **testo reso** dal resolver i18n (D-A.4: nessuna stringa italiana nel core, i template `insight.memory.*` vivono nei locale `it`/`en` dell'app). La sezione Story 2.4 passa a 👀 **IN REVIEW** e il suo terzo AC è verificato. **27 test** nuovi in `@ls/core` + **5** in `@ls/web`. Scelte dichiarate (D.61.1…D.61.7): il config object versiona **anche** `milestoneHours` e `milestoneArtists` (le tre famiglie di milestone del trigger `04§7.2`), `on_this_day` confronta anno+mese+giorno, la rilevanza ordinata vive in `Insight.confidence` (il payload `02§4` è chiuso), l'id dell'insight è deterministico (ricalcolo idempotente), il confine del giorno è UTC. La lista di priorità degli agenti mette la **spec dell'EPIC 4.1** prima della 2.1: senza le audio features il mood tracker non produce insight (D-A.1) |
 | 1.6.21 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 completata** (Memory Engine, PR #185, merge `40ad0b7`): la sezione Story passa a ✅ DONE. Il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata" — **risposta corretta**, non una regressione: la 2.1 resta bloccata dalle audio features dell'EPIC 4.1 (D-A.1) e 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`), quindi **non esiste** una story implementabile finché l'EPIC 4.1 non è specificata (issue #180). Per questo la lista di priorità degli agenti mette la **spec dell'EPIC 4.1 al primo posto** e dichiara la catena 4.1 → 2.1 → 2.2/2.3: il puntatore è tornato veritiero invece di indicare un vicolo cieco (lesson della issue #182). Non si è creato uno state file per la 2.2: il blocco avrebbe indicato una story bloccata a monte — lo stesso difetto che la issue #182 ha chiuso |
+| 1.6.22 | Sessione 62 (2026-10-28, issue #187) | **Spec dell'EPIC 4.1 ratificata**: `docs/21-AUDIO-FEATURES.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0** (ratifica al merge della PR di ratifica): le **nove decisioni** (D-AF.1…D-AF.9) sono chiuse come proposte e ratificate — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), la licenza dell'app passa ad **AGPL-3.0** per `essentia.js` (D-AF.2: atto del Boss sul file `LICENSE`, non applicato qui), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice vive in `packages/core/src/enrichment/` **senza React** (D-AF.5), il rate limit di AcousticBrainz è **letto dagli header** (D-AF.6), trigger e budget restano quelli di `05§6.1` (D-AF.7), il `source` delle feature derivate resta `acousticbrainz` (D-AF.8) e la CSP ha **due host in più** (D-AF.9). La sezione **Story 4.1** passa a **implementabile**: `**Stato**:` 🟢, i **4 AC** originali (di cui uno ambiguo) sostituiti dagli **11 AC** riscritti di `21§16`, `**Spec**:` aggiornata. Issue di implementazione **#188**: `needs-spec` → **`agent-ready`**. Allineati i documenti che la spec tocca: `05` (v1.4), `09` (v0.6), `10` (v1.1), `12` (v1.0), `14` (v1.1), `08` (v0.8: il namespace `enrichment.*` in §2.17) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). La **lista di priorità** degli agenti mette la **4.1** al primo posto dell'EPIC 2 e la 2.1 dopo la 4.1 *implementata*: la catena 4.1 → 2.1 → 2.2/2.3 riparte |
 
 
 

@@ -1,6 +1,6 @@
 # 10 — Strategia di Testing
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 3
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 62 (2026-10-28, issue #187)
 
 ---
 
@@ -139,7 +139,7 @@ Invarianti che devono SEMPRE valere:
 ## 8. Mock delle API esterne
 
 - **MusicBrainz**: mock con risposte predefinite da `fixtures/api-mocks/musicbrainz/`
-- **FreqBlog / Musicae**: mock con fixture di audio features
+- **iTunes Search API** (anteprima audio per Essentia.js) e **AcousticBrainz** (bonus sui MBID): mock con fixture di audio features in `fixtures/api-mocks/itunes/` e `fixtures/api-mocks/acousticbrainz/` (`21-AUDIO-FEATURES.md` §15.2). **Rimosse** le voci "FreqBlog / Musicae": provider placeholder mai esistiti, già rimossi da `02§3.4` e dalla CSP (`12§2.1`)
 - **Last.fm / ListenBrainz**: mock API per test adapter
 
 Mai chiamate reali in CI.
@@ -164,3 +164,4 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 |----------|------|-----------|
 | 0.1 | Sessione 3 | Prima versione |
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
+| 1.1 | 2026-10-28 (issue #187) | **§8 allineata alla spec `21-AUDIO-FEATURES.md`** (v1.0 🟢 APPROVED): la riga "FreqBlog / Musicae" — due placeholder mai esistiti come provider, già rimossi da `02§3.4` e dalla CSP di `12§2.1` — è sostituita dai **due mock reali** della pipeline audio features (**iTunes Search API** per l'anteprima audio di 30 s che alimenta Essentia.js, **AcousticBrainz** per il bonus sui MBID), con i fixture in `fixtures/api-mocks/itunes/` e `fixtures/api-mocks/acousticbrainz/` (`21§15.2`). Il resto della strategia di testing non cambia: `§2` (coverage ≥ 75% per `packages/core/enrichment/*`) e `§7` (invarianti `valence ∈ [0,1]`) sono già quelli richiesti dalla spec. Header allineato (era fermo a v1.0 dalla Sessione 3) |
