@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-29 17:13
+> Data: 2026-10-29 16:22
 > Totale file: 109
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1544,7 +1544,7 @@ Apache License
 | 59 | Ratifica della spec dell'analisi (04-ANALYSIS-ALGORITHMS.md) e apertura delle story 2.4 / 2.1 | 🟢 | ✅ | #181 |
 | 60 | Il blocco NEXT-STEP indica solo story lavorabili (issue #182) | 🟢 | ✅ | #183 |
 | 61 | Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179) | 🟢 | ✅ | #185 |
-| 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #189 |
+| 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -6945,7 +6945,7 @@ puntatore è tornato a essere veritiero invece di indicare un vicolo cieco
 
 - **Data**: 2026-10-28
 - **Stato**: 🟢
-- **Merged**: ✅ PR #189 (87d4d7d66765386ef336742129deb493833e161d, 2026-10-28T17:02:41Z)
+- **Merged**: ✅ PR #190 (b1dd83ecea987e3e6fd1e99e4e8a83cec922cf69, 2026-10-29)
 - **Claim**: `kilo-hp-elitebook-hj59`
 
 ```
@@ -6956,8 +6956,8 @@ puntatore è tornato a essere veritiero invece di indicare un vicolo cieco
 > ratifica** (doc-sync di Sessione 62, branch `docs/187-session-62-ratifica`) e le nove
 > decisioni **D-AF.1…D-AF.9** sono chiuse come proposte. La **v0.1 🟡 DRAFT** era
 > stata merged dalla PR #189 (`87d4d7d`, 2026-10-28T17:02:41Z).
-> Il frontmatter registra il merge della **stesura** (PR #189): il doc-sync di chiusura
-> aggiornerà `pr` e `merged_commit` con la PR di ratifica (come per le Sessioni 57, 59 e 61). L'issue di implementazione **#188** è `agent-ready`.
+> Il frontmatter registra il merge della **PR di ratifica** (#190, `b1dd83e`): la v0.1
+> 🟡 DRAFT era stata merged dalla PR #189 (`87d4d7d`, 2026-10-28T17:02:41Z). L'issue di implementazione **#188** è `agent-ready`.
 > Il doc-sync di ratifica (branch `docs/187-session-62-ratifica`) allinea i
 > documenti che la spec tocca: `05` (v1.4), `08` (v0.8), `09` (v0.6), `10`
 > (v1.1), `11` (v1.6.22), `12` (v1.0), `14` (v1.1) e `docs/state/stories/4.1-audio-features.md`.
@@ -6976,10 +6976,10 @@ CSP, lo stoccaggio, i costi **misurati**, i test e gli acceptance criteria
 riscritti della Story 4.1. Apre **nove decisioni** (D-AF.1…D-AF.9) da
 chiudere alla ratifica.
 
-La spec è poi stata **ratificata** al merge della PR di ratifica (la v0.1 🟡
-DRAFT era stata merged dalla PR #189, `87d4d7d`, 2026-10-28T17:02:41Z): le nove
-decisioni sono chiuse come proposte e vincolanti, il documento passa a **v1.0 🟢
-APPROVED** e l'issue di implementazione **#188** diventa **`agent-ready`**.
+La spec è poi stata **ratificata** al merge della **PR #190** (`b1dd83e`,
+2026-10-29T16:09:16Z), che ha promosso la v0.1 🟡 DRAFT (merged dalla PR #189, `87d4d7d`) a
+**v1.0 🟢 APPROVED**: le nove decisioni sono chiuse come proposte e vincolanti e
+l'issue di implementazione **#188** diventa **`agent-ready`**.
 
 ## Trigger
 
@@ -7093,7 +7093,7 @@ roadmap).
 - `docs/BUNDLE.md` — rigenerato
 - `docs/state/sessions/62-epic-4-1-audio-features-spec.md` — **nuovo**
 
-*Doc-sync di ratifica (branch `docs/187-session-62-ratifica`)*
+*Doc-sync di ratifica (PR #190, `b1dd83e`, 2026-10-29)*
 
 - `docs/21-AUDIO-FEATURES.md` — **v1.0 🟢 APPROVED**: le nove decisioni sono
   chiuse come proposte, §18 (impatto sui documenti) e i deliverable
@@ -7116,13 +7116,29 @@ roadmap).
 
 ## Cross-refs
 
-- **#187** — la spec (claim `kilo-hp-elitebook-hj59`), chiusa da questa PR
+- **#187** — la spec (claim `kilo-hp-elitebook-hj59`): chiusa dalla PR #189 e
+  ratificata dalla PR #190
 - **#188** — l'implementazione della Story 4.1: `needs-spec` fino alla
   ratifica della spec, poi **`agent-ready`**
 - **#180** — la Story 2.1: la catena 4.1 → 2.1 → 2.2/2.3 è quella dichiarata
   nella lista di priorità degli agenti (`11§Priorità`)
 - **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢), da cui
   `04§12` discende l'obbligo di questa spec
+
+## Esito post-merge
+
+PR #190 **merged** in `main` il 2026-10-29T16:09:16Z (merge commit `b1dd83e`).
+L'issue **#187** è chiusa con `status:done` e l'issue di implementazione **#188**
+è `agent-ready` con il body riallineato alla spec (gli 11 AC di `21§16`).
+
+Automazioni post-merge: `auto-state-aggregate` (`124a39b`) e `auto-bundle`
+(`9838237`), più `auto-status-done` e `auto-branch-cleanup` (branch remoto
+eliminato). Il blocco `AGGREGATE-STORIES-*` mostra la story 4.1 come `todo` con
+l'issue #188: è il primo anello della catena 4.1 → 2.1 → 2.2/2.3 e il blocco
+NEXT-STEP del README punta a essa.
+
+Il doc-sync di chiusura (frontmatter con `pr: 190` e il merge commit) è in una
+PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
