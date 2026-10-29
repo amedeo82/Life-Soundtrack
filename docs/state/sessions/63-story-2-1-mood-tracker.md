@@ -3,9 +3,9 @@ number: 63
 title: "Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180)"
 date: 2026-10-29
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: d018a26
+merged_date: 2026-10-29
 branch: feat/180-mood-tracker
 pr: 192
 claim: kilo-HP-ELITEBOOK-cbd0dc
@@ -152,3 +152,24 @@ review. Il percorso dati completo (feature vere nella tabella `features`)
 resta alla Story 4.1 (#188): fino a quel momento il mood tracker produce
 **nulla** in un'installazione reale, ed è il comportamento dichiarato e
 testato, non un difetto.
+
+## Esito post-merge
+
+La PR #192 è **merged** in `main` il 2026-10-29T16:49:33Z (merge commit
+`d018a26`), CI verde (`quality`, `cleanup`, `apply-status-done`,
+GitGuardian). L'issue **#180** è chiusa con `status:done` (applicato da
+`auto-status-done`), le label `agent-ready` / `in-progress` /
+`status:in-review` sono rimosse e il commento `release:` è automatico.
+
+Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup` (branch
+remoto eliminato), `auto-state-aggregate` (`b10cf70`) e `auto-bundle`
+(`e64504d`). La pulizia git locale (worktree `ls-180-mood-tracker` e branch
+`feat/180-mood-tracker`) è stata eseguita con `scripts/post-merge.ps1`: la
+rimozione della worktree ha richiesto di nuovo `rd /s /q` con prefisso
+`\\?\` (su Windows, `git worktree remove` fallisce con "Result too large" sui
+path lunghi con `node_modules`), poi `post-merge.ps1 -Check` esce 0.
+
+Issue aperte dal lavoro, ancora da fare: **#193** (la mappa
+`genre → valence/energy` per il fallback mood-by-genre di `04§1.4`,
+`needs-spec`) e **#194** (l'esempio numerico di `04§3.5` che non torna,
+`docs`: la correzione di un documento APPROVED è un atto del project owner).
