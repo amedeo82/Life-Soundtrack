@@ -3,16 +3,17 @@
  *
  * Il codice dell'orchestratore è **il contratto**, i generatori sono
  * plug-in (decisione D-A.5): ogni generatore è indipendente dagli altri e
- * riceve gli stessi input. La prima tranche (Story 2.4) implementa **solo il
- * memory engine**; mood tracker, session segmentation, pattern analyzer, era
- * detector ed event detector si aggiungeranno senza modificare il contratto,
- * come i sink di scrobbling si sono aggiunti al registry senza modificare
- * `PlatformAdapter` (ADR-0011 V1).
+ * riceve gli stessi input. La tranche corrente implementa il **memory
+ * engine** (04§7) e il **mood tracker** (04§3); session segmentation,
+ * pattern analyzer, era detector ed event detector si aggiungeranno senza
+ * modificare il contratto, come i sink di scrobbling si sono aggiunti al
+ * registry senza modificare `PlatformAdapter` (ADR-0011 V1).
  */
 
-import type { Artist, Insight, ListenEvent, Track } from '../schema';
+import type { Artist, AudioFeatures, Insight, ListenEvent, Track } from '../schema';
 import { MemoryEngine, type MemoryConfig } from './memory';
 import type { Translator } from './memory';
+import { MoodEngine, type MoodConfig, type MoodPeriod } from './mood';
 
 /** Dati che il pipeline consegna a ogni generatore. */
 export interface AnalysisInput {
@@ -22,6 +23,15 @@ export interface AnalysisInput {
   readonly tracks: readonly Track[];
   /** Artisti. */
   readonly artists: readonly Artist[];
+  /**
+   * Feature audio disponibili.
+   *
+   * Le legge solo il mood tracker (04§3.3) e solo quelle **misurate o
+   * manuali**: il filtro per sorgente è applicato dal generatore
+   * (`21-AUDIO-FEATURES.md` §12, D-AF.4). È opzionale perché i generatori
+   * che non ne hanno bisogno non devono pagare il costo di caricarle.
+   */
+  readonly features?: readonly AudioFeatures[];
   /** Istante di riferimento ("oggi"), in unix ms UTC. */
   readonly today: number;
   /** Locale dell'app, per i nomi localizzati. */
@@ -40,7 +50,7 @@ export interface AnalysisGenerator {
  * Pipeline di analisi: esegue i generatori registrati, in ordine.
  *
  * Il perimetro della tranche corrente è deliberatamente minimo: nessun
- * generatore oltre al memory engine (04§8.1).
+ * generatore oltre a quelli implementati (04§8.1).
  */
 export class AnalysisPipeline {
   private readonly generators: readonly AnalysisGenerator[];
@@ -94,6 +104,38 @@ export function createMemoryGenerator(options: MemoryGeneratorOptions): Analysis
         artists: input.artists,
       });
       return generated.map((memory) => memory.insight);
+    },
+  };
+}
+
+/** Opzioni del generatore di mood. */
+export interface MoodGeneratorOptions {
+  /** Override dei parametri del mood tracker. */
+  readonly config?: Partial<MoodConfig>;
+  /** Periodi aggregati (default: giorno, settimana e mese). */
+  readonly periods?: readonly MoodPeriod[];
+}
+
+/**
+ * Adatta il mood tracker al contratto del pipeline.
+ *
+ * Il generatore passa al motore gli ascolti e le feature ricevute: il filtro
+ * per sorgente (misurate o manuali) è applicato dal motore
+ * (`21-AUDIO-FEATURES.md` §12).
+ */
+export function createMoodGenerator(options: MoodGeneratorOptions = {}): AnalysisGenerator {
+  return {
+    name: 'mood',
+    async generate(input: AnalysisInput): Promise<Insight[]> {
+      const engine = new MoodEngine({
+        ...(options.config ? { config: options.config } : {}),
+        ...(options.periods ? { periods: options.periods } : {}),
+      });
+      const generated = await engine.generate({
+        listens: input.listens,
+        features: input.features ?? [],
+      });
+      return generated.map((mood) => mood.insight);
     },
   };
 }
