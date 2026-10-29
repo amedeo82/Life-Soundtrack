@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-29 17:54
+> Data: 2026-10-29 16:58
 > Totale file: 110
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1179,11 +1179,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **2.1** — Mood Tracker giornaliero (priority `B`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **4.1** — Pipeline audio features (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/2.1-mood-tracker.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
-
-Altre non-done e non bloccate in ordine di priorita backlog (id): 4.1.
+Sorgente: `docs/state/stories/4.1-audio-features.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -1547,7 +1545,7 @@ Apache License
 | 60 | Il blocco NEXT-STEP indica solo story lavorabili (issue #182) | 🟢 | ✅ | #183 |
 | 61 | Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179) | 🟢 | ✅ | #185 |
 | 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
-| 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ❌ | #192 |
+| 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ✅ | #192 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1587,10 +1585,10 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **40** (merge: 33)
-- Stories migrate in state/stories: **15** (done: 13)
+- Sessioni migrate in state/sessions: **40** (merge: 34)
+- Stories migrate in state/stories: **15** (done: 14)
 - Ultima sessione migrata: **S63** - Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.4
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -7148,7 +7146,7 @@ PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 
 - **Data**: 2026-10-29
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #192)
+- **Merged**: ✅ PR #192 (d018a26, 2026-10-29)
 - **Claim**: `kilo-HP-ELITEBOOK-cbd0dc`
 
 ```
@@ -7292,6 +7290,27 @@ review. Il percorso dati completo (feature vere nella tabella `features`)
 resta alla Story 4.1 (#188): fino a quel momento il mood tracker produce
 **nulla** in un'installazione reale, ed è il comportamento dichiarato e
 testato, non un difetto.
+
+## Esito post-merge
+
+La PR #192 è **merged** in `main` il 2026-10-29T16:49:33Z (merge commit
+`d018a26`), CI verde (`quality`, `cleanup`, `apply-status-done`,
+GitGuardian). L'issue **#180** è chiusa con `status:done` (applicato da
+`auto-status-done`), le label `agent-ready` / `in-progress` /
+`status:in-review` sono rimosse e il commento `release:` è automatico.
+
+Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup` (branch
+remoto eliminato), `auto-state-aggregate` (`b10cf70`) e `auto-bundle`
+(`e64504d`). La pulizia git locale (worktree `ls-180-mood-tracker` e branch
+`feat/180-mood-tracker`) è stata eseguita con `scripts/post-merge.ps1`: la
+rimozione della worktree ha richiesto di nuovo `rd /s /q` con prefisso
+`\\?\` (su Windows, `git worktree remove` fallisce con "Result too large" sui
+path lunghi con `node_modules`), poi `post-merge.ps1 -Check` esce 0.
+
+Issue aperte dal lavoro, ancora da fare: **#193** (la mappa
+`genre → valence/energy` per il fallback mood-by-genre di `04§1.4`,
+`needs-spec`) e **#194** (l'esempio numerico di `04§3.5` che non torna,
+`docs`: la correzione di un documento APPROVED è un atto del project owner).
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -19434,7 +19453,7 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
-| 2.1 - Mood Tracker giornaliero | in_review | #192 | - | analysis |
+| 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 4.1 - Pipeline audio features | todo | #0 | - | enrichment |
 
