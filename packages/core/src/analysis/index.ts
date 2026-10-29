@@ -8,10 +8,43 @@
 export {
   AnalysisPipeline,
   createMemoryGenerator,
+  createMoodGenerator,
   type AnalysisGenerator,
   type AnalysisInput,
   type MemoryGeneratorOptions,
+  type MoodGeneratorOptions,
 } from './pipeline';
+
+export {
+  ANALYSIS_FEATURE_SOURCES,
+  buildFeatureIndex,
+  classifyMood,
+  computeMoodDerivedVersion,
+  computeMoodForPeriod,
+  DEFAULT_MOOD_CONFIG,
+  endOfUtcMonth,
+  groupByPeriod,
+  isAnalysisFeatureSource,
+  MOOD_INSIGHT_TYPES,
+  MOOD_PERIODS,
+  MOOD_WEIGHT_BASE_MS,
+  MoodEngine,
+  moodInsightId,
+  periodBounds,
+  resolveMoodConfig,
+  startOfUtcMonth,
+  startOfUtcWeek,
+  weightedAverage,
+  type AnalysisFeatureSource,
+  type GeneratedMood,
+  type MoodConfig,
+  type MoodEngineOptions,
+  type MoodInput,
+  type MoodPeriod,
+  type MoodPeriodBounds,
+  type MoodValue,
+  type WeightedValue,
+} from './mood';
 
 export {
   buildWorkspace,

@@ -111,6 +111,8 @@ export {
   listStaleInsights,
   putInsights,
   replaceInsights,
+  replaceInsightsOfType,
+  type ReplaceInsightsOfTypeOptions,
   type ReplaceInsightsOptions,
   type ReplaceInsightsReport,
 } from './insights';

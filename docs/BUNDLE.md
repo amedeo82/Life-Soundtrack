@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-29 16:22
-> Totale file: 109
+> Data: 2026-10-29 17:44
+> Totale file: 110
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 108 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1465.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-29 16:21
+- Dimensione totale: 1463 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-29 16:09
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1453,14 +1453,14 @@ Apache License
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 57 (v0.7) | Matrice piattaforme europee + campi dati — v0.7: rimandi al percorso di **scrittura** degli hub (§3.7-3.9, Story 1.5 ratificata) |
 | 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 57 (v1.6) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter; v1.6: §3.8 `scrobbleHubs: ScrobbleHubId[]` + §6.2 tabella `scrobbleOutbox` (schema Dexie v5, Story 1.5) |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 57 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.2, S47/S57: token in scrittura, percorso incrementale) + Last.fm (🟢 v1.2, S50/S51/S57: percorso di scrittura, md5 D-SH.11, proxy D-SH.14) — **adapter implementati** in Sessione 52 (issue #155) |
-| 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟢 APPROVED | Sessione 59 (v1.0) | Algoritmi di analisi (mood, ere, eventi, ricordi) — **ratificata** (Sessione 59, issue #178): i trigger dei 5 tipi di ricordo sono specificati, il perimetro della tranche è dichiarato; la Story 2.4 è implementabile, la 2.1 aspetta le audio features (EPIC 4.1) |
+| 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟢 APPROVED | Sessione 59 (v1.0) | Algoritmi di analisi (mood, ere, eventi, ricordi) — **ratificata** (Sessione 59, issue #178): i trigger dei 5 tipi di ricordo sono specificati, il perimetro della tranche è dichiarato; la Story 2.4 è implementata (Sessione 61) e la **2.1 è implementata** (Sessione 63, issue #180) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 62 (v1.4) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 62 (v0.8) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1) |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 62 (v0.6) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 62 (v1.6.22) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 63 (v1.6.23) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 62 (v1.0) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i due host delle audio features |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
@@ -1612,7 +1612,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo step tecnico** (aggiornato alla Sessione 62, issue #187): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e la **Story 2.4 (Memory Engine) è completata** (issue **#179**, PR #185, merge `40ad0b7`): il pacchetto `packages/core/src/analysis/` esiste — i 5 generatori (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il feed ordinato per rilevanza (`04§7.4`), la persistenza degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4). **La spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` **v1.0 🟢 APPROVED**, Sessione 62, issue #187, PR #190 `b1dd83e`): le nove decisioni D-AF.1…D-AF.9 sono chiuse come proposte — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice sta in `packages/core/src/enrichment/` **senza React** (D-AF.5) e la CSP ha **due host in più** (D-AF.9). **Prossimo passo**: **implementare la Story 4.1** (issue **#188**, `agent-ready`, `size:L`) — la pipeline delle audio features: cascata, provider Essentia.js e AcousticBrainz, fallback euristico, privacy, stoccaggio. È il primo anello della catena **4.1 → 2.1 → 2.2/2.3**: la **Story 2.1 (Mood Tracker)** resta bloccata finché le feature non esistono (decisione D-A.1, issue **#180** `needs-spec`), e 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`). Restano poi le tranche dell'EPIC 3 (UI) e la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 63, issue #180): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e **due story dell'EPIC 2 sono implementate**: la **2.4 (Memory Engine)** (issue **#179**, PR #185, merge `40ad0b7`) e la **2.1 (Mood Tracker)** (issue **#180**, PR #192, Sessione 63): il motore in `packages/core/src/analysis/mood/` calcola il mood dominante di **giorno, settimana e mese** dalla valence/energy media ponderata per durata (`04§3`), lo persiste come insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion` calcolata dai parametri (`04§9`) e legge **solo** le feature misurate o manuali (`21§12`, D-AF.4). **La spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` **v1.0 🟢 APPROVED**, Sessione 62, issue #187): le nove decisioni D-AF.1…D-AF.9 sono chiuse come proposte — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice sta in `packages/core/src/enrichment/` **senza React** (D-AF.5) e la CSP ha **due host in più** (D-AF.9). **Prossimo passo**: **implementare la Story 4.1** (issue **#188**, `agent-ready`, `size:L`) — la pipeline delle audio features: cascata, provider Essentia.js e AcousticBrainz, fallback euristico, privacy, stoccaggio. È ciò che **popola** la tabella `features` da cui il mood tracker legge: la catena è **4.1 (dati) → 2.1 (letture)** e le due story sono implementabili in parallelo (l'ordine è stato invertito dal project owner il 2026-10-29: senza feature il mood tracker **non produce nulla**, comportamento dichiarato e testato, non un difetto). Restano poi le tranche dell'EPIC 3 (UI) e la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -7441,8 +7441,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.9
-> Ultima modifica: 2026-10-28 — §28 Issue #187 (ratifica della spec dell'EPIC 4.1 — pipeline audio features)
+> Versione: 2.16
+> Ultima modifica: 2026-10-29 — §29 Issue #180 (Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -8306,6 +8306,35 @@ mezzo del lavoro.
 
 ---
 
+## 29. Issue #180 — Story 2.1: il Mood Tracker (Sessione 63)
+
+**Tipo**: feature (`packages/core/src/analysis/mood/`) + persistenza (`db/`) — issue #180, claim `kilo-hp-elitebook-cbd0dc`
+**Branch**: `feat/180-mood-tracker` (worktree `ls-180-mood-tracker`)
+**PR**: #192 (aperta su `main` dalla worktree)
+**Data**: 2026-10-29
+**Stato**: 🟡 in review — il motore del mood (giorno, settimana, mese), il filtro per sorgente delle feature, la persistenza con `derivedVersion` e il plug-in dell'orchestratore
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 29-1 | P+L | La story era **bloccata** dalle audio features (D-A.1, `04§11`), ma il **codice** del mood tracker era già interamente specificato (`04§3`) | La D-A.1 leggeva la dipendenza come *sequenza*: senza feature la 2.1 non produce insight. Ma ciò che mancava era il **riempimento** della tabella `features`, non la lettura | Ordine invertito dal project owner il 2026-10-29 (D.63.1): le due story sono **parallele**, **4.1 (dati) → 2.1 (letture)**. Il rischio del "falso verde" si neutralizza da solo: senza feature il motore **non produce niente**, ed è un comportamento testato | `docs/state/stories/2.1-mood-tracker.md` |
+| 29-2 | P+F | Il codice avrebbe potuto leggere le feature **euristiche** (stime) e costruire un umore su una stima | `02§3.4` chiude `source` a quattro valori e non dice chi può leggerli; il filtro è definito in `21§12` (D-AF.4), **nella spec dell'EPIC 4.1**, non in `04` | Il filtro per sorgente vive nel **layer di analisi** (`analysis/mood/features.ts`), non dentro il motore: è un contratto fra due moduli e vale per qualunque generatore futuro (D.63.2). Test dedicato: le feature euristiche sono invisibili | `packages/core/src/analysis/mood/features.ts` |
+| 29-3 | P+F | Il pseudocodice di `04§3.3` controlla solo `af.valence != null` e pusherebbe `af.energy` **anche quando è `null`** | `02§3.4` dichiara i due campi nullable indipendentemente: il pseudocodice assume che `energy` ci sia quando `valence` c'è | Un ascolto è utilizzabile solo se ha **valence ed energy** (D.63.5): altrimenti la media ponderata produrrebbe `NaN` e l'invariante `avgEnergy ∈ [0, 1]` (`04§3.6`) sarebbe violato | `packages/core/src/analysis/mood/engine.ts` |
+| 29-4 | P | L'esempio numerico di **`04§3.5`** non torna: con i suoi stessi input dà **0.570** di valence media e **0.667** di energy media, non 0.585 e 0.675 | Errore aritmetico nella spec (i pesi sono arrotondati, la somma dei prodotti non è quella scritta) | Il codice implementa la **formula** e la **conclusione** dell'esempio (`happy`), che è corretta; la difformità è **segnalata** in un'issue `docs`: `04` è APPROVED e non si modifica da un agente | `docs/04-ANALYSIS-ALGORITHMS.md` §3.5 |
+| 29-5 | P+L | `04§3.2` (tabella) e `04§3.3` (pseudocodice) danno risultati diversi per `0.49 / 0.50` | La tabella mette `angry` (valence < 0.5, energy ≥ 0.5), la nota dice che `neutral` sovrascrive le quattro classi "se entrambe le coordinate sono nella fascia [0.4, 0.6]" — e 0.49 è nella fascia | Il codice segue il **pseudocodice**, che controlla la fascia neutra per prima: è l'unico dei due criteri che non richiede di scegliere. Test dedicato alla precedenza | `packages/core/src/analysis/mood/classify.ts` |
+| 29-6 | P+F | Il ricalcolo degli insight di **tutti** i periodi (giorni, settimane, mesi) avrebbe aperto una transazione per ogni giorno | `replaceInsights` (Story 2.4) sostituisce gli insight di **un** `periodStart` | `replaceInsightsOfType` (D.63.11): una transazione che rimuove gli insight `stale` (MIG-3) e quelli dei periodi ricalcolati, e **lascia intatti** gli altri periodi dello stesso tipo (ricalcolo incrementale, `04§1.2`) | `packages/core/src/db/insights.ts` |
+| 29-7 | P+L | Il **vocabolario temporale** (confine UTC, `eventTime`) viveva dentro `analysis/memory/`, e il mood tracker avrebbe dovuto importarlo da lì | Il memory engine era il primo modulo dell'EPIC 2 e ha creato gli helper; il secondo modulo li trovava "già scritti" nel posto sbagliato | Gli helper generici sono saliti a `analysis/datetime.ts` e `analysis/memory/datetime.ts` li riusa: due moduli, un vocabolario, nessuna dipendenza fra sibling | `packages/core/src/analysis/datetime.ts` |
+
+**Lesson learned sintetica**: un blocco dichiarato dalla spec può essere una **scelta di sequencing**, non un blocco di codice (29-1): la D-A.1 proibiva di consegnare una story che non produce nulla, ma il codice era già interamente specificato — mancava il **riempimento** della tabella, non la lettura. Separare le due cose rende le story parallele. E il contratto fra due moduli (il filtro per sorgente delle feature) va codificato dove vale per entrambi, non dentro il generatore che lo usa per primo (29-2).
+
+### Link utili
+
+- Branch: `feat/180-mood-tracker` (worktree `ls-180-mood-tracker`)
+- Issue: **#180** (`size:M`, `area:analysis`), claim `kilo-hp-elitebook-cbd0dc`
+- Sessione: `docs/state/sessions/63-story-2-1-mood-tracker.md`
+- Precedenti: **#178** (la ratifica della spec dell'analisi) · **#187** (la spec dell'EPIC 4.1, da cui il contratto `getAudioFeatures` filtrato per sorgente) · **#188** (la Story 4.1: il percorso dati, ancora da fare)
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -8332,7 +8361,7 @@ mezzo del lavoro.
 | 2.2 | 2026-10-27 (issue #168) | **§22 Issue #168 — ADR-0011 "contratto di scrittura negli hub"** (Sessione 56, claim `kilo-hp-elitebook-41xb`, PR #170): 5 lesson (56-1 un ADR che dichiara **dove vive** un contratto e una spec che dichiara **cosa contiene** un protocollo non sono lo stesso atto: il primo è architetturale (`05§4` è APPROVED → serve ADR), il secondo è di protocollo (🟡 DRAFT → serve ratifica); confonderli crea un blocco — finché la spec è DRAFT, i documenti APPROVED che essa tocca (`02`, `09`, `08`) non si possono modificare, e l'ADR deve **dichiarare** l'elenco dei documenti da aggiornare senza toccarli; 56-2 la simmetria con il precedente ADR è la leva della decisione: `parseRemote?()` ha risolto "l'adapter non ha un file" con un metodo opzionale, "l'hub non è un adapter" si risolve con un'interfaccia dedicata — stessa forma, opposta direzione; 56-3 `recoverable` non è un nome neutro: la stessa bandiera booleana con due semantiche (`AdapterError` = "persistito", `ScrobbleError` = "ritentabile") è un errore di remediation, quindi la classe di errore va nominata e tipizzata per il dominio che descrive; 56-4 il payload chiuso per costruzione (dal tipo, non dalla policy) è la forma forte di una promessa di privacy: "non inviare l'IP" è una promessa che un refactor dimentica, un campo inesistente non può essere inviato; 56-5 una riga di changelog appesa fuori dalla tabella non è un difetto di formattazione: è un documento con l'header rotto — la riga della v1.2 di `05-ARCHITECTURE.md` stava **prima del titolo**, e i gate che contano le versioni non lo vedono). ADR `docs/13-ADR/0011-scrobble-sink.md` v0.1 🟡 DRAFT: decisione A1 (`ScrobbleSink` separato da `PlatformAdapter`), vincoli V1-V10, alternative A2-A5 scartate, garanzie G-SH.1…G-SH.6 recepite dalla spec; `05§4.2` aggiunta (v1.3) |
 | 2.3 | 2026-10-27 (issue #168) | **§22 — ratifica dell'ADR-0011**: il merge della PR #170 (`8900c3b`, 2026-10-27T16:31:39Z) è la ratifica del Boss → `docs/13-ADR/0011-scrobble-sink.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**, **nessuna modifica di contenuto** (stesso pattern di ADR-0010, PR #152 → commit di promozione `90aded0`). Il punto aperto 1 della spec (`20§18`) è chiuso: restano i punti 2-5, che sono decisioni di **protocollo** e non del contratto. Doc-sync: `05-ARCHITECTURE.md` (riga degli ADR collegati: 0011 🟢 APPROVED v1.0), `docs/INDEX.md` (riga `13-ADR/`, ADR APPROVED 8 → **9**, riga `11`, "Prossimo step tecnico"), `docs/11-BACKLOG.md` (Story 1.5: dipendenza **soddisfatta**, AC `[x]`, riga roadmap, v1.6.15), `docs/state/sessions/56-*.md` (`state: 🟢`, `merged: true`, merge commit `8900c3b`), `docs/state/_index.md`, `docs/20-SCROBBLING-HUB.md` §18 punto 1. Esito post-merge: `auto-status-done` ha applicato `status:done` a #168 e chiuso l'issue, `auto-branch-cleanup` ha eliminato il branch remoto, `auto-state-aggregate` + `auto-bundle` hanno rigenerato i blocchi; worktree e branch locale eliminati con `scripts/post-merge.ps1` (la rimozione della worktree ha richiesto `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
 | 2.4 | 2026-10-27 (issue #172) | **§23 Issue #172 — ratifica della spec Scrobbling hub** (Sessione 57, claim `kilo-hp-elitebook-41xb`, PR #174): 5 lesson (23-1 la stessa classe di difetto della Sessione 56 — la riga di changelog appesa **prima del titolo** — si era riprodotta in `02-DATA-SCHEMA.md`: la scansione di tutti i `.md` di `docs/` (prima riga che comincia con `| <version> |`) è il rilevatore economico della classe; 23-2 l'header di un documento è una **seconda fonte di verità**: cinque documenti dichiaravano una versione più vecchia del proprio changelog, e nessun gate li confronta; 23-3 **ratificare una spec non è promuoverla**: chiudere i punti aperti modifica regole normative (T-SH.3, T-SH.4, E.SH.10, E.SH.11, finestra, modalità proxy) e le modifiche vanno **dichiarate**, perché la regola "i documenti APPROVED non si modificano su una spec DRAFT" ha senso solo se l'effetto è esplicito; 23-4 una regola di default va giudicata su **quanti utenti reali la superano**: "durata ignota → non maturo" era la più prudente e la meno utile (escludeva la maggior parte degli ascolti degli utenti Last.fm/ListenBrainz) → D-SH.13 soglia dei 4 minuti + fiducia nella fonte; 23-5 issue di decisioni e issue di implementazione nate nella stessa sessione: la transizione `needs-spec` → `agent-ready` è avvenuta solo con l'assegnazione esplicita del project owner, e le due issue hanno esiti opposti — #172 chiusa con `status:done`, #173 aperta `agent-ready`). `docs/20-SCROBBLING-HUB.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le quattro decisioni chiuse come **D-SH.11…D-SH.14** (§2.1): md5 in JS puro, finestra a 7 giorni + azione esplicita, soglia dei 4 minuti con fiducia nella fonte, modalità del proxy dichiarata. Allineati i documenti che la spec tocca (`02§3.8`+`§6.2`, `09§3.3`+`§4`, `08§1`+`§2.16`, `03-ADAPTERS/lastfm.md` §4+§10, `03-ADAPTERS/listenbrainz.md` §3.4+D-LB.5, `01§3.7-3.9`), i casi di test da 29 a **31**. Aperti `docs/state/stories/1.5-scrobbling-hub.md` e l'**issue di implementazione #173** (`agent-ready`, `size:L`) |
-| 2.5 | 2026-10-27 (issue #172) | **§23 — esito post-merge della ratifica**: la PR #174 è **merged** (`4abb73e`, 2026-10-27T16:59:24Z) → `docs/20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** e l'issue #172 è chiusa con `status:done`. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 57 con `pr: 174`, `merged: true` e merge commit, più la sezione "Esito post-merge"): il numero della PR non era noto quando il file è stato scritto, e D.21.1 vuole il doc-sync **nel branch della PR** — impossibile per il PR number, che si conosce solo dopo l'apertura. L'alternativa (scrivere `pr: 0` e correggere dopo) è quella scelta, ed è la ragione per cui il blocco aggregato mostrava "PR #0" per la Sessione 57. Automazioni: `auto-status-done` (status:done su #172), `auto-branch-cleanup`, `auto-state-aggregate` (`c27fc1f`), `auto-bundle` (`4002520`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
+| 2.5 | 2026-10-27 (issue #172) | **§23 — esito post-merge della ratifica**: la PR #174 è **merged** (`4abb73e`, 2026-10-27T16:59:24Z) → `docs/20-SCROBBLING-HUB.md` è **v1.0 🟢 APPROVED** e l'issue #172 è chiusa con `status:done`. Doc-sync di chiusura in una PR `docs:` separata (frontmatter della Sessione 57 con `pr: 174`, `merged: true` e merge commit, più la sezione "Esito post-merge"): il numero della PR non era noto quando il file è stato scritto, e D.21.1 vuole il doc-sync **nel branch della PR** — impossibile per il PR number, che si conosce solo dopo l'apertura. L'alternativa (scrivere `pr: 192` e correggere dopo) è quella scelta, ed è la ragione per cui il blocco aggregato mostrava "PR #0" per la Sessione 57. Automazioni: `auto-status-done` (status:done su #172), `auto-branch-cleanup`, `auto-state-aggregate` (`c27fc1f`), `auto-bundle` (`4002520`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`) |
 | 2.6 | 2026-10-28 (issue #173) | **§24 Issue #173 — Story 1.5 implementata** (Sessione 58, claim `kilo-hp-elitebook-41xb`, PR #176): 6 entry (24-1 il **test di performance** misurava il **carico del runner**, non il layer DB: con tre file di test in più la suite parallela faceva superare la soglia locale di 500 ms, e la verifica decisiva fu togliere i file nuovi con la tabella già presente → il test gira ora in una **run separata**, con la soglia dell'AC invariata; 24-2 `db/health.ts` dichiarava la versione attesa 4 mentre lo schema corrente è **5** (falso "schema sotto l'attesa"); 24-3 `db.test.ts` contava 13 tabelle: `scrobbleOutbox` è la 14ª; 24-4 il tipo di dominio `ScrobbleHubId` sta in `schema/index.ts` perché il **db non deve dipendere dagli adapter** (`05§9.2` parla di package, non di moduli: il ciclo fra moduli nessun gate lo misura); 24-5 i brani si risolvono con una **scansione** (`tracks` ha PK `canonicalKey`, `id` non è indicizzato), come in `db/orphan-cleanup.ts`; 24-6 il delay di retry del protocollo è una **capacità opzionale** del sink (`retryDelayMs()`), così il contratto approvato `05§4.2` resta intatto e il protocollo resta nel sink (V9)). Consegnati i 15 deliverable di `20§16`: contratto `ScrobbleSink`, registry, sink Last.fm (md5 JS puro, batch 50, POST via proxy) e ListenBrainz (`submit-listens`), coda `scrobbleOutbox` (schema Dexie v5, write-ahead, backoff con jitter), filtro di eleggibilità `20§5` con D-SH.13, `parseRemote?()` incrementale con cursore persistito, web auth Last.fm, pannello UI, namespace i18n `scrobble`; **31 casi di test** coperti (267 in `@ls/core`, 91 in `@ls/web`). **AC-SH.11 parzialmente soddisfatto** (MBID → DEDUP-2 ✓; `track.genres` via MusicBrainz ✗ → EPIC 4) |
 | 2.7 | 2026-10-28 (issue #178) | **§25 Issue #178 — ratifica della spec dell'analisi** (Sessione 59, claim `kilo-hp-elitebook-41xb`, PR #181): 4 entry (25-1 i **template i18n dei ricordi esistevano già** (`08§2.15`) e la prima stesura della ratifica li **rinominava** con parametri diversi: una spec che ratifica non può rinominare un contratto già dichiarato — le formule sono state riallinate alle chiavi esistenti e `08§2.15` le dichiara vincolanti; 25-2 il ricordo **stagionale** era per artista nella spec e per genere nel template: decisione D-A.7 (per genere, con l'informazione nel `text` reso); 25-3 la sezione dei template era stata inserita come **§2.13** in collisione con `error.*`: rimossa e la nota di vincolanza messa dentro §2.15; 25-4 la **Story 2.1** dipendeva dalle **audio features** (EPIC 4.1) senza che nessun documento lo dicesse: la dipendenza è ora in `04§12`, nel backlog e nell'issue #180 — consegnare la 2.1 senza feature sarebbe stato un falso verde). `docs/04-ANALYSIS-ALGORITHMS.md` v0.2 🟡 DRAFT → **v1.0 🟢 APPROVED** con le cinque decisioni chiuse come proposte (**D-A.1…D-A.5**, §11): la **Story 2.4** (Memory Engine) è implementabile (issue **#179**, `agent-ready`), la **Story 2.1** (Mood Tracker) aspetta le audio features dell'EPIC 4.1 (issue **#180**, `needs-spec`). Allineati `08-COPY-I18N.md` §2.15 (v0.7), `11-BACKLOG.md` (Story 2.1/2.4, priorità agenti, v1.6.18), `docs/INDEX.md` (riga 04, conteggi legacy), `docs/state/` (sessione 59 + le story 2.1 e 2.4) |
 | 2.8 | 2026-10-28 (issue #173) | **§24 — esito post-merge della Story 1.5**: la PR #176 è **merged** (`bfb5946`, 2026-10-28T13:56:09Z) → l'issue #173 è chiusa con `status:done` e la story 1.5 è `done`: il percorso di scrittura verso Last.fm e ListenBrainz è consegnato. Doc-sync di chiusura (frontmatter della Sessione 58 con `merged: true` e merge commit, `merged_commit`/`merged_date` della story 1.5, §24 aggiornato). Automazioni: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` (`669cc82`), `auto-bundle` (`6388d12`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`: `git worktree remove` fallisce con "Result too large" su path Windows lunghi con `node_modules`). **AC-SH.11 resta parzialmente soddisfatto**: `track.genres` via lookup MusicBrainz dipende dall'enrichment (EPIC 4) |
@@ -8343,6 +8372,8 @@ mezzo del lavoro.
 | 2.13 | 2026-10-28 (issue #179) | **§27 — esito post-merge della Story 2.4**: la PR #185 è **merged** (`40ad0b7`, 2026-10-28T16:15:43Z) → l'issue #179 è chiusa con `status:done` e la story 2.4 è `done` con il merge commit nel frontmatter. Automazioni: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` (`be98fe7`), `auto-bundle` (`de15099`); worktree e branch locale eliminati con `scripts/post-merge.ps1` (di nuovo `rd /s /q` con prefisso `\\?\`). Il blocco NEXT-STEP ricade sul fallback "nessuna story non-done e non bloccata migrata": è la risposta **corretta** (la 2.1 è bloccata dalle audio features dell'EPIC 4.1 e 2.2/2.3 dipendono da lei) e per questo **non** si è creato uno state file per la 2.2 — un blocco che punta a una story bloccata a monte è il difetto chiuso dalla issue #182. La catena è 4.1 → 2.1 → 2.2/2.3: il prossimo lavoro è la **spec dell'EPIC 4.1** (issue #180), non un'implementazione |
 | 2.14 | 2026-10-28 (issue #187) | **§28 Issue #187 — ratifica della spec dell'EPIC 4.1** (Sessione 62, claim `kilo-hp-elitebook-hj59`; la v0.1 🟡 era stata merged dalla PR #189, `87d4d7d`: la **ratifica a v1.0 🟢** è l'atto di questa PR): 5 entry (28-1 la spec dichiarava che il namespace `enrichment.*` andasse in `08§2.16`, ma §2.16 è `scrobble.*` della Story 1.5: il namespace è **§2.17** e i riferimenti sono stati corretti in `21` §14, §18, header e changelog; 28-2 `08-COPY-I18N.md` era disallineato con se stesso (header v0.6, changelog 0.6, `INDEX` che dichiarava v0.7 dal Sessione 59): riga 0.7 recuperata, nuova riga 0.8, header a v0.8; 28-3 la riga 1.4 di `05-ARCHITECTURE.md` era stata inserita **prima** della 1.3: spostata dopo; 28-4 dopo la ratifica tre documenti dichiaravano **fatti falsi** (l'inventario `09§4`, la CSP `12§2.1`, la riga dei mock `10§8`): l'allineamento è avvenuto **alla ratifica**, come prescrive `AGENTS.md` §"Chi può scrivere cosa nei file globali", e i deliverable `T4.1.11`/`T4.1.12` dichiarano il confine fra i documenti (fatto) e il codice (fixture, CSP applicata al bundle, locale); 28-5 la riga legacy "Documenti APPROVED: 8" di `docs/INDEX.md` era sbagliata dal Sessione 57 (mancava `20`): ora 10, con `21`). `docs/21-AUDIO-FEATURES.md` v0.1 🟡 DRAFT → **v1.0 🟢 APPROVED** con le nove decisioni chiuse come proposte (**D-AF.1…D-AF.9**): la fonte dell'audio è il preview di 30 s dell'**iTunes Search API**, il modello valence/energy è **DEAM**, l'euristico **non** alimenta il mood tracker, il codice sta in `core` **senza React**, il rate limit di AcousticBrainz si legge dagli header, la CSP ha due host in più. Allineati `05` (v1.4), `08` (v0.8, `08§2.17`), `09` (v0.6), `10` (v1.1), `11` (v1.6.22, Story 4.1 implementabile), `12` (v1.0), `14` (v1.1), `docs/INDEX.md` (riga `21`, conteggi legacy, "Prossimo step tecnico") e `docs/state/` (sessione 62 + la story 4.1). Issue di implementazione **#188** aperta `agent-ready` |
 | 2.15 | 2026-10-29 (issue #187) | **§28 — esito post-merge della ratifica**: la PR #190 è **merged** (`b1dd83e`, 2026-10-29T16:09:16Z) → l'issue #187 resta chiusa con `status:done` e l'issue di implementazione **#188** è `agent-ready` con il body riallineato alla spec (gli 11 AC di `21§16`). Automazioni: `auto-state-aggregate` (`124a39b`), `auto-bundle` (`9838237`), `auto-status-done`, `auto-branch-cleanup` (branch remoto eliminato). Il blocco NEXT-STEP del README ricade sulla **Story 4.1**: è la risposta **corretta** (la 2.1 resta bloccata dalle audio features, D-A.1) e la catena 4.1 → 2.1 → 2.2/2.3 riparte. Il doc-sync di chiusura (frontmatter con `pr: 190` e merge commit) è in una PR `docs:` separata: il merge commit si conosce solo dopo il merge |
+
+| 2.16 | 2026-10-29 (issue #180) | **§29 Issue #180 — Story 2.1 implementata** (Mood Tracker, Sessione 63, claim `kilo-hp-elitebook-cbd0dc`, PR #192): 7 entry (29-1 la story era **bloccata** dalle audio features (D-A.1), ma il **codice** era già interamente specificato (`04§3`): a mancare era il **riempimento** della tabella `features`, non la lettura — l'ordine è stato invertito dal project owner (D.63.1) e le due story sono ora parallele, **4.1 (dati) → 2.1 (letture)**; 29-2 il filtro per sorgente delle feature vive nel **layer di analisi** e non dentro il motore: è un contratto fra due moduli (`21§12`, D-AF.4) e vale per qualunque generatore futuro (D.63.2); 29-3 il pseudocodice di `04§3.3` controlla solo `valence` e pusherebbe `energy` **null** → `NaN`: un ascolto è utilizzabile solo se ha entrambi (D.63.5); 29-4 l'esempio di `04§3.5` **non torna** (0.570/0.667 calcolati, non 0.585/0.675): il codice implementa la formula e la conclusione (`happy`), la difformità è segnalata in un'issue `docs` perché `04` è APPROVED; 29-5 `04§3.2` e `04§3.3` danno risultati diversi per `0.49/0.50` (`angry` vs `neutral`): il codice segue il **pseudocodice**, che controlla la fascia neutra per prima; 29-6 il ricalcolo di **tutti** i periodi avrebbe aperto una transazione per ogni giorno: `replaceInsightsOfType` (D.63.11) ne fa una sola e lascia intatti gli altri periodi dello stesso tipo (ricalcolo incrementale); 29-7 il vocabolario temporale è salito da `analysis/memory/datetime.ts` a `analysis/datetime.ts`: due moduli, un vocabolario, nessuna dipendenza fra sibling). Consegnati: il motore in `packages/core/src/analysis/mood/` (periodi UTC di giorno, settimana e mese, media ponderata per durata, mappa dei sei quadranti, invarianti `04§3.6`), la persistenza degli insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion` (`04§9`) e rilevamento degli insight `stale` (MIG-3), il plug-in `createMoodGenerator` dell'orchestratore (`04§8.1`, D-A.5). **51 test** nuovi in `@ls/core` (classificazione, periodi, persistenza, fixture di scenario) |
 
 ---
 
@@ -11254,6 +11285,165 @@ PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 
 
 
+===== FILE: docs/state/sessions/63-story-2-1-mood-tracker.md =====
+
+---
+number: 63
+title: "Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180)"
+date: 2026-10-29
+state: 🟢
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: feat/180-mood-tracker
+pr: 192
+claim: kilo-HP-ELITEBOOK-cbd0dc
+cross_refs: [180, 188, 187, 178]
+tags: [analysis, phase-2]
+---
+
+# Sessione 63 — Story 2.1: il Mood Tracker (issue #180)
+
+## Sintesi
+
+Il **mood tracker** calcola il mood dominante di un periodo (giorno,
+settimana, mese) dalla valence e dall'energy media degli ascolti, e lo
+persiste come `Insight` di tipo `mood_day` / `mood_week` / `mood_month`
+(`04-ANALYSIS-ALGORITHMS.md` v1.0 🟢 §3, `02-DATA-SCHEMA.md` §4).
+
+La story era **bloccata**: senza audio features il motore non produceva
+niente (decisione **D-A.1**, `04§11`). Il **project owner** ha invertito
+l'ordine il 2026-10-29 ("prendi in carico la issue 180 e procediamo a
+lavorare su di essa"): il motore è consegnato **completo**, e consuma le
+feature **già persistite** nella tabella `features`. Ciò che manca non è il
+codice del mood tracker, ma il **riempimento** della tabella: quello resta
+alla Story 4.1 (issue #188).
+
+Il motore **non inventa segnali**: sotto la soglia di eventi con feature non
+produce nessun insight, e le feature **euristiche** (stime) non sono
+visibili al layer di analisi (`21-AUDIO-FEATURES.md` §12, D-AF.4).
+
+## Trigger
+
+Issue **#180** (`size:M`, `area:analysis`), aperta nella Sessione 59 dopo la
+ratifica della spec dell'analisi (issue #178) e bloccata dalle audio features
+(EPIC 4.1). Claim `kilo-HP-ELITEBOOK-cbd0dc` (unico claim, riverificato), su
+assegnazione esplicita del project owner.
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| Il motore del mood (periodi, media ponderata, classificazione) | `packages/core/src/analysis/mood/` |
+| Il filtro delle sorgenti (solo feature misurate o manuali) | `packages/core/src/analysis/mood/features.ts` |
+| Il plug-in dell'orchestratore (`createMoodGenerator`) | `packages/core/src/analysis/pipeline.ts` |
+| Il ricalcolo batch degli insight (`replaceInsightsOfType`) | `packages/core/src/db/insights.ts` |
+| Il vocabolario temporale condiviso (confine UTC) | `packages/core/src/analysis/datetime.ts` |
+| I test (classificazione, periodi, persistenza, fixture di scenario) | `packages/core/src/analysis/__tests__/` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.63.1 | La Story 2.1 si implementa **prima** della 4.1 | Ordine invertito dal project owner il 2026-10-29. La D-A.1 (`04§11`) diceva "la 2.1 aspetta l'EPIC 4.1" per non consegnare una story che non produce nulla: qui il motore è consegnato **completo** e la catena diventa **4.1 (dati) → 2.1 (letture)**, implementabili in parallelo. Il percorso dati resta dichiarato: senza la 4.1 la tabella `features` è vuota e il mood tracker non ha nulla su cui leggere |
+| D.63.2 | Il **filtro per sorgente** vive nel layer di analisi, non nel motore | `21§12` (punto 1-3) è un contratto fra la pipeline di arricchimento e l'analisi: vale per qualunque generatore che legga le feature, non solo per il mood tracker. Il file `analysis/mood/features.ts` lo applica a ogni riga, e la regola che ne deriva è una riga: **il mood tracker vede solo le feature misurate o manuali** |
+| D.63.3 | `weekStartDay` (lunedì, ISO-8601) è un **parametro versionato** | `04§3.3` parla di "periodo (giorno/settimana/mese)" ma non dice da quando comincia la settimana. Il parametro è nel config object, quindi versionato come tutti gli altri (`04§1.1`): senza, un cambio di convenzione non renderebbe `stale` gli insight già prodotti (MIG-3). Allargamento **dichiarato** del registro `04§9`, come D.61.1 per il memory engine |
+| D.63.4 | Il fallback **mood-by-genre** di `04§1.4` **non** è implementato | La mappa genere→valence/energy "di default" non è ratificata in nessun documento: inventarla sarebbe esattamente il "segnale inventato" che la D-A.1 esclude. Aperta issue `needs-spec` per la mappa; il comportamento dichiarato (nessun insight senza feature) è quello che `04§3.3` prescrive (`if valences.length < 3: return null`) |
+| D.63.5 | Un ascolto è utilizzabile solo se ha **valence ed energy** | `02§3.4` dichiara entrambi nullable; il pseudocodice di `04§3.3` controlla solo `valence` e pusherebbe un `energy` `null` nella media, producendo `NaN` e violando l'invariante `avgEnergy ∈ [0, 1]` (`04§3.6`) |
+| D.63.6 | Il peso dell'ascolto è `durationMs / 240000`; la media ponderata restituisce `null` se il peso totale è zero | `04§3.3` fissa i 4 minuti come riferimento. Il `null` (anziché `NaN`) evita un insight con medie non finite quando tutti gli ascolti hanno durata zero |
+| D.63.7 | `eventCount` è il numero di **tutti** gli ascolti del periodo | È what `04§3.3` scrive (`eventCount: events.length`): dice quanta attività copre il mood, non quanta è stata misurata. La copertura sta in `Insight.confidence` |
+| D.63.8 | La `confidence` dell'insight è la **copertura dei dati** (quota di ascolti con feature utilizzabili) | `MoodPeriodPayload` (`02§4`) è **chiuso**: non ha un campo score e non si modifica. `confidence` (0..1) è l'unico campo libero, e il dato disponibile è quanto del periodo il mood copre. Come D.61.4 per il memory engine |
+| D.63.9 | L'id dell'insight è **deterministico** (`mood-<period>-<chiave>`) | Ricalcolare un periodo non deve creare un duplicato: con un UUID casuale ogni run ripetuto aggiungerebbe righe. Il ricalcolo è idempotente per costruzione (come `mem-…`, D.61.5) |
+| D.63.10 | Il confine è **UTC** e l'istante è l'**inizio** dell'ascolto (`startedAt`, o la fine se `startedAt` è `null`) | Coerente con `ListenEvent.day` (`02§3.2`) e con il memory engine (D.61.6): i due moduli concordano su quale giorno è un ascolto |
+| D.63.11 | `replaceInsightsOfType` per il **ricalcolo batch** | Il mood calcola tutti i periodi coperti dagli ascolti in una passata: `replaceInsights` (una transazione per periodo) aprirebbe una transazione per ogni giorno. La variante batch cancella gli insight **stale** (MIG-3) e quelli dei periodi ricalcolati, e lascia intatti gli altri periodi dello stesso tipo (ricalcolo incrementale, `04§1.2`) |
+| D.63.12 | Le feature dei **fixture di scenario** sono sintetiche e deterministiche | La pipeline di arricchimento (EPIC 4.1) non è implementata: nessun provider scrive feature vere. I test generano feature deterministiche (seme FNV-1a dell'id del brano + mulberry32, come il generatore dei fixture) dal profilo di mood dello scenario, e verificano il risultato contro il mood dominante **dichiarato** dal fixture (`_metadata.expectedInsights.dominantMood`) |
+
+## Difetti trovati lungo il percorso
+
+**L'esempio numerico di `04§3.5` non torna**: con i suoi stessi input (pesi
+0.83 / 1.0 / 0.75 / 1.25 / 0.92, somma 4.75) la media ponderata della
+valence è **0.570** e quella dell'energy **0.667**, non 0.585 e 0.675 come
+scritto. La **conclusione** (happy) è corretta e il codice la reproduce: è
+l'aritmetica dell'esempio ad avere l'errore. Aperta issue `docs` per la
+correzione: `04` è APPROVED e non si modifica da un agente.
+
+**La fascia neutra sovrascrive `angry`**: la tabella di `04§3.2` mette
+`angry` per valence < 0.5 ed energy ≥ 0.5, ma la nota dice che `neutral`
+sovrascrive le quattro classi "se entrambe le coordinate sono nella fascia
+[0.4, 0.6]": `0.49 / 0.50` è dentro la fascia, quindi il risultato è
+`neutral`, non `angry`. Il codice segue il **pseudocodice** di `04§3.3`, che
+controlla la fascia neutra per prima — è l'unico dei due criteri che non
+richiede di scegliere.
+
+## Verifica
+
+- `pnpm run lint` → verde
+- `pnpm run typecheck` → verde
+- `pnpm run test` → **348** test in `@ls/core` (**51** nuovi: 31 motore e
+  orchestratore, 9 periodi, 6 persistenza, 5 fixture di scenario) + **2** test
+  di performance, tutti verdi; **93** in `@ls/web`, verdi
+- `pnpm run build` → verde
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 (sessione `63`
+  pre-allocata con la procedura di `docs/state/_index.md`)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 63-1 | **Un blocco dichiarato dalla spec può essere una scelta di sequencing, non un blocco di codice.** La D-A.1 diceva "la 2.1 aspetta la 4.1" per non consegnare una story che non produce nulla. Il codice del mood tracker, però, era già interamente specificato (`04§3`): ciò che mancava era il **riempimento** della tabella `features`, non la lettura. Separare le due cose (D.63.1) rende le due story parallele invece che sequenziali — e il rischio del "falso verde" si neutralizza da solo: senza feature il motore **non produce niente**, ed è un comportamento testato, non un'omissione |
+| 63-2 | **Il contratto fra due moduli va codificato dove può valere per entrambi.** Il filtro per sorgente (`21§12`) è una regola fra la pipeline e l'analisi: metterla dentro il motore del mood l'avrebbe resa una peculiarità di un solo generatore, e il generatore successivo (l'era detector) avrebbe potuto leggerla diversamente. In `analysis/mood/features.ts` il filtro è una funzione riutilizzabile |
+| 63-3 | **Una spec APPROVED può avere un errore aritmetico: il codice giusto e la segnalazione giusta.** L'esempio di `04§3.5` dà 0.585/0.675 dove il calcolo dà 0.570/0.667. Il codice implementa la **formula** (la conclusione dell'esempio è giusta) e la difformità va **segnalata** in un'issue: `04` è APPROVED, correggerlo è un atto del Boss, non dell'agente |
+| 63-4 | **Le feature sintetiche dei test sono un trucco, non un falso green — se sono dichiarate.** I fixture di scenario dichiarano il mood dominante atteso (`_metadata.expectedInsights`); le feature che lo rendono osservabile sono sintetiche e deterministiche, generate dal profilo dello scenario. Il test verifica il calcolo del motore, non la pipeline di arricchimento (che è un'altra story) |
+
+## Documenti aggiornati
+
+- `packages/core/src/analysis/mood/` — **nuovo**: `types.ts` (config e
+  periodi), `classify.ts` (la mappa dei sei quadranti e la media ponderata),
+  `period.ts` (confini UTC di giorno, settimana e mese), `features.ts` (il
+  filtro per sorgente), `derivedVersion.ts`, `engine.ts`, `index.ts`
+- `packages/core/src/analysis/datetime.ts` — **nuovo**: il vocabolario
+  temporale condiviso (spostato da `analysis/memory/datetime.ts`, che lo
+  riusa)
+- `packages/core/src/analysis/pipeline.ts` — `AnalysisInput.features` (opzionale)
+  e il plug-in `createMoodGenerator`
+- `packages/core/src/analysis/index.ts`, `packages/core/src/index.ts` — gli
+  export del modulo mood
+- `packages/core/src/db/insights.ts` — `replaceInsightsOfType` (ricalcolo
+  batch) · `packages/core/src/db/index.ts` — il suo export
+- `packages/core/src/analysis/__tests__/` — `mood-engine.test.ts`,
+  `mood-periods.test.ts`, `mood-persistence.test.ts`, `mood-scenarios.test.ts`
+  e gli helper (`syntheticFeaturesFor`, `moodPayloadOf`)
+- `docs/state/stories/2.1-mood-tracker.md` — `status: in_review`, branch, AC
+  verificati, scelte di implementazione
+- `docs/state/sessions/63-story-2-1-mood-tracker.md` — **nuovo**
+- `docs/11-BACKLOG.md` — sezione Story 2.1 (`**Stato**:` e AC), lista di
+  priorità degli agenti, changelog v1.6.23
+- `docs/18-DEV-LOG.md` — §29 + changelog
+- `docs/INDEX.md` — la riga di `04`, la riga di `11-BACKLOG.md` e il
+  "Prossimo passo tecnico"
+- `scripts/generate-bundle.ps1` — `$files`: la sessione 63
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#180** — la Story 2.1 (claim `kilo-HP-ELITEBOOK-cbd0dc`, PR #192)
+- **#188** — la Story 4.1 (pipeline audio features): **ancora da fare**, è
+  ciò che popola la tabella `features` (`agent-ready`, `size:L`)
+- **#187** — la spec dell'EPIC 4.1 ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢),
+  da cui viene il contratto `getAudioFeatures` filtrato per sorgente (§12)
+- **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢, D-A.1…D-A.5)
+
+## Stato al termine della sessione
+
+Il motore del mood tracker è consegnato e testato; la PR è in attesa di
+review. Il percorso dati completo (feature vere nella tabella `features`)
+resta alla Story 4.1 (#188): fino a quel momento il mood tracker produce
+**nulla** in un'installazione reale, ed è il comportamento dichiarato e
+testato, non un difetto.
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -11641,19 +11831,19 @@ id: "2.1"
 title: "Mood Tracker giornaliero"
 phase: 2
 area: analysis
-status: blocked
+status: in_review
 priority: B
 depends_on: ["0.2", "4.1"]
 issue: 180
-branch: ""
-pr: 0
+branch: "feat/180-mood-tracker"
+pr: 192
 merged_commit: ""
 merged_date: ""
-claim: ""
+claim: kilo-HP-ELITEBOOK-cbd0dc
 spec_refs:
   - docs/04-ANALYSIS-ALGORITHMS.md
+  - docs/21-AUDIO-FEATURES.md
   - docs/02-DATA-SCHEMA.md
-  - docs/08-COPY-I18N.md
 ---
 
 ## Descrizione
@@ -11663,50 +11853,85 @@ valence e dall'energy media degli ascolti, e lo persiste come `Insight` di tipo
 `mood_day` / `mood_week` / `mood_month`.
 
 La formula è specificata in `docs/04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED**
-(§3): il mood è il risultato di una mappa valence×energy su 5 quadranti
-(`happy`, `sad`, `excited`, `calm`, `neutral`), con soglie e pesi configurabili
-(§3.4) e la versione degli insight calcolata dai parametri (§9).
+(§3): il mood è il risultato di una mappa valence×energy su 6 quadranti
+(`sad`, `angry`, `neutral`, `calm`, `happy`, `excited`), con soglie e pesi
+configurabili (§3.4) e la versione degli insight calcolata dai parametri (§9).
 
 ## Stato
 
-⛔ **bloccata** — dalle **audio features** dell'**EPIC 4.1**, che non sono
-implementate. `04§3.3` legge `getAudioFeatures(e.trackId)` e restituisce `null`
-sotto i 3 eventi con valence: senza feature il mood tracker non produce **alcun**
-insight. È la decisione **D-A.1**, chiusa alla ratifica della spec (issue #178,
-2026-10-28).
+👀 **IN REVIEW** — implementata nella Sessione 63 (issue #180, PR #192,
+branch `feat/180-mood-tracker`).
 
-Consegnare la story così sarebbe un falso verde: sarebbe "completata" senza
-produrre nulla (lesson 58-4 della Sessione 58 — *un AC che mescola due story non
-si può spuntare*).
+La story era ⛔ **bloccata** dalle audio features dell'EPIC 4.1 (decisione
+**D-A.1**, `04§11`): `04§3.3` legge `getAudioFeatures(e.trackId)` e, senza
+valence/energy, il mood tracker non produceva alcun insight. Il **project
+owner** ha invertito l'ordine il 2026-10-29: il motore è consegnato
+**completo** e consuma le feature **già persistite** nella tabella `features`.
 
-**Issue**: #180 (`needs-spec`) — chiede la **spec dell'EPIC 4.1** (provider delle
-feature, privacy, stoccaggio, costi), che non appartiene a `04`.
+Ciò che resta alla **Story 4.1** (issue #188) è il **riempimento** della
+tabella: fino a quando la pipeline di arricchimento non scrive feature vere,
+il mood tracker non ha nulla su cui leggere e **non produce insight** — un
+comportamento dichiarato e testato, non un difetto (D.63.1). Il motore, in
+una volta reale, resta un lettore: nessun segnale viene inventato.
 
-Il codice resta **specificato** in `04§3`: quando l'EPIC 4.1 porterà le feature,
-la story si implementa senza altre decisioni.
+## Task
+
+- [x] T2.1.1 — Il motore (`packages/core/src/analysis/mood/`): periodi UTC di
+  giorno, settimana e mese, media ponderata per durata (`04§3.3`), mappa dei
+  sei quadranti (`04§3.2`), invarianti (`04§3.6`)
+- [x] T2.1.2 — Il contratto con le audio features: il motore vede **solo**
+  feature misurate o manuali (`21-AUDIO-FEATURES.md` §12, D-AF.4); l'euristico
+  è una stima e non alimenta l'analisi
+- [x] T2.1.3 — La persistenza: insight di tipo `mood_day` / `mood_week` /
+  `mood_month` con `derivedVersion` calcolata dai parametri (`04§9`) e
+  ricalcolo batch che rimuove gli insight `stale` (MIG-3, `02§7`)
+- [x] T2.1.4 — Il plug-in dell'orchestratore (`createMoodGenerator`), senza
+  modificare il contratto della pipeline (D-A.5, `04§8.1`)
+- [x] T2.1.5 — I test: classificazione, confini dei periodi, persistenza e
+  **fixture di scenario** con esito noto (`10-TESTING.md` §3.3)
 
 ## Acceptance criteria
 
 - [x] Formula specificata in `04-ANALYSIS-ALGORITHMS.md` (Sessione 4; **ratificata** in v1.0 🟢 il 2026-10-28, §3.2-§3.6)
-- [ ] Insight tipo `mood_day` persistito con `derivedVersion`
-- [ ] Test su fixture con scenario noto
+- [x] Insight tipo `mood_day` persistito con `derivedVersion`
+- [x] Test su fixture con scenario noto
 
-## Cosa sblocca la story
+## Scelte di implementazione
 
-1. L'**EPIC 4.1** (audio features: valence, energy, danceability, BPM) con la sua
-   spec: il provider (Essentia.js), il costo di bundle, la privacy delle feature
-   e il loro stoccaggio sono decisioni che non appartengono a `04`
-2. Una volta disponibili le feature, l'implementazione non richiede altre
-   decisioni
+Le decisioni della sessione (D.63.1…D.63.12) sono in
+`docs/state/sessions/63-story-2-1-mood-tracker.md`. In sintesi:
+
+- la 2.1 è implementata **prima** della 4.1 per assegnazione esplicita del
+  project owner (D.63.1): la catena diventa **4.1 (dati) → 2.1 (letture)**,
+  parallela;
+- il **filtro per sorgente** delle feature è un contratto fra due moduli e
+  vive nel layer di analisi, non dentro il motore (D.63.2);
+- `weekStartDay` (lunedì) è un parametro **versionato**: `04§3.3` non dice da
+  quando comincia la settimana (D.63.3);
+- il fallback **mood-by-genre** di `04§1.4` **non** è implementato: la mappa
+  genere→valence/energy non è ratificata in nessun documento e inventarla
+  sarebbe il segnale inventato che D-A.1 esclude (D.63.4, issue `needs-spec`
+  aperta);
+- un ascolto è utilizzabile solo se ha **valence ed energy** (entrambi
+  nullable in `02§3.4`): senza, la media produrrebbe `NaN` (D.63.5);
+- `Insight.confidence` è la **copertura dei dati** (quota di ascolti con
+  feature utilizzabili): il payload `02§4` è chiuso e non ha un campo score
+  (D.63.8);
+- l'id dell'insight è **deterministico** (`mood-<period>-<chiave>`): il
+  ricalcolo è idempotente (D.63.9).
 
 ## Documenti collegati
 
 - `docs/04-ANALYSIS-ALGORITHMS.md` §3 (Mood Tracker) · §11 (decisione D-A.1) ·
   §12 (perimetro e dipendenze)
+- `docs/21-AUDIO-FEATURES.md` §12 (il contratto `getAudioFeatures` filtrato per
+  sorgente) · §3 (D-AF.4)
 - `docs/02-DATA-SCHEMA.md` §4 (`MoodPeriodPayload`, `Insight.derivedVersion`) ·
-  §6 (tabella `insights`)
+  §6 (tabella `insights`) · §7 (MIG-3)
 - `docs/08-COPY-I18N.md` §2.15 — i template `mood.*`
+- `docs/10-TESTING.md` §3.3 — i fixture di scenario
 - `docs/11-BACKLOG.md` §Story 2.1
+- `docs/state/sessions/63-story-2-1-mood-tracker.md`
 
 
 
@@ -18389,7 +18614,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.22 · Sessione 62 (2026-10-28, issue #187) · la **spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, PR #190 `b1dd83e`): le nove decisioni D-AF.1…D-AF.9 sono chiuse, gli AC della Story 4.1 sono riscritti (`21§16`) e l'issue di implementazione **#188** è `agent-ready` → la catena 4.1 → 2.1 → 2.2/2.3 riparte dalla Story 4.1
+> Status: 🟢 APPROVED · Versione 1.6.23 · Sessione 63 (2026-10-29, issue #180) · la **Story 2.1 (Mood Tracker) è implementata** (PR #192): il motore calcola il mood di giorno, settimana e mese dalle audio features persistite e lo persiste come insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion`. L'ordine è stato invertito dal project owner: la catena è ora **4.1 (dati) → 2.1 (letture)**, parallela — il percorso dati resta alla Story 4.1 (#188), la cui spec è ratificata (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, PR #190 `b1dd83e`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -18741,12 +18966,12 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.1 — Mood Tracker giornaliero `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
 
-**Stato**: ⛔ **bloccata** dalle **audio features** (EPIC 4.1, non implementate): `04§3.3` legge `getAudioFeatures(e.trackId)` e senza valence/energy non produce alcun insight (decisione **D-A.1**, issue #178, ratifica del 2026-10-28). Il codice è specificato in `04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED** (§3): quando l'EPIC 4.1 porterà le feature, la story si implementa senza altre decisioni.
+**Stato**: 👀 **IN REVIEW — implementata nella Sessione 63** (issue #180, PR #192, branch `feat/180-mood-tracker`). La story era ⛔ bloccata dalle audio features (EPIC 4.1, decisione **D-A.1**, ratifica del 2026-10-28): il **project owner** ha invertito l'ordine il 2026-10-29 ("prendi in carico la issue 180"). Consegnato: il motore in `packages/core/src/analysis/mood/` (periodi UTC di giorno, settimana e mese; media ponderata per durata; mappa dei sei quadranti; invarianti `04§3.6`), il **filtro per sorgente** delle feature (`21-AUDIO-FEATURES.md` §12, D-AF.4: il motore vede solo feature misurate o manuali), la persistenza degli insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion` (`04§9`) e il ricalcolo batch che rimuove gli insight `stale` (MIG-3), il plug-in `createMoodGenerator` dell'orchestratore (`04§8.1`) e **51 test** (classificazione, periodi, persistenza, fixture di scenario). **Il percorso dati resta alla Story 4.1 (issue #188)**: senza feature vere nella tabella `features` il motore non produce nulla — comportamento dichiarato e testato, nessun segnale inventato (D-A.1). Dettagli e scelte: `docs/state/stories/2.1-mood-tracker.md`.
 
 **Acceptance criteria**:
 - [x] Formula specificata in `04-ANALYSIS-ALGORITHMS.md` (Sessione 4; **ratificata** in v1.0 🟢 il 2026-10-28, §3.2-§3.6)
-- [ ] Insight tipo `mood_day` persistito con `derivedVersion`
-- [ ] Test su fixture con scenario noto
+- [x] Insight tipo `mood_day` persistito con `derivedVersion`
+- [x] Test su fixture con scenario noto
 
 ---
 
@@ -18928,9 +19153,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
 9. **1.4** Dedup promozione
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
-11. **4.1** pipeline audio features (issue #188, `agent-ready`) — la **spec è ratificata** (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). **Prima di ogni altra story dell'EPIC 2**: senza le audio features non c'è valence/energy, e quindi la **2.1** (mood tracker) non produce insight (D-A.1), la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare. Il backlog dichiara 2.2 e 2.3 dipendenti dalla 2.1 (`[DEP:2.1]`): la catena è 4.1 → 2.1 → 2.2/2.3
-12. **2.1** mood tracker — dopo la 4.1 **implementata** (la spec ratificata sblocca la 2.1 solo quando le feature esistono: l'issue #180 resta `needs-spec` fino al merge della 4.1)
-13. **2.2, 2.3** analisi avanzata — dopo la 2.1
+11. **4.1** pipeline audio features (issue #188, `agent-ready`) — la **spec è ratificata** (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). È il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: senza le audio features non c'è valence/energy, e quindi la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
+12. **2.1** mood tracker — **implementata** (Sessione 63, issue #180, PR #192): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** resta alla 4.1: la catena è 4.1 (dati) → 2.1 (letture), e le due story sono implementabili **in parallelo**
+13. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`)
 14. **3.1, 3.2, 3.3** UI
 15. **5.1, 5.2** privacy
 16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
@@ -19008,6 +19233,7 @@ Ogni story deve avere label GitHub:
 | 1.6.20 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 implementata** (Memory Engine, PR #185): il pacchetto `packages/core/src/analysis/` è nato — i **5 generatori** (`on_this_day`, `first_time`, `milestone`, `return`, `seasonal`), il **ranking** `baseScore × relevance × recency` (`04§7.4`), la **persistenza** degli insight `memory` con `derivedVersion` calcolata dai parametri (`04§9`) e l'insight vecchio `stale` al cambio dei parametri (MIG-3), l'**orchestratore minimale** (`04§8.1`, D-A.5) e il **testo reso** dal resolver i18n (D-A.4: nessuna stringa italiana nel core, i template `insight.memory.*` vivono nei locale `it`/`en` dell'app). La sezione Story 2.4 passa a 👀 **IN REVIEW** e il suo terzo AC è verificato. **27 test** nuovi in `@ls/core` + **5** in `@ls/web`. Scelte dichiarate (D.61.1…D.61.7): il config object versiona **anche** `milestoneHours` e `milestoneArtists` (le tre famiglie di milestone del trigger `04§7.2`), `on_this_day` confronta anno+mese+giorno, la rilevanza ordinata vive in `Insight.confidence` (il payload `02§4` è chiuso), l'id dell'insight è deterministico (ricalcolo idempotente), il confine del giorno è UTC. La lista di priorità degli agenti mette la **spec dell'EPIC 4.1** prima della 2.1: senza le audio features il mood tracker non produce insight (D-A.1) |
 | 1.6.21 | Sessione 61 (2026-10-28, issue #179) | **Story 2.4 completata** (Memory Engine, PR #185, merge `40ad0b7`): la sezione Story passa a ✅ DONE. Il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata" — **risposta corretta**, non una regressione: la 2.1 resta bloccata dalle audio features dell'EPIC 4.1 (D-A.1) e 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`), quindi **non esiste** una story implementabile finché l'EPIC 4.1 non è specificata (issue #180). Per questo la lista di priorità degli agenti mette la **spec dell'EPIC 4.1 al primo posto** e dichiara la catena 4.1 → 2.1 → 2.2/2.3: il puntatore è tornato veritiero invece di indicare un vicolo cieco (lesson della issue #182). Non si è creato uno state file per la 2.2: il blocco avrebbe indicato una story bloccata a monte — lo stesso difetto che la issue #182 ha chiuso |
 | 1.6.22 | Sessione 62 (2026-10-28, issue #187) | **Spec dell'EPIC 4.1 ratificata**: `docs/21-AUDIO-FEATURES.md` passa da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0** (ratificata dalla PR #190 `b1dd83e`, 2026-10-29T16:09:16Z): le **nove decisioni** (D-AF.1…D-AF.9) sono chiuse come proposte e ratificate — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), la licenza dell'app passa ad **AGPL-3.0** per `essentia.js` (D-AF.2: atto del Boss sul file `LICENSE`, non applicato qui), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice vive in `packages/core/src/enrichment/` **senza React** (D-AF.5), il rate limit di AcousticBrainz è **letto dagli header** (D-AF.6), trigger e budget restano quelli di `05§6.1` (D-AF.7), il `source` delle feature derivate resta `acousticbrainz` (D-AF.8) e la CSP ha **due host in più** (D-AF.9). La sezione **Story 4.1** passa a **implementabile**: `**Stato**:` 🟢, i **4 AC** originali (di cui uno ambiguo) sostituiti dagli **11 AC** riscritti di `21§16`, `**Spec**:` aggiornata. Issue di implementazione **#188**: `needs-spec` → **`agent-ready`**. Allineati i documenti che la spec tocca: `05` (v1.4), `09` (v0.6), `10` (v1.1), `12` (v1.0), `14` (v1.1), `08` (v0.8: il namespace `enrichment.*` in §2.17) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). La **lista di priorità** degli agenti mette la **4.1** al primo posto dell'EPIC 2 e la 2.1 dopo la 4.1 *implementata*: la catena 4.1 → 2.1 → 2.2/2.3 riparte |
+| 1.6.23 | Sessione 63 (2026-10-29, issue #180) | **Story 2.1 implementata** (Mood Tracker, PR #192): il motore in `packages/core/src/analysis/mood/` calcola il mood dominante di giorno, settimana e mese dalla valence/energy media ponderata per durata (`04§3.2`…`04§3.6`) e lo persiste come insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion` (`04§9`); il plug-in `createMoodGenerator` entra nell'orchestratore (`04§8.1`) e il ricalcolo batch (`replaceInsightsOfType`) rimuove gli insight `stale` (MIG-3). La sezione Story 2.1 passa da ⛔ bloccata a 👀 **IN REVIEW** e i suoi tre AC sono verificati. **L'ordine è stato invertito dal project owner** (2026-10-29): la D-A.1 diceva "la 2.1 aspetta la 4.1", ma il codice del mood tracker era già interamente specificato — a mancare era il **riempimento** della tabella `features`, che resta alla Story 4.1 (#188). Le due story sono quindi parallele: **4.1 (dati) → 2.1 (letture)**. Scelte dichiarate (D.63.1…D.63.12): il **filtro per sorgente** delle feature vive nel layer di analisi e lascia fuori l'euristico (`21§12`, D-AF.4), `weekStartDay` (lunedì) è un parametro **versionato**, il fallback **mood-by-genre** di `04§1.4` **non** è implementato (la mappa non è ratificata: inventarla sarebbe il segnale inventato che D-A.1 esclude), un ascolto è utilizzabile solo se ha **valence ed energy**, `Insight.confidence` è la **copertura dei dati** (il payload `02§4` è chiuso) e l'id dell'insight è **deterministico**. **51 test** nuovi in `@ls/core` (classificazione, periodi, persistenza, fixture di scenario). La **lista di priorità** degli agenti mette la 2.1 come **implementata** |
 
 
 

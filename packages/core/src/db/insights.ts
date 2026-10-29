@@ -118,3 +118,53 @@ export async function replaceInsights(
     };
   });
 }
+
+/** Opzioni di `replaceInsightsOfType`. */
+export interface ReplaceInsightsOfTypeOptions {
+  /** Tipo degli insight da sostituire. */
+  readonly type: InsightType;
+  /** Insight appena calcolati (uno o più periodi). */
+  readonly insights: Insight[];
+  /** `derivedVersion` corrente dei parametri. */
+  readonly derivedVersion: string;
+}
+
+/**
+ * Sostituisce gli insight di un tipo per **tutti i periodi ricalcolati**, e
+ * rimuove quelli `stale` (MIG-3).
+ *
+ * È la variante **per batch** di `replaceInsights`: il mood tracker (04§3)
+ * calcola il mood di tutti i periodi coperti dagli ascolti (giorni,
+ * settimane, mesi) in una passata, e chiamare `replaceInsights` una volta per
+ * periodo aprirebbe una transazione per ogni giorno.
+ *
+ * Restano intatti gli insight degli altri periodi dello stesso tipo: un
+ * calcolo incrementale (04§1.2) che ricalcola solo la settimana corrente non
+ * deve cancellare le settimane passate.
+ */
+export async function replaceInsightsOfType(
+  db: LifeSoundtrackDB,
+  options: ReplaceInsightsOfTypeOptions,
+): Promise<ReplaceInsightsReport> {
+  return db.transaction('rw', [db.insights], async () => {
+    const existing = await db.insights.where('type').equals(options.type).toArray();
+    const recalculated = new Set(options.insights.map((insight) => insight.periodStart));
+    const stale = existing.filter((insight) => insight.derivedVersion !== options.derivedVersion);
+    const superseded = existing.filter(
+      (insight) =>
+        insight.derivedVersion === options.derivedVersion && recalculated.has(insight.periodStart),
+    );
+    const removed = [...stale, ...superseded];
+    if (removed.length > 0) {
+      await db.insights.bulkDelete(removed.map((insight) => insight.id));
+    }
+    if (options.insights.length > 0) {
+      await db.insights.bulkPut(options.insights);
+    }
+    return {
+      inserted: options.insights.length,
+      removedStale: stale.length,
+      removedSuperseded: superseded.length,
+    };
+  });
+}
