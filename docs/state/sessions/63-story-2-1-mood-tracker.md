@@ -7,7 +7,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: feat/180-mood-tracker
-pr: 0
+pr: 192
 claim: kilo-HP-ELITEBOOK-cbd0dc
 cross_refs: [180, 188, 187, 178]
 tags: [analysis, phase-2]
@@ -138,7 +138,7 @@ richiede di scegliere.
 
 ## Cross-refs
 
-- **#180** — la Story 2.1 (claim `kilo-HP-ELITEBOOK-cbd0dc`, PR #191)
+- **#180** — la Story 2.1 (claim `kilo-HP-ELITEBOOK-cbd0dc`, PR #192)
 - **#188** — la Story 4.1 (pipeline audio features): **ancora da fare**, è
   ciò che popola la tabella `features` (`agent-ready`, `size:L`)
 - **#187** — la spec dell'EPIC 4.1 ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢),
