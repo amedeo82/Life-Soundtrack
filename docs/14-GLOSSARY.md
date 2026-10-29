@@ -1,6 +1,6 @@
 # 14 — Glossario di Dominio
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 1
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 62 (2026-10-28, issue #187)
 > Definizioni univoche. In caso di conflitto tra un documento e questo glossario, vale questo glossario (finché non viene aggiornato).
 
 ## Termini di dominio
@@ -18,6 +18,7 @@
 | **Valence** | Punteggio 0..1 di positività emotiva percepita del brano |
 | **Energy** | Punteggio 0..1 di intensità/attivazione del brano |
 | **Danceability** | Punteggio 0..1 di attitudine al ballo del brano |
+| **Audio features** | Caratteristiche musicali di un brano (valence, energy, danceability, BPM, tonalità…): **misurate** (calcolate dal segnale audio), **derivate** (ricavate da altri predittori, es. le classi `mood_*` di AcousticBrainz) o **stimate** (euristica dai soli metadata). Solo le misurate e le derivate alimentano il mood tracker (`21-AUDIO-FEATURES.md` §12) |
 
 ## Identificatori
 
@@ -59,3 +60,4 @@
 |----------|------|-----------|
 | 0.1 | Sessione 1 | Prima versione |
 | 1.0 | Sessione 1 | 🟢 APPROVED · Versione 1.0 · Sessione 1 |
+| 1.1 | 2026-10-28 (issue #187) | **§"Termini di dominio" — voce `Audio features`**: la ratifica della spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED) introduce la distinzione che il glossario non aveva: una feature è **misurata** (calcolata dal segnale audio), **derivata** (ricavata da altri predittori, es. le classi `mood_*` di AcousticBrainz) o **stimata** (euristica dai soli metadata). Solo le misurate e le derivate alimentano il mood tracker (`21§12`, D-AF.4): il fallback euristico copre il catalogo per la UI, ma è un segnale inventato e non entra nell'analisi. Header allineato (era fermo a v1.0 dalla Sessione 1) |

@@ -1,10 +1,11 @@
 # 21 — Pipeline audio features (provider, privacy, stoccaggio, costi)
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 62 (2026-10-28)
-> Issue: #187 (questa spec) · #188 (implementazione della Story 4.1) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 62 (2026-10-28)
+> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
 > Spec collegata a: `04-ANALYSIS-ALGORITHMS.md` §3, §11, §12 · `05-ARCHITECTURE.md` §6, §6.1, §6.2, §9, §10 · `02-DATA-SCHEMA.md` §3.4, §3.8, §6 · `09-PRIVACY-SECURITY.md` §3, §4, §7.4, §10 · `10-TESTING.md` §2, §7, §8 · `12-DEVOPS.md` §2.1
 > Precedente di struttura: `20-SCROBBLING-HUB.md` (una spec di protocollo, non un adapter)
-> Decisioni aperte: **D-AF.1 … D-AF.9**, da chiudere come proposte alla ratifica (§3)
+> **Ratificata in**: `05-ARCHITECTURE.md` §6, §8, §9 (v1.4) · `10-TESTING.md` §8 (v1.1) · `14-GLOSSARY.md` (v1.1) · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (v0.6) · `12-DEVOPS.md` §2.1 (v1.0) · `08-COPY-I18N.md` §2.17 (v0.8) — le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e ratificate **al merge della PR di ratifica** (Sessione 62, issue #187)
+> Decisioni ratificate: **D-AF.1 … D-AF.9** (§3)
 
 ---
 
@@ -186,16 +187,19 @@ UI, prima del download (consenso informato, §10).
 
 ---
 
-## 3. Le decisioni da chiudere alla ratifica
+## 3. Le decisioni ratificate
 
 Il precedente di `20-SCROBBLING-HUB.md` chiude le decisioni "come proposte"
 nella spec e le ratifica con il merge. Le nove decisioni qui sotto seguono lo
-stesso statuto: **proposte**, da ratificare con il merge della PR.
+stesso statuto: **chiuse come proposte** nella v0.1 🟡 DRAFT, **ratificate**
+al merge della **PR di ratifica** (issue #187, Sessione 62), che promuove la spec
+a **v1.0 🟢 APPROVED** (la v0.1 🟡 DRAFT era stata merged dalla PR #189,
+`87d4d7d`, 2026-10-28T17:02:41Z).
 
-| # | Decisione | Scelta proposta | Motivazione |
-|---|-----------|-----------------|-------------|
+| # | Decisione | Scelta ratificata | Motivazione |
+|---|-----------|-------------------|-------------|
 | **D-AF.1** | **Da dove arriva l'audio** per il provider acustico | Il **preview di 30 s dell'iTunes Search API** (`previewUrl`), scaricato e decodificato in memoria | È l'unica fonte gratuita, senza autenticazione e senza account a pagamento (§2.1). Il percorso alternativo (file forniti dall'utente) è un progetto separato |
-| **D-AF.2** | **Il regime di licenza** dell'app | L'app passa da **Apache-2.0 a AGPL-3.0** | `essentia.js` è AGPL-3.0 e il bundle è distribuito ai browser (§2.4). Rinunciare a Essentia (opzione b) lascia la cascata senza provider acustico e la 2.1 senza feature reali |
+| **D-AF.2** | **Il regime di licenza** dell'app | L'app passa da **Apache-2.0 a AGPL-3.0** | `essentia.js` è AGPL-3.0 e il bundle è distribuito ai browser (§2.4). Rinunciare a Essentia (opzione b) lascia la cascata senza provider acustico e la 2.1 senza feature reali. **La modifica del file `LICENSE` è un atto del Boss**: questa spec non la applica |
 | **D-AF.3** | **Il modello per valence/energy** | **DEAM** (`deam-msd-musicnn-2`, 1.802 brani, CCC 0,647 su valence) | Il dataset più ampio e la correlazione migliore fra i tre disponibili (emoMusic: 1.000 brani, CCC 0,622). `energy` = `arousal` normalizzato |
 | **D-AF.4** | **Il fallback euristico e D-A.1** | L'euristico **non alimenta il mood tracker**: il layer di analisi legge solo `source ∈ {essentia, acousticbrainz, manual}`. L'euristico serve la UI (copertura 100%) ed è etichettato come stima | `04§11` (D-A.1) esclude i segnali inventati dalle letture di umore. `05§6` lo mette in cascata per la copertura, non per l'analisi: le due cose non si contraddicono se il consumo è separato |
 | **D-AF.5** | **Dove vive il codice** | `packages/core/src/enrichment/` **senza React**: il core espone porte e orchestratore puri; `apps/web` fornisce l'implementazione HTTP e lo stato per la UI | `05§9.2` dichiara `@ls/core` foglia runtime-agnostic ( gira anche nel Worker) e `05§9` colloca lì un modulo annotato "React Query": le due cose non possono stare insieme. React Query resta nel web, per la UI |
@@ -206,7 +210,7 @@ stesso statuto: **proposte**, da ratificare con il merge della PR.
 
 **Punti che restano al di sopra di questa spec** (non sono decisioni
 implementabili): la **politica editoriale** dei testi pubblici (non in questa
-spec) e la **ratifica** delle nove decisioni.
+spec) e l'esecuzione materiale del cambio di licenza (D-AF.2).
 
 ---
 
@@ -755,8 +759,8 @@ Stati della pipeline (per brano e aggregati):
   `fatto (stima)` · `nessun audio disponibile` · `non arricchito (toggle spento)` ·
   `errore (dettaglio in Settings)`.
 
-Le chiavi i18n (namespace `enrichment.*`, da aggiungere a `08§2.16` e ai
-locale `it`/`en`):
+Le chiavi i18n (namespace `enrichment.*`, dichiarate in `08§2.17` e da
+materializzare nei locale `it`/`en`):
 
 | Chiave | Uso |
 |--------|-----|
@@ -884,8 +888,8 @@ versione riscritta, verificabile:
 | T4.1.8 | La coda e i trigger (on-import, on-demand, scheduled) | `packages/core/src/enrichment/queue.ts` |
 | T4.1.9 | I mock e i fixture delle API esterne | `fixtures/api-mocks/` |
 | T4.1.10 | I test (unit, integrazione, property-based, scenario) | `packages/core/src/enrichment/__tests__/` |
-| T4.1.11 | La CSP allineata | `docs/12-DEVOPS.md` §2.1 |
-| T4.1.12 | L'inventario privacy e i testi pubblici | `docs/09-PRIVACY-SECURITY.md` §3.1, §3.3, §4; `docs/08-COPY-I18N.md` §2.16 + locale |
+| T4.1.11 | La CSP allineata — la **policy** è già dichiarata in `docs/12-DEVOPS.md` §2.1 (v1.0): resta l'applicazione al bundle | `apps/web` (config CSP / header) + check in CI |
+| T4.1.12 | L'inventario privacy e i testi pubblici — i **documenti** sono già allineati (`09` v0.6, `08` §2.17 v0.8): resta la materializzazione nei locale | `docs/08-COPY-I18N.md` §2.17 + locale `it`/`en` |
 | T4.1.13 | La verifica del bundle (il WASM non è nel bundle iniziale) | `apps/web/vite.config.ts` (config manualChunks) + check in CI |
 
 ---
@@ -894,16 +898,26 @@ versione riscritta, verificabile:
 
 | Documento | Cosa cambia | Quando |
 |-----------|-------------|--------|
-| `docs/05-ARCHITECTURE.md` §6 | Le premesse (§2) e la fonte dell'audio: il testo dichiara "preview dal catalogo" senza dire quale | Alla ratifica, se il Boss approva D-AF.1 |
-| `docs/05-ARCHITECTURE.md` §9 | Il modulo `enrichment` è in `core` **senza React** (D-AF.5): la dicitura "React Query per MB/Last.fm" va corretta | Alla ratifica |
+| `docs/05-ARCHITECTURE.md` §6 | Le premesse (§2) e la fonte dell'audio: il testo dichiara "preview dal catalogo" senza dire quale | **Alla ratifica** (v1.4, D-AF.1) |
+| `docs/05-ARCHITECTURE.md` §9 | Il modulo `enrichment` è in `core` **senza React** (D-AF.5): la dicitura "React Query per MB/Last.fm" va corretta | **Alla ratifica** (v1.4) |
 | `docs/02-DATA-SCHEMA.md` §3.4 | Nessuna modifica (APPROVED): il tipo resta com'è. La distinzione "misurata / derivata / stimata" resta nella spec | — |
-| `docs/09-PRIVACY-SECURITY.md` §3.1, §3.3, §4 | Le righe mancanti dell'inventario, la riga "cosa esce" riscritta, la rimozione di FreqBlog dal diagramma | Nell'implementazione (T4.1.12) |
-| `docs/12-DEVOPS.md` §2.1 | La CSP con i due host nuovi | Nell'implementazione (T4.1.11) |
-| `docs/10-TESTING.md` §8 | La riga "FreqBlog / Musicae" (provider inesistenti) va sostituita con i due mock reali; la directory `fixtures/api-mocks/` viene creata | Nell'implementazione (T4.1.9) |
-| `docs/08-COPY-I18N.md` §2.16 | Il namespace `enrichment.*` con le 8 chiavi | Nell'implementazione (T4.1.12) |
-| `docs/14-GLOSSARY.md` | "Valence" e "Danceability" ci sono; manca **Energy** e manca la distinzione misurata/derivata/stimata | Alla ratifica |
-| `docs/11-BACKLOG.md` Story 4.1 | Gli AC riscritti (§16) e la riga `**Stato**:` | Alla ratifica |
+| `docs/09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 | Le righe mancanti dell'inventario, la riga "cosa esce" riscritta, la rimozione di FreqBlog dal diagramma e i testi pubblici | **Alla ratifica** (v0.6): l'inventario non può descrivere un provider inesistente — i fixture e la UI restano nell'implementazione (T4.1.12) |
+| `docs/12-DEVOPS.md` §2.1 | La CSP con i due host nuovi | **Alla ratifica** (v1.0): la policy dichiarata deve coincidere con la pipeline ratificata — l'applicazione della CSP al bundle resta nell'implementazione (T4.1.11) |
+| `docs/10-TESTING.md` §8 | La riga "FreqBlog / Musicae" (provider inesistenti) va sostituita con i due mock reali; la directory `fixtures/api-mocks/` viene creata | **Alla ratifica** (v1.1) per la riga dei mock; i **fixture** nell'implementazione (T4.1.9) |
+| `docs/08-COPY-I18N.md` §2.17 | Il namespace `enrichment.*` con le 8 chiavi | **Alla ratifica** (v0.8): i testi sono dichiarati vincolanti — la **materializzazione** nei locale `it`/`en` nell'implementazione (T4.1.12) |
+| `docs/14-GLOSSARY.md` | "Valence" e "Danceability" ci sono; manca **Energy** e manca la distinzione misurata/derivata/stimata | **Alla ratifica** (v1.1) |
+| `docs/11-BACKLOG.md` Story 4.1 | Gli AC riscritti (§16) e la riga `**Stato**:` | **Alla ratifica** (v1.6.22) |
 | `docs/04-ANALYSIS-ALGORITHMS.md` | **Nessuna modifica**: `04` è APPROVED e la semantica di `getAudioFeatures` è definita qui, in `§12` | — |
+
+> **Nota (Sessione 62)**: la v0.1 rimandava l'allineamento di `09`, `12`, `10` e
+> `08` all'implementazione. L'allineamento è avvenuto **alla ratifica**, per la
+> regola di `AGENTS.md` §"Chi può scrivere cosa nei file globali" — *se una
+> sezione dichiara un fatto che la PR cambia, va allineata nella stessa PR*:
+> dopo la ratifica, l'inventario privacy che nombra solo MusicBrainz, la CSP
+> che ammette solo MusicBrainz e la riga dei mock che nomina due provider mai
+> esistiti erano **falsi**. Nell'implementazione restano i **lati di codice**:
+> i fixture (`T4.1.9`), la CSP applicata al bundle (`T4.1.11`) e la
+> materializzazione dei locale (`T4.1.12`).
 
 ---
 
@@ -941,3 +955,4 @@ versione riscritta, verificabile:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-28 (Sessione 62, issue #187) | Prima stesura. Definisce il contratto `AudioFeatureProvider`, la cascata (`05§6`), la mappatura dei campi di `AudioFeatures` per ogni provider, la normalizzazione DEAM [1,9] → [0,1], la separazione fra feature misurate/derivate/stimate, il contratto con il layer di analisi (`getAudioFeatures` filtrato per sorgente), la privacy e la CSP, lo stoccaggio e l'invalidazione, i costi reali misurati (WASM ~2,7 MB + backbone ~3,2 MB + TFJS), i 14 casi di test minimi e gli AC riscritti della Story 4.1. Apre **9 decisioni** (D-AF.1…D-AF.9) da chiudere alla ratifica. Verificati in data: la morte di Spotify `audio_features` per le nuove app (27/11/2024, con restrizioni 2026), l'API di AcousticBrainz viva ma con sole classi `mood_*` (nessuna `valence`/`energy`), l'anteprima di 30 s dell'iTunes Search API senza autenticazione, la licenza AGPL-3.0 di `essentia.js` contro Apache-2.0 dell'app, il rate limit di AcousticBrainz letto dagli header (`Limit: 100`, `Reset-In: 2` il 28/10/2026) |
+| 1.0 | 2026-10-28 (Sessione 62, issue #187) | **Ratificata**: da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**. Le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e **ratificate al merge della PR di ratifica**. La stessa PR allinea i documenti che la spec tocca: `05§6`, `05§8` e `05§9` (v1.4), `10§8` (v1.1, la riga dei mock reali), `14-GLOSSARY.md` (v1.1, la voce **Audio features** con la distinzione *misurata / derivata / stimata*), `09§3.1`, `09§3.3`, `09§4`, `09§7.4` (v0.6, le righe mancanti dell'inventario e la rimozione di FreqBlog), `12§2.1` (v1.0, la CSP con i due host) e `08§2.17` (v0.8, il namespace `enrichment.*` con le 8 chiavi); `11-BACKLOG.md` Story 4.1 (v1.6.22, gli AC riscritti di §16 e la riga `**Stato**:`) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). **§18**: la colonna «Quando» è allineata alla realtà (l'allineamento dei documenti che la spec tocca è alla ratifica, non all'implementazione: vedi la nota sotto la tabella) e i deliverable `T4.1.11` e `T4.1.12` dichiarano il confine fra ciò che la ratifica fa (i documenti) e ciò che resta all'implementazione (i fixture, la CSP applicata al bundle, i locale). **Riferimenti corretti**: il namespace `enrichment.*` sta in `08§2.17` (la v0.1 indicava `08§2.16`, che è il namespace `scrobble.*` della Story 1.5). L'issue **#188** (implementazione della Story 4.1) passa da `needs-spec` a **`agent-ready`**: la spec è APPROVED e gli AC sono verificabili. **Il cambio di licenza (D-AF.2) non è applicato qui**: è un atto del Boss sul file `LICENSE` |

@@ -1,6 +1,6 @@
 # 09 — Privacy & Security
 
-> Status: 🟡 DRAFT · Versione 0.5 · Sessione 57 (2026-10-27)
+> Status: 🟡 DRAFT · Versione 0.6 · Sessione 62 (2026-10-28)
 > ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
 > (§7) DEVE essere revisionata da un professionista legale qualificato prima
 > del lancio pubblico. Questo documento non costituisce consulenza legale.
@@ -67,8 +67,13 @@ Definire:
     │                    RETE (opzionale)                         │
     │                                                             │
     │  [toggle enrichMetadata ON]                                 │
-    │     └─▶ MusicBrainz / FreqBlog: invia SOLO nome brano +     │
-    │         artista (nessun dato utente, nessun timestamp)      │
+    │     └─▶ MusicBrainz / iTunes Search / AcousticBrainz:       │
+    │        invia SOLO nome brano + artista (o il solo MBID)     │
+    │         (nessun dato utente, nessun timestamp)              │
+    │                                                             │
+    │         L'anteprima audio di 30 s di iTunes Search          │
+    │         viene SCARICATA e analizzata in locale:             │
+    │         l'audio non esce e non viene scritto su disco       │
     │                                                             │
     │  [scrobbleHubs configurato]                                 │
     │     └─▶ Last.fm / ListenBrainz: invia brano + timestamp     │
@@ -91,7 +96,9 @@ Definire:
 
 | Dato | Destinazione | Trigger | Contenuto inviato |
 |------|--------------|---------|-------------------|
-| Nome brano + artista | MusicBrainz / API audio features | `enrichMetadata` ON | Solo stringhe titolo/artista, nessun dato utente |
+| Nome brano + artista | MusicBrainz / iTunes Search API | `enrichMetadata` ON | Solo stringhe titolo/artista, nessun dato utente |
+| Recording MBID | AcousticBrainz | `enrichMetadata` ON | Solo l'identificatore della registrazione (non un dato utente) |
+| Anteprima audio 30 s | iTunes Search API | `enrichMetadata` ON | I **byte dell'audio** vengono scaricati e analizzati **in locale**: non escono e non vengono persistiti |
 | Brano + timestamp ascolto | Last.fm / ListenBrainz | `scrobbleHubs` configurato (consenso **per-hub**) | **Payload di scrobbling chiuso per costruzione** (`05§4.2` V8): `idempotencyKey`, `startedAt`, `durationMs` (opzionale), `recordingMbid` (opzionale), `isrc` (opzionale), `artistName`, `trackName`, `albumName` (opzionale). **Nessun** campo per contesto, device, IP o insight: non è una policy, è il *tipo* |
 | Ciphertext | Server sync (Fase 2) | `syncCloud` ON | Solo dati cifrati E2E |
 
@@ -104,6 +111,8 @@ Definire:
 | Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
 | Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale), `car` solo se `carDetectionConsent` | Consenso esplicito |
 | Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
+| **Audio features** (valence, energy, danceability, BPM, tonalità) | Dati derivati (potenzialmente sensibili) | Calcolo locale (Essentia.js) o dataset pubblico (AcousticBrainz) o stima euristica | Sì (locale, tabella `features`) | Consenso esplicito (toggle `enrichMetadata`) |
+| **Query di ricerca per l'arricchimento** (nome brano + artista) | Dati personali | Ricerca su servizi pubblici | **No** — solo nel log di rete, senza PII | Consenso esplicito (toggle `enrichMetadata`) |
 | Playlist e libreria | Dati personali | Export utente | Sì (locale) | Consenso esplicito |
 | Ricerche effettuate | Dati personali | Export Spotify | Sì (locale, opzionale) | Consenso esplicito |
 | Username ListenBrainz | Dati personali | Export ListenBrainz | **No** — letto da `user.json` e mai persistito | Consenso esplicito (art. 6.1.a) |
@@ -214,7 +223,9 @@ non come verità.
 Non condividiamo nulla con terze parti, tranne nei casi in cui sei TU ad
 attivarlo esplicitamente:
 - **Arricchimento metadati**: se attivi il toggle, inviamo il nome del brano
-  a servizi pubblici (MusicBrainz) per recuperare caratteristiche musicali.
+  a servizi pubblici (MusicBrainz, iTunes Search, AcousticBrainz) per recuperare
+  caratteristiche musicali. L'anteprima audio di 30 secondi che scarichiamo
+  viene analizzata **sul tuo dispositivo** e non viene conservata.
   Non inviamo nessun dato su di te.
 - **Scrobbling**: se colleghi Last.fm o ListenBrainz, i tuoi ascolti vengono
   inviati a quei servizi secondo le loro privacy policy.
@@ -327,8 +338,9 @@ email).
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
+| 0.1 | Sessione 6 | Prima versione completa |
 | 0.2 | 2026-10-21 (issue #109) | §4: la riga "Tipo dispositivo" dichiara che `car` viene persistito solo con `carDetectionConsent` attivo — il gate è applicato in scrittura dalla pipeline core (`applyCarConsent`), come già previsto da `02` §3.8 |
 | 0.3 | 2026-10-26 (issue #145) | §4: tre righe nuove per ListenBrainz (username mai persistito, User Token locale e mai nei log, `inserted_at` mai persistito). §7: nota sulla destinazione del User Token (storage locale, uso **solo in lettura** nella 1.3) |
 | 0.4 | 2026-10-26 (issue #144) | §4: cinque righe nuove per Last.fm (username, API key, shared secret, session key `sk`, URL del proxy) — tutte locali (Dexie), mai nel bundle, mai nei log. §7.2: nota sul **proxy** — è di fiducia dell'utente, vede la sua API key, e l'import da file ne evita l'esposizione |
-| 0.1 | Sessione 6 | Prima versione completa |
 | 0.5 | 2026-10-27 (issue #172) | **Story 1.5 — percorso di scrittura ratificato** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED, `05§4.2` ADR-0011 🟢 v1.0): §3.3 — la riga "Brano + timestamp ascolto" dichiara il **payload esatto** e il fatto che sia **chiuso per costruzione** (nessun campo per contesto, device, IP o insight: `retainIp` non è applicabile alla scrittura); §4 — tre righe nuove (payload di scrobbling, coda `scrobbleOutbox`, User Token e `sk` **in scrittura**) e una nota che chiarisce dove stanno i segreti (storage locale, mai nel payload né nei log) e cosa succede alla coda quando il consenso viene revocato. Header allineato (era fermo a v0.2 dal Sessione 6, mentre il changelog era già alla 0.4) |
+| 0.6 | 2026-10-28 (issue #187) | Allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): §3.1 il diagramma del flusso di rete non cita più **FreqBlog** (provider mai esistito, già rimosso da `02§3.4` e dalla CSP) ma i tre host reali (MusicBrainz, iTunes Search API, AcousticBrainz), e dichiara che l'anteprima audio di 30 s viene **analizzata in locale e non persiste**; §3.3 le tre righe di "cosa esce" (query per nome brano + artista, MBID, anteprima audio elaborata in locale); §4 le due righe mancanti dell'inventario (**audio features** e **query di ricerca** per l'arricchimento); §7.4 il testo pubblico della privacy policy aggiorna i servizi e dichiara il trattamento locale dell'anteprima. La riga **0.1** ("Prima versione completa") è stata riposizionata **in cima** alla tabella: era stata appesa fra la 0.4 e la 0.5 |

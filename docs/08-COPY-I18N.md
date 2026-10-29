@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.6 · Sessione 58 (2026-10-28)
+> Status: 🟡 DRAFT · Versione 0.8 · Sessione 62 (2026-10-28, issue #187)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -28,6 +28,7 @@
 | `common` | Bottoni e testi condivisi |
 | `insight` | Insight narrativi |
 | `scrobble` | Invio degli ascolti ai hub (Story 1.5 — spec `20-SCROBBLING-HUB.md` §13.2) |
+| `enrichment` | Stato della pipeline delle audio features (Story 4.1 — spec `21-AUDIO-FEATURES.md` §14) |
 
 ## 2. Stringhe UI
 
@@ -437,6 +438,36 @@ sono nel namespace `settings`, accanto alle altre chiavi del pannello Last.fm.
 | `settings.lastfm.authSaved` | Sessione autorizzata: la scrittura su Last.fm è abilitata | Session authorized: writing to Last.fm is enabled |
 | `settings.lastfm.authMissingToken` | Nell\'indirizzo incollato non c\'è un token: copia l\'intero indirizzo della pagina di reindirizzamento | There is no token in the pasted address: copy the whole redirect page address |
 
+### 2.17 `enrichment.*` (Story 4.1 — spec `21-AUDIO-FEATURES.md` §14)
+
+Namespace della pipeline delle **audio features**. Le **otto chiavi** sono
+**vincolanti** (spec ratificata in v1.0 🟢): la coppia chiave → stato della
+pipeline è decisa dalla spec, non dalla UI.
+
+| Key | IT | EN |
+|-----|----|----|
+| `enrichment.status.queued` | In coda | In the queue |
+| `enrichment.status.analyzing` | In analisi | Analyzing |
+| `enrichment.status.done` | Fatto ({source}) | Done ({source}) |
+| `enrichment.status.estimated` | Fatto, ma è una stima | Done, but it's an estimate |
+| `enrichment.status.no_audio` | Nessun audio disponibile | No audio available |
+| `enrichment.status.disabled` | Arricchimento spento | Enrichment is off |
+| `enrichment.download.size` | L'analisi acustica scarica ~6 MB, una volta sola. Vuoi continuare? | Acoustic analysis downloads ~6 MB, once. Do you want to continue? |
+| `enrichment.error.aggregate` | {count, plural, one {Un brano non è stato analizzato} other {# brani non sono stati analizzati}} | {count, plural, one {One track could not be analyzed} other {# tracks could not be analyzed}} |
+
+**Pluralizzazione**: `enrichment.error.aggregate` segue §3
+(`{count, plural, one {…} other {…}}`).
+
+**Parametri**: `{source}` = il nome della fonte della feature (`Essentia`,
+`AcousticBrainz`, `manuale`); `{count}` = il numero di brani non analizzati
+nell'avviso aggregato di `06§5`.
+
+**Il confine "stima ≠ misura"**: `enrichment.status.estimated` è l'unica chiave
+che può descrivere una feature **euristica**; le altre descrivono una feature
+**misurata** o **derivata**. Il testo dell'euristico non usa mai la parola
+"analizzato" (`21§12`, D-AF.4): la stima non è un'analisi, e la UI non deve
+farla sembrare tale.
+
 ## 3. Pluralizzazione
 
 Formato: `{count, plural, one {...} other {...}}`
@@ -498,3 +529,5 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.4 | Sessione 52 (2026-10-26, issue #155) | **Materializzazione** delle chiavi della Story 1.3: `adapter.listenbrainz.*` (§2.12c) e `adapter.lastfm.*` (§2.12d, 14 chiavi) sono ora nei locale `it`/`en` dell'app; aggiunta §2.12e `settings.lastfm.*` (11 chiavi) per il pannello di configurazione del proxy. I nomi delle chiavi nel materializzato sono **completti** (`adapter.listenbrainz.detect.success`): le tabelle delle sezioni omettono il prefisso `adapter.` come le altre (§2.12a/§2.12b) |
 | 0.5 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 — namespace `scrobble.*`**: §1 (tabella dei namespace) e **§2.16 (nuova)**, i **15 codici** della spec `20-SCROBBLING-HUB.md` §13.2 (ratificata in v1.0 🟢), con i testi IT ed EN. La coppia codice → caso d'uso è **vincolante**: la mappa `ScrobbleError` (`05§4.2`) decide quale codice compare in quale situazione. Nota sulla pluralizzazione delle quattro stringhe con `{count}` (§3). Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.4) |
 | 0.6 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 — UI del percorso di scrittura**: §2.12f (nuova) le chiavi di interfaccia del pannello scrobbling (`settings.scrobble.*`: selettore per-hub, modalità del proxy, vista della coda) e §2.12g (nuova) le chiavi del percorso **web auth** Last.fm (`settings.lastfm.auth*`). Il namespace `scrobble` di §2.16 (i 15 codici di errore e avviso) è stato **materializzato** nei locale `it`/`en` dell'app, con le varianti `_one`/`_other` per le quattro stringhe con `{count}` |
+| 0.7 | Sessione 59 (2026-10-28, issue #178) | **§2.15 `insight.*` — i template dei ricordi** (`memory.onThisDay`, `memory.firstTime`, `memory.milestone.*`, `memory.return`, `memory.seasonal`, `memory.disclaimer*`): la ratifica di `04-ANALYSIS-ALGORITHMS.md` (v1.0 🟢 APPROVED) li dichiara **vincolanti** (D-A.4). Riga di changelog mancante: la modifica c'era (Sessione 59) ma il header e la tabella erano rimasti a **v0.6** — il drift è stato corretto dalla Sessione 62 (issue #187) |
+| 0.8 | Sessione 62 (2026-10-28, issue #187) | **§2.17 `enrichment.*` (nuova) — Story 4.1**: le **otto chiavi** della pipeline audio features elencate da `21-AUDIO-FEATURES.md` §14, con i testi IT ed EN: gli stati della pipeline (`queued`, `analyzing`, `done`, `estimated`, `no_audio`, `disabled`), l'avviso **prima** del download del WASM (`download.size`, ~6 MB una volta sola) e l'avviso aggregato in Settings (`error.aggregate`, con pluralizzazione §3). §1: il namespace `enrichment` aggiunto alla tabella dei namespace. Il **confine "stima ≠ misura"** è dichiarato nei testi: `enrichment.status.estimated` è l'unica chiave che può descrivere una feature euristica e non usa mai la parola "analizzato" (`21§12`, D-AF.4). Header allineato (era fermo a **v0.6** dal Sessione 58, mentre il changelog era già alla 0.5 e `docs/INDEX.md` dichiarava v0.7) |

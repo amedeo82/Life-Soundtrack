@@ -1,8 +1,8 @@
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
-> Versione: 1.3
-> Ultima modifica: Sessione 56 (2026-10-27) — §4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)
+> Versione: 1.4
+> Ultima modifica: Sessione 62 (2026-10-28) — §6 Pipeline di arricchimento allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED)
 > ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟢 APPROVED v1.0)
 
 ---
@@ -272,12 +272,14 @@ Problema: Spotify ha deprecato le audio-features (nov 2024); Apple non le ha mai
 **Strategia a cascata per ogni traccia** (D.A.6):
 
 1. **Cache locale** (feature già calcolata/scaricata)
-2. **Essentia.js (WASM) in-browser** — provider di default quando è disponibile un preview audio (30s) dal catalogo
-3. **AcousticBrainz** — bonus se il brano ha un MBID mappato (lookup per recording_id)
-4. **Fallback euristico** (`source: 'heuristic'`) — stime da metadata (BPM da genre, energia da popolarità, valence da key/mode); qualità bassa ma copre il 100% del catalogo
+2. **Essentia.js (WASM) in-browser** — provider di default quando è disponibile un preview audio (30s) dal catalogo. **La fonte del preview è l'iTunes Search API** (`previewUrl`, senza autenticazione): i preview di Spotify non sono più disponibili per le app nuove e quelli di Apple Music richiedono un account Developer a pagamento (`21-AUDIO-FEATURES.md` §2.1, D-AF.1). `valence` ed `energy` sono misurati sui classification head **DEAM** (`deam-msd-musicnn-2`), normalizzati da [1,9] a [0,1]
+3. **AcousticBrainz** — bonus se il brano ha un MBID mappato (lookup per recording_id). L'API fornisce **classificazioni `mood_*` e `danceability`**, non `valence`/`energy`: i due campi che il mood tracker legge sono **derivati** da quelle probabilità (`21` §7.3, D-AF.8)
+4. **Fallback euristico** (`source: 'heuristic'`) — stime da metadata (BPM da genre, energia da popolarità, valence da key/mode); qualità bassa ma copre il 100% del catalogo. **Non alimenta il mood tracker**: il layer di analisi legge solo `source ∈ {essentia, acousticbrainz, manual}` (`21` §12, D-AF.4)
 5. **Niente feature**: le analisi basate su valence/energy degradano a mood-by-genre (vedi `04-ANALYSIS-ALGORITHMS.md`)
 
 Ogni feature salvata registra la **fonte** (`AudioFeatures.source: 'essentia' | 'acousticbrainz' | 'heuristic' | 'manual'`) per trasparenza e ricalcolo futuro. **Rimosse** le voci placeholder `api_freqblog` / `api_musicae` (non sono provider reali).
+
+La specifica completa del provider (contratto, mappatura dei campi, normalizzazione, privacy, CSP, stoccaggio, costi misurati e test) è **`21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED)**.
 
 ### 6.1 Trigger conditions
 
@@ -341,7 +343,7 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 | Grafici | **Recharts 2.15+** standard + **D3 7** solo per Timeline (D.A.4, lazy import) | 90% Recharts, Timeline custom | futuro (Fase 3) |
 | UI kit | **Tailwind 4** + shadcn/ui | Coerenza col design system | futuro (Fase 3) |
 | Parsing | **PapaParse** (CSV), JSON nativo, streaming | File grandi | futuro (Fase 1) |
-| Audio features | **Essentia.js (WASM)** (D.A.6) + AcousticBrainz bonus + fallback euristico | Open source, locale, no rete | futuro (Fase 2) |
+| Audio features | **Essentia.js (WASM)** (D.A.6) + AcousticBrainz bonus + fallback euristico | Open source, locale, no rete | futuro (Fase 2) — spec: `21-AUDIO-FEATURES.md` v1.0 |
 | Logger | **core/logger** wrapper | Schema `{level, module, msg, ctx}` consistente, no PII | attivo |
 | Test | **Vitest 2+** + fake-indexeddb + **MSW** + **Playwright 1.5+** | Unit + e2e + API mock | attivo (MSW futuro) |
 | Coverage | **@vitest/coverage-v8** per package | Soglie da `10§2` | attivo |
@@ -374,7 +376,7 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
     │   ├── core/
     │   │   ├── adapters/         # un modulo per piattaforma
     │   │   ├── analysis/         # Web Worker
-    │   │   ├── enrichment/       # React Query per MB/Last.fm
+    │   │   ├── enrichment/       # porte + orchestratore puri (NO React: vedi §9.2)
     │   │   ├── schema/           # tipi TypeScript condivisi (= 02)
     │   │   ├── db/               # Dexie wrapper
     │   │   └── logger/           # wrapper logger strutturato
@@ -567,3 +569,4 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 | 1.1 | Sessione 48 (2026-10-26) | **§4.1 Sorgenti remote (ADR-0010)**: il contratto `PlatformAdapter` era nato file-only — i tre adapter del perimetro e ListenBrainz consumano tutti un export scaricato dall'utente — ma Last.fm è la prima piattaforma senza export utilizzabile dall'app (l'unico canale è l'API `user.getRecentTracks`, paginata e autenticata). Aggiunto il metodo **opzionale** `parseRemote?(source: RemoteSource, options?): AsyncIterable<RawListenEvent>` e la struttura `RemoteSource` (endpoint, credenziali per-utente, paginazione, header extra, `AbortSignal`); `ParseOptions` estratto come tipo nominato. Vincoli: il percorso remoto produce gli stessi `RawListenEvent` del percorso file (pipeline di §3.1 riusata invariata), il rate limiting è responsabilità dell'adapter (ogni piattaforma ha limiti e semantica degli header diversi), il payload raw non è persistito, nessun segreto è embedded nel bundle, "sorgente irraggiungibile" è un errore recuperabile. Aggiunto il codice errore `SOURCE_UNREACHABLE` alla tabella degli `AdapterError` (gli altri quattro sono orientati al file e avrebbero mentito: `INVALID_FORMAT` non è un problema di formato). Nessuna modifica agli adapter esistenti: il metodo è opzionale e il loro comportamento non cambia |
 | 1.2 | Sessione 53 (2026-10-26, issue #160) | **§12.1/§12.2**: `rekey()` da "futuro (Story 0.7)" a **attivo (Story 1.4)** — la funzione esisteva dalla Story 0.7 ma non soddisfava gli acceptance criteria della story (nessuna transazione, sopravvivenza non deterministica, riferimenti `library`/`playlistItems`/`features` non riorientati, ISRC non normalizzato, contatori sommati a mano invece che delegati a `recount()`). La Sessione 53 ne ha chiusi i buhi. Nessuna modifica al resto della sezione. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 56, issue #168)* |
 | 1.3 | Sessione 56 (2026-10-27, issue #168) | **§4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)**: il contratto di `§4` descrive la sola **lettura** (import da file o da sorgente remota). La Story 1.5 chiede l'operazione opposta — **inviare** i propri ascolti ai hub — e i due insiemi non coincidono (non ogni piattaforma scrobbla; `maloja`/`subsonic`/`roon` sono client, non fonti). Aggiunta la sottosezione "Contratto di scrittura (`ScrobbleSink`)": l'interfaccia `ScrobbleSink` (con `hub`, `name`, `version`, `isConfigured()`, `submit()`), il tipo dedicato `ScrobbleHubId`, i tipi `ScrobblePayload` e `ScrobbleResult`, e la classe `ScrobbleError` con i sei codici (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`). Vincoli: il contratto è **separato** da quello di lettura ma ne riusa la forma (`PlatformAdapter` non cambia, nessun adapter esistente è toccato); il rate limiting è responsabilità del **sink** (Last.fm ~5 req/s, ListenBrainz 1 req/s con `X-RateLimit-*`); nessun segreto nel bundle e nessun server di backend (il proxy è dell'utente); `AbortSignal` per la cancellazione; `ScrobbleError` dedicato perché `recoverable` ha qui una semantica diversa ("si può ritentare lo stesso invio" e non "gli eventi validi sono persistiti"); `ScrobbleHubId` dedicato perché `scrobbleHubs` non è `PlatformId[]`; il payload è **chiuso per costruzione** (nessun campo per contesto, device o IP); l'idempotenza è locale e verificabile (chiave unica `hub|eventKey` sulla coda `scrobbleOutbox`, write-ahead). Il percorso incrementale ListenBrainz resta sul contratto di **lettura** (`parseRemote?()`) |
+| 1.4 | Sessione 62 (2026-10-28, issue #187) | **§6 Pipeline di arricchimento** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): la fonte del preview audio per Essentia.js è dichiarata (**iTunes Search API**, D-AF.1: i preview di Spotify non esistono più per le app nuove e quelli di Apple Music costano 99 $/anno); i classification head sono **DEAM** con normalizzazione [1,9] → [0,1] (D-AF.3); AcousticBrainz fornisce classi `mood_*` e **non** `valence`/`energy`, che sono quindi **derivati** (D-AF.8); il fallback euristico **non alimenta il mood tracker** (D-AF.4): il layer di analisi legge solo `source ∈ {essentia, acousticbrainz, manual}`. **§9**: il modulo `enrichment/` è annotato come porte + orchestratore puri (**no React**: `§9.2` vieta React nel core, e React Query resta nel web — D-AF.5). **§8**: la riga delle audio features rimanda alla spec |
