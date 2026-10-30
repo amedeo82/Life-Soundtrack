@@ -5,7 +5,7 @@ date: 2026-10-30
 state: 🟡
 merged: false
 branch: feat/193-mood-genre
-pr: 0
+pr: 203
 claim: kilo-HP-EliteBook-f1a7
 cross_refs: [193, 178, 187, 188, 180]
 tags: [analysis, phase-2]
@@ -41,6 +41,8 @@ non era ratificata in nessun documento). Claim `kilo-HP-EliteBook-f1a7`
 Il **project owner** ha scelto l'opzione B fra tre (A: ratificare la mappa
 esistente; B: nessun fallback; C: un insight di stima separato) e ha chiesto
 che il **warning aggregato** fosse implementato nel codice.
+
+PR **#203** (branch `feat/193-mood-genre`, worktree `ls-193-mood-genre`).
 
 ## Cosa è stato consegnato
 
