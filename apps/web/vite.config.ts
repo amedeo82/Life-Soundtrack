@@ -124,7 +124,7 @@ export default mergeConfig(
         'virtual:pwa-register/react': pwaMockPath,
       },
     },
-    // La CSP dichiarata in `12-DEVOPS.md` §2.1 (v1.0) applicata al server:
+    // La CSP dichiarata in `12-DEVOPS.md` §2.1 (v1.1) applicata al server:
     // `preview` serve la build di produzione e usa la policy di produzione;
     // `server` (dev) usa la stessa policy con il solo rilassamento di
     // `script-src` dichiarato in `src/security/csp.ts` (Vite inietta un
