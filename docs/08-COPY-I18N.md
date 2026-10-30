@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.8 · Sessione 62 (2026-10-28, issue #187)
+> Status: 🟡 DRAFT · Versione 0.9 · Sessione 67 (2026-10-30, issue #201)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -176,6 +176,13 @@
 | `preferences` | Preferenze | Preferences |
 | `privacy.retainIp` | Conserva indirizzi IP | Retain IP addresses |
 | `privacy.retainIpDesc` | Gli IP restano solo sul tuo dispositivo | IPs stay only on your device |
+| `privacy.retainCountry` | Conserva il paese di connessione | Retain connection country |
+| `privacy.retainCountryDesc` | Il paese resta anche senza l'IP: è un dato derivato, non identificativo | The country stays even without the IP: derived, non-identifying |
+| `privacy.retainCity` | Deduce la città dall'IP | Derive the city from the IP |
+| `privacy.retainCityDesc` | Stima incerta e opt-in: richiede il database locale | Uncertain, opt-in estimate: needs the local database |
+| `privacy.retainDeviceType` | Conserva il tipo di dispositivo | Retain device type |
+| `privacy.retainDeviceDetail` | Conserva la stringa grezza del dispositivo | Retain the raw device string |
+| `privacy.deriveContext` | Deduce il contesto (casa, lavoro, viaggio) | Infer context (home, work, travel) |
 | `privacy.enrich` | Arricchimento metadati online | Online metadata enrichment |
 | `privacy.enrichDesc` | Recupera audio features da fonti esterne | Fetch audio features from external sources |
 | `privacy.carDetection` | Rileva ascolti in auto | Detect car listening |
@@ -531,3 +538,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.6 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 — UI del percorso di scrittura**: §2.12f (nuova) le chiavi di interfaccia del pannello scrobbling (`settings.scrobble.*`: selettore per-hub, modalità del proxy, vista della coda) e §2.12g (nuova) le chiavi del percorso **web auth** Last.fm (`settings.lastfm.auth*`). Il namespace `scrobble` di §2.16 (i 15 codici di errore e avviso) è stato **materializzato** nei locale `it`/`en` dell'app, con le varianti `_one`/`_other` per le quattro stringhe con `{count}` |
 | 0.7 | Sessione 59 (2026-10-28, issue #178) | **§2.15 `insight.*` — i template dei ricordi** (`memory.onThisDay`, `memory.firstTime`, `memory.milestone.*`, `memory.return`, `memory.seasonal`, `memory.disclaimer*`): la ratifica di `04-ANALYSIS-ALGORITHMS.md` (v1.0 🟢 APPROVED) li dichiara **vincolanti** (D-A.4). Riga di changelog mancante: la modifica c'era (Sessione 59) ma il header e la tabella erano rimasti a **v0.6** — il drift è stato corretto dalla Sessione 62 (issue #187) |
 | 0.8 | Sessione 62 (2026-10-28, issue #187) | **§2.17 `enrichment.*` (nuova) — Story 4.1**: le **otto chiavi** della pipeline audio features elencate da `21-AUDIO-FEATURES.md` §14, con i testi IT ed EN: gli stati della pipeline (`queued`, `analyzing`, `done`, `estimated`, `no_audio`, `disabled`), l'avviso **prima** del download del WASM (`download.size`, ~6 MB una volta sola) e l'avviso aggregato in Settings (`error.aggregate`, con pluralizzazione §3). §1: il namespace `enrichment` aggiunto alla tabella dei namespace. Il **confine "stima ≠ misura"** è dichiarato nei testi: `enrichment.status.estimated` è l'unica chiave che può descrivere una feature euristica e non usa mai la parola "analizzato" (`21§12`, D-AF.4). Header allineato (era fermo a **v0.6** dal Sessione 58, mentre il changelog era già alla 0.5 e `docs/INDEX.md` dichiarava v0.7) |
+| 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |

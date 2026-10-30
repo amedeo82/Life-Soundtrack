@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-30 16:52
-> Totale file: 116
+> Data: 2026-10-30 17:31
+> Totale file: 122
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1219,7 +1219,9 @@ Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lav
 
 ## 📜 Licenza
 
-[Apache-2.0](LICENSE) — vedi decisione D.A.10 dell'audit del 2026-10-15. Open-source puro, nessuna monetizzazione (D.A.9).
+[AGPL-3.0](LICENSE) — il progetto passa ad AGPL-3.0 perché `essentia.js` è AGPL-3.0 e la PWA distribuisce il modulo acustico agli utenti (D-AF.2, `docs/21-AUDIO-FEATURES.md` §2.4; ratificata dal project owner il 2026-10-30, issue #201). Open-source puro, nessuna monetizzazione (D.A.9).
+
+> **AGPL §13 — offerta del sorgente**: la PWA interagisce con gli utenti in rete, quindi l'app deve offrire il sorgente corrispondente a chi la usa. L'implementazione è un requisito aperto (issue #202): fino a che non è pronta, il repository pubblico è il canale indicato nel footer di about.
 
 ---
 
@@ -1229,207 +1231,668 @@ Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lav
 
 ===== FILE: LICENSE =====
 
-Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+                       Version 3, 19 November 2007
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
 
-   1. Definitions.
+                            Preamble
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+  The GNU Affero General Public License is a free, copyleft license for
+software and other kinds of works, specifically designed to ensure
+cooperation with the community in the case of network server software.
 
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+our General Public Licenses are intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.
 
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+  Developers that use our General Public Licenses protect your rights
+with two steps: (1) assert copyright on the software, and (2) offer
+you this License which gives you legal permission to copy, distribute
+and/or modify the software.
 
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
+  A secondary benefit of defending all users' freedom is that
+improvements made in alternate versions of the program, if they
+receive widespread use, become available for other developers to
+incorporate.  Many developers of free software are heartened and
+encouraged by the resulting cooperation.  However, in the case of
+software used on network servers, this result may fail to come about.
+The GNU General Public License permits making a modified version and
+letting the public access it on a server without ever releasing its
+source code to the public.
 
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
+  The GNU Affero General Public License is designed specifically to
+ensure that, in such cases, the modified source code becomes available
+to the community.  It requires the operator of a network server to
+provide the source code of the modified version running there to the
+users of that server.  Therefore, public use of a modified version, on
+a publicly accessible server, gives the public access to the source
+code of the modified version.
 
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+  An older license, called the Affero General Public License and
+published by Affero, was designed to accomplish similar goals.  This is
+a different license, not a version of the Affero GPL, but Affero has
+released a new version of the Affero GPL which permits relicensing under
+this license.
 
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
+  The precise terms and conditions for copying, distribution and
+modification follow.
 
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an Legal Entity authorized to submit on behalf of the copyright
-      owner. For the purposes of this definition, "submitted" means any form
-      of electronic, verbal, or written communication sent to the Licensor or
-      its representatives, including but not limited to communication on
-      electronic mailing lists, source code control systems, and issue
-      tracking systems that are managed by, or on behalf of, the Licensor
-      for the purpose of tracking or otherwise improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
+                       TERMS AND CONDITIONS
 
-      "Contributor" shall mean Licensor and any Legal Entity on behalf of
-      whom a Contribution has been received by Licensor and subsequently
-      incorporated within the Work.
+  0. Definitions.
 
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+  "This License" refers to version 3 of the GNU Affero General Public License.
 
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
 
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
 
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
 
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
 
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
 
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
 
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
 
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
+  1. Source Code.
 
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for describing the origin of the Work and
-      reproducing the content of the NOTICE file.
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
 
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
 
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
 
-   9. Accepting Warranty or Support. While redistributing the Work or
-      Derivative Works thereof, You may choose to offer, and charge a
-      fee for, acceptance of support, warranty, indemnity, or other
-      liability obligations and/or rights consistent with this License.
-      However, in accepting such obligations, You may act only on Your
-      own behalf and on Your sole responsibility, not on behalf of any
-      other Contributor, and only if You agree to indemnify, defend,
-      and hold each Contributor harmless for any liability incurred by,
-      or claims asserted against, such Contributor by reason of your
-      accepting any such warranty or support.
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
 
-   END OF TERMS AND CONDITIONS
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
 
-   APPENDIX: How to apply the Apache License to your work.
+  The Corresponding Source for a work in source code form is that
+same work.
 
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file name and extension be included on the same line as the
-      copyright notice for easy identification within third-party
-      archives.
+  2. Basic Permissions.
 
-   Copyright 2026 Life Soundtrack contributors
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
 
-       http://www.apache.org/licenses/LICENSE-2.0
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Remote Network Interaction; Use with the GNU General Public License.
+
+  Notwithstanding any other provision of this License, if you modify the
+Program, your modified version must prominently offer all users
+interacting with it remotely through a computer network (if your version
+supports such interaction) an opportunity to receive the Corresponding
+Source of your version by providing access to the Corresponding Source
+from a network server at no charge, through some standard or customary
+means of facilitating copying of software.  This Corresponding Source
+shall include the Corresponding Source for any work covered by version 3
+of the GNU General Public License that is incorporated pursuant to the
+following paragraph.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the work with which it is combined will remain governed by version
+3 of the GNU General Public License.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU Affero General Public License from time to time.  Such new versions
+will be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU Affero General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU Affero General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU Affero General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If your software can interact with users remotely through a computer
+network, you should also make sure that it provides a way for users to
+get its source.  For example, if your program is a web application, its
+interface could display a "Source" link that leads users to an archive
+of the code.  There are many ways you could offer source, and different
+solutions will be better for different programs; see section 13 for the
+specific requirements.
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU AGPL, see
+<https://www.gnu.org/licenses/>.
+
 
 
 ===== FILE: docs/INDEX.md =====
@@ -1457,16 +1920,16 @@ Apache License
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 62 (v1.4) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 62 (v0.8) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1) |
-| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 62 (v0.6) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 67 (v0.9) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`) |
+| 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 66 (v1.1) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196) |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
-| 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟡 DRAFT | Sessione 41 | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto |
+| 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟢 APPROVED | Sessione 67 (v1.0) | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto — **ratificata** (Sessione 67, issue #201): i 3 punti aperti chiusi (DB geo **on-demand** D-B.2, soglie come **costanti misurabili** D-B.3, `retainCountry` già deciso con l'issue #108), gli edge case geo rinumerati **E19..E24** (E11..E18 erano già presi in `01-PLATFORMS.md` §5) e la revoca di D.39.8 applicata a `03-ADAPTERS/youtube-music.md` §7 |
 | 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟢 APPROVED | Sessione 57 (v1.0) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164); **ratificata** (Sessione 57, issue #172): le 4 decisioni aperte chiuse (D-SH.11…D-SH.14) → issue di implementazione **#173** |
 | 21 | [`21-AUDIO-FEATURES.md`](21-AUDIO-FEATURES.md) | 🟢 APPROVED | Sessione 66 (v1.1) | **Pipeline audio features (Story 4.1)**: contratto `AudioFeatureProvider`, cascata cache → Essentia.js (WASM) → AcousticBrainz → euristico, mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), normalizzazione DEAM [1,9] → [0,1], privacy e CSP, stoccaggio e invalidazione, costi reali misurati — **ratificata** (Sessione 62, issue #187, PR #190 `b1dd83e`): le 9 decisioni D-AF.1…D-AF.9 sono chiuse come proposte → issue di implementazione **#188** (`agent-ready`); **v1.1** (Sessione 66, issue #196): **D-AF.9 emendata**, la CSP ammette anche l'host della **ricerca** iTunes (senza il quale D-AF.1 non è applicabile) |
 
@@ -1477,7 +1940,7 @@ Apache License
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
 | [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.27 | Protocollo per agenti (Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
-| [`../LICENSE`](../LICENSE) | 🟢 Apache-2.0 | Licenza del progetto (D.A.10) |
+| [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
 | [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.7 | Diario cronologico per story: problemi, fix, lesson learned — §25: ratifica della spec dell'analisi (issue #178) |
@@ -1600,10 +2063,10 @@ Apache License
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 10 documenti (`02` v1.6, `03-ADAPTERS/`, `04` v1.0, `05` v1.4, `10` v1.1, `11` v1.6.22, `14` v1.1, `16-OPERATIONS`, `20` v1.0, `21` v1.0) + 9 ADR in `13-ADR/` (0001-0003, 0005-0008, 0010, 0011)
-- **Documenti DRAFT**: 11 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, `19`) + ADR-0009 — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.8, `09` ora v0.6, `12` ora v1.0, `17` ora v0.2, `18` ora v2.7, `19` introdotto in Sessione 41; `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
+- **Documenti APPROVED**: 11 documenti (`02` v1.6, `03-ADAPTERS/`, `04` v1.0, `05` v1.4, `10` v1.1, `11` v1.6.28, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
+- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.9, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.20; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
-- **Licenza**: Apache-2.0
+- **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
 - **Implementazione**: 🟢 **Fase 0 tecnica completa: 7/7 story merged** — 0.1 scaffold (PR #2 `c0fb0a4`) · 0.2 schema DB Dexie (PR #4 `fa09b06`) · 0.3 adapter Spotify (PR #28 `3dc9654`) · 0.4 UI import onboarding (PR #71 `0a8e83f`) · 0.5 PWA e service worker (PR #19 `3fa3c0d`) · 0.6 i18n (PR #22 `5235c88`) · 0.7 operations runbook (PR #64 `b44420b`). Dettaglio per story in `docs/state/stories/` (fonte di verità) e `docs/18-DEV-LOG.md`.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
@@ -1615,7 +2078,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 66, issue #196): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e **tre story sono completate**: la **2.4 (Memory Engine)** (issue **#179**, PR #185, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, PR #192, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, PR #197, merge `7458220`, Sessione 64): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) realizza la cascata **cache → Essentia.js → AcousticBrainz → euristico** con i tre provider, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i trigger e il budget e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. **La catena 4.1 (dati) → 2.1 (letture) è chiusa**: la pipeline popola la tabella `features` da cui il mood tracker legge. **Prossimo passo**: non esiste più una story lavorabile già migrata in `docs/state/stories/` — le **2.2/2.3** (analisi avanzata) hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC sono specificate in `04` (v1.0 🟢 APPROVED), ma non hanno ancora issue né state file; restano la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). Gli atti del project owner rimasti sono la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41: servono i 3 punti aperti — default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo) e il **cambio di licenza AGPL-3.0** (D-AF.2): l'issue **#196** è **risolta** (Sessione 66 — la ratifica del terzo host della CSP, D-AF.9 emendata in `21` v1.1).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 67, issue #201): **gli atti del project owner sono chiusi** — la ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED) e dell'ADR-0009 (v1.0 🟢 APPROVED) e l'applicazione della **licenza AGPL-3.0** (D-AF.2), che era l'ultimo atto pendente (l'obbligo del §13 resta il requisito aperto dell'issue **#202**). **EPIC 1 — Import core: 5/5 ✅** e tre story dell'EPIC 2/4 completate: la **2.4 (Memory Engine)** (issue **#179**, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, merge `7458220`, Sessione 64): la catena **4.1 (dati) → 2.1 (letture)** è chiusa. **Prossimo passo**: le **2.2 (Era Detector)** e **2.3 (Event Detector)** hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC sono specificate in `04` (v1.0 🟢 APPROVED): con i loro state file il blocco NEXT-STEP del README indica la **prima story lavorabile** invece del fallback. Dietro di loro: la tranche dell'EPIC 3 (**UI**), il **lookup MusicBrainz** (Story 4.2) e la nuova tranche **geo** — **1.6** (fondazione geo: delta su `02` v1.7 e classificatore L1), **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto) — la cui specifica è ratificata nella Sessione 67 (`19` v1.0 🟢, ADR-0009 v1.0 🟢). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -7785,8 +8248,8 @@ lo confronta con il file (lesson 28-1).
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.2
-> Ultima modifica: 2026-10-16 — implementazione Story 0.2 (Sessione 14)
+> Versione: 0.3
+> Ultima modifica: 2026-10-30 — licenza AGPL-3.0 e ratifica degli atti del Boss (Sessione 67, issue #201)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
 
@@ -7926,6 +8389,24 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   script `test:coverage` (`vitest run --coverage --exclude src/db/__tests__/perf.test.ts`);
   misurare con warm-up non misurato + **minimo di 3 round** (steady-state, robusto a jitter).
 
+### P10 — La licenza è AGPL-3.0: le dipendenze distribuite contano
+
+- **Sintomo**: `essentia.js` è AGPL-3.0 e la PWA lo distribuisce agli utenti: il
+  repository è passato ad **AGPL-3.0** il 2026-10-30 (D-AF.2, `21` §2.4, issue
+  #201). Da quel momento ogni dipendenza che **finisce nel bundle** è soggetta
+  all'obbligo di offerta del sorgente (§13) e la sua licenza deve essere
+  compatibile con l'opera distribuita.
+- **Causa**: il codice permissivo può entrare in un'opera AGPL, il contrario non
+  vale. Il bundle è una distribuzione (la PWA è servita ai browser), quindi una
+  dipendenza AGPL nel bundle obbliga l'opera a essere AGPL.
+- **Soluzione**: prima di aggiungere una dipendenza che finisce nel bundle,
+  controllare la sua licenza (il campo `license` nel `package.json` del
+  pacchetto npm) e **non introdurre codice AGPL senza la decisione del Boss**;
+  le dipendenze solo-Dev restano fuori dal bundle e non hanno impatto. Il
+  carico delle licenze del bundle va verificato con il listino del package
+  manager (`pnpm licenses list --prod`) nella story che introduce la
+  dipendenza. L'obbligo del §13 — offrire il sorgente corrispondente agli
+  utenti che interagiscono in rete — è il requirement dell'issue **#202**.
 ## 4. Cosa NON è ancora implementato
 
 Zod (validazione runtime: fuori perimetro Story 0.2, valutare con Story 0.3 adapter), Zustand,
@@ -7935,6 +8416,14 @@ si apre lo schema; alternativa in Story 0.7). Il layer `@ls/core/db` è operativ
 (classe Dexie v1+v2, repository, `recount()`). Gli upgrade major della toolchain (pnpm 12,
 ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 
+L'obbligo del **§13** della licenza AGPL-3.0 (offerta del sorgente corrispondente
+agli utenti che interagiscono con l'app in rete) **non è ancora implementato**
+(issue #202): nessuna schermata offre il sorgente e non esiste un NOTICE con le
+attribuzioni delle terze parti distribuite (Essentia.js AGPL-3.0; DB-IP Lite
+CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
+`ContextPeriod`, il database MMDB locale) è specificato in
+`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED ma non implementato (Story 1.6 / 4.4).
+
 
 
 ===== FILE: docs/18-DEV-LOG.md =====
@@ -7942,8 +8431,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.19
-> Ultima modifica: 2026-10-30 — §30 esito post-merge (Story 4.1 — Pipeline audio features: PR #197 merged `7458220`)
+> Versione: 2.20
+> Ultima modifica: 2026-10-30 — §32 atti del Boss: ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0 (issue #201)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -8899,6 +9388,30 @@ mezzo del lavoro.
 - Precedenti: **#188** (la Story 4.1, Sessione 64: l'implementazione che ha dichiarato la contraddizione) · **#187** (la ratifica di `21` v1.0, Sessione 62, da cui la v1.1 discende)
 - Aperte dal lavoro: nessuna — l'issue #196 è risolta da questa stessa ratifica
 
+## 32. Issue #201 — Atti del Boss: ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0 (Sessione 67)
+
+**Branch**: `feat/201-ratifica-geo-licenza-agpl` (**in lavorazione**)
+**PR**: **#NN**
+**Data**: 2026-10-30
+**Stato**: 🟡 **IN CORSO** — le quattro decisioni del project owner sono prese e i documenti sono ratificati; la PR attende la review del Boss (il merge è la ratifica).
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 32-1 | P+L | Gli edge case geo di `19§10` erano numerati **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** (ListenBrainz E11..E13, Last.fm E14..E18) | `19` è stata scritta nella Sessione 41; gli identificatori E11..E18 sono stati presi **dopo**, dagli adapter della Sessione 47 | Rinumerati in **E19..E24** in entrambi i documenti, con la nota esplicita del perché. Il controllo resta manuale: **non esiste un gate** che confronti i cataloghi degli edge case fra documenti | `docs/19-GEO-CONTEXT.md` §10, `docs/01-PLATFORMS.md` §5 |
+| 32-2 | P+L | `19§4`/`§11` propongono un delta su `02-DATA-SCHEMA.md` **v1.3** con migrazione Dexie **v2→v3**; lo schema è **v1.6 / Dexie v5** | La `19` non era stata aggiornata dalla Sessione 41, mentre lo schema è cambiato tre volte (v1.4, v1.5, v1.6) | Il delta è riallineato e la sua applicazione è dichiarata come deliverable della Story 1.6 — lo stesso percorso della `21` (ratificata nella Sessione 62, applicata a `02` nella Sessione 64) | `docs/19-GEO-CONTEXT.md` §4, §11 |
+| 32-3 | P | La revoca di D.39.8 era **dichiarata** in `19§9` ma non applicata: `03-ADAPTERS/youtube-music.md` diceva ancora «sempre scartati al parse» | La revoca era rinviata a una sessione successiva (Sessione 42 nella stima del 2026-10-21) e la Sessione 42 è stata un'altra cosa | La revoca è applicata in questa sessione: `youtube-music.md` v2.0, `locationInfos` dietro il toggle `ytLocationInfos` (default OFF) | `docs/03-ADAPTERS/youtube-music.md` §7 |
+| 32-4 | P+L | La motivazione su MaxMind GeoLite2 diceva «incompatibile con Apache-2.0» | Scritta quando l'app era Apache-2.0 | La ragione è riscritta: l'obiezione è la **EULA** di MaxMind (ridistribuzione in un prodotto senza licenza commerciale a pagamento), **indipendente dalla licenza dell'app**. Conclusione invariata, ragione corretta | `docs/13-ADR/0009-local-ip-geolocation.md` §"Motivazioni" |
+| 32-5 | P | `19§12` elencava fra i punti aperti il default di `retainCountry`, **già deciso** con l'issue #108 (opzione A) | Il punto era rimasto scritto per inerzia dalla Sessione 41 | Chiuso con il riferimento all'issue #108 e alla nota già presente in `09§4` | `docs/19-GEO-CONTEXT.md` §12 |
+| 32-6 | P+F | La **CSP applicata** (`script-src 'self' 'wasm-unsafe-eval'`) non dichiara l'host da cui proviene il modulo WASM di Essentia, che `21§6.5` dà come «scaricato on-demand» | La CSP è stata scritta per i tre host delle **chiamate** (`connect-src`); l'host da cui arriva lo **script** non è mai stato dichiarato | Dichiarato come **requisito della story di implementazione** (l'host va aggiunto insieme al codice che lo scarica), con la regola imparata dalla issue #196: la CSP applicata e la spec devono dire la stessa cosa | `docs/12-DEVOPS.md` §5.1, `docs/21-AUDIO-FEATURES.md` §6.5 |
+
+**Lesson learned sintetica**: un documento che attende la ratifica per settimane invecchia **contro** gli altri documenti che intorno a lui cambiano: tre versioni di schema, otto identificatori di edge case presi da altri adapter, una revoca dichiarata e mai applicata, un punto aperto già chiuso altrove. La ratifica non è un atto di firma: è il momento in cui il documento viene confrontato con **lo stato reale** e i difetti si correggono — e i difetti che emergono sono quasi tutti di **numerazione e di riferimenti incrociati**, non di sostanza. La regola pratica: un documento DRAFT che cita altri documenti va riletto **per nome**, non per numero di sezione (la lezione 65-4 della Sessione 65, ripetuta).
+
+**Link utili**:
+- Issue: **#201** (atto del project owner: ratifica di `19` + ADR-0009 e licenza AGPL-3.0) · **#202** (follow-up: offerta del sorgente, §13)
+- Documenti ratificati: `docs/19-GEO-CONTEXT.md` v1.0 🟢 · `docs/13-ADR/0009-local-ip-geolocation.md` v1.0 🟢
+- Documenti allineati: `03-ADAPTERS/youtube-music.md` v2.0 · `01-PLATFORMS.md` v0.8 · `09-PRIVACY-SECURITY.md` v0.7 · `08-COPY-I18N.md` v0.9 · `12-DEVOPS.md` v1.2 · `17-DEV-NOTES.md` v0.3 · `21-AUDIO-FEATURES.md` v1.2 · `11-BACKLOG.md` v1.6.28 · `docs/INDEX.md`
+- Codice e meta: `LICENSE` (AGPL-3.0), `package.json` (`"license": "AGPL-3.0"`), `README.md` §"Licenza"
+- State: `docs/state/sessions/67-ratifica-geo-licenza-agpl.md` · `docs/state/stories/{2.2,2.3,1.6,4.4,3.4}-*.md`
+
 ---
 
 | Versione | Data | Modifiche |
@@ -8943,6 +9456,7 @@ mezzo del lavoro.
 | 2.18 | 2026-10-30 (issue #188) | **§30 Issue #188 — Story 4.1 implementata** (Pipeline audio features, Sessione 64, claim `kilo-HP-EliteBook-fc1d`, PR #197): 9 entry (30-1 **la CSP dei due host non può ospitare la ricerca iTunes**: D-AF.1 impone `GET https://itunes.apple.com/search`, D-AF.9 elenca in `connect-src` solo l'API AB e il **CDN** dei file audio — l'host della *ricerca* è un terzo host: la CSP applicata lo include e il conflitto è segnalato all'issue **#196** (`needs-spec`); 30-2 il contratto ha `fetch(track, context)` perché `Track` (`02§3.3`) non porta il nome dell'artista, e la ricerca del preview lo richiede (D.188.1); 30-3 property test senza `fast-check`: PRNG mulberry32 con seme esplicito, campione deterministico e riproducibile; 30-4 la feature **euristica** in cache non termina la cascata (D.188.6): è un fallback, e la riga identica non viene riscritta (T-AF.14); 30-5 il **limiter MusicBrainz** (1 req/s) è consegnato come limiter + test, il lookup è la Story 4.2; 30-6 il WASM (~2,7 MB) resta fuori dal bundle (167 KB gzip) perché il motore è una porta e il modulo si carica con `import(/* @vite-ignore */ url)` su URL configurato a runtime, con un test che verifica il divieto di import statico; 30-7 due file in una directory gemella per un percorso riscritto a mano: il path si copia, non si riscrive; 30-8 `exactOptionalPropertyTypes`: `number | undefined` dichiarato nel tipo invece di un `as any`; 30-9 in jsdom `import.meta.url` non è un URL `file:`: il path del test si risolve da `process.cwd()`). Consegnati: il pacchetto `packages/core/src/enrichment/` (contratto, cascata, normalizzazione DEAM, derivazione mood, tre provider, due limiter, coda con budget e trigger, stoccaggio con TTL e LRU), il subpath `@ls/core/enrichment`, la CSP applicata (header Vite + tag `<meta>`), le 8 chiavi `enrichment.*` in `it`/`en`, i 4 fixture di `fixtures/api-mocks/`. **142 test** nuovi in `@ls/core` + **15** in `@ls/web` |
 | 2.19 | 2026-10-30 (issue #188) | **§30 — esito post-merge della Story 4.1**: la PR #197 è **merged** (`7458220`, 2026-10-30T11:24:49Z), CI verde (22 step del job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README) → l'issue #188 è chiusa con `status:done` e il commento `release:` è automatico (`auto-status-done`). Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`), `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata": con la 4.1 e la 2.1 completate è la risposta **corretta** (le 2.2/2.3 dipendono dalla 2.1 e non hanno uno state file). Aperta dal lavoro l'issue **#196** (`needs-spec`): la contraddizione fra D-AF.1 e D-AF.9 sulla CSP. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 4.1) è in questa PR `docs:` separata: il merge commit si conosce solo dopo il merge |
 | 2.20 | 2026-10-30 (issue #196) | **§31 Issue #196 — ratifica del terzo host della CSP** (Sessione 66, claim `kilo-hp-elitebook-jrka`): 4 entry (31-1 **due AC della stessa spec non potevano essere veri insieme** — D-AF.1 prescrive `GET https://itunes.apple.com/search` e D-AF.9 elencava in `connect-src` solo l'API AB e il **CDN** dei file audio: l'host che **risponde** alla ricerca è un terzo host; le due decisioni erano state ratificate nella stessa PR (Sessione 62) senza che nessuna le confrontasse con l'endpoint che la prima richiede, e il conflitto è emerso due sessioni dopo, quando qualcuno ha dovuto implementare la ricerca; il project owner ha **ratificato l'opzione A** — `https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata** nella **v1.1** di `21-AUDIO-FEATURES.md`; l'opzione B (rivedere D-AF.1) non aveva alternative — Spotify `audio_features` è morto e MusicKit costa 99 $/anno — e l'opzione C (accettare la degradazione) avrebbe lasciato il mood tracker senza dati misurati, che D.A.1 vieta; 31-2 **il gate della CSP confrontava due artefatti della stessa costante** (la costante e il tag `<meta>`, che da essa è generato: i due non possono divergere) mentre la `connect-src` **dichiarata** in `12-DEVOPS.md` non era confrontata con nessuno — il test legge ora il blocco del documento e lo confronta con la costante; 31-3 la CSP vive in `12§5.1` ma tutto il progetto la cita come `12§2.1`: riferimento ereditato dalla v0.1 della spec, **non corretto** (fuori perimetro dell'issue), registrato come osservazione; 31-4 la sessione 65 era già pre-allocata da un altro agente (issue #193): la Sessione 66 usa il numero successivo). Consegnati: `21` v1.1 🟢 APPROVED (header, §2.1, §3, §10.2, §16, §18), `12` v1.1 (la CSP con i tre host), `11-BACKLOG.md` v1.6.27, `docs/INDEX.md` (righe `11`, `12`, `21` e "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti), la sessione 66 e i commenti del codice applicato (`apps/web/src/security/`) — **la CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197, la ratifica allinea la **dichiarazione** al codice |
+| 2.21 | 2026-10-30 (issue #201) | **§32 Atti del Boss — ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0** (Sessione 67, claim `kilo-HP-EliteBook-b7x2`): 6 entry (32-1 gli edge case geo erano **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** da ListenBrainz (E11..E13) e Last.fm (E14..E18): rinumerati in **E19..E24**; 32-2 il delta su `02` era ancorato a **v1.3 / Dexie v2→v3** mentre lo schema è **v1.6 / Dexie v5**: riallineato, e la sua applicazione è dichiarata deliverable della Story 1.6; 32-3 la **revoca di D.39.8** era dichiarata ma **mai applicata** (`youtube-music.md` diceva ancora «sempre scartati al parse»): applicata, `locationInfos` dietro il toggle `ytLocationInfos`; 32-4 la motivazione su MaxMind GeoLite2 legava l'obiezione alla licenza **Apache-2.0** dell'app: riscritta — l'obiezione è la EULA di MaxMind, indipendente dalla licenza dell'app; 32-5 `19§12` elencava come aperto un punto **già deciso** (issue #108): chiuso; 32-6 la **CSP applicata** non dichiara l'host da cui arriva il WASM di Essentia, che `21§6.5` dà come scaricato on-demand: dichiarato come requisito della story di implementazione, con la lezione della issue #196). Consegnati: `LICENSE` (AGPL-3.0 canonico), `package.json` (`"license"`), `README.md`, `19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, e l'allineamento di `03-ADAPTERS/youtube-music.md` (v2.0), `01-PLATFORMS.md` (v0.8), `09-PRIVACY-SECURITY.md` (v0.7), `08-COPY-I18N.md` (v0.9), `12-DEVOPS.md` (v1.2, §5.3 licenza e offerta del sorgente), `17-DEV-NOTES.md` (v0.3, P10), `21-AUDIO-FEATURES.md` (v1.2, §19 punto 1 chiuso), `11-BACKLOG.md` (v1.6.28, tre story geo), `docs/INDEX.md`, e i 6 nuovi state file (sessione 67 + le story 2.2, 2.3, 1.6, 4.4, 3.4). Aperta l'issue **#202**: l'offerta del sorgente richiesta dal §13 della licenza |
 
 ---
 
@@ -12377,6 +12891,159 @@ lo confronta con il file (lesson 28-1).
 
 
 
+===== FILE: docs/state/sessions/67-ratifica-geo-licenza-agpl.md =====
+
+---
+number: 67
+title: "Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)"
+date: 2026-10-30
+state: 🟡
+merged: false
+branch: feat/201-ratifica-geo-licenza-agpl
+pr: 0
+claim: kilo-HP-EliteBook-b7x2
+cross_refs: [201, 202, 196, 193, 108, 187, 188]
+tags: [privacy, devops, phase-2]
+---
+
+# Sessione 67 — Gli atti del Boss (issue #201)
+
+## Sintesi
+
+Tre atti del project owner erano rimasti aperti dal 2026-10-21: la ratifica
+di `19-GEO-CONTEXT.md` (🟡 DRAFT v0.2), quella dell'ADR-0009 (🟡 DRAFT v0.1)
+e l'applicazione della **licenza AGPL-3.0** (D-AF.2), che la spec `21`
+aveva ratificato ma che era «un atto del Boss» sul file `LICENSE`.
+
+Il project owner ha preso quattro decisioni il 2026-10-30: **D-B.1** la
+licenza diventa AGPL-3.0 (non si rinuncia a Essentia); **D-B.2** il database
+geo si **scarica on-demand** al primo uso, non è embedded nel bundle;
+**D-B.3** le soglie dell'algoritmo (`confidence` 0.5, `R6` 0.4,
+`cityConfidence` 0.6) sono **costanti misurabili**: default vincolanti, da
+calibrare sul fixture; **D-B.4** la ratifica avviene **con le correzioni** dei
+difetti trovati.
+
+Le correzioni non sono cosmetiche: gli edge case geo erano numerati
+**E11..E15**, ma nel catalogo di `01-PLATFORMS.md` §5 quegli identificatori
+erano **già presi** (ListenBrainz E11..E13, Last.fm E14..E18) → rinumerati in
+**E19..E24**. Il delta su `02` era ancorato a **v1.3 / Dexie v2→v3** mentre lo
+schema è **v1.6 / Dexie v5**. La revoca di D.39.8 era **dichiarata** in
+`19§9` ma **mai applicata** all'adapter YouTube Music. E `19§12` elencava come
+aperto un punto che era **già deciso** (issue #108).
+
+## Trigger
+
+Issue **#201** (`size:L`, `agent-ready`, `area:privacy`, `area:devops`,
+`priority:important`), aperta in questa sessione con l'analisi dei tre atti.
+Claim `kilo-HP-EliteBook-b7x2` (unico claim, riverificato). Worktree
+`ls-201-ratifica-geo-licenza-agpl`, branch `feat/201-ratifica-geo-licenza-agpl`.
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| Il testo **AGPL-3.0** canonico al posto di Apache-2.0 | `LICENSE` |
+| Il campo `"license": "AGPL-3.0"` (che **non esisteva**) | `package.json` |
+| La sezione "Licenza" del README e l'obbligo del §13 | `README.md` |
+| `19-GEO-CONTEXT.md` 🟢 APPROVED **v1.0** (punti aperti chiusi, E19..E24, delta riallineato) | `docs/19-GEO-CONTEXT.md` |
+| `13-ADR/0009-local-ip-geolocation.md` 🟢 APPROVED **v1.0** (DB on-demand, motivazione GeoLite2 riscritta, CC BY, freschezza) | `docs/13-ADR/0009/` |
+| La revoca di D.39.8 applicata all'adapter | `docs/03-ADAPTERS/youtube-music.md` (v2.0) |
+| La matrice di disponibilità geo e gli edge case E19..E24 | `docs/01-PLATFORMS.md` (v0.8) |
+| L'inventario privacy di `city`/`ContextPeriod`/database geo | `docs/09-PRIVACY-SECURITY.md` (v0.7) |
+| Il namespace `timeline.context.*` e i toggle geo | `docs/08-COPY-I18N.md` (v0.9) |
+| La §5.3 licenza e offerta del sorgente | `docs/12-DEVOPS.md` (v1.2) |
+| Il pitfall P10 (le dipendenze distribuite contano) | `docs/17-DEV-NOTES.md` (v0.3) |
+| La chiusura del punto aperto D-AF.2 | `docs/21-AUDIO-FEATURES.md` (v1.2, §19 punto 1) |
+| Le tre story geo nella roadmap e la priorità | `docs/11-BACKLOG.md` (v1.6.28) |
+| I 6 nuovi state file (sessione 67 + le story 2.2, 2.3, 1.6, 4.4, 3.4) | `docs/state/` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| **D-B.1** | Il repository passa da **Apache-2.0 a AGPL-3.0** (D-AF.2 eseguita) | `essentia.js` è AGPL-3.0 e la PWA distribuisce il modulo acustico agli utenti: il codice permissivo può entrare in un'opera AGPL, il contrario no. **Non** si rinuncia a Essentia (opzione b): la cascata avrebbe perso l'unico provider che misura `valence`/`energy` davvero (AcousticBrainz è congelato a giugno 2022 e copre solo i brani con MBID) e il mood tracker sarebbe rimasto senza dati misurati (D-A.1). L'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è un **requisito aperto**: issue #202 |
+| **D-B.2** | Il database MMDB geo si **scarica on-demand** al primo uso, **non** è embedded | Il vincolo che rendeva necessaria la misura (il budget di 300 KB gzip, `05§10`) è proprio ciò che la decisione elimina: il database non entra nel bundle. È lo stesso pattern già deciso per il WASM di Essentia (`21§6.5`): fuori dal bundle, fuori dal precache, in Cache Storage. **L0 (paese) e L1 (contesto) reggono da sole**: senza database c'è il paese, non la città |
+| **D-B.3** | Le soglie (`confidence` 0.5, `R6` 0.4, `cityConfidence` 0.6) sono **costanti misurabili** | Sono ragionate, non misurate: la ratifica le fissa come **default vincolanti**, le espone come parametri di config (quindi dentro il `derivedVersion`, MIG-3) e dichiara la calibrazione sul fixture realistico come deliverable della tranche di implementazione. Ogni variazione produce un bump di `derivedVersion` e un ricalcolo |
+| **D-B.4** | La ratifica avviene **con le correzioni** dei difetti trovati | Un documento che attende mesi invecchia contro gli altri documenti: tre versioni di schema, otto identificatori di edge case presi altrove, una revoca dichiarata e mai applicata, un punto aperto già chiuso. La ratifica non è un atto di firma: è il confronto con lo stato reale |
+| **D.67.1** | Gli edge case geo sono **E19..E24** (non E11..E15) | `01-PLATFORMS.md` §5 usa già E11..E18 (ListenBrainz, Last.fm). Rinumerare è l'unico modo per non avere due significati per lo stesso identificatore in due documenti che si citano. Il sesto caso, «database assente», nasce dalla D-B.2 |
+| **D.67.2** | Il delta su `02` è **ratificato come decisione**, applicato nella Story 1.6 | È il percorso già fatto dalla `21`: ratificata nella Sessione 62, applicata a `02` nella Sessione 64 dalla Story 4.1. Fino ad allora `02` v1.6 resta il contratto vigente per il codice |
+
+## Difetti trovati lungo il percorso
+
+**I difetti di una ratifica sono quasi sempre di numerazione e di riferimenti
+incrociati, non di sostanza.** Nessuno dei cinque difetti trovati riguardava
+il merito della specifica: riguardavano gli identificatori (E11..E15 già
+presi), la versione di uno schema (v1.3 invece di v1.6), una decisione già
+applicata in un altro documento (D.39.8) e un punto aperto già chiuso
+(issue #108). La lezione è la stessa della Sessione 65 (lesson 65-4): i
+riferimenti fra documenti APPROVED vanno cercati **per nome**, non per numero
+di sezione.
+
+**La ragione di una decisione può invecchiare senza che cambi la
+conclusione.** La motivazione su MaxMind GeoLite2 diceva «incompatibile con
+Apache-2.0»: dopo il passaggio ad AGPL-3.0 la frase è falsa (l'obiezione non
+dipende dalla licenza dell'app, è la EULA di MaxMind), ma la conclusione
+resta: si usa DB-IP Lite. Cambia la ragione, non la scelta.
+
+**Un host che il codice usa e la spec non dichiara è una richiesta bloccata.**
+La CSP applicata è `script-src 'self' 'wasm-unsafe-eval'` e `21§6.5` prevede
+il download on-demand del modulo WASM: l'host da cui arriva non è dichiarato
+da nessuna parte. È la stessa classe della issue #196 (l'host della ricerca
+iTunes), vista dal lato opposto: lì la CSP mancava di un host, qui la spec
+manca dell'host che la CSP deve consentire.
+
+## Verifica
+
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift **atteso** nei blocchi
+  aggregati (SESSIONS/BACKLOG/INDEX/BUNDLE/README): li rigenera
+  `auto-state-aggregate` post-merge (ADR-0008). Nessun numero di sessione
+  duplicato (`67` pre-allocato con la procedura di `docs/state/_index.md`)
+- `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `pnpm run lint` / `typecheck` / `test` / `build` → verdi (nessun codice di
+  applicazione cambiato: solo documentazione, `LICENSE` e `package.json`)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|---|
+| 67-1 | **Ratificare non è firmare: è confrontare con lo stato reale.** Cinque difetti, nessuno di merito: due di numerazione, uno di versione, uno di decisione non applicata, uno di punto già chiuso. Un documento DRAFT che aspetta settimane invecchia contro tutto ciò che gli sta intorno |
+| 67-2 | **Una ragione che cambia va riscritta anche se la conclusione resta.** «Incompatibile con Apache-2.0» era vero e non lo è più: l'obiezione è la EULA di MaxMind, indipendente dalla licenza dell'app. Una motivazione falsa è una bugia utile, se lascia intendere che la decisione regge su di essa |
+| 67-3 | **I numeri degli edge case sono uno spazio globale, non un inventario per documento.** `01-PLATFORMS.md` §5 è il catalogo: chi scrive in un altro documento deve allocare lì, o dichiarare il numero che userà. Nessun gate lo verifica oggi — è il candidato naturale a un check come quello dei fatti del README (issue #161) |
+| 67-4 | **La CSP e la spec devono dire la stessa cosa, anche per gli script.** L'errore della issue #196 era un host `connect-src` mancante; il suo gemello è un host `script-src` mancante per un asset scaricato on-demand. La regola è una sola: ciò che il codice carica va dichiarato dove il codice lo dichiara |
+
+## Documenti aggiornati
+
+- `LICENSE` — il testo AGPL-3.0 canonico
+- `package.json` — il campo `license`
+- `README.md` — la sezione "Licenza" e l'obbligo del §13
+- `docs/19-GEO-CONTEXT.md` — v1.0 🟢 APPROVED
+- `docs/13-ADR/0009-local-ip-geolocation.md` — v1.0 🟢 APPROVED
+- `docs/03-ADAPTERS/youtube-music.md` — v2.0 (revoca di D.39.8)
+- `docs/01-PLATFORMS.md` — v0.8 (E19..E24 + matrice geo)
+- `docs/09-PRIVACY-SECURITY.md` — v0.7 (inventario e data flow)
+- `docs/08-COPY-I18N.md` — v0.9 (namespace e toggle)
+- `docs/12-DEVOPS.md` — v1.2 (§5.3 licenza; nota sull'host geo)
+- `docs/17-DEV-NOTES.md` — v0.3 (P10)
+- `docs/21-AUDIO-FEATURES.md` — v1.2 (§19 punto 1 chiuso)
+- `docs/11-BACKLOG.md` — v1.6.28 (tre story geo, priorità, roadmap)
+- `docs/INDEX.md` — le righe legacy, lo stato dei documenti, la licenza, il prossimo passo
+- `docs/18-DEV-LOG.md` — v2.20 (§32 e changelog)
+- `docs/state/sessions/67-ratifica-geo-licenza-agpl.md` — **nuovo**
+- `docs/state/stories/{2.2,2.3,1.6,4.4,3.4}-*.md` — **nuovi**
+- `scripts/generate-bundle.ps1` — `$files`: i 6 nuovi file
+
+## Cross-refs
+
+- **#201** — gli atti del Boss (claim `kilo-HP-EliteBook-b7x2`)
+- **#202** — l'offerta del sorgente richiesta dal §13 della licenza (aperta da questa sessione)
+- **#196** — la lezione della CSP: la spec e la CSP applicata devono dire la stessa cosa
+- **#193** — la Sessione 65 (D-A.6: il fallback mood-by-genre non esiste)
+- **#108** — la decisione su `retainCountry` (opzione A), chiusa nella ratifica
+- **#187 / #188** — la spec delle audio features e la sua implementazione (la catena 4.1 → 2.1)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -12535,6 +13202,61 @@ al merge della **PR #158** (`7afbf03`, 2026-10-26T20:56Z).
 
 Sblocca: nessuna story è dipendente da 1.3. La 1.5 dipende dal contratto
 `parseRemote?()` (ADR-0010, ratificato) per il percorso incrementale.
+
+
+
+===== FILE: docs/state/stories/1.6-geo-foundation.md =====
+
+---
+id: "1.6"
+title: "Fondazione geo e contesto di ascolto"
+phase: 2
+area: db
+status: todo
+priority: I
+depends_on: ["0.2"]
+spec_refs:
+  - docs/19-GEO-CONTEXT.md
+  - docs/13-ADR/0009-local-ip-geolocation.md
+---
+
+## Descrizione
+
+La base dati e l'algoritmo del **contesto di ascolto**:
+
+- il **delta su `02-DATA-SCHEMA.md`** (v1.7, migrazione Dexie v5→v6): i campi
+  `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata
+  `ContextPeriod` con la tabella `contexts`, i toggle `retainCity`,
+  `retainDeviceType`, `retainDeviceDetail`, `deriveContext`;
+- il **classificatore L1** (contesto dedotto: casa, lavoro, viaggio): le regole
+  R1..R7 nell'ordine dichiarato, la soglia di aggregazione 0.5, la
+  `derivedVersion` calcolata dai parametri (MIG-3).
+
+Il delta è **ratificato come decisione** nella Sessione 67 (`19-GEO-CONTEXT.md`
+v1.0 🟢 APPROVED) e viene applicato **in questa story** — lo stesso percorso
+della `21`, ratificata nella Sessione 62 e applicata a `02` nella Sessione 64.
+
+Il livello **L2 (città)** è un'altra story (la 4.4): questa story fonda lo
+schema e L1, che **reggono da sole** anche senza database.
+
+## Task
+
+- T1.6.1 — Applicare il delta a `02-DATA-SCHEMA.md` (v1.7) e la migrazione Dexie v5→v6
+- T1.6.2 — Implementare il classificatore L1 secondo `19§5` (R1..R7, soglia 0.5)
+- T1.6.3 — Persistenza dei `ContextPeriod` con `recompute()` e `userLabel`
+- T1.6.4 — Test: determinismo, calibrazione delle soglie sul fixture di scenario, gate del consenso `carDetectionConsent`
+
+## Acceptance criteria
+
+- [ ] Il classificatore produce gli stessi periodi a parità di input e di `derivedVersion` (`19§5.2`)
+- [ ] Un periodo sotto la soglia 0.5 **non** viene aggregato (`19§5.3`, E22)
+- [ ] `country` resta derivato e conservato indipendentemente da `retainIp` (issue #108)
+- [ ] La classificazione `car` è impossibile senza `carDetectionConsent` (`19§5.3`, issue #109)
+- [ ] Le soglie sono **parametri di config** e la loro variazione produce un bump di `derivedVersion` (D-B.3)
+
+## Documenti aggiornati
+
+- (nessuno: la story non è ancora iniziata)
 
 
 
@@ -12868,6 +13590,90 @@ Le decisioni della sessione (D.63.1…D.63.12) sono in
 
 
 
+===== FILE: docs/state/stories/2.2-era-detector.md =====
+
+---
+id: "2.2"
+title: "Era Detector"
+phase: 2
+area: analysis
+status: todo
+priority: I
+depends_on: ["2.1"]
+spec_refs:
+  - docs/04-ANALYSIS-ALGORITHMS.md
+---
+
+## Descrizione
+
+Il rilevatore di **ere** musicali: segmenta la storia di ascolto in periodi
+coerenti (le «ere» dell'ascolto) con un algoritmo **deterministico e
+versionato** — change point detection, non clustering non supervisionato
+(l'esclusione è dichiarata in `04§5`).
+
+La story è **sbloccata**: la dipendenza `[DEP:2.1]` è soddisfatta dalla Story
+2.1 (Sessione 63, merge `d018a26`), che ha consegnato il mood su cui
+l'era detector si appoggia (`moodDominant`, `avgValence`, `avgEnergy`).
+
+## Task
+
+- T2.2.1 — Implementare l'algoritmo di segmentazione secondo `04§5`
+- T2.2.2 — Persistenza delle ere con `derivedVersion` (MIG-3) e ricalcolo
+- T2.2.3 — Test sul fixture di scenario: a parità di `derivedVersion` le stesse ere
+
+## Acceptance criteria
+
+- [ ] Le ere sono deterministiche e ricalcolabili: stesso input, stesso output, stessa `derivedVersion` (`04§5`)
+- [ ] L'algoritmo **non** usa clustering non supervisionato (`04§5`)
+- [ ] Ogni era porta il mood dominante e le medie di valence/energy lette dal mood tracker (`04§3`, `04§5`)
+
+## Documenti aggiornati
+
+- (nessuno: la story non è ancora iniziata)
+
+
+
+===== FILE: docs/state/stories/2.3-event-detector.md =====
+
+---
+id: "2.3"
+title: "Event Detector"
+phase: 2
+area: analysis
+status: todo
+priority: I
+depends_on: ["2.1"]
+spec_refs:
+  - docs/04-ANALYSIS-ALGORITHMS.md
+---
+
+## Descrizione
+
+Il rilevatore di **eventi**: riconosce nella storia di ascolto i momenti che
+meritano una lettura — un cambio di genere, una sessione eccezionale, un
+picco di intensità — e li rende **insight** narrativi con la loro confidenza.
+
+La story è **sbloccata**: la dipendenza `[DEP:2.1]` è soddisfatta dalla Story
+2.1 (Sessione 63, merge `d018a26`).
+
+## Task
+
+- T2.3.1 — Implementare il rilevatore secondo `04§6`
+- T2.3.2 — Persistenza degli insight con `derivedVersion` (MIG-3) e stato dell'insight
+- T2.3.3 — Test sul fixture di scenario: determinismo e copertura dei casi minimi (`04§6`)
+
+## Acceptance criteria
+
+- [ ] Gli eventi sono deterministici e ricalcolabili a parità di `derivedVersion` (`04§6`)
+- [ ] Ogni insight dichiara la propria confidenza e la copertura dei dati (`04§6`, `04§9`)
+- [ ] Il rilevatore opera **solo** su feature misurate o manuali: l'euristico non alimenta l'analisi (`21§12`, D-AF.4)
+
+## Documenti aggiornati
+
+- (nessuno: la story non è ancora iniziata)
+
+
+
 ===== FILE: docs/state/stories/2.4-memory-engine.md =====
 
 ---
@@ -13018,6 +13824,52 @@ un'implementazione.
 
 
 
+===== FILE: docs/state/stories/3.4-context-ribbon.md =====
+
+---
+id: "3.4"
+title: "Nastro contesto (Timeline)"
+phase: 3
+area: ui
+status: todo
+priority: I
+depends_on: ["1.6", "4.4"]
+spec_refs:
+  - docs/19-GEO-CONTEXT.md
+---
+
+## Descrizione
+
+Il **nastro contesto** sotto le `EraBand` della Timeline (schermata ⑦) e la
+schermata di dettaglio del periodo (⑧): un segmento per `ContextPeriod`,
+colore per `kind`, etichetta paese (+ «circa *città*» solo se la fonte non è
+manuale), pips dei dispositivi, filtri per `kind`/paese/dispositivo e le azioni
+utente (`confirmed` / etichetta / `dismissed`).
+
+**Nessuna mappa**: nessuna dipendenza MapLibre/Leaflet, nessun tile online,
+nessun placeholder cartografico — la scala disponibile (paese, talvolta città)
+non giustifica una mappa, e un tile implicherebbe uscita di rete.
+
+## Task
+
+- T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
+- T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
+- T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
+- T3.4.4 — Nessuna dipendenza cartografica e nessuna richiesta di rete per il nastro
+
+## Acceptance criteria
+
+- [ ] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
+- [ ] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
+- [ ] Il nastro **non** effettua richieste di rete e non carica alcuna mappa
+- [ ] Il periodo senza contesto determinato resta `unknown` e non viene aggregato (`19§5.3`)
+
+## Documenti aggiornati
+
+- (nessuno: la story non è ancora iniziata)
+
+
+
 ===== FILE: docs/state/stories/4.1-audio-features.md =====
 
 ---
@@ -13078,8 +13930,11 @@ acceptance criteria (`21§16`).
 Il **percorso dati** della catena **4.1 (dati) → 2.1 (letture)** è chiuso:
 questa pipeline popola la tabella `features` da cui il mood tracker (Story 2.1,
 Sessione 63) legge valence ed energy. Restano **fuori perimetro e dichiarati**
-la UI (Story 3.x), il lookup MusicBrainz (Story 4.2) e il cambio di licenza
-AGPL-3.0 (D-AF.2, atto del Boss).
+la UI (Story 3.x) e il lookup MusicBrainz (Story 4.2). Il **cambio di licenza
+AGPL-3.0** (D-AF.2) non è più un atto pendente: il project owner lo ha
+ratificato il 2026-10-30 (Sessione 67, issue #201) e il repository è passato
+ad AGPL-3.0. L'obbligo del §13 (offerta del sorgente) è un requisito aperto
+(issue #202).
 
 ## Task
 
@@ -13204,6 +14059,58 @@ un peso non dichiarato è un peso nascosto:
 - `docs/12-DEVOPS.md` §2.1 (la CSP con i tre host)
 - `docs/08-COPY-I18N.md` §2.17 (il namespace `enrichment.*`)
 - `docs/11-BACKLOG.md` §Story 4.1
+
+
+
+===== FILE: docs/state/stories/4.4-db-ip-city.md =====
+
+---
+id: "4.4"
+title: "DB IP→città (geolocalizzazione locale)"
+phase: 2
+area: enrichment
+status: todo
+priority: L
+depends_on: ["1.6"]
+spec_refs:
+  - docs/13-ADR/0009-local-ip-geolocation.md
+  - docs/19-GEO-CONTEXT.md
+---
+
+## Descrizione
+
+Il livello **L2** del contesto: la derivazione della **città** dall'IP tramite
+un database MMDB (DB-IP Lite City, licenza **CC BY 4.0**) **scaricato on-demand**
+e interrogato in-process **durante l'import**, prima che l'IP venga azzerato.
+
+Il database **non** è embedded: esce dal bundle iniziale e dal precache, va in
+Cache Storage, e la sua assenza degrada L2 senza toccare L0/L1 (E24). La
+decisione (D-B.2) ha sostituito la v0.1 dell'ADR, che lo prevedeva embedded.
+
+La città è **sempre stimata**: `cityConfidence` esplicito, soglia 0.6 con
+warning `cityLowConfidence` (E19), copy «circa *X*» e correzione manuale
+(`citySource = 'manual'`).
+
+## Task
+
+- T4.4.1 — Download on-demand del `.mmdb` (fuori dal bundle e dal precache, in Cache Storage), con l'host **dichiarato** nella CSP applicata e la dimensione mostrata prima del download
+- T4.4.2 — Lookup MMDB in-process nella pipeline di import, **prima** dello scarto dell'IP
+- T4.4.3 — Provenance e correzione: `citySource`, `cityConfidence`, soglia 0.6 e warning `cityLowConfidence`
+- T4.4.4 — Freshness: build date del `.mmdb` visibile nella UI, warning `cityDbStale` oltre i 60 giorni
+- T4.4.5 — Attribuzione **CC BY 4.0**: NOTICE/LICENSE, `⑭ Impostazioni` e footer di about
+
+## Acceptance criteria
+
+- [ ] L'IP non esce mai dal dispositivo e, senza `retainIp`, non viene persistito (`19§6.1`)
+- [ ] Senza database la città è `null` e il paese resta (E24)
+- [ ] Il database **non** entra nel bundle iniziale né nel precache (`13-ADR/0009`)
+- [ ] L'host di download è dichiarato **sia** nella CSP applicata **sia** nella spec (`12§2.1`)
+- [ ] L'attribuzione CC BY 4.0 è esposta all'utente
+- [ ] Il valore è sempre presentato come stimato: «circa *X*», mai come fatto (`19§8.3`)
+
+## Documenti aggiornati
+
+- (nessuno: la story non è ancora iniziata)
 
 
 
@@ -14089,8 +14996,8 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 # 01 — Matrice Piattaforme e Dati Ottenibili
 
 > Status: 🟡 DRAFT
-> Versione: 0.7
-> Ultima modifica: Sessione 57 (2026-10-27) — rimandi al percorso di scrittura degli hub (Story 1.5 ratificata)
+> Versione: 0.8
+> Ultima modifica: Sessione 67 (2026-10-30) — edge case geo E19..E24 e matrice di disponibilita del contesto (Story 1.6, ratificata)
 > Scope: MVP europeo
 
 ---
@@ -14251,6 +15158,23 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | E16 | Last.fm | **Nessun export utilizzabile dall'app**: l'export GDPR è manuale, asincrono e incompleto, e richiede di disattivare *"Hide recent listening information"* | L'utente deve degradare la propria privacy per ottenere il file | Il canale MVP è l'API via proxy configurato dall'utente; il percorso file usa gli export di terze parti, senza degradare la privacy (`lastfm.md` §1) |
 | E17 | Last.fm | `mbid` del brano presente solo con `extended=1` e **frequentemente vuoto** | DEDUP-2 non raggiungibile su molti scrobble | Degrado a DEDUP-3 con warning aggregato; `artist.mbid` resta il contributo utile (`lastfm.md` E.LF.5) |
 | E18 | Last.fm | L'API **non emette header CORS** | La fetch cross-origin dalla PWA è bloccata | Proxy CORS configurato dall'utente in Settings, default vuoto → card `disabled` e **zero richieste** (D-LF.0) |
+| E19 | Geo (tutte) | IP non risolvibile nel DB locale (MMDB, `13-ADR/0009`) | `city = null`; il paese resta | Warning `cityUnresolved`; la derivazione L2 non avviene, L0/L1 restano (`19§10`) |
+| E20 | Geo (tutte) | IP riservato o CGNAT (RFC1918, 100.64/10, link-local) | Nessuna geolocalizzazione possibile | Warning `citySkipped`; caso **più frequente** del progetto: le reti mobili usano CGNAT (`19§10`) |
+| E21 | Geo (tutte) | Cambio paese improvviso | `travel`, non errore | Warning `countryShift` (`19§10`) |
+| E22 | Geo (tutte) | Nessun cluster dominante | `unknown`, `confidence` bassa, il periodo non è aggregato | Warning `contextAmbiguous` (`19§10`) |
+| E23 | Geo (tutte) | Re-import con toggle diversi | I campi già persistiti **non** vengono azzerati | Warning `contextStale`; il contesto si ricalcola solo con `recompute()` esplicito (`19§10`) |
+| E24 | Geo (tutte) | Database geo non presente (non scaricato, o download fallito) | `city = null`, `country` resta, il nastro mostra il paese | Warning `cityDbMissing`; L0/L1 reggono da sole (`19§10`, D-B.2) |
+
+### 5.1 Disponibilità dei dati di contesto (matrice geo)
+
+| Livello | Fonte | Spotify | YouTube Music | Apple Music | Last.fm / ListenBrainz | Toggle |
+|---|---|:---:|:---:|:---:|:---:|---|
+| **L0** paese | `conn_country` | ✅ | ⚠️ (`locationInfos`, dietro il toggle `ytLocationInfos`, default OFF) | ❌ | ❌ | `retainCountry` (default ON) |
+| **L2** città | derivato dall'IP via DB-MMDB locale | ✅ (opt-in) | ✅ (opt-in) | ❌ | ❌ | `retainCity` (default OFF) |
+| **L1** contesto dedotto | pattern su paese + ora locale + dispositivo | ✅ | ✅ | ⚠️ (solo L1) | ⚠️ (solo L1) | `deriveContext` (default ON) |
+| dispositivo | `platform` | ✅ | ❌ | ❌ | ❌ | `retainDeviceType` (default ON) / `retainDeviceDetail` (default OFF) |
+
+Specifica: `19-GEO-CONTEXT.md` v1.0 🟢 APPROVED §2, §7.1 · `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED.
 
 ## 6. Strategia di integrazione MVP
 
@@ -14272,6 +15196,8 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.5 | Sessione 47 (2026-10-26, issue #145) | §3.8 riscritto: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/listens` — la doc prescrive l'export per lo storico completo e ne sconsiglia la paginazione; corretti i limiti (`MAX_ITEMS_PER_GET` = 1000, non 100; rate limit 1 req/s, User-Agent obbligatorio, HTTPS only, CORS verificato sul sorgente); `recording_msid` documentato come hash dei metadati (**non** ID univoco per ascolto); `duration_ms` opzionale e di durata catalogo → E12; export non atomico → E13; cross-ref spec adapter `03-ADAPTERS/listenbrainz.md` |
 | 0.6 | Sessione 50 (2026-10-26, issue #144) | §3.7 riscritto: Last.fm **non ha un export utilizzabile dall'app** (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy dell'utente) → il canale MVP è l'API `user.getRecentTracks` via **proxy CORS configurato dall'utente** (l'API non emette `Access-Control-Allow-Origin`: dalla PWA la fetch sarebbe bloccata). Corretti i limiti (`limit` max **200**, non 1000; `artist` è stringa senza `extended=1` e oggetto con `extended=1`; il brano in riproduzione **non ha `date`**; il rate limit non è pubblicato e non ci sono header di rate limit); `mbid` del brano solo con `extended=1` e frequentemente vuoto → tabella §4 corretta da ❌ a ⚠️ per ISRC/MBID e per "brani salvati"; `loved` disponibile ma senza campo nel modello → ⚠️. Aggiunti E14-E18; cross-ref spec adapter `03-ADAPTERS/lastfm.md` |
 | 0.7 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): §3.7 e §3.8 — aggiunto il rimando al **percorso di scrittura** dei due hub (contratto `13-ADR/0011-scrobble-sink.md` 🟢 v1.0): per Last.fm `track.scrobble` con `sk` + `api_sig` (md5 in JS puro, D-SH.11) e trasporto via proxy dell'utente che deve inoltrare una **POST con body**, con **modalità dichiarata** (`solo lettura` / `lettura + scrittura`, D-SH.14); per ListenBrainz `POST /1/submit-listens` con User Token, CORS abilitato e **nessun proxy**. §3.9 — la nota su `PlatformId` ora dice che `scrobbleHubs` è una lista di **`ScrobbleHubId`** (tipo dedicato, `02§3.8`) e non di `PlatformId`. Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.6) |
+| 0.8 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §5.1 nuova — **matrice di disponibilità dei dati di contesto** (L0 paese, L1 contesto dedotto, L2 città, dispositivo) con la colonna dei toggle; §5 — aggiunti gli edge case geo **E19..E24** (rinumerati: nella v0.2 di `19` erano E11..E15, ma **E11..E18 erano già presi** in questo catalogo dagli edge case di ListenBrainz e Last.fm — due significati diversi per lo stesso identificatore); E24 è il caso nuovo «database geo non presente» (D-B.2, download on-demand). |
+
 
 
 ===== FILE: docs/02-DATA-SCHEMA.md =====
@@ -15188,7 +16114,7 @@ Casi minimi:
 
 # Adapter YouTube Music
 
-> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 40 (2026-10-21)
+> Status: 🟢 APPROVED · Versione 2.0 · Ultima modifica: Sessione 67 (2026-10-30, issue #201)
 > Piattaforma: YouTube Music (Google LLC)
 > Sede legale: USA
 > Tier: **S** · Priorità MVP: **sì**
@@ -15282,7 +16208,7 @@ Non vengono accettati altri file del Takeout (`search-history.json`, `MyActivity
 | `deviceType` | — | — | `'unknown'` | Nessun campo dispositivo nell'export |
 | `deviceDetail` | — | — | `null` | Assente |
 | `ip` | — | — | `null` | Mai presente nell'export |
-| `country` | — | — | `null` | **Non derivato da `locationInfos`**: scartati sempre (privacy, §7) |
+| `country` | — | — | `null` | **Non derivato da `locationInfos` per default**: il campo è scartato al parse salvo che il toggle `ytLocationInfos` sia attivo (default OFF, §7) |
 | `day` | (derivato) | `YYYY-MM-DD` | da `timestamp` UTC | indice critico |
 
 **Estrazione `videoId`**: da `titleUrl` via `URLSearchParams(new URL(titleUrl)).get('v')`; gestiti `youtube.com/watch?v=`, `music.youtube.com/watch?v=` e `youtu.be/<id>`.
@@ -15371,7 +16297,7 @@ Copia da `01-PLATFORMS.md` §5 (piattaforma YouTube) + edge case specifici Takeo
 
 | Dato sensibile | Default | Note |
 |----------------|---------|------|
-| `locationInfos` | **sempre scartati al parse** | Potenziale dato geografico sensibile; nessun toggle dedicato nello schema → scarto incondizionato (più restrittivo di `retainIp`); `country` resta `null` |
+| `locationInfos` | **scartati al parse per default** (toggle `ytLocationInfos` OFF) | La **revoca di D.39.8** (Sessione 67, issue #201, `19-GEO-CONTEXT.md` §9) rende il campo disponibile **solo** dietro toggle dedicato: la motivazione originale di D.39.8 («nessun toggle dedicato nello schema») non valeva più. Con il toggle OFF resta lo scarto incondizionato (più restrittivo di `retainIp`) e `country` resta `null`; con il toggle ON il campo concorre con `conn_country`/`ip` per la derivazione L0/L2 (`19` §7.1) |
 | `details[].name` | usato solo per l'euristica di filtro | Mai persistito |
 | `activityControls` | ignorato | Metadato di provisioning Google, nessun valore analitico |
 | IP address | assente dall'export | n/a |
@@ -15391,7 +16317,7 @@ Casi di test minimi:
 6. **E.YT.5 durata assente**: nessun campo durata ovunque → `completed = false`, `skipped = null` su tutti gli eventi
 7. **E.YT.6 duplicato cross-export**: stesso evento (stesso `videoId` + `time`) in due file → un solo ListenEvent
 8. **E10 fuso orario**: `time` con offset `+02:00` → `day` UTC corretto (cambio giorno per eventi vicino a mezzanotte)
-9. **Privacy**: evento con `locationInfos` popolato → nessun dato di location persistito, `country = null`
+9. **Privacy**: evento con `locationInfos` popolato → nessun dato di location persistito e `country = null`, **salvo** che il toggle `ytLocationInfos` sia attivo (default OFF, §7)
 10. **DEDUP**: stesso brano via video musicale (canale VEVO) e topic channel (videoId diversi) → **una sola Track** (fuzzy name+artist, bucket 0)
 11. **E.YT.3 prefisso localizzato**: `title = "Guardato X"` → `name = "X"`
 12. **HTML rifiutato**: file HTML con cronologia → `detect` fallisce con `error.htmlExport`
@@ -15429,6 +16355,7 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.youtub
 |----------|------|-----------|
 | 0.1 | Sessione 39 (2026-10-21) | Prima stesura (issue #96). Decisioni D1-D7 chiuse con il Boss; formato Takeout verificato su fonti 2026. Promozione a 🟢 APPROVED al merge della PR di approvazione |
 | 1.0 | Sessione 40 (2026-10-21) | 🟢 APPROVED · promozione al merge della PR #97 (approvazione Boss) — nessuna modifica di contenuto |
+| 2.0 | Sessione 67 (2026-10-30, issue #201) | **Revoca di D.39.8 applicata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED, §9): `locationInfos` non è più scartato **incondizionatamente** ma dietro il toggle `ytLocationInfos` (default OFF, come `retainIp`). §3 (mappa dei campi): il `country` non è derivato da `locationInfos` **per default**. §7 (comportamento privacy): la riga di `locationInfos` dichiara il nuovo default e la revoca, con la motivazione originale di D.39.8 («nessun toggle dedicato nello schema») dichiarata superata. §8 (edge case 9): lo scarto vale salvo toggle attivo. Il perimetro della derivazione L0/L2 è in `19-GEO-CONTEXT.md` §7.1 |
 
 
 
@@ -18572,7 +19499,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.8 · Sessione 62 (2026-10-28, issue #187)
+> Status: 🟡 DRAFT · Versione 0.9 · Sessione 67 (2026-10-30, issue #201)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -18748,6 +19675,13 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `preferences` | Preferenze | Preferences |
 | `privacy.retainIp` | Conserva indirizzi IP | Retain IP addresses |
 | `privacy.retainIpDesc` | Gli IP restano solo sul tuo dispositivo | IPs stay only on your device |
+| `privacy.retainCountry` | Conserva il paese di connessione | Retain connection country |
+| `privacy.retainCountryDesc` | Il paese resta anche senza l'IP: è un dato derivato, non identificativo | The country stays even without the IP: derived, non-identifying |
+| `privacy.retainCity` | Deduce la città dall'IP | Derive the city from the IP |
+| `privacy.retainCityDesc` | Stima incerta e opt-in: richiede il database locale | Uncertain, opt-in estimate: needs the local database |
+| `privacy.retainDeviceType` | Conserva il tipo di dispositivo | Retain device type |
+| `privacy.retainDeviceDetail` | Conserva la stringa grezza del dispositivo | Retain the raw device string |
+| `privacy.deriveContext` | Deduce il contesto (casa, lavoro, viaggio) | Infer context (home, work, travel) |
 | `privacy.enrich` | Arricchimento metadati online | Online metadata enrichment |
 | `privacy.enrichDesc` | Recupera audio features da fonti esterne | Fetch audio features from external sources |
 | `privacy.carDetection` | Rileva ascolti in auto | Detect car listening |
@@ -19103,13 +20037,15 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.6 | Sessione 58 (2026-10-28, issue #173) | **Story 1.5 — UI del percorso di scrittura**: §2.12f (nuova) le chiavi di interfaccia del pannello scrobbling (`settings.scrobble.*`: selettore per-hub, modalità del proxy, vista della coda) e §2.12g (nuova) le chiavi del percorso **web auth** Last.fm (`settings.lastfm.auth*`). Il namespace `scrobble` di §2.16 (i 15 codici di errore e avviso) è stato **materializzato** nei locale `it`/`en` dell'app, con le varianti `_one`/`_other` per le quattro stringhe con `{count}` |
 | 0.7 | Sessione 59 (2026-10-28, issue #178) | **§2.15 `insight.*` — i template dei ricordi** (`memory.onThisDay`, `memory.firstTime`, `memory.milestone.*`, `memory.return`, `memory.seasonal`, `memory.disclaimer*`): la ratifica di `04-ANALYSIS-ALGORITHMS.md` (v1.0 🟢 APPROVED) li dichiara **vincolanti** (D-A.4). Riga di changelog mancante: la modifica c'era (Sessione 59) ma il header e la tabella erano rimasti a **v0.6** — il drift è stato corretto dalla Sessione 62 (issue #187) |
 | 0.8 | Sessione 62 (2026-10-28, issue #187) | **§2.17 `enrichment.*` (nuova) — Story 4.1**: le **otto chiavi** della pipeline audio features elencate da `21-AUDIO-FEATURES.md` §14, con i testi IT ed EN: gli stati della pipeline (`queued`, `analyzing`, `done`, `estimated`, `no_audio`, `disabled`), l'avviso **prima** del download del WASM (`download.size`, ~6 MB una volta sola) e l'avviso aggregato in Settings (`error.aggregate`, con pluralizzazione §3). §1: il namespace `enrichment` aggiunto alla tabella dei namespace. Il **confine "stima ≠ misura"** è dichiarato nei testi: `enrichment.status.estimated` è l'unica chiave che può descrivere una feature euristica e non usa mai la parola "analizzato" (`21§12`, D-AF.4). Header allineato (era fermo a **v0.6** dal Sessione 58, mentre il changelog era già alla 0.5 e `docs/INDEX.md` dichiarava v0.7) |
+| 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
+
 
 
 ===== FILE: docs/09-PRIVACY-SECURITY.md =====
 
 # 09 — Privacy & Security
 
-> Status: 🟡 DRAFT · Versione 0.6 · Sessione 62 (2026-10-28)
+> Status: 🟡 DRAFT · Versione 0.7 · Sessione 67 (2026-10-30, issue #201)
 > ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
 > (§7) DEVE essere revisionata da un professionista legale qualificato prima
 > del lancio pubblico. Questo documento non costituisce consulenza legale.
@@ -19169,6 +20105,7 @@ Definire:
      └─────────────────────────────────────────────────────────────┘
 
 **Nota (opzione A, issue #108)**: il `country` è derivato dall'IP e conservato **indipendentemente dal toggle `retainIp`** (`02` §3.8): anche quando l'IP viene scartato (`retainIp = false`), il paese resta nel DB locale come dato derivato non identificativo. Il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP stesso.
+**Nota (ratifica `19-GEO-CONTEXT.md` v1.0 🟢 APPROVED, Sessione 67)**: la **città** segue la stessa logica del paese ed è più sensibile: è derivata dall'IP **prima** che l'IP venga azzerato (nella pipeline di import, `adapters/pipeline.ts:92`), nel DB resta solo come dato derivato (`city`, `citySource`, `cityConfidence`) e l'IP resta scartato. La derivazione è condizionata alla presenza del database MMDB locale, **scaricato on-demand e non embedded** (`13-ADR/0009` v1.0 🟢, D-B.2): senza database non c'è città, ma il paese resta. Il valore è **sempre stimato**: la UI lo introduce con un indicatore di incertezza ("circa") e la soglia `cityConfidence` 0.6 scarta sotto il rumore.
 
                            │ SOLO se toggle specifici ON:
                            ▼
@@ -19219,6 +20156,9 @@ Definire:
 | Paese di connessione | Dati personali (derivato, non identificativo) | Derivato da IP | Sì (locale) | Necessario al servizio — consenso solo per `retainIp` |
 | Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
 | Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale), `car` solo se `carDetectionConsent` | Consenso esplicito |
+| **Città stimata** (`city`, `citySource`, `cityConfidence`) | Dati derivati (potenzialmente sensibili) | Derivato localmente dall'IP via DB-MMDB locale (`13-ADR/0009`) | Sì (locale), **solo se `retainCity`** | Consenso esplicito (toggle `retainCity`) |
+| **Contesto dedotto** (`ContextPeriod`: casa/lavoro/viaggio, etichetta dell'utente) | Dati derivati (potenzialmente sensibili) | Calcolo locale sugli eventi | Sì (locale); `userLabel` solo se l'utente lo scrive | Consenso esplicito (toggle `deriveContext`) |
+| **Database geo locale** (`.mmdb`, DB-IP Lite City) | **Non è dato personale** | File pubblico scaricato dall'utente | Sì (locale, Cache Storage) | — |
 | Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
 | **Audio features** (valence, energy, danceability, BPM, tonalità) | Dati derivati (potenzialmente sensibili) | Calcolo locale (Essentia.js) o dataset pubblico (AcousticBrainz) o stima euristica | Sì (locale, tabella `features`) | Consenso esplicito (toggle `enrichMetadata`) |
 | **Query di ricerca per l'arricchimento** (nome brano + artista) | Dati personali | Ricerca su servizi pubblici | **No** — solo nel log di rete, senza PII | Consenso esplicito (toggle `enrichMetadata`) |
@@ -19303,6 +20243,13 @@ piattaforma di streaming (Spotify, Apple Music, YouTube Music, ecc.):
 cronologia ascolti, brani, artisti, timestamp, e — se lo attivi tu — indirizzi IP.
 
 Tutti questi dati restano sul tuo dispositivo. Non li inviamo a nessun server.
+**La città, se la attivi**: l'app può stimare la tua città a partire
+dall'indirizzo IP che la piattaforma ti ha già dato nell'export. La stima
+avviene **sul tuo dispositivo** (un database locale scaricato al primo uso, non
+incluso nell'app), il risultato viene salvato come dato derivato — mai come
+fatto: te lo mostriamo come "circa *Parigi*" — e l'indirizzo IP viene comunque
+scartato. Puoi lasciare l'opzione disattivata: il paese resta comunque
+disponibile.
 
 **Credenziali di piattaforma**: quando colleghi un account esterno (per esempio
 ListenBrainz, o Last.fm per il percorso API), la chiave di accesso che ci serve
@@ -19453,6 +20400,8 @@ email).
 | 0.4 | 2026-10-26 (issue #144) | §4: cinque righe nuove per Last.fm (username, API key, shared secret, session key `sk`, URL del proxy) — tutte locali (Dexie), mai nel bundle, mai nei log. §7.2: nota sul **proxy** — è di fiducia dell'utente, vede la sua API key, e l'import da file ne evita l'esposizione |
 | 0.5 | 2026-10-27 (issue #172) | **Story 1.5 — percorso di scrittura ratificato** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED, `05§4.2` ADR-0011 🟢 v1.0): §3.3 — la riga "Brano + timestamp ascolto" dichiara il **payload esatto** e il fatto che sia **chiuso per costruzione** (nessun campo per contesto, device, IP o insight: `retainIp` non è applicabile alla scrittura); §4 — tre righe nuove (payload di scrobbling, coda `scrobbleOutbox`, User Token e `sk` **in scrittura**) e una nota che chiarisce dove stanno i segreti (storage locale, mai nel payload né nei log) e cosa succede alla coda quando il consenso viene revocato. Header allineato (era fermo a v0.2 dal Sessione 6, mentre il changelog era già alla 0.4) |
 | 0.6 | 2026-10-28 (issue #187) | Allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): §3.1 il diagramma del flusso di rete non cita più **FreqBlog** (provider mai esistito, già rimosso da `02§3.4` e dalla CSP) ma i tre host reali (MusicBrainz, iTunes Search API, AcousticBrainz), e dichiara che l'anteprima audio di 30 s viene **analizzata in locale e non persiste**; §3.3 le tre righe di "cosa esce" (query per nome brano + artista, MBID, anteprima audio elaborata in locale); §4 le due righe mancanti dell'inventario (**audio features** e **query di ricerca** per l'arricchimento); §7.4 il testo pubblico della privacy policy aggiorna i servizi e dichiara il trattamento locale dell'anteprima. La riga **0.1** ("Prima versione completa") è stata riposizionata **in cima** alla tabella: era stata appesa fra la 0.4 e la 0.5 |
+| 0.7 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §3.1 — la nota sulla derivazione della **città** (derivata dall'IP prima dello scarto, conservata solo come dato derivato, condizionata al database MMDB scaricato on-demand, sempre stimata); §4 — tre righe di inventario nuove (`city`/`citySource`/`cityConfidence`, `ContextPeriod` con l'etichetta dell'utente, database geo locale che **non è dato personale**); §7.2 — il paragrafo pubblico sulla città stimata e sul suo essere «circa *X*». |
+
 
 
 ===== FILE: docs/10-TESTING.md =====
@@ -19630,7 +20579,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.26 · Sessione 64 (2026-10-30, issue #188) · la **Story 4.1 (Pipeline audio features) è completata** (PR #197 merged il 2026-10-30, merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) contiene il contratto `AudioFeatureProvider`, la cascata `cache → Essentia.js → AcousticBrainz → euristico`, la normalizzazione dichiarata, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i tre trigger e il budget, e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. La **Story 2.1 (Mood Tracker)** è il consumer finale: il percorso dati è chiuso e la catena **4.1 (dati) → 2.1 (letture)** è completa. Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss)
+> Status: 🟢 APPROVED · Versione 1.6.28 · Sessione 67 (2026-10-30, issue #201) · la **Story 4.1 (Pipeline audio features) è completata** (PR #197 merged il 2026-10-30, merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) contiene il contratto `AudioFeatureProvider`, la cascata `cache → Essentia.js → AcousticBrainz → euristico`, la normalizzazione dichiarata, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i tre trigger e il budget, e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. La **Story 2.1 (Mood Tracker)** è il consumer finale: il percorso dati è chiuso e la catena **4.1 (dati) → 2.1 (letture)** è completa. Fuori perimetro e dichiarato: la UI (Story 3.x) e il lookup MusicBrainz (Story 4.2). Il **cambio di licenza AGPL-3.0** (D-AF.2) è **stato eseguito** (Sessione 67, issue #201): il repository è passato ad AGPL-3.0 e l'obbligo del §13 è il requisito aperto dell'issue #202
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -19978,6 +20927,27 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 1.6 — Fondazione geo e contesto di ascolto `[PHASE-2]` `[AREA:db]` `[PRI:I]` `[SIZE:L]` `[DEP:0.2]`
+
+**Descrizione**: La base dati del contesto di ascolto: il delta su `02-DATA-SCHEMA.md` (v1.7, Dexie v5→v6) con i campi `city`/`citySource`/`cityConfidence` e l'entità derivata `ContextPeriod` (tabella `contexts`), i toggle `retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, e il classificatore **L1** (contesto dedotto: casa, lavoro, viaggio) come algoritmo deterministico e versionato.
+
+**Stato**: ⬚ **TODO** — la specifica è **ratificata** (`docs/19-GEO-CONTEXT.md` v1.0 🟢 APPROVED, Sessione 67, issue #201; `docs/13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED). L'implementazione non è iniziata: manca l'issue di claim. Il **delta su `02`** è ratificato come decisione e viene applicato **in questa story** (v1.7, Dexie v5→v6), come avvenuto per la `21` nella Story 4.1.
+
+**Task**:
+- T1.6.1 — Applicare il delta a `02-DATA-SCHEMA.md` (v1.7): `city`/`citySource`/`cityConfidence` su `ListenEvent`, `ContextPeriod`, tabella `contexts`, toggle, migrazione Dexie v5→v6
+- T1.6.2 — Classificatore L1 deterministico e versionato (`19§5`): le regole R1..R7 nell'ordine dichiarato, la soglia 0.5, il `derivedVersion` (MIG-3)
+- T1.6.3 — Persistenza dei periodi con `recompute()` e `userLabel` (verdetto utente: `confirmed`/`corrected`/`dismissed`)
+- T1.6.4 — Test sul fixture di scenario: il classificatore è ricalcolabile e deterministico a parità di `derivedVersion`
+
+**Acceptance criteria** (da `19` v1.0 🟢):
+- [ ] Il classificatore produce gli stessi periodi a parità di input e di `derivedVersion` (`19§5.2`)
+- [ ] Un periodo sotto la soglia 0.5 **non** viene aggregato (`19§5.3`, E22)
+- [ ] `country` resta derivato e conservato indipendentemente da `retainIp` (issue #108)
+- [ ] `car` è classificabile solo con `carDetectionConsent` attivo (`19§5.3`)
+
+**Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §4, §5, §7 · `docs/13-ADR/0009-local-ip-geolocation.md` (v1.0 🟢 APPROVED) · `docs/02-DATA-SCHEMA.md` §3.8 · `docs/09-PRIVACY-SECURITY.md` §3.1, §4
+
+---
 ## EPIC 2 — Analisi (Fase 2)
 
 ### Story 2.1 — Mood Tracker giornaliero `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
@@ -20050,6 +21020,26 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 3.4 — Nastro contesto (Timeline) `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:M]` `[DEP:1.6, 4.4]`
+
+**Descrizione**: Il nastro contesto sotto le `EraBand` della Timeline (schermata ⑦) e la schermata di dettaglio del periodo (⑧): un segmento per `ContextPeriod`, colore per `kind`, etichetta paese (+ «circa *città*» solo se la fonte non è manuale), pips dei dispositivi, filtri per `kind`/paese/dispositivo, azioni utente (`confirmed` / etichetta / `dismissed`).
+
+**Stato**: ⬚ **TODO** — la specifica è ratificata (`19` v1.0 🟢 §8.2-8.3, Sessione 67). **Nessuna mappa**: nessuna dipendenza cartografica, nessun tile online — la scala disponibile non lo giustifica e un tile implicherebbe uscita di rete.
+
+**Task**:
+- T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
+- T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
+- T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
+- T3.4.4 — Nessuna dipendenza MapLibre/Leaflet e nessuna richiesta di rete per il nastro
+
+**Acceptance criteria** (da `19` v1.0 🟢):
+- [ ] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
+- [ ] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
+- [ ] Il nastro **non** effettua richieste di rete
+
+**Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §8.2-8.3 · `docs/08-COPY-I18N.md` §2.12h · `docs/06-UX-FLOWS-STATES.md` (schermata ⑦)
+
+---
 ## EPIC 4 — Arricchimento (Fase 2/3)
 
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
@@ -20108,6 +21098,29 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 4.4 — DB IP→città (geolocalizzazione locale) `[PHASE-2]` `[AREA:enrichment]` `[PRI:L]` `[SIZE:L]` `[DEP:1.6]`
+
+**Descrizione**: Il livello **L2** del contesto: la derivazione della città dall'IP tramite un database MMDB (DB-IP Lite City, CC BY 4.0) **scaricato on-demand** e interrogato in-process durante l'import, **prima** che l'IP venga azzerato. Il database non è embedded: esce dal bundle e dal precache, va in Cache Storage, e la sua assenza degrada L2 senza toccare L0/L1.
+
+**Stato**: ⬚ **TODO** — la specifica è ratificata (`13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED, Sessione 67, issue #201; D-B.2). L'implementazione non è iniziata: manca l'issue di claim.
+
+**Task**:
+- T4.4.1 — Download on-demand del `.mmdb` (fuori dal bundle e dal precache, in Cache Storage), con l'host **dichiarato** nella CSP applicata (`12§2.1`) e l'utente informato della dimensione prima del download
+- T4.4.2 — Lookup MMDB in-process nella pipeline di import, **prima** dello scarto dell'IP (`19§6.1`)
+- T4.4.3 — Provenance e correzione: `citySource` (`dbip-lite`/`manual`), `cityConfidence`, soglia 0.6 con warning `cityLowConfidence`
+- T4.4.4 — Freshness: build date del `.mmdb` visibile nella UI, warning `cityDbStale` oltre i 60 giorni
+- T4.4.5 — Attribuzione **CC BY 4.0**: NOTICE/LICENSE, `⑭ Impostazioni` e footer di about
+
+**Acceptance criteria** (da `13-ADR/0009` v1.0 🟢 e `19` v1.0 🟢):
+- [ ] L'IP non esce mai dal dispositivo e, senza `retainIp`, non viene persistito (`19§6.1`)
+- [ ] Senza database la città è `null` e il paese resta (E24)
+- [ ] Il database **non** entra nel bundle iniziale né nel precache
+- [ ] L'host di download è dichiarato nella CSP applicata **e** nella spec (`12§2.1`, la lezione della issue #196)
+- [ ] L'attribuzione CC BY 4.0 è esposta all'utente
+
+**Spec**: `docs/13-ADR/0009-local-ip-geolocation.md` (v1.0 🟢 APPROVED, Sessione 67) · `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED) §6 · `docs/09-PRIVACY-SECURITY.md` §3.1, §4, §7.2
+
+---
 ## EPIC 5 — Privacy e legale (Fase 6)
 
 ### Story 5.1 — Privacy spec finale `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
@@ -20173,8 +21186,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`)
 14. **3.1, 3.2, 3.3** UI
-15. **5.1, 5.2** privacy
-16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
+15. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1), la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
+16. **5.1, 5.2** privacy
+17. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
 **Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
@@ -20189,12 +21203,15 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
-| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork) e i generi |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
+| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1, la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
 **EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 5/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment · 1.5 scrobbling hub). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
+> **Aggiornato al 2026-10-30** (Sessione 67, issue #201: gli **atti del project owner** sono chiusi — la ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢) e dell'ADR-0009 (v1.0 🟢) e l'applicazione della **licenza AGPL-3.0** (D-AF.2). Le tre story della tranche geo — **1.6** (fondazione geo), **4.4** (DB IP→città) e **3.4** (nastro contesto) — entrano nella roadmap con la specifica già ratificata; le story **2.2** e **2.3** ricevono il loro state file (la dipendenza `[DEP:2.1]` è soddisfatta dal merge della 2.1). Con i loro state file il blocco NEXT-STEP del README punta alla **prima story lavorabile** invece del fallback. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
+>
 > **Aggiornato al 2026-10-30** (Sessione 64, issue #188: la 4.1 è **completata** — PR #197 merged `7458220` — e il suo `**Stato**:` passa a ✅ DONE; la riga dell'EPIC 4 torna a ⬚ TODO perché restano **4.2** (lookup MusicBrainz), **4.3** (artwork) e i generi. Con la 4.1 e la 2.1 completate il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata": è la risposta **corretta**, non una regressione — le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
 >
 > **Aggiornato al 2026-10-28** (Sessione 58, issue #173: la 1.5 rimossa dalla roadmap perché implementata e mergiata con la PR #176, e il suo `**Stato**:` allineato a ✅ — l'EPIC 1 è 5/5. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
@@ -20282,6 +21299,7 @@ Ogni story deve avere label GitHub:
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
+| 1.6.28 | Sessione 67 (2026-10-30, issue #201) | **Atti del project owner chiusi**: ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED) e dell'ADR-0009 (v1.0 🟢 APPROVED) e applicazione della **licenza AGPL-3.0** (D-AF.2). Aggiunte le tre story della tranche geo — **1.6** (fondazione geo: delta su `02` v1.7 / Dexie v5→v6, tabella `contexts`, classificatore L1), **4.4** (DB MMDB on-demand + derivazione della città, `13-ADR/0009` v1.0) e **3.4** (nastro contesto) — con le rispettive Task e AC; la priorità di lavorazione le inserisce al posto 15 (L2 è opt-in, L0/L1 reggono da sole); la roadmap aggiunge la riga della tranche geo e aggiorna quella dell'EPIC 4 con la 4.4; le **2.2** e **2.3** ricevono il loro state file (dipendenza `[DEP:2.1]` soddisfatta, AC in `04` v1.0 🟢), così il blocco NEXT-STEP del README punta alla prima story lavorabile. Header allineato (la licenza non è più un atto del Boss pendente) |
 
 <!-- AGGREGATE-STORIES-END -->
 
@@ -20291,7 +21309,7 @@ Ogni story deve avere label GitHub:
 
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.1 · Sessione 66 (2026-10-30, issue #196) · gate "fatti del README"
+> Status: 🟡 DRAFT · Versione 1.2 · Sessione 67 (2026-10-30, issue #201) · gate "fatti del README"
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -20478,6 +21496,7 @@ Content-Security-Policy:
 **Aggiornamento (Sessione 62, spec `21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED)**: la pipeline delle audio features ha due host in più, entrambi dichiarati nella spec (D-AF.9): `https://acousticbrainz.org` per il bonus sui MBID e `https://audio-ssl.itunes.apple.com` per il **download dell'anteprima audio di 30 s**, che viene analizzata in locale e non esce dal dispositivo. Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`.
 
 **Aggiornamento (Sessione 66, spec `21-AUDIO-FEATURES.md` v1.1 🟢 APPROVED, issue #196)**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (`GET https://itunes.apple.com/search`). La v1.0 della spec elencava i due host che **non** sono quello della ricerca: la CSP bloccava la richiesta e la pipeline degradava sempre ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate). Il project owner ha **ratificato il terzo host** (D-AF.9 emendata): i **tre** host sono gli unici aggiunti, nessun altro servizio entra in `connect-src`. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della Story 4.1: questa è l'allineamento della **dichiarazione** al codice.
+**Nota (Sessione 67, `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED, D-B.2)**: il download on-demand del database geo introduce **un host nuovo** che qui **non è ancora dichiarato**. L'host va aggiunto a `connect-src` — e il file scaricato servito da un'origine dichiarata in `script-src` — **nella story che implementa la Story 4.4**, insieme al codice che lo scarica. La regola è quella imparata con la issue #196: la CSP applicata e la spec devono dire la stessa cosa; un host usato dal codice e non dichiarato è una richiesta bloccata.
 
 ### 5.2 Altri Headers di Sicurezza
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
@@ -20485,6 +21504,13 @@ Content-Security-Policy:
 - `X-Frame-Options: DENY`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Permissions-Policy: microphone=(), camera=(), geolocation=()` (Disabilita accesso a hardware sensibile non necessario).
+### 5.3 Licenza e offerta del sorgente (AGPL-3.0)
+
+Il repository è sotto **AGPL-3.0** (`LICENSE`), non Apache-2.0: `essentia.js` è AGPL-3.0 e la PWA distribuisce il modulo acustico agli utenti (D-AF.2, `21-AUDIO-FEATURES.md` §2.4; ratificata dal project owner il 2026-10-30, issue #201).
+
+L'obbligo operativo è il **§13** della licenza: chi modifica l'app e la mette a disposizione su una rete deve offrire a tutti gli utenti che interagiscono con essa **l'opportunità di ricevere il Corresponding Source** della propria versione. Per un progetto open-source puro l'offerta è il repository pubblico, ma **deve essere dichiarata in-product**: è il requisito dell'issue **#202**, non ancora implementato.
+
+Deliverable della story che lo implementa: un NOTICE con le attribuzioni delle terze parti distribuite (Essentia.js AGPL-3.0; DB-IP Lite CC BY 4.0 quando la Story 4.4 lo introduce) e un riferimento alla licenza nelle schermate di about e nelle Impostazioni.
 
 ---
 
@@ -21036,6 +22062,7 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 0.9 | Sessione 54 (2026-10-27) | **§9.8f gate "fatti del README"** (issue #161): il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti), audio features e analisi/mood/ricordi come feature presenti, e un conteggio di stato duplicato — la prosa era quella del bootstrap (`ebdab9d`, 2026-10-14) perché i merge delle Story 1.2 e 1.3 non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice (pipeline verde, README falso). Causa radice di **ownership**, non di tooling: `README.md` è ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) e non era in nessuna tabella di ownership; la regola nuova è in `AGENTS.md` §"Ownership del `README.md`" (D.161.1). Gate: `scripts/check-readme-facts.mjs`, **read-only** (0 = in sync, 1 = drift, 2 = errore di ambiente): confronta l'elenco delle piattaforme con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` + le classi in `packages/core/src/adapters/`, vieta le capability EPIC 2/EPIC 4 fuori dalla roadmap, vieta i conteggi duplicati in prosa. **Nessuna modalità di scrittura**: il README è già target di `aggregate-state.ps1`, e un secondo writer riprodurrebbe la race fra i writer di `main` risolta dal #149. Test di scenario negativo `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert). **§9.10** aggiornata: 18 step, con i due nuovi gate in posizione 17 e 18 (entrambi bloccanti). |
 | 1.0 | Sessione 62 (2026-10-28) | **§2.1 CSP** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED, issue #187): `connect-src` aggiunge i due host della pipeline delle audio features (D-AF.9) — `https://acousticbrainz.org` (bonus sui MBID) e `https://audio-ssl.itunes.apple.com` (download dell'anteprima audio di 30 s, analizzata **in locale**: i byte non escono e non vengono persistiti). Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`. `'wasm-unsafe-eval'` era già presente per Essentia.js e resta |
 | 1.1 | Sessione 66 (2026-10-30) | **§2.1 CSP**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (issue #196, ratifica del project owner). La v1.0 della spec `21-AUDIO-FEATURES.md` elencava in `connect-src` i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico — Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati (D.A.1). **D-AF.9 è emendata** (`21` v1.1): i **tre** host sono gli unici aggiunti. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della PR #197 (Sessione 64): la modifica è l'allineamento della **dichiarazione** al codice |
+| 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
 
 
 
@@ -21593,7 +22620,10 @@ Perché è V3 e non un'eccezione one-shot: il pattern è identico ("marker + Bui
 
 # ADR-0009 — Geolocalizzazione IP locale e derivazione in pipeline
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 41
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 67 (2026-10-30)
+> Ratificato dal project owner il 2026-10-30 (issue #201). Vincolante per `19-GEO-CONTEXT.md` §6, `02-DATA-SCHEMA.md` §3.8, `09-PRIVACY-SECURITY.md` §3.2.
+
+---
 
 ## Contesto
 
@@ -21608,65 +22638,72 @@ Resta la domanda: **dove vive il database IP→città, e chi lo interroga?**
 
 ## Decisione
 
-**Geolocalizzazione IP interamente locale, con database MMDB embedded nell'applicazione, interrogato in-process durante l'import.**
+**Geolocalizzazione IP interamente locale, con database MMDB scaricato al primo uso e interrogato in-process durante l'import.**
 
 - **Sorgente dati: DB-IP Lite City** (formato MaxMind `.mmdb`), licenza **CC BY 4.0**.
-- **Nessuna egress**: nessuna richiesta di rete, nessuna chiave API, nessun account.
+- **Il database NON è embedded nel bundle**: si scarica **on-demand al primo uso** (D-B.2, ratificata dal project owner il 2026-10-30, issue #201), si mette in **Cache Storage** e non entra nel precache del service worker (`12§2.1`). Il budget del bundle iniziale (`05§10`: 300 KB gzip) resta quindi **intatto**: è questa la ragione che scioglie il punto aperto della v0.1.
+- **Nessuna egress dei dati dell'utente**: nessuna richiesta di rete che porti l'IP dell'utente a un terzo, nessuna chiave API, nessun account. L'unica rete ammessa è il download del **database** (un file pubblico, richiesto dall'utente, che non contiene dati dell'utente).
 - **Nessuna persistenza dell'IP** derivata dal lookup: l'IP resta un input effimero; in DB finisce solo il campo derivato (`city`, `citySource`, `cityConfidence`), e l'IP solo se `retainIp` è attivo.
-- **Il lookup è parte della normalizzazione** dell'adapter, non un arricchimento asincrono: `city` è disponibile nello stesso momento in cui l'evento viene scritto.
-- **La città è sempre un dato stimato**: `cityConfidence` esplicito, soglia di scarto sotto 0.6, copy "circa X", correggibile dall'utente con `citySource = 'manual'`.
-
-Il carico del DB sul bundle della PWA e la sua freschezza sono il principale costo di questa scelta e restano un **punto aperto** (§"Punti aperti").
+- **Il lookup è parte della normalizzazione** dell'adapter, non un arricchimento asincrono: `city` è disponibile nello stesso momento in cui l'evento viene scritto — *se* il database è presente.
+- **La città è sempre un dato stimato**: `cityConfidence` esplicito, soglia di scarto sotto 0.6 (costante misurabile, D-B.3), copy "circa X", correggibile dall'utente con `citySource = 'manual'`.
+- **Senza database non c'è città**: la derivazione è condizionata alla presenza del `.mmdb`; senza, `city = null`, `country` resta e l'utente vede l'avviso (edge case **E21**, `19§10`).
 
 ## Motivazioni
 
-- **Non c'è alternativa locale credibile.** `GeoLite2` di MaxMind è il free tier più diffuso, ma è la scelta sbagliata per un progetto open source: la GeoLite EULA vieta la ridistribuzione del database in un prodotto senza una **Commercial Redistribution License** a pagamento, e lega chi la riceve agli stessi vincoli — incompatibile con Apache-2.0.
+- **Non c'è alternativa locale credibile.** `GeoLite2` di MaxMind è il free tier più diffuso, ma è la scelta sbagliata per un progetto open source: la GeoLite EULA vieta la ridistribuzione del database in un prodotto senza una **Commercial Redistribution License** a pagamento, e lega chi la riceve agli stessi vincoli.
+  > **Nota (Sessione 67, D-B.1)**: l'obiezione **non dipende dalla licenza dell'app**. Resta valida anche dopo il passaggio ad **AGPL-3.0**: il vincolo è della EULA di MaxMind, non della licenza del progetto. Nella v0.1 la motivazione era formulata come «incompatibile con Apache-2.0» — la ragione è cambiata, la conclusione no.
 - **DB-IP Lite è realmente ridistribuibile** (CC BY 4.0): l'unico onere è l'attribuzione, che è una riga in `⑭ Impostazioni` e nel footer di about. Nessun account, nessun `license key`, aggiornamento mensile.
 - **Formato compatibile**: MMDB è lo standard di fatto e lo stesso reader funziona con GeoLite2 o IPinfo se l'utente vuole sostituirlo. Il codice di lookup non è legato al fornitore.
 - **Nessun dato esce dal dispositivo**: la promessa di `09` §3.2 resta vera letteralmente, e il §7 della privacy policy non deve cambiare.
 - **Costo di esercizio nullo**: nessuna chiave da ruotare, nessuna quota, nessun costo per utente — coerente con il business model open-source puro (D.10.x).
 - **Coerenza con il principio "normalizza presto"** (`ADR-0003`): il dato viene derivato al parse, non in un secondo momento, quindi il `Listens` è completo e autosufficiente.
+- **Il download on-demand è lo stesso pattern già deciso per il WASM di Essentia** (`21§6.5`): fuori dal bundle iniziale, fuori dal precache, in Cache Storage con `CacheFirst`. Un solo modello mentale per due asset pesanti.
 
 ## Alternative considerate
 
 | # | Alternativa | Esito | Motivo |
 |---|---|---|---|
 | **A1** | **API di geolocalizzazione remota** (ip-api.com, ipinfo, MaxMind GeoIP2 Web Service) | ❌ scartata | Invia l'IP dell'utente a un terzo: viola `09` §3.2 e `ADR-0002`, aggiunge un costo per utente e una dipendenza di disponibilità. Per un lookup offline e per 200k eventi anche le prestazioni sono insufficienti |
-| **A2** | **MaxMind GeoLite2 embedded** | ❌ scartata | Licenza non consente la ridistribuzione in un prodotto Apache-2.0 senza licenza commerciale a pagamento che vincola downstream |
-| **A3** | **MaxMind GeoLite2 scaricato al primo uso** (con account + license key) | ⚠️ **fallback** | Tecnicamente legittimo e più accurato, ma impone a ogni utente un account MaxMind prima di poter usare la funzione. Tenuto come via di fuga se la dimensione embedded (punto aperto 2) risultasse inaccettabile |
+| **A2** | **MaxMind GeoLite2 embedded** | ❌ scartata | Licenza non consente la ridistribuzione in un prodotto senza licenza commerciale a pagamento che vincola downstream — indipendentemente dalla licenza dell'app (D-B.1) |
+| **A3** | **MaxMind GeoLite2 scaricato al primo uso** (con account + license key) | ❌ scartata | Tecnicamente legittimo e più accurato, ma impone a ogni utente un account MaxMind prima di poter usare la funzione. Il **pattern** download-on-demand è stato però adottato (D-B.2), con DB-IP Lite che non chiede account |
 | **A4** | **Solo `country` (L0), nessuna città** | ❌ scartata | Scelta del Boss: il perimetro comprende L2. resta però il fallback operativo se L2 venisse abbandonato — in tal caso il progetto continua a funzionare con `country` + contesto dedotto |
 | **A5** | **Derivazione lato server (batch)** | ❌ scartata | Contraria ad `ADR-0002`, e costerebbe il vantaggio privacy per cui L2 esiste |
-| **A6** | **DB ospitato dall'utente (path custom)** | ⚠️ supportata | Prevista come opzione avanzata: l'utente può puntare a un proprio `.mmdb`. Copre l'utente enterprise/privacy che non vuole il DB embedded |
+| **A6** | **DB ospitato dall'utente (path custom)** | ⚠️ supportata | Prevista come opzione avanzata: l'utente può puntare a un proprio `.mmdb`. Copre l'utente enterprise/privacy che non vuole il DB scaricato dall'app |
+| **A7** | **DB-MMDB embedded nel bundle** | ❌ scartata | Era la decisione della v0.1: un `.mmdb` City Lite è di decine di MB e **sfonda necessariamente** il budget di 300 KB gzip (`05§10`). Il project owner ha ratificato il **download on-demand** (D-B.2) |
 
 ## Conseguenze
 
-- **Positive**: nessuna egress, nessun costo, nessun account, funziona offline e in PWA, dato derivato e non identificativo, provider sostituibile (MMDB).
+- **Positive**: nessuna egress dei dati dell'utente, nessun costo, nessun account, funziona offline dopo il primo download, dato derivato e non identificativo, provider sostituibile (MMDB), budget del bundle intatto.
 - **Negative**:
-  - **Dimensione del bundle**: un DB City Lite è ordini di grandezza più grande di un Country Lite (pochi MB): va misurato in uno spike prima della ratifica.
-  - **Freschezza mensile**: le allocazioni di blocchi IP cambiano; il DB invecchia tra una release e l'altra.Va esposto il *build date* del MMDB nella UI e la sua staleness è un fatto visibile, non un dettaglio nascosto.
+  - **Il database è una dipendenza esterna all'utente**: senza rete (o senza aver scaricato il file) la città non c'è. Il paese — il dato su cui poggia il nastro (`19` §8.2) — non dipende dal database e resta sempre disponibile: **L0 regge da solo**, che è la ragione per cui `19` §3 dice «L0 e L1 sono il prodotto; L2 è il condimento».
+  - **Freschezza mensile**: le allocazioni di blocchi IP cambiano; il DB invecchia tra una release e l'altra. Va esposto il *build date* del MMDB nella UI e la sua staleness è un fatto visibile, non un dettaglio nascosto.
   - **Accuratezza**: vedi `19-GEO-CONTEXT.md` §6.2 — `country` > 95%, `city` 70-78% e spesso errata su IP mobili (CGNAT e HQ operatore). L'ADR accetta questo limite **a condizione** che il dato resti dichiaratamente stimato.
-  - **Attribuzione CC BY**: va esposta in `⑭ Impostazioni` e nel repository (NOTICE/LICENSE).
+  - **Un nuovo host di rete**: il download on-demand introduce un host che oggi **non è dichiarato** né nella CSP applicata (`apps/web/src/security/csp.ts`: `script-src 'self' 'wasm-unsafe-eval'`) né in `12§2.1`. L'host va dichiarato nella CSP applicata al bundle **nella story di implementazione** (Story 4.4), con la stessa disciplina con cui la D-AF.9 ha dovuto essere emendata (issue #196): la spec e la CSP applicata devono dire la stessa cosa.
+  - **Attribuzione CC BY**: va esposta in `⑭ Impostazioni` e nel repository (NOTICE/LICENSE). È un deliverable della Story 4.4, che è la story che introduce il database nel prodotto.
 - **Mitigazioni**: `cityConfidence` + soglia 0.6 + copy "circa" + correzione manuale (`19` §6.3); `country` resta il dato su cui poggia il nastro (`19` §8.2).
 
-## Punti aperti
+## Punti aperti — chiusi
 
-1. **Embedded vs download-on-demand** — misurare la taglia reale del `.mmdb` City Lite e il suo impatto sul budget di bundle (Story 0.5 ha fissato un budget di 300 KB / 91 KB gzip: un DB di decine di MB lo sfonda necessariamente, e va deciso se entra nel bundle, in un asset scaricato a runtime, o in una build separata). **La misura manca**: la decisione va presa dopo uno spike, non prima.
-2. **Soglia `cityConfidence`** — 0.6 è un valore ragionato, non misurato su dati reali.
-3. **Aggiornamento del DB** — con A3/A6 l'utente può portare un DB più recente; va deciso se l'app offre un check di freschezza del build date e cosa dice quando il DB ha più di 60 giorni.
+1. **Embedded vs download-on-demand** → **chiuso**: **download on-demand** (D-B.2, ratificata dal project owner il 2026-10-30, issue #201). Il vincolo che rendeva necessaria la misura (il budget di 300 KB gzip) è esattamente ciò che la decisione elimina: il database non entra nel bundle. La **taglia reale** del `.mmdb` resta un dato da misurare per la UI (dimensione del download, come per il WASM di Essentia: `21§19` punto 2).
+2. **Soglia `cityConfidence`** → **chiuso**: **0.6** è ratificata come **costante misurabile** (D-B.3): è il default vincolante, va esposta come parametro di config (e quindi entra nel `derivedVersion`), e va calibrata sul fixture realistico nella tranche di implementazione. Stesso trattamento per `confidence` 0.5 e `R6` 0.4 (`19` §5.2, §5.3).
+3. **Aggiornamento del DB** → **chiuso**: l'app mostra il **build date** del `.mmdb` e lo segnala come **stale** oltre i 60 giorni (warning `cityDbStale`). Con il percorso on-demand l'utente può sempre sostituire il file con uno più recente (A6) o scaricarlo a mano.
 
 ## Collegamenti
 
 - `ADR-0002` local-first · `ADR-0003` normalizzazione early
-- `19-GEO-CONTEXT.md` §6 (derivazione), §7 (toggle), §8 (UX)
+- `19-GEO-CONTEXT.md` §6 (derivazione), §7 (toggle), §8 (UX), §10 (E16..E21)
 - `02-DATA-SCHEMA.md` §3.8 (toggle), §8 (GPS mai raccolte)
 - `09-PRIVACY-SECURITY.md` §3.2 (cosa non esce dal dispositivo)
-- `01-PLATFORMS.md` §5 (E11, E12)
+- `01-PLATFORMS.md` §5 (E16, E17)
+- `21-AUDIO-FEATURES.md` §6.5 (il pattern download-on-demand del WASM)
 
 ## Changelog
 
 | Versione | Data | Modifiche |
 |---|---|---|
+| 1.0 | 2026-10-30 (issue #201) | **Ratificata**: da 🟡 DRAFT v0.1 a 🟢 APPROVED v1.0. Il project owner ha ratificato tre decisioni: **(D-B.1)** l'app passa ad **AGPL-3.0** (`LICENSE`, D-AF.2 di `21§3`); **(D-B.2)** il database MMDB è **scaricato on-demand al primo uso**, non embedded nel bundle (il budget di 300 KB gzip, `05§10`, resta intatto); **(D-B.3)** le soglie dell'algoritmo (`confidence` 0.5, `R6` 0.4, `cityConfidence` 0.6) sono **costanti misurabili**: default vincolanti, da calibrare sul fixture realistico nella tranche di implementazione. Modifiche alla v0.1: la decisione passa da «embedded» a «download on-demand»; la motivazione su MaxMind GeoLite2 è riscritta (l'obiezione non dipende dalla licenza dell'app: è la EULA di MaxMind — la conclusione non cambia, la ragione sì); l'alternativa «embedded» è esplicitata come **A7** con il perché (il budget); l'obbligo di attribuzione CC BY e il nuovo host di rete sono dichiarati come deliverable della Story 4.4; i tre punti aperti sono chiusi con le rispettive decisioni. |
 | 0.1 | Sessione 41 | Prima stesura: DB-IP Lite embedded, derivazione in pipeline, alternative A1-A6, punti aperti su dimensione e freschezza |
+
 
 
 ===== FILE: docs/13-ADR/0010-remote-source-adapter.md =====
@@ -22540,9 +23577,8 @@ Schema attuale: **versione 3** (v1 → v2 aggiunge `searchQueries`; v2 → v3 ag
 
 # 19 — Geo & Contesto di ascolto
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 41 (2026-10-21)
-> Da ratificare in: `02-DATA-SCHEMA.md` v1.3 (🟢 APPROVED), `09-PRIVACY-SECURITY.md`, `04-ANALYSIS-ALGORITHMS.md`
-> Decisione architetturale collegata: [`13-ADR/0009-local-ip-geolocation.md`](13-ADR/0009-local-ip-geolocation.md)
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 67 (2026-10-30)
+> Ratificato dal project owner il 2026-10-30 (issue #201). Vincolante per `02-DATA-SCHEMA.md` §3.8 (toggle), `09-PRIVACY-SECURITY.md` §3.2, `01-PLATFORMS.md` §5 (E16..E21), `13-ADR/0009-local-ip-geolocation.md` 🟢 APPROVED v1.0.
 
 ---
 
@@ -22559,7 +23595,7 @@ Questo documento definisce come trasformarli in un "diario di ascolto" leggibile
 | Piattaforma | Paese | IP | Dispositivo | Note |
 |---|:---:|:---:|:---:|---|
 | **Spotify** | ✅ `conn_country` | ✅ `ip_addr` | ✅ `platform` | unica fonte di contesto |
-| **YouTube Music** | ⚠️ `locationInfos` | ❌ | ❌ | scartato al parse da `youtube-music.md` §7 (D.39.8) |
+| **YouTube Music** | ⚠️ `locationInfos` | ❌ | ❌ | scartato al parse da `youtube-music.md` §7 (D.39.8), **salvo** revoca della Sessione 67: dietro il toggle `ytLocationInfos` (default disattivato) |
 | **Apple Music** | ❌ | ❌ | ❌ | edge case **E9**: nessun campo contestuale |
 | **Deezer / Tidal / SoundCloud** | ❌ | ❌ | ❌ | nessun contesto |
 | **Last.fm / ListenBrainz** | ❌ | ❌ | ❌ | nessun contesto |
@@ -22577,11 +23613,15 @@ Tre conseguenze che la spec deve dichiarare apertamente, perché determinano le 
 |---|---|---|:---:|:---:|
 | **L0** | Paese di connessione | `conn_country` (direttamente dall'export) | ~0 | basso (>95% accurate) |
 | **L1** | Contesto dedotto (casa / lavoro / in auto / viaggio) | pattern su paese + ora locale + dispositivo + ricorrenza | ~0 (CPU locale) | medio (è un'inferenza) |
-| **L2** | Città stimata | geolocalizzazione locale dell'IP | medio (DB ~decine di MB, lookup per evento) | alto (accuratezza scarsa su IP mobili) |
+| **L2** | Città stimata | geolocalizzazione locale dell'IP (DB-MMDB scaricato on-demand) | medio (download del DB, lookup per evento) | alto (accuratezza scarsa su IP mobili) |
 
-**L0 e L1 sono il prodotto; L2 è il condimento.** Il diario deve reggere anche se l'utente tiene L2 disattivato — ed è il default.
+**L0 e L1 sono il prodotto; L2 è il condimento.** Il diario deve reggere anche se l'utente tiene L2 disattivato — ed è il default. La ratifica del 2026-10-30 ha reso questo esplicito anche per l'assenza del **database**: senza `.mmdb` L2 non esiste, e L0/L1 restano interi (edge case **E21**).
 
-## 4. Modello dati proposto (delta su `02-DATA-SCHEMA.md` v1.3)
+## 4. Modello dati (delta su `02-DATA-SCHEMA.md` v1.6)
+
+> **Il delta è ratificato come decisione; la sua applicazione a `02-DATA-SCHEMA.md` avviene nella story di implementazione** (Story 1.6, che applica il delta a `02` v1.7 con la migrazione Dexie v5→v6). Fino ad allora `02` v1.6 resta il contratto vigente per il codice: è lo stesso percorso della `21` (ratificata nella Sessione 62, applicata a `02` nella Sessione 64 dalla Story 4.1).
+>
+> *La v0.2 di questo documento ancorava il delta a `02` **v1.3** con migrazione Dexie **v2→v3**: lo schema è oggi **v1.6 / Dexie v5** (la tabella `scrobbleOutbox` è nata con la Story 1.5). Il delta è riallineato.*
 
 ### 4.1 Campi aggiunti a `ListenEvent`
 
@@ -22664,9 +23704,11 @@ Algoritmo **deterministico e versionato**, non ML: same reasoni di `04-ANALYSIS-
 
 **R6 è deliberatamente sotto la soglia**: "ascoltavo qualcosa mentre andavo a lavoro" non è deducibile da 4 segnali deboli. Sta a 0.4, quindi non viene aggregato come periodo e non compare nel nastro. Se l'utente lo conferma manualmente, il `status` passa a `confirmed` e il periodo viene mantenuto con la label data.
 
+> **Soglie ratificate come costanti misurabili (D-B.3, Sessione 67)**: i valori 0.9 / 0.7 / 0.6 / 0.4 di questa tabella e la soglia di aggregazione 0.5 (§5.3) sono **ragionati, non misurati**. La ratifica li fissa come **default vincolanti** e li rende parametri di config (quindi parte del `derivedVersion`, MIG-3): la calibrazione su un fixture realistico avviene nella tranche di implementazione, e ogni variazione produce un bump di `derivedVersion` e un ricalcolo.
+
 ### 5.3 Soglie e fallback
 
-- `confidence < 0.5` → il periodo **non viene aggregato** (E14).
+- `confidence < 0.5` → il periodo **non viene aggregato** (E19).
 - Il paese di riferimento = moda dei `country` degli ultimi 90 giorni con almeno 30 eventi; altrimenti il paese più frequente dell'intero storico.
 - `userTimezone` deve essere persistito a livello app: oggi esiste solo dentro `PatternPayload.userTimezone` (`02` §4), che è un campo derivato — serve una sua copia nelle impostazioni per non dipendere dal ricalcolo.
 - Qualsiasi classificazione `car` — **inferita** dal pattern di ascolto **oppure** derivata da `deviceType='car'` (la stringa `platform` dell'export contiene `CarPlay`/`Android Auto`) — richiede `PrivacySettings.carDetectionConsent` (`02` §3.8). Senza consenso, `NormalizationPipeline` demuove `deviceType` a `unknown` in scrittura e `R2` non può mai scattare: il gate è applicato in `adapters/pipeline.ts` (`applyCarConsent`, issue #109), non nel classificatore. È la scelta coerente con `02` §3.8, che nomina esplicitamente CarPlay e Android Auto tra i segnali coperti dal consenso.
@@ -22691,6 +23733,8 @@ record.ip_addr ──► deriveCity(ip) ──► city / citySource / cityConfid
 
 Il campo derivato entra nel DB; l'IP no. È la stessa logica di minimizzazione che già vale per `country` (derivato, conservato, IP scartato), estesa a un livello più fine. Il risultato è che l'opzione "città" **non costa nulla in termini di esposizione dell'IP**.
 
+**La derivazione è condizionata alla presenza del database** (`13-ADR/0009`, D-B.2): il `.mmdb` (DB-IP Lite City) si scarica **on-demand al primo uso** e **non è embedded nel bundle** — il budget di 300 KB gzip (`05§10`) resta intatto. Senza database la derivazione **non avviene**: `city = null`, `country` resta, e l'utente vede l'avviso (edge case **E21**). Il paese — il dato su cui poggia il nastro (§8.2) — non dipende dal database e resta sempre disponibile.
+
 ### 6.2 Perché la città non può essere trattata come il paese
 
 Dati pubblici sui free tier di geolocalizzazione IP:
@@ -22705,7 +23749,7 @@ E soprattutto: **gli IP mobili risolvono spesso all'HQ dell'operatore**, non all
 Conseguenze di progetto, non rimandabili:
 
 1. `city` **non è mai presentata come fatto**: la UI mostra sempre `citySource !== 'manual'` → "circa *X*" e il valore è confidenza-esplicita.
-2. `cityConfidence < 0.6` → `city = null`, con warning `cityLowConfidence` (E11).
+2. `cityConfidence < 0.6` → `city = null`, con warning `cityLowConfidence` (E16). La soglia 0.6 è una **costante misurabile** (D-B.3).
 3. Il nastro contesto mostra **il paese**; la città è un dettaglio del dettaglio.
 4. Il `ContextPeriod` resta valido anche senza `city`: `travel` si basa sul paese, che è affidabile.
 
@@ -22715,7 +23759,7 @@ Conseguenze di progetto, non rimandabili:
 
 ## 7. Toggle e override per import
 
-### 7.1 Toggle globali (`PrivacySettings`, `02` §3.8 — proposta v1.3)
+### 7.1 Toggle globali (`PrivacySettings`, `02` §3.8 — proposta ratificata con la Story 1.6)
 
 | Toggle | Default | Governa | Motivazione del default |
 |---|:---:|---|---|
@@ -22769,54 +23813,59 @@ Una striscia orizzontale sotto le `EraBand`, sincronizzata con lo zoom:
 
 ### 8.3 Copy
 
-`08-COPY-I18N.md` riceverà chiavi con la forma `settings.privacy.*` (già esistenti per `retainIp`) e `timeline.context.*`. Regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza** ("circa", "~"), il paese mai.
+`08-COPY-I18N.md` riceverà chiavi con la forma `settings.privacy.*` (già esistenti per `retainIp`) e `timeline.context.*` (namespace dichiarato nella Sessione 67). Regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza** ("circa", "~"), il paese mai.
 
 ## 9. YouTube `locationInfos` — revoca di D.39.8
 
 La Sessione 39 (issue #96, PR #97) ha deciso lo scarto incondizionato di `locationInfos`. Questa sessione **revoca** quella decisione: il campo viene letto solo se `ytLocationInfos` è attivo (default `false`), e in quel caso concorre con `conn_country`/`ip` per la derivazione L0/L2 secondo la stessa catena degli altri campi.
 
-La motivazione originale (D.39.8: "nessun toggle dedicato nello schema → scarto incondizionato") cessa di valere: il toggle dedicato è esattamente ciò che `19-GEO-CONTEXT.md` §7.1 introduce. La revoca è formalizzata come **D.41.x** e comporta la modifica di `03-ADAPTERS/youtube-music.md` §7 in una sessione successiva.
+La motivazione originale (D.39.8: "nessun toggle dedicato nello schema → scarto incondizionato") cessa di valere: il toggle dedicato è esattamente ciò che `19-GEO-CONTEXT.md` §7.1 introduce. La revoca è formalizzata come **D.41.x** ed è stata **applicata** a `03-ADAPTERS/youtube-music.md` §7 nella Sessione 67 (issue #201) — nella v0.2 di questo documento la revoca era dichiarata ma il documento dell'adapter non era stato ancora allineato.
 
 ## 10. Edge case nuovi
 
 | # | Caso | Comportamento | Warning |
-|---|---|---|:---:|
-| **E11** | IP non risolvibile nel DB locale | `city = null`, `country` resta | `cityUnresolved` |
-| **E12** | IP riservato o CGNAT (RFC1918, 100.64/10, link-local) | **nessuna** geolocalizzazione possibile | `citySkipped` |
-| **E13** | Cambio paese improvviso | `travel`, non errore | `countryShift` |
-| **E14** | Nessun cluster dominante | `unknown`, `confidence` bassa, non aggregato | `contextAmbiguous` |
-| **E15** | Re-import con toggle diversi | I campi già persistiti **non** vengono azzerati; il contesto si ricalcola solo con `recompute()` esplicito | `contextStale` |
+|---|---|---|---|
+| **E16** | IP non risolvibile nel DB locale | `city = null`, `country` resta | `cityUnresolved` |
+| **E17** | IP riservato o CGNAT (RFC1918, 100.64/10, link-local) | **nessuna** geolocalizzazione possibile | `citySkipped` |
+| **E18** | Cambio paese improvviso | `travel`, non errore | `countryShift` |
+| **E19** | Nessun cluster dominante | `unknown`, `confidence` bassa, non aggregato | `contextAmbiguous` |
+| **E20** | Re-import con toggle diversi | I campi già persistiti **non** vengono azzerati; il contesto si ricalcola solo con `recompute()` esplicito | `contextStale` |
+| **E21** | Database geo non presente (non scaricato, o download fallito) | `city = null`, `country` resta, il nastro mostra il paese | `cityDbMissing` |
 
-**E12 è il caso più frequente del progetto**: le reti mobili usano CGNAT per decine di milioni di indirizzi, e quegli IP non sono geolocalizzabili per definizione. Va detto all'utente nella schermata di import, non scoperto dopo.
+**E17 è il caso più frequente del progetto**: le reti mobili usano CGNAT per decine di milioni di indirizzi, e quegli IP non sono geolocalizzabili per definizione. Va detto all'utente nella schermata di import, non scoperto dopo.
 
-E1..E10 restano invariati (§5 `01-PLATFORMS.md`); E11..E15 si aggiungono a catalogo in `01-PLATFORMS.md` §5.
+E1..E15 restano invariati (§5 `01-PLATFORMS.md`); **E16..E21** si aggiungono a catalogo in `01-PLATFORMS.md` §5.
+
+> **Perché la rinumerazione**: nella v0.2 questi casi erano **E11..E15**, ma nel catalogo di `01-PLATFORMS.md` §5 gli identificatori **E11..E15 sono già presi** dagli edge case di ListenBrainz e Last.fm (Sessione 47): due significati diversi per lo stesso identificatore, in due documenti che si citano a vicenda. La ratifica li rinumera in **E16..E21** — il sesto caso, «database assente», nasce dalla decisione on-demand (D-B.2).
 
 ## 11. Impatto sui documenti
 
-| Documento | Modifica | Sessione |
-|---|---|:--:|
-| `13-ADR/0009-local-ip-geolocation.md` | **nuovo** — scelta del DB e del modello di derivazione | 41 |
-| `02-DATA-SCHEMA.md` | v1.3: `city`/`citySource`/`cityConfidence`, `ContextPeriod`, tabella `contexts`, toggle, migrazione Dexie v2→v3 | 42 |
-| `03-ADAPTERS/youtube-music.md` | v2: revoca D.39.8, `locationInfos` dietro toggle | 42 |
-| `09-PRIVACY-SECURITY.md` | risolvere la contraddizione su `country`; inventariare `city` e `ContextPeriod`; §3.1 data flow con la derivazione | 42 |
-| `01-PLATFORMS.md` | E11..E15 + matrice disponibilità geo | 42 |
-| `04-ANALYSIS-ALGORITHMS.md` | Context Classifier (§5) come algoritmo di Fase 2 | 43 |
-| `06-UX-FLOWS-STATES.md` / `07-UI-SPEC.md` | pannello ③ e nastro ⑦ | 43 |
-| `08-COPY-I18N.md` | chiavi `timeline.context.*` | 43 |
-| `11-BACKLOG.md` | Story 1.6 (fondazione geo), 4.4 (DB IP→città), 3.4 (nastro contesto) | 43 |
+| Documento | Modifica | Stato |
+|---|---|---|
+| `13-ADR/0009-local-ip-geolocation.md` | **v1.0 🟢 APPROVED** — DB on-demand, CC BY, freschezza, soglie | fatto (Sessione 67) |
+| `02-DATA-SCHEMA.md` | v1.7: `city`/`citySource`/`cityConfidence`, `ContextPeriod`, tabella `contexts`, toggle, migrazione Dexie v5→v6 | **decisione ratificata qui; applicazione nella Story 1.6** |
+| `03-ADAPTERS/youtube-music.md` | v2: revoca D.39.8, `locationInfos` dietro toggle | fatto (Sessione 67) |
+| `09-PRIVACY-SECURITY.md` | v0.7: inventario `city` e `ContextPeriod`, §3.1 data flow con la derivazione | fatto (Sessione 67) |
+| `01-PLATFORMS.md` | E16..E21 + matrice disponibilità geo | fatto (Sessione 67) |
+| `04-ANALYSIS-ALGORITHMS.md` | Context Classifier (§5) come algoritmo di Fase 2 | da fare (story 2.x) |
+| `06-UX-FLOWS-STATES.md` / `07-UI-SPEC.md` | pannello ③ e nastro ⑦ | da fare (story 3.4) |
+| `08-COPY-I18N.md` | chiavi `timeline.context.*` | fatto (Sessione 67) |
+| `11-BACKLOG.md` | Story 1.6 (fondazione geo), 4.4 (DB IP→città), 3.4 (nastro contesto) | fatto (Sessione 67) |
 
-## 12. Punti aperti (bloccano la ratifica)
+## 12. Punti aperti — chiusi dalla ratifica
 
-1. **Default di `retainCountry`** — `true` (§7.1) o `false`? La proposta è `true`; la decisione scioglie la contraddizione `02` §3.8 ↔ `09` §4.
-2. **DB geo embedded o scaricato al primo uso?** — ADR-0009 §"Punti aperti". Un DB City Lite è ordini di grandezza più grosso di un Country Lite (pochi MB): va misurato prima di scegliere, per non inflazionare il bundle della PWA.
-3. **Soglia di aggregazione 0.5 e regola R6 a 0.4** — sono numeri ragionati, non misurati. Lo spike li calibra su un fixture realistico.
+1. **Default di `retainCountry`** — **chiuso**: `true` (issue #108, opzione A). La contraddizione `02` §3.8 ↔ `09` §4 è sciolta a favore di `02`, e `09` §4 è allineato. La riga non era più bloccata dalla Sessione 41: era rimasta scritta fra i punti aperti per inerzia.
+2. **DB geo embedded o scaricato al primo uso?** — **chiuso**: **download on-demand** (D-B.2, ratificata dal project owner il 2026-10-30, issue #201). Il vincolo che rendeva necessaria la misura (il budget di 300 KB gzip, `05§10`) è ciò che la decisione elimina: il database non entra nel bundle. Cfr. `13-ADR/0009` §"Punti aperti" 1.
+3. **Soglia di aggregazione 0.5 e regola R6 a 0.4** — **chiuse come costanti misurabili** (D-B.3): i numeri sono ragionati, non misurati. La ratifica li fissa come default vincolanti, li espone come parametri di config (quindi dentro il `derivedVersion`) e ne dichiara la calibrazione sul fixture realistico come deliverable della tranche di implementazione. Stessa sorte per `cityConfidence` 0.6.
 
 ## 13. Changelog
 
 | Versione | Data | Modifiche |
 |---|---|---|
+| 1.0 | 2026-10-30 (issue #201) | **Ratificata**: da 🟡 DRAFT v0.2 a 🟢 APPROVED v1.0. Il project owner ha ratificato tre decisioni (D-B.2 DB on-demand, D-B.3 soglie come costanti misurabili, D-B.4 ratifica con correzioni) e la ratifica della licenza AGPL-3.0 (D-B.1, D-AF.2). Modifiche alla v0.2: **§4** il delta è riallineato da `02` v1.3 / Dexie v2→v3 allo schema vigente **v1.6 / Dexie v5→v6**, e la sua applicazione a `02` è dichiarata come deliverable della Story 1.6 (lo stesso percorso della `21` nella Sessione 64); **§6.1** la derivazione è condizionata alla presenza del database scaricato on-demand, senza il quale `city = null` (E21); **§10** gli edge case geo sono rinumerati **E11..E15 → E16..E21** (E11..E15 erano già presi in `01-PLATFORMS.md` §5 dagli edge case di ListenBrainz e Last.fm) e ne nasce uno nuovo, «database assente»; **§9** la revoca di D.39.8 è **applicata** a `03-ADAPTERS/youtube-music.md` §7 (nella v0.2 era dichiarata ma non ancora allineata); **§12** i tre punti aperti sono chiusi (`retainCountry` era già deciso con l'issue #108); **§3** il costo di L2 dichiara il download del DB; **§5.2** le soglie sono dichiarate costanti misurabili. |
 | 0.2 | 2026-10-21 (issue #109) | Rimossa la deviazione da `02` §3.8: la distinzione "`car` mappato dalla stringa `platform` = dato grezzo, non richiede consenso". Il gate `carDetectionConsent` copre anche `deviceType='car'` derivato da CarPlay/Android Auto ed è applicato in scrittura dalla pipeline core (`applyCarConsent`); `R2` è condizionata al consenso; `deviceDetail` resta conservato. |
 | 0.1 | Sessione 41 (2026-10-21) | Prima stesura: L0/L1/L2, tassonomia `ContextKind`, classificatore deterministico, modello dei toggle + override per import, nastro contesto, revoca di D.39.8, edge case E11..E15 |
+
 
 
 ===== FILE: docs/20-SCROBBLING-HUB.md =====
@@ -23438,8 +24487,8 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 
 # 21 — Pipeline audio features (provider, privacy, stoccaggio, costi)
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 66 (2026-10-30)
-> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #196 (ratifica del terzo host della CSP) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 67 (2026-10-30)
+> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #196 (ratifica del terzo host della CSP) · #201 (D-AF.2: la licenza passa ad AGPL-3.0) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
 > Spec collegata a: `04-ANALYSIS-ALGORITHMS.md` §3, §11, §12 · `05-ARCHITECTURE.md` §6, §6.1, §6.2, §9, §10 · `02-DATA-SCHEMA.md` §3.4, §3.8, §6 · `09-PRIVACY-SECURITY.md` §3, §4, §7.4, §10 · `10-TESTING.md` §2, §7, §8 · `12-DEVOPS.md` §2.1
 > Precedente di struttura: `20-SCROBBLING-HUB.md` (una spec di protocollo, non un adapter)
 > **Ratificata in**: `05-ARCHITECTURE.md` §6, §8, §9 (v1.4) · `10-TESTING.md` §8 (v1.1) · `14-GLOSSARY.md` (v1.1) · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (v0.6) · `12-DEVOPS.md` §2.1 (v1.0) · `08-COPY-I18N.md` §2.17 (v0.8) — le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e ratificate **al merge della PR #190** (`b1dd83e`, 2026-10-29)
@@ -23600,6 +24649,12 @@ Le alternative sono tre, e vanno messe sul tavolo con i loro costi:
 La spec **propone (a)** e chiede la ratifica (§3, D-AF.2). Nota: il runtime
 TensorFlow.js è **Apache-2.0** (`@tensorflow/tfjs@4.22.0`), quindi è il solo
 `essentia.js` a imporre il cambio.
+
+> **Ratificata ed applicata (Sessione 67, issue #201)**: il project owner ha
+> scelto l'opzione **(a)** — il repository è passato ad **AGPL-3.0** (`LICENSE`,
+> `package.json`, `README.md`). L'obbligo del **§13** (offerta del sorgente
+> corrispondente agli utenti che interagiscono in rete) è un **requisito
+> aperto**: issue **#202**.*.
 
 ### 2.5 Il budget del bundle iniziale è 300 KB gzip: il WASM non ci entra, e non deve
 
@@ -24390,10 +25445,12 @@ versione riscritta, verificabile:
 
 ## 19. I punti aperti
 
-1. **La licenza dell'app** (D-AF.2): la ratifica della spec deve cambiare la
-   licenza del repository da Apache-2.0 ad AGPL-3.0, o rinunciare al
-   provider acustico locale. È una decisione del Boss e ha effetti legali
-   sulla distribuzione.
+1. **La licenza dell'app** (D-AF.2): **CHIUSO** (Sessione 67, issue #201) — il
+   project owner ha ratificato l'opzione (a): il repository è passato da
+   Apache-2.0 ad **AGPL-3.0** (`LICENSE`, `package.json`, `README.md`). Il
+   provider acustico locale **resta**. L'obbligo del §13 (offerta del
+   Corresponding Source agli utenti che interagiscono in rete) è un
+   **requisito aperto**: issue **#202**.
 2. **Il costo di 6 MB e il consenso**: un download da 6 MB sul telefono è
    una decisione dell'utente, non un dettaglio. Va detto prima (chiave
    `enrichment.download.size`).
@@ -24424,6 +25481,7 @@ versione riscritta, verificabile:
 | 0.1 | 2026-10-28 (Sessione 62, issue #187) | Prima stesura. Definisce il contratto `AudioFeatureProvider`, la cascata (`05§6`), la mappatura dei campi di `AudioFeatures` per ogni provider, la normalizzazione DEAM [1,9] → [0,1], la separazione fra feature misurate/derivate/stimate, il contratto con il layer di analisi (`getAudioFeatures` filtrato per sorgente), la privacy e la CSP, lo stoccaggio e l'invalidazione, i costi reali misurati (WASM ~2,7 MB + backbone ~3,2 MB + TFJS), i 14 casi di test minimi e gli AC riscritti della Story 4.1. Apre **9 decisioni** (D-AF.1…D-AF.9) da chiudere alla ratifica. Verificati in data: la morte di Spotify `audio_features` per le nuove app (27/11/2024, con restrizioni 2026), l'API di AcousticBrainz viva ma con sole classi `mood_*` (nessuna `valence`/`energy`), l'anteprima di 30 s dell'iTunes Search API senza autenticazione, la licenza AGPL-3.0 di `essentia.js` contro Apache-2.0 dell'app, il rate limit di AcousticBrainz letto dagli header (`Limit: 100`, `Reset-In: 2` il 28/10/2026) |
 | 1.0 | 2026-10-28 (Sessione 62, issue #187, PR #190 `b1dd83e`) | **Ratificata**: da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**. Le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e **ratificate al merge della PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z). La stessa PR allinea i documenti che la spec tocca: `05§6`, `05§8` e `05§9` (v1.4), `10§8` (v1.1, la riga dei mock reali), `14-GLOSSARY.md` (v1.1, la voce **Audio features** con la distinzione *misurata / derivata / stimata*), `09§3.1`, `09§3.3`, `09§4`, `09§7.4` (v0.6, le righe mancanti dell'inventario e la rimozione di FreqBlog), `12§2.1` (v1.0, la CSP con i due host) e `08§2.17` (v0.8, il namespace `enrichment.*` con le 8 chiavi); `11-BACKLOG.md` Story 4.1 (v1.6.22, gli AC riscritti di §16 e la riga `**Stato**:`) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). **§18**: la colonna «Quando» è allineata alla realtà (l'allineamento dei documenti che la spec tocca è alla ratifica, non all'implementazione: vedi la nota sotto la tabella) e i deliverable `T4.1.11` e `T4.1.12` dichiarano il confine fra ciò che la ratifica fa (i documenti) e ciò che resta all'implementazione (i fixture, la CSP applicata al bundle, i locale). **Riferimenti corretti**: il namespace `enrichment.*` sta in `08§2.17` (la v0.1 indicava `08§2.16`, che è il namespace `scrobble.*` della Story 1.5). L'issue **#188** (implementazione della Story 4.1) passa da `needs-spec` a **`agent-ready`**: la spec è APPROVED e gli AC sono verificabili. **Il cambio di licenza (D-AF.2) non è applicato qui**: è un atto del Boss sul file `LICENSE` |
 | 1.1 | 2026-10-30 (Sessione 66, issue #196) | **Emendamento di D-AF.9 (ratifica del terzo host della CSP)**. La v1.0 elencava in `connect-src` due host — l'API di AcousticBrainz e il **CDN** dei file audio — mentre D-AF.1 prescrive la ricerca `GET https://itunes.apple.com/search`: l'host che **risponde** alla ricerca è un **terzo** host, non in lista. La contraddizione (due AC della stessa spec) è stata dichiarata dall'implementazione della Story 4.1 (Sessione 64, issue #188) all'issue **#196** (`needs-spec`), che chiedeva di ratificare A (confermare il terzo host) o B (rivedere D-AF.1). **Il project owner ha ratificato A** (Sessione 66): la pipeline degraderebbe *sempre* ad AcousticBrainz/euristico senza l'host della ricerca (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Modifiche: §2.1 (i **due** host iTunes: ricerca e CDN), §3 (la decisione D-AF.9 emendata e la nota della ratifica), §10.2 (la CSP dichiarata con i **tre** host), §16 (l'AC «consumo di rete limitato ai **tre** host dichiarati») e §18 (la riga di `12-DEVOPS.md`). Allineati i documenti che la ratifica rende falsi: `12-DEVOPS.md` §2.1 (v1.1, la CSP con i tre host), `11-BACKLOG.md` (v1.6.27, l'AC della Story 4.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (l'AC e i limiti dichiarati) e il codice applicato (`apps/web/src/security/{hosts,csp}.ts` + il test: i commenti che dichiaravano la contraddizione sono sostituiti dalla ratifica). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 (Sessione 64) — questa ratifica allinea la **dichiarazione** al codice, non il codice alla dichiarazione |
+| 1.2 | 2026-10-30 (Sessione 67, issue #201) | **D-AF.2 ratificata e applicata**: il project owner ha scelto l'opzione (a) — il repository passa da Apache-2.0 ad **AGPL-3.0** (`LICENSE` con il testo canonico, `package.json` con il campo `license`, `README.md` §"Licenza"). §2.4 dichiara l'avvenuta esecuzione e segnala l'obbligo del **§13** come requisito aperto (issue **#202**); §19 punto 1 è **chiuso**. Il provider acustico locale **resta**: la rinuncia a Essentia (opzione b) è scartata, perché la cascata avrebbe perso l'unico provider che misura `valence`/`energy` davvero (AcousticBrainz è congelato a giugno 2022 e copre solo i brani con MBID) e il mood tracker sarebbe rimasto senza dati misurati (D-A.1). Nessuna modifica al codice della pipeline. |
 
 
 

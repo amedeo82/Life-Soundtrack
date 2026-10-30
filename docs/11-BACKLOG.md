@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.26 · Sessione 64 (2026-10-30, issue #188) · la **Story 4.1 (Pipeline audio features) è completata** (PR #197 merged il 2026-10-30, merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) contiene il contratto `AudioFeatureProvider`, la cascata `cache → Essentia.js → AcousticBrainz → euristico`, la normalizzazione dichiarata, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i tre trigger e il budget, e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. La **Story 2.1 (Mood Tracker)** è il consumer finale: il percorso dati è chiuso e la catena **4.1 (dati) → 2.1 (letture)** è completa. Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss)
+> Status: 🟢 APPROVED · Versione 1.6.28 · Sessione 67 (2026-10-30, issue #201) · la **Story 4.1 (Pipeline audio features) è completata** (PR #197 merged il 2026-10-30, merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) contiene il contratto `AudioFeatureProvider`, la cascata `cache → Essentia.js → AcousticBrainz → euristico`, la normalizzazione dichiarata, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i tre trigger e il budget, e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. La **Story 2.1 (Mood Tracker)** è il consumer finale: il percorso dati è chiuso e la catena **4.1 (dati) → 2.1 (letture)** è completa. Fuori perimetro e dichiarato: la UI (Story 3.x) e il lookup MusicBrainz (Story 4.2). Il **cambio di licenza AGPL-3.0** (D-AF.2) è **stato eseguito** (Sessione 67, issue #201): il repository è passato ad AGPL-3.0 e l'obbligo del §13 è il requisito aperto dell'issue #202
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -348,6 +348,27 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 1.6 — Fondazione geo e contesto di ascolto `[PHASE-2]` `[AREA:db]` `[PRI:I]` `[SIZE:L]` `[DEP:0.2]`
+
+**Descrizione**: La base dati del contesto di ascolto: il delta su `02-DATA-SCHEMA.md` (v1.7, Dexie v5→v6) con i campi `city`/`citySource`/`cityConfidence` e l'entità derivata `ContextPeriod` (tabella `contexts`), i toggle `retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, e il classificatore **L1** (contesto dedotto: casa, lavoro, viaggio) come algoritmo deterministico e versionato.
+
+**Stato**: ⬚ **TODO** — la specifica è **ratificata** (`docs/19-GEO-CONTEXT.md` v1.0 🟢 APPROVED, Sessione 67, issue #201; `docs/13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED). L'implementazione non è iniziata: manca l'issue di claim. Il **delta su `02`** è ratificato come decisione e viene applicato **in questa story** (v1.7, Dexie v5→v6), come avvenuto per la `21` nella Story 4.1.
+
+**Task**:
+- T1.6.1 — Applicare il delta a `02-DATA-SCHEMA.md` (v1.7): `city`/`citySource`/`cityConfidence` su `ListenEvent`, `ContextPeriod`, tabella `contexts`, toggle, migrazione Dexie v5→v6
+- T1.6.2 — Classificatore L1 deterministico e versionato (`19§5`): le regole R1..R7 nell'ordine dichiarato, la soglia 0.5, il `derivedVersion` (MIG-3)
+- T1.6.3 — Persistenza dei periodi con `recompute()` e `userLabel` (verdetto utente: `confirmed`/`corrected`/`dismissed`)
+- T1.6.4 — Test sul fixture di scenario: il classificatore è ricalcolabile e deterministico a parità di `derivedVersion`
+
+**Acceptance criteria** (da `19` v1.0 🟢):
+- [ ] Il classificatore produce gli stessi periodi a parità di input e di `derivedVersion` (`19§5.2`)
+- [ ] Un periodo sotto la soglia 0.5 **non** viene aggregato (`19§5.3`, E22)
+- [ ] `country` resta derivato e conservato indipendentemente da `retainIp` (issue #108)
+- [ ] `car` è classificabile solo con `carDetectionConsent` attivo (`19§5.3`)
+
+**Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §4, §5, §7 · `docs/13-ADR/0009-local-ip-geolocation.md` (v1.0 🟢 APPROVED) · `docs/02-DATA-SCHEMA.md` §3.8 · `docs/09-PRIVACY-SECURITY.md` §3.1, §4
+
+---
 ## EPIC 2 — Analisi (Fase 2)
 
 ### Story 2.1 — Mood Tracker giornaliero `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:M]` `[DEP:0.2]`
@@ -420,6 +441,26 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 3.4 — Nastro contesto (Timeline) `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:M]` `[DEP:1.6, 4.4]`
+
+**Descrizione**: Il nastro contesto sotto le `EraBand` della Timeline (schermata ⑦) e la schermata di dettaglio del periodo (⑧): un segmento per `ContextPeriod`, colore per `kind`, etichetta paese (+ «circa *città*» solo se la fonte non è manuale), pips dei dispositivi, filtri per `kind`/paese/dispositivo, azioni utente (`confirmed` / etichetta / `dismissed`).
+
+**Stato**: ⬚ **TODO** — la specifica è ratificata (`19` v1.0 🟢 §8.2-8.3, Sessione 67). **Nessuna mappa**: nessuna dipendenza cartografica, nessun tile online — la scala disponibile non lo giustifica e un tile implicherebbe uscita di rete.
+
+**Task**:
+- T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
+- T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
+- T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
+- T3.4.4 — Nessuna dipendenza MapLibre/Leaflet e nessuna richiesta di rete per il nastro
+
+**Acceptance criteria** (da `19` v1.0 🟢):
+- [ ] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
+- [ ] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
+- [ ] Il nastro **non** effettua richieste di rete
+
+**Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §8.2-8.3 · `docs/08-COPY-I18N.md` §2.12h · `docs/06-UX-FLOWS-STATES.md` (schermata ⑦)
+
+---
 ## EPIC 4 — Arricchimento (Fase 2/3)
 
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
@@ -478,6 +519,29 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 4.4 — DB IP→città (geolocalizzazione locale) `[PHASE-2]` `[AREA:enrichment]` `[PRI:L]` `[SIZE:L]` `[DEP:1.6]`
+
+**Descrizione**: Il livello **L2** del contesto: la derivazione della città dall'IP tramite un database MMDB (DB-IP Lite City, CC BY 4.0) **scaricato on-demand** e interrogato in-process durante l'import, **prima** che l'IP venga azzerato. Il database non è embedded: esce dal bundle e dal precache, va in Cache Storage, e la sua assenza degrada L2 senza toccare L0/L1.
+
+**Stato**: ⬚ **TODO** — la specifica è ratificata (`13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED, Sessione 67, issue #201; D-B.2). L'implementazione non è iniziata: manca l'issue di claim.
+
+**Task**:
+- T4.4.1 — Download on-demand del `.mmdb` (fuori dal bundle e dal precache, in Cache Storage), con l'host **dichiarato** nella CSP applicata (`12§2.1`) e l'utente informato della dimensione prima del download
+- T4.4.2 — Lookup MMDB in-process nella pipeline di import, **prima** dello scarto dell'IP (`19§6.1`)
+- T4.4.3 — Provenance e correzione: `citySource` (`dbip-lite`/`manual`), `cityConfidence`, soglia 0.6 con warning `cityLowConfidence`
+- T4.4.4 — Freshness: build date del `.mmdb` visibile nella UI, warning `cityDbStale` oltre i 60 giorni
+- T4.4.5 — Attribuzione **CC BY 4.0**: NOTICE/LICENSE, `⑭ Impostazioni` e footer di about
+
+**Acceptance criteria** (da `13-ADR/0009` v1.0 🟢 e `19` v1.0 🟢):
+- [ ] L'IP non esce mai dal dispositivo e, senza `retainIp`, non viene persistito (`19§6.1`)
+- [ ] Senza database la città è `null` e il paese resta (E24)
+- [ ] Il database **non** entra nel bundle iniziale né nel precache
+- [ ] L'host di download è dichiarato nella CSP applicata **e** nella spec (`12§2.1`, la lezione della issue #196)
+- [ ] L'attribuzione CC BY 4.0 è esposta all'utente
+
+**Spec**: `docs/13-ADR/0009-local-ip-geolocation.md` (v1.0 🟢 APPROVED, Sessione 67) · `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED) §6 · `docs/09-PRIVACY-SECURITY.md` §3.1, §4, §7.2
+
+---
 ## EPIC 5 — Privacy e legale (Fase 6)
 
 ### Story 5.1 — Privacy spec finale `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
@@ -543,8 +607,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`)
 14. **3.1, 3.2, 3.3** UI
-15. **5.1, 5.2** privacy
-16. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
+15. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1), la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
+16. **5.1, 5.2** privacy
+17. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
 **Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
@@ -559,12 +624,15 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
-| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork) e i generi |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
+| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1, la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
 **EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 5/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment · 1.5 scrobbling hub). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
+> **Aggiornato al 2026-10-30** (Sessione 67, issue #201: gli **atti del project owner** sono chiusi — la ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢) e dell'ADR-0009 (v1.0 🟢) e l'applicazione della **licenza AGPL-3.0** (D-AF.2). Le tre story della tranche geo — **1.6** (fondazione geo), **4.4** (DB IP→città) e **3.4** (nastro contesto) — entrano nella roadmap con la specifica già ratificata; le story **2.2** e **2.3** ricevono il loro state file (la dipendenza `[DEP:2.1]` è soddisfatta dal merge della 2.1). Con i loro state file il blocco NEXT-STEP del README punta alla **prima story lavorabile** invece del fallback. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
+>
 > **Aggiornato al 2026-10-30** (Sessione 64, issue #188: la 4.1 è **completata** — PR #197 merged `7458220` — e il suo `**Stato**:` passa a ✅ DONE; la riga dell'EPIC 4 torna a ⬚ TODO perché restano **4.2** (lookup MusicBrainz), **4.3** (artwork) e i generi. Con la 4.1 e la 2.1 completate il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata": è la risposta **corretta**, non una regressione — le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
 >
 > **Aggiornato al 2026-10-28** (Sessione 58, issue #173: la 1.5 rimossa dalla roadmap perché implementata e mergiata con la PR #176, e il suo `**Stato**:` allineato a ✅ — l'EPIC 1 è 5/5. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
@@ -652,5 +720,6 @@ Ogni story deve avere label GitHub:
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
+| 1.6.28 | Sessione 67 (2026-10-30, issue #201) | **Atti del project owner chiusi**: ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED) e dell'ADR-0009 (v1.0 🟢 APPROVED) e applicazione della **licenza AGPL-3.0** (D-AF.2). Aggiunte le tre story della tranche geo — **1.6** (fondazione geo: delta su `02` v1.7 / Dexie v5→v6, tabella `contexts`, classificatore L1), **4.4** (DB MMDB on-demand + derivazione della città, `13-ADR/0009` v1.0) e **3.4** (nastro contesto) — con le rispettive Task e AC; la priorità di lavorazione le inserisce al posto 15 (L2 è opt-in, L0/L1 reggono da sole); la roadmap aggiunge la riga della tranche geo e aggiorna quella dell'EPIC 4 con la 4.4; le **2.2** e **2.3** ricevono il loro state file (dipendenza `[DEP:2.1]` soddisfatta, AC in `04` v1.0 🟢), così il blocco NEXT-STEP del README punta alla prima story lavorabile. Header allineato (la licenza non è più un atto del Boss pendente) |
 
 <!-- AGGREGATE-STORIES-END -->

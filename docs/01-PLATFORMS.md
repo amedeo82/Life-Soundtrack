@@ -1,8 +1,8 @@
 # 01 — Matrice Piattaforme e Dati Ottenibili
 
 > Status: 🟡 DRAFT
-> Versione: 0.7
-> Ultima modifica: Sessione 57 (2026-10-27) — rimandi al percorso di scrittura degli hub (Story 1.5 ratificata)
+> Versione: 0.8
+> Ultima modifica: Sessione 67 (2026-10-30) — edge case geo E19..E24 e matrice di disponibilita del contesto (Story 1.6, ratificata)
 > Scope: MVP europeo
 
 ---
@@ -163,6 +163,23 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | E16 | Last.fm | **Nessun export utilizzabile dall'app**: l'export GDPR è manuale, asincrono e incompleto, e richiede di disattivare *"Hide recent listening information"* | L'utente deve degradare la propria privacy per ottenere il file | Il canale MVP è l'API via proxy configurato dall'utente; il percorso file usa gli export di terze parti, senza degradare la privacy (`lastfm.md` §1) |
 | E17 | Last.fm | `mbid` del brano presente solo con `extended=1` e **frequentemente vuoto** | DEDUP-2 non raggiungibile su molti scrobble | Degrado a DEDUP-3 con warning aggregato; `artist.mbid` resta il contributo utile (`lastfm.md` E.LF.5) |
 | E18 | Last.fm | L'API **non emette header CORS** | La fetch cross-origin dalla PWA è bloccata | Proxy CORS configurato dall'utente in Settings, default vuoto → card `disabled` e **zero richieste** (D-LF.0) |
+| E19 | Geo (tutte) | IP non risolvibile nel DB locale (MMDB, `13-ADR/0009`) | `city = null`; il paese resta | Warning `cityUnresolved`; la derivazione L2 non avviene, L0/L1 restano (`19§10`) |
+| E20 | Geo (tutte) | IP riservato o CGNAT (RFC1918, 100.64/10, link-local) | Nessuna geolocalizzazione possibile | Warning `citySkipped`; caso **più frequente** del progetto: le reti mobili usano CGNAT (`19§10`) |
+| E21 | Geo (tutte) | Cambio paese improvviso | `travel`, non errore | Warning `countryShift` (`19§10`) |
+| E22 | Geo (tutte) | Nessun cluster dominante | `unknown`, `confidence` bassa, il periodo non è aggregato | Warning `contextAmbiguous` (`19§10`) |
+| E23 | Geo (tutte) | Re-import con toggle diversi | I campi già persistiti **non** vengono azzerati | Warning `contextStale`; il contesto si ricalcola solo con `recompute()` esplicito (`19§10`) |
+| E24 | Geo (tutte) | Database geo non presente (non scaricato, o download fallito) | `city = null`, `country` resta, il nastro mostra il paese | Warning `cityDbMissing`; L0/L1 reggono da sole (`19§10`, D-B.2) |
+
+### 5.1 Disponibilità dei dati di contesto (matrice geo)
+
+| Livello | Fonte | Spotify | YouTube Music | Apple Music | Last.fm / ListenBrainz | Toggle |
+|---|---|:---:|:---:|:---:|:---:|---|
+| **L0** paese | `conn_country` | ✅ | ⚠️ (`locationInfos`, dietro il toggle `ytLocationInfos`, default OFF) | ❌ | ❌ | `retainCountry` (default ON) |
+| **L2** città | derivato dall'IP via DB-MMDB locale | ✅ (opt-in) | ✅ (opt-in) | ❌ | ❌ | `retainCity` (default OFF) |
+| **L1** contesto dedotto | pattern su paese + ora locale + dispositivo | ✅ | ✅ | ⚠️ (solo L1) | ⚠️ (solo L1) | `deriveContext` (default ON) |
+| dispositivo | `platform` | ✅ | ❌ | ❌ | ❌ | `retainDeviceType` (default ON) / `retainDeviceDetail` (default OFF) |
+
+Specifica: `19-GEO-CONTEXT.md` v1.0 🟢 APPROVED §2, §7.1 · `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED.
 
 ## 6. Strategia di integrazione MVP
 
@@ -184,3 +201,4 @@ Legenda: ✅ completo · ⚠️ parziale · ❌ assente
 | 0.5 | Sessione 47 (2026-10-26, issue #145) | §3.8 riscritto: il canale MVP è l'**export API** (ZIP con JSONL), non la paginazione `/listens` — la doc prescrive l'export per lo storico completo e ne sconsiglia la paginazione; corretti i limiti (`MAX_ITEMS_PER_GET` = 1000, non 100; rate limit 1 req/s, User-Agent obbligatorio, HTTPS only, CORS verificato sul sorgente); `recording_msid` documentato come hash dei metadati (**non** ID univoco per ascolto); `duration_ms` opzionale e di durata catalogo → E12; export non atomico → E13; cross-ref spec adapter `03-ADAPTERS/listenbrainz.md` |
 | 0.6 | Sessione 50 (2026-10-26, issue #144) | §3.7 riscritto: Last.fm **non ha un export utilizzabile dall'app** (l'export GDPR è manuale, asincrono, incompleto, e richiede di degradare la privacy dell'utente) → il canale MVP è l'API `user.getRecentTracks` via **proxy CORS configurato dall'utente** (l'API non emette `Access-Control-Allow-Origin`: dalla PWA la fetch sarebbe bloccata). Corretti i limiti (`limit` max **200**, non 1000; `artist` è stringa senza `extended=1` e oggetto con `extended=1`; il brano in riproduzione **non ha `date`**; il rate limit non è pubblicato e non ci sono header di rate limit); `mbid` del brano solo con `extended=1` e frequentemente vuoto → tabella §4 corretta da ❌ a ⚠️ per ISRC/MBID e per "brani salvati"; `loved` disponibile ma senza campo nel modello → ⚠️. Aggiunti E14-E18; cross-ref spec adapter `03-ADAPTERS/lastfm.md` |
 | 0.7 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): §3.7 e §3.8 — aggiunto il rimando al **percorso di scrittura** dei due hub (contratto `13-ADR/0011-scrobble-sink.md` 🟢 v1.0): per Last.fm `track.scrobble` con `sk` + `api_sig` (md5 in JS puro, D-SH.11) e trasporto via proxy dell'utente che deve inoltrare una **POST con body**, con **modalità dichiarata** (`solo lettura` / `lettura + scrittura`, D-SH.14); per ListenBrainz `POST /1/submit-listens` con User Token, CORS abilitato e **nessun proxy**. §3.9 — la nota su `PlatformId` ora dice che `scrobbleHubs` è una lista di **`ScrobbleHubId`** (tipo dedicato, `02§3.8`) e non di `PlatformId`. Header allineato (era fermo a v0.2 dal Sessione 9, mentre il changelog era già alla 0.6) |
+| 0.8 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §5.1 nuova — **matrice di disponibilità dei dati di contesto** (L0 paese, L1 contesto dedotto, L2 città, dispositivo) con la colonna dei toggle; §5 — aggiunti gli edge case geo **E19..E24** (rinumerati: nella v0.2 di `19` erano E11..E15, ma **E11..E18 erano già presi** in questo catalogo dagli edge case di ListenBrainz e Last.fm — due significati diversi per lo stesso identificatore); E24 è il caso nuovo «database geo non presente» (D-B.2, download on-demand). |

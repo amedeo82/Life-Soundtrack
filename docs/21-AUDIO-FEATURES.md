@@ -1,7 +1,7 @@
 # 21 — Pipeline audio features (provider, privacy, stoccaggio, costi)
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 66 (2026-10-30)
-> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #196 (ratifica del terzo host della CSP) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 67 (2026-10-30)
+> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #196 (ratifica del terzo host della CSP) · #201 (D-AF.2: la licenza passa ad AGPL-3.0) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
 > Spec collegata a: `04-ANALYSIS-ALGORITHMS.md` §3, §11, §12 · `05-ARCHITECTURE.md` §6, §6.1, §6.2, §9, §10 · `02-DATA-SCHEMA.md` §3.4, §3.8, §6 · `09-PRIVACY-SECURITY.md` §3, §4, §7.4, §10 · `10-TESTING.md` §2, §7, §8 · `12-DEVOPS.md` §2.1
 > Precedente di struttura: `20-SCROBBLING-HUB.md` (una spec di protocollo, non un adapter)
 > **Ratificata in**: `05-ARCHITECTURE.md` §6, §8, §9 (v1.4) · `10-TESTING.md` §8 (v1.1) · `14-GLOSSARY.md` (v1.1) · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (v0.6) · `12-DEVOPS.md` §2.1 (v1.0) · `08-COPY-I18N.md` §2.17 (v0.8) — le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e ratificate **al merge della PR #190** (`b1dd83e`, 2026-10-29)
@@ -162,6 +162,12 @@ Le alternative sono tre, e vanno messe sul tavolo con i loro costi:
 La spec **propone (a)** e chiede la ratifica (§3, D-AF.2). Nota: il runtime
 TensorFlow.js è **Apache-2.0** (`@tensorflow/tfjs@4.22.0`), quindi è il solo
 `essentia.js` a imporre il cambio.
+
+> **Ratificata ed applicata (Sessione 67, issue #201)**: il project owner ha
+> scelto l'opzione **(a)** — il repository è passato ad **AGPL-3.0** (`LICENSE`,
+> `package.json`, `README.md`). L'obbligo del **§13** (offerta del sorgente
+> corrispondente agli utenti che interagiscono in rete) è un **requisito
+> aperto**: issue **#202**.*.
 
 ### 2.5 Il budget del bundle iniziale è 300 KB gzip: il WASM non ci entra, e non deve
 
@@ -952,10 +958,12 @@ versione riscritta, verificabile:
 
 ## 19. I punti aperti
 
-1. **La licenza dell'app** (D-AF.2): la ratifica della spec deve cambiare la
-   licenza del repository da Apache-2.0 ad AGPL-3.0, o rinunciare al
-   provider acustico locale. È una decisione del Boss e ha effetti legali
-   sulla distribuzione.
+1. **La licenza dell'app** (D-AF.2): **CHIUSO** (Sessione 67, issue #201) — il
+   project owner ha ratificato l'opzione (a): il repository è passato da
+   Apache-2.0 ad **AGPL-3.0** (`LICENSE`, `package.json`, `README.md`). Il
+   provider acustico locale **resta**. L'obbligo del §13 (offerta del
+   Corresponding Source agli utenti che interagiscono in rete) è un
+   **requisito aperto**: issue **#202**.
 2. **Il costo di 6 MB e il consenso**: un download da 6 MB sul telefono è
    una decisione dell'utente, non un dettaglio. Va detto prima (chiave
    `enrichment.download.size`).
@@ -986,3 +994,4 @@ versione riscritta, verificabile:
 | 0.1 | 2026-10-28 (Sessione 62, issue #187) | Prima stesura. Definisce il contratto `AudioFeatureProvider`, la cascata (`05§6`), la mappatura dei campi di `AudioFeatures` per ogni provider, la normalizzazione DEAM [1,9] → [0,1], la separazione fra feature misurate/derivate/stimate, il contratto con il layer di analisi (`getAudioFeatures` filtrato per sorgente), la privacy e la CSP, lo stoccaggio e l'invalidazione, i costi reali misurati (WASM ~2,7 MB + backbone ~3,2 MB + TFJS), i 14 casi di test minimi e gli AC riscritti della Story 4.1. Apre **9 decisioni** (D-AF.1…D-AF.9) da chiudere alla ratifica. Verificati in data: la morte di Spotify `audio_features` per le nuove app (27/11/2024, con restrizioni 2026), l'API di AcousticBrainz viva ma con sole classi `mood_*` (nessuna `valence`/`energy`), l'anteprima di 30 s dell'iTunes Search API senza autenticazione, la licenza AGPL-3.0 di `essentia.js` contro Apache-2.0 dell'app, il rate limit di AcousticBrainz letto dagli header (`Limit: 100`, `Reset-In: 2` il 28/10/2026) |
 | 1.0 | 2026-10-28 (Sessione 62, issue #187, PR #190 `b1dd83e`) | **Ratificata**: da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**. Le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e **ratificate al merge della PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z). La stessa PR allinea i documenti che la spec tocca: `05§6`, `05§8` e `05§9` (v1.4), `10§8` (v1.1, la riga dei mock reali), `14-GLOSSARY.md` (v1.1, la voce **Audio features** con la distinzione *misurata / derivata / stimata*), `09§3.1`, `09§3.3`, `09§4`, `09§7.4` (v0.6, le righe mancanti dell'inventario e la rimozione di FreqBlog), `12§2.1` (v1.0, la CSP con i due host) e `08§2.17` (v0.8, il namespace `enrichment.*` con le 8 chiavi); `11-BACKLOG.md` Story 4.1 (v1.6.22, gli AC riscritti di §16 e la riga `**Stato**:`) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). **§18**: la colonna «Quando» è allineata alla realtà (l'allineamento dei documenti che la spec tocca è alla ratifica, non all'implementazione: vedi la nota sotto la tabella) e i deliverable `T4.1.11` e `T4.1.12` dichiarano il confine fra ciò che la ratifica fa (i documenti) e ciò che resta all'implementazione (i fixture, la CSP applicata al bundle, i locale). **Riferimenti corretti**: il namespace `enrichment.*` sta in `08§2.17` (la v0.1 indicava `08§2.16`, che è il namespace `scrobble.*` della Story 1.5). L'issue **#188** (implementazione della Story 4.1) passa da `needs-spec` a **`agent-ready`**: la spec è APPROVED e gli AC sono verificabili. **Il cambio di licenza (D-AF.2) non è applicato qui**: è un atto del Boss sul file `LICENSE` |
 | 1.1 | 2026-10-30 (Sessione 66, issue #196) | **Emendamento di D-AF.9 (ratifica del terzo host della CSP)**. La v1.0 elencava in `connect-src` due host — l'API di AcousticBrainz e il **CDN** dei file audio — mentre D-AF.1 prescrive la ricerca `GET https://itunes.apple.com/search`: l'host che **risponde** alla ricerca è un **terzo** host, non in lista. La contraddizione (due AC della stessa spec) è stata dichiarata dall'implementazione della Story 4.1 (Sessione 64, issue #188) all'issue **#196** (`needs-spec`), che chiedeva di ratificare A (confermare il terzo host) o B (rivedere D-AF.1). **Il project owner ha ratificato A** (Sessione 66): la pipeline degraderebbe *sempre* ad AcousticBrainz/euristico senza l'host della ricerca (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Modifiche: §2.1 (i **due** host iTunes: ricerca e CDN), §3 (la decisione D-AF.9 emendata e la nota della ratifica), §10.2 (la CSP dichiarata con i **tre** host), §16 (l'AC «consumo di rete limitato ai **tre** host dichiarati») e §18 (la riga di `12-DEVOPS.md`). Allineati i documenti che la ratifica rende falsi: `12-DEVOPS.md` §2.1 (v1.1, la CSP con i tre host), `11-BACKLOG.md` (v1.6.27, l'AC della Story 4.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (l'AC e i limiti dichiarati) e il codice applicato (`apps/web/src/security/{hosts,csp}.ts` + il test: i commenti che dichiaravano la contraddizione sono sostituiti dalla ratifica). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 (Sessione 64) — questa ratifica allinea la **dichiarazione** al codice, non il codice alla dichiarazione |
+| 1.2 | 2026-10-30 (Sessione 67, issue #201) | **D-AF.2 ratificata e applicata**: il project owner ha scelto l'opzione (a) — il repository passa da Apache-2.0 ad **AGPL-3.0** (`LICENSE` con il testo canonico, `package.json` con il campo `license`, `README.md` §"Licenza"). §2.4 dichiara l'avvenuta esecuzione e segnala l'obbligo del **§13** come requisito aperto (issue **#202**); §19 punto 1 è **chiuso**. Il provider acustico locale **resta**: la rinuncia a Essentia (opzione b) è scartata, perché la cascata avrebbe perso l'unico provider che misura `valence`/`energy` davvero (AcousticBrainz è congelato a giugno 2022 e copre solo i brani con MBID) e il mood tracker sarebbe rimasto senza dati misurati (D-A.1). Nessuna modifica al codice della pipeline. |

@@ -1,6 +1,6 @@
 # 09 — Privacy & Security
 
-> Status: 🟡 DRAFT · Versione 0.6 · Sessione 62 (2026-10-28)
+> Status: 🟡 DRAFT · Versione 0.7 · Sessione 67 (2026-10-30, issue #201)
 > ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
 > (§7) DEVE essere revisionata da un professionista legale qualificato prima
 > del lancio pubblico. Questo documento non costituisce consulenza legale.
@@ -60,6 +60,7 @@ Definire:
      └─────────────────────────────────────────────────────────────┘
 
 **Nota (opzione A, issue #108)**: il `country` è derivato dall'IP e conservato **indipendentemente dal toggle `retainIp`** (`02` §3.8): anche quando l'IP viene scartato (`retainIp = false`), il paese resta nel DB locale come dato derivato non identificativo. Il consenso esplicito è richiesto solo per la ritenuta dell'indirizzo IP stesso.
+**Nota (ratifica `19-GEO-CONTEXT.md` v1.0 🟢 APPROVED, Sessione 67)**: la **città** segue la stessa logica del paese ed è più sensibile: è derivata dall'IP **prima** che l'IP venga azzerato (nella pipeline di import, `adapters/pipeline.ts:92`), nel DB resta solo come dato derivato (`city`, `citySource`, `cityConfidence`) e l'IP resta scartato. La derivazione è condizionata alla presenza del database MMDB locale, **scaricato on-demand e non embedded** (`13-ADR/0009` v1.0 🟢, D-B.2): senza database non c'è città, ma il paese resta. Il valore è **sempre stimato**: la UI lo introduce con un indicatore di incertezza ("circa") e la soglia `cityConfidence` 0.6 scarta sotto il rumore.
 
                            │ SOLO se toggle specifici ON:
                            ▼
@@ -110,6 +111,9 @@ Definire:
 | Paese di connessione | Dati personali (derivato, non identificativo) | Derivato da IP | Sì (locale) | Necessario al servizio — consenso solo per `retainIp` |
 | Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
 | Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale), `car` solo se `carDetectionConsent` | Consenso esplicito |
+| **Città stimata** (`city`, `citySource`, `cityConfidence`) | Dati derivati (potenzialmente sensibili) | Derivato localmente dall'IP via DB-MMDB locale (`13-ADR/0009`) | Sì (locale), **solo se `retainCity`** | Consenso esplicito (toggle `retainCity`) |
+| **Contesto dedotto** (`ContextPeriod`: casa/lavoro/viaggio, etichetta dell'utente) | Dati derivati (potenzialmente sensibili) | Calcolo locale sugli eventi | Sì (locale); `userLabel` solo se l'utente lo scrive | Consenso esplicito (toggle `deriveContext`) |
+| **Database geo locale** (`.mmdb`, DB-IP Lite City) | **Non è dato personale** | File pubblico scaricato dall'utente | Sì (locale, Cache Storage) | — |
 | Inferenze mood/ere/eventi | Dati derivati (potenzialmente sensibili) | Calcolo locale | Sì (locale) | Consenso esplicito |
 | **Audio features** (valence, energy, danceability, BPM, tonalità) | Dati derivati (potenzialmente sensibili) | Calcolo locale (Essentia.js) o dataset pubblico (AcousticBrainz) o stima euristica | Sì (locale, tabella `features`) | Consenso esplicito (toggle `enrichMetadata`) |
 | **Query di ricerca per l'arricchimento** (nome brano + artista) | Dati personali | Ricerca su servizi pubblici | **No** — solo nel log di rete, senza PII | Consenso esplicito (toggle `enrichMetadata`) |
@@ -194,6 +198,13 @@ piattaforma di streaming (Spotify, Apple Music, YouTube Music, ecc.):
 cronologia ascolti, brani, artisti, timestamp, e — se lo attivi tu — indirizzi IP.
 
 Tutti questi dati restano sul tuo dispositivo. Non li inviamo a nessun server.
+**La città, se la attivi**: l'app può stimare la tua città a partire
+dall'indirizzo IP che la piattaforma ti ha già dato nell'export. La stima
+avviene **sul tuo dispositivo** (un database locale scaricato al primo uso, non
+incluso nell'app), il risultato viene salvato come dato derivato — mai come
+fatto: te lo mostriamo come "circa *Parigi*" — e l'indirizzo IP viene comunque
+scartato. Puoi lasciare l'opzione disattivata: il paese resta comunque
+disponibile.
 
 **Credenziali di piattaforma**: quando colleghi un account esterno (per esempio
 ListenBrainz, o Last.fm per il percorso API), la chiave di accesso che ci serve
@@ -344,3 +355,4 @@ email).
 | 0.4 | 2026-10-26 (issue #144) | §4: cinque righe nuove per Last.fm (username, API key, shared secret, session key `sk`, URL del proxy) — tutte locali (Dexie), mai nel bundle, mai nei log. §7.2: nota sul **proxy** — è di fiducia dell'utente, vede la sua API key, e l'import da file ne evita l'esposizione |
 | 0.5 | 2026-10-27 (issue #172) | **Story 1.5 — percorso di scrittura ratificato** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED, `05§4.2` ADR-0011 🟢 v1.0): §3.3 — la riga "Brano + timestamp ascolto" dichiara il **payload esatto** e il fatto che sia **chiuso per costruzione** (nessun campo per contesto, device, IP o insight: `retainIp` non è applicabile alla scrittura); §4 — tre righe nuove (payload di scrobbling, coda `scrobbleOutbox`, User Token e `sk` **in scrittura**) e una nota che chiarisce dove stanno i segreti (storage locale, mai nel payload né nei log) e cosa succede alla coda quando il consenso viene revocato. Header allineato (era fermo a v0.2 dal Sessione 6, mentre il changelog era già alla 0.4) |
 | 0.6 | 2026-10-28 (issue #187) | Allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): §3.1 il diagramma del flusso di rete non cita più **FreqBlog** (provider mai esistito, già rimosso da `02§3.4` e dalla CSP) ma i tre host reali (MusicBrainz, iTunes Search API, AcousticBrainz), e dichiara che l'anteprima audio di 30 s viene **analizzata in locale e non persiste**; §3.3 le tre righe di "cosa esce" (query per nome brano + artista, MBID, anteprima audio elaborata in locale); §4 le due righe mancanti dell'inventario (**audio features** e **query di ricerca** per l'arricchimento); §7.4 il testo pubblico della privacy policy aggiorna i servizi e dichiara il trattamento locale dell'anteprima. La riga **0.1** ("Prima versione completa") è stata riposizionata **in cima** alla tabella: era stata appesa fra la 0.4 e la 0.5 |
+| 0.7 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §3.1 — la nota sulla derivazione della **città** (derivata dall'IP prima dello scarto, conservata solo come dato derivato, condizionata al database MMDB scaricato on-demand, sempre stimata); §4 — tre righe di inventario nuove (`city`/`citySource`/`cityConfidence`, `ContextPeriod` con l'etichetta dell'utente, database geo locale che **non è dato personale**); §7.2 — il paragrafo pubblico sulla città stimata e sul suo essere «circa *X*». |

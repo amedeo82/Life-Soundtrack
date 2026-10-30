@@ -1,8 +1,8 @@
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.2
-> Ultima modifica: 2026-10-16 — implementazione Story 0.2 (Sessione 14)
+> Versione: 0.3
+> Ultima modifica: 2026-10-30 — licenza AGPL-3.0 e ratifica degli atti del Boss (Sessione 67, issue #201)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
 
@@ -142,6 +142,24 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   script `test:coverage` (`vitest run --coverage --exclude src/db/__tests__/perf.test.ts`);
   misurare con warm-up non misurato + **minimo di 3 round** (steady-state, robusto a jitter).
 
+### P10 — La licenza è AGPL-3.0: le dipendenze distribuite contano
+
+- **Sintomo**: `essentia.js` è AGPL-3.0 e la PWA lo distribuisce agli utenti: il
+  repository è passato ad **AGPL-3.0** il 2026-10-30 (D-AF.2, `21` §2.4, issue
+  #201). Da quel momento ogni dipendenza che **finisce nel bundle** è soggetta
+  all'obbligo di offerta del sorgente (§13) e la sua licenza deve essere
+  compatibile con l'opera distribuita.
+- **Causa**: il codice permissivo può entrare in un'opera AGPL, il contrario non
+  vale. Il bundle è una distribuzione (la PWA è servita ai browser), quindi una
+  dipendenza AGPL nel bundle obbliga l'opera a essere AGPL.
+- **Soluzione**: prima di aggiungere una dipendenza che finisce nel bundle,
+  controllare la sua licenza (il campo `license` nel `package.json` del
+  pacchetto npm) e **non introdurre codice AGPL senza la decisione del Boss**;
+  le dipendenze solo-Dev restano fuori dal bundle e non hanno impatto. Il
+  carico delle licenze del bundle va verificato con il listino del package
+  manager (`pnpm licenses list --prod`) nella story che introduce la
+  dipendenza. L'obbligo del §13 — offrire il sorgente corrispondente agli
+  utenti che interagiscono in rete — è il requirement dell'issue **#202**.
 ## 4. Cosa NON è ancora implementato
 
 Zod (validazione runtime: fuori perimetro Story 0.2, valutare con Story 0.3 adapter), Zustand,
@@ -150,3 +168,11 @@ migrazione Dexie v2→v3 per `artworkUrl` (02 §10: nullable, nessun indice — 
 si apre lo schema; alternativa in Story 0.7). Il layer `@ls/core/db` è operativo da Story 0.2
 (classe Dexie v1+v2, repository, `recount()`). Gli upgrade major della toolchain (pnpm 12,
 ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
+
+L'obbligo del **§13** della licenza AGPL-3.0 (offerta del sorgente corrispondente
+agli utenti che interagiscono con l'app in rete) **non è ancora implementato**
+(issue #202): nessuna schermata offre il sorgente e non esiste un NOTICE con le
+attribuzioni delle terze parti distribuite (Essentia.js AGPL-3.0; DB-IP Lite
+CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
+`ContextPeriod`, il database MMDB locale) è specificato in
+`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED ma non implementato (Story 1.6 / 4.4).
