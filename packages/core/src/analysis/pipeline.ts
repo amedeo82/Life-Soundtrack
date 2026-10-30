@@ -10,6 +10,7 @@
  * registry senza modificare `PlatformAdapter` (ADR-0011 V1).
  */
 
+import type { Logger } from '../logger';
 import type { Artist, AudioFeatures, Insight, ListenEvent, Track } from '../schema';
 import { MemoryEngine, type MemoryConfig } from './memory';
 import type { Translator } from './memory';
@@ -114,6 +115,12 @@ export interface MoodGeneratorOptions {
   readonly config?: Partial<MoodConfig>;
   /** Periodi aggregati (default: giorno, settimana e mese). */
   readonly periods?: readonly MoodPeriod[];
+  /**
+   * Logger per il warning aggregato sulle feature mancanti (04§1.4).
+   *
+   * Opzionale: senza logger il generatore non emette warning.
+   */
+  readonly logger?: Logger | undefined;
 }
 
 /**
@@ -130,6 +137,7 @@ export function createMoodGenerator(options: MoodGeneratorOptions = {}): Analysi
       const engine = new MoodEngine({
         ...(options.config ? { config: options.config } : {}),
         ...(options.periods ? { periods: options.periods } : {}),
+        ...(options.logger ? { logger: options.logger } : {}),
       });
       const generated = await engine.generate({
         listens: input.listens,

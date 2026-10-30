@@ -1,8 +1,8 @@
 # 04 — Algoritmi di Analisi
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 59 (2026-10-28)
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30)
 > Vincolante per: `packages/core/analysis/*` e relativi test
-> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12)
+> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12)
 
 ---
 
@@ -33,10 +33,18 @@ Tutti gli algoritmi devono essere **incrementali**: dato lo stato precedente + n
 
 ### 1.4 Degradazione graziosa
 
-Se mancano `AudioFeatures` (valence/energy null), l'algoritmo:
+Se mancano `AudioFeatures` **misurate o manuali** (valence/energy null), l'algoritmo:
 - Non produce insight basati su mood (salta)
-- Usa `genre` come proxy quando disponibile (mapping genre→valence/energy di default)
-- Logga warning aggregato "X eventi senza audio features"
+- **Non** usa `genre` come proxy: **non esiste** un mapping
+  genre→valence/energy ratificato, e inventarlo sarebbe il "segnale inventato"
+  che la D-A.1 esclude (§11). La decisione è la **D-A.6** (§11.1, issue #193)
+- Logga un warning **aggregato per periodo**: "X eventi senza audio features",
+  dove X è il numero di eventi del periodo senza feature misurata o manuale.
+  Il warning non porta dati personali: solo periodo e conteggi
+
+Sotto la soglia `minEventsPerPeriod` (§3.4) il periodo non produce insight:
+è il comportamento prescritto da §3.3, non una lacuna. La `confidence`
+dell'insight (§3, D.63.8) dice quanto del periodo il mood copre.
 
 ### 1.5 Tabella config → derivedVersion
 
@@ -862,7 +870,7 @@ La prima tranche (Story 2.4, e poi 2.1) implementa:
 | Generatore | Stato | Note |
 |---|---|---|
 | **Memory engine** (§7) | ✅ in questa tranche | usa solo ascolti, brani e artisti |
-| **Mood tracker** (§3) | ⛔ in attesa dell'EPIC 4.1 | senza audio features non produce insight (D-A.1, §12) |
+| **Mood tracker** (§3) | ✅ in questa tranche (Story 2.1, Sessione 63) | legge le feature **misurate o manuali**; senza audio features non produce insight (D-A.1, D-A.6, §12) |
 | Session segmentation (§2) | ⏭ differita | serve a `ListeningSession` (EPIC 2, tranche successiva) |
 | Pattern analyzer (§4) | ⏭ differita | Story 2.2 |
 | Era detector (§5) | ⏭ differita | Story 2.2 |
@@ -928,6 +936,23 @@ algoritmi mancanti e il criterio di `first_time`), D-A.3 e D-A.2 modificano
 ricordi) e un namespace in `08-COPY-I18N.md`, D-A.5 aggiunge **§8.1** (il
 perimetro della tranche).
 
+### 11.1 Emendamento ratificato nella Sessione 65 (issue #193)
+
+Il **project owner** ha ratificato il 2026-10-30 l'**opzione B** della issue
+#193: *il fallback mood-by-genre non esiste*. Come D-A.1…D-A.5, la decisione è
+chiusa **come proposta** nella spec e ratificata dal merge della PR.
+
+| # | Decisione | Scelta | Motivazione |
+|---|-----------|--------|-------------|
+| **D-A.6** | Esiste un fallback mood-by-genre (`§1.4`: "mapping genre→valence/energy di default")? | **No** (opzione B): `§1.4` è riscritta sul comportamento reale — nessun insight mood senza feature misurate o manuali, più il warning aggregato per periodo — e `21-AUDIO-FEATURES.md` **§12** (punto 3) è allineato: la feature `heuristic`, per l'analisi, è come se non esistesse | La mappa non era ratificata in nessun documento: `§1.4` la nominava dal 2026-10-14 (Sessione 4) e la ratifica della Sessione 59 non l'ha aggiunta. Inventarla sarebbe il "segnale inventato" che la D-A.1 esclude — *"la vision promette letture vere"*. Le opzioni alternative (ratificare la mappa, o un insight di stima separato) avrebbero richiesto un campo che marcasse la stima in `MoodPeriodPayload` (`02§4`, **chiuso**): un mood stimato sarebbe indistinguibile da uno misurato nel dato persistito. Il costo dichiarato: **il mood resta un dato raro** (solo periodi con ≥3 ascolti misurati o manuali) e `Insight.confidence` dice quanto il mood copre |
+
+**Effetti sulle regole già scritte**: la D-A.6 modifica **§1.4** (la degradazione
+dichiarata), **§8.1** (lo stato dei generatori) e **§12** (la nota di stato);
+`21-AUDIO-FEATURES.md` **§12** (punto 3) è allineato nella stessa PR. Il codice
+di `§3` **non cambia**: il mood tracker già restituiva `null` sotto la soglia
+(D.63.4) — la modifica del comportamento è solo il **warning aggregato**, che
+`§1.4` dichiarava e il codice non emetteva.
+
 ---
 
 ## 12. Perimetro e dipendenze di questa versione
@@ -946,6 +971,13 @@ decisioni. Nel frattempo l'issue della 2.1 resta aperta e **non** candidabile.
 costo, la privacy delle feature e il loro stoccaggio sono decisioni che non
 appartengono a `04`.
 
+> **Stato al 2026-10-30 (Sessione 65)**: la tabella sopra è la fotografia **al
+> momento della ratifica della Sessione 59**. Da allora la **2.4** è
+> implementata (Sessione 61, PR #185), la **2.1** è implementata (Sessione 63,
+> PR #192) e l'**EPIC 4.1** è implementata (Sessione 64, PR #197): la catena
+> **4.1 (dati) → 2.1 (letture)** è completa. Lo stato corrente delle storie
+> vive in `11-BACKLOG.md` e in `docs/state/stories/`.
+
 ---
 
 ## Changelog
@@ -955,3 +987,4 @@ appartengono a `04`.
 | 0.1 | Sessione 4 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: §4.2 `computeCircadianPattern`/`Weekly`/`Seasonal` estesi con tutti i campi `PatternPayload` (`02§4` v1.1) — `peakDay`, `peakMonth`, `weekendShare`, `userTimezone`; campi non applicabili esplicitamente `null`; §4.5 invarianti aggiornate |
 | 1.0 | Sessione 59 (2026-10-28, issue #178) | 🟢 APPROVED — **ratifica del Boss al merge della PR**: le cinque decisioni aperte (§11, D-A.1…D-A.5) sono chiuse **come proposte**. **§7.2**: `return` e `seasonal` sono specificati (il silenzio è l'ultimo ascolto precedente dell'artista; la concentrazione stagionale è calcolata su 12 mesi) e `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3); **§7.3**: i parametri allineati (`firstTimeMinTracks`, `seasonalMinEvents`) e il parametro `returnMinGapDays` dichiarato; **§7.3.1** (nuova): il `text` del ricordo è una stringa **resa** alla generazione con il template i18n `insight.memory.*` (D-A.4), non una chiave né una stringa italiana inline; **§8.1** (nuova): il perimetro della tranche — orchestratore minimale estensibile, solo i generatori implementati (D-A.5); **§9**: il registro dei parametri allineato; **§11** (nuova): le cinque decisioni con la motivazione; **§12** (nuova): il perimetro — la **Story 2.4** è implementabile subito, la **Story 2.1** aspetta le **audio features dell'EPIC 4.1** (D-A.1). Le formule, i parametri e i vinanti di §1…§10 restano quelli di v0.2, salvo le modifiche elencate |
+| 1.1 | Sessione 65 (2026-10-30, issue #193) | 🟢 APPROVED — **emendamento ratificato dal project owner** (opzione B): il fallback **mood-by-genre non esiste**. **§1.4**: la degradazione è riscritta sul comportamento reale — nessun insight mood senza feature misurate o manuali, **nessun proxy sul genere** e il warning **aggregato per periodo** ("X eventi senza audio features", solo conteggi); **§8.1**: il mood tracker passa da "in attesa dell'EPIC 4.1" a generatore della tranche; **§11.1** (nuova): la decisione **D-A.6** con la motivazione e gli effetti; **§12**: nota di stato (la tabella resta la fotografia della ratifica della Sessione 59). Il codice di `§3` **non cambia** nel calcolo: il mood tracker già restituiva `null` sotto `minEventsPerPeriod` (D.63.4); la modifica del comportamento è il **warning aggregato**, che `§1.4` dichiarava e il codice non emetteva. `21-AUDIO-FEATURES.md` §12 (punto 3) è allineato nella stessa PR |

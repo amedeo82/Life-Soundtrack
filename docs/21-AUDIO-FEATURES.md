@@ -590,6 +590,13 @@ sono separati (D-AF.4): l'euristico riempie la tabella `features` per la
 copertura e la UI, e il **layer di analisi non lo legge**. Il contratto con
 l'analisi è §12.
 
+Lo stesso ragionamento vale per il **fallback mood-by-genere**: la decisione
+**D-A.6** (`04§11.1`, issue #193, ratificata il 2026-10-30) ha stabilito che
+**non esiste** — la mappa genre→valence/energy non è ratificata in nessun
+documento, e l'analisi senza feature misurate o manuali **non produce
+insight**, segnalando la copertura mancante con il warning aggregato per
+periodo (`04§1.4`).
+
 ---
 
 ## 9. Il provider `manuale`
@@ -670,8 +677,10 @@ rimosso dalla CSP): la riga va riscritta con i due host reali.
 
 `PrivacySettings.enrichMetadata` (default **false**, `02§3.8`) governa tutta
 la pipeline. `05§6.2` è categorico: *"se `PrivacySettings.enrichMetadata ===
-false`, la cache non viene letta né scritta; le analisi degradano a
-mood-by-genre"*.
+false`, la cache non viene letta né scritta; le analisi basate su
+valence/energy **non producono insight**"*. (La formulazione di `05§6.2` è
+stata allineata nella Sessione 65: prima citava la degradazione a
+mood-by-genre, che **non esiste** — D-A.6, `04§11.1`, issue #193.)
 
 La specifica ne precisa tre conseguenze:
 
@@ -752,8 +761,11 @@ La specifica definisce la semantica di `getAudioFeatures` **senza modificare
 2. le feature `heuristic` **non** sono visibili al layer di analisi (D-AF.4):
    il mood tracker non deve costruire un umore su una stima;
 3. se la riga esiste ma è `heuristic`, per l'analisi è come se **non
-   esistesse**: l'analisi degrada a mood-by-genre (`04§1.4`), che è
-   esattamente il comportamento dichiarato per le feature mancanti;
+   esistesse**: l'analisi **non produce insight mood** (D-A.1, D-A.6), e
+   segnala la copertura mancante con il warning aggregato per periodo
+   (`04§1.4`). **Non** c'è un fallback mood-by-genre: la mappa
+   genre→valence/energy non è ratificata in nessun documento, e inventarla
+   sarebbe il segnale inventato che la D-A.1 esclude (`04§11.1`, issue #193);
 4. la funzione è **pura e sincrona** dal punto di vista dell'analisi: il
    layer di analisi gira nel Web Worker (`05§7`) e legge da IndexedDB
    attraverso il repository (`getFeatures` esiste già in
@@ -942,7 +954,7 @@ versione riscritta, verificabile:
 | `docs/08-COPY-I18N.md` §2.17 | Il namespace `enrichment.*` con le 8 chiavi | **Alla ratifica** (v0.8): i testi sono dichiarati vincolanti — la **materializzazione** nei locale `it`/`en` nell'implementazione (T4.1.12) |
 | `docs/14-GLOSSARY.md` | "Valence" e "Danceability" ci sono; manca **Energy** e manca la distinzione misurata/derivata/stimata | **Alla ratifica** (v1.1) |
 | `docs/11-BACKLOG.md` Story 4.1 | Gli AC riscritti (§16) e la riga `**Stato**:` | **Alla ratifica** (v1.6.22) |
-| `docs/04-ANALYSIS-ALGORITHMS.md` | **Nessuna modifica**: `04` è APPROVED e la semantica di `getAudioFeatures` è definita qui, in `§12` | — |
+| `docs/04-ANALYSIS-ALGORITHMS.md` | **Nessuna modifica alla ratifica**: `04` è APPROVED e la semantica di `getAudioFeatures` è definita qui, in `§12`. L'emendamento della Sessione 65 allinea `04§1.4` e `04§11.1` a questa sezione | **Emendamento (Sessione 65, issue #193)**: `04§1.4` (la degradazione reale, senza fallback mood-by-genre) e `04§11.1` (la decisione D-A.6) |
 
 > **Nota (Sessione 62)**: la v0.1 rimandava l'allineamento di `09`, `12`, `10` e
 > `08` all'implementazione. L'allineamento è avvenuto **alla ratifica**, per la

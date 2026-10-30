@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { createLogger, type LogEntry } from '../../logger';
 import type { AudioFeatures, ListenEvent, MoodId } from '../../schema';
 import {
   buildFeatureIndex,
@@ -351,5 +352,120 @@ describe('orchestratore (04§8.1)', () => {
       locale: 'it',
     });
     expect(insights.every((insight) => insight.type === 'mood_day')).toBe(true);
+  });
+});
+
+describe('warning aggregato sulle feature mancanti (04§1.4)', () => {
+  /** Logger che raccoglie le voci emesse. */
+  function collectingLogger(): { logger: ReturnType<typeof createLogger>; entries: LogEntry[] } {
+    const entries: LogEntry[] = [];
+    return { logger: createLogger('analysis:mood', (entry) => entries.push(entry)), entries };
+  }
+
+  it('un solo warning per periodo, con il numero di eventi senza feature', async () => {
+    const { logger, entries } = collectingLogger();
+    const engine = new MoodEngine({ logger });
+    const listens = [
+      listen({ id: 'a', trackId: 't-1' }),
+      listen({ id: 'b', trackId: 't-2' }),
+      listen({ id: 'c', trackId: 't-3' }),
+    ];
+
+    await engine.generate({ listens, features: [] });
+
+    const warnings = entries.filter((entry) => entry.level === 'warn');
+    // Tre periodi (giorno, settimana, mese) e un warning per periodo: il
+    // conteggio è aggregato, non un warning per ascolto.
+    expect(warnings).toHaveLength(3);
+    for (const warning of warnings) {
+      expect(warning.msg).toBe('eventi senza audio features');
+      expect(warning.ctx).toMatchObject({ missingFeatures: 3, totalEvents: 3 });
+    }
+    expect(warnings.map((warning) => warning.ctx?.period)).toEqual(['day', 'week', 'month']);
+  });
+
+  it('nessun warning quando tutti gli eventi hanno feature utilizzabili', async () => {
+    const { logger, entries } = collectingLogger();
+    const engine = new MoodEngine({ logger });
+    const listens = [
+      listen({ id: 'a', trackId: 't-1' }),
+      listen({ id: 'b', trackId: 't-2' }),
+      listen({ id: 'c', trackId: 't-3' }),
+    ];
+    const features = listens.map((event) =>
+      feature({ trackId: event.trackId, valence: 0.8, energy: 0.8 }),
+    );
+
+    await engine.generate({ listens, features });
+
+    expect(entries.filter((entry) => entry.level === 'warn')).toEqual([]);
+  });
+
+  it('il conteggio separa gli eventi senza feature da quelli con feature', async () => {
+    const { logger, entries } = collectingLogger();
+    const engine = new MoodEngine({ logger });
+    const listens = [
+      listen({ id: 'a', trackId: 't-1' }),
+      listen({ id: 'b', trackId: 't-2' }),
+      listen({ id: 'c', trackId: 't-3' }),
+      listen({ id: 'd', trackId: 't-4' }),
+    ];
+    const features = [
+      feature({ trackId: 't-1', valence: 0.8, energy: 0.8 }),
+      feature({ trackId: 't-2', valence: 0.8, energy: 0.8 }),
+      feature({ trackId: 't-3', valence: 0.8, energy: 0.8 }),
+    ];
+
+    const generated = await engine.generate({ listens, features });
+
+    const warnings = entries.filter((entry) => entry.level === 'warn');
+    expect(warnings).toHaveLength(3);
+    for (const warning of warnings) {
+      expect(warning.ctx).toMatchObject({ missingFeatures: 1, totalEvents: 4 });
+    }
+    // Il mood copre tre eventi su quattro: la copertura è nella confidence.
+    const day = generated.find((mood) => mood.period === 'day');
+    expect(day?.insight.confidence).toBeCloseTo(3 / 4, 5);
+  });
+
+  it('il warning compare anche quando il periodo non produce insight', async () => {
+    const { logger, entries } = collectingLogger();
+    const engine = new MoodEngine({ logger });
+    const listens = [listen({ id: 'a' }), listen({ id: 'b' })];
+
+    // Sotto `minEventsPerPeriod` (3) nessun insight: è proprio il caso in
+    // cui la copertura manca, e il warning deve esserci.
+    const generated = await engine.generate({ listens, features: [] });
+
+    expect(generated).toHaveLength(0);
+    const warnings = entries.filter((entry) => entry.level === 'warn');
+    expect(warnings).toHaveLength(3);
+    for (const warning of warnings) {
+      expect(warning.ctx).toMatchObject({ missingFeatures: 2, totalEvents: 2 });
+    }
+  });
+
+  it('il logger è opzionale: senza logger il motore non osserva nulla', async () => {
+    const engine = new MoodEngine();
+    const listens = [listen({ id: 'a' }), listen({ id: 'b' }), listen({ id: 'c' })];
+
+    expect(await engine.generate({ listens, features: [] })).toHaveLength(0);
+  });
+
+  it('il generatore dell’orchestratore inoltra il logger al motore', async () => {
+    const { logger, entries } = collectingLogger();
+    const pipeline = new AnalysisPipeline([createMoodGenerator({ logger })]);
+    const listens = [listen({ id: 'a' }), listen({ id: 'b' }), listen({ id: 'c' })];
+
+    await pipeline.run({
+      listens,
+      tracks: [],
+      artists: [],
+      features: [],
+      today: Date.UTC(2024, 2, 15, 12),
+      locale: 'it',
+    });
+
+    expect(entries.filter((entry) => entry.level === 'warn')).toHaveLength(3);
   });
 });
