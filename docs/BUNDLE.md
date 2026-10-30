@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-30 16:41
-> Totale file: 115
+> Data: 2026-10-30 16:52
+> Totale file: 116
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 114 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1534.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-30 12:32
+- Totale file: 115 (incluso 4 file aggregator-managed)
+- Dimensione totale: 1557 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-30 16:48
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 68 |
+| docs/ | 69 |
 | scripts/ | 20 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1460,15 +1460,15 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 62 (v0.8) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1) |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 62 (v0.6) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 64 (v1.6.26) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 62 (v1.0) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i due host delle audio features |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 66 (v1.1) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
 | 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟡 DRAFT | Sessione 41 | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto |
 | 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟢 APPROVED | Sessione 57 (v1.0) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164); **ratificata** (Sessione 57, issue #172): le 4 decisioni aperte chiuse (D-SH.11…D-SH.14) → issue di implementazione **#173** |
-| 21 | [`21-AUDIO-FEATURES.md`](21-AUDIO-FEATURES.md) | 🟢 APPROVED | Sessione 62 (v1.0) | **Pipeline audio features (Story 4.1)**: contratto `AudioFeatureProvider`, cascata cache → Essentia.js (WASM) → AcousticBrainz → euristico, mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), normalizzazione DEAM [1,9] → [0,1], privacy e CSP, stoccaggio e invalidazione, costi reali misurati — **ratificata** (Sessione 62, issue #187, PR #190 `b1dd83e`): le 9 decisioni D-AF.1…D-AF.9 sono chiuse come proposte → issue di implementazione **#188** (`agent-ready`) |
+| 21 | [`21-AUDIO-FEATURES.md`](21-AUDIO-FEATURES.md) | 🟢 APPROVED | Sessione 66 (v1.1) | **Pipeline audio features (Story 4.1)**: contratto `AudioFeatureProvider`, cascata cache → Essentia.js (WASM) → AcousticBrainz → euristico, mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), normalizzazione DEAM [1,9] → [0,1], privacy e CSP, stoccaggio e invalidazione, costi reali misurati — **ratificata** (Sessione 62, issue #187, PR #190 `b1dd83e`): le 9 decisioni D-AF.1…D-AF.9 sono chiuse come proposte → issue di implementazione **#188** (`agent-ready`); **v1.1** (Sessione 66, issue #196): **D-AF.9 emendata**, la CSP ammette anche l'host della **ricerca** iTunes (senza il quale D-AF.1 non è applicabile) |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
@@ -1547,6 +1547,7 @@ Apache License
 | 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
 | 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ✅ | #192 |
 | 64 | Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188) | 🟢 | ✅ | #197 |
+| 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1586,9 +1587,9 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **41** (merge: 35)
+- Sessioni migrate in state/sessions: **42** (merge: 35)
 - Stories migrate in state/stories: **15** (done: 15)
-- Ultima sessione migrata: **S64** - Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188)
+- Ultima sessione migrata: **S66** - Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -1614,7 +1615,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 64, issue #188): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e **tre story sono completate**: la **2.4 (Memory Engine)** (issue **#179**, PR #185, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, PR #192, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, PR #197, merge `7458220`, Sessione 64): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) realizza la cascata **cache → Essentia.js → AcousticBrainz → euristico** con i tre provider, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i trigger e il budget e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. **La catena 4.1 (dati) → 2.1 (letture) è chiusa**: la pipeline popola la tabella `features` da cui il mood tracker legge. **Prossimo passo**: non esiste più una story lavorabile già migrata in `docs/state/stories/` — le **2.2/2.3** (analisi avanzata) hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC sono specificate in `04` (v1.0 🟢 APPROVED), ma non hanno ancora issue né state file; restano la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). Gli atti del project owner sono la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41: servono i 3 punti aperti — default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo), il **cambio di licenza AGPL-3.0** (D-AF.2) e l'issue **#196** (`needs-spec`), che chiede di ratificare il terzo host della CSP o di rivedere D-AF.1.
+- **Prossimo passo tecnico** (aggiornato alla Sessione 66, issue #196): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e **tre story sono completate**: la **2.4 (Memory Engine)** (issue **#179**, PR #185, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, PR #192, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, PR #197, merge `7458220`, Sessione 64): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) realizza la cascata **cache → Essentia.js → AcousticBrainz → euristico** con i tre provider, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i trigger e il budget e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. **La catena 4.1 (dati) → 2.1 (letture) è chiusa**: la pipeline popola la tabella `features` da cui il mood tracker legge. **Prossimo passo**: non esiste più una story lavorabile già migrata in `docs/state/stories/` — le **2.2/2.3** (analisi avanzata) hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC sono specificate in `04` (v1.0 🟢 APPROVED), ma non hanno ancora issue né state file; restano la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). Gli atti del project owner rimasti sono la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41: servono i 3 punti aperti — default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo) e il **cambio di licenza AGPL-3.0** (D-AF.2): l'issue **#196** è **risolta** (Sessione 66 — la ratifica del terzo host della CSP, D-AF.9 emendata in `21` v1.1).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -7497,6 +7498,150 @@ contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
 è fra i due host dichiarati in `connect-src`).
 ```
 
+### Sessione 66 - Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili
+
+- **Data**: 2026-10-30
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-hp-elitebook-jrka`
+
+```
+
+# Sessione 66 — Ratifica del terzo host della CSP (issue #196)
+
+## Sintesi
+
+La spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED) conteneva **due decisioni
+incompatibili**: D-AF.1 prescrive la ricerca
+`GET https://itunes.apple.com/search` come fonte dell'audio, mentre D-AF.9
+metteva in `connect-src` due host — l'API di AcousticBrainz e il **CDN** dei
+file audio — **senza** l'host che risponde alla ricerca. Due acceptance
+criteria della stessa spec non potevano essere vere insieme.
+
+Il project owner ha **ratificato l'opzione A** (confermare il terzo host):
+`https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata**
+nella **v1.1** della spec. La CSP applicata al bundle **non cambia** — quel
+host era già in `connect-src` dal merge della Story 4.1 (Sessione 64): questa
+sessione allinea la **dichiarazione** al codice e chiude il buco che aveva
+prodotto l'incoerenza.
+
+## Trigger
+
+Issue **#196** (`needs-spec`, `size:S`, `area:privacy`, `phase-2`), aperta
+dalla Sessione 64 (issue #188, Story 4.1) con l'etichettatura della
+contraddizione. Claim `kilo-hp-elitebook-jrka` (unico claim, riverificato:
+ID GitHub 6526547721). Worktree `ls-196-csp-itunes-search-host`.
+
+La ratifica è un atto del project owner: D-AF.9 era 🟢 APPROVED e quindi
+vincolante. Le tre opzioni dell'issue (A: ratificare il terzo host · B:
+rivedere D-AF.1 · C: accettare la degradazione) sono state messe davanti al
+Boss, che ha scelto **A**: l'opzione B avrebbe lasciato la pipeline senza
+provider acustico (nessuna fonte libera e senza autenticazione è nota) e
+l'opzione C avrebbe lasciato il mood tracker senza dati misurati (D.A.1 vieta
+il fallback su segnali inventati).
+
+## Cosa è stato consegnato
+
+| Consegnato | Dove |
+|------------|------|
+| **D-AF.9 emendata**: `connect-src` ammette anche `https://itunes.apple.com` | `docs/21-AUDIO-FEATURES.md` §3 (v1.1) |
+| §2.1 riscritta: la fonte dell'audio richiede **due** host iTunes (ricerca e CDN) | `docs/21-AUDIO-FEATURES.md` §2.1 |
+| La CSP dichiarata con i **tre** host e la nota della ratifica | `docs/21-AUDIO-FEATURES.md` §10.2 · `docs/12-DEVOPS.md` §2.1 (v1.1) |
+| L'AC «il consumo di rete è limitato ai **tre** host dichiarati» | `docs/21-AUDIO-FEATURES.md` §16 · `docs/11-BACKLOG.md` (v1.6.27) · `docs/state/stories/4.1-audio-features.md` |
+| I commenti del codice applicato, che dichiaravano la contraddizione | `apps/web/src/security/{hosts,csp}.ts` |
+| **Un gate nuovo**: la `connect-src` applicata è confrontata con quella **dichiarata** in `docs/12-DEVOPS.md` | `apps/web/src/security/__tests__/csp.test.ts` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.196.1 | La ratifica è **A**: il terzo host entra in `connect-src` | L'opzione B (rivedere D-AF.1) non ha alternative: Spotify `audio_features` è morto per le nuove app e MusicKit costa 99 $/anno. L'opzione C (accettare la degradazione) lascia il mood tracker senza `valence`/`energy` misurate, che D.A.1 vieta di sostituire con segnali inventati. Una pipeline che non può mai misurare niente è un falso verde peggiore di un host in più |
+| D.196.2 | La ratifica allinea la **dichiarazione** al codice, non il codice alla dichiarazione | Il codice applicato include l'host della ricerca dal merge della PR #197 (Sessione 64): la scelta dell'implementazione era *funzionare* invece di *degradare sempre*, dichiarata nei commenti. La ratifica rende quella scelta **vincolante** e le dà una base normativa |
+| D.196.3 | Il confronto **dichiarazione ↔ codice** diventa un test | Il commento del file di test prometteva già «il test la confronta con quella dichiarata in `docs/12-DEVOPS.md`», ma il confronto non esisteva: il test confrontava solo la costante con il tag `<meta>`. Il drift che ha prodotto l'issue #196 era quindi invisibile. Il test legge ora il blocco `connect-src` del documento e lo confronta con la costante |
+
+## Difetti trovati lungo il percorso
+
+**La dichiarazione e il codice non erano confrontati da nessun gate**: il
+confronto esisteva solo fra la costante e il tag `<meta>` di `index.html` — due
+artefatti generati dalla stessa costante, quindi mai in disaccordo. La
+dichiarazione in `docs/12-DEVOPS.md` era confrontata con **nessuno**. Il
+risultato è la classe di difetto già vista in `05§6` e `09§4` dopo la ratifica
+della Sessione 62 (tre documenti che dichiaravano fatti falsi): una sezione
+che dichiara un fatto va confrontata con il codice che lo realizza.
+
+**La CSP è in `12§5.1`, ma tutto il progetto la cita come `12§2.1`**: il
+riferimento è ereditato dalla v0.1 della spec, quando la sezione era la 2.1.
+Non è corretto in questa sessione — la correzione toccherebbe una ventina di
+citazioni in sei documenti e nel codice applicato, e non è ciò che l'issue
+chiede — ma è il genere di riferimento che invecchia in silenzio: nessun gate
+lo confronta con il file (lesson 28-1).
+
+## Verifica
+
+- `pnpm run lint` → verde (core, web)
+- `pnpm run typecheck` → verde (4 package)
+- `pnpm run test` → verde: **490** test in `@ls/core` + **110** in `@ls/web`
+  (il nuovo gate sulla `connect-src` dichiarata è il test 110)
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift **atteso** nei blocchi
+  aggregati (SESSIONS/BACKLOG/INDEX/BUNDLE): li rigenera
+  `auto-state-aggregate` post-merge (ADR-0008)
+- `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 66-1 | **Un gate che confronta due artefatti della stessa costante non confronta nulla.** Il test della CSP verificava la costante contro il tag `<meta>`: i due non possono divergere, perché il tag è generato dalla costante. La dichiarazione in `12§2.1` era il terzo oggetto, ed era quello che poteva divergere — ed è divergito. Un gate deve confrontare la dichiarazione con l'implementazione, non due copie dello stesso sorgente |
+| 66-2 | **Le decisioni ratificate vanno confrontate fra loro, non solo con il codice.** D-AF.1 e D-AF.9 sono state ratificate nella stessa PR (Sessione 62) senza che nessuno le confrontasse con l'endpoint che la prima richiede. La contraddizione è emersa **due sessioni dopo**, quando qualcuno ha dovuto implementare la ricerca |
+| 66-3 | **Un host di ricerca e un host di contenuto sono due host.** `itunes.apple.com` (la ricerca) e `audio-ssl.itunes.apple.com` (i file) sono la stessa organizzazione, non lo stesso host: la CSP ragiona per origine, non per brand. L'errore è naturale in una lista scritta a mano, e invisibile finché la pipeline non chiama entrambi |
+| 66-4 | **Il codice che degrada in silenzio è più difficile da notare del codice che fallisce.** La pipeline applicata includeva l'host non dichiarato e funzionava: nessun errore, nessun test rosso, solo un documento che mentiva. Dichiarare la contraddizione in un'issue `needs-spec` invece di adeguare il codice alla dichiarazione è ciò che ha reso la decisione visibile (lesson 64-2) |
+
+## Documenti aggiornati
+
+- `docs/21-AUDIO-FEATURES.md` — **v1.1 🟢 APPROVED**: header, §2.1, §3 (la nota
+  della ratifica e la riga D-AF.9 emendata), §10.2, §16, §18 (la riga di
+  `12-DEVOPS.md` e il changelog 1.1)
+- `docs/12-DEVOPS.md` — **v1.1**: header, §2.1 (la CSP con i tre host e la nota
+  della ratifica), changelog 1.1
+- `docs/11-BACKLOG.md` — l'AC della Story 4.1 (i tre host) e il changelog v1.6.27
+- `docs/INDEX.md` — le righe `11`, `12` e `21` e il "Prossimo passo tecnico"
+  (l'issue #196 non è più un atto pendente del project owner)
+- `docs/state/stories/4.1-audio-features.md` — stato, task T4.1.11, AC, la
+  scelta D.188.11 e i limiti dichiarati (il punto 5 non è più un limite)
+- `docs/state/sessions/66-csp-terzo-host-itunes.md` — **nuovo**
+- `docs/18-DEV-LOG.md` — §31 (entry dell'issue #196) e changelog 2.20
+- `apps/web/src/security/hosts.ts` — il commento che dichiarava la
+  contraddizione è sostituito dalla ratifica
+- `apps/web/src/security/csp.ts` — idem, più la versione della spec citata
+- `apps/web/src/security/__tests__/csp.test.ts` — i nomi dei test e il **gate
+  nuovo** sulla `connect-src` dichiarata
+- `apps/web/vite.config.ts` — la versione della spec nel commento della CSP
+- `scripts/generate-bundle.ps1` — `$files`: la sessione 66
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#196** — la ratifica (claim `kilo-hp-elitebook-jrka`)
+- **#188** — la Story 4.1 (Sessione 64): l'implementazione che ha dichiarato
+  la contraddizione
+- **#187** — la ratifica della spec `21` v1.0 (Sessione 62), da cui la v1.1
+  discende
+
+## Note per la sessione successiva
+
+- L'issue **#196** si chiude al merge (`Closes #196`): `auto-status-done`
+  applicherà `status:done` e rimuoverà `in-progress`.
+- Restano gli atti del project owner: la ratifica di `19-GEO-CONTEXT.md` +
+  `13-ADR/0009` (🟡 DRAFT, Sessione 41) e il **cambio di licenza AGPL-3.0**
+  (D-AF.2, atto sul file `LICENSE`).
+- Non esiste più una story lavorabile migrata in `docs/state/stories/`: le
+  2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Le
+  tranche rimaste sono la **UI** (Story 3.x) e il **lookup MusicBrainz**
+  (Story 4.2).
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -8727,6 +8872,35 @@ mezzo del lavoro.
 
 ---
 
+## 31. Issue #196 — ratifica del terzo host della CSP (Sessione 66)
+
+**Tipo**: ratifica di spec (`docs/21-AUDIO-FEATURES.md` v1.1 🟢 APPROVED) — issue #196, claim `kilo-hp-elitebook-jrka`
+**Branch**: `feat/196-csp-itunes-search-host` (worktree `ls-196-csp-itunes-search-host`)
+**PR**: #0 (aperta su `main` dalla worktree — il numero è noto solo dopo l'apertura)
+**Data**: 2026-10-30
+**Stato**: 🟡 **ratificata, in attesa di merge** — il project owner ha scelto l'opzione **A** (confermare il terzo host); D-AF.9 è emendata nella v1.1 della spec
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 31-1 | P+L | **Due AC della stessa spec non potevano essere veri insieme**: D-AF.1 prescrive `GET https://itunes.apple.com/search` come fonte dell'audio, D-AF.9 mette in `connect-src` solo l'API di AcousticBrainz e il **CDN** dei file audio — l'host che **risponde** alla ricerca non è in lista | Le due decisioni sono state ratificate nella stessa PR (Sessione 62) senza che nessuna le confrontasse con l'endpoint che la prima richiede: l'host della ricerca e l'host del contenuto sono la stessa organizzazione, non lo stesso host | Il project owner ha **ratificato l'opzione A**: `https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata** (`21` v1.1, `12§2.1` v1.1). La CSP applicata al bundle **non cambia**: quell'host era già in `connect-src` dal merge della PR #197 — la ratifica allinea la dichiarazione al codice | `docs/21-AUDIO-FEATURES.md` §3, `docs/12-DEVOPS.md` §2.1 |
+| 31-2 | P+F | **Il gate della CSP confrontava due artefatti della stessa costante**: il test verificava la costante contro il tag `<meta>` di `index.html`, e il tag è *generato* dalla costante — i due non possono divergere. La `connect-src` **dichiarata** in `docs/12-DEVOPS.md` non era confrontata con **nessuno** | Il gate era stato scritto sul canale più comodo (header, `<meta>`, Vite) invece che sul canale che può mentire: il documento | Il test legge ora il blocco `connect-src` del documento e lo confronta con la costante: il drift che ha prodotto l'issue #196 diventa un test rosso. La ricerca del file sale dalla cwd del package, così il percorso del repository non è un'assunzione | `apps/web/src/security/__tests__/csp.test.ts` |
+| 31-3 | P | La CSP vive in `12-DEVOPS.md` **§5.1**, ma tutto il progetto la cita come **§2.1** (una ventina di citazioni in sei documenti e nel codice applicato) | Il riferimento è ereditato dalla v0.1 della spec, quando la sezione era la 2.1 | **Non corretto in questa sessione**: la correzione è più ampia dell'issue e riguarderebbe citazioni in documenti che l'issue non tocca. È registrato come osservazione: è la classe di riferimento che invecchia in silenzio, perché nessun gate lo confronta con il file (lesson 28-1) | `docs/12-DEVOPS.md` §5.1 |
+| 31-4 | P | La sessione **65** era già stata pre-allocata da un altro agente (issue #193, mood-by-genre) | La procedura di allocazione (`docs/state/_index.md`) assegna il numero dalla `origin/main` + i file locali non pushati | La Sessione 66 usa il numero successivo: la numerazione delle sessioni resta univoca, che è la garanzia che il gate `aggregate-state.ps1` verifica (`Find-DuplicateSessionNumbers`) | `docs/state/sessions/66-csp-terzo-host-itunes.md` |
+
+**Lesson learned sintetica**: una decisione ratificata può essere **incompatibile con un'altra decisione ratificata** (31-1) e il conflitto può restare invisibile per due sessioni, finché nessuno implementa l'endpoint che una delle due prescrive. Il codice che risolve il conflitto "funzionando" invece di degradare in silenzio è la scelta giusta — ma va accompagnata dalla dichiarazione del conflitto, altrimenti diventa una fonte di verità nascosta (lesson 64-2). E il gate che mancava (31-2) è la parte che mancava davvero: confrontare la costante con un artefatto generato dalla costante non può mai fallire; confrontare la **dichiarazione** con il codice può.
+
+**Stato al momento della scrittura**: la PR non è ancora stata mergata; il doc-sync di chiusura (frontmatter con `pr`, `merged: true` e merge commit, più l'esito post-merge) va in una PR `docs:` separata, come per le Sessioni 62, 63 e 64: il merge commit si conosce solo dopo il merge.
+
+### Link utili
+
+- Branch: `feat/196-csp-itunes-search-host` (worktree `ls-196-csp-itunes-search-host`)
+- Issue: **#196** (`size:S`, `area:privacy`, `phase-2`), claim `kilo-hp-elitebook-jrka`
+- Sessione: `docs/state/sessions/66-csp-terzo-host-itunes.md`
+- Precedenti: **#188** (la Story 4.1, Sessione 64: l'implementazione che ha dichiarato la contraddizione) · **#187** (la ratifica di `21` v1.0, Sessione 62, da cui la v1.1 discende)
+- Aperte dal lavoro: nessuna — l'issue #196 è risolta da questa stessa ratifica
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -8768,6 +8942,7 @@ mezzo del lavoro.
 | 2.17 | 2026-10-29 (issue #180) | **§29 — esito post-merge della Story 2.1**: la PR #192 è **merged** (`d018a26`, 2026-10-29T16:49:33Z), CI verde (`quality`, `cleanup`, `apply-status-done`, GitGuardian) → l'issue #180 è chiusa con `status:done` e il commento `release:` è automatico (`auto-status-done`). Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`b10cf70`), `auto-bundle` (`e64504d`). La pulizia git locale (worktree `ls-180-mood-tracker`, branch `feat/180-mood-tracker`) è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Aperte dal lavoro due issue: **#193** (la mappa `genre → valence/energy` del fallback mood-by-genre di `04§1.4`, `needs-spec`) e **#194** (l'esempio numerico di `04§3.5` che non torna: 0.570/0.667 calcolati, non 0.585/0.675 — la correzione di un documento APPROVED è un atto del project owner). Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 2.1) è in questa PR `docs:` separata: il merge commit si conosce solo dopo il merge |
 | 2.18 | 2026-10-30 (issue #188) | **§30 Issue #188 — Story 4.1 implementata** (Pipeline audio features, Sessione 64, claim `kilo-HP-EliteBook-fc1d`, PR #197): 9 entry (30-1 **la CSP dei due host non può ospitare la ricerca iTunes**: D-AF.1 impone `GET https://itunes.apple.com/search`, D-AF.9 elenca in `connect-src` solo l'API AB e il **CDN** dei file audio — l'host della *ricerca* è un terzo host: la CSP applicata lo include e il conflitto è segnalato all'issue **#196** (`needs-spec`); 30-2 il contratto ha `fetch(track, context)` perché `Track` (`02§3.3`) non porta il nome dell'artista, e la ricerca del preview lo richiede (D.188.1); 30-3 property test senza `fast-check`: PRNG mulberry32 con seme esplicito, campione deterministico e riproducibile; 30-4 la feature **euristica** in cache non termina la cascata (D.188.6): è un fallback, e la riga identica non viene riscritta (T-AF.14); 30-5 il **limiter MusicBrainz** (1 req/s) è consegnato come limiter + test, il lookup è la Story 4.2; 30-6 il WASM (~2,7 MB) resta fuori dal bundle (167 KB gzip) perché il motore è una porta e il modulo si carica con `import(/* @vite-ignore */ url)` su URL configurato a runtime, con un test che verifica il divieto di import statico; 30-7 due file in una directory gemella per un percorso riscritto a mano: il path si copia, non si riscrive; 30-8 `exactOptionalPropertyTypes`: `number | undefined` dichiarato nel tipo invece di un `as any`; 30-9 in jsdom `import.meta.url` non è un URL `file:`: il path del test si risolve da `process.cwd()`). Consegnati: il pacchetto `packages/core/src/enrichment/` (contratto, cascata, normalizzazione DEAM, derivazione mood, tre provider, due limiter, coda con budget e trigger, stoccaggio con TTL e LRU), il subpath `@ls/core/enrichment`, la CSP applicata (header Vite + tag `<meta>`), le 8 chiavi `enrichment.*` in `it`/`en`, i 4 fixture di `fixtures/api-mocks/`. **142 test** nuovi in `@ls/core` + **15** in `@ls/web` |
 | 2.19 | 2026-10-30 (issue #188) | **§30 — esito post-merge della Story 4.1**: la PR #197 è **merged** (`7458220`, 2026-10-30T11:24:49Z), CI verde (22 step del job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README) → l'issue #188 è chiusa con `status:done` e il commento `release:` è automatico (`auto-status-done`). Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`), `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata": con la 4.1 e la 2.1 completate è la risposta **corretta** (le 2.2/2.3 dipendono dalla 2.1 e non hanno uno state file). Aperta dal lavoro l'issue **#196** (`needs-spec`): la contraddizione fra D-AF.1 e D-AF.9 sulla CSP. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 4.1) è in questa PR `docs:` separata: il merge commit si conosce solo dopo il merge |
+| 2.20 | 2026-10-30 (issue #196) | **§31 Issue #196 — ratifica del terzo host della CSP** (Sessione 66, claim `kilo-hp-elitebook-jrka`): 4 entry (31-1 **due AC della stessa spec non potevano essere veri insieme** — D-AF.1 prescrive `GET https://itunes.apple.com/search` e D-AF.9 elencava in `connect-src` solo l'API AB e il **CDN** dei file audio: l'host che **risponde** alla ricerca è un terzo host; le due decisioni erano state ratificate nella stessa PR (Sessione 62) senza che nessuna le confrontasse con l'endpoint che la prima richiede, e il conflitto è emerso due sessioni dopo, quando qualcuno ha dovuto implementare la ricerca; il project owner ha **ratificato l'opzione A** — `https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata** nella **v1.1** di `21-AUDIO-FEATURES.md`; l'opzione B (rivedere D-AF.1) non aveva alternative — Spotify `audio_features` è morto e MusicKit costa 99 $/anno — e l'opzione C (accettare la degradazione) avrebbe lasciato il mood tracker senza dati misurati, che D.A.1 vieta; 31-2 **il gate della CSP confrontava due artefatti della stessa costante** (la costante e il tag `<meta>`, che da essa è generato: i due non possono divergere) mentre la `connect-src` **dichiarata** in `12-DEVOPS.md` non era confrontata con nessuno — il test legge ora il blocco del documento e lo confronta con la costante; 31-3 la CSP vive in `12§5.1` ma tutto il progetto la cita come `12§2.1`: riferimento ereditato dalla v0.1 della spec, **non corretto** (fuori perimetro dell'issue), registrato come osservazione; 31-4 la sessione 65 era già pre-allocata da un altro agente (issue #193): la Sessione 66 usa il numero successivo). Consegnati: `21` v1.1 🟢 APPROVED (header, §2.1, §3, §10.2, §16, §18), `12` v1.1 (la CSP con i tre host), `11-BACKLOG.md` v1.6.27, `docs/INDEX.md` (righe `11`, `12`, `21` e "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti), la sessione 66 e i commenti del codice applicato (`apps/web/src/security/`) — **la CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197, la ratifica allinea la **dichiarazione** al codice |
 
 ---
 
@@ -12051,6 +12226,157 @@ contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
 
 
 
+===== FILE: docs/state/sessions/66-csp-terzo-host-itunes.md =====
+
+---
+number: 66
+title: "Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili"
+date: 2026-10-30
+state: 🟡
+merged: false
+branch: feat/196-csp-itunes-search-host
+pr: 0
+claim: kilo-hp-elitebook-jrka
+cross_refs: [196, 188, 187]
+tags: [privacy, devops, phase-2]
+---
+
+# Sessione 66 — Ratifica del terzo host della CSP (issue #196)
+
+## Sintesi
+
+La spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED) conteneva **due decisioni
+incompatibili**: D-AF.1 prescrive la ricerca
+`GET https://itunes.apple.com/search` come fonte dell'audio, mentre D-AF.9
+metteva in `connect-src` due host — l'API di AcousticBrainz e il **CDN** dei
+file audio — **senza** l'host che risponde alla ricerca. Due acceptance
+criteria della stessa spec non potevano essere vere insieme.
+
+Il project owner ha **ratificato l'opzione A** (confermare il terzo host):
+`https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata**
+nella **v1.1** della spec. La CSP applicata al bundle **non cambia** — quel
+host era già in `connect-src` dal merge della Story 4.1 (Sessione 64): questa
+sessione allinea la **dichiarazione** al codice e chiude il buco che aveva
+prodotto l'incoerenza.
+
+## Trigger
+
+Issue **#196** (`needs-spec`, `size:S`, `area:privacy`, `phase-2`), aperta
+dalla Sessione 64 (issue #188, Story 4.1) con l'etichettatura della
+contraddizione. Claim `kilo-hp-elitebook-jrka` (unico claim, riverificato:
+ID GitHub 6526547721). Worktree `ls-196-csp-itunes-search-host`.
+
+La ratifica è un atto del project owner: D-AF.9 era 🟢 APPROVED e quindi
+vincolante. Le tre opzioni dell'issue (A: ratificare il terzo host · B:
+rivedere D-AF.1 · C: accettare la degradazione) sono state messe davanti al
+Boss, che ha scelto **A**: l'opzione B avrebbe lasciato la pipeline senza
+provider acustico (nessuna fonte libera e senza autenticazione è nota) e
+l'opzione C avrebbe lasciato il mood tracker senza dati misurati (D.A.1 vieta
+il fallback su segnali inventati).
+
+## Cosa è stato consegnato
+
+| Consegnato | Dove |
+|------------|------|
+| **D-AF.9 emendata**: `connect-src` ammette anche `https://itunes.apple.com` | `docs/21-AUDIO-FEATURES.md` §3 (v1.1) |
+| §2.1 riscritta: la fonte dell'audio richiede **due** host iTunes (ricerca e CDN) | `docs/21-AUDIO-FEATURES.md` §2.1 |
+| La CSP dichiarata con i **tre** host e la nota della ratifica | `docs/21-AUDIO-FEATURES.md` §10.2 · `docs/12-DEVOPS.md` §2.1 (v1.1) |
+| L'AC «il consumo di rete è limitato ai **tre** host dichiarati» | `docs/21-AUDIO-FEATURES.md` §16 · `docs/11-BACKLOG.md` (v1.6.27) · `docs/state/stories/4.1-audio-features.md` |
+| I commenti del codice applicato, che dichiaravano la contraddizione | `apps/web/src/security/{hosts,csp}.ts` |
+| **Un gate nuovo**: la `connect-src` applicata è confrontata con quella **dichiarata** in `docs/12-DEVOPS.md` | `apps/web/src/security/__tests__/csp.test.ts` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.196.1 | La ratifica è **A**: il terzo host entra in `connect-src` | L'opzione B (rivedere D-AF.1) non ha alternative: Spotify `audio_features` è morto per le nuove app e MusicKit costa 99 $/anno. L'opzione C (accettare la degradazione) lascia il mood tracker senza `valence`/`energy` misurate, che D.A.1 vieta di sostituire con segnali inventati. Una pipeline che non può mai misurare niente è un falso verde peggiore di un host in più |
+| D.196.2 | La ratifica allinea la **dichiarazione** al codice, non il codice alla dichiarazione | Il codice applicato include l'host della ricerca dal merge della PR #197 (Sessione 64): la scelta dell'implementazione era *funzionare* invece di *degradare sempre*, dichiarata nei commenti. La ratifica rende quella scelta **vincolante** e le dà una base normativa |
+| D.196.3 | Il confronto **dichiarazione ↔ codice** diventa un test | Il commento del file di test prometteva già «il test la confronta con quella dichiarata in `docs/12-DEVOPS.md`», ma il confronto non esisteva: il test confrontava solo la costante con il tag `<meta>`. Il drift che ha prodotto l'issue #196 era quindi invisibile. Il test legge ora il blocco `connect-src` del documento e lo confronta con la costante |
+
+## Difetti trovati lungo il percorso
+
+**La dichiarazione e il codice non erano confrontati da nessun gate**: il
+confronto esisteva solo fra la costante e il tag `<meta>` di `index.html` — due
+artefatti generati dalla stessa costante, quindi mai in disaccordo. La
+dichiarazione in `docs/12-DEVOPS.md` era confrontata con **nessuno**. Il
+risultato è la classe di difetto già vista in `05§6` e `09§4` dopo la ratifica
+della Sessione 62 (tre documenti che dichiaravano fatti falsi): una sezione
+che dichiara un fatto va confrontata con il codice che lo realizza.
+
+**La CSP è in `12§5.1`, ma tutto il progetto la cita come `12§2.1`**: il
+riferimento è ereditato dalla v0.1 della spec, quando la sezione era la 2.1.
+Non è corretto in questa sessione — la correzione toccherebbe una ventina di
+citazioni in sei documenti e nel codice applicato, e non è ciò che l'issue
+chiede — ma è il genere di riferimento che invecchia in silenzio: nessun gate
+lo confronta con il file (lesson 28-1).
+
+## Verifica
+
+- `pnpm run lint` → verde (core, web)
+- `pnpm run typecheck` → verde (4 package)
+- `pnpm run test` → verde: **490** test in `@ls/core` + **110** in `@ls/web`
+  (il nuovo gate sulla `connect-src` dichiarata è il test 110)
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift **atteso** nei blocchi
+  aggregati (SESSIONS/BACKLOG/INDEX/BUNDLE): li rigenera
+  `auto-state-aggregate` post-merge (ADR-0008)
+- `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 66-1 | **Un gate che confronta due artefatti della stessa costante non confronta nulla.** Il test della CSP verificava la costante contro il tag `<meta>`: i due non possono divergere, perché il tag è generato dalla costante. La dichiarazione in `12§2.1` era il terzo oggetto, ed era quello che poteva divergere — ed è divergito. Un gate deve confrontare la dichiarazione con l'implementazione, non due copie dello stesso sorgente |
+| 66-2 | **Le decisioni ratificate vanno confrontate fra loro, non solo con il codice.** D-AF.1 e D-AF.9 sono state ratificate nella stessa PR (Sessione 62) senza che nessuno le confrontasse con l'endpoint che la prima richiede. La contraddizione è emersa **due sessioni dopo**, quando qualcuno ha dovuto implementare la ricerca |
+| 66-3 | **Un host di ricerca e un host di contenuto sono due host.** `itunes.apple.com` (la ricerca) e `audio-ssl.itunes.apple.com` (i file) sono la stessa organizzazione, non lo stesso host: la CSP ragiona per origine, non per brand. L'errore è naturale in una lista scritta a mano, e invisibile finché la pipeline non chiama entrambi |
+| 66-4 | **Il codice che degrada in silenzio è più difficile da notare del codice che fallisce.** La pipeline applicata includeva l'host non dichiarato e funzionava: nessun errore, nessun test rosso, solo un documento che mentiva. Dichiarare la contraddizione in un'issue `needs-spec` invece di adeguare il codice alla dichiarazione è ciò che ha reso la decisione visibile (lesson 64-2) |
+
+## Documenti aggiornati
+
+- `docs/21-AUDIO-FEATURES.md` — **v1.1 🟢 APPROVED**: header, §2.1, §3 (la nota
+  della ratifica e la riga D-AF.9 emendata), §10.2, §16, §18 (la riga di
+  `12-DEVOPS.md` e il changelog 1.1)
+- `docs/12-DEVOPS.md` — **v1.1**: header, §2.1 (la CSP con i tre host e la nota
+  della ratifica), changelog 1.1
+- `docs/11-BACKLOG.md` — l'AC della Story 4.1 (i tre host) e il changelog v1.6.27
+- `docs/INDEX.md` — le righe `11`, `12` e `21` e il "Prossimo passo tecnico"
+  (l'issue #196 non è più un atto pendente del project owner)
+- `docs/state/stories/4.1-audio-features.md` — stato, task T4.1.11, AC, la
+  scelta D.188.11 e i limiti dichiarati (il punto 5 non è più un limite)
+- `docs/state/sessions/66-csp-terzo-host-itunes.md` — **nuovo**
+- `docs/18-DEV-LOG.md` — §31 (entry dell'issue #196) e changelog 2.20
+- `apps/web/src/security/hosts.ts` — il commento che dichiarava la
+  contraddizione è sostituito dalla ratifica
+- `apps/web/src/security/csp.ts` — idem, più la versione della spec citata
+- `apps/web/src/security/__tests__/csp.test.ts` — i nomi dei test e il **gate
+  nuovo** sulla `connect-src` dichiarata
+- `apps/web/vite.config.ts` — la versione della spec nel commento della CSP
+- `scripts/generate-bundle.ps1` — `$files`: la sessione 66
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#196** — la ratifica (claim `kilo-hp-elitebook-jrka`)
+- **#188** — la Story 4.1 (Sessione 64): l'implementazione che ha dichiarato
+  la contraddizione
+- **#187** — la ratifica della spec `21` v1.0 (Sessione 62), da cui la v1.1
+  discende
+
+## Note per la sessione successiva
+
+- L'issue **#196** si chiude al merge (`Closes #196`): `auto-status-done`
+  applicherà `status:done` e rimuoverà `in-progress`.
+- Restano gli atti del project owner: la ratifica di `19-GEO-CONTEXT.md` +
+  `13-ADR/0009` (🟡 DRAFT, Sessione 41) e il **cambio di licenza AGPL-3.0**
+  (D-AF.2, atto sul file `LICENSE`).
+- Non esiste più una story lavorabile migrata in `docs/state/stories/`: le
+  2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Le
+  tranche rimaste sono la **UI** (Story 3.x) e il **lookup MusicBrainz**
+  (Story 4.2).
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -12741,7 +13067,8 @@ HTTP e lo stato per la UI.
 `feat/188-feat-enrichment-pipeline-audio-features`). La spec è **ratificata**
 (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62, issue #187, PR #190
 `b1dd83e`): le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e
-vincolanti.
+vincolanti; **D-AF.9 è stata emendata nella v1.1** (Sessione 66, issue #196),
+che ammette in `connect-src` anche l'host della **ricerca** iTunes.
 
 **Issue**: #188 (`status:done`, `size:L`, `area:enrichment`, `phase-2`) — la
 tranche di implementazione, chiusa al merge della PR #197. La spec contiene i
@@ -12766,7 +13093,7 @@ AGPL-3.0 (D-AF.2, atto del Boss).
 - [x] T4.1.8 — La coda e i trigger (on-import, on-demand, scheduled) (`packages/core/src/enrichment/queue.ts`)
 - [x] T4.1.9 — I mock e i fixture delle API esterne (`fixtures/api-mocks/`)
 - [x] T4.1.10 — I test (unit, integrazione, property-based, scenario) (`packages/core/src/enrichment/__tests__/`)
-- [x] T4.1.11 — La CSP allineata: la **policy** è già dichiarata in `docs/12-DEVOPS.md` §2.1 (v1.0), resta l'applicazione al bundle
+- [x] T4.1.11 — La CSP allineata: la **policy** è già dichiarata in `docs/12-DEVOPS.md` §2.1 (v1.1), resta l'applicazione al bundle
 - [x] T4.1.12 — L'inventario privacy e i testi pubblici: i **documenti** sono già allineati (`docs/09-PRIVACY-SECURITY.md` v0.6, `docs/08-COPY-I18N.md` §2.17 v0.8), resta la materializzazione nei locale `it`/`en`
 - [x] T4.1.13 — La verifica del bundle (il WASM non è nel bundle iniziale) (`apps/web/vite.config.ts` + check in CI)
 
@@ -12780,7 +13107,7 @@ AGPL-3.0 (D-AF.2, atto del Boss).
 - [x] Il layer di analisi legge **solo** le feature misurate o manuali: il fallback euristico non alimenta il mood tracker (`21§12`, D-AF.4)
 - [x] Il WASM e i modelli **non** sono nel bundle iniziale né nel precache: download su richiesta, cache browser, versionamento (`21§6.5`)
 - [x] La pipeline è **idempotente** e **interrompibile**: due esecuzioni non producono righe duplicate; un job interrotto non lascia righe parziali (`21§11.3`, T-AF.14)
-- [x] Il consumo di rete è limitato ai **due host** dichiarati, con la CSP allineata (`21§10.2`)
+- [x] Il consumo di rete è limitato ai **tre host** dichiarati (ricerca iTunes, CDN delle anteprime, API di AcousticBrainz), con la CSP allineata (`21§10.2`)
 - [x] L'inventario dati di `09§4` ha le righe delle audio features e delle query di ricerca (`21§10.3`)
 - [x] I test coprono i 14 casi minimi (`21§15.3`) con i mock delle API esterne, **mai** chiamate reali (`21§15.2`)
 
@@ -12806,7 +13133,7 @@ un peso non dichiarato è un peso nascosto:
 | D.188.8 | Il ramo **euristico non scrive** sopra una feature misurata, anche se scaduta: la riga vecchia resta e viene ricalcolata al trigger successivo | `21§11.3`: l'euristico non degrada una misura |
 | D.188.9 | Il **limiter AB** è a **header**: prima della prima risposta non c'è alcun limite noto, e il limiter non blocca | D-AF.6: un valore hard-coded sbaglierebbe in entrambe le direzioni (`21§7.2`) |
 | D.188.10 | La coverage esclude i file **solo tipi** (`types.ts`) e i **barrel** (`index.ts`) dal report | Il provider v8 li mappa come 0% coperto: non contengono una sola istruzione eseguibile e abbassavano il modulo sotto il target dichiarato in `10§2` (≥ 75%). L'esclusione **non indebolisce il gate**: `src/enrichment` è a **100%** delle istruzioni e **89,9%** dei rami |
-| D.188.11 | La CSP applicata include anche `https://itunes.apple.com` (l'host della **ricerca**), oltre ai due host di D-AF.9 | D-AF.1 impone la chiamata alla ricerca e D-AF.9 elenca solo l'API AB e il **CDN** dei file audio: i due AC sono incompatibili. La scelta è *funzionare* invece di *degradare sempre*, e la contraddizione è segnalata all'issue **#196** (`needs-spec`) |
+| D.188.11 | La CSP applicata include anche `https://itunes.apple.com` (l'host della **ricerca**), oltre ai due host di D-AF.9 | D-AF.1 impone la chiamata alla ricerca e D-AF.9 elenca solo l'API AB e il **CDN** dei file audio: i due AC sono incompatibili. La scelta è *funzionare* invece di *degradare sempre*, e la contraddizione è stata segnalata all'issue **#196** (`needs-spec`) — **ratificata** nella Sessione 66: D-AF.9 è emendata (v1.1) e l'host della ricerca è dichiarato |
 
 ## Limiti dichiarati
 
@@ -12820,11 +13147,12 @@ un peso non dichiarato è un peso nascosto:
    4.2 (fuori perimetro, `21§1`).
 4. **La licenza dell'app resta Apache-2.0**: D-AF.2 (il passaggio ad AGPL-3.0)
    è un atto del Boss sul file `LICENSE` e **non** è applicato qui (`21§3`).
-5. **La contraddizione D-AF.1 / D-AF.9 sulla CSP** non è risolta: la CSP
+5. **La contraddizione D-AF.1 / D-AF.9 sulla CSP** è **risolta**: la CSP
    applicata include il terzo host (`https://itunes.apple.com`, l'host della
    *ricerca* iTunes, distinto dal *CDN* dei file audio) perché senza il ramo
-   Essentia non può mai partire. La ratifica è richiesta nell'issue **#196**
-   (`needs-spec`): o il terzo host entra in `connect-src`, o D-AF.1 decade.
+   Essentia non può mai partire, e il project owner ha **ratificato** l'host
+   nella Sessione 66 (issue **#196**): D-AF.9 è emendata nella **v1.1** della
+   spec (`21§3`, `21§10.2`) e `12§2.1` (v1.1) dichiara i tre host.
 
 ## Lesson learned
 
@@ -12865,14 +13193,15 @@ un peso non dichiarato è un peso nascosto:
 
 ## Documenti collegati
 
-- `docs/21-AUDIO-FEATURES.md` — la spec (v1.0 🟢 APPROVED): §3 le decisioni
-  D-AF.1…D-AF.9 · §16 gli AC · §17 i deliverable · §18 l'impatto sui documenti
+- `docs/21-AUDIO-FEATURES.md` — la spec (v1.1 🟢 APPROVED): §3 le decisioni
+  D-AF.1…D-AF.9 (D-AF.9 emendata nella v1.1) · §16 gli AC · §17 i deliverable
+  · §18 l'impatto sui documenti
 - `docs/05-ARCHITECTURE.md` §6, §6.1, §6.2 (cascata, trigger, caching) · §9
   (il modulo `enrichment` nel core, senza React)
 - `docs/02-DATA-SCHEMA.md` §3.4 (`AudioFeatures`) · §6 (tabella `features`)
 - `docs/04-ANALYSIS-ALGORITHMS.md` §3, §12 (la semantica di `getAudioFeatures`)
 - `docs/09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (la rete consentita e l'inventario)
-- `docs/12-DEVOPS.md` §2.1 (la CSP con i due host)
+- `docs/12-DEVOPS.md` §2.1 (la CSP con i tre host)
 - `docs/08-COPY-I18N.md` §2.17 (il namespace `enrichment.*`)
 - `docs/11-BACKLOG.md` §Story 4.1
 
@@ -19736,7 +20065,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] Il layer di analisi legge **solo** le feature misurate o manuali: il fallback euristico non alimenta il mood tracker (`21§12`, D-AF.4)
 - [ ] Il WASM e i modelli **non** sono nel bundle iniziale né nel precache: download su richiesta, cache browser, versionamento (`21§6.5`)
 - [ ] La pipeline è **idempotente** e **interrompibile**: due esecuzioni non producono righe duplicate; un job interrotto non lascia righe parziali (`21§11.3`, T-AF.14)
-- [ ] Il consumo di rete è limitato ai **due host** dichiarati, con la CSP allineata (`21§10.2`)
+- [ ] Il consumo di rete è limitato ai **tre host** dichiarati (ricerca iTunes, CDN delle anteprime, API di AcousticBrainz), con la CSP allineata (`21§10.2`)
 - [ ] L'inventario dati di `09§4` ha le righe delle audio features e delle query di ricerca (`21§10.3`)
 - [ ] I test coprono i 14 casi minimi (`21§15.3`) con i mock delle API esterne, **mai** chiamate reali (`21§15.2`)
 
@@ -19926,6 +20255,7 @@ Ogni story deve avere label GitHub:
 | 1.6.24 | Sessione 63 (2026-10-29, issue #180) | **Story 2.1 completata** (Mood Tracker, PR #192 merged, merge commit `d018a26`): la sezione Story passa a ✅ **DONE** e `docs/state/stories/2.1-mood-tracker.md` ha `status: done` con `merged_commit` e `merged_date`. La PR è stata merged in `main` il 2026-10-29T16:49:33Z con CI verde (`quality`, `cleanup`, `apply-status-done`, GitGuardian); l'issue **#180** è chiusa con `status:done` e le label `agent-ready`/`in-progress`/`status:in-review` rimosse da `auto-status-done`, che ha pubblicato anche il commento `release:`. Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`b10cf70`) e `auto-bundle` (`e64504d`). La pulizia git locale (worktree `ls-180-mood-tracker`, branch `feat/180-mood-tracker`) è stata fatta con `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con "Result too large" (path lunghi con `node_modules` su Windows) e la rimozione è passata da `rd /s /q` con prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Aperte dal lavoro due issue: **#193** (la mappa `genre → valence/energy` del fallback mood-by-genre di `04§1.4`, `needs-spec`) e **#194** (l'esempio numerico di `04§3.5` che non torna, `docs`: la correzione di un documento APPROVED è un atto del project owner). La **lista di priorità** degli agenti mette la 2.1 come **completata** |
 | 1.6.25 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 implementata** (Pipeline audio features): il pacchetto `packages/core/src/enrichment/` è nato — **senza React** (D-AF.5), con il contratto `AudioFeatureProvider` (`fetch(track, context)`: il `Track` di `02§3.3` non porta il nome dell'artista, e la ricerca del preview lo richiede, D-AF.1), la **cascata** `cache → Essentia.js → AcousticBrainz → euristico` con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete", la **normalizzazione** DEAM `[1,9] → [0,1]` con clamp e warning (E8, `10§7`), la **derivazione** mood → valence/energy di AcousticBrainz con i pesi dichiarati (`21§7.3`, D-AF.8), il **fallback euristico** che stima tempo/ballabilità/acustica dal genere e **non** stima valence/energy (`21§8.1`), i **limiter** (MusicBrainz 1 req/s a intervallo fisso, AcousticBrainz **dagli header** `X-RateLimit-*` senza costanti, D-AF.6), la **coda** con i tre trigger, il budget di 5 min/giorno, la concurrency 1 e l'interrompibilità (`21§5.2`, D-AF.7), lo **stoccaggio** (TTL 90 giorni per AB, `schemaVersion`, LRU a 50.000 righe) e il subpath `@ls/core/enrichment`. Tutte le dipendenze esterne sono **porte iniettate** (HTTP, clock, sleep, storage, policy): i **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) non chiamano mai la rete (`10§8`). La **CSP** dichiarata in `12§2.1` è applicata al bundle (`apps/web/src/security/csp.ts` + header Vite + tag `<meta>`) e le **8 chiavi** `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en` (15 test in `@ls/web`). **Contraddizione dichiarata**: D-AF.1 impone la ricerca `GET https://itunes.apple.com/search`, ma D-AF.9 elenca in `connect-src` solo i due host che **non** sono quello della ricerca → la CSP applicata include il terzo host e il conflitto è segnalato all'issue **#196** (`needs-spec`). Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2, di cui è consegnato il limiter) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss) |
 | 1.6.26 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 completata** (Pipeline audio features, PR #197 merged, merge commit `7458220`): la sezione Story passa a ✅ **DONE** e `docs/state/stories/4.1-audio-features.md` ha `status: done` con `merged_commit` e `merged_date`; `docs/state/sessions/64-audio-features-pipeline.md` ha `state: 🟢`, `merged: true` e la sezione "Esito post-merge". La PR è stata merged in `main` il 2026-10-30T11:24:49Z con CI verde (22 step del job `quality`); l'issue **#188** è chiusa con `status:done` e le label `agent-ready`/`in-progress`/`status:in-review` rimosse da `auto-status-done`, che ha pubblicato anche il commento `release:`. Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`) e `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è stata fatta con `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con "Result too large" (path lunghi con `node_modules` su Windows) e la rimozione è passata da `rd /s /q` con prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. La riga dell'EPIC 4 nella roadmap torna a ⬚ TODO (restano 4.2, 4.3 e i generi) e il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata" — **risposta corretta**, non una regressione: le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Aperta dal lavoro l'issue **#196** (`needs-spec`): la contraddizione fra D-AF.1 e D-AF.9 sulla CSP. La **lista di priorità** degli agenti mette la 4.1 e la 2.1 come **completate** |
+| 1.6.27 | Sessione 66 (2026-10-30, issue #196) | **Ratifica del terzo host della CSP**: `docs/21-AUDIO-FEATURES.md` passa a **v1.1 🟢 APPROVED** con **D-AF.9 emendata** — `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview. La v1.0 elencava i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP applicata bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Il project owner ha ratificato l'opzione **A** (confermare il terzo host) fra le due proposte dall'issue #196: l'opzione B (rivedere D-AF.1) avrebbe lasciato la pipeline senza provider acustico. Allineati: l'AC della Story 4.1 (i **tre** host dichiarati), `12-DEVOPS.md` (v1.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti dichiarati) e i commenti del codice applicato (`apps/web/src/security/`). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 — la ratifica allinea la **dichiarazione** al codice |
 
 
 
@@ -19961,7 +20291,7 @@ Ogni story deve avere label GitHub:
 
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.0 · Sessione 62 (2026-10-28, issue #187) · gate "fatti del README"
+> Status: 🟡 DRAFT · Versione 1.1 · Sessione 66 (2026-10-30, issue #196) · gate "fatti del README"
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -20139,13 +20469,15 @@ Content-Security-Policy:
   script-src 'self' 'wasm-unsafe-eval'; 
   style-src 'self' 'unsafe-inline'; 
   img-src 'self' data: https:; 
-  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org https://acousticbrainz.org https://audio-ssl.itunes.apple.com; 
+  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org https://acousticbrainz.org https://audio-ssl.itunes.apple.com https://itunes.apple.com; 
   worker-src 'self' blob:;
   frame-ancestors 'none';
 ```
-*Nota*: `'wasm-unsafe-eval'` è necessario per Essentia.js (WebAssembly). `connect-src` limita le chiamate di rete ai **provider approvati**: MusicBrainz (enrichment + bonus audio features su MBID) e, dal Sessione 62, i due host delle audio features (D-AF.9). **Rimosso** `https://freqblog.com` (D.A.6: provider non più usato).
+*Nota*: `'wasm-unsafe-eval'` è necessario per Essentia.js (WebAssembly). `connect-src` limita le chiamate di rete ai **provider approvati**: MusicBrainz (enrichment + bonus audio features su MBID) e, dal Sessione 62, i **tre** host delle audio features (D-AF.9). **Rimosso** `https://freqblog.com` (D.A.6: provider non più usato).
 
 **Aggiornamento (Sessione 62, spec `21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED)**: la pipeline delle audio features ha due host in più, entrambi dichiarati nella spec (D-AF.9): `https://acousticbrainz.org` per il bonus sui MBID e `https://audio-ssl.itunes.apple.com` per il **download dell'anteprima audio di 30 s**, che viene analizzata in locale e non esce dal dispositivo. Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`.
+
+**Aggiornamento (Sessione 66, spec `21-AUDIO-FEATURES.md` v1.1 🟢 APPROVED, issue #196)**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (`GET https://itunes.apple.com/search`). La v1.0 della spec elencava i due host che **non** sono quello della ricerca: la CSP bloccava la richiesta e la pipeline degradava sempre ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate). Il project owner ha **ratificato il terzo host** (D-AF.9 emendata): i **tre** host sono gli unici aggiunti, nessun altro servizio entra in `connect-src`. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della Story 4.1: questa è l'allineamento della **dichiarazione** al codice.
 
 ### 5.2 Altri Headers di Sicurezza
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
@@ -20703,6 +21035,7 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 0.8 | Sessione 47 (2026-10-26) | **§9.8e ordinamento fra i due writer di `main`** (issue #149): il concurrency group `post-merge-main` serializza i *run* ma non ne impone l'ordine*, e `auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica — quindi può copiare blocchi aggregati stale. Caso reale: merge della PR #147 (2026-10-26T12:50Z), `auto-bundle` alle 12:50:23 e `auto-state-aggregate` alle 12:50:55: il bundle copiò i blocchi vecchi, il guard idempotente scrisse «già in sync» e non committò, e il drift di 6 righe in `docs/BUNDLE.md` restò silenzioso (il gate sul bundle è warning-only). Il commit del bot non poteva auto-correggerlo: il push con `GITHUB_TOKEN` sopprime i workflow run innescati dal token stesso. Fix (opzione A, Boss): trigger `workflow_run` su `auto-state-aggregate` in `auto-bundle.yml` — è agganciato alla *conclusione* del workflow, quindi sopravvive alla soppressione del GITHUB_TOKEN ed è il workaround documentato per i workflow che si innescano a vicenda; con esso il bundle rigenera **sempre** dopo che l'aggregate ha committato. Difesa: quarto sub-gate in `scripts/validate-workflows.mjs` (verifica la presenza del trigger **e** che il nome in `workflows:` combaci con il `name:` reale del producer, altrimenti il trigger non scatterebbe mai, in silenzio) + `scripts/test-workflow-writer-ordering.sh` (T1..T5, 6 assert, scenario negativo). **§9.10** aggiornata: 16 step, con il nuovo gate in posizione 13. |
 | 0.9 | Sessione 54 (2026-10-27) | **§9.8f gate "fatti del README"** (issue #161): il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti), audio features e analisi/mood/ricordi come feature presenti, e un conteggio di stato duplicato — la prosa era quella del bootstrap (`ebdab9d`, 2026-10-14) perché i merge delle Story 1.2 e 1.3 non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice (pipeline verde, README falso). Causa radice di **ownership**, non di tooling: `README.md` è ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) e non era in nessuna tabella di ownership; la regola nuova è in `AGENTS.md` §"Ownership del `README.md`" (D.161.1). Gate: `scripts/check-readme-facts.mjs`, **read-only** (0 = in sync, 1 = drift, 2 = errore di ambiente): confronta l'elenco delle piattaforme con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` + le classi in `packages/core/src/adapters/`, vieta le capability EPIC 2/EPIC 4 fuori dalla roadmap, vieta i conteggi duplicati in prosa. **Nessuna modalità di scrittura**: il README è già target di `aggregate-state.ps1`, e un secondo writer riprodurrebbe la race fra i writer di `main` risolta dal #149. Test di scenario negativo `scripts/test-readme-facts-gate.sh` (T1..T9, 12 assert). **§9.10** aggiornata: 18 step, con i due nuovi gate in posizione 17 e 18 (entrambi bloccanti). |
 | 1.0 | Sessione 62 (2026-10-28) | **§2.1 CSP** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED, issue #187): `connect-src` aggiunge i due host della pipeline delle audio features (D-AF.9) — `https://acousticbrainz.org` (bonus sui MBID) e `https://audio-ssl.itunes.apple.com` (download dell'anteprima audio di 30 s, analizzata **in locale**: i byte non escono e non vengono persistiti). Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`. `'wasm-unsafe-eval'` era già presente per Essentia.js e resta |
+| 1.1 | Sessione 66 (2026-10-30) | **§2.1 CSP**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (issue #196, ratifica del project owner). La v1.0 della spec `21-AUDIO-FEATURES.md` elencava in `connect-src` i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico — Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati (D.A.1). **D-AF.9 è emendata** (`21` v1.1): i **tre** host sono gli unici aggiunti. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della PR #197 (Sessione 64): la modifica è l'allineamento della **dichiarazione** al codice |
 
 
 
@@ -23105,11 +23438,12 @@ Cosa l'issue di implementazione (da aprire all'approvazione di questa spec, come
 
 # 21 — Pipeline audio features (provider, privacy, stoccaggio, costi)
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 62 (2026-10-28)
-> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 66 (2026-10-30)
+> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #196 (ratifica del terzo host della CSP) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
 > Spec collegata a: `04-ANALYSIS-ALGORITHMS.md` §3, §11, §12 · `05-ARCHITECTURE.md` §6, §6.1, §6.2, §9, §10 · `02-DATA-SCHEMA.md` §3.4, §3.8, §6 · `09-PRIVACY-SECURITY.md` §3, §4, §7.4, §10 · `10-TESTING.md` §2, §7, §8 · `12-DEVOPS.md` §2.1
 > Precedente di struttura: `20-SCROBBLING-HUB.md` (una spec di protocollo, non un adapter)
 > **Ratificata in**: `05-ARCHITECTURE.md` §6, §8, §9 (v1.4) · `10-TESTING.md` §8 (v1.1) · `14-GLOSSARY.md` (v1.1) · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (v0.6) · `12-DEVOPS.md` §2.1 (v1.0) · `08-COPY-I18N.md` §2.17 (v0.8) — le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e ratificate **al merge della PR #190** (`b1dd83e`, 2026-10-29)
+> **Emendata nella v1.1** (Sessione 66, issue #196): **D-AF.9** accetta anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview — senza il quale D-AF.1 non è applicabile (la contraddizione fra le due decisioni è stata dichiarata dall'implementazione della Story 4.1, Sessione 64, e **ratificata dal project owner**)
 > Decisioni ratificate: **D-AF.1 … D-AF.9** (§3)
 
 ---
@@ -23176,9 +23510,15 @@ Le fonti di un brano di 30 secondi oggi sono tre, e solo una è percorribile:
 
 Verificato il 2026-10-28: la ricerca iTunes per "daft punk" restituisce
 `previewUrl = https://audio-ssl.itunes.apple.com/.../mzaf_6906185026678279401.plus.aac.p.m4a`.
-L'host del CDN (`audio-ssl.itunes.apple.com`) **non** è oggi in `connect-src`
-(`12§2.1`): la pipeline non può scaricare il preview senza una modifica della
-CSP.
+
+La fonte dell'audio (D-AF.1) richiede **due** host iTunes, non uno: quello che
+**risponde** alla ricerca (`itunes.apple.com`) e quello che **serve** i file
+audio (`audio-ssl.itunes.apple.com`). La CSP dichiarata in `12§2.1` ammette
+entrambi (D-AF.9, v1.1): senza il primo la richiesta di ricerca viene bloccata
+e il ramo Essentia non può mai partire. La contraddizione fra le due
+decisioni — aperta dall'implementazione della Story 4.1 (Sessione 64) e
+segnalata all'issue **#196** — è **ratificata** dal project owner nella
+Sessione 66.
 
 **Conseguenza**: la copertura di Essentia.js è **legata alla disponibilità del
 preview**, non al catalogo dell'utente. Un brano senza preview in iTunes resta
@@ -23301,6 +23641,16 @@ al merge della **PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z), che ha promosso la
 **v1.0 🟢 APPROVED** (la v0.1 🟡 DRAFT era stata merged dalla PR #189, `87d4d7d`,
 2026-10-28T17:02:41Z).
 
+Una decisione è stata **emendata** dopo la ratifica: **D-AF.9** (la rete
+consentita). Nella v1.0 elencava due host — l'API di AcousticBrainz e il **CDN**
+dei file audio — ma non l'host che **risponde** alla ricerca del preview, che è
+un terzo host. La contraddizione (D-AF.1 prescrive
+`GET https://itunes.apple.com/search`, D-AF.9 non ammetteva
+`itunes.apple.com`) è stata dichiarata dall'implementazione della Story 4.1
+(Sessione 64) all'issue **#196**, che chiedeva la ratifica fra due opzioni:
+confermare il terzo host (A) o rivedere D-AF.1 (B). Il project owner ha
+**ratificato A** (Sessione 66): l'emendamento è la riga D-AF.9 qui sotto.
+
 | # | Decisione | Scelta ratificata | Motivazione |
 |---|-----------|-------------------|-------------|
 | **D-AF.1** | **Da dove arriva l'audio** per il provider acustico | Il **preview di 30 s dell'iTunes Search API** (`previewUrl`), scaricato e decodificato in memoria | È l'unica fonte gratuita, senza autenticazione e senza account a pagamento (§2.1). Il percorso alternativo (file forniti dall'utente) è un progetto separato |
@@ -23311,7 +23661,7 @@ al merge della **PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z), che ha promosso la
 | **D-AF.6** | **Il rate limiting** | **MusicBrainz**: 1 req/s (AC della Story 4.1, valore noto e pubblicato). **AcousticBrainz**: il limite **si legge dagli header** `X-RateLimit-Limit` / `-Remaining` / `-Reset-In`, senza costanti | Il limite AB non è stabile: la documentazione dice "tipicamente 10 query ogni 10 secondi per IP", ma il 28/10/2026 la risposta live diceva `Limit: 100`, `Remaining: 99`, `Reset-In: 2`. Un valore hard-coded sbaglierebbe in entrambe le direzioni |
 | **D-AF.7** | **I trigger e il budget** | Confermati i tre trigger di `05§6.1` (on-import, on-demand, scheduled idle), con **concurrency 1** e **budget 5 min/giorno**; l'on-import **non** attende la rete (si popola in background) | `05§6.1` è APPROVED e dice "l'arricchimento non blocca mai l'import": la specifica non può indebolirlo. La concurrency 1 evita di saturare il rate limit di MB/AB |
 | **D-AF.8** | **Il `source` delle feature derivate** | Una feature derivata da un classificatore (AB mood → valence/energy) resta `source: 'acousticbrainz'`, con la derivazione dichiarata in questo documento | `02§3.4` è APPROVED e chiude `source` a quattro valori: non si può aggiungere `'derived'`. La trasparenza la dà il documento, non il valore |
-| **D-AF.9** | **La rete consentita** (CSP) | `connect-src` aggiunge `https://acousticbrainz.org` e `https://audio-ssl.itunes.apple.com` | Sono gli unici due host nuovi. `12§2.1` è DRAFT e può essere aggiornato; la modifica va nella stessa PR di implementazione |
+| **D-AF.9** | **La rete consentita** (CSP) | `connect-src` aggiunge `https://acousticbrainz.org`, `https://audio-ssl.itunes.apple.com` **e `https://itunes.apple.com`** (l'host della *ricerca*, dal v1.1) | Sono gli unici tre host nuovi. L'host della ricerca è **imprescindibile**: senza di esso la CSP blocca `GET https://itunes.apple.com/search` e **D-AF.1 diventa inapplicabile** (la fonte dell'audio). Emendamento ratificato dal project owner nella **v1.1** (Sessione 66, issue #196). `12§2.1` è DRAFT e può essere aggiornato |
 
 **Punti che restano al di sopra di questa spec** (non sono decisioni
 implementabili): la **politica editoriale** dei testi pubblici (non in questa
@@ -23711,12 +24061,24 @@ insight (`09§3.2`).
 connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org;
 ```
 
-Con D-AF.9 diventa:
+Con D-AF.9 (v1.1) diventa:
 
 ```
 connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org
-           https://acousticbrainz.org https://audio-ssl.itunes.apple.com;
+           https://acousticbrainz.org https://audio-ssl.itunes.apple.com
+           https://itunes.apple.com;
 ```
+
+I **tre** host della pipeline sono tutti necessari: `acousticbrainz.org` per il
+bonus sui MBID, `audio-ssl.itunes.apple.com` per il **download** dell'anteprima
+di 30 s e `itunes.apple.com` per la **ricerca** che la restituisce (D-AF.1).
+Il terzo mancava nella v1.0: la contraddizione fra D-AF.1 e D-AF.9 è stata
+dichiarata dall'implementazione della Story 4.1 (Sessione 64) all'issue
+**#196** e **ratificata** dal project owner nella Sessione 66. La CSP
+applicata al bundle include già l'host della ricerca
+(`apps/web/src/security/hosts.ts`): la v1.1 allinea la dichiarazione a ciò che
+il codice fa, e l'AC «il consumo di rete è limitato ai tre host dichiarati»
+diventa verificabile.
 
 `script-src 'self' 'wasm-unsafe-eval'` è **già** predisposto per Essentia.js
 e resta. Nessun altro host entra.
@@ -23970,8 +24332,8 @@ versione riscritta, verificabile:
 - [ ] La pipeline è **idempotente** e **interrompibile**: due esecuzioni non
       producono righe duplicate; un job interrotto non lascia righe parziali
       (§11.3, T-AF.14)
-- [ ] Il consumo di rete è limitato ai **due host** dichiarati, con la CSP
-      allineata (§10.2)
+- [ ] Il consumo di rete è limitato ai **tre host** dichiarati (ricerca iTunes,
+      CDN delle anteprime, API di AcousticBrainz), con la CSP allineata (§10.2)
 - [ ] L'inventario dati di `09§4` ha le righe delle audio features e delle
       query di ricerca (§10.3)
 - [ ] I test coprono i 14 casi minimi (§15.3) con i mock delle API esterne,
@@ -24007,7 +24369,7 @@ versione riscritta, verificabile:
 | `docs/05-ARCHITECTURE.md` §9 | Il modulo `enrichment` è in `core` **senza React** (D-AF.5): la dicitura "React Query per MB/Last.fm" va corretta | **Alla ratifica** (v1.4) |
 | `docs/02-DATA-SCHEMA.md` §3.4 | Nessuna modifica (APPROVED): il tipo resta com'è. La distinzione "misurata / derivata / stimata" resta nella spec | — |
 | `docs/09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 | Le righe mancanti dell'inventario, la riga "cosa esce" riscritta, la rimozione di FreqBlog dal diagramma e i testi pubblici | **Alla ratifica** (v0.6): l'inventario non può descrivere un provider inesistente — i fixture e la UI restano nell'implementazione (T4.1.12) |
-| `docs/12-DEVOPS.md` §2.1 | La CSP con i due host nuovi | **Alla ratifica** (v1.0): la policy dichiarata deve coincidere con la pipeline ratificata — l'applicazione della CSP al bundle resta nell'implementazione (T4.1.11) |
+| `docs/12-DEVOPS.md` §2.1 | La CSP con i due host nuovi; dal **v1.1** i **tre** host (il terzo è l'host della ricerca iTunes, issue #196) | **Alla ratifica** (v1.0): la policy dichiarata deve coincidere con la pipeline ratificata — l'applicazione della CSP al bundle resta nell'implementazione (T4.1.11) |
 | `docs/10-TESTING.md` §8 | La riga "FreqBlog / Musicae" (provider inesistenti) va sostituita con i due mock reali; la directory `fixtures/api-mocks/` viene creata | **Alla ratifica** (v1.1) per la riga dei mock; i **fixture** nell'implementazione (T4.1.9) |
 | `docs/08-COPY-I18N.md` §2.17 | Il namespace `enrichment.*` con le 8 chiavi | **Alla ratifica** (v0.8): i testi sono dichiarati vincolanti — la **materializzazione** nei locale `it`/`en` nell'implementazione (T4.1.12) |
 | `docs/14-GLOSSARY.md` | "Valence" e "Danceability" ci sono; manca **Energy** e manca la distinzione misurata/derivata/stimata | **Alla ratifica** (v1.1) |
@@ -24061,6 +24423,7 @@ versione riscritta, verificabile:
 |----------|------|-----------|
 | 0.1 | 2026-10-28 (Sessione 62, issue #187) | Prima stesura. Definisce il contratto `AudioFeatureProvider`, la cascata (`05§6`), la mappatura dei campi di `AudioFeatures` per ogni provider, la normalizzazione DEAM [1,9] → [0,1], la separazione fra feature misurate/derivate/stimate, il contratto con il layer di analisi (`getAudioFeatures` filtrato per sorgente), la privacy e la CSP, lo stoccaggio e l'invalidazione, i costi reali misurati (WASM ~2,7 MB + backbone ~3,2 MB + TFJS), i 14 casi di test minimi e gli AC riscritti della Story 4.1. Apre **9 decisioni** (D-AF.1…D-AF.9) da chiudere alla ratifica. Verificati in data: la morte di Spotify `audio_features` per le nuove app (27/11/2024, con restrizioni 2026), l'API di AcousticBrainz viva ma con sole classi `mood_*` (nessuna `valence`/`energy`), l'anteprima di 30 s dell'iTunes Search API senza autenticazione, la licenza AGPL-3.0 di `essentia.js` contro Apache-2.0 dell'app, il rate limit di AcousticBrainz letto dagli header (`Limit: 100`, `Reset-In: 2` il 28/10/2026) |
 | 1.0 | 2026-10-28 (Sessione 62, issue #187, PR #190 `b1dd83e`) | **Ratificata**: da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**. Le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e **ratificate al merge della PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z). La stessa PR allinea i documenti che la spec tocca: `05§6`, `05§8` e `05§9` (v1.4), `10§8` (v1.1, la riga dei mock reali), `14-GLOSSARY.md` (v1.1, la voce **Audio features** con la distinzione *misurata / derivata / stimata*), `09§3.1`, `09§3.3`, `09§4`, `09§7.4` (v0.6, le righe mancanti dell'inventario e la rimozione di FreqBlog), `12§2.1` (v1.0, la CSP con i due host) e `08§2.17` (v0.8, il namespace `enrichment.*` con le 8 chiavi); `11-BACKLOG.md` Story 4.1 (v1.6.22, gli AC riscritti di §16 e la riga `**Stato**:`) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). **§18**: la colonna «Quando» è allineata alla realtà (l'allineamento dei documenti che la spec tocca è alla ratifica, non all'implementazione: vedi la nota sotto la tabella) e i deliverable `T4.1.11` e `T4.1.12` dichiarano il confine fra ciò che la ratifica fa (i documenti) e ciò che resta all'implementazione (i fixture, la CSP applicata al bundle, i locale). **Riferimenti corretti**: il namespace `enrichment.*` sta in `08§2.17` (la v0.1 indicava `08§2.16`, che è il namespace `scrobble.*` della Story 1.5). L'issue **#188** (implementazione della Story 4.1) passa da `needs-spec` a **`agent-ready`**: la spec è APPROVED e gli AC sono verificabili. **Il cambio di licenza (D-AF.2) non è applicato qui**: è un atto del Boss sul file `LICENSE` |
+| 1.1 | 2026-10-30 (Sessione 66, issue #196) | **Emendamento di D-AF.9 (ratifica del terzo host della CSP)**. La v1.0 elencava in `connect-src` due host — l'API di AcousticBrainz e il **CDN** dei file audio — mentre D-AF.1 prescrive la ricerca `GET https://itunes.apple.com/search`: l'host che **risponde** alla ricerca è un **terzo** host, non in lista. La contraddizione (due AC della stessa spec) è stata dichiarata dall'implementazione della Story 4.1 (Sessione 64, issue #188) all'issue **#196** (`needs-spec`), che chiedeva di ratificare A (confermare il terzo host) o B (rivedere D-AF.1). **Il project owner ha ratificato A** (Sessione 66): la pipeline degraderebbe *sempre* ad AcousticBrainz/euristico senza l'host della ricerca (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Modifiche: §2.1 (i **due** host iTunes: ricerca e CDN), §3 (la decisione D-AF.9 emendata e la nota della ratifica), §10.2 (la CSP dichiarata con i **tre** host), §16 (l'AC «consumo di rete limitato ai **tre** host dichiarati») e §18 (la riga di `12-DEVOPS.md`). Allineati i documenti che la ratifica rende falsi: `12-DEVOPS.md` §2.1 (v1.1, la CSP con i tre host), `11-BACKLOG.md` (v1.6.27, l'AC della Story 4.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (l'AC e i limiti dichiarati) e il codice applicato (`apps/web/src/security/{hosts,csp}.ts` + il test: i commenti che dichiaravano la contraddizione sono sostituiti dalla ratifica). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 (Sessione 64) — questa ratifica allinea la **dichiarazione** al codice, non il codice alla dichiarazione |
 
 
 

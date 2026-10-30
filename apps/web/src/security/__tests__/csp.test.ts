@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import {
   CONTENT_SECURITY_POLICY,
   CONTENT_SECURITY_POLICY_DEV,
@@ -15,13 +15,14 @@ import { ACOUSTICBRAINZ_HOST, ITUNES_AUDIO_HOST, ITUNES_SEARCH_HOST } from '../h
  * La CSP applicata al bundle — `21-AUDIO-FEATURES.md` §10.2 (D-AF.9),
  * deliverable T4.1.11.
  *
- * Il test è un **gate sulla privacy**: la pipeline può contattare due host,
- * e nessun altro. Una CSP che "si ricorda a memoria" in due posti diverge:
- * qui la policy vive in una costante, e il test la confronta con quella
- * dichiarata in `docs/12-DEVOPS.md` §2.1.
+ * Il test è un **gate sulla privacy**: la pipeline può contattare tre host
+ * (la ricerca iTunes, il CDN delle anteprime, l'API di AcousticBrainz) e
+ * nessun altro. Una CSP che "si ricorda a memoria" in due posti diverge:
+ * qui la policy vive in una costante, e il test la confronta sia con il tag
+ * `<meta>` sia con quella **dichiarata** in `docs/12-DEVOPS.md`.
  */
 describe('Content Security Policy (12§2.1, 21§10.2)', () => {
-  it('consente in connect-src i due host della pipeline e MusicBrainz', () => {
+  it('consente in connect-src i tre host della pipeline e MusicBrainz', () => {
     const connect = CSP_DIRECTIVES['connect-src'];
     expect(connect).toContain("'self'");
     expect(connect).toContain('https://api.musicbrainz.org');
@@ -30,10 +31,10 @@ describe('Content Security Policy (12§2.1, 21§10.2)', () => {
     expect(connect).toContain(ITUNES_AUDIO_HOST);
   });
 
-  it("consente anche l'host della ricerca iTunes: D-AF.1 lo impone, D-AF.9 non lo elencava", () => {
-    // Contraddizione dichiarata e segnalata all'issue `needs-spec`
-    // (cfr. `src/security/hosts.ts`): senza questo host la CSP bloccherebbe
-    // la ricerca del preview e il ramo Essentia non potrebbe mai partire.
+  it("consente anche l'host della ricerca iTunes: D-AF.1 impone la chiamata", () => {
+    // L'host della *ricerca* è distinto dal *CDN* dei file audio: senza di
+    // esso la CSP bloccherebbe la ricerca del preview e il ramo Essentia non
+    // potrebbe mai partire (D-AF.1, ratificato in `21` v1.1, issue #196).
     expect(CSP_DIRECTIVES['connect-src']).toContain(ITUNES_SEARCH_HOST);
   });
 
@@ -47,6 +48,13 @@ describe('Content Security Policy (12§2.1, 21§10.2)', () => {
       ITUNES_SEARCH_HOST,
     ]);
     expect([...CSP_DIRECTIVES['connect-src']]).toEqual([...allowed]);
+  });
+
+  it('la connect-src applicata coincide con quella dichiarata in docs/12-DEVOPS.md', () => {
+    // Il confronto che mancava: la dichiarazione e il codice possono
+    // divergere in silenzio (è successo fra D-AF.1 e D-AF.9, issue #196).
+    const declared = readDeclaredConnectSrc();
+    expect(declared).toEqual([...CSP_DIRECTIVES['connect-src']]);
   });
 
   it("consente 'wasm-unsafe-eval' per Essentia.js e non 'unsafe-eval'", () => {
@@ -98,3 +106,46 @@ describe('Content Security Policy (12§2.1, 21§10.2)', () => {
     expect(match?.[1]).toEqual(CONTENT_SECURITY_POLICY_META);
   });
 });
+
+/**
+ * La `connect-src` **dichiarata** in `docs/12-DEVOPS.md`.
+ *
+ * È il confronto che mancava: la dichiarazione e il codice potevano
+ * divergere in silenzio (è successo fra D-AF.1 e D-AF.9, issue #196 — la
+ * spec elencava due host e la pipeline ne chiamava tre).
+ *
+ * @returns le sorgenti dichiarate, nell'ordine del documento.
+ */
+function readDeclaredConnectSrc(): string[] {
+  const docPath = findRepoFile('docs/12-DEVOPS.md');
+  const content = readFileSync(docPath, 'utf8');
+  const line = content
+    .split('\n')
+    .map((candidate) => candidate.trim())
+    .find((candidate) => candidate.startsWith('connect-src '));
+  if (!line) {
+    throw new Error(`Nessuna riga "connect-src" nella CSP dichiarata in ${docPath}`);
+  }
+  return line.slice('connect-src '.length).replace(/;$/, '').split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Cerca un file del repository salendo dalla directory corrente.
+ *
+ * Il test gira con la cwd sul package `@ls/web`, ma il percorso del
+ * repository non è fisso: la ricerca sale finché il file non compare.
+ *
+ * @param relative - il path del file, relativo alla root del repository.
+ * @returns il path assoluto del file trovato.
+ */
+function findRepoFile(relative: string): string {
+  let directory = process.cwd();
+  for (let depth = 0; depth < 6; depth += 1) {
+    const candidate = resolve(directory, relative);
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+    directory = dirname(directory);
+  }
+  throw new Error(`File non trovato salendo da ${process.cwd()}: ${relative}`);
+}

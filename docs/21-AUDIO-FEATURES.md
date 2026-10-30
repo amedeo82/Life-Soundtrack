@@ -1,10 +1,11 @@
 # 21 — Pipeline audio features (provider, privacy, stoccaggio, costi)
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 62 (2026-10-28)
-> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 66 (2026-10-30)
+> Issue: #187 (spec, ratificata) · #188 (implementazione della Story 4.1) · #196 (ratifica del terzo host della CSP) · #180 (la Story 2.1 che questa spec sblocca) · Story: 4.1 (`11-BACKLOG.md`)
 > Spec collegata a: `04-ANALYSIS-ALGORITHMS.md` §3, §11, §12 · `05-ARCHITECTURE.md` §6, §6.1, §6.2, §9, §10 · `02-DATA-SCHEMA.md` §3.4, §3.8, §6 · `09-PRIVACY-SECURITY.md` §3, §4, §7.4, §10 · `10-TESTING.md` §2, §7, §8 · `12-DEVOPS.md` §2.1
 > Precedente di struttura: `20-SCROBBLING-HUB.md` (una spec di protocollo, non un adapter)
 > **Ratificata in**: `05-ARCHITECTURE.md` §6, §8, §9 (v1.4) · `10-TESTING.md` §8 (v1.1) · `14-GLOSSARY.md` (v1.1) · `09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 (v0.6) · `12-DEVOPS.md` §2.1 (v1.0) · `08-COPY-I18N.md` §2.17 (v0.8) — le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e ratificate **al merge della PR #190** (`b1dd83e`, 2026-10-29)
+> **Emendata nella v1.1** (Sessione 66, issue #196): **D-AF.9** accetta anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview — senza il quale D-AF.1 non è applicabile (la contraddizione fra le due decisioni è stata dichiarata dall'implementazione della Story 4.1, Sessione 64, e **ratificata dal project owner**)
 > Decisioni ratificate: **D-AF.1 … D-AF.9** (§3)
 
 ---
@@ -71,9 +72,15 @@ Le fonti di un brano di 30 secondi oggi sono tre, e solo una è percorribile:
 
 Verificato il 2026-10-28: la ricerca iTunes per "daft punk" restituisce
 `previewUrl = https://audio-ssl.itunes.apple.com/.../mzaf_6906185026678279401.plus.aac.p.m4a`.
-L'host del CDN (`audio-ssl.itunes.apple.com`) **non** è oggi in `connect-src`
-(`12§2.1`): la pipeline non può scaricare il preview senza una modifica della
-CSP.
+
+La fonte dell'audio (D-AF.1) richiede **due** host iTunes, non uno: quello che
+**risponde** alla ricerca (`itunes.apple.com`) e quello che **serve** i file
+audio (`audio-ssl.itunes.apple.com`). La CSP dichiarata in `12§2.1` ammette
+entrambi (D-AF.9, v1.1): senza il primo la richiesta di ricerca viene bloccata
+e il ramo Essentia non può mai partire. La contraddizione fra le due
+decisioni — aperta dall'implementazione della Story 4.1 (Sessione 64) e
+segnalata all'issue **#196** — è **ratificata** dal project owner nella
+Sessione 66.
 
 **Conseguenza**: la copertura di Essentia.js è **legata alla disponibilità del
 preview**, non al catalogo dell'utente. Un brano senza preview in iTunes resta
@@ -196,6 +203,16 @@ al merge della **PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z), che ha promosso la
 **v1.0 🟢 APPROVED** (la v0.1 🟡 DRAFT era stata merged dalla PR #189, `87d4d7d`,
 2026-10-28T17:02:41Z).
 
+Una decisione è stata **emendata** dopo la ratifica: **D-AF.9** (la rete
+consentita). Nella v1.0 elencava due host — l'API di AcousticBrainz e il **CDN**
+dei file audio — ma non l'host che **risponde** alla ricerca del preview, che è
+un terzo host. La contraddizione (D-AF.1 prescrive
+`GET https://itunes.apple.com/search`, D-AF.9 non ammetteva
+`itunes.apple.com`) è stata dichiarata dall'implementazione della Story 4.1
+(Sessione 64) all'issue **#196**, che chiedeva la ratifica fra due opzioni:
+confermare il terzo host (A) o rivedere D-AF.1 (B). Il project owner ha
+**ratificato A** (Sessione 66): l'emendamento è la riga D-AF.9 qui sotto.
+
 | # | Decisione | Scelta ratificata | Motivazione |
 |---|-----------|-------------------|-------------|
 | **D-AF.1** | **Da dove arriva l'audio** per il provider acustico | Il **preview di 30 s dell'iTunes Search API** (`previewUrl`), scaricato e decodificato in memoria | È l'unica fonte gratuita, senza autenticazione e senza account a pagamento (§2.1). Il percorso alternativo (file forniti dall'utente) è un progetto separato |
@@ -206,7 +223,7 @@ al merge della **PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z), che ha promosso la
 | **D-AF.6** | **Il rate limiting** | **MusicBrainz**: 1 req/s (AC della Story 4.1, valore noto e pubblicato). **AcousticBrainz**: il limite **si legge dagli header** `X-RateLimit-Limit` / `-Remaining` / `-Reset-In`, senza costanti | Il limite AB non è stabile: la documentazione dice "tipicamente 10 query ogni 10 secondi per IP", ma il 28/10/2026 la risposta live diceva `Limit: 100`, `Remaining: 99`, `Reset-In: 2`. Un valore hard-coded sbaglierebbe in entrambe le direzioni |
 | **D-AF.7** | **I trigger e il budget** | Confermati i tre trigger di `05§6.1` (on-import, on-demand, scheduled idle), con **concurrency 1** e **budget 5 min/giorno**; l'on-import **non** attende la rete (si popola in background) | `05§6.1` è APPROVED e dice "l'arricchimento non blocca mai l'import": la specifica non può indebolirlo. La concurrency 1 evita di saturare il rate limit di MB/AB |
 | **D-AF.8** | **Il `source` delle feature derivate** | Una feature derivata da un classificatore (AB mood → valence/energy) resta `source: 'acousticbrainz'`, con la derivazione dichiarata in questo documento | `02§3.4` è APPROVED e chiude `source` a quattro valori: non si può aggiungere `'derived'`. La trasparenza la dà il documento, non il valore |
-| **D-AF.9** | **La rete consentita** (CSP) | `connect-src` aggiunge `https://acousticbrainz.org` e `https://audio-ssl.itunes.apple.com` | Sono gli unici due host nuovi. `12§2.1` è DRAFT e può essere aggiornato; la modifica va nella stessa PR di implementazione |
+| **D-AF.9** | **La rete consentita** (CSP) | `connect-src` aggiunge `https://acousticbrainz.org`, `https://audio-ssl.itunes.apple.com` **e `https://itunes.apple.com`** (l'host della *ricerca*, dal v1.1) | Sono gli unici tre host nuovi. L'host della ricerca è **imprescindibile**: senza di esso la CSP blocca `GET https://itunes.apple.com/search` e **D-AF.1 diventa inapplicabile** (la fonte dell'audio). Emendamento ratificato dal project owner nella **v1.1** (Sessione 66, issue #196). `12§2.1` è DRAFT e può essere aggiornato |
 
 **Punti che restano al di sopra di questa spec** (non sono decisioni
 implementabili): la **politica editoriale** dei testi pubblici (non in questa
@@ -606,12 +623,24 @@ insight (`09§3.2`).
 connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org;
 ```
 
-Con D-AF.9 diventa:
+Con D-AF.9 (v1.1) diventa:
 
 ```
 connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org
-           https://acousticbrainz.org https://audio-ssl.itunes.apple.com;
+           https://acousticbrainz.org https://audio-ssl.itunes.apple.com
+           https://itunes.apple.com;
 ```
+
+I **tre** host della pipeline sono tutti necessari: `acousticbrainz.org` per il
+bonus sui MBID, `audio-ssl.itunes.apple.com` per il **download** dell'anteprima
+di 30 s e `itunes.apple.com` per la **ricerca** che la restituisce (D-AF.1).
+Il terzo mancava nella v1.0: la contraddizione fra D-AF.1 e D-AF.9 è stata
+dichiarata dall'implementazione della Story 4.1 (Sessione 64) all'issue
+**#196** e **ratificata** dal project owner nella Sessione 66. La CSP
+applicata al bundle include già l'host della ricerca
+(`apps/web/src/security/hosts.ts`): la v1.1 allinea la dichiarazione a ciò che
+il codice fa, e l'AC «il consumo di rete è limitato ai tre host dichiarati»
+diventa verificabile.
 
 `script-src 'self' 'wasm-unsafe-eval'` è **già** predisposto per Essentia.js
 e resta. Nessun altro host entra.
@@ -865,8 +894,8 @@ versione riscritta, verificabile:
 - [ ] La pipeline è **idempotente** e **interrompibile**: due esecuzioni non
       producono righe duplicate; un job interrotto non lascia righe parziali
       (§11.3, T-AF.14)
-- [ ] Il consumo di rete è limitato ai **due host** dichiarati, con la CSP
-      allineata (§10.2)
+- [ ] Il consumo di rete è limitato ai **tre host** dichiarati (ricerca iTunes,
+      CDN delle anteprime, API di AcousticBrainz), con la CSP allineata (§10.2)
 - [ ] L'inventario dati di `09§4` ha le righe delle audio features e delle
       query di ricerca (§10.3)
 - [ ] I test coprono i 14 casi minimi (§15.3) con i mock delle API esterne,
@@ -902,7 +931,7 @@ versione riscritta, verificabile:
 | `docs/05-ARCHITECTURE.md` §9 | Il modulo `enrichment` è in `core` **senza React** (D-AF.5): la dicitura "React Query per MB/Last.fm" va corretta | **Alla ratifica** (v1.4) |
 | `docs/02-DATA-SCHEMA.md` §3.4 | Nessuna modifica (APPROVED): il tipo resta com'è. La distinzione "misurata / derivata / stimata" resta nella spec | — |
 | `docs/09-PRIVACY-SECURITY.md` §3.1, §3.3, §4, §7.4 | Le righe mancanti dell'inventario, la riga "cosa esce" riscritta, la rimozione di FreqBlog dal diagramma e i testi pubblici | **Alla ratifica** (v0.6): l'inventario non può descrivere un provider inesistente — i fixture e la UI restano nell'implementazione (T4.1.12) |
-| `docs/12-DEVOPS.md` §2.1 | La CSP con i due host nuovi | **Alla ratifica** (v1.0): la policy dichiarata deve coincidere con la pipeline ratificata — l'applicazione della CSP al bundle resta nell'implementazione (T4.1.11) |
+| `docs/12-DEVOPS.md` §2.1 | La CSP con i due host nuovi; dal **v1.1** i **tre** host (il terzo è l'host della ricerca iTunes, issue #196) | **Alla ratifica** (v1.0): la policy dichiarata deve coincidere con la pipeline ratificata — l'applicazione della CSP al bundle resta nell'implementazione (T4.1.11) |
 | `docs/10-TESTING.md` §8 | La riga "FreqBlog / Musicae" (provider inesistenti) va sostituita con i due mock reali; la directory `fixtures/api-mocks/` viene creata | **Alla ratifica** (v1.1) per la riga dei mock; i **fixture** nell'implementazione (T4.1.9) |
 | `docs/08-COPY-I18N.md` §2.17 | Il namespace `enrichment.*` con le 8 chiavi | **Alla ratifica** (v0.8): i testi sono dichiarati vincolanti — la **materializzazione** nei locale `it`/`en` nell'implementazione (T4.1.12) |
 | `docs/14-GLOSSARY.md` | "Valence" e "Danceability" ci sono; manca **Energy** e manca la distinzione misurata/derivata/stimata | **Alla ratifica** (v1.1) |
@@ -956,3 +985,4 @@ versione riscritta, verificabile:
 |----------|------|-----------|
 | 0.1 | 2026-10-28 (Sessione 62, issue #187) | Prima stesura. Definisce il contratto `AudioFeatureProvider`, la cascata (`05§6`), la mappatura dei campi di `AudioFeatures` per ogni provider, la normalizzazione DEAM [1,9] → [0,1], la separazione fra feature misurate/derivate/stimate, il contratto con il layer di analisi (`getAudioFeatures` filtrato per sorgente), la privacy e la CSP, lo stoccaggio e l'invalidazione, i costi reali misurati (WASM ~2,7 MB + backbone ~3,2 MB + TFJS), i 14 casi di test minimi e gli AC riscritti della Story 4.1. Apre **9 decisioni** (D-AF.1…D-AF.9) da chiudere alla ratifica. Verificati in data: la morte di Spotify `audio_features` per le nuove app (27/11/2024, con restrizioni 2026), l'API di AcousticBrainz viva ma con sole classi `mood_*` (nessuna `valence`/`energy`), l'anteprima di 30 s dell'iTunes Search API senza autenticazione, la licenza AGPL-3.0 di `essentia.js` contro Apache-2.0 dell'app, il rate limit di AcousticBrainz letto dagli header (`Limit: 100`, `Reset-In: 2` il 28/10/2026) |
 | 1.0 | 2026-10-28 (Sessione 62, issue #187, PR #190 `b1dd83e`) | **Ratificata**: da 🟡 DRAFT v0.1 a **🟢 APPROVED v1.0**. Le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e **ratificate al merge della PR #190** (`b1dd83e`, 2026-10-29T16:09:16Z). La stessa PR allinea i documenti che la spec tocca: `05§6`, `05§8` e `05§9` (v1.4), `10§8` (v1.1, la riga dei mock reali), `14-GLOSSARY.md` (v1.1, la voce **Audio features** con la distinzione *misurata / derivata / stimata*), `09§3.1`, `09§3.3`, `09§4`, `09§7.4` (v0.6, le righe mancanti dell'inventario e la rimozione di FreqBlog), `12§2.1` (v1.0, la CSP con i due host) e `08§2.17` (v0.8, il namespace `enrichment.*` con le 8 chiavi); `11-BACKLOG.md` Story 4.1 (v1.6.22, gli AC riscritti di §16 e la riga `**Stato**:`) e il nuovo `docs/state/stories/4.1-audio-features.md` (`status: todo`). **§18**: la colonna «Quando» è allineata alla realtà (l'allineamento dei documenti che la spec tocca è alla ratifica, non all'implementazione: vedi la nota sotto la tabella) e i deliverable `T4.1.11` e `T4.1.12` dichiarano il confine fra ciò che la ratifica fa (i documenti) e ciò che resta all'implementazione (i fixture, la CSP applicata al bundle, i locale). **Riferimenti corretti**: il namespace `enrichment.*` sta in `08§2.17` (la v0.1 indicava `08§2.16`, che è il namespace `scrobble.*` della Story 1.5). L'issue **#188** (implementazione della Story 4.1) passa da `needs-spec` a **`agent-ready`**: la spec è APPROVED e gli AC sono verificabili. **Il cambio di licenza (D-AF.2) non è applicato qui**: è un atto del Boss sul file `LICENSE` |
+| 1.1 | 2026-10-30 (Sessione 66, issue #196) | **Emendamento di D-AF.9 (ratifica del terzo host della CSP)**. La v1.0 elencava in `connect-src` due host — l'API di AcousticBrainz e il **CDN** dei file audio — mentre D-AF.1 prescrive la ricerca `GET https://itunes.apple.com/search`: l'host che **risponde** alla ricerca è un **terzo** host, non in lista. La contraddizione (due AC della stessa spec) è stata dichiarata dall'implementazione della Story 4.1 (Sessione 64, issue #188) all'issue **#196** (`needs-spec`), che chiedeva di ratificare A (confermare il terzo host) o B (rivedere D-AF.1). **Il project owner ha ratificato A** (Sessione 66): la pipeline degraderebbe *sempre* ad AcousticBrainz/euristico senza l'host della ricerca (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Modifiche: §2.1 (i **due** host iTunes: ricerca e CDN), §3 (la decisione D-AF.9 emendata e la nota della ratifica), §10.2 (la CSP dichiarata con i **tre** host), §16 (l'AC «consumo di rete limitato ai **tre** host dichiarati») e §18 (la riga di `12-DEVOPS.md`). Allineati i documenti che la ratifica rende falsi: `12-DEVOPS.md` §2.1 (v1.1, la CSP con i tre host), `11-BACKLOG.md` (v1.6.27, l'AC della Story 4.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (l'AC e i limiti dichiarati) e il codice applicato (`apps/web/src/security/{hosts,csp}.ts` + il test: i commenti che dichiaravano la contraddizione sono sostituiti dalla ratifica). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 (Sessione 64) — questa ratifica allinea la **dichiarazione** al codice, non il codice alla dichiarazione |

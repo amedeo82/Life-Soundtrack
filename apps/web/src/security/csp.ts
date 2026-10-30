@@ -1,23 +1,25 @@
 /**
- * La Content Security Policy dell'app — `docs/12-DEVOPS.md` §2.1 (v1.0),
+ * La Content Security Policy dell'app — `docs/12-DEVOPS.md` §2.1 (v1.1),
  * applicazione della pipeline delle audio features (`21-AUDIO-FEATURES.md`
- * v1.0 🟢 §10.2, D-AF.9, deliverable T4.1.11).
+ * v1.1 🟢 §10.2, D-AF.9, deliverable T4.1.11).
  *
  * La **policy dichiarata** nei documenti è quella di produzione; qui vive
  * come **costante applicabile**, così header e `<meta>` non possono
  * divergere (una CSP che "si ricorda a memoria" in due posti diverge).
  *
- * I due host aggiunti dalla pipeline sono gli **unici** consentiti in
+ * I **tre** host aggiunti dalla pipeline sono gli **unici** consentiti in
  * `connect-src` oltre a MusicBrainz:
  *
  * - `https://acousticbrainz.org` — il bonus sui recording con MBID;
  * - `https://audio-ssl.itunes.apple.com` — il download dell'anteprima audio
- *   di 30 s, analizzata **in locale** (i byte non escono dal dispositivo).
+ *   di 30 s, analizzata **in locale** (i byte non escono dal dispositivo);
+ * - `https://itunes.apple.com` — la ricerca che restituisce il `previewUrl`
+ *   (D-AF.1: senza di essa il ramo Essentia non può mai partire).
  */
 
 import { ACOUSTICBRAINZ_HOST, ITUNES_AUDIO_HOST, ITUNES_SEARCH_HOST } from './hosts';
 
-/** La policy dichiarata in `12-DEVOPS.md` §2.1 (v1.0). */
+/** La policy dichiarata in `12-DEVOPS.md` §2.1 (v1.1). */
 export const CSP_DIRECTIVES = {
   'default-src': ["'self'"],
   'script-src': ["'self'", "'wasm-unsafe-eval'"],
@@ -30,8 +32,7 @@ export const CSP_DIRECTIVES = {
     ACOUSTICBRAINZ_HOST,
     ITUNES_AUDIO_HOST,
     // L'host della **ricerca** iTunes: D-AF.1 impone la chiamata, D-AF.9
-    // non lo elencava. Contraddizione segnalata all'issue `needs-spec`
-    // (cfr. `hosts.ts`): senza, il ramo Essentia non può mai partire.
+    // lo dichiara dal v1.1 della spec (ratifica dell'issue #196).
     ITUNES_SEARCH_HOST,
   ],
   'worker-src': ["'self'", 'blob:'],

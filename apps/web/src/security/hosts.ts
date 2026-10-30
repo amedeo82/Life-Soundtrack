@@ -1,13 +1,15 @@
 /**
  * Gli host che la pipeline delle audio features può contattare —
- * `21-AUDIO-FEATURES.md` v1.0 🟢 §10.1, §10.2 (D-AF.9).
+ * `21-AUDIO-FEATURES.md` v1.1 🟢 §10.1, §10.2 (D-AF.9).
  *
- * Sono **due**, e sono gli unici aggiunti a `connect-src` oltre a
+ * Sono **tre**, e sono gli unici aggiunti a `connect-src` oltre a
  * MusicBrainz:
  *
  * - l'API di AcousticBrainz (bonus sui recording con MBID);
  * - il CDN delle anteprime dell'iTunes Search API (30 s di audio analizzata
- *   **in locale**: i byte non escono e non vengono persistiti).
+ *   **in locale**: i byte non escono e non vengono persistiti);
+ * - l'**iTunes Search API** stessa, l'host che **risponde** alla ricerca del
+ *   preview.
  *
  * Il fatto di avere una costante dedicata (e non una stringa sparsa nel
  * codice) è ciò che permette al test della CSP di dimostrare che **non
@@ -23,20 +25,16 @@ export const ITUNES_AUDIO_HOST = 'https://audio-ssl.itunes.apple.com';
 /**
  * L'host dell'**iTunes Search API**.
  *
- * ⚠️ **Terzo host, non previsto da D-AF.9**: la decisione D-AF.9 elenca due
- * host nuovi in `connect-src` (`acousticbrainz.org` e
- * `audio-ssl.itunes.apple.com`), ma D-AF.1 impone di prendere l'audio dal
- * **preview** restituito da `GET https://itunes.apple.com/search` — e
- * l'host della *ricerca* è diverso da quello del *CDN* dei file audio.
+ * È il terzo host della pipeline, distinto dal CDN dei file audio: la
+ * ricerca (`GET https://itunes.apple.com/search`) restituisce il
+ * `previewUrl` che il CDN serve (D-AF.1).
  *
- * Senza questo host la CSP bloccherebbe la ricerca e il ramo Essentia non
- * potrebbe mai partire: i due AC ("la fonte dell'audio è il preview iTunes"
- * e "la rete è limitata ai due host dichiarati") sono **incompatibili** fra
- * loro. La contradizione è segnalata all'issue con label `needs-spec`: la
- * ratifica del Boss può (a) confermare il terzo host o (b) rivedere D-AF.9.
- *
- * Finché la ratifica non c'è, il codice **funziona** (il ramo Essentia
- * trova il preview) invece di degradare sempre: una pipeline che non può
- * mai misurare niente è un falso verde peggiore di un host in più.
+ * Nella **v1.0** della spec, D-AF.9 elencava in `connect-src` soltanto i due
+ * host che *non* sono quello della ricerca: la CSP applicata bloccava la
+ * richiesta e la pipeline degradava **sempre** ad AcousticBrainz/euristico
+ * (Essentia mai chiamabile, `valence`/`energy` mai misurate). La
+ * contraddizione fra le due decisioni è stata dichiarata all'issue **#196**
+ * (`needs-spec`) e **ratificata dal project owner** nella Sessione 66:
+ * **D-AF.9 è emendata** nella v1.1 della spec e questo host è ora dichiarato.
  */
 export const ITUNES_SEARCH_HOST = 'https://itunes.apple.com';
