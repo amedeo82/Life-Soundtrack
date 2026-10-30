@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-30 13:25
+> Data: 2026-10-30 12:32
 > Totale file: 115
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1179,9 +1179,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **4.1** — Pipeline audio features (priority `I`, vedi `docs/11-BACKLOG.md`).
+_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
 
-Sorgente: `docs/state/stories/4.1-audio-features.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -1546,7 +1546,7 @@ Apache License
 | 61 | Story 2.4 — Memory Engine: i 5 tipi di ricordo e il feed per rilevanza (issue #179) | 🟢 | ✅ | #185 |
 | 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
 | 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ✅ | #192 |
-| 64 | Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188) | 🟡 | ❌ | #197 |
+| 64 | Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188) | 🟢 | ✅ | #197 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -1586,10 +1586,10 @@ Apache License
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **41** (merge: 34)
-- Stories migrate in state/stories: **15** (done: 14)
+- Sessioni migrate in state/sessions: **41** (merge: 35)
+- Stories migrate in state/stories: **15** (done: 15)
 - Ultima sessione migrata: **S64** - Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -7317,8 +7317,8 @@ Issue aperte dal lavoro, ancora da fare: **#193** (la mappa
 ### Sessione 64 - Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188)
 
 - **Data**: 2026-10-30
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #197)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #197 (7458220, 2026-10-30)
 - **Claim**: `kilo-HP-EliteBook-fc1d`
 
 ```
@@ -7447,7 +7447,7 @@ la cwd sul package.
 - `apps/web/src/i18n/locales/{it,en}.json` — le 8 chiavi `enrichment.*` (`08§2.17`)
 - `apps/web/src/i18n/index.ts` — il namespace `enrichment`
 - `fixtures/api-mocks/` — **nuovo**: i 4 fixture delle risposte esterne
-- `docs/state/stories/4.1-audio-features.md` — `status: in_review`, task e AC
+- `docs/state/stories/4.1-audio-features.md` — `status: done`, task e AC
   verificati, scelte implementative e limiti dichiarati
 - `docs/state/sessions/64-audio-features-pipeline.md` — **nuovo**
 - `docs/11-BACKLOG.md` — sezione Story 4.1 (`**Stato**:`), riga roadmap, lista di
@@ -7461,7 +7461,40 @@ la cwd sul package.
 - **#188** — la Story 4.1 (claim `kilo-HP-EliteBook-fc1d`)
 - **#187** — la ratifica della spec (`21` v1.0 🟢 APPROVED), Sessione 62
 - **#180** — la Story 2.1 (Mood Tracker): consuma le feature che questa pipeline
-  produce; resta bloccata finché la tabella `features` non si riempie (D-A.1)
+  produce; è **completata** (Sessione 63, merge `d018a26`) e il percorso dati
+  che le mancava è quello consegnato qui (D-A.1)
+
+## Esito post-merge
+
+La PR #197 è **merged** in `main` il 2026-10-30T11:24:49Z (merge commit
+`7458220`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README). L'issue **#188** è chiusa con
+`status:done` (applicato da `auto-status-done`), le label `agent-ready` /
+`in-progress` / `status:in-review` sono rimosse e il commento `release:` è
+automatico.
+
+Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup` (branch
+remoto eliminato), `auto-state-aggregate` (`9c3a13f`) e `auto-bundle`
+(`1062c04`). La pulizia git locale (worktree
+`ls-188-feat-enrichment-pipeline-audio-features` e branch
+`feat/188-feat-enrichment-pipeline-audio-features`) è stata eseguita con
+`scripts/post-merge.ps1`: la rimozione della worktree ha richiesto di nuovo
+`rd /s /q` con prefisso `\\?\` (su Windows `git worktree remove` fallisce con
+"Result too large" sui path lunghi con `node_modules`), poi
+`post-merge.ps1 -Check` esce 0.
+
+Con la 4.1 e la 2.1 completate **non esiste più una story lavorabile già
+migrata** in `docs/state/stories/`: il blocco NEXT-STEP del README ricade sul
+fallback "_Nessuna story non-done e non bloccata migrata_", che è la risposta
+**corretta** — le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno
+state file. Le tranche rimaste sono la **UI** (Story 3.x), il **lookup
+MusicBrainz** (Story 4.2) e gli atti del Boss: la ratifica di
+`19-GEO-CONTEXT.md` + `13-ADR/0009`, il cambio di licenza AGPL-3.0 (D-AF.2) e
+l'issue **#196**.
+
+Issue aperte dal lavoro, ancora da fare: **#196** (`needs-spec`) — la
+contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
+è fra i due host dichiarati in `connect-src`).
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -19918,7 +19951,7 @@ Ogni story deve avere label GitHub:
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 4.1 - Pipeline audio features | in_review | #197 | - | enrichment |
+| 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 
 <!-- AGGREGATE-STORIES-END -->
 
