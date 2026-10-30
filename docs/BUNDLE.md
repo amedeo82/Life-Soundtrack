@@ -9578,9 +9578,9 @@ mezzo del lavoro.
 ## 34. Issue #201 — l'inventario del bundle resta stale su una PR solo-docs (Sessione 67, follow-up)
 
 **Branch**: `docs/201-bundle-inventory-sync`
-**PR**: **#NN**
+**PR**: **#207** (aperta il 2026-10-30)
 **Data**: 2026-10-30
-**Stato**: 🟡 **IN REVIEW** — drift chiuso, in attesa di merge
+**Stato**: 👀 **IN REVIEW** — drift chiuso, in attesa di merge
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
