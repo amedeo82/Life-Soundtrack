@@ -123,6 +123,7 @@ $files = @(
     "docs/state/sessions/62-epic-4-1-audio-features-spec.md",
     "docs/state/sessions/63-story-2-1-mood-tracker.md",
     "docs/state/sessions/64-audio-features-pipeline.md",
+    "docs/state/sessions/65-mood-by-genre-ratifica.md",
     "docs/state/sessions/66-csp-terzo-host-itunes.md",
     "docs/state/sessions/67-ratifica-geo-licenza-agpl.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",

@@ -12,11 +12,15 @@
  *
  * **Niente segnali inventati** (D-A.1, 04§11): sotto la soglia di eventi con
  * feature il periodo non produce nessun insight. Il fallback "mood-by-genre"
- * di 04§1.4 non è implementato, perché la mappa genere→valence/energy non è
- * ratificata in nessun documento: inventarla sarebbe esattamente il segnale
- * inventato che D-A.1 esclude (issue aperta al riguardo).
+ * di `04§1.4` **non esiste** (D-A.6, ratificata il 2026-10-30 dalla issue
+ * #193): la mappa genere→valence/energy non è ratificata in nessun
+ * documento, e inventarla sarebbe esattamente il segnale inventato che D-A.1
+ * esclude. La degradazione dichiarata da `04§1.4` è quindi: nessun insight
+ * mood, più un **warning aggregato** per periodo con il numero di eventi
+ * senza feature misurata o manuale.
  */
 
+import type { Logger } from '../../logger';
 import type { AudioFeatures, Insight, ListenEvent, MoodPeriodPayload } from '../../schema';
 import { eventTime } from '../datetime';
 import { classifyMood, weightedAverage } from './classify';
@@ -40,6 +44,14 @@ export interface MoodEngineOptions {
   readonly config?: Partial<MoodConfig>;
   /** Periodi aggregati. Default: giorno, settimana e mese (04§3.1). */
   readonly periods?: readonly MoodPeriod[];
+  /**
+   * Logger per il warning aggregato sulle feature mancanti (04§1.4).
+   *
+   * È **opzionale**: il motore resta puro e chi non ne ha bisogno non
+   * osserva nulla. Il warning non porta dati personali: solo periodo e
+   * conteggi (09§4).
+   */
+  readonly logger?: Logger | undefined;
 }
 
 /** Dati grezzi su cui il motore lavora. */
@@ -123,11 +135,13 @@ export function computeMoodForPeriod(
 export class MoodEngine {
   private readonly config: MoodConfig;
   private readonly periods: readonly MoodPeriod[];
+  private readonly logger?: Logger | undefined;
   private versionPromise: Promise<string> | null = null;
 
   constructor(options: MoodEngineOptions = {}) {
     this.config = resolveMoodConfig(options.config);
     this.periods = options.periods ?? MOOD_PERIODS;
+    this.logger = options.logger;
   }
 
   /** Parametri effettivi del motore. */
@@ -156,10 +170,11 @@ export class MoodEngine {
     for (const period of this.periods) {
       const groups = groupByPeriod(input.listens, eventTime, period, this.config);
       for (const [key, events] of groups) {
+        const usable = countUsable(events, features);
+        this.warnMissingFeatures(period, key, events.length - usable, events.length);
         const payload = computeMoodForPeriod(events, features, this.config);
         if (!payload) continue;
         const bounds = periodBounds(period, eventTime(events[0]!), this.config);
-        const usable = countUsable(events, features);
         generated.push({
           insight: {
             id: moodInsightId(period, key),
@@ -187,6 +202,31 @@ export class MoodEngine {
       (a, b) =>
         a.insight.periodStart - b.insight.periodStart || a.insight.id.localeCompare(b.insight.id),
     );
+  }
+
+  /**
+   * Warning aggregato sulle feature mancanti — 04§1.4.
+   *
+   * **Un solo warning per periodo**, con il **numero** di eventi senza
+   * feature misurata o manuale: il segnale dice quanto il mood copre, non
+   * elenca i singoli ascolti (e non porta dati personali, 09§4).
+   *
+   * Il warning è emesso anche quando il periodo non produce insight: è
+   * proprio il caso in cui la copertura manca.
+   */
+  private warnMissingFeatures(
+    period: MoodPeriod,
+    periodKey: string,
+    missing: number,
+    total: number,
+  ): void {
+    if (missing <= 0) return;
+    this.logger?.warn('eventi senza audio features', {
+      period,
+      periodKey,
+      missingFeatures: missing,
+      totalEvents: total,
+    });
   }
 }
 
