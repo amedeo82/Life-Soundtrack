@@ -308,5 +308,16 @@
   "enrichment.status.disabled": "Enrichment is off",
   "enrichment.download.size": "Acoustic analysis downloads ~6 MB, once. Do you want to continue?",
   "enrichment.error.aggregate_one": "One track could not be analyzed",
-  "enrichment.error.aggregate_other": "{{count}} tracks could not be analyzed"
+  "enrichment.error.aggregate_other": "{{count}} tracks could not be analyzed",
+  "about.title": "About",
+  "about.version": "Version {{version}}",
+  "about.license": "License",
+  "about.licenseText": "Life Soundtrack is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).",
+  "about.notice": "Third-party attributions",
+  "about.noticeText": "See the NOTICE file for the full list of third-party components and their licenses (including Essentia.js, AGPL-3.0).",
+  "about.sourceOffer": "Corresponding Source offer (AGPL §13)",
+  "about.sourceOfferText": "You interact with this application over the network, so you may obtain the Corresponding Source of the deployed version at no charge from the public repository: https://github.com/amedeo82/Life-Soundtrack. The source matching a release is identified by its git tag on the repository Releases page.",
+  "settings.license": "License",
+  "settings.licenseText": "AGPL-3.0 — the corresponding source is offered per AGPL §13 (see About).",
+  "settings.sourceOffer": "Corresponding Source (AGPL §13)"
 }

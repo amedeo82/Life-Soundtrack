@@ -21,6 +21,7 @@ import it from './locales/it.json';
 
 /** Namespace di 08-COPY-I18N §1, nel formato chiave `namespace.scope.key`. */
 export const NAMESPACES = [
+  'about',
   'onboarding',
   'home',
   'timeline',

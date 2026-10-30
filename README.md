@@ -86,7 +86,7 @@ Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lav
 
 [AGPL-3.0](LICENSE) — il progetto passa ad AGPL-3.0 perché `essentia.js` è AGPL-3.0 e la PWA distribuisce il modulo acustico agli utenti (D-AF.2, `docs/21-AUDIO-FEATURES.md` §2.4; ratificata dal project owner il 2026-10-30, issue #201). Open-source puro, nessuna monetizzazione (D.A.9).
 
-> **AGPL §13 — offerta del sorgente**: la PWA interagisce con gli utenti in rete, quindi l'app deve offrire il sorgente corrispondente a chi la usa. L'implementazione è un requisito aperto (issue #202): fino a che non è pronta, il repository pubblico è il canale indicato nel footer di about.
+> **AGPL §13 — offerta del sorgente**: implementata (issue #202). La PWA interagisce con gli utenti in rete, quindi l'app offre il sorgente corrispondente a chi la usa: schermata **Informazioni / About** con licenza, testo dell'offerta (§13) e link al repository pubblico; file **NOTICE** con le attribuzioni di terze parti (Essentia.js AGPL-3.0; DB-IP Lite CC BY 4.0 in attesa della Story 4.4).
 
 ---
 
