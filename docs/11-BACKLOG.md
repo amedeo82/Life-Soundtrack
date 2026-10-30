@@ -717,9 +717,13 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
+| 1.6 - Fondazione geo e contesto di ascolto | todo | - | - | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
+| 2.2 - Era Detector | todo | - | - | analysis |
+| 2.3 - Event Detector | todo | - | - | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
+| 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
-| 1.6.28 | Sessione 67 (2026-10-30, issue #201) | **Atti del project owner chiusi**: ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED) e dell'ADR-0009 (v1.0 🟢 APPROVED) e applicazione della **licenza AGPL-3.0** (D-AF.2). Aggiunte le tre story della tranche geo — **1.6** (fondazione geo: delta su `02` v1.7 / Dexie v5→v6, tabella `contexts`, classificatore L1), **4.4** (DB MMDB on-demand + derivazione della città, `13-ADR/0009` v1.0) e **3.4** (nastro contesto) — con le rispettive Task e AC; la priorità di lavorazione le inserisce al posto 15 (L2 è opt-in, L0/L1 reggono da sole); la roadmap aggiunge la riga della tranche geo e aggiorna quella dell'EPIC 4 con la 4.4; le **2.2** e **2.3** ricevono il loro state file (dipendenza `[DEP:2.1]` soddisfatta, AC in `04` v1.0 🟢), così il blocco NEXT-STEP del README punta alla prima story lavorabile. Header allineato (la licenza non è più un atto del Boss pendente) |
+| 4.4 - DB IP→città (geolocalizzazione locale) | todo | - | - | enrichment |
 
 <!-- AGGREGATE-STORIES-END -->

@@ -112,6 +112,7 @@
 | 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ✅ | #192 |
 | 64 | Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188) | 🟢 | ✅ | #197 |
 | 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
+| 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -151,9 +152,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **42** (merge: 35)
-- Stories migrate in state/stories: **15** (done: 15)
-- Ultima sessione migrata: **S66** - Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili
+- Sessioni migrate in state/sessions: **43** (merge: 35)
+- Stories migrate in state/stories: **20** (done: 15)
+- Ultima sessione migrata: **S67** - Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
