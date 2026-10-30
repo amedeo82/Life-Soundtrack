@@ -1,6 +1,6 @@
 # Adapter YouTube Music
 
-> Status: 🟢 APPROVED · Versione 1.0 · Ultima modifica: Sessione 40 (2026-10-21)
+> Status: 🟢 APPROVED · Versione 2.0 · Ultima modifica: Sessione 67 (2026-10-30, issue #201)
 > Piattaforma: YouTube Music (Google LLC)
 > Sede legale: USA
 > Tier: **S** · Priorità MVP: **sì**
@@ -94,7 +94,7 @@ Non vengono accettati altri file del Takeout (`search-history.json`, `MyActivity
 | `deviceType` | — | — | `'unknown'` | Nessun campo dispositivo nell'export |
 | `deviceDetail` | — | — | `null` | Assente |
 | `ip` | — | — | `null` | Mai presente nell'export |
-| `country` | — | — | `null` | **Non derivato da `locationInfos`**: scartati sempre (privacy, §7) |
+| `country` | — | — | `null` | **Non derivato da `locationInfos` per default**: il campo è scartato al parse salvo che il toggle `ytLocationInfos` sia attivo (default OFF, §7) |
 | `day` | (derivato) | `YYYY-MM-DD` | da `timestamp` UTC | indice critico |
 
 **Estrazione `videoId`**: da `titleUrl` via `URLSearchParams(new URL(titleUrl)).get('v')`; gestiti `youtube.com/watch?v=`, `music.youtube.com/watch?v=` e `youtu.be/<id>`.
@@ -183,7 +183,7 @@ Copia da `01-PLATFORMS.md` §5 (piattaforma YouTube) + edge case specifici Takeo
 
 | Dato sensibile | Default | Note |
 |----------------|---------|------|
-| `locationInfos` | **sempre scartati al parse** | Potenziale dato geografico sensibile; nessun toggle dedicato nello schema → scarto incondizionato (più restrittivo di `retainIp`); `country` resta `null` |
+| `locationInfos` | **scartati al parse per default** (toggle `ytLocationInfos` OFF) | La **revoca di D.39.8** (Sessione 67, issue #201, `19-GEO-CONTEXT.md` §9) rende il campo disponibile **solo** dietro toggle dedicato: la motivazione originale di D.39.8 («nessun toggle dedicato nello schema») non valeva più. Con il toggle OFF resta lo scarto incondizionato (più restrittivo di `retainIp`) e `country` resta `null`; con il toggle ON il campo concorre con `conn_country`/`ip` per la derivazione L0/L2 (`19` §7.1) |
 | `details[].name` | usato solo per l'euristica di filtro | Mai persistito |
 | `activityControls` | ignorato | Metadato di provisioning Google, nessun valore analitico |
 | IP address | assente dall'export | n/a |
@@ -203,7 +203,7 @@ Casi di test minimi:
 6. **E.YT.5 durata assente**: nessun campo durata ovunque → `completed = false`, `skipped = null` su tutti gli eventi
 7. **E.YT.6 duplicato cross-export**: stesso evento (stesso `videoId` + `time`) in due file → un solo ListenEvent
 8. **E10 fuso orario**: `time` con offset `+02:00` → `day` UTC corretto (cambio giorno per eventi vicino a mezzanotte)
-9. **Privacy**: evento con `locationInfos` popolato → nessun dato di location persistito, `country = null`
+9. **Privacy**: evento con `locationInfos` popolato → nessun dato di location persistito e `country = null`, **salvo** che il toggle `ytLocationInfos` sia attivo (default OFF, §7)
 10. **DEDUP**: stesso brano via video musicale (canale VEVO) e topic channel (videoId diversi) → **una sola Track** (fuzzy name+artist, bucket 0)
 11. **E.YT.3 prefisso localizzato**: `title = "Guardato X"` → `name = "X"`
 12. **HTML rifiutato**: file HTML con cronologia → `detect` fallisce con `error.htmlExport`
@@ -241,3 +241,4 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.youtub
 |----------|------|-----------|
 | 0.1 | Sessione 39 (2026-10-21) | Prima stesura (issue #96). Decisioni D1-D7 chiuse con il Boss; formato Takeout verificato su fonti 2026. Promozione a 🟢 APPROVED al merge della PR di approvazione |
 | 1.0 | Sessione 40 (2026-10-21) | 🟢 APPROVED · promozione al merge della PR #97 (approvazione Boss) — nessuna modifica di contenuto |
+| 2.0 | Sessione 67 (2026-10-30, issue #201) | **Revoca di D.39.8 applicata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED, §9): `locationInfos` non è più scartato **incondizionatamente** ma dietro il toggle `ytLocationInfos` (default OFF, come `retainIp`). §3 (mappa dei campi): il `country` non è derivato da `locationInfos` **per default**. §7 (comportamento privacy): la riga di `locationInfos` dichiara il nuovo default e la revoca, con la motivazione originale di D.39.8 («nessun toggle dedicato nello schema») dichiarata superata. §8 (edge case 9): lo scarto vale salvo toggle attivo. Il perimetro della derivazione L0/L2 è in `19-GEO-CONTEXT.md` §7.1 |
