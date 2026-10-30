@@ -2,7 +2,7 @@
 number: 67
 title: "Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)"
 date: 2026-10-30
-state: 🟡
+state: 👀
 merged: false
 branch: feat/201-ratifica-geo-licenza-agpl
 pr: 0

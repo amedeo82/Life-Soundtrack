@@ -961,9 +961,9 @@ mezzo del lavoro.
 ## 32. Issue #201 — Atti del Boss: ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0 (Sessione 67)
 
 **Branch**: `feat/201-ratifica-geo-licenza-agpl` (**in lavorazione**)
-**PR**: **#NN**
+**PR**: **#204** (aperta il 2026-10-30)
 **Data**: 2026-10-30
-**Stato**: 🟡 **IN CORSO** — le quattro decisioni del project owner sono prese e i documenti sono ratificati; la PR attende la review del Boss (il merge è la ratifica).
+**Stato**: 👀 **IN REVIEW** — le quattro decisioni del project owner sono prese e i documenti sono ratificati; la PR attende la review del Boss (il merge **è** la ratifica).
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
 | 32-1 | P+L | Gli edge case geo di `19§10` erano numerati **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** (ListenBrainz E11..E13, Last.fm E14..E18) | `19` è stata scritta nella Sessione 41; gli identificatori E11..E18 sono stati presi **dopo**, dagli adapter della Sessione 47 | Rinumerati in **E19..E24** in entrambi i documenti, con la nota esplicita del perché. Il controllo resta manuale: **non esiste un gate** che confronti i cataloghi degli edge case fra documenti | `docs/19-GEO-CONTEXT.md` §10, `docs/01-PLATFORMS.md` §5 |
