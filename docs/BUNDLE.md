@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-30 17:49
+> Data: 2026-10-30 18:05
 > Totale file: 122
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 121 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1626.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-30 16:43
+- Dimensione totale: 1632.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-30 18:03
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -8580,8 +8580,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.21
-> Ultima modifica: 2026-10-30 — §33 allineamento del "prossimo passo" (follow-up post-merge della Sessione 67)
+> Versione: 2.22
+> Ultima modifica: 2026-10-30 — §34 l'inventario del bundle resta stale su una PR solo-docs (follow-up post-merge della Sessione 67)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -9575,6 +9575,21 @@ mezzo del lavoro.
 | 33-1 | P | Dopo il merge degli atti del Boss, il blocco NEXT-STEP del README indicava **1.6** (fondazione geo) mentre la prosa di `INDEX.md` §"Prossimo passo tecnico" e la lista di priorità di `11-BACKLOG.md` indicavano **2.2/2.3**: due documenti, due risposte diverse sul prossimo lavoro | L'aggregatore ordina le story **migrate per id** (`[version]$Id`), non per la priorità del backlog: la 1.6 è stata creata come state file nella Sessione 67 (la sua specifica era appena ratificata) e «1.6» < «2.2». La prosa, scritta a mano, aveva seguito l'ordine storico del backlog | Il project owner ha scelto **geo prima**: la lista di priorità sale (tranche geo al posto 13) e la prosa dell'INDEX dice la stessa cosa del puntatore. **Nessuna modifica al codice dell'aggregatore** e nessun gate nuovo: l'ordine per id è documentato e il README lo dichiara («la prima story non completata fra quelle già migrate») | `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti", `docs/INDEX.md` §"Prossimo passo tecnico" |
 
 **Lesson learned sintetica**: il blocco NEXT-STEP e la prosa del README rispondono a **domande diverse** — il blocco «quale è la prima story lavorabile fra quelle già migrate», la prosa «quale sarà la prossima cosa che facciamo». Finché le due domande hanno la stessa risposta, nessuno se ne accorge; quando divergono, il lettore prende la strada sbagliata. La regola: **quando si crea uno state file, si controlla a mano in quale posizione cade l'ordinamento per id** e si allineano le sezioni legacy che dichiarano l'ordine — il generatore ordina per id, non per la priorità che l'agente scrive a mano.
+## 34. Issue #201 — l'inventario del bundle resta stale su una PR solo-docs (Sessione 67, follow-up)
+
+**Branch**: `docs/201-bundle-inventory-sync`
+**PR**: **#207** (aperta il 2026-10-30)
+**Data**: 2026-10-30
+**Stato**: 👀 **IN REVIEW** — drift chiuso, in attesa di merge
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 34-1 | P+F | Dopo il merge della PR #206 (solo documentazione), `aggregate-state.ps1 -Check` segnalava drift su `docs/BUNDLE.md`: il blocco inventory dichiarava una **Dimensione totale di 1626.2 KB** mentre i file in catalogo pesavano **1628.8 KB**. Nessun gate bloccante: il check dell'agregator in CI è warning-only (`|| echo "::warning::..."`), e il bundle check era verde | `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`: una PR che tocca solo `docs/` — cioè i **file di cui l'inventario misura la dimensione** — **non lo attiva**. Il numero è derivato dalle dimensioni, quindi può solo invecchiare finché nessuno lo ricalcola | Il drift è stato chiuso eseguendo l'aggregator in locale e committando il blocco ricalcolato in una PR `docs:` separata (il Livello 3 delle post-merge actions prevede il doc-sync di emergenza, e la regola «NO commit su `main`» impone la PR). **La causa strutturale resta aperta**: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo (`docs/**`, `README.md`, `AGENTS.md`, `LICENSE`, `fixtures/**`) — proposta da sottoporre al project owner, perché allargare il trigger significa far girare l'aggregatore a ogni cambiamento di documentazione | `.github/workflows/auto-state-aggregate.yml` (`paths:`), `docs/BUNDLE.md` (blocco inventory) |
+
+**Lesson learned**: un dato derivato che dipende dai **contenuti** ha un ciclo di vita diverso da uno che dipende dalle **dimensioni**. Il primo si aggiorna da solo quando il file che lo contiene cambia; il secondo si aggiorna solo quando qualcuno lo **ricalcola**. I `paths:` del workflow coprono i primi e non i secondi: l'inventario delle dimensioni è il caso che resta scoperto, e nessun gate bloccante lo segnala (il check è warning-only per la incompatibilità residua PS 5.1 vs 7, issue #63). La lezione operativa: **quando un blocco generato contiene un dato derivato dalle dimensioni, il trigger del generatore deve coprire i file che lo cambiano** — non basta che il generatore giri «quando i dati cambiano».
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -9619,6 +9634,7 @@ mezzo del lavoro.
 | 2.20 | 2026-10-30 (issue #196) | **§31 Issue #196 — ratifica del terzo host della CSP** (Sessione 66, claim `kilo-hp-elitebook-jrka`): 4 entry (31-1 **due AC della stessa spec non potevano essere veri insieme** — D-AF.1 prescrive `GET https://itunes.apple.com/search` e D-AF.9 elencava in `connect-src` solo l'API AB e il **CDN** dei file audio: l'host che **risponde** alla ricerca è un terzo host; le due decisioni erano state ratificate nella stessa PR (Sessione 62) senza che nessuna le confrontasse con l'endpoint che la prima richiede, e il conflitto è emerso due sessioni dopo, quando qualcuno ha dovuto implementare la ricerca; il project owner ha **ratificato l'opzione A** — `https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata** nella **v1.1** di `21-AUDIO-FEATURES.md`; l'opzione B (rivedere D-AF.1) non aveva alternative — Spotify `audio_features` è morto e MusicKit costa 99 $/anno — e l'opzione C (accettare la degradazione) avrebbe lasciato il mood tracker senza dati misurati, che D.A.1 vieta; 31-2 **il gate della CSP confrontava due artefatti della stessa costante** (la costante e il tag `<meta>`, che da essa è generato: i due non possono divergere) mentre la `connect-src` **dichiarata** in `12-DEVOPS.md` non era confrontata con nessuno — il test legge ora il blocco del documento e lo confronta con la costante; 31-3 la CSP vive in `12§5.1` ma tutto il progetto la cita come `12§2.1`: riferimento ereditato dalla v0.1 della spec, **non corretto** (fuori perimetro dell'issue), registrato come osservazione; 31-4 la sessione 65 era già pre-allocata da un altro agente (issue #193): la Sessione 66 usa il numero successivo). Consegnati: `21` v1.1 🟢 APPROVED (header, §2.1, §3, §10.2, §16, §18), `12` v1.1 (la CSP con i tre host), `11-BACKLOG.md` v1.6.27, `docs/INDEX.md` (righe `11`, `12`, `21` e "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti), la sessione 66 e i commenti del codice applicato (`apps/web/src/security/`) — **la CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197, la ratifica allinea la **dichiarazione** al codice |
 | 2.21 | 2026-10-30 (issue #201) | **§32 Atti del Boss — ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0** (Sessione 67, claim `kilo-HP-EliteBook-b7x2`): 6 entry (32-1 gli edge case geo erano **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** da ListenBrainz (E11..E13) e Last.fm (E14..E18): rinumerati in **E19..E24**; 32-2 il delta su `02` era ancorato a **v1.3 / Dexie v2→v3** mentre lo schema è **v1.6 / Dexie v5**: riallineato, e la sua applicazione è dichiarata deliverable della Story 1.6; 32-3 la **revoca di D.39.8** era dichiarata ma **mai applicata** (`youtube-music.md` diceva ancora «sempre scartati al parse»): applicata, `locationInfos` dietro il toggle `ytLocationInfos`; 32-4 la motivazione su MaxMind GeoLite2 legava l'obiezione alla licenza **Apache-2.0** dell'app: riscritta — l'obiezione è la EULA di MaxMind, indipendente dalla licenza dell'app; 32-5 `19§12` elencava come aperto un punto **già deciso** (issue #108): chiuso; 32-6 la **CSP applicata** non dichiara l'host da cui arriva il WASM di Essentia, che `21§6.5` dà come scaricato on-demand: dichiarato come requisito della story di implementazione, con la lezione della issue #196). Consegnati: `LICENSE` (AGPL-3.0 canonico), `package.json` (`"license"`), `README.md`, `19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, e l'allineamento di `03-ADAPTERS/youtube-music.md` (v2.0), `01-PLATFORMS.md` (v0.8), `09-PRIVACY-SECURITY.md` (v0.7), `08-COPY-I18N.md` (v0.9), `12-DEVOPS.md` (v1.2, §5.3 licenza e offerta del sorgente), `17-DEV-NOTES.md` (v0.3, P10), `21-AUDIO-FEATURES.md` (v1.2, §19 punto 1 chiuso), `11-BACKLOG.md` (v1.6.28, tre story geo), `docs/INDEX.md`, e i 6 nuovi state file (sessione 67 + le story 2.2, 2.3, 1.6, 4.4, 3.4). Aperta l'issue **#202**: l'offerta del sorgente richiesta dal §13 della licenza |
 | 2.22 | 2026-10-30 (issue #201) | **§33 Allineamento del "prossimo passo"** (follow-up post-merge della Sessione 67): il blocco NEXT-STEP generato indicava **1.6** (l'aggregatore ordina le story migrate **per id**, e «1.6» < «2.2») mentre la prosa di `INDEX.md` e la lista di priorità di `11-BACKLOG.md` indicavano **2.2/2.3**. Il project owner ha scelto **geo prima**: la tranche geo sale al posto 13 della lista di priorità e la prosa dell'INDEX è riallineata al puntatore. Nessuna modifica al codice dell'aggregatore, nessun gate nuovo. Documenti toccati: `11-BACKLOG.md` (v1.6.29), `docs/INDEX.md`, `docs/18-DEV-LOG.md` (v2.21) |
+| 2.23 | 2026-10-30 (issue #201) | **§34 L'inventario del bundle resta stale su una PR solo-docs** (follow-up post-merge della Sessione 67): dopo il merge della PR #206 il blocco inventory di `docs/BUNDLE.md` dichiarava 1626.2 KB mentre i file in catalogo pesavano 1628.8 KB. Causa: `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`, quindi una PR che tocca solo `docs/` — i file **di cui l'inventario misura la dimensione** — non lo attiva, e il check dell'aggregator in CI è warning-only. Drift chiuso con una PR `docs:` separata (aggregator eseguito in locale); **la causa strutturale resta aperta** e va sottoposta al project owner: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo. Lezione: un dato derivato dalle **dimensioni** non si aggiorna da solo quando i **contenuti** cambiano |
 
 ---
 
