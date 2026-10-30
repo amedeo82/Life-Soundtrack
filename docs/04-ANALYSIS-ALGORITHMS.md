@@ -239,8 +239,8 @@ Periodo: lunedì (5 eventi)
 - Brano D: valence 0.8, energy 0.9, durata 300s → weight 1.25
 - Brano E: valence 0.5, energy 0.5, durata 220s → weight 0.92
 
-Weighted avg valence: (0.3·0.83 + 0.7·1.0 + 0.4·0.75 + 0.8·1.25 + 0.5·0.92) / 4.75 = 0.585
-Weighted avg energy: (0.4·0.83 + 0.8·1.0 + 0.6·0.75 + 0.9·1.25 + 0.5·0.92) / 4.75 = 0.675
+Weighted avg valence: (0.3·0.83 + 0.7·1.0 + 0.4·0.75 + 0.8·1.25 + 0.5·0.92) / 4.75 ≈ 0.570
+Weighted avg energy: (0.4·0.83 + 0.8·1.0 + 0.6·0.75 + 0.9·1.25 + 0.5·0.92) / 4.75 ≈ 0.667
 
 Classify: valence ≥ 0.5, energy in [0.5, 0.75) → **happy**
 
