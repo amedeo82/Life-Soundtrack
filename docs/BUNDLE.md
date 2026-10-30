@@ -2,21 +2,21 @@
 
 > Generato automaticamente da scripts/generate-bundle.ps1
 > Data: 2026-10-30 18:15
-> Totale file: 122
+> Totale file: 123
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 121 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1632.4 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-30 18:23
+- Totale file: 122 (incluso 4 file aggregator-managed)
+- Dimensione totale: 1644.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-30 18:14
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 75 |
+| docs/ | 76 |
 | scripts/ | 20 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1223,7 +1223,7 @@ Questo progetto è attualmente gestito da un team umano + AI. Per iniziare a lav
 
 [AGPL-3.0](LICENSE) — il progetto passa ad AGPL-3.0 perché `essentia.js` è AGPL-3.0 e la PWA distribuisce il modulo acustico agli utenti (D-AF.2, `docs/21-AUDIO-FEATURES.md` §2.4; ratificata dal project owner il 2026-10-30, issue #201). Open-source puro, nessuna monetizzazione (D.A.9).
 
-> **AGPL §13 — offerta del sorgente**: implementata (issue #202). La PWA interagisce con gli utenti in rete, quindi l'app offre il sorgente corrispondente a chi la usa: schermata **Informazioni / About** con licenza, testo dell'offerta (§13) e link al repository pubblico; file **NOTICE** con le attribuzioni di terze parti (Essentia.js AGPL-3.0; DB-IP Lite CC BY 4.0 in attesa della Story 4.4).
+> **AGPL §13 — offerta del sorgente**: la PWA interagisce con gli utenti in rete, quindi l'app deve offrire il sorgente corrispondente a chi la usa. L'implementazione è un requisito aperto (issue #202): fino a che non è pronta, il repository pubblico è il canale indicato nel footer di about.
 
 ---
 
@@ -2012,6 +2012,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
 | 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ✅ | #192 |
 | 64 | Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188) | 🟢 | ✅ | #197 |
+| 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟡 | ❌ | #203 |
 | 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
 | 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
 
@@ -2053,7 +2054,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **43** (merge: 35)
+- Sessioni migrate in state/sessions: **44** (merge: 35)
 - Stories migrate in state/stories: **20** (done: 15)
 - Ultima sessione migrata: **S67** - Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4, 4.1
@@ -7964,6 +7965,148 @@ contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
 è fra i due host dichiarati in `connect-src`).
 ```
 
+### Sessione 65 - Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193)
+
+- **Data**: 2026-10-30
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #203)
+- **Claim**: `kilo-HP-EliteBook-f1a7`
+
+```
+
+# Sessione 65 — La ratifica del fallback mood-by-genre (issue #193)
+
+## Sintesi
+
+Due documenti 🟢 APPROVED dicevano cose diverse sullo stesso caso: «senza
+audio features». `04§1.4` prescriveva un *fallback* mood-by-genre (una mappa
+`genre → valence/energy` «di default»), `21§12` (punto 3) diceva che
+l'analisi «degrada a mood-by-genre». Il codice non faceva nessuna delle due
+cose: restituiva `null` sotto `minEventsPerPeriod` (D.63.4).
+
+Il **project owner** ha ratificato il 2026-10-30 l'**opzione B**: **il
+fallback mood-by-genre non esiste**. La decisione è chiusa come proposta nella
+spec (`04§11.1`, **D-A.6**) ed è ratificata dal merge della PR, come D-A.1…D-A.5.
+
+La conseguenza operativa è che il mood resta un **dato raro**: nessun insight
+senza feature misurate o manuali. Il segnale che copre il vuoto è il
+**warning aggregato per periodo** dichiarato da `04§1.4` e mai emesso: è
+quello che questa sessione ha implementato.
+
+## Trigger
+
+Issue **#193** (`size:S`, `agent-ready`, `area:analysis`, `priority:important`),
+aperta dalla Sessione 63 come `needs-spec` (la mappa `genre → valence/energy`
+non era ratificata in nessun documento). Claim `kilo-HP-EliteBook-f1a7`
+(unico claim, riverificato). Worktree `ls-193-mood-genre`, branch
+`feat/193-mood-genre`.
+
+Il **project owner** ha scelto l'opzione B fra tre (A: ratificare la mappa
+esistente; B: nessun fallback; C: un insight di stima separato) e ha chiesto
+che il **warning aggregato** fosse implementato nel codice.
+
+PR **#203** (branch `feat/193-mood-genre`, worktree `ls-193-mood-genre`).
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| Il **warning aggregato per periodo** («X eventi senza audio features», solo conteggi) | `packages/core/src/analysis/mood/engine.ts` |
+| Il `logger` **opzionale** sul motore e sulla pipeline | `packages/core/src/analysis/mood/engine.ts`, `packages/core/src/analysis/pipeline.ts` |
+| I **6 test** del warning aggregato | `packages/core/src/analysis/__tests__/mood-engine.test.ts` |
+| `04§1.4` riscritta + `04§11.1` (la decisione **D-A.6**) + `04§8.1` + `04§12` | `docs/04-ANALYSIS-ALGORITHMS.md` (v1.1) |
+| `21§12` (punto 3), `21§8.2`, `21§18`, changelog | `docs/21-AUDIO-FEATURES.md` (v1.1) |
+| `05§6` (punto 5) e `05§6.2` | `docs/05-ARCHITECTURE.md` (v1.5) |
+| Il changelog del backlog (v1.6.27) e le righe legacy dell'indice | `docs/11-BACKLOG.md`, `docs/INDEX.md` |
+| Lo state file della story 2.1 allineato alla decisione | `docs/state/stories/2.1-mood-tracker.md` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-A.6 | **Il fallback mood-by-genre non esiste.** `04§1.4` è riscritta sul comportamento reale (nessun insight senza feature misurate o manuali, nessun proxy sul genere) e `21§12` (punto 3) è allineata: la feature `heuristic`, per l'analisi, è come se non esistesse | La mappa `genre → valence/energy` non era ratificata in **nessun** documento: `04§1.4` la nominava dal 2026-10-14 (Sessione 4) e la ratifica della Sessione 59 non l'ha aggiunta. Inventarla sarebbe il «segnale inventato» che la D-A.1 esclude (*«la vision promette letture vere»*). Le opzioni A e C avrebbero richiesto un campo che marcasse la stima in `MoodPeriodPayload` (`02§4`, **chiuso**): un mood stimato sarebbe indistinguibile da uno misurato nel dato persistito |
+| D.65.1 | Il warning è **aggregato per periodo** e contiene **solo conteggi** (eventi senza feature, eventi totali) | `04§1.4` prescrive la forma esatta; un warning per evento o con dati di brano sarebbe rumore e un costo di log |
+| D.65.2 | Il `logger` è **opzionale** nel motore e nella pipeline | Nessuna dipendenza nuova e nessun cambiamento di contratto per i chiamanti esistenti: senza logger il motore funziona come prima, semplicemente senza warning |
+| D.65.3 | Il warning è emesso **anche quando il periodo non produce insight** (copertura sotto soglia) | Il warning dice «quanta copertura manca», non «quanti insight ho perso»: leggerlo solo quando c'è un insight nasconderebbe proprio il caso peggiore (periodi interi senza feature) |
+| D.65.4 | Il **calcolo del mood non cambia** | Sotto `minEventsPerPeriod` il motore restituiva già `null` (D.63.4): la modifica del comportamento è il warning, non la formula |
+
+## Difetti trovati lungo il percorso
+
+**La contraddizione era in due punti, non in uno.** La issue #193 segnalava
+`04§1.4`; il punto gemello era `21§12` (punto 3), che ripeteva la stessa
+degradazione. Correggere il primo avrebbe lasciato il secondo a dichiarare un
+comportamento inesistente: i due documenti sono stati allineati nella stessa
+PR.
+
+**Un documento APPROVED che cita un altro documento APPROVED è una catena di
+riferimenti, non un fatto.** `21§10.4` riportava la frase di `05§6.2` alla
+lettera («le analisi degradano a mood-by-genre»): la correzione di `04` non
+bastava, perché la citazione era ancorata in un terzo documento. La verifica
+finale è stata una ricerca testuale di `mood-by-genre` in tutto `docs/`.
+
+**Le opzioni A e C non sono solo documentali.** `MoodPeriodPayload` (`02§4`)
+è **chiuso**: nessun campo marca la stima. Ratificare la mappa (A) o
+separare l'insight stimato (C) avrebbe significato aprire lo schema dati dei
+insight — un atto molto più grosso di una riga di spec.
+
+## Verifica
+
+- `pnpm --filter @ls/core exec vitest run src/analysis/__tests__/mood-engine.test.ts`
+  → **37** test verdi (6 nuovi sul warning aggregato)
+- `pnpm run lint` → verde
+- `pnpm run typecheck` → verde
+- `pnpm run test` → verde
+- `pnpm run build` → verde
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift **atteso** nei blocchi
+  aggregati (SESSIONS/BACKLOG/INDEX/BUNDLE): li rigenera
+  `auto-state-aggregate` post-merge (ADR-0008); nessun numero di sessione
+  duplicato (`65` pre-allocato con la procedura di `docs/state/_index.md`)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 65-1 | **Una specifica che nomina una mappa senza darle contenuto è una specifica incompleta, non una feature.** Per mesi `04§1.4` ha descritto un fallback che nessuno sapeva implementare: la frase «mapping genre→valence/energy di default» sembrava una prescrizione, ma non c'era nessun "default" da cui leggerlo. Il costo dell'ambiguità non è stato un bug: è stato un issue aperto e una decisione di design rimandata per tre sessioni |
+| 65-2 | **Il codice che non fa una cosa che la spec prescrive è spesso il codice giusto.** Il mood tracker non ha mai degradato a mood-by-genre, e la D-A.1 già vietava i segnali inventati: la contraddizione era solo fra documenti. Verificare il codice prima di modificare la spec ha evitato di "implementare" un fallback che nessuno voleva |
+| 65-3 | **Un warning che serve a misurare una copertura va emesso anche quando la copertura è zero.** Emetterlo solo quando si produce un output nasconde il caso peggiore (il periodo interamente coperto di feature mancanti): il segnale di qualità è più utile del segnale di successo |
+| 65-4 | **Riferimenti fra documenti APPROVED vanno cercati per nome, non per numero di sezione.** `mood-by-genre` era citato in `04`, `05`, `21` e nei changelog di `11-BACKLOG` e `18-DEV-LOG`: una ricerca testuale sull'intera cartella `docs/` ha trovato cinque occorrenze che la navigazione per sezione non mostrava |
+
+## Documenti aggiornati
+
+- `packages/core/src/analysis/mood/engine.ts` — il `logger` opzionale e il
+  warning aggregato per periodo
+- `packages/core/src/analysis/pipeline.ts` — `MoodGeneratorOptions.logger`
+  inoltrato al motore
+- `packages/core/src/analysis/__tests__/mood-engine.test.ts` — 6 test nuovi
+- `docs/04-ANALYSIS-ALGORITHMS.md` — v1.1: `§1.4`, `§8.1`, `§11.1` (nuova),
+  `§12`, changelog
+- `docs/21-AUDIO-FEATURES.md` — v1.1: `§8.2`, `§10.4`, `§12`, `§18`, changelog
+- `docs/05-ARCHITECTURE.md` — v1.5: `§6` (punto 5), `§6.2`, changelog
+- `docs/11-BACKLOG.md` — changelog v1.6.27
+- `docs/INDEX.md` — le righe legacy di `04`, `05`, `11`, `21` e il «prossimo
+  passo tecnico»
+- `docs/state/stories/2.1-mood-tracker.md` — la scelta D.63.4 allineata alla
+  D-A.6
+- `docs/state/sessions/65-mood-by-genre-ratifica.md` — **nuovo**
+- `scripts/generate-bundle.ps1` — `$files`: il nuovo state file
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#193** — la ratifica del fallback mood-by-genre (claim
+  `kilo-HP-EliteBook-f1a7`)
+- **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢 APPROVED),
+  Sessione 59: le decisioni D-A.1…D-A.5
+- **#187** — la ratifica della spec delle audio features (`21` v1.0 🟢
+  APPROVED), Sessione 62: la D-AF.4 (l'euristico non alimenta il mood tracker)
+- **#188** — la Story 4.1 (Pipeline audio features), completata nella Sessione
+  64: è la pipeline che popola la tabella `features` da cui il mood tracker
+  legge
+- **#180** — la Story 2.1 (Mood Tracker), completata nella Sessione 63: il
+  codice che questa sessione ha modificato
+```
+
 ### Sessione 66 - Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili
 
 - **Data**: 2026-10-30
@@ -8580,8 +8723,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.22
-> Ultima modifica: 2026-10-30 — §34 l'inventario del bundle resta stale su una PR solo-docs (follow-up post-merge della Sessione 67)
+> Versione: 2.21
+> Ultima modifica: 2026-10-30 — §33 allineamento del "prossimo passo" (follow-up post-merge della Sessione 67)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -9575,21 +9718,6 @@ mezzo del lavoro.
 | 33-1 | P | Dopo il merge degli atti del Boss, il blocco NEXT-STEP del README indicava **1.6** (fondazione geo) mentre la prosa di `INDEX.md` §"Prossimo passo tecnico" e la lista di priorità di `11-BACKLOG.md` indicavano **2.2/2.3**: due documenti, due risposte diverse sul prossimo lavoro | L'aggregatore ordina le story **migrate per id** (`[version]$Id`), non per la priorità del backlog: la 1.6 è stata creata come state file nella Sessione 67 (la sua specifica era appena ratificata) e «1.6» < «2.2». La prosa, scritta a mano, aveva seguito l'ordine storico del backlog | Il project owner ha scelto **geo prima**: la lista di priorità sale (tranche geo al posto 13) e la prosa dell'INDEX dice la stessa cosa del puntatore. **Nessuna modifica al codice dell'aggregatore** e nessun gate nuovo: l'ordine per id è documentato e il README lo dichiara («la prima story non completata fra quelle già migrate») | `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti", `docs/INDEX.md` §"Prossimo passo tecnico" |
 
 **Lesson learned sintetica**: il blocco NEXT-STEP e la prosa del README rispondono a **domande diverse** — il blocco «quale è la prima story lavorabile fra quelle già migrate», la prosa «quale sarà la prossima cosa che facciamo». Finché le due domande hanno la stessa risposta, nessuno se ne accorge; quando divergono, il lettore prende la strada sbagliata. La regola: **quando si crea uno state file, si controlla a mano in quale posizione cade l'ordinamento per id** e si allineano le sezioni legacy che dichiarano l'ordine — il generatore ordina per id, non per la priorità che l'agente scrive a mano.
-## 34. Issue #201 — l'inventario del bundle resta stale su una PR solo-docs (Sessione 67, follow-up)
-
-**Branch**: `docs/201-bundle-inventory-sync`
-**PR**: **#207** (aperta il 2026-10-30)
-**Data**: 2026-10-30
-**Stato**: 👀 **IN REVIEW** — drift chiuso, in attesa di merge
-
-| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
-|---|------|---------|-------|-------------------|------|
-| 34-1 | P+F | Dopo il merge della PR #206 (solo documentazione), `aggregate-state.ps1 -Check` segnalava drift su `docs/BUNDLE.md`: il blocco inventory dichiarava una **Dimensione totale di 1626.2 KB** mentre i file in catalogo pesavano **1628.8 KB**. Nessun gate bloccante: il check dell'agregator in CI è warning-only (`|| echo "::warning::..."`), e il bundle check era verde | `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`: una PR che tocca solo `docs/` — cioè i **file di cui l'inventario misura la dimensione** — **non lo attiva**. Il numero è derivato dalle dimensioni, quindi può solo invecchiare finché nessuno lo ricalcola | Il drift è stato chiuso eseguendo l'aggregator in locale e committando il blocco ricalcolato in una PR `docs:` separata (il Livello 3 delle post-merge actions prevede il doc-sync di emergenza, e la regola «NO commit su `main`» impone la PR). **La causa strutturale resta aperta**: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo (`docs/**`, `README.md`, `AGENTS.md`, `LICENSE`, `fixtures/**`) — proposta da sottoporre al project owner, perché allargare il trigger significa far girare l'aggregatore a ogni cambiamento di documentazione | `.github/workflows/auto-state-aggregate.yml` (`paths:`), `docs/BUNDLE.md` (blocco inventory) |
-
-**Lesson learned**: un dato derivato che dipende dai **contenuti** ha un ciclo di vita diverso da uno che dipende dalle **dimensioni**. Il primo si aggiorna da solo quando il file che lo contiene cambia; il secondo si aggiorna solo quando qualcuno lo **ricalcola**. I `paths:` del workflow coprono i primi e non i secondi: l'inventario delle dimensioni è il caso che resta scoperto, e nessun gate bloccante lo segnala (il check è warning-only per la incompatibilità residua PS 5.1 vs 7, issue #63). La lezione operativa: **quando un blocco generato contiene un dato derivato dalle dimensioni, il trigger del generatore deve coprire i file che lo cambiano** — non basta che il generatore giri «quando i dati cambiano».
-
----
-
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
@@ -9634,7 +9762,6 @@ mezzo del lavoro.
 | 2.20 | 2026-10-30 (issue #196) | **§31 Issue #196 — ratifica del terzo host della CSP** (Sessione 66, claim `kilo-hp-elitebook-jrka`): 4 entry (31-1 **due AC della stessa spec non potevano essere veri insieme** — D-AF.1 prescrive `GET https://itunes.apple.com/search` e D-AF.9 elencava in `connect-src` solo l'API AB e il **CDN** dei file audio: l'host che **risponde** alla ricerca è un terzo host; le due decisioni erano state ratificate nella stessa PR (Sessione 62) senza che nessuna le confrontasse con l'endpoint che la prima richiede, e il conflitto è emerso due sessioni dopo, quando qualcuno ha dovuto implementare la ricerca; il project owner ha **ratificato l'opzione A** — `https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata** nella **v1.1** di `21-AUDIO-FEATURES.md`; l'opzione B (rivedere D-AF.1) non aveva alternative — Spotify `audio_features` è morto e MusicKit costa 99 $/anno — e l'opzione C (accettare la degradazione) avrebbe lasciato il mood tracker senza dati misurati, che D.A.1 vieta; 31-2 **il gate della CSP confrontava due artefatti della stessa costante** (la costante e il tag `<meta>`, che da essa è generato: i due non possono divergere) mentre la `connect-src` **dichiarata** in `12-DEVOPS.md` non era confrontata con nessuno — il test legge ora il blocco del documento e lo confronta con la costante; 31-3 la CSP vive in `12§5.1` ma tutto il progetto la cita come `12§2.1`: riferimento ereditato dalla v0.1 della spec, **non corretto** (fuori perimetro dell'issue), registrato come osservazione; 31-4 la sessione 65 era già pre-allocata da un altro agente (issue #193): la Sessione 66 usa il numero successivo). Consegnati: `21` v1.1 🟢 APPROVED (header, §2.1, §3, §10.2, §16, §18), `12` v1.1 (la CSP con i tre host), `11-BACKLOG.md` v1.6.27, `docs/INDEX.md` (righe `11`, `12`, `21` e "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti), la sessione 66 e i commenti del codice applicato (`apps/web/src/security/`) — **la CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197, la ratifica allinea la **dichiarazione** al codice |
 | 2.21 | 2026-10-30 (issue #201) | **§32 Atti del Boss — ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0** (Sessione 67, claim `kilo-HP-EliteBook-b7x2`): 6 entry (32-1 gli edge case geo erano **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** da ListenBrainz (E11..E13) e Last.fm (E14..E18): rinumerati in **E19..E24**; 32-2 il delta su `02` era ancorato a **v1.3 / Dexie v2→v3** mentre lo schema è **v1.6 / Dexie v5**: riallineato, e la sua applicazione è dichiarata deliverable della Story 1.6; 32-3 la **revoca di D.39.8** era dichiarata ma **mai applicata** (`youtube-music.md` diceva ancora «sempre scartati al parse»): applicata, `locationInfos` dietro il toggle `ytLocationInfos`; 32-4 la motivazione su MaxMind GeoLite2 legava l'obiezione alla licenza **Apache-2.0** dell'app: riscritta — l'obiezione è la EULA di MaxMind, indipendente dalla licenza dell'app; 32-5 `19§12` elencava come aperto un punto **già deciso** (issue #108): chiuso; 32-6 la **CSP applicata** non dichiara l'host da cui arriva il WASM di Essentia, che `21§6.5` dà come scaricato on-demand: dichiarato come requisito della story di implementazione, con la lezione della issue #196). Consegnati: `LICENSE` (AGPL-3.0 canonico), `package.json` (`"license"`), `README.md`, `19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, e l'allineamento di `03-ADAPTERS/youtube-music.md` (v2.0), `01-PLATFORMS.md` (v0.8), `09-PRIVACY-SECURITY.md` (v0.7), `08-COPY-I18N.md` (v0.9), `12-DEVOPS.md` (v1.2, §5.3 licenza e offerta del sorgente), `17-DEV-NOTES.md` (v0.3, P10), `21-AUDIO-FEATURES.md` (v1.2, §19 punto 1 chiuso), `11-BACKLOG.md` (v1.6.28, tre story geo), `docs/INDEX.md`, e i 6 nuovi state file (sessione 67 + le story 2.2, 2.3, 1.6, 4.4, 3.4). Aperta l'issue **#202**: l'offerta del sorgente richiesta dal §13 della licenza |
 | 2.22 | 2026-10-30 (issue #201) | **§33 Allineamento del "prossimo passo"** (follow-up post-merge della Sessione 67): il blocco NEXT-STEP generato indicava **1.6** (l'aggregatore ordina le story migrate **per id**, e «1.6» < «2.2») mentre la prosa di `INDEX.md` e la lista di priorità di `11-BACKLOG.md` indicavano **2.2/2.3**. Il project owner ha scelto **geo prima**: la tranche geo sale al posto 13 della lista di priorità e la prosa dell'INDEX è riallineata al puntatore. Nessuna modifica al codice dell'aggregatore, nessun gate nuovo. Documenti toccati: `11-BACKLOG.md` (v1.6.29), `docs/INDEX.md`, `docs/18-DEV-LOG.md` (v2.21) |
-| 2.23 | 2026-10-30 (issue #201) | **§34 L'inventario del bundle resta stale su una PR solo-docs** (follow-up post-merge della Sessione 67): dopo il merge della PR #206 il blocco inventory di `docs/BUNDLE.md` dichiarava 1626.2 KB mentre i file in catalogo pesavano 1628.8 KB. Causa: `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`, quindi una PR che tocca solo `docs/` — i file **di cui l'inventario misura la dimensione** — non lo attiva, e il check dell'aggregator in CI è warning-only. Drift chiuso con una PR `docs:` separata (aggregator eseguito in locale); **la causa strutturale resta aperta** e va sottoposta al project owner: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo. Lezione: un dato derivato dalle **dimensioni** non si aggiorna da solo quando i **contenuti** cambiano |
 
 ---
 
@@ -12918,6 +13045,155 @@ contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
 
 
 
+===== FILE: docs/state/sessions/65-mood-by-genre-ratifica.md =====
+
+---
+number: 65
+title: "Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193)"
+date: 2026-10-30
+state: 🟡
+merged: false
+branch: feat/193-mood-genre
+pr: 203
+claim: kilo-HP-EliteBook-f1a7
+cross_refs: [193, 178, 187, 188, 180]
+tags: [analysis, phase-2]
+---
+
+# Sessione 65 — La ratifica del fallback mood-by-genre (issue #193)
+
+## Sintesi
+
+Due documenti 🟢 APPROVED dicevano cose diverse sullo stesso caso: «senza
+audio features». `04§1.4` prescriveva un *fallback* mood-by-genre (una mappa
+`genre → valence/energy` «di default»), `21§12` (punto 3) diceva che
+l'analisi «degrada a mood-by-genre». Il codice non faceva nessuna delle due
+cose: restituiva `null` sotto `minEventsPerPeriod` (D.63.4).
+
+Il **project owner** ha ratificato il 2026-10-30 l'**opzione B**: **il
+fallback mood-by-genre non esiste**. La decisione è chiusa come proposta nella
+spec (`04§11.1`, **D-A.6**) ed è ratificata dal merge della PR, come D-A.1…D-A.5.
+
+La conseguenza operativa è che il mood resta un **dato raro**: nessun insight
+senza feature misurate o manuali. Il segnale che copre il vuoto è il
+**warning aggregato per periodo** dichiarato da `04§1.4` e mai emesso: è
+quello che questa sessione ha implementato.
+
+## Trigger
+
+Issue **#193** (`size:S`, `agent-ready`, `area:analysis`, `priority:important`),
+aperta dalla Sessione 63 come `needs-spec` (la mappa `genre → valence/energy`
+non era ratificata in nessun documento). Claim `kilo-HP-EliteBook-f1a7`
+(unico claim, riverificato). Worktree `ls-193-mood-genre`, branch
+`feat/193-mood-genre`.
+
+Il **project owner** ha scelto l'opzione B fra tre (A: ratificare la mappa
+esistente; B: nessun fallback; C: un insight di stima separato) e ha chiesto
+che il **warning aggregato** fosse implementato nel codice.
+
+PR **#203** (branch `feat/193-mood-genre`, worktree `ls-193-mood-genre`).
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| Il **warning aggregato per periodo** («X eventi senza audio features», solo conteggi) | `packages/core/src/analysis/mood/engine.ts` |
+| Il `logger` **opzionale** sul motore e sulla pipeline | `packages/core/src/analysis/mood/engine.ts`, `packages/core/src/analysis/pipeline.ts` |
+| I **6 test** del warning aggregato | `packages/core/src/analysis/__tests__/mood-engine.test.ts` |
+| `04§1.4` riscritta + `04§11.1` (la decisione **D-A.6**) + `04§8.1` + `04§12` | `docs/04-ANALYSIS-ALGORITHMS.md` (v1.1) |
+| `21§12` (punto 3), `21§8.2`, `21§18`, changelog | `docs/21-AUDIO-FEATURES.md` (v1.1) |
+| `05§6` (punto 5) e `05§6.2` | `docs/05-ARCHITECTURE.md` (v1.5) |
+| Il changelog del backlog (v1.6.27) e le righe legacy dell'indice | `docs/11-BACKLOG.md`, `docs/INDEX.md` |
+| Lo state file della story 2.1 allineato alla decisione | `docs/state/stories/2.1-mood-tracker.md` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-A.6 | **Il fallback mood-by-genre non esiste.** `04§1.4` è riscritta sul comportamento reale (nessun insight senza feature misurate o manuali, nessun proxy sul genere) e `21§12` (punto 3) è allineata: la feature `heuristic`, per l'analisi, è come se non esistesse | La mappa `genre → valence/energy` non era ratificata in **nessun** documento: `04§1.4` la nominava dal 2026-10-14 (Sessione 4) e la ratifica della Sessione 59 non l'ha aggiunta. Inventarla sarebbe il «segnale inventato» che la D-A.1 esclude (*«la vision promette letture vere»*). Le opzioni A e C avrebbero richiesto un campo che marcasse la stima in `MoodPeriodPayload` (`02§4`, **chiuso**): un mood stimato sarebbe indistinguibile da uno misurato nel dato persistito |
+| D.65.1 | Il warning è **aggregato per periodo** e contiene **solo conteggi** (eventi senza feature, eventi totali) | `04§1.4` prescrive la forma esatta; un warning per evento o con dati di brano sarebbe rumore e un costo di log |
+| D.65.2 | Il `logger` è **opzionale** nel motore e nella pipeline | Nessuna dipendenza nuova e nessun cambiamento di contratto per i chiamanti esistenti: senza logger il motore funziona come prima, semplicemente senza warning |
+| D.65.3 | Il warning è emesso **anche quando il periodo non produce insight** (copertura sotto soglia) | Il warning dice «quanta copertura manca», non «quanti insight ho perso»: leggerlo solo quando c'è un insight nasconderebbe proprio il caso peggiore (periodi interi senza feature) |
+| D.65.4 | Il **calcolo del mood non cambia** | Sotto `minEventsPerPeriod` il motore restituiva già `null` (D.63.4): la modifica del comportamento è il warning, non la formula |
+
+## Difetti trovati lungo il percorso
+
+**La contraddizione era in due punti, non in uno.** La issue #193 segnalava
+`04§1.4`; il punto gemello era `21§12` (punto 3), che ripeteva la stessa
+degradazione. Correggere il primo avrebbe lasciato il secondo a dichiarare un
+comportamento inesistente: i due documenti sono stati allineati nella stessa
+PR.
+
+**Un documento APPROVED che cita un altro documento APPROVED è una catena di
+riferimenti, non un fatto.** `21§10.4` riportava la frase di `05§6.2` alla
+lettera («le analisi degradano a mood-by-genre»): la correzione di `04` non
+bastava, perché la citazione era ancorata in un terzo documento. La verifica
+finale è stata una ricerca testuale di `mood-by-genre` in tutto `docs/`.
+
+**Le opzioni A e C non sono solo documentali.** `MoodPeriodPayload` (`02§4`)
+è **chiuso**: nessun campo marca la stima. Ratificare la mappa (A) o
+separare l'insight stimato (C) avrebbe significato aprire lo schema dati dei
+insight — un atto molto più grosso di una riga di spec.
+
+## Verifica
+
+- `pnpm --filter @ls/core exec vitest run src/analysis/__tests__/mood-engine.test.ts`
+  → **37** test verdi (6 nuovi sul warning aggregato)
+- `pnpm run lint` → verde
+- `pnpm run typecheck` → verde
+- `pnpm run test` → verde
+- `pnpm run build` → verde
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → drift **atteso** nei blocchi
+  aggregati (SESSIONS/BACKLOG/INDEX/BUNDLE): li rigenera
+  `auto-state-aggregate` post-merge (ADR-0008); nessun numero di sessione
+  duplicato (`65` pre-allocato con la procedura di `docs/state/_index.md`)
+
+## Lesson learned
+
+| # | Osservazione |
+|---|----------------|
+| 65-1 | **Una specifica che nomina una mappa senza darle contenuto è una specifica incompleta, non una feature.** Per mesi `04§1.4` ha descritto un fallback che nessuno sapeva implementare: la frase «mapping genre→valence/energy di default» sembrava una prescrizione, ma non c'era nessun "default" da cui leggerlo. Il costo dell'ambiguità non è stato un bug: è stato un issue aperto e una decisione di design rimandata per tre sessioni |
+| 65-2 | **Il codice che non fa una cosa che la spec prescrive è spesso il codice giusto.** Il mood tracker non ha mai degradato a mood-by-genre, e la D-A.1 già vietava i segnali inventati: la contraddizione era solo fra documenti. Verificare il codice prima di modificare la spec ha evitato di "implementare" un fallback che nessuno voleva |
+| 65-3 | **Un warning che serve a misurare una copertura va emesso anche quando la copertura è zero.** Emetterlo solo quando si produce un output nasconde il caso peggiore (il periodo interamente coperto di feature mancanti): il segnale di qualità è più utile del segnale di successo |
+| 65-4 | **Riferimenti fra documenti APPROVED vanno cercati per nome, non per numero di sezione.** `mood-by-genre` era citato in `04`, `05`, `21` e nei changelog di `11-BACKLOG` e `18-DEV-LOG`: una ricerca testuale sull'intera cartella `docs/` ha trovato cinque occorrenze che la navigazione per sezione non mostrava |
+
+## Documenti aggiornati
+
+- `packages/core/src/analysis/mood/engine.ts` — il `logger` opzionale e il
+  warning aggregato per periodo
+- `packages/core/src/analysis/pipeline.ts` — `MoodGeneratorOptions.logger`
+  inoltrato al motore
+- `packages/core/src/analysis/__tests__/mood-engine.test.ts` — 6 test nuovi
+- `docs/04-ANALYSIS-ALGORITHMS.md` — v1.1: `§1.4`, `§8.1`, `§11.1` (nuova),
+  `§12`, changelog
+- `docs/21-AUDIO-FEATURES.md` — v1.1: `§8.2`, `§10.4`, `§12`, `§18`, changelog
+- `docs/05-ARCHITECTURE.md` — v1.5: `§6` (punto 5), `§6.2`, changelog
+- `docs/11-BACKLOG.md` — changelog v1.6.27
+- `docs/INDEX.md` — le righe legacy di `04`, `05`, `11`, `21` e il «prossimo
+  passo tecnico»
+- `docs/state/stories/2.1-mood-tracker.md` — la scelta D.63.4 allineata alla
+  D-A.6
+- `docs/state/sessions/65-mood-by-genre-ratifica.md` — **nuovo**
+- `scripts/generate-bundle.ps1` — `$files`: il nuovo state file
+- `docs/BUNDLE.md` — rigenerato
+
+## Cross-refs
+
+- **#193** — la ratifica del fallback mood-by-genre (claim
+  `kilo-HP-EliteBook-f1a7`)
+- **#178** — la ratifica della spec dell'analisi (`04` v1.0 🟢 APPROVED),
+  Sessione 59: le decisioni D-A.1…D-A.5
+- **#187** — la ratifica della spec delle audio features (`21` v1.0 🟢
+  APPROVED), Sessione 62: la D-AF.4 (l'euristico non alimenta il mood tracker)
+- **#188** — la Story 4.1 (Pipeline audio features), completata nella Sessione
+  64: è la pipeline che popola la tabella `features` da cui il mood tracker
+  legge
+- **#180** — la Story 2.1 (Mood Tracker), completata nella Sessione 63: il
+  codice che questa sessione ha modificato
+
+
+
 ===== FILE: docs/state/sessions/66-csp-terzo-host-itunes.md =====
 
 ---
@@ -13743,8 +14019,10 @@ Le decisioni della sessione (D.63.1…D.63.12) sono in
   quando comincia la settimana (D.63.3);
 - il fallback **mood-by-genre** di `04§1.4` **non** è implementato: la mappa
   genere→valence/energy non è ratificata in nessun documento e inventarla
-  sarebbe il segnale inventato che D-A.1 esclude (D.63.4, issue `needs-spec`
-  aperta);
+  sarebbe il segnale inventato che D-A.1 esclude (D.63.4, issue #193); l'issue
+  è stata **chiusa** nella Sessione 65 dalla decisione **D-A.6** (`04§11.1`):
+  il fallback **non esiste** e la copertura mancante è segnalata con un
+  warning aggregato per periodo (`04§1.4`);
 - un ascolto è utilizzabile solo se ha **valence ed energy** (entrambi
   nullable in `02§3.4`): senza, la media produrrebbe `NaN` (D.63.5);
 - `Insight.confidence` è la **copertura dei dati** (quota di ascolti con
@@ -13756,7 +14034,7 @@ Le decisioni della sessione (D.63.1…D.63.12) sono in
 ## Documenti collegati
 
 - `docs/04-ANALYSIS-ALGORITHMS.md` §3 (Mood Tracker) · §11 (decisione D-A.1) ·
-  §12 (perimetro e dipendenze)
+  §11.1 (decisione D-A.6, issue #193) · §12 (perimetro e dipendenze)
 - `docs/21-AUDIO-FEATURES.md` §12 (il contratto `getAudioFeatures` filtrato per
   sorgente) · §3 (D-AF.4)
 - `docs/02-DATA-SCHEMA.md` §4 (`MoodPeriodPayload`, `Insight.derivedVersion`) ·
@@ -13765,6 +14043,7 @@ Le decisioni della sessione (D.63.1…D.63.12) sono in
 - `docs/10-TESTING.md` §3.3 — i fixture di scenario
 - `docs/11-BACKLOG.md` §Story 2.1
 - `docs/state/sessions/63-story-2-1-mood-tracker.md`
+- `docs/state/sessions/65-mood-by-genre-ratifica.md` (D-A.6, issue #193)
 
 
 
@@ -17649,9 +17928,9 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 
 # 04 — Algoritmi di Analisi
 
-> Status: 🟢 APPROVED · Versione 1.0 · Sessione 59 (2026-10-28)
+> Status: 🟢 APPROVED · Versione 1.1 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30)
 > Vincolante per: `packages/core/analysis/*` e relativi test
-> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12)
+> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12)
 
 ---
 
@@ -17682,10 +17961,18 @@ Tutti gli algoritmi devono essere **incrementali**: dato lo stato precedente + n
 
 ### 1.4 Degradazione graziosa
 
-Se mancano `AudioFeatures` (valence/energy null), l'algoritmo:
+Se mancano `AudioFeatures` **misurate o manuali** (valence/energy null), l'algoritmo:
 - Non produce insight basati su mood (salta)
-- Usa `genre` come proxy quando disponibile (mapping genre→valence/energy di default)
-- Logga warning aggregato "X eventi senza audio features"
+- **Non** usa `genre` come proxy: **non esiste** un mapping
+  genre→valence/energy ratificato, e inventarlo sarebbe il "segnale inventato"
+  che la D-A.1 esclude (§11). La decisione è la **D-A.6** (§11.1, issue #193)
+- Logga un warning **aggregato per periodo**: "X eventi senza audio features",
+  dove X è il numero di eventi del periodo senza feature misurata o manuale.
+  Il warning non porta dati personali: solo periodo e conteggi
+
+Sotto la soglia `minEventsPerPeriod` (§3.4) il periodo non produce insight:
+è il comportamento prescritto da §3.3, non una lacuna. La `confidence`
+dell'insight (§3, D.63.8) dice quanto del periodo il mood copre.
 
 ### 1.5 Tabella config → derivedVersion
 
@@ -18511,7 +18798,7 @@ La prima tranche (Story 2.4, e poi 2.1) implementa:
 | Generatore | Stato | Note |
 |---|---|---|
 | **Memory engine** (§7) | ✅ in questa tranche | usa solo ascolti, brani e artisti |
-| **Mood tracker** (§3) | ⛔ in attesa dell'EPIC 4.1 | senza audio features non produce insight (D-A.1, §12) |
+| **Mood tracker** (§3) | ✅ in questa tranche (Story 2.1, Sessione 63) | legge le feature **misurate o manuali**; senza audio features non produce insight (D-A.1, D-A.6, §12) |
 | Session segmentation (§2) | ⏭ differita | serve a `ListeningSession` (EPIC 2, tranche successiva) |
 | Pattern analyzer (§4) | ⏭ differita | Story 2.2 |
 | Era detector (§5) | ⏭ differita | Story 2.2 |
@@ -18577,6 +18864,23 @@ algoritmi mancanti e il criterio di `first_time`), D-A.3 e D-A.2 modificano
 ricordi) e un namespace in `08-COPY-I18N.md`, D-A.5 aggiunge **§8.1** (il
 perimetro della tranche).
 
+### 11.1 Emendamento ratificato nella Sessione 65 (issue #193)
+
+Il **project owner** ha ratificato il 2026-10-30 l'**opzione B** della issue
+#193: *il fallback mood-by-genre non esiste*. Come D-A.1…D-A.5, la decisione è
+chiusa **come proposta** nella spec e ratificata dal merge della PR.
+
+| # | Decisione | Scelta | Motivazione |
+|---|-----------|--------|-------------|
+| **D-A.6** | Esiste un fallback mood-by-genre (`§1.4`: "mapping genre→valence/energy di default")? | **No** (opzione B): `§1.4` è riscritta sul comportamento reale — nessun insight mood senza feature misurate o manuali, più il warning aggregato per periodo — e `21-AUDIO-FEATURES.md` **§12** (punto 3) è allineato: la feature `heuristic`, per l'analisi, è come se non esistesse | La mappa non era ratificata in nessun documento: `§1.4` la nominava dal 2026-10-14 (Sessione 4) e la ratifica della Sessione 59 non l'ha aggiunta. Inventarla sarebbe il "segnale inventato" che la D-A.1 esclude — *"la vision promette letture vere"*. Le opzioni alternative (ratificare la mappa, o un insight di stima separato) avrebbero richiesto un campo che marcasse la stima in `MoodPeriodPayload` (`02§4`, **chiuso**): un mood stimato sarebbe indistinguibile da uno misurato nel dato persistito. Il costo dichiarato: **il mood resta un dato raro** (solo periodi con ≥3 ascolti misurati o manuali) e `Insight.confidence` dice quanto il mood copre |
+
+**Effetti sulle regole già scritte**: la D-A.6 modifica **§1.4** (la degradazione
+dichiarata), **§8.1** (lo stato dei generatori) e **§12** (la nota di stato);
+`21-AUDIO-FEATURES.md` **§12** (punto 3) è allineato nella stessa PR. Il codice
+di `§3` **non cambia**: il mood tracker già restituiva `null` sotto la soglia
+(D.63.4) — la modifica del comportamento è solo il **warning aggregato**, che
+`§1.4` dichiarava e il codice non emetteva.
+
 ---
 
 ## 12. Perimetro e dipendenze di questa versione
@@ -18595,6 +18899,13 @@ decisioni. Nel frattempo l'issue della 2.1 resta aperta e **non** candidabile.
 costo, la privacy delle feature e il loro stoccaggio sono decisioni che non
 appartengono a `04`.
 
+> **Stato al 2026-10-30 (Sessione 65)**: la tabella sopra è la fotografia **al
+> momento della ratifica della Sessione 59**. Da allora la **2.4** è
+> implementata (Sessione 61, PR #185), la **2.1** è implementata (Sessione 63,
+> PR #192) e l'**EPIC 4.1** è implementata (Sessione 64, PR #197): la catena
+> **4.1 (dati) → 2.1 (letture)** è completa. Lo stato corrente delle storie
+> vive in `11-BACKLOG.md` e in `docs/state/stories/`.
+
 ---
 
 ## Changelog
@@ -18604,6 +18915,7 @@ appartengono a `04`.
 | 0.1 | Sessione 4 | Prima versione completa |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: §4.2 `computeCircadianPattern`/`Weekly`/`Seasonal` estesi con tutti i campi `PatternPayload` (`02§4` v1.1) — `peakDay`, `peakMonth`, `weekendShare`, `userTimezone`; campi non applicabili esplicitamente `null`; §4.5 invarianti aggiornate |
 | 1.0 | Sessione 59 (2026-10-28, issue #178) | 🟢 APPROVED — **ratifica del Boss al merge della PR**: le cinque decisioni aperte (§11, D-A.1…D-A.5) sono chiuse **come proposte**. **§7.2**: `return` e `seasonal` sono specificati (il silenzio è l'ultimo ascolto precedente dell'artista; la concentrazione stagionale è calcolata su 12 mesi) e `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3); **§7.3**: i parametri allineati (`firstTimeMinTracks`, `seasonalMinEvents`) e il parametro `returnMinGapDays` dichiarato; **§7.3.1** (nuova): il `text` del ricordo è una stringa **resa** alla generazione con il template i18n `insight.memory.*` (D-A.4), non una chiave né una stringa italiana inline; **§8.1** (nuova): il perimetro della tranche — orchestratore minimale estensibile, solo i generatori implementati (D-A.5); **§9**: il registro dei parametri allineato; **§11** (nuova): le cinque decisioni con la motivazione; **§12** (nuova): il perimetro — la **Story 2.4** è implementabile subito, la **Story 2.1** aspetta le **audio features dell'EPIC 4.1** (D-A.1). Le formule, i parametri e i vinanti di §1…§10 restano quelli di v0.2, salvo le modifiche elencate |
+| 1.1 | Sessione 65 (2026-10-30, issue #193) | 🟢 APPROVED — **emendamento ratificato dal project owner** (opzione B): il fallback **mood-by-genre non esiste**. **§1.4**: la degradazione è riscritta sul comportamento reale — nessun insight mood senza feature misurate o manuali, **nessun proxy sul genere** e il warning **aggregato per periodo** ("X eventi senza audio features", solo conteggi); **§8.1**: il mood tracker passa da "in attesa dell'EPIC 4.1" a generatore della tranche; **§11.1** (nuova): la decisione **D-A.6** con la motivazione e gli effetti; **§12**: nota di stato (la tabella resta la fotografia della ratifica della Sessione 59). Il codice di `§3` **non cambia** nel calcolo: il mood tracker già restituiva `null` sotto `minEventsPerPeriod` (D.63.4); la modifica del comportamento è il **warning aggregato**, che `§1.4` dichiarava e il codice non emetteva. `21-AUDIO-FEATURES.md` §12 (punto 3) è allineato nella stessa PR |
 
 
 ===== FILE: docs/05-ARCHITECTURE.md =====
@@ -18611,8 +18923,8 @@ appartengono a `04`.
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
-> Versione: 1.4
-> Ultima modifica: Sessione 62 (2026-10-28) — §6 Pipeline di arricchimento allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED)
+> Versione: 1.5
+> Ultima modifica: Sessione 65 (2026-10-30) — §6 Pipeline di arricchimento allineata all'emendamento della **D-A.6** (issue #193): il fallback mood-by-genre **non esiste** (`04§11.1`)
 > ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟢 APPROVED v1.0)
 
 ---
@@ -18885,11 +19197,11 @@ Problema: Spotify ha deprecato le audio-features (nov 2024); Apple non le ha mai
 2. **Essentia.js (WASM) in-browser** — provider di default quando è disponibile un preview audio (30s) dal catalogo. **La fonte del preview è l'iTunes Search API** (`previewUrl`, senza autenticazione): i preview di Spotify non sono più disponibili per le app nuove e quelli di Apple Music richiedono un account Developer a pagamento (`21-AUDIO-FEATURES.md` §2.1, D-AF.1). `valence` ed `energy` sono misurati sui classification head **DEAM** (`deam-msd-musicnn-2`), normalizzati da [1,9] a [0,1]
 3. **AcousticBrainz** — bonus se il brano ha un MBID mappato (lookup per recording_id). L'API fornisce **classificazioni `mood_*` e `danceability`**, non `valence`/`energy`: i due campi che il mood tracker legge sono **derivati** da quelle probabilità (`21` §7.3, D-AF.8)
 4. **Fallback euristico** (`source: 'heuristic'`) — stime da metadata (BPM da genre, energia da popolarità, valence da key/mode); qualità bassa ma copre il 100% del catalogo. **Non alimenta il mood tracker**: il layer di analisi legge solo `source ∈ {essentia, acousticbrainz, manual}` (`21` §12, D-AF.4)
-5. **Niente feature**: le analisi basate su valence/energy degradano a mood-by-genre (vedi `04-ANALYSIS-ALGORITHMS.md`)
+5. **Niente feature**: le analisi basate su valence/energy **non producono insight** e il mood tracker segnala la copertura mancante con un **warning aggregato per periodo** (`04§1.4`). **Non** esiste un fallback mood-by-genre: la mappa genre→valence/energy non è ratificata in nessun documento e inventarla sarebbe il "segnale inventato" che la D-A.1 esclude (decisione **D-A.6**, `04§11.1`, issue #193)
 
 Ogni feature salvata registra la **fonte** (`AudioFeatures.source: 'essentia' | 'acousticbrainz' | 'heuristic' | 'manual'`) per trasparenza e ricalcolo futuro. **Rimosse** le voci placeholder `api_freqblog` / `api_musicae` (non sono provider reali).
 
-La specifica completa del provider (contratto, mappatura dei campi, normalizzazione, privacy, CSP, stoccaggio, costi misurati e test) è **`21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED)**.
+La specifica completa del provider (contratto, mappatura dei campi, normalizzazione, privacy, CSP, stoccaggio, costi misurati e test) è **`21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED)**.
 
 ### 6.1 Trigger conditions
 
@@ -18909,7 +19221,7 @@ L'arricchimento **non blocca mai l'import**: se Essentia o AB falliscono, si cad
 - **TTL**: nessuno per i risultati Essentia/heuristica (calcolo locale, deterministico). Per AcousticBrainz: 90 giorni (i dataset AB sono congelati per data di dump)
 - **LRU**: limite 50k record; oltre, evict LRU basato su `lastSeenAt` del track
 - **Invalidazione**: bump del `schemaVersion` in `AudioFeatures` (vedi `02§3.4`) quando cambia la versione Essentia o il modello euristica; i record con `schemaVersion` vecchio vengono ricalcolati al prossimo trigger
-- **Disattivazione**: se `PrivacySettings.enrichMetadata === false`, la cache non viene letta né scritta; le analisi degradano a mood-by-genre
+- **Disattivazione**: se `PrivacySettings.enrichMetadata === false`, la cache non viene letta né scritta; le analisi basate su valence/energy **non producono insight** (D-A.6, `04§11.1`: il fallback mood-by-genre non esiste)
 
 ## 7. Analysis engine
 
@@ -19180,6 +19492,7 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 | 1.2 | Sessione 53 (2026-10-26, issue #160) | **§12.1/§12.2**: `rekey()` da "futuro (Story 0.7)" a **attivo (Story 1.4)** — la funzione esisteva dalla Story 0.7 ma non soddisfava gli acceptance criteria della story (nessuna transazione, sopravvivenza non deterministica, riferimenti `library`/`playlistItems`/`features` non riorientati, ISRC non normalizzato, contatori sommati a mano invece che delegati a `recount()`). La Sessione 53 ne ha chiusi i buhi. Nessuna modifica al resto della sezione. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 56, issue #168)* |
 | 1.3 | Sessione 56 (2026-10-27, issue #168) | **§4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)**: il contratto di `§4` descrive la sola **lettura** (import da file o da sorgente remota). La Story 1.5 chiede l'operazione opposta — **inviare** i propri ascolti ai hub — e i due insiemi non coincidono (non ogni piattaforma scrobbla; `maloja`/`subsonic`/`roon` sono client, non fonti). Aggiunta la sottosezione "Contratto di scrittura (`ScrobbleSink`)": l'interfaccia `ScrobbleSink` (con `hub`, `name`, `version`, `isConfigured()`, `submit()`), il tipo dedicato `ScrobbleHubId`, i tipi `ScrobblePayload` e `ScrobbleResult`, e la classe `ScrobbleError` con i sei codici (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`). Vincoli: il contratto è **separato** da quello di lettura ma ne riusa la forma (`PlatformAdapter` non cambia, nessun adapter esistente è toccato); il rate limiting è responsabilità del **sink** (Last.fm ~5 req/s, ListenBrainz 1 req/s con `X-RateLimit-*`); nessun segreto nel bundle e nessun server di backend (il proxy è dell'utente); `AbortSignal` per la cancellazione; `ScrobbleError` dedicato perché `recoverable` ha qui una semantica diversa ("si può ritentare lo stesso invio" e non "gli eventi validi sono persistiti"); `ScrobbleHubId` dedicato perché `scrobbleHubs` non è `PlatformId[]`; il payload è **chiuso per costruzione** (nessun campo per contesto, device o IP); l'idempotenza è locale e verificabile (chiave unica `hub|eventKey` sulla coda `scrobbleOutbox`, write-ahead). Il percorso incrementale ListenBrainz resta sul contratto di **lettura** (`parseRemote?()`) |
 | 1.4 | Sessione 62 (2026-10-28, issue #187) | **§6 Pipeline di arricchimento** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): la fonte del preview audio per Essentia.js è dichiarata (**iTunes Search API**, D-AF.1: i preview di Spotify non esistono più per le app nuove e quelli di Apple Music costano 99 $/anno); i classification head sono **DEAM** con normalizzazione [1,9] → [0,1] (D-AF.3); AcousticBrainz fornisce classi `mood_*` e **non** `valence`/`energy`, che sono quindi **derivati** (D-AF.8); il fallback euristico **non alimenta il mood tracker** (D-AF.4): il layer di analisi legge solo `source ∈ {essentia, acousticbrainz, manual}`. **§9**: il modulo `enrichment/` è annotato come porte + orchestratore puri (**no React**: `§9.2` vieta React nel core, e React Query resta nel web — D-AF.5). **§8**: la riga delle audio features rimanda alla spec |
+| 1.5 | Sessione 65 (2026-10-30, issue #193) | **§6 Pipeline di arricchimento** allineata all'emendamento della **D-A.6** ratificato dal project owner: il fallback **mood-by-genre non esiste**. Il punto 5 della cascata non dice più che "le analisi degradano a mood-by-genre" ma che le analisi basate su valence/energy **non producono insight** e che il mood tracker segnala la copertura mancante con un **warning aggregato per periodo** (`04§1.4`); la motivazione (la mappa genre→valence/energy non è ratificata in nessun documento: inventarla sarebbe il "segnale inventato" che la D-A.1 esclude) è dichiarata inline con il rimando a `04§11.1`. **§6.2**: la riga «Disattivazione» (toggle `enrichMetadata` spento) dice la stessa cosa — niente feature, niente insight — invece di citare il fallback inesistente. Il riferimento alla spec passa a `21-AUDIO-FEATURES.md` **v1.1**. Nessuna modifica alla pipeline del codice: il comportamento era già quello (D.63.4); la modifica è il **warning aggregato** |
 
 
 ===== FILE: docs/06-UX-FLOWS-STATES.md =====
@@ -19875,9 +20188,6 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `delete.confirm1` | Sei sicuro? Questa azione è irreversibile. | Are you sure? This cannot be undone. |
 | `delete.confirm2` | Digita ELIMINA per confermare | Type DELETE to confirm |
 | `delete.keyword` | ELIMINA | DELETE |
-| `license` | Licenza | License |
-| `licenseText` | AGPL-3.0 — il sorgente corrispondente è offerto per AGPL §13 (vedi Informazioni). | AGPL-3.0 — the corresponding source is offered per AGPL §13 (see About). |
-| `sourceOffer` | Sorgente corrispondente (AGPL §13) | Corresponding Source (AGPL §13) |
 
 ### 2.10 `empty.*`
 
@@ -25264,6 +25574,13 @@ sono separati (D-AF.4): l'euristico riempie la tabella `features` per la
 copertura e la UI, e il **layer di analisi non lo legge**. Il contratto con
 l'analisi è §12.
 
+Lo stesso ragionamento vale per il **fallback mood-by-genere**: la decisione
+**D-A.6** (`04§11.1`, issue #193, ratificata il 2026-10-30) ha stabilito che
+**non esiste** — la mappa genre→valence/energy non è ratificata in nessun
+documento, e l'analisi senza feature misurate o manuali **non produce
+insight**, segnalando la copertura mancante con il warning aggregato per
+periodo (`04§1.4`).
+
 ---
 
 ## 9. Il provider `manuale`
@@ -25344,8 +25661,10 @@ rimosso dalla CSP): la riga va riscritta con i due host reali.
 
 `PrivacySettings.enrichMetadata` (default **false**, `02§3.8`) governa tutta
 la pipeline. `05§6.2` è categorico: *"se `PrivacySettings.enrichMetadata ===
-false`, la cache non viene letta né scritta; le analisi degradano a
-mood-by-genre"*.
+false`, la cache non viene letta né scritta; le analisi basate su
+valence/energy **non producono insight**"*. (La formulazione di `05§6.2` è
+stata allineata nella Sessione 65: prima citava la degradazione a
+mood-by-genre, che **non esiste** — D-A.6, `04§11.1`, issue #193.)
 
 La specifica ne precisa tre conseguenze:
 
@@ -25426,8 +25745,11 @@ La specifica definisce la semantica di `getAudioFeatures` **senza modificare
 2. le feature `heuristic` **non** sono visibili al layer di analisi (D-AF.4):
    il mood tracker non deve costruire un umore su una stima;
 3. se la riga esiste ma è `heuristic`, per l'analisi è come se **non
-   esistesse**: l'analisi degrada a mood-by-genre (`04§1.4`), che è
-   esattamente il comportamento dichiarato per le feature mancanti;
+   esistesse**: l'analisi **non produce insight mood** (D-A.1, D-A.6), e
+   segnala la copertura mancante con il warning aggregato per periodo
+   (`04§1.4`). **Non** c'è un fallback mood-by-genre: la mappa
+   genre→valence/energy non è ratificata in nessun documento, e inventarla
+   sarebbe il segnale inventato che la D-A.1 esclude (`04§11.1`, issue #193);
 4. la funzione è **pura e sincrona** dal punto di vista dell'analisi: il
    layer di analisi gira nel Web Worker (`05§7`) e legge da IndexedDB
    attraverso il repository (`getFeatures` esiste già in
@@ -25616,7 +25938,7 @@ versione riscritta, verificabile:
 | `docs/08-COPY-I18N.md` §2.17 | Il namespace `enrichment.*` con le 8 chiavi | **Alla ratifica** (v0.8): i testi sono dichiarati vincolanti — la **materializzazione** nei locale `it`/`en` nell'implementazione (T4.1.12) |
 | `docs/14-GLOSSARY.md` | "Valence" e "Danceability" ci sono; manca **Energy** e manca la distinzione misurata/derivata/stimata | **Alla ratifica** (v1.1) |
 | `docs/11-BACKLOG.md` Story 4.1 | Gli AC riscritti (§16) e la riga `**Stato**:` | **Alla ratifica** (v1.6.22) |
-| `docs/04-ANALYSIS-ALGORITHMS.md` | **Nessuna modifica**: `04` è APPROVED e la semantica di `getAudioFeatures` è definita qui, in `§12` | — |
+| `docs/04-ANALYSIS-ALGORITHMS.md` | **Nessuna modifica alla ratifica**: `04` è APPROVED e la semantica di `getAudioFeatures` è definita qui, in `§12`. L'emendamento della Sessione 65 allinea `04§1.4` e `04§11.1` a questa sezione | **Emendamento (Sessione 65, issue #193)**: `04§1.4` (la degradazione reale, senza fallback mood-by-genre) e `04§11.1` (la decisione D-A.6) |
 
 > **Nota (Sessione 62)**: la v0.1 rimandava l'allineamento di `09`, `12`, `10` e
 > `08` all'implementazione. L'allineamento è avvenuto **alla ratifica**, per la
