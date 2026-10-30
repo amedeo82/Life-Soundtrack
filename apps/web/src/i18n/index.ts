@@ -37,6 +37,7 @@ export const NAMESPACES = [
   'error',
   'common',
   'insight',
+  'enrichment',
 ] as const;
 
 const bundledResources: Resource = {

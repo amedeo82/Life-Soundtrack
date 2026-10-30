@@ -1,0 +1,20 @@
+{
+  "_comment": "Mock della risposta dell'iTunes Search API — 21-AUDIO-FEATURES.md §6.6. Il primo risultato è il match esatto (titolo + artista normalizzati); il secondo è una variante ('Live') che il resolver NON deve accettare (E2: una feature sbagliata è peggio di nessuna).",
+  "resultCount": 2,
+  "results": [
+    {
+      "trackId": 1234567890,
+      "trackName": "Northern Sky",
+      "artistName": "The Midnight Echo",
+      "collectionName": "Long Nights",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/1a2b3c4d/plus.aac.p.m4a"
+    },
+    {
+      "trackId": 987654321,
+      "trackName": "Northern Sky (Live)",
+      "artistName": "The Midnight Echo",
+      "collectionName": "Long Nights (Deluxe Edition)",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/9z8y7x6w/plus.aac.p.m4a"
+    }
+  ]
+}

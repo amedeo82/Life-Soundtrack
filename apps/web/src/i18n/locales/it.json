@@ -299,5 +299,14 @@
   "settings.lastfm.authCallback": "Indirizzo di callback",
   "settings.lastfm.authConnect": "Collega la sessione",
   "settings.lastfm.authSaved": "Sessione autorizzata: la scrittura su Last.fm è abilitata",
-  "settings.lastfm.authMissingToken": "Nell'indirizzo incollato non c'è un token: copia l'intero indirizzo della pagina di reindirizzamento"
+  "settings.lastfm.authMissingToken": "Nell'indirizzo incollato non c'è un token: copia l'intero indirizzo della pagina di reindirizzamento",
+  "enrichment.status.queued": "In coda",
+  "enrichment.status.analyzing": "In analisi",
+  "enrichment.status.done": "Fatto ({{source}})",
+  "enrichment.status.estimated": "Fatto, ma è una stima",
+  "enrichment.status.no_audio": "Nessun audio disponibile",
+  "enrichment.status.disabled": "Arricchimento spento",
+  "enrichment.download.size": "L'analisi acustica scarica ~6 MB, una volta sola. Vuoi continuare?",
+  "enrichment.error.aggregate_one": "Un brano non è stato analizzato",
+  "enrichment.error.aggregate_other": "{{count}} brani non sono stati analizzati"
 }

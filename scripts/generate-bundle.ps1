@@ -122,6 +122,7 @@ $files = @(
     "docs/state/sessions/61-story-2-4-memory-engine.md",
     "docs/state/sessions/62-epic-4-1-audio-features-spec.md",
     "docs/state/sessions/63-story-2-1-mood-tracker.md",
+    "docs/state/sessions/64-audio-features-pipeline.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.4-dedup-promotion.md",
     "docs/state/stories/1.5-scrobbling-hub.md",
@@ -273,7 +274,14 @@ $files = @(
     "fixtures/synthetic-history/lastfm-export-ghanl-sample.csv",
     "fixtures/synthetic-history/lastfm-export-4col-sample.csv",
     "fixtures/synthetic-history/lastfm-export-sample.json",
-    "fixtures/db-seed/minimal.json"
+    "fixtures/db-seed/minimal.json",
+    # Fixture delle API esterne della pipeline delle audio features (Story 4.1,
+    # issue #188): le risposte di iTunes Search e di AcousticBrainz, usate dai
+    # test della pipeline senza mai chiamare la rete (10-TESTING.md §8).
+    "fixtures/api-mocks/itunes/search-preview.json",
+    "fixtures/api-mocks/itunes/search-no-match.json",
+    "fixtures/api-mocks/acousticbrainz/high-level-happy.json",
+    "fixtures/api-mocks/acousticbrainz/headers-rate-limit.json"
 )
 
 # === Costruzione del bundle (in memoria) ===

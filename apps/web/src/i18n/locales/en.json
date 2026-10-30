@@ -299,5 +299,14 @@
   "settings.lastfm.authCallback": "Callback address",
   "settings.lastfm.authConnect": "Connect the session",
   "settings.lastfm.authSaved": "Session authorized: writing to Last.fm is enabled",
-  "settings.lastfm.authMissingToken": "There is no token in the pasted address: copy the whole redirect page address"
+  "settings.lastfm.authMissingToken": "There is no token in the pasted address: copy the whole redirect page address",
+  "enrichment.status.queued": "In the queue",
+  "enrichment.status.analyzing": "Analyzing",
+  "enrichment.status.done": "Done ({{source}})",
+  "enrichment.status.estimated": "Done, but it's an estimate",
+  "enrichment.status.no_audio": "No audio available",
+  "enrichment.status.disabled": "Enrichment is off",
+  "enrichment.download.size": "Acoustic analysis downloads ~6 MB, once. Do you want to continue?",
+  "enrichment.error.aggregate_one": "One track could not be analyzed",
+  "enrichment.error.aggregate_other": "{{count}} tracks could not be analyzed"
 }
