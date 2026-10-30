@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-30 17:48
+> Data: 2026-10-30 17:49
 > Totale file: 122
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9566,9 +9566,9 @@ mezzo del lavoro.
 ## 33. Issue #201 — allineamento del "prossimo passo" dopo il merge degli atti del Boss (Sessione 67, follow-up)
 
 **Branch**: `docs/201-allineamento-prossimo-step`
-**PR**: **#NN**
+**PR**: **#206** (aperta il 2026-10-30)
 **Data**: 2026-10-30
-**Stato**: 🟡 **IN REVIEW** — drift chiuso, in attesa di merge
+**Stato**: 👀 **IN REVIEW** — drift chiuso, in attesa di merge
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
