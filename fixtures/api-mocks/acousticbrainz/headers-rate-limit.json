@@ -1,0 +1,6 @@
+{
+  "_comment": "Gli header di rate limit di AcousticBrainz — 21-AUDIO-FEATURES.md §7.2 (D-AF.6). Il limite NON è una costante nel codice: si legge dagli header. 'remaining: 0' obbliga la pipeline ad aspettare 'reset-in' secondi prima della richiesta successiva (T-AF.9).",
+  "x-ratelimit-limit": "100",
+  "x-ratelimit-remaining": "0",
+  "x-ratelimit-reset-in": "2"
+}

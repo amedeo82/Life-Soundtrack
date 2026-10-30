@@ -1,0 +1,19 @@
+{
+  "_comment": "Mock del documento 'high-level' di AcousticBrainz — 21-AUDIO-FEATURES.md §7.1. I valori sono esposti come {value: n}. valence ed energy NON esistono: sono derivate dalle classi mood con i pesi dichiarati in §7.3 (valence = 0.62 + 0.5*0.11 - 0.04 - 0.5*0.02 = 0.625; energy = 0.35 + 0.02 + 0.5*0.44 = 0.59).",
+  "high-level": {
+    "mood_happy": { "value": 0.62 },
+    "mood_sad": { "value": 0.04 },
+    "mood_relaxed": { "value": 0.11 },
+    "mood_party": { "value": 0.35 },
+    "mood_aggressive": { "value": 0.02 },
+    "mood_acoustic": { "value": 0.21 },
+    "mood_electronic": { "value": 0.44 },
+    "danceable": { "value": 0.78 },
+    "gender": { "value": "female" },
+    "genre_dortmund": { "value": "pop" },
+    "genre_electronic": { "value": "pop" },
+    "timbre": { "value": "bright" },
+    "tonal_atonal": { "value": "tonal" },
+    "voice_instrumental": { "value": "instrumental" }
+  }
+}

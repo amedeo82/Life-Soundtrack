@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, mergeConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 import { vitestBase } from '@ls/config/vitest/base';
+import { CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY_DEV } from './src/security/csp';
 
 // Mock del virtual module esposto da `vite-plugin-pwa` per Vitest.
 // In produzione è generato da Vite; in jsdom lo sostituiamo con uno stub.
@@ -121,6 +122,21 @@ export default mergeConfig(
         // Virtual module di `vite-plugin-pwa` risolto a uno stub in test.
         // Vitest legge `resolve.alias` in fase di `vite-node`.
         'virtual:pwa-register/react': pwaMockPath,
+      },
+    },
+    // La CSP dichiarata in `12-DEVOPS.md` §2.1 (v1.0) applicata al server:
+    // `preview` serve la build di produzione e usa la policy di produzione;
+    // `server` (dev) usa la stessa policy con il solo rilassamento di
+    // `script-src` dichiarato in `src/security/csp.ts` (Vite inietta un
+    // preamble inline per React Refresh).
+    server: {
+      headers: {
+        'Content-Security-Policy': CONTENT_SECURITY_POLICY_DEV,
+      },
+    },
+    preview: {
+      headers: {
+        'Content-Security-Policy': CONTENT_SECURITY_POLICY,
       },
     },
     build: {

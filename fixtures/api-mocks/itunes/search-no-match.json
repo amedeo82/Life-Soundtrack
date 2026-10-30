@@ -1,0 +1,13 @@
+{
+  "_comment": "Mock della risposta dell'iTunes Search API quando il brano NON è in catalogo o il titolo è ambiguo — 21-AUDIO-FEATURES.md §13 (E2). Il resolver deve saltare il ramo: non si sceglie a caso.",
+  "resultCount": 1,
+  "results": [
+    {
+      "trackId": 555000111,
+      "trackName": "Greatest Hits",
+      "artistName": "Various Artists",
+      "collectionName": "Compilation",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/0f0f0f0f/plus.aac.p.m4a"
+    }
+  ]
+}
