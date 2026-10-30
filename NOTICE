@@ -1,0 +1,45 @@
+Life Soundtrack — Third-party software attributions
+===================================================
+
+This product bundles the following third-party software. Each component is
+distributed under its own license; the Life Soundtrack application itself is
+licensed under the GNU Affero General Public License v3.0 (see LICENSE).
+
+1. essentia.js
+   - Project: https://github.com/MTG/essentia.js
+   - Version: essentia.js@0.1.3 (npm)
+   - License: GNU Affero General Public License v3.0 (AGPL-3.0)
+   - Copyright: Music Technology Group, Universitat Pompeu Fabra
+   - Bundled parts: WASM module (essentia-wasm.web.wasm), glue JS, MusicNN
+     backbone models and classification heads (deam-msd-musicnn-2).
+   - Source: https://github.com/MTG/essentia.js
+     https://www.npmjs.com/package/essentia.js/v/0.1.3
+
+   essentia.js is AGPL-3.0; bundling it in the distributed PWA is the reason
+   the Life Soundtrack repository is licensed under AGPL-3.0 (see
+   docs/21-AUDIO-FEATURES.md §2.4, decision D-AF.2). The Corresponding Source
+   of the application is offered per AGPL §13 (see the "About" screen and
+   docs/12-DEVOPS.md §5.3).
+
+2. DB-IP Lite City (.mmdb)
+   - Project: https://db-ip.com
+   - License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+   - Status: NOT yet distributed (pending Story 4.4 — DB IP→città geolocalizzazione).
+     When Story 4.4 introduces the on-demand MMDB download, this entry will be
+     completed with the exact database version, build date and attribution text,
+     and the NOTICE will be re-issued accordingly (see
+     docs/13-ADR/0009-local-ip-geolocation.md D-B.5 and docs/12-DEVOPS.md §5.3).
+
+Corresponding Source offer (AGPL §13):
+   Life Soundtrack is a PWA served to users' browsers over the network. Anyone
+   interacting with the running application may obtain the Corresponding Source
+   of the deployed version at no charge from the public repository:
+
+       https://github.com/amedeo82/Life-Soundtrack
+
+   The source matching a deployed release is identified by the git tag of that
+   release (see the repository Releases page). The version in use is shown in
+   the About screen of the application.
+
+No warranty is provided for the third-party components listed above; see their
+respective licenses and the LICENSE file (AGPL-3.0, sections 15-16).

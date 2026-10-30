@@ -198,6 +198,9 @@
 | `delete.confirm1` | Sei sicuro? Questa azione è irreversibile. | Are you sure? This cannot be undone. |
 | `delete.confirm2` | Digita ELIMINA per confermare | Type DELETE to confirm |
 | `delete.keyword` | ELIMINA | DELETE |
+| `license` | Licenza | License |
+| `licenseText` | AGPL-3.0 — il sorgente corrispondente è offerto per AGPL §13 (vedi Informazioni). | AGPL-3.0 — the corresponding source is offered per AGPL §13 (see About). |
+| `sourceOffer` | Sorgente corrispondente (AGPL §13) | Corresponding Source (AGPL §13) |
 
 ### 2.10 `empty.*`
 
