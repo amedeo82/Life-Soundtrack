@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-30 11:25
+> Data: 2026-10-30 13:25
 > Totale file: 115
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1460,7 +1460,7 @@ Apache License
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 62 (v0.8) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1) |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 62 (v0.6) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 63 (v1.6.24) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 64 (v1.6.26) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 62 (v1.0) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i due host delle audio features |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation 🟡 DRAFT**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
@@ -1614,7 +1614,7 @@ Apache License
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 63, issue #180): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e **due story dell'EPIC 2 sono implementate**: la **2.4 (Memory Engine)** (issue **#179**, PR #185, merge `40ad0b7`) e la **2.1 (Mood Tracker) è completata** (issue **#180**, PR #192, merge `d018a26`, Sessione 63): il motore in `packages/core/src/analysis/mood/` calcola il mood dominante di **giorno, settimana e mese** dalla valence/energy media ponderata per durata (`04§3`), lo persiste come insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion` calcolata dai parametri (`04§9`) e legge **solo** le feature misurate o manuali (`21§12`, D-AF.4). **La spec dell'EPIC 4.1 è ratificata** (`docs/21-AUDIO-FEATURES.md` **v1.0 🟢 APPROVED**, Sessione 62, issue #187): le nove decisioni D-AF.1…D-AF.9 sono chiuse come proposte — la fonte dell'audio è il preview di 30 s dell'**iTunes Search API** (D-AF.1), il modello valence/energy è **DEAM** (D-AF.3), l'euristico **non** alimenta il mood tracker (D-AF.4), il codice sta in `packages/core/src/enrichment/` **senza React** (D-AF.5) e la CSP ha **due host in più** (D-AF.9). **Prossimo passo**: **implementare la Story 4.1** (issue **#188**, `agent-ready`, `size:L`) — la pipeline delle audio features: cascata, provider Essentia.js e AcousticBrainz, fallback euristico, privacy, stoccaggio. È ciò che **popola** la tabella `features` da cui il mood tracker legge: la catena è **4.1 (dati) → 2.1 (letture)** e le due story sono implementabili in parallelo (l'ordine è stato invertito dal project owner il 2026-10-29: senza feature il mood tracker **non produce nulla**, comportamento dichiarato e testato, non un difetto). Restano poi le tranche dell'EPIC 3 (UI) e la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41): servono i 3 punti aperti (default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 64, issue #188): **EPIC 1 — Import core: 5/5 ✅**, la **spec dell'analisi** (`04-ANALYSIS-ALGORITHMS.md`) è **v1.0 🟢 APPROVED** e **tre story sono completate**: la **2.4 (Memory Engine)** (issue **#179**, PR #185, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, PR #192, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, PR #197, merge `7458220`, Sessione 64): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) realizza la cascata **cache → Essentia.js → AcousticBrainz → euristico** con i tre provider, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i trigger e il budget e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. **La catena 4.1 (dati) → 2.1 (letture) è chiusa**: la pipeline popola la tabella `features` da cui il mood tracker legge. **Prossimo passo**: non esiste più una story lavorabile già migrata in `docs/state/stories/` — le **2.2/2.3** (analisi avanzata) hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC sono specificate in `04` (v1.0 🟢 APPROVED), ma non hanno ancora issue né state file; restano la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). Gli atti del project owner sono la **ratifica di `19-GEO-CONTEXT.md` + `13-ADR/0009`** (🟡 DRAFT, Sessione 41: servono i 3 punti aperti — default di `retainCountry`, DB embedded vs on-demand, soglie dell'algoritmo), il **cambio di licenza AGPL-3.0** (D-AF.2) e l'issue **#196** (`needs-spec`), che chiede di ratificare il terzo host della CSP o di rivedere D-AF.1.
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -7764,8 +7764,8 @@ ESLint 10+, bump a cascata) sono differiti a Story 6.1 (D.10.2).
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.18
-> Ultima modifica: 2026-10-30 — §30 Issue #188 (Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi)
+> Versione: 2.19
+> Ultima modifica: 2026-10-30 — §30 esito post-merge (Story 4.1 — Pipeline audio features: PR #197 merged `7458220`)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -8666,7 +8666,7 @@ mezzo del lavoro.
 **Branch**: `feat/188-feat-enrichment-pipeline-audio-features` (worktree `ls-188-feat-enrichment-pipeline-audio-features`)
 **PR**: #197 (aperta su `main` dalla worktree)
 **Data**: 2026-10-30
-**Stato**: 🟡 in review — il pacchetto `packages/core/src/enrichment/` (contratto, cascata, normalizzazione, tre provider, limiter, coda, stoccaggio), la CSP dichiarata applicata al bundle, le 8 chiavi `enrichment.*` nei locale e i fixture delle API esterne
+**Stato**: ✅ **completata e merged** — la PR #197 è merged in `main` il 2026-10-30T11:24:49Z (merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (contratto, cascata, normalizzazione, tre provider, limiter, coda, stoccaggio), la CSP dichiarata applicata al bundle, le 8 chiavi `enrichment.*` nei locale e i fixture delle API esterne
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -8681,6 +8681,8 @@ mezzo del lavoro.
 | 30-9 | P+F | Il test della CSP leggeva `index.html` con `fileURLToPath(new URL(..., import.meta.url))` e falliva con "The URL must be of scheme file" | In jsdom `import.meta.url` non è un URL `file:` | Il path si risolve da `process.cwd()`: Vitest gira con la cwd sul package `@ls/web` | `apps/web/src/security/__tests__/csp.test.ts` |
 
 **Lesson learned sintetica**: una decisione ratificata può essere **incompatibile con un'altra decisione ratificata** (30-1) — e il conflitto non emerge da un test, ma dal confronto fra ciò che la spec prescrive e ciò che il browser può fare. Dichiararlo in un'issue `needs-spec` e **non** degradare la pipeline in silenzio è la differenza fra un codice che funziona e uno che sembra funzionare. E le porte iniettate (30-3, 30-5, 30-6) rendono la pipeline verificabile per intero: 142 test in 1,7 s, senza mai chiamare la rete.
+
+**Esito post-merge**: la PR #197 è **merged** (`7458220`, 2026-10-30T11:24:49Z) con CI verde (22 step del job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README). L'issue #188 è chiusa con `status:done` e il commento `release:` è automatico (`auto-status-done`). Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`) e `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata": con la 4.1 e la 2.1 completate è la risposta **corretta** (le 2.2/2.3 dipendono dalla 2.1 e non hanno uno state file). Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 4.1) è in una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 
 ### Link utili
 
@@ -8732,6 +8734,7 @@ mezzo del lavoro.
 | 2.16 | 2026-10-29 (issue #180) | **§29 Issue #180 — Story 2.1 implementata** (Mood Tracker, Sessione 63, claim `kilo-hp-elitebook-cbd0dc`, PR #192): 7 entry (29-1 la story era **bloccata** dalle audio features (D-A.1), ma il **codice** era già interamente specificato (`04§3`): a mancare era il **riempimento** della tabella `features`, non la lettura — l'ordine è stato invertito dal project owner (D.63.1) e le due story sono ora parallele, **4.1 (dati) → 2.1 (letture)**; 29-2 il filtro per sorgente delle feature vive nel **layer di analisi** e non dentro il motore: è un contratto fra due moduli (`21§12`, D-AF.4) e vale per qualunque generatore futuro (D.63.2); 29-3 il pseudocodice di `04§3.3` controlla solo `valence` e pusherebbe `energy` **null** → `NaN`: un ascolto è utilizzabile solo se ha entrambi (D.63.5); 29-4 l'esempio di `04§3.5` **non torna** (0.570/0.667 calcolati, non 0.585/0.675): il codice implementa la formula e la conclusione (`happy`), la difformità è segnalata in un'issue `docs` perché `04` è APPROVED; 29-5 `04§3.2` e `04§3.3` danno risultati diversi per `0.49/0.50` (`angry` vs `neutral`): il codice segue il **pseudocodice**, che controlla la fascia neutra per prima; 29-6 il ricalcolo di **tutti** i periodi avrebbe aperto una transazione per ogni giorno: `replaceInsightsOfType` (D.63.11) ne fa una sola e lascia intatti gli altri periodi dello stesso tipo (ricalcolo incrementale); 29-7 il vocabolario temporale è salito da `analysis/memory/datetime.ts` a `analysis/datetime.ts`: due moduli, un vocabolario, nessuna dipendenza fra sibling). Consegnati: il motore in `packages/core/src/analysis/mood/` (periodi UTC di giorno, settimana e mese, media ponderata per durata, mappa dei sei quadranti, invarianti `04§3.6`), la persistenza degli insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion` (`04§9`) e rilevamento degli insight `stale` (MIG-3), il plug-in `createMoodGenerator` dell'orchestratore (`04§8.1`, D-A.5). **51 test** nuovi in `@ls/core` (classificazione, periodi, persistenza, fixture di scenario) |
 | 2.17 | 2026-10-29 (issue #180) | **§29 — esito post-merge della Story 2.1**: la PR #192 è **merged** (`d018a26`, 2026-10-29T16:49:33Z), CI verde (`quality`, `cleanup`, `apply-status-done`, GitGuardian) → l'issue #180 è chiusa con `status:done` e il commento `release:` è automatico (`auto-status-done`). Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`b10cf70`), `auto-bundle` (`e64504d`). La pulizia git locale (worktree `ls-180-mood-tracker`, branch `feat/180-mood-tracker`) è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Aperte dal lavoro due issue: **#193** (la mappa `genre → valence/energy` del fallback mood-by-genre di `04§1.4`, `needs-spec`) e **#194** (l'esempio numerico di `04§3.5` che non torna: 0.570/0.667 calcolati, non 0.585/0.675 — la correzione di un documento APPROVED è un atto del project owner). Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 2.1) è in questa PR `docs:` separata: il merge commit si conosce solo dopo il merge |
 | 2.18 | 2026-10-30 (issue #188) | **§30 Issue #188 — Story 4.1 implementata** (Pipeline audio features, Sessione 64, claim `kilo-HP-EliteBook-fc1d`, PR #197): 9 entry (30-1 **la CSP dei due host non può ospitare la ricerca iTunes**: D-AF.1 impone `GET https://itunes.apple.com/search`, D-AF.9 elenca in `connect-src` solo l'API AB e il **CDN** dei file audio — l'host della *ricerca* è un terzo host: la CSP applicata lo include e il conflitto è segnalato all'issue **#196** (`needs-spec`); 30-2 il contratto ha `fetch(track, context)` perché `Track` (`02§3.3`) non porta il nome dell'artista, e la ricerca del preview lo richiede (D.188.1); 30-3 property test senza `fast-check`: PRNG mulberry32 con seme esplicito, campione deterministico e riproducibile; 30-4 la feature **euristica** in cache non termina la cascata (D.188.6): è un fallback, e la riga identica non viene riscritta (T-AF.14); 30-5 il **limiter MusicBrainz** (1 req/s) è consegnato come limiter + test, il lookup è la Story 4.2; 30-6 il WASM (~2,7 MB) resta fuori dal bundle (167 KB gzip) perché il motore è una porta e il modulo si carica con `import(/* @vite-ignore */ url)` su URL configurato a runtime, con un test che verifica il divieto di import statico; 30-7 due file in una directory gemella per un percorso riscritto a mano: il path si copia, non si riscrive; 30-8 `exactOptionalPropertyTypes`: `number | undefined` dichiarato nel tipo invece di un `as any`; 30-9 in jsdom `import.meta.url` non è un URL `file:`: il path del test si risolve da `process.cwd()`). Consegnati: il pacchetto `packages/core/src/enrichment/` (contratto, cascata, normalizzazione DEAM, derivazione mood, tre provider, due limiter, coda con budget e trigger, stoccaggio con TTL e LRU), il subpath `@ls/core/enrichment`, la CSP applicata (header Vite + tag `<meta>`), le 8 chiavi `enrichment.*` in `it`/`en`, i 4 fixture di `fixtures/api-mocks/`. **142 test** nuovi in `@ls/core` + **15** in `@ls/web` |
+| 2.19 | 2026-10-30 (issue #188) | **§30 — esito post-merge della Story 4.1**: la PR #197 è **merged** (`7458220`, 2026-10-30T11:24:49Z), CI verde (22 step del job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README) → l'issue #188 è chiusa con `status:done` e il commento `release:` è automatico (`auto-status-done`). Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`), `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata": con la 4.1 e la 2.1 completate è la risposta **corretta** (le 2.2/2.3 dipendono dalla 2.1 e non hanno uno state file). Aperta dal lavoro l'issue **#196** (`needs-spec`): la contraddizione fra D-AF.1 e D-AF.9 sulla CSP. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 4.1) è in questa PR `docs:` separata: il merge commit si conosce solo dopo il merge |
 
 ---
 
@@ -11829,10 +11832,10 @@ Issue aperte dal lavoro, ancora da fare: **#193** (la mappa
 number: 64
 title: "Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188)"
 date: 2026-10-30
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: 7458220
+merged_date: 2026-10-30
 branch: feat/188-feat-enrichment-pipeline-audio-features
 pr: 197
 claim: kilo-HP-EliteBook-fc1d
@@ -11964,7 +11967,7 @@ la cwd sul package.
 - `apps/web/src/i18n/locales/{it,en}.json` — le 8 chiavi `enrichment.*` (`08§2.17`)
 - `apps/web/src/i18n/index.ts` — il namespace `enrichment`
 - `fixtures/api-mocks/` — **nuovo**: i 4 fixture delle risposte esterne
-- `docs/state/stories/4.1-audio-features.md` — `status: in_review`, task e AC
+- `docs/state/stories/4.1-audio-features.md` — `status: done`, task e AC
   verificati, scelte implementative e limiti dichiarati
 - `docs/state/sessions/64-audio-features-pipeline.md` — **nuovo**
 - `docs/11-BACKLOG.md` — sezione Story 4.1 (`**Stato**:`), riga roadmap, lista di
@@ -11978,7 +11981,40 @@ la cwd sul package.
 - **#188** — la Story 4.1 (claim `kilo-HP-EliteBook-fc1d`)
 - **#187** — la ratifica della spec (`21` v1.0 🟢 APPROVED), Sessione 62
 - **#180** — la Story 2.1 (Mood Tracker): consuma le feature che questa pipeline
-  produce; resta bloccata finché la tabella `features` non si riempie (D-A.1)
+  produce; è **completata** (Sessione 63, merge `d018a26`) e il percorso dati
+  che le mancava è quello consegnato qui (D-A.1)
+
+## Esito post-merge
+
+La PR #197 è **merged** in `main` il 2026-10-30T11:24:49Z (merge commit
+`7458220`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README). L'issue **#188** è chiusa con
+`status:done` (applicato da `auto-status-done`), le label `agent-ready` /
+`in-progress` / `status:in-review` sono rimosse e il commento `release:` è
+automatico.
+
+Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup` (branch
+remoto eliminato), `auto-state-aggregate` (`9c3a13f`) e `auto-bundle`
+(`1062c04`). La pulizia git locale (worktree
+`ls-188-feat-enrichment-pipeline-audio-features` e branch
+`feat/188-feat-enrichment-pipeline-audio-features`) è stata eseguita con
+`scripts/post-merge.ps1`: la rimozione della worktree ha richiesto di nuovo
+`rd /s /q` con prefisso `\\?\` (su Windows `git worktree remove` fallisce con
+"Result too large" sui path lunghi con `node_modules`), poi
+`post-merge.ps1 -Check` esce 0.
+
+Con la 4.1 e la 2.1 completate **non esiste più una story lavorabile già
+migrata** in `docs/state/stories/`: il blocco NEXT-STEP del README ricade sul
+fallback "_Nessuna story non-done e non bloccata migrata_", che è la risposta
+**corretta** — le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno
+state file. Le tranche rimaste sono la **UI** (Story 3.x), il **lookup
+MusicBrainz** (Story 4.2) e gli atti del Boss: la ratifica di
+`19-GEO-CONTEXT.md` + `13-ADR/0009`, il cambio di licenza AGPL-3.0 (D-AF.2) e
+l'issue **#196**.
+
+Issue aperte dal lavoro, ancora da fare: **#196** (`needs-spec`) — la
+contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
+è fra i due host dichiarati in `connect-src`).
 
 
 
@@ -12630,14 +12666,14 @@ id: "4.1"
 title: "Pipeline audio features"
 phase: 2
 area: enrichment
-status: in_review
+status: done
 priority: I
 depends_on: ["0.2"]
 issue: 188
 branch: "feat/188-feat-enrichment-pipeline-audio-features"
 pr: 197
-merged_commit: ""
-merged_date: ""
+merged_commit: 7458220
+merged_date: 2026-10-30
 claim: "kilo-HP-EliteBook-fc1d"
 spec_refs:
   - docs/21-AUDIO-FEATURES.md
@@ -12667,20 +12703,23 @@ HTTP e lo stato per la UI.
 
 ## Stato
 
-👀 **IN REVIEW** — l'implementazione è completa e verificata in locale
-(issue #188, claim `kilo-HP-EliteBook-fc1d`, branch
+✅ **DONE** — implementata nella Sessione 64 (issue #188, PR #197 merged il
+2026-10-30, merge commit `7458220`, branch
 `feat/188-feat-enrichment-pipeline-audio-features`). La spec è **ratificata**
 (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62, issue #187, PR #190
 `b1dd83e`): le nove decisioni **D-AF.1…D-AF.9** sono chiuse come proposte e
 vincolanti.
 
-**Issue**: #188 (`agent-ready`, `size:L`, `area:enrichment`, `phase-2`) — la
-tranche di implementazione. La spec contiene i 13 deliverable (`21§17`), i 14
-casi di test minimi (`21§15.3`) e gli 11 acceptance criteria (`21§16`).
+**Issue**: #188 (`status:done`, `size:L`, `area:enrichment`, `phase-2`) — la
+tranche di implementazione, chiusa al merge della PR #197. La spec contiene i
+13 deliverable (`21§17`), i 14 casi di test minimi (`21§15.3`) e gli 11
+acceptance criteria (`21§16`).
 
-Il blocco NEXT-STEP del README punta a questa story: è il primo anello della
-catena **4.1 → 2.1 → 2.2/2.3** (la Story 2.1 resta `blocked` finché le feature
-non esistono — decisione D-A.1).
+Il **percorso dati** della catena **4.1 (dati) → 2.1 (letture)** è chiuso:
+questa pipeline popola la tabella `features` da cui il mood tracker (Story 2.1,
+Sessione 63) legge valence ed energy. Restano **fuori perimetro e dichiarati**
+la UI (Story 3.x), il lookup MusicBrainz (Story 4.2) e il cambio di licenza
+AGPL-3.0 (D-AF.2, atto del Boss).
 
 ## Task
 
@@ -19229,7 +19268,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.25 · Sessione 64 (2026-10-30, issue #188) · la **Story 4.1 (Pipeline audio features) è implementata** e in review: il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) contiene il contratto `AudioFeatureProvider`, la cascata `cache → Essentia.js → AcousticBrainz → euristico`, la normalizzazione dichiarata, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i tre trigger e il budget, e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. La **Story 2.1 (Mood Tracker)** resta il consumer finale: il percorso dati è ora chiuso e la catena 4.1 (dati) → 2.1 (letture) può partire. Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss)
+> Status: 🟢 APPROVED · Versione 1.6.26 · Sessione 64 (2026-10-30, issue #188) · la **Story 4.1 (Pipeline audio features) è completata** (PR #197 merged il 2026-10-30, merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) contiene il contratto `AudioFeatureProvider`, la cascata `cache → Essentia.js → AcousticBrainz → euristico`, la normalizzazione dichiarata, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i tre trigger e il budget, e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. La **Story 2.1 (Mood Tracker)** è il consumer finale: il percorso dati è chiuso e la catena **4.1 (dati) → 2.1 (letture)** è completa. Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -19653,7 +19692,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
 
-**Stato**: 👀 **IN REVIEW** (Sessione 64, issue #188, PR #197, branch `feat/188-feat-enrichment-pipeline-audio-features`) — la pipeline è **implementata** secondo la spec ratificata (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62, issue #187; ratificata dalla PR #190 `b1dd83e`). Consegnato: il pacchetto `packages/core/src/enrichment/` **senza React** (D-AF.5) — il contratto `AudioFeatureProvider` con `fetch(track, context)`, la **cascata** `cache → Essentia.js → AcousticBrainz → euristico` con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete", la **normalizzazione** DEAM `[1,9] → [0,1]` con clamp e arrotondamento a 4 decimali (`21§6.2`, E8), la **derivazione** mood → valence/energy di AcousticBrainz con pesi dichiarati (`21§7.3`, D-AF.8), il **fallback euristico** che stima tempo/ballabilità/acustica dal genere e **non** stima valence/energy (`21§8.1`), i **limiter** (MusicBrainz 1 req/s a intervallo fisso, AcousticBrainz **dagli header** `X-RateLimit-*` senza costanti, D-AF.6), la **coda** con i tre trigger, il budget di 5 min/giorno, la concurrency 1 e l'interrompibilità (`21§5.2`, D-AF.7), lo **stoccaggio** (TTL 90 giorni per AB, `schemaVersion`, LRU a 50.000 righe) e il **subpath** `@ls/core/enrichment`. La **CSP** dichiarata in `12§2.1` è applicata al bundle (`apps/web/src/security/csp.ts` + header Vite + tag `<meta>`), le **8 chiavi** `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`, e i **fixture** delle API esterne vivono in `fixtures/api-mocks/`. **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) + **15** in `@ls/web` (CSP, i18n). **Fuori perimetro, dichiarato**: la UI (Story 3.x), il *lookup* MusicBrainz (Story 4.2) e il cambio di licenza AGPL-3.0 (D-A.2: atto del Boss). Dettagli e scelte: `docs/state/stories/4.1-audio-features.md`.
+**Stato**: ✅ **DONE** (Sessione 64, issue #188, PR #197 merged il 2026-10-30, merge commit `7458220`, branch `feat/188-feat-enrichment-pipeline-audio-features`) — la pipeline è **implementata e completata** secondo la spec ratificata (`docs/21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62, issue #187; ratificata dalla PR #190 `b1dd83e`). Consegnato: il pacchetto `packages/core/src/enrichment/` **senza React** (D-AF.5) — il contratto `AudioFeatureProvider` con `fetch(track, context)`, la **cascata** `cache → Essentia.js → AcousticBrainz → euristico` con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete", la **normalizzazione** DEAM `[1,9] → [0,1]` con clamp e arrotondamento a 4 decimali (`21§6.2`, E8), la **derivazione** mood → valence/energy di AcousticBrainz con pesi dichiarati (`21§7.3`, D-AF.8), il **fallback euristico** che stima tempo/ballabilità/acustica dal genere e **non** stima valence/energy (`21§8.1`), i **limiter** (MusicBrainz 1 req/s a intervallo fisso, AcousticBrainz **dagli header** `X-RateLimit-*` senza costanti, D-AF.6), la **coda** con i tre trigger, il budget di 5 min/giorno, la concurrency 1 e l'interrompibilità (`21§5.2`, D-AF.7), lo **stoccaggio** (TTL 90 giorni per AB, `schemaVersion`, LRU a 50.000 righe) e il **subpath** `@ls/core/enrichment`. La **CSP** dichiarata in `12§2.1` è applicata al bundle (`apps/web/src/security/csp.ts` + header Vite + tag `<meta>`), le **8 chiavi** `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`, e i **fixture** delle API esterne vivono in `fixtures/api-mocks/`. **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) + **15** in `@ls/web` (CSP, i18n). **Fuori perimetro, dichiarato**: la UI (Story 3.x), il *lookup* MusicBrainz (Story 4.2) e il cambio di licenza AGPL-3.0 (D-A.2: atto del Boss). Dettagli e scelte: `docs/state/stories/4.1-audio-features.md`.
 
 **Acceptance criteria** (riscritti in `21§16`):
 - [ ] La cascata è **cache → Essentia.js → AcousticBrainz → euristico**, con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete" (`05§6.1`)
@@ -19768,8 +19807,8 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 8. **1.1, 1.2, 1.3** in parallelo (altri adapter)
 9. **1.4** Dedup promozione
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
-11. **4.1** pipeline audio features (issue #188, 👀 **IN REVIEW**, PR #197) — la pipeline è **implementata** (Sessione 64, branch `feat/188-feat-enrichment-pipeline-audio-features`): cascata, provider, limiter, coda, stoccaggio, CSP e i18n (`21§4…§11`), con **142 test** in `@ls/core` e **15** in `@ls/web`. La spec è ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). È il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: senza le audio features non c'è valence/energy, e quindi la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
-12. **2.1** mood tracker — **implementata** (Sessione 63, issue #180, PR #192): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** resta alla 4.1: la catena è 4.1 (dati) → 2.1 (letture), e le due story sono implementabili **in parallelo**
+11. **4.1** pipeline audio features (issue #188, ✅ **DONE**, PR #197 merged `7458220`) — la pipeline è **completata** (Sessione 64): cascata, provider, limiter, coda, stoccaggio, CSP e i18n (`21§4…§11`), con **142 test** in `@ls/core` e **15** in `@ls/web`. La spec è ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). Era il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: ha fornito le valence/energy senza le quali la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
+12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`)
 14. **3.1, 3.2, 3.3** UI
 15. **5.1, 5.2** privacy
@@ -19788,12 +19827,14 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
-| 4 | 4.x enrichment (audio features, artwork, generi) | 👀 IN REVIEW | dipende da 0.2 ✅ · **4.1**: pipeline implementata (Sessione 64, issue #188, branch `feat/188-feat-enrichment-pipeline-audio-features`) |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork) e i generi |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
 **EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 5/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment · 1.5 scrobbling hub). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
+> **Aggiornato al 2026-10-30** (Sessione 64, issue #188: la 4.1 è **completata** — PR #197 merged `7458220` — e il suo `**Stato**:` passa a ✅ DONE; la riga dell'EPIC 4 torna a ⬚ TODO perché restano **4.2** (lookup MusicBrainz), **4.3** (artwork) e i generi. Con la 4.1 e la 2.1 completate il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata": è la risposta **corretta**, non una regressione — le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
+>
 > **Aggiornato al 2026-10-28** (Sessione 58, issue #173: la 1.5 rimossa dalla roadmap perché implementata e mergiata con la PR #176, e il suo `**Stato**:` allineato a ✅ — l'EPIC 1 è 5/5. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
 >
 > **Aggiornato al 2026-10-27** (Sessione 54, issue #161: il conteggio dell'EPIC 1 era fermo a `2/5` dal 2026-10-22 — la 1.3 (PR #158, merge `7afbf03`) e la 1.4 (PR #162, merge `471a049`) erano state completate senza allineare questa riga legacy. Il drift è silenzioso: i blocchi aggregati sono corretti, questa riga no. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
@@ -19851,6 +19892,7 @@ Ogni story deve avere label GitHub:
 | 1.6.23 | Sessione 63 (2026-10-29, issue #180) | **Story 2.1 implementata** (Mood Tracker, PR #192): il motore in `packages/core/src/analysis/mood/` calcola il mood dominante di giorno, settimana e mese dalla valence/energy media ponderata per durata (`04§3.2`…`04§3.6`) e lo persiste come insight `mood_day`/`mood_week`/`mood_month` con `derivedVersion` (`04§9`); il plug-in `createMoodGenerator` entra nell'orchestratore (`04§8.1`) e il ricalcolo batch (`replaceInsightsOfType`) rimuove gli insight `stale` (MIG-3). La sezione Story 2.1 passa da ⛔ bloccata a 👀 **IN REVIEW** e i suoi tre AC sono verificati. **L'ordine è stato invertito dal project owner** (2026-10-29): la D-A.1 diceva "la 2.1 aspetta la 4.1", ma il codice del mood tracker era già interamente specificato — a mancare era il **riempimento** della tabella `features`, che resta alla Story 4.1 (#188). Le due story sono quindi parallele: **4.1 (dati) → 2.1 (letture)**. Scelte dichiarate (D.63.1…D.63.12): il **filtro per sorgente** delle feature vive nel layer di analisi e lascia fuori l'euristico (`21§12`, D-AF.4), `weekStartDay` (lunedì) è un parametro **versionato**, il fallback **mood-by-genre** di `04§1.4` **non** è implementato (la mappa non è ratificata: inventarla sarebbe il segnale inventato che D-A.1 esclude), un ascolto è utilizzabile solo se ha **valence ed energy**, `Insight.confidence` è la **copertura dei dati** (il payload `02§4` è chiuso) e l'id dell'insight è **deterministico**. **51 test** nuovi in `@ls/core` (classificazione, periodi, persistenza, fixture di scenario). La **lista di priorità** degli agenti mette la 2.1 come **implementata** |
 | 1.6.24 | Sessione 63 (2026-10-29, issue #180) | **Story 2.1 completata** (Mood Tracker, PR #192 merged, merge commit `d018a26`): la sezione Story passa a ✅ **DONE** e `docs/state/stories/2.1-mood-tracker.md` ha `status: done` con `merged_commit` e `merged_date`. La PR è stata merged in `main` il 2026-10-29T16:49:33Z con CI verde (`quality`, `cleanup`, `apply-status-done`, GitGuardian); l'issue **#180** è chiusa con `status:done` e le label `agent-ready`/`in-progress`/`status:in-review` rimosse da `auto-status-done`, che ha pubblicato anche il commento `release:`. Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`b10cf70`) e `auto-bundle` (`e64504d`). La pulizia git locale (worktree `ls-180-mood-tracker`, branch `feat/180-mood-tracker`) è stata fatta con `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con "Result too large" (path lunghi con `node_modules` su Windows) e la rimozione è passata da `rd /s /q` con prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. Aperte dal lavoro due issue: **#193** (la mappa `genre → valence/energy` del fallback mood-by-genre di `04§1.4`, `needs-spec`) e **#194** (l'esempio numerico di `04§3.5` che non torna, `docs`: la correzione di un documento APPROVED è un atto del project owner). La **lista di priorità** degli agenti mette la 2.1 come **completata** |
 | 1.6.25 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 implementata** (Pipeline audio features): il pacchetto `packages/core/src/enrichment/` è nato — **senza React** (D-AF.5), con il contratto `AudioFeatureProvider` (`fetch(track, context)`: il `Track` di `02§3.3` non porta il nome dell'artista, e la ricerca del preview lo richiede, D-AF.1), la **cascata** `cache → Essentia.js → AcousticBrainz → euristico` con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete", la **normalizzazione** DEAM `[1,9] → [0,1]` con clamp e warning (E8, `10§7`), la **derivazione** mood → valence/energy di AcousticBrainz con i pesi dichiarati (`21§7.3`, D-AF.8), il **fallback euristico** che stima tempo/ballabilità/acustica dal genere e **non** stima valence/energy (`21§8.1`), i **limiter** (MusicBrainz 1 req/s a intervallo fisso, AcousticBrainz **dagli header** `X-RateLimit-*` senza costanti, D-AF.6), la **coda** con i tre trigger, il budget di 5 min/giorno, la concurrency 1 e l'interrompibilità (`21§5.2`, D-AF.7), lo **stoccaggio** (TTL 90 giorni per AB, `schemaVersion`, LRU a 50.000 righe) e il subpath `@ls/core/enrichment`. Tutte le dipendenze esterne sono **porte iniettate** (HTTP, clock, sleep, storage, policy): i **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) non chiamano mai la rete (`10§8`). La **CSP** dichiarata in `12§2.1` è applicata al bundle (`apps/web/src/security/csp.ts` + header Vite + tag `<meta>`) e le **8 chiavi** `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en` (15 test in `@ls/web`). **Contraddizione dichiarata**: D-AF.1 impone la ricerca `GET https://itunes.apple.com/search`, ma D-AF.9 elenca in `connect-src` solo i due host che **non** sono quello della ricerca → la CSP applicata include il terzo host e il conflitto è segnalato all'issue **#196** (`needs-spec`). Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2, di cui è consegnato il limiter) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss) |
+| 1.6.26 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 completata** (Pipeline audio features, PR #197 merged, merge commit `7458220`): la sezione Story passa a ✅ **DONE** e `docs/state/stories/4.1-audio-features.md` ha `status: done` con `merged_commit` e `merged_date`; `docs/state/sessions/64-audio-features-pipeline.md` ha `state: 🟢`, `merged: true` e la sezione "Esito post-merge". La PR è stata merged in `main` il 2026-10-30T11:24:49Z con CI verde (22 step del job `quality`); l'issue **#188** è chiusa con `status:done` e le label `agent-ready`/`in-progress`/`status:in-review` rimosse da `auto-status-done`, che ha pubblicato anche il commento `release:`. Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`) e `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è stata fatta con `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con "Result too large" (path lunghi con `node_modules` su Windows) e la rimozione è passata da `rd /s /q` con prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. La riga dell'EPIC 4 nella roadmap torna a ⬚ TODO (restano 4.2, 4.3 e i generi) e il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata" — **risposta corretta**, non una regressione: le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Aperta dal lavoro l'issue **#196** (`needs-spec`): la contraddizione fra D-AF.1 e D-AF.9 sulla CSP. La **lista di priorità** degli agenti mette la 4.1 e la 2.1 come **completate** |
 
 
 
