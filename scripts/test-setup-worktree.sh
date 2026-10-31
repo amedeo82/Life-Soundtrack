@@ -89,7 +89,9 @@ make_mock_env() {
     git commit --quiet -m "initial commit"
   # Bare remote per il push
   local remote_dir="$tmpdir/remote.git"
-  git init --quiet --bare "$remote_dir"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init --quiet --bare -b main "$remote_dir"
   git remote add origin "$remote_dir"
   git push --quiet -u origin main
 

@@ -48,7 +48,7 @@ sequenza.
 | `test-post-merge.sh` | 52,4 s | 39,3 s | −25 % |
 | `pwsh scripts/aggregate-state.ps1 -Check` | 1,23 s | 0,91 s | −26 % |
 | `pwsh scripts/generate-bundle.ps1 -Check` | 1,37 s | 1,05 s | −23 % |
-| 4 task turbo sequenziali | 52,7 s | 32,8 s | −38 % |
+| 4 task turbo sequenziali | 52,7 s | 52,7 s | invariato — la forma parallela (32,8 s) **rompeva il gate**, vedi «Il parallelismo ha un costo» |
 | `auto-bundle` per merge che tocca `docs/state/` | 2 run (20 s + 22 s) | 1 run | −22 s di latenza |
 
 ## Decisioni
@@ -58,11 +58,12 @@ sequenza.
 | D.73.1 | La **CI passa da 1 job sequenziale a 9 job** (8 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
 | D.73.2 | `quality` conserva il **nome** del check ed è **fail-closed** | Senza il controllo esplicito sui risultati dei job dipendenti, `needs:` renderebbe `quality` *skipped* quando un job fallisce, e la branch protection può interpretare un check saltato come successo. Il nome invariato evita di dover cambiare la branch protection |
 | D.73.3 | I **5 job di gate non installano le dipendenze npm** | `scripts/validate-*.mjs` e `scripts/check-readme-facts.mjs` usano **solo i moduli built-in di node**; le suite bash usano `git` + `bash` + `pwsh`, tutti preinstallati sui runner GitHub. Installare npm in 5 job che non ne hanno bisogno era costo puro |
-| D.73.4 | `lint`/`typecheck`/`test`/`build` passano da **4 invocazioni turbo** a **1** (`pnpm run verify`) | 4 round-trip di turbo uno dietro l'altro: 52,7 s → 32,8 s. Turbo esce non-zero se uno solo dei 4 task fallisce ⇒ i 4 gate restano bloccanti |
+| D.73.4 | I 4 task turbo restano **sequenziali**; la forma parallela (`turbo run lint typecheck test build`, 32,8 s) è stata implementata e poi **revertita** | Sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`: è la classe del lesson 30-1, e la soglia di un test time-sensitive è un **acceptance criterion** |
 | D.73.5 | Le **5 suite** che la CI non eseguiva sono **aggiunte alla CI**, dopo aver corretto i loro difetti | La procedura più distruttiva del repo (`post-merge.ps1`: `git push origin --delete`, `git branch -D`) non aveva copertura. Il project owner ha chiesto di «controllare tutte le procedure automatiche»: controllare una procedura significa che la sua verifica gira |
 | D.73.6 | Il contatore degli assert delle suite in subshell passa su un **file di risultati condiviso** | I contatori in memoria di una subshell non arrivano al padre: `test-safe-branch-switch.sh` riportava «0 passati, 0 falliti» e usciva 0 **sempre** (lesson 43-1) |
 | D.73.7 | Il run di `auto-bundle` su `workflow_run` viene **saltato** se l'aggregator non ha prodotto un commit | Il secondo run serve solo se l'aggregator ha committato. Il controllo è esatto (`workflow_run.head_sha` vs `origin/main`), non prudenziale. Se l'aggregator è **fallito** si rigenera comunque |
-| D.73.8 | Il **typecheck duplicato**, il **doppio startup di vitest**, la **CI sui push del bot** e la **parallelizzazione interna delle suite** restano **fuori perimetro** | Sono modifiche alla *definizione* di un task o del *trigger* della CI: decisioni sul test strategy che spettano al project owner (D.71.4). Sono documentati con la misura in `12-DEVOPS.md §9.14.6` |
+| D.73.8 | Il **typecheck duplicato**, il **doppio startup di vitest**, la **CI sui push del bot** e la **parallelizzazione interna delle suite** restano **fuori perimetro** | Sono modifiche alla *definizione* di un task o del *trigger* della CI: decisioni sul test strategy che spettano al project owner (D.71.4). Sono documentati con la misura in `12-DEVOPS.md §9.14.9` |
+| D.73.9 | `git init` nelle suite dichiara **esplicitamente** il branch iniziale (`-b main`) | `init.defaultBranch` è una configurazione **di macchina**: la dev machine ha `main`, il runner GitHub ha `master`. Con `master`, `git clone` del bare repo non fa il checkout di nessun branch e `git push origin main` fallisce: il test era verde solo in locale |
 
 ## I tre difetti che la misura ha smascherato
 
@@ -77,9 +78,48 @@ sequenza.
    Windows: aggiunto un wrapper `gh.cmd`). In CI, **8 assert**.
 3. **`test-appendline-lf-fix.ps1` aveva S3 stale** (pretendeva che `aggregate-state.ps1` non
    contenesse `AppendLine`: ne ha 64, e sono la forma *corretta* del fix dell'issue #58) e **S5
-   mutava il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'aggregator). Ora S3
+   mutava il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'agregator). Ora S3
    verifica l'invariante reale («normalizza CRLF→LF in scrittura») e S5 gira su un **fixture
    temporaneo**. In CI.
+
+## Il parallelismo ha un costo: il gate che misura il tempo
+
+Una delle ottimizzazioni proposte — una **sola** invocazione `turbo run lint typecheck test build`
+invece di 4 sequenziali (52,7 s → 32,8 s) — è stata implementata, **pubblicata sulla PR**, e poi
+**revertita** perché sul runner **rompeva un gate**.
+
+Il runner GitHub ha **2 vCPU**. Con i 4 task in un'unica invocazione, turbo esegue `build`
+(`vite build` + `tsc`) **in concorrenza** con `test`, e il vitest riceve meno CPU: i 2 test di
+integrazione del fixture `db-seed/medium.json` (5000 eventi) sono scadati con «Test timed out in
+5000ms».
+
+È **esattamente** la classe del lesson 30-1: «il test di performance misurava il **carico del
+runner**, non il layer DB […] il test gira ora in una **run separata**, con la soglia dell'AC
+invariata». La soglia **non** si tocca: è un acceptance criterion.
+
+**Regola generale**: «parallelizzare» (a livello di **job**, dove i gate sono processi separati) e
+«aumentare il parallelismo interno di un gate» (a livello di **task runner**, che condivide il
+processore) sono due ottimizzazioni **indipendenti**, e la seconda può invalidare la prima quando
+un gate è **time-sensitive**.
+
+## Un test verde in locale non è un test verde ovunque
+
+`test-post-merge.sh` è fallito sul runner con «error: src refspec main does not match any» **solo
+su Linux**. La causa: la dev machine ha `init.defaultBranch = main` in
+`C:\Program Files\Git\etc\gitconfig`, il runner GitHub ha il default di git, `master`.
+
+La meccanica: `git init --bare` crea un bare repo con `HEAD → refs/heads/<init.defaultBranch>`;
+`git clone` di quel repo, se `HEAD` punta a un branch **inesistente**, avvisa «remote HEAD refers
+to nonexistent ref» e **non fa il checkout di nessun branch**; il successivo `git push origin main`
+fallisce.
+
+Correzione: **`git init -q --bare -b main`** in tutte e tre le suite che creano un bare repo
+(`test-post-merge.sh`, `test-issue-76-residue.sh`, `test-setup-worktree.sh`).
+`init.defaultBranch` è una configurazione **di macchina**, non del progetto.
+
+**Regola generale**: un test che crea repository git temporanei deve dichiarare **esplicitamente**
+il branch iniziale: la CI ha una configurazione git diversa da qualunque dev machine, e un test che
+passa in locale non è un test che passa ovunque.
 
 ## Il costo nascosto: i processi figli
 
@@ -106,6 +146,9 @@ di scansione regex).
 | 73-5 | **Il bundle rigenerava due volte per merge**: il secondo run (22 s) era pensato per l'ordinamento (issue #149) ma girava anche quando l'aggregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main`; se l'aggregator è fallito si rigenera comunque |
 | 73-6 | **La concatenazione con `+=` in PowerShell è O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione | `StringBuilder`; output byte-identico (SHA-256 verificato sullo stesso albero) |
 | 73-7 | **Le misure vanno fatte sulla macchina e sull'ambiente giusti**: il `bash` di default su questa macchina è lo stub WSL (`bash.exe` → «non è installata una distribuzione Linux»), non Git Bash | I benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`; i tempi misurati altrimenti non sono quelli del repo |
+| 73-8 | **Parallelizzare i job e parallelizzare i task interni sono due cose diverse**: i 4 task turbo in un'unica invocazione facevano scadere per timeout un test time-sensitive sul runner a 2 vCPU | I 4 task restano sequenziali; il parallelismo si Decide a livello di **job** (`docs/12-DEVOPS.md §9.14.7`) |
+| 73-9 | **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale | `git init -b main` esplicito in tutte le suite che creano repository (`docs/12-DEVOPS.md §9.14.8`) |
+| 73-10 | **La prima CI della PR vale come test**: la pipeline parallela ha rivelato in 90 secondi due difetti che 14 suite in locale non potevano mostrare (il timeout del test perf e il `git init` con branch implicito) | I due difetti sono corretti e riprodotti localmente simulando il runner (`init.defaultBranch=master`) |
 
 ## Documenti aggiornati
 
@@ -113,14 +156,15 @@ di scansione regex).
   skip del secondo run di `auto-bundle`, footer v1.31
 - `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (21 gate su 9 job), **§9.13** *Chiusura
   dell'audit*, **§9.14** (nuova) *Prestazioni delle procedure automatiche* — profilo, costo dei
-  processi figli, tabella dei risultati, equivalenza dimostrata, e ciò che non è stato fatto;
+  processi figli, tabella dei risultati, equivalenza dimostrata, il costo del parallelismo
+  (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che non è stato fatto (§9.14.9);
   changelog 1.5
 - `docs/17-DEV-NOTES.md` (v0.5 → **0.6**): **P13** (nuova) — il costo delle procedure automatiche
   è quasi sempre nei processi figli
 - `docs/18-DEV-LOG.md`: **§40**
 - `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`;
   `$files` += `scripts/safe-branch-switch.ps1` e `scripts/test-safe-branch-switch.sh`
-- `package.json`: nuovo script `verify`
+- `package.json`: nuovo script `verify` (`turbo run lint && turbo run typecheck && turbo run test && turbo run build`)
 
 ## Verifica
 
@@ -132,8 +176,11 @@ di scansione regex).
 - 14 suite di test locali → tutte exit 0 (37 + 12 + 9 + 29 + 8 + 11 + 8 + 5 assert sulle procedure,
   più le 6 suite sui workflow)
 - **Equivalenza dimostrata**: il bundle generato dal generatore nuovo e da quello vecchio sullo
-  stesso albero ha   **SHA-256 identico**; l'aggregator nuovo e quello vecchio producono output
+  stesso albero ha **SHA-256 identico**; l'aggregator nuovo e quello vecchio producono output
   identico a parità del campo mutabile (`Ultima aggregazione`)
+- **Riproduzione locale dei difetti del runner**: con `init.defaultBranch=master` (il default del
+  runner GitHub) le 3 suite che creano repository temporanei passano tutte e 3; senza il fix
+  `test-post-merge.sh` falliva con «src refspec main does not match any»
 
 ## Link utili
 

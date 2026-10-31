@@ -64,7 +64,14 @@ make_repo() {
   mkdir -p "$d"
   (
     cd "$d" || exit 1
-    git init -q --bare origin.git
+    # `-b main`: il branch iniziale del bare repo e' esplicito. Senza, il
+    # default e' `init.defaultBranch`, che sul runner GitHub e' `master`:
+    # `git clone` del bare repo allora avvisa "remote HEAD refers to
+    # nonexistent ref" e **non fa il checkout di nessun branch**, e il
+    # successivo `git push origin main` fallisce con "src refspec main does
+    # not match any". Il test era verde solo in locale, dove
+    # `init.defaultBranch` e' `main` (Sessione 73, issue #224).
+    git init -q --bare -b main origin.git
     git init -q -b main work
     cd work || exit 1
     # NB: identita', gpgsign e autocrlf arrivano dalle env var esportate in

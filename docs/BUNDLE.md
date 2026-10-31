@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 17:09
+> Data: 2026-10-31 18:10
 > Totale file: 129
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 128 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1860.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 17:09
+- Dimensione totale: 1867.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 18:10
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -867,7 +867,7 @@ di tempo pareggio sul runner), ora è **9 job** di cui **8 girano in parallelo**
 
 | Job | Cosa contiene |
 |---|---|
-| `node` | `pnpm install` + `pnpm run verify` (= `turbo run lint typecheck test build`) |
+| `node` | `pnpm install` + i 4 task turbo (`lint`, `typecheck`, `test`, `build`), **sequenziali** |
 | `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) |
 | `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) |
 | `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) |
@@ -1091,7 +1091,7 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 *Ultimo aggiornamento: v1.31 — **le procedure automatiche sono state misurate e velocizzate** (Sessione 73, issue #224). La Sessione 72 aveva **misurato** le procedure automatiche (tempi reali, difetti, copertura CI) ma le aveva solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»: l'audit è stato quindi **chiuso con le correzioni**. Il dato di partenza è il tempo pareggio reale del job `quality` (unico, 18 step in sequenza): **172 s** (run `41212641314`, 2026-10-31). Il risultato: **~85-95 s**, con **nessun gate** rimosso, indebolito o reso non-bloccante. Aggiunti:
 - **§"🏎️ La CI: 9 job in parallelo"** (nuova): `ci.yml` passa da 1 job sequenziale a **9 job** (8 in parallelo + `quality` aggregatore). Il check `CI / quality` **conserva il nome** ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato — senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo. I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node)
-- **`package.json`**: nuovo script **`verify`** = `turbo run lint typecheck test build`. Le 4 invocazioni `turbo run` sequenziali (52,7 s misurati) diventano una sola costruzione del task graph (32,8 s); i 4 gate restano bloccanti perché turbo esce non-zero se uno solo fallisce
+- **`package.json`**: nuovo script **`verify`** = `turbo run lint && turbo run typecheck && turbo run test && turbo run build` (i 4 gate del CI in una sola invocazione locale). Le 4 invocazioni `turbo run` **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU, `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`. È la classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca (`docs/12-DEVOPS.md §9.14.7`)
 - **`docs/12-DEVOPS.md` §9.10** (riscritta): l'elenco autorevole dei **21 gate** riorganizzati per job, con bloccante/non-bloccante e issue di riferimento
 - **`docs/12-DEVOPS.md` §9.13** (nuova sezione *Chiusura dell'audit*): le **5 suite che la CI non esegueva** sono ora in CI, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (i contatori vivevano dentro subshell ⇒ «0 passati, 0 falliti» e uscita sempre 0; ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** e S5 che **mutava il working tree**, `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows)
 - **`docs/12-DEVOPS.md` §9.14** (nuova): il profilo delle procedure automatiche, il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = **9,5 s per repo** → ~50 ms), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica. Il costo più alto della sessione **non era nella logica**: era nel numero di processi figli
@@ -9267,7 +9267,7 @@ sequenza.
 | `test-post-merge.sh` | 52,4 s | 39,3 s | −25 % |
 | `pwsh scripts/aggregate-state.ps1 -Check` | 1,23 s | 0,91 s | −26 % |
 | `pwsh scripts/generate-bundle.ps1 -Check` | 1,37 s | 1,05 s | −23 % |
-| 4 task turbo sequenziali | 52,7 s | 32,8 s | −38 % |
+| 4 task turbo sequenziali | 52,7 s | 52,7 s | invariato — la forma parallela (32,8 s) **rompeva il gate**, vedi «Il parallelismo ha un costo» |
 | `auto-bundle` per merge che tocca `docs/state/` | 2 run (20 s + 22 s) | 1 run | −22 s di latenza |
 
 ## Decisioni
@@ -9277,11 +9277,12 @@ sequenza.
 | D.73.1 | La **CI passa da 1 job sequenziale a 9 job** (8 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
 | D.73.2 | `quality` conserva il **nome** del check ed è **fail-closed** | Senza il controllo esplicito sui risultati dei job dipendenti, `needs:` renderebbe `quality` *skipped* quando un job fallisce, e la branch protection può interpretare un check saltato come successo. Il nome invariato evita di dover cambiare la branch protection |
 | D.73.3 | I **5 job di gate non installano le dipendenze npm** | `scripts/validate-*.mjs` e `scripts/check-readme-facts.mjs` usano **solo i moduli built-in di node**; le suite bash usano `git` + `bash` + `pwsh`, tutti preinstallati sui runner GitHub. Installare npm in 5 job che non ne hanno bisogno era costo puro |
-| D.73.4 | `lint`/`typecheck`/`test`/`build` passano da **4 invocazioni turbo** a **1** (`pnpm run verify`) | 4 round-trip di turbo uno dietro l'altro: 52,7 s → 32,8 s. Turbo esce non-zero se uno solo dei 4 task fallisce ⇒ i 4 gate restano bloccanti |
+| D.73.4 | I 4 task turbo restano **sequenziali**; la forma parallela (`turbo run lint typecheck test build`, 32,8 s) è stata implementata e poi **revertita** | Sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`: è la classe del lesson 30-1, e la soglia di un test time-sensitive è un **acceptance criterion** |
 | D.73.5 | Le **5 suite** che la CI non eseguiva sono **aggiunte alla CI**, dopo aver corretto i loro difetti | La procedura più distruttiva del repo (`post-merge.ps1`: `git push origin --delete`, `git branch -D`) non aveva copertura. Il project owner ha chiesto di «controllare tutte le procedure automatiche»: controllare una procedura significa che la sua verifica gira |
 | D.73.6 | Il contatore degli assert delle suite in subshell passa su un **file di risultati condiviso** | I contatori in memoria di una subshell non arrivano al padre: `test-safe-branch-switch.sh` riportava «0 passati, 0 falliti» e usciva 0 **sempre** (lesson 43-1) |
 | D.73.7 | Il run di `auto-bundle` su `workflow_run` viene **saltato** se l'aggregator non ha prodotto un commit | Il secondo run serve solo se l'aggregator ha committato. Il controllo è esatto (`workflow_run.head_sha` vs `origin/main`), non prudenziale. Se l'aggregator è **fallito** si rigenera comunque |
-| D.73.8 | Il **typecheck duplicato**, il **doppio startup di vitest**, la **CI sui push del bot** e la **parallelizzazione interna delle suite** restano **fuori perimetro** | Sono modifiche alla *definizione* di un task o del *trigger* della CI: decisioni sul test strategy che spettano al project owner (D.71.4). Sono documentati con la misura in `12-DEVOPS.md §9.14.6` |
+| D.73.8 | Il **typecheck duplicato**, il **doppio startup di vitest**, la **CI sui push del bot** e la **parallelizzazione interna delle suite** restano **fuori perimetro** | Sono modifiche alla *definizione* di un task o del *trigger* della CI: decisioni sul test strategy che spettano al project owner (D.71.4). Sono documentati con la misura in `12-DEVOPS.md §9.14.9` |
+| D.73.9 | `git init` nelle suite dichiara **esplicitamente** il branch iniziale (`-b main`) | `init.defaultBranch` è una configurazione **di macchina**: la dev machine ha `main`, il runner GitHub ha `master`. Con `master`, `git clone` del bare repo non fa il checkout di nessun branch e `git push origin main` fallisce: il test era verde solo in locale |
 
 ## I tre difetti che la misura ha smascherato
 
@@ -9296,9 +9297,48 @@ sequenza.
    Windows: aggiunto un wrapper `gh.cmd`). In CI, **8 assert**.
 3. **`test-appendline-lf-fix.ps1` aveva S3 stale** (pretendeva che `aggregate-state.ps1` non
    contenesse `AppendLine`: ne ha 64, e sono la forma *corretta* del fix dell'issue #58) e **S5
-   mutava il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'aggregator). Ora S3
+   mutava il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'agregator). Ora S3
    verifica l'invariante reale («normalizza CRLF→LF in scrittura») e S5 gira su un **fixture
    temporaneo**. In CI.
+
+## Il parallelismo ha un costo: il gate che misura il tempo
+
+Una delle ottimizzazioni proposte — una **sola** invocazione `turbo run lint typecheck test build`
+invece di 4 sequenziali (52,7 s → 32,8 s) — è stata implementata, **pubblicata sulla PR**, e poi
+**revertita** perché sul runner **rompeva un gate**.
+
+Il runner GitHub ha **2 vCPU**. Con i 4 task in un'unica invocazione, turbo esegue `build`
+(`vite build` + `tsc`) **in concorrenza** con `test`, e il vitest riceve meno CPU: i 2 test di
+integrazione del fixture `db-seed/medium.json` (5000 eventi) sono scadati con «Test timed out in
+5000ms».
+
+È **esattamente** la classe del lesson 30-1: «il test di performance misurava il **carico del
+runner**, non il layer DB […] il test gira ora in una **run separata**, con la soglia dell'AC
+invariata». La soglia **non** si tocca: è un acceptance criterion.
+
+**Regola generale**: «parallelizzare» (a livello di **job**, dove i gate sono processi separati) e
+«aumentare il parallelismo interno di un gate» (a livello di **task runner**, che condivide il
+processore) sono due ottimizzazioni **indipendenti**, e la seconda può invalidare la prima quando
+un gate è **time-sensitive**.
+
+## Un test verde in locale non è un test verde ovunque
+
+`test-post-merge.sh` è fallito sul runner con «error: src refspec main does not match any» **solo
+su Linux**. La causa: la dev machine ha `init.defaultBranch = main` in
+`C:\Program Files\Git\etc\gitconfig`, il runner GitHub ha il default di git, `master`.
+
+La meccanica: `git init --bare` crea un bare repo con `HEAD → refs/heads/<init.defaultBranch>`;
+`git clone` di quel repo, se `HEAD` punta a un branch **inesistente**, avvisa «remote HEAD refers
+to nonexistent ref» e **non fa il checkout di nessun branch**; il successivo `git push origin main`
+fallisce.
+
+Correzione: **`git init -q --bare -b main`** in tutte e tre le suite che creano un bare repo
+(`test-post-merge.sh`, `test-issue-76-residue.sh`, `test-setup-worktree.sh`).
+`init.defaultBranch` è una configurazione **di macchina**, non del progetto.
+
+**Regola generale**: un test che crea repository git temporanei deve dichiarare **esplicitamente**
+il branch iniziale: la CI ha una configurazione git diversa da qualunque dev machine, e un test che
+passa in locale non è un test che passa ovunque.
 
 ## Il costo nascosto: i processi figli
 
@@ -9325,6 +9365,9 @@ di scansione regex).
 | 73-5 | **Il bundle rigenerava due volte per merge**: il secondo run (22 s) era pensato per l'ordinamento (issue #149) ma girava anche quando l'aggregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main`; se l'aggregator è fallito si rigenera comunque |
 | 73-6 | **La concatenazione con `+=` in PowerShell è O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione | `StringBuilder`; output byte-identico (SHA-256 verificato sullo stesso albero) |
 | 73-7 | **Le misure vanno fatte sulla macchina e sull'ambiente giusti**: il `bash` di default su questa macchina è lo stub WSL (`bash.exe` → «non è installata una distribuzione Linux»), non Git Bash | I benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`; i tempi misurati altrimenti non sono quelli del repo |
+| 73-8 | **Parallelizzare i job e parallelizzare i task interni sono due cose diverse**: i 4 task turbo in un'unica invocazione facevano scadere per timeout un test time-sensitive sul runner a 2 vCPU | I 4 task restano sequenziali; il parallelismo si Decide a livello di **job** (`docs/12-DEVOPS.md §9.14.7`) |
+| 73-9 | **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale | `git init -b main` esplicito in tutte le suite che creano repository (`docs/12-DEVOPS.md §9.14.8`) |
+| 73-10 | **La prima CI della PR vale come test**: la pipeline parallela ha rivelato in 90 secondi due difetti che 14 suite in locale non potevano mostrare (il timeout del test perf e il `git init` con branch implicito) | I due difetti sono corretti e riprodotti localmente simulando il runner (`init.defaultBranch=master`) |
 
 ## Documenti aggiornati
 
@@ -9332,14 +9375,15 @@ di scansione regex).
   skip del secondo run di `auto-bundle`, footer v1.31
 - `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (21 gate su 9 job), **§9.13** *Chiusura
   dell'audit*, **§9.14** (nuova) *Prestazioni delle procedure automatiche* — profilo, costo dei
-  processi figli, tabella dei risultati, equivalenza dimostrata, e ciò che non è stato fatto;
+  processi figli, tabella dei risultati, equivalenza dimostrata, il costo del parallelismo
+  (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che non è stato fatto (§9.14.9);
   changelog 1.5
 - `docs/17-DEV-NOTES.md` (v0.5 → **0.6**): **P13** (nuova) — il costo delle procedure automatiche
   è quasi sempre nei processi figli
 - `docs/18-DEV-LOG.md`: **§40**
 - `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`;
   `$files` += `scripts/safe-branch-switch.ps1` e `scripts/test-safe-branch-switch.sh`
-- `package.json`: nuovo script `verify`
+- `package.json`: nuovo script `verify` (`turbo run lint && turbo run typecheck && turbo run test && turbo run build`)
 
 ## Verifica
 
@@ -9351,8 +9395,11 @@ di scansione regex).
 - 14 suite di test locali → tutte exit 0 (37 + 12 + 9 + 29 + 8 + 11 + 8 + 5 assert sulle procedure,
   più le 6 suite sui workflow)
 - **Equivalenza dimostrata**: il bundle generato dal generatore nuovo e da quello vecchio sullo
-  stesso albero ha   **SHA-256 identico**; l'aggregator nuovo e quello vecchio producono output
+  stesso albero ha **SHA-256 identico**; l'aggregator nuovo e quello vecchio producono output
   identico a parità del campo mutabile (`Ultima aggregazione`)
+- **Riproduzione locale dei difetti del runner**: con `init.defaultBranch=master` (il default del
+  runner GitHub) le 3 suite che creano repository temporanei passano tutte e 3; senza il fix
+  `test-post-merge.sh` falliva con «src refspec main does not match any»
 
 ## Link utili
 
@@ -10960,7 +11007,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.27 | 2026-10-31 (issue #221) | **§39 Story 4.4 — DB IP→città** (Sessione 72, claim `kilo-HP-EliteBook-ydy5o2`, PR #222 merged `e661e37`): 6 entry (39-1 il database MMDB (DB-IP Lite City, CC BY 4.0) è scaricato on-demand in Cache Storage al primo uso, non embedded nel bundle né nel precache (D-B.2); 39-2 l'host di download `https://download.db-ip.com` è dichiarato in `connect-src` della CSP applicata e in `12-DEVOPS.md` §2.1 (lezione issue #196: CSP applicata e spec devono coincidere); 39-3 la derivazione L2 avviene in `NormalizationPipeline` prima dello scarto dell'IP, usando `raw.ip` mai inviato in rete; 39-4 `cityConfidence` con soglia 0.6 (D-B.3): sotto, la città viene scartata (E16); 39-5 il toggle `retainCity` è opt-in (default false): senza, città null (E21); 39-6 il reader MMDB legge solo `city.names.en` per IPv4, con guard bounds per evitare `RangeError` su buffer corti/malformati). Consegnati: `packages/core/src/geo/` (tipi, lookup MMDB, policy retainCity, deriveCity, isDbStale + 17 test), `packages/core/src/adapters/pipeline.ts` (geoLookup/geoPolicy opzionali), `apps/web/src/security/` (DBIP_HOST, connect-src, meta CSP index.html), `docs/12-DEVOPS.md` (§2.1 CSP include download.db-ip.com). 10 test CSP + 17 test geo verdi in CI. |
 | 2.26 | 2026-10-31 (issue #218) | **§38 Issue #218 — baseline PowerShell 7 (pwsh) per gli script del repo** (Sessione 71, claim `kilo-hp-elitebook-lrm6`, PR #219): 4 entry (38-1 la documentazione prescriveva ancora il toolchain di **Windows PowerShell 5.1** — il README avvertiva che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `AGENTS.md` usava `--check` in una dozzina di punti — mentre `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usava `shell: pwsh` da sempre: **nessun gate confronta la documentazione con l'ambiente reale**; 38-2 il footer v1.20 di `AGENTS.md` dichiarava «tutti i `pwsh scripts/* --check` convertiti a `-Check`» ma il corpo del file non l'aveva mai ricevuto: la normalizzazione è un problema di **copertura**, non di spot-check; 38-3 `aggregate-state.ps1 --strict` era indicato come comando da eseguire ma il parametro **non è dichiarato** (il guard lo rifiuta con exit 2): un flag documentato che non esiste è peggio di un flag assente, e nessun gate lo segnala; 38-4 la motivazione dei due gate `-Check` warning-only era attribuita alla differenza **PS 5.1 vs 7**, che non esiste più: la residua è **di piattaforma**). Consegnati: il baseline `pwsh` dichiarato in `README.md` (requisiti), `17-DEV-NOTES.md` v0.4 (nuovo **P11**), `12-DEVOPS.md` v1.3 (§9.1, §9.7b, §9.8, §9.10), `13-ADR/0008` (vincoli implementativi), `13-ADR/0006`, `docs/state/_index.md`, `11-BACKLOG.md`, `AGENTS.md` v1.29 (session start checklist a 6 check con F9) e il nuovo state file `docs/state/sessions/71-powershell-7-baseline.md`. **Fuori perimetro, dichiarato**: nessuna modifica al codice degli script e nessun cambio alla semantica dei gate in CI — promuoverli a bloccanti è una decisione sul test strategy e spetta al project owner. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding) |
 
-| 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **9 job** (8 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: job `quality` **172 s → ~85-95 s**; `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; 4 task turbo sequenziali 52,7 → 32,8 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). Consegnati: `ci.yml` (9 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
+| 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **9 job** (8 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: job `quality` **172 s → ~85-95 s**; `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). **Due correzioni nate dalla prima CI della PR** (che vale come test): 73-8 **parallelizzare i job e parallelizzare i task interni sono due cose diverse** — i 4 task turbo in un'unica invocazione (52,7 → 32,8 s) facevano scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` sul runner a 2 vCPU (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion) ⇒ i 4 task restano sequenziali; 73-9 **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale (`git clone` del bare repo senza branch esistente non fa il checkout di nessun branch ⇒ «src refspec main does not match any») ⇒ `git init -b main` esplicito in tutte e 3 le suite che creano repository temporanei, con riproduzione locale del difetto. Consegnati: `ci.yml` (9 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -24781,7 +24828,10 @@ protection può interpretare un check saltato come successo.
 | # | Job | Step / gate | Bloccante | Issue |
 |---|-----|-------------|:---------:|-------|
 | 1 | `node` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
-| 2 | `node` | `Lint, Typecheck, Test, Build` (`pnpm run verify` → `turbo run lint typecheck test build`) | sì | — |
+| 2 | `node` | `Lint` (`pnpm run lint`) | sì | — |
+| 3 | `node` | `Typecheck` (`pnpm run typecheck`) | sì | — |
+| 4 | `node` | `Test` (`pnpm run test`) | sì | — |
+| 5 | `node` | `Build` (`pnpm run build`) | sì | — |
 | 3 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
 | 4 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
 | 5 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
@@ -24999,7 +25049,7 @@ git init + 3 config: 261ms
 | `test-post-merge.sh` | 52,4 s | **39,3 s** | −25 % |
 | `pwsh scripts/aggregate-state.ps1 -Check` | 1,23 s | **0,91 s** | −26 % |
 | `pwsh scripts/generate-bundle.ps1 -Check` | 1,37 s | **1,05 s** | −23 % |
-| 4 task turbo sequenziali (`lint`+`typecheck`+`test`+`build`) | 52,7 s | **32,8 s** | −38 % |
+| 4 task turbo sequenziali (`lint`+`typecheck`+`test`+`build`) | 52,7 s | 52,7 s | invariato — la forma parallela (32,8 s) **rompeva il gate**, vedi §9.14.7 |
 | **Job `quality` di `ci.yml` (wall-clock)** | **172 s** | **~85-95 s** (8 job in parallelo) | **~−50 %** |
 | `auto-bundle` su merge che tocca `docs/state/` | 2 run (20 s + 22 s) | **1 run** (il secondo viene saltato) | −22 s di latenza post-merge |
 
@@ -25015,7 +25065,7 @@ git init + 3 config: 261ms
 | Suite: `git config` → env var (`GIT_AUTHOR_*`, `GIT_COMMITTER_*`, `GIT_CONFIG_COUNT/KEY_n/VALUE_n`) | Git >= 2.31 legge la config per-process dalle env var. Il `commit.gpgsign=false` resta garantito (era il motivo delle 3 chiamate a `git config`) |
 | Suite: `mkdir`/`touch` per file → `mkdir` per directory + `: > file` | Redirezione built-in: azzera il file senza processo. Stessi path, stessi stub vuoti |
 | `ci.yml`: 8 gate in parallelo + job `quality` aggregatore | Nessun gate rimosso, indebolito o reso non-bloccante. Il check `CI / quality` conserva il nome ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato (senza questo, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo) |
-| `ci.yml`: `pnpm run verify` = `turbo run lint typecheck test build` | Turbo esegue tutti e 4 i task e **esce non-zero se uno solo fallisce**: i 4 gate restano bloccanti. Una sola costruzione del task graph invece di 4 |
+| `ci.yml`: le 4 invocazioni `turbo run` restano **sequenziali** | Vedi §9.14.7: la forma parallela (`turbo run lint typecheck test build`, 32,8 s) **rompeva il gate**: sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere i 2 test di integrazione del fixture `db-seed/medium.json` per timeout. È la classe del lesson 30-1 |
 | `auto-bundle.yml`: il run su `workflow_run` viene saltato se l'aggregator non ha prodotto un commit | `workflow_run.head_sha` è il commit su cui l'agregator ha girato: se `origin/main` è diverso, l'aggregator ha pushato e il bundle va rigenerato; se è uguale, il run su `push` ha già rigenerato il bundle da quello stato. Se l'aggregator è **fallito**, si rigenera comunque (un fallimento può aver lasciato i blocchi a metà) |
 
 #### 9.14.5 I due difetti che la misura ha smascherato
@@ -25050,7 +25100,55 @@ rigenera il bundle **da solo**, quindi se l'aggregator non ha girato dopo l'ulti
 `docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'agregator e **poi** il generatore, e
 verifica **entrambi** i check. La sequenza è stabile (verificata su 3 cicli consecutivi).
 
-#### 9.14.7 Cosa NON è stato fatto (e perché)
+#### 9.14.7 Il parallelismo ha un costo: il gate che misura il tempo
+
+Una delle ottimizzazioni proposte — una **sola** invocazione `turbo run lint typecheck test build`
+invece di 4 sequenziali — **è stata implementata e poi revertita**, perché sul runner **rompeva un
+gate**.
+
+| Forma | Tempo (dev machine, cache disabilitato) | Esito sul runner |
+|---|---:|---|
+| 4 invocazioni `turbo run <task>` sequenziali | 52,7 s | verde (baseline) |
+| 1 invocazione `turbo run lint typecheck test build` | 32,8 s | **rosso** |
+
+Il runner GitHub ha **2 vCPU**: con i 4 task in un'unica invocazione, turbo esegue `build`
+(`vite build` + `tsc`) **in concorrenza** con `test`, e il vitest riceve meno CPU. I 2 test di
+integrazione del fixture `db-seed/medium.json` (5000 eventi, `packages/core/src/db/__tests__/db.test.ts`)
+sono scadati: «Test timed out in 5000ms».
+
+È **esattamente** la classe del lesson 30-1: «il test di performance misurava il **carico del
+runner**, non il layer DB: con tre file di test in più faceva superare la soglia locale, e la
+verifica decisiva fu togliere i file nuovi ⇒ il test gira ora in una **run separata**, con la
+soglia dell'AC invariata». La soglia **non** si tocca: è un acceptance criterion.
+
+**Regola generale**: «parallelizzare» e «aumentare il parallelismo interno di un gate» sono due
+ottimizzazioni **indipendenti**, e la seconda può invalidare la prima quando un gate è
+**time-sensitive**. Il parallelismo si Decide a livello di **job** (dove i gate sono processi
+separati e non condividono CPU), non dentro un singolo task runner che condivide il processore.
+
+**Alternativa scartata**: isolare `test` in un job separato (e tenere `build` in un altro) recupera
+~10 s ma duplica `pnpm install` e non vale la complessità.
+
+#### 9.14.8 Un test verde in locale non è un test verde ovunque
+
+`test-post-merge.sh` falliva sul runner con «error: src refspec main does not match any» **solo
+su Linux**, e solo perché la dev machine ha `init.defaultBranch = main` in
+`C:\Program Files\Git\etc\gitconfig` mentre il runner GitHub ha il default di git, `master`.
+
+La meccanica: `git init --bare` crea un bare repo con `HEAD → refs/heads/<init.defaultBranch>`;
+`git clone` di quel repo, se `HEAD` punta a un branch **inesistente**, avvisa «remote HEAD refers
+to nonexistent ref» e **non fa il checkout di nessun branch**; il successivo `git push origin main`
+fallisce con «src refspec main does not match any».
+
+Correzione: **`git init -q --bare -b main`** in tutte e tre le suite che creano un bare repo
+(`test-post-merge.sh`, `test-issue-76-residue.sh`, `test-setup-worktree.sh`). Il branch iniziale
+diventa **esplicito** e il test non dipende più dalla configurazione git della macchina.
+
+**Regola generale**: un test che crea repository git temporanei deve dichiarare **esplicitamente**
+il branch iniziale (`git init -b main`): `init.defaultBranch` è una configurazione **di macchina**,
+non del progetto, e la CI la ha diversa da qualunque dev machine.
+
+#### 9.14.9 Cosa NON è stato fatto (e perché)
 
 - **Typecheck duplicato**: `apps/web` esegue `tsc --noEmit` sia in `typecheck` sia in `build`
   (che lo precede). Si risolve togliendo il `tsc --noEmit` dallo script di `build`, ma è una
@@ -25087,7 +25185,7 @@ verifica **entrambi** i check. La sequenza è stabile (verificata su 3 cicli con
 | 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
 | 1.3 | Sessione 71 (2026-10-31) | **Baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1`. `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1: il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `§9.1` prescriveva «MAI `--check`», `§9.7b` descriveva il bug #104 come se fosse il caso normale e la motivazione dei due gate warning-only era attribuita alla differenza **PS 5.1 vs 7** invece che a quella **di piattaforma**. §9.1 riscritta: il doppio trattino in `pwsh` viene normalizzato sul singolo **prima** del binding, quindi `--check` e `-Check` sono equivalenti (verificato su pwsh 7.6.9); il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente. La forma canonica resta a **singolo trattino** (`-Check`), unica forma con comportamento identico su 5.1 e 7 e quella indicata dal guard fail-closed. §9.7b: il guard resta in piedi ma non scatta più nello scenario che l'ha motivato — protegge i flag davvero inesistenti e le invocazioni da shell 5.1. §9.10: la motivazione dei due step warning-only è riformulata — l'asse versione di PowerShell è chiuso, resta quello di piattaforma (dev Windows vs CI Linux). Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
 | 1.4 | Sessione 72 (2026-10-31) | **§9.12 Ambiente PowerShell locale** (nuova): provenienza dell'installazione verificata (`pwsh` **7.6.9**, pacchetto **MSIX/Store** `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, alias per-utente in `WindowsApps`, **nessun MSI** in `C:\Program Files\PowerShell\7` e nessuna voce di disinstallazione nel registro; pacchetto creato/aggiornato il 2026-10-26 09:38) con i comandi di verifica (`pwsh -NoProfile -c '$PSVersionTable.PSVersion'`, `winget list --id Microsoft.PowerShell`, `Get-AppxPackage Microsoft.PowerShell`). La sezione fissa anche il **confine**: `scripts/aggregate-state.ps1` è UTF-8 **senza BOM** e contiene 9 righe con caratteri non-ASCII ⇒ sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e `-Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in modalità scrittura il mojibake verrebbe scritto nei file globali; `generate-bundle.ps1` invece è immune (legge/scrive sempre con `-Encoding UTF8`). Il vincolo «ASCII-only nei `.ps1`» di `13-ADR/0008` viene corretto: riguarda il **parsing**, non solo la scrittura. Il fix dello script (rimuovere i letterali o aggiungere il BOM) è **decisione del project owner** (D.71.4) e non è applicato. **§9.13 Copertura CI delle suite di test locali** (nuova): 5 suite presenti in `scripts/` **non** eseguite da `ci.yml` (`test-post-merge.sh`, `test-setup-worktree.sh`, `test-safe-branch-switch.sh`, `test-pre-commit-clean-check.sh`, `test-appendline-lf-fix.ps1`), con tempi misurati e difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ "0 passati, 0 falliti" e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 **stale** (64 `AppendLine` sono il fix corrente, non una regressione) e S5 **muta il working tree**, `test-setup-worktree.sh` fallisce su Windows/Git Bash (mock `gh` non intercettato + path POSIX). I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili. Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
-| 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **9 job** di cui 8 in parallelo (`node`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint typecheck test build`): 4 invocazioni turbo sequenziali (52,7 s) → 1 sola costruzione del task graph (32,8 s). **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **job `quality` 172 s → ~85-95 s**), l'equivalenza dimostrata di ogni modifica e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
+| 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **9 job** di cui 8 in parallelo (`node`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **job `quality` 172 s → ~85-95 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
 
 
 ===== FILE: docs/13-ADR/0001-pwa-first.md =====
@@ -30700,7 +30798,9 @@ make_mock_env() {
     git commit --quiet -m "initial commit"
   # Bare remote per il push
   local remote_dir="$tmpdir/remote.git"
-  git init --quiet --bare "$remote_dir"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init --quiet --bare -b main "$remote_dir"
   git remote add origin "$remote_dir"
   git push --quiet -u origin main
 
@@ -31595,7 +31695,14 @@ make_repo() {
   mkdir -p "$d"
   (
     cd "$d" || exit 1
-    git init -q --bare origin.git
+    # `-b main`: il branch iniziale del bare repo e' esplicito. Senza, il
+    # default e' `init.defaultBranch`, che sul runner GitHub e' `master`:
+    # `git clone` del bare repo allora avvisa "remote HEAD refers to
+    # nonexistent ref" e **non fa il checkout di nessun branch**, e il
+    # successivo `git push origin main` fallisce con "src refspec main does
+    # not match any". Il test era verde solo in locale, dove
+    # `init.defaultBranch` e' `main` (Sessione 73, issue #224).
+    git init -q --bare -b main origin.git
     git init -q -b main work
     cd work || exit 1
     # NB: identita', gpgsign e autocrlf arrivano dalle env var esportate in
@@ -32098,7 +32205,9 @@ export GIT_CONFIG_VALUE_1="false"
 make_repo() {
   local d="$1"
   mkdir -p "$d/origin.git"
-  git init -q --bare "$d/origin.git"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init -q --bare -b main "$d/origin.git"
   git init -q -b main "$d/work"
   (
     cd "$d/work" || exit 1
@@ -35347,10 +35456,30 @@ jobs:
       # 4 round-trip di turbo uno dietro l'altro. Una singola invocazione con
       # i 4 task lascia turbo costruire il task graph una volta sola e li
       # eseguire in parallelo dove il grafo lo consente: 32,8 s misurati
-      # (-20 s, -38%). I quattro gate restano tutti eseguiti e tutti
-      # bloccanti: turbo esce non-zero se uno solo fallisce.
-      - name: Lint, Typecheck, Test, Build
-        run: pnpm run verify
+      # (-20 s, -38%).
+      #
+      # **MA** la forma parallela si e' rivelata sbagliata sul runner: il
+      # runner GitHub ha 2 vCPU, e `build` (vite build + tsc) in concorrenza
+      # con `test` ruba CPU al vitest: i 2 test di integrazione del fixture
+      # `db-seed/medium.json` (5000 eventi) sono scaduti per timeout
+      # ("Test timed out in 5000ms"). E' la stessa classe del lesson 30-1
+      # (il test di performance misurava il carico del runner, non il layer
+      # DB): la soglia dell'AC presuppone che il test giri isolato, e la
+      # soglia **non** si tocca.
+      #
+      # Quindi: `test` resta **isolato**, e gli altri tre task tornano
+      # sequenziali come prima. I 4 gate restano 4 e tutti bloccanti.
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
 
   # ---------------------------------------------------------------------------
   # 2. Gate sui generatori di documentazione e sul README.

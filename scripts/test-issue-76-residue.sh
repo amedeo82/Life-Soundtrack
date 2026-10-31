@@ -57,7 +57,9 @@ export GIT_CONFIG_VALUE_1="false"
 make_repo() {
   local d="$1"
   mkdir -p "$d/origin.git"
-  git init -q --bare "$d/origin.git"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init -q --bare -b main "$d/origin.git"
   git init -q -b main "$d/work"
   (
     cd "$d/work" || exit 1
