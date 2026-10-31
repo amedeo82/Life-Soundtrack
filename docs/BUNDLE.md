@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 19:27
+> Data: 2026-10-31 19:40
 > Totale file: 130
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 129 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1902.9 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 19:27
+- Dimensione totale: 1907.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 19:40
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -870,14 +870,21 @@ runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il 
 | `node-lint-typecheck` | `pnpm install` + `lint` + `typecheck` | solo `pull_request` |
 | `node-test` | `pnpm install` + `test` (**isolato**: nessun altro task CPU-bound condivide il processore) | solo `pull_request` |
 | `node-build` | `pnpm install` + `build` | solo `pull_request` |
-| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | sempre |
-| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | sempre |
-| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | sempre |
-| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | sempre |
-| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | sempre |
-| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | sempre |
-| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | sempre |
-| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | sempre |
+| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | **sempre** |
+| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | **sempre** |
+| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | solo `pull_request` |
+| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | solo `pull_request` |
+| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | solo `pull_request` |
+| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | solo `pull_request` |
+| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | solo `pull_request` |
+| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | **sempre** |
+
+**Su `push` su `main` girano solo i 2 gate leggeri** (`gates-docs` + `gates-workflows`, ~15 s):
+i 3 job `node-*` verificano il codice e i 5 gate che verificano gli **script**, che su `main` non
+sono cambiati rispetto a quanto già validato dalla PR. La PR ha eseguito quegli stessi gate sullo
+stesso contenuto: rieseguirli lì è lavoro sprecato. Misurato sul merge di PR #227: la run su `main`
+era **42-66 s** con tutti i gate in parallelo; con i 5 gate passati a `pull_request` scende a
+**~15 s** (il percorso critico diventa `gates-docs`, 11 s, più `quality`, 3 s).
 
 **Perché la pipeline non gira più 4 volte per ogni cambiamento logico** (Sessione 74). Il ciclo era:
 
@@ -900,10 +907,11 @@ Le tre ripetizioni erano tutte riconducibili a due cause:
    conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è
    **fail-safe**: se il detector fallisce, i gate girano comunque.
 
-Su `push` su `main` girano **solo i job leggeri** (misurato sul merge di PR #227: **42 s**, con i 3
-job `node-*` **skipped** a 0 s, contro i 172 s della pipeline sequenziale originale): i 3 job
+Su `push` su `main` girano **solo i job leggeri** (misurato sul merge di PR #227: **42 s** con tutti
+i gate in parallelo; con i 5 gate degli script passati a `pull_request`: **~15 s**): i 3 job
 `node-*` sono condizionati a `github.event_name == 'pull_request'` perché su `main` il codice non
-è cambiato rispetto a quanto già validato dalla PR.
+è cambiato rispetto a quanto già validato dalla PR, e lo stesso vale per i 5 gate che verificano
+gli script.
 
 > ⚠️ **I commit dei writer automatici non attivano la CI, e non è colpa del filtro.** GitHub non
 > crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository (comportamento
@@ -9573,6 +9581,25 @@ per il regex JavaScript. Ora le righe sono normalizzate una volta sola.
 | 74-4 | **Un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex e non avrebbe intercettato un YAML rotto | Controllo di validità YAML + normalizzazione CRLF, con test di regressione |
 | 74-5 | **Il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern con `$` smettono di matchiare | Normalizzare il fine-riga una volta sola, prima di qualsiasi controllo |
 
+## Follow-up: i 5 gate che verificano gli script passano a `pull_request` only
+
+Misurato sul merge di PR #227: la run `CI` su `main` era **42-66 s**, e il percorso critico era
+`gates-aggregate` (**50 s**), un gate che su `main` **non è nemmeno richiesto** da `quality` (su
+push `quality` esige solo `gates-docs` + `gates-workflows`).
+
+I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`,
+`gates-scripts`, `gates-procedure`) sono passati a `pull_request` only: su `main` quegli script non
+sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sul
+lo stesso contenuto**. Rieseguirli lì era lavoro sprecato — 27 s di tempo di runner sprecati per
+ogni merge.
+
+Su `push` su `main` restano quindi **2 gate leggeri** (`gates-docs` + `gates-workflows`, ~11 s e
+~7 s in parallelo) più l'aggregatore `quality` (~3 s): **~15 s** di tempo pareggio, contro i
+42-66 s precedenti e i **172 s** della pipeline sequenziale originale.
+
+Nessuna perdita di copertura: i 27 gate restano 27, e ognuno gira dove serve — sulla PR che
+modifica il codice o gli script.
+
 ## Il merge di PR #227 e la verifica sul runner
 
 Dopo il merge (2026-10-31T18:22:26Z, commit `51f4076`) la run `CI` su `main` è durata **42 s** con
@@ -9580,7 +9607,6 @@ i 3 job `node-*` **skipped** (0 s, nessuna installazione di dipendenze) e gli 11
 contro i **172 s** della pipeline sequenziale originale.
 
 ### ⚠️ Correzione a una premessa di questa sessione
-
 Questa sessione aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei
 **writer automatici** fossero «gli unici che arrivano su `main` senza essere mai passati da una PR»
 e che il filtro li catturasse. La premessa è corretta, **la conseguenza pratica no**: quei commit
@@ -10064,7 +10090,7 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 
 > Status: 🟡 DRAFT
 > Versione: 2.29
-> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge + correzione: i commit dei writer non attivano la CI (GITHUB_TOKEN) (Sessione 74)
+> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge (+ follow-up: i 5 gate degli script passano a pull_request only) e correzione: i commit dei writer non attivano la CI (GITHUB_TOKEN) (Sessione 74)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -11239,6 +11265,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
 | 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
 | 2.29b | 2026-10-31 (issue #224) | **§41 (correzione) La CI girava 4 volte per ogni merge — e una premessa da correggere** (Sessione 74, merge di PR #227, commit `51f4076`): la run `CI` su `main` dopo il merge è durata **42 s** con i 3 job `node-*` **skipped** (0 s, nessuna installazione) e gli 11 gate verdi, contro i **172 s** della pipeline sequenziale originale. **Correzione**: la Sessione 74 aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei **writer automatici** fossero «gli unici che arrivano su `main` senza passare da una PR» e che il filtro li catturasse — la premessa è corretta, **la conseguenza pratica no**: quei commit **non attivano nessuna run**, e non è colpa del filtro. **GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (comportamento documentato, per impedire i loop ricorsivi; unica eccezione `workflow_dispatch`/`repository_dispatch`), e i due writer pushano con `secrets.GITHUB_TOKEN` (`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`). Verificato run per run sull'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`, `04c76fd`) **non** hanno **mai** attivato una run `CI` — né prima né dopo la Sessione 74, nemmeno col trigger `push` privo di filtro; gli unici workflow che si attivano su quei commit sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce (è il workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer, issue #149). **Conseguenze**: il filtro per path serve a **saltare** la CI sui merge umani che non toccano i 5 file aggregati, non a catturare i commit dei writer; **l'integrità di `main` dopo i writer è garantita dai writer stessi** (idempotenti, conservati da `git diff --quiet`, col `workflow_run` di `auto-bundle` che rigenera il bundle dopo l'aggregator); un check indipendente sullo stato finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml` ⇒ **+1 run leggera per merge**, trade-off fra copertura e numero di run che spetta al project owner (**non è stato fatto**). **Lesson**: una premessa corretta può avere una conseguenza pratica falsa — la verifica va fatta **sui dati**, non per deduzione |
+| 2.29c | 2026-10-31 (issue #224) | **§41 (follow-up) I 5 gate che verificano gli script passano a `pull_request` only** (Sessione 74, su richiesta del project owner): misurato sul merge di PR #227, la run `CI` su `main` era **42-66 s** e il percorso critico era `gates-aggregate` (**50 s**) — un gate che su `main` **non è nemmeno richiesto** da `quality`, che su push esige solo `gates-docs` + `gates-workflows`. I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`, `gates-scripts`, `gates-procedure`) passano a `pull_request` only: su `main` quegli script non sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sullo stesso contenuto** ⇒ 27 s di tempo di runner sprecati per ogni merge. Su `push` su `main` restano **2 gate leggeri** (`gates-docs` ~11 s, `gates-workflows` ~7 s) più l'aggregatore `quality` (~3 s) ⇒ **~15 s** di tempo pareggio, contro i 42-66 s precedenti e i **172 s** della pipeline sequenziale originale. **Nessuna perdita di copertura**: i 27 gate restano 27 e ognuno gira dove serve (sulla PR che modifica il codice o gli script); `quality` su push continua a richiedere solo i 2 gate leggeri, su pull_request tutti. Documentazione: `12-DEVOPS.md` §9.10 (nuova colonna «Quando gira» per job), `AGENTS.md` (tabella della CI aggiornata) |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -25060,35 +25087,35 @@ protection deve richiedere. Senza il controllo esplicito, `needs:` renderebbe
 `quality` *skipped* (non *failed*) quando un job dipendente fallisce, e la branch
 protection può interpretare un check saltato come successo.
 
-| # | Job | Step / gate | Bloccante | Issue |
-|---|-----|-------------|:---------:|-------|
-| 1 | `node-lint-typecheck` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
-| 2 | `node-lint-typecheck` | `Lint` (`pnpm run lint`) | sì | — |
-| 3 | `node-lint-typecheck` | `Typecheck` (`pnpm run typecheck`) | sì | — |
-| 4 | `node-test` | `Installa dipendenze` | sì | Story 0.1 |
-| 5 | `node-test` | `Test` (`pnpm run test`) | sì | — |
-| 6 | `node-build` | `Installa dipendenze` | sì | Story 0.1 |
-| 7 | `node-build` | `Build` (`pnpm run build`) | sì | — |
-| 8 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
-| 9 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
-| 10 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
-| 11 | `gates-docs` | `Gate "fatti del README" fail-closed` | sì | **#161** |
-| 12 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | sì | #70 |
-| 13 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | sì | #104 |
-| 14 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
-| 15 | `gates-workflows` | `Copertura git add vs $targets` | sì | #136 |
-| 16 | `gates-workflows` | `Scope permissions: valide` | sì | **#135** |
-| 17 | `gates-workflows` | `Sync origin/main prima del push su main` | sì | **#140** |
-| 18 | `gates-workflows` | `Ordinamento dei writer di main` | sì | **#149** |
-| 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | sì | #76 |
-| 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | sì | #110 |
-| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | sì | sessione 33 |
-| 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | sì | #53 |
-| 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
-| 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
-| 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
-| 26 | `gates-workflows` | `Validità YAML dei workflow` (`test-workflow-yaml-scalars.sh`, 8 assert) | sì | sessione 74 |
-| 27 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
+| # | Job | Step / gate | Quando gira | Bloccante | Issue |
+|---|-----|-------------|:-----------:|:---------:|-------
+| 1 | `node-lint-typecheck` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | solo PR | sì | Story 0.1 |
+| 2 | `node-lint-typecheck` | `Lint` (`pnpm run lint`) | solo PR | sì | — |
+| 3 | `node-lint-typecheck` | `Typecheck` (`pnpm run typecheck`) | solo PR | sì | — |
+| 4 | `node-test` | `Installa dipendenze` | solo PR | sì | Story 0.1 |
+| 5 | `node-test` | `Test` (`pnpm run test`) | solo PR | sì | — |
+| 6 | `node-build` | `Installa dipendenze` | solo PR | sì | Story 0.1 |
+| 7 | `node-build` | `Build` (`pnpm run build`) | solo PR | sì | — |
+| 8 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | solo PR | **no** (`::warning::`) | #63 |
+| 9 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | solo PR | **no** (`::warning::`) | #63, #66 |
+| 10 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | solo PR | sì | **#161** |
+| 11 | `gates-docs` | `Gate "fatti del README" fail-closed` | solo PR | sì | **#161** |
+| 12 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | solo PR | sì | #70 |
+| 13 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | solo PR | sì | #104 |
+| 14 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | solo PR | sì | #73 |
+| 15 | `gates-workflows` | `Copertura git add vs $targets` | solo PR | sì | #136 |
+| 16 | `gates-workflows` | `Scope permissions: valide` | solo PR | sì | **#135** |
+| 17 | `gates-workflows` | `Sync origin/main prima del push su main` | solo PR | sì | **#140** |
+| 18 | `gates-workflows` | `Ordinamento dei writer di main` | solo PR | sì | **#149** |
+| 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | solo PR | sì | #76 |
+| 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | solo PR | sì | #110 |
+| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | solo PR | sì | sessione 33 |
+| 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | solo PR | sì | #53 |
+| 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | solo PR | sì | sessione 23 |
+| 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | solo PR | sì | #49 |
+| 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | solo PR | sì | #58 |
+| 26 | `gates-workflows` | `Validità YAML dei workflow` (`test-workflow-yaml-scalars.sh`, 8 assert) | solo PR | sì | sessione 74 |
+| 27 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
 
 I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check
 `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono
@@ -36321,6 +36348,12 @@ jobs:
   #    Il gate piu' pesante: 37 assert su repo git temporanei.
   # ---------------------------------------------------------------------------
   gates-aggregate:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36341,6 +36374,12 @@ jobs:
   # 4. Gate fail-closed dei flag del generatore del bundle (issue #104).
   # ---------------------------------------------------------------------------
   gates-bundle:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36434,6 +36473,12 @@ jobs:
   # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
   # ---------------------------------------------------------------------------
   gates-git:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
     # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
@@ -36482,6 +36527,12 @@ jobs:
   # git temporanei e non tocca il repository.
   # ---------------------------------------------------------------------------
   gates-scripts:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36500,6 +36551,12 @@ jobs:
   #    encoding LF. Anch'essi erano privi di copertura in CI (audit §9.13).
   # ---------------------------------------------------------------------------
   gates-procedure:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36539,10 +36596,13 @@ jobs:
   # puo' interpretare un check saltato come successo.
   #
   # Su `pull_request` si esigono TUTTI i job. Su `push` su `main` (che scatta
-  # solo per i file dei writer automatici) si esigono i job **leggeri**: i 3
-  # job `node-*` sono saltati perche' su `main` il codice non e' cambiato
-  # rispetto a quanto gia' validato dalla PR, e il loro 'skipped' e' atteso
-  # — non un errore. I job di gate, invece, girano e devono essere verdi.
+  # solo per i file dei writer automatici) si esigono i job **leggeri**
+  # (`gates-docs` + `gates-workflows`): i 3 job `node-*` sono saltati perche' su
+  # `main` il codice non e' cambiato rispetto a quanto gia' validato dalla PR, e
+  # i 5 gate che verificano gli SCRIPT (`gates-aggregate`, `gates-bundle`,
+  # `gates-git`, `gates-scripts`, `gates-procedure`) sono saltati perche' quegli
+  # script non sono cambiati e la PR ha gia' eseguito quegli stessi gate sullo
+  # stesso contenuto. Il loro 'skipped' e' atteso, non un errore.
   # ---------------------------------------------------------------------------
   quality:
     if: always()

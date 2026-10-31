@@ -121,6 +121,25 @@ per il regex JavaScript. Ora le righe sono normalizzate una volta sola.
 | 74-4 | **Un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex e non avrebbe intercettato un YAML rotto | Controllo di validità YAML + normalizzazione CRLF, con test di regressione |
 | 74-5 | **Il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern con `$` smettono di matchiare | Normalizzare il fine-riga una volta sola, prima di qualsiasi controllo |
 
+## Follow-up: i 5 gate che verificano gli script passano a `pull_request` only
+
+Misurato sul merge di PR #227: la run `CI` su `main` era **42-66 s**, e il percorso critico era
+`gates-aggregate` (**50 s**), un gate che su `main` **non è nemmeno richiesto** da `quality` (su
+push `quality` esige solo `gates-docs` + `gates-workflows`).
+
+I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`,
+`gates-scripts`, `gates-procedure`) sono passati a `pull_request` only: su `main` quegli script non
+sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sul
+lo stesso contenuto**. Rieseguirli lì era lavoro sprecato — 27 s di tempo di runner sprecati per
+ogni merge.
+
+Su `push` su `main` restano quindi **2 gate leggeri** (`gates-docs` + `gates-workflows`, ~11 s e
+~7 s in parallelo) più l'aggregatore `quality` (~3 s): **~15 s** di tempo pareggio, contro i
+42-66 s precedenti e i **172 s** della pipeline sequenziale originale.
+
+Nessuna perdita di copertura: i 27 gate restano 27, e ognuno gira dove serve — sulla PR che
+modifica il codice o gli script.
+
 ## Il merge di PR #227 e la verifica sul runner
 
 Dopo il merge (2026-10-31T18:22:26Z, commit `51f4076`) la run `CI` su `main` è durata **42 s** con
@@ -128,7 +147,6 @@ i 3 job `node-*` **skipped** (0 s, nessuna installazione di dipendenze) e gli 11
 contro i **172 s** della pipeline sequenziale originale.
 
 ### ⚠️ Correzione a una premessa di questa sessione
-
 Questa sessione aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei
 **writer automatici** fossero «gli unici che arrivano su `main` senza essere mai passati da una PR»
 e che il filtro li catturasse. La premessa è corretta, **la conseguenza pratica no**: quei commit

@@ -839,14 +839,21 @@ runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il 
 | `node-lint-typecheck` | `pnpm install` + `lint` + `typecheck` | solo `pull_request` |
 | `node-test` | `pnpm install` + `test` (**isolato**: nessun altro task CPU-bound condivide il processore) | solo `pull_request` |
 | `node-build` | `pnpm install` + `build` | solo `pull_request` |
-| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | sempre |
-| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | sempre |
-| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | sempre |
-| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | sempre |
-| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | sempre |
-| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | sempre |
-| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | sempre |
-| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | sempre |
+| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | **sempre** |
+| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | **sempre** |
+| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | solo `pull_request` |
+| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | solo `pull_request` |
+| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | solo `pull_request` |
+| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | solo `pull_request` |
+| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | solo `pull_request` |
+| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | **sempre** |
+
+**Su `push` su `main` girano solo i 2 gate leggeri** (`gates-docs` + `gates-workflows`, ~15 s):
+i 3 job `node-*` verificano il codice e i 5 gate che verificano gli **script**, che su `main` non
+sono cambiati rispetto a quanto già validato dalla PR. La PR ha eseguito quegli stessi gate sullo
+stesso contenuto: rieseguirli lì è lavoro sprecato. Misurato sul merge di PR #227: la run su `main`
+era **42-66 s** con tutti i gate in parallelo; con i 5 gate passati a `pull_request` scende a
+**~15 s** (il percorso critico diventa `gates-docs`, 11 s, più `quality`, 3 s).
 
 **Perché la pipeline non gira più 4 volte per ogni cambiamento logico** (Sessione 74). Il ciclo era:
 
@@ -869,10 +876,11 @@ Le tre ripetizioni erano tutte riconducibili a due cause:
    conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è
    **fail-safe**: se il detector fallisce, i gate girano comunque.
 
-Su `push` su `main` girano **solo i job leggeri** (misurato sul merge di PR #227: **42 s**, con i 3
-job `node-*` **skipped** a 0 s, contro i 172 s della pipeline sequenziale originale): i 3 job
+Su `push` su `main` girano **solo i job leggeri** (misurato sul merge di PR #227: **42 s** con tutti
+i gate in parallelo; con i 5 gate degli script passati a `pull_request`: **~15 s**): i 3 job
 `node-*` sono condizionati a `github.event_name == 'pull_request'` perché su `main` il codice non
-è cambiato rispetto a quanto già validato dalla PR.
+è cambiato rispetto a quanto già validato dalla PR, e lo stesso vale per i 5 gate che verificano
+gli script.
 
 > ⚠️ **I commit dei writer automatici non attivano la CI, e non è colpa del filtro.** GitHub non
 > crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository (comportamento

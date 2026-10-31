@@ -287,6 +287,12 @@ jobs:
   #    Il gate piu' pesante: 37 assert su repo git temporanei.
   # ---------------------------------------------------------------------------
   gates-aggregate:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -307,6 +313,12 @@ jobs:
   # 4. Gate fail-closed dei flag del generatore del bundle (issue #104).
   # ---------------------------------------------------------------------------
   gates-bundle:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -400,6 +412,12 @@ jobs:
   # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
   # ---------------------------------------------------------------------------
   gates-git:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
     # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
@@ -448,6 +466,12 @@ jobs:
   # git temporanei e non tocca il repository.
   # ---------------------------------------------------------------------------
   gates-scripts:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -466,6 +490,12 @@ jobs:
   #    encoding LF. Anch'essi erano privi di copertura in CI (audit §9.13).
   # ---------------------------------------------------------------------------
   gates-procedure:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -505,10 +535,13 @@ jobs:
   # puo' interpretare un check saltato come successo.
   #
   # Su `pull_request` si esigono TUTTI i job. Su `push` su `main` (che scatta
-  # solo per i file dei writer automatici) si esigono i job **leggeri**: i 3
-  # job `node-*` sono saltati perche' su `main` il codice non e' cambiato
-  # rispetto a quanto gia' validato dalla PR, e il loro 'skipped' e' atteso
-  # — non un errore. I job di gate, invece, girano e devono essere verdi.
+  # solo per i file dei writer automatici) si esigono i job **leggeri**
+  # (`gates-docs` + `gates-workflows`): i 3 job `node-*` sono saltati perche' su
+  # `main` il codice non e' cambiato rispetto a quanto gia' validato dalla PR, e
+  # i 5 gate che verificano gli SCRIPT (`gates-aggregate`, `gates-bundle`,
+  # `gates-git`, `gates-scripts`, `gates-procedure`) sono saltati perche' quegli
+  # script non sono cambiati e la PR ha gia' eseguito quegli stessi gate sullo
+  # stesso contenuto. Il loro 'skipped' e' atteso, non un errore.
   # ---------------------------------------------------------------------------
   quality:
     if: always()
