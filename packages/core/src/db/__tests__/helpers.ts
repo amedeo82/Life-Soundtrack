@@ -44,6 +44,9 @@ export function makeListen(overrides: Partial<ListenEvent> = {}): ListenEvent {
     deviceDetail: null,
     ip: null,
     country: 'IT',
+    city: null,
+    citySource: null,
+    cityConfidence: null,
     day: '2024-03-15',
     ...overrides,
   };

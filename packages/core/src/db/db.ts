@@ -5,6 +5,7 @@ import type {
   Album,
   Artist,
   AudioFeatures,
+  ContextPeriod,
   ImportRecord,
   Insight,
   LibraryItem,
@@ -88,6 +89,19 @@ export const DB_SCHEMA_V5: Record<string, string> = {
 };
 
 /**
+ * Schema Dexie versione 6 — 02-DATA-SCHEMA.md §6.3 (Story 1.6).
+ * Aggiunge `contexts`: i **periodi di contesto** derivati (19-GEO-CONTEXT.md
+ * §4.3). La tabella è derivata (MIG-2): ricostruibile con `recompute()` a
+ * partire dagli ascolti, quindi nessun dato può perdersi con un drop.
+ * Migrazione non distruttiva (MIG-1): nessuna tabella esistente viene
+ * modificata e nessun dato viene perso; la tabella nasce vuota.
+ */
+export const DB_SCHEMA_V6: Record<string, string> = {
+  ...DB_SCHEMA_V5,
+  contexts: '&id, kind, startTime, endTime, derivedVersion, status',
+};
+
+/**
  * Database locale Life-Soundtrack (IndexedDB via Dexie 4).
  *
  * Le tabelle con `&x` usano x come chiave primaria unica (02§6): in particolare
@@ -112,6 +126,8 @@ export class LifeSoundtrackDB extends Dexie {
   settings!: EntityTable<AppSetting, 'key'>;
   /** Coda di invio degli scrobble (Story 1.5): PK `hub|eventKey`. */
   scrobbleOutbox!: EntityTable<ScrobbleOutboxRow, 'idempotencyKey'>;
+  /** Periodi di contesto derivati (Story 1.6): ricostruibili con `recompute()`. */
+  contexts!: EntityTable<ContextPeriod, 'id'>;
 
   constructor(name: string = DB_NAME) {
     super(name);
@@ -132,6 +148,23 @@ export class LifeSoundtrackDB extends Dexie {
     });
     this.version(4).stores(DB_SCHEMA_V4);
     this.version(5).stores(DB_SCHEMA_V5);
+    // v6 (Story 1.6): tabella `contexts` + i tre campi di città su `listens`.
+    // L'upgrade azzera i campi città sugli ascolti esistenti (`null` = dato
+    // assente): la città è una **derivazione** (L2) che nasce solo con il
+    // database geo on-demand (Story 4.4), quindi sugli ascolti già
+    // persistiti non può essere nota. Migrazione non distruttiva (MIG-1):
+    // nessuna riga viene cancellata e nessun dato preesistente viene perso.
+    this.version(6)
+      .stores(DB_SCHEMA_V6)
+      .upgrade((tx) => {
+        tx.table('listens')
+          .toCollection()
+          .modify((listen) => {
+            listen.city = listen.city ?? null;
+            listen.citySource = listen.citySource ?? null;
+            listen.cityConfidence = listen.cityConfidence ?? null;
+          });
+      });
   }
 }
 

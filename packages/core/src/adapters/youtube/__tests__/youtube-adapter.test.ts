@@ -14,8 +14,13 @@ const FIXTURE_PATH = fileURLToPath(
   new URL('../../../../../../fixtures/synthetic-history/youtube-sample.json', import.meta.url),
 );
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -49,7 +54,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
 
   it('caso 1 (happy path): 9 eventi con semantica D2/E.YT.5, eventKey stabile, day UTC', async () => {
     const summary = await runImport(db, new YouTubeMusicAdapter(), fixtureBlob(), {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       fileName: 'watch-history.json',
     });
 
@@ -116,7 +121,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
   });
 
   it('caso 10 (§8): DEDUP — stesso brano con videoId diversi → una Track, 2 ascolti', async () => {
-    await runImport(db, new YouTubeMusicAdapter(), fixtureBlob(), { privacy: PRIVACY_OFF });
+    await runImport(db, new YouTubeMusicAdapter(), fixtureBlob(), { privacy: PRIVACY_DEFAULTS });
     const sinfonia = await db.tracks.filter((t) => t.name === 'Sinfonia Della Vita').toArray();
     expect(sinfonia).toHaveLength(1);
     expect(await db.listens.where('trackId').equals(sinfonia[0]!.id).count()).toBe(2);
@@ -133,8 +138,8 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
 
   it('caso 2 (§8): re-import dello stesso file è idempotente (eventKey §3.1)', async () => {
     const adapter = new YouTubeMusicAdapter();
-    const first = await runImport(db, adapter, fixtureBlob(), { privacy: PRIVACY_OFF });
-    const second = await runImport(db, adapter, fixtureBlob(), { privacy: PRIVACY_OFF });
+    const first = await runImport(db, adapter, fixtureBlob(), { privacy: PRIVACY_DEFAULTS });
+    const second = await runImport(db, adapter, fixtureBlob(), { privacy: PRIVACY_DEFAULTS });
 
     expect(first.eventsInserted).toBe(9);
     expect(second.eventsInserted).toBe(0);
@@ -147,7 +152,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
 
   it('caso 7 (§8): E.YT.6 — stesso evento in due export → un solo ListenEvent', async () => {
     const adapter = new YouTubeMusicAdapter();
-    await runImport(db, adapter, fixtureBlob(), { privacy: PRIVACY_OFF });
+    await runImport(db, adapter, fixtureBlob(), { privacy: PRIVACY_DEFAULTS });
     const duplicate = {
       header: 'YouTube Music',
       title: 'Watched Never Gonna Give You Up',
@@ -161,7 +166,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
       db,
       adapter,
       new Blob([new TextEncoder().encode(JSON.stringify([duplicate])) as unknown as ArrayBuffer]),
-      { privacy: PRIVACY_OFF },
+      { privacy: PRIVACY_DEFAULTS },
     );
     expect(second.eventsParsed).toBe(1);
     expect(second.eventsInserted).toBe(0);
@@ -173,7 +178,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
     const html = new Blob(['<!DOCTYPE html><html><body>Watch history</body></html>']);
     expect(await new YouTubeMusicAdapter().detect(html)).toBe(false);
     await expect(
-      runImport(db, new YouTubeMusicAdapter(), html, { privacy: PRIVACY_OFF }),
+      runImport(db, new YouTubeMusicAdapter(), html, { privacy: PRIVACY_DEFAULTS }),
     ).rejects.toThrow(AdapterError);
     expect(await db.listens.count()).toBe(0);
     const record = (await db.imports.toArray())[0]!;
@@ -195,7 +200,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
       db,
       new YouTubeMusicAdapter(),
       new Blob([zip as unknown as ArrayBuffer]),
-      { privacy: PRIVACY_OFF, fileName: 'takeout.zip' },
+      { privacy: PRIVACY_DEFAULTS, fileName: 'takeout.zip' },
     );
     expect(summary.status).toBe('done');
     expect(summary.eventsInserted).toBe(9);
@@ -212,7 +217,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
     const cut = new Blob([full.slice(0, Math.floor(full.length * 0.7))]);
     let failure: unknown;
     try {
-      await runImport(db, new YouTubeMusicAdapter(), cut, { privacy: PRIVACY_OFF });
+      await runImport(db, new YouTubeMusicAdapter(), cut, { privacy: PRIVACY_DEFAULTS });
     } catch (error) {
       failure = error;
     }
@@ -229,7 +234,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
   it('cancellazione cooperativa: AbortSignal ⇒ status partial senza errori (05§4)', async () => {
     const controller = new AbortController();
     const summary = await runImport(db, new YouTubeMusicAdapter(), fixtureBlob(), {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       signal: controller.signal,
       onProgress: () => controller.abort(),
     });
@@ -238,7 +243,7 @@ describe('YouTubeMusicAdapter — import fixture (§8: casi 1-12)', () => {
   });
 
   it("recount() dopo l'import resta coerente (02§7 MIG-4)", async () => {
-    await runImport(db, new YouTubeMusicAdapter(), fixtureBlob(), { privacy: PRIVACY_OFF });
+    await runImport(db, new YouTubeMusicAdapter(), fixtureBlob(), { privacy: PRIVACY_DEFAULTS });
     await recount(db);
     const tracks = await db.tracks.toArray();
     const totalListens = tracks.reduce((sum, t) => sum + t.listenCount, 0);

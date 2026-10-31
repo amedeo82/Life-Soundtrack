@@ -13,8 +13,13 @@ const FIXTURE_PATH = fileURLToPath(
   new URL('../../../../../../fixtures/synthetic-history/spotify-sample.json', import.meta.url),
 );
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -47,7 +52,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
       new SpotifyAdapter(),
       new Blob([fixtureBytes() as unknown as ArrayBuffer]),
       {
-        privacy: PRIVACY_OFF,
+        privacy: PRIVACY_DEFAULTS,
         fileName: 'spotify-sample.json',
       },
     );
@@ -118,7 +123,11 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     expect(first!.day).toBe('2024-03-15');
     expect(first!.country).toBe('IT');
     expect(first!.ip).toBeNull();
-    expect(first!.deviceDetail).toBe('Android OS 13 (samsung, SM-S911B)');
+    // `deviceDetail` è la stringa grezza del provider: dato identificante,
+    // quindi **opt-in** (`retainDeviceDetail`, default false — 19-GEO-CONTEXT
+    // §7.1). Il valore persistito con il default è `null`.
+    expect(first!.deviceDetail).toBeNull();
+    expect(first!.deviceType).toBe('mobile');
 
     // Contatori denormalizzati ricalcolati (recount): `merged` ha 2 ListenEvent
     // che lo puntano (entrambi gli eventi DEDUP-3), dunque `listenCount` deve
@@ -129,8 +138,8 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
   it('caso 2: re-import dello stesso file è idempotente (eventKey unico)', async () => {
     const adapter = new SpotifyAdapter();
     const input = new Blob([fixtureBytes() as unknown as ArrayBuffer]);
-    const first = await runImport(db, adapter, input, { privacy: PRIVACY_OFF });
-    const second = await runImport(db, adapter, input, { privacy: PRIVACY_OFF });
+    const first = await runImport(db, adapter, input, { privacy: PRIVACY_DEFAULTS });
+    const second = await runImport(db, adapter, input, { privacy: PRIVACY_DEFAULTS });
 
     expect(first.eventsInserted).toBe(10);
     expect(second.eventsInserted).toBe(0);
@@ -145,7 +154,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     const adapter = new SpotifyAdapter();
     const input = new Blob([fixtureBytes() as unknown as ArrayBuffer]);
 
-    const noIp = await runImport(db, adapter, input, { privacy: PRIVACY_OFF });
+    const noIp = await runImport(db, adapter, input, { privacy: PRIVACY_DEFAULTS });
     expect(noIp.status).toBe('done');
     for (const listen of await db.listens.toArray()) {
       expect(listen.ip).toBeNull();
@@ -155,7 +164,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     const dbKeep = new LifeSoundtrackDB(`spotify-adapter-keepip-${crypto.randomUUID()}`);
     try {
       const keepIp = await runImport(dbKeep, adapter, input, {
-        privacy: { ...PRIVACY_OFF, retainIp: true },
+        privacy: { ...PRIVACY_DEFAULTS, retainIp: true },
       });
       expect(keepIp.eventsInserted).toBe(10);
       const kept = await dbKeep.listens.toArray();
@@ -176,7 +185,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
       ),
     });
     const summary = await runImport(db, new SpotifyAdapter(), new Blob([zip]), {
-      privacy: { ...PRIVACY_OFF, carDetectionConsent: true },
+      privacy: { ...PRIVACY_DEFAULTS, carDetectionConsent: true },
       fileName: 'export.zip',
     });
 
@@ -191,7 +200,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
   it('AC: file CarDetectionEvent.json da solo non è un export Spotify', async () => {
     const zip = zipSync({ 'CarDetectionEvent.json': new TextEncoder().encode('[]') });
     await expect(
-      runImport(db, new SpotifyAdapter(), new Blob([zip]), { privacy: PRIVACY_OFF }),
+      runImport(db, new SpotifyAdapter(), new Blob([zip]), { privacy: PRIVACY_DEFAULTS }),
     ).rejects.toThrow(AdapterError);
     expect(await db.listens.count()).toBe(0);
     const record = (await db.imports.toArray())[0]!;
@@ -203,7 +212,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     const cut = new Blob([full.slice(0, Math.floor(full.length * 0.7))]);
     let failure: unknown;
     try {
-      await runImport(db, new SpotifyAdapter(), cut, { privacy: PRIVACY_OFF });
+      await runImport(db, new SpotifyAdapter(), cut, { privacy: PRIVACY_DEFAULTS });
     } catch (error) {
       failure = error;
     }
@@ -222,7 +231,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
     const adapter = new SpotifyAdapter();
     const input = new Blob([fixtureBytes() as unknown as ArrayBuffer]);
     const summary = await runImport(db, adapter, input, {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       signal: controller.signal,
       onProgress: () => controller.abort(),
     });
@@ -257,7 +266,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
         },
       ]),
     );
-    const summary = await runImport(db, adapter, new Blob([bytes]), { privacy: PRIVACY_OFF });
+    const summary = await runImport(db, adapter, new Blob([bytes]), { privacy: PRIVACY_DEFAULTS });
     expect(summary.eventsInserted).toBe(1);
     expect(summary.eventsDuplicated).toBe(1);
     expect(await db.listens.count()).toBe(1);
@@ -268,7 +277,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
       db,
       new SpotifyAdapter(),
       new Blob([fixtureBytes() as unknown as ArrayBuffer]),
-      { privacy: PRIVACY_OFF },
+      { privacy: PRIVACY_DEFAULTS },
     );
     await recount(db);
     const tracks = await db.tracks.toArray();

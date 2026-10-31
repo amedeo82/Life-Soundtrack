@@ -41,7 +41,7 @@ const manifest = {
   version: pkg.version,
   buildHash: gitRevParse(),
   releasedAt: new Date().toISOString(),
-  minSchemaVersion: 5, // schema v5 (02-DATA-SCHEMA.md §6.2, tabella scrobbleOutbox — Story 1.5)
+  minSchemaVersion: 6, // schema v6 (02-DATA-SCHEMA.md §6.3, tabella contexts — Story 1.6)
 };
 
 writeFileSync(outPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');

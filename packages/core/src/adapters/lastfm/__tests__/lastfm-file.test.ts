@@ -25,8 +25,13 @@ const JSON_EXPORT = fileURLToPath(
   ),
 );
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -64,7 +69,7 @@ describe('LastfmAdapter — percorso file (§2.3, §8 casi 14-16, 19, 22)', () =
 
   it('CSV ghan.nl (8 colonne): 3 eventi, timestamp da uts, durata 0', async () => {
     const summary = await runImport(db, new LastfmAdapter(), blobFrom(GHANL_CSV), {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       fileName: 'lastfm-ghanl.csv',
     });
     expect(summary.status).toBe('done');
@@ -87,7 +92,7 @@ describe('LastfmAdapter — percorso file (§2.3, §8 casi 14-16, 19, 22)', () =
 
   it("CSV lastfm-to-csv (4 colonne): 3 eventi, l'ultima riga senza data è scartata", async () => {
     const summary = await runImport(db, new LastfmAdapter(), blobFrom(FOUR_COL_CSV), {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       fileName: 'lastfm-4col.csv',
     });
     expect(summary.eventsParsed).toBe(2);
@@ -101,8 +106,8 @@ describe('LastfmAdapter — percorso file (§2.3, §8 casi 14-16, 19, 22)', () =
   });
 
   it('E.LF.16 / D-LF.7: lo stesso scrobble via API (secondi) e via CSV (minuto) → stesso eventKey', async () => {
-    await runImport(db, new LastfmAdapter(), blobFrom(GHANL_CSV), { privacy: PRIVACY_OFF });
-    await runImport(db, new LastfmAdapter(), blobFrom(FOUR_COL_CSV), { privacy: PRIVACY_OFF });
+    await runImport(db, new LastfmAdapter(), blobFrom(GHANL_CSV), { privacy: PRIVACY_DEFAULTS });
+    await runImport(db, new LastfmAdapter(), blobFrom(FOUR_COL_CSV), { privacy: PRIVACY_DEFAULTS });
     // "Airbag" non ha mbid in nessuno dei due percorsi → la normalizzazione
     // al minuto li fa convergere sulla stessa chiave.
     const key = `lastfm:${MINUTE_0943}|Airbag|Radiohead`;
@@ -113,7 +118,7 @@ describe('LastfmAdapter — percorso file (§2.3, §8 casi 14-16, 19, 22)', () =
 
   it('export JSON: 3 eventi con lo stesso mapping del CSV', async () => {
     const summary = await runImport(db, new LastfmAdapter(), blobFrom(JSON_EXPORT), {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       fileName: 'lastfm-export.json',
     });
     expect(summary.eventsParsed).toBe(3);
@@ -136,15 +141,15 @@ describe('LastfmAdapter — percorso file (§2.3, §8 casi 14-16, 19, 22)', () =
 
   it('E.LF.5: mbid mancante → un solo warning aggregato con il conteggio', async () => {
     const summary = await runImport(db, new LastfmAdapter(), blobFrom(GHANL_CSV), {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
     });
     expect(summary.warningCounts['adapter.lastfm.warn.mbidMissing']).toBe(2);
   });
 
   it('idempotenza: re-import dello stesso CSV → duplicati, nessuna nuova riga', async () => {
     const adapter = new LastfmAdapter();
-    await runImport(db, adapter, blobFrom(GHANL_CSV), { privacy: PRIVACY_OFF });
-    const second = await runImport(db, adapter, blobFrom(GHANL_CSV), { privacy: PRIVACY_OFF });
+    await runImport(db, adapter, blobFrom(GHANL_CSV), { privacy: PRIVACY_DEFAULTS });
+    const second = await runImport(db, adapter, blobFrom(GHANL_CSV), { privacy: PRIVACY_DEFAULTS });
     expect(second.eventsInserted).toBe(0);
     expect(second.eventsDuplicated).toBe(3);
   });

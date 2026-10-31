@@ -44,6 +44,9 @@ function listenAt(ms: number, id: string): ListenEvent {
     deviceDetail: null,
     ip: null,
     country: 'IT',
+    city: null,
+    citySource: null,
+    cityConfidence: null,
     day: '2024-03-15',
   };
 }

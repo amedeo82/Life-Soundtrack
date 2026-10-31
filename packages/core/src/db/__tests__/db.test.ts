@@ -8,6 +8,7 @@ import {
   DB_SCHEMA_V3,
   DB_SCHEMA_V4,
   DB_SCHEMA_V5,
+  DB_SCHEMA_V6,
   countListens,
   getAlbum,
   getArtist,
@@ -57,13 +58,14 @@ afterEach(closeAllDbs);
 // ---------------------------------------------------------------------------
 
 describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
-  it('espone tutte le 14 tabelle della spec v1.6 + settings + scrobbleOutbox (Story 1.5)', async () => {
+  it('espone tutte le 14 tabelle della spec v1.6 + settings + scrobbleOutbox (Story 1.5) + contexts (Story 1.6)', async () => {
     const db = freshDb('ls-schema-tables');
     await db.open();
     expect(db.tables.map((t) => t.name).sort()).toEqual(
       [
         'albums',
         'artists',
+        'contexts',
         'features',
         'imports',
         'insights',
@@ -109,6 +111,10 @@ describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
         primKey: 'idempotencyKey',
         indexes: ['hub', 'status', 'createdAt', 'nextAttemptAt'],
       },
+      contexts: {
+        primKey: 'id',
+        indexes: ['kind', 'startTime', 'endTime', 'derivedVersion', 'status'],
+      },
     };
 
     for (const [table, want] of Object.entries(expected)) {
@@ -122,10 +128,10 @@ describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
     }
   });
 
-  it('dichiara la versione 5 come massima (searchQueries v1→v2, artworkUrl v2→v3, settings v3→v4, scrobbleOutbox v4→v5)', async () => {
+  it('dichiara la versione 6 come massima (searchQueries v1→v2, artworkUrl v2→v3, settings v3→v4, scrobbleOutbox v4→v5, contexts v5→v6)', async () => {
     const db = freshDb('ls-schema-versions');
     await db.open();
-    expect(db.verno).toBe(5);
+    expect(db.verno).toBe(6);
     expect(Object.keys(DB_SCHEMA_V2)).toContain('searchQueries');
     expect(Object.keys(DB_SCHEMA_V1)).not.toContain('searchQueries');
     expect(Object.keys(DB_SCHEMA_V3).length).toBe(Object.keys(DB_SCHEMA_V2).length);
@@ -133,6 +139,8 @@ describe('schema Dexie (02-DATA-SCHEMA.md §6)', () => {
     expect(Object.keys(DB_SCHEMA_V3)).not.toContain('settings');
     expect(Object.keys(DB_SCHEMA_V5)).toContain('scrobbleOutbox');
     expect(Object.keys(DB_SCHEMA_V4)).not.toContain('scrobbleOutbox');
+    expect(Object.keys(DB_SCHEMA_V6)).toContain('contexts');
+    expect(Object.keys(DB_SCHEMA_V5)).not.toContain('contexts');
   });
 
   it('openDb apre o crea il DB col nome di default', async () => {
@@ -170,7 +178,7 @@ describe('migrazione v1 → v2', () => {
     // 2. Riapre con lo schema corrente (v1→v2→v3): le migrazioni sono automatiche.
     const upgraded = freshDb(name);
     await upgraded.open();
-    expect(upgraded.verno).toBe(5);
+    expect(upgraded.verno).toBe(6);
     expect(await getListen(upgraded, listen.eventKey)).toEqual(listen);
     expect(await getTrack(upgraded, track.canonicalKey)).toEqual(track);
     expect(upgraded.table('searchQueries')).toBeDefined();
@@ -218,7 +226,7 @@ describe('migrazione v2 → v3', () => {
     // 2. Riapre con lo schema corrente (v3): la migrazione v2→v3 è automatica.
     const upgraded = freshDb(name);
     await upgraded.open();
-    expect(upgraded.verno).toBe(5);
+    expect(upgraded.verno).toBe(6);
 
     // 3. I dati esistenti sono preservati e artworkUrl è stato aggiunto come null.
     const storedTrack = await upgraded.table('tracks').get(track.canonicalKey);

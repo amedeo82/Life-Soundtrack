@@ -15,8 +15,13 @@ const FIXTURE_PATH = fileURLToPath(
   ),
 );
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -91,7 +96,7 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
 
   it('importa 16 eventi, scarta 4 righe e conta i warning per categoria', async () => {
     const summary = await runImport(db, new ListenBrainzAdapter(), exportArchive(), {
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       fileName: 'listenbrainz-export.zip',
     });
 
@@ -115,7 +120,7 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
   });
 
   it('eventKey D-LB.2: listened_at + recording_msid', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const event = await db.listens.get('listenbrainz:1710498600|msid-happy-1');
     expect(event).toBeDefined();
     expect(event!.platform).toBe('listenbrainz');
@@ -125,13 +130,13 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
   });
 
   it('E.LB.8: stesso msid con listened_at diverse → due eventi distinti', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     expect(await db.listens.get('listenbrainz:1710592200|msid-shared')).toBeDefined();
     expect(await db.listens.get('listenbrainz:1710592260|msid-shared')).toBeDefined();
   });
 
   it('E.LB.13: stesso brano con msid diversi → due eventi, una Track', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     expect(await db.listens.get('listenbrainz:1710678600|msid-client-a')).toBeDefined();
     expect(await db.listens.get('listenbrainz:1710682200|msid-client-b')).toBeDefined();
     const creep = await db.tracks.where('name').equals('Creep').first();
@@ -140,7 +145,7 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
   });
 
   it('DEDUP-1 (ISRC) e DEDUP-2 (MBID) con precedenza del mbid_mapping (D2)', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const spaceOddity = await db.tracks.where('name').equals('Space Oddity').first();
     expect(spaceOddity!.canonicalKey).toBe('isrc:GBAYE0601498');
     expect(spaceOddity!.isrc).toBe('GBAYE0601498');
@@ -155,7 +160,7 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
   });
 
   it('E.LB.11: artista ricostruita dal mapping, mai divisa per "&"', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const walk = await db.tracks.where('name').equals('Walk').first();
     const artist = await db.artists.get(walk!.artistId);
     expect(artist!.name).toBe('Artist A & Artist B');
@@ -167,7 +172,7 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
   });
 
   it('E.LB.1/E.LB.2: durata assente → stesso bucket DEDUP-3, durata solo hint sulla Track', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const sunrise = await db.tracks.where('name').equals('Sunrise').first();
     expect(sunrise).toBeDefined();
     expect(sunrise!.listenCount).toBe(2);
@@ -178,7 +183,7 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
   });
 
   it('senza msid e senza MBID: sourceEventId null → fallback SHA-1 del core', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const event = await db.listens
       .where('trackId')
       .notEqual('')
@@ -190,21 +195,21 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
   });
 
   it("E.LB.19: il tempo dell'evento è listened_at, non inserted_at", async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const event = await db.listens.get('listenbrainz:1711458600|msid-backdated');
     expect(event).toBeDefined();
     expect(event!.timestamp).toBe(1711458600000);
   });
 
   it('E10: day derivato dal timestamp UTC (confine di mezzanotte)', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const event = await db.listens.get('listenbrainz:1711929630|msid-midnight');
     expect(event).toBeDefined();
     expect(event!.day).toBe('2024-04-01');
   });
 
   it('privacy: user_name, ip e country mai persistiti', async () => {
-    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, new ListenBrainzAdapter(), exportArchive(), { privacy: PRIVACY_DEFAULTS });
     const events = await db.listens.toArray();
     expect(events.every((e) => e.ip === null && e.country === null)).toBe(true);
     const dump = JSON.stringify(events) + JSON.stringify(await db.tracks.toArray());
@@ -215,8 +220,8 @@ describe('ListenBrainzAdapter — import del fixture (§8: casi 1-20)', () => {
 
   it('idempotenza: re-import dello stesso archivio → 16 duplicati', async () => {
     const adapter = new ListenBrainzAdapter();
-    await runImport(db, adapter, exportArchive(), { privacy: PRIVACY_OFF });
-    const second = await runImport(db, adapter, exportArchive(), { privacy: PRIVACY_OFF });
+    await runImport(db, adapter, exportArchive(), { privacy: PRIVACY_DEFAULTS });
+    const second = await runImport(db, adapter, exportArchive(), { privacy: PRIVACY_DEFAULTS });
     expect(second.eventsInserted).toBe(0);
     expect(second.eventsDuplicated).toBe(16);
     expect(await db.listens.count()).toBe(16);

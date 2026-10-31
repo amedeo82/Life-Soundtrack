@@ -40,6 +40,9 @@ function listen(id: string, trackId: string, startedAt: number): ListenEvent {
     deviceDetail: null,
     ip: null,
     country: 'IT',
+    city: null,
+    citySource: null,
+    cityConfidence: null,
     day: '2024-03-15',
   };
 }

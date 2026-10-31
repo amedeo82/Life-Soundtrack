@@ -456,6 +456,233 @@ function buildScenario({
   };
 }
 
+/**
+ * Scenario **geo e contesto di ascolto** — Story 1.6, `19-GEO-CONTEXT.md` §5.
+ *
+ * I fixture di scenario esistenti usano paese e dispositivo **casuali**:
+ * per il classificatore di contesto servono pattern realistici (casa, lavoro,
+ * spostamento, viaggio, auto), altrimenti non c'è nessun cluster da
+ * riconoscere. Questo fixture è quindi una **cronologia composta**,
+ * deterministica e senza RNG: 4 settimane di un ascoltatore a Roma
+ * (Europe/Rome) con una settimana di viaggio in Germania.
+ *
+ * Il piano è dichiarato in `expectedContexts` e verificato dai test del
+ * classificatore (`packages/core/src/context/__tests__/`).
+ */
+function buildGeoContextScenario() {
+  const importId = 'imp-geo-context-1';
+  const artists = [
+    {
+      id: 'ar-geo-1',
+      name: 'Artisti Geo Uno',
+      mbid: null,
+      genres: ['rock'],
+      spotifyId: 'sp-ar-geo-1',
+    },
+    {
+      id: 'ar-geo-2',
+      name: 'Artisti Geo Due',
+      mbid: null,
+      genres: ['pop'],
+      spotifyId: 'sp-ar-geo-2',
+    },
+    {
+      id: 'ar-geo-3',
+      name: 'Artisti Geo Tre',
+      mbid: null,
+      genres: ['jazz'],
+      spotifyId: 'sp-ar-geo-3',
+    },
+  ];
+  const tracks = [];
+  for (let i = 1; i <= 12; i += 1) {
+    const artist = artists[(i - 1) % artists.length];
+    tracks.push({
+      id: `tr-geo-${String(i).padStart(2, '0')}`,
+      canonicalKey: `fuzzy:ck-geo-${String(i).padStart(2, '0')}`,
+      name: `Brano Geo ${String(i).padStart(2, '0')}`,
+      artistId: artist.id,
+      albumId: null,
+      durationMs: 240000,
+      isrc: null,
+      mbid: null,
+      explicit: false,
+      genres: artist.genres,
+      artworkUrl: null,
+      platformIds: { spotify: `sp-tr-geo-${String(i).padStart(2, '0')}` },
+      firstSeenAt: Date.UTC(2024, 3, 1),
+      lastSeenAt: Date.UTC(2024, 3, 1),
+      listenCount: 0,
+      spotifyId: `sp-tr-geo-${String(i).padStart(2, '0')}`,
+    });
+  }
+
+  const listens = [];
+  let counter = 0;
+
+  /** Orario locale (Europe/Rome = UTC+2 in aprile 2024) → istante UTC. */
+  const at = (dayIndex, hour, minute) => Date.UTC(2024, 3, 1 + dayIndex, hour - 2, minute);
+
+  /**
+   * Emette una sessione di ascolto: `n` tracce consecutive.
+   * La durata della sessione (`end - start`) è ciò che il classificatore
+   * usa per distinguere una sessione domestica da uno spostamento.
+   */
+  const session = ({ start, trackMs, n, deviceType, country }) => {
+    for (let i = 0; i < n; i += 1) {
+      counter += 1;
+      const track = tracks[(counter - 1) % tracks.length];
+      const timestamp = start + (i + 1) * trackMs;
+      const durationMs = trackMs;
+      listens.push({
+        id: `le-geo-${String(counter).padStart(4, '0')}`,
+        eventKey: `spotify:ek-geo-${String(counter).padStart(4, '0')}`,
+        platform: 'spotify',
+        importId,
+        timestamp,
+        startedAt: timestamp - durationMs,
+        durationMs,
+        trackId: track.id,
+        completed: true,
+        skipped: false,
+        shuffle: false,
+        offline: false,
+        incognito: false,
+        reasonStart: 'playbtn',
+        reasonEnd: 'trackdone',
+        deviceType,
+        deviceDetail: null,
+        ip: null,
+        country,
+        city: null,
+        citySource: null,
+        cityConfidence: null,
+        day: new Date(timestamp).toISOString().slice(0, 10),
+      });
+    }
+  };
+
+  /** Casa: sera, sessioni lunghe (30 min), telefono. */
+  const home = (dayIndex) =>
+    session({
+      start: at(dayIndex, 20, 0),
+      trackMs: 360000,
+      n: 5,
+      deviceType: 'mobile',
+      country: 'IT',
+    });
+  /** Lavoro: mattina, desktop, orario 09:30-10:00 (fascia lavorativa). */
+  const work = (dayIndex) =>
+    session({
+      start: at(dayIndex, 9, 30),
+      trackMs: 300000,
+      n: 6,
+      deviceType: 'desktop',
+      country: 'IT',
+    });
+  /** Spostamento: mattina presto, telefono, sessioni brevi (8 min). */
+  const commute = (dayIndex) =>
+    session({
+      start: at(dayIndex, 8, 10),
+      trackMs: 240000,
+      n: 2,
+      deviceType: 'mobile',
+      country: 'IT',
+    });
+  /** Viaggio: tre giorni consecutivi in Germania. */
+  const travel = (dayIndex) =>
+    session({
+      start: at(dayIndex, 20, 0),
+      trackMs: 360000,
+      n: 5,
+      deviceType: 'mobile',
+      country: 'DE',
+    });
+  /** Auto: sera in auto (richiede `carDetectionConsent`). */
+  const car = (dayIndex) =>
+    session({
+      start: at(dayIndex, 20, 0),
+      trackMs: 360000,
+      n: 5,
+      deviceType: 'car',
+      country: 'IT',
+    });
+
+  // Settimana 1 (1-7 aprile): casa + lavoro, un giorno di solo spostamento.
+  home(0);
+  work(0);
+  home(1);
+  work(1);
+  commute(2);
+  home(3);
+  work(3);
+  home(4);
+  work(4);
+  home(5);
+  home(6);
+  // Settimana 2 (8-14 aprile): casa + lavoro, un giorno di solo spostamento.
+  home(7);
+  work(7);
+  commute(8);
+  work(8);
+  home(9);
+  work(9);
+  home(10);
+  work(10);
+  home(11);
+  work(11);
+  home(12);
+  home(13);
+  // Settimana 3 (15-21 aprile): tre giorni di viaggio in Germania, poi casa.
+  travel(14);
+  travel(15);
+  travel(16);
+  home(17);
+  work(17);
+  home(18);
+  work(18);
+  home(19);
+  home(20);
+  // Settimana 4 (22-28 aprile): casa + lavoro, un giorno in auto.
+  commute(21);
+  work(21);
+  home(22);
+  work(22);
+  car(23);
+  work(23);
+  home(24);
+  work(24);
+  home(25);
+  work(25);
+  home(26);
+  home(27);
+
+  return {
+    _metadata: {
+      name: 'geo-context',
+      version: '1.0',
+      session: 61,
+      generatedAt: new Date().toISOString(),
+      seed: null,
+      description:
+        'Contesto di ascolto (Story 1.6): 4 settimane a Roma (Europe/Rome) con casa serale, lavoro diurno da desktop, spostamenti brevi, 3 giorni di viaggio in Germania e una serata in auto. Verifica 19-GEO-CONTEXT §5 (classificatore L1) e la persistenza dei periodi.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedContexts: {
+        home: 'periodi serali (mobile, 20:00, sessioni da 30 min) — confidenza 0.7',
+        work: 'periodi diurni feriali (desktop, 09:30) — confidenza 0.6',
+        commute: 'spostamenti brevi (mobile, 08:10) — confidenza 0.4, sotto soglia: NON aggregati',
+        travel: '3 giorni consecutivi in DE — confidenza 0.9',
+        car: 'una serata in auto — confidenza 0.9, solo con carDetectionConsent',
+        away: 'nessuno (tutti gli ascolti hanno un paese)',
+      },
+      spec: '02-DATA-SCHEMA.md v1.7 + 19-GEO-CONTEXT.md v1.0 + 10-TESTING.md §3.3',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
@@ -610,6 +837,7 @@ const targets = {
     });
   },
   demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
+  geo: () => buildGeoContextScenario(),
 };
 
 function writeJson(path, data) {
@@ -647,6 +875,7 @@ for (const t of targets_) {
   else if (t === 'lockdown') out = resolve(SCENARIOS_DIR, 'lockdown-2020.json');
   else if (t === 'breakup') out = resolve(SCENARIOS_DIR, 'breakup-oct2021.json');
   else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
+  else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
   else out = resolve(SCENARIOS_DIR, `${t}.json`);
   writeJson(out, data);
 }

@@ -16,6 +16,11 @@ describe('PrivacyScreen — 4 toggle (02-DATA-SCHEMA §3.8)', () => {
       <PrivacyScreen
         privacy={{
           retainIp: false,
+          retainCountry: true,
+          retainCity: false,
+          retainDeviceType: true,
+          retainDeviceDetail: false,
+          deriveContext: true,
           enrichMetadata: false,
           carDetectionConsent: false,
           scrobbleHubs: [],

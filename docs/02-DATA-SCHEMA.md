@@ -1,6 +1,6 @@
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.6 · Sessione 57 (2026-10-27)
+> Status: 🟢 APPROVED · Versione 1.7 · Sessione 68 (2026-10-31)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -68,12 +68,24 @@ Regola: `timestamp` = **momento in cui l'ascolto si conclude**; `startedAt` = in
       deviceType: DeviceType;
       deviceDetail: string | null;
       ip: string | null;         // conservato SOLO se PrivacySettings.retainIp
-      country: string | null;    // ISO 3166-1 alpha-2, sempre derivato      
+      country: string | null;    // ISO 3166-1 alpha-2, derivato, conservato
+                                 // indipendentemente da retainIp (§3.8)
+      city: string | null;       // città STIMATA (L2), null finché il DB geo
+                                 // non c'è (19§4.1, E21)
+      citySource: 'dbip-lite' | 'manual' | null;  // provenance della stima
+      cityConfidence: number | null;  // 0..1, sotto 0.6 la città è scartata
       day: string;             // 'YYYY-MM-DD' (derivato, indicizzato)
     }
 
 **eventKey** = `platform + ':' + (sourceEventId ?? sha1(trackId|timestamp|durationMs))`
 Calcolato dall'adapter. Garantisce import idempotenti.
+
+**I tre campi `city*`** (v1.7, Story 1.6) sono **derivati**, non raccolti:
+la città viene stimata dal database geo locale a partire dall'IP già
+presente nell'export (`19-GEO-CONTEXT.md` §4.1). Senza database geo — o senza
+consenso `retainCity` — restano `null`. La derivazione è la **Story 4.4**:
+questa versione fissa solo il **contratto** (i campi esistono, sono
+nullable, e hanno una provenance esplicita).
 
 ### 3.3 Track / Artist / Album
 
@@ -213,15 +225,36 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       addedAt: number | null;
     }
 
-### 3.8 PrivacySettings (toggle espliciti, default off)
+### 3.8 PrivacySettings (toggle espliciti)
 
     export interface PrivacySettings {
       retainIp: boolean;          // default false; toggle ESPLICITO dell'utente
+      retainCountry: boolean;     // default TRUE; persistenza del paese derivato
+      retainCity: boolean;        // default false; derivazione e persistenza della città (L2)
+      retainDeviceType: boolean;  // default true; persistenza del tipo di dispositivo
+      retainDeviceDetail: boolean;// default false; persistenza della stringa grezza del device
+      deriveContext: boolean;     // default true; classificazione del contesto di ascolto (L1)
       enrichMetadata: boolean;    // default false; arricchimento metadati brani
       carDetectionConsent: boolean; // default false; rilevamento ascolti in auto (es. Bluetooth/Battery)
       scrobbleHubs: ScrobbleHubId[]; // default []; hub di scrobbling scelti (tipo DEDICATO — vedi sotto)
       syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2, ADR-0005)
     }
+
+**I default non sono tutti `off`** (v1.7, Story 1.6 — decisione del project
+owner sull'issue #108, ratificata in `19-GEO-CONTEXT.md` §7.1):
+
+| Toggle | Default | Perché |
+|---|---|---|
+| `retainIp` | `false` | dato identificante: l'IP resta nel file dell'utente, non nel DB |
+| `retainCountry` | **`true`** | dato **derivato**, non identificante, e cuore del prodotto: metterlo a `false` sarebbe una regressione di feature, non un rafforzamento della privacy |
+| `retainCity` | `false` | dato **stimato**, accuratezza scarsa su IP mobili, più sensibile del paese: opt-in |
+| `retainDeviceType` | `true` | 8 valori granulari, nessun identificativo |
+| `retainDeviceDetail` | `false` | è la **stringa grezza** del provider (`"iPhone di Mario"`): dato identificante, opt-in |
+| `deriveContext` | `true` | non raccoglie nulla di nuovo: opera su dati già conservati (`country`, `deviceType`, timestamp) |
+
+Il `country` resta quindi **conservato indipendentemente da `retainIp`**:
+retainere l'IP e conservare il paese sono due decisioni separate. Il toggle
+`retainCountry` li disaccoppia esplicitamente.
 
 **`ScrobbleHubId` è un tipo dedicato, non `PlatformId`** (ratificato dalla spec
 `20-SCROBBLING-HUB.md` v1.0 🟢, D-SH.2 e ADR-0011 🟢 v1.0 §"I vincoli", V7):
@@ -272,6 +305,39 @@ Quando `carDetectionConsent` è true (default false):
       resultCount: number | null; // null se non disponibile
       context: 'manual' | 'browse' | 'recommendation';
     }
+
+### 3.10 ContextPeriod (derivato, con verdetto utente) — v1.7
+
+    export const CONTEXT_KINDS = [
+      'home', 'work', 'commute', 'car', 'travel', 'away', 'unknown',
+    ] as const;
+    export type ContextKind = (typeof CONTEXT_KINDS)[number];
+
+    export interface ContextPeriod {
+      id: string;              // deterministico: il ricalcolo non crea duplicati
+      startTime: number;       // unix ms UTC, inizio del periodo
+      endTime: number;         // unix ms UTC, fine del periodo
+      kind: ContextKind;       // contesto dedotto (L1) o tassonomia del periodo
+      country: string | null;  // ISO 3166-1 alpha-2
+      city: string | null;     // città stimata (L2, Story 4.4): null in questa tranche
+      eventCount: number;      // ascolti coperti
+      deviceTypes: DeviceType[];
+      confidence: number;      // 0..1 — sotto 0.5 il periodo non viene aggregato
+      derivedVersion: string;  // hash dei parametri dell'algoritmo (MIG-3)
+      status: 'pending' | 'confirmed' | 'corrected' | 'dismissed';
+      userLabel: string | null;  // etichetta libera: "Casa di mia madre"
+      createdAt: number;
+    }
+
+Il contesto **non sta sull'evento**: si ripeterebbe identico su migliaia di
+righe. Sta su un **periodo**, ricostruibile con `recompute()` (MIG-2) e
+versionato come gli insight (MIG-3). La tassonomia dei `kind` è vincolante
+(`19-GEO-CONTEXT.md` §4.3): `unknown` non è un errore, è la dichiarazione
+"i segnali non bastano".
+
+Il **verdetto dell'utente** (`status` ≠ `pending`, `userLabel`) è stabile: un
+ricalcolo non cancella un periodo confermato, corretto o scartato, e non ne
+duplica uno sovrapposto (E20).
 
 Regole di persistenza:
 - Solo se `PrivacySettings.enrichMetadata` è true OPPURE il consenso specifico è attivo
@@ -490,12 +556,58 @@ modificata e nessun dato viene perso; la tabella nasce vuota.
 `settings`), nessun contesto di ascolto, nessun IP, nessun device (il payload è
 chiuso per costruzione, `05§4.2` V8).
 
+### 6.3 Tabella `contexts` (schema v6 — Story 1.6)
+
+I **periodi di contesto** (`19-GEO-CONTEXT.md` §4.3) hanno stato per elemento,
+confidenza, versione degli algoritmi e verdetto dell'utente: sono quindi una
+tabella a sé, non una chiave/valore in `settings` → **schema Dexie v6**.
+
+    db.version(6).stores({
+      ...v5,
+      contexts: '&id, kind, startTime, endTime, derivedVersion, status',
+    });
+
+| Campo | Tipo | Note |
+|-------|------|------|
+| `id` | string | **PK**: deterministico (`ctx-<kind>-<startTime>`) → il ricalcolo aggiorna, non duplica |
+| `startTime` | number | ts (unix ms UTC) di inizio del periodo |
+| `endTime` | number | ts (unix ms UTC) di fine del periodo |
+| `kind` | `ContextKind` | indice: il nastro filtra per contesto (`19§8.2`) |
+| `country` | string \| null | ISO 3166-1 alpha-2 |
+| `city` | string \| null | città stimata (L2, Story 4.4): null in questa tranche |
+| `eventCount` | number | ascolti coperti |
+| `deviceTypes` | `DeviceType[]` | dispositivi presenti nel periodo |
+| `confidence` | number | 0..1 — sotto 0.5 il periodo non viene aggregato (E19) |
+| `derivedVersion` | string | hash dei parametri dell'algoritmo (MIG-3) |
+| `status` | `'pending' \| 'confirmed' \| 'corrected' \| 'dismissed'` | verdetto dell'utente |
+| `userLabel` | string \| null | etichetta libera: "Casa di mia madre" |
+| `createdAt` | number | ts di creazione |
+
+**Tabella derivata** (MIG-2): `contexts` è ricostruibile da `listens` con
+`recompute()`. Un drop non perde nulla.
+
+**Migrazione non distruttiva** (MIG-1): la tabella nasce vuota e nessuna
+tabella esistente viene modificata. L'unica-touch è l'upgrade che azzera i
+tre campi `city*` sugli ascolti già persistiti:
+
+    db.version(6).stores({...}).upgrade(tx =>
+      tx.table('listens').toCollection().modify(l => {
+        l.city = l.city ?? null;
+        l.citySource = l.citySource ?? null;
+        l.cityConfidence = l.cityConfidence ?? null;
+      }))
+
+La città è una **derivazione** (L2) che nasce solo con il database geo
+on-demand (Story 4.4): sugli ascolti già persistiti non può essere nota, e
+`null` significa "dato assente", non "dato perso".
+
 ## 7. Politiche di migrazione e ricalcolo
 
 - **MIG-1**: ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)`; mai drop di tabelle utente
-- **MIG-2**: tabelle derivate (`sessions`, `insights`) sono **ricostruibili**: comando `recompute()` le rigenera da `listens` + `features`
+- **MIG-2**: tabelle derivate (`sessions`, `insights`, `contexts`) sono **ricostruibili**: comando `recompute()` le rigenera da `listens` + `features`
 - **MIG-3**: ogni modifica ai parametri di analisi cambia `derivedVersion` (hash del config); insight con version vecchia sono marcati `stale` e ricalcolati al prossimo avvio
 - **MIG-4**: i contatori denormalizzati (`listenCount`) sono ricalcolabili con `recount()`; servono solo per performance UI
+- **MIG-5** (v1.7): il ricalcolo dei **periodi di contesto** è **esplicito** — un re-import con toggle diversi **non** azzera i campi già persistiti (E20). I periodi con verdetto dell'utente (`status` ≠ `pending`) sono preservati e i periodi nuovi che li sovrappongono vengono scartati
 
 ## 8. Cosa NON è nello schema (decisioni esplicite)
 
@@ -550,3 +662,4 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.4 | Sessione 52 (2026-10-26, issue #155) | §6.1 (nuova): tabella `settings` (chiave/valore) nello schema Dexie **v4** — proxy CORS Last.fm, `api_key`, username, per-utente e locali (`09§4`). Migrazione non distruttiva (MIG-1), nessuna modifica alle tabelle dati. §3.1: il contratto `RawListenEvent` riceve due campi **additivi e opzionali** — `sourceArtistMbid` (→ `Artist.mbid`, richiesto dalle spec `03-ADAPTERS/lastfm.md` §3.1.2 e `listenbrainz.md` §3.1.2) e `sourceTrackDurationMs` (durata **catalogo**, solo hint sulla `Track`: non entra nel bucket DEDUP-3, altrimenti uno stesso brano finirebbe in due `Track` distinte) |
 | 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 57, issue #172)* |
 | 1.6 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **§3.8** — `scrobbleHubs` passa da `PlatformId[]` al **tipo dedicato** `ScrobbleHubId` (`'lastfm' \| 'listenbrainz'`), con la semantica del toggle (default `[]`, consenso per-hub indipendente dagli altri toggle, revoca che svuota la coda del hub, configurazione per-utente in `settings`); **§6.2 (nuova)** — tabella `scrobbleOutbox` nello schema Dexie **v5** (PK `hub\|eventKey`, indice per `hub`/`status`/`createdAt`/`nextAttemptAt`, payload senza segreti, write-ahead `in_flight`), con la garanzia di idempotenza per costruzione (G-SH.1) e il caso residuo dichiarato (doppio scrobble possibile, mai una perdita). Migrazione **non distruttiva** (MIG-1). Il tipo `ScrobblePayload` e il contratto `ScrobbleSink` sono in `05§4.2` (ADR-0011 🟢 v1.0) |
+| 1.7 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 — fondazione geo e contesto di ascolto** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): **§3.2** — tre campi derivati `city` / `citySource` / `cityConfidence` su `ListenEvent` (la città è una *stima* L2, non un fatto: la derivazione è la Story 4.4); **§3.8** — `PrivacySettings` con i toggle `retainCountry` (default **true**: il paese è derivato e non identificativo, decisione del project owner sull'issue #108), `retainCity` (default false), `retainDeviceType` (default true), `retainDeviceDetail` (default false: la stringa grezza del provider è identificante) e `deriveContext` (default true), con la semantica dichiarata che **il `country` è conservato indipendentemente da `retainIp`**; **§3.10 (nuova)** — `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS` (`home`, `work`, `commute`, `car`, `travel`, `away`, `unknown`), il verdetto utente (`status` + `userLabel`) e la soglia 0.5 (E19); **§6.3 (nuova)** — tabella `contexts` nello schema Dexie **v6** (tabella derivata, ricostruibile con `recompute()`, MIG-2) con migrazione non distruttiva che azzera i campi città sugli ascolti esistenti; **§7** — MIG-5: il ricalcolo del contesto è **esplicito** e non azzera i campi già persistiti (E20) |
