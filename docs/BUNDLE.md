@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 09:37
+> Data: 2026-10-31 09:47
 > Totale file: 123
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 122 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1673.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 09:37
+- Dimensione totale: 1674.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 09:45
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1179,11 +1179,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **1.6** — Fondazione geo e contesto di ascolto (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **2.2** — Era Detector (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/1.6-geo-foundation.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/2.2-era-detector.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 2.2, 2.3, 3.4, 4.4.
+Altre non-done e non bloccate in ordine di priorita backlog (id): 2.3, 3.4, 4.4.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2015,7 +2015,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟡 | ❌ | #203 |
 | 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
 | 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
-| 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 👀 | ❌ | #209 |
+| 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2055,10 +2055,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **45** (merge: 35)
-- Stories migrate in state/stories: **20** (done: 15)
+- Sessioni migrate in state/sessions: **45** (merge: 36)
+- Stories migrate in state/stories: **20** (done: 16)
 - Ultima sessione migrata: **S68** - Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4, 4.1
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2083,7 +2083,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 68, issue #205): la **Story 1.6 (fondazione geo e contesto di ascolto) è implementata e in review** — il delta su `02` v1.7 (campi `city*`, entità `ContextPeriod`, tabella `contexts` nello schema Dexie v6, toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`) e il **classificatore L1** in `packages/core/src/context/` (regole R1..R7, soglia 0.5, `derivedVersion` dai parametri) con la persistenza dei periodi e il fixture di scenario geo. **EPIC 1 — Import core: 5/5 ✅** e tre story dell'EPIC 2/4 completate: la **2.4 (Memory Engine)** (issue **#179**, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, merge `7458220`, Sessione 64): la catena **4.1 (dati) → 2.1 (letture)** è chiusa. **Prossimo passo**: chiudere la review della **1.6** e poi la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201). Dietro di loro: le **2.2 (Era Detector)** e **2.3 (Event Detector)**, che hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.0 🟢 APPROVED), poi la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 1.6: la **UI dei toggle** (Story 3.x) e la **derivazione L2** (Story 4.4).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 68, issue #205): la **Story 1.6 (fondazione geo e contesto di ascolto) è completata** — PR #209 merged il 2026-10-31 (merge commit `68c27e5`): il delta su `02` v1.7 (campi `city*`, entità `ContextPeriod`, tabella `contexts` nello schema Dexie v6, toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`) e il **classificatore L1** in `packages/core/src/context/` (regole R1..R7, soglia 0.5, `derivedVersion` dai parametri) con la persistenza dei periodi e il fixture di scenario geo. **EPIC 1 — Import core: 5/5 ✅** e tre story dell'EPIC 2/4 completate: la **2.4 (Memory Engine)** (issue **#179**, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, merge `7458220`, Sessione 64): la catena **4.1 (dati) → 2.1 (letture)** è chiusa. **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 ora disponibile. **Divergenza dichiarata** (la stessa della Sessione 67, §33 del DEV-LOG): il blocco NEXT-STEP del README ordina le story **per id** e indica quindi la **2.2** (Era Detector), mentre la **lista di priorità** di `11-BACKLOG.md` (posizione 13) mette la tranche geo **prima** delle 2.2/2.3 per la scelta del project owner («geo prima», Sessione 67): l'agente segue la **lista di priorità**, il blocco è un puntatore per id. Dietro: le **2.2 (Era Detector)** e **2.3 (Event Detector)**, con la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.0 🟢 APPROVED), poi la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 1.6: la **UI dei toggle** (Story 3.x) e la **derivazione L2** (Story 4.4).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -8401,8 +8401,8 @@ manca dell'host che la CSP deve consentire.
 ### Sessione 68 - Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205)
 
 - **Data**: 2026-10-31
-- **Stato**: 👀
-- **Merged**: ❌ non ancora mergiato (PR #209)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #209 (68c27e5, 2026-10-31)
 - **Claim**: `kilo-HP-ELITEBOOK-q7v2`
 
 ```
@@ -8488,6 +8488,28 @@ l'AC è stato allineato a **E19** nel backlog e nello state file.
 - **UI dei toggle**: Story 3.x. I toggle esistono nello schema e sono applicati
   in scrittura; l'interfaccia che li espone è un'altra tranche.
 - **Il nastro contesto**: Story 3.4 (consuma i `ContextPeriod`).
+
+## Esito post-merge
+
+La PR **#209** è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit
+`68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README; GitGuardian). L'issue **#205** è chiusa
+con `status:done` (applicato da `auto-status-done`), le label `agent-ready` /
+`in-progress` / `status:in-review` sono rimosse e il commento `release:` è
+automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`).
+
+La **pulizia git locale** è stata eseguita con `scripts/post-merge.ps1`:
+`git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi
+con `node_modules` su Windows) e la rimozione è passata con `rd /s /q` e
+prefisso `\\?\` — il **fallimento noto**, non una regressione. I passi
+restanti sono passati: `main` allineato a `origin/main` (`68c27e5`), merge
+verificato via `gh`, branch remoto già assente (eliminato da
+`auto-branch-cleanup`), branch locale eliminato con `git branch -d`, prune +
+audit finale (`post-merge.ps1 -Check` esce 0, nessun residuo).
+
+Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`,
+`auto-state-aggregate` e `auto-bundle`. Il presente doc-sync di chiusura è in
+una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -9827,9 +9849,9 @@ mezzo del lavoro.
 ## 35. Issue #205 — Story 1.6: fondazione geo e contesto di ascolto (Sessione 68)
 
 **Branch**: `feat/205-geo-context-foundation`
-**PR**: **#209** (aperta il 2026-10-31)
+**PR**: **#209** (aperta il 2026-10-31) — **merged** il 2026-10-31T08:40:45Z (merge commit `68c27e5`)
 **Data**: 2026-10-31
-**Stato**: 👀 **IN REVIEW** — implementazione completa, in attesa di review
+**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -9842,6 +9864,10 @@ mezzo del lavoro.
 | 35-7 | P | Il modulo `context/` è stato creato **fuori** da `analysis/`, contro la forma degli altri algoritmi | Il layer `analysis` è **puro** e non ha dipendenze dal DB (`05§9`: gira nel Web Worker), ma il contesto ha bisogno dei due (motore + tabella `contexts`) | Il modulo segue la forma di `enrichment/` (porte + orchestratore + storage Dexie) ed espone il subpath `@ls/core/context`. **Scelta dichiarata** (S7) | `05§9` · scelta dichiarata S7 |
 
 **Lesson learned**: le regole deterministiche hanno un difetto che i test casuali non trovano: **una regola che non scatta mai** e **una regola che scatta troppo spesso** si somigliano, e la seconda è più pericolosa della prima. R4 senza il vincolo di duranza non era «una regola che scatta troppo spesso»: era una regola che **rubava** il caso di R6. Il difetto è emerso solo scrivendo il **fixture di scenario** con una cronologia composta (gli scenario esistenti usano paese e dispositivo casuali, e per il contesto non hanno nessun cluster da riconoscere). La regola operativa: **un classificatore a regole si verifica con un fixture che contiene il caso ambiguo**, non con un fixture generato a caso.
+
+**§35 — esito post-merge della Story 1.6**: la PR #209 è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit `68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian). L'issue **#205** è chiusa con `status:done` (applicato da `auto-status-done`), le label `agent-ready` / `in-progress` / `status:in-review` sono rimosse e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`).
+
+La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il **fallimento noto**, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main` `68c27e5`, merge verificato via `gh`, branch remoto già assente per `auto-branch-cleanup`, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` e `auto-bundle`.
 
 ---
 
@@ -13795,12 +13821,14 @@ id: "1.6"
 title: "Fondazione geo e contesto di ascolto"
 phase: 2
 area: db
-status: in_review
+status: done
 priority: I
 depends_on: ["0.2"]
 issue: 205
 branch: "feat/205-geo-context-foundation"
 pr: 209
+merged_commit: 68c27e5
+merged_date: 2026-10-31
 claim: "kilo-HP-ELITEBOOK-q7v2"
 spec_refs:
   - docs/19-GEO-CONTEXT.md
@@ -21731,7 +21759,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: La base dati del contesto di ascolto: il delta su `02-DATA-SCHEMA.md` (v1.7, Dexie v5→v6) con i campi `city`/`citySource`/`cityConfidence` e l'entità derivata `ContextPeriod` (tabella `contexts`), i toggle `retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, e il classificatore **L1** (contesto dedotto: casa, lavoro, viaggio) come algoritmo deterministico e versionato.
 
-**Stato**: 👀 **IN REVIEW — implementata nella Sessione 68** (issue #205). Consegnato: il **delta su `02-DATA-SCHEMA.md` v1.7** (i campi `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia `CONTEXT_KINDS`, i toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e MIG-5 sul ricalcolo esplicito), il **classificatore L1** in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel`) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`). Il **delta su `02`** era ratificato come decisione ed è stato applicato **in questa story**, come avvenuto per la `21` nella Story 4.1. Dettagli e scelte dichiarate: `docs/state/stories/1.6-geo-foundation.md`.
+**Stato**: ✅ **DONE — implementata nella Sessione 68** (issue #205, PR #209 merged il 2026-10-31, merge commit `68c27e5`, branch `feat/205-geo-context-foundation`). Consegnato: il **delta su `02-DATA-SCHEMA.md` v1.7** (i campi `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia `CONTEXT_KINDS`, i toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e MIG-5 sul ricalcolo esplicito), il **classificatore L1** in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel`) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`). Il **delta su `02`** era ratificato come decisione ed è stato applicato **in questa story**, come avvenuto per la `21` nella Story 4.1. Dettagli e scelte dichiarate: `docs/state/stories/1.6-geo-foundation.md`.
 
 **Task**:
 - T1.6.1 — Applicare il delta a `02-DATA-SCHEMA.md` (v1.7): `city`/`citySource`/`cityConfidence` su `ListenEvent`, `ContextPeriod`, tabella `contexts`, toggle, migrazione Dexie v5→v6
@@ -21984,7 +22012,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
 11. **4.1** pipeline audio features (issue #188, ✅ **DONE**, PR #197 merged `7458220`) — la pipeline è **completata** (Sessione 64): cascata, provider, limiter, coda, stoccaggio, CSP e i18n (`21§4…§11`), con **142 test** in `@ls/core` e **15** in `@ls/web`. La spec è ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). Era il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: ha fornito le valence/energy senza le quali la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
-13. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1), la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto). È la **prima story lavorabile**, e il blocco NEXT-STEP del README la indica: l'aggregatore ordina le story **migrate per id**, e «1.6» viene prima di «2.2». Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
+13. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1) è **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`); restano la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto), che dipendono da lei. Era la **prima story lavorabile**, e il blocco NEXT-STEP del README la indica: l'aggregatore ordina le story **migrate per id**, e «1.6» viene prima di «2.2». Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità
 15. **3.1, 3.2, 3.3** UI
 16. **5.1, 5.2** privacy
@@ -22004,7 +22032,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 |------|-------|-------|------|
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
-| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | 👀 IN REVIEW (1.6) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **implementata e in review** (Sessione 61, issue #205) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
+| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO (1.6 completata) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
@@ -22075,6 +22103,7 @@ Ogni story deve avere label GitHub:
 | 1.6.25 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 implementata** (Pipeline audio features): il pacchetto `packages/core/src/enrichment/` è nato — **senza React** (D-AF.5), con il contratto `AudioFeatureProvider` (`fetch(track, context)`: il `Track` di `02§3.3` non porta il nome dell'artista, e la ricerca del preview lo richiede, D-AF.1), la **cascata** `cache → Essentia.js → AcousticBrainz → euristico` con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete", la **normalizzazione** DEAM `[1,9] → [0,1]` con clamp e warning (E8, `10§7`), la **derivazione** mood → valence/energy di AcousticBrainz con i pesi dichiarati (`21§7.3`, D-AF.8), il **fallback euristico** che stima tempo/ballabilità/acustica dal genere e **non** stima valence/energy (`21§8.1`), i **limiter** (MusicBrainz 1 req/s a intervallo fisso, AcousticBrainz **dagli header** `X-RateLimit-*` senza costanti, D-AF.6), la **coda** con i tre trigger, il budget di 5 min/giorno, la concurrency 1 e l'interrompibilità (`21§5.2`, D-AF.7), lo **stoccaggio** (TTL 90 giorni per AB, `schemaVersion`, LRU a 50.000 righe) e il subpath `@ls/core/enrichment`. Tutte le dipendenze esterne sono **porte iniettate** (HTTP, clock, sleep, storage, policy): i **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) non chiamano mai la rete (`10§8`). La **CSP** dichiarata in `12§2.1` è applicata al bundle (`apps/web/src/security/csp.ts` + header Vite + tag `<meta>`) e le **8 chiavi** `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en` (15 test in `@ls/web`). **Contraddizione dichiarata**: D-AF.1 impone la ricerca `GET https://itunes.apple.com/search`, ma D-AF.9 elenca in `connect-src` solo i due host che **non** sono quello della ricerca → la CSP applicata include il terzo host e il conflitto è segnalato all'issue **#196** (`needs-spec`). Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2, di cui è consegnato il limiter) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss) |
 | 1.6.26 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 completata** (Pipeline audio features, PR #197 merged, merge commit `7458220`): la sezione Story passa a ✅ **DONE** e `docs/state/stories/4.1-audio-features.md` ha `status: done` con `merged_commit` e `merged_date`; `docs/state/sessions/64-audio-features-pipeline.md` ha `state: 🟢`, `merged: true` e la sezione "Esito post-merge". La PR è stata merged in `main` il 2026-10-30T11:24:49Z con CI verde (22 step del job `quality`); l'issue **#188** è chiusa con `status:done` e le label `agent-ready`/`in-progress`/`status:in-review` rimosse da `auto-status-done`, che ha pubblicato anche il commento `release:`. Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`) e `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è stata fatta con `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con "Result too large" (path lunghi con `node_modules` su Windows) e la rimozione è passata da `rd /s /q` con prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. La riga dell'EPIC 4 nella roadmap torna a ⬚ TODO (restano 4.2, 4.3 e i generi) e il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata" — **risposta corretta**, non una regressione: le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Aperta dal lavoro l'issue **#196** (`needs-spec`): la contraddizione fra D-AF.1 e D-AF.9 sulla CSP. La **lista di priorità** degli agenti mette la 4.1 e la 2.1 come **completate** |
 | 1.6.27 | Sessione 66 (2026-10-30, issue #196) | **Ratifica del terzo host della CSP**: `docs/21-AUDIO-FEATURES.md` passa a **v1.1 🟢 APPROVED** con **D-AF.9 emendata** — `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview. La v1.0 elencava i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP applicata bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Il project owner ha ratificato l'opzione **A** (confermare il terzo host) fra le due proposte dall'issue #196: l'opzione B (rivedere D-AF.1) avrebbe lasciato la pipeline senza provider acustico. Allineati: l'AC della Story 4.1 (i **tre** host dichiarati), `12-DEVOPS.md` (v1.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti dichiarati) e i commenti del codice applicato (`apps/web/src/security/`). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 — la ratifica allinea la **dichiarazione** al codice |
+| 1.6.29 | Sessione 68 (2026-10-31, issue #205) | **§35 — esito post-merge della Story 1.6**: la PR #209 è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit `68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian) → l'issue #205 è chiusa con `status:done` e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate`, `auto-bundle`. La pulizia git locale è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il fallimento noto, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main`, merge verificato via `gh`, branch remoto già assente, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). La story 1.6 passa a ✅ **DONE** con `merged_commit` e `merged_date` nel frontmatter; la riga dell'EPIC geo nella roadmap torna a ⬚ TODO (restano **4.4** e **3.4**); il blocco NEXT-STEP del README ricade sulla **4.4**, la prima story lavorabile della tranche |
 | 1.6.28 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 implementata** (fondazione geo e contesto di ascolto): il delta su `02-DATA-SCHEMA.md` passa a **v1.7** (i tre campi derivati `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS`, i toggle `retainCountry` (**default true**: il paese è derivato e non identificativo — decisione del project owner sull'issue #108), `retainCity`/`retainDeviceDetail` (default false) e `retainDeviceType`/`deriveContext` (default true), la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e **MIG-5**: il ricalcolo del contesto è esplicito e non azzera i campi già persistiti). Il **classificatore L1** vive in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo, paese di riferimento = moda su 90gg con ≥30 eventi) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel` sopravvive al ricalcolo) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`, generato da `scripts/generate-fixtures.mjs geo`). **39 test** nuovi in `@ls/core`. Scelte dichiarate (`docs/state/stories/1.6-geo-foundation.md`): `away` come complemento di R1, R4 vincolata alla durata delle sessioni (25 minuti, la soglia di R6) perché uno spostamento ricorrente non venga classificato `home`, il viaggio riconosciuto sull'intero *run* di giorni esteri, il modulo in `context/` (il layer `analysis` è puro e non ha dipendenze dal DB), il fuso come dato in `settings` (`app.timezone`). Correzione di numerazione: l'AC citava «E22», la spec `19` dichiara **E19** |
 
 
@@ -22099,7 +22128,7 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
-| 1.6 - Fondazione geo e contesto di ascolto | in_review | #209 | - | db |
+| 1.6 - Fondazione geo e contesto di ascolto | done | #209 | `68c27e5` | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.2 - Era Detector | todo | - | - | analysis |
 | 2.3 - Event Detector | todo | - | - | analysis |

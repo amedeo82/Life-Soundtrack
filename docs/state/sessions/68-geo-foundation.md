@@ -2,8 +2,10 @@
 number: 68
 title: "Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205)"
 date: 2026-10-31
-state: 👀
-merged: false
+state: 🟢
+merged: true
+merged_commit: 68c27e5
+merged_date: 2026-10-31
 branch: feat/205-geo-context-foundation
 pr: 209
 claim: kilo-HP-ELITEBOOK-q7v2
@@ -92,3 +94,26 @@ l'AC è stato allineato a **E19** nel backlog e nello state file.
 - **UI dei toggle**: Story 3.x. I toggle esistono nello schema e sono applicati
   in scrittura; l'interfaccia che li espone è un'altra tranche.
 - **Il nastro contesto**: Story 3.4 (consuma i `ContextPeriod`).
+
+## Esito post-merge
+
+La PR **#209** è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit
+`68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README; GitGuardian). L'issue **#205** è chiusa
+con `status:done` (applicato da `auto-status-done`), le label `agent-ready` /
+`in-progress` / `status:in-review` sono rimosse e il commento `release:` è
+automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`).
+
+La **pulizia git locale** è stata eseguita con `scripts/post-merge.ps1`:
+`git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi
+con `node_modules` su Windows) e la rimozione è passata con `rd /s /q` e
+prefisso `\\?\` — il **fallimento noto**, non una regressione. I passi
+restanti sono passati: `main` allineato a `origin/main` (`68c27e5`), merge
+verificato via `gh`, branch remoto già assente (eliminato da
+`auto-branch-cleanup`), branch locale eliminato con `git branch -d`, prune +
+audit finale (`post-merge.ps1 -Check` esce 0, nessun residuo).
+
+Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`,
+`auto-state-aggregate` e `auto-bundle`. Il presente doc-sync di chiusura è in
+una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+
