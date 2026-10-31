@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.29 — Sessione 71 (2026-10-31)**
+> **Versione 1.31 — Sessione 73 (2026-10-31)**
 
 ---
 
@@ -542,8 +542,8 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] **Il body della PR contiene la keyword di chiusura come riga nuda e una sola volta** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick, fuori dalle checklist e senza ripetizioni**, così GitHub chiude l'issue al merge e `auto-status-done` non transiziona issue non collegate (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
-- [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
-- [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
+- [ ] `pwsh scripts/generate-bundle.ps1 -Check` esce con exit code 0
+- [ ] `pwsh scripts/aggregate-state.ps1 -Check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
 - [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (53 assert, T1..T14) — **gate bloccante in CI**
 - [ ] Se ho scritto una sessione: il file `docs/state/sessions/<N>-<slug>.md` ha la sezione **`## Analisi di avanzamento`** (numeri, cosa è pronto, cosa manca, salute tecnica): è ciò che il blocco `AGGREGATE-PROGRESS` rende al project owner (issue #216)
 
@@ -568,14 +568,14 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 
 **Regola operativa**: se una PR tocca codice, schema, policy o stato di story, allora tocca anche documentazione. La PR senza aggiornamenti di stato è **incompleta**.
 
-**Perché la tabella distingue aggregato da legacy**: i blocchi `AGGREGATE-*` si aggiornano da soli post-merge, quindi chiederne la modifica manuale crea solo drift e fallisce il gate `--check`. Le sezioni legacy non hanno un generatore: se un agente le ignora, invecchiano senza che nessun gate se ne accorga (è successo tra S22 e S38, issue #84 e #90). Vedi §"Chi può scrivere cosa nei file globali".
+**Perché la tabella distingue aggregato da legacy**: i blocchi `AGGREGATE-*` si aggiornano da soli post-merge, quindi chiederne la modifica manuale crea solo drift e fallisce il gate `-Check`. Le sezioni legacy non hanno un generatore: se un agente le ignora, invecchiano senza che nessun gate se ne accorga (è successo tra S22 e S38, issue #84 e #90). Vedi §"Chi può scrivere cosa nei file globali".
 
 **Doc-sync nel branch (preferito, vedi Sessione 21 D.21.1)**: il doc-sync finale (con PR number e merge commit hash) va committato nel branch della PR, NON come commit separato su `main` (vedi §"📤 Post-merge actions"). L'eccezione "commit di follow-up immediatamente successivo" è declassata a fallback sconsigliato per race con altri agenti in parallelo.
 
 **Auto-check**: prima del merge, eseguire localmente
 
 ```powershell
-pwsh scripts/generate-bundle.ps1 --check   # exit 0 = documentazione in sync
+pwsh scripts/generate-bundle.ps1 -Check   # exit 0 = documentazione in sync
 ```
 
 Se esce con exit ≠ 0, rigenerare il bundle e committarlo nella stessa PR.
@@ -602,7 +602,7 @@ Se l'audit elenca worktree attive o branch `feat/*` / `fix/*` merged-orfani, ese
 
 2. **Verifica che il bundle sia allineato** (in CI e in locale):
    ```powershell
-   pwsh scripts/generate-bundle.ps1 --check
+   pwsh scripts/generate-bundle.ps1 -Check
    ```
    Exit code 0 = in sync, 1 = da rigenerare, 2 = file dichiarati mancanti.
 
@@ -612,7 +612,7 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 
 ### 📦 D.26.3 — Bundle regeneration obbligatoria in stessa PR *(lesson learned)*
 
-**Regola**: ogni PR che modifica il **contenuto** di uno qualsiasi dei file elencati in `$files` (`docs/`, `AGENTS.md`, `README.md`, `fixtures/` foundational, `scripts/*`, `LICENSE`) **deve rigenerare `docs/BUNDLE.md` nello stesso commit** (o in un commit di follow-up immediato prima del merge), per evitare il fail di `pwsh scripts/generate-bundle.ps1 --check` in CI.
+**Regola**: ogni PR che modifica il **contenuto** di uno qualsiasi dei file elencati in `$files` (`docs/`, `AGENTS.md`, `README.md`, `fixtures/` foundational, `scripts/*`, `LICENSE`) **deve rigenerare `docs/BUNDLE.md` nello stesso commit** (o in un commit di follow-up immediato prima del merge), per evitare il fail di `pwsh scripts/generate-bundle.ps1 -Check` in CI.
 
 **Perché è importante**: il check del bundle è un **CI gate bloccante** (vedi `docs/12-DEVOPS.md §9` + §"📝 Checklist di auto-revisione PR" riga "BUNDLE check exit 0"). Una PR che modifica `AGENTS.md` senza rigenerare `BUNDLE.md` fallirà la pipeline quality anche se il codice di per sé è corretto, costringendo a un commit di fix che prolunga il ciclo di review.
 
@@ -620,7 +620,7 @@ Non serve intervenire sullo script se modifichi solo il **contenuto** di un file
 
 ```powershell
 # Dopo aver modificato qualsiasi file in scope del bundle:
-pwsh scripts/generate-bundle.ps1 --check   # verifica locale: deve uscire 0
+pwsh scripts/generate-bundle.ps1 -Check   # verifica locale: deve uscire 0
 
 # Se esce != 0:
 pwsh scripts/generate-bundle.ps1            # rigenera
@@ -629,9 +629,9 @@ git commit --amend                          # o commit separato nella stessa PR
 git push
 ```
 
-**Lezione operativa D.26.3 (Sessione 26, 2026-10-19, durante estensione di PR #44)**: l'agente ha modificato `AGENTS.md` (v1.6 → v1.7, D.26.1 + D.26.2) senza rigenerare `docs/BUNDLE.md`. La 1a run di CI quality è fallita con `pwsh scripts/generate-bundle.ps1 --check` → `docs/BUNDLE.md non è in sync`. Fix richiesto: 3° commit della PR ha rigenerato il bundle (+8139 byte) e portato la pipeline a verde. **Costo evitabile**: ~5 minuti di review extra + rumore nella history della PR.
+**Lezione operativa D.26.3 (Sessione 26, 2026-10-19, durante estensione di PR #44)**: l'agente ha modificato `AGENTS.md` (v1.6 → v1.7, D.26.1 + D.26.2) senza rigenerare `docs/BUNDLE.md`. La 1a run di CI quality è fallita con `pwsh scripts/generate-bundle.ps1 -Check` → `docs/BUNDLE.md non è in sync`. Fix richiesto: 3° commit della PR ha rigenerato il bundle (+8139 byte) e portato la pipeline a verde. **Costo evitabile**: ~5 minuti di review extra + rumore nella history della PR.
 
-**Auto-check pre-push** (rafforzativo di D.4): il pre-push hook di `.githooks/pre-push` esegue già `generate-bundle.ps1 --check` e blocca il push se drift. Se bypassi il hook con `LIFE_SOUNDTRACK_SKIP_HOOKS=1` (emergenza), esegui manualmente il check prima del merge.
+**Auto-check pre-push** (rafforzativo di D.4): il pre-push hook di `.githooks/pre-push` esegue già `generate-bundle.ps1 -Check` e blocca il push se drift. Se bypassi il hook con `LIFE_SOUNDTRACK_SKIP_HOOKS=1` (emergenza), esegui manualmente il check prima del merge.
 
 ## 🗺️ Struttura del repository
 
@@ -783,9 +783,9 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
 4. **Verifica statale post-merge** (sostituisce l'ex "Verifica statale post-merge" v1.7):
      ```powershell
      # 4a. Aggregator in sync (post GH Action auto-state-aggregate)
-     pwsh scripts/aggregate-state.ps1 --check
+     pwsh scripts/aggregate-state.ps1 -Check
      # 4b. Bundle in sync
-     pwsh scripts/generate-bundle.ps1 --check
+     pwsh scripts/generate-bundle.ps1 -Check
      # 4c. Nessun residuo post-merge (worktree attive, branch merged, main locale stale)
      pwsh scripts/post-merge.ps1 -Check    # exit 14 se c'e' da pulire, 0 se pulito
      ```
@@ -824,7 +824,7 @@ La regola sopra vieta di toccare i **file** globali. Ma questi file contengono d
 
 | Tipo di contenuto | Dove si trova | Chi lo scrive | Regola |
 |---|---|---|---|
-| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 --check` fallisce (gate CI) e `auto-state-aggregate` sovrascrive il diff |
+| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 -Check` fallisce (gate CI) e `auto-state-aggregate` sovrascrive il diff |
 | **Sezioni legacy** | tutto il resto: prosa, tabelle statiche, changelog, `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" di `11-BACKLOG.md`, `18-DEV-LOG.md` | **l'agente**, nella stessa PR che cambia i fatti che dichiarano | **Allinearle è obbligatorio**, non facoltativo: se la sezione dichiara uno stato, un conteggio, una versione o un riferimento che la tua PR cambia, aggiornala in quella PR |
 
 **Non è un allargamento di ADR-0008**: i blocchi aggregati restano vietati. La regola riguarda le sezioni legacy, che non hanno alcun generatore e quindi nessuno le aggiorna al posto tuo.
@@ -912,12 +912,15 @@ Esempi: `docs/state/sessions/22-pwa.md`, `docs/state/stories/0.5-pwa.md`. Schema
 ### Aggregator
 
 ```powershell
-pwsh scripts/aggregate-state.ps1 --list       # audit: cosa verrebbe letto/scritto
-pwsh scripts/aggregate-state.ps1 --check      # CI gate: --check exit 0 = in sync
-pwsh scripts/aggregate-state.ps1 --check --strict  # fallisce anche sul drift "lenient"
-pwsh scripts/aggregate-state.ps1 --dry-run    # preview senza scrivere
-pwsh scripts/aggregate-state.ps1              # scrivi (idempotente: 0 diff se nulla e' cambiato)
+pwsh scripts/aggregate-state.ps1 -List       # audit: cosa verrebbe letto/scritto
+pwsh scripts/aggregate-state.ps1 -Check      # CI gate: exit 0 = in sync
+pwsh scripts/aggregate-state.ps1 -DryRun     # preview senza scrivere
+pwsh scripts/aggregate-state.ps1            # scrivi (idempotente: 0 diff se nulla e' cambiato)
 ```
+
+> **Forma dei flag**: il **singolo trattino** (`-Check`, `-List`, `-DryRun`) è la forma canonica. Il doppio trattino (`--check`) funziona **solo** sotto PowerShell 7, dove viene normalizzato sul singolo prima del binding: con Windows PowerShell 5.1 ricade in modalità WRITING (fail-open, issue #104) e con un flag inesistente esce **2** (errore di parametro), non 1 (drift). Baseline del repo: **PowerShell 7 (`pwsh`)** — vedi `docs/12-DEVOPS.md §9.1` e `§9.7b`.
+>
+> **Nota**: il flag `-Strict` citato nelle versioni precedenti di questo file **non esiste** in `scripts/aggregate-state.ps1`: il parametro non è dichiarato e il guard fail-closed lo rifiuta con exit 2. Non usarlo.
 
 CI gate bloccante in `.github/workflows/ci.yml` (introdotto in #51). Se la PR modifica solo `docs/state/`, lo script esce 0 e non blocca. Se per errore un agente modifica direttamente `SESSIONS.md`, `BACKLOG.md`, `INDEX.md` o `BUNDLE.md`, lo script rileva drift e fallisce.
 
@@ -930,8 +933,8 @@ L'aggregator è la linfa dorsale del workflow parallelo: se produce output diver
 | **Ordinamento per valore** (sessioni per `Number`, story per `[version]$Id`, tie-break su `Base`) | L'ordine di enumerazione del filesystem non è garantito: senza sort per valore lo stesso input produceva `0.3,0.5,0.6` su Linux e `0.6,0.5,0.3` su Windows | T1, T2, T6 |
 | **Idempotenza byte-identica** (il timestamp `Ultima aggregazione` viene riusato quando il blocco non cambia altro): `Apply-Blocks` confronta il blocco calcolato con quello su disco **a parità del campo mutabile** e, se coincidono, riusa il valore esistente (`Get-NormalizedBlock` + `Sync-MutableTimestamp`) | Senza questo, ogni run produceva un diff e `auto-state-aggregate` committava a vuoto su `main`. **Issue #142**: la normalizzazione esisteva solo in `-Check`, quindi il path di scrittura ristampava `Get-Date` e T3 falliva a intermittenza quando i due run strappavano il confine di minuto (run `39818043647`) | T3, **T11** |
 | **Degradazione invece di crash** su file `state/` malformati (`Get-Frontmatter`) | Un singolo file corrotto faceva crashare l'intera aggregazione, bloccando anche il workflow post-merge | T5 (più il guard `Get-Frontmatter`) |
-| **`Dimensione totale` indipendente dai file riscritti dall'aggregator** (issue #86, opt A): i 4 file aggregator-managed (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`) sono esclusi dal calcolo della taglia nel blocco BUNDLE inventory, perche' vengono misurati **prima** della riscrittura e oscillano di 1-2 run dopo ogni merge | Senza esclusione: `--check` su main appena mergato segnalava "blocco drift" con blocchi della stessa lunghezza e contenuto identico (rumore puro). Il drift era in `766.6 KB` vs `764.2 KB` su main = 2.4 KB = drift dei 4 file aggregator-managed tra due run consecutivi | T7 (3 assert) |
-| **`Dimensione totale` coerente cross-platform** (issue #88): il calcolo normalizza CRLF->LF via `Get-Content -Raw` + `GetByteCount(($text -replace "`r`n","`n"))`, in modo che la dimensione sia la stessa su Windows (`core.autocrlf=true`, 14 file CRLF sul disco) e su Linux (LF committed). Senza normalizzazione, `--check` su Windows mostrava un drift spurio di ~2.3 KB rispetto a origin/main | Conseguenza dell'autocrlf Windows: la dimensione su disco (CRLF) divergeva dai byte committed (LF) per ognuno dei 14 file di testo con EOL conversion abilitata; il `Get-Item .Length` riportava i byte CRLF. Il fix trasforma l'aggregator in cross-platform-deterministic, chiudendo la radice del warning `#63` (PS 5.1 vs 7 incompatibilita residue) per il blocco BUNDLE | T8 (3 assert) |
+| **`Dimensione totale` indipendente dai file riscritti dall'aggregator** (issue #86, opt A): i 4 file aggregator-managed (`SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`, `BUNDLE.md`) sono esclusi dal calcolo della taglia nel blocco BUNDLE inventory, perche' vengono misurati **prima** della riscrittura e oscillano di 1-2 run dopo ogni merge | Senza esclusione: `-Check` su main appena mergato segnalava "blocco drift" con blocchi della stessa lunghezza e contenuto identico (rumore puro). Il drift era in `766.6 KB` vs `764.2 KB` su main = 2.4 KB = drift dei 4 file aggregator-managed tra due run consecutivi | T7 (3 assert) |
+| **`Dimensione totale` coerente cross-platform** (issue #88): il calcolo normalizza CRLF->LF via `Get-Content -Raw` + `GetByteCount(($text -replace "`r`n","`n"))`, in modo che la dimensione sia la stessa su Windows (`core.autocrlf=true`, 14 file CRLF sul disco) e su Linux (LF committed). Senza normalizzazione, `-Check` su Windows mostrava un drift spurio di ~2.3 KB rispetto a origin/main | Conseguenza dell'autocrlf Windows: la dimensione su disco (CRLF) divergeva dai byte committed (LF) per ognuno dei 14 file di testo con EOL conversion abilitata; il `Get-Item .Length` riportava i byte CRLF. Il fix trasforma l'aggregator in cross-platform-deterministic, chiudendo la radice del warning `#63` (differenza di **piattaforma**) per il blocco BUNDLE | T8 (3 assert) |
 
 ```bash
 bash scripts/test-aggregate-determinism.sh    # 53 assert (T1..T14), gate bloccante in CI
@@ -939,7 +942,7 @@ bash scripts/test-aggregate-determinism.sh    # 53 assert (T1..T14), gate blocca
 
 **T3 da solo non basta** *(issue #142)*: verifica l'idempotenza con due run ravvicinati, ma il timestamp ha granularità al minuto — se i due run cadono su minuti diversi il test fallisce **per l'orologio, non per il codice** (è successo sul run `39818043647`, 16:55 → 16:56). **T11** verifica la stessa garanzia senza orologio: semina un *sentinel* nella riga del timestamp, esegue l'aggregator e verifica che il valore venga riusato; la contro-prova verifica che il timestamp si aggiorni quando il blocco cambia davvero. Stessa struttura per `> Data:` in `test-bundle-check-idempotent.sh` (T7).
 
-**Se tocchi `scripts/aggregate-state.ps1`, il test è bloccante**: eseguilo prima di aprire la PR. Il gate `-Check` resta warning-only in CI per incompatibilità residue PS 5.1 vs 7 (issue #63, risolto strutturalmente da #66); il test di determinismo copre invece la stessa classe di bug in modo affidabile, perché confronta l'output **dentro la stessa piattaforma**.
+**Se tocchi `scripts/aggregate-state.ps1`, il test è bloccante**: eseguilo prima di aprire la PR. Il gate `-Check` resta warning-only in CI per l'incompatibilità **residua di piattaforma** (dev Windows vs CI Linux, issue #63 risolto strutturalmente da #66): l'asse **versione di PowerShell** è chiuso dal baseline **PowerShell 7 (`pwsh`)** (Sessione 71) — dev e CI girano lo stesso engine. Il test di determinismo copre la stessa classe di bug in modo affidabile, perché confronta l'output **dentro la stessa piattaforma**.
 
 ### Allocazione numero di sessione *(vincolante, issue #105)*
 
@@ -974,13 +977,13 @@ Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` s
 - [ ] Ho allineato le **sezioni legacy** dei file globali che la mia PR rende false (vedi §"Chi può scrivere cosa nei file globali")
 - [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
 - [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
-- [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 --check` localmente: exit 0
+- [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 -Check` localmente: exit 0
 - [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (determinismo + idempotenza, issue #70)
 - [ ] Se ho aggiunto un nuovo file in `docs/state/` o `scripts/aggregate-state.ps1`, ho aggiornato `scripts/generate-bundle.ps1` `$files` + rigenerato `BUNDLE.md`
 
 ## 🛡️ Session start checklist
 
-Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti **5 check** per catturare precocemente i failure mode del parallelismo:
+Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti **6 check** per catturare precocemente i failure mode del parallelismo:
 
 ```powershell
 git status                          # working tree clean? (F3, F5)
@@ -988,9 +991,14 @@ git branch --show-current           # sul branch giusto? (F1)
 git fetch origin && git status -uno # main stale? (F4)
 gh issue view <N> --jq .state       # issue ancora nostra e aperta? (F7)
 git worktree list                   # non in worktree di un altro agente? (F8, post-#54)
+pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'  # PowerShell 7? (F9, Sessione 71)
 ```
 
-Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+
+**F9 — PowerShell 7 (`pwsh`) è il baseline del repo** *(Sessione 71, rafforzato dalla Sessione 72)*: gli script in `scripts/*.ps1` si invocano con `pwsh`. Sotto Windows PowerShell 5.1 il doppio trattino non viene normalizzato e i gate con `--check` ricadono silenziosamente in modalità WRITING (fail-open, issue #104): verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output. La forma canonica dei flag resta a **singolo trattino** (`-Check`, `-List`, `-DryRun`). Vedi `docs/12-DEVOPS.md §9.1`.
+
+**F9-bis — `powershell` (5.1) non è un fallback: è un rischio di corruzione** *(Sessione 72)*. I `.ps1` del repo sono UTF-8 **senza BOM** e contengono letterali non-ASCII: sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e i blocchi calcolati non corrispondono più a quelli su disco (`aggregate-state.ps1 -Check` esce **1** con drift spurio: attesi 620 caratteri, trovati 616) — e in modalità scrittura il mojibake verrebbe **scritto** nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`). Regole: (a) scrivere **`pwsh`** per esteso, mai `powershell`; (b) eseguire il check F9 **prima** di qualunque `.ps1`; (c) i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito). Dettagli e misure: `docs/12-DEVOPS.md §9.12`, `docs/17-DEV-NOTES.md` P12.
 
 **Opzionale (se si ritorna dopo un merge di un altro agente)**: audit dei residui post-merge prima di iniziare lavoro nuovo — exit 14 indica branch/worktree merged-orfani da pulire con `pwsh scripts/post-merge.ps1 -Check` (vedi §"♻️ Pulizia branch post-merge").
 
@@ -1003,15 +1011,31 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.29 — il project owner chiedeva un indicatore di avanzamento **automatico** ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si sarebbe letto ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 64% — 18 done, 10 step rimanenti. Aggiunti:
+*Ultimo aggiornamento: v1.31 — **l'indicatore di avanzamento automatico** (Sessione 73, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 64% — 18 done, 10 step rimanenti. Aggiunti:
 - `scripts/aggregate-state.ps1` **V4**: blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con percentuale (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), `X/Y` completate, **Z step rimanenti**, tabella per EPIC, elenco degli step, **gate di testabilità** (e2e = EPIC 3, motore = EPIC 2, dati reali = 5.2) e l'**analisi della sessione corrente**; modalità read-only `-Progress` (`pnpm run progress`)
 - **Fail-closed del denominatore**: uno state file che il backlog non dichiara ⇒ exit 2 con i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale
 - `docs/state/sessions/<N>-<slug>.md`: nuova sezione **`## Analisi di avanzamento`**, resa dentro il blocco — l'analisi narrativa e i numeri calcolati nello stesso posto, senza doppio lavoro
 - `.github/workflows/auto-state-aggregate.yml`: `docs/11-BACKLOG.md` nei `paths:` (il blocco dipende dal catalogo)
-- `scripts/validate-workflows.mjs`: **sesto** controllo — i `paths:` del workflow devono coprire tutti gli input del blocco PROGRESS; senza, l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio
-- `scripts/test-aggregate-determinism.sh`: **T12** (numeri e denominatore), **T12b** (analisi resa), **T13** (fail-closed: exit non-zero, messaggio, nessuna scrittura), **T14** (idempotenza + scenario negativo sui trigger)
-- `docs/12-DEVOPS.md` §9.8h (nuova) + changelog 1.3; `docs/state/_index.md` (schema + aggregazione); `docs/18-DEV-LOG.md` §38; `docs/BUNDLE.md` rigenerato
+- `scripts/validate-workflows.mjs`: **sesto** controllo — i `paths:` del workflow devono coprire tutti gli input del blocco PROGRESS; senza, l'indicatore resterebbe fermo con un denominatore vecchio, in silenzza
+- `scripts/test-aggregate-determinism.sh`: **T12** (numeri e denominatore), **T12b** (analisi resa), **T13** (fail-closed: exit non-zero, messaggio, nessuna scrittura), **T14** (idempotenza + scenario negativo sui trigger) — 53 assert in tutto
+- `docs/12-DEVOPS.md` §9.8h (nuova) + changelog 1.5; `docs/state/_index.md` (schema + aggregazione); `docs/18-DEV-LOG.md` §38; `docs/BUNDLE.md` rigenerato
 - `package.json`: script `progress`
+- **Rinumerazione della sessione 71 → 73**: il branch è partito quando la Sessione 71 era ancora libera; nel frattempo `main` ha preso la 71 (baseline `pwsh`) e la 72 (audit procedure). La numerazione delle sessioni è **univoca** (issue #105) ⇒ il file è stato rinumerato in `docs/state/sessions/73-progress-indicator.md` e il suo `number:` aggiornato. Le forme dei flag nel corpo del protocollo sono allineate alla **canonica a singolo trattino** (`-Check`, `-List`, `-DryRun`, `-Progress`): il `--check` che la checklist di questa versione riportava è un residuo della v1.29 e l'ho convertito.
+- **`scripts/generate-bundle.ps1`**: `$files` riallineata alle sessioni effettivamente presenti — `71-powershell-7-baseline.md`, `72-audit-procedure-automatiche-pwsh-encoding.md` (assente da `main`: il bundle non la includeva) e `73-progress-indicator.md`.
+
+*Precedente v1.30 — **la provenienza e il confine di encoding di `pwsh`** (Sessione 72). La Sessione 71 aveva dichiarato il baseline (PowerShell 7) ma non aveva risolto due cose: **da dove arriva l'installazione** e **cosa succede se si usa 5.1 per sbaglio**. Verificato il 2026-10-31: `pwsh` **7.6.9** è un pacchetto **MSIX/Store** (`Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`), esposto via alias per-utente in `WindowsApps`; non è un MSI (`C:\Program Files\PowerShell\7` assente, nessuna voce nel registro) ed è visibile anche da Git Bash, quindi il `pre-push` rigenera il bundle con l'engine corretto. Il confine: i `.ps1` del repo sono UTF-8 **senza BOM** con letterali non-ASCII ⇒ sotto 5.1 il **parsing** li sovradecodifica e `aggregate-state.ps1 -Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in scrittura il mojibake finirebbe nei file globali. Aggiunti:
+- **§"🛡️ Session start checklist"**: nuovo **F9-bis** — `powershell` (5.1) non è un fallback accettabile ma un rischio di corruzione; `pwsh` va scritto per esteso, il check F9 va eseguito prima di qualunque `.ps1`, e i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito)
+- **`docs/12-DEVOPS.md` §9.12** (nuova): provenienza dell'installazione con i comandi di verifica, matrice misurata PS7 vs PS5.1 sui due generatori, e la distinzione fra **parsing** (version-dipendente, BOM) e **scrittura** (version-indipendente, `WriteAllText` + `UTF8Encoding($false)`). La motivazione dei due gate warning-only si riduce a «piattaforma»; la loro promozione a bloccante resta **decisione del project owner** (D.71.4)
+- **`docs/12-DEVOPS.md` §9.13** (nuova): audit della copertura CI delle suite locali — 5 suite in `scripts/` **non** eseguite da `ci.yml`, con tempi misurati e i difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ «0 passati, 0 falliti» e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 stale e S5 che muta il working tree, `test-setup-worktree.sh` fallisce su Windows/Git Bash. I due gate più pesanti (116,4 s su ~213 s) sono indipendenti e parallelizzabili
+- **`docs/13-ADR/0008`**: il vincolo «ASCII-only nel codice PowerShell» viene corretto — riguarda il **parsing del sorgente**, non solo la scrittura; stato misurato: `aggregate-state.ps1` oggi lo **viola** (9 righe non-ASCII, nessun BOM) e il fix è manutenzione dello script, decisione del project owner
+- **`docs/17-DEV-NOTES.md`** (v0.5): nuovo **P12** — provenienza di `pwsh`, comandi di verifica, e i due failure modes distinti (drift spurio in `-Check`, corruzione in scrittura) con la relativa causa (encoding del sorgente)
+
+*Precedente v1.29 — **PowerShell 7 (`pwsh`)** è il baseline del repo per gli script in `scripts/*.ps1` (Sessione 71). La situazione di partenza: `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1 — il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `§9.7b` descriveva il fail-open dell'issue #104 come se fosse il caso normale. Il drift è la classe di problema che questo repo già sa riconoscere: **nessun gate confronta la documentazione con l'ambiente reale**. Correzioni:
+- **Forma canonica dei flag**: il **singolo trattino** (`-Check`, `-List`, `-DryRun`, `-Help`) è ormai la forma usata in tutto il file. I `--check` sparsi nel corpo del protocollo erano un residuo: il footer v1.20 dichiarava già «tutti i `pwsh scripts/* --check` convertiti a `-Check` (issue #104, PR #111 gia' aperta)», ma la conversione non era stata applicata al corpo del file — il protocollo diceva una cosa e ne faceva un'altra. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo **prima** del binding), quindi il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente
+- **§"🔄 Lazy-state aggregation" → Aggregator**: il blocco dei comandi usa `-List` / `-Check` / `-DryRun`. Rimossa la riga `--check --strict`: il flag **`-Strict` non esiste** in `scripts/aggregate-state.ps1` (il parametro non è dichiarato) e il guard fail-closed lo rifiuta con exit 2 — la riga indicava un comando che non può funzionare. Aggiunta la nota esplicita
+- **§"🛡️ Session start checklist"**: estesa a **6 check** con `pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'` (F9). Un check che passa sempre non è un gate (lesson 43-1): senza questo, l'ambiente PowerShell sbagliato viene scoperto solo quando un gate riscrive un file invece di verificarlo
+- **§"Determinismo e idempotenza"**: la motivazione del warning-only dei due gate CI è riformulata — l'asse **versione di PowerShell** è chiuso (dev e CI girano lo stesso engine), resta quello di **piattaforma** (dev Windows vs CI Linux). La semantica dei gate in CI **non** cambia
+- `README.md`, `docs/17-DEV-NOTES.md` (nuovo **P11**), `docs/12-DEVOPS.md` (§9.1, §9.7b, §9.8, changelog 1.3), `docs/13-ADR/0008` (vincoli implementativi), `docs/13-ADR/0006`, `docs/state/_index.md`, `docs/11-BACKLOG.md` allineati
 
 *Precedente v1.28 — il blocco NEXT-STEP del README indicava una story **bloccata** (issue #182). `scripts/aggregate-state.ps1` filtra ora anche `blocked` (STOP) e `wontdo` (NO) accanto a `done`: il blocco indica la prima story **lavorabile**, non una dipendenza esterna irrisolvibile. Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle audio features dell'EPIC 4.1 (decisione D-A.1, Sessione 59) e il puntatore era finito su di lei, mentre la story implementabile era la 2.4 (Memory Engine, issue #179). La regola è coperta da due sub-test nuovi in `scripts/test-aggregate-determinism.sh` (T10e, T10f) che **falliscono senza il fix**: un gate che passa sempre non è un gate (lesson 43-1). Il messaggio di fallback e la riga delle "altre candidate" dicono ora "non-done e non bloccate".
 

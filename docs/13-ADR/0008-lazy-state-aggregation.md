@@ -61,16 +61,19 @@ Estensioni future previste (V2): `docs/INDEX.md` "Stato del progetto" + "Roadmap
 
 ### Script aggregator
 
-`scripts/aggregate-state.ps1`:
-- `--list` — elenca i sorgenti e i target gestiti
-- `--check` — verifica sincronia, exit 0 se allineato, 1 se drift (CI gate)
-- `--dry-run` — calcola ma non scrive
+`scripts/aggregate-state.ps1` (da invocare con **PowerShell 7 / `pwsh`**):
+- `-List` — elenca i sorgenti e i target gestiti
+- `-Check` — verifica sincronia, exit 0 se allineato, 1 se drift (CI gate)
+- `-DryRun` — calcola ma non scrive
 - default — applica i blocchi calcolati (idempotente)
 
 Vincoli implementativi (lesson consolidata in `docs/state/_index.md` §"Aggregazione"):
 - Idempotenza (riproducibile)
 - UTF-8 senza BOM per compatibilità cross-platform (lesson 0.1-7)
-- ASCII-only nel codice PowerShell (PS 5.1 + UTF-8 no BOM = corruption di caratteri non-ASCII)
+- **Scrittura** — indipendente dalla versione: le scritture passano da `[System.IO.File]::WriteAllText` con `UTF8Encoding($false)`, che evita BOM e CRLF (in 5.1 la scrittura con `Set-Content -Encoding UTF8` aggiungeva il BOM e corrompeva i caratteri non-ASCII — lesson 37-5, 69-5)
+- **Parsing** — *dipendente* dalla versione: un file `.ps1` **senza BOM** viene letto da PowerShell 5.1 come ANSI (Windows-1252) e da PowerShell 7 come UTF-8. I letterali non-ASCII presenti nel **sorgente** diventano quindi mojibake sotto 5.1 (`—` → `â€”`, 3 caratteri invece di 1) *prima* di eseguire qualsiasi logica. I `.ps1` del repo restano quindi **ASCII-only** (oppure con BOM UTF-8 esplicito): la regione "encoding" copre il sorgente, non solo il file prodotto
+  - Stato misurato il 2026-10-31: `scripts/aggregate-state.ps1` **non** ha BOM e contiene 9 righe con caratteri non-ASCII (`—`, `§`, `→`, `✅`, `❌`). Sotto 5.1 il blocco NEXT-STEP del `README.md` viene calcolato con i letterali corrotti → `aggregate-state.ps1 -Check` esce **1** con drift spurio (attesi 620 caratteri, trovati 616) e in **modalità scrittura** il mojibake verrebbe scritto nei file globali (lesson 36-6, 69-5). Sotto `pwsh` 7 lo stesso comando esce **0**. Il fix (rimuovere i letterali non-ASCII dal sorgente, oppure aggiungere il BOM) è una decisione di manutenzione dello script: finché non è applicato, **5.1 non è un ambiente sicuro per l'aggregator**
+- **Baseline PowerShell 7 (`pwsh`)** (Sessione 71): in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding, quindi `-Check` e `--check` sono equivalenti. La forma **canonica** resta a singolo trattino: è l'unica che si comporta allo stesso modo su 5.1 e 7, ed è quella che il guard fail-closed dell'issue #104 indica come corretta (un flag non riconosciuto esce **2**, non 1)
 
 ### GH Action
 
@@ -109,12 +112,12 @@ L'eccezione "PR di introduzione policy" si applica **solo a questa PR** (PR #24 
 
 - **Costo iniziale**: agenti devono imparare la nuova policy + scrivere frontmatter. Mitigazione: template in `docs/state/_index.md` §"Schema frontmatter" + lesson in `17-DEV-NOTES.md` P10 (nuovo).
 - **Migration storica**: ~25 sessioni + ~7 story Phase 0 da migrare. V1 include solo S22, S23, S24 + stories 0.5, 0.6 (le più recenti e dimostrative). Le altre restano nel file legacy fino a V2.
-- **Dipendenza da GH Action**: se l'azione fallisce, lo stato resta drift. Mitigazione: non-bloccante + log warning + auto-check in CI (`pwsh scripts/aggregate-state.ps1 --check` su ogni PR).
+- **Dipendenza da GH Action**: se l'azione fallisce, lo stato resta drift. Mitigazione: non-bloccante + log warning + auto-check in CI (`pwsh scripts/aggregate-state.ps1 -Check` su ogni PR).
 - **PR di introduzione S25**: l'unica che tocca `INDEX/SESSIONS/BACKLOG` direttamente. Dopo S25 vietato.
 
 ### Mitigazioni
 
-- Pre-push hook esteso (D3) **NON blocca** le PR che modificano solo `state/`; `--check` aggregator opzionale ma raccomandato (vedi `AGENTS.md` aggiornato).
+- Pre-push hook esteso (D3) **NON blocca** le PR che modificano solo `state/`; `-Check` aggregator opzionale ma raccomandato (vedi `AGENTS.md` aggiornato).
 - ADR-0006 esteso (futuro V2) per check pre-claim: "issue N tocca area X, area X ha file globali? → suggerisci `state/<X>/` invece di edit diretto". Per ora: convention + checklist PR.
 - ADR-0007 invariato: `status:*` post-claim funziona indipendentemente.
 
@@ -125,7 +128,7 @@ L'eccezione "PR di introduzione policy" si applica **solo a questa PR** (PR #24 
 1. ✅ `docs/state/_index.md` con README gerarchia e schema frontmatter
 2. ✅ `docs/state/sessions/{22-pwa, 23-fix-hook, 24-i18n}.md` (3 file seed)
 3. ✅ `docs/state/stories/{0.5-pwa, 0.6-i18n}.md` (2 file seed)
-4. ✅ `scripts/aggregate-state.ps1` (`--list`, `--check`, `--dry-run`, default)
+4. ✅ `scripts/aggregate-state.ps1` (`-List`, `-Check`, `-DryRun`, default)
 5. ✅ `.github/workflows/auto-state-aggregate.yml` (trigger push to main, non-bloccante)
 6. ✅ `docs/13-ADR/0008-lazy-state-aggregation.md` (questo ADR)
 7. ✅ `AGENTS.md` §"Post-merge actions" → §"Lazy-state aggregation (D.24.x)" aggiornata
@@ -150,7 +153,7 @@ Caso speciale del pattern ADR-0008: invece di estendere un altro file globale, V
 4. Migration: `state/stories/0.1-monorepo-setup.md`, `0.2-schema-db-dexie.md` (entrambe `done`) + `1.1-adapter-youtube-music.md` (prima non-done, alimenta il blocco).
 5. Regola di ownership ADR-0008 estesa: il blocco NEXT-STEP del `README.md` segue la stessa policy "mai a mano, solo aggregator" dei blocchi V1+V2.
 
-Perché è V3 e non un'eccezione one-shot: il pattern è identico ("marker + Build function + target"), la copertura di test è garantita dal `aggregate-state.ps1 --check` (gate CI esistente), e zero overhead per il workflow agenti.
+Perché è V3 e non un'eccezione one-shot: il pattern è identico ("marker + Build function + target"), la copertura di test è garantita dal `aggregate-state.ps1 -Check` (gate CI esistente), e zero overhead per il workflow agenti.
 
 ## Riferimenti
 

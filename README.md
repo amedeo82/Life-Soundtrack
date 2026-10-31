@@ -117,8 +117,6 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 Sorgente: `docs/state/stories/3.4-context-ribbon.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 4.4.
-
 <!-- AGGREGATE-NEXT-STEP-END -->
 
 Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md".
@@ -134,7 +132,7 @@ Il blocco **non conosce le dipendenze** fra story: la story indicata può dipend
 
 ## 🛠️ Sviluppo locale
 
-Requisiti: Node ≥ 20, pnpm 9 (pinnato in `packageManager`).
+Requisiti: Node ≥ 20, pnpm 9 (pinnato in `packageManager`), **PowerShell 7 (`pwsh`)** per gli script di maintenance del repo (`scripts/*.ps1`).
 
 ```bash
 pnpm install          # installa il workspace e attiva i git hook
@@ -147,7 +145,12 @@ pnpm run e2e          # Playwright (prima volta: pnpm exec playwright install ch
 
 Non esiste ancora uno script `dev`: per un preview locale esegui `pnpm run build` e poi `pnpm --filter @ls/web exec vite preview`.
 
-> ⚠️ **PowerShell 5.1 (Windows senza `pwsh`)**: i gate `scripts/aggregate-state.ps1 -Check` e `scripts/generate-bundle.ps1 -Check` richiedono il **singolo trattino**. Il doppio trattino (`--check`) esce 2 con il call operator `&` a partire da issue #104; vedi `docs/12-DEVOPS.md §9.7b`.
+> **PowerShell 7 (`pwsh`)**: gli script di maintenance del repo (`scripts/*.ps1`) vanno invocati con `pwsh`, non con `powershell` (Windows PowerShell 5.1). In `pwsh` il doppio trattino viene normalizzato sul singolo, ma la forma **canonica** resta quella a singolo trattino (`-Check`): è l'unica che non cambia comportamento se il gate viene invocato da una shell 5.1. Vedi `docs/12-DEVOPS.md §9.1`.
+>
+> ```powershell
+> pwsh scripts/generate-bundle.ps1 -Check   # docs/BUNDLE.md in sync? exit 0 = in sync
+> pwsh scripts/aggregate-state.ps1 -Check   # blocchi aggregati in sync? exit 0 = in sync
+> ```
 
 ## 🤝 Come contribuire
 

@@ -38,3 +38,17 @@ export const ITUNES_AUDIO_HOST = 'https://audio-ssl.itunes.apple.com';
  * **D-AF.9 è emendata** nella v1.1 della spec e questo host è ora dichiarato.
  */
 export const ITUNES_SEARCH_HOST = 'https://itunes.apple.com';
+
+/**
+ * L'host di download del database DB-IP Lite City (MMDB, CC BY 4.0) —
+ * `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 (Story 4.4).
+ *
+ * È l'host da cui si scarica on-demand il `.mmdb` per la derivazione L2
+ * (città stimata dall'IP). Non contiene dati dell'utente: è un file pubblico
+ * richiesto dall'utente, e l'unica rete ammessa per il modulo geo.
+ *
+ * Dichiarato nella CSP applicata al bundle nella Story 4.4, con la stessa
+ * disciplina con cui D-AF.9 è stata emendata (issue #196): la spec e la CSP
+ * applicata devono dire la stessa cosa.
+ */
+export const DBIP_HOST = 'https://download.db-ip.com';

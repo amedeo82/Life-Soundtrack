@@ -7,17 +7,19 @@
  * come **costante applicabile**, così header e `<meta>` non possono
  * divergere (una CSP che "si ricorda a memoria" in due posti diverge).
  *
- * I **tre** host aggiunti dalla pipeline sono gli **unici** consentiti in
- * `connect-src` oltre a MusicBrainz:
+ * I **quattro** host aggiunti in `connect-src` oltre a MusicBrainz:
  *
  * - `https://acousticbrainz.org` — il bonus sui recording con MBID;
  * - `https://audio-ssl.itunes.apple.com` — il download dell'anteprima audio
  *   di 30 s, analizzata **in locale** (i byte non escono dal dispositivo);
  * - `https://itunes.apple.com` — la ricerca che restituisce il `previewUrl`
- *   (D-AF.1: senza di essa il ramo Essentia non può mai partire).
+ *   (D-AF.1: senza di essa il ramo Essentia non può mai partire);
+ * - `https://download.db-ip.com` — il download on-demand del database
+ *   MMDB per la derivazione L2 città (Story 4.4, `13-ADR/0009`). Non
+ *   contiene dati dell'utente: è un file pubblico richiesto dall'utente.
  */
 
-import { ACOUSTICBRAINZ_HOST, ITUNES_AUDIO_HOST, ITUNES_SEARCH_HOST } from './hosts';
+import { ACOUSTICBRAINZ_HOST, DBIP_HOST, ITUNES_AUDIO_HOST, ITUNES_SEARCH_HOST } from './hosts';
 
 /** La policy dichiarata in `12-DEVOPS.md` §2.1 (v1.1). */
 export const CSP_DIRECTIVES = {
@@ -34,6 +36,9 @@ export const CSP_DIRECTIVES = {
     // L'host della **ricerca** iTunes: D-AF.1 impone la chiamata, D-AF.9
     // lo dichiara dal v1.1 della spec (ratifica dell'issue #196).
     ITUNES_SEARCH_HOST,
+    // L'host di download del database MMDB DB-IP Lite (Story 4.4,
+    // `13-ADR/0009` D-B.2): dichiarato nella CSP applicata al bundle.
+    DBIP_HOST,
   ],
   'worker-src': ["'self'", 'blob:'],
   'frame-ancestors': ["'none'"],

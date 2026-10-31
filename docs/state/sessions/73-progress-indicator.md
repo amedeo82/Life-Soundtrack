@@ -1,5 +1,5 @@
 ---
-number: 71
+number: 73
 title: "Indicatore di avanzamento automatico (issue #216)"
 date: 2026-10-31
 state: 🟡
@@ -11,7 +11,7 @@ cross_refs: [216, 127, 52, 24]
 tags: [devops, tooling, adr-0008]
 ---
 
-# Sessione 71 — Indicatore di avanzamento automatico (issue #216)
+# Sessione 73 — Indicatore di avanzamento automatico (issue #216)
 
 ## Sintesi
 
