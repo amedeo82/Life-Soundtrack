@@ -18,18 +18,29 @@
       - docs/INDEX.md: AGGREGATE-INDEX-STATUS-* + AGGREGATE-INDEX-ROADMAP-*
       - docs/BUNDLE.md: AGGREGATE-BUNDLE-INVENTORY-*
 
+    V4 (issue #216 S70):
+      - README.md + docs/INDEX.md: AGGREGATE-PROGRESS-*
+        Indicatore di avanzamento: percentuale di implementazione (story e
+        pesata per effort), story completate su totale, step rimanenti,
+        tabella per EPIC, gate di testabilita' e analisi della sessione
+        corrente. Il denominatore e' il catalogo completo delle story
+        dichiarate in docs/11-BACKLOG.md; lo stato di ciascuna story arriva
+        dai file in docs/state/stories/.
+
     Modalita d'uso:
       (default)        Scrive i blocchi aggregati nei marker designati (idempotente)
       --check          Confronta lo stato calcolato con i marker esistenti; exit 0 se allineato, 1 se drift
       --dry-run        Calcola ma non scrive; stampa il diff previsto
       --list           Lista i file sorgente e i blocchi target
+      --progress       Stampa l'indicatore di avanzamento senza scrivere nulla
       --help           Mostra questo help
 
 .EXAMPLE
-    pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2
+    pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2+V4
     pwsh scripts/aggregate-state.ps1 --check         # CI gate: --check exit 0
     pwsh scripts/aggregate-state.ps1 --dry-run       # preview senza scrivere
     pwsh scripts/aggregate-state.ps1 --list           # audit: cosa verrebbe letto/scritto?
+    pwsh scripts/aggregate-state.ps1 --progress       # "a che punto siamo?" senza toccare il repo
 
 .NOTES
     ## Blocchi marcati (regex-based)
@@ -59,6 +70,11 @@
         ... inventario file + timestamp ...
         <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
 
+    In `README.md` e `docs/INDEX.md`:
+        <!-- AGGREGATE-PROGRESS-START -->
+        ... indicatore di avanzamento (percentuale, X/Y, Z rimanenti) ...
+        <!-- AGGREGATE-PROGRESS-END -->
+
     ## Idempotenza
 
     Rieseguire lo script con le stesse sources produce lo stesso output (modulo
@@ -79,6 +95,7 @@ param(
     [switch]$Check,
     [switch]$DryRun,
     [switch]$List,
+    [switch]$Progress,
     [switch]$Help
 )
 
@@ -135,6 +152,13 @@ $markerBundleInventoryEnd   = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-END --${
 # `docs/state/stories/*.md` (frontmatter `status`).
 $markerNextStepStart       = "${lt}${bangs} AGGREGATE-NEXT-STEP-START --${gt}"
 $markerNextStepEnd         = "${lt}${bangs} AGGREGATE-NEXT-STEP-END --${gt}"
+# V4 (ADR-0008 V4, issue #216): blocco "Indicatore di avanzamento" con la
+# percentuale di implementazione, il conteggio delle story completate e
+# rimanenti, i gate di testabilita' e l'analisi della sessione corrente.
+# Denominatore: il catalogo completo delle story dichiarate in
+# `docs/11-BACKLOG.md` (non solo le story con state file).
+$markerProgressStart       = "${lt}${bangs} AGGREGATE-PROGRESS-START --${gt}"
+$markerProgressEnd         = "${lt}${bangs} AGGREGATE-PROGRESS-END --${gt}"
 
 $targets = @(
     @{ Path = "docs/SESSIONS.md";   Start = $markerSessionsStart;        End = $markerSessionsEnd },
@@ -142,7 +166,9 @@ $targets = @(
     @{ Path = "docs/INDEX.md";      Start = $markerIndexStatusStart;     End = $markerIndexStatusEnd },
     @{ Path = "docs/INDEX.md";      Start = $markerIndexRoadmapStart;    End = $markerIndexRoadmapEnd },
     @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd },
-    @{ Path = "README.md";          Start = $markerNextStepStart;        End = $markerNextStepEnd }
+    @{ Path = "README.md";          Start = $markerNextStepStart;        End = $markerNextStepEnd },
+    @{ Path = "README.md";          Start = $markerProgressStart;        End = $markerProgressEnd },
+    @{ Path = "docs/INDEX.md";      Start = $markerProgressStart;        End = $markerProgressEnd }
 )
 
 # === Helpers ===
@@ -367,6 +393,7 @@ function Get-Calculated-Block {
     if ($Start -eq $markerIndexRoadmapStart)    { return Build-Block-IndexRoadmap }
     if ($Start -eq $markerBundleInventoryStart) { return Build-Block-BundleInventory }
     if ($Start -eq $markerNextStepStart)        { return Build-Block-NextStep }
+    if ($Start -eq $markerProgressStart)        { return Build-Block-Progress }
     throw "Unknown marker: $Start"
 }
 
@@ -632,6 +659,329 @@ function Build-Block-NextStep {
     return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
+# === ADR-0008 V4 (issue #216) — indicatore di avanzamento ===
+
+# Pesi di effort per la percentuale pesata: i tag `[SIZE:...]` vivono negli
+# heading `### Story` di `docs/11-BACKLOG.md` (le Story 5.1 e 5.2 non hanno il
+# tag: default M, dichiarato qui perche' il default e' una decisione, non un
+# accidento del parser).
+$ProgressSizeWeights = @{ 'S' = 1; 'M' = 2; 'L' = 3; 'XL' = 4 }
+$ProgressDefaultSize = 'M'
+
+# Gate di testabilita': milestone che il project owner vuole poter verificare.
+# Un gate e' soddisfatto quando TUTTE le story indicate sono `done`.
+# Dichiarati qui (unico posto) perche' il blocco li rende leggibili senza
+# doverli ricalcolare a mano a ogni sessione.
+$ProgressGates = @(
+    @{ Label = "Test end-to-end dell'app";       Epic = '3' },
+    @{ Label = "Motore di analisi completo";     Epic = '2' },
+    @{ Label = "Test con dati personali reali";  Stories = @('5.2') }
+)
+
+function Get-SizeWeight {
+    param([string]$Size)
+    if ($Size -and $ProgressSizeWeights.ContainsKey($Size)) { return $ProgressSizeWeights[$Size] }
+    return $ProgressSizeWeights[$ProgressDefaultSize]
+}
+
+function Get-Percent {
+    param([double]$Value)
+    # MidpointRounding.AwayFromZero: il default di [math]::Round in PowerShell
+    # e' il bankers' rounding (0.5 -> 0), mentre la lettura umana di una
+    # percentuale arrotonda .5 per eccesso (e `Math.round` in JavaScript
+    # fa lo stesso). Senza l'esplicito, lo stesso input produceva percentuali
+    # diverse a seconda del linguaggio che leggeva il blocco.
+    return [int][math]::Round($Value, 0, [System.MidpointRounding]::AwayFromZero)
+}
+
+function Get-RoadmapCatalogue {
+    # Catalogo delle story: letto dagli heading "### Story <id> ..." di
+    # `docs/11-BACKLOG.md`.
+    #
+    # Perche' il backlog e non `docs/state/stories/`: i state file esistono
+    # solo per le story gia' claimate (20 su 28 al 2026-10-31). Calcolare la
+    # percentuale su quella sola fonte darebbe un denominatore falsato: il
+    # 100% sarebbe raggiunto con 8 story mai scritte. Il backlog e' la roadmap
+    # APPROVED e dichiara TUTTE le story, quindi e' il denominatore giusto; lo
+    # stato di ciascuna story arriva dai state file (ASSR-0008: la sorgente
+    # atomica dello stato resta `docs/state/`).
+    $backlog = Join-Path $repoRoot "docs/11-BACKLOG.md"
+    if (-not (Test-Path $backlog)) { return @() }
+    $text = Get-Content -LiteralPath $backlog -Raw -Encoding UTF8
+
+    $epicNames = @{}
+    foreach ($m in [regex]::Matches($text, '(?m)^##\s+EPIC\s+(?<id>\d+)\s+[-\u2013\u2014]\s*(?<name>[^\r\n(]+)')) {
+        $epicNames[$m.Groups['id'].Value] = $m.Groups['name'].Value.Trim()
+    }
+
+    $items = New-Object System.Collections.Generic.List[object]
+    foreach ($m in [regex]::Matches($text, '(?m)^###\s+Story\s+(?<id>\d+\.\d+)\s+[-\u2013\u2014]\s*(?<rest>[^\r\n]*)$')) {
+        $id   = $m.Groups['id'].Value
+        $rest = $m.Groups['rest'].Value
+        # Il titolo finisce dove iniziano i tag `[PHASE-...]`.
+        $cut = $rest.IndexOf('`[')
+        $title = if ($cut -ge 0) { $rest.Substring(0, $cut).Trim() } else { $rest.Trim() }
+        $sizeMatch = [regex]::Match($rest, '\[SIZE:(?<size>[A-Za-z]+)\]')
+        $size = if ($sizeMatch.Success) { $sizeMatch.Groups['size'].Value.ToUpperInvariant() } else { $ProgressDefaultSize }
+        $epic = ($id -split '\.')[0]
+        $epicName = if ($epicNames.ContainsKey($epic)) { $epicNames[$epic] } else { "EPIC $epic" }
+        [void]$items.Add([PSCustomObject]@{
+            Id       = $id
+            Title    = $title
+            Epic     = $epic
+            EpicName = $epicName
+            Size     = $size
+        })
+    }
+    # NB: senza il wrapper `,` l'array viene enumerato dal pipeline e il
+    # chiamante riceve gli elementi uno a uno (con `@(...)` tornano gli item).
+    # Con il wrapper, `@(...)` avrebbe un unico elemento (l'array) e il
+    # conteggio delle story sarebbe 1: il denominatore falsato.
+    return $items.ToArray()
+}
+
+function Get-ProgressModel {
+    # Il modello viene calcolato una volta per run: la verifica di coerenza
+    # (fail-closed sul catalogo) deve scattare PRIMA delle scritture, quindi
+    # viene calcolata in preflight e riusata dal report.
+    if ($null -ne $script:ProgressModelCache) { return $script:ProgressModelCache }
+
+    $catalogue = @(Get-RoadmapCatalogue)
+
+    # Stato delle story migrate: frontmatter `status` dei file in
+    # `docs/state/stories/`. Una story senza state file non e' mai stata
+    # claimata: vale `todo`.
+    $states = @{}
+    foreach ($f in @(Get-StateStoryFiles)) {
+        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $parsed = Parse-Frontmatter $content
+        if ($null -eq $parsed) { continue }
+        $id = if ($parsed.Frontmatter['id']) { $parsed.Frontmatter['id'] } else { $f.Base }
+        $status = if ($parsed.Frontmatter['status']) { $parsed.Frontmatter['status'] } else { 'todo' }
+        $states[$id] = [PSCustomObject]@{ Status = $status; Base = $f.Base }
+    }
+
+    if ($catalogue.Count -eq 0) {
+        # Nessun catalogo (backlog assente): il blocco resta un placeholder
+        # invece di far fallire l'aggregazione. Nel repo reale il backlog
+        # esiste sempre: questa via serve ai repo di test.
+        $script:ProgressModelCache = [PSCustomObject]@{ Available = $false; Total = 0; Rows = @() }
+        return $script:ProgressModelCache
+    }
+
+    # Fail-closed (issue #216, AC3): uno state file che descrive una story
+    # assente dal backlog rende il denominatore sbagliato, e una percentuale
+    # falsa e' peggio di nessuna percentuale. Interrompe l'aggregazione con
+    # un messaggio che dice cosa riallineare.
+    $catalogueIds = @{}
+    foreach ($c in $catalogue) { $catalogueIds[$c.Id] = $true }
+    $orphans = @()
+    foreach ($id in @($states.Keys | Sort-Object)) {
+        if (-not $catalogueIds.ContainsKey($id)) { $orphans += $id }
+    }
+    if ($orphans.Count -gt 0) {
+        # Fail-closed esplicito: `exit 2` termina lo script con codice non-zero
+        # e il messaggio dice cosa riallineare. Una `throw` lascerebbe l'errore
+        # al wrapping di PowerShell (exit 1 + stack trace): il codice non-zero
+        # ci sarebbe, ma il messaggio utile no.
+        Write-Host ("[FAIL] $($orphans.Count) state file di story che il backlog non dichiara: " +
+                    ($orphans -join ', ') +
+                    ". Il denominatore della percentuale sarebbe sbagliato: riallineare docs/11-BACKLOG.md e docs/state/stories/ (issue #216, AC3).") -ForegroundColor Red
+        exit 2
+    }
+
+    $rows = New-Object System.Collections.Generic.List[object]
+    $done = 0; $inProgress = 0; $todo = 0; $blocked = 0; $wontdo = 0
+    $weightDone = 0; $weightTotal = 0
+    foreach ($c in $catalogue) {
+        $status = if ($states.ContainsKey($c.Id)) { $states[$c.Id].Status } else { 'todo' }
+        $w = Get-SizeWeight $c.Size
+        $weightTotal += $w
+        if ($status -eq 'done') { $done++; $weightDone += $w }
+        elseif ($status -eq 'in_progress' -or $status -eq 'in_review') { $inProgress++ }
+        elseif ($status -eq 'blocked') { $blocked++ }
+        elseif ($status -eq 'wontdo') { $wontdo++ }
+        else { $todo++ }
+        [void]$rows.Add([PSCustomObject]@{
+            Id       = $c.Id
+            Title    = $c.Title
+            Epic     = $c.Epic
+            EpicName = $c.EpicName
+            Size     = $c.Size
+            Status   = $status
+            Weight   = $w
+        })
+    }
+
+    $total = $catalogue.Count
+    $percent = if ($total -gt 0) { Get-Percent (100.0 * $done / $total) } else { 0 }
+    $percentWeighted = if ($weightTotal -gt 0) { Get-Percent (100.0 * $weightDone / $weightTotal) } else { 0 }
+
+    # Raggruppamento per EPIC (ordinamento numerico: 0, 1, 2, ... e non
+    # lessicografico, che metterebbe "10" prima di "2").
+    $epics = New-Object System.Collections.Generic.List[object]
+    foreach ($grp in @($rows | Group-Object -Property Epic | Sort-Object { [int]$_.Name })) {
+        $epicDone = @($grp.Group | Where-Object { $_.Status -eq 'done' }).Count
+        $epicRows = @($grp.Group)
+        $epicTotal = $epicRows.Count
+        $epicPercent = if ($epicTotal -gt 0) { Get-Percent (100.0 * $epicDone / $epicTotal) } else { 0 }
+        $epicName = $epicRows[0].EpicName
+        [void]$epics.Add([PSCustomObject]@{
+            Epic     = $grp.Name
+            EpicName = $epicName
+            Done     = $epicDone
+            Total    = $epicTotal
+            Percent  = $epicPercent
+        })
+    }
+
+    $model = [PSCustomObject]@{
+        Available       = $true
+        Total           = $total
+        Done            = $done
+        InProgress      = $inProgress
+        Todo            = $todo
+        Blocked         = $blocked
+        Wontdo          = $wontdo
+        Remaining       = $total - $done - $wontdo
+        Percent         = $percent
+        PercentWeighted = $percentWeighted
+        WeightDone      = $weightDone
+        WeightTotal     = $weightTotal
+        Rows            = $rows.ToArray()
+        Epics           = $epics.ToArray()
+    }
+    $script:ProgressModelCache = $model
+    return $model
+}
+
+function Get-StatusLabel {
+    param([string]$Status)
+    switch ($Status) {
+        'done'        { return 'completata' }
+        'in_progress' { return 'in corso' }
+        'in_review'   { return 'in review' }
+        'blocked'     { return 'bloccata' }
+        'wontdo'      { return 'annullata' }
+        default       { return 'da fare' }
+    }
+}
+
+function Get-LatestSessionAnalysis {
+    # Analisi narrativa dell'ultima sessione: sezione "## Analisi di avanzamento"
+    # dentro `docs/state/sessions/<N>-*.md`. E' il posto dove l'agente scrive
+    # l'analisi di fine implementazione: l'aggregator la rende accanto ai
+    # numeri, cosi' il report finale e' "la mia analisi + i numeri" senza
+    # doppio lavoro manuale.
+    $sessions = @(Get-StateSessionFiles)
+    if ($sessions.Count -eq 0) { return $null }
+    $latest = $sessions[-1]
+    $content = Get-Content -LiteralPath $latest.Path -Raw -Encoding UTF8
+    $m = [regex]::Match($content, '(?ms)^##\s+Analisi di avanzamento\s*\r?\n(.*?)(?=^##\s|\z)')
+    if (-not $m.Success) { return $null }
+    $text = $m.Groups[1].Value.Trim()
+    if ([string]::IsNullOrWhiteSpace($text)) { return $null }
+    $parsed = Parse-Frontmatter $content
+    $number = if ($parsed -and $parsed.Frontmatter['number']) { $parsed.Frontmatter['number'] } else { '?' }
+    return [PSCustomObject]@{ Number = $number; Text = $text }
+}
+
+function Get-ProgressReport {
+    # Corpo del report (senza marker): numeri, tabella per EPIC, story
+    # rimanenti, gate di testabilita' e analisi della sessione corrente.
+    #
+    # Le lettere accentate sono costruite a runtime: il sorgente resta ASCII
+    # (PS 5.1 su file UTF-8 senza BOM legge i non-ASCII con la codepage ANSI,
+    # vedi issue #63).
+    $accA = [char]0x00E0   # a con accento grave
+    $accE = [char]0x00E8   # e con accento grave
+    $model = Get-ProgressModel
+    $sb = New-Object System.Text.StringBuilder
+    if (-not $model.Available) {
+        [void]$sb.AppendLine('_Catalogo delle story non disponibile: `docs/11-BACKLOG.md` non e'' leggibile._')
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+    }
+
+    # Barra di avanzamento: 30 celle, caratteri costruiti a runtime per non
+    # introdurre byte non-ASCII nel sorgente (PS 5.1 su file UTF-8 senza BOM
+    # legge i non-ASCII con la codepage ANSI: vedi issue #63).
+    $barWidth = 30
+    $filled = [int][math]::Round($barWidth * $model.Percent / 100.0)
+    if ($filled -lt 0) { $filled = 0 }
+    if ($filled -gt $barWidth) { $filled = $barWidth }
+    $bar = ([string][char]0x2588) * $filled + ([string][char]0x2591) * ($barWidth - $filled)
+
+    [void]$sb.AppendLine("**Implementazione: $($model.Percent)%** - $($model.Done) story completate su $($model.Total) - effort pesato $($model.PercentWeighted)% - **mancano $($model.Remaining) step**")
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("``$bar`` $($model.Percent)%")
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('| EPIC | Completate | Totale | % | Stato |')
+    [void]$sb.AppendLine('|------|-----------|--------|---|-------|')
+    foreach ($e in $model.Epics) {
+        $state = if ($e.Done -eq $e.Total) { 'completo' } elseif ($e.Done -gt 0) { 'in corso' } else { 'da fare' }
+        [void]$sb.AppendLine("| EPIC $($e.Epic) - $($e.EpicName) | $($e.Done) | $($e.Total) | $($e.Percent)% | $state |")
+    }
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("**Distribuzione**: $($model.Done) `done` - $($model.InProgress) in corso - $($model.Todo) da fare - $($model.Blocked) bloccate - $($model.Wontdo) annullate")
+    [void]$sb.AppendLine('')
+
+    $remaining = @($model.Rows | Where-Object { $_.Status -ne 'done' -and $_.Status -ne 'wontdo' })
+    if ($remaining.Count -eq 0) {
+        [void]$sb.AppendLine("**Step ancora da implementare**: nessuno - il piano del backlog $accE completo.")
+    } else {
+        [void]$sb.AppendLine("**Step ancora da implementare** ($($remaining.Count)):")
+        foreach ($r in $remaining) {
+            [void]$sb.AppendLine("- $($r.Id) $($r.Title) - $(Get-StatusLabel $r.Status) (size $($r.Size))")
+        }
+    }
+    [void]$sb.AppendLine('')
+
+    [void]$sb.AppendLine("**Gate di testabilit$accA**")
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('| Gate | Requisito | Stato |')
+    [void]$sb.AppendLine('|------|-----------|-------|')
+    foreach ($g in $ProgressGates) {
+        if ($g.Epic) {
+            $rows = @($model.Rows | Where-Object { $_.Epic -eq $g.Epic })
+            $done = @($rows | Where-Object { $_.Status -eq 'done' }).Count
+            $total = $rows.Count
+            $req = "EPIC $($g.Epic) ($total story)"
+        } else {
+            $rows = @($model.Rows | Where-Object { $g.Stories -contains $_.Id })
+            $done = @($rows | Where-Object { $_.Status -eq 'done' }).Count
+            $total = $rows.Count
+            $req = ($g.Stories -join ', ')
+        }
+        $state = if ($total -gt 0 -and $done -eq $total) { 'soddisfatto' } elseif ($done -gt 0) { 'in corso' } else { 'non ancora' }
+        [void]$sb.AppendLine("| $($g.Label) | $req | $done/$total - $state |")
+    }
+    [void]$sb.AppendLine('')
+
+    $analysis = Get-LatestSessionAnalysis
+    if ($analysis) {
+        [void]$sb.AppendLine("**Analisi della sessione corrente** (S$($analysis.Number))")
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine($analysis.Text)
+    } else {
+        [void]$sb.AppendLine('**Analisi della sessione corrente**: non ancora registrata (sezione `## Analisi di avanzamento` nel file di sessione).')
+    }
+
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+}
+
+function Build-Block-Progress {
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine($markerProgressStart)
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V4, ADR-0008, issue #216).')
+    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine((Get-ProgressReport))
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine($markerProgressEnd)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+}
+
 function Find-Block {
     param([string]$Content, [string]$Start, [string]$End)
     $sIdx = $Content.IndexOf($Start)
@@ -672,6 +1022,13 @@ function Sync-MutableTimestamp {
 }
 
 function Apply-Blocks {
+    # Issue #216: il fail-closed del denominatore (state file che il backlog non
+    # dichiara) deve scattare PRIMA di scrivere qualsiasi blocco: se scattasse
+    # dentro il ciclo, il run avrebbe gia' riscritto i primi target e poi
+    # abbandonerebbe il repo a meta' (blocchi aggiornati, blocco progress
+    # assente). La validazione costa una decina di file: e' trascurabile.
+    $null = Get-ProgressModel
+
     # Issue #105: avvisa SEMPRE di eventuali collisioni di `Number` tra i file
     # state/sessions/, anche se l'applicazione dei blocchi va a buon fine (il
     # drift e' gia' su `main`, l'allineamento non lo risolve - serve un
@@ -738,6 +1095,11 @@ function Test-Blocks {
     # Il check deve uscire non-zero per rendere il problema visibile al
     # gate CI e al `auto-state-aggregate` workflow.
     $drift = $false
+
+    # Issue #216: lo stesso fail-closed del denominatore scatta in --check: uno
+    # state file che il backlog non dichiara rende il denominatore sbagliato e
+    # il check deve dirlo invece di passare su un blocco formalmente "in sync".
+    $null = Get-ProgressModel
 
     $dupes = Find-DuplicateSessionNumbers
     if ($dupes.Count -gt 0) {
@@ -811,6 +1173,20 @@ if ($List) {
     Write-Host ""
     Write-Host "Target files (blocchi gestiti):" -ForegroundColor Cyan
     foreach ($t in $targets) { Write-Host "  $($t.Path)  markers=[$($t.Start) ... $($t.End)]" -ForegroundColor Cyan }
+    exit 0
+}
+
+# === Progress mode (issue #216) ===
+#
+# Stampa l'indicatore di avanzamento senza scrivere nulla: il project owner
+# puo' chiedere "a che punto siamo" in qualunque momento senza toccare il
+# repo. Stessa sorgente di verita' del blocco aggregato: catalogo del
+# backlog + stato dei state file.
+
+if ($Progress) {
+    Write-Host ""
+    Write-Host (Get-ProgressReport) -ForegroundColor Cyan
+    Write-Host ""
     exit 0
 }
 

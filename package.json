@@ -18,6 +18,7 @@
     "verify": "turbo run lint && turbo run typecheck && turbo run test && turbo run build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "progress": "pwsh scripts/aggregate-state.ps1 -Progress",
     "prepare": "husky",
     "postinstall": "node scripts/setup-hooks.js",
     "setup-hooks": "node scripts/setup-hooks.js"

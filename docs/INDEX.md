@@ -25,7 +25,7 @@
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 74 (v1.6) | CI/CD, deploy, self-hosting — **§9.14.10** la CI girava **4 volte per ogni merge**: trigger `push` su `main` filtrato per path sui file dei writer automatici, su `push` girano solo i job leggeri, e `detect-code` fa saltare i gate sul codice quando la PR tocca solo `.md`; **§9.14.11** `validate-workflows.mjs` ora valida la sintassi YAML (un file rotto fa fallire GitHub con `jobs: 0` a 0 s: la firma dell'issue #135) e normalizza il fine-riga (i controlli con regex ancorate fallivano in silenzio sui file CRLF); §9.14 prestazioni delle procedure automatiche (tempo pareggio 172 s → 73 s misurati); §9.10 **elenco autorevole dei 27 gate su 12 job**; §9.13 chiusura dell'audit sulle 5 suite ora in CI; §9.12 ambiente PowerShell locale: provenienza di `pwsh` (7.6.9, pacchetto MSIX/Store) e confine di encoding dei `.ps1`; §8.f gate "fatti del README" (issue #161); §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
@@ -40,11 +40,11 @@
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.31 | Protocollo per agenti (Sessione 74: la CI a **12 job** e non gira più 4 volte per ogni merge (trigger `push` filtrato per path, `detect-code` per le PR solo-`.md`); Sessione 73: la CI a **11 job in parallelo** con `quality` aggregatore fail-closed e il check `CI / quality` invariato; il bundle rigenera una volta sola; Sessione 72: provenienza e confine di encoding di `pwsh` — F9-bis, `powershell` 5.1 non è un fallback ma un rischio di corruzione dei file globali; Sessione 71: baseline PowerShell 7 (`pwsh`); Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.27 | Protocollo per agenti (Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
-| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.6 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati — P13: il costo delle procedure automatiche è quasi sempre nei **processi figli**, non nella logica; P11: baseline PowerShell 7 e forma canonica dei flag; P12: provenienza di `pwsh` e confine di encoding dei `.ps1` |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.29 | Diario cronologico per story: problemi, fix, lesson learned — §41: la CI girava 4 volte per ogni merge (issue #224); §40: procedure automatiche, profilo e parallelizzazione dei gate |
+| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.7 | Diario cronologico per story: problemi, fix, lesson learned — §25: ratifica della spec dell'analisi (issue #178) |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -121,6 +121,7 @@
 | 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ✅ | #223 |
 | 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
+| 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -160,14 +161,88 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **51** (merge: 40)
+- Sessioni migrate in state/sessions: **52** (merge: 40)
 - Stories migrate in state/stories: **20** (done: 19)
-- Ultima sessione migrata: **S74** - La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati
+- Ultima sessione migrata: **S75** - Indicatore di avanzamento automatico (issue #216)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
 <!-- AGGREGATE-INDEX-STATUS-END -->
+
+### Indicatore di avanzamento
+
+<!-- AGGREGATE-PROGRESS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+**Implementazione: 68%** - 19 story completate su 28 - effort pesato 68% - **mancano 9 step**
+
+`████████████████████░░░░░░░░░░` 68%
+
+| EPIC | Completate | Totale | % | Stato |
+|------|-----------|--------|---|-------|
+| EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
+| EPIC 1 - Import core | 6 | 6 | 100% | completo |
+| EPIC 2 - Analisi | 4 | 4 | 100% | completo |
+| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
+| EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
+| EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
+
+**Distribuzione**: 19 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+
+**Step ancora da implementare** (9):
+- 3.1 Home + Timeline - da fare (size XL)
+- 3.2 Ricordi + Share - da fare (size L)
+- 3.3 Esplora + Analisi - da fare (size L)
+- 3.4 Nastro contesto (Timeline) - da fare (size M)
+- 4.2 MusicBrainz lookup - da fare (size M)
+- 4.3 Artwork enrichment - da fare (size M)
+- 5.1 Privacy spec finale - da fare (size M)
+- 5.2 Export e purge - da fare (size M)
+- 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
+
+**Gate di testabilità**
+
+| Gate | Requisito | Stato |
+|------|-----------|-------|
+| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
+| Test con dati personali reali | 5.2 | 0/1 - non ancora |
+
+**Analisi della sessione corrente** (S75)
+
+### Numeri
+
+- **Implementazione: 68%** — 19 story completate su 28 · effort pesato 68% · **mancano 9 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
+- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura (dopo il merge che
+> ha chiuso la 4.4): se il blocco e l'analisi divergono, il primo e' la fonte di verita' — la
+> percentuale e' un dato calcolato, la prosa e' un commento.
+
+### Salute tecnica (verificata su `main`)
+
+`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+
+### Procedura introdotta con questa sessione
+
+1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
+2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
+3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
+4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
+5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+
+<!-- AGGREGATE-PROGRESS-END -->
 
 ### Dettaglio (legacy — allineato alla Sessione 38, issue #90)
 
@@ -179,6 +254,7 @@
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
 - **Implementazione**: 🟢 **Fase 0 tecnica completa: 7/7 story merged** — 0.1 scaffold (PR #2 `c0fb0a4`) · 0.2 schema DB Dexie (PR #4 `fa09b06`) · 0.3 adapter Spotify (PR #28 `3dc9654`) · 0.4 UI import onboarding (PR #71 `0a8e83f`) · 0.5 PWA e service worker (PR #19 `3fa3c0d`) · 0.6 i18n (PR #22 `5235c88`) · 0.7 operations runbook (PR #64 `b44420b`). Dettaglio per story in `docs/state/stories/` (fonte di verità) e `docs/18-DEV-LOG.md`.
+- **Indicatore di avanzamento** (V4, issue #216, Sessione 71): percentuale di implementazione, `X/Y` story completate, **step rimanenti**, tabella per EPIC, **gate di testabilità** e analisi della sessione corrente → blocco aggregato `<!-- AGGREGATE-PROGRESS-* -->` **qui sopra** (e nel `README.md`). I numeri vivono lì: non duplicarli qui. Per l'anteprima read-only: `pwsh scripts/aggregate-state.ps1 -Progress`.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
@@ -188,7 +264,7 @@
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 70, issue #214): la **Story 2.3 (Event Detector) è completata** — PR #215 merged il 2026-10-31T11:18:48Z (merge commit `5149b2c`): il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore e valence/energy medie ponderate; detector a **z-score** su griglia settimanale — baseline 60gg, finestra 14gg, soglia 2.0; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e soggetto), la persistenza degli insight `event` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** degli eventi, il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). Con la 2.3 l'**EPIC 2** è completo: 2.1 (mood), 2.2 (ere), 2.3 (eventi), 2.4 (ricordi). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 già disponibile. Dietro: la tranche dell'EPIC 3 (**UI**, che includerà la schermata ⑧ degli eventi) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.3: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'evento** (Story 3.x).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 70, issue #214): la **Story 2.3 (Event Detector) è completata** — il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore e valence/energy medie ponderate; detector a **z-score** su griglia settimanale — baseline 60gg, finestra 14gg, soglia 2.0; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e soggetto), la persistenza degli insight `event` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** degli eventi, il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). Con la 2.3 l'**EPIC 2** è completo: 2.1 (mood), 2.2 (ere), 2.3 (eventi), 2.4 (ricordi). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 già disponibile. Dietro: la tranche dell'EPIC 3 (**UI**, che includerà la schermata ⑧ degli eventi) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.3: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'evento** (Story 3.x).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

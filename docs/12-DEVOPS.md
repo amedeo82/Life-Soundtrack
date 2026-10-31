@@ -636,6 +636,73 @@ Il test (`scripts/test-readme-facts-gate.sh`) copre i 9 casi in cui il gate deve
 
 ---
 
+### 9.8h Indicatore di avanzamento automatico (issue #216)
+
+Il blocco `<!-- AGGREGATE-PROGRESS-* -->` risponde a una domanda che nessuno
+strumento del repository poneva: **"a che punto siamo?"** — percentuale di
+implementazione, story completate su totale, step rimanenti, e l'analisi
+narrativa della sessione. È il blocco che il project owner legge per decidere
+se il progetto è testabile.
+
+**Il buco che lo rendeva necessario**: la percentuale si può calcolare in due
+modi, e quello sbagliato dà una risposta falsa.
+
+| Denominatore possibile | Numeri al 2026-10-31 | Perché è sbagliato |
+|---|---|---|
+| I soli state file in `docs/state/stories/` | 20 file, 18 `done` → **90%** | i state file esistono **solo per le story claimate**: 8 story del backlog non hanno mai un state file. Il 100% sarebbe raggiunto con metà del backlog mai scritto |
+| Il catalogo delle story in `docs/11-BACKLOG.md` | 28 story, 18 `done` → **64%** | ✅ il denominatore giusto: il backlog APPROVED dichiara tutte le story |
+
+Il denominatore è il **catalogo del backlog** (gli heading `### Story <id> …`
+con il tag `[SIZE:…]`); lo **stato** di ciascuna story resta nei state file
+(ADR-0008: la sorgente atomica dello stato è `docs/state/`).
+
+**Che cosa contiene il blocco**:
+
+| Parte | Contenuto |
+|---|---|
+| Percentuale | in story (X/Y) e **pesata per effort** (S=1, M=2, L=3, XL=4): una story `XL` non vale una `S` |
+| Conteggio | `X story completate su Y` + `mancano Z step` |
+| Tabella EPIC | completate / totale / % per ciascun EPIC |
+| Step rimanenti | l'elenco delle story non fatte, con la size |
+| Gate di testabilità | milestone dichiarate (`EPIC 3` per l'e2e, `EPIC 2` per il motore, `5.2` per i dati reali) con stato `soddisfatto` / `in corso` / `non ancora` |
+| Analisi della sessione | la sezione `## Analisi di avanzamento` del file di sessione più recente, resa **dentro** il blocco: i numeri calcolati e l'analisi narrativa nello stesso posto |
+
+**Il fail-closed del denominatore**: uno state file che descrive una story
+**assente dal backlog** rende il denominatore falso → il run esce con codice
+2 e il messaggio cita i path da riallineare. Una percentuale falsa è peggio
+di nessuna percentuale. Il controllo avviene **prima** di scrivere qualsiasi
+blocco (niente scritture a metà). Se il backlog non ha proprio heading
+`### Story` (repo di test, o backlog in forma diversa), il blocco resta un
+placeholder: l'aggregazione non si blocca.
+
+**Il trigger è parte del contratto**: il blocco dipende dal backlog, quindi
+`auto-state-aggregate.yml` deve scattare anche quando il backlog cambia. Senza
+`docs/11-BACKLOG.md` nei `paths:`, una story nuova lascerebbe l'indicatore
+fermo con un denominatore vecchio — e nessun gate se ne accorgerebbe, perché
+il gate `-Check` confronta il blocco con i file *di quel momento*, non con la
+data dell'ultima modifica del catalogo. Il sesto controllo di
+`scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input
+del blocco e **fallisce** se non li coprono.
+
+```powershell
+pwsh scripts/aggregate-state.ps1 -Progress   # stampa l'indicatore, non scrive
+pnpm run progress                             # stesso, via npm script
+bash scripts/test-aggregate-determinism.sh    # T12/T12b/T13/T14
+```
+
+**T12** verifica i numeri (50% in story, 70% pesato, 2 step rimanenti, la
+tabella EPIC) e l'elenco degli step; **T12b** verifica che l'analisi della
+sessione venga resa; **T13** verifica il fail-closed (exit non-zero, messaggio
+che cita lo state file orfano, **nessun** blocco scritto); **T14** verifica
+l'idempotenza del blocco e la copertura dei trigger (scenario negativo: il
+validatore deve segnalare il path mancante).
+
+**Regola generale**: un indicatore di avanzamento è utile solo se il suo
+denominatore è dichiarato. Senza la fonte del denominatore, "64%" e "90%" sono
+entrambi numeri, e il lettore non ha modo di sapere quale sia vero.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -728,6 +795,8 @@ protection può interpretare un check saltato come successo.
 | 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | solo PR | sì | #58 |
 | 26 | `gates-workflows` | `Validità YAML dei workflow` (`test-workflow-yaml-scalars.sh`, 8 assert) | solo PR | sì | sessione 74 |
 | 27 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
+
+**Verifica**: gli step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). **Sette** sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149), `Validità YAML dei workflow` (Sessione 74), `Copertura dei trigger del blocco progress` (#216, vedi §9.8h) e la sintassi JS dei blocchi `script:` (#73).
 
 I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check
 `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono
@@ -1163,3 +1232,4 @@ fallivano **in silenzio** su un file CRLF. Ora le righe vengono normalizzate una
 | 1.3 | Sessione 71 (2026-10-31) | **Baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1`. `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1: il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `§9.1` prescriveva «MAI `--check`», `§9.7b` descriveva il bug #104 come se fosse il caso normale e la motivazione dei due gate warning-only era attribuita alla differenza **PS 5.1 vs 7** invece che a quella **di piattaforma**. §9.1 riscritta: il doppio trattino in `pwsh` viene normalizzato sul singolo **prima** del binding, quindi `--check` e `-Check` sono equivalenti (verificato su pwsh 7.6.9); il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente. La forma canonica resta a **singolo trattino** (`-Check`), unica forma con comportamento identico su 5.1 e 7 e quella indicata dal guard fail-closed. §9.7b: il guard resta in piedi ma non scatta più nello scenario che l'ha motivato — protegge i flag davvero inesistenti e le invocazioni da shell 5.1. §9.10: la motivazione dei due step warning-only è riformulata — l'asse versione di PowerShell è chiuso, resta quello di piattaforma (dev Windows vs CI Linux). Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
 | 1.4 | Sessione 72 (2026-10-31) | **§9.12 Ambiente PowerShell locale** (nuova): provenienza dell'installazione verificata (`pwsh` **7.6.9**, pacchetto **MSIX/Store** `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, alias per-utente in `WindowsApps`, **nessun MSI** in `C:\Program Files\PowerShell\7` e nessuna voce di disinstallazione nel registro; pacchetto creato/aggiornato il 2026-10-26 09:38) con i comandi di verifica (`pwsh -NoProfile -c '$PSVersionTable.PSVersion'`, `winget list --id Microsoft.PowerShell`, `Get-AppxPackage Microsoft.PowerShell`). La sezione fissa anche il **confine**: `scripts/aggregate-state.ps1` è UTF-8 **senza BOM** e contiene 9 righe con caratteri non-ASCII ⇒ sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e `-Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in modalità scrittura il mojibake verrebbe scritto nei file globali; `generate-bundle.ps1` invece è immune (legge/scrive sempre con `-Encoding UTF8`). Il vincolo «ASCII-only nei `.ps1`» di `13-ADR/0008` viene corretto: riguarda il **parsing**, non solo la scrittura. Il fix dello script (rimuovere i letterali o aggiungere il BOM) è **decisione del project owner** (D.71.4) e non è applicato. **§9.13 Copertura CI delle suite di test locali** (nuova): 5 suite presenti in `scripts/` **non** eseguite da `ci.yml` (`test-post-merge.sh`, `test-setup-worktree.sh`, `test-safe-branch-switch.sh`, `test-pre-commit-clean-check.sh`, `test-appendline-lf-fix.ps1`), con tempi misurati e difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ "0 passati, 0 falliti" e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 **stale** (64 `AppendLine` sono il fix corrente, non una regressione) e S5 **muta il working tree**, `test-setup-worktree.sh` fallisce su Windows/Git Bash (mock `gh` non intercettato + path POSIX). I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili. Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
 | 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **11 job** di cui 10 in parallelo (`node-lint-typecheck`, `node-test`, `node-build`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **tempo pareggio della pipeline 172 s → 73 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
+| 1.6 | Sessione 75 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74): la numerazione delle sessioni è univoca (issue #105). |

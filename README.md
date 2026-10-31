@@ -35,6 +35,80 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 > Le sezioni legacy dei documenti globali (stato, conteggi, versioni, riferimenti) vanno allineate nella **stessa PR** che cambia i fatti che dichiarano: vedi [`AGENTS.md`](AGENTS.md) §"Chi può scrivere cosa nei file globali".
 
+### Indicatore di avanzamento
+
+<!-- AGGREGATE-PROGRESS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+**Implementazione: 68%** - 19 story completate su 28 - effort pesato 68% - **mancano 9 step**
+
+`████████████████████░░░░░░░░░░` 68%
+
+| EPIC | Completate | Totale | % | Stato |
+|------|-----------|--------|---|-------|
+| EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
+| EPIC 1 - Import core | 6 | 6 | 100% | completo |
+| EPIC 2 - Analisi | 4 | 4 | 100% | completo |
+| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
+| EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
+| EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
+
+**Distribuzione**: 19 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+
+**Step ancora da implementare** (9):
+- 3.1 Home + Timeline - da fare (size XL)
+- 3.2 Ricordi + Share - da fare (size L)
+- 3.3 Esplora + Analisi - da fare (size L)
+- 3.4 Nastro contesto (Timeline) - da fare (size M)
+- 4.2 MusicBrainz lookup - da fare (size M)
+- 4.3 Artwork enrichment - da fare (size M)
+- 5.1 Privacy spec finale - da fare (size M)
+- 5.2 Export e purge - da fare (size M)
+- 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
+
+**Gate di testabilità**
+
+| Gate | Requisito | Stato |
+|------|-----------|-------|
+| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
+| Test con dati personali reali | 5.2 | 0/1 - non ancora |
+
+**Analisi della sessione corrente** (S75)
+
+### Numeri
+
+- **Implementazione: 68%** — 19 story completate su 28 · effort pesato 68% · **mancano 9 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
+- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura (dopo il merge che
+> ha chiuso la 4.4): se il blocco e l'analisi divergono, il primo e' la fonte di verita' — la
+> percentuale e' un dato calcolato, la prosa e' un commento.
+
+### Salute tecnica (verificata su `main`)
+
+`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+
+### Procedura introdotta con questa sessione
+
+1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
+2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
+3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
+4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
+5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+
+<!-- AGGREGATE-PROGRESS-END -->
+
 ### Prossima story
 
 <!-- AGGREGATE-NEXT-STEP-START -->
