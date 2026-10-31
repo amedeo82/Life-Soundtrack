@@ -74,20 +74,66 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 3 spawn per ogni repo temporaneo
+# (~260 ms per repo). Con le env var l'identita' e' risolta da git senza
+# scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+# `commit.gpgsign=false` iniettato via env: git >= 2.31 (CI: ubuntu-latest,
+# dev: 2.56) legge GIT_CONFIG_COUNT/KEY_0/VALUE_0 come config addizionale
+# per-process, senza bisogno di un `git config` dedicato.
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+
+# Elenco dei path in $files di generate-bundle.ps1, calcolato UNA sola volta.
+# La pipeline grep|sed costa ~120 ms e veniva rieseguita a ogni make_repo
+# (4 volte in questa suite).
+BUNDLE_FILE_LIST=""
+bundle_file_list() {
+  if [ -z "$BUNDLE_FILE_LIST" ]; then
+    # Estrai i path tra virgolette dentro $files. Formato PowerShell:
+    #     "docs/INDEX.md",
+    #     "scripts/generate-bundle.ps1",
+    # Cattura sia le entry con virgola finale (lista) sia l'ultima senza.
+    BUNDLE_FILE_LIST="$(grep -oE '^[[:space:]]*"([^"]+)"' "$SCRIPT" | sed -E 's/^[[:space:]]*"([^"]+)".*/\1/')"
+  fi
+  printf '%s\n' "$BUNDLE_FILE_LIST"
+}
+
 # Estrae l'array $files da generate-bundle.ps1 e crea stub vuoti per ogni entry.
 # Necessario perche' generate-bundle.ps1 ha un check di "missing files" che esce 2
 # se l'$files contiene path non esistenti (test fixture-repo deve avere TUTTI i file
 # o il check fallirebbe per motivi sbagliati). D.117.4.
+#
+# PERF: la versione originale invocava `dirname` + `mkdir -p` + `touch` una volta
+# per file: 128 file => 256 processi per repo, ~9,5 s per repo (misurato il
+# 2026-10-31) e ~38 s dei 53 s totali della suite. Ora:
+#   - la directory e' calcolata con l'espansione built-in `${f%/*}` (nessun
+#     subprocess `dirname`);
+#   - `mkdir -p` viene invocato una volta per directory DISTINTA (~10), non
+#     una volta per file;
+#   - `: > "$f"` e' una redirezione built-in: azzera il file senza spawnare
+#     `touch`.
+# Output byte-identico: stessi path, stessi stub vuoti.
 seed_repo_files() {
-  local d="$1"
-  # Estrai i path tra virgolette dentro $files. Formato PowerShell:
-  #     "docs/INDEX.md",
-  #     "scripts/generate-bundle.ps1",
-  # Cattura sia le entry con virgola finale (lista) sia l'ultima senza.
-  grep -oE '^[[:space:]]*"([^"]+)"' "$SCRIPT" | sed -E 's/^[[:space:]]*"([^"]+)".*/\1/' | while read -r f; do
-    mkdir -p "$d/$(dirname "$f")"
-    touch "$d/$f"
-  done
+  local d="$1" f dir seen=""
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    dir="${f%/*}"
+    [ "$dir" = "$f" ] && dir="."
+    case "$seen" in
+      *"|$dir|"*) ;;
+      *) seen="$seen|$dir|"; mkdir -p "$d/$dir" ;;
+    esac
+  done <<< "$(bundle_file_list)"
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    : > "$d/$f"
+  done <<< "$(bundle_file_list)"
   # NB: NON sovrascrivere scripts/generate-bundle.ps1 qui. Il file e' gia'
   # stato copiato in $d/scripts/generate-bundle.ps1 da make_repo prima della
   # chiamata a seed_repo_files, e verra' eventualmente sovrascritto da make_repo
@@ -110,9 +156,8 @@ make_repo() {
   (
     cd "$d" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"
-    git config user.name "Test"
-    git config commit.gpgsign false
+    # NB: identita' e commit.gpgsign arrivano dalle env var esportate in testa
+    # allo script: niente `git config` (3 processi per repo).
     echo "x" > AGENTS.md
     echo "y" > README.md
     echo "z" > LICENSE

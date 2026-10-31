@@ -173,21 +173,41 @@ $targets = @(
 
 # === Helpers ===
 
+# PERF (Sessione 73, issue #224): cache per-process delle sorgenti di stato.
+#
+# Lo script era 2,09 s perche' leggeva gli stessi file piu' volte:
+#   - i file di sessione venivano letti 4 volte (Build-Block-Sessions,
+#     Build-Block-IndexStatus, Build-Block-IndexRoadmap, Find-DuplicateSessionNumbers)
+#   - i file di story venivano letti 3 volte (Build-Block-Stories,
+#     Build-Block-IndexStatus, Build-Block-NextStep)
+#   - ogni file veniva anche ri-parsato dal frontmatter a ogni passaggio
+# Le tre cache qui sotto eliminano le letture ripetute: il contenuto dei file
+# in docs/state/ non cambia durante una singola esecuzione, quindi la cache
+# e' coerente per costruzione (e `Apply-Blocks` non scrive mai i file di
+# state/, solo i target aggregati).
+$script:stateSessionFileCache = $null
+$script:stateStoryFileCache   = $null
+$script:stateContentCache     = @{}
+$script:stateParsedCache      = @{}
+
 function Get-StateSessionFiles {
-    if (-not (Test-Path $stateSessionsDir)) { return @() }
-    Get-ChildItem -Path $stateSessionsDir -Filter "*.md" | ForEach-Object {
+    if ($null -ne $script:stateSessionFileCache) { return $script:stateSessionFileCache }
+    if (-not (Test-Path $stateSessionsDir)) { $script:stateSessionFileCache = @(); return $script:stateSessionFileCache }
+    $script:stateSessionFileCache = @(Get-ChildItem -Path $stateSessionsDir -Filter "*.md" | ForEach-Object {
         $number = ($_.BaseName -split '-')[0]
         [PSCustomObject]@{
             Number = [int]$number
             Path   = $_.FullName
             Base   = $_.BaseName
         }
-    } | Sort-Object Number
+    } | Sort-Object Number)
+    return $script:stateSessionFileCache
 }
 
 function Get-StateStoryFiles {
-    if (-not (Test-Path $stateStoriesDir)) { return @() }
-    Get-ChildItem -Path $stateStoriesDir -Filter "*.md" | ForEach-Object {
+    if ($null -ne $script:stateStoryFileCache) { return $script:stateStoryFileCache }
+    if (-not (Test-Path $stateStoriesDir)) { $script:stateStoryFileCache = @(); return $script:stateStoryFileCache }
+    $script:stateStoryFileCache = @(Get-ChildItem -Path $stateStoriesDir -Filter "*.md" | ForEach-Object {
         $id = ($_.BaseName -split '-')[0]
         [PSCustomObject]@{
             Id   = $id
@@ -199,7 +219,29 @@ function Get-StateStoryFiles {
     # tutti gli item hanno sort key `$null`, l'ordine degenera a quello di
     # `Get-ChildItem` (filesystem-dipendente). Vedi issue #79 e il gate
     # `scripts/test-aggregate-determinism.sh` (T1+T2).
-    } | Sort-Object { [version]$_.Id }
+    } | Sort-Object { [version]$_.Id })
+    return $script:stateStoryFileCache
+}
+
+# Contenuto di un file di state/, letto una sola volta per esecuzione.
+function Get-StateContent {
+    param([string]$Path)
+    if (-not $script:stateContentCache.ContainsKey($Path)) {
+        # PERF: `ReadAllText` al posto di `Get-Content -Raw`: stessa
+        # decodifica UTF-8 (BOM rilevato e consumato) senza l'overhead del
+        # cmdlet di PowerShell.
+        $script:stateContentCache[$Path] = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    }
+    return $script:stateContentCache[$Path]
+}
+
+# Frontmatter di un file di state/, parsato una sola volta per esecuzione.
+function Get-StateParsed {
+    param([string]$Path)
+    if (-not $script:stateParsedCache.ContainsKey($Path)) {
+        $script:stateParsedCache[$Path] = Parse-Frontmatter (Get-StateContent $Path)
+    }
+    return $script:stateParsedCache[$Path]
 }
 
 # === Issue #105 — guard anti-collisione sui numeri di sessione ===
@@ -280,8 +322,7 @@ function Build-Block-Sessions {
     [void]$sb.Append("> Aggregator version: 1 (ADR-0008, S25)." + "`n")
     [void]$sb.Append("" + "`n")
     foreach ($f in $files) {
-        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-StateParsed $f.Path
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
@@ -330,8 +371,7 @@ function Build-Block-Stories {
     [void]$sb.Append("| Story | Stato | PR | Merge commit | Area |" + "`n")
     [void]$sb.Append("|-------|-------|----|--------------|------|" + "`n")
     foreach ($f in $files) {
-        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-StateParsed $f.Path
         $id = if ($parsed.Frontmatter['id']) { $parsed.Frontmatter['id'] } else { $f.Base }
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { "?" }
         $status = if ($parsed.Frontmatter['status']) { $parsed.Frontmatter['status'] } else { "?" }
@@ -366,8 +406,7 @@ function Build-Block-IndexStatus {
     # Sessions per merge status
     $mergedSessions = 0
     foreach ($f in $sessions) {
-        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Parse-Frontmatter $c
+        $p = Get-StateParsed $f.Path
         if ($p.Frontmatter['merged'] -eq 'true') {
             $mergedSessions++
         }
@@ -378,8 +417,7 @@ function Build-Block-IndexStatus {
     if ($sessionCount -gt 0) { $latestSession = $sessions[-1] }
     $latestSessionInfo = ""
     if ($latestSession) {
-        $content = Get-Content -LiteralPath $latestSession.Path -Raw -Encoding UTF8
-        $parsed = Parse-Frontmatter $content
+        $parsed = Get-StateParsed $latestSession.Path
         $n = $parsed.Frontmatter['number']
         $t = $parsed.Frontmatter['title']
         $latestSessionInfo = "Ultima sessione migrata: **S$n** - $t"
@@ -388,8 +426,7 @@ function Build-Block-IndexStatus {
     # Stories per status
     $doneStories = @()
     foreach ($f in $stories) {
-        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Parse-Frontmatter $c
+        $p = Get-StateParsed $f.Path
         if ($p.Frontmatter['status'] -eq 'done') {
             $doneStories += $p.Frontmatter['id']
         }
@@ -435,8 +472,7 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine("| Sessione | Nome | Stato | Merged | PR |")
     [void]$sb.AppendLine("|----------|------|-------|--------|----|")
     foreach ($f in $files) {
-        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-StateParsed $f.Path
         $n = $parsed.Frontmatter['number']
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
@@ -472,6 +508,9 @@ function Build-Block-BundleInventory {
     # NEXT-STEP e va escluso come gli altri (Story 1.1: senza esclusione il
     # totale oscillava di 1 run dopo ogni cambio di stato di una story).
     $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md', 'README.md')
+    # Set per il lookup O(1) e codifica condivisa (PERF, Sessione 73).
+    $managedSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$aggregatorManaged)
+    $utf8 = [System.Text.Encoding]::UTF8
 
     # Categorize files
     $categories = @{ 'docs/' = 0; 'scripts/' = 0; 'fixtures/' = 0; '.githooks/' = 0; '.github/' = 0; 'root/' = 0 }
@@ -484,27 +523,40 @@ function Build-Block-BundleInventory {
         }
         if (-not $matched) { $categories['root/']++ }
         $fullPath = Join-Path $repoRoot $f
-        if (Test-Path $fullPath) {
-            # Issue #88: usare la dimensione del contenuto normalizzato a LF invece
-            # di (Get-Item).Length, perche' con `core.autocrlf=true` su Windows 14
-            # file di testo vengono serviti CRLF sul disco e il check su origin/main
-            # (committed LF) generava un drift spurio cross-platform (~2.3 KB).
-            # Il valore cosi ottenuto coincide con `git cat-file -s HEAD:<file>` ed e
-            # quindi identico su Windows / Linux / macOS.
-            $fileText = Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-            if ($null -ne $fileText) {
-                $lfText = $fileText -replace "`r`n", "`n"
-                $size = [System.Text.Encoding]::UTF8.GetByteCount($lfText)
-            } else {
-                # File binario o illeggibile come UTF-8: usa la dimensione raw.
-                $size = (Get-Item $fullPath).Length
-            }
-            if ($aggregatorManaged -contains $f) {
-                $excludedSizeFiles++
-            } else {
-                $totalSize += $size
-            }
+        if (-not [System.IO.File]::Exists($fullPath)) { continue }
+        if ($managedSet.Contains($f)) {
+            # PERF (Sessione 73, issue #224): per i file aggregator-managed la
+            # dimensione calcolata veniva **scartata** (issue #86, opt A: sono
+            # esclusi dal totale). Leggerli era quindi lavoro inutile:
+            # `docs/SESSIONS.md` (504 KB), `docs/11-BACKLOG.md` (98 KB) e
+            # `docs/INDEX.md` (30 KB) venivano letti e decodificati solo per
+            # buttare il risultato.
+            $excludedSizeFiles++
+            continue
         }
+        # Issue #88: usare la dimensione del contenuto normalizzato a LF invece
+        # di (Get-Item).Length, perche' con `core.autocrlf=true` su Windows 14
+        # file di testo vengono serviti CRLF sul disco e il check su origin/main
+        # (committed LF) generava un drift spurio cross-platform (~2.3 KB).
+        # Il valore cosi ottenuto coincide con `git cat-file -s HEAD:<file>` ed e
+        # quindi identico su Windows / Linux / macOS.
+        #
+        # PERF: `ReadAllText` + conteggio CRLF senza allocare una seconda
+        # stringa, al posto di `Get-Content -Raw` + `-replace` (che allocava
+        # una copia di ~2,4 MB solo per normalizzare i line ending).
+        $fileText = $null
+        try { $fileText = [System.IO.File]::ReadAllText($fullPath, $utf8) } catch { $fileText = $null }
+        if ($null -ne $fileText) {
+            $crlf = 0
+            $idx = 0
+            while (($idx = $fileText.IndexOf("`r`n", $idx)) -ge 0) { $crlf++; $idx += 2 }
+            # Ogni CRLF -> LF rimuove esattamente un byte.
+            $size = $utf8.GetByteCount($fileText) - $crlf
+        } else {
+            # File binario o illeggibile come UTF-8: usa la dimensione raw.
+            $size = (Get-Item -LiteralPath $fullPath).Length
+        }
+        $totalSize += $size
     }
 
     $totalKB = [math]::Round($totalSize / 1KB, 1)
@@ -560,8 +612,7 @@ function Build-Block-NextStep {
     $files = @(Get-StateStoryFiles)
     $candidates = New-Object System.Collections.Generic.List[object]
     foreach ($f in $files) {
-        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Parse-Frontmatter $c
+        $p = Get-StateParsed $f.Path
         if ($null -eq $p) { continue }
         $status = $p.Frontmatter['status']
         # Non sono "da implementare": gia' fatte, bloccate o annullate.
@@ -1003,7 +1054,7 @@ function Apply-Blocks {
             Write-Host "[SKIP] $path non esiste" -ForegroundColor Yellow
             continue
         }
-        $content = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+        $content = [System.IO.File]::ReadAllText((Join-Path $repoRoot $path), [System.Text.Encoding]::UTF8)
         $found = Find-Block $content $start $end
         if ($null -eq $found) {
             Write-Host "[INSERT] $path - marker non presente, append in fondo" -ForegroundColor Cyan
@@ -1024,7 +1075,12 @@ function Apply-Blocks {
             # Issue #58: WriteAllText con UTF-8 no BOM. Il -replace CRLF, LF e
             # l'uso di Append(... + "`n") invece di AppendLine garantiscono LF uniforme
             # su Windows (che altrimenti userebbe CRLF default).
-            $new = $new -replace "`r`n", "`n"
+            # PERF (Sessione 73): `.Replace()` al posto di `-replace`: il pattern
+            # e' un letterale (nessun metacarattere di regex), quindi il risultato
+            # e' identico, ma l'operazione passa da una scansione regex a un
+            # confronto ordinale. Su `docs/BUNDLE.md` (2,4 MB) la differenza si
+            # misura in decine di millisecondi per run.
+            $new = $new.Replace("`r`n", "`n")
             $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
             [System.IO.File]::WriteAllText((Join-Path $repoRoot $path), $new, $utf8NoBom)
             Write-Host "[WRITE] $path - $($calculated.Length) chars applicati" -ForegroundColor Green
@@ -1068,7 +1124,7 @@ function Test-Blocks {
             $drift = $true
             continue
         }
-        $content = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+        $content = [System.IO.File]::ReadAllText((Join-Path $repoRoot $path), [System.Text.Encoding]::UTF8)
         $found = Find-Block $content $start $end
         if ($null -eq $found) {
             Write-Host "[FAIL] $path - marker $start assente" -ForegroundColor Red

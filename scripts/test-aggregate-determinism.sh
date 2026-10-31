@@ -88,6 +88,21 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 3 spawn per ogni repo temporaneo
+# (~15 repo in questa suite => ~45 processi, ~1,2 s). Con le env var l'identita'
+# e' risolta da git senza scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+# `commit.gpgsign=false` iniettato via env: git >= 2.31 (CI: ubuntu-latest,
+# dev: 2.56) legge GIT_CONFIG_COUNT/KEY_0/VALUE_0 come config addizionale
+# per-process, senza bisogno di un `git config` dedicato.
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+
 run_agg() {
   "$PS" -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
   return $?
@@ -102,10 +117,8 @@ make_repo() {
   (
     cd "$d" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"
-    git config user.name "Test"
-    git config commit.gpgsign false
-
+    # NB: identita' e commit.gpgsign arrivano dalle env var esportate in testa
+    # allo script: niente `git config` (3 processi per repo).
     if [ "$order" = "asc" ]; then
       write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
       write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
@@ -534,9 +547,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
     (
       cd "$d" || exit 1
       git init -q -b main
-      git config user.email "t@t.local"
-      git config user.name "Test"
-      git config commit.gpgsign false
+      # Identita' e gpgsign via env var (vedi header dello script).
 
       write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
       write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
@@ -569,7 +580,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   (
     cd "$D" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Identita' e gpgsign via env var (vedi header dello script).
     # Ordine INVERSO: 1.2 prima di 1.1 (scenario "filesystem-dipendente")
     write_story 1.2 "adapter-apple-music" "Adapter Apple Music" todo "" "adapter"
     write_story 1.1 "adapter-youtube-music" "Adapter YouTube Music" todo "" "adapter"
@@ -603,7 +614,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   (
     cd "$D" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Identita' e gpgsign via env var (vedi header dello script).
     write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
     write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
     write_story 2.4 "memory-engine" "Memory Engine" todo "" "analysis"
@@ -630,7 +641,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   (
     cd "$D" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Identita' e gpgsign via env var (vedi header dello script).
     write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
     write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
   )

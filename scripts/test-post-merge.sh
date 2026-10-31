@@ -44,19 +44,38 @@ run_ps() {
 branch_exists_locally() { git rev-parse --verify --quiet "refs/heads/$1" >/dev/null 2>&1; }
 branch_exists_remotely() { git ls-remote --exit-code origin "$1" >/dev/null 2>&1; }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 4 spawn per ogni repo temporaneo
+# (~20 repo in questa suite). Con le env var l'identita' e le impostazioni
+# sono risolte da git senza scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+export GIT_CONFIG_KEY_1="core.autocrlf"
+export GIT_CONFIG_VALUE_1="false"
+
 # Repo con origin bare: main + feat/x. Con WORKTREE=1 crea anche ../wt su feat/x.
 make_repo() {
   local d="$1" use_wt="${2:-0}"
   mkdir -p "$d"
   (
     cd "$d" || exit 1
-    git init -q --bare origin.git
+    # `-b main`: il branch iniziale del bare repo e' esplicito. Senza, il
+    # default e' `init.defaultBranch`, che sul runner GitHub e' `master`:
+    # `git clone` del bare repo allora avvisa "remote HEAD refers to
+    # nonexistent ref" e **non fa il checkout di nessun branch**, e il
+    # successivo `git push origin main` fallisce con "src refspec main does
+    # not match any". Il test era verde solo in locale, dove
+    # `init.defaultBranch` e' `main` (Sessione 73, issue #224).
+    git init -q --bare -b main origin.git
     git init -q -b main work
     cd work || exit 1
-    git config user.email "t@t.local"
-    git config user.name "Test"
-    git config commit.gpgsign false
-    git config core.autocrlf false
+    # NB: identita', gpgsign e autocrlf arrivano dalle env var esportate in
+    # testa allo script: niente `git config` (4 processi per repo).
     printf 'initial\n' > file.txt
     git add file.txt >/dev/null 2>&1
     git commit -q -m "chore: initial"
@@ -185,10 +204,12 @@ echo "=== T6: main locale divergente (nessuna azione distruttiva) ==="
   git clone -q "$D/origin.git" "$D/clone2"
   (
     cd "$D/clone2" || exit 1
-    git config user.email "t2@t.local"; git config user.name "Test2"
+    # Identita' del clone: env var locali (non quelle globali dello script).
     printf 'altro\n' > other.txt
     git add other.txt >/dev/null 2>&1
-    git commit -q -m "chore: concurrent commit"
+    GIT_AUTHOR_NAME="Test2" GIT_AUTHOR_EMAIL="t2@t.local" \
+    GIT_COMMITTER_NAME="Test2" GIT_COMMITTER_EMAIL="t2@t.local" \
+      git commit -q -m "chore: concurrent commit"
     git push -q origin main
   )
 

@@ -1,7 +1,7 @@
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.5
+> Versione: 0.6
 > Ultima modifica: 2026-10-31 — baseline PowerShell 7 (`pwsh`), provenienza dell'installazione e confine di encoding dei `.ps1` (Sessione 72)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
@@ -226,6 +226,38 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   E quando l'engine è scelto, la sua *provenienza* va documentata: «installato» senza dire
   *come* (MSI, Store, scoop, chocolatey) lascia la macchina non riproducibile su un'altra
   postazione (lesson 71-1: un toolchain installato non è un toolchain documentato).
+
+### P13 — Il costo delle procedure automatiche è quasi sempre nei **processi figli**, non nella logica
+
+- **Sintomo**: «le procedure automatiche ci mettono tanto tempo». Misurato, il job `quality`
+  (unico, 18 step in sequenza) durava **172 s** di tempo pareggio. Il profilo non indicava
+  un algoritmo lento: indicava **troppi processi**.
+- **Causa** (misurata il 2026-10-31 con Git Bash su Windows):
+  - `seed_repo_files` in `test-bundle-check-idempotent.sh` chiamava `dirname` + `mkdir -p` +
+    `touch` **una volta per file**: 128 file ⇒ **256 processi per repo**, **9,5 s per repo**,
+    ~38 s dei 53 s della suite. `mkdir` su una directory che esiste già non è free: ogni
+    spawn è ~35 ms.
+  - `git config user.email` / `user.name` / `commit.gpgsign` = **3-4 processi per repo
+    temporaneo** (~130 ms ciascuno), ripetuti in ogni scenario.
+  - `generate-bundle.ps1` costruiva ~2,4 MB con `$bundle += $content`: la concatenazione
+    con `+=` **ricopia l'intera stringa a ogni iterazione** ⇒ O(n²) su 126 file.
+- **Soluzione**:
+  - **In bash**: usare le **builtin** del shell, non i comandi. `dirname` → espansione
+    `${f%/*}`; `touch` → redirezione `: > "$f"`; `mkdir -p` → **una volta per directory
+    distinta**, non per file. Per la config git: variabili d'ambiente
+    (`GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_*`) e, per le impostazioni,
+    `GIT_CONFIG_COUNT` + `GIT_CONFIG_KEY_n`/`GIT_CONFIG_VALUE_n` (git ≥ 2.31) invece di
+    `git config`. Risultato: 9,5 s → **~50 ms** per repo.
+  - **In PowerShell**: `StringBuilder` invece di `+=` (O(n) invece di O(n²));
+    `[System.IO.File]::ReadAllText` invece di `Get-Content -Raw` (stessa decodifica UTF-8,
+    senza l'overhead del cmdlet); `.Replace("`r`n","`n")` invece di
+    `-replace "`r`n", "`n"` (il pattern è un **letterale**: il risultato è identico, ma è un
+    confronto ordinale e non una scansione regex su megabyte).
+- **Regola generale**: prima di ottimizzare la **logica** di uno script, contare i
+  **processi figli** che genera. Un loop che chiama un comando esterno per ogni elemento
+  costa ~35 ms **per elemento**; la stessa operazione con una builtin costa ~0. E in
+  PowerShell la concatenazione di stringhe con `+=` è il riflesso O(n²) da cui partire
+  sempre.
 
 ## 4. Cosa NON è ancora implementato
 

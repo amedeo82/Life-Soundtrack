@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.31 — Sessione 73 (2026-10-31)**
+> **Versione 1.32 — Sessione 75 (2026-10-31)**
 
 ---
 
@@ -608,6 +608,33 @@ Se l'audit elenca worktree attive o branch `feat/*` / `fix/*` merged-orfani, ese
 
 3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
 
+### ⚠️ L'ordine dei due generatori è vincolante *(Sessione 73, issue #224)*
+
+`docs/INDEX.md` è **sia** un file in `$files` **sia** un target dell'aggregator. Quindi:
+
+```
+pwsh scripts/aggregate-state.ps1     # 1° : scrive i blocchi AGGREGATE-* in INDEX.md
+pwsh scripts/generate-bundle.ps1     # 2° : copia INDEX.md (con i blocchi nuovi) dentro BUNDLE.md
+```
+
+Nell'ordine inverso (`generate-bundle` prima) la copia di `docs/INDEX.md` dentro `docs/BUNDLE.md`
+resta **stale** rispetto ai blocchi appena riscritti, e `generate-bundle.ps1 -Check` **fallisce**
+con «non è in sync» anche se i due generatori hanno girato entrambi e nessuno dei due file è
+"rotto". È la stessa classe dell'ordinamento fra i due writer di `main` (issue #149), in versione
+locale: il `pre-push` hook rigenera il bundle da solo, quindi se l'aggregator non ha girato dopo
+l'ultima modifica a `docs/INDEX.md` il bundle ne copia una versione vecchia.
+
+**Regola operativa**: quando tocchi `docs/state/`, `docs/INDEX.md`, `docs/SESSIONS.md`,
+`docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'aggregator e **poi** il generatore del
+bundle, e verifica **entrambi** i check:
+
+```powershell
+pwsh scripts/aggregate-state.ps1
+pwsh scripts/generate-bundle.ps1
+pwsh scripts/aggregate-state.ps1 -Check    # exit 0
+pwsh scripts/generate-bundle.ps1 -Check    # exit 0
+```
+
 Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
 
 ### 📦 D.26.3 — Bundle regeneration obbligatoria in stessa PR *(lesson learned)*
@@ -755,6 +782,15 @@ Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; qua
 | `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group. Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
+> **Sessione 73 (issue #224) — il bundle rigenera una volta sola.** `auto-bundle` ha due trigger
+> (`push` e `workflow_run`) e, su un merge che tocca `docs/state/**`, partiva **due volte**
+> (misurato: 20 s + 22 s). Il secondo run serve solo se l'aggregator ha prodotto un commit:
+> è quello il caso in cui i blocchi aggregati sono cambiati e il bundle li deve copiare. Ora il
+> run su `workflow_run` viene **saltato** quando `workflow_run.head_sha` coincide con
+> `origin/main` (l'aggregator non ha pushato nulla ⇒ il run sul `push` ha già rigenerato il
+> bundle da quello stato). Se l'aggregator è **fallito** si rigenera comunque: un fallimento
+> può aver lasciato i blocchi a metà. Vedi `docs/12-DEVOPS.md §9.14`.
+
 Dettagli e motivazioni:
 
 1. **`auto-status-done` e la mutua esclusività (ADR-0007)**: prima rimuoveva solo `in-progress` e `status:in-review`. Un agente che apriva la PR dimenticando di togliere `agent-ready` lasciava l'issue con `agent-ready + status:done` — stato non previsto dalla macchina a stati, e l'issue restava nella query dei candidati, quindi **un altro agente poteva claimare un lavoro già completato**. Ora rimuove tutte e tre.
@@ -793,6 +829,91 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
    - (4a) drift su SESSIONS/BACKLOG/INDEX/BUNDLE → `pwsh scripts/aggregate-state.ps1` localmente + commit (doc-sync di emergenza; il workflow dovrebbe averlo gia fatto)
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
+
+### 🏎️ La CI: 12 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74)*
+
+`ci.yml` era **un job unico con 18 step in sequenza** (misurato: **172 s** di tempo pareggio sul
+runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il check aggregatore.
+
+| Job | Cosa contiene | Quando gira |
+|---|---|---|
+| `detect-code` | la PR tocca file di codice o solo `.md`? | solo `pull_request` |
+| `node-lint-typecheck` | `pnpm install` + `lint` + `typecheck` | solo `pull_request` |
+| `node-test` | `pnpm install` + `test` (**isolato**: nessun altro task CPU-bound condivide il processore) | solo `pull_request` |
+| `node-build` | `pnpm install` + `build` | solo `pull_request` |
+| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | **sempre** |
+| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | **sempre** |
+| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | solo `pull_request` |
+| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | solo `pull_request` |
+| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | solo `pull_request` |
+| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | solo `pull_request` |
+| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | solo `pull_request` |
+| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | **sempre** |
+
+**Su `push` su `main` girano solo i 2 gate leggeri** (`gates-docs` + `gates-workflows`, ~15 s):
+i 3 job `node-*` verificano il codice e i 5 gate che verificano gli **script**, che su `main` non
+sono cambiati rispetto a quanto già validato dalla PR. La PR ha eseguito quegli stessi gate sullo
+stesso contenuto: rieseguirli lì è lavoro sprecato. Misurato sul merge di PR #227: la run su `main`
+era **42-66 s** con tutti i gate in parallelo; con i 5 gate passati a `pull_request` scende a
+**~15 s** (il percorso critico diventa `gates-docs`, 11 s, più `quality`, 3 s).
+
+**Perché la pipeline non gira più 4 volte per ogni cambiamento logico** (Sessione 74). Il ciclo era:
+
+```
+PR  →  CI (pull_request)  →  merge  →  CI (push)  →  doc-sync PR  →  CI (pull_request)  →  merge  →  CI (push)
+```
+
+Le tre ripetizioni erano tutte riconducibili a due cause:
+
+1. **Il trigger `push: branches: [main]` senza filtro** rieseguiva l'**intera** pipeline su ogni
+   merge, duplicando la validazione che la PR aveva già fatto sullo stesso albero. Ora il trigger
+   `push` è **filtrato per path** sui 5 file che i **writer automatici** modificano
+   (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`).
+   Su un merge umano che non li tocca la pipeline **non gira**: l'albero che arriva su `main` è
+   lo stesso che la PR ha già validato. Su un merge che li tocca girano **solo i job leggeri**.
+2. **Il doc-sync PR** (che porta `pr:` e `merged_commit:`, noti solo **dopo** il merge) girava
+   l'intera pipeline su file **solo `.md`**. Ora il job `detect-code` verifica se **almeno un**
+   file cambiato non è un `.md`: se sono tutti `.md`, i 3 job `node-*` non installano le
+   dipendenze e non eseguono i task (il job **riusce**, non viene saltato). La regola è
+   conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è
+   **fail-safe**: se il detector fallisce, i gate girano comunque.
+
+Su `push` su `main` girano **solo i job leggeri** (misurato sul merge di PR #227: **42 s** con tutti
+i gate in parallelo; con i 5 gate degli script passati a `pull_request`: **~15 s**): i 3 job
+`node-*` sono condizionati a `github.event_name == 'pull_request'` perché su `main` il codice non
+è cambiato rispetto a quanto già validato dalla PR, e lo stesso vale per i 5 gate che verificano
+gli script.
+
+> ⚠️ **I commit dei writer automatici non attivano la CI, e non è colpa del filtro.** GitHub non
+> crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository (comportamento
+> documentato, per impedire i loop ricorsivi), e i due writer pushano con `secrets.GITHUB_TOKEN`.
+> Verificato sui dati: i loro commit non hanno **mai** attivato una run `CI`, nemmeno quando il
+> trigger `push` era privo di filtro. L'integrità di `main` dopo i writer è garantita dai writer
+> stessi (idempotenti, conservati da `git diff --quiet`, e con il `workflow_run` di `auto-bundle`
+> che rigenera il bundle **dopo** l'agregator — issue #149). Un check indipendente sullo stato
+> finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml`: **+1 run leggera per merge**,
+> un trade-off fra copertura e numero di run che spetta al project owner.
+> Dettaglio in `docs/12-DEVOPS.md §9.14.10`.
+
+Cinque cose da sapere quando si legge una pipeline verde:
+
+1. **Il check da richiedere in branch protection resta `CI / quality`**: conserva il nome ed è
+   l'aggregatore. I nuovi job hanno nomi propri e possono essere richiesti singolarmente.
+2. **`quality` è fail-closed, non solo `skipped`**: senza il controllo esplicito sui risultati,
+   `needs:` renderebbe `quality` *skipped* quando un job dipendente fallisce, e la branch
+   protection può interpretare un check saltato come successo.
+3. **I gate non richiedono `pnpm install`**: `scripts/validate-*.mjs` e
+   `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo i 3 job `node-*`
+   installano le dipendenze npm, e solo su `pull_request`.
+4. **Il doc-sync PR resta**: esiste perché `pr:` e `merged_commit:` sono noti solo dopo il merge.
+   Eliminarlo richiederebbe un cambio allo schema del frontmatter, che è una decisione del
+   project owner (`docs/12-DEVOPS.md §9.14.10`).
+5. **`validate-workflows.mjs` valida anche la sintassi YAML** (Sessione 74): un file workflow che
+   GitHub rifiuta in fase di validazione non produce un job che fallisce, ma una run con `jobs: 0`
+   e `failure` a 0 secondi — la firma del failure mode dell'issue #135.
+
+L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
+`docs/12-DEVOPS.md §9.10`; le misure di prestazione in `§9.14`.
 
 ### Regola fondamentale — NO commit su `main`
 
@@ -1011,7 +1132,7 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.31 — **l'indicatore di avanzamento automatico** (Sessione 73, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 64% — 18 done, 10 step rimanenti. Aggiunti:
+*Ultimo aggiornamento: v1.32 — **l'indicatore di avanzamento automatico** (Sessione 75, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 68% — 19 done, 9 step rimanenti. Aggiunti:
 - `scripts/aggregate-state.ps1` **V4**: blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con percentuale (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), `X/Y` completate, **Z step rimanenti**, tabella per EPIC, elenco degli step, **gate di testabilità** (e2e = EPIC 3, motore = EPIC 2, dati reali = 5.2) e l'**analisi della sessione corrente**; modalità read-only `-Progress` (`pnpm run progress`)
 - **Fail-closed del denominatore**: uno state file che il backlog non dichiara ⇒ exit 2 con i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale
 - `docs/state/sessions/<N>-<slug>.md`: nuova sezione **`## Analisi di avanzamento`**, resa dentro il blocco — l'analisi narrativa e i numeri calcolati nello stesso posto, senza doppio lavoro
@@ -1020,8 +1141,20 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 - `scripts/test-aggregate-determinism.sh`: **T12** (numeri e denominatore), **T12b** (analisi resa), **T13** (fail-closed: exit non-zero, messaggio, nessuna scrittura), **T14** (idempotenza + scenario negativo sui trigger) — 53 assert in tutto
 - `docs/12-DEVOPS.md` §9.8h (nuova) + changelog 1.5; `docs/state/_index.md` (schema + aggregazione); `docs/18-DEV-LOG.md` §38; `docs/BUNDLE.md` rigenerato
 - `package.json`: script `progress`
-- **Rinumerazione della sessione 71 → 73**: il branch è partito quando la Sessione 71 era ancora libera; nel frattempo `main` ha preso la 71 (baseline `pwsh`) e la 72 (audit procedure). La numerazione delle sessioni è **univoca** (issue #105) ⇒ il file è stato rinumerato in `docs/state/sessions/73-progress-indicator.md` e il suo `number:` aggiornato. Le forme dei flag nel corpo del protocollo sono allineate alla **canonica a singolo trattino** (`-Check`, `-List`, `-DryRun`, `-Progress`): il `--check` che la checklist di questa versione riportava è un residuo della v1.29 e l'ho convertito.
-- **`scripts/generate-bundle.ps1`**: `$files` riallineata alle sessioni effettivamente presenti — `71-powershell-7-baseline.md`, `72-audit-procedure-automatiche-pwsh-encoding.md` (assente da `main`: il bundle non la includeva) e `73-progress-indicator.md`.
+- **Rinumerazione della sessione 71 → 75**: il branch è partito quando la Sessione 71 era ancora libera; nel frattempo `main` ha preso la 71 (baseline `pwsh`), la 72 (audit procedure), la 73 (profilo delle procedure) e la 74 (CI una volta sola per merge). La numerazione delle sessioni è **univoca** (issue #105) ⇒ il file è stato rinumerato in `docs/state/sessions/75-progress-indicator.md` e il suo `number:` aggiornato. Le forme dei flag nel corpo del protocollo sono allineate alla **canonica a singolo trattino** (`-Check`, `-List`, `-DryRun`, `-Progress`): il `--check` che la checklist di questa versione riportava è un residuo della v1.29 e l'ho convertito.
+- **`scripts/generate-bundle.ps1`**: `$files` riallineata alle sessioni effettivamente presenti — `71-powershell-7-baseline.md`, `72-audit-procedure-automatiche-pwsh-encoding.md`, `73-perf-procedure-automatiche.md`, `74-ci-merge-once.md` e `75-progress-indicator.md`.
+- **`scripts/validate-workflows.mjs`**: il **sesto** controllo (copertura dei trigger rispetto agli input del blocco) convive con i controlli arrivati da `main` (validità YAML dei workflow, normalizzazione del fine-riga): il file è un unico validatore con sette controlli indipendenti.
+
+*Precedente v1.31 — **le procedure automatiche sono state misurate e velocizzate** (Sessione 73, issue #224). La Sessione 72 aveva **misurato** le procedure automatiche (tempi reali, difetti, copertura CI) ma le aveva solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»: l'audit è stato quindi **chiuso con le correzioni**. Il dato di partenza è il tempo pareggio reale del job `quality` (unico, 18 step in sequenza): **172 s** (run `41212641314`, 2026-10-31). Il risultato: **73 s**, con **nessun gate** rimosso, indebolito o reso non-bloccante. Aggiunti:
+- **§"🏎️ La CI: 11 job in parallelo"** (nuova): `ci.yml` passa da 1 job sequenziale a **11 job** (10 in parallelo + `quality` aggregatore). Il check `CI / quality` **conserva il nome** ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato — senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo. I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node)
+- **`package.json`**: nuovo script **`verify`** = `turbo run lint && turbo run typecheck && turbo run test && turbo run build` (i 4 gate del CI in una sola invocazione locale). Le 4 invocazioni `turbo run` **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU, `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`. È la classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca (`docs/12-DEVOPS.md §9.14.7`)
+- **`docs/12-DEVOPS.md` §9.10** (riscritta): l'elenco autorevole dei **26 gate** riorganizzati per job, con bloccante/non-bloccante e issue di riferimento
+- **`docs/12-DEVOPS.md` §9.13** (nuova sezione *Chiusura dell'audit*): le **5 suite che la CI non esegueva** sono ora in CI, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (i contatori vivevano dentro subshell ⇒ «0 passati, 0 falliti» e uscita sempre 0; ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** e S5 che **mutava il working tree**, `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows)
+- **`docs/12-DEVOPS.md` §9.14** (nuova): il profilo delle procedure automatiche, il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = **9,5 s per repo** → ~50 ms), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica. Il costo più alto della sessione **non era nella logica**: era nel numero di processi figli
+- **`scripts/generate-bundle.ps1`**: `StringBuilder` al posto di `$bundle += ...` (O(n²) → O(n) su ~2,4 MB), `ReadAllText` al posto di `Get-Content -Raw`, `.Replace()` al posto di `-replace` per il CRLF. **Output byte-identico** (SHA-256 verificato sullo stesso albero)
+- **`scripts/aggregate-state.ps1`**: cache per-process di elenco file / contenuti / frontmatter (i file di sessione erano letti **4 volte**, quelli di story **3 volte**), i file aggregator-managed non vengono più letti per l'inventario (la loro dimensione veniva calcolata e **scartata**), `ReadAllText` + conteggio CRLF senza allocare la copia da ~2,4 MB
+- **`.github/workflows/auto-bundle.yml`**: il run su `workflow_run` viene **saltato** se l'aggregator non ha prodotto alcun commit (`workflow_run.head_sha` == `origin/main`). Su un merge che tocca `docs/state/**` il bundle rigenerava **due volte** (20 s + 22 s); se l'aggregator è **fallito** si rigenera comunque
+- **`docs/17-DEV-NOTES.md`** (v0.6): nuovo **P13** — il costo dei processi figli in bash, e la forma `StringBuilder` per la concatenazione in PowerShell
 
 *Precedente v1.30 — **la provenienza e il confine di encoding di `pwsh`** (Sessione 72). La Sessione 71 aveva dichiarato il baseline (PowerShell 7) ma non aveva risolto due cose: **da dove arriva l'installazione** e **cosa succede se si usa 5.1 per sbaglio**. Verificato il 2026-10-31: `pwsh` **7.6.9** è un pacchetto **MSIX/Store** (`Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`), esposto via alias per-utente in `WindowsApps`; non è un MSI (`C:\Program Files\PowerShell\7` assente, nessuna voce nel registro) ed è visibile anche da Git Bash, quindi il `pre-push` rigenera il bundle con l'engine corretto. Il confine: i `.ps1` del repo sono UTF-8 **senza BOM** con letterali non-ASCII ⇒ sotto 5.1 il **parsing** li sovradecodifica e `aggregate-state.ps1 -Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in scrittura il mojibake finirebbe nei file globali. Aggiunti:
 - **§"🛡️ Session start checklist"**: nuovo **F9-bis** — `powershell` (5.1) non è un fallback accettabile ma un rischio di corruzione; `pwsh` va scritto per esteso, il check F9 va eseguito prima di qualunque `.ps1`, e i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito)

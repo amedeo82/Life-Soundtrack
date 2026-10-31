@@ -43,6 +43,29 @@ TOTAL=0
 pass() { PASS=$((PASS+1)); TOTAL=$((TOTAL+1)); echo "  [PASS] $1"; }
 fail() { FAIL=$((FAIL+1)); TOTAL=$((TOTAL+1)); echo "  [FAIL] $1"; echo "         $2"; }
 
+# Sessione 73 (issue #224): `mktemp -d` restituisce un path POSIX
+# (/tmp/tmp.XXXX) che il pwsh nativo su Windows NON risolve: i path vanno
+# convertiti con `cygpath -w` (disponibile in Git Bash, assente su Linux,
+# dove il path POSIX passa invariato e il comportamento in CI non cambia).
+# Stesso helper di scripts/test-bundle-check-idempotent.sh (D.117.4).
+PS_IS_PWSH=0
+if command -v pwsh >/dev/null 2>&1; then PS_IS_PWSH=1; fi
+
+ps_path() {
+  local p="$1"
+  if [ "$PS_IS_PWSH" = "1" ] && command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$p"
+  else
+    echo "$p"
+  fi
+}
+
+TARGET_SCRIPT_PS="$(ps_path "$TARGET_SCRIPT")"
+
+# TMPDIR e PATH originali, ripristinati dopo ogni scenario.
+ORIG_TMPDIR="${TMPDIR:-}"
+ORIG_PATH="$PATH"
+
 # Helper: crea mock repo + mock gh in tmpdir
 # $1 = scenario name (per logging)
 # Output: variabili d'ambiente TMPDIR, REPO_DIR, WORKTREE_PARENT, PATH (esteso con mock bin)
@@ -55,14 +78,20 @@ make_mock_env() {
   mkdir -p "$repo_dir"
   cd "$repo_dir"
   git init --quiet -b main
-  git config user.email "test@example.com"
-  git config user.name "Test"
+  # Identita' git via env var invece di `git config` (nessun subprocess).
+  GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
+  GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
+    git commit --quiet --allow-empty -m "initial commit" 2>/dev/null || true
   echo "# Test repo" > README.md
   git add README.md
-  git commit --quiet -m "initial commit"
+  GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
+  GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
+    git commit --quiet -m "initial commit"
   # Bare remote per il push
   local remote_dir="$tmpdir/remote.git"
-  git init --quiet --bare "$remote_dir"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init --quiet --bare -b main "$remote_dir"
   git remote add origin "$remote_dir"
   git push --quiet -u origin main
 
@@ -121,6 +150,18 @@ exit 0
 EOF
   chmod +x "$mock_bin/gh"
 
+  # Sessione 73 (issue #224): su Windows il pwsh NATIVO risolve `gh` tramite
+  # PATHEXT, quindi uno script bash senza estensione non e' eseguibile e il
+  # mock non veniva intercettato ("impossibile leggere issue #N"). Si aggiunge
+  # un wrapper `gh.cmd` che delega al mock bash. Su Linux il wrapper non serve
+  # (il mock e' gia' eseguibile) e non viene creato.
+  if uname -s 2>/dev/null | grep -qi 'mingw\|msys\|cygwin\|windows'; then
+    cat > "$mock_bin/gh.cmd" <<'EOF'
+@echo off
+bash "%~dp0gh" %*
+EOF
+  fi
+
   # Esporta variabili
   export TMPDIR="$tmpdir"
   export REPO_DIR="$repo_dir"
@@ -135,6 +176,14 @@ cleanup_mock_env() {
   if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then
     rm -rf "$TMPDIR"
   fi
+  # Sessione 73 (issue #224): TMPDIR e PATH vanno RIPRISTINATI. Senza questo,
+  # lo scenario successivo ereditava un TMPDIR gia' cancellato (`mktemp -d`
+  # falliva con "No such file or directory") e il PATH accumulava i
+  # mock_bin deprecati — cosi' lo scenario S8 non riusciva a togliere il mock
+  # `gh` dal PATH e falliva. Il difetto non era specifico di Windows:
+  # `mktemp` onora TMPDIR anche su Linux, quindi la suite falliva ovunque.
+  if [ -n "$ORIG_TMPDIR" ]; then export TMPDIR="$ORIG_TMPDIR"; else unset TMPDIR; fi
+  export PATH="$ORIG_PATH"
 }
 
 # === S1: Issue inesistente ===
@@ -144,7 +193,10 @@ test_s1_issue_missing() {
   make_mock_env "s1"
   MOCK_ISSUE_STATE="missing"
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 99 -SkipGhCheck 2>&1)" && exitcode=0 || exitcode=$?
+  # NB: senza `-SkipGhCheck`: e' il mock `gh` (MOCK_ISSUE_STATE=missing) a
+  # dover fallire. Con -SkipGhCheck la verifica dell'issue viene saltata e
+  # lo scenario non testerebbe nulla.
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 99 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -ne 0 ]; then
     pass "S1 exitcode non-zero per issue inesistente (exit=$exitcode)"
   else
@@ -160,8 +212,13 @@ test_s2_slug_derived() {
   make_mock_env "s2"
   MOCK_ISSUE_TITLE="My Cool Feature [Test]"
   local output
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -NoPush 2>&1)" || true
-  if echo "$output" | grep -q "Worktree creata: $WORKTREE_PARENT/ls-42-my-cool-feature-test"; then
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -NoPush 2>&1)" || true
+  # Sessione 73 (issue #224): l'asserzione confrontava l'intero path, che su
+  # Windows e' un path nativo (`C:\...\ls-42-...`) e su Linux un path POSIX
+  # (`/tmp/.../ls-42-...`): la suite passava solo su Linux. Qui si confronta
+  # il LEAF del path — che e' cio' che lo scenario verifica davvero (la
+  # derivazione dello slug) — ed e' indipendente dalla piattaforma.
+  if echo "$output" | grep -q "Worktree creata:.*ls-42-my-cool-feature-test"; then
     pass "S2 worktree creata con path corretto"
   else
     fail "S2" "path worktree non trovato. Output: $output"
@@ -175,8 +232,9 @@ test_s3_slug_explicit() {
   echo "Scenario S3: slug esplicito dall'utente"
   make_mock_env "s3"
   local output
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -Slug "custom-fix" -NoPush 2>&1)" || true
-  if echo "$output" | grep -q "Worktree creata: $WORKTREE_PARENT/ls-42-custom-fix"; then
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -Slug "custom-fix" -NoPush 2>&1)" || true
+  # Leaf del path (vedi nota in S2): indipendente dalla piattaforma.
+  if echo "$output" | grep -q "Worktree creata:.*ls-42-custom-fix"; then
     pass "S3 worktree creata con slug esplicito"
   else
     fail "S3" "slug esplicito non rispettato. Output: $output"
@@ -191,7 +249,7 @@ test_s4_path_exists() {
   make_mock_env "s4"
   mkdir -p "$WORKTREE_PARENT/ls-99-existing"
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 99 -Slug "existing" -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 99 -Slug "existing" -NoPush 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -ne 0 ] && echo "$output" | grep -q "gia esistente"; then
     pass "S4 errore rilevato correttamente (exit=$exitcode)"
   else
@@ -206,7 +264,7 @@ test_s5_base_branch_missing() {
   echo "Scenario S5: branch base inesistente"
   make_mock_env "s5"
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -BaseBranch origin/does-not-exist -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -BaseBranch origin/does-not-exist -NoPush 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -ne 0 ] && echo "$output" | grep -q "branch base 'origin/does-not-exist' non trovato"; then
     pass "S5 errore branch base mancante (exit=$exitcode)"
   else
@@ -222,8 +280,8 @@ test_s6_idempotent_fails() {
   make_mock_env "s6"
   cd "$REPO_DIR"
   local first second
-  first="$(pwsh "$TARGET_SCRIPT" 42 -Slug "idem" -NoPush 2>&1)" || true
-  second="$(pwsh "$TARGET_SCRIPT" 42 -Slug "idem" -NoPush 2>&1)" && ec=0 || ec=$?
+  first="$(pwsh "$TARGET_SCRIPT_PS" 42 -Slug "idem" -NoPush 2>&1)" || true
+  second="$(pwsh "$TARGET_SCRIPT_PS" 42 -Slug "idem" -NoPush 2>&1)" && ec=0 || ec=$?
   if echo "$first" | grep -q "Worktree creata"; then
     if [ "$ec" -ne 0 ] && echo "$second" | grep -q "gia esistente"; then
       pass "S6 1a chiamata OK + 2a fallisce con 'gia esistente'"
@@ -242,7 +300,7 @@ test_s7_no_push() {
   echo "Scenario S7: -NoPush salta il push"
   make_mock_env "s7"
   local output
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -NoPush 2>&1)" || true
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -NoPush 2>&1)" || true
   if echo "$output" | grep -q "Push early SKIPPATO"; then
     pass "S7 push saltato correttamente con -NoPush"
   else
@@ -267,7 +325,7 @@ test_s8_skip_gh_check() {
     rm -rf "$mock_bin_path"
   fi
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -SkipGhCheck -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -SkipGhCheck -NoPush 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -eq 0 ] && echo "$output" | grep -q "Salto verifica issue"; then
     pass "S8 -SkipGhCheck funziona senza gh nel PATH (exit=$exitcode)"
   else

@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 22:02
-> Totale file: 129
+> Data: 2026-10-31 22:05
+> Totale file: 134
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 128 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1869.9 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 22:02
+- Totale file: 133 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2009.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 22:05
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 82 |
-| scripts/ | 20 |
+| docs/ | 84 |
+| scripts/ | 23 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
 | .github/ | 4 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.31 — Sessione 73 (2026-10-31)**
+> **Versione 1.32 — Sessione 75 (2026-10-31)**
 
 ---
 
@@ -639,6 +639,33 @@ Se l'audit elenca worktree attive o branch `feat/*` / `fix/*` merged-orfani, ese
 
 3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
 
+### ⚠️ L'ordine dei due generatori è vincolante *(Sessione 73, issue #224)*
+
+`docs/INDEX.md` è **sia** un file in `$files` **sia** un target dell'aggregator. Quindi:
+
+```
+pwsh scripts/aggregate-state.ps1     # 1° : scrive i blocchi AGGREGATE-* in INDEX.md
+pwsh scripts/generate-bundle.ps1     # 2° : copia INDEX.md (con i blocchi nuovi) dentro BUNDLE.md
+```
+
+Nell'ordine inverso (`generate-bundle` prima) la copia di `docs/INDEX.md` dentro `docs/BUNDLE.md`
+resta **stale** rispetto ai blocchi appena riscritti, e `generate-bundle.ps1 -Check` **fallisce**
+con «non è in sync» anche se i due generatori hanno girato entrambi e nessuno dei due file è
+"rotto". È la stessa classe dell'ordinamento fra i due writer di `main` (issue #149), in versione
+locale: il `pre-push` hook rigenera il bundle da solo, quindi se l'aggregator non ha girato dopo
+l'ultima modifica a `docs/INDEX.md` il bundle ne copia una versione vecchia.
+
+**Regola operativa**: quando tocchi `docs/state/`, `docs/INDEX.md`, `docs/SESSIONS.md`,
+`docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'aggregator e **poi** il generatore del
+bundle, e verifica **entrambi** i check:
+
+```powershell
+pwsh scripts/aggregate-state.ps1
+pwsh scripts/generate-bundle.ps1
+pwsh scripts/aggregate-state.ps1 -Check    # exit 0
+pwsh scripts/generate-bundle.ps1 -Check    # exit 0
+```
+
 Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
 
 ### 📦 D.26.3 — Bundle regeneration obbligatoria in stessa PR *(lesson learned)*
@@ -786,6 +813,15 @@ Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; qua
 | `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group. Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
+> **Sessione 73 (issue #224) — il bundle rigenera una volta sola.** `auto-bundle` ha due trigger
+> (`push` e `workflow_run`) e, su un merge che tocca `docs/state/**`, partiva **due volte**
+> (misurato: 20 s + 22 s). Il secondo run serve solo se l'aggregator ha prodotto un commit:
+> è quello il caso in cui i blocchi aggregati sono cambiati e il bundle li deve copiare. Ora il
+> run su `workflow_run` viene **saltato** quando `workflow_run.head_sha` coincide con
+> `origin/main` (l'aggregator non ha pushato nulla ⇒ il run sul `push` ha già rigenerato il
+> bundle da quello stato). Se l'aggregator è **fallito** si rigenera comunque: un fallimento
+> può aver lasciato i blocchi a metà. Vedi `docs/12-DEVOPS.md §9.14`.
+
 Dettagli e motivazioni:
 
 1. **`auto-status-done` e la mutua esclusività (ADR-0007)**: prima rimuoveva solo `in-progress` e `status:in-review`. Un agente che apriva la PR dimenticando di togliere `agent-ready` lasciava l'issue con `agent-ready + status:done` — stato non previsto dalla macchina a stati, e l'issue restava nella query dei candidati, quindi **un altro agente poteva claimare un lavoro già completato**. Ora rimuove tutte e tre.
@@ -824,6 +860,91 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
    - (4a) drift su SESSIONS/BACKLOG/INDEX/BUNDLE → `pwsh scripts/aggregate-state.ps1` localmente + commit (doc-sync di emergenza; il workflow dovrebbe averlo gia fatto)
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
+
+### 🏎️ La CI: 12 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74)*
+
+`ci.yml` era **un job unico con 18 step in sequenza** (misurato: **172 s** di tempo pareggio sul
+runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il check aggregatore.
+
+| Job | Cosa contiene | Quando gira |
+|---|---|---|
+| `detect-code` | la PR tocca file di codice o solo `.md`? | solo `pull_request` |
+| `node-lint-typecheck` | `pnpm install` + `lint` + `typecheck` | solo `pull_request` |
+| `node-test` | `pnpm install` + `test` (**isolato**: nessun altro task CPU-bound condivide il processore) | solo `pull_request` |
+| `node-build` | `pnpm install` + `build` | solo `pull_request` |
+| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | **sempre** |
+| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | **sempre** |
+| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | solo `pull_request` |
+| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | solo `pull_request` |
+| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | solo `pull_request` |
+| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | solo `pull_request` |
+| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | solo `pull_request` |
+| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | **sempre** |
+
+**Su `push` su `main` girano solo i 2 gate leggeri** (`gates-docs` + `gates-workflows`, ~15 s):
+i 3 job `node-*` verificano il codice e i 5 gate che verificano gli **script**, che su `main` non
+sono cambiati rispetto a quanto già validato dalla PR. La PR ha eseguito quegli stessi gate sullo
+stesso contenuto: rieseguirli lì è lavoro sprecato. Misurato sul merge di PR #227: la run su `main`
+era **42-66 s** con tutti i gate in parallelo; con i 5 gate passati a `pull_request` scende a
+**~15 s** (il percorso critico diventa `gates-docs`, 11 s, più `quality`, 3 s).
+
+**Perché la pipeline non gira più 4 volte per ogni cambiamento logico** (Sessione 74). Il ciclo era:
+
+```
+PR  →  CI (pull_request)  →  merge  →  CI (push)  →  doc-sync PR  →  CI (pull_request)  →  merge  →  CI (push)
+```
+
+Le tre ripetizioni erano tutte riconducibili a due cause:
+
+1. **Il trigger `push: branches: [main]` senza filtro** rieseguiva l'**intera** pipeline su ogni
+   merge, duplicando la validazione che la PR aveva già fatto sullo stesso albero. Ora il trigger
+   `push` è **filtrato per path** sui 5 file che i **writer automatici** modificano
+   (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`).
+   Su un merge umano che non li tocca la pipeline **non gira**: l'albero che arriva su `main` è
+   lo stesso che la PR ha già validato. Su un merge che li tocca girano **solo i job leggeri**.
+2. **Il doc-sync PR** (che porta `pr:` e `merged_commit:`, noti solo **dopo** il merge) girava
+   l'intera pipeline su file **solo `.md`**. Ora il job `detect-code` verifica se **almeno un**
+   file cambiato non è un `.md`: se sono tutti `.md`, i 3 job `node-*` non installano le
+   dipendenze e non eseguono i task (il job **riusce**, non viene saltato). La regola è
+   conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è
+   **fail-safe**: se il detector fallisce, i gate girano comunque.
+
+Su `push` su `main` girano **solo i job leggeri** (misurato sul merge di PR #227: **42 s** con tutti
+i gate in parallelo; con i 5 gate degli script passati a `pull_request`: **~15 s**): i 3 job
+`node-*` sono condizionati a `github.event_name == 'pull_request'` perché su `main` il codice non
+è cambiato rispetto a quanto già validato dalla PR, e lo stesso vale per i 5 gate che verificano
+gli script.
+
+> ⚠️ **I commit dei writer automatici non attivano la CI, e non è colpa del filtro.** GitHub non
+> crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository (comportamento
+> documentato, per impedire i loop ricorsivi), e i due writer pushano con `secrets.GITHUB_TOKEN`.
+> Verificato sui dati: i loro commit non hanno **mai** attivato una run `CI`, nemmeno quando il
+> trigger `push` era privo di filtro. L'integrità di `main` dopo i writer è garantita dai writer
+> stessi (idempotenti, conservati da `git diff --quiet`, e con il `workflow_run` di `auto-bundle`
+> che rigenera il bundle **dopo** l'agregator — issue #149). Un check indipendente sullo stato
+> finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml`: **+1 run leggera per merge**,
+> un trade-off fra copertura e numero di run che spetta al project owner.
+> Dettaglio in `docs/12-DEVOPS.md §9.14.10`.
+
+Cinque cose da sapere quando si legge una pipeline verde:
+
+1. **Il check da richiedere in branch protection resta `CI / quality`**: conserva il nome ed è
+   l'aggregatore. I nuovi job hanno nomi propri e possono essere richiesti singolarmente.
+2. **`quality` è fail-closed, non solo `skipped`**: senza il controllo esplicito sui risultati,
+   `needs:` renderebbe `quality` *skipped* quando un job dipendente fallisce, e la branch
+   protection può interpretare un check saltato come successo.
+3. **I gate non richiedono `pnpm install`**: `scripts/validate-*.mjs` e
+   `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo i 3 job `node-*`
+   installano le dipendenze npm, e solo su `pull_request`.
+4. **Il doc-sync PR resta**: esiste perché `pr:` e `merged_commit:` sono noti solo dopo il merge.
+   Eliminarlo richiederebbe un cambio allo schema del frontmatter, che è una decisione del
+   project owner (`docs/12-DEVOPS.md §9.14.10`).
+5. **`validate-workflows.mjs` valida anche la sintassi YAML** (Sessione 74): un file workflow che
+   GitHub rifiuta in fase di validazione non produce un job che fallisce, ma una run con `jobs: 0`
+   e `failure` a 0 secondi — la firma del failure mode dell'issue #135.
+
+L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
+`docs/12-DEVOPS.md §9.10`; le misure di prestazione in `§9.14`.
 
 ### Regola fondamentale — NO commit su `main`
 
@@ -1042,7 +1163,7 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.31 — **l'indicatore di avanzamento automatico** (Sessione 73, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 64% — 18 done, 10 step rimanenti. Aggiunti:
+*Ultimo aggiornamento: v1.32 — **l'indicatore di avanzamento automatico** (Sessione 75, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 68% — 19 done, 9 step rimanenti. Aggiunti:
 - `scripts/aggregate-state.ps1` **V4**: blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con percentuale (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), `X/Y` completate, **Z step rimanenti**, tabella per EPIC, elenco degli step, **gate di testabilità** (e2e = EPIC 3, motore = EPIC 2, dati reali = 5.2) e l'**analisi della sessione corrente**; modalità read-only `-Progress` (`pnpm run progress`)
 - **Fail-closed del denominatore**: uno state file che il backlog non dichiara ⇒ exit 2 con i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale
 - `docs/state/sessions/<N>-<slug>.md`: nuova sezione **`## Analisi di avanzamento`**, resa dentro il blocco — l'analisi narrativa e i numeri calcolati nello stesso posto, senza doppio lavoro
@@ -1051,8 +1172,20 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 - `scripts/test-aggregate-determinism.sh`: **T12** (numeri e denominatore), **T12b** (analisi resa), **T13** (fail-closed: exit non-zero, messaggio, nessuna scrittura), **T14** (idempotenza + scenario negativo sui trigger) — 53 assert in tutto
 - `docs/12-DEVOPS.md` §9.8h (nuova) + changelog 1.5; `docs/state/_index.md` (schema + aggregazione); `docs/18-DEV-LOG.md` §38; `docs/BUNDLE.md` rigenerato
 - `package.json`: script `progress`
-- **Rinumerazione della sessione 71 → 73**: il branch è partito quando la Sessione 71 era ancora libera; nel frattempo `main` ha preso la 71 (baseline `pwsh`) e la 72 (audit procedure). La numerazione delle sessioni è **univoca** (issue #105) ⇒ il file è stato rinumerato in `docs/state/sessions/73-progress-indicator.md` e il suo `number:` aggiornato. Le forme dei flag nel corpo del protocollo sono allineate alla **canonica a singolo trattino** (`-Check`, `-List`, `-DryRun`, `-Progress`): il `--check` che la checklist di questa versione riportava è un residuo della v1.29 e l'ho convertito.
-- **`scripts/generate-bundle.ps1`**: `$files` riallineata alle sessioni effettivamente presenti — `71-powershell-7-baseline.md`, `72-audit-procedure-automatiche-pwsh-encoding.md` (assente da `main`: il bundle non la includeva) e `73-progress-indicator.md`.
+- **Rinumerazione della sessione 71 → 75**: il branch è partito quando la Sessione 71 era ancora libera; nel frattempo `main` ha preso la 71 (baseline `pwsh`), la 72 (audit procedure), la 73 (profilo delle procedure) e la 74 (CI una volta sola per merge). La numerazione delle sessioni è **univoca** (issue #105) ⇒ il file è stato rinumerato in `docs/state/sessions/75-progress-indicator.md` e il suo `number:` aggiornato. Le forme dei flag nel corpo del protocollo sono allineate alla **canonica a singolo trattino** (`-Check`, `-List`, `-DryRun`, `-Progress`): il `--check` che la checklist di questa versione riportava è un residuo della v1.29 e l'ho convertito.
+- **`scripts/generate-bundle.ps1`**: `$files` riallineata alle sessioni effettivamente presenti — `71-powershell-7-baseline.md`, `72-audit-procedure-automatiche-pwsh-encoding.md`, `73-perf-procedure-automatiche.md`, `74-ci-merge-once.md` e `75-progress-indicator.md`.
+- **`scripts/validate-workflows.mjs`**: il **sesto** controllo (copertura dei trigger rispetto agli input del blocco) convive con i controlli arrivati da `main` (validità YAML dei workflow, normalizzazione del fine-riga): il file è un unico validatore con sette controlli indipendenti.
+
+*Precedente v1.31 — **le procedure automatiche sono state misurate e velocizzate** (Sessione 73, issue #224). La Sessione 72 aveva **misurato** le procedure automatiche (tempi reali, difetti, copertura CI) ma le aveva solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»: l'audit è stato quindi **chiuso con le correzioni**. Il dato di partenza è il tempo pareggio reale del job `quality` (unico, 18 step in sequenza): **172 s** (run `41212641314`, 2026-10-31). Il risultato: **73 s**, con **nessun gate** rimosso, indebolito o reso non-bloccante. Aggiunti:
+- **§"🏎️ La CI: 11 job in parallelo"** (nuova): `ci.yml` passa da 1 job sequenziale a **11 job** (10 in parallelo + `quality` aggregatore). Il check `CI / quality` **conserva il nome** ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato — senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo. I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node)
+- **`package.json`**: nuovo script **`verify`** = `turbo run lint && turbo run typecheck && turbo run test && turbo run build` (i 4 gate del CI in una sola invocazione locale). Le 4 invocazioni `turbo run` **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU, `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`. È la classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca (`docs/12-DEVOPS.md §9.14.7`)
+- **`docs/12-DEVOPS.md` §9.10** (riscritta): l'elenco autorevole dei **26 gate** riorganizzati per job, con bloccante/non-bloccante e issue di riferimento
+- **`docs/12-DEVOPS.md` §9.13** (nuova sezione *Chiusura dell'audit*): le **5 suite che la CI non esegueva** sono ora in CI, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (i contatori vivevano dentro subshell ⇒ «0 passati, 0 falliti» e uscita sempre 0; ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** e S5 che **mutava il working tree**, `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows)
+- **`docs/12-DEVOPS.md` §9.14** (nuova): il profilo delle procedure automatiche, il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = **9,5 s per repo** → ~50 ms), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica. Il costo più alto della sessione **non era nella logica**: era nel numero di processi figli
+- **`scripts/generate-bundle.ps1`**: `StringBuilder` al posto di `$bundle += ...` (O(n²) → O(n) su ~2,4 MB), `ReadAllText` al posto di `Get-Content -Raw`, `.Replace()` al posto di `-replace` per il CRLF. **Output byte-identico** (SHA-256 verificato sullo stesso albero)
+- **`scripts/aggregate-state.ps1`**: cache per-process di elenco file / contenuti / frontmatter (i file di sessione erano letti **4 volte**, quelli di story **3 volte**), i file aggregator-managed non vengono più letti per l'inventario (la loro dimensione veniva calcolata e **scartata**), `ReadAllText` + conteggio CRLF senza allocare la copia da ~2,4 MB
+- **`.github/workflows/auto-bundle.yml`**: il run su `workflow_run` viene **saltato** se l'aggregator non ha prodotto alcun commit (`workflow_run.head_sha` == `origin/main`). Su un merge che tocca `docs/state/**` il bundle rigenerava **due volte** (20 s + 22 s); se l'aggregator è **fallito** si rigenera comunque
+- **`docs/17-DEV-NOTES.md`** (v0.6): nuovo **P13** — il costo dei processi figli in bash, e la forma `StringBuilder` per la concatenazione in PowerShell
 
 *Precedente v1.30 — **la provenienza e il confine di encoding di `pwsh`** (Sessione 72). La Sessione 71 aveva dichiarato il baseline (PowerShell 7) ma non aveva risolto due cose: **da dove arriva l'installazione** e **cosa succede se si usa 5.1 per sbaglio**. Verificato il 2026-10-31: `pwsh` **7.6.9** è un pacchetto **MSIX/Store** (`Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`), esposto via alias per-utente in `WindowsApps`; non è un MSI (`C:\Program Files\PowerShell\7` assente, nessuna voce nel registro) ed è visibile anche da Git Bash, quindi il `pre-push` rigenera il bundle con l'engine corretto. Il confine: i `.ps1` del repo sono UTF-8 **senza BOM** con letterali non-ASCII ⇒ sotto 5.1 il **parsing** li sovradecodifica e `aggregate-state.ps1 -Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in scrittura il mojibake finirebbe nei file globali. Aggiunti:
 - **§"🛡️ Session start checklist"**: nuovo **F9-bis** — `powershell` (5.1) non è un fallback accettabile ma un rischio di corruzione; `pwsh` va scritto per esteso, il check F9 va eseguito prima di qualunque `.ps1`, e i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito)
@@ -1269,7 +1402,7 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S73)
+**Analisi della sessione corrente** (S75)
 
 ### Numeri
 
@@ -2153,8 +2286,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
 | 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ✅ | #219 |
-| 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ❌ | - |
-| 73 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | - |
+| 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ✅ | #223 |
+| 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
+| 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
+| 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2194,9 +2329,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **50** (merge: 39)
+- Sessioni migrate in state/sessions: **52** (merge: 40)
 - Stories migrate in state/stories: **20** (done: 19)
-- Ultima sessione migrata: **S73** - Indicatore di avanzamento automatico (issue #216)
+- Ultima sessione migrata: **S75** - Indicatore di avanzamento automatico (issue #216)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2245,7 +2380,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S73)
+**Analisi della sessione corrente** (S75)
 
 ### Numeri
 
@@ -9159,7 +9294,7 @@ macchina che li esegue.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ✅ PR #223 (aa6100f, 2026-10-31)
 - **Claim**: `kilo-HP-ELITEBOOK-ced9`
 
 ```
@@ -9288,6 +9423,25 @@ letterali corrotti verrebbero **scritti** nei file globali.
   v1.30, `17-DEV-NOTES.md` → v0.5
 - `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`
 
+## Come è finita su `main`
+
+Il contenuto della sessione è arrivato su `main` **dentro il commit di doc-sync di un altro
+agente** (`2f5c1c2`, "docs: post-merge sync story 4.4 (pr 222)"), che ha incluso i file di
+documentazione non committati presenti nella working copy condivisa; la PR **#223**
+(`aa6100f`) li ha portati su `main`. Il frontmatter riflette quel percorso reale
+(`pr: 223`, `merged_commit: aa6100f`), non una PR dedicata.
+
+La PR **#224** (`docs/224-audit-procedure-automatiche`) contiene il **solo allineamento dei
+metadati** di questa sessione (frontmatter + rigenerazione di `SESSIONS.md` e `BUNDLE.md`),
+come il precedente "docs(state): allinea la Sessione 71 al numero di PR" della Sessione 71.
+
+**Lesson 72-6**: in una working copy condivisa, un `git add -A` dell'agente successivo può
+portare su `main` il lavoro documentale di un altro agente **senza messaggio di commit
+coerente**: il contenuto arriva, la tracciabilità no. Il rimedio non è evitare il
+doc-sync (che è il meccanismo voluto, ADR-0008) ma **non lasciare il WIP nella working copy
+condivisa**: la worktree dedicata (`setup-worktree.ps1`) è l'unico modo per tenere il confine
+fra il lavoro proprio e quello altrui.
+
 ## Verifica
 
 - `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
@@ -9307,7 +9461,394 @@ letterali corrotti verrebbero **scritti** nei file globali.
 - Issue #63 (byte-per-byte), #104 (fail-closed sui flag), #218 (baseline pwsh)
 ```
 
-### Sessione 73 - Indicatore di avanzamento automatico (issue #216)
+### Sessione 73 - Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura
+
+- **Data**: 2026-10-31
+- **Stato**: 🟢
+- **Merged**: ❌ non ancora mergiato (PR #225)
+- **Claim**: `kilo-HP-ELITEBOOK-perf73`
+
+```
+
+# Sessione 73 — Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura
+
+## Sintesi
+
+La Sessione 72 (issue #224) aveva **misurato** le procedure automatiche del repo ma le aveva
+solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la
+semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto
+esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»:
+l'audit è stato quindi **chiuso con le correzioni**.
+
+Il dato di partenza è il tempo pareggio **reale** del job `quality` di `ci.yml`, ricavato
+dall'API GitHub (run `41212641314`, 2026-10-31): **172 s**, in un **unico job** con 18 step in
+sequenza.
+
+## Cosa è stato misurato (e da dove)
+
+| Sorgile | Dato |
+|---|---|
+| API GitHub, run `41212641314` | job `quality` = **172 s** (1 job, 18 step) |
+| API GitHub, run `41212641340` / `41212688495` | `auto-bundle` su `push` = 20 s, su `workflow_run` = 22 s ⇒ **2 run per merge** |
+| API GitHub, run `41212641429` | `auto-state-aggregate` = 38 s |
+| Dev machine (Windows, `pwsh` 7.6.9, Git Bash) | profilo dei singoli script e delle suite |
+| Profilo dei processi figli | `seed_repo_files` = **256 spawn per repo** = **9,5 s per repo** |
+
+## Il risultato
+
+| Procedura | Prima | Dopo | Δ |
+|---|---:|---:|---:|
+| **Tempo pareggio della pipeline CI** | **172 s** | **73 s** | **−58 %** |
+| `test-bundle-check-idempotent.sh` | 53,0 s | 11,9 s | −77 % |
+| `test-aggregate-determinism.sh` | 48,2 s | 39,7 s | −18 % |
+| `test-issue-76-residue.sh` | 16,1 s | 11,5 s | −29 % |
+| `test-post-merge.sh` | 52,4 s | 39,3 s | −25 % |
+| `pwsh scripts/aggregate-state.ps1 -Check` | 1,23 s | 0,91 s | −26 % |
+| `pwsh scripts/generate-bundle.ps1 -Check` | 1,37 s | 1,05 s | −23 % |
+| 4 task turbo sequenziali | 52,7 s | 52,7 s | invariato — la forma parallela (32,8 s) **rompeva il gate**, vedi «Il parallelismo ha un costo» |
+| `auto-bundle` per merge che tocca `docs/state/` | 2 run (20 s + 22 s) | 1 run | −22 s di latenza |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.73.1 | La **CI passa da 1 job sequenziale a 11 job** (10 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
+| D.73.2 | `quality` conserva il **nome** del check ed è **fail-closed** | Senza il controllo esplicito sui risultati dei job dipendenti, `needs:` renderebbe `quality` *skipped* quando un job fallisce, e la branch protection può interpretare un check saltato come successo. Il nome invariato evita di dover cambiare la branch protection |
+| D.73.3 | I **5 job di gate non installano le dipendenze npm** | `scripts/validate-*.mjs` e `scripts/check-readme-facts.mjs` usano **solo i moduli built-in di node**; le suite bash usano `git` + `bash` + `pwsh`, tutti preinstallati sui runner GitHub. Installare npm in 5 job che non ne hanno bisogno era costo puro |
+| D.73.4 | I 4 task turbo restano **sequenziali**; la forma parallela (`turbo run lint typecheck test build`, 32,8 s) è stata implementata e poi **revertita** | Sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`: è la classe del lesson 30-1, e la soglia di un test time-sensitive è un **acceptance criterion** |
+| D.73.5 | Le **5 suite** che la CI non eseguiva sono **aggiunte alla CI**, dopo aver corretto i loro difetti | La procedura più distruttiva del repo (`post-merge.ps1`: `git push origin --delete`, `git branch -D`) non aveva copertura. Il project owner ha chiesto di «controllare tutte le procedure automatiche»: controllare una procedura significa che la sua verifica gira |
+| D.73.6 | Il contatore degli assert delle suite in subshell passa su un **file di risultati condiviso** | I contatori in memoria di una subshell non arrivano al padre: `test-safe-branch-switch.sh` riportava «0 passati, 0 falliti» e usciva 0 **sempre** (lesson 43-1) |
+| D.73.7 | Il run di `auto-bundle` su `workflow_run` viene **saltato** se l'aggregator non ha prodotto un commit | Il secondo run serve solo se l'aggregator ha committato. Il controllo è esatto (`workflow_run.head_sha` vs `origin/main`), non prudenziale. Se l'aggregator è **fallito** si rigenera comunque |
+| D.73.8 | Il **typecheck duplicato**, il **doppio startup di vitest**, la **CI sui push del bot** e la **parallelizzazione interna delle suite** restano **fuori perimetro** | Sono modifiche alla *definizione* di un task o del *trigger* della CI: decisioni sul test strategy che spettano al project owner (D.71.4). Sono documentati con la misura in `12-DEVOPS.md §9.14.9` |
+| D.73.9 | `git init` nelle suite dichiara **esplicitamente** il branch iniziale (`-b main`) | `init.defaultBranch` è una configurazione **di macchina**: la dev machine ha `main`, il runner GitHub ha `master`. Con `master`, `git clone` del bare repo non fa il checkout di nessun branch e `git push origin main` fallisce: il test era verde solo in locale |
+
+## I tre difetti che la misura ha smascherato
+
+1. **`test-safe-branch-switch.sh` era fail-open**: riportava «0 passati, 0 falliti» e usciva 0
+   **sempre** (i contatori vivevano dentro subshell). Ora gli assert scrivono su un file di
+   risultati condiviso: **11 assert** contati. In CI (job `gates-procedure`).
+2. **`test-setup-worktree.sh` falliva su *ogni* piattaforma**, non solo su Windows — la Sessione 72
+   concludeva che «su `ubuntu-latest` passerebbe», ed era **falso**: `mktemp` onora `TMPDIR` anche su
+   Linux, e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ lo scenario successivo
+   ereditava una directory già cancellata. Corretti anche il path POSIX passato a `pwsh` (ora
+   convertito con `cygpath -w`) e il mock `gh` (script bash, non eseguibile dal `pwsh` nativo su
+   Windows: aggiunto un wrapper `gh.cmd`). In CI, **8 assert**.
+3. **`test-appendline-lf-fix.ps1` aveva S3 stale** (pretendeva che `aggregate-state.ps1` non
+   contenesse `AppendLine`: ne ha 64, e sono la forma *corretta* del fix dell'issue #58) e **S5
+   mutava il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'agregator). Ora S3
+   verifica l'invariante reale («normalizza CRLF→LF in scrittura») e S5 gira su un **fixture
+   temporaneo**. In CI.
+
+## Il parallelismo ha un costo: il gate che misura il tempo
+
+Una delle ottimizzazioni proposte — una **sola** invocazione `turbo run lint typecheck test build`
+invece di 4 sequenziali (52,7 s → 32,8 s) — è stata implementata, **pubblicata sulla PR**, e poi
+**revertita** perché sul runner **rompeva un gate**.
+
+Il runner GitHub ha **2 vCPU**. Con i 4 task in un'unica invocazione, turbo esegue `build`
+(`vite build` + `tsc`) **in concorrenza** con `test`, e il vitest riceve meno CPU: i 2 test di
+integrazione del fixture `db-seed/medium.json` (5000 eventi) sono scadati con «Test timed out in
+5000ms».
+
+È **esattamente** la classe del lesson 30-1: «il test di performance misurava il **carico del
+runner**, non il layer DB […] il test gira ora in una **run separata**, con la soglia dell'AC
+invariata». La soglia **non** si tocca: è un acceptance criterion.
+
+**Regola generale**: «parallelizzare» (a livello di **job**, dove i gate sono processi separati) e
+«aumentare il parallelismo interno di un gate» (a livello di **task runner**, che condivide il
+processore) sono due ottimizzazioni **indipendenti**, e la seconda può invalidare la prima quando
+un gate è **time-sensitive**.
+
+## Un test verde in locale non è un test verde ovunque
+
+`test-post-merge.sh` è fallito sul runner con «error: src refspec main does not match any» **solo
+su Linux**. La causa: la dev machine ha `init.defaultBranch = main` in
+`C:\Program Files\Git\etc\gitconfig`, il runner GitHub ha il default di git, `master`.
+
+La meccanica: `git init --bare` crea un bare repo con `HEAD → refs/heads/<init.defaultBranch>`;
+`git clone` di quel repo, se `HEAD` punta a un branch **inesistente**, avvisa «remote HEAD refers
+to nonexistent ref» e **non fa il checkout di nessun branch**; il successivo `git push origin main`
+fallisce.
+
+Correzione: **`git init -q --bare -b main`** in tutte e tre le suite che creano un bare repo
+(`test-post-merge.sh`, `test-issue-76-residue.sh`, `test-setup-worktree.sh`).
+`init.defaultBranch` è una configurazione **di macchina**, non del progetto.
+
+**Regola generale**: un test che crea repository git temporanei deve dichiarare **esplicitamente**
+il branch iniziale: la CI ha una configurazione git diversa da qualunque dev machine, e un test che
+passa in locale non è un test che passa ovunque.
+
+## Il costo nascosto: i processi figli
+
+Il singolo costo più alto della sessione non era nella logica, era nel **numero di processi**.
+`seed_repo_files` creava 128 stub chiamando `dirname` + `mkdir -p` + `touch` **una volta per
+file**: 256 processi per repo, **9,5 s per repo**, ~38 s dei 53 s della suite. Risolto con le
+**builtin** del shell (`${f%/*}` al posto di `dirname`, `: > "$f"` al posto di `touch`, `mkdir -p`
+una volta per directory distinta) e con le **env var** git al posto di `git config`
+(`GIT_AUTHOR_*`, `GIT_COMMITTER_*`, `GIT_CONFIG_COUNT/KEY_n/VALUE_n`).
+
+In PowerShell: `StringBuilder` al posto di `$bundle += ...` (O(n²) → O(n) su ~2,4 MB),
+`[System.IO.File]::ReadAllText` al posto di `Get-Content -Raw`, `.Replace("`r`n","`n")` al posto
+di `-replace "`r`n", "`n"` (pattern letterale ⇒ risultato identico, ma confronto ordinale invece
+di scansione regex).
+
+## Lesson learned
+
+| # | Osservazione | Azione |
+|---|--------------|--------|
+| 73-1 | **Il tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano 172 s anche se il lavoro utile era ~89 s | `ci.yml` a 11 job; `quality` aggregatore fail-closed con il nome invariato |
+| 73-2 | **Il costo più alto era nel numero di processi, non nell'algoritmo**: 256 spawn per repo = 9,5 s, e nessun profiler di linguaggio lo avrebbe mostrato | `docs/17-DEV-NOTES.md` **P13**; suite riscritte con le builtin |
+| 73-3 | **Una suite che non può fallire costa anche quando non fallisce**: `test-safe-branch-switch.sh` consumava 6,7 s per niente, perché riportava «0 passati, 0 falliti» e usciva 0 sempre | Contatori su file condiviso; ora 11 assert e in CI |
+| 73-4 | **L'audit precedente aveva diagnosticato la piattaforma invece del difetto**: «su `ubuntu-latest` passerebbe» era falso — `mktemp` onora `TMPDIR` su ogni OS | Il difetto era il *cleanup*; la correzione è cross-platform e la suite ora gira ovunque |
+| 73-5 | **Il bundle rigenerava due volte per merge**: il secondo run (22 s) era pensato per l'ordinamento (issue #149) ma girava anche quando l'aggregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main`; se l'aggregator è fallito si rigenera comunque |
+| 73-6 | **La concatenazione con `+=` in PowerShell è O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione | `StringBuilder`; output byte-identico (SHA-256 verificato sullo stesso albero) |
+| 73-7 | **Le misure vanno fatte sulla macchina e sull'ambiente giusti**: il `bash` di default su questa macchina è lo stub WSL (`bash.exe` → «non è installata una distribuzione Linux»), non Git Bash | I benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`; i tempi misurati altrimenti non sono quelli del repo |
+| 73-8 | **Parallelizzare i job e parallelizzare i task interni sono due cose diverse**: i 4 task turbo in un'unica invocazione facevano scadere per timeout un test time-sensitive sul runner a 2 vCPU | I 4 task restano sequenziali; il parallelismo si Decide a livello di **job** (`docs/12-DEVOPS.md §9.14.7`) |
+| 73-9 | **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale | `git init -b main` esplicito in tutte le suite che creano repository (`docs/12-DEVOPS.md §9.14.8`) |
+| 73-10 | **La prima CI della PR vale come test**: la pipeline parallela ha rivelato in 90 secondi due difetti che 14 suite in locale non potevano mostrare (il timeout del test perf e il `git init` con branch implicito) | I due difetti sono corretti e riprodotti localmente simulando il runner (`init.defaultBranch=master`) |
+
+## Documenti aggiornati
+
+- `AGENTS.md` (v1.30 → **v1.31**): nuova sezione **§"🏎️ La CI: 11 job in parallelo"**, nota sullo
+  skip del secondo run di `auto-bundle`, footer v1.31
+- `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (26 gate su 11 job), **§9.13** *Chiusura
+  dell'audit*, **§9.14** (nuova) *Prestazioni delle procedure automatiche* — profilo, costo dei
+  processi figli, tabella dei risultati, equivalenza dimostrata, il costo del parallelismo
+  (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che non è stato fatto (§9.14.9);
+  changelog 1.5
+- `docs/17-DEV-NOTES.md` (v0.5 → **0.6**): **P13** (nuova) — il costo delle procedure automatiche
+  è quasi sempre nei processi figli
+- `docs/18-DEV-LOG.md`: **§40**
+- `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`;
+  `$files` += `scripts/safe-branch-switch.ps1` e `scripts/test-safe-branch-switch.sh`
+- `package.json`: nuovo script `verify` (`turbo run lint && turbo run typecheck && turbo run test && turbo run build`)
+
+## Verifica
+
+- `pnpm run verify` → exit 0 (lint + typecheck + test + build)
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (129 file)
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0
+- `node scripts/check-readme-facts.mjs` → exit 0
+- 14 suite di test locali → tutte exit 0 (37 + 12 + 9 + 29 + 8 + 11 + 8 + 5 assert sulle procedure,
+  più le 6 suite sui workflow)
+- **Equivalenza dimostrata**: il bundle generato dal generatore nuovo e da quello vecchio sullo
+  stesso albero ha **SHA-256 identico**; l'aggregator nuovo e quello vecchio producono output
+  identico a parità del campo mutabile (`Ultima aggregazione`)
+- **Riproduzione locale dei difetti del runner**: con `init.defaultBranch=master` (il default del
+  runner GitHub) le 3 suite che creano repository temporanei passano tutte e 3; senza il fix
+  `test-post-merge.sh` falliva con «src refspec main does not match any»
+
+## Link utili
+
+- `docs/12-DEVOPS.md` §9.14 — prestazioni, profilo e misure
+- `docs/12-DEVOPS.md` §9.13 — audit della copertura CI e la sua chiusura
+- `docs/17-DEV-NOTES.md` P13 — il costo dei processi figli
+- Sessione 72 (`72-audit-procedure-automatiche-pwsh-encoding.md`) — l'audit che questa sessione chiude
+- Issue #224, #73 (parallelizzazione dei gate), #43 (lesson 43-1), #149 (ordinamento dei writer)
+```
+
+### Sessione 74 - La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati
+
+- **Data**: 2026-10-31
+- **Stato**: 🟢
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK-perf74`
+
+```
+
+# Sessione 74 — La CI girava 4 volte per ogni merge
+
+## Sintesi
+
+Domanda del project owner: «la CI viene eseguita durante la PR e poi nuovamente durante il merge,
+poi dopo il merge viene prodotto il doc sync ed una nuova PR, viene eseguita nuovamente la CI sulla
+PR, poi viene fatto il merge della PR del doc sync e viene eseguita nuovamente la CI. Come mai tutte
+queste volte gli stessi step? Non basta eseguirli durante la PR soltanto?»
+
+La risposta misurata: **4 run di CI e 3 run `auto-*` per ogni cambiamento logico**, di cui **3 dei 4
+run di CI erano ripetizioni** di una validazione già fatta. Questa sessione chiude la ripetizione.
+
+## L'anatomia del ciclo (misurata sull'API GitHub)
+
+PR #222 → #223, 2026-10-31:
+
+| # | Quando | Workflow | Evento | Necessario? |
+|---|---|---|---|---|
+| 1 | apertura PR #222 | `CI` | `pull_request` | **sì** |
+| 2 | merge di #222 | `CI` | `push` su `main` | **no** — stesso albero del run #1 |
+| 3 | merge di #222 | `auto-state-aggregate` | `push` su `main` | sì (è il lavoro) |
+| 4 | merge di #222 | `auto-bundle` | `push` su `main` | sì (è il lavoro) |
+| 5 | dopo l'aggregate | `auto-bundle` | `workflow_run` | **no** se l'aggregate non ha committato |
+| 6 | committa dell'aggregate | `CI` | `push` su `main` | **no** — ma è l'unico check sui commit dei writer |
+| 7 | apertura PR #223 (doc-sync) | `CI` | `pull_request` | sì, ma su una PR di **sola documentazione** |
+| 8 | merge di #223 | `CI` | `push` su `main` | **no** — stesso albero del run #7 |
+
+**Costo**: 4 × 73 s = **292 s** di CI per ogni cambiamento logico, di cui ~219 s di ripetizioni.
+
+## Le due cause, e cosa è stato fatto
+
+### Causa 1 — il trigger `push: branches: [main]` senza filtro
+
+Il workflow scattava su **ogni** push a `main`, rieseguendo l'intera pipeline. Ma l'albero che
+arriva su `main` con un merge umano è **lo stesso** che la PR ha già validato (per squash è lo
+stesso identico; per merge commit è l'unione di alberi già validati dalle rispettive PR).
+
+**Correzione**: il trigger `push` è ora **filtrato per path** sui 5 file che i **writer automatici**
+modificano — `docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`,
+`README.md`. Sono gli **unici** commit che arrivano su `main` senza essere mai passati da una PR, e
+quindi gli unici che non sono già validati. Su un merge umano la pipeline non gira più.
+
+Su `push` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza
+`pnpm install`): i 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'`.
+
+### Causa 2 — il doc-sync PR girava l'intera pipeline su file solo `.md`
+
+Il doc-sync PR esiste perché il frontmatter della sessione porta `pr:` e `merged_commit:`, noti
+**solo dopo** il merge. Tocca **solo file `.md`**: farci girare lint, typecheck, test e build è
+lavoro sprecato (~68 s di job + 3 installazioni di dipendenze).
+
+**Correzione**: il job `detect-code` calcola se **almeno un** file cambiato non è un `.md`. Se sono
+tutti `.md`, i 3 job `node-*` non installano le dipendenze e non eseguono i task — e **riuscono**
+(non sono saltati), così `quality` resta fail-closed senza casi speciali.
+
+Due scelte di progetto importanti:
+
+- **Conservativa**: la regola è «almeno un file **non** `.md` ⇒ i gate girano». Qualsiasi `.ts`,
+  `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate. Il doc-sync, che tocca solo `.md`, li salta.
+- **Fail-safe**: se il detector **fallisce**, `has_code` resta vuoto e la condizione dei job è
+  `!= 'false'` ⇒ i gate **girano comunque**. Un detector rotto non può mai far saltare la
+  validazione.
+
+## Il secondo finding: il validatore dei workflow non validava il YAML
+
+Scritto il gate che intercetta lo scalare semplice invalido, è emerso che
+`scripts/validate-workflows.mjs` **non faceva parsing YAML**: lavorava sul testo con regex.
+
+Un file workflow sintatticamente rotto passava il gate, e GitHub lo **rifiutava in fase di
+validazione**: run con `jobs: 0`, `conclusion: failure` a 0 secondi, nessun log, nessuna
+annotazione via API — **la firma identica** al failure mode dell'issue #135 (22 ore di gate spenti
+senza che nessuno se ne accorgesse), indistinguibile da «Actions rotta per billing».
+
+**Correzione**: `checkYamlScalars()` intercetta la forma invalida più comune — uno **scalare
+semplice** (non quotato, non block scalar) che contiene `: `, che in contesto block è
+l'indicatore di chiave. Il controllo **salta** i block scalar (dove `: ` è testo letterale), i
+valori quotati, le raccolte flow e i commenti (`#` preceduto da spazio apre un commento e non fa
+parte del valore). Coperto da `scripts/test-workflow-yaml-scalars.sh` (8 assert).
+
+### Bug collaterale: i controlli fallivano in silenzio sui file CRLF
+
+Il validatore divideva il file con `text.split('\n')` **senza normalizzare il fine-riga**. Un file
+salvato con **CRLF** (un contributore su Windows) lasciava un `\r` finale su ogni riga, e i pattern
+ancorati con `$` — incluso quello del gate sui push su `main` (#140) — **non matchiavano più**: i
+controlli fallivano **in silenzio**. In YAML `.` non matcha `\r`, che non è un terminatore di riga
+per il regex JavaScript. Ora le righe sono normalizzate una volta sola.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.74.1 | Il trigger `push` su `main` è **filtrato per path** sui 5 file dei writer automatici | Sono gli unici commit che arrivano su `main` senza passare da una PR. Su un merge umano l'albero è già validato |
+| D.74.2 | Su `push` girano **solo i job leggeri** | I 3 job `node-*` servono a validare il codice, che su `main` non è cambiato. Costa ~21 s invece di ~73 s |
+| D.74.3 | Il doc-sync PR viene riconosciuto da `detect-code` (solo `.md`) ⇒ i gate sul codice non girano | La regola è conservativa (qualunque file non-`.md` fa scattare i gate) e **fail-safe** (detector rotto ⇒ i gate girano) |
+| D.74.4 | I 3 job `node-*` **riuscono** (non vengono saltati) quando i gate non sono applicabili | `quality` resta fail-closed senza dover distinguere «saltato per design» da «saltato per errore» |
+| D.74.5 | `validate-workflows.mjs` acquisisce un controllo di validità YAML + normalizzazione del fine-riga | Un file rotto che GitHub rifiuta produce una run con `jobs: 0` e `failure` a 0 s: la firma dell'issue #135. E i controlli con regex ancorate fallivano in silenzio sui file CRLF |
+| D.74.6 | Il **doc-sync PR non viene eliminato** | `pr:` e `merged_commit:` sono noti solo dopo il merge. Eliminarlo richiederebbe un cambio allo **schema** del frontmatter: decisione del project owner, non un'ottimizzazione della CI |
+
+## Lesson learned
+
+| # | Osservazione | Azione |
+|---|--------------|--------|
+| 74-1 | **Un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati | Filtro per path sui file che i writer automatici modificano |
+| 74-2 | **La pipeline non deve girare su ciò che non è cambiato**: i gate sul codice su un merge sono lavoro sprecato | `detect-code`: i gate sul codice girano solo se la PR tocca almeno un file non-`.md` |
+| 74-3 | **Fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano | Condizione `!= 'false'`, mai `== 'true'`, per i passi che decidono |
+| 74-4 | **Un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex e non avrebbe intercettato un YAML rotto | Controllo di validità YAML + normalizzazione CRLF, con test di regressione |
+| 74-5 | **Il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern con `$` smettono di matchiare | Normalizzare il fine-riga una volta sola, prima di qualsiasi controllo |
+
+## Follow-up: i 5 gate che verificano gli script passano a `pull_request` only
+
+Misurato sul merge di PR #227: la run `CI` su `main` era **42-66 s**, e il percorso critico era
+`gates-aggregate` (**50 s**), un gate che su `main` **non è nemmeno richiesto** da `quality` (su
+push `quality` esige solo `gates-docs` + `gates-workflows`).
+
+I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`,
+`gates-scripts`, `gates-procedure`) sono passati a `pull_request` only: su `main` quegli script non
+sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sul
+lo stesso contenuto**. Rieseguirli lì era lavoro sprecato — 27 s di tempo di runner sprecati per
+ogni merge.
+
+Su `push` su `main` restano quindi **2 gate leggeri** (`gates-docs` + `gates-workflows`, ~11 s e
+~7 s in parallelo) più l'aggregatore `quality` (~3 s): **~15 s** di tempo pareggio, contro i
+42-66 s precedenti e i **172 s** della pipeline sequenziale originale.
+
+Nessuna perdita di copertura: i 27 gate restano 27, e ognuno gira dove serve — sulla PR che
+modifica il codice o gli script.
+
+## Il merge di PR #227 e la verifica sul runner
+
+Dopo il merge (2026-10-31T18:22:26Z, commit `51f4076`) la run `CI` su `main` è durata **42 s** con
+i 3 job `node-*` **skipped** (0 s, nessuna installazione di dipendenze) e gli 11 gate verdi —
+contro i **172 s** della pipeline sequenziale originale.
+
+### ⚠️ Correzione a una premessa di questa sessione
+Questa sessione aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei
+**writer automatici** fossero «gli unici che arrivano su `main` senza essere mai passati da una PR»
+e che il filtro li catturasse. La premessa è corretta, **la conseguenza pratica no**: quei commit
+**non attivano nessuna run**, e non è colpa del filtro.
+
+**GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (il
+comportamento documentato che impedisce i loop ricorsivi; l'unica eccezione è
+`workflow_dispatch`/`repository_dispatch`). I due writer pushano con `secrets.GITHUB_TOKEN`
+(`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`).
+
+Verificato sui dati dell'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`,
+`04c76fd`) **non** hanno mai attivato una run `CI` — né prima né dopo questa sessione, nemmeno
+quando il trigger `push` era privo di filtro. Gli unici workflow che si attivano sui loro commit
+sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce: è esattamente il
+workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer (issue #149).
+
+**Conseguenze, e scelte:**
+
+- Il filtro per path, nella pratica, serve a **saltare** la CI sui merge umani che non toccano i 5
+  file aggregati — non a catturare i commit dei writer.
+- **L'integrità di `main` dopo i writer non è garantita dalla CI**, ma dai writer stessi: ciascuno
+  è idempotente, è conservato da `git diff --quiet` prima del push, e il `workflow_run` di
+  `auto-bundle` rigenera il bundle **dopo** l'aggregator, riparando da solo il caso dell'ordinamento
+  invertito (issue #149).
+- Volere **anche** un check indipendente sullo stato finale di `main` richiederebbe un trigger
+  `workflow_run` su `ci.yml` per i due writer: **+1 run leggera per merge**. È un trade-off fra
+  copertura e numero di run, e la scelta è del project owner: **non è stato fatto**.
+
+**Lesson**: una premessa corretta può avere una conseguenza pratica falsa. «I commit dei writer
+sono gli unici che non passano da una PR» ⇒ «il filtro li cattura» sembra ovvio, ma fra la premessa
+e la conseguenza c'è il comportamento di GitHub sui push fatti col `GITHUB_TOKEN`. La verifica va
+fatta **sui dati**, non per deduzione: è stato controllato l'API GitHub run per run, e i commit dei
+writer non hanno *mai* attivato una `CI`.
+
+## Documenti aggiornati
+
+- `docs/12-DEVOPS.md` §9.10 (27 gate su 12 job), **§9.14.10** (nuova: l'anatomia del ciclo e le
+  correzioni), **§9.14.11** (nuova: il validatore non validava il YAML)
+- `AGENTS.md` §"🏎️ La CI: 12 job, e non gira 4 volte per ogni merge"
+- `docs/18-DEV-LOG.md`: **§41**
+- `docs/state/_index.md`, `docs/INDEX.md`: allineati
+- `scripts/validate-workflows.mjs`: `checkYamlScalars()` + normalizzazione del fine-riga
+- `scripts/test-workflow-yaml-scalars.sh`: nuovo (8 assert)
+- `scripts/generate-bundle.ps1`: `$files` += `scripts/test-workflow-yaml-scalars.sh`
+
+## Verifica
+
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0 (0 falsi positivi sui 6 workflow
+  reali) e exit 1 sulle fixture invalide
+- `bash scripts/test-workflow-yaml-scalars.sh` → exit 0 (8 assert)
+- 13 suite di test locali → tutte exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `node scripts/check-readme-facts.mjs` → exit 0
+- Encoding: tutti i file toccati UTF-8 **senza BOM**, fine-riga LF, nessun U+FFFD
+```
+
+### Sessione 75 - Indicatore di avanzamento automatico (issue #216)
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
@@ -9316,7 +9857,7 @@ letterali corrotti verrebbero **scritti** nei file globali.
 
 ```
 
-# Sessione 73 — Indicatore di avanzamento automatico (issue #216)
+# Sessione 75 — Indicatore di avanzamento automatico (issue #216)
 
 ## Sintesi
 
@@ -9547,7 +10088,7 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.5
+> Versione: 0.6
 > Ultima modifica: 2026-10-31 — baseline PowerShell 7 (`pwsh`), provenienza dell'installazione e confine di encoding dei `.ps1` (Sessione 72)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
@@ -9773,6 +10314,38 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   *come* (MSI, Store, scoop, chocolatey) lascia la macchina non riproducibile su un'altra
   postazione (lesson 71-1: un toolchain installato non è un toolchain documentato).
 
+### P13 — Il costo delle procedure automatiche è quasi sempre nei **processi figli**, non nella logica
+
+- **Sintomo**: «le procedure automatiche ci mettono tanto tempo». Misurato, il job `quality`
+  (unico, 18 step in sequenza) durava **172 s** di tempo pareggio. Il profilo non indicava
+  un algoritmo lento: indicava **troppi processi**.
+- **Causa** (misurata il 2026-10-31 con Git Bash su Windows):
+  - `seed_repo_files` in `test-bundle-check-idempotent.sh` chiamava `dirname` + `mkdir -p` +
+    `touch` **una volta per file**: 128 file ⇒ **256 processi per repo**, **9,5 s per repo**,
+    ~38 s dei 53 s della suite. `mkdir` su una directory che esiste già non è free: ogni
+    spawn è ~35 ms.
+  - `git config user.email` / `user.name` / `commit.gpgsign` = **3-4 processi per repo
+    temporaneo** (~130 ms ciascuno), ripetuti in ogni scenario.
+  - `generate-bundle.ps1` costruiva ~2,4 MB con `$bundle += $content`: la concatenazione
+    con `+=` **ricopia l'intera stringa a ogni iterazione** ⇒ O(n²) su 126 file.
+- **Soluzione**:
+  - **In bash**: usare le **builtin** del shell, non i comandi. `dirname` → espansione
+    `${f%/*}`; `touch` → redirezione `: > "$f"`; `mkdir -p` → **una volta per directory
+    distinta**, non per file. Per la config git: variabili d'ambiente
+    (`GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_*`) e, per le impostazioni,
+    `GIT_CONFIG_COUNT` + `GIT_CONFIG_KEY_n`/`GIT_CONFIG_VALUE_n` (git ≥ 2.31) invece di
+    `git config`. Risultato: 9,5 s → **~50 ms** per repo.
+  - **In PowerShell**: `StringBuilder` invece di `+=` (O(n) invece di O(n²));
+    `[System.IO.File]::ReadAllText` invece di `Get-Content -Raw` (stessa decodifica UTF-8,
+    senza l'overhead del cmdlet); `.Replace("`r`n","`n")` invece di
+    `-replace "`r`n", "`n"` (il pattern è un **letterale**: il risultato è identico, ma è un
+    confronto ordinale e non una scansione regex su megabyte).
+- **Regola generale**: prima di ottimizzare la **logica** di uno script, contare i
+  **processi figli** che genera. Un loop che chiama un comando esterno per ogni elemento
+  costa ~35 ms **per elemento**; la stessa operazione con una builtin costa ~0. E in
+  PowerShell la concatenazione di stringhe con `+=` è il riflesso O(n²) da cui partire
+  sempre.
+
 ## 4. Cosa NON è ancora implementato
 
 Zod (validazione runtime: fuori perimetro Story 0.2, valutare con Story 0.3 adapter), Zustand,
@@ -9797,8 +10370,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.27
-> Ultima modifica: 2026-10-31 — §39 Story 4.4: DB IP→città (geolocalizzazione locale L2) (issue #221, PR #222 merged `e661e37`)
+> Versione: 2.29
+> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge (+ follow-up: i 5 gate degli script passano a pull_request only) e correzione: i commit dei writer non attivano la CI (GITHUB_TOKEN) (Sessione 74)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -10994,6 +11567,11 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.27 | 2026-10-31 (issue #221) | **§39 Story 4.4 — DB IP→città** (Sessione 72, claim `kilo-HP-EliteBook-ydy5o2`, PR #222 merged `e661e37`): 6 entry (39-1 il database MMDB (DB-IP Lite City, CC BY 4.0) è scaricato on-demand in Cache Storage al primo uso, non embedded nel bundle né nel precache (D-B.2); 39-2 l'host di download `https://download.db-ip.com` è dichiarato in `connect-src` della CSP applicata e in `12-DEVOPS.md` §2.1 (lezione issue #196: CSP applicata e spec devono coincidere); 39-3 la derivazione L2 avviene in `NormalizationPipeline` prima dello scarto dell'IP, usando `raw.ip` mai inviato in rete; 39-4 `cityConfidence` con soglia 0.6 (D-B.3): sotto, la città viene scartata (E16); 39-5 il toggle `retainCity` è opt-in (default false): senza, città null (E21); 39-6 il reader MMDB legge solo `city.names.en` per IPv4, con guard bounds per evitare `RangeError` su buffer corti/malformati). Consegnati: `packages/core/src/geo/` (tipi, lookup MMDB, policy retainCity, deriveCity, isDbStale + 17 test), `packages/core/src/adapters/pipeline.ts` (geoLookup/geoPolicy opzionali), `apps/web/src/security/` (DBIP_HOST, connect-src, meta CSP index.html), `docs/12-DEVOPS.md` (§2.1 CSP include download.db-ip.com). 10 test CSP + 17 test geo verdi in CI. |
 | 2.26 | 2026-10-31 (issue #218) | **§38 Issue #218 — baseline PowerShell 7 (pwsh) per gli script del repo** (Sessione 71, claim `kilo-hp-elitebook-lrm6`, PR #219): 4 entry (38-1 la documentazione prescriveva ancora il toolchain di **Windows PowerShell 5.1** — il README avvertiva che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `AGENTS.md` usava `--check` in una dozzina di punti — mentre `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usava `shell: pwsh` da sempre: **nessun gate confronta la documentazione con l'ambiente reale**; 38-2 il footer v1.20 di `AGENTS.md` dichiarava «tutti i `pwsh scripts/* --check` convertiti a `-Check`» ma il corpo del file non l'aveva mai ricevuto: la normalizzazione è un problema di **copertura**, non di spot-check; 38-3 `aggregate-state.ps1 --strict` era indicato come comando da eseguire ma il parametro **non è dichiarato** (il guard lo rifiuta con exit 2): un flag documentato che non esiste è peggio di un flag assente, e nessun gate lo segnala; 38-4 la motivazione dei due gate `-Check` warning-only era attribuita alla differenza **PS 5.1 vs 7**, che non esiste più: la residua è **di piattaforma**). Consegnati: il baseline `pwsh` dichiarato in `README.md` (requisiti), `17-DEV-NOTES.md` v0.4 (nuovo **P11**), `12-DEVOPS.md` v1.3 (§9.1, §9.7b, §9.8, §9.10), `13-ADR/0008` (vincoli implementativi), `13-ADR/0006`, `docs/state/_index.md`, `11-BACKLOG.md`, `AGENTS.md` v1.29 (session start checklist a 6 check con F9) e il nuovo state file `docs/state/sessions/71-powershell-7-baseline.md`. **Fuori perimetro, dichiarato**: nessuna modifica al codice degli script e nessun cambio alla semantica dei gate in CI — promuoverli a bloccanti è una decisione sul test strategy e spetta al project owner. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding) |
 
+| 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: tempo pareggio della pipeline **172 s → 73 s** (misurato sul runner: 112 s con 9 job, **73 s** con i 3 job `node` separati); `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). **Due correzioni nate dalla prima CI della PR** (che vale come test): 73-8 **parallelizzare i job e parallelizzare i task interni sono due cose diverse** — i 4 task turbo in un'unica invocazione (52,7 → 32,8 s) facevano scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` sul runner a 2 vCPU (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion) ⇒ i 4 task restano sequenziali; 73-9 **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale (`git clone` del bare repo senza branch esistente non fa il checkout di nessun branch ⇒ «src refspec main does not match any») ⇒ `git init -b main` esplicito in tutte e 3 le suite che creano repository temporanei, con riproduzione locale del difetto. Consegnati: `ci.yml` (11 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
+| 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
+| 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
+| 2.29b | 2026-10-31 (issue #224) | **§41 (correzione) La CI girava 4 volte per ogni merge — e una premessa da correggere** (Sessione 74, merge di PR #227, commit `51f4076`): la run `CI` su `main` dopo il merge è durata **42 s** con i 3 job `node-*` **skipped** (0 s, nessuna installazione) e gli 11 gate verdi, contro i **172 s** della pipeline sequenziale originale. **Correzione**: la Sessione 74 aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei **writer automatici** fossero «gli unici che arrivano su `main` senza passare da una PR» e che il filtro li catturasse — la premessa è corretta, **la conseguenza pratica no**: quei commit **non attivano nessuna run**, e non è colpa del filtro. **GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (comportamento documentato, per impedire i loop ricorsivi; unica eccezione `workflow_dispatch`/`repository_dispatch`), e i due writer pushano con `secrets.GITHUB_TOKEN` (`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`). Verificato run per run sull'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`, `04c76fd`) **non** hanno **mai** attivato una run `CI` — né prima né dopo la Sessione 74, nemmeno col trigger `push` privo di filtro; gli unici workflow che si attivano su quei commit sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce (è il workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer, issue #149). **Conseguenze**: il filtro per path serve a **saltare** la CI sui merge umani che non toccano i 5 file aggregati, non a catturare i commit dei writer; **l'integrità di `main` dopo i writer è garantita dai writer stessi** (idempotenti, conservati da `git diff --quiet`, col `workflow_run` di `auto-bundle` che rigenera il bundle dopo l'aggregator); un check indipendente sullo stato finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml` ⇒ **+1 run leggera per merge**, trade-off fra copertura e numero di run che spetta al project owner (**non è stato fatto**). **Lesson**: una premessa corretta può avere una conseguenza pratica falsa — la verifica va fatta **sui dati**, non per deduzione |
+| 2.29c | 2026-10-31 (issue #224) | **§41 (follow-up) I 5 gate che verificano gli script passano a `pull_request` only** (Sessione 74, su richiesta del project owner): misurato sul merge di PR #227, la run `CI` su `main` era **42-66 s** e il percorso critico era `gates-aggregate` (**50 s**) — un gate che su `main` **non è nemmeno richiesto** da `quality`, che su push esige solo `gates-docs` + `gates-workflows`. I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`, `gates-scripts`, `gates-procedure`) passano a `pull_request` only: su `main` quegli script non sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sullo stesso contenuto** ⇒ 27 s di tempo di runner sprecati per ogni merge. Su `push` su `main` restano **2 gate leggeri** (`gates-docs` ~11 s, `gates-workflows` ~7 s) più l'aggregatore `quality` (~3 s) ⇒ **~15 s** di tempo pareggio, contro i 42-66 s precedenti e i **172 s** della pipeline sequenziale originale. **Nessuna perdita di copertura**: i 27 gate restano 27 e ognuno gira dove serve (sulla PR che modifica il codice o gli script); `quality` su push continua a richiedere solo i 2 gate leggeri, su pull_request tutti. Documentazione: `12-DEVOPS.md` §9.10 (nuova colonna «Quando gira» per job), `AGENTS.md` (tabella della CI aggiornata) |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -11241,6 +11819,9 @@ peggio di nessuna percentuale.
 | `state/stories/2.2-era-detector.md` | ✅ creata | Story 2.2 (Era Detector) — ✅ **done** (Sessione 69, issue #211): **change point detection** su firme settimanali (`04§5`, nessun clustering non supervisionato), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`) e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8) |
 | `state/sessions/70-event-detector.md` | ✅ creata | Sessione 70 (issue #214): **implementazione della Story 2.3** (Event Detector) — il detector a **z-score** su griglia settimanale, il detector a **quota** per `spike_artist`/`spike_genre`, i detector specialistici per `silence` ed `exploration`, il dedupe per tipo e soggetto, la persistenza degli eventi con `derivedVersion` (MIG-3) e il fixture di scenario `listening-spike.json`. **Merged** il 2026-10-31T11:18:48Z (PR #215, merge commit `5149b2c`) |
 | `state/sessions/71-powershell-7-baseline.md` | ✅ creata | Sessione 71: **baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1` — la documentazione era rimasta ancorata al world di PS 5.1 anche se `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usa `shell: pwsh` da sempre. Forma canonica dei flag a singolo trattino (`-Check`), `AGENTS.md` v1.29 con la session start checklist a 6 check (F9: versione di PowerShell), rimosso il riferimento al flag `-Strict` (che non esiste in `aggregate-state.ps1`), `12-DEVOPS.md` v1.3 e `17-DEV-NOTES.md` v0.4 con il nuovo P11 |
+| `state/sessions/73-perf-procedure-automatiche.md` | ✅ creata | Sessione 73 (issue #224): **procedure automatiche misurate e velocizzate** — `ci.yml` da 1 job sequenziale (18 step, **172 s**) a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il nome invariato), `pnpm run verify` (i 4 gate del CI in una sola invocazione locale), `generate-bundle.ps1` con `StringBuilder` (O(n²)→O(n), output byte-identico), `aggregate-state.ps1` con cache dei file di stato, le **5 suite** che la CI non eseguiva ora in CI (con i difetti corretti: `test-safe-branch-switch.sh` fail-open, `test-appendline-lf-fix.ps1` S3 stale, `test-setup-worktree.sh` falliva su ogni piattaforma) e il secondo run di `auto-bundle` saltato quando l'aggregator non ha prodotto un commit. `12-DEVOPS.md` v1.5 (nuova **§9.14**), `17-DEV-NOTES.md` v0.6 (nuovo **P13**), `AGENTS.md` v1.31 |
+| state/sessions/74-ci-merge-once.md | ✅ creata | Sessione 74: **la CI girava 4 volte per ogni merge** — il trigger push: branches: [main] senza filtro rieseguiva l'intera pipeline su alberi già validati dalla PR, e il doc-sync PR (che porta pr: e merged_commit:, noti solo dopo il merge) girava l'intera pipeline su file **solo .md**. Ora il trigger push è **filtrato per path** sui 5 file dei writer automatici (gli unici commit che arrivano su main senza passare da una PR), su push girano **solo i job leggeri** (~21 s invece di ~73 s), e il job detect-code fa saltare i gate sul codice quando la PR tocca solo .md (regola conservativa e fail-safe: detector rotto ⇒ i gate girano comunque). In più alidate-workflows.mjs ora **valida la sintassi YAML** (uno scalare semplice con :  rende il file irifiutabile da GitHub: run con jobs: 0 e ailure a 0 s, la firma dell'issue #135) e **normalizza il fine-riga**: i controlli con regex ancorate fallivano in silenzio sui file CRLF. 12-DEVOPS.md §9.14.10-11, AGENTS.md v1.31 |
+| `state/sessions/75-progress-indicator.md` | ✅ creata | Sessione 75 (issue #216): **indicatore di avanzamento automatico** — `scripts/aggregate-state.ps1` V4 genera il blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con la percentuale di implementazione (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), il conteggio `X/Y`, gli **Z step rimanenti**, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione corrente (`## Analisi di avanzamento` nel file di sessione). Il **denominatore** è il catalogo del backlog (`docs/11-BACKLOG.md`, 28 story), non i soli state file (che esistono solo per le story claimate): **fail-closed** se uno state file descrive una story assente dal backlog (exit 2, prima di scrivere qualsiasi blocco). Modalità read-only `-Progress` (`pnpm run progress`); il workflow `auto-state-aggregate` rigenera il blocco a ogni merge (i trigger `paths:` includono `docs/11-BACKLOG.md`) e il sesto sub-gate di `validate-workflows.mjs` verifica che i trigger coprano tutti gli input del blocco. Test `test-aggregate-determinism.sh` T12/T12b/T13/T14. Sessione rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74) |
 | `state/stories/2.3-event-detector.md` | ✅ creata | Story 2.3 (Event Detector) — ✅ **done** (Sessione 70, issue #214, PR #215, merge `5149b2c`): gli **otto** tipi di evento di `02§4` (`04§6`), il plug-in dell'orchestratore (`04§8.1`), la descrizione resa dal resolver i18n (`insight.event.*`, D-A.4) e il ricalcolo che sostituisce **l'insieme** degli eventi |
 | `state/stories/4.1-audio-features.md` | ✅ creata | Story 4.1 (Pipeline audio features) — ⬚ **todo** (Sessione 62, issue #187): la spec `21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (ratificata al merge della PR di ratifica), le nove decisioni D-AF.1…D-AF.9 sono ratificate e l'issue di implementazione **#188** è `agent-ready`. `status: todo` ⇒ il blocco NEXT-STEP del README punta alla 4.1, primo anello della catena 4.1 → 2.1 → 2.2/2.3 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
@@ -15351,11 +15932,11 @@ number: 72
 title: "Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh"
 date: 2026-10-31
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
-branch: main
-pr: 0
+merged: true
+merged_commit: aa6100f
+merged_date: 2026-10-31
+branch: docs/4.4-post-merge-sync
+pr: 223
 claim: kilo-HP-ELITEBOOK-ced9
 cross_refs: [63, 104, 218, 43]
 tags: [devops, docs, audit]
@@ -15485,6 +16066,25 @@ letterali corrotti verrebbero **scritti** nei file globali.
   v1.30, `17-DEV-NOTES.md` → v0.5
 - `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`
 
+## Come è finita su `main`
+
+Il contenuto della sessione è arrivato su `main` **dentro il commit di doc-sync di un altro
+agente** (`2f5c1c2`, "docs: post-merge sync story 4.4 (pr 222)"), che ha incluso i file di
+documentazione non committati presenti nella working copy condivisa; la PR **#223**
+(`aa6100f`) li ha portati su `main`. Il frontmatter riflette quel percorso reale
+(`pr: 223`, `merged_commit: aa6100f`), non una PR dedicata.
+
+La PR **#224** (`docs/224-audit-procedure-automatiche`) contiene il **solo allineamento dei
+metadati** di questa sessione (frontmatter + rigenerazione di `SESSIONS.md` e `BUNDLE.md`),
+come il precedente "docs(state): allinea la Sessione 71 al numero di PR" della Sessione 71.
+
+**Lesson 72-6**: in una working copy condivisa, un `git add -A` dell'agente successivo può
+portare su `main` il lavoro documentale di un altro agente **senza messaggio di commit
+coerente**: il contenuto arriva, la tracciabilità no. Il rimedio non è evitare il
+doc-sync (che è il meccanismo voluto, ADR-0008) ma **non lasciare il WIP nella working copy
+condivisa**: la worktree dedicata (`setup-worktree.ps1`) è l'unico modo per tenere il confine
+fra il lavoro proprio e quello altrui.
+
 ## Verifica
 
 - `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
@@ -15505,10 +16105,415 @@ letterali corrotti verrebbero **scritti** nei file globali.
 
 
 
-===== FILE: docs/state/sessions/73-progress-indicator.md =====
+===== FILE: docs/state/sessions/73-perf-procedure-automatiche.md =====
 
 ---
 number: 73
+title: "Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura"
+date: 2026-10-31
+state: 🟢
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: docs/224-audit-procedure-automatiche
+pr: 225
+claim: kilo-HP-ELITEBOOK-perf73
+cross_refs: [224, 63, 104, 218, 43, 73, 53, 49, 58]
+tags: [devops, performance, ci, audit]
+---
+
+# Sessione 73 — Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura
+
+## Sintesi
+
+La Sessione 72 (issue #224) aveva **misurato** le procedure automatiche del repo ma le aveva
+solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la
+semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto
+esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»:
+l'audit è stato quindi **chiuso con le correzioni**.
+
+Il dato di partenza è il tempo pareggio **reale** del job `quality` di `ci.yml`, ricavato
+dall'API GitHub (run `41212641314`, 2026-10-31): **172 s**, in un **unico job** con 18 step in
+sequenza.
+
+## Cosa è stato misurato (e da dove)
+
+| Sorgile | Dato |
+|---|---|
+| API GitHub, run `41212641314` | job `quality` = **172 s** (1 job, 18 step) |
+| API GitHub, run `41212641340` / `41212688495` | `auto-bundle` su `push` = 20 s, su `workflow_run` = 22 s ⇒ **2 run per merge** |
+| API GitHub, run `41212641429` | `auto-state-aggregate` = 38 s |
+| Dev machine (Windows, `pwsh` 7.6.9, Git Bash) | profilo dei singoli script e delle suite |
+| Profilo dei processi figli | `seed_repo_files` = **256 spawn per repo** = **9,5 s per repo** |
+
+## Il risultato
+
+| Procedura | Prima | Dopo | Δ |
+|---|---:|---:|---:|
+| **Tempo pareggio della pipeline CI** | **172 s** | **73 s** | **−58 %** |
+| `test-bundle-check-idempotent.sh` | 53,0 s | 11,9 s | −77 % |
+| `test-aggregate-determinism.sh` | 48,2 s | 39,7 s | −18 % |
+| `test-issue-76-residue.sh` | 16,1 s | 11,5 s | −29 % |
+| `test-post-merge.sh` | 52,4 s | 39,3 s | −25 % |
+| `pwsh scripts/aggregate-state.ps1 -Check` | 1,23 s | 0,91 s | −26 % |
+| `pwsh scripts/generate-bundle.ps1 -Check` | 1,37 s | 1,05 s | −23 % |
+| 4 task turbo sequenziali | 52,7 s | 52,7 s | invariato — la forma parallela (32,8 s) **rompeva il gate**, vedi «Il parallelismo ha un costo» |
+| `auto-bundle` per merge che tocca `docs/state/` | 2 run (20 s + 22 s) | 1 run | −22 s di latenza |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.73.1 | La **CI passa da 1 job sequenziale a 11 job** (10 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
+| D.73.2 | `quality` conserva il **nome** del check ed è **fail-closed** | Senza il controllo esplicito sui risultati dei job dipendenti, `needs:` renderebbe `quality` *skipped* quando un job fallisce, e la branch protection può interpretare un check saltato come successo. Il nome invariato evita di dover cambiare la branch protection |
+| D.73.3 | I **5 job di gate non installano le dipendenze npm** | `scripts/validate-*.mjs` e `scripts/check-readme-facts.mjs` usano **solo i moduli built-in di node**; le suite bash usano `git` + `bash` + `pwsh`, tutti preinstallati sui runner GitHub. Installare npm in 5 job che non ne hanno bisogno era costo puro |
+| D.73.4 | I 4 task turbo restano **sequenziali**; la forma parallela (`turbo run lint typecheck test build`, 32,8 s) è stata implementata e poi **revertita** | Sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`: è la classe del lesson 30-1, e la soglia di un test time-sensitive è un **acceptance criterion** |
+| D.73.5 | Le **5 suite** che la CI non eseguiva sono **aggiunte alla CI**, dopo aver corretto i loro difetti | La procedura più distruttiva del repo (`post-merge.ps1`: `git push origin --delete`, `git branch -D`) non aveva copertura. Il project owner ha chiesto di «controllare tutte le procedure automatiche»: controllare una procedura significa che la sua verifica gira |
+| D.73.6 | Il contatore degli assert delle suite in subshell passa su un **file di risultati condiviso** | I contatori in memoria di una subshell non arrivano al padre: `test-safe-branch-switch.sh` riportava «0 passati, 0 falliti» e usciva 0 **sempre** (lesson 43-1) |
+| D.73.7 | Il run di `auto-bundle` su `workflow_run` viene **saltato** se l'aggregator non ha prodotto un commit | Il secondo run serve solo se l'aggregator ha committato. Il controllo è esatto (`workflow_run.head_sha` vs `origin/main`), non prudenziale. Se l'aggregator è **fallito** si rigenera comunque |
+| D.73.8 | Il **typecheck duplicato**, il **doppio startup di vitest**, la **CI sui push del bot** e la **parallelizzazione interna delle suite** restano **fuori perimetro** | Sono modifiche alla *definizione* di un task o del *trigger* della CI: decisioni sul test strategy che spettano al project owner (D.71.4). Sono documentati con la misura in `12-DEVOPS.md §9.14.9` |
+| D.73.9 | `git init` nelle suite dichiara **esplicitamente** il branch iniziale (`-b main`) | `init.defaultBranch` è una configurazione **di macchina**: la dev machine ha `main`, il runner GitHub ha `master`. Con `master`, `git clone` del bare repo non fa il checkout di nessun branch e `git push origin main` fallisce: il test era verde solo in locale |
+
+## I tre difetti che la misura ha smascherato
+
+1. **`test-safe-branch-switch.sh` era fail-open**: riportava «0 passati, 0 falliti» e usciva 0
+   **sempre** (i contatori vivevano dentro subshell). Ora gli assert scrivono su un file di
+   risultati condiviso: **11 assert** contati. In CI (job `gates-procedure`).
+2. **`test-setup-worktree.sh` falliva su *ogni* piattaforma**, non solo su Windows — la Sessione 72
+   concludeva che «su `ubuntu-latest` passerebbe», ed era **falso**: `mktemp` onora `TMPDIR` anche su
+   Linux, e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ lo scenario successivo
+   ereditava una directory già cancellata. Corretti anche il path POSIX passato a `pwsh` (ora
+   convertito con `cygpath -w`) e il mock `gh` (script bash, non eseguibile dal `pwsh` nativo su
+   Windows: aggiunto un wrapper `gh.cmd`). In CI, **8 assert**.
+3. **`test-appendline-lf-fix.ps1` aveva S3 stale** (pretendeva che `aggregate-state.ps1` non
+   contenesse `AppendLine`: ne ha 64, e sono la forma *corretta* del fix dell'issue #58) e **S5
+   mutava il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'agregator). Ora S3
+   verifica l'invariante reale («normalizza CRLF→LF in scrittura») e S5 gira su un **fixture
+   temporaneo**. In CI.
+
+## Il parallelismo ha un costo: il gate che misura il tempo
+
+Una delle ottimizzazioni proposte — una **sola** invocazione `turbo run lint typecheck test build`
+invece di 4 sequenziali (52,7 s → 32,8 s) — è stata implementata, **pubblicata sulla PR**, e poi
+**revertita** perché sul runner **rompeva un gate**.
+
+Il runner GitHub ha **2 vCPU**. Con i 4 task in un'unica invocazione, turbo esegue `build`
+(`vite build` + `tsc`) **in concorrenza** con `test`, e il vitest riceve meno CPU: i 2 test di
+integrazione del fixture `db-seed/medium.json` (5000 eventi) sono scadati con «Test timed out in
+5000ms».
+
+È **esattamente** la classe del lesson 30-1: «il test di performance misurava il **carico del
+runner**, non il layer DB […] il test gira ora in una **run separata**, con la soglia dell'AC
+invariata». La soglia **non** si tocca: è un acceptance criterion.
+
+**Regola generale**: «parallelizzare» (a livello di **job**, dove i gate sono processi separati) e
+«aumentare il parallelismo interno di un gate» (a livello di **task runner**, che condivide il
+processore) sono due ottimizzazioni **indipendenti**, e la seconda può invalidare la prima quando
+un gate è **time-sensitive**.
+
+## Un test verde in locale non è un test verde ovunque
+
+`test-post-merge.sh` è fallito sul runner con «error: src refspec main does not match any» **solo
+su Linux**. La causa: la dev machine ha `init.defaultBranch = main` in
+`C:\Program Files\Git\etc\gitconfig`, il runner GitHub ha il default di git, `master`.
+
+La meccanica: `git init --bare` crea un bare repo con `HEAD → refs/heads/<init.defaultBranch>`;
+`git clone` di quel repo, se `HEAD` punta a un branch **inesistente**, avvisa «remote HEAD refers
+to nonexistent ref» e **non fa il checkout di nessun branch**; il successivo `git push origin main`
+fallisce.
+
+Correzione: **`git init -q --bare -b main`** in tutte e tre le suite che creano un bare repo
+(`test-post-merge.sh`, `test-issue-76-residue.sh`, `test-setup-worktree.sh`).
+`init.defaultBranch` è una configurazione **di macchina**, non del progetto.
+
+**Regola generale**: un test che crea repository git temporanei deve dichiarare **esplicitamente**
+il branch iniziale: la CI ha una configurazione git diversa da qualunque dev machine, e un test che
+passa in locale non è un test che passa ovunque.
+
+## Il costo nascosto: i processi figli
+
+Il singolo costo più alto della sessione non era nella logica, era nel **numero di processi**.
+`seed_repo_files` creava 128 stub chiamando `dirname` + `mkdir -p` + `touch` **una volta per
+file**: 256 processi per repo, **9,5 s per repo**, ~38 s dei 53 s della suite. Risolto con le
+**builtin** del shell (`${f%/*}` al posto di `dirname`, `: > "$f"` al posto di `touch`, `mkdir -p`
+una volta per directory distinta) e con le **env var** git al posto di `git config`
+(`GIT_AUTHOR_*`, `GIT_COMMITTER_*`, `GIT_CONFIG_COUNT/KEY_n/VALUE_n`).
+
+In PowerShell: `StringBuilder` al posto di `$bundle += ...` (O(n²) → O(n) su ~2,4 MB),
+`[System.IO.File]::ReadAllText` al posto di `Get-Content -Raw`, `.Replace("`r`n","`n")` al posto
+di `-replace "`r`n", "`n"` (pattern letterale ⇒ risultato identico, ma confronto ordinale invece
+di scansione regex).
+
+## Lesson learned
+
+| # | Osservazione | Azione |
+|---|--------------|--------|
+| 73-1 | **Il tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano 172 s anche se il lavoro utile era ~89 s | `ci.yml` a 11 job; `quality` aggregatore fail-closed con il nome invariato |
+| 73-2 | **Il costo più alto era nel numero di processi, non nell'algoritmo**: 256 spawn per repo = 9,5 s, e nessun profiler di linguaggio lo avrebbe mostrato | `docs/17-DEV-NOTES.md` **P13**; suite riscritte con le builtin |
+| 73-3 | **Una suite che non può fallire costa anche quando non fallisce**: `test-safe-branch-switch.sh` consumava 6,7 s per niente, perché riportava «0 passati, 0 falliti» e usciva 0 sempre | Contatori su file condiviso; ora 11 assert e in CI |
+| 73-4 | **L'audit precedente aveva diagnosticato la piattaforma invece del difetto**: «su `ubuntu-latest` passerebbe» era falso — `mktemp` onora `TMPDIR` su ogni OS | Il difetto era il *cleanup*; la correzione è cross-platform e la suite ora gira ovunque |
+| 73-5 | **Il bundle rigenerava due volte per merge**: il secondo run (22 s) era pensato per l'ordinamento (issue #149) ma girava anche quando l'aggregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main`; se l'aggregator è fallito si rigenera comunque |
+| 73-6 | **La concatenazione con `+=` in PowerShell è O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione | `StringBuilder`; output byte-identico (SHA-256 verificato sullo stesso albero) |
+| 73-7 | **Le misure vanno fatte sulla macchina e sull'ambiente giusti**: il `bash` di default su questa macchina è lo stub WSL (`bash.exe` → «non è installata una distribuzione Linux»), non Git Bash | I benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`; i tempi misurati altrimenti non sono quelli del repo |
+| 73-8 | **Parallelizzare i job e parallelizzare i task interni sono due cose diverse**: i 4 task turbo in un'unica invocazione facevano scadere per timeout un test time-sensitive sul runner a 2 vCPU | I 4 task restano sequenziali; il parallelismo si Decide a livello di **job** (`docs/12-DEVOPS.md §9.14.7`) |
+| 73-9 | **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale | `git init -b main` esplicito in tutte le suite che creano repository (`docs/12-DEVOPS.md §9.14.8`) |
+| 73-10 | **La prima CI della PR vale come test**: la pipeline parallela ha rivelato in 90 secondi due difetti che 14 suite in locale non potevano mostrare (il timeout del test perf e il `git init` con branch implicito) | I due difetti sono corretti e riprodotti localmente simulando il runner (`init.defaultBranch=master`) |
+
+## Documenti aggiornati
+
+- `AGENTS.md` (v1.30 → **v1.31**): nuova sezione **§"🏎️ La CI: 11 job in parallelo"**, nota sullo
+  skip del secondo run di `auto-bundle`, footer v1.31
+- `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (26 gate su 11 job), **§9.13** *Chiusura
+  dell'audit*, **§9.14** (nuova) *Prestazioni delle procedure automatiche* — profilo, costo dei
+  processi figli, tabella dei risultati, equivalenza dimostrata, il costo del parallelismo
+  (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che non è stato fatto (§9.14.9);
+  changelog 1.5
+- `docs/17-DEV-NOTES.md` (v0.5 → **0.6**): **P13** (nuova) — il costo delle procedure automatiche
+  è quasi sempre nei processi figli
+- `docs/18-DEV-LOG.md`: **§40**
+- `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`;
+  `$files` += `scripts/safe-branch-switch.ps1` e `scripts/test-safe-branch-switch.sh`
+- `package.json`: nuovo script `verify` (`turbo run lint && turbo run typecheck && turbo run test && turbo run build`)
+
+## Verifica
+
+- `pnpm run verify` → exit 0 (lint + typecheck + test + build)
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (129 file)
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0
+- `node scripts/check-readme-facts.mjs` → exit 0
+- 14 suite di test locali → tutte exit 0 (37 + 12 + 9 + 29 + 8 + 11 + 8 + 5 assert sulle procedure,
+  più le 6 suite sui workflow)
+- **Equivalenza dimostrata**: il bundle generato dal generatore nuovo e da quello vecchio sullo
+  stesso albero ha **SHA-256 identico**; l'aggregator nuovo e quello vecchio producono output
+  identico a parità del campo mutabile (`Ultima aggregazione`)
+- **Riproduzione locale dei difetti del runner**: con `init.defaultBranch=master` (il default del
+  runner GitHub) le 3 suite che creano repository temporanei passano tutte e 3; senza il fix
+  `test-post-merge.sh` falliva con «src refspec main does not match any»
+
+## Link utili
+
+- `docs/12-DEVOPS.md` §9.14 — prestazioni, profilo e misure
+- `docs/12-DEVOPS.md` §9.13 — audit della copertura CI e la sua chiusura
+- `docs/17-DEV-NOTES.md` P13 — il costo dei processi figli
+- Sessione 72 (`72-audit-procedure-automatiche-pwsh-encoding.md`) — l'audit che questa sessione chiude
+- Issue #224, #73 (parallelizzazione dei gate), #43 (lesson 43-1), #149 (ordinamento dei writer)
+
+
+
+===== FILE: docs/state/sessions/74-ci-merge-once.md =====
+
+---
+number: 74
+title: "La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati"
+date: 2026-10-31
+state: 🟢
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: docs/224-ci-merge-once
+pr: 0
+claim: kilo-HP-ELITEBOOK-perf74
+cross_refs: [224, 135, 140, 149, 43]
+tags: [devops, ci, performance, coverage]
+---
+
+# Sessione 74 — La CI girava 4 volte per ogni merge
+
+## Sintesi
+
+Domanda del project owner: «la CI viene eseguita durante la PR e poi nuovamente durante il merge,
+poi dopo il merge viene prodotto il doc sync ed una nuova PR, viene eseguita nuovamente la CI sulla
+PR, poi viene fatto il merge della PR del doc sync e viene eseguita nuovamente la CI. Come mai tutte
+queste volte gli stessi step? Non basta eseguirli durante la PR soltanto?»
+
+La risposta misurata: **4 run di CI e 3 run `auto-*` per ogni cambiamento logico**, di cui **3 dei 4
+run di CI erano ripetizioni** di una validazione già fatta. Questa sessione chiude la ripetizione.
+
+## L'anatomia del ciclo (misurata sull'API GitHub)
+
+PR #222 → #223, 2026-10-31:
+
+| # | Quando | Workflow | Evento | Necessario? |
+|---|---|---|---|---|
+| 1 | apertura PR #222 | `CI` | `pull_request` | **sì** |
+| 2 | merge di #222 | `CI` | `push` su `main` | **no** — stesso albero del run #1 |
+| 3 | merge di #222 | `auto-state-aggregate` | `push` su `main` | sì (è il lavoro) |
+| 4 | merge di #222 | `auto-bundle` | `push` su `main` | sì (è il lavoro) |
+| 5 | dopo l'aggregate | `auto-bundle` | `workflow_run` | **no** se l'aggregate non ha committato |
+| 6 | committa dell'aggregate | `CI` | `push` su `main` | **no** — ma è l'unico check sui commit dei writer |
+| 7 | apertura PR #223 (doc-sync) | `CI` | `pull_request` | sì, ma su una PR di **sola documentazione** |
+| 8 | merge di #223 | `CI` | `push` su `main` | **no** — stesso albero del run #7 |
+
+**Costo**: 4 × 73 s = **292 s** di CI per ogni cambiamento logico, di cui ~219 s di ripetizioni.
+
+## Le due cause, e cosa è stato fatto
+
+### Causa 1 — il trigger `push: branches: [main]` senza filtro
+
+Il workflow scattava su **ogni** push a `main`, rieseguendo l'intera pipeline. Ma l'albero che
+arriva su `main` con un merge umano è **lo stesso** che la PR ha già validato (per squash è lo
+stesso identico; per merge commit è l'unione di alberi già validati dalle rispettive PR).
+
+**Correzione**: il trigger `push` è ora **filtrato per path** sui 5 file che i **writer automatici**
+modificano — `docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`,
+`README.md`. Sono gli **unici** commit che arrivano su `main` senza essere mai passati da una PR, e
+quindi gli unici che non sono già validati. Su un merge umano la pipeline non gira più.
+
+Su `push` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza
+`pnpm install`): i 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'`.
+
+### Causa 2 — il doc-sync PR girava l'intera pipeline su file solo `.md`
+
+Il doc-sync PR esiste perché il frontmatter della sessione porta `pr:` e `merged_commit:`, noti
+**solo dopo** il merge. Tocca **solo file `.md`**: farci girare lint, typecheck, test e build è
+lavoro sprecato (~68 s di job + 3 installazioni di dipendenze).
+
+**Correzione**: il job `detect-code` calcola se **almeno un** file cambiato non è un `.md`. Se sono
+tutti `.md`, i 3 job `node-*` non installano le dipendenze e non eseguono i task — e **riuscono**
+(non sono saltati), così `quality` resta fail-closed senza casi speciali.
+
+Due scelte di progetto importanti:
+
+- **Conservativa**: la regola è «almeno un file **non** `.md` ⇒ i gate girano». Qualsiasi `.ts`,
+  `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate. Il doc-sync, che tocca solo `.md`, li salta.
+- **Fail-safe**: se il detector **fallisce**, `has_code` resta vuoto e la condizione dei job è
+  `!= 'false'` ⇒ i gate **girano comunque**. Un detector rotto non può mai far saltare la
+  validazione.
+
+## Il secondo finding: il validatore dei workflow non validava il YAML
+
+Scritto il gate che intercetta lo scalare semplice invalido, è emerso che
+`scripts/validate-workflows.mjs` **non faceva parsing YAML**: lavorava sul testo con regex.
+
+Un file workflow sintatticamente rotto passava il gate, e GitHub lo **rifiutava in fase di
+validazione**: run con `jobs: 0`, `conclusion: failure` a 0 secondi, nessun log, nessuna
+annotazione via API — **la firma identica** al failure mode dell'issue #135 (22 ore di gate spenti
+senza che nessuno se ne accorgesse), indistinguibile da «Actions rotta per billing».
+
+**Correzione**: `checkYamlScalars()` intercetta la forma invalida più comune — uno **scalare
+semplice** (non quotato, non block scalar) che contiene `: `, che in contesto block è
+l'indicatore di chiave. Il controllo **salta** i block scalar (dove `: ` è testo letterale), i
+valori quotati, le raccolte flow e i commenti (`#` preceduto da spazio apre un commento e non fa
+parte del valore). Coperto da `scripts/test-workflow-yaml-scalars.sh` (8 assert).
+
+### Bug collaterale: i controlli fallivano in silenzio sui file CRLF
+
+Il validatore divideva il file con `text.split('\n')` **senza normalizzare il fine-riga**. Un file
+salvato con **CRLF** (un contributore su Windows) lasciava un `\r` finale su ogni riga, e i pattern
+ancorati con `$` — incluso quello del gate sui push su `main` (#140) — **non matchiavano più**: i
+controlli fallivano **in silenzio**. In YAML `.` non matcha `\r`, che non è un terminatore di riga
+per il regex JavaScript. Ora le righe sono normalizzate una volta sola.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.74.1 | Il trigger `push` su `main` è **filtrato per path** sui 5 file dei writer automatici | Sono gli unici commit che arrivano su `main` senza passare da una PR. Su un merge umano l'albero è già validato |
+| D.74.2 | Su `push` girano **solo i job leggeri** | I 3 job `node-*` servono a validare il codice, che su `main` non è cambiato. Costa ~21 s invece di ~73 s |
+| D.74.3 | Il doc-sync PR viene riconosciuto da `detect-code` (solo `.md`) ⇒ i gate sul codice non girano | La regola è conservativa (qualunque file non-`.md` fa scattare i gate) e **fail-safe** (detector rotto ⇒ i gate girano) |
+| D.74.4 | I 3 job `node-*` **riuscono** (non vengono saltati) quando i gate non sono applicabili | `quality` resta fail-closed senza dover distinguere «saltato per design» da «saltato per errore» |
+| D.74.5 | `validate-workflows.mjs` acquisisce un controllo di validità YAML + normalizzazione del fine-riga | Un file rotto che GitHub rifiuta produce una run con `jobs: 0` e `failure` a 0 s: la firma dell'issue #135. E i controlli con regex ancorate fallivano in silenzio sui file CRLF |
+| D.74.6 | Il **doc-sync PR non viene eliminato** | `pr:` e `merged_commit:` sono noti solo dopo il merge. Eliminarlo richiederebbe un cambio allo **schema** del frontmatter: decisione del project owner, non un'ottimizzazione della CI |
+
+## Lesson learned
+
+| # | Osservazione | Azione |
+|---|--------------|--------|
+| 74-1 | **Un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati | Filtro per path sui file che i writer automatici modificano |
+| 74-2 | **La pipeline non deve girare su ciò che non è cambiato**: i gate sul codice su un merge sono lavoro sprecato | `detect-code`: i gate sul codice girano solo se la PR tocca almeno un file non-`.md` |
+| 74-3 | **Fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano | Condizione `!= 'false'`, mai `== 'true'`, per i passi che decidono |
+| 74-4 | **Un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex e non avrebbe intercettato un YAML rotto | Controllo di validità YAML + normalizzazione CRLF, con test di regressione |
+| 74-5 | **Il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern con `$` smettono di matchiare | Normalizzare il fine-riga una volta sola, prima di qualsiasi controllo |
+
+## Follow-up: i 5 gate che verificano gli script passano a `pull_request` only
+
+Misurato sul merge di PR #227: la run `CI` su `main` era **42-66 s**, e il percorso critico era
+`gates-aggregate` (**50 s**), un gate che su `main` **non è nemmeno richiesto** da `quality` (su
+push `quality` esige solo `gates-docs` + `gates-workflows`).
+
+I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`,
+`gates-scripts`, `gates-procedure`) sono passati a `pull_request` only: su `main` quegli script non
+sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sul
+lo stesso contenuto**. Rieseguirli lì era lavoro sprecato — 27 s di tempo di runner sprecati per
+ogni merge.
+
+Su `push` su `main` restano quindi **2 gate leggeri** (`gates-docs` + `gates-workflows`, ~11 s e
+~7 s in parallelo) più l'aggregatore `quality` (~3 s): **~15 s** di tempo pareggio, contro i
+42-66 s precedenti e i **172 s** della pipeline sequenziale originale.
+
+Nessuna perdita di copertura: i 27 gate restano 27, e ognuno gira dove serve — sulla PR che
+modifica il codice o gli script.
+
+## Il merge di PR #227 e la verifica sul runner
+
+Dopo il merge (2026-10-31T18:22:26Z, commit `51f4076`) la run `CI` su `main` è durata **42 s** con
+i 3 job `node-*` **skipped** (0 s, nessuna installazione di dipendenze) e gli 11 gate verdi —
+contro i **172 s** della pipeline sequenziale originale.
+
+### ⚠️ Correzione a una premessa di questa sessione
+Questa sessione aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei
+**writer automatici** fossero «gli unici che arrivano su `main` senza essere mai passati da una PR»
+e che il filtro li catturasse. La premessa è corretta, **la conseguenza pratica no**: quei commit
+**non attivano nessuna run**, e non è colpa del filtro.
+
+**GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (il
+comportamento documentato che impedisce i loop ricorsivi; l'unica eccezione è
+`workflow_dispatch`/`repository_dispatch`). I due writer pushano con `secrets.GITHUB_TOKEN`
+(`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`).
+
+Verificato sui dati dell'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`,
+`04c76fd`) **non** hanno mai attivato una run `CI` — né prima né dopo questa sessione, nemmeno
+quando il trigger `push` era privo di filtro. Gli unici workflow che si attivano sui loro commit
+sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce: è esattamente il
+workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer (issue #149).
+
+**Conseguenze, e scelte:**
+
+- Il filtro per path, nella pratica, serve a **saltare** la CI sui merge umani che non toccano i 5
+  file aggregati — non a catturare i commit dei writer.
+- **L'integrità di `main` dopo i writer non è garantita dalla CI**, ma dai writer stessi: ciascuno
+  è idempotente, è conservato da `git diff --quiet` prima del push, e il `workflow_run` di
+  `auto-bundle` rigenera il bundle **dopo** l'aggregator, riparando da solo il caso dell'ordinamento
+  invertito (issue #149).
+- Volere **anche** un check indipendente sullo stato finale di `main` richiederebbe un trigger
+  `workflow_run` su `ci.yml` per i due writer: **+1 run leggera per merge**. È un trade-off fra
+  copertura e numero di run, e la scelta è del project owner: **non è stato fatto**.
+
+**Lesson**: una premessa corretta può avere una conseguenza pratica falsa. «I commit dei writer
+sono gli unici che non passano da una PR» ⇒ «il filtro li cattura» sembra ovvio, ma fra la premessa
+e la conseguenza c'è il comportamento di GitHub sui push fatti col `GITHUB_TOKEN`. La verifica va
+fatta **sui dati**, non per deduzione: è stato controllato l'API GitHub run per run, e i commit dei
+writer non hanno *mai* attivato una `CI`.
+
+## Documenti aggiornati
+
+- `docs/12-DEVOPS.md` §9.10 (27 gate su 12 job), **§9.14.10** (nuova: l'anatomia del ciclo e le
+  correzioni), **§9.14.11** (nuova: il validatore non validava il YAML)
+- `AGENTS.md` §"🏎️ La CI: 12 job, e non gira 4 volte per ogni merge"
+- `docs/18-DEV-LOG.md`: **§41**
+- `docs/state/_index.md`, `docs/INDEX.md`: allineati
+- `scripts/validate-workflows.mjs`: `checkYamlScalars()` + normalizzazione del fine-riga
+- `scripts/test-workflow-yaml-scalars.sh`: nuovo (8 assert)
+- `scripts/generate-bundle.ps1`: `$files` += `scripts/test-workflow-yaml-scalars.sh`
+
+## Verifica
+
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0 (0 falsi positivi sui 6 workflow
+  reali) e exit 1 sulle fixture invalide
+- `bash scripts/test-workflow-yaml-scalars.sh` → exit 0 (8 assert)
+- 13 suite di test locali → tutte exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `node scripts/check-readme-facts.mjs` → exit 0
+- Encoding: tutti i file toccati UTF-8 **senza BOM**, fine-riga LF, nessun U+FFFD
+
+
+
+===== FILE: docs/state/sessions/75-progress-indicator.md =====
+
+---
+number: 75
 title: "Indicatore di avanzamento automatico (issue #216)"
 date: 2026-10-31
 state: 🟡
@@ -15520,7 +16525,7 @@ cross_refs: [216, 127, 52, 24]
 tags: [devops, tooling, adr-0008]
 ---
 
-# Sessione 73 — Indicatore di avanzamento automatico (issue #216)
+# Sessione 75 — Indicatore di avanzamento automatico (issue #216)
 
 ## Sintesi
 
@@ -17081,21 +18086,41 @@ $targets = @(
 
 # === Helpers ===
 
+# PERF (Sessione 73, issue #224): cache per-process delle sorgenti di stato.
+#
+# Lo script era 2,09 s perche' leggeva gli stessi file piu' volte:
+#   - i file di sessione venivano letti 4 volte (Build-Block-Sessions,
+#     Build-Block-IndexStatus, Build-Block-IndexRoadmap, Find-DuplicateSessionNumbers)
+#   - i file di story venivano letti 3 volte (Build-Block-Stories,
+#     Build-Block-IndexStatus, Build-Block-NextStep)
+#   - ogni file veniva anche ri-parsato dal frontmatter a ogni passaggio
+# Le tre cache qui sotto eliminano le letture ripetute: il contenuto dei file
+# in docs/state/ non cambia durante una singola esecuzione, quindi la cache
+# e' coerente per costruzione (e `Apply-Blocks` non scrive mai i file di
+# state/, solo i target aggregati).
+$script:stateSessionFileCache = $null
+$script:stateStoryFileCache   = $null
+$script:stateContentCache     = @{}
+$script:stateParsedCache      = @{}
+
 function Get-StateSessionFiles {
-    if (-not (Test-Path $stateSessionsDir)) { return @() }
-    Get-ChildItem -Path $stateSessionsDir -Filter "*.md" | ForEach-Object {
+    if ($null -ne $script:stateSessionFileCache) { return $script:stateSessionFileCache }
+    if (-not (Test-Path $stateSessionsDir)) { $script:stateSessionFileCache = @(); return $script:stateSessionFileCache }
+    $script:stateSessionFileCache = @(Get-ChildItem -Path $stateSessionsDir -Filter "*.md" | ForEach-Object {
         $number = ($_.BaseName -split '-')[0]
         [PSCustomObject]@{
             Number = [int]$number
             Path   = $_.FullName
             Base   = $_.BaseName
         }
-    } | Sort-Object Number
+    } | Sort-Object Number)
+    return $script:stateSessionFileCache
 }
 
 function Get-StateStoryFiles {
-    if (-not (Test-Path $stateStoriesDir)) { return @() }
-    Get-ChildItem -Path $stateStoriesDir -Filter "*.md" | ForEach-Object {
+    if ($null -ne $script:stateStoryFileCache) { return $script:stateStoryFileCache }
+    if (-not (Test-Path $stateStoriesDir)) { $script:stateStoryFileCache = @(); return $script:stateStoryFileCache }
+    $script:stateStoryFileCache = @(Get-ChildItem -Path $stateStoriesDir -Filter "*.md" | ForEach-Object {
         $id = ($_.BaseName -split '-')[0]
         [PSCustomObject]@{
             Id   = $id
@@ -17107,7 +18132,29 @@ function Get-StateStoryFiles {
     # tutti gli item hanno sort key `$null`, l'ordine degenera a quello di
     # `Get-ChildItem` (filesystem-dipendente). Vedi issue #79 e il gate
     # `scripts/test-aggregate-determinism.sh` (T1+T2).
-    } | Sort-Object { [version]$_.Id }
+    } | Sort-Object { [version]$_.Id })
+    return $script:stateStoryFileCache
+}
+
+# Contenuto di un file di state/, letto una sola volta per esecuzione.
+function Get-StateContent {
+    param([string]$Path)
+    if (-not $script:stateContentCache.ContainsKey($Path)) {
+        # PERF: `ReadAllText` al posto di `Get-Content -Raw`: stessa
+        # decodifica UTF-8 (BOM rilevato e consumato) senza l'overhead del
+        # cmdlet di PowerShell.
+        $script:stateContentCache[$Path] = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    }
+    return $script:stateContentCache[$Path]
+}
+
+# Frontmatter di un file di state/, parsato una sola volta per esecuzione.
+function Get-StateParsed {
+    param([string]$Path)
+    if (-not $script:stateParsedCache.ContainsKey($Path)) {
+        $script:stateParsedCache[$Path] = Parse-Frontmatter (Get-StateContent $Path)
+    }
+    return $script:stateParsedCache[$Path]
 }
 
 # === Issue #105 — guard anti-collisione sui numeri di sessione ===
@@ -17188,8 +18235,7 @@ function Build-Block-Sessions {
     [void]$sb.Append("> Aggregator version: 1 (ADR-0008, S25)." + "`n")
     [void]$sb.Append("" + "`n")
     foreach ($f in $files) {
-        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-StateParsed $f.Path
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $date = if ($parsed.Frontmatter['date']) { $parsed.Frontmatter['date'] } else { "?" }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
@@ -17238,8 +18284,7 @@ function Build-Block-Stories {
     [void]$sb.Append("| Story | Stato | PR | Merge commit | Area |" + "`n")
     [void]$sb.Append("|-------|-------|----|--------------|------|" + "`n")
     foreach ($f in $files) {
-        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-StateParsed $f.Path
         $id = if ($parsed.Frontmatter['id']) { $parsed.Frontmatter['id'] } else { $f.Base }
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { "?" }
         $status = if ($parsed.Frontmatter['status']) { $parsed.Frontmatter['status'] } else { "?" }
@@ -17274,8 +18319,7 @@ function Build-Block-IndexStatus {
     # Sessions per merge status
     $mergedSessions = 0
     foreach ($f in $sessions) {
-        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Parse-Frontmatter $c
+        $p = Get-StateParsed $f.Path
         if ($p.Frontmatter['merged'] -eq 'true') {
             $mergedSessions++
         }
@@ -17286,8 +18330,7 @@ function Build-Block-IndexStatus {
     if ($sessionCount -gt 0) { $latestSession = $sessions[-1] }
     $latestSessionInfo = ""
     if ($latestSession) {
-        $content = Get-Content -LiteralPath $latestSession.Path -Raw -Encoding UTF8
-        $parsed = Parse-Frontmatter $content
+        $parsed = Get-StateParsed $latestSession.Path
         $n = $parsed.Frontmatter['number']
         $t = $parsed.Frontmatter['title']
         $latestSessionInfo = "Ultima sessione migrata: **S$n** - $t"
@@ -17296,8 +18339,7 @@ function Build-Block-IndexStatus {
     # Stories per status
     $doneStories = @()
     foreach ($f in $stories) {
-        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Parse-Frontmatter $c
+        $p = Get-StateParsed $f.Path
         if ($p.Frontmatter['status'] -eq 'done') {
             $doneStories += $p.Frontmatter['id']
         }
@@ -17343,8 +18385,7 @@ function Build-Block-IndexRoadmap {
     [void]$sb.AppendLine("| Sessione | Nome | Stato | Merged | PR |")
     [void]$sb.AppendLine("|----------|------|-------|--------|----|")
     foreach ($f in $files) {
-        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $parsed  = Parse-Frontmatter $content
+        $parsed  = Get-StateParsed $f.Path
         $n = $parsed.Frontmatter['number']
         $title = if ($parsed.Frontmatter['title']) { $parsed.Frontmatter['title'] } else { $f.Base }
         $state = if ($parsed.Frontmatter['state']) { $parsed.Frontmatter['state'] } else { "?" }
@@ -17380,6 +18421,9 @@ function Build-Block-BundleInventory {
     # NEXT-STEP e va escluso come gli altri (Story 1.1: senza esclusione il
     # totale oscillava di 1 run dopo ogni cambio di stato di una story).
     $aggregatorManaged = @('docs/SESSIONS.md', 'docs/INDEX.md', 'docs/11-BACKLOG.md', 'docs/BUNDLE.md', 'README.md')
+    # Set per il lookup O(1) e codifica condivisa (PERF, Sessione 73).
+    $managedSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$aggregatorManaged)
+    $utf8 = [System.Text.Encoding]::UTF8
 
     # Categorize files
     $categories = @{ 'docs/' = 0; 'scripts/' = 0; 'fixtures/' = 0; '.githooks/' = 0; '.github/' = 0; 'root/' = 0 }
@@ -17392,27 +18436,40 @@ function Build-Block-BundleInventory {
         }
         if (-not $matched) { $categories['root/']++ }
         $fullPath = Join-Path $repoRoot $f
-        if (Test-Path $fullPath) {
-            # Issue #88: usare la dimensione del contenuto normalizzato a LF invece
-            # di (Get-Item).Length, perche' con `core.autocrlf=true` su Windows 14
-            # file di testo vengono serviti CRLF sul disco e il check su origin/main
-            # (committed LF) generava un drift spurio cross-platform (~2.3 KB).
-            # Il valore cosi ottenuto coincide con `git cat-file -s HEAD:<file>` ed e
-            # quindi identico su Windows / Linux / macOS.
-            $fileText = Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
-            if ($null -ne $fileText) {
-                $lfText = $fileText -replace "`r`n", "`n"
-                $size = [System.Text.Encoding]::UTF8.GetByteCount($lfText)
-            } else {
-                # File binario o illeggibile come UTF-8: usa la dimensione raw.
-                $size = (Get-Item $fullPath).Length
-            }
-            if ($aggregatorManaged -contains $f) {
-                $excludedSizeFiles++
-            } else {
-                $totalSize += $size
-            }
+        if (-not [System.IO.File]::Exists($fullPath)) { continue }
+        if ($managedSet.Contains($f)) {
+            # PERF (Sessione 73, issue #224): per i file aggregator-managed la
+            # dimensione calcolata veniva **scartata** (issue #86, opt A: sono
+            # esclusi dal totale). Leggerli era quindi lavoro inutile:
+            # `docs/SESSIONS.md` (504 KB), `docs/11-BACKLOG.md` (98 KB) e
+            # `docs/INDEX.md` (30 KB) venivano letti e decodificati solo per
+            # buttare il risultato.
+            $excludedSizeFiles++
+            continue
         }
+        # Issue #88: usare la dimensione del contenuto normalizzato a LF invece
+        # di (Get-Item).Length, perche' con `core.autocrlf=true` su Windows 14
+        # file di testo vengono serviti CRLF sul disco e il check su origin/main
+        # (committed LF) generava un drift spurio cross-platform (~2.3 KB).
+        # Il valore cosi ottenuto coincide con `git cat-file -s HEAD:<file>` ed e
+        # quindi identico su Windows / Linux / macOS.
+        #
+        # PERF: `ReadAllText` + conteggio CRLF senza allocare una seconda
+        # stringa, al posto di `Get-Content -Raw` + `-replace` (che allocava
+        # una copia di ~2,4 MB solo per normalizzare i line ending).
+        $fileText = $null
+        try { $fileText = [System.IO.File]::ReadAllText($fullPath, $utf8) } catch { $fileText = $null }
+        if ($null -ne $fileText) {
+            $crlf = 0
+            $idx = 0
+            while (($idx = $fileText.IndexOf("`r`n", $idx)) -ge 0) { $crlf++; $idx += 2 }
+            # Ogni CRLF -> LF rimuove esattamente un byte.
+            $size = $utf8.GetByteCount($fileText) - $crlf
+        } else {
+            # File binario o illeggibile come UTF-8: usa la dimensione raw.
+            $size = (Get-Item -LiteralPath $fullPath).Length
+        }
+        $totalSize += $size
     }
 
     $totalKB = [math]::Round($totalSize / 1KB, 1)
@@ -17468,8 +18525,7 @@ function Build-Block-NextStep {
     $files = @(Get-StateStoryFiles)
     $candidates = New-Object System.Collections.Generic.List[object]
     foreach ($f in $files) {
-        $c = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
-        $p = Parse-Frontmatter $c
+        $p = Get-StateParsed $f.Path
         if ($null -eq $p) { continue }
         $status = $p.Frontmatter['status']
         # Non sono "da implementare": gia' fatte, bloccate o annullate.
@@ -17911,7 +18967,7 @@ function Apply-Blocks {
             Write-Host "[SKIP] $path non esiste" -ForegroundColor Yellow
             continue
         }
-        $content = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+        $content = [System.IO.File]::ReadAllText((Join-Path $repoRoot $path), [System.Text.Encoding]::UTF8)
         $found = Find-Block $content $start $end
         if ($null -eq $found) {
             Write-Host "[INSERT] $path - marker non presente, append in fondo" -ForegroundColor Cyan
@@ -17932,7 +18988,12 @@ function Apply-Blocks {
             # Issue #58: WriteAllText con UTF-8 no BOM. Il -replace CRLF, LF e
             # l'uso di Append(... + "`n") invece di AppendLine garantiscono LF uniforme
             # su Windows (che altrimenti userebbe CRLF default).
-            $new = $new -replace "`r`n", "`n"
+            # PERF (Sessione 73): `.Replace()` al posto di `-replace`: il pattern
+            # e' un letterale (nessun metacarattere di regex), quindi il risultato
+            # e' identico, ma l'operazione passa da una scansione regex a un
+            # confronto ordinale. Su `docs/BUNDLE.md` (2,4 MB) la differenza si
+            # misura in decine di millisecondi per run.
+            $new = $new.Replace("`r`n", "`n")
             $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
             [System.IO.File]::WriteAllText((Join-Path $repoRoot $path), $new, $utf8NoBom)
             Write-Host "[WRITE] $path - $($calculated.Length) chars applicati" -ForegroundColor Green
@@ -17976,7 +19037,7 @@ function Test-Blocks {
             $drift = $true
             continue
         }
-        $content = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+        $content = [System.IO.File]::ReadAllText((Join-Path $repoRoot $path), [System.Text.Encoding]::UTF8)
         $found = Find-Block $content $start $end
         if ($null -eq $found) {
             Write-Host "[FAIL] $path - marker $start assente" -ForegroundColor Red
@@ -25480,32 +26541,74 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 
 ### 9.10 Gate reali di `ci.yml`
 
-Elenco dei 18 step nominati del job `quality`, verificato riga per riga contro `.github/workflows/ci.yml` il 2026-10-27 (Sessione 54, issue #161; la Sessione 47 ne aveva verificati 16). È l'elenco autorevole: §2.1 è uno scheletro di progetto e va letto insieme a questa tabella, non al posto suo.
+> **Sessione 73 (issue #224) e Sessione 74: la tabella è stata riscritta due volte.**
+> `ci.yml` non è più un job unico con 18 step in sequenza: è **12 job** di cui **10 girano in
+> parallelo** e due (`quality` e `detect-code`) hanno un ruolo particolare.
+> **Sessione 74**: il trigger `push` su `main` è filtrato per path e su `push` girano **solo i
+> job leggeri**; i 3 job `node-*` girano **solo su `pull_request`**, e saltano (riuscendo) se la
+> PR tocca **solo file `.md`**. Dettaglio e misure in **§9.14.10**.
+> La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
+> temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
-| # | Step | Bloccante | Issue |
-|---|------|:---------:|-------|
-| 1 | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
-| 2 | `Lint` | sì | — |
-| 3 | `Typecheck` | sì | — |
-| 4 | `Test` | sì | — |
-| 5 | `Build` | sì | — |
-| 6 | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
-| 7 | `Bundle check fail-closed` | sì | #104 |
-| 8 | `Aggregator deterministico` | sì | #70 |
-| 9 | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
-| 10 | `Copertura git add vs $targets` | sì | #136 |
-| 11 | `Scope permissions: valide` | sì | **#135** |
-| 12 | **`Sync origin/main prima del push su main`** | sì | **#140** |
-| 13 | **`Ordinamento dei writer di main`** | sì | **#149** |
-| 14 | `Residui post-merge` | sì | #76 |
-| 15 | `Label in sync con AGENTS.md` | sì | #110 |
-| 16 | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
-| 17 | **`Fatti del README in sync con il codice`** (`check-readme-facts.mjs`) | sì | **#161** |
-| 18 | **`Gate "fatti del README" fail-closed`** | sì | **#161** |
+Il job `quality` è il **check aggregatore**: fallisce in modo esplicito se uno
+qualunque dei job paralleli è fallito, annullato o saltato. È il check che la branch
+protection deve richiedere. Senza il controllo esplicito, `needs:` renderebbe
+`quality` *skipped* (non *failed*) quando un job dipendente fallisce, e la branch
+protection può interpretare un check saltato come successo.
 
-I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono divergere per casi non riproducibili localmente. L'asse **versione di PowerShell** è invece chiuso: dal baseline **PowerShell 7 (`pwsh`)** (Sessione 71) sia la dev machine che la CI girano lo stesso engine, quindi il confronto non soffre più della differenza PS 5.1 vs 7 che era la causa originale (issue #63). Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
+| # | Job | Step / gate | Quando gira | Bloccante | Issue |
+|---|-----|-------------|:-----------:|:---------:|-------
+| 1 | `node-lint-typecheck` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | solo PR | sì | Story 0.1 |
+| 2 | `node-lint-typecheck` | `Lint` (`pnpm run lint`) | solo PR | sì | — |
+| 3 | `node-lint-typecheck` | `Typecheck` (`pnpm run typecheck`) | solo PR | sì | — |
+| 4 | `node-test` | `Installa dipendenze` | solo PR | sì | Story 0.1 |
+| 5 | `node-test` | `Test` (`pnpm run test`) | solo PR | sì | — |
+| 6 | `node-build` | `Installa dipendenze` | solo PR | sì | Story 0.1 |
+| 7 | `node-build` | `Build` (`pnpm run build`) | solo PR | sì | — |
+| 8 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | solo PR | **no** (`::warning::`) | #63 |
+| 9 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | solo PR | **no** (`::warning::`) | #63, #66 |
+| 10 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | solo PR | sì | **#161** |
+| 11 | `gates-docs` | `Gate "fatti del README" fail-closed` | solo PR | sì | **#161** |
+| 12 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | solo PR | sì | #70 |
+| 13 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | solo PR | sì | #104 |
+| 14 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | solo PR | sì | #73 |
+| 15 | `gates-workflows` | `Copertura git add vs $targets` | solo PR | sì | #136 |
+| 16 | `gates-workflows` | `Scope permissions: valide` | solo PR | sì | **#135** |
+| 17 | `gates-workflows` | `Sync origin/main prima del push su main` | solo PR | sì | **#140** |
+| 18 | `gates-workflows` | `Ordinamento dei writer di main` | solo PR | sì | **#149** |
+| 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | solo PR | sì | #76 |
+| 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | solo PR | sì | #110 |
+| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | solo PR | sì | sessione 33 |
+| 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | solo PR | sì | #53 |
+| 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | solo PR | sì | sessione 23 |
+| 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | solo PR | sì | #49 |
+| 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | solo PR | sì | #58 |
+| 26 | `gates-workflows` | `Validità YAML dei workflow` (`test-workflow-yaml-scalars.sh`, 8 assert) | solo PR | sì | sessione 74 |
+| 27 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
 
-**Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Cinque sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149) e `Copertura dei trigger del blocco progress` (#216, vedi §9.8h).
+**Verifica**: gli step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). **Sette** sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149), `Validità YAML dei workflow` (Sessione 74), `Copertura dei trigger del blocco progress` (#216, vedi §9.8h) e la sintassi JS dei blocchi `script:` (#73).
+
+I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check
+`-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono
+divergere per casi non riproducibili localmente. L'asse **versione di PowerShell** è invece
+chiuso: dal baseline **PowerShell 7 (`pwsh`)** (Sessione 71) sia la dev machine che la CI girano
+lo stesso engine, quindi il confronto non soffre più della differenza PS 5.1 vs 7 che era la causa
+originale (issue #63). Ogni **gate di copertura e di schema** è invece bloccante, perché confronta
+dati prodotti nella stessa piattaforma.
+
+Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs
+$targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main`
+(#140) e `Ordinamento dei writer di main` (#149).
+
+**I 5 job di gate non richiedono `pnpm install`**: `scripts/validate-*.mjs` e
+`scripts/check-readme-facts.mjs` usano **solo i moduli built-in di node**, e le suite bash usano
+`git` + `bash` + `pwsh`. Solo il job `node` installa le dipendenze npm. I runner GitHub
+includono già `pwsh`, `bash`, `git` e `node` 20.
+
+**Nota sui check richiesti**: i nomi dei check passati da 1 a 8 (`CI / quality`) a 9
+(`CI / node`, `CI / gates-docs`, …). Il check `CI / quality` **conserva il nome** ed è quello
+aggregatore, quindi la branch protection non deve cambiare. I nuovi job hanno nomi propri e
+possono essere richiesti singolarmente per una revisione più granulare.
 
 ---
 
@@ -25606,15 +26709,301 @@ In **modalità scrittura** (default) la stessa invocazione sotto 5.1 **scrive** 
 | `test-setup-worktree.sh` | **no** | 2,9 s | **exit 1** | fallisce su Windows/Git Bash (S1: il mock `gh` non viene intercettato → lo script non fallisce come deve; S2: path POSIX `mktemp` non risolto). Su `ubuntu-latest` (CI) passerebbe |
 | `test-safe-branch-switch.sh` | **no** | 6,7 s | exit 0 con **"0 passati, 0 falliti"** | **fail-open**: i tre scenari girano in subshell `( … )`, quindi gli incrementi di `pass`/`fail` non arrivano al padre e `[ "$fail" -eq 0 ]` è sempre vero ⇒ il gate non può mai fallire (lesson 43-1) |
 | `test-pre-commit-clean-check.sh` | **no** | 4,7 s | 8 assert, 0 falliti | — |
-| `test-appendline-lf-fix.ps1` | **no** | 6,1 s | **exit 1** (4/5) | S3 asserisce che `aggregate-state.ps1` non contenga `AppendLine`: l'aspettativa è **superata** (l'attuale fix normalizza CRLF→LF in scrittura, non elimina `AppendLine`) ⇒ test stale. In più lo scenario S5 **muta il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'aggregator) |
+| `test-appendline-lf-fix.ps1` | **no** | 6,1 s | **exit 1** (4/5) | S3 asserisce che `aggregate-state.ps1` non contenga `AppendLine`: l'aspettativa è **superata** (l'attuale fix normalizza CRLF→LF in scrittura, non elimina `AppendLine`) ⇒ test stale. In più lo scenario S5 **muta il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'agregator) |
 
 **Costi**: i due gate più pesanti (`test-aggregate-determinism.sh` + `test-bundle-check-idempotent.sh`) valgono **116,4 s** su ~213 s di gate sequenziali: ogni uno crea decine di repo git temporanei e lancia `pwsh` altrettante volte. Sono indipendenti fra loro e potrebbero girare in parallelo (o in job separati), riducendo il tempo pareggio della pipeline di circa 2 minuti.
 
 **Perché non è stato corretto qui**: aggiungere step a `ci.yml` e modificare la semantica di un gate (da assente a bloccante) sono decisioni sul **test strategy**, che il protocollo riserva al project owner (D.71.4). I difetti sopra sono **segnalati** con evidenza misurata; il fix (`test-safe-branch-switch.sh` con i contatori riportati fuori dalle subshell, `test-appendline-lf-fix.ps1` con S3 allineato al fix corrente e senza effetti collaterali sul working tree, `test-setup-worktree.sh` portato a girare su Windows) è una PR di manutenzione a sé.
 
+#### Chiusura dell'audit (Sessione 73, issue #224)
+
+Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle
+il più veloci possibili». L'audit è stato quindi **chiuso con le correzioni**, non solo documentato.
+Il dettaglio dei fix e delle misure è in **§9.14**; qui il solo stato di chiusura:
+
+| Suite | In CI (Sessione 73) | Difetto | Correzione |
+|---|:---:|---|---|
+| `test-safe-branch-switch.sh` | sì (job `gates-procedure`) | fail-open | gli assert scrivono su un **file di risultati condiviso**; il conteggio finale lo legge. **11 assert** ora contati (prima: 0) |
+| `test-appendline-lf-fix.ps1` | sì (job `gates-procedure`) | S3 stale + S5 mutava il working tree | S3 verifica l'invariante reale («normalizza CRLF→LF in scrittura») invece dell'assenza di `AppendLine`; S5 gira su un **fixture temporaneo** e non tocca il repo |
+| `test-setup-worktree.sh` | sì (job `gates-procedure`) | falliva ovunque (non solo Windows) | `cleanup_mock_env` non ripristinava `TMPDIR`/`PATH` ⇒ lo scenario successivo ereditava un `TMPDIR` cancellato (`mktemp -d` falliva) e il PATH accumulava i mock `gh`; il path POSIX veniva passato a `pwsh` senza conversione; il mock `gh` (script bash) non è eseguibile dal `pwsh` nativo su Windows. Corretti i tre: **8 assert, 0 falliti** |
+| `test-pre-commit-clean-check.sh` | sì (job `gates-procedure`) | — | aggiunta alla CI senza modifiche |
+| `test-post-merge.sh` | sì (job `gates-scripts`) | — | aggiunta alla CI: la procedura più distruttiva del repo ora ha copertura |
+
+**Nota sull'audit precedente**: la Sessione 72 concludeva che «su `ubuntu-latest` (CI)
+`test-setup-worktree.sh` passerebbe». Era **falso**: `mktemp` onora `TMPDIR` anche su Linux, e
+`TMPDIR` puntava a una directory già cancellata — la suite falliva su **qualsiasi** piattaforma.
+Il difetto era il *cleanup*, non la piattaforma.
+
 ---
 
-## Changelog
+### 9.14 Prestazioni delle procedure automatiche (issue #224)
+
+Tutte le misure sono su dev machine Windows, `pwsh` 7.6.9, Git Bash, con il working tree del
+repository reale. I tempi di CI sono ricavati dall'API GitHub (run `41212641314`,
+2026-10-31: job `quality` = **172 s**).
+
+#### 9.14.1 Dove andava il tempo
+
+Il profilo del job `quality` (unico, 18 step in sequenza) si decomprime così:
+
+| Fase | Tempo | Note |
+|---|---:|---|
+| `pnpm install` + lint + typecheck + test + build | ~83 s | 4 invocazioni `turbo run` **sequenziali** (52,7 s misurati con cache disabilitato) |
+| 18 gate in sequenza | ~89 s | i due più pesanti da soli (56,0 s + 60,4 s) |
+
+I due gate più pesanti erano **indipendenti**: il tempo pareggio era la **somma** di
+lavoro che poteva girare in parallelo.
+
+#### 9.14.2 Il vero costo nascosto: i processi figli
+
+Il singolo costo più alto della sessione non era nella logica, era nel **numero di
+processi figli**. `seed_repo_files` in `test-bundle-check-idempotent.sh` creava 128 stub
+chiamando `dirname` + `mkdir -p` + `touch` **una volta per file**:
+
+| Operazione | Spawn | Tempo |
+|---|---:|---:|
+| `seed_repo_files` (prima) | 256 processi per repo × 4 repo | **9,5 s per repo** (~38 s su 53) |
+| `seed_repo_files` (dopo) | ~10 `mkdir` + 0 (`:` è una redirezione built-in) | **~50 ms per repo** |
+| `git config` × 3-4 per repo temporaneo | 3-4 processi per repo | ~120-160 ms per repo |
+
+Misura del profilo (dev machine, `mktemp -d` su Windows):
+
+```
+seed_repo_files (spawn-per-file): create=9538ms
+pwsh -Command startup: 518ms
+pwsh -File startup: 330ms
+git init + 3 config: 261ms
+```
+
+#### 9.14.3 Risultati
+
+| Procedura | Prima | Dopo | Δ |
+|---|---:|---:|---:|
+| `test-bundle-check-idempotent.sh` | 53,0 s | **11,9 s** | **−77 %** |
+| `test-aggregate-determinism.sh` | 48,2 s | **39,7 s** | −18 % |
+| `test-issue-76-residue.sh` | 16,1 s | **11,5 s** | −29 % |
+| `test-post-merge.sh` | 52,4 s | **39,3 s** | −25 % |
+| `pwsh scripts/aggregate-state.ps1 -Check` | 1,23 s | **0,91 s** | −26 % |
+| `pwsh scripts/generate-bundle.ps1 -Check` | 1,37 s | **1,05 s** | −23 % |
+| 4 task turbo sequenziali (`lint`+`typecheck`+`test`+`build`) | 52,7 s | 52,7 s | invariato — la forma parallela (32,8 s) **rompeva il gate**, vedi §9.14.7 |
+| **Tempo pareggio della pipeline CI** | **172 s** | **73 s** (10 job in parallelo) | **−58 %** |
+| `auto-bundle` su merge che tocca `docs/state/` | 2 run (20 s + 22 s) | **1 run** (il secondo viene saltato) | −22 s di latenza post-merge |
+
+#### 9.14.4 Le modifiche, e perché sono equivalenti
+
+| Modifica | Equivalentenza dimostrata |
+|---|---|
+| `generate-bundle.ps1`: `StringBuilder` al posto di `$bundle += ...` | La concatenazione PowerShell è puramente additiva: lo stesso byte. Verificato con SHA-256 identico del bundle generato dal vecchio e dal nuovo generatore sullo stesso albero |
+| `generate-bundle.ps1`: `.Replace("`r`n","`n")` al posto di `-replace "`r`n", "`n"` | Il pattern è un **letterale**: nessun metacarattere di regex, quindi il risultato è identico. `.Replace` è un confronto ordinale, non una scansione regex |
+| `aggregate-state.ps1`: cache per-process di elenco file, contenuti e frontmatter | I file in `docs/state/` non cambiano durante una singola esecuzione: la cache è coerente **per costruzione** |
+| `aggregate-state.ps1`: i file aggregator-managed non vengono più letti per l'inventario | La loro dimensione veniva calcolata e **scartata** (issue #86, opt A): leggere `docs/SESSIONS.md` (504 KB), `docs/11-BACKLOG.md` (98 KB) e `docs/INDEX.md` (30 KB) era lavoro inutile |
+| `aggregate-state.ps1`: `ReadAllText` + conteggio CRLF invece di `Get-Content -Raw` + `-replace` | Ogni CRLF→LF rimuove **esattamente** un byte: `GetByteCount(text) - nCRLF` è il valore di prima, senza allocare la copia da ~2,4 MB |
+| Suite: `git config` → env var (`GIT_AUTHOR_*`, `GIT_COMMITTER_*`, `GIT_CONFIG_COUNT/KEY_n/VALUE_n`) | Git >= 2.31 legge la config per-process dalle env var. Il `commit.gpgsign=false` resta garantito (era il motivo delle 3 chiamate a `git config`) |
+| Suite: `mkdir`/`touch` per file → `mkdir` per directory + `: > file` | Redirezione built-in: azzera il file senza processo. Stessi path, stessi stub vuoti |
+| `ci.yml`: 8 gate in parallelo + job `quality` aggregatore | Nessun gate rimosso, indebolito o reso non-bloccante. Il check `CI / quality` conserva il nome ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato (senza questo, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo) |
+| `ci.yml`: le 4 invocazioni `turbo run` restano **sequenziali** | Vedi §9.14.7: la forma parallela (`turbo run lint typecheck test build`, 32,8 s) **rompeva il gate**: sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere i 2 test di integrazione del fixture `db-seed/medium.json` per timeout. È la classe del lesson 30-1 |
+| `auto-bundle.yml`: il run su `workflow_run` viene saltato se l'aggregator non ha prodotto un commit | `workflow_run.head_sha` è il commit su cui l'agregator ha girato: se `origin/main` è diverso, l'aggregator ha pushato e il bundle va rigenerato; se è uguale, il run su `push` ha già rigenerato il bundle da quello stato. Se l'aggregator è **fallito**, si rigenera comunque (un fallimento può aver lasciato i blocchi a metà) |
+
+#### 9.14.5 I due difetti che la misura ha smascherato
+
+1. **`test-safe-branch-switch.sh` era fail-open**: riportava «0 passati, 0 falliti» ed esceva 0
+   **sempre**. Il contatore degli assert ora vive su un file di risultati condiviso, letto dal
+   processo padre: **11 assert** contati. La suite è in CI (job `gates-procedure`).
+2. **`test-setup-worktree.sh` falliva su ogni piattaforma**, non solo su Windows: `cleanup_mock_env`
+   cancellava `TMPDIR` senza ripristinarlo, e `mktemp` onora `TMPDIR` anche su Linux ⇒ lo scenario
+   successivo ereditava una directory cancellata. Corretti anche il path POSIX passato a `pwsh`
+   (ora convertito con `cygpath -w`) e il mock `gh` (script bash, non eseguibile dal `pwsh` nativo
+   su Windows: aggiunto un wrapper `gh.cmd`).
+
+#### 9.14.6 L'ordine dei due generatori è vincolante *(unFinding della Sessione 73)*
+
+`docs/INDEX.md` è **sia** un file in `$files` del generatore del bundle **sia** un target
+dell'agregator. I due script non sono quindi indipendenti, e **l'ordine conta**:
+
+```
+pwsh scripts/aggregate-state.ps1     # 1° : scrive i blocchi AGGREGATE-* in INDEX.md
+pwsh scripts/generate-bundle.ps1     # 2° : copia INDEX.md (con i blocchi nuovi) dentro BUNDLE.md
+```
+
+Nell'ordine inverso la copia di `docs/INDEX.md` dentro `docs/BUNDLE.md` resta stale rispetto ai
+blocchi appena riscritti, e `generate-bundle.ps1 -Check` **fallisce** con «non è in sync» anche se
+entrambi i generatori hanno girato e nessuno dei due file è corrotto. È la stessa classe dell'
+ordinamento fra i due writer di `main` (issue #149), in versione locale — e il `pre-push` hook
+rigenera il bundle **da solo**, quindi se l'aggregator non ha girato dopo l'ultima modifica a
+`docs/INDEX.md` il bundle ne copia una versione vecchia.
+
+**Regola operativa**: quando tocchi `docs/state/`, `docs/INDEX.md`, `docs/SESSIONS.md`,
+`docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'agregator e **poi** il generatore, e
+verifica **entrambi** i check. La sequenza è stabile (verificata su 3 cicli consecutivi).
+
+#### 9.14.7 Il parallelismo ha un costo: il gate che misura il tempo
+
+Una delle ottimizzazioni proposte — una **sola** invocazione `turbo run lint typecheck test build`
+invece di 4 sequenziali — **è stata implementata e poi revertita**, perché sul runner **rompeva un
+gate**.
+
+| Forma | Tempo (dev machine, cache disabilitato) | Esito sul runner |
+|---|---:|---|
+| 4 invocazioni `turbo run <task>` sequenziali | 52,7 s | verde (baseline) |
+| 1 invocazione `turbo run lint typecheck test build` | 32,8 s | **rosso** |
+
+Il runner GitHub ha **2 vCPU**: con i 4 task in un'unica invocazione, turbo esegue `build`
+(`vite build` + `tsc`) **in concorrenza** con `test`, e il vitest riceve meno CPU. I 2 test di
+integrazione del fixture `db-seed/medium.json` (5000 eventi, `packages/core/src/db/__tests__/db.test.ts`)
+sono scadati: «Test timed out in 5000ms».
+
+È **esattamente** la classe del lesson 30-1: «il test di performance misurava il **carico del
+runner**, non il layer DB: con tre file di test in più faceva superare la soglia locale, e la
+verifica decisiva fu togliere i file nuovi ⇒ il test gira ora in una **run separata**, con la
+soglia dell'AC invariata». La soglia **non** si tocca: è un acceptance criterion.
+
+**Regola generale**: «parallelizzare» e «aumentare il parallelismo interno di un gate» sono due
+ottimizzazioni **indipendenti**, e la seconda può invalidare la prima quando un gate è
+**time-sensitive**. Il parallelismo si Decide a livello di **job** (dove i gate sono processi
+separati e non condividono CPU), non dentro un singolo task runner che condivide il processore.
+
+**Alternativa scartata**: isolare `test` in un job separato (e tenere `build` in un altro) recupera
+~10 s ma duplica `pnpm install` e non vale la complessità.
+
+#### 9.14.8 Un test verde in locale non è un test verde ovunque
+
+`test-post-merge.sh` falliva sul runner con «error: src refspec main does not match any» **solo
+su Linux**, e solo perché la dev machine ha `init.defaultBranch = main` in
+`C:\Program Files\Git\etc\gitconfig` mentre il runner GitHub ha il default di git, `master`.
+
+La meccanica: `git init --bare` crea un bare repo con `HEAD → refs/heads/<init.defaultBranch>`;
+`git clone` di quel repo, se `HEAD` punta a un branch **inesistente**, avvisa «remote HEAD refers
+to nonexistent ref» e **non fa il checkout di nessun branch**; il successivo `git push origin main`
+fallisce con «src refspec main does not match any».
+
+Correzione: **`git init -q --bare -b main`** in tutte e tre le suite che creano un bare repo
+(`test-post-merge.sh`, `test-issue-76-residue.sh`, `test-setup-worktree.sh`). Il branch iniziale
+diventa **esplicito** e il test non dipende più dalla configurazione git della macchina.
+
+**Regola generale**: un test che crea repository git temporanei deve dichiarare **esplicitamente**
+il branch iniziale (`git init -b main`): `init.defaultBranch` è una configurazione **di macchina**,
+non del progetto, e la CI la ha diversa da qualunque dev machine.
+
+#### 9.14.10 La CI girava 4 volte per ogni cambiamento logico *(Sessione 74)*
+
+Il ciclo di merge del repo produceva **4 run di CI** e **3 run `auto-*`** per ogni cambiamento
+logico. I dati (API GitHub, 2026-10-31, PR #222 → #223):
+
+| # | Quando | Workflow | Evento | Contenuto | Necessario? |
+|---|---|---|---|---|---|
+| 1 | apertura PR #222 | `CI` | `pull_request` | pipeline completa | **sì** |
+| 2 | merge di #222 | `CI` | `push` su `main` | pipeline completa | **no** — stesso albero del run #1 |
+| 3 | merge di #222 | `auto-state-aggregate` | `push` su `main` | committa `docs/BUNDLE.md` | sì (è il lavoro) |
+| 4 | merge di #222 | `auto-bundle` (push) | `push` su `main` | committa `docs/BUNDLE.md` | sì (è il lavoro) |
+| 5 | dopo l'aggregate | `auto-bundle` (`workflow_run`) | `workflow_run` | rigenera il bundle | **no** se l'aggregate non ha committato |
+| 6 | committa dell'aggregate | `CI` | `push` su `main` | pipeline completa | **no** — ma è l'unico check sui commit dei writer |
+| 7 | apertura PR #223 (doc-sync) | `CI` | `pull_request` | pipeline completa | sì, ma su una PR di **sola documentazione** |
+| 8 | merge di #223 | `CI` | `push` su `main` | pipeline completa | **no** — stesso albero del run #7 |
+
+**Il costo**: 4 × 73 s = **292 s** di CI per ogni cambiamento logico, di cui ~219 s
+**ripetizioni** di validazione già fatta.
+
+**Le cause, e cosa è stato fatto:**
+
+| Causa | Correzione |
+|---|---|
+| Il trigger `push: branches: [main]` senza filtro faceva rieseguire l'**intera** pipeline su ogni merge | Il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`). Su un merge umano che non li tocca la pipeline **non gira**: l'albero che arriva su `main` è lo stesso che la PR ha già validato. Su un merge che li tocca girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~42 s con tutti i gate di controllo, ~21 s se si restringono a quelli strettamente necessari) |
+| Su `push` giravano anche i 3 job `node-*` (73 s + 3 installazioni di dipendenze) | I 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'`: su `main` il codice non è cambiato rispetto a quanto già validato dalla PR |
+| Il doc-sync PR (che porta il numero di PR e l'hash di merge, noti solo **dopo** il merge) girava l'intera pipeline su file **solo `.md`** | Un job `detect-code` calcola se **almeno un** file cambiato non è un `.md`; se tutti lo sono, i 3 job `node-*` non installano le dipendenze e non eseguono i task (il job **riusce**, non viene saltato: `quality` resta fail-closed senza casi speciali). La regola è conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è **fail-safe**: se il detector fallisce, `has_code` resta vuoto e i gate girano comunque |
+| Il secondo run di `auto-bundle` girava anche quando l'aggregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main` (vedi §9.14.4) |
+
+**Il risultato**: per ogni cambiamento logico la CI passa da **4 run completi** a **1 run completo
++ 1 ridotto + 2-3 run leggeri**, e da **292 s** a ~**125 s**. Misurato sul merge di PR #227
+(2026-10-31T18:22:29Z): la run `CI` su `main` è durata **42 s** con i 3 job `node-*` **skipped**
+(0 s, nessuna installazione di dipendenze), contro i **172 s** della pipeline sequenziale
+originale.
+
+##### ⚠️ I commit dei writer automatici **non** attivano la CI — e non è colpa del filtro
+
+Il filtro per path è stato motivato con l'idea che i commit dei writer automatici siano «gli unici
+che arrivano su `main` senza essere passati da una PR». L'idea è corretta, ma **la conseguenza
+pratica non è**: quei commit **non attivano nessuna run**, e non è colpa del filtro.
+
+GitHub **non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (è il
+comportamento documentato che impedisce i loop ricorsivi; l'unica eccezione è
+`workflow_dispatch`/`repository_dispatch`). I due writer pushano con `secrets.GITHUB_TOKEN`:
+
+```yaml
+# .github/workflows/auto-state-aggregate.yml:54 e auto-bundle.yml:101
+token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Verificato sui dati (API GitHub): i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`,
+`04c76fd`) **non** hanno mai attivato una run `CI` — né prima né dopo questa sessione, nemmeno
+quando il trigger `push` era privo di filtro. Gli unici workflow che si attivano sui loro commit
+sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce: è esattamente il
+workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer (issue #149).
+
+**Conseguenze, e scelte**:
+
+- Il filtro per path, nella pratica, serve a **saltare** la CI sui merge umani che non toccano i 5
+  file aggregati — non a catturare i commit dei writer.
+- **L'integrità di `main` dopo i writer non è garantita dalla CI**, ma dai writer stessi: ciascuno
+  è idempotente, è conservato da `git diff --quiet` prima del push, e il `workflow_run` di
+  `auto-bundle` (che sopravvive alla soppressione) rigenera il bundle **dopo** l'agregator,
+  riparando da solo il caso dell'ordinamento invertito (issue #149).
+- Volere **anche** un check indipendente sullo stato finale di `main` richiederebbe un trigger
+  `workflow_run` su `ci.yml` per i due writer: **+1 run leggera per merge**. È un trade-off
+  fra copertura e numero di run, e la scelta è del project owner (non è stato fatto).
+
+**Cosa NON è stato fatto e perché:**
+
+- **Il doc-sync PR non è stato eliminato.** Esiste perché il frontmatter della sessione porta
+  `pr:` e `merged_commit:`, che sono noti **solo dopo** il merge. Eliminarlo richiederebbe un
+  cambio allo **schema** del frontmatter (contratto di D.12.x), che è una decisione del project
+  owner, non un ottimizzazione della CI.
+- **Il filtro per path non distingue «il bundle è cambiato perché l'ha rigenerato il writer» da
+  «il bundle è cambiato perché l'ha rigenerato il pre-push hook nella PR»**: in entrambi i casi
+  `docs/BUNDLE.md` cambia, e in entrambi i casi il run leggero su `main` scatta. Costa ~21 s e
+  non è distinguisho con i trigger nativi. L'alternativa (trigger `workflow_run` sui writer) non
+  funziona bene: `workflow_run.head_sha` è il commit su cui il writer è partito, **non** la testa
+  di `main` dopo il suo commit.
+
+#### 9.14.11 Il validatore dei workflow non validava il YAML *(Sessione 74)*
+
+Scritto il gate che intercetta lo scalare semplice invalido, è emerso che
+`scripts/validate-workflows.mjs` **non faceva parsing YAML**: lavorava sul testo con regex. Quindi
+un file workflow sintatticamente rotto passava il gate, e GitHub lo **rifiutava in fase di
+validazione**: run con `jobs: 0`, `conclusion: failure` a 0 secondi, nessun log, nessuna
+annotazione via API — la firma identica al failure mode dell'issue #135.
+
+Il controllo aggiunto intercetta la forma invalida più comune (scalare semplice non quotato che
+contiene `: `), **salta** i block scalar (dove `: ` è testo letterale), i valori quotati, le
+raccolte flow e i commenti (`#` preceduto da spazio apre un commento e non fa parte del valore),
+ed è coperto da `scripts/test-workflow-yaml-scalars.sh` (8 assert: repo reale, caso invalido,
+forme valide, fixture CRLF).
+
+**Bug collaterale trovato nella stessa occasione**: il validatore divideva il file con
+`text.split('\n')` **senza normalizzare il fine-riga**. Un file salvato con **CRLF** (un
+contributore su Windows) lasciava un `\r` finale su ogni riga, e i pattern ancorati con `$` —
+incluso quello del gate sui push su `main` (#140) — **non matchiavano più**: i controlli
+fallivano **in silenzio** su un file CRLF. Ora le righe vengono normalizzate una volta sola.
+
+#### 9.14.12 Cosa NON è stato fatto (e perché)
+
+- **Typecheck duplicato**: `apps/web` esegue `tsc --noEmit` sia in `typecheck` sia in `build`
+  (che lo precede). Si risolve togliendo il `tsc --noEmit` dallo script di `build`, ma è una
+  modifica alla **definizione** del task di build, non della sua esecuzione: decisione del project
+  owner (D.71.4).
+- **`@ls/core` avvia vitest due volte** (`vitest run --exclude '**/perf.test.ts' && vitest run
+  src/db/__tests__/perf.test.ts`): doppio startup, doppio parsing della config. Si risolve con un
+  unico `vitest run` con un pattern di inclusione, che cambia il task di test: stessa decisione.
+- **`ci.yml` gira anche sui push del bot**: il merge su `main` genera un commit di
+  `auto-state-aggregate`/`auto-bundle`, che fa scattare `ci.yml` di nuovo (`push: branches: [main]`
+  senza filtro sui path) ⇒ ogni merge costa due run complete. Si risolve con un filtro sui path
+  (escludere `docs/BUNDLE.md` e i blocchi aggregati), ma il filtro va applicato **a tutti** i
+  trigger perché i due writer di `main` sono serializzati (issue #149).
+- **Parallelizzare le suite fra loro**: i blocchi di `test-aggregate-determinism.sh` sono indipendenti
+  e potrebbero girare in parallelo, ma i contatori vivono in subshell: la lezione 43-1 (un gate che
+  passa sempre non è un gate) si applica anche a chi parallelizza. Richiede il file di risultati
+  condiviso già introdotto in `test-safe-branch-switch.sh`.
+
+---
 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
@@ -25632,7 +27021,8 @@ In **modalità scrittura** (default) la stessa invocazione sotto 5.1 **scrive** 
 | 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
 | 1.3 | Sessione 71 (2026-10-31) | **Baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1`. `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1: il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `§9.1` prescriveva «MAI `--check`», `§9.7b` descriveva il bug #104 come se fosse il caso normale e la motivazione dei due gate warning-only era attribuita alla differenza **PS 5.1 vs 7** invece che a quella **di piattaforma**. §9.1 riscritta: il doppio trattino in `pwsh` viene normalizzato sul singolo **prima** del binding, quindi `--check` e `-Check` sono equivalenti (verificato su pwsh 7.6.9); il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente. La forma canonica resta a **singolo trattino** (`-Check`), unica forma con comportamento identico su 5.1 e 7 e quella indicata dal guard fail-closed. §9.7b: il guard resta in piedi ma non scatta più nello scenario che l'ha motivato — protegge i flag davvero inesistenti e le invocazioni da shell 5.1. §9.10: la motivazione dei due step warning-only è riformulata — l'asse versione di PowerShell è chiuso, resta quello di piattaforma (dev Windows vs CI Linux). Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
 | 1.4 | Sessione 72 (2026-10-31) | **§9.12 Ambiente PowerShell locale** (nuova): provenienza dell'installazione verificata (`pwsh` **7.6.9**, pacchetto **MSIX/Store** `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, alias per-utente in `WindowsApps`, **nessun MSI** in `C:\Program Files\PowerShell\7` e nessuna voce di disinstallazione nel registro; pacchetto creato/aggiornato il 2026-10-26 09:38) con i comandi di verifica (`pwsh -NoProfile -c '$PSVersionTable.PSVersion'`, `winget list --id Microsoft.PowerShell`, `Get-AppxPackage Microsoft.PowerShell`). La sezione fissa anche il **confine**: `scripts/aggregate-state.ps1` è UTF-8 **senza BOM** e contiene 9 righe con caratteri non-ASCII ⇒ sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e `-Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in modalità scrittura il mojibake verrebbe scritto nei file globali; `generate-bundle.ps1` invece è immune (legge/scrive sempre con `-Encoding UTF8`). Il vincolo «ASCII-only nei `.ps1`» di `13-ADR/0008` viene corretto: riguarda il **parsing**, non solo la scrittura. Il fix dello script (rimuovere i letterali o aggiungere il BOM) è **decisione del project owner** (D.71.4) e non è applicato. **§9.13 Copertura CI delle suite di test locali** (nuova): 5 suite presenti in `scripts/` **non** eseguite da `ci.yml` (`test-post-merge.sh`, `test-setup-worktree.sh`, `test-safe-branch-switch.sh`, `test-pre-commit-clean-check.sh`, `test-appendline-lf-fix.ps1`), con tempi misurati e difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ "0 passati, 0 falliti" e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 **stale** (64 `AppendLine` sono il fix corrente, non una regressione) e S5 **muta il working tree**, `test-setup-worktree.sh` fallisce su Windows/Git Bash (mock `gh` non intercettato + path POSIX). I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili. Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
->| 1.5 | Sessione 73 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **73** (nel frattempo `main` aveva preso la 71 e la 72): la numerazione delle sessioni è univoca (issue #105). |
+| 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **11 job** di cui 10 in parallelo (`node-lint-typecheck`, `node-test`, `node-build`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **tempo pareggio della pipeline 172 s → 73 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
+| 1.6 | Sessione 75 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74): la numerazione delle sessioni è univoca (issue #105). |
 
 
 
@@ -30702,70 +32092,124 @@ if ($crCount -eq 0 -and $lfCount -eq 1) {
     fail "S2" "atteso CR=0 LF=1, trovato CR=$crCount LF=$lfCount"
 }
 
-# Test 3: aggregator (su main dopo il fix) non usa piu AppendLine
+# Test 3: il path di SCRITTURA dell'aggregator normalizza CRLF -> LF.
+#
+# Sessione 73 (issue #224): l'aspettativa originale ("0 occorrenze di
+# AppendLine nel codice") era STALE: il fix dell'issue #58 non ha eliminato
+# `AppendLine`, ha normalizzato CRLF->LF nel path di scrittura (e i 64
+# `AppendLine` rimasti sono la forma *corretta* del fix, non una regressione).
+# L'invariante che conta e' "l'output scritto e' LF-only", ed e' verificata
+# end-to-end dallo scenario S5. Qui si verifica che il path di scrittura
+# contenga la normalizzazione.
 Write-Host ""
-Write-Host "Scenario S3: scripts/aggregate-state.ps1 non usa AppendLine (escludendo commenti)"
+Write-Host "Scenario S3: scripts/aggregate-state.ps1 normalizza CRLF->LF in scrittura"
 $aggregatorPath = Join-Path $scriptDir "aggregate-state.ps1"
 if (Test-Path $aggregatorPath) {
     $content = Get-Content $aggregatorPath -Raw
-    # Rimuovi commenti <# ... #> e righe di commento #
-    $codeOnly = $content -replace '<#[\s\S]*?#>', ''
-    $codeOnly = $codeOnly -replace '(?m)^\s*#[^\r\n]*', ''
-    $appendLineCount = ([regex]::Matches($codeOnly, 'AppendLine')).Count
-    if ($appendLineCount -eq 0) {
-        pass "aggregate-state.ps1 non contiene AppendLine in codice (0 occorrenze)"
+    # Accetta entrambe le forme equivalenti: `-replace "`r`n", "`n"` (regex,
+    # forma originale) e `.Replace("`r`n", "`n")` (ordinale, forma veloce
+    # introdotta dalla Sessione 73).
+    $hasNormalize = ($content -match '-replace\s+"`r`n",\s*"`n"') -or ($content -match '\.Replace\("`r`n",\s*"`n"\)')
+    if ($hasNormalize) {
+        pass "aggregate-state.ps1 normalizza CRLF->LF nel path di scrittura"
     } else {
-        fail "S3" "aggregate-state.ps1 contiene ancora $appendLineCount AppendLine nel codice"
+        fail "S3" "aggregate-state.ps1 non contiene alcuna normalizzazione CRLF->LF in scrittura"
     }
 } else {
     fail "S3" "$aggregatorPath non trovato"
 }
 
-# Test 4: generate-bundle (su main dopo il fix) ha il -replace CRLF, LF
+# Test 4: generate-bundle (su main dopo il fix) ha la normalizzazione CRLF
 Write-Host ""
 Write-Host "Scenario S4: scripts/generate-bundle.ps1 normalizza CRLF"
 $bundlePath = Join-Path $scriptDir "generate-bundle.ps1"
 if (Test-Path $bundlePath) {
     $content = Get-Content $bundlePath -Raw
-    if ($content -match '-replace\s+"`r`n",\s+"`n"') {
-        pass "generate-bundle.ps1 ha -replace CRLF, LF"
+    # Entrambe le forme sono accettate (vedi S3): l'invariante e' la
+    # normalizzazione, non la sua forma sintattica.
+    if (($content -match '-replace\s+"`r`n",\s+"`n"') -or ($content -match '\.Replace\("`r`n",\s*"`n"\)')) {
+        pass "generate-bundle.ps1 normalizza CRLF->LF"
     } else {
-        fail "S4" "generate-bundle.ps1 non ha -replace CRLF, LF"
+        fail "S4" "generate-bundle.ps1 non normalizza CRLF->LF"
     }
 } else {
     fail "S4" "$bundlePath non trovato"
 }
 
-# Test 5: end-to-end - run aggregator, check SESSIONS.md block has 0 CR
+# Test 5: end-to-end - run aggregator in un fixture temporaneo, check SESSIONS.md
+# block has 0 CR.
+#
+# Sessione 73 (issue #224): la versione precedente eseguiva l'aggregator
+# DENTRO il working tree del repo (`git checkout -- docs/SESSIONS.md` + run),
+# lasciando il tree modificato e sporco al termine del test: in CI questo
+# rendeva il tree non riproducibile per gli step successivi. Ora il test gira
+# su una COPIA temporanea del minimo necessario (script + sorgenti di stato +
+# file target), quindi il working tree del repo non e' mai toccato.
 Write-Host ""
-Write-Host "Scenario S5: aggregator end-to-end produce block LF-only"
+Write-Host "Scenario S5: aggregator end-to-end produce block LF-only (fixture temporanea)"
 if (Test-Path $aggregatorPath) {
-    # Reset SESSIONS.md to HEAD
-    git checkout -- docs/SESSIONS.md 2>&1 | Out-Null
-    # Run aggregator (powershell 5.1 o pwsh, dipende da ambiente)
-    $psCmd = Get-Command pwsh -ErrorAction SilentlyContinue
-    if ($psCmd) {
-        & pwsh $aggregatorPath 2>&1 | Out-Null
-    } else {
-        & powershell -NoProfile -ExecutionPolicy Bypass -File $aggregatorPath 2>&1 | Out-Null
-    }
-    # Check block encoding
-    $sessPath = Join-Path (Get-Location) "docs/SESSIONS.md"
-    if (Test-Path $sessPath) {
-        $content = Get-Content $sessPath -Raw -Encoding UTF8
-        $startMarker = "<!-- AGGREGATE-SESSIONS-START -->"
-        $endMarker = "<!-- AGGREGATE-SESSIONS-END -->"
-        $sIdx = $content.IndexOf($startMarker)
-        $eIdx = $content.IndexOf($endMarker, $sIdx)
-        $block = $content.Substring($sIdx, $eIdx - $sIdx + $endMarker.Length)
-        $crInBlock = ($block.ToCharArray() | Where-Object { $_ -eq [char]13 }).Count
-        if ($crInBlock -eq 0) {
-            pass "SESSIONS.md block ha 0 CR dopo aggregator (LF only)"
-        } else {
-            fail "S5" "SESSIONS.md block ha $crInBlock CR dopo aggregator"
+    $repoRoot = Split-Path -Parent $scriptDir
+    $fixture = Join-Path ([System.IO.Path]::GetTempPath()) ("ls-appendline-" + [guid]::NewGuid().ToString("N"))
+    try {
+        New-Item -ItemType Directory -Path (Join-Path $fixture "scripts") -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $fixture "docs/state/sessions") -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $fixture "docs/state/stories") -Force | Out-Null
+        Copy-Item -LiteralPath $aggregatorPath -Destination (Join-Path $fixture "scripts/aggregate-state.ps1")
+        if (Test-Path $bundlePath) {
+            Copy-Item -LiteralPath $bundlePath -Destination (Join-Path $fixture "scripts/generate-bundle.ps1")
         }
-    } else {
-        fail "S5" "$sessPath non trovato"
+        foreach ($sub in @('sessions','stories')) {
+            $src = Join-Path $repoRoot "docs/state/$sub"
+            if (Test-Path $src) {
+                Get-ChildItem -Path $src -Filter "*.md" | ForEach-Object {
+                    Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $fixture "docs/state/$sub/$($_.Name)")
+                }
+            }
+        }
+        foreach ($t in @('docs/SESSIONS.md','docs/11-BACKLOG.md','docs/INDEX.md','docs/BUNDLE.md','README.md')) {
+            $src = Join-Path $repoRoot $t
+            if (Test-Path $src) {
+                $dst = Join-Path $fixture $t
+                New-Item -ItemType Directory -Path (Split-Path -Parent $dst) -Force | Out-Null
+                Copy-Item -LiteralPath $src -Destination $dst
+            }
+        }
+
+        $psCmd = Get-Command pwsh -ErrorAction SilentlyContinue
+        Push-Location $fixture
+        try {
+            if ($psCmd) {
+                & pwsh (Join-Path $fixture "scripts/aggregate-state.ps1") 2>&1 | Out-Null
+            } else {
+                & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $fixture "scripts/aggregate-state.ps1") 2>&1 | Out-Null
+            }
+        } finally {
+            Pop-Location
+        }
+
+        $sessPath = Join-Path $fixture "docs/SESSIONS.md"
+        if (Test-Path $sessPath) {
+            $content = Get-Content $sessPath -Raw -Encoding UTF8
+            $startMarker = "<!-- AGGREGATE-SESSIONS-START -->"
+            $endMarker = "<!-- AGGREGATE-SESSIONS-END -->"
+            $sIdx = $content.IndexOf($startMarker)
+            $eIdx = $content.IndexOf($endMarker, $sIdx)
+            if ($sIdx -lt 0 -or $eIdx -lt 0) {
+                fail "S5" "marker del blocco AGGREGATE-SESSIONS non trovati nel fixture"
+            } else {
+                $block = $content.Substring($sIdx, $eIdx - $sIdx + $endMarker.Length)
+                $crInBlock = ($block.ToCharArray() | Where-Object { $_ -eq [char]13 }).Count
+                if ($crInBlock -eq 0) {
+                    pass "SESSIONS.md block ha 0 CR dopo aggregator (LF only)"
+                } else {
+                    fail "S5" "SESSIONS.md block ha $crInBlock CR dopo aggregator"
+                }
+            }
+        } else {
+            fail "S5" "$sessPath non trovato"
+        }
+    } finally {
+        Remove-Item -LiteralPath $fixture -Recurse -Force -ErrorAction SilentlyContinue
     }
 } else {
     fail "S5" "$aggregatorPath non trovato"
@@ -31146,6 +32590,29 @@ TOTAL=0
 pass() { PASS=$((PASS+1)); TOTAL=$((TOTAL+1)); echo "  [PASS] $1"; }
 fail() { FAIL=$((FAIL+1)); TOTAL=$((TOTAL+1)); echo "  [FAIL] $1"; echo "         $2"; }
 
+# Sessione 73 (issue #224): `mktemp -d` restituisce un path POSIX
+# (/tmp/tmp.XXXX) che il pwsh nativo su Windows NON risolve: i path vanno
+# convertiti con `cygpath -w` (disponibile in Git Bash, assente su Linux,
+# dove il path POSIX passa invariato e il comportamento in CI non cambia).
+# Stesso helper di scripts/test-bundle-check-idempotent.sh (D.117.4).
+PS_IS_PWSH=0
+if command -v pwsh >/dev/null 2>&1; then PS_IS_PWSH=1; fi
+
+ps_path() {
+  local p="$1"
+  if [ "$PS_IS_PWSH" = "1" ] && command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$p"
+  else
+    echo "$p"
+  fi
+}
+
+TARGET_SCRIPT_PS="$(ps_path "$TARGET_SCRIPT")"
+
+# TMPDIR e PATH originali, ripristinati dopo ogni scenario.
+ORIG_TMPDIR="${TMPDIR:-}"
+ORIG_PATH="$PATH"
+
 # Helper: crea mock repo + mock gh in tmpdir
 # $1 = scenario name (per logging)
 # Output: variabili d'ambiente TMPDIR, REPO_DIR, WORKTREE_PARENT, PATH (esteso con mock bin)
@@ -31158,14 +32625,20 @@ make_mock_env() {
   mkdir -p "$repo_dir"
   cd "$repo_dir"
   git init --quiet -b main
-  git config user.email "test@example.com"
-  git config user.name "Test"
+  # Identita' git via env var invece di `git config` (nessun subprocess).
+  GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
+  GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
+    git commit --quiet --allow-empty -m "initial commit" 2>/dev/null || true
   echo "# Test repo" > README.md
   git add README.md
-  git commit --quiet -m "initial commit"
+  GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
+  GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
+    git commit --quiet -m "initial commit"
   # Bare remote per il push
   local remote_dir="$tmpdir/remote.git"
-  git init --quiet --bare "$remote_dir"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init --quiet --bare -b main "$remote_dir"
   git remote add origin "$remote_dir"
   git push --quiet -u origin main
 
@@ -31224,6 +32697,18 @@ exit 0
 EOF
   chmod +x "$mock_bin/gh"
 
+  # Sessione 73 (issue #224): su Windows il pwsh NATIVO risolve `gh` tramite
+  # PATHEXT, quindi uno script bash senza estensione non e' eseguibile e il
+  # mock non veniva intercettato ("impossibile leggere issue #N"). Si aggiunge
+  # un wrapper `gh.cmd` che delega al mock bash. Su Linux il wrapper non serve
+  # (il mock e' gia' eseguibile) e non viene creato.
+  if uname -s 2>/dev/null | grep -qi 'mingw\|msys\|cygwin\|windows'; then
+    cat > "$mock_bin/gh.cmd" <<'EOF'
+@echo off
+bash "%~dp0gh" %*
+EOF
+  fi
+
   # Esporta variabili
   export TMPDIR="$tmpdir"
   export REPO_DIR="$repo_dir"
@@ -31238,6 +32723,14 @@ cleanup_mock_env() {
   if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then
     rm -rf "$TMPDIR"
   fi
+  # Sessione 73 (issue #224): TMPDIR e PATH vanno RIPRISTINATI. Senza questo,
+  # lo scenario successivo ereditava un TMPDIR gia' cancellato (`mktemp -d`
+  # falliva con "No such file or directory") e il PATH accumulava i
+  # mock_bin deprecati — cosi' lo scenario S8 non riusciva a togliere il mock
+  # `gh` dal PATH e falliva. Il difetto non era specifico di Windows:
+  # `mktemp` onora TMPDIR anche su Linux, quindi la suite falliva ovunque.
+  if [ -n "$ORIG_TMPDIR" ]; then export TMPDIR="$ORIG_TMPDIR"; else unset TMPDIR; fi
+  export PATH="$ORIG_PATH"
 }
 
 # === S1: Issue inesistente ===
@@ -31247,7 +32740,10 @@ test_s1_issue_missing() {
   make_mock_env "s1"
   MOCK_ISSUE_STATE="missing"
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 99 -SkipGhCheck 2>&1)" && exitcode=0 || exitcode=$?
+  # NB: senza `-SkipGhCheck`: e' il mock `gh` (MOCK_ISSUE_STATE=missing) a
+  # dover fallire. Con -SkipGhCheck la verifica dell'issue viene saltata e
+  # lo scenario non testerebbe nulla.
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 99 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -ne 0 ]; then
     pass "S1 exitcode non-zero per issue inesistente (exit=$exitcode)"
   else
@@ -31263,8 +32759,13 @@ test_s2_slug_derived() {
   make_mock_env "s2"
   MOCK_ISSUE_TITLE="My Cool Feature [Test]"
   local output
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -NoPush 2>&1)" || true
-  if echo "$output" | grep -q "Worktree creata: $WORKTREE_PARENT/ls-42-my-cool-feature-test"; then
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -NoPush 2>&1)" || true
+  # Sessione 73 (issue #224): l'asserzione confrontava l'intero path, che su
+  # Windows e' un path nativo (`C:\...\ls-42-...`) e su Linux un path POSIX
+  # (`/tmp/.../ls-42-...`): la suite passava solo su Linux. Qui si confronta
+  # il LEAF del path — che e' cio' che lo scenario verifica davvero (la
+  # derivazione dello slug) — ed e' indipendente dalla piattaforma.
+  if echo "$output" | grep -q "Worktree creata:.*ls-42-my-cool-feature-test"; then
     pass "S2 worktree creata con path corretto"
   else
     fail "S2" "path worktree non trovato. Output: $output"
@@ -31278,8 +32779,9 @@ test_s3_slug_explicit() {
   echo "Scenario S3: slug esplicito dall'utente"
   make_mock_env "s3"
   local output
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -Slug "custom-fix" -NoPush 2>&1)" || true
-  if echo "$output" | grep -q "Worktree creata: $WORKTREE_PARENT/ls-42-custom-fix"; then
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -Slug "custom-fix" -NoPush 2>&1)" || true
+  # Leaf del path (vedi nota in S2): indipendente dalla piattaforma.
+  if echo "$output" | grep -q "Worktree creata:.*ls-42-custom-fix"; then
     pass "S3 worktree creata con slug esplicito"
   else
     fail "S3" "slug esplicito non rispettato. Output: $output"
@@ -31294,7 +32796,7 @@ test_s4_path_exists() {
   make_mock_env "s4"
   mkdir -p "$WORKTREE_PARENT/ls-99-existing"
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 99 -Slug "existing" -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 99 -Slug "existing" -NoPush 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -ne 0 ] && echo "$output" | grep -q "gia esistente"; then
     pass "S4 errore rilevato correttamente (exit=$exitcode)"
   else
@@ -31309,7 +32811,7 @@ test_s5_base_branch_missing() {
   echo "Scenario S5: branch base inesistente"
   make_mock_env "s5"
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -BaseBranch origin/does-not-exist -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -BaseBranch origin/does-not-exist -NoPush 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -ne 0 ] && echo "$output" | grep -q "branch base 'origin/does-not-exist' non trovato"; then
     pass "S5 errore branch base mancante (exit=$exitcode)"
   else
@@ -31325,8 +32827,8 @@ test_s6_idempotent_fails() {
   make_mock_env "s6"
   cd "$REPO_DIR"
   local first second
-  first="$(pwsh "$TARGET_SCRIPT" 42 -Slug "idem" -NoPush 2>&1)" || true
-  second="$(pwsh "$TARGET_SCRIPT" 42 -Slug "idem" -NoPush 2>&1)" && ec=0 || ec=$?
+  first="$(pwsh "$TARGET_SCRIPT_PS" 42 -Slug "idem" -NoPush 2>&1)" || true
+  second="$(pwsh "$TARGET_SCRIPT_PS" 42 -Slug "idem" -NoPush 2>&1)" && ec=0 || ec=$?
   if echo "$first" | grep -q "Worktree creata"; then
     if [ "$ec" -ne 0 ] && echo "$second" | grep -q "gia esistente"; then
       pass "S6 1a chiamata OK + 2a fallisce con 'gia esistente'"
@@ -31345,7 +32847,7 @@ test_s7_no_push() {
   echo "Scenario S7: -NoPush salta il push"
   make_mock_env "s7"
   local output
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -NoPush 2>&1)" || true
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -NoPush 2>&1)" || true
   if echo "$output" | grep -q "Push early SKIPPATO"; then
     pass "S7 push saltato correttamente con -NoPush"
   else
@@ -31370,7 +32872,7 @@ test_s8_skip_gh_check() {
     rm -rf "$mock_bin_path"
   fi
   local output exitcode
-  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT" 42 -SkipGhCheck -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -SkipGhCheck -NoPush 2>&1)" && exitcode=0 || exitcode=$?
   if [ "$exitcode" -eq 0 ] && echo "$output" | grep -q "Salto verifica issue"; then
     pass "S8 -SkipGhCheck funziona senza gh nel PATH (exit=$exitcode)"
   else
@@ -32011,19 +33513,38 @@ run_ps() {
 branch_exists_locally() { git rev-parse --verify --quiet "refs/heads/$1" >/dev/null 2>&1; }
 branch_exists_remotely() { git ls-remote --exit-code origin "$1" >/dev/null 2>&1; }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 4 spawn per ogni repo temporaneo
+# (~20 repo in questa suite). Con le env var l'identita' e le impostazioni
+# sono risolte da git senza scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+export GIT_CONFIG_KEY_1="core.autocrlf"
+export GIT_CONFIG_VALUE_1="false"
+
 # Repo con origin bare: main + feat/x. Con WORKTREE=1 crea anche ../wt su feat/x.
 make_repo() {
   local d="$1" use_wt="${2:-0}"
   mkdir -p "$d"
   (
     cd "$d" || exit 1
-    git init -q --bare origin.git
+    # `-b main`: il branch iniziale del bare repo e' esplicito. Senza, il
+    # default e' `init.defaultBranch`, che sul runner GitHub e' `master`:
+    # `git clone` del bare repo allora avvisa "remote HEAD refers to
+    # nonexistent ref" e **non fa il checkout di nessun branch**, e il
+    # successivo `git push origin main` fallisce con "src refspec main does
+    # not match any". Il test era verde solo in locale, dove
+    # `init.defaultBranch` e' `main` (Sessione 73, issue #224).
+    git init -q --bare -b main origin.git
     git init -q -b main work
     cd work || exit 1
-    git config user.email "t@t.local"
-    git config user.name "Test"
-    git config commit.gpgsign false
-    git config core.autocrlf false
+    # NB: identita', gpgsign e autocrlf arrivano dalle env var esportate in
+    # testa allo script: niente `git config` (4 processi per repo).
     printf 'initial\n' > file.txt
     git add file.txt >/dev/null 2>&1
     git commit -q -m "chore: initial"
@@ -32152,10 +33673,12 @@ echo "=== T6: main locale divergente (nessuna azione distruttiva) ==="
   git clone -q "$D/origin.git" "$D/clone2"
   (
     cd "$D/clone2" || exit 1
-    git config user.email "t2@t.local"; git config user.name "Test2"
+    # Identita' del clone: env var locali (non quelle globali dello script).
     printf 'altro\n' > other.txt
     git add other.txt >/dev/null 2>&1
-    git commit -q -m "chore: concurrent commit"
+    GIT_AUTHOR_NAME="Test2" GIT_AUTHOR_EMAIL="t2@t.local" \
+    GIT_COMMITTER_NAME="Test2" GIT_COMMITTER_EMAIL="t2@t.local" \
+      git commit -q -m "chore: concurrent commit"
     git push -q origin main
   )
 
@@ -32219,6 +33742,246 @@ echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]
 
 
+===== FILE: scripts/safe-branch-switch.ps1 =====
+
+<#
+.SYNOPSIS
+    Wrapper di `git checkout <branch>` con safety check sul working tree.
+
+.DESCRIPTION
+    scripts/safe-branch-switch.ps1 esegue il cambio di branch proteggendo il lavoro
+    non committato dell'operatore, seguendo AGENTS.md §"Transizioni tra branch".
+
+    Comportamento:
+    1. Verifica se il working tree ha modifiche TRACKED sporche (staged o unstaged).
+       - Se sporco: esegue automaticamente `git stash push -u` (include untracked)
+         con subject descrittivo, PRIMA del checkout.
+    2. Esegue `git checkout <branch>`.
+    3. Post-checkout: verifica che gli untracked dell'operatore originale siano
+       preservati (nello stash se erano presenti) e stampa output strutturato per audit.
+    4. Output user-friendly: "switched from X to Y" + diff riassuntivo.
+
+.PARAMETER Branch
+    Nome del branch di destinazione (es. main, feat/49-safe-branch-switch).
+
+.PARAMETER Help
+    Mostra questo help.
+
+.EXAMPLE
+    pwsh scripts/safe-branch-switch.ps1 main
+    pwsh scripts/safe-branch-switch.ps1 feat/42-nuova-feature -h
+
+.NOTES
+    Restituisce exit code 0 in caso di successo, diverso da 0 se il checkout fallisce.
+#>
+
+param(
+    [Parameter(Position = 0)]
+    [string]$Branch,
+
+    [switch]$Help
+)
+
+# Supporta -h, --help, -Help, --Help oltre a -Help dello switch
+$helpRequested = $Help -or ($args -contains '-h') -or ($args -contains '--help') -or ($args -contains '-Help') -or ($args -contains '--Help')
+
+if ($helpRequested) {
+    Get-Help $MyInvocation.MyCommand.Path -Full | Out-String | Write-Host
+    exit 0
+}
+
+if ([string]::IsNullOrWhiteSpace($Branch)) {
+    Write-Host "[safe-branch-switch] ERRORE: specificare il branch di destinazione." -ForegroundColor Red
+    Write-Host "Uso: pwsh scripts/safe-branch-switch.ps1 <branch> [-h|--help]"
+    exit 1
+}
+
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+Write-Host "[safe-branch-switch] Branch corrente: $(git branch --show-current)" -ForegroundColor Cyan
+
+# --- 1. Verifica tracked dirty ---
+# Riga tracked = prima colonna qualsiasi, seconda colonna diversa da '?' (ignora untracked '??')
+# Esempi match: ' M', 'M ', 'AM', 'MM'. Non match: '??' (untracked).
+$dirtyTracked = git status --porcelain | Select-String '^.[^\?]'
+
+$stashed = $false
+$stashSubject = "auto-stash before switching to $Branch ($(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ'))"
+
+if ($dirtyTracked) {
+    Write-Host "[safe-branch-switch] Working tree SPORCO (tracked): eseguo git stash push -u prima del checkout." -ForegroundColor Yellow
+    git stash push -u -m $stashSubject | Out-Null
+    $stashed = $true
+    Write-Host "[safe-branch-switch] Stash creato: $stashSubject" -ForegroundColor Green
+} else {
+    Write-Host "[safe-branch-switch] Working tree pulito: nessun tracked dirty, proseguo diretto al checkout." -ForegroundColor Green
+}
+
+# --- Memorizza branch di origine e untracked pre-checkout (per audit) ---
+$fromBranch = git branch --show-current
+$untrackedBefore = @(git ls-files --others --exclude-standard)
+
+# --- 2. Esegui checkout ---
+git checkout $Branch | Out-Null
+
+# --- 3. Verifica post-checkout untracked preservati ---
+$untrackedAfter = @(git ls-files --others --exclude-standard)
+
+Write-Host ""
+Write-Host "==============================================" -ForegroundColor Cyan
+Write-Host "safe-branch-switch: switched from $fromBranch to $Branch" -ForegroundColor Green
+Write-Host "==============================================" -ForegroundColor Cyan
+
+if ($stashed) {
+    Write-Host "Stash automatico: ESEGUITO (`"$stashSubject`")" -ForegroundColor Yellow
+    Write-Host "  I file untracked dell'operatore originale sono PRESERVATI nello stash."
+    Write-Host "  Per recuperarli: git stash pop"
+} else {
+    Write-Host "Stash automatico: non necessario (working tree pulito)." -ForegroundColor Green
+}
+
+if ($untrackedBefore.Count -gt 0) {
+    Write-Host "Untracked pre-checkout ($($untrackedBefore.Count)):"
+    $untrackedBefore | ForEach-Object { Write-Host "  - $_" }
+    if ($stashed) {
+        Write-Host "  -> inclusi nello stash -u, recuperabili con 'git stash pop'."
+    } else {
+        Write-Host "  -> preservati nel working tree (checkout non rimuove gli untracked)."
+    }
+} else {
+    Write-Host "Nessun file untracked prima del checkout."
+}
+
+# --- Diff riassuntivo tra branch di origine e destinazione ---
+Write-Host ""
+try {
+    $diffStat = git diff --stat $fromBranch HEAD
+    if ($diffStat) {
+        Write-Host "Diff riassuntivo ($fromBranch -> $Branch):" -ForegroundColor Cyan
+        $diffStat | ForEach-Object { Write-Host "  $_" }
+    } else {
+        Write-Host "Nessuna differenza di contenuto tra $fromBranch e $Branch." -ForegroundColor Green
+    }
+} catch {
+    Write-Host "Diff riassuntivo non disponibile." -ForegroundColor Yellow
+}
+
+Write-Host ""
+Write-Host "Branch attuale: $(git branch --show-current)" -ForegroundColor Cyan
+exit 0
+
+
+
+===== FILE: scripts/test-safe-branch-switch.sh =====
+
+#!/usr/bin/env bash
+# Smoke test per scripts/safe-branch-switch.ps1 (issue #49).
+# Esegue 3 scenari sul working tree: clean / dirty tracked / dirty untracked.
+# Richiede: pwsh, bash, git. (pwsh e' disponibile in CI; in locale assente => skip.)
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT="$SCRIPT_DIR/safe-branch-switch.ps1"
+
+if ! command -v pwsh >/dev/null 2>&1; then
+  echo "[SKIP] pwsh non disponibile: impossibile eseguire safe-branch-switch.ps1"
+  exit 0
+fi
+
+pass=0
+fail=0
+# Sessione 73 (issue #224): i tre scenari girano dentro subshell `( ... )`, e
+# gli incrementi di `pass`/`fail` dentro una subshell NON arrivano al padre:
+# la suite riportava "0 passati, 0 falliti" e `[ "$fail" -eq 0 ]` era sempre
+# vero, cioe' il gate NON poteva mai fallire (fail-open, lesson 43-1).
+# Correzione: ogni assert scrive una riga su un file di risultati condiviso;
+# il conteggio finale legge il file. I file sono append-only e gli scenari
+# girano in sequenza, quindi non c'e' interleaving.
+RESULTS="$(mktemp)"
+trap 'rm -f "$RESULTS"' EXIT
+ok()   { echo "  [PASS] $1"; echo "PASS" >> "$RESULTS"; }
+ng()   { echo "  [FAIL] $1"; echo "FAIL" >> "$RESULTS"; }
+
+# Identita' git via env var invece di `git config` (nessun subprocess).
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+
+run_ps() {
+  pwsh -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@"
+}
+
+# Crea un repo con main + branch feature-x, lascia il working tree su main pulito.
+make_repo() {
+  local d="$1"
+  mkdir -p "$d"
+  (
+    cd "$d" || exit 1
+    git init -q -b main
+    # Identita' e gpgsign via env var (vedi header dello script).
+    printf 'initial\n' > file.txt
+    git add file.txt >/dev/null 2>&1
+    git commit -q -m "chore: initial"
+    git checkout -q -b feature-x
+    printf 'branch work\n' > file.txt
+    git add file.txt >/dev/null 2>&1
+    git commit -q -m "chore: branch"
+    git checkout -q main
+  )
+}
+
+echo "=== Scenario 1: working tree pulito ==="
+(
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  run_ps feature-x >/tmp/sbs-s1.out 2>&1
+  rc=$?
+  [ $rc -eq 0 ] && ok "exit 0 su albero pulito" || { ng "exit !=0 su albero pulito"; cat /tmp/sbs-s1.out; }
+  [ "$(git branch --show-current)" = "feature-x" ] && ok "su feature-x dopo switch" || { ng "non su feature-x"; git branch --show-current; }
+  [ -z "$(git stash list)" ] && ok "nessuno stash su albero pulito" || { ng "stash inatteso su albero pulito"; git stash list; }
+  cd /; rm -rf "$D"
+)
+
+echo "=== Scenario 2: tracked dirty ==="
+(
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  printf 'modifica tracked\n' >> file.txt
+  run_ps feature-x >/tmp/sbs-s2.out 2>&1
+  rc=$?
+  [ $rc -eq 0 ] && ok "exit 0 su tracked dirty" || { ng "exit !=0 su tracked dirty"; cat /tmp/sbs-s2.out; }
+  [ "$(git branch --show-current)" = "feature-x" ] && ok "su feature-x dopo switch" || { ng "non su feature-x"; }
+  [ -n "$(git stash list)" ] && ok "stash creato su tracked dirty" || { ng "nessuno stash su tracked dirty"; }
+  [ "$(git show HEAD:file.txt)" = "branch work" ] && ok "tracked ripristinato allo stato committato" || { ng "tracked non ripristinato"; git show HEAD:file.txt; }
+  cd /; rm -rf "$D"
+)
+
+echo "=== Scenario 3: untracked dirty ==="
+(
+  D="$(mktemp -d)"; make_repo "$D"; cd "$D" || exit 1
+  printf 'nuovo file\n' > untracked.txt
+  run_ps feature-x >/tmp/sbs-s3.out 2>&1
+  rc=$?
+  [ $rc -eq 0 ] && ok "exit 0 su untracked dirty" || { ng "exit !=0 su untracked dirty"; cat /tmp/sbs-s3.out; }
+  [ "$(git branch --show-current)" = "feature-x" ] && ok "su feature-x dopo switch" || { ng "non su feature-x"; }
+  [ -z "$(git stash list)" ] && ok "nessuno stash su solo untracked" || { ng "stash inatteso su solo untracked"; git stash list; }
+  [ -f untracked.txt ] && ok "untracked preservato post-checkout" || { ng "untracked perso post-checkout"; }
+  cd /; rm -rf "$D"
+)
+
+# Contatore letto dal file di risultati: i contatori in memoria dei subshell
+# non arrivano al padre (vedi nota in testa allo script).
+pass=$(grep -c '^PASS$' "$RESULTS" 2>/dev/null || true)
+fail=$(grep -c '^FAIL$' "$RESULTS" 2>/dev/null || true)
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
+
+
+
 ===== FILE: scripts/test-issue-76-residue.sh =====
 
 #!/usr/bin/env bash
@@ -32259,16 +34022,35 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 4 spawn per ogni repo temporaneo.
+# Con le env var l'identita' e le impostazioni sono risolte da git senza
+# scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+# `commit.gpgsign=false` + `core.autocrlf=false` iniettati via env: git >= 2.31
+# (CI: ubuntu-latest, dev: 2.56) legge GIT_CONFIG_COUNT/KEY_n/VALUE_n come
+# config addizionale per-process.
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+export GIT_CONFIG_KEY_1="core.autocrlf"
+export GIT_CONFIG_VALUE_1="false"
+
 # Repo temporaneo con origin bare e 2 commit su main.
 make_repo() {
   local d="$1"
   mkdir -p "$d/origin.git"
-  git init -q --bare "$d/origin.git"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init -q --bare -b main "$d/origin.git"
   git init -q -b main "$d/work"
   (
     cd "$d/work" || exit 1
-    git config user.email "t@t.local"; git config user.name "Test"
-    git config commit.gpgsign false; git config core.autocrlf false
+    # NB: identita', gpgsign e autocrlf arrivano dalle env var esportate in
+    # testa allo script: niente `git config` (4 processi per repo).
     printf 'a\n' > f.txt; git add f.txt; git commit -q -m "c1"
     git remote add origin "$d/origin.git"; git push -q -u origin main
     printf 'b\n' >> f.txt; git commit -q -am "c2"; git push -q origin main
@@ -32438,6 +34220,21 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 3 spawn per ogni repo temporaneo
+# (~15 repo in questa suite => ~45 processi, ~1,2 s). Con le env var l'identita'
+# e' risolta da git senza scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+# `commit.gpgsign=false` iniettato via env: git >= 2.31 (CI: ubuntu-latest,
+# dev: 2.56) legge GIT_CONFIG_COUNT/KEY_0/VALUE_0 come config addizionale
+# per-process, senza bisogno di un `git config` dedicato.
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+
 run_agg() {
   "$PS" -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
   return $?
@@ -32452,10 +34249,8 @@ make_repo() {
   (
     cd "$d" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"
-    git config user.name "Test"
-    git config commit.gpgsign false
-
+    # NB: identita' e commit.gpgsign arrivano dalle env var esportate in testa
+    # allo script: niente `git config` (3 processi per repo).
     if [ "$order" = "asc" ]; then
       write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
       write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
@@ -32884,9 +34679,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
     (
       cd "$d" || exit 1
       git init -q -b main
-      git config user.email "t@t.local"
-      git config user.name "Test"
-      git config commit.gpgsign false
+      # Identita' e gpgsign via env var (vedi header dello script).
 
       write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
       write_story 0.5 "pwa" "PWA e service worker" done "#19" "devops"
@@ -32919,7 +34712,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   (
     cd "$D" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Identita' e gpgsign via env var (vedi header dello script).
     # Ordine INVERSO: 1.2 prima di 1.1 (scenario "filesystem-dipendente")
     write_story 1.2 "adapter-apple-music" "Adapter Apple Music" todo "" "adapter"
     write_story 1.1 "adapter-youtube-music" "Adapter YouTube Music" todo "" "adapter"
@@ -32953,7 +34746,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   (
     cd "$D" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Identita' e gpgsign via env var (vedi header dello script).
     write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
     write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
     write_story 2.4 "memory-engine" "Memory Engine" todo "" "analysis"
@@ -32980,7 +34773,7 @@ echo "=== T10: NEXT-STEP block deterministico (ADR-0008 V3, issue #127) ==="
   (
     cd "$D" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    # Identita' e gpgsign via env var (vedi header dello script).
     write_story 0.3 "adapter-spotify" "Adapter Spotify base" done "#28" "adapter"
     write_story 2.1 "mood-tracker" "Mood Tracker giornaliero" blocked "" "analysis"
   )
@@ -33328,20 +35121,66 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 3 spawn per ogni repo temporaneo
+# (~260 ms per repo). Con le env var l'identita' e' risolta da git senza
+# scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+# `commit.gpgsign=false` iniettato via env: git >= 2.31 (CI: ubuntu-latest,
+# dev: 2.56) legge GIT_CONFIG_COUNT/KEY_0/VALUE_0 come config addizionale
+# per-process, senza bisogno di un `git config` dedicato.
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+
+# Elenco dei path in $files di generate-bundle.ps1, calcolato UNA sola volta.
+# La pipeline grep|sed costa ~120 ms e veniva rieseguita a ogni make_repo
+# (4 volte in questa suite).
+BUNDLE_FILE_LIST=""
+bundle_file_list() {
+  if [ -z "$BUNDLE_FILE_LIST" ]; then
+    # Estrai i path tra virgolette dentro $files. Formato PowerShell:
+    #     "docs/INDEX.md",
+    #     "scripts/generate-bundle.ps1",
+    # Cattura sia le entry con virgola finale (lista) sia l'ultima senza.
+    BUNDLE_FILE_LIST="$(grep -oE '^[[:space:]]*"([^"]+)"' "$SCRIPT" | sed -E 's/^[[:space:]]*"([^"]+)".*/\1/')"
+  fi
+  printf '%s\n' "$BUNDLE_FILE_LIST"
+}
+
 # Estrae l'array $files da generate-bundle.ps1 e crea stub vuoti per ogni entry.
 # Necessario perche' generate-bundle.ps1 ha un check di "missing files" che esce 2
 # se l'$files contiene path non esistenti (test fixture-repo deve avere TUTTI i file
 # o il check fallirebbe per motivi sbagliati). D.117.4.
+#
+# PERF: la versione originale invocava `dirname` + `mkdir -p` + `touch` una volta
+# per file: 128 file => 256 processi per repo, ~9,5 s per repo (misurato il
+# 2026-10-31) e ~38 s dei 53 s totali della suite. Ora:
+#   - la directory e' calcolata con l'espansione built-in `${f%/*}` (nessun
+#     subprocess `dirname`);
+#   - `mkdir -p` viene invocato una volta per directory DISTINTA (~10), non
+#     una volta per file;
+#   - `: > "$f"` e' una redirezione built-in: azzera il file senza spawnare
+#     `touch`.
+# Output byte-identico: stessi path, stessi stub vuoti.
 seed_repo_files() {
-  local d="$1"
-  # Estrai i path tra virgolette dentro $files. Formato PowerShell:
-  #     "docs/INDEX.md",
-  #     "scripts/generate-bundle.ps1",
-  # Cattura sia le entry con virgola finale (lista) sia l'ultima senza.
-  grep -oE '^[[:space:]]*"([^"]+)"' "$SCRIPT" | sed -E 's/^[[:space:]]*"([^"]+)".*/\1/' | while read -r f; do
-    mkdir -p "$d/$(dirname "$f")"
-    touch "$d/$f"
-  done
+  local d="$1" f dir seen=""
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    dir="${f%/*}"
+    [ "$dir" = "$f" ] && dir="."
+    case "$seen" in
+      *"|$dir|"*) ;;
+      *) seen="$seen|$dir|"; mkdir -p "$d/$dir" ;;
+    esac
+  done <<< "$(bundle_file_list)"
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    : > "$d/$f"
+  done <<< "$(bundle_file_list)"
   # NB: NON sovrascrivere scripts/generate-bundle.ps1 qui. Il file e' gia'
   # stato copiato in $d/scripts/generate-bundle.ps1 da make_repo prima della
   # chiamata a seed_repo_files, e verra' eventualmente sovrascritto da make_repo
@@ -33364,9 +35203,8 @@ make_repo() {
   (
     cd "$d" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"
-    git config user.name "Test"
-    git config commit.gpgsign false
+    # NB: identita' e commit.gpgsign arrivano dalle env var esportate in testa
+    # allo script: niente `git config` (3 processi per repo).
     echo "x" > AGENTS.md
     echo "y" > README.md
     echo "z" > LICENSE
@@ -33645,9 +35483,22 @@ let pushers = 0;
 // Elenco preso da "Workflow syntax for GitHub Actions" -> permissions.
 // `metadata` e' volutamente assente: e' sempre attiva e non dichiarabile.
 const PERMISSION_SCOPES = [
-  'actions', 'artifact-metadata', 'attestations', 'checks', 'code-quality',
-  'contents', 'deployments', 'discussions', 'id-token', 'issues', 'models',
-  'packages', 'pages', 'pull-requests', 'security-events', 'statuses',
+  'actions',
+  'artifact-metadata',
+  'attestations',
+  'checks',
+  'code-quality',
+  'contents',
+  'deployments',
+  'discussions',
+  'id-token',
+  'issues',
+  'models',
+  'packages',
+  'pages',
+  'pull-requests',
+  'security-events',
+  'statuses',
   'vulnerability-alerts',
 ];
 const PERMISSION_SCOPE_SET = new Set(PERMISSION_SCOPES);
@@ -33668,22 +35519,87 @@ const SYNC_FORMS = [
 ];
 const PUSH_MAIN_RE = /^\s*git\s+push\s+origin\s+main\s*$/;
 
-for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
+// === Scalari semplici con ": " — YAML non valido (Sessione 74) ===
+//
+// Un file workflow che GitHub **rifiuta in fase di validazione** non produce
+// un job che fallisce: produce una run con `jobs: 0` che chiude `failure` a
+// 0 secondi, senza log e senza annotazioni via API. Il sintomo e'
+// indistinguibile da "Actions rotta per billing" — la classe di failure mode
+// dell'issue #135 (22 ore di gate spenti senza che nessuno se ne accorgesse).
+//
+// La forma invalida piu' comune e' uno **scalare semplice** (non quotato, non
+// block scalar) che contiene `: ` (due punti + spazio). In contesto block
+// quello e' l'indicatore di chiave, quindi il valore non puo' contenerlo:
+//
+//     run: echo "::notice::PR di sola documentazione: lint."   <- INVALIDO
+//     run: |                                                 <- valido
+//       echo "::notice::PR di sola documentazione: lint."
+//     run: "echo a: b"                                      <- valido (quotato)
+//
+// Nota: dentro un block scalar (`|` o `>`) il `: ` e' testo letterale e
+// valido — per questo i corpi dei block scalar sono esclusi dal controllo.
+function checkYamlScalars(lines, file) {
+  let fails = 0;
+  let blockIndent = -1; // >= 0: siamo dentro il corpo di un block scalar
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (blockIndent >= 0) {
+      if (line.trim() === '') continue;
+      const indent = line.match(/^\s*/)[0].length;
+      if (indent > blockIndent) continue; // ancora dentro il blocco
+      blockIndent = -1;
+    }
+    const m = line.match(/^(\s*)(?:-\s+)?([A-Za-z0-9_"'-]+):(?:\s+(.*))?$/);
+    if (!m) continue;
+    // In YAML un `#` preceduto da spazio apre un commento: il commento NON fa
+    // parte del valore. Senza questo strip, `if: always()  # nota: x` verrebbe
+    // segnalato come falso positivo.
+    const value = (m[3] || '').replace(/\s+#.*$/, '').trim();
+    if (value === '') continue;
+    if (value.startsWith('|') || value.startsWith('>')) {
+      blockIndent = m[1].length;
+      continue;
+    }
+    if (value.startsWith('"') || value.startsWith("'")) continue; // quotato: valido
+    if (value.startsWith('[') || value.startsWith('{')) continue; // flow: valido
+    if (/: /.test(value)) {
+      console.error(
+        `[FAIL] ${file}: riga ${i + 1}: scalare semplice non quotato che contiene ": " — ` +
+          `YAML non valido, GitHub rifiuterebbe il file (run con 0 job). ` +
+          `Usa un block scalar (|) o quota il valore.`,
+      );
+      fails++;
+    }
+  }
+  return fails;
+}
+
+for (const file of readdirSync(dir).filter((f) => f.endsWith('.yml'))) {
   const full = join(dir, file);
   const text = readFileSync(full, 'utf8');
 
   // Tab usati per l'indentazione sono illegali in YAML.
-  const tabLine = text.split('\n').findIndex(l => /^\s*\t/.test(l)) + 1;
+  const tabLine = text.split('\n').findIndex((l) => /^\s*\t/.test(l)) + 1;
   if (tabLine > 0) {
     console.error(`[FAIL] ${file}: tab nell'indentazione alla riga ${tabLine}`);
     failures++;
   }
 
   // Estrae i blocchi scalari `script: |` e ne verifica la sintassi JS.
-  const lines = text.split('\n');
+  //
+  // NB: si normalizza il fine-riga. Senza questo, un file salvato con CRLF
+  // (un contributore su Windows) lascerebbe un `\r` finale su ogni riga: i
+  // pattern ancorati con `$` — incluso quello del controllo sui push su
+  // `main` — non matcherebbero piu', e i controlli fallirebbero in SILENZIO
+  // su un file CRLF. Il `\r` non e' un terminatore di riga per il regex
+  // JavaScript: `.` non lo matcha.
+  const lines = text.split('\n').map((l) => (l.endsWith('\r') ? l.slice(0, -1) : l));
 
   // Issue #135: le scope dichiarate in `permissions:` devono essere reali.
   failures += checkPermissionScopes(lines, file);
+  // Sessione 74: uno scalare semplice con ": " rende il file non valido per
+  // GitHub, che lo rifiuterebbe in fase di validazione (run con 0 job).
+  failures += checkYamlScalars(lines, file);
   // Issue #140: chi pusha su `main` deve sincronizzarsi con `origin/main` prima.
   failures += checkPushSync(lines, file);
   for (let i = 0; i < lines.length; i++) {
@@ -33693,9 +35609,12 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
     const body = [];
     for (let j = i + 1; j < lines.length; j++) {
       const line = lines[j];
-      if (line.trim() === '') { body.push(''); continue; }
+      if (line.trim() === '') {
+        body.push('');
+        continue;
+      }
       const indent = line.match(/^\s*/)[0].length;
-      if (indent <= baseIndent) break;   // uscita dal blocco scalare
+      if (indent <= baseIndent) break; // uscita dal blocco scalare
       body.push(line.slice(baseIndent + 2));
     }
     // github-script avvolge il codice in una arrow function async, quindi
@@ -33715,12 +35634,20 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
     writeFileSync(tmp, wrapped, 'utf8');
     try {
       execFileSync(process.execPath, ['--check', tmp], { stdio: 'pipe' });
-      console.log(`[OK] ${file}: blocco script alla riga ${i + 1} (${js.split('\n').length} righe JS) sintatticamente valido`);
+      console.log(
+        `[OK] ${file}: blocco script alla riga ${i + 1} (${js.split('\n').length} righe JS) sintatticamente valido`,
+      );
     } catch (e) {
-      console.error(`[FAIL] ${file}: script alla riga ${i + 1} non valido:\n${e.stderr?.toString() || e.message}`);
+      console.error(
+        `[FAIL] ${file}: script alla riga ${i + 1} non valido:\n${e.stderr?.toString() || e.message}`,
+      );
       failures++;
     } finally {
-      try { unlinkSync(tmp); } catch { /* noop */ }
+      try {
+        unlinkSync(tmp);
+      } catch {
+        /* noop */
+      }
     }
   }
 }
@@ -33756,7 +35683,7 @@ function extractGitAddPaths(text) {
     const cleaned = raw.replace(/\s*2>&1\s*\|\s*Out-Null\s*$/, '').replace(/\s*2>&1\s*$/, '');
     const m = cleaned.match(/^\s*git add\s+(.+?)\s*$/);
     if (!m) continue;
-    return m[1].split(/\s+/).filter(t => t && !t.startsWith('-'));
+    return m[1].split(/\s+/).filter((t) => t && !t.startsWith('-'));
   }
   return null;
 }
@@ -33766,7 +35693,7 @@ function extractGitAddPaths(text) {
 // sotto la radice (`.` copre tutto).
 function isStaged(target, staged) {
   if (staged.includes(target)) return true;
-  return staged.some(p => p === '.' || p === './' || (p.endsWith('/') && target.startsWith(p)));
+  return staged.some((p) => p === '.' || p === './' || (p.endsWith('/') && target.startsWith(p)));
 }
 
 const repoRoot = resolve(dir, '..', '..');
@@ -33782,29 +35709,40 @@ if (existsSync(aggregatorRoot)) {
     }
     const scriptPath = join(repoRoot, script);
     if (!existsSync(scriptPath)) {
-      console.error(`[FAIL] ${workflow}: ${script} non trovato, la copertura \`git add\` non e' verificabile`);
+      console.error(
+        `[FAIL] ${workflow}: ${script} non trovato, la copertura \`git add\` non e' verificabile`,
+      );
       failures++;
       continue;
     }
     const targets = extractAggregatorTargets(readFileSync(scriptPath, 'utf8'));
     const staged = extractGitAddPaths(readFileSync(wfPath, 'utf8'));
     if (!targets || targets.length === 0) {
-      console.error(`[FAIL] ${workflow}: nessun target estratto da $targets in ${script} (la forma dell'array e' cambiata?)`);
+      console.error(
+        `[FAIL] ${workflow}: nessun target estratto da $targets in ${script} (la forma dell'array e' cambiata?)`,
+      );
       failures++;
       continue;
     }
     if (!staged) {
-      console.error(`[FAIL] ${workflow}: nessuna riga \`git add\` trovata, i target dell'aggregator non verrebbero committati`);
+      console.error(
+        `[FAIL] ${workflow}: nessuna riga \`git add\` trovata, i target dell'aggregator non verrebbero committati`,
+      );
       failures++;
       continue;
     }
-    const missing = targets.filter(t => !isStaged(t, staged));
+    const missing = targets.filter((t) => !isStaged(t, staged));
     if (missing.length > 0) {
-      console.error(`[FAIL] ${workflow}: la riga \`git add\` NON copre ${missing.length}/${targets.length} $targets di ${script}:`);
-      for (const t of missing) console.error(`         mancante: ${t} (generato dal blocco aggregato, mai committato)`);
+      console.error(
+        `[FAIL] ${workflow}: la riga \`git add\` NON copre ${missing.length}/${targets.length} $targets di ${script}:`,
+      );
+      for (const t of missing)
+        console.error(`         mancante: ${t} (generato dal blocco aggregato, mai committato)`);
       failures++;
     } else {
-      console.log(`[OK] ${workflow}: la riga \`git add\` copre tutti i ${targets.length} $targets di ${script}`);
+      console.log(
+        `[OK] ${workflow}: la riga \`git add\` copre tutti i ${targets.length} $targets di ${script}`,
+      );
     }
   }
 }
@@ -33845,7 +35783,9 @@ function checkPermissionScopes(lines, file) {
 
     if (inline !== '') {
       if (!PERMISSION_SHORTHANDS.has(inline)) {
-        console.error(`[FAIL] ${file}:${i + 1}: \`permissions: ${inline}\` non e' una forma ammessa (usa un blocco scope, \`{}\`, \`read-all\` o \`write-all\`)`);
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`permissions: ${inline}\` non e' una forma ammessa (usa un blocco scope, \`{}\`, \`read-all\` o \`write-all\`)`,
+        );
         bad++;
       }
       continue;
@@ -33860,18 +35800,22 @@ function checkPermissionScopes(lines, file) {
       if (trimmed === '' || trimmed.startsWith('#')) continue;
       if (raw.match(/^\s*/)[0].length <= baseIndent) break;
       const entry = raw.match(/^\s*([A-Za-z0-9_-]+):\s*(\S+)\s*(?:#.*)?$/);
-      if (!entry) break;   // forma non `scope: valore` (flow mapping): niente da validare
+      if (!entry) break; // forma non `scope: valore` (flow mapping): niente da validare
       const [, scope, value] = entry;
       entries++;
       if (!PERMISSION_SCOPE_SET.has(scope)) {
-        console.error(`[FAIL] ${file}:${j + 1}: scope \`${scope}\` non valida in \`permissions:\` — GitHub rifiuta l'intero workflow (\`Unexpected value '${scope}'\`), la run viene creata con 0 job e fallisce a 0s su ogni trigger.`);
+        console.error(
+          `[FAIL] ${file}:${j + 1}: scope \`${scope}\` non valida in \`permissions:\` — GitHub rifiuta l'intero workflow (\`Unexpected value '${scope}'\`), la run viene creata con 0 job e fallisce a 0s su ogni trigger.`,
+        );
         console.error(`         scope valide: ${PERMISSION_SCOPES.join(', ')}`);
         bad++;
         continue;
       }
       const allowed = PERMISSION_RESTRICTED.get(scope) || PERMISSION_VALUES;
       if (!allowed.has(value)) {
-        console.error(`[FAIL] ${file}:${j + 1}: scope \`${scope}\` accetta solo ${[...allowed].join('|')}, trovato \`${value || '(vuoto)'}\``);
+        console.error(
+          `[FAIL] ${file}:${j + 1}: scope \`${scope}\` accetta solo ${[...allowed].join('|')}, trovato \`${value || '(vuoto)'}\``,
+        );
         bad++;
       }
     }
@@ -33905,17 +35849,25 @@ function checkPermissionScopes(lines, file) {
 // contratto: un sync dopo il push non serve a niente.
 
 function checkPushSync(lines, file) {
-  const pushAt = lines.findIndex(l => PUSH_MAIN_RE.test(l));
-  if (pushAt < 0) return 0;   // non e' un writer di `main`: niente da tassare
+  const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l));
+  if (pushAt < 0) return 0; // non e' un writer di `main`: niente da tassare
   pushers++;
   const before = lines.slice(0, pushAt).join('\n');
-  if (SYNC_FORMS.some(re => re.test(before))) {
-    console.log(`[OK] ${file}:${pushAt + 1}: \`git push origin main\` preceduto da una sincronizzazione con origin/main`);
+  if (SYNC_FORMS.some((re) => re.test(before))) {
+    console.log(
+      `[OK] ${file}:${pushAt + 1}: \`git push origin main\` preceduto da una sincronizzazione con origin/main`,
+    );
     return 0;
   }
-  console.error(`[FAIL] ${file}:${pushAt + 1}: \`git push origin main\` senza sincronizzazione preventiva con \`origin/main\`.`);
-  console.error(`       Con piu' workflow che pushano su \`main\` (auto-bundle + auto-state-aggregate), il checkout di default e' il \`github.sha\` del merge commit: se l'altra ha gia' pushato, questo push viene rifiutato con \`non-fast-forward\` e i blocchi aggregati restano indietro senza che nessun gate se ne accorga.`);
-  console.error(`       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push.`);
+  console.error(
+    `[FAIL] ${file}:${pushAt + 1}: \`git push origin main\` senza sincronizzazione preventiva con \`origin/main\`.`,
+  );
+  console.error(
+    `       Con piu' workflow che pushano su \`main\` (auto-bundle + auto-state-aggregate), il checkout di default e' il \`github.sha\` del merge commit: se l'altra ha gia' pushato, questo push viene rifiutato con \`non-fast-forward\` e i blocchi aggregati restano indietro senza che nessun gate se ne accorga.`,
+  );
+  console.error(
+    `       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push.`,
+  );
   return 1;
 }
 
@@ -33970,20 +35922,27 @@ function extractWorkflowRunTargets(text) {
     const indent = raw.match(/^\s*/)[0].length;
     const trimmed = raw.trim();
     if (!inOn) {
-      if (/^on:\s*$/.test(trimmed)) { inOn = true; onIndent = indent; }
+      if (/^on:\s*$/.test(trimmed)) {
+        inOn = true;
+        onIndent = indent;
+      }
       continue;
     }
     if (indent <= onIndent && trimmed !== '' && !trimmed.startsWith('#')) {
       // uscita dal blocco `on:`
-      inOn = false; inRun = false;
+      inOn = false;
+      inRun = false;
       continue;
     }
     if (!inRun) {
-      if (/^workflow_run:\s*$/.test(trimmed)) { inRun = true; runIndent = indent; }
+      if (/^workflow_run:\s*$/.test(trimmed)) {
+        inRun = true;
+        runIndent = indent;
+      }
       continue;
     }
     if (indent <= runIndent && trimmed !== '' && !trimmed.startsWith('#')) {
-      inRun = false;   // uscita dal blocco `workflow_run:`
+      inRun = false; // uscita dal blocco `workflow_run:`
       continue;
     }
     const m = trimmed.match(/^workflows:\s*\[(.*)\]\s*$/);
@@ -34007,11 +35966,15 @@ function checkWriterOrdering(dir) {
     // copertura `git add` ne porta solo uno). Tassarle produrrebbe un falso
     // positivo su un check che qui non ha niente da dire.
     if (!existsSync(consumerPath)) {
-      console.log(`[SKIP] ${consumer}: assente dalla directory ispezionata, il check di ordinamento non e' applicabile`);
+      console.log(
+        `[SKIP] ${consumer}: assente dalla directory ispezionata, il check di ordinamento non e' applicabile`,
+      );
       continue;
     }
     if (!existsSync(producerPath)) {
-      console.error(`[FAIL] ${consumer}: il workflow produttore ${producer} non esiste, l'ordinamento non e' verificabile`);
+      console.error(
+        `[FAIL] ${consumer}: il workflow produttore ${producer} non esiste, l'ordinamento non e' verificabile`,
+      );
       bad++;
       continue;
     }
@@ -34019,15 +35982,25 @@ function checkWriterOrdering(dir) {
     const producerText = readFileSync(producerPath, 'utf8');
     const targets = extractWorkflowRunTargets(consumerText);
     if (!targets) {
-      console.error(`[FAIL] ${consumer}: nessun trigger \`workflow_run:\` con \`workflows:\` trovato.`);
-      console.error(`       Senza di esso i due writer di \`main\` restano serializzati ma NON ordinati: \`${consumer}\` puo' copiare blocchi aggregati stale da \`${producer}\` (caso reale: PR #147, 2026-10-26T12:50Z, drift di 6 righe in docs/BUNDLE.md).`);
-      console.error(`       Aggiungi un blocco \`workflow_run:\` con \`workflows: ["${producerName}"]\` e \`types: [completed]\`.`);
+      console.error(
+        `[FAIL] ${consumer}: nessun trigger \`workflow_run:\` con \`workflows:\` trovato.`,
+      );
+      console.error(
+        `       Senza di esso i due writer di \`main\` restano serializzati ma NON ordinati: \`${consumer}\` puo' copiare blocchi aggregati stale da \`${producer}\` (caso reale: PR #147, 2026-10-26T12:50Z, drift di 6 righe in docs/BUNDLE.md).`,
+      );
+      console.error(
+        `       Aggiungi un blocco \`workflow_run:\` con \`workflows: ["${producerName}"]\` e \`types: [completed]\`.`,
+      );
       bad++;
       continue;
     }
     if (!targets.includes(producerName)) {
-      console.error(`[FAIL] ${consumer}: il trigger \`workflow_run:\` non include \`${producerName}\` (trovati: ${targets.join(', ') || 'nessuno'}).`);
-      console.error(`       Il bundle deve rigenerarsi DOPO che \`${producer}\` ha committato i blocchi aggregati, altrimenti copia il contenuto stale.`);
+      console.error(
+        `[FAIL] ${consumer}: il trigger \`workflow_run:\` non include \`${producerName}\` (trovati: ${targets.join(', ') || 'nessuno'}).`,
+      );
+      console.error(
+        `       Il bundle deve rigenerarsi DOPO che \`${producer}\` ha committato i blocchi aggregati, altrimenti copia il contenuto stale.`,
+      );
       bad++;
       continue;
     }
@@ -34035,12 +36008,18 @@ function checkWriterOrdering(dir) {
     // una disallineazione non da' errore, ma il trigger semplicemente non scatta.
     const actualName = extractWorkflowName(producerText);
     if (actualName !== producerName) {
-      console.error(`[FAIL] ${consumer}: \`workflows: ["${producerName}"]\` non combacia con il \`name:\` reale di ${producer} ("${actualName}").`);
-      console.error(`       Il trigger \`workflow_run\` non scatterebbe MAI: silenzioso, senza errore di GitHub.`);
+      console.error(
+        `[FAIL] ${consumer}: \`workflows: ["${producerName}"]\` non combacia con il \`name:\` reale di ${producer} ("${actualName}").`,
+      );
+      console.error(
+        `       Il trigger \`workflow_run\` non scatterebbe MAI: silenzioso, senza errore di GitHub.`,
+      );
       bad++;
       continue;
     }
-    console.log(`[OK] ${consumer}: trigger \`workflow_run\` su "${producerName}" presente e allineato al \`name:\` di ${producer}`);
+    console.log(
+      `[OK] ${consumer}: trigger \`workflow_run\` su "${producerName}" presente e allineato al \`name:\` di ${producer}`,
+    );
   }
   return bad;
 }
@@ -34076,7 +36055,7 @@ const AGGREGATOR_TRIGGER_INPUTS = [
   },
   {
     workflow: 'auto-state-aggregate.yml',
-    path: 'docs/state/sessions/71-progress-indicator.md',
+    path: 'docs/state/sessions/75-progress-indicator.md',
     why: 'stato di una sessione (analisi narrativa + blocco SESSIONS)',
   },
   {
@@ -34209,7 +36188,9 @@ function checkTriggerCoverage(dir) {
 
 failures += checkTriggerCoverage(dir);
 
-console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`);
+console.log(
+  `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`,
+);
 process.exit(failures === 0 ? 0 : 1);
 
 
@@ -34804,6 +36785,168 @@ echo
 echo "=== $PASS ok, $FAIL fallimenti ==="
 [ "$FAIL" -eq 0 ] || exit 1
 exit 0
+
+
+
+===== FILE: scripts/test-workflow-yaml-scalars.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per la validita' YAML dei workflow (Sessione 74).
+#
+# Un file workflow che GitHub **rifiuta in fase di validazione** non produce un
+# job che fallisce: produce una run con `jobs: []` (0 check-run), `conclusion:
+# failure` e `run_started_at == created_at` (0 secondi), nessun log e nessuna
+# annotazione via API. E' la stessa firma del failure mode dell'issue #135
+# (22 ore di gate spenti senza che nessuno se ne accorgesse), e il sintomo e'
+# indistinguibile da "Actions rotta per billing".
+#
+# La forma invalida piu' comune e' uno **scalare semplice** (non quotato, non
+# block scalar) che contiene `: ` — in contesto block quello e' l'indicatore
+# di chiave, quindi non puo' stare dentro il valore:
+#
+#     run: echo "::notice::PR: solo documentazione."     <- INVALIDO
+#     run: |                                              <- valido
+#       echo "::notice::PR: solo documentazione."
+#     run: "echo a: b"                                   <- valido (quotato)
+#
+# Il gate vive in scripts/validate-workflows.mjs; questo file e' il suo test di
+# regressione: verifica che il gate **esca 1** quando si reintroduce l'errore.
+# Un gate che passa sempre non e' un gate (lesson 43-1).
+#
+# Scenari coperti:
+#   T1  repo reale: nessuno scalare semplice invalido -> exit 0
+#   T2  fixture con uno scalare semplice che contiene ": " -> exit 1, messaggio
+#       che nomina il file e la riga
+#   T3  fixture con le forme valide equivalenti (block scalar, valore quotato,
+#       commento) -> exit 0: nessun falso positivo
+#   T4  fixture CRLF (un contributore su Windows salva con CRLF): il gate deve
+#       comunque intercettare — e i controlli gia' esistenti non devono
+#       fallire in silenzio per il `\r` finale
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
+AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
+AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[SKIP] node non disponibile: impossibile eseguire validate-workflows.mjs"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+# Repo fixture minimo. La struttura conta: validate-workflows.mjs risolve
+# repoRoot come <dir>/../.., e il gate di copertura `git add` (#136) fallisce se
+# `auto-state-aggregate.yml` o l'aggregator mancano — altrimenti i test
+# passerebbero per il motivo sbagliato.
+make_fixture() {
+  local d="$1"
+  mkdir -p "$d/.github/workflows" "$d/scripts"
+  cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
+  cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
+  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/auto-state-aggregate.yml"
+  cp "$CI_WF" "$d/.github/workflows/ci.yml"
+}
+
+run_validator() {
+  node "$1/scripts/validate-workflows.mjs" "$1/.github/workflows" 2>&1
+}
+
+echo "=== T1: repo reale - nessuno scalare semplice invalido ==="
+out="$(node "$VALIDATOR" "$REPO_ROOT/.github/workflows" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (nessuno scalare invalido in .github/workflows)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi
+if echo "$out" | grep -q "scalare semplice non quotato"; then ng "il gate segnala uno scalare invalido sul repo reale"; else ok "nessuno scalare invalido nel repo reale"; fi
+
+echo "=== T2: fixture con uno scalare semplice che contiene ': ' ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  # Scalare semplice: il valore non e' quotato e contiene ": ".
+  printf '%s\n' \
+    'name: Fixture' \
+    'on:' \
+    '  push:' \
+    '    branches: [main]' \
+    'jobs:' \
+    '  x:' \
+    '    runs-on: ubuntu-latest' \
+    '    steps:' \
+    '      - name: Rotto' \
+    '        run: echo "::notice::PR di sola documentazione: lint e typecheck."' \
+    > "$D/.github/workflows/rotto.yml"
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sullo scalare invalido)"; else ng "exit $ec (atteso 1): il gate NON intercetta l'errore"; fi
+  if echo "$out" | grep -q "rotto.yml: riga [0-9]"; then ok "il messaggio cita il file e la riga"; else ng "il messaggio non cita file:riga: $(echo "$out" | tail -5)"; fi
+  if echo "$out" | grep -q "scalare semplice non quotato"; then ok "il messaggio spiega il problema"; else ng "il messaggio non spiega il problema: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: fixture con le forme valide equivalenti -> nessun falso positivo ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  printf '%s\n' \
+    'name: Fixture' \
+    'on:' \
+    '  push:' \
+    '    branches: [main]' \
+    'jobs:' \
+    '  x:' \
+    '    runs-on: ubuntu-latest' \
+    '    steps:' \
+    '      - name: Block scalar' \
+    '        run: |' \
+    '          echo "::notice::PR di sola documentazione: lint e typecheck."' \
+    '      - name: Valore quotato' \
+    '        run: "echo a: b"' \
+    '      - name: Commento' \
+    '        if: always()  # nota: questo e'"'"' un commento' \
+    '        run: echo ciao' \
+    > "$D/.github/workflows/valido.yml"
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 0 ]; then ok "exit 0 (block scalar, quotato e commento accettati)"; else ng "exit $ec (atteso 0): falso positivo: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4: fixture CRLF - il gate deve comunque intercettare ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  printf '%s\n' \
+    'name: Fixture' \
+    'on:' \
+    '  push:' \
+    '    branches: [main]' \
+    'jobs:' \
+    '  x:' \
+    '    runs-on: ubuntu-latest' \
+    '    steps:' \
+    '      - name: Rotto' \
+    '        run: echo "::notice::PR di sola documentazione: lint e typecheck."' \
+    | sed 's/$/\r/' \
+    > "$D/.github/workflows/crlf.yml"
+  if grep -qU $'\r' "$D/.github/workflows/crlf.yml"; then
+    ok "mutazione applicata (fixture CRLF)"
+  else
+    ng "mutazione non applicata: la fixture non ha CRLF"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (intercettato anche su file CRLF)"; else ng "exit $ec (atteso 1): il gate NON intercetta l'errore su CRLF"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
 
 
 
@@ -35785,8 +37928,24 @@ name: CI
 
 on:
   pull_request:
+  # Sessione 74: il trigger `push: branches: [main]` senza filtro faceva
+  # rieseguire l'INTERA pipeline su ogni merge, duplicando la validazione
+  # che la PR aveva gia' fatto sullo stesso albero (4 run di CI per ogni
+  # cambiamento logico: PR, merge, doc-sync PR, merge del doc-sync).
+  #
+  # Il push su `main` scatta solo per i file che i **writer automatici**
+  # modificano: sono gli unici commit che arrivano su `main` senza essere
+  # mai passati da una PR, e quindi gli unici che non sono gia' validati.
+  # Per un merge umano la pipeline non gira piu': l'albero che arriva su
+  # `main` e' lo stesso che la PR ha gia' validato.
   push:
     branches: [main]
+    paths:
+      - 'docs/BUNDLE.md'
+      - 'docs/SESSIONS.md'
+      - 'docs/11-BACKLOG.md'
+      - 'docs/INDEX.md'
+      - 'README.md'
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -35795,27 +37954,113 @@ concurrency:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
+# Sessione 73 (issue #224): la pipeline era un UNICO job sequenziale con 18
+# step, per una durata misurata di **172 s** (run 41212641314, 2026-10-31).
+# I gate erano in gran parte indipendenti fra loro, ma venivano eseguiti in
+# sequenza: il tempo pareggio era la SOMMA, non il massimo.
+#
+# La riorganizzazione mette in parallelo i gate che non dipendono l'uno
+# dall'altro. Nessun gate e' stato rimosso, reso non-bloccante o indebolito:
+# i 18 gate restano 18, con la stessa semantica bloccante/non-bloccante.
+#
+#   PRIMA (1 job, sequenziale)         DOPO (6 job in parallelo)
+#   ---------------------------------  ---------------------------------
+#   install + lint + typecheck         node            (install + 4 task turbo)
+#   + test + build              ~83 s
+#   + 18 gate sequenziali      ~89 s
+#   TOTALE                      ~172 s   TOTALE  ~ max(83, 40, 12, 12, 8, 6)
+#                                              ~= 85-95 s di tempo pareggio
+#
+# I 5 job di gate NON richiedono `pnpm install`: `scripts/validate-*.mjs` e
+# `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node, e le
+# suite bash usano git + bash + pwsh. Installare le dipendenze npm in 5 job
+# che non ne hanno bisogno era puro costo.
+#
+# Il job `quality` (l'ultimo) resta il **check aggregatore**: e' lui il check
+# che branch protection deve richiedere, e fallisce esplicitamente se uno
+# qualunque dei job paralleli e' fallito o saltato. Senza `if: always()` +
+# controllo esplicito, un job fallito produrrebbe un `quality` *skipped* (non
+# *failed*), che la branch protection puo' accettare come successo.
+
 jobs:
-  quality:
+  # ---------------------------------------------------------------------------
+  # 0. Rilevamento: la PR tocca file di codice?
+  #
+  # Il ciclo di merge del repo prevede due PR: quella di implementazione e il
+  # doc-sync finale (che porta il numero di PR e l'hash di merge, noti solo
+  # DOPO il merge). Il doc-sync tocca **solo file `.md`**: farci girare
+  # lint, typecheck, test e build su un cambiamento di sola documentazione
+  # e' lavoro sprecato (~68 s di job + 3 installazioni di dipendenze).
+  #
+  # La regola e' deliberatamente conservativa: i gate sul codice girano
+  # **solo se ALmeno un file cambiato non e' un `.md`**. Qualunque file
+  # `.ts`, `.tsx`, `.js`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate.
+  #
+  # Fail-safe: se questo job fallisce, `has_code` resta vuoto e la condizione
+  # `!= 'false'` dei job di codice e' vera => i gate girano comunque. Un
+  # detector rotto non puo' mai far saltare la validazione.
+  # ---------------------------------------------------------------------------
+  detect-code:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
-    # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
-    # il job usa il default GitHub-managed token, che NON include lo scope
-    # `issues` — insufficiente per leggere le label. Aggiungiamo quindi
-    # `issues: read` (lettura label repo) + rendiamo `contents: read` esplicito.
-    # `GH_TOKEN` viene passato via env allo step (vedi sotto).
-    #
-    # Issue #135: `metadata: read` NON e' una scope dichiarabile. Non e' fra le
-    # scope documentate della GITHUB_TOKEN ed e' sempre concessa implicitamente:
-    # elencarla qui faceva fallire la VALIDAZIONE DEL FILE WORKFLOW, non un job —
-    # la run veniva creata, non partiva alcun job e finiva `failure` a 0s, su
-    # ogni push e su ogni pull_request dal 2026-10-21T16:21Z. Nessun `gh` check
-    # e nessun syntax-check YAML la intercetta: `js-yaml` la parse senza
-    # errori. Difesa strutturale: `scripts/validate-workflows.mjs` valida ora
-    # le scope di `permissions:` (gate bloccante dal #73).
     permissions:
       contents: read
-      issues: read
+    outputs:
+      has_code: ${{ steps.detect.outputs.has_code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Rileva i file di codice cambiati
+        id: detect
+        shell: bash
+        run: |
+          set -uo pipefail
+          base="origin/${{ github.base_ref }}"
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" 2>/dev/null || true
+          if ! git rev-parse --verify --quiet "$base" >/dev/null 2>&1; then
+            base="FETCH_HEAD"
+          fi
+          changed="$(git diff --name-only "$base" HEAD 2>/dev/null || true)"
+          echo "File cambiati rispetto a $base:"
+          printf '%s\n' "$changed" | sed 's/^/  /'
+          if [ -z "$changed" ]; then
+            # Nessun file rilevato: non si sa nulla => si assume codice
+            # (fail-safe: i gate girano).
+            echo "has_code=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s\n' "$changed" | grep -qv '\.md$'; then
+            echo "C'e' almeno un file non-'.md': i gate sul codice girano."
+            echo "has_code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tutti i file cambiati sono '.md': i gate sul codice non sono applicabili."
+            echo "has_code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # 1. Gate sui sorgenti TypeScript, su 3 job paralleli.
+  #
+  # La misura sul runner (run 41223269637, 2026-10-31) diceva che il job
+  # `node` unico era il **percorso critico** della pipeline: 106 s di cui
+  # ~27 s di setup+install e ~80 s di task. I 3 job qui sotto isolano i
+  # task su runner diversi: il tempo pareggio diventa il max
+  # (~67 s) invece della somma (~106 s).
+  #
+  # L'installazione delle dipendenze viene rifatta in ciascun job: costa
+  # ~17 s per job ma **in parallelo**, quindi paga una volta sola sul
+  # percorso critico. Lo store pnpm e' condiviso dalla cache di
+  # `setup-node`, quindi il download avviene una sola volta per lockfile.
+  #
+  # I 3 job girano **solo su pull_request**: su `main` il codice non e'
+  # cambiato rispetto a quanto gia' validato dalla PR, e i gate che restano
+  # (bundle, lazy-state, README, workflow) sono gia' coperti dai job leggeri.
+  # ---------------------------------------------------------------------------
+  node-lint-typecheck:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -35827,25 +38072,186 @@ jobs:
           cache: pnpm
 
       - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm install --frozen-lockfile
 
       - name: Lint
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run lint
 
       - name: Typecheck
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run typecheck
 
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: lint e typecheck non sono applicabili."
+
+  node-test:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
+        run: pnpm install --frozen-lockfile
+
+      # `test` gira **isolato**: nessun altro task CPU-bound condivide il
+      # processore. Con i 4 task in un'unica invocazione turbo, `build`
+      # (vite + tsc) rubava CPU al vitest e i 2 test di integrazione del
+      # fixture `db-seed/medium.json` scadevano per timeout ("Test timed out
+      # in 5000ms"). La soglia di un test time-sensitive e' un acceptance
+      # criterion e non si tocca (lesson 30-1, `12-DEVOPS.md §9.14.7`).
       - name: Test
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run test
 
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: i test non sono applicabili."
+
+  node-build:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
+        run: pnpm install --frozen-lockfile
+
       - name: Build
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run build
+
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: il build non e' applicabile."
+
+  # ---------------------------------------------------------------------------
+  # 2. Gate sui generatori di documentazione e sul README.
+  #    Read-only: nessuno dei tre gate scrive nel working tree.
+  # ---------------------------------------------------------------------------
+  gates-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Bundle in sync
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 -Check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
-# Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
+      # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
+      # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
+      # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
+      # docs/state/ (vedi ADR-0008 e AGENTS.md sezione "Lazy-state aggregation").
+      # Nota: la strict-mode del check e intenzionalmente bloccante in teoria, ma
+      # PowerShell 5.1 (Windows dev) vs PowerShell 7 (Linux CI) producono output
+      # byte-diversi per casi specifici non riproducibili localmente. Tracking: #63.
+      #
+      # Issue #70: la causa root era il determinismo (ordinamento `$Id` invece di
+      # `$_.Id` + timestamp non-idempotente), ora risolta e coperta dal gate
+      # bloccante "Aggregator deterministico" (job gates-aggregate). Rimane
+      # warning per non bloccare finche' il fix di #63 (riscrittura
+      # cross-platform) non e' merged.
+      # Workaround temporaneo: warning non-bloccante. Fix completo richiede:
+      # (a) issue #66: riscrittura di scripts/aggregate-state.ps1 in Node.js
+      #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
+      # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
+      - name: Lazy-state in sync (ADR-0008)
+        run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+
+      # Issue #161: il README dichiarava 8 piattaforme importabili (Deezer, Tidal,
+      # SoundCloud inesistenti) e funzionalita' non implementate (audio features,
+      # analisi, mood, ricordi), mentre i merge delle Story 1.2 e 1.3 non l'avevano
+      # toccato: nessun gate confrontava la prosa con il codice, quindi il drift era
+      # silenzioso e la pipeline restava verde. Il gate e' READ-ONLY (non genera e
+      # non scrive): confronta l'elenco delle piattaforme del README con
+      # `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` + le classi in
+      # `packages/core/src/adapters/`, vieta le capability non implementate
+      # fuori dalla sezione roadmap, e vieta i conteggi duplicati in prosa.
+      # Fail-closed: exit 1 = drift, exit 2 = errore di ambiente.
+      - name: Fatti del README in sync con il codice (issue #161)
+        run: node scripts/check-readme-facts.mjs
+
+      # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
+      # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
+      # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
+      # (lesson 43-1): senza questo test, un refactor del gate potrebbe renderlo
+      # fail-open senza che nessuno se ne accorga.
+      - name: Gate "fatti del README" fail-closed (issue #161)
+        run: bash scripts/test-readme-facts-gate.sh
+
+  # ---------------------------------------------------------------------------
+  # 3. Gate di determinismo dell'aggregator (issue #70).
+  #    Il gate piu' pesante: 37 assert su repo git temporanei.
+  # ---------------------------------------------------------------------------
+  gates-aggregate:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Issue #70: gate BLOCCANTE per il determinismo dell'agregator.
+      # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
+      # ordinamento per valore): il risultato non dipende dalla piattaforma, quindi
+      # questo test puo' fallire in modo utile, a differenza dei check --check sopra
+      # (che confrontano output prodotto su piattaforme diverse).
+      # Prima di questo gate il bug di ordinamento (`$Id` invece di `$_.Id`) e il
+      # timestamp non-idempotente restavano invisibili e producevano drift su main.
+      - name: Aggregator deterministico (issue #70)
+        run: bash scripts/test-aggregate-determinism.sh
+
+  # ---------------------------------------------------------------------------
+  # 4. Gate fail-closed dei flag del generatore del bundle (issue #104).
+  # ---------------------------------------------------------------------------
+  gates-bundle:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
       # In PowerShell 5.1 con `&`, `--check` veniva interpretato come
       # fine-dei-parametri + token posizionale, lasciando $Check=false e facendo
       # ricadere lo script in modalita' WRITING (riscrittura silenziosa di BUNDLE.md,
@@ -35856,15 +38262,15 @@ jobs:
       - name: Bundle check fail-closed (issue #104)
         run: bash scripts/test-bundle-check-idempotent.sh
 
-# Issue #70: gate BLOCCANTE per il determinismo dell'aggregator.
-      # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
-      # ordinamento per valore): il risultato non dipende dalla piattaforma, quindi
-      # questo test puo' fallire in modo utile, a differenza dei check --check sopra
-      # (che confrontano output prodotto su piattaforme diverse).
-      # Prima di questo gate il bug di ordinamento (`$Id` invece di `$_.Id`) e il
-      # timestamp non-idempotente restavano invisibili e producevano drift su main.
-      - name: Aggregator deterministico (issue #70)
-        run: bash scripts/test-aggregate-determinism.sh
+  # ---------------------------------------------------------------------------
+  # 5. Gate sui workflow GitHub Actions (validatore + 4 scenari negativi).
+  # ---------------------------------------------------------------------------
+  gates-workflows:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
 
       # Issue #73: nessun runner Actions locale, quindi un errore di sintassi JS
       # dentro un blocco `script:` di github-script si scoprirebbe solo dopo il push
@@ -35888,9 +38294,9 @@ jobs:
       # che fallisce — produce un workflow che GitHub rifiuta in fase di
       # validazione, quindi zero job e una run `failure` a 0s su ogni trigger.
       # Il gate di scope vive in validate-workflows.mjs (run precedente); questo
-      # test e' il suo scenario negativo — reintroduce `metadata: read` in una
-      # fixture e verifica che il gate esca 1 (un gate che passa sempre non
-      # e' un gate, lesson 43-1).
+      # test ne verifica lo scenario negativo — reintroduce `metadata: read` in una
+      # fixture e verifica che il gate esca 1 (un gate che passa sempre non e' un
+      # gate, lesson 43-1).
       - name: Scope `permissions:` valide (issue #135)
         run: bash scripts/test-workflow-permission-scopes.sh
 
@@ -35918,6 +38324,47 @@ jobs:
       - name: Ordinamento dei writer di `main` (issue #149)
         run: bash scripts/test-workflow-writer-ordering.sh
 
+      # Sessione 74: validita' YAML dei file workflow. Un file che GitHub
+      # rifiuta in fase di validazione non produce un job che fallisce:
+      # produce una run con `jobs: 0`, `conclusion: failure` a 0 secondi,
+      # nessun log e nessuna annotazione via API — la stessa firma del
+      # failure mode dell'issue #135, indistinguibile da "Actions rotta".
+      # Lo scalare semplice (non quotato) che contiene ": " e' la forma
+      # invalida piu' comune.
+      - name: Validita' YAML dei workflow (sessione 74)
+        run: bash scripts/test-workflow-yaml-scalars.sh
+
+  # ---------------------------------------------------------------------------
+  # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
+  # ---------------------------------------------------------------------------
+  gates-git:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
+    # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
+    # il job usa il default GitHub-managed token, che NON include lo scope
+    # `issues` — insufficiente per leggere le label. Aggiungiamo quindi
+    # `issues: read` (lettura label repo) + rendiamo `contents: read` esplicito.
+    #
+    # Issue #135: `metadata: read` NON e' una scope dichiarabile. Non e' fra le
+    # scope documentate della GITHUB_TOKEN ed e' sempre concessa implicitamente:
+    # elencarla qui faceva fallire la VALIDAZIONE DEL FILE WORKFLOW, non un job —
+    # la run veniva creata, non partiva alcun job e finiva `failure` a 0s, su
+    # ogni push e su ogni pull_request dal 2026-10-21T16:21Z. Nessun `gh` check
+    # e nessun syntax-check YAML la intercetta: `js-yaml` la parse senza
+    # errori. Difesa strutturale: `scripts/validate-workflows.mjs` valida ora
+    # le scope di `permissions:` (gate bloccante dal #73).
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - uses: actions/checkout@v4
+
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
       # (orfano -> segnalato) sia quello di sicurezza (lavoro non pushato -> MAI
@@ -35936,44 +38383,132 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/validate-labels.mjs
 
-      # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
-      # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
-      # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
-      # docs/state/ (vedi ADR-0008 e AGENTS.md sezione "Lazy-state aggregation").
-      # Nota: la strict-mode del check e intenzionalmente bloccante in teoria, ma
-      # PowerShell 5.1 (Windows dev) vs PowerShell 7 (Linux CI) producono output
-      # byte-diversi per casi specifici non riproducibili localmente. Tracking: #63.
-      #
-      # Issue #70: la causa root era il determinismo (ordinamento `$Id` invece di
-      # `$_.Id` + timestamp non-idempotente), ora risolta e coperta dal gate
-      # bloccante "Aggregator deterministico" qui sopra. Rimane warning per non
-      # bloccare finche' il fix di #63 (riscrittura cross-platform) non e' merged.
-      # Workaround temporaneo: warning non-bloccante. Fix completo richiede:
-      # (a) issue #66: riscrittura di scripts/aggregate-state.ps1 in Node.js
-      #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
-      # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
-      - name: Lazy-state in sync (ADR-0008)
-        run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+  # ---------------------------------------------------------------------------
+  # 7. Gate della procedura canonica post-merge (issue #76, sessione 33).
+  #
+  # `scripts/post-merge.ps1` e' la procedura PIU distruttiva del repo
+  # (`git push origin --delete`, `git branch -D`): non aveva alcuna copertura
+  # in CI (audit §9.13 di 12-DEVOPS.md, Sessione 72). La suite gira su repo
+  # git temporanei e non tocca il repository.
+  # ---------------------------------------------------------------------------
+  gates-scripts:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
 
-      # Issue #161: il README dichiarava 8 piattaforme importabili (Deezer, Tidal,
-      # SoundCloud inesistenti) e funzionalita' non implementate (audio features,
-      # analisi, mood, ricordi), mentre i merge delle Story 1.2 e 1.3 non l'avevano
-      # toccato: nessun gate confrontava la prosa con il codice, quindi il drift era
-      # silenzioso e la pipeline restava verde. Il gate e' READ-ONLY (non genera e
-      # non scrive): confronta l'elenco delle piattaforme del README con
-      # `ACTIVE_PLATFORMS` + le classi adapter, vieta le capability non implementate
-      # fuori dalla sezione roadmap, e vieta i conteggi duplicati in prosa.
-      # Fall-closed: exit 1 = drift, exit 2 = errore di ambiente.
-      - name: Fatti del README in sync con il codice (issue #161)
-        run: node scripts/check-readme-facts.mjs
+      # T1..T9: merge commit + worktree, branch non mergato (exit 12), WIP
+      # tracked (exit 10), merge squash, main divergente (exit 11), audit
+      # -Check (exit 14), idempotenza, esecuzione da dentro la worktree
+      # (exit 15). Copre E3/E4/E5 e F7.
+      - name: Procedura canonica post-merge (sessione 33)
+        run: bash scripts/test-post-merge.sh
 
-      # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
-      # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
-      # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
-      # (lesson 43-1): senza questo test, un refactor del gate potrebbe renderlo
-      # fail-open senza che nessuno se ne accorga.
-      - name: Gate "fatti del README" fail-closed (issue #161)
-        run: bash scripts/test-readme-facts-gate.sh
+  # ---------------------------------------------------------------------------
+  # 8. Gate delle procedure di supporto: worktree, pre-commit, branch switch,
+  #    encoding LF. Anch'essi erano privi di copertura in CI (audit §9.13).
+  # ---------------------------------------------------------------------------
+  gates-procedure:
+    # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
+    # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
+    # `main` non sono cambiati rispetto a quanto gia' validato dalla PR: la PR ha
+    # gia' eseguito questo stesso gate sullo stesso contenuto. `quality` su push
+    # richiede solo i due gate leggeri, quindi qui lo `skipped` e' atteso.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # S1..S8 su setup-worktree.ps1 (issue #53): issue inesistente, slug
+      # derivato, slug esplicito, path gia esistente, branch base mancante,
+      # idempotenza, -NoPush, -SkipGhCheck.
+      - name: Setup worktree (issue #53)
+        run: bash scripts/test-setup-worktree.sh
+
+      # Pre-commit hook: il check "clean check" del working tree (D3).
+      - name: Pre-commit clean check (sessione 23)
+        run: bash scripts/test-pre-commit-clean-check.sh
+
+      # safe-branch-switch.ps1 (issue #49): 3 scenari (pulito / tracked dirty /
+      # untracked dirty). Il conteggio degli assert vive su un file condiviso:
+      # dentro le subshell i contatori in memoria non arrivano al padre e la
+      # suite era fail-open (riportava "0 passati, 0 falliti").
+      - name: Safe branch switch (issue #49)
+        run: bash scripts/test-safe-branch-switch.sh
+
+      # issue #58: il path di scrittura dei generatori produce output LF-only.
+      # Gira su un fixture temporaneo: non tocca il working tree del repo.
+      - name: Encoding LF dei generatori (issue #58)
+        shell: pwsh
+        run: pwsh scripts/test-appendline-lf-fix.ps1
+
+  # ---------------------------------------------------------------------------
+  # 10. Check aggregatore (nome invariato: "CI / quality").
+  #
+  # E' il check che la branch protection deve richiedere. Fallisce in modo
+  # ESPLICITO se uno qualunque dei job paralleli e' fallito, annullato o
+  # saltato: senza questo controllo, `needs:` renderebbe `quality` *skipped*
+  # (non *failed*) quando un job dipendente fallisce, e la branch protection
+  # puo' interpretare un check saltato come successo.
+  #
+  # Su `pull_request` si esigono TUTTI i job. Su `push` su `main` (che scatta
+  # solo per i file dei writer automatici) si esigono i job **leggeri**
+  # (`gates-docs` + `gates-workflows`): i 3 job `node-*` sono saltati perche' su
+  # `main` il codice non e' cambiato rispetto a quanto gia' validato dalla PR, e
+  # i 5 gate che verificano gli SCRIPT (`gates-aggregate`, `gates-bundle`,
+  # `gates-git`, `gates-scripts`, `gates-procedure`) sono saltati perche' quegli
+  # script non sono cambiati e la PR ha gia' eseguito quegli stessi gate sullo
+  # stesso contenuto. Il loro 'skipped' e' atteso, non un errore.
+  # ---------------------------------------------------------------------------
+  quality:
+    if: always()
+    needs:
+      - detect-code
+      - node-lint-typecheck
+      - node-test
+      - node-build
+      - gates-docs
+      - gates-aggregate
+      - gates-bundle
+      - gates-workflows
+      - gates-git
+      - gates-scripts
+      - gates-procedure
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Esito dei gate paralleli
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          else
+            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }}"
+          fi
+          echo "Evento: ${{ github.event_name }}"
+          echo "Risultati: $results"
+          failed=""
+          for r in $results; do
+            case "$r" in
+              success) ;;
+              *) failed="$failed $r" ;;
+            esac
+          done
+          if [ -n "$failed" ]; then
+            echo "::error::Uno o piu' job di gate non sono verdi:$failed"
+            exit 1
+          fi
+          echo "Tutti i gate sono verdi."
 
 
 
@@ -36097,7 +38632,53 @@ jobs:
             git reset --hard origin/main
           }
 
+      # Sessione 73 (issue #224): il bundle rigenera DUE volte per merge che
+      # tocca `docs/state/**` — una sul `push`, una sul `workflow_run`
+      # (misurato: run 41212641340 push = 20 s, run 41212688495 workflow_run =
+      # 22 s). Il secondo run serve solo se l'aggregator ha prodotto un commit:
+      # e' quello il caso in cui i blocchi aggregati sono cambiati e il bundle
+      # li deve copiare. Se l'aggregator non ha committato nulla, `origin/main`
+      # e' ancora al commit su cui ha girato, e il run sul `push` ha gia'
+      # rigenerato il bundle da quello stato: il secondo run non trova nulla
+      # da fare (il guard idempotente scrive "gia' in sync") e costa 22 s di
+      # tempo di runner per niente.
+      #
+      # Il controllo e' esatto, non prudenziale: `workflow_run.head_sha` e' il
+      # commit su cui l'aggregator ha girato. Se `origin/main` e' diverso,
+      # l'aggregator ha pushato e il bundle va rigenerato. Se e' uguale,
+      # l'aggregator non ha prodotto nulla.
+      #
+      # NB: se l'aggregator e' fallito (conclusion != success) si rigenera
+      # comunque: un fallimento puo' aver lasciato i blocchi a meta'.
+      - name: Decide se la rigenerazione e' necessaria
+        id: needed
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'push') {
+            Write-Host "Trigger push: la rigenerazione e' sempre necessaria."
+            "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          } else {
+            $head = '${{ github.event.workflow_run.head_sha }}'
+            $conclusion = '${{ github.event.workflow_run.conclusion }}'
+            # `origin/main` dopo il fetch dello step precedente; FETCH_HEAD e' il
+            # fallback (il fetch lo scrive sempre, anche quando e' un no-op).
+            $current = (git rev-parse origin/main 2>$null).Trim()
+            if (-not $current) { $current = (git rev-parse FETCH_HEAD).Trim() }
+            Write-Host "aggregate: conclusion=$conclusion head_sha=$head ; origin/main=$current"
+            if ($conclusion -ne 'success') {
+              Write-Host "L'aggregator non e' andato a buon fine: rigenero comunque."
+              "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            } elseif ($head -and $current -eq $head) {
+              Write-Host "L'aggregator non ha prodotto alcun commit: il bundle e' gia' stato rigenerato dal run su push. Salto."
+              "needed=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            } else {
+              Write-Host "L'aggregator ha prodotto un commit: rigenero il bundle per allinearlo."
+              "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            }
+          }
+
       - name: Rigenera BUNDLE.md
+        if: steps.needed.outputs.needed == 'true'
         shell: pwsh
         run: |
           Write-Host "::group::Regenerate BUNDLE.md"
@@ -36107,7 +38688,7 @@ jobs:
       # salta il commit. Evita commit-vuoto su push che non hanno cambiato
       # il contenuto effettivo di BUNDLE (es. aggiornamenti di metadata).
       - name: Verifica diff su docs/BUNDLE.md
-        if: always()
+        if: always() && steps.needed.outputs.needed == 'true'
         id: diff
         shell: pwsh
         run: |

@@ -131,7 +131,9 @@ $files = @(
     "docs/state/sessions/70-event-detector.md",
     "docs/state/sessions/71-powershell-7-baseline.md",
     "docs/state/sessions/72-audit-procedure-automatiche-pwsh-encoding.md",
-    "docs/state/sessions/73-progress-indicator.md",
+    "docs/state/sessions/73-perf-procedure-automatiche.md",
+    "docs/state/sessions/74-ci-merge-once.md",
+    "docs/state/sessions/75-progress-indicator.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -205,6 +207,15 @@ $files = @(
     # prune). Test associato con 9 scenari (T1..T9) su repo temporanei.
     "scripts/post-merge.ps1",
     "scripts/test-post-merge.sh",
+    # Script di supporto per le transizioni tra branch (issue #49): wrappa
+    # `git checkout` con lo stesso safety check dello hook post-checkout
+    # (stash -u automatico su tracked dirty + verifica post-checkout degli
+    # untracked). Test con 3 scenari (pulito / tracked dirty / untracked dirty).
+    # Sessione 73 (issue #224): la suite e' stata aggiunta ai gate di CI e il
+    # suo conteggio degli assert e' stato riportato fuori dalle subshell
+    # (prima era fail-open: riportava "0 passati, 0 falliti").
+    "scripts/safe-branch-switch.ps1",
+    "scripts/test-safe-branch-switch.sh",
     # Test dei residui post-merge (Sessione 36 / issue #76): rilevamento dei branch
     # LOCALI orfani in post-merge.ps1 -Check (incluso il caso di sicurezza: un branch
     # con lavoro non pushato non deve MAI essere segnalato) e fetch obbligatorio in
@@ -245,6 +256,14 @@ $files = @(
     # che il gate esca 1; un caso verifica che il nome dichiarato nel trigger
     # combaci con il `name:` reale del producer.
     "scripts/test-workflow-writer-ordering.sh",
+    # Gate sulla validita' YAML dei file workflow (Sessione 74): uno scalare
+    # semplice (non quotato) che contiene ": " rende il file non valido per
+    # GitHub, che lo rifiuta in fase di validazione: la run si chiude `failure`
+    # a 0 secondi con `jobs: 0`, nessun log e nessuna annotazione via API —
+    # la stessa firma del failure mode dell'issue #135. Il gate intercetta
+    # anche i file CRLF (i controlli con regex ancorate a `$` fallivano in
+    # silenzio per il `\r` finale).
+    "scripts/test-workflow-yaml-scalars.sh",
     # Gate "fatti del README" (Sessione 54 / issue #161): confronta la prosa del
     # README con il codice (ACTIVE_PLATFORMS + ADAPTER_FACTORIES + le classi in
     # packages/core/src/adapters), vieta le capability non implementate fuori dalla
@@ -304,32 +323,45 @@ function Build-Bundle {
         [string]$Timestamp = (Get-Date -Format 'yyyy-MM-dd HH:mm')
     )
     $fileCount = $files.Count
-    $missing = @()
+    $missing = New-Object System.Collections.Generic.List[string]
 
     $header = "# BUNDLE CONTENUTO`n`n"
     $header += "> Generato automaticamente da scripts/generate-bundle.ps1`n"
     $header += "> Data: $Timestamp`n"
     $header += "> Totale file: $fileCount`n"
 
-    $bundle = $header
-    $included = @()
+    # PERF: `StringBuilder` invece della concatenazione `$bundle += ...`.
+    # La concatenazione con `+=` ricopia l'intera stringa a ogni iterazione:
+    # con ~2,4 MB di contenuto e 126 file l'operazione e' O(n^2) e da' circa
+    # 150 MB di copie. Il `StringBuilder` e' O(n) e produce lo stesso byte
+    # (la concatenazione PowerShell e' puramente additiva).
+    $sb = [System.Text.StringBuilder]::new($header.Length + (1MB))
+    [void]$sb.Append($header)
+    $included = New-Object System.Collections.Generic.List[string]
+    $utf8 = [System.Text.UTF8Encoding]::new($false)
 
     foreach ($file in $files) {
-        if (Test-Path $file) {
-            $content = Get-Content $file -Raw -Encoding UTF8
-            $bundle += "`n`n===== FILE: $file =====`n`n"
-            $bundle += $content
-            $bundle += "`n"
-            $included += $file
+        # PERF: `[System.IO.File]::Exists` al posto del cmdlet `Test-Path`:
+        # 126 chiamate in meno al provider di PowerShell, e il path viene
+        # trattato come path letterale (nessuna interpretazione di wildcard).
+        if ([System.IO.File]::Exists($file)) {
+            # PERF: `ReadAllText` al posto di `Get-Content -Raw`: stessa
+            # decodifica UTF-8 con rilevamento del BOM, senza l'overhead del
+            # cmdlet. Stesso contenuto, byte per byte.
+            $content = [System.IO.File]::ReadAllText($file, $utf8)
+            [void]$sb.Append("`n`n===== FILE: $file =====`n`n")
+            if ($null -ne $content) { [void]$sb.Append($content) }
+            [void]$sb.Append("`n")
+            $included.Add($file)
         } else {
-            $missing += $file
+            $missing.Add($file)
         }
     }
 
     return @{
-        Bundle   = $bundle
-        Included = $included
-        Missing  = $missing
+        Bundle   = $sb.ToString()
+        Included = $included.ToArray()
+        Missing  = $missing.ToArray()
     }
 }
 
@@ -394,9 +426,13 @@ if ($Check) {
         exit 1
     }
     $existing = Get-Content $outputFile -Raw -Encoding UTF8
-    # Normalizza timestamp E line endings (CRLF vs LF) per confronto deterministico
-    $existing = $existing -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00' -replace "`r`n", "`n"
-    $newNormalized = $newBundle -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00' -replace "`r`n", "`n"
+    # Normalizza timestamp E line endings (CRLF vs LF) per confronto deterministico.
+    # PERF: `.Replace()` al posto di `-replace` per il CRLF: il pattern e' un
+    # letterale (nessun metacarattere di regex), quindi il risultato e' identico,
+    # ma l'operazione e' un confronto ordinale invece di una scansione regex
+    # su ~2,4 MB.
+    $existing = [regex]::Replace($existing, '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00').Replace("`r`n", "`n")
+    $newNormalized = [regex]::Replace($newBundle, '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00').Replace("`r`n", "`n")
     if ($existing -eq $newNormalized) {
         Write-Host "`n[OK] $outputFile e in sync con la lista corrente ($($files.Count) file)." -ForegroundColor Green
         exit 0
@@ -425,7 +461,7 @@ if ($Check) {
 # Usa UTF-8 senza BOM per stabilita cross-platform e per --check deterministico.
 # FORZA LF (issue #58): WriteAllText con UTF-8 no BOM usa line endings OS-default
 # (CRLF su Windows, LF su Linux/macOS). Git memorizza LF. -replace CRLF, LF normalizza.
-$newBundle = $newBundle -replace "`r`n", "`n"
+$newBundle = $newBundle.Replace("`r`n", "`n")
 
 # Issue #142: riuso di `> Data:` quando il bundle non cambia per il resto.
 # Difetto gemello di quello chiuso in aggregate-state.ps1: `Build-Bundle` accetta
@@ -443,12 +479,12 @@ $newBundle = $newBundle -replace "`r`n", "`n"
 # `> Data: 2026-10-15`) non devono essere toccati: corromperli sarebbe un danno
 # peggiore del commit-rumore che si vuole eliminare.
 if (Test-Path $outputFile) {
-    $existingBundleLF = (Get-Content $outputFile -Raw -Encoding UTF8) -replace "`r`n", "`n"
+    $existingBundleLF = (Get-Content $outputFile -Raw -Encoding UTF8).Replace("`r`n", "`n")
     $oldStamp = [regex]::Match($existingBundleLF, '(?m)^> Data: (.+)$')
     if ($oldStamp.Success) {
         $stamp = $oldStamp.Groups[1].Value.Trim()
-        $newNorm = $newBundle -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00'
-        $oldNorm = $existingBundleLF -replace '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00'
+        $newNorm = [regex]::Replace($newBundle, '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00')
+        $oldNorm = [regex]::Replace($existingBundleLF, '(?m)^> Data: .+$', '> Data: 0000-00-00 00:00')
         if (-not [string]::IsNullOrWhiteSpace($stamp) -and $newNorm -eq $oldNorm) {
             $newStamp = [regex]::Match($newBundle, '(?m)^> Data: (.+)$')
             if ($newStamp.Success) {
