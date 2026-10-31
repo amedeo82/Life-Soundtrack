@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 22:20
-> Totale file: 135
+> Data: 2026-10-31 22:38
+> Totale file: 137
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 134 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2027.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 22:20
+- Totale file: 136 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2044 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 22:36
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 85 |
+| docs/ | 87 |
 | scripts/ | 23 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1367,24 +1367,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 71%** - 20 story completate su 28 - effort pesato 71% - **mancano 8 step**
+**Implementazione: 75%** - 21 story completate su 28 - effort pesato 77% - **mancano 7 step**
 
-`█████████████████████░░░░░░░░░` 71%
+`██████████████████████░░░░░░░░` 75%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 1 | 4 | 25% | in corso |
+| EPIC 3 - UI/UX | 2 | 4 | 50% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 20 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 21 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
-- 3.1 Home + Timeline - da fare (size XL)
+**Step ancora da implementare** (7):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 4.2 MusicBrainz lookup - da fare (size M)
@@ -1397,22 +1396,22 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 1/4 - in corso |
+| Test end-to-end dell'app | EPIC 3 (4 story) | 2/4 - in corso |
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S76)
+**Analisi della sessione corrente** (S77)
 
 ### Numeri
 
-- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
-- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
-- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
+- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
+- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
+- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
 - **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
 
@@ -1422,14 +1421,18 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 ### Salute tecnica (verificata in questa worktree)
 
-`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
 
 ### Procedura introdotta con questa sessione
 
-1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
-2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
-3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
-4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
+1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
+2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
+3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
+4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
+5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
+6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
+7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
+8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2290,6 +2293,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
+| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2329,10 +2333,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **53** (merge: 40)
-- Stories migrate in state/stories: **20** (done: 20)
-- Ultima sessione migrata: **S76** - Nastro contesto (Story 3.4, issue #231)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **54** (merge: 40)
+- Stories migrate in state/stories: **21** (done: 21)
+- Ultima sessione migrata: **S77** - Home + Timeline (Story 3.1, issue #233)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2345,24 +2349,23 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 71%** - 20 story completate su 28 - effort pesato 71% - **mancano 8 step**
+**Implementazione: 75%** - 21 story completate su 28 - effort pesato 77% - **mancano 7 step**
 
-`█████████████████████░░░░░░░░░` 71%
+`██████████████████████░░░░░░░░` 75%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 1 | 4 | 25% | in corso |
+| EPIC 3 - UI/UX | 2 | 4 | 50% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 20 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 21 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
-- 3.1 Home + Timeline - da fare (size XL)
+**Step ancora da implementare** (7):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 4.2 MusicBrainz lookup - da fare (size M)
@@ -2375,22 +2378,22 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 1/4 - in corso |
+| Test end-to-end dell'app | EPIC 3 (4 story) | 2/4 - in corso |
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S76)
+**Analisi della sessione corrente** (S77)
 
 ### Numeri
 
-- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
-- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
-- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
+- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
+- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
+- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
 - **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
 
@@ -2400,14 +2403,18 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 ### Salute tecnica (verificata in questa worktree)
 
-`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
 
 ### Procedura introdotta con questa sessione
 
-1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
-2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
-3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
-4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
+1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
+2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
+3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
+4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
+5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
+6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
+7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
+8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2431,7 +2438,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 76, issue #231): la **tranche geo è chiusa** — la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76: il nastro con un segmento per `ContextPeriod` e il dettaglio del periodo con le azioni utente) sono completate, e con la 3.4 l'**EPIC 3** (UI) passa a 1/4. **Prossimo passo**: la **3.1** (Home + Timeline, `[SIZE:XL]`) — è il pezzo che manca per **montare** il nastro sotto le `EraBand` e per sbloccare il test **end-to-end** dell'app: senza Timeline l'app resta onboarding + import, e si può testare il motore ma non l'esperienza «colonna sonora della mia vita». Dietro: la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi), il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 77, issue #233): l'**EPIC 3** ha le sue **prime due schermate** — la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati). Il blocco NEXT-STEP del README indica ora la **3.2** (Ricordi + Share, `[SIZE:L]`): è la prima delle due schermate mancanti, e con la **3.3** (Esplora + Analisi) chiude il percorso end-to-end dell'app. Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -10044,6 +10051,119 @@ Due scelte della spec sono state prese sul serio, al punto da renderle
 - `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/18-DEV-LOG.md` — sezioni legacy allineate
 ```
 
+### Sessione 77 - Home + Timeline (Story 3.1, issue #233)
+
+- **Data**: 2026-10-31
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #234)
+- **Claim**: `kilo-HP-ELITEBOOK-progress`
+
+```
+
+# Sessione 77 — Home + Timeline (Story 3.1, issue #233)
+
+## Sintesi
+
+La **Story 3.1** porta l'app dal solo onboarding alle sue **prime due
+schermate vere**: ⑥ Home e ⑦ Timeline. È la story che sblocca il **gate
+end-to-end**: fino a qui si poteva testare il motore, non l'esperienza «colonna
+sonora della mia vita».
+
+La scelta di fondo è la stessa della Story 3.4 (nastro contesto): **il modello
+è puro, i componenti sono presentazionali**. Tutta la logica — i quattro numeri
+della Home, la bar week, i bucket per granularità, le serie di volume e mood,
+le bande di era, il zoom progressivo — sta in
+`apps/web/src/screens/homeTimelineModel.ts`, senza React e senza DOM. I
+componenti (`StatCard`, `MemoryCard`, `BarWeek`, `EraBand`, `StreamChart`,
+`MoodLine`) ricevono dati per props e restituiscono callback.
+
+Tre scelte della spec sono state prese sul serio, al punto da renderle
+**strutturali**:
+
+- **il bucket vuoto esiste e vale zero**: una linea che salta i buchi
+  suggerirebbe continuità che i dati non hanno; e il **mood non viene
+  interpolato** nei bucket senza dati — l'assenza di un dato non è uno zero;
+- **l'area del volume è chiusa sul minimo del dominio**, non su zero: un
+  ascolto non riparte da zero minuti, e un'area che scende a zero inventerebbe
+  un silenzio;
+- **la sincronizzazione fra EraBand, StreamChart e MoodLine è uno stato
+  condiviso**, non un effetto locale: l'hover su una banda evidenzia il bucket
+  nei due grafici, e l'hover su un punto evidenzia l'era che lo contiene.
+
+Nessuna libreria di grafici: i tre grafici sono **SVG scritti a mano**, con la
+geometria in un file puro e testato (`chartGeometry.ts`). Introdurre una
+dipendenza di chart sarebbe una decisione di **stack**, non di story.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.77.1 | Il modello è **puro** (`homeTimelineModel.ts`), i componenti sono presentazionali | Testabile con il solo dato (19 test senza mock di IndexedDB) e la stessa separazione della Story 3.4; inoltre la regola `react-refresh/only-export-components` pretende che un file di componente esporti solo componenti |
+| D.77.2 | Il vocabolario temporale è quello del core (`@core/analysis`) | La Timeline non introduce un secondo calendario (lesson 27-7): stessi bucket, stesso inizio settimana, stessa base UTC |
+| D.77.3 | I bucket vuoti **esistono** (valore 0) e il mood **non** viene interpolato | Una linea senza buchi mente; un mood assente non è un mood nullo. I dati mancanti restano mancanti |
+| D.77.4 | L'area del volume è chiusa sul **minimo** del dominio | Il volume di ascolto ha un basale nonzero: chiudere su zero inventerebbe silenzi fra un giorno e l'altro |
+| D.77.5 | Nessuna libreria di chart: SVG scritto a mano | Il toolchain non ha una libreria di grafici e introdurla è una decisione di stack, non di story. Tre grafici con la geometria in un file puro sono meno codice di una dipendenza e del suo adattamento |
+| D.77.6 | I grafici hanno `<title>`, `<desc>` e una **tabella dati nascosta** (`sr-only`) | Contratto a11y vincolante (`07§2.7`): un grafico da solo non è leggibile da uno screen reader, e i valori esatti devono essere disponibili |
+| D.77.7 | Il conteggio della StatCard si anima all'**hover**, non al mount | Una StatCard che si conta da sola consuma attenzione senza informare; `prefers-reduced-motion` disattiva del tutto l'animazione (`07§4`) |
+| D.77.8 | La scelta fra onboarding e app è legata ai **dati** (il DB ha ascolti?), non a un flag | Un flag in `localStorage` mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo: i dati sono la verità |
+| D.77.9 | Le soglie di stato sono dichiarate **in un punto solo** (`useHomeTimelineData.ts`): 100 eventi per la Home, 6 mesi per la Timeline | Sono i valori della spec (`06§2.6-2.7`): dichiararli in due schermate li avrebbe fatti divergere |
+| D.77.10 | La granularità **segue lo zoom** finché l'utente non sceglie | Una storia lunga si legge per anni, poche settimane per giorni: il default è derivato dalla durata dei dati (`granularityForSpan`), non arbitrario |
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
+- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
+- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
+> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
+> la prosa e' un commento.
+
+### Salute tecnica (verificata in questa worktree)
+
+`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+
+### Procedura introdotta con questa sessione
+
+1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
+2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
+3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
+4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
+5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
+6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
+7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
+8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
+
+## Lesson learned
+
+- **Il modello puro rende la UI testabile senza mock**: i 19 test della sessione girano senza IndexedDB, senza Dexie e senza `fake-indexeddb`, perché la logica non li tocca. Il costo e' stato separare il modello dal componente fin dall'inizio — il prezzo di quel lavoro e' stato ripagato in test che scrivono.
+- **«Il dato mancante non e' zero»**: due scelte nella stessa sessione (il bucket vuoto esiste, il mood non viene interpolato) discendono dalla stessa idea. Interpollare un'assenza produce una curva che mente sul dato, ed e' il tipo di errore che nessun gate segnala, perche' il codice funziona.
+- **La decisione fra onboarding e app non puo' essere un flag**: con il flag, l'app apriva l'onboarding anche su un dispositivo gia' importato (o viceversa). Leggerlo dai dati costa una query e toglie una classe intera di bug.
+
+## Documenti aggiornati
+
+- `apps/web/src/screens/homeTimelineModel.ts`, `Home.tsx`, `Timeline.tsx`, `AppShell.tsx` (nuovi)
+- `apps/web/src/components/StatCard.tsx`, `MemoryCard.tsx`, `BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx`, `chartGeometry.ts` (nuovi)
+- `apps/web/src/hooks/useCountUp.ts`, `useHomeTimelineData.ts` (nuovi)
+- `apps/web/src/__tests__/home-timeline.test.tsx` (nuovo) — 19 test
+- `apps/web/src/App.tsx`, `apps/web/src/onboarding/OnboardingRouter.tsx` — la scelta onboarding/app
+- `apps/web/src/i18n/index.ts`, `i18n/locales/it.json`, `en.json` — namespace `nav` e le nuove chiavi
+- `apps/web/src/onboarding/onboarding.css` — gli stili della shell, delle StatCard, dei grafici e delle bande
+- `docs/08-COPY-I18N.md` — namespace `nav` in §1 + changelog 0.13
+- `docs/state/stories/3.1-home-timeline.md` — `status: done`, task e acceptance criteria spuntati
+- `scripts/generate-bundle.ps1` — `$files` += il file di sessione e il file di story
+- `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/18-DEV-LOG.md` — sezioni legacy allineate
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -11672,6 +11792,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.29b | 2026-10-31 (issue #224) | **§41 (correzione) La CI girava 4 volte per ogni merge — e una premessa da correggere** (Sessione 74, merge di PR #227, commit `51f4076`): la run `CI` su `main` dopo il merge è durata **42 s** con i 3 job `node-*` **skipped** (0 s, nessuna installazione) e gli 11 gate verdi, contro i **172 s** della pipeline sequenziale originale. **Correzione**: la Sessione 74 aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei **writer automatici** fossero «gli unici che arrivano su `main` senza passare da una PR» e che il filtro li catturasse — la premessa è corretta, **la conseguenza pratica no**: quei commit **non attivano nessuna run**, e non è colpa del filtro. **GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (comportamento documentato, per impedire i loop ricorsivi; unica eccezione `workflow_dispatch`/`repository_dispatch`), e i due writer pushano con `secrets.GITHUB_TOKEN` (`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`). Verificato run per run sull'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`, `04c76fd`) **non** hanno **mai** attivato una run `CI` — né prima né dopo la Sessione 74, nemmeno col trigger `push` privo di filtro; gli unici workflow che si attivano su quei commit sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce (è il workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer, issue #149). **Conseguenze**: il filtro per path serve a **saltare** la CI sui merge umani che non toccano i 5 file aggregati, non a catturare i commit dei writer; **l'integrità di `main` dopo i writer è garantita dai writer stessi** (idempotenti, conservati da `git diff --quiet`, col `workflow_run` di `auto-bundle` che rigenera il bundle dopo l'aggregator); un check indipendente sullo stato finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml` ⇒ **+1 run leggera per merge**, trade-off fra copertura e numero di run che spetta al project owner (**non è stato fatto**). **Lesson**: una premessa corretta può avere una conseguenza pratica falsa — la verifica va fatta **sui dati**, non per deduzione |
 | 2.29c | 2026-10-31 (issue #224) | **§41 (follow-up) I 5 gate che verificano gli script passano a `pull_request` only** (Sessione 74, su richiesta del project owner): misurato sul merge di PR #227, la run `CI` su `main` era **42-66 s** e il percorso critico era `gates-aggregate` (**50 s**) — un gate che su `main` **non è nemmeno richiesto** da `quality`, che su push esige solo `gates-docs` + `gates-workflows`. I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`, `gates-scripts`, `gates-procedure`) passano a `pull_request` only: su `main` quegli script non sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sullo stesso contenuto** ⇒ 27 s di tempo di runner sprecati per ogni merge. Su `push` su `main` restano **2 gate leggeri** (`gates-docs` ~11 s, `gates-workflows` ~7 s) più l'aggregatore `quality` (~3 s) ⇒ **~15 s** di tempo pareggio, contro i 42-66 s precedenti e i **172 s** della pipeline sequenziale originale. **Nessuna perdita di copertura**: i 27 gate restano 27 e ognuno gira dove serve (sulla PR che modifica il codice o gli script); `quality` su push continua a richiedere solo i 2 gate leggeri, su pull_request tutti. Documentazione: `12-DEVOPS.md` §9.10 (nuova colonna «Quando gira» per job), `AGENTS.md` (tabella della CI aggiornata) |
 | 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
+| 2.31 | 2026-10-31 (issue #233) | **§43 Story 3.1 — Home + Timeline** (Sessione 77, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (77-1 **il modello è puro, i componenti sono presentazionali**: tutta la logica — i quattro numeri della Home, la bar week, i bucket per granularità, le serie di volume e mood, le bande di era, il zoom progressivo — sta in `apps/web/src/screens/homeTimelineModel.ts`, senza React né DOM, riutilizzando il **vocabolario temporale del core** (`@core/analysis`): la Timeline non introduce un secondo calendario (lesson 27-7). I 19 test girano senza IndexedDB né `fake-indexeddb`, perché la logica non li tocca; 77-2 **«il dato mancante non è zero»**: il bucket vuoto **esiste** e vale 0 (una linea che salta i buchi suggerirebbe continuità che i dati non hanno) e il **mood non viene interpolato** nei bucket senza dati; l'area del volume è chiusa sul **minimo** del dominio e non su zero, perché un ascolto non riparte da zero minuti e un'area che scende a zero inventerebbe un silenzio; 77-3 **nessuna libreria di chart**: i tre grafici (StreamChart, MoodLine, BarWeek) sono **SVG scritti a mano**, con la geometria in un file puro e testato (`chartGeometry.ts`) e il contratto a11y della spec (`07§2.7`): `<title>`, `<desc>` e una **tabella dati nascosta** per screen reader. Introdurre una dipendenza di grafici sarebbe una decisione di **stack**, non di story; 77-4 **la scelta fra onboarding e app è legata ai dati**: `App.tsx` interroga il database (ci sono ascolti?) invece di usare un flag in `localStorage`, che mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo; 77-5 **le soglie di stato sono in un punto solo**: 100 eventi per la Home e 6 mesi per la Timeline (`06§2.6-2.7`) sono dichiarati in `useHomeTimelineData.ts`, non nelle due schermate). Consegnati: `apps/web/src/screens/{homeTimelineModel.ts,Home.tsx,Timeline.tsx,AppShell.tsx}`, `apps/web/src/components/{StatCard,MemoryCard,BarWeek,EraBand,StreamChart,MoodLine}.tsx` + `chartGeometry.ts`, `apps/web/src/hooks/{useCountUp.ts,useHomeTimelineData.ts}`, il cablaggio di `App.tsx` e `OnboardingRouter.tsx`, 11 chiavi i18n nuove (namespace `nav` incluso), gli stili in `onboarding.css`, `08-COPY-I18N.md` v0.13 e lo stato della story 3.1 (`done`). Con la 3.1 l'**EPIC 3** passa a 2/4 e l'indicatore di avanzamento (issue #216) a **75%** — 21 story su 28, 7 step rimanenti |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -16821,6 +16942,126 @@ Due scelte della spec sono state prese sul serio, al punto da renderle
 
 
 
+===== FILE: docs/state/sessions/77-home-timeline.md =====
+
+---
+number: 77
+title: "Home + Timeline (Story 3.1, issue #233)"
+date: 2026-10-31
+state: 🟡
+merged: false
+branch: feat/233-home-timeline
+pr: 234
+claim: kilo-HP-ELITEBOOK-progress
+cross_refs: [233, 231, 216]
+tags: [ui, timeline, home]
+---
+
+# Sessione 77 — Home + Timeline (Story 3.1, issue #233)
+
+## Sintesi
+
+La **Story 3.1** porta l'app dal solo onboarding alle sue **prime due
+schermate vere**: ⑥ Home e ⑦ Timeline. È la story che sblocca il **gate
+end-to-end**: fino a qui si poteva testare il motore, non l'esperienza «colonna
+sonora della mia vita».
+
+La scelta di fondo è la stessa della Story 3.4 (nastro contesto): **il modello
+è puro, i componenti sono presentazionali**. Tutta la logica — i quattro numeri
+della Home, la bar week, i bucket per granularità, le serie di volume e mood,
+le bande di era, il zoom progressivo — sta in
+`apps/web/src/screens/homeTimelineModel.ts`, senza React e senza DOM. I
+componenti (`StatCard`, `MemoryCard`, `BarWeek`, `EraBand`, `StreamChart`,
+`MoodLine`) ricevono dati per props e restituiscono callback.
+
+Tre scelte della spec sono state prese sul serio, al punto da renderle
+**strutturali**:
+
+- **il bucket vuoto esiste e vale zero**: una linea che salta i buchi
+  suggerirebbe continuità che i dati non hanno; e il **mood non viene
+  interpolato** nei bucket senza dati — l'assenza di un dato non è uno zero;
+- **l'area del volume è chiusa sul minimo del dominio**, non su zero: un
+  ascolto non riparte da zero minuti, e un'area che scende a zero inventerebbe
+  un silenzio;
+- **la sincronizzazione fra EraBand, StreamChart e MoodLine è uno stato
+  condiviso**, non un effetto locale: l'hover su una banda evidenzia il bucket
+  nei due grafici, e l'hover su un punto evidenzia l'era che lo contiene.
+
+Nessuna libreria di grafici: i tre grafici sono **SVG scritti a mano**, con la
+geometria in un file puro e testato (`chartGeometry.ts`). Introdurre una
+dipendenza di chart sarebbe una decisione di **stack**, non di story.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.77.1 | Il modello è **puro** (`homeTimelineModel.ts`), i componenti sono presentazionali | Testabile con il solo dato (19 test senza mock di IndexedDB) e la stessa separazione della Story 3.4; inoltre la regola `react-refresh/only-export-components` pretende che un file di componente esporti solo componenti |
+| D.77.2 | Il vocabolario temporale è quello del core (`@core/analysis`) | La Timeline non introduce un secondo calendario (lesson 27-7): stessi bucket, stesso inizio settimana, stessa base UTC |
+| D.77.3 | I bucket vuoti **esistono** (valore 0) e il mood **non** viene interpolato | Una linea senza buchi mente; un mood assente non è un mood nullo. I dati mancanti restano mancanti |
+| D.77.4 | L'area del volume è chiusa sul **minimo** del dominio | Il volume di ascolto ha un basale nonzero: chiudere su zero inventerebbe silenzi fra un giorno e l'altro |
+| D.77.5 | Nessuna libreria di chart: SVG scritto a mano | Il toolchain non ha una libreria di grafici e introdurla è una decisione di stack, non di story. Tre grafici con la geometria in un file puro sono meno codice di una dipendenza e del suo adattamento |
+| D.77.6 | I grafici hanno `<title>`, `<desc>` e una **tabella dati nascosta** (`sr-only`) | Contratto a11y vincolante (`07§2.7`): un grafico da solo non è leggibile da uno screen reader, e i valori esatti devono essere disponibili |
+| D.77.7 | Il conteggio della StatCard si anima all'**hover**, non al mount | Una StatCard che si conta da sola consuma attenzione senza informare; `prefers-reduced-motion` disattiva del tutto l'animazione (`07§4`) |
+| D.77.8 | La scelta fra onboarding e app è legata ai **dati** (il DB ha ascolti?), non a un flag | Un flag in `localStorage` mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo: i dati sono la verità |
+| D.77.9 | Le soglie di stato sono dichiarate **in un punto solo** (`useHomeTimelineData.ts`): 100 eventi per la Home, 6 mesi per la Timeline | Sono i valori della spec (`06§2.6-2.7`): dichiararli in due schermate li avrebbe fatti divergere |
+| D.77.10 | La granularità **segue lo zoom** finché l'utente non sceglie | Una storia lunga si legge per anni, poche settimane per giorni: il default è derivato dalla durata dei dati (`granularityForSpan`), non arbitrario |
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
+- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
+- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
+> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
+> la prosa e' un commento.
+
+### Salute tecnica (verificata in questa worktree)
+
+`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+
+### Procedura introdotta con questa sessione
+
+1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
+2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
+3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
+4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
+5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
+6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
+7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
+8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
+
+## Lesson learned
+
+- **Il modello puro rende la UI testabile senza mock**: i 19 test della sessione girano senza IndexedDB, senza Dexie e senza `fake-indexeddb`, perché la logica non li tocca. Il costo e' stato separare il modello dal componente fin dall'inizio — il prezzo di quel lavoro e' stato ripagato in test che scrivono.
+- **«Il dato mancante non e' zero»**: due scelte nella stessa sessione (il bucket vuoto esiste, il mood non viene interpolato) discendono dalla stessa idea. Interpollare un'assenza produce una curva che mente sul dato, ed e' il tipo di errore che nessun gate segnala, perche' il codice funziona.
+- **La decisione fra onboarding e app non puo' essere un flag**: con il flag, l'app apriva l'onboarding anche su un dispositivo gia' importato (o viceversa). Leggerlo dai dati costa una query e toglie una classe intera di bug.
+
+## Documenti aggiornati
+
+- `apps/web/src/screens/homeTimelineModel.ts`, `Home.tsx`, `Timeline.tsx`, `AppShell.tsx` (nuovi)
+- `apps/web/src/components/StatCard.tsx`, `MemoryCard.tsx`, `BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx`, `chartGeometry.ts` (nuovi)
+- `apps/web/src/hooks/useCountUp.ts`, `useHomeTimelineData.ts` (nuovi)
+- `apps/web/src/__tests__/home-timeline.test.tsx` (nuovo) — 19 test
+- `apps/web/src/App.tsx`, `apps/web/src/onboarding/OnboardingRouter.tsx` — la scelta onboarding/app
+- `apps/web/src/i18n/index.ts`, `i18n/locales/it.json`, `en.json` — namespace `nav` e le nuove chiavi
+- `apps/web/src/onboarding/onboarding.css` — gli stili della shell, delle StatCard, dei grafici e delle bande
+- `docs/08-COPY-I18N.md` — namespace `nav` in §1 + changelog 0.13
+- `docs/state/stories/3.1-home-timeline.md` — `status: done`, task e acceptance criteria spuntati
+- `scripts/generate-bundle.ps1` — `$files` += il file di sessione e il file di story
+- `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/18-DEV-LOG.md` — sezioni legacy allineate
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -17922,6 +18163,117 @@ Consegnato:
 - `docs/02-DATA-SCHEMA.md` §4.1 (`citySource`)
 - `docs/11-BACKLOG.md` Story 3.4
 - `docs/state/sessions/76-nastro-contesto.md`
+
+
+
+===== FILE: docs/state/stories/3.1-home-timeline.md =====
+
+---
+id: "3.1"
+title: "Home + Timeline"
+phase: 3
+area: ui
+status: done
+priority: B
+depends_on: []
+issue: 233
+branch: "feat/233-home-timeline"
+pr: 234
+claim: kilo-HP-ELITEBOOK-progress
+spec_refs:
+  - docs/06-UX-FLOWS-STATES.md
+  - docs/07-UI-SPEC.md
+  - docs/15-DESIGN-SYSTEM.md
+---
+
+## Descrizione
+
+Le schermate ⑥ **Home** e ⑦ **Timeline**: quattro StatCard con count-up, il
+ricordo del giorno, la bar week e il mood della settimana; in Timeline le
+`EraBand`, lo `StreamChart` del volume e la `MoodLine` del mood sincronizzati,
+il **nastro contesto** (Story 3.4) sotto le bande, il toggle di granularità
+(Anni/Mesi/Settimane/Giorni) e lo **zoom progressivo**.
+
+Nessuna libreria di chart: i grafici sono **SVG scritti a mano**. Nessuna
+richiesta di rete, nessuna mappa.
+
+## Stato
+
+✅ **DONE** — implementata nella Sessione 77 (issue **#233**, branch
+`feat/233-home-timeline`, worktree `ls-233-home-timeline`).
+
+Consegnato:
+
+- **`apps/web/src/screens/homeTimelineModel.ts`**: il modello **puro** (nessun
+  React, nessun DOM) — i quattro numeri della Home, la bar week, i bucket per
+  granularità, le serie di volume e mood, le bande di era, il zoom progressivo.
+  Riutilizza il **vocabolario temporale del core** (`@core/analysis`): la
+  Timeline non introduce un secondo calendario;
+- **`apps/web/src/screens/Home.tsx`** e **`Timeline.tsx`**: le due schermate,
+  con gli stati dichiarati dalla spec (`empty` / `partial` / `loading` /
+  `ready` / `error`);
+- **`apps/web/src/components/`**: `StatCard` (count-up 600 ms), `MemoryCard`,
+  `BarWeek`, `EraBand`, `StreamChart`, `MoodLine` e
+  `chartGeometry.ts` (geometria SVG pura);
+- **`apps/web/src/screens/AppShell.tsx`**: la prima navigazione dell'app
+  (Home ↔ Timeline);
+- **`apps/web/src/hooks/useHomeTimelineData.ts`**: l'unico punto che conosce
+  Dexie; dichiara le soglie di stato (100 eventi per la Home, 6 mesi per la
+  Timeline);
+- **`apps/web/src/App.tsx`**: la scelta fra onboarding e app è legata ai
+  **dati** (il database ha ascolti?), non a un flag;
+- **19 test** nuovi in `@ls/web`.
+
+## Task
+
+- [x] T3.1.1 — Schermata ⑥ Home: 4 StatCard con count-up, MemoryCard, BarWeek, mood della settimana
+- [x] T3.1.2 — Schermata ⑦ Timeline: EraBands + StreamChart + MoodLine sincronizzati, nastro contesto (Story 3.4) sotto le EraBand
+- [x] T3.1.3 — Zoom progressivo anni → mesi → giorni e granularità Anni/Mesi/Settimane/Giorni
+- [x] T3.1.4 — Stati `empty` / `partial` / `loading` / `ready` / `error` e breakpoint responsive
+
+## Acceptance criteria
+
+- [x] Schermata ⑥ Home con StatCard animate, ricordo del giorno, bar week
+- [x] Schermata ⑦ Timeline con EraBands, StreamChart, MoodLine sincronizzati
+- [x] Zoom progressivo anni → mesi → giorni
+- [x] Responsive breakpoint rispettati
+- [x] Il hover su un EraBand evidenzia il punto corrispondente in StreamChart e MoodLine, e viceversa (`06§2.7`)
+- [x] I grafici sono SVG con `<title>`/`<desc>` e tabella dati nascosta per screen reader (`07§2.7`)
+- [x] Le animazioni rispettano `prefers-reduced-motion` (`07§4`)
+- [x] Nessuna dipendenza cartografica e nessuna richiesta di rete
+
+## Scelte di implementazione
+
+- **Il modello è puro e separato dai componenti.** Tutta la logica (conteggi,
+  bucket, bande, zoom) sta in `homeTimelineModel.ts`, senza React: è testabile
+  con il solo dato e i componenti restano presentazionali. È la stessa scelta
+  della Story 3.4 (nastro contesto).
+- **Il bucket vuoto esiste e vale zero.** Una linea che salta i buchi
+  suggerirebbe continuità che i dati non hanno; e il mood **non** viene
+  interpolato nei bucket senza dati: l'assenza di un dato non è uno zero.
+- **L'area del volume è chiusa sul minimo del dominio**, non su zero: un
+  ascolto non riparte da zero minuti, e un'area che scende a zero inventerebbe
+  un silenzio.
+- **La sincronizzazione è uno stato condiviso**, non un effetto locale: il hover
+  su un'EraBand evidenzia il bucket nei due grafici, e il hover su un punto
+  evidenzia l'era che lo contiene (`06§2.7`).
+- **La scelta fra onboarding e app è legata ai dati**, non a un flag in
+  `localStorage`: un flag mentirebbe dopo una cancellazione dei dati o un
+  import su un altro dispositivo.
+- **Nessuna libreria di chart.** Introdurre una dipendenza di grafici sarebbe
+  una decisione di stack, non di story: i tre grafici sono SVG scritti a mano e
+  la geometria è in un file puro e testato.
+- **La granularità segue lo zoom finché l'utente non sceglie**: una storia
+  lunga si legge per anni, poche settimane per giorni.
+
+## Documenti collegati
+
+- `docs/06-UX-FLOWS-STATES.md` §2.6 (Home) · §2.7 (Timeline) · §3.2 (flusso quotidiano)
+- `docs/07-UI-SPEC.md` §2.1 (StatCard) · §2.2 (MemoryCard) · §2.3 (EraBand) · §2.7 (grafici) · §4 (animazioni)
+- `docs/15-DESIGN-SYSTEM.md` §5 (inventario) · §10 (responsive)
+- `docs/08-COPY-I18N.md` §1 (namespace `nav`) · §2.6 · §2.7
+- `docs/11-BACKLOG.md` Story 3.1
+- `docs/state/sessions/77-home-timeline.md`
 
 
 
@@ -24188,7 +24540,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.12 · Sessione 76 (2026-10-31, issue #231), aggiornata nelle Sessioni 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
+> Status: 🟡 DRAFT · Versione 0.13 · Sessione 77 (2026-10-31, issue #233), aggiornata nelle Sessioni 76 (2026-10-31, issue #231), 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -24202,6 +24554,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 |-----------|-----|
 | `onboarding` | Schermate ①-④ |
 | `home` | Schermata ⑥ |
+| `nav` | Navigazione principale (Home / Timeline — Story 3.1) |
 | `timeline` | Schermata ⑦ |
 | `era` | Schermata ⑧ |
 | `explore` | Schermata ⑨ |
@@ -24826,6 +25179,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
 | 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |
 | 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |
+| 0.13 | Sessione 77 (2026-10-31, issue #233) | **Story 3.1 — Home (⑥) e Timeline (⑦)**: le chiavi delle due schermate **esistevano già** (`home.*`, `timeline.*`) ma mancavano le **8 nuove** che la story rende necessarie — `home.partial` (il messaggio «più dati importi, più la tua storia diventa ricca» dello stato `partial`), `timeline.granularity` (l'etichetta del toggle Anni/Mesi/Settimane/Giorni), `timeline.eras` (la riga delle bande), `timeline.eraDuration` (la durata resa nelle `aria-label` delle EraBand), `timeline.partial`, `timeline.error`, `timeline.retry` e il **nuovo namespace `nav`** (`nav.label`, `nav.home`, `nav.timeline` — la prima navigazione dell'app), dichiarato in §1. I **dati** (nomi dei paesi, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
 
 
@@ -25376,7 +25730,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.32 · Sessione 76 (2026-10-31, issue #231) · la **tranche geo è chiusa**: la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76) sono completate. Con la 3.4 l'**EPIC 3** (UI) parte: il nastro contesto e il dettaglio del periodo sono pronti, ma le schermate non esistono ancora — il prossimo passo è la **3.1** (Home + Timeline), che sblocca il test end-to-end dell'app. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.33 · Sessione 77 (2026-10-31, issue #233) · l'**EPIC 3** (UI) ha le sue **prime due schermate**: la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.2** (Ricordi + Share) e la **3.3** (Esplora + Analisi) per chiudere il percorso end-to-end, poi la **5.1/5.2** (privacy, export e purge) e il **lookup MusicBrainz** (4.2) con l'artwork (4.3). Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -25796,11 +26150,19 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 3.1 — Home + Timeline `[PHASE-3]` `[AREA:ui]` `[PRI:B]` `[SIZE:XL]`
 
+**Stato**: ✅ **DONE** — implementata nella Sessione 77 (issue **#233**, branch `feat/233-home-timeline`). Spec `06-UX-FLOWS-STATES.md` §2.6-2.7, `07-UI-SPEC.md` §2.1-2.7, `15-DESIGN-SYSTEM.md` §5 e §10.
+
+Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del giorno, bar week, mood della settimana) e la ⑦ **Timeline** (EraBands, StreamChart, MoodLine sincronizzati, nastro contesto della Story 3.4 sotto le bande, toggle di granularità e zoom progressivo); la prima navigazione dell'app (`AppShell`) e la scelta onboarding/app legata ai **dati**. I grafici sono **SVG scritti a mano** (nessuna libreria di chart), il modello è **puro** e riutilizza il vocabolario temporale del core. **19 test** nuovi.
+
 **Acceptance criteria**:
-- [ ] Schermata ⑥ Home con StatCard animate, ricordo del giorno, bar week
-- [ ] Schermata ⑦ Timeline con EraBands, StreamChart, MoodLine sincronizzati
-- [ ] Zoom progressivo anni → mesi → giorni
-- [ ] Responsive breakpoint rispettati
+- [x] Schermata ⑥ Home con StatCard animate, ricordo del giorno, bar week
+- [x] Schermata ⑦ Timeline con EraBands, StreamChart, MoodLine sincronizzati
+- [x] Zoom progressivo anni → mesi → giorni
+- [x] Responsive breakpoint rispettati
+- [x] Hover su EraBand ↔ punto corrispondente nei grafici, e viceversa (`06§2.7`)
+- [x] Grafici SVG con `<title>`/`<desc>` e tabella dati nascosta per screen reader (`07§2.7`)
+- [x] Animazioni rispettate sotto `prefers-reduced-motion` (`07§4`)
+- [x] Nessuna dipendenza cartografica e nessuna richiesta di rete
 
 ---
 
@@ -25990,7 +26352,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **1.6, 4.4, 3.4** geo e contesto di ascolto — **tranche chiusa** (Sessione 76, issue #231): dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201) sono state completate la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1 — Sessione 68, issue #205, PR #209, merge `68c27e5`), la **4.4** (DB MMDB on-demand + derivazione della città — issue #221) e la **3.4** (nastro contesto — Sessione 76, issue #231: il nastro e il dettaglio del periodo, con il namespace `timeline.context.*` materializzato). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città. Il blocco NEXT-STEP del README indica ora la **3.1** (Home + Timeline): con il nastro pronto, la Timeline è il pezzo che manca per montarlo e per sbloccare il test end-to-end
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
-15. **3.1, 3.2, 3.3** UI
+15. **3.1, 3.2, 3.3** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233): le schermate ⑥ e ⑦ esistono, con i grafici SVG scritti a mano e il nastro contesto della 3.4 montato sotto le EraBand; l'app non è più solo onboarding (la scelta onboarding/app è legata ai dati). Restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L): sono le ultime due schermate mancanti e chiudono il percorso end-to-end
 16. **5.1, 5.2** privacy
 17. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
@@ -26006,7 +26368,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — restano le **3.x** (UI), di cui la **3.4** (nastro contesto) è completata (Sessione 76, issue #231) |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231) e la **3.1** (Home + Timeline, Sessione 77, issue #233): l'app ha ora le sue prime due schermate vere. Restano le **3.2** (Ricordi + Share) e la **3.3** (Esplora + Analisi) |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -26111,6 +26473,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
+| 3.1 - Home + Timeline | done | #234 | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |

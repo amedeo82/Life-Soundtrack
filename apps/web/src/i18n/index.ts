@@ -24,6 +24,7 @@ export const NAMESPACES = [
   'about',
   'onboarding',
   'home',
+  'nav',
   'timeline',
   'era',
   'explore',

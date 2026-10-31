@@ -123,6 +123,7 @@
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
+| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -162,10 +163,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **53** (merge: 40)
-- Stories migrate in state/stories: **20** (done: 20)
-- Ultima sessione migrata: **S76** - Nastro contesto (Story 3.4, issue #231)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **54** (merge: 40)
+- Stories migrate in state/stories: **21** (done: 21)
+- Ultima sessione migrata: **S77** - Home + Timeline (Story 3.1, issue #233)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -178,24 +179,23 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 71%** - 20 story completate su 28 - effort pesato 71% - **mancano 8 step**
+**Implementazione: 75%** - 21 story completate su 28 - effort pesato 77% - **mancano 7 step**
 
-`█████████████████████░░░░░░░░░` 71%
+`██████████████████████░░░░░░░░` 75%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 1 | 4 | 25% | in corso |
+| EPIC 3 - UI/UX | 2 | 4 | 50% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 20 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 21 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
-- 3.1 Home + Timeline - da fare (size XL)
+**Step ancora da implementare** (7):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 4.2 MusicBrainz lookup - da fare (size M)
@@ -208,22 +208,22 @@
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 1/4 - in corso |
+| Test end-to-end dell'app | EPIC 3 (4 story) | 2/4 - in corso |
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S76)
+**Analisi della sessione corrente** (S77)
 
 ### Numeri
 
-- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
-- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
-- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
+- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
+- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
+- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
 - **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
 
@@ -233,14 +233,18 @@
 
 ### Salute tecnica (verificata in questa worktree)
 
-`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
 
 ### Procedura introdotta con questa sessione
 
-1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
-2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
-3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
-4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
+1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
+2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
+3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
+4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
+5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
+6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
+7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
+8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -264,7 +268,7 @@
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 76, issue #231): la **tranche geo è chiusa** — la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76: il nastro con un segmento per `ContextPeriod` e il dettaglio del periodo con le azioni utente) sono completate, e con la 3.4 l'**EPIC 3** (UI) passa a 1/4. **Prossimo passo**: la **3.1** (Home + Timeline, `[SIZE:XL]`) — è il pezzo che manca per **montare** il nastro sotto le `EraBand` e per sbloccare il test **end-to-end** dell'app: senza Timeline l'app resta onboarding + import, e si può testare il motore ma non l'esperienza «colonna sonora della mia vita». Dietro: la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi), il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 77, issue #233): l'**EPIC 3** ha le sue **prime due schermate** — la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati). Il blocco NEXT-STEP del README indica ora la **3.2** (Ricordi + Share, `[SIZE:L]`): è la prima delle due schermate mancanti, e con la **3.3** (Esplora + Analisi) chiude il percorso end-to-end dell'app. Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*

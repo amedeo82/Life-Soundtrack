@@ -47,7 +47,7 @@ export interface ContextRibbonProps {
   /** Range visibile (zoom della Timeline): default, tutto. */
   visibleRange?: ContextRibbonRange;
   /** Chiamata quando l'utente sceglie un periodo (apre il dettaglio). */
-  onSelect?: (period: ContextRibbonPeriod) => void;
+  onSelect?: ((period: ContextRibbonPeriod) => void) | undefined;
 }
 
 /**

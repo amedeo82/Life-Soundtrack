@@ -59,7 +59,7 @@ const initialState: ImportPlatformState = {
   uniqueTracks: 0,
 };
 
-export function OnboardingRouter() {
+export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | undefined }) {
   const t = useT();
   const [screen, setScreen] = useState<'welcome' | 'privacy' | 'import' | 'processing' | 'reveal'>(
     'welcome',
@@ -269,7 +269,15 @@ export function OnboardingRouter() {
   if (screen === 'processing') {
     return <ProcessingScreen total={totalEvents} onCancel={handleCancel} />;
   }
-  return <RevealScreen events={totalEvents} onComplete={() => setScreen('welcome')} />;
+  return (
+    <RevealScreen
+      events={totalEvents}
+      onComplete={() => {
+        onComplete?.();
+        setScreen('welcome');
+      }}
+    />
+  );
 }
 
 export function WelcomeScreen({ onStart }: { onStart: () => void }) {

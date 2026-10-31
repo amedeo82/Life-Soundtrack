@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.32 · Sessione 76 (2026-10-31, issue #231) · la **tranche geo è chiusa**: la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76) sono completate. Con la 3.4 l'**EPIC 3** (UI) parte: il nastro contesto e il dettaglio del periodo sono pronti, ma le schermate non esistono ancora — il prossimo passo è la **3.1** (Home + Timeline), che sblocca il test end-to-end dell'app. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.33 · Sessione 77 (2026-10-31, issue #233) · l'**EPIC 3** (UI) ha le sue **prime due schermate**: la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.2** (Ricordi + Share) e la **3.3** (Esplora + Analisi) per chiudere il percorso end-to-end, poi la **5.1/5.2** (privacy, export e purge) e il **lookup MusicBrainz** (4.2) con l'artwork (4.3). Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -420,11 +420,19 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 3.1 — Home + Timeline `[PHASE-3]` `[AREA:ui]` `[PRI:B]` `[SIZE:XL]`
 
+**Stato**: ✅ **DONE** — implementata nella Sessione 77 (issue **#233**, branch `feat/233-home-timeline`). Spec `06-UX-FLOWS-STATES.md` §2.6-2.7, `07-UI-SPEC.md` §2.1-2.7, `15-DESIGN-SYSTEM.md` §5 e §10.
+
+Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del giorno, bar week, mood della settimana) e la ⑦ **Timeline** (EraBands, StreamChart, MoodLine sincronizzati, nastro contesto della Story 3.4 sotto le bande, toggle di granularità e zoom progressivo); la prima navigazione dell'app (`AppShell`) e la scelta onboarding/app legata ai **dati**. I grafici sono **SVG scritti a mano** (nessuna libreria di chart), il modello è **puro** e riutilizza il vocabolario temporale del core. **19 test** nuovi.
+
 **Acceptance criteria**:
-- [ ] Schermata ⑥ Home con StatCard animate, ricordo del giorno, bar week
-- [ ] Schermata ⑦ Timeline con EraBands, StreamChart, MoodLine sincronizzati
-- [ ] Zoom progressivo anni → mesi → giorni
-- [ ] Responsive breakpoint rispettati
+- [x] Schermata ⑥ Home con StatCard animate, ricordo del giorno, bar week
+- [x] Schermata ⑦ Timeline con EraBands, StreamChart, MoodLine sincronizzati
+- [x] Zoom progressivo anni → mesi → giorni
+- [x] Responsive breakpoint rispettati
+- [x] Hover su EraBand ↔ punto corrispondente nei grafici, e viceversa (`06§2.7`)
+- [x] Grafici SVG con `<title>`/`<desc>` e tabella dati nascosta per screen reader (`07§2.7`)
+- [x] Animazioni rispettate sotto `prefers-reduced-motion` (`07§4`)
+- [x] Nessuna dipendenza cartografica e nessuna richiesta di rete
 
 ---
 
@@ -614,7 +622,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **1.6, 4.4, 3.4** geo e contesto di ascolto — **tranche chiusa** (Sessione 76, issue #231): dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201) sono state completate la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1 — Sessione 68, issue #205, PR #209, merge `68c27e5`), la **4.4** (DB MMDB on-demand + derivazione della città — issue #221) e la **3.4** (nastro contesto — Sessione 76, issue #231: il nastro e il dettaglio del periodo, con il namespace `timeline.context.*` materializzato). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città. Il blocco NEXT-STEP del README indica ora la **3.1** (Home + Timeline): con il nastro pronto, la Timeline è il pezzo che manca per montarlo e per sbloccare il test end-to-end
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
-15. **3.1, 3.2, 3.3** UI
+15. **3.1, 3.2, 3.3** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233): le schermate ⑥ e ⑦ esistono, con i grafici SVG scritti a mano e il nastro contesto della 3.4 montato sotto le EraBand; l'app non è più solo onboarding (la scelta onboarding/app è legata ai dati). Restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L): sono le ultime due schermate mancanti e chiudono il percorso end-to-end
 16. **5.1, 5.2** privacy
 17. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
@@ -630,7 +638,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — restano le **3.x** (UI), di cui la **3.4** (nastro contesto) è completata (Sessione 76, issue #231) |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231) e la **3.1** (Home + Timeline, Sessione 77, issue #233): l'app ha ora le sue prime due schermate vere. Restano le **3.2** (Ricordi + Share) e la **3.3** (Esplora + Analisi) |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -735,6 +743,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
+| 3.1 - Home + Timeline | done | #234 | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |
