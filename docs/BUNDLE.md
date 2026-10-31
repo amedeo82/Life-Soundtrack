@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 15:40
+> Data: 2026-10-31 14:46
 > Totale file: 127
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.30 — Sessione 72 (2026-10-31)**
+> **Versione 1.29 — Sessione 71 (2026-10-31)**
 
 ---
 
@@ -1006,9 +1006,7 @@ pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'  # PowerShell 7? (F9, Sessi
 
 Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
 
-**F9 — PowerShell 7 (`pwsh`) è il baseline del repo** *(Sessione 71, rafforzato dalla Sessione 72)*: gli script in `scripts/*.ps1` si invocano con `pwsh`. Sotto Windows PowerShell 5.1 il doppio trattino non viene normalizzato e i gate con `--check` ricadono silenziosamente in modalità WRITING (fail-open, issue #104): verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output. La forma canonica dei flag resta a **singolo trattino** (`-Check`, `-List`, `-DryRun`). Vedi `docs/12-DEVOPS.md §9.1`.
-
-**F9-bis — `powershell` (5.1) non è un fallback: è un rischio di corruzione** *(Sessione 72)*. I `.ps1` del repo sono UTF-8 **senza BOM** e contengono letterali non-ASCII: sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e i blocchi calcolati non corrispondono più a quelli su disco (`aggregate-state.ps1 -Check` esce **1** con drift spurio: attesi 620 caratteri, trovati 616) — e in modalità scrittura il mojibake verrebbe **scritto** nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`). Regole: (a) scrivere **`pwsh`** per esteso, mai `powershell`; (b) eseguire il check F9 **prima** di qualunque `.ps1`; (c) i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito). Dettagli e misure: `docs/12-DEVOPS.md §9.12`, `docs/17-DEV-NOTES.md` P12.
+**F9 — PowerShell 7 (`pwsh`) è il baseline del repo** *(Sessione 71)*: gli script in `scripts/*.ps1` si invocano con `pwsh`. Sotto Windows PowerShell 5.1 il doppio trattino non viene normalizzato e i gate con `--check` ricadono silenziosamente in modalità WRITING (fail-open, issue #104): verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output. La forma canonica dei flag resta a **singolo trattino** (`-Check`, `-List`, `-DryRun`). Vedi `docs/12-DEVOPS.md §9.1`.
 
 **Opzionale (se si ritorna dopo un merge di un altro agente)**: audit dei residui post-merge prima di iniziare lavoro nuovo — exit 14 indica branch/worktree merged-orfani da pulire con `pwsh scripts/post-merge.ps1 -Check` (vedi §"♻️ Pulizia branch post-merge").
 
@@ -1021,14 +1019,7 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.30 — **la provenienza e il confine di encoding di `pwsh`** (Sessione 72). La Sessione 71 aveva dichiarato il baseline (PowerShell 7) ma non aveva risolto due cose: **da dove arriva l'installazione** e **cosa succede se si usa 5.1 per sbaglio**. Verificato il 2026-10-31: `pwsh` **7.6.9** è un pacchetto **MSIX/Store** (`Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`), esposto via alias per-utente in `WindowsApps`; non è un MSI (`C:\Program Files\PowerShell\7` assente, nessuna voce nel registro) ed è visibile anche da Git Bash, quindi il `pre-push` rigenera il bundle con l'engine corretto. Il confine: i `.ps1` del repo sono UTF-8 **senza BOM** con letterali non-ASCII ⇒ sotto 5.1 il **parsing** li sovradecodifica e `aggregate-state.ps1 -Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in scrittura il mojibake finirebbe nei file globali. Aggiunti:
-- **§"🛡️ Session start checklist"**: nuovo **F9-bis** — `powershell` (5.1) non è un fallback accettabile ma un rischio di corruzione; `pwsh` va scritto per esteso, il check F9 va eseguito prima di qualunque `.ps1`, e i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito)
-- **`docs/12-DEVOPS.md` §9.12** (nuova): provenienza dell'installazione con i comandi di verifica, matrice misurata PS7 vs PS5.1 sui due generatori, e la distinzione fra **parsing** (version-dipendente, BOM) e **scrittura** (version-indipendente, `WriteAllText` + `UTF8Encoding($false)`). La motivazione dei due gate warning-only si riduce a «piattaforma»; la loro promozione a bloccante resta **decisione del project owner** (D.71.4)
-- **`docs/12-DEVOPS.md` §9.13** (nuova): audit della copertura CI delle suite locali — 5 suite in `scripts/` **non** eseguite da `ci.yml`, con tempi misurati e i difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ «0 passati, 0 falliti» e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 stale e S5 che muta il working tree, `test-setup-worktree.sh` fallisce su Windows/Git Bash. I due gate più pesanti (116,4 s su ~213 s) sono indipendenti e parallelizzabili
-- **`docs/13-ADR/0008`**: il vincolo «ASCII-only nel codice PowerShell» viene corretto — riguarda il **parsing del sorgente**, non solo la scrittura; stato misurato: `aggregate-state.ps1` oggi lo **viola** (9 righe non-ASCII, nessun BOM) e il fix è manutenzione dello script, decisione del project owner
-- **`docs/17-DEV-NOTES.md`** (v0.5): nuovo **P12** — provenienza di `pwsh`, comandi di verifica, e i due failure modes distinti (drift spurio in `-Check`, corruzione in scrittura) con la relativa causa (encoding del sorgente)
-
-*Precedente v1.29 — **PowerShell 7 (`pwsh`)** è il baseline del repo per gli script in `scripts/*.ps1` (Sessione 71). La situazione di partenza: `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1 — il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `§9.7b` descriveva il fail-open dell'issue #104 come se fosse il caso normale. Il drift è la classe di problema che questo repo già sa riconoscere: **nessun gate confronta la documentazione con l'ambiente reale**. Correzioni:
+*Ultimo aggiornamento: v1.29 — **PowerShell 7 (`pwsh`)** è il baseline del repo per gli script in `scripts/*.ps1` (Sessione 71). La situazione di partenza: `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1 — il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `§9.7b` descriveva il fail-open dell'issue #104 come se fosse il caso normale. Il drift è la classe di problema che questo repo già sa riconoscere: **nessun gate confronta la documentazione con l'ambiente reale**. Correzioni:
 - **Forma canonica dei flag**: il **singolo trattino** (`-Check`, `-List`, `-DryRun`, `-Help`) è ormai la forma usata in tutto il file. I `--check` sparsi nel corpo del protocollo erano un residuo: il footer v1.20 dichiarava già «tutti i `pwsh scripts/* --check` convertiti a `-Check` (issue #104, PR #111 gia' aperta)», ma la conversione non era stata applicata al corpo del file — il protocollo diceva una cosa e ne faceva un'altra. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo **prima** del binding), quindi il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente
 - **§"🔄 Lazy-state aggregation" → Aggregator**: il blocco dei comandi usa `-List` / `-Check` / `-DryRun`. Rimossa la riga `--check --strict`: il flag **`-Strict` non esiste** in `scripts/aggregate-state.ps1` (il parametro non è dichiarato) e il guard fail-closed lo rifiuta con exit 2 — la riga indicava un comando che non può funzionare. Aggiunta la nota esplicita
 - **§"🛡️ Session start checklist"**: estesa a **6 check** con `pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'` (F9). Un check che passa sempre non è un gate (lesson 43-1): senza questo, l'ambiente PowerShell sbagliato viene scoperto solo quando un gate riscrive un file invece di verificarlo
@@ -1955,7 +1946,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 72 (v1.4) | CI/CD, deploy, self-hosting — §9.12 **ambiente PowerShell locale**: provenienza di `pwsh` (7.6.9, pacchetto MSIX/Store) e confine di encoding dei `.ps1` (sotto 5.1 il parsing del sorgente sovradecodifica i letterali non-ASCII → drift spurio in `-Check` e corruzione in scrittura); §9.13 **copertura CI delle suite locali** (5 suite in `scripts/` non eseguite da `ci.yml`, tempi misurati, `test-safe-branch-switch.sh` fail-open); §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
@@ -1970,10 +1961,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.30 | Protocollo per agenti (Sessione 72: provenienza e confine di encoding di `pwsh` — F9-bis, `powershell` 5.1 non è un fallback ma un rischio di corruzione dei file globali; Sessione 71: baseline PowerShell 7 (`pwsh`); Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.27 | Protocollo per agenti (Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
-| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.5 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati — P11: baseline PowerShell 7 e forma canonica dei flag; P12: provenienza di `pwsh` e confine di encoding dei `.ps1` |
+| [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
 | [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.7 | Diario cronologico per story: problemi, fix, lesson learned — §25: ratifica della spec dell'analisi (issue #178) |
 
 ## Design & mockup
@@ -2048,7 +2039,6 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
 | 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ✅ | #219 |
-| 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2088,9 +2078,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **49** (merge: 39)
+- Sessioni migrate in state/sessions: **48** (merge: 39)
 - Stories migrate in state/stories: **20** (done: 18)
-- Ultima sessione migrata: **S72** - Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh
+- Ultima sessione migrata: **S71** - Baseline PowerShell 7 (pwsh) per gli script del repo
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -8974,158 +8964,6 @@ macchina che li esegue.
 - Lesson 42-1 (`docs/state/sessions/42-approve-apple-music-spec.md`) — l'installazione di `pwsh` sulla dev machine
 ```
 
-### Sessione 72 - Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh
-
-- **Data**: 2026-10-31
-- **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
-- **Claim**: `kilo-HP-ELITEBOOK-ced9`
-
-```
-
-# Sessione 72 — Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di `pwsh`
-
-## Sintesi
-
-Audit delle **procedure automatiche** del repo: 6 workflow GitHub Actions, 3 git hook
-versionati, 25 script in `scripts/` (13 suite di test), i task Turborepo e i 13 script di
-verifica eseguiti da `ci.yml` (di cui 8 suite di test). Obiettivo:
-misurare i tempi reali di esecuzione e verificare che le procedure siano corrette (exit code
-atteso, fail-closed, effetti collaterali).
-
-Il secondo filone della sessione è nato dalla domanda del project owner «perché `pwsh` 7 è
-installata?». La risposta: **è il baseline dichiarato dalla Sessione 71** (issue #218, PR #219,
-mergiata il 2026-10-31), installato come pacchetto **MSIX/Store** — non un MSI — e visibile
-anche da Git Bash. Ma la verifica ha scoperto che il baseline era dichiarato solo a metà: la
-**provenienza** dell'installazione non era documentata e, soprattutto, il **confine** oltre il
-quale l'ambiente non è più sicuro non era scritto da nessuna parte.
-
-Misurato (dev machine Windows, `pwsh` 7.6.9):
-
-| Comando | Esito | Tempo |
-|---|---|---|
-| `pwsh scripts/aggregate-state.ps1 -Check` | exit 0 (in sync) | 2,09 s |
-| `powershell scripts/aggregate-state.ps1 -Check` | **exit 1** — drift spurio (attesi 620 char, trovati 616) | 1,81 s |
-| `pwsh scripts/generate-bundle.ps1 -Check` | exit 0 (126 file) | 1,79 s |
-| `powershell scripts/generate-bundle.ps1 -Check` | exit 0 (immune) | 2,43 s |
-
-La causa è il **parsing del sorgente**, non la logica: `scripts/aggregate-state.ps1` è UTF-8
-**senza BOM** e contiene 9 righe con letterali non-ASCII; Windows PowerShell 5.1 lo legge come
-ANSI (Windows-1252) e trasforma `—` in `â€”` (3 caratteri invece di 1). Lo scarto di 4
-caratteri è esattamente `—` (+2), `§` (+1), `à` (+1). In **modalità scrittura** quegli stessi
-letterali corrotti verrebbero **scritti** nei file globali.
-
-## Decisioni
-
-| # | Decisione | Motivazione |
-|---|-----------|-------------|
-| D.72.1 | Il **parsing** dei `.ps1` è version-dipendente e va trattato come parte del vincolo «encoding» | Il vincolo ASCII-only di ADR-0008 copriva solo la **scrittura** (indipendente dalla versione grazie a `WriteAllText` + `UTF8Encoding($false)`). Ma un sorgente `.ps1` **senza BOM** è interpretato come ANSI da 5.1 e come UTF-8 da 7: i letterali non-ASCII nel sorgente sono corrotti **prima** di eseguire qualsiasi logica |
-| D.72.2 | **`powershell` (5.1) non è un fallback accettabile per i `.ps1` del repo**: è un rischio di corruzione | Non è solo il fail-open del doppio trattino (issue #104): è drift spurio in `-Check` **e** scrittura di mojibake nei file globali. Il fallback del `.githooks/pre-push` (`pwsh` → `powershell`) è innocuo perché il bundle rigenera contenuto identico, ma per l'aggregator no |
-| D.72.3 | La **provenienza** dell'installazione di `pwsh` viene documentata, non solo la sua presenza | Un runtime installato ma non riproducibile non è un toolchain documentato (lesson 71-1): `winget list --id Microsoft.PowerShell` restituisce 7.6.9, `Get-AppxPackage` conferma `SignatureKind: Store`, `C:\Program Files\PowerShell\7` non esiste e il registro non ha voci di disinstallazione → l'installazione attiva è il pacchetto MSIX/Store, non l'MSI citato da lesson 42-1 |
-| D.72.4 | Il **fix** dello script (rimuovere i 9 letterali non-ASCII, oppure aggiungere il BOM) **non** viene applicato in questa sessione | Modificare `scripts/aggregate-state.ps1` è manutenzione dello script, e cambiare la semantica dei gate è una decisione sul test strategy che il protocollo riserva al project owner (D.71.4). Il difetto è **segnalato** con misura e causa; la decisione è del Boss |
-| D.72.5 | Le 5 suite di test **non eseguite da `ci.yml`** vengono documentate, non aggiunte alla pipeline | Aggiungere step alla CI e cambiare la semantica di un gate (da assente a bloccante) sono decisioni sul test strategy (D.71.4). L'audit produce l'inventario con tempi e difetti, che è l'input per la decisione |
-| D.72.6 | Il **costo** della pipeline viene quantificato per distinguere il lavoro necessario da quello ripetuto | I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili |
-
-## Audit: procedure automatiche
-
-### Tempi misurati (dev machine, `pnpm exec turbo run <task> --force` = cache disabilitato, come in CI)
-
-| Procedura | Tempo | Note |
-|---|---:|---|
-| `turbo run lint` | 11,43 s | 3 task |
-| `turbo run typecheck` | 10,22 s | 3 task |
-| `turbo run test` | 29,19 s | 2 task (`@ls/core` lancia vitest **due volte**: suite senza `perf.test.ts`, poi `perf.test.ts`) |
-| `turbo run build` | 22,85 s | `apps/web` esegue `tsc --noEmit` **una seconda volta** (è già il `typecheck`) |
-| `node scripts/validate-workflows.mjs` | 0,36 s | 4 sub-gate |
-| `node scripts/check-readme-facts.mjs` | 0,35 s | 15 check |
-| `node scripts/validate-labels.mjs` | 0,69 s | richiede `GH_TOKEN` |
-| `test-workflow-git-add-coverage.sh` | 1,98 s | |
-| `test-workflow-permission-scopes.sh` | 3,01 s | |
-| `test-workflow-push-sync.sh` | 2,72 s | |
-| `test-workflow-writer-ordering.sh` | 2,09 s | |
-| `test-issue-76-residue.sh` | 16,09 s | |
-| `test-readme-facts-gate.sh` | 3,71 s | |
-| `test-aggregate-determinism.sh` | 56,02 s | 37 assert — il più pesante |
-| `test-bundle-check-idempotent.sh` | 60,44 s | 12 assert — il più pesante |
-| `test-post-merge.sh` | 52,44 s | **non in CI** |
-| `test-setup-worktree.sh` | 2,93 s | **non in CI** — exit 1 su Windows |
-| `test-safe-branch-switch.sh` | 6,74 s | **non in CI** — fail-open |
-| `test-pre-commit-clean-check.sh` | 4,73 s | **non in CI** |
-| `test-appendline-lf-fix.ps1` | 6,06 s | **non in CI** — exit 1 (S3 stale) |
-
-### Difetti rilevati
-
-1. **`test-safe-branch-switch.sh` è fail-open**: i tre scenari girano dentro subshell `( … )`,
-   quindi gli incrementi di `pass`/`fail` non arrivano al processo padre e la condizione finale
-   `[ "$fail" -eq 0 ]` è **sempre** vera. Misurato: «Risultati: 0 passati, 0 falliti» con exit 0.
-   Il gate non può mai fallire — lesson 43-1.
-2. **`test-appendline-lf-fix.ps1` ha un'aspettativa superata** (S3: «`aggregate-state.ps1` non
-   usa `AppendLine`» → ne ha 64) e **muta il working tree** (S5: `git checkout -- docs/SESSIONS.md`
-   + run dell'aggregator). Non è in CI, quindi nessuno se ne accorge.
-3. **`test-setup-worktree.sh` non gira su Windows/Git Bash**: S1 (il mock `gh` non viene
-   intercettato ⇒ lo script non fallisce come deve) e S2 (path POSIX `mktemp` non risolto).
-4. **La procedura più distruttiva del repo non ha copertura CI**: `post-merge.ps1` (che esegue
-   `git push origin --delete` e `git branch -D`) è coperto da `test-post-merge.sh`, che la CI
-   **non** esegue.
-5. **Typecheck duplicato in CI**: `pnpm run typecheck` e poi `pnpm run build`, il cui script di
-   `apps/web` è `node generate-version.mjs && tsc -p tsconfig.json --noEmit && vite build` ⇒ il
-   `tsc --noEmit` gira due volte.
-6. **`@ls/core` avvia vitest due volte** (`vitest run --exclude '**/perf.test.ts' && vitest run
-   src/db/__tests__/perf.test.ts`): doppio startup, doppio parsing della config.
-7. **Gate sequenziali**: i 13 gate di `ci.yml` stanno in un solo job in sequenza; i quattro più
-   pesanti sono indipendenti e potrebbero girare in parallelo (o in job separati) — risparmio
-   atteso ≈ 2 minuti di pareggio.
-8. **`ci.yml` gira anche sui push del bot**: il merge su `main` genera un commit di
-   `auto-state-aggregate`/`auto-bundle`, che a sua volta fa scattare `ci.yml` di nuovo
-   (trigger `push: branches: [main]` senza filtro sui path): ogni merge costa **due** run
-   complete di CI. Il ciclo termina perché il guard idempotente del bundle non committa nulla
-   quando il contenuto non cambia.
-
-## Lesson learned
-
-| # | Osservazione | Azione |
-|---|--------------|--------|
-| 72-1 | **Un baseline dichiarato senza il confine è a metà**: la Sessione 71 ha dichiarato «`pwsh` è il baseline» senza dire (a) da dove viene l'installazione e (b) cosa succede quando si usa 5.1 per sbaglio | `docs/12-DEVOPS.md §9.12` (provenienza + matrice misurata), `docs/17-DEV-NOTES.md` P12, **F9-bis** nella session start checklist di `AGENTS.md` |
-| 72-2 | **Il drift spurio si distingue dal drift reale per la sua ampiezza**: 4 caratteri su un blocco da 616 non sono un documento cambiato, sono 4 letterali sovradecodificati (`—` +2, `§` +1, `à` +1) | Il delta è esattamente la somma delle sovradecodifiche UTF-8→CP1252: la misura ha localizzato la causa senza bisogno di un debugger |
-| 72-3 | **Un test che non può fallire è più pericoloso di un test assente**: `test-safe-branch-switch.sh` riporta «0 passati, 0 falliti» ed esce 0 — sembra un test che non ha scenario, ed è invece un test che non ha contatori | Segnalato con evidenza; il fix (contatori riportati fuori dalle subshell) è una PR di manutenzione separata (D.72.5) |
-| 72-4 | **La copertura dichiarata e la copertura eseguita sono due elenchi distinti**: `AGENTS.md` e `docs/12-DEVOPS.md` descrivono la copertura di `post-merge`, `setup-worktree` e `safe-branch-switch`; la CI non esegue nessuna delle tre | `docs/12-DEVOPS.md §9.13` — l'inventario che confronta i due elenchi, con i tempi misurati |
-| 72-5 | **Misurare costa meno che supporre**: «le procedure sono lente» era un'impressione; il dato mostra che i 116 s dei due gate più pesanti sono in test indipendenti, e che il typecheck è eseguito due volte | Il report distingue il lavoro necessario (lint/typecheck/test/build ≈ 74 s) da quello ripetuto o non eseguito |
-
-## Documenti aggiornati
-
-- `AGENTS.md` (v1.29 → **v1.30**): **F9-bis** nella session start checklist (5.1 non è un fallback
-  ma un rischio di corruzione; `pwsh` per esteso; i nuovi `.ps1` ASCII-only), footer v1.30
-- `docs/12-DEVOPS.md` (v1.3 → **1.4**): **§9.12** (nuova) ambiente PowerShell locale — provenienza,
-  verifiche, matrice PS7 vs PS5.1, confine di encoding; **§9.13** (nuova) copertura CI delle suite
-  locali; changelog 1.4
-- `docs/17-DEV-NOTES.md` (v0.4 → **0.5**): **P12** (nuova) — provenienza di `pwsh` e confine di
-  encoding dei `.ps1`
-- `docs/13-ADR/0008-lazy-state-aggregation.md`: il vincolo «ASCII-only nel codice PowerShell» viene
-  corretto — riguarda il **parsing** del sorgente, non solo la scrittura; stato misurato del
-  `aggregate-state.ps1` (9 righe non-ASCII, nessun BOM)
-- `docs/INDEX.md` (sezioni legacy allineate): `12-DEVOPS.md` → Sessione 72 (v1.4), `AGENTS.md` →
-  v1.30, `17-DEV-NOTES.md` → v0.5
-- `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`
-
-## Verifica
-
-- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
-- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
-- `node scripts/check-readme-facts.mjs` → exit 0
-- `node scripts/validate-workflows.mjs .github/workflows` → exit 0
-- `pwsh -NoProfile -c '$PSVersionTable.PSVersion'` → 7.6.9 (Core)
-- `powershell scripts/aggregate-state.ps1 -Check` → exit 1 (drift spurio: **atteso**, è il difetto
-  documentato in §9.12)
-
-## Link utili
-
-- `docs/12-DEVOPS.md` §9.12 e §9.13 — ambiente PowerShell e copertura CI
-- `docs/17-DEV-NOTES.md` P12 — il pitfall del confine di encoding
-- `docs/13-ADR/0008-lazy-state-aggregation.md` §"Script aggregator" — i vincoli implementativi
-- Sessione 71 (`71-powershell-7-baseline.md`) — la dichiarazione del baseline
-- Issue #63 (byte-per-byte), #104 (fail-closed sui flag), #218 (baseline pwsh)
-```
-
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -9269,8 +9107,8 @@ letterali corrotti verrebbero **scritti** nei file globali.
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.5
-> Ultima modifica: 2026-10-31 — baseline PowerShell 7 (`pwsh`), provenienza dell'installazione e confine di encoding dei `.ps1` (Sessione 72)
+> Versione: 0.4
+> Ultima modifica: 2026-10-31 — baseline PowerShell 7 (`pwsh`) per gli script del repo (Sessione 71)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
 
@@ -9447,53 +9285,6 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   fail-closed degli script indica come corretta. Se il gate riceve un flag che non riconosce,
   esce **2** (errore di parametro) e **non** 1 (drift): verificare sempre l'`exit code` **e** la
   riga `[OK] … in sync` nell'output. Vedi `docs/12-DEVOPS.md §9.1` e `§9.7b`.
-
-### P12 — Provenienza di `pwsh` e confine di encoding dei `.ps1`
-
-- **Sintomo**: due failure diverse con la stessa radice.
-  1. `powershell scripts/aggregate-state.ps1 -Check` (Windows PowerShell 5.1) esce **1** con
-     `[FAIL] README.md - blocco drift | Atteso: 620 chars, Trovato: 616 chars`, mentre
-     `pwsh scripts/aggregate-state.ps1 -Check` esce **0**. Il drift è **spurio**: nessun file
-     è cambiato.
-  2. In modalità scrittura (default), lo stesso comando sotto 5.1 **scrive** i letterali
-     corrotti nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`):
-     mojibake (`â€”` al posto di `—`) + BOM, la stessa classe di danno di lesson 36-6 e 69-5.
-- **Causa**: `scripts/aggregate-state.ps1` è **UTF-8 senza BOM** e contiene 9 righe con
-  caratteri non-ASCII (`—`, `§`, `→`, `✅`, `❌`). Il **parsing** del file sorgente dipende
-  dalla versione: 7 legge UTF-8, 5.1 legge ANSI (Windows-1252) e trasforma `—` (3 byte UTF-8)
-  in 3 caratteri `â€”`. La differenza di 4 caratteri fra "atteso" e "trovato" è esattamente
-  la somma delle sovradecodifiche (`—` +2, `§` +1, `à` +1). Nota: il vincolo «ASCII-only nel
-  codice PowerShell» già esiste in `docs/13-ADR/0008-lazy-state-aggregation.md`, ma riguardava
-  solo la **scrittura**; la **lettura del sorgente** dipende dal BOM ed è version-dipendente.
-- **Soluzione**:
-  - **Operativa**: `pwsh` va invocato **esplicitamente**. La shell di default di Windows
-    (`powershell`, 5.1) e la shell di default di molti tool sono 5.1: `pwsh` è un comando
-    diverso e va scritto per esteso. Il check F9 della session start checklist
-    (`pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'`) va eseguito **prima** di
-    invocare qualsiasi `.ps1` del repo.
-  - **Sul codice**: i `.ps1` del repo restano **ASCII-only** (o con BOM UTF-8 esplicito).
-    `aggregate-state.ps1` oggi non lo rispetta: il fix (rimuovere i 9 letterali non-ASCII,
-    oppure aggiungere il BOM) è manutenzione dello script e va deciso dal project owner.
-  - **Provenienza dell'installazione** (verificata il 2026-10-31): `pwsh` **7.6.9** è
-    installato come **pacchetto MSIX / Microsoft Store** (`Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`,
-    `SignatureKind: Store`), esposto tramite **alias per utente** in
-    `%LOCALAPPDATA%\Microsoft\WindowsApps\pwsh.exe` (reparse point da 0 byte). Non è un MSI:
-    `C:\Program Files\PowerShell\7` **non esiste** e non c'è alcuna voce di disinstallazione
-    del prodotto nel registro. Il pacchetto è stato creato/aggiornato il **2026-10-26 09:38**.
-    Verifiche:
-    ```powershell
-    pwsh -NoProfile -c '$PSVersionTable.PSVersion'   # 7.6.9
-    winget list --id Microsoft.PowerShell             # PowerShell 7.6.9.0
-    Get-AppxPackage Microsoft.PowerShell | Select-Object Version, SignatureKind, InstallLocation
-    ```
-    L'alias è visibile anche da Git Bash (`command -v pwsh` → `/c/Users/<user>/AppData/Local/Microsoft/WindowsApps/pwsh`),
-    quindi il `.githooks/pre-push` — che preferisce `pwsh` e usa `powershell` solo come
-    fallback — rigenera il bundle con l'engine corretto.
-- **Regola generale**: il baseline di un runtime non si dichiara solo nei documenti, si
-  **verifica**: prima di ogni sessione, il check F9 (`$PSVersionTable.PSVersion.Major` = 7).
-  E quando l'engine è scelto, la sua *provenienza* va documentata: «installato» senza dire
-  *come* (MSI, Store, scoop, chocolatey) lascia la macchina non riproducibile su un'altra
-  postazione (lesson 71-1: un toolchain installato non è un toolchain documentato).
 
 ## 4. Cosa NON è ancora implementato
 
@@ -25030,9 +24821,7 @@ Estensioni future previste (V2): `docs/INDEX.md` "Stato del progetto" + "Roadmap
 Vincoli implementativi (lesson consolidata in `docs/state/_index.md` §"Aggregazione"):
 - Idempotenza (riproducibile)
 - UTF-8 senza BOM per compatibilità cross-platform (lesson 0.1-7)
-- **Scrittura** — indipendente dalla versione: le scritture passano da `[System.IO.File]::WriteAllText` con `UTF8Encoding($false)`, che evita BOM e CRLF (in 5.1 la scrittura con `Set-Content -Encoding UTF8` aggiungeva il BOM e corrompeva i caratteri non-ASCII — lesson 37-5, 69-5)
-- **Parsing** — *dipendente* dalla versione: un file `.ps1` **senza BOM** viene letto da PowerShell 5.1 come ANSI (Windows-1252) e da PowerShell 7 come UTF-8. I letterali non-ASCII presenti nel **sorgente** diventano quindi mojibake sotto 5.1 (`—` → `â€”`, 3 caratteri invece di 1) *prima* di eseguire qualsiasi logica. I `.ps1` del repo restano quindi **ASCII-only** (oppure con BOM UTF-8 esplicito): la regione "encoding" copre il sorgente, non solo il file prodotto
-  - Stato misurato il 2026-10-31: `scripts/aggregate-state.ps1` **non** ha BOM e contiene 9 righe con caratteri non-ASCII (`—`, `§`, `→`, `✅`, `❌`). Sotto 5.1 il blocco NEXT-STEP del `README.md` viene calcolato con i letterali corrotti → `aggregate-state.ps1 -Check` esce **1** con drift spurio (attesi 620 caratteri, trovati 616) e in **modalità scrittura** il mojibake verrebbe scritto nei file globali (lesson 36-6, 69-5). Sotto `pwsh` 7 lo stesso comando esce **0**. Il fix (rimuovere i letterali non-ASCII dal sorgente, oppure aggiungere il BOM) è una decisione di manutenzione dello script: finché non è applicato, **5.1 non è un ambiente sicuro per l'aggregator**
+- ASCII-only nel codice PowerShell: le scritture passano da `[System.IO.File]::WriteAllText` con `UTF8Encoding($false)`, che evita BOM e CRLF ed è **indipendente dalla versione di PowerShell** (in 5.1 la scrittura con `Set-Content -Encoding UTF8` aggiungeva il BOM e corrompeva i caratteri non-ASCII — lesson 37-5, 69-5)
 - **Baseline PowerShell 7 (`pwsh`)** (Sessione 71): in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding, quindi `-Check` e `--check` sono equivalenti. La forma **canonica** resta a singolo trattino: è l'unica che si comporta allo stesso modo su 5.1 e 7, ed è quella che il guard fail-closed dell'issue #104 indica come corretta (un flag non riconosciuto esce **2**, non 1)
 
 ### GH Action
