@@ -1,8 +1,8 @@
 # 04 — Algoritmi di Analisi
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30), aggiornata nella Sessione 69 (2026-10-31)
+> Status: 🟢 APPROVED · Versione 1.3 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30), aggiornata nelle Sessioni 69 (2026-10-31) e 70 (2026-10-31)
 > Vincolante per: `packages/core/analysis/*` e relativi test
-> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12) · Implementazioni: 2.4 (Sessione 61), 2.1 (Sessione 63), 2.2 (Sessione 69, issue #211)
+> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12) · Implementazioni: 2.4 (Sessione 61), 2.1 (Sessione 63), 2.2 (Sessione 69, issue #211), 2.3 (Sessione 70, issue #214)
 
 ---
 
@@ -646,6 +646,36 @@ z = (7 - 3) / 1 = 4.0 > 2.0 → **volume_spike** rilevato con confidence min(1, 
 - Eventi non sovrapposti (dedupe mantiene solo quello con confidence più alta)
 - `periodStart < periodEnd`
 
+### 6.8 Scelte di implementazione (Story 2.3)
+
+Il testo dell'algoritmo (§6.2-§6.6) **non cambia**: le scelte che la spec
+non esplicita sono dichiarate in `docs/state/sessions/70-event-detector.md`
+(D.70.1…D.70.8) e in `docs/state/stories/2.3-event-detector.md`. In sintesi:
+
+- **la baseline e la finestra non si sovrappongono**: la finestra è
+  `[cursor, cursor + windowDays)` e la baseline i `baselineDays` giorni
+  immediatamente precedenti (D.70.1);
+- **la finestra deve essere completa**: l'ultima finestra utile è quella che
+  finisce entro l'ultimo giorno osservato — una finestra troncata ha meno
+  giorni e produrrebbe un `volume_drop` sistematico (D.70.3);
+- **un giorno senza ascolti non è un giorno a volume zero**: il volume
+  misura «quanto hai ascolto nei giorni in cui hai ascoltato», e i buchi
+  sono il segnale del detector di silenzio (D.70.5);
+- **la deviazione standard è popolazionale** (÷N): la baseline è
+  l'intera popolazione dei giorni osservati (D.70.4);
+- **il dedupe è per tipo e per soggetto**: due eventi dello stesso tipo (e
+  dello stesso artista o genere) che si sovrappongono sono lo stesso evento
+  visto da due finestre diverse; due eventi di **tipi diversi** sulla stessa
+  finestra coesistono (D.70.8);
+- **il detector a quota ha due condizioni**: la **dominanza** (la quota del
+  soggetto supera `minDominantShare`) e il **picco** (la quota supera 2× la
+  quota in baseline) — il rapporto è definito rispetto alla soglia di
+  dominanza quando il soggetto è assente in baseline, così è sempre finito
+  (D.70.2, D.70.6);
+- **la finestra dell'esplorazione è lunga `strideDays` giorni** (7 per
+  default, come i «7gg» di §6.2) ed è allineata alla stessa griglia degli
+  altri detector (D.70.7).
+
 ---
 
 ## 7. Memory Engine
@@ -872,14 +902,21 @@ La prima tranche (Story 2.4, e poi 2.1) implementa:
 | **Memory engine** (§7) | ✅ in questa tranche | usa solo ascolti, brani e artisti |
 | **Mood tracker** (§3) | ✅ in questa tranche (Story 2.1, Sessione 63) | legge le feature **misurate o manuali**; senza audio features non produce insight (D-A.1, D-A.6, §12) |
 | **Era detector** (§5) | ✅ in questa tranche (Story 2.2, Sessione 69) | change point detection su firme settimanali; senza feature misurate o manuali non produce ere (D-A.1) |
+| **Event detector** (§6) | ✅ in questa tranche (Story 2.3, Sessione 70) | z-score su griglia settimanale, detector a quota e detector specialistici; senza feature misurate o manuali non produce eventi di valence (D-A.1) |
 | Session segmentation (§2) | ⏭ differita | serve a `ListeningSession` (EPIC 2, tranche successiva) |
 | Pattern analyzer (§4) | ⏭ differita | il pattern analyzer è un generatore a sé (storia futura): `nightShare` è la sua metrica (§4.3) |
-| Event detector (§6) | ⏭ differita | Story 2.3 |
 
 L'orchestratore della tranche corrente chiama **solo** i generatori
 implementati: gli altri si aggiungono senza cambiarne il contratto, come i sink
 di scrobbling si sono aggiunti al registry senza modificare `PlatformAdapter`
 (ADR-0011 V1).
+
+> **I parametri dell'event detector** (§6.5) sono **otto**, non sei: alle
+> soglie ratificate (`baselineDays`, `windowDays`, `zScoreThreshold`,
+> `silenceMinDays`, `explorationMinNewArtists`, `strideDays`) si aggiungono
+> `minBaselineDays` e `minDominantShare`, le due condizioni che la spec non
+> esplicita e che la Story 2.3 dichiara (D.70.1, D.70.2). Il registro dei
+> parametri è in §9.
 
 ---
 
@@ -891,10 +928,18 @@ di scrobbling si sono aggiunti al registry senza modificare `PlatformAdapter`
 | Mood tracker | `{valenceThreshold, energyThreshold, neutralBand, excitedEnergyThreshold, minEventsPerPeriod}` | calcolata |
 | Pattern analyzer | `{nightHours, weekendDays, minEvents}` | calcolata |
 | Era detector | `{windowDays, stepDays, similarityThreshold, minEraDays, weights}` | calcolata |
-| Event detector | `{baselineDays, windowDays, zScoreThreshold, silenceMinDays, explorationMinNewArtists, strideDays}` | calcolata |
+| Event detector | `{baselineDays, windowDays, zScoreThreshold, silenceMinDays, explorationMinNewArtists, strideDays, minBaselineDays, minDominantShare}` | calcolata |
 | Memory engine | `{onThisDayYears, firstTimeMinTracks, milestones, returnMinGapDays, seasonalConcentration, seasonalMinEvents}` | calcolata |
 
 Ogni volta che si cambia un parametro di default, la versione cambia e gli insight diventano `stale` → ricalcolo automatico al prossimo avvio.
+
+> Il config object dell'**event detector** comprende **otto** chiavi: le sei
+> di `04§6.5` più `minBaselineDays` (i giorni con dati minimi perché una
+> baseline sia utilizzabile) e `minDominantShare` (la quota minima perché un
+> artista o un genere **domini** la finestra). Le due sono dichiarate dalla
+> Story 2.3 (D.70.1, D.70.2): senza, una baseline di due giorni produrrebbe
+> z-score arbitrari e ogni variazione ordinaria di una quota sembrerebbe un
+> «picco».
 
 ---
 
@@ -989,3 +1034,4 @@ appartengono a `04`.
 | 1.0 | Sessione 59 (2026-10-28, issue #178) | 🟢 APPROVED — **ratifica del Boss al merge della PR**: le cinque decisioni aperte (§11, D-A.1…D-A.5) sono chiuse **come proposte**. **§7.2**: `return` e `seasonal` sono specificati (il silenzio è l'ultimo ascolto precedente dell'artista; la concentrazione stagionale è calcolata su 12 mesi) e `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3); **§7.3**: i parametri allineati (`firstTimeMinTracks`, `seasonalMinEvents`) e il parametro `returnMinGapDays` dichiarato; **§7.3.1** (nuova): il `text` del ricordo è una stringa **resa** alla generazione con il template i18n `insight.memory.*` (D-A.4), non una chiave né una stringa italiana inline; **§8.1** (nuova): il perimetro della tranche — orchestratore minimale estensibile, solo i generatori implementati (D-A.5); **§9**: il registro dei parametri allineato; **§11** (nuova): le cinque decisioni con la motivazione; **§12** (nuova): il perimetro — la **Story 2.4** è implementabile subito, la **Story 2.1** aspetta le **audio features dell'EPIC 4.1** (D-A.1). Le formule, i parametri e i vinanti di §1…§10 restano quelli di v0.2, salvo le modifiche elencate |
 | 1.1 | Sessione 65 (2026-10-30, issue #193) | 🟢 APPROVED — **emendamento ratificato dal project owner** (opzione B): il fallback **mood-by-genre non esiste**. **§1.4**: la degradazione è riscritta sul comportamento reale — nessun insight mood senza feature misurate o manuali, **nessun proxy sul genere** e il warning **aggregato per periodo** ("X eventi senza audio features", solo conteggi); **§8.1**: il mood tracker passa da "in attesa dell'EPIC 4.1" a generatore della tranche; **§11.1** (nuova): la decisione **D-A.6** con la motivazione e gli effetti; **§12**: nota di stato (la tabella resta la fotografia della ratifica della Sessione 59). Il codice di `§3` **non cambia** nel calcolo: il mood tracker già restituiva `null` sotto `minEventsPerPeriod` (D.63.4); la modifica del comportamento è il **warning aggregato**, che `§1.4` dichiarava e il codice non emetteva. `21-AUDIO-FEATURES.md` §12 (punto 3) è allineato nella stessa PR |
 | 1.2 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 implementata** (era detector): **§8.1** l'era detector passa da "differita" a **generatore della tranche** (`packages/core/src/analysis/era/`). Il testo dell'algoritmo (§5.2-§5.5) **non cambia**: le scelte che la spec non explicita sono dichiarate in `docs/state/stories/2.2-era-detector.md` (D.69.1…D.69.7) e in `docs/state/sessions/69-era-detector.md`. **§9**: il config object dell'era detector comprende anche le **soglie del mood**, perché il mood dominante dell'era è classificato dal **classificatore del mood tracker** (D.69.2): senza, un cambio delle soglie non renderebbe `stale` le ere (MIG-3). **§4.3**: la `nightShare` è la metrica che l'era detector riusa (orari UTC, D.69.4) |
+| 1.3 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 implementata** (event detector): **§8.1** l'event detector passa da "differita" a **generatore della tranche** (`packages/core/src/analysis/event/`). Il testo dell'algoritmo (§6.2-§6.6) **non cambia**: le scelte che la spec non explicita sono dichiarate in **§6.8** (nuova) e nei file di stato (D.70.1…D.70.8). **§9**: il config object dell'event detector comprende **otto** chiavi — le sei di §6.5 più `minBaselineDays` (D.70.1) e `minDominantShare` (D.70.2): senza, una baseline di due giorni produrrebbe z-score arbitrari e ogni variazione ordinaria di una quota sembrerebbe un «picco». **§6.8** (nuova): le scelte di implementazione del detector, dichiarate in sintesi |

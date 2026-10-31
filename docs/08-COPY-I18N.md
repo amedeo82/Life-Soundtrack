@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.10 · Sessione 67 (2026-10-30, issue #201), aggiornata nella Sessione 69 (2026-10-31, issue #211)
+> Status: 🟡 DRAFT · Versione 0.11 · Sessione 67 (2026-10-30, issue #201), aggiornata nelle Sessioni 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -358,6 +358,17 @@ Lo stesso vale per l'**etichetta dell'era** (`era.*`, Story 2.2): `EraPayload.la
 partire dal **nome localizzato** del mood (`insight.era.mood.*`) e dal genere
 più ascoltato — che è **dato**, non copia, e non viene tradotto.
 
+Vale per la **descrizione dell'evento** (`event.*`, Story 2.3):
+`EventPayload.description` (`02§4`) è una stringa resa dal template
+`insight.event.<eventType>`, come il ricordo e l'etichetta dell'era. I
+template di `event.*` accettano due segnaposto: `{{artist}}` (il nome
+dell'artista che domina, per `spike_artist`) e `{{genre}}` (il genere che
+domina, per `spike_genre`) — il genere è **dato**, non copia, e non viene
+tradotto. La descrizione è seguita dal **suffisso numerico** del detector che
+l'ha prodotta: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per
+quello a quota. Il suffisso è **linguisticamente neutro** (il nome della
+statistica e un numero): è il dato che rende l'evento verificabile.
+
 | Key | IT | EN |
 |-----|----|----|
 | `mood.happy` | La tua musica è stata prevalentemente felice | Your music was mostly happy |
@@ -365,6 +376,7 @@ più ascoltato — che è **dato**, non copia, e non viene tradotto.
 | `mood.excited` | Periodo ad alta energia | High-energy period |
 | `mood.calm` | Periodo rilassato | Relaxed period |
 | `event.spike_artist` | Hai scoperto {artist} che ha dominato il tuo ascolto | You discovered {artist} who dominated your listening |
+| `event.spike_genre` | Il genere {genre} ha dominato il tuo ascolto | The {genre} genre dominated your listening |
 | `event.valence_drop` | La tua musica è diventata più malinconica | Your music became more melancholic |
 | `event.valence_rise` | La tua musica è diventata più allegra | Your music became more cheerful |
 | `event.volume_spike` | Hai ascoltato molta più musica del solito | You listened to much more music than usual |
@@ -563,3 +575,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.8 | Sessione 62 (2026-10-28, issue #187) | **§2.17 `enrichment.*` (nuova) — Story 4.1**: le **otto chiavi** della pipeline audio features elencate da `21-AUDIO-FEATURES.md` §14, con i testi IT ed EN: gli stati della pipeline (`queued`, `analyzing`, `done`, `estimated`, `no_audio`, `disabled`), l'avviso **prima** del download del WASM (`download.size`, ~6 MB una volta sola) e l'avviso aggregato in Settings (`error.aggregate`, con pluralizzazione §3). §1: il namespace `enrichment` aggiunto alla tabella dei namespace. Il **confine "stima ≠ misura"** è dichiarato nei testi: `enrichment.status.estimated` è l'unica chiave che può descrivere una feature euristica e non usa mai la parola "analizzato" (`21§12`, D-AF.4). Header allineato (era fermo a **v0.6** dal Sessione 58, mentre il changelog era già alla 0.5 e `docs/INDEX.md` dichiarava v0.7) |
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
 | 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |
+| 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |

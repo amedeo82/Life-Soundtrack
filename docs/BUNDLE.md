@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 10:53
-> Totale file: 124
+> Data: 2026-10-31 12:13
+> Totale file: 126
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 123 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1706.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 10:53
+- Totale file: 125 (incluso 4 file aggregator-managed)
+- Dimensione totale: 1752.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 12:14
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 77 |
+| docs/ | 79 |
 | scripts/ | 20 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1179,15 +1179,17 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **2.3** — Event Detector (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **3.4** — Nastro contesto (Timeline) (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/2.3-event-detector.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/3.4-context-ribbon.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 3.4, 4.4.
+Altre non-done e non bloccate in ordine di priorita backlog (id): 4.4.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
-Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md`.
+Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md".
+
+Il blocco **non conosce le dipendenze** fra story: la story indicata può dipenderne da un'altra non ancora fatta. Prima di claimarla, guarda `depends_on` nel suo file in `docs/state/stories/`. Oggi la **3.4** (nastro contesto) dichiara `[DEP:4.4]`: la tranche geo si fa nella **4.4** (il DB IP→città, la specifica già ratificata) e **poi** nella 3.4, che la consuma.
 
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)
@@ -2017,6 +2019,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
+| 70 | Story 2.3 — Event Detector (issue #214) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2056,10 +2059,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **46** (merge: 37)
-- Stories migrate in state/stories: **20** (done: 17)
-- Ultima sessione migrata: **S69** - Story 2.2 — Era Detector (issue #211)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.4, 4.1
+- Sessioni migrate in state/sessions: **47** (merge: 37)
+- Stories migrate in state/stories: **20** (done: 18)
+- Ultima sessione migrata: **S70** - Story 2.3 — Event Detector (issue #214)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2084,7 +2087,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 69, issue #211): la **Story 2.2 (Era Detector) è completata** — PR #212 merged il 2026-10-31T09:49:44Z (merge commit `3294aa4`): il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection** — nessun clustering non supervisionato, `04§5`), il mood dominante dell'era classificato dal **classificatore del mood tracker** (D.69.2), la persistenza degli insight `era` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8), il plug-in `createEraGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `era-shift.json` (confine dichiarato al giorno 56). Con la 2.2 l'**EPIC 2** ha completato 2.1, 2.2 e 2.4: restano la **2.3 (Event Detector)** e le 3.x (UI). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 ora disponibile; e, per il blocco NEXT-STEP del README (che ordina le story **per id**), la **2.3 (Event Detector)**, con la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.2 🟢 APPROVED). Dietro: la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.2: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'era** (Story 3.x).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 70, issue #214): la **Story 2.3 (Event Detector) è completata** — il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore e valence/energy medie ponderate; detector a **z-score** su griglia settimanale — baseline 60gg, finestra 14gg, soglia 2.0; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e soggetto), la persistenza degli insight `event` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** degli eventi, il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). Con la 2.3 l'**EPIC 2** è completo: 2.1 (mood), 2.2 (ere), 2.3 (eventi), 2.4 (ricordi). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 già disponibile. Dietro: la tranche dell'EPIC 3 (**UI**, che includerà la schermata ⑧ degli eventi) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.3: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'evento** (Story 3.x).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -8671,6 +8674,163 @@ non può verificare un algoritmo che cerca un salto** — il salto deve essere
 - **#205** — la Story 1.6 (geo), l'ultima story completata prima di questa
 ```
 
+### Sessione 70 - Story 2.3 — Event Detector (issue #214)
+
+- **Data**: 2026-10-31
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK-7d3f`
+
+```
+
+# Sessione 70 — Story 2.3: Event Detector (issue #214)
+
+## Sintesi
+
+La Story 2.3 implementa il **rilevatore di eventi**: le anomalie
+significative della storia di ascolto — un picco di volume, un crollo
+emotivo, un'esplosione di novità, un silenzio — diventano **insight**
+narrativi con la loro confidenza, secondo l'algoritmo di
+`docs/04-ANALYSIS-ALGORITHMS.md` **v1.3 🟢 APPROVED** (§6, ratificata nella
+Sessione 59, issue #178).
+
+L'implementazione copre **tutti gli otto tipi** di `02§4`, ciascuno con un
+produttore dichiarato: il detector a **z-score** (§6.3) produce
+`volume_spike`, `volume_drop`, `valence_rise`, `valence_drop` ed
+`exploration`; il detector a **quota** (§6.2) produce `spike_artist` e
+`spike_genre`; i detector **specialistici** (§6.4) producono `silence` ed
+`exploration`.
+
+Il pacchetto consegnato:
+
+- **il motore** (`packages/core/src/analysis/event/`): `metrics.ts`,
+  `detect.ts`, `engine.ts`, `derivedVersion.ts`, `i18n.ts`, `types.ts`;
+- **la persistenza**: gli insight di tipo `event` con `derivedVersion` e il
+  ricalcolo che sostituisce **l'insieme** degli eventi
+  (`replaceAllInsightsOfType`);
+- **il plug-in** `createEventGenerator` dell'orchestratore (`04§8.1`, D-A.5:
+  il contratto non cambia);
+- **il fixture di scenario** `fixtures/scenarios/listening-spike.json`;
+- **43 test** nuovi in `@ls/core`.
+
+## Trigger
+
+Il blocco NEXT-STEP del README indicava la **2.3** come prima story
+lavorabile (è la prima non-done fra quelle migrate in `docs/state/stories/`),
+ma **non esisteva alcuna issue `agent-ready`**: il repository non aveva
+nessuna issue aperta, e la story non era claimabile. L'agente ha quindi
+aperto la **issue #214** (`size:L`, `agent-ready`, `area:analysis`,
+`phase-2`) con gli AC ricavati dalla spec ratificata, poi ha eseguito la
+procedura di claim (ADR-0006): label `in-progress` + commento `claim:
+kilo-HP-ELITEBOOK-7d3f`, riverificato come **unico** claim attivo.
+
+Worktree `ls-214-event-detector`, branch `feat/214-event-detector` (creata
+con `scripts/setup-worktree.ps1 214`, push early D.20.2).
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| Il **motore** dell'event detector | `packages/core/src/analysis/event/` |
+| Il plug-in dell'orchestratore | `createEventGenerator` in `analysis/pipeline.ts` |
+| Il ricalcolo dell'**insieme** degli eventi | `replaceAllInsightsOfType` in `db/insights.ts` |
+| I **template** della descrizione | `insight.event.*` in `apps/web/src/i18n/locales/{it,en}.json` |
+| Il **fixture di scenario** | `fixtures/scenarios/listening-spike.json` (`scripts/generate-fixtures.mjs spike`) |
+| I **43 test** | `analysis/__tests__/event-{engine,persistence,scenarios}.test.ts` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| **D.70.1** | La **baseline** e la **finestra** non si sovrappongono: la finestra è `[cursor, cursor + windowDays)` e la baseline i `baselineDays` giorni immediatamente precedenti. Una baseline con meno di `minBaselineDays` giorni **con dati** non è utilizzabile | Il pseudocodice di `04§6.3` scrive `dailyMetrics[cursor - baselineDays .. cursor]` e `dailyMetrics[cursor .. cursor + windowDays]`: le due finestre si sovrappongono al giorno `cursor`, e la baseline avrebbe 61 giorni invece di 60. Con una baseline di **due** giorni la deviazione standard è rumore, e lo z-score diventa arbitrario: `minBaselineDays` (14, metà della baseline) è la condizione che rende lo z-score calcolabile. Il parametro è **versionato** (`EventConfig.minBaselineDays`): senza, un suo cambio non renderebbe `stale` gli eventi (MIG-3) |
+| **D.70.2** | Il detector a **quota** ha due condizioni: la **dominanza** (la quota del soggetto nella finestra supera `minDominantShare`) e il **picco** (la quota supera `EVENT_QUOTA_RATIO` volte la quota in baseline) | `04§6.2` dichiara il trigger («quota artista > 2× baseline») ma non dice cosa distingue un picco da una variazione ordinaria: la sola colonna «Trigger» rende *qualsiasi* variazione un picco. La **descrizione** della stessa tabella («ha dominato il tuo ascolto») porta la condizione mancante: il soggetto deve **dominare** la finestra. Il soggetto è **il primo per quota** della finestra (un solo artista o genere per finestra), con il pareggio risolto in modo deterministico (id dell'artista, ordine alfabetico del genere) |
+| **D.70.3** | La finestra deve essere **completa**: l'ultima finestra utile è quella che finisce entro l'ultimo giorno osservato (`cursor + windowDays <= lastDay + 1`) | Il pseudocodice dice `while cursor <= latestDay`: l'ultima finestra sarebbe **troncata**, con meno giorni della baseline. La sua media sarebbe più bassa per costruzione, e il detector produrrebbe un `volume_drop` **sistematico** su ogni storia — un falso positivo garantito, non un evento |
+| **D.70.4** | La deviazione standard è **popolazionale** (÷N) | `04§6.3` scrive `stats(baseline[metric])` senza dire quale. La baseline è l'intera **popolazione** dei giorni osservati, non un campione: con N ≥ 14 la differenza è marginale, ma la formula deve essere una sola e dichiarata |
+| **D.70.5** | Un giorno **senza ascolti** non è un giorno a volume zero: è un giorno **assente** dalla mappa delle metriche. Vale per il volume **e** per la valence: un giorno senza feature è assente, non a valence 0 | Il volume misura «quanto hai ascolto **nei giorni in cui hai ascoltato**». Conteggiare i buchi come zero farebbe crollare la media della baseline di un ascoltatore abituale ma saltellante, e il detector lo dichiarerebbe un `volume_drop` senza che nulla sia cambiato. Per la valence la regola è la stessa di D.69.5: trattare un dato assente come zero falserebbe lo z-score verso il basso — un periodo senza feature sembrerebbe «triste» |
+| **D.70.6** | Il rapporto del detector a quota è definito rispetto alla **soglia di dominanza** quando il soggetto è assente in baseline (`windowShare / minDominantShare`), altrimenti rispetto alla quota in baseline (`windowShare / baselineShare`) | Un artista nuovo ha quota baseline **0**: il rapporto sarebbe infinito, e `Infinity` non è un numero serializzabile in JSON (`JSON.stringify(Infinity)` → `null`) né un valore finito nel payload persistito. La formula scelta mantiene il rapporto finito **e** confrontabile: il trigger resta il rapporto 2× (D.70.2) |
+| **D.70.7** | La finestra dell'**esplorazione** è lunga `strideDays` giorni (7 per default, come i «7gg» di `04§6.2`) ed è allineata alla **stessa griglia** degli altri detector; il detector parte dalla stessa soglia (`earliestDay + baselineDays`) | `04§6.4` dice «7-day windows» ma `04§6.5` non ha un parametro per la lunghezza della finestra dell'esplorazione, e `04§9` non lo elenca nel config object. Usare `strideDays` — che è già un parametro versionato e vale 7 per default — evita di aggiungere un nono parametro e tiene i due detector sulla stessa griglia settimanale. La soglia di partenza è la stessa degli altri detector perché i **primi giorni** della storia hanno per definizione tutti gli artisti «nuovi»: contarli produrrebbe un evento di esplorazione all'inizio di **ogni** storia |
+| **D.70.8** | Il **dedupe** è per **tipo e per soggetto**: due eventi dello stesso tipo (e dello stesso artista o genere) che si sovrappongono sono lo stesso evento visto da due finestre diverse; si tiene quello con la confidenza più alta. Due eventi di **tipi diversi** sulla stessa finestra coesistono | La griglia avanza di `strideDays` (7) giorni e la finestra è lunga `windowDays` (14): le finestre consecutive **si sovrappongono**, e un picco persistente viene visto da più finestre. Il deduve di `04§6.3` esiste per questo. Se il dedupe fosse globale per sovrapposizione, un `volume_spike` e un `valence_drop` sulla stessa finestra — due letture diverse della stessa settimana — non potrebbero coesistere, e il loop sui tre metriche di `04§6.3` avrebbe un solo esito per finestra |
+
+## Discrepanza rilevata
+
+L'AC del backlog chiedeva «**Falsi positivi < 10%** su fixture di test». Un
+criterio così richiede una **misura**, non un'asserzione: il fixture
+`listening-spike` dichiara **quattro** tipi di evento attesi nella baseline
+(`volume_spike` e `valence_drop` per il picco, `silence` per i 3 giorni
+senza ascolti, `exploration` per gli artisti nuovi) e **nessuno** nella
+baseline. La verifica è quindi esatta e verificabile: **zero** eventi
+indebiti sulle finestre della baseline, e i tipi attesi tutti presenti.
+
+Il secondo AC («Z-score o IQR con finestra documentata») è soddisfatto dal
+**z-score**: la finestra è di 14 giorni, la baseline di 60, e il passo di 7
+(`04§6.5`).
+
+Il terzo AC («Rileva spike/crolli volume, valence drop/rise, exploration,
+silence») è coperto dai **otto** tipi dell'enum di `02§4`: i sei citati
+esplicitamente più `spike_artist` e `spike_genre`, che `04§6.2` dichiara e
+che sono coperti dal detector a quota.
+
+## Fuori perimetro e dichiarato
+
+- **La session segmentation** (`04§2`): differita — serve a
+  `ListeningSession`
+- **Il pattern analyzer** (`04§4`): differita — è un generatore a sé
+- **La UI degli eventi** (schermata ⑧): Story 3.x. La descrizione è una
+  stringa **resa** (D-A.4), con i template dichiarati in
+  `08-COPY-I18N.md` §2.15
+- **Il collegamento evento → contesto** (geolocalizzazione, `19-GEO-CONTEXT.md`):
+  Story 3.4 / 4.4
+
+## Verifica
+
+- `pnpm run lint` · `pnpm run typecheck` · `pnpm run test` (611 test in
+  `@ls/core`, 112 in `@ls/web`) · `pnpm run build` → verdi
+- `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+
+## Lesson learned
+
+| # | Osservazione |
+|---|---|
+| 70-1 | **Il blocco NEXT-STEP non è un claim**: senza un'issue `agent-ready` la story indicata non è lavorabile. Come nella Sessione 69, l'apertura dell'issue è il primo atto dell'agente, non un adempimento |
+| 70-2 | **Una colonna di trigger senza la descrizione è una specifica a metà**: `04§6.2` dichiara «quota artista > 2× baseline» e, nella colonna accanto, «ha dominato il tuo ascolto». La prima riga, da sola, rende ogni variazione un picco: è la seconda a dire cosa distingue un picco. Quando due colonne della stessa tabella si contraddicono, la **descrizione** (il cosa) prevale sul **trigger** (il come) — ed è la differenza a dichiarare, non da nascondere |
+| 70-3 | **Una finestra troncata è un falso positivo garantito**: l'ultima finestra di una griglia ha meno giorni della baseline, e la sua media è più bassa per costruzione. Il detector l'avrebbe letta come un `volume_drop` su **ogni** storia. La completezza della finestra è una condizione di esistenza, non un dettaglio |
+| 70-4 | **Un assente non è uno zero**: la regola che rende il volume confrontabile è che un giorno senza ascolti non esista nella mappa delle metriche. La stessa regola, applicata alla valence, evita che un periodo senza feature sembri «triste» (D.69.5): due detector, la stessa lezione |
+| 70-5 | **L'infinito non è un numero**: il rapporto di un artista nuovo (quota baseline 0) è infinito, e `Infinity` non sopravvive alla serializzazione JSON. Il payload persistito deve avere solo numeri finiti: il rapporto è stato definito rispetto alla soglia di dominanza |
+| 70-6 | **Il blocco NEXT-STEP non conosce le dipendenze**: dopo la 2.3 l'aggregatore indica la **3.4** (nastro contesto), che dichiara `[DEP:4.4]` — e la 4.4 non è fatta. L'aggregatore filtra `done`/`blocked`/`wontdo`, non `depends_on` | Il contratto dell'agregatore (ADR-0008 V3) è «la prima story **non-done e non bloccata**»: la dipendenza fra story è un fatto che vive solo nel `depends_on` del suo file di stato | La dipendenza è stata resa **esplicita nella prosa del README** (che è dell'agente, non dell'agregatore): prima di claimare la story indicata, leggere il suo `depends_on`. Il caso è dichiarato qui perché **cambiare l'aggregatore** è una modifica di policy (ADR-0008) e va trattata come issue a sé, non dentro una story di analisi |
+
+## Documenti aggiornati
+
+- `packages/core/src/analysis/event/` — **nuovo** (6 file)
+- `packages/core/src/analysis/pipeline.ts` — `createEventGenerator`
+- `packages/core/src/analysis/index.ts` — gli export
+- `packages/core/src/analysis/__tests__/` — `event-engine`, `event-persistence`,
+  `event-scenarios` + `helpers.ts` (`eventPayloadOf`,
+  `syntheticFeaturesByArtist`, il fixture `listening-spike`)
+- `apps/web/src/i18n/locales/{it,en}.json` — la chiave
+  `insight.event.spike_genre`
+- `fixtures/scenarios/listening-spike.json` — **nuovo**
+- `scripts/generate-fixtures.mjs` — il builder
+  `buildListeningSpikeScenario()`
+- `docs/04-ANALYSIS-ALGORITHMS.md` — v1.3 (`§6.8` nuova, `§8.1`, `§9`)
+- `docs/08-COPY-I18N.md` — v0.11 (`§2.15`)
+- `docs/10-TESTING.md` — v1.2 (§3.3)
+- `docs/11-BACKLOG.md` — Story 2.3, la roadmap, la priorità, il changelog
+- `docs/state/stories/2.3-event-detector.md` — lo stato della story
+- `docs/state/sessions/70-event-detector.md` — **nuovo** (questo file)
+- `docs/state/_index.md` — la tabella di migration
+
+## Cross-refs
+
+- **#214** — l'issue di implementazione (claim `kilo-HP-ELITEBOOK-7d3f`)
+- **#178** — la ratifica di `04-ANALYSIS-ALGORITHMS.md` (D-A.1…D-A.5)
+- **#193** — l'emendamento D-A.6 (il mood-by-genre non esiste)
+- **#180** — la Story 2.1 (mood tracker), da cui dipende la 2.3
+- **#188** — la Story 4.1 (audio features): le valence/energy misurate che il
+  detector della valence consuma
+- **#211** — la Story 2.2 (era detector), l'ultima story completata prima di
+  questa
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -8997,8 +9157,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.23
-> Ultima modifica: 2026-10-30 — §34 l'inventario del bundle resta stale su una PR solo-docs (follow-up post-merge della Sessione 67)
+> Versione: 2.24
+> Ultima modifica: 2026-10-31 — §37 Story 2.3: l'Event Detector (Sessione 70, issue #214)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -10056,6 +10216,33 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 
 ---
 
+## 37. Issue #214 — Story 2.3: l'Event Detector (Sessione 70)
+
+**Branch**: `feat/214-event-detector`
+**PR**: **#215** (aperta il 2026-10-31)
+**Data**: 2026-10-31
+**Stato**: 🟡 **IN REVIEW** — implementazione completa e validata in locale
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 37-1 | P | Il blocco NEXT-STEP del README indicava la **2.3**, ma il repository **non aveva alcuna issue aperta**: la story non era claimabile | L'apertura dell'issue di implementazione è un atto **manuale**: senza di essa il puntatore è un consiglio, non un lavoro (come nella Sessione 69) | L'agente apre l'**issue #214** (`agent-ready`, con gli AC ricavati dalla spec ratificata) **prima** del claim, poi esegue la procedura ADR-0006 e riverifica il claim | `AGENTS.md` §"🚀 Primo task" · issue #214 |
+| 37-2 | P | Il trigger dichiarato per `spike_artist` («quota artista > 2× baseline») rende **qualsiasi** variazione di quota un «picco»: un artista che passa dal 20% al 25% della finestra è un picco | `04§6.2` ha due colonne: il **trigger** (il come) e la **descrizione** (il cosa: «ha **dominato** il tuo ascolto»). La prima, da sola, non distingue un picco da una variazione ordinaria | Il detector a quota ha **due condizioni**: la **dominanza** (quota ≥ `minDominantShare`, 30%) e il **picco** (quota > 2× la baseline). Il soggetto è il **primo per quota** della finestra. La regola generale: quando due colonne della stessa tabella si contraddicono, la **descrizione** prevale sul **trigger** | D.70.2 · `04§6.2` |
+| 37-3 | P | L'ultima finestra della griglia avrebbe prodotto un `volume_drop` **su ogni storia**: la sua media copre meno giorni della baseline, quindi è più bassa per costruzione | `04§6.3` scrive `while cursor <= latestDay`: l'ultima finestra è **troncata** | La finestra deve essere **completa**: l'ultima finestra utile è quella che finisce entro l'ultimo giorno osservato (`cursor + windowDays <= lastDay + 1`). La completezza della finestra è una **condizione di esistenza**, non un dettaglio | D.70.3 |
+| 37-4 | P | Un giorno senza ascolti, conteggiato a volume zero, avrebbe fatto crollare la media della baseline di un ascoltatore abituale ma saltellante: il detector lo avrebbe dichiarato un `volume_drop` senza che nulla fosse cambiato | Il volume misura «quanto hai ascolto **in tutti i giorni**», e un giorno vuoto è indistinguibile da un giorno in cui hai ascoltato poco | Un giorno **senza ascolti non esiste** nella mappa delle metriche: il volume misura «quanto hai ascoltato **nei giorni in cui hai ascoltato**», e i buchi sono il segnale del **detector di silenzio**. La stessa regola, applicata alla valence, evita che un periodo senza feature sembri «triste» (D.69.5) | D.70.5 |
+| 37-5 | P | Il rapporto di un artista **nuovo** (quota baseline 0) sarebbe infinito: `JSON.stringify(Infinity)` → `null`, e il payload persistito avrebbe un valore non finito | Il trigger è un rapporto, e il denominatore può essere zero | Il rapporto è definito rispetto alla **soglia di dominanza** quando il soggetto è assente in baseline: finito, confrontabile e coerente con il trigger | D.70.6 |
+| 37-6 | P | Un dedupe globale per sovrapposizione avrebbe impedito a un `volume_spike` e a un `valence_drop` sulla **stessa** finestra di coesistere — e il loop sui tre metriche di `04§6.3` avrebbe avuto un solo esito per finestra | Il dedupe di `04§6.3` dice «eventi non sovrapposti», senza dire **di quale tipo** | Il dedupe è **per tipo e per soggetto**: due eventi dello stesso tipo (e dello stesso artista o genere) che si sovrappongono sono lo stesso evento visto da due finestre diverse (la griglia avanza di 7 giorni e la finestra è lunga 14, quindi le finestre consecutive si sovrappongono); due eventi di **tipi diversi** coesistono, perché sono due letture diverse della stessa settimana | D.70.8 |
+| 37-7 | P | Una baseline di **due** giorni ha una deviazione standard rumore: lo z-score sarebbe arbitrario e l'evento non significherebbe nulla | `04§6.3` non dice quanti giorni servono perché la baseline sia utilizzabile | `minBaselineDays` (14, metà della baseline) è un **parametro versionato**: senza, il suo cambio non renderebbe `stale` gli eventi (MIG-3). Il config object dell'event detector passa quindi a **otto** chiavi, dichiarato in `04§9` | D.70.1 · `04§9` |
+
+**Lesson learned**: la specifica più pericolosa non è quella che manca, è quella che ha **due colonne in contraddizione**. `04§6.2` dichiara il trigger di `spike_artist` in una colonna e il suo significato in un'altra: la prima dice il *come* e, presa da sola, rende ogni variazione un picco; la seconda dice il *cosa* e porta la condizione che manca. La lezione operativa: quando un trigger e una descrizione non tornano insieme, **la descrizione prevale** — e la differenza va **dichiarata**, non risolta in silenzio.
+
+La seconda lezione è sulla **griglia**: una finestra troncata non è un dettaglio dell'implementazione, è un falso positivo garantito. Ogni detector che lavora su finestre scorrevoli deve dichiarare se la finestra è **completa**, e la risposta cambia il risultato su **ogni** storia, non su un caso limite.
+
+La terza è sulla **forma dei dati assenti**: un assente non è uno zero. La regola che rende confrontabili il volume e la valence è la stessa — un giorno senza ascolti e un giorno senza feature **non esistono** nella mappa — e la sua conseguenza non è tecnica ma semantica: i buchi sono un **segnale** (il silenzio), non un valore mancante da colmare con uno zero.
+
+**Verifica**: `pnpm run lint`, `pnpm run typecheck`, `pnpm run test` (611 test in `@ls/core`, 112 in `@ls/web`) e `pnpm run build` verdi; `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 2.3) sarà in una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 |----------|------|-----------|
@@ -10101,8 +10288,14 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 | 2.20 | 2026-10-30 (issue #196) | **§31 Issue #196 — ratifica del terzo host della CSP** (Sessione 66, claim `kilo-hp-elitebook-jrka`): 4 entry (31-1 **due AC della stessa spec non potevano essere veri insieme** — D-AF.1 prescrive `GET https://itunes.apple.com/search` e D-AF.9 elencava in `connect-src` solo l'API AB e il **CDN** dei file audio: l'host che **risponde** alla ricerca è un terzo host; le due decisioni erano state ratificate nella stessa PR (Sessione 62) senza che nessuna le confrontasse con l'endpoint che la prima richiede, e il conflitto è emerso due sessioni dopo, quando qualcuno ha dovuto implementare la ricerca; il project owner ha **ratificato l'opzione A** — `https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata** nella **v1.1** di `21-AUDIO-FEATURES.md`; l'opzione B (rivedere D-AF.1) non aveva alternative — Spotify `audio_features` è morto e MusicKit costa 99 $/anno — e l'opzione C (accettare la degradazione) avrebbe lasciato il mood tracker senza dati misurati, che D.A.1 vieta; 31-2 **il gate della CSP confrontava due artefatti della stessa costante** (la costante e il tag `<meta>`, che da essa è generato: i due non possono divergere) mentre la `connect-src` **dichiarata** in `12-DEVOPS.md` non era confrontata con nessuno — il test legge ora il blocco del documento e lo confronta con la costante; 31-3 la CSP vive in `12§5.1` ma tutto il progetto la cita come `12§2.1`: riferimento ereditato dalla v0.1 della spec, **non corretto** (fuori perimetro dell'issue), registrato come osservazione; 31-4 la sessione 65 era già pre-allocata da un altro agente (issue #193): la Sessione 66 usa il numero successivo). Consegnati: `21` v1.1 🟢 APPROVED (header, §2.1, §3, §10.2, §16, §18), `12` v1.1 (la CSP con i tre host), `11-BACKLOG.md` v1.6.27, `docs/INDEX.md` (righe `11`, `12`, `21` e "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti), la sessione 66 e i commenti del codice applicato (`apps/web/src/security/`) — **la CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197, la ratifica allinea la **dichiarazione** al codice |
 | 2.21 | 2026-10-30 (issue #201) | **§32 Atti del Boss — ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0** (Sessione 67, claim `kilo-HP-EliteBook-b7x2`): 6 entry (32-1 gli edge case geo erano **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** da ListenBrainz (E11..E13) e Last.fm (E14..E18): rinumerati in **E19..E24**; 32-2 il delta su `02` era ancorato a **v1.3 / Dexie v2→v3** mentre lo schema è **v1.6 / Dexie v5**: riallineato, e la sua applicazione è dichiarata deliverable della Story 1.6; 32-3 la **revoca di D.39.8** era dichiarata ma **mai applicata** (`youtube-music.md` diceva ancora «sempre scartati al parse»): applicata, `locationInfos` dietro il toggle `ytLocationInfos`; 32-4 la motivazione su MaxMind GeoLite2 legava l'obiezione alla licenza **Apache-2.0** dell'app: riscritta — l'obiezione è la EULA di MaxMind, indipendente dalla licenza dell'app; 32-5 `19§12` elencava come aperto un punto **già deciso** (issue #108): chiuso; 32-6 la **CSP applicata** non dichiara l'host da cui arriva il WASM di Essentia, che `21§6.5` dà come scaricato on-demand: dichiarato come requisito della story di implementazione, con la lezione della issue #196). Consegnati: `LICENSE` (AGPL-3.0 canonico), `package.json` (`"license"`), `README.md`, `19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, e l'allineamento di `03-ADAPTERS/youtube-music.md` (v2.0), `01-PLATFORMS.md` (v0.8), `09-PRIVACY-SECURITY.md` (v0.7), `08-COPY-I18N.md` (v0.9), `12-DEVOPS.md` (v1.2, §5.3 licenza e offerta del sorgente), `17-DEV-NOTES.md` (v0.3, P10), `21-AUDIO-FEATURES.md` (v1.2, §19 punto 1 chiuso), `11-BACKLOG.md` (v1.6.28, tre story geo), `docs/INDEX.md`, e i 6 nuovi state file (sessione 67 + le story 2.2, 2.3, 1.6, 4.4, 3.4). Aperta l'issue **#202**: l'offerta del sorgente richiesta dal §13 della licenza |
 | 2.22 | 2026-10-30 (issue #201) | **§33 Allineamento del "prossimo passo"** (follow-up post-merge della Sessione 67): il blocco NEXT-STEP generato indicava **1.6** (l'aggregatore ordina le story migrate **per id**, e «1.6» < «2.2») mentre la prosa di `INDEX.md` e la lista di priorità di `11-BACKLOG.md` indicavano **2.2/2.3**. Il project owner ha scelto **geo prima**: la tranche geo sale al posto 13 della lista di priorità e la prosa dell'INDEX è riallineata al puntatore. Nessuna modifica al codice dell'aggregatore, nessun gate nuovo. Documenti toccati: `11-BACKLOG.md` (v1.6.29), `docs/INDEX.md`, `docs/18-DEV-LOG.md` (v2.21) |
-| 2.24 | 2026-10-31 (issue #205) | **§35 Issue #205 — Story 1.6 implementata** (fondazione geo e contesto di ascolto, Sessione 68, claim kilo-HP-ELITEBOOK-q7v2): 7 entry (35-1 la **claim abbandonata** dell'issue #205 (worktree pulita, zero commit, nessun processo né sessione, TTL di 12h non ancora scaduto) è stata presa con takeover **documentato in issue** (stale-release: con l'evidenza + claim: riverificato come unico claim attivo) riprendendo la worktree esistente invece di crearne una gemella; 35-2 il **paese di riferimento** era sbagliato (DE invece di IT): la moda pesava i *chiavi* della mappa dei conteggi invece dei valori — aggiunto modeOfCounted; 35-3 il **viaggio** era riconosciuto solo dal terzo giorno: il conteggio dei giorni esteri guardava all'indietro dal giorno dello slot, ora copre l'intero *run*; 35-4 uno **spostamento** ricorrente veniva classificato home (R4 non aveva un vincolo di durazione): aggiunto homeMinSessionMs (25 min, la soglia di R6); 35-5 **way** non era prodotto da nessuna regola pur essendo un kind della tassonomia: è il complemento di R1 (R1-away, confidenza 0.5); 35-6 l'AC citava «**E22**» mentre la spec ratificata dichiara **E19**: allineati backlog e state file alla numerazione del documento 🟢; 35-7 il modulo context/ sta **fuori** da nalysis/ perché il layer di analisi è puro e non ha dipendenze dal DB ( 5§9): stessa forma di enrichment/, subpath @ls/core/context). Consegnati: il delta su  2-DATA-SCHEMA.md **v1.7** (campi city*, ContextPeriod, tabella contexts nello schema Dexie **v6**, toggle etainCountry/etainCity/etainDeviceType/etainDeviceDetail/deriveContext, MIG-5), il **classificatore L1** (regole R1..R7, soglia 0.5, derivedVersion dai parametri, slot = giorno locale × dispositivo) con la persistenza dei periodi (ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixtures/scenarios/geo-context.json, generato da scripts/generate-fixtures.mjs geo) e **39 test** nuovi in @ls/core |
+| 2.24 | 2026-10-31 (issue #205) | **§35 Issue #205 — Story 1.6 implementata** (fondazione geo e contesto di ascolto, Sessione 68, claim kilo-HP-ELITEBOOK-q7v2): 7 entry (35-1 la **claim abbandonata** dell'issue #205 (worktree pulita, zero commit, nessun processo né sessione, TTL di 12h non ancora scaduto) è stata presa con takeover **documentato in issue** (stale-release: con l'evidenza + claim: riverificato come unico claim attivo) riprendendo la worktree esistente invece di crearne una gemella; 35-2 il **paese di riferimento** era sbagliato (DE invece di IT): la moda pesava i *chiavi* della mappa dei conteggi invece dei valori — aggiunto modeOfCounted; 35-3 il **viaggio** era riconosciuto solo dal terzo giorno: il conteggio dei giorni esteri guardava all'indietro dal giorno dello slot, ora copre l'intero *run*; 35-4 uno **spostamento** ricorrente veniva classificato home (R4 non aveva un vincolo di durazione): aggiunto homeMinSessionMs (25 min, la soglia di R6); 35-5 **way** non era prodotto da nessuna regola pur essendo un kind della tassonomia: è il complemento di R1 (R1-away, confidenza 0.5); 35-6 l'AC citava «**E22**» mentre la spec ratificata dichiara **E19**: allineati backlog e state file alla numerazione del documento 🟢; 35-7 il modulo context/ sta **fuori** da nalysis/ perché il layer di analisi è puro e non ha dipendenze dal DB ( 5§9): stessa forma di enrichment/, subpath @ls/core/context). Consegnati: il delta su  2-DATA-SCHEMA.md **v1.7** (campi city*, ContextPeriod, tabella contexts nello schema Dexie **v6**, toggle 
+etainCountry/
+etainCity/
+etainDeviceType/
+etainDeviceDetail/deriveContext, MIG-5), il **classificatore L1** (regole R1..R7, soglia 0.5, derivedVersion dai parametri, slot = giorno locale × dispositivo) con la persistenza dei periodi (
+ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixtures/scenarios/geo-context.json, generato da scripts/generate-fixtures.mjs geo) e **39 test** nuovi in @ls/core |
 | 2.23 | 2026-10-30 (issue #201) | **§34 L'inventario del bundle resta stale su una PR solo-docs** (follow-up post-merge della Sessione 67): dopo il merge della PR #206 il blocco inventory di `docs/BUNDLE.md` dichiarava 1626.2 KB mentre i file in catalogo pesavano 1628.8 KB. Causa: `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`, quindi una PR che tocca solo `docs/` — i file **di cui l'inventario misura la dimensione** — non lo attiva, e il check dell'aggregator in CI è warning-only. Drift chiuso con una PR `docs:` separata (aggregator eseguito in locale); **la causa strutturale resta aperta** e va sottoposta al project owner: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo. Lezione: un dato derivato dalle **dimensioni** non si aggiorna da solo quando i **contenuti** cambiano |
+| 2.24 | 2026-10-31 (issue #214) | **§37 Story 2.3 implementata** (Event Detector): il motore in `packages/core/src/analysis/event/` — metriche giornaliere (volume in ore, valence/energy medie ponderate, diversità, artisti nuovi), detector a **z-score** su griglia settimanale (baseline 60gg, finestra 14gg, soglia 2.0), detector a **quota** per `spike_artist`/`spike_genre` (dominanza + rapporto 2× sulla baseline), detector specialistici per `silence` ed `exploration`, dedupe per tipo e soggetto; la persistenza sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`); il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non c'è alcun evento basato sulla valence. **43 test** nuovi in `@ls/core`. 7 problemi/fix/lesson (37-1…37-7): l'issue `agent-ready` mancante, il **trigger** di `04§6.2` che rende ogni variazione un picco, la **finestra troncata** che produce un `volume_drop` garantito, il giorno **senza ascolti** che non è uno zero, il **rapporto infinito** di un artista nuovo, il **dedupe** per tipo e per soggetto, la baseline di due giorni |
 | 2.25 | 2026-10-31 (issue #211) | **§36 Issue #211 — Story 2.2 implementata** (Era Detector, Sessione 69, claim `kilo-HP-ELITEBOOK-4f2k`): 6 entry (36-1 il blocco NEXT-STEP non è un claim: senza issue `agent-ready` la story indicata non è lavorabile, e il repository non aveva nessuna issue aperta; 36-2 un fixture **casuale** non verifica un algoritmo che cerca un salto — il `lockdown-2020` non ha un cambio di gusto e il suo atteso era una congettura, perciò la verifica è stata spostata sul fixture composto `era-shift.json` (96 eventi, confine dichiarato al giorno 56); 36-3 il titolo della schermata avrebbe prodotto «Era Era Malinconia Indie»: la label contiene già il prefisso, `era.title` è diventato un pass-through; 36-4 senza feature misurate l’era non viene prodotta (`avgValence`/`avgEnergy` non sono nullable in `02§4`): niente segnali inventati (D-A.1); 36-5 il ricalcolo per periodo avrebbe lasciato ere orfane quando i confini si spostano → `replaceAllInsightsOfType`; 36-6 **la shell non è un editor**: `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha raddoppiato la codifica di un documento (mojibake + BOM), ripristinato con `git checkout --`). Consegnato: il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection**, filtro `minEraDays`), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`, D-A.4), il plug-in `createEraGenerator` (`04§8.1`) e **37 test** nuovi in `@ls/core`. Allineati `04` v1.2 (`§8.1`), `08` v0.10 (`insight.era.*`, `era.title`), `10` §3.3, `11` (Story 2.2 ✅, roadmap, priorità), `INDEX.md` (stato documenti e prossimo passo) |
 
 ---
@@ -10320,6 +10513,8 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/2.1-mood-tracker.md` | ✅ creata | Story 2.1 (Mood Tracker) — ⛔ **blocked**: senza le audio features dell'EPIC 4.1 il mood tracker non produce insight (decisione D-A.1); issue #180 (`needs-spec`) |
 | `state/stories/2.4-memory-engine.md` | ✅ creata | Story 2.4 (Memory Engine) — ✅ **done** (Sessione 61, issue #179, PR #185, merge `40ad0b7`): i 5 tipi di ricordo (`04§7.2`), il feed per rilevanza (`04§7.4`), la `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4) |
 | `state/stories/2.2-era-detector.md` | ✅ creata | Story 2.2 (Era Detector) — ✅ **done** (Sessione 69, issue #211): **change point detection** su firme settimanali (`04§5`, nessun clustering non supervisionato), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`) e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8) |
+| `state/sessions/70-event-detector.md` | ✅ creata | Sessione 70 (issue #214): **implementazione della Story 2.3** (Event Detector) — il detector a **z-score** su griglia settimanale, il detector a **quota** per `spike_artist`/`spike_genre`, i detector specialistici per `silence` ed `exploration`, il dedupe per tipo e soggetto, la persistenza degli eventi con `derivedVersion` (MIG-3) e il fixture di scenario `listening-spike.json` |
+| `state/stories/2.3-event-detector.md` | ✅ creata | Story 2.3 (Event Detector) — ✅ **done** (Sessione 70, issue #214): gli **otto** tipi di evento di `02§4` (`04§6`), il plug-in dell'orchestratore (`04§8.1`), la descrizione resa dal resolver i18n (`insight.event.*`, D-A.4) e il ricalcolo che sostituisce **l'insieme** degli eventi |
 | `state/stories/4.1-audio-features.md` | ✅ creata | Story 4.1 (Pipeline audio features) — ⬚ **todo** (Sessione 62, issue #187): la spec `21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (ratificata al merge della PR di ratifica), le nove decisioni D-AF.1…D-AF.9 sono ratificate e l'issue di implementazione **#188** è `agent-ready`. `status: todo` ⇒ il blocco NEXT-STEP del README punta alla 4.1, primo anello della catena 4.1 → 2.1 → 2.2/2.3 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
@@ -13842,6 +14037,130 @@ manca dell'host che la CSP deve consentire.
 
 
 
+===== FILE: docs/state/sessions/68-geo-foundation.md =====
+
+---
+number: 68
+title: "Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205)"
+date: 2026-10-31
+state: 🟢
+merged: true
+merged_commit: 68c27e5
+merged_date: 2026-10-31
+branch: feat/205-geo-context-foundation
+pr: 209
+claim: kilo-HP-ELITEBOOK-q7v2
+cross_refs: [205, 201, 108, 109]
+tags: [privacy, db, analysis, phase-2]
+---
+
+# Sessione 68 — Story 1.6: fondazione geo e contesto di ascolto (issue #205)
+
+## Sintesi
+
+La Story 1.6 applica il **delta ratificato nella Sessione 67** (`19-GEO-CONTEXT.md`
+v1.0 🟢 APPROVED): lo schema passa a **v1.7** (Dexie **v5→v6**) e nasce il
+**classificatore L1** del contesto di ascolto.
+
+Due deliverable distinti:
+
+- **il delta su `02-DATA-SCHEMA.md`**: i tre campi derivati `city`/`citySource`/
+  `cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la
+  tassonomia vincolante `CONTEXT_KINDS`, i toggle `retainCountry`/
+  `retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, la
+  tabella `contexts` (schema Dexie v6) e la politica **MIG-5** (il ricalcolo del
+  contesto è esplicito e non azzera i campi già persistiti);
+- **il classificatore L1** in `packages/core/src/context/`: le regole R1..R7
+  nell'ordine dichiarato, la soglia di aggregazione 0.5, i parametri
+  versionati (D-B.3) e la persistenza dei periodi con `recompute()` e
+  verdetto utente (`userLabel`).
+
+## Trigger
+
+Issue **#205** (`size:L`, `agent-ready`, `area:db`, `area:analysis`,
+`phase-2`), aperta dopo la ratifica della Sessione 67. La claim precedente
+(`kilo-HP-ELITEBOOK-fa3c`, 2026-10-30T21:21Z) era **abbandonata** — worktree
+pulita, zero commit, zero WIP, nessun processo né sessione attiva — e il TTL
+di 12 ore non era ancora scaduto: il takeover è documentato in issue con
+`stale-release:` (con l'evidenza) e poi `claim:` (`kilo-HP-ELITEBOOK-q7v2`),
+riverificato come unico claim attivo. Worktree `ls-205-geo-context-foundation`,
+branch `feat/205-geo-context-foundation` (ripresa della worktree abbandonata:
+non c'era WIP da preservare).
+
+## Cosa è stato consegnato
+
+- **Schema (`packages/core/src/schema/`)**: `ListenEvent.city*`, `PrivacySettings`
+  con i 5 toggle nuovi, `ContextPeriod` + `CONTEXT_KINDS`/`ContextKind`.
+- **DB (`packages/core/src/db/`)**: `DB_SCHEMA_V6` con la tabella `contexts`,
+  migrazione non distruttiva (upgrade che azzera i campi città sugli ascolti
+  esistenti), `loadUserTimezone`/`saveUserTimezone` (chiave `app.timezone`).
+- **Classificatore (`packages/core/src/context/`)**: `classifier.ts` (sessioni
+  derivate, slot = giorno locale × dispositivo, paese di riferimento, indice di
+  ricorrenza settimanale, R1..R7), `engine.ts` (periodi deterministici, id
+  `ctx-<kind>-<startTime>`), `storage.ts` (persistenza + verdetto utente),
+  `recompute.ts` (orchestratore), `localTime.ts` (ora locale via `Intl`, senza
+  dipendenze), `derivedVersion.ts` e `types.ts` (i parametri ratificati).
+- **Pipeline (`packages/core/src/adapters/pipeline.ts`)**: i toggle sono
+  applicati **in scrittura** (`applyDeviceTypeConsent`), il `country` resta
+  conservato indipendentemente da `retainIp` (issue #108).
+- **Fixture**: `fixtures/scenarios/geo-context.json`, generato da
+  `scripts/generate-fixtures.mjs geo` — 4 settimane di cronologia composta
+  (casa serale, lavoro diurno, spostamenti brevi, 3 giorni di viaggio in
+  Germania, una serata in auto).
+- **39 test** nuovi: regole R1..R7 una per una, fixture di scenario,
+  persistenza (`recompute()`, `stale`, verdetto utente, toggle
+  `deriveContext`, fuso) e toggle privacy nell'import.
+
+## Scelte dichiarate
+
+Sette scelte che la spec non explicita sono dichiarate in
+`docs/state/stories/1.6-geo-foundation.md` (S1..S7): `away` come complemento
+di R1, R4 vincolata alla durata delle sessioni (25 minuti) perché uno
+spostamento ricorrente non venga classificato `home`, il viaggio riconosciuto
+sull'intero *run* di giorni esteri, il modulo in `context/` (il layer
+`analysis` è puro e non ha dipendenze dal DB), il fuso come dato in
+`settings`, l'id deterministico del periodo e la forma del modulo.
+
+## Discrepanza rilevata
+
+L'AC del backlog e il state file citavano «**E22**» per la soglia di
+aggregazione, ma `19-GEO-CONTEXT.md` §10 (🟢 APPROVED) dichiara **E19**
+(«nessun cluster dominante»): la numerazione del documento ratificato vince e
+l'AC è stato allineato a **E19** nel backlog e nello state file.
+
+## Fuori perimetro e dichiarato
+
+- **L2 (città)**: la derivazione dal database MMDB on-demand è la Story 4.4;
+  questa story fissa solo il **contratto** (i campi esistono e sono nullable).
+- **UI dei toggle**: Story 3.x. I toggle esistono nello schema e sono applicati
+  in scrittura; l'interfaccia che li espone è un'altra tranche.
+- **Il nastro contesto**: Story 3.4 (consuma i `ContextPeriod`).
+
+## Esito post-merge
+
+La PR **#209** è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit
+`68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README; GitGuardian). L'issue **#205** è chiusa
+con `status:done` (applicato da `auto-status-done`), le label `agent-ready` /
+`in-progress` / `status:in-review` sono rimosse e il commento `release:` è
+automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`).
+
+La **pulizia git locale** è stata eseguita con `scripts/post-merge.ps1`:
+`git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi
+con `node_modules` su Windows) e la rimozione è passata con `rd /s /q` e
+prefisso `\\?\` — il **fallimento noto**, non una regressione. I passi
+restanti sono passati: `main` allineato a `origin/main` (`68c27e5`), merge
+verificato via `gh`, branch remoto già assente (eliminato da
+`auto-branch-cleanup`), branch locale eliminato con `git branch -d`, prune +
+audit finale (`post-merge.ps1 -Check` esce 0, nessun residuo).
+
+Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`,
+`auto-state-aggregate` e `auto-bundle`. Il presente doc-sync di chiusura è in
+una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+
+
+
+
 ===== FILE: docs/state/sessions/69-era-detector.md =====
 
 ---
@@ -14006,6 +14325,170 @@ non può verificare un algoritmo che cerca un salto** — il salto deve essere
 - **#193** — l'emendamento D-A.6 (il mood-by-genre non esiste)
 - **#180** — la Story 2.1 (mood tracker), da cui dipende la 2.2
 - **#205** — la Story 1.6 (geo), l'ultima story completata prima di questa
+
+
+
+===== FILE: docs/state/sessions/70-event-detector.md =====
+
+---
+number: 70
+title: "Story 2.3 — Event Detector (issue #214)"
+date: 2026-10-31
+state: 🟡
+merged: false
+branch: feat/214-event-detector
+pr: 0
+claim: kilo-HP-ELITEBOOK-7d3f
+cross_refs: [214, 211, 180, 188, 178]
+tags: [analysis, phase-2]
+---
+
+# Sessione 70 — Story 2.3: Event Detector (issue #214)
+
+## Sintesi
+
+La Story 2.3 implementa il **rilevatore di eventi**: le anomalie
+significative della storia di ascolto — un picco di volume, un crollo
+emotivo, un'esplosione di novità, un silenzio — diventano **insight**
+narrativi con la loro confidenza, secondo l'algoritmo di
+`docs/04-ANALYSIS-ALGORITHMS.md` **v1.3 🟢 APPROVED** (§6, ratificata nella
+Sessione 59, issue #178).
+
+L'implementazione copre **tutti gli otto tipi** di `02§4`, ciascuno con un
+produttore dichiarato: il detector a **z-score** (§6.3) produce
+`volume_spike`, `volume_drop`, `valence_rise`, `valence_drop` ed
+`exploration`; il detector a **quota** (§6.2) produce `spike_artist` e
+`spike_genre`; i detector **specialistici** (§6.4) producono `silence` ed
+`exploration`.
+
+Il pacchetto consegnato:
+
+- **il motore** (`packages/core/src/analysis/event/`): `metrics.ts`,
+  `detect.ts`, `engine.ts`, `derivedVersion.ts`, `i18n.ts`, `types.ts`;
+- **la persistenza**: gli insight di tipo `event` con `derivedVersion` e il
+  ricalcolo che sostituisce **l'insieme** degli eventi
+  (`replaceAllInsightsOfType`);
+- **il plug-in** `createEventGenerator` dell'orchestratore (`04§8.1`, D-A.5:
+  il contratto non cambia);
+- **il fixture di scenario** `fixtures/scenarios/listening-spike.json`;
+- **43 test** nuovi in `@ls/core`.
+
+## Trigger
+
+Il blocco NEXT-STEP del README indicava la **2.3** come prima story
+lavorabile (è la prima non-done fra quelle migrate in `docs/state/stories/`),
+ma **non esisteva alcuna issue `agent-ready`**: il repository non aveva
+nessuna issue aperta, e la story non era claimabile. L'agente ha quindi
+aperto la **issue #214** (`size:L`, `agent-ready`, `area:analysis`,
+`phase-2`) con gli AC ricavati dalla spec ratificata, poi ha eseguito la
+procedura di claim (ADR-0006): label `in-progress` + commento `claim:
+kilo-HP-ELITEBOOK-7d3f`, riverificato come **unico** claim attivo.
+
+Worktree `ls-214-event-detector`, branch `feat/214-event-detector` (creata
+con `scripts/setup-worktree.ps1 214`, push early D.20.2).
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| Il **motore** dell'event detector | `packages/core/src/analysis/event/` |
+| Il plug-in dell'orchestratore | `createEventGenerator` in `analysis/pipeline.ts` |
+| Il ricalcolo dell'**insieme** degli eventi | `replaceAllInsightsOfType` in `db/insights.ts` |
+| I **template** della descrizione | `insight.event.*` in `apps/web/src/i18n/locales/{it,en}.json` |
+| Il **fixture di scenario** | `fixtures/scenarios/listening-spike.json` (`scripts/generate-fixtures.mjs spike`) |
+| I **43 test** | `analysis/__tests__/event-{engine,persistence,scenarios}.test.ts` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| **D.70.1** | La **baseline** e la **finestra** non si sovrappongono: la finestra è `[cursor, cursor + windowDays)` e la baseline i `baselineDays` giorni immediatamente precedenti. Una baseline con meno di `minBaselineDays` giorni **con dati** non è utilizzabile | Il pseudocodice di `04§6.3` scrive `dailyMetrics[cursor - baselineDays .. cursor]` e `dailyMetrics[cursor .. cursor + windowDays]`: le due finestre si sovrappongono al giorno `cursor`, e la baseline avrebbe 61 giorni invece di 60. Con una baseline di **due** giorni la deviazione standard è rumore, e lo z-score diventa arbitrario: `minBaselineDays` (14, metà della baseline) è la condizione che rende lo z-score calcolabile. Il parametro è **versionato** (`EventConfig.minBaselineDays`): senza, un suo cambio non renderebbe `stale` gli eventi (MIG-3) |
+| **D.70.2** | Il detector a **quota** ha due condizioni: la **dominanza** (la quota del soggetto nella finestra supera `minDominantShare`) e il **picco** (la quota supera `EVENT_QUOTA_RATIO` volte la quota in baseline) | `04§6.2` dichiara il trigger («quota artista > 2× baseline») ma non dice cosa distingue un picco da una variazione ordinaria: la sola colonna «Trigger» rende *qualsiasi* variazione un picco. La **descrizione** della stessa tabella («ha dominato il tuo ascolto») porta la condizione mancante: il soggetto deve **dominare** la finestra. Il soggetto è **il primo per quota** della finestra (un solo artista o genere per finestra), con il pareggio risolto in modo deterministico (id dell'artista, ordine alfabetico del genere) |
+| **D.70.3** | La finestra deve essere **completa**: l'ultima finestra utile è quella che finisce entro l'ultimo giorno osservato (`cursor + windowDays <= lastDay + 1`) | Il pseudocodice dice `while cursor <= latestDay`: l'ultima finestra sarebbe **troncata**, con meno giorni della baseline. La sua media sarebbe più bassa per costruzione, e il detector produrrebbe un `volume_drop` **sistematico** su ogni storia — un falso positivo garantito, non un evento |
+| **D.70.4** | La deviazione standard è **popolazionale** (÷N) | `04§6.3` scrive `stats(baseline[metric])` senza dire quale. La baseline è l'intera **popolazione** dei giorni osservati, non un campione: con N ≥ 14 la differenza è marginale, ma la formula deve essere una sola e dichiarata |
+| **D.70.5** | Un giorno **senza ascolti** non è un giorno a volume zero: è un giorno **assente** dalla mappa delle metriche. Vale per il volume **e** per la valence: un giorno senza feature è assente, non a valence 0 | Il volume misura «quanto hai ascolto **nei giorni in cui hai ascoltato**». Conteggiare i buchi come zero farebbe crollare la media della baseline di un ascoltatore abituale ma saltellante, e il detector lo dichiarerebbe un `volume_drop` senza che nulla sia cambiato. Per la valence la regola è la stessa di D.69.5: trattare un dato assente come zero falserebbe lo z-score verso il basso — un periodo senza feature sembrerebbe «triste» |
+| **D.70.6** | Il rapporto del detector a quota è definito rispetto alla **soglia di dominanza** quando il soggetto è assente in baseline (`windowShare / minDominantShare`), altrimenti rispetto alla quota in baseline (`windowShare / baselineShare`) | Un artista nuovo ha quota baseline **0**: il rapporto sarebbe infinito, e `Infinity` non è un numero serializzabile in JSON (`JSON.stringify(Infinity)` → `null`) né un valore finito nel payload persistito. La formula scelta mantiene il rapporto finito **e** confrontabile: il trigger resta il rapporto 2× (D.70.2) |
+| **D.70.7** | La finestra dell'**esplorazione** è lunga `strideDays` giorni (7 per default, come i «7gg» di `04§6.2`) ed è allineata alla **stessa griglia** degli altri detector; il detector parte dalla stessa soglia (`earliestDay + baselineDays`) | `04§6.4` dice «7-day windows» ma `04§6.5` non ha un parametro per la lunghezza della finestra dell'esplorazione, e `04§9` non lo elenca nel config object. Usare `strideDays` — che è già un parametro versionato e vale 7 per default — evita di aggiungere un nono parametro e tiene i due detector sulla stessa griglia settimanale. La soglia di partenza è la stessa degli altri detector perché i **primi giorni** della storia hanno per definizione tutti gli artisti «nuovi»: contarli produrrebbe un evento di esplorazione all'inizio di **ogni** storia |
+| **D.70.8** | Il **dedupe** è per **tipo e per soggetto**: due eventi dello stesso tipo (e dello stesso artista o genere) che si sovrappongono sono lo stesso evento visto da due finestre diverse; si tiene quello con la confidenza più alta. Due eventi di **tipi diversi** sulla stessa finestra coesistono | La griglia avanza di `strideDays` (7) giorni e la finestra è lunga `windowDays` (14): le finestre consecutive **si sovrappongono**, e un picco persistente viene visto da più finestre. Il deduve di `04§6.3` esiste per questo. Se il dedupe fosse globale per sovrapposizione, un `volume_spike` e un `valence_drop` sulla stessa finestra — due letture diverse della stessa settimana — non potrebbero coesistere, e il loop sui tre metriche di `04§6.3` avrebbe un solo esito per finestra |
+
+## Discrepanza rilevata
+
+L'AC del backlog chiedeva «**Falsi positivi < 10%** su fixture di test». Un
+criterio così richiede una **misura**, non un'asserzione: il fixture
+`listening-spike` dichiara **quattro** tipi di evento attesi nella baseline
+(`volume_spike` e `valence_drop` per il picco, `silence` per i 3 giorni
+senza ascolti, `exploration` per gli artisti nuovi) e **nessuno** nella
+baseline. La verifica è quindi esatta e verificabile: **zero** eventi
+indebiti sulle finestre della baseline, e i tipi attesi tutti presenti.
+
+Il secondo AC («Z-score o IQR con finestra documentata») è soddisfatto dal
+**z-score**: la finestra è di 14 giorni, la baseline di 60, e il passo di 7
+(`04§6.5`).
+
+Il terzo AC («Rileva spike/crolli volume, valence drop/rise, exploration,
+silence») è coperto dai **otto** tipi dell'enum di `02§4`: i sei citati
+esplicitamente più `spike_artist` e `spike_genre`, che `04§6.2` dichiara e
+che sono coperti dal detector a quota.
+
+## Fuori perimetro e dichiarato
+
+- **La session segmentation** (`04§2`): differita — serve a
+  `ListeningSession`
+- **Il pattern analyzer** (`04§4`): differita — è un generatore a sé
+- **La UI degli eventi** (schermata ⑧): Story 3.x. La descrizione è una
+  stringa **resa** (D-A.4), con i template dichiarati in
+  `08-COPY-I18N.md` §2.15
+- **Il collegamento evento → contesto** (geolocalizzazione, `19-GEO-CONTEXT.md`):
+  Story 3.4 / 4.4
+
+## Verifica
+
+- `pnpm run lint` · `pnpm run typecheck` · `pnpm run test` (611 test in
+  `@ls/core`, 112 in `@ls/web`) · `pnpm run build` → verdi
+- `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+
+## Lesson learned
+
+| # | Osservazione |
+|---|---|
+| 70-1 | **Il blocco NEXT-STEP non è un claim**: senza un'issue `agent-ready` la story indicata non è lavorabile. Come nella Sessione 69, l'apertura dell'issue è il primo atto dell'agente, non un adempimento |
+| 70-2 | **Una colonna di trigger senza la descrizione è una specifica a metà**: `04§6.2` dichiara «quota artista > 2× baseline» e, nella colonna accanto, «ha dominato il tuo ascolto». La prima riga, da sola, rende ogni variazione un picco: è la seconda a dire cosa distingue un picco. Quando due colonne della stessa tabella si contraddicono, la **descrizione** (il cosa) prevale sul **trigger** (il come) — ed è la differenza a dichiarare, non da nascondere |
+| 70-3 | **Una finestra troncata è un falso positivo garantito**: l'ultima finestra di una griglia ha meno giorni della baseline, e la sua media è più bassa per costruzione. Il detector l'avrebbe letta come un `volume_drop` su **ogni** storia. La completezza della finestra è una condizione di esistenza, non un dettaglio |
+| 70-4 | **Un assente non è uno zero**: la regola che rende il volume confrontabile è che un giorno senza ascolti non esista nella mappa delle metriche. La stessa regola, applicata alla valence, evita che un periodo senza feature sembri «triste» (D.69.5): due detector, la stessa lezione |
+| 70-5 | **L'infinito non è un numero**: il rapporto di un artista nuovo (quota baseline 0) è infinito, e `Infinity` non sopravvive alla serializzazione JSON. Il payload persistito deve avere solo numeri finiti: il rapporto è stato definito rispetto alla soglia di dominanza |
+| 70-6 | **Il blocco NEXT-STEP non conosce le dipendenze**: dopo la 2.3 l'aggregatore indica la **3.4** (nastro contesto), che dichiara `[DEP:4.4]` — e la 4.4 non è fatta. L'aggregatore filtra `done`/`blocked`/`wontdo`, non `depends_on` | Il contratto dell'agregatore (ADR-0008 V3) è «la prima story **non-done e non bloccata**»: la dipendenza fra story è un fatto che vive solo nel `depends_on` del suo file di stato | La dipendenza è stata resa **esplicita nella prosa del README** (che è dell'agente, non dell'agregatore): prima di claimare la story indicata, leggere il suo `depends_on`. Il caso è dichiarato qui perché **cambiare l'aggregatore** è una modifica di policy (ADR-0008) e va trattata come issue a sé, non dentro una story di analisi |
+
+## Documenti aggiornati
+
+- `packages/core/src/analysis/event/` — **nuovo** (6 file)
+- `packages/core/src/analysis/pipeline.ts` — `createEventGenerator`
+- `packages/core/src/analysis/index.ts` — gli export
+- `packages/core/src/analysis/__tests__/` — `event-engine`, `event-persistence`,
+  `event-scenarios` + `helpers.ts` (`eventPayloadOf`,
+  `syntheticFeaturesByArtist`, il fixture `listening-spike`)
+- `apps/web/src/i18n/locales/{it,en}.json` — la chiave
+  `insight.event.spike_genre`
+- `fixtures/scenarios/listening-spike.json` — **nuovo**
+- `scripts/generate-fixtures.mjs` — il builder
+  `buildListeningSpikeScenario()`
+- `docs/04-ANALYSIS-ALGORITHMS.md` — v1.3 (`§6.8` nuova, `§8.1`, `§9`)
+- `docs/08-COPY-I18N.md` — v0.11 (`§2.15`)
+- `docs/10-TESTING.md` — v1.2 (§3.3)
+- `docs/11-BACKLOG.md` — Story 2.3, la roadmap, la priorità, il changelog
+- `docs/state/stories/2.3-event-detector.md` — lo stato della story
+- `docs/state/sessions/70-event-detector.md` — **nuovo** (questo file)
+- `docs/state/_index.md` — la tabella di migration
+
+## Cross-refs
+
+- **#214** — l'issue di implementazione (claim `kilo-HP-ELITEBOOK-7d3f`)
+- **#178** — la ratifica di `04-ANALYSIS-ALGORITHMS.md` (D-A.1…D-A.5)
+- **#193** — l'emendamento D-A.6 (il mood-by-genre non esiste)
+- **#180** — la Story 2.1 (mood tracker), da cui dipende la 2.3
+- **#188** — la Story 4.1 (audio features): le valence/energy misurate che il
+  detector della valence consuma
+- **#211** — la Story 2.2 (era detector), l'ultima story completata prima di
+  questa
 
 
 
@@ -14742,11 +15225,17 @@ id: "2.3"
 title: "Event Detector"
 phase: 2
 area: analysis
-status: todo
+status: done
 priority: I
 depends_on: ["2.1"]
+issue: 214
+branch: "feat/214-event-detector"
+pr: 0
+claim: kilo-HP-ELITEBOOK-7d3f
 spec_refs:
   - docs/04-ANALYSIS-ALGORITHMS.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/08-COPY-I18N.md
 ---
 
 ## Descrizione
@@ -14755,24 +15244,97 @@ Il rilevatore di **eventi**: riconosce nella storia di ascolto i momenti che
 meritano una lettura — un cambio di genere, una sessione eccezionale, un
 picco di intensità — e li rende **insight** narrativi con la loro confidenza.
 
-La story è **sbloccata**: la dipendenza `[DEP:2.1]` è soddisfatta dalla Story
+La story era **sbloccata**: la dipendenza `[DEP:2.1]` è soddisfatta dalla Story
 2.1 (Sessione 63, merge `d018a26`).
+
+## Stato
+
+✅ **DONE** — implementata nella Sessione 70 (issue **#214**, branch
+`feat/214-event-detector`, worktree `ls-214-event-detector`). Il merge commit
+viene scritto nel doc-sync di chiusura, dopo il merge della PR (non è noto al
+momento della stesura di questo file).
+
+Consegnato:
+
+- **il motore** (`packages/core/src/analysis/event/`): `metrics.ts` (le
+  metriche giornaliere: volume in ore, valence/energy medie ponderate,
+  diversità, artisti nuovi), `detect.ts` (i quattro detector e il dedupe),
+  `engine.ts` (il motore e l'id deterministico), `derivedVersion.ts`,
+  `i18n.ts`, `types.ts`;
+- **i quattro detector**: z-score generico su griglia settimanale (`volume`,
+  `valence`, `diversity`), detector a quota (`spike_artist`, `spike_genre`),
+  detector di silenzio e detector di esplorazione — **gli otto tipi** di
+  `02§4` hanno ciascuno un produttore;
+- **la persistenza**: gli insight di tipo `event` con `derivedVersion`
+  (`04§9`) e il ricalcolo che sostituisce **l'insieme** degli eventi
+  (`replaceAllInsightsOfType`);
+- **il plug-in** `createEventGenerator` dell'orchestratore (`04§8.1`);
+- **il fixture di scenario** `fixtures/scenarios/listening-spike.json` (709
+  ascolti, 95 giorni: 81 di baseline + 14 di picco, il picco dichiarato al
+  giorno 81), generato da `scripts/generate-fixtures.mjs spike`;
+- **43 test** nuovi in `@ls/core` (`event-engine`, `event-persistence`,
+  `event-scenarios`).
 
 ## Task
 
-- T2.3.1 — Implementare il rilevatore secondo `04§6`
-- T2.3.2 — Persistenza degli insight con `derivedVersion` (MIG-3) e stato dell'insight
-- T2.3.3 — Test sul fixture di scenario: determinismo e copertura dei casi minimi (`04§6`)
+- [x] T2.3.1 — Implementare il rilevatore secondo `04§6`
+- [x] T2.3.2 — Persistenza degli insight con `derivedVersion` (MIG-3) e stato dell'insight
+- [x] T2.3.3 — Test sul fixture di scenario: determinismo e copertura dei casi minimi (`04§6`)
 
 ## Acceptance criteria
 
-- [ ] Gli eventi sono deterministici e ricalcolabili a parità di `derivedVersion` (`04§6`)
-- [ ] Ogni insight dichiara la propria confidenza e la copertura dei dati (`04§6`, `04§9`)
-- [ ] Il rilevatore opera **solo** su feature misurate o manuali: l'euristico non alimenta l'analisi (`21§12`, D-AF.4)
+- [x] Gli eventi sono deterministici e ricalcolabili a parità di `derivedVersion` (`04§6`)
+- [x] Ogni insight dichiara la propria confidenza e la copertura dei dati (`04§6`, `04§9`)
+- [x] Il rilevatore opera **solo** su feature misurate o manuali: l'euristico non alimenta l'analisi (`21§12`, D-AF.4)
 
-## Documenti aggiornati
+## Scelte di implementazione
 
-- (nessuno: la story non è ancora iniziata)
+Le otto scelte che la spec non esplicita sono dichiarate in
+`docs/state/sessions/70-event-detector.md` (D.70.1…D.70.8) e in sintesi in
+`docs/04-ANALYSIS-ALGORITHMS.md` §6.8. In sintesi:
+
+- la **baseline** e la **finestra** non si sovrappongono: la finestra è
+  `[cursor, cursor + windowDays)` e la baseline i `baselineDays` giorni
+  immediatamente precedenti; una baseline con meno di `minBaselineDays` giorni
+  **con dati** non è utilizzabile (D.70.1);
+- il detector a **quota** ha due condizioni: la **dominanza** (la quota del
+  soggetto supera `minDominantShare`) e il **picco** (la quota supera 2× la
+  quota in baseline). La dominanza è ciò che distingue un picco da una
+  variazione ordinaria; il rapporto, quando il soggetto è assente in
+  baseline, è definito rispetto alla soglia di dominanza, così è sempre
+  finito (D.70.2, D.70.6);
+- la finestra deve essere **completa**: l'ultima finestra utile è quella che
+  finisce entro l'ultimo giorno osservato — una finestra troncata avrebbe
+  meno giorni e produrrebbe un `volume_drop` sistematico (D.70.3);
+- la deviazione standard è **popolazionale** (÷N): la baseline è l'intera
+  popolazione dei giorni osservati, non un campione (D.70.4);
+- un giorno **senza ascolti** non è un giorno a volume zero: il volume misura
+  «quanto hai ascolto nei giorni in cui hai ascoltato», e i buchi sono il
+  segnale del detector di silenzio. Trattarli come zero produrrebbe falsi
+  `volume_drop` (D.70.5);
+- la finestra dell'**esplorazione** è lunga `strideDays` giorni (7 per
+  default, come i «7gg» di `04§6.2`) ed è allineata alla stessa griglia
+  degli altri detector; il detector parte dalla stessa soglia degli altri
+  (`earliestDay + baselineDays`), perché i primi giorni della storia hanno
+  per definizione tutti gli artisti «nuovi» (D.70.7);
+- il **dedupe** è per tipo e per soggetto: due eventi dello stesso tipo (e
+  dello stesso artista o genere) che si sovrappongono sono lo stesso evento
+  visto da due finestre diverse; due eventi di **tipi diversi** sulla stessa
+  finestra coesistono, perché sono due letture diverse della stessa
+  settimana (D.70.8).
+
+## Documenti collegati
+
+- `docs/04-ANALYSIS-ALGORITHMS.md` §6 (Event Detector) · §6.5 (parametri) ·
+  §6.7 (invarianti) · §6.8 (scelte di implementazione) · §8.1 (perimetro
+  della tranche) · §9 (derivedVersion registry)
+- `docs/02-DATA-SCHEMA.md` §3.6 (`Insight`) · §4 (`EventPayload`) · §6
+  (tabella `insights`) · §7 (MIG-3)
+- `docs/08-COPY-I18N.md` §2.15 (`insight.event.*`)
+- `docs/21-AUDIO-FEATURES.md` §12 (D-AF.4)
+- `docs/10-TESTING.md` §3.3 (fixture di scenario)
+- `docs/11-BACKLOG.md` Story 2.3
+- `docs/state/sessions/70-event-detector.md`
 
 
 
@@ -18686,9 +19248,9 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 
 # 04 — Algoritmi di Analisi
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30), aggiornata nella Sessione 69 (2026-10-31)
+> Status: 🟢 APPROVED · Versione 1.3 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30), aggiornata nelle Sessioni 69 (2026-10-31) e 70 (2026-10-31)
 > Vincolante per: `packages/core/analysis/*` e relativi test
-> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12) · Implementazioni: 2.4 (Sessione 61), 2.1 (Sessione 63), 2.2 (Sessione 69, issue #211)
+> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12) · Implementazioni: 2.4 (Sessione 61), 2.1 (Sessione 63), 2.2 (Sessione 69, issue #211), 2.3 (Sessione 70, issue #214)
 
 ---
 
@@ -19332,6 +19894,36 @@ z = (7 - 3) / 1 = 4.0 > 2.0 → **volume_spike** rilevato con confidence min(1, 
 - Eventi non sovrapposti (dedupe mantiene solo quello con confidence più alta)
 - `periodStart < periodEnd`
 
+### 6.8 Scelte di implementazione (Story 2.3)
+
+Il testo dell'algoritmo (§6.2-§6.6) **non cambia**: le scelte che la spec
+non esplicita sono dichiarate in `docs/state/sessions/70-event-detector.md`
+(D.70.1…D.70.8) e in `docs/state/stories/2.3-event-detector.md`. In sintesi:
+
+- **la baseline e la finestra non si sovrappongono**: la finestra è
+  `[cursor, cursor + windowDays)` e la baseline i `baselineDays` giorni
+  immediatamente precedenti (D.70.1);
+- **la finestra deve essere completa**: l'ultima finestra utile è quella che
+  finisce entro l'ultimo giorno osservato — una finestra troncata ha meno
+  giorni e produrrebbe un `volume_drop` sistematico (D.70.3);
+- **un giorno senza ascolti non è un giorno a volume zero**: il volume
+  misura «quanto hai ascolto nei giorni in cui hai ascoltato», e i buchi
+  sono il segnale del detector di silenzio (D.70.5);
+- **la deviazione standard è popolazionale** (÷N): la baseline è
+  l'intera popolazione dei giorni osservati (D.70.4);
+- **il dedupe è per tipo e per soggetto**: due eventi dello stesso tipo (e
+  dello stesso artista o genere) che si sovrappongono sono lo stesso evento
+  visto da due finestre diverse; due eventi di **tipi diversi** sulla stessa
+  finestra coesistono (D.70.8);
+- **il detector a quota ha due condizioni**: la **dominanza** (la quota del
+  soggetto supera `minDominantShare`) e il **picco** (la quota supera 2× la
+  quota in baseline) — il rapporto è definito rispetto alla soglia di
+  dominanza quando il soggetto è assente in baseline, così è sempre finito
+  (D.70.2, D.70.6);
+- **la finestra dell'esplorazione è lunga `strideDays` giorni** (7 per
+  default, come i «7gg» di §6.2) ed è allineata alla stessa griglia degli
+  altri detector (D.70.7).
+
 ---
 
 ## 7. Memory Engine
@@ -19558,14 +20150,21 @@ La prima tranche (Story 2.4, e poi 2.1) implementa:
 | **Memory engine** (§7) | ✅ in questa tranche | usa solo ascolti, brani e artisti |
 | **Mood tracker** (§3) | ✅ in questa tranche (Story 2.1, Sessione 63) | legge le feature **misurate o manuali**; senza audio features non produce insight (D-A.1, D-A.6, §12) |
 | **Era detector** (§5) | ✅ in questa tranche (Story 2.2, Sessione 69) | change point detection su firme settimanali; senza feature misurate o manuali non produce ere (D-A.1) |
+| **Event detector** (§6) | ✅ in questa tranche (Story 2.3, Sessione 70) | z-score su griglia settimanale, detector a quota e detector specialistici; senza feature misurate o manuali non produce eventi di valence (D-A.1) |
 | Session segmentation (§2) | ⏭ differita | serve a `ListeningSession` (EPIC 2, tranche successiva) |
 | Pattern analyzer (§4) | ⏭ differita | il pattern analyzer è un generatore a sé (storia futura): `nightShare` è la sua metrica (§4.3) |
-| Event detector (§6) | ⏭ differita | Story 2.3 |
 
 L'orchestratore della tranche corrente chiama **solo** i generatori
 implementati: gli altri si aggiungono senza cambiarne il contratto, come i sink
 di scrobbling si sono aggiunti al registry senza modificare `PlatformAdapter`
 (ADR-0011 V1).
+
+> **I parametri dell'event detector** (§6.5) sono **otto**, non sei: alle
+> soglie ratificate (`baselineDays`, `windowDays`, `zScoreThreshold`,
+> `silenceMinDays`, `explorationMinNewArtists`, `strideDays`) si aggiungono
+> `minBaselineDays` e `minDominantShare`, le due condizioni che la spec non
+> esplicita e che la Story 2.3 dichiara (D.70.1, D.70.2). Il registro dei
+> parametri è in §9.
 
 ---
 
@@ -19577,10 +20176,18 @@ di scrobbling si sono aggiunti al registry senza modificare `PlatformAdapter`
 | Mood tracker | `{valenceThreshold, energyThreshold, neutralBand, excitedEnergyThreshold, minEventsPerPeriod}` | calcolata |
 | Pattern analyzer | `{nightHours, weekendDays, minEvents}` | calcolata |
 | Era detector | `{windowDays, stepDays, similarityThreshold, minEraDays, weights}` | calcolata |
-| Event detector | `{baselineDays, windowDays, zScoreThreshold, silenceMinDays, explorationMinNewArtists, strideDays}` | calcolata |
+| Event detector | `{baselineDays, windowDays, zScoreThreshold, silenceMinDays, explorationMinNewArtists, strideDays, minBaselineDays, minDominantShare}` | calcolata |
 | Memory engine | `{onThisDayYears, firstTimeMinTracks, milestones, returnMinGapDays, seasonalConcentration, seasonalMinEvents}` | calcolata |
 
 Ogni volta che si cambia un parametro di default, la versione cambia e gli insight diventano `stale` → ricalcolo automatico al prossimo avvio.
+
+> Il config object dell'**event detector** comprende **otto** chiavi: le sei
+> di `04§6.5` più `minBaselineDays` (i giorni con dati minimi perché una
+> baseline sia utilizzabile) e `minDominantShare` (la quota minima perché un
+> artista o un genere **domini** la finestra). Le due sono dichiarate dalla
+> Story 2.3 (D.70.1, D.70.2): senza, una baseline di due giorni produrrebbe
+> z-score arbitrari e ogni variazione ordinaria di una quota sembrerebbe un
+> «picco».
 
 ---
 
@@ -19675,6 +20282,7 @@ appartengono a `04`.
 | 1.0 | Sessione 59 (2026-10-28, issue #178) | 🟢 APPROVED — **ratifica del Boss al merge della PR**: le cinque decisioni aperte (§11, D-A.1…D-A.5) sono chiuse **come proposte**. **§7.2**: `return` e `seasonal` sono specificati (il silenzio è l'ultimo ascolto precedente dell'artista; la concentrazione stagionale è calcolata su 12 mesi) e `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3); **§7.3**: i parametri allineati (`firstTimeMinTracks`, `seasonalMinEvents`) e il parametro `returnMinGapDays` dichiarato; **§7.3.1** (nuova): il `text` del ricordo è una stringa **resa** alla generazione con il template i18n `insight.memory.*` (D-A.4), non una chiave né una stringa italiana inline; **§8.1** (nuova): il perimetro della tranche — orchestratore minimale estensibile, solo i generatori implementati (D-A.5); **§9**: il registro dei parametri allineato; **§11** (nuova): le cinque decisioni con la motivazione; **§12** (nuova): il perimetro — la **Story 2.4** è implementabile subito, la **Story 2.1** aspetta le **audio features dell'EPIC 4.1** (D-A.1). Le formule, i parametri e i vinanti di §1…§10 restano quelli di v0.2, salvo le modifiche elencate |
 | 1.1 | Sessione 65 (2026-10-30, issue #193) | 🟢 APPROVED — **emendamento ratificato dal project owner** (opzione B): il fallback **mood-by-genre non esiste**. **§1.4**: la degradazione è riscritta sul comportamento reale — nessun insight mood senza feature misurate o manuali, **nessun proxy sul genere** e il warning **aggregato per periodo** ("X eventi senza audio features", solo conteggi); **§8.1**: il mood tracker passa da "in attesa dell'EPIC 4.1" a generatore della tranche; **§11.1** (nuova): la decisione **D-A.6** con la motivazione e gli effetti; **§12**: nota di stato (la tabella resta la fotografia della ratifica della Sessione 59). Il codice di `§3` **non cambia** nel calcolo: il mood tracker già restituiva `null` sotto `minEventsPerPeriod` (D.63.4); la modifica del comportamento è il **warning aggregato**, che `§1.4` dichiarava e il codice non emetteva. `21-AUDIO-FEATURES.md` §12 (punto 3) è allineato nella stessa PR |
 | 1.2 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 implementata** (era detector): **§8.1** l'era detector passa da "differita" a **generatore della tranche** (`packages/core/src/analysis/era/`). Il testo dell'algoritmo (§5.2-§5.5) **non cambia**: le scelte che la spec non explicita sono dichiarate in `docs/state/stories/2.2-era-detector.md` (D.69.1…D.69.7) e in `docs/state/sessions/69-era-detector.md`. **§9**: il config object dell'era detector comprende anche le **soglie del mood**, perché il mood dominante dell'era è classificato dal **classificatore del mood tracker** (D.69.2): senza, un cambio delle soglie non renderebbe `stale` le ere (MIG-3). **§4.3**: la `nightShare` è la metrica che l'era detector riusa (orari UTC, D.69.4) |
+| 1.3 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 implementata** (event detector): **§8.1** l'event detector passa da "differita" a **generatore della tranche** (`packages/core/src/analysis/event/`). Il testo dell'algoritmo (§6.2-§6.6) **non cambia**: le scelte che la spec non explicita sono dichiarate in **§6.8** (nuova) e nei file di stato (D.70.1…D.70.8). **§9**: il config object dell'event detector comprende **otto** chiavi — le sei di §6.5 più `minBaselineDays` (D.70.1) e `minDominantShare` (D.70.2): senza, una baseline di due giorni produrrebbe z-score arbitrari e ogni variazione ordinaria di una quota sembrerebbe un «picco». **§6.8** (nuova): le scelte di implementazione del detector, dichiarate in sintesi |
 
 
 ===== FILE: docs/05-ARCHITECTURE.md =====
@@ -20749,7 +21357,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.10 · Sessione 67 (2026-10-30, issue #201), aggiornata nella Sessione 69 (2026-10-31, issue #211)
+> Status: 🟡 DRAFT · Versione 0.11 · Sessione 67 (2026-10-30, issue #201), aggiornata nelle Sessioni 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -21107,6 +21715,17 @@ Lo stesso vale per l'**etichetta dell'era** (`era.*`, Story 2.2): `EraPayload.la
 partire dal **nome localizzato** del mood (`insight.era.mood.*`) e dal genere
 più ascoltato — che è **dato**, non copia, e non viene tradotto.
 
+Vale per la **descrizione dell'evento** (`event.*`, Story 2.3):
+`EventPayload.description` (`02§4`) è una stringa resa dal template
+`insight.event.<eventType>`, come il ricordo e l'etichetta dell'era. I
+template di `event.*` accettano due segnaposto: `{{artist}}` (il nome
+dell'artista che domina, per `spike_artist`) e `{{genre}}` (il genere che
+domina, per `spike_genre`) — il genere è **dato**, non copia, e non viene
+tradotto. La descrizione è seguita dal **suffisso numerico** del detector che
+l'ha prodotta: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per
+quello a quota. Il suffisso è **linguisticamente neutro** (il nome della
+statistica e un numero): è il dato che rende l'evento verificabile.
+
 | Key | IT | EN |
 |-----|----|----|
 | `mood.happy` | La tua musica è stata prevalentemente felice | Your music was mostly happy |
@@ -21114,6 +21733,7 @@ più ascoltato — che è **dato**, non copia, e non viene tradotto.
 | `mood.excited` | Periodo ad alta energia | High-energy period |
 | `mood.calm` | Periodo rilassato | Relaxed period |
 | `event.spike_artist` | Hai scoperto {artist} che ha dominato il tuo ascolto | You discovered {artist} who dominated your listening |
+| `event.spike_genre` | Il genere {genre} ha dominato il tuo ascolto | The {genre} genre dominated your listening |
 | `event.valence_drop` | La tua musica è diventata più malinconica | Your music became more melancholic |
 | `event.valence_rise` | La tua musica è diventata più allegra | Your music became more cheerful |
 | `event.volume_spike` | Hai ascoltato molta più musica del solito | You listened to much more music than usual |
@@ -21312,6 +21932,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.8 | Sessione 62 (2026-10-28, issue #187) | **§2.17 `enrichment.*` (nuova) — Story 4.1**: le **otto chiavi** della pipeline audio features elencate da `21-AUDIO-FEATURES.md` §14, con i testi IT ed EN: gli stati della pipeline (`queued`, `analyzing`, `done`, `estimated`, `no_audio`, `disabled`), l'avviso **prima** del download del WASM (`download.size`, ~6 MB una volta sola) e l'avviso aggregato in Settings (`error.aggregate`, con pluralizzazione §3). §1: il namespace `enrichment` aggiunto alla tabella dei namespace. Il **confine "stima ≠ misura"** è dichiarato nei testi: `enrichment.status.estimated` è l'unica chiave che può descrivere una feature euristica e non usa mai la parola "analizzato" (`21§12`, D-AF.4). Header allineato (era fermo a **v0.6** dal Sessione 58, mentre il changelog era già alla 0.5 e `docs/INDEX.md` dichiarava v0.7) |
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
 | 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |
+| 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |
 
 
 
@@ -21684,7 +22305,7 @@ email).
 
 # 10 — Strategia di Testing
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 62 (2026-10-28, issue #187)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 62 (2026-10-28, issue #187), aggiornata nella Sessione 70 (2026-10-31, issue #214)
 
 ---
 
@@ -21743,10 +22364,11 @@ Tutti i fixture sono **deterministici** (seed mulberry32 fisso, default `0xC0FFE
 - `summer-roadtrip.json` — 5.000 eventi, giugno-agosto 2022; mood happy/excited; alta valence; per testare exploration event detector + mood
 - `geo-context.json` — 96 eventi, 4 settimane a Roma con casa/lavoro/spostamenti/viaggio/auto; per testare il classificatore di contesto L1 (`19-GEO-CONTEXT.md` §5, Story 1.6)
 - `era-shift.json` — 96 eventi, 16 settimane: 8 di *pop* diurno e poi 8 di *indie folk* notturno, con il **cambio di gusto al giorno 56**; per testare l'**era detector** (`04-ANALYSIS-ALGORITHMS.md` §5, Story 2.2): il confine è dichiarato e il rilevamento deve produrre **due** ere
+- `listening-spike.json` — 709 eventi, 95 giorni: 81 di **baseline** (4-7 ascolti al giorno, 6 artisti noti, 3 giorni di **silenzio** ai giorni 40-42) e poi 14 di **picco** (20 ascolti al giorno, un artista che domina il 60% e 4 artisti nuovi ogni giorno); per testare l'**event detector** (`04-ANALYSIS-ALGORITHMS.md` §6, Story 2.3): il picco è dichiarato e il rilevamento deve produrre **`volume_spike`, `valence_drop`, `exploration`, `spike_artist`, `spike_genre` e `silence`**
 
 Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi dopo l'analisi, secondo le spec di `04-ANALYSIS-ALGORITHMS.md`.
 
-> **Gli scenari "composti" servono a un algoritmo deterministico**: `geo-context` ed `era-shift` non usano il generatore casuale, ma una cronologia **composta a mano**: servono pattern che un generatore casuale non produce (casa/lavoro/viaggio per il contesto, un cambio di gusto netto per le ere). Su un fixture casuale il confine atteso non esiste, e il test non potrebbe dichiarare un risultato.
+> **Gli scenari "composti" servono a un algoritmo deterministico**: `geo-context`, `era-shift` e `listening-spike` non usano il generatore casuale, ma una cronologia **composta a mano**: servono pattern che un generatore casuale non produce (casa/lavoro/viaggio per il contesto, un cambio di gusto netto per le ere, un picco netto per gli eventi). Su un fixture casuale il confine atteso non esiste, e il test non potrebbe dichiarare un risultato.
 
 ### 3.4 Fixture demo mode
 
@@ -21853,13 +22475,14 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 | 0.1 | Sessione 3 | Prima versione |
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | 2026-10-28 (issue #187) | **§8 allineata alla spec `21-AUDIO-FEATURES.md`** (v1.0 🟢 APPROVED): la riga "FreqBlog / Musicae" — due placeholder mai esistiti come provider, già rimossi da `02§3.4` e dalla CSP di `12§2.1` — è sostituita dai **due mock reali** della pipeline audio features (**iTunes Search API** per l'anteprima audio di 30 s che alimenta Essentia.js, **AcousticBrainz** per il bonus sui MBID), con i fixture in `fixtures/api-mocks/itunes/` e `fixtures/api-mocks/acousticbrainz/` (`21§15.2`). Il resto della strategia di testing non cambia: `§2` (coverage ≥ 75% per `packages/core/enrichment/*`) e `§7` (invarianti `valence ∈ [0,1]`) sono già quelli richiesti dalla spec. Header allineato (era fermo a v1.0 dalla Sessione 3) |
+| 1.2 | 2026-10-31 (issue #214) | **§3.3 — il fixture di scenario dell'event detector**: `fixtures/scenarios/listening-spike.json` (709 eventi, 95 giorni) è una cronologia **composta**: 81 giorni di baseline (4-7 ascolti al giorno, 6 artisti noti, **3 giorni di silenzio** ai giorni 40-42) e 14 giorni di **picco** (20 ascolti al giorno, un artista che domina il 60% e 4 artisti nuovi ogni giorno). Serve perché l'event detector cerca **anomalie**: su un fixture casuale non ci sarebbe nessun salto dichiarato, e il test non potrebbe dichiarare un risultato (la lezione della Sessione 69). Il **profilo delle audio features** è **per artista** (dichiarato nel test): la baseline deve avere una varianza giornaliera della valence, altrimenti la deviazione standard sarebbe zero e lo z-score sulla valence non sarebbe definito. Aggiunto il fixture alla lista dei **composti** in §3.3 |
 
 
 ===== FILE: docs/11-BACKLOG.md =====
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.30 · Sessione 68 (2026-10-31, issue #205) · la **Story 1.6 (Fondazione geo e contesto di ascolto) è in review**: il delta su `02-DATA-SCHEMA.md` è applicato (v1.7 — campi `city*` su `ListenEvent`, entità `ContextPeriod`, tabella `contexts` nello schema Dexie v6, toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`) e il **classificatore L1** vive in `packages/core/src/context/` (regole R1..R7, soglia 0.5, `derivedVersion` dai parametri) con la persistenza dei periodi e il fixture di scenario geo. L'implementazione è in review sulla PR dell'issue #205; le story **4.4** (DB IP→città) e **3.4** (nastro contesto) restano da fare e **dipendono da questa**: il livello L2 è opt-in (`retainCity` default OFF) e L0/L1 reggono da sole. Fuori perimetro e dichiarato: la UI dei toggle (Story 3.x) e la derivazione L2 (Story 4.4). La **ratifica della spec geo** (`19-GEO-CONTEXT.md` v1.0 🟢 e `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201) era il presupposto di questa story ed è stata eseguita allora
+> Status: 🟢 APPROVED · Versione 1.6.31 · Sessione 70 (2026-10-31, issue #214) · la **Story 2.3 (Event Detector) è in review**: il motore in `packages/core/src/analysis/event/` rileva le anomalie della storia di ascolto (z-score su griglia settimanale, detector a quota, detector specialistici per silenzio ed esplorazione) e le rende insight di tipo `event` con `derivedVersion` e confidenza. Con la 2.3 l'**EPIC 2** è completo (2.1 mood, 2.2 ere, 2.3 eventi, 2.4 ricordi): il prossimo passo è la tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201). Fuori perimetro e dichiarato: la **UI degli eventi** (Story 3.x), la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -22255,10 +22878,12 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.3 — Event Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
+**Stato**: ✅ **DONE — implementata nella Sessione 70** (issue #214, branch `feat/214-event-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.3 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e il §6 dichiara gli **otto tipi** di evento e i loro trigger. Consegnato: il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore, valence/energy medie ponderate, diversità e artisti nuovi; detector a **z-score** su griglia settimanale; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e per soggetto), la persistenza degli insight `event` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`), il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non viene prodotto alcun evento basato sulla valence. Dettagli e scelte dichiarate (D.70.1…D.70.8): `docs/state/stories/2.3-event-detector.md`.
+
 **Acceptance criteria**:
-- [ ] Rileva spike/crolli volume, valence drop/rise, exploration, silence
-- [ ] Z-score o IQR con finestra documentata
-- [ ] Falsi positivi < 10% su fixture di test
+- [x] Rileva spike/crolli volume, valence drop/rise, exploration, silence
+- [x] Z-score o IQR con finestra documentata
+- [x] Falsi positivi < 10% su fixture di test
 
 ---
 
@@ -22468,7 +23093,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 11. **4.1** pipeline audio features (issue #188, ✅ **DONE**, PR #197 merged `7458220`) — la pipeline è **completata** (Sessione 64): cascata, provider, limiter, coda, stoccaggio, CSP e i18n (`21§4…§11`), con **142 test** in `@ls/core` e **15** in `@ls/web`. La spec è ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). Era il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: ha fornito le valence/energy senza le quali la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1) è **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`); restano la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto), che dipendono da lei. Era la **prima story lavorabile**, e il blocco NEXT-STEP del README la indica: l'aggregatore ordina le story **migrate per id**, e «1.6» viene prima di «2.2». Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
-14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) è **completata** (Sessione 69, issue #211): il blocco NEXT-STEP del README ricade ora sulla **2.3** (event detector), l'ultima story dell'EPIC 2 ancora lavorabile
+14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
 15. **3.1, 3.2, 3.3** UI
 16. **5.1, 5.2** privacy
 17. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
@@ -22485,7 +23110,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 completata** (Sessione 69, issue #211): restano **2.3** (event detector) e le 3.x |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — restano le **3.x** (UI) |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO (1.6 completata) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -22561,6 +23186,7 @@ Ogni story deve avere label GitHub:
 | 1.6.29 | Sessione 68 (2026-10-31, issue #205) | **§35 — esito post-merge della Story 1.6**: la PR #209 è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit `68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian) → l'issue #205 è chiusa con `status:done` e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate`, `auto-bundle`. La pulizia git locale è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il fallimento noto, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main`, merge verificato via `gh`, branch remoto già assente, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). La story 1.6 passa a ✅ **DONE** con `merged_commit` e `merged_date` nel frontmatter; la riga dell'EPIC geo nella roadmap torna a ⬚ TODO (restano **4.4** e **3.4**); il blocco NEXT-STEP del README ricade sulla **4.4**, la prima story lavorabile della tranche |
 | 1.6.28 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 implementata** (fondazione geo e contesto di ascolto): il delta su `02-DATA-SCHEMA.md` passa a **v1.7** (i tre campi derivati `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS`, i toggle `retainCountry` (**default true**: il paese è derivato e non identificativo — decisione del project owner sull'issue #108), `retainCity`/`retainDeviceDetail` (default false) e `retainDeviceType`/`deriveContext` (default true), la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e **MIG-5**: il ricalcolo del contesto è esplicito e non azzera i campi già persistiti). Il **classificatore L1** vive in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo, paese di riferimento = moda su 90gg con ≥30 eventi) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel` sopravvive al ricalcolo) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`, generato da `scripts/generate-fixtures.mjs geo`). **39 test** nuovi in `@ls/core`. Scelte dichiarate (`docs/state/stories/1.6-geo-foundation.md`): `away` come complemento di R1, R4 vincolata alla durata delle sessioni (25 minuti, la soglia di R6) perché uno spostamento ricorrente non venga classificato `home`, il viaggio riconosciuto sull'intero *run* di giorni esteri, il modulo in `context/` (il layer `analysis` è puro e non ha dipendenze dal DB), il fuso come dato in `settings` (`app.timezone`). Correzione di numerazione: l'AC citava «E22», la spec `19` dichiara **E19** |
 | 1.6.30 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 implementata** (Era Detector): il motore in `packages/core/src/analysis/era/` — firme settimanali (distribuzione dei generi, top artist, valence/energy medie, quota notturna, tasso di ripetizione), similarità (cosine + Jaccard + distanza normalizzata), **change point detection** (nessun clustering non supervisionato, `04§5`), costruzione delle ere e filtro `minEraDays`; il mood dominante dell’era è classificato dal **classificatore del mood tracker** (D.69.2); la persistenza sostituisce **l’insieme** delle ere (`replaceAllInsightsOfType`, D.69.8); il plug-in `createEraGenerator` dell’orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/era-shift.json` (confine dichiarato al giorno 56). **37 test** nuovi in `@ls/core`. Sezione Story 2.2: `**Stato**:` ✅ DONE e i **4 AC** spuntati; la riga roadmap «2-3» allineata (restano 2.3 e 3.x); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla **2.3**). `docs/04-ANALYSIS-ALGORITHMS.md` → **v1.2** (`§8.1`), `docs/08-COPY-I18N.md` → **v0.10** (namespace `insight.era.*`), `docs/10-TESTING.md` → **v1.2** (§3.3) |
+| 1.6.31 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 implementata** (Event Detector): il motore in `packages/core/src/analysis/event/` — metriche giornaliere (volume in ore, valence/energy medie ponderate, diversità, artisti nuovi), detector a **z-score** su griglia settimanale (baseline 60gg, finestra 14gg, soglia 2.0), detector a **quota** per `spike_artist`/`spike_genre` (dominanza + rapporto 2× sulla baseline), detector specialistici per `silence` ed `exploration`, dedupe per tipo e per soggetto; la persistenza sostituisce **l’insieme** degli eventi (`replaceAllInsightsOfType`); il plug-in `createEventGenerator` dell’orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non c’è alcun evento basato sulla valence. Sezione Story 2.3: `**Stato**:` ✅ DONE e i **3 AC** spuntati; la riga roadmap «2-3» allineata (l’EPIC 2 ha ora mood, ere, eventi e ricordi); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla tranche **geo**, 4.4 e 3.4). `docs/04-ANALYSIS-ALGORITHMS.md` → **v1.3** (`§6.8` nuova, `§8.1`, `§9`), `docs/08-COPY-I18N.md` → **v0.11** (`insight.event.spike_genre`), `docs/10-TESTING.md` → **v1.2** (§3.3) |
 
 
 
@@ -22587,7 +23213,7 @@ Ogni story deve avere label GitHub:
 | 1.6 - Fondazione geo e contesto di ascolto | done | #209 | `68c27e5` | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
-| 2.3 - Event Detector | todo | - | - | analysis |
+| 2.3 - Event Detector | done | #0 | - | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
@@ -26800,7 +27426,7 @@ versione riscritta, verificabile:
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti
- *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|geo|era|demo)
+ *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|geo|era|spike|demo)
  *   node scripts/generate-fixtures.mjs --seed 42       # seed custom (default 0xC0FFEE)
  *
  * Output:
@@ -26812,6 +27438,7 @@ versione riscritta, verificabile:
  *   fixtures/scenarios/summer-roadtrip.json
  *   fixtures/scenarios/geo-context.json
  *   fixtures/scenarios/era-shift.json
+ *   fixtures/scenarios/listening-spike.json
  *   fixtures/demo-user.json         (1 anno di storia sintetica, demo mode §06)
  *
  * Vincoli: nessuna dipendenza esterna (Node ≥ 20 LTS, solo stdlib).
@@ -27623,6 +28250,238 @@ function buildEraShiftScenario() {
   };
 }
 
+/**
+ * Scenario **picco di ascolto (listening spike)** — Story 2.3,
+ * `04-ANALYSIS-ALGORITHMS.md` §6.
+ *
+ * L'event detector cerca **anomalie**: un picco, un crollo, un'esplosione di
+ * novità, un silenzio. Per verificarlo serve una cronologia con un'anomalia
+ * **a un istante noto**: i fixture di scenario esistenti sono generati
+ * casualmente, e nessuna anomalia netta renderebbe il rilevamento
+ * deterministico.
+ *
+ * Questo fixture è quindi una **cronologia composta**, deterministica e senza
+ * RNG:
+ *
+ * - **baseline** (giorni 0-80): 6 artisti noti, 4-7 ascolti al giorno
+ *   distribuiti a rotazione, 3 giorni di **silenzio** (giorni 40-42);
+ * - **picco** (giorni 81-94, due settimane): 20 ascolti al giorno, un artista
+ *   nuovo che domina (12/20) e 4 artisti nuovi ogni giorno.
+ *
+ * Le **audio features** sono sintetiche e le costruisce il test (come nel
+ * fixture `era-shift`): la pipeline di arricchimento (EPIC 4.1) non scrive
+ * ancora feature vere. Il profilo di valence è **per artista** (dichiarato
+ * nel test), così la baseline ha una varianza giornaliera non nulla: senza,
+ * la deviazione standard sarebbe zero e lo z-score sulla valence non sarebbe
+ * definito.
+ *
+ * Il piano è dichiarato in `expectedInsights` e verificato dai test dell'event
+ * detector (`packages/core/src/analysis/__tests__/event-scenarios.test.ts`).
+ */
+function buildListeningSpikeScenario() {
+  const importId = 'imp-listening-spike-1';
+  const start = Date.UTC(2024, 0, 1);
+  const dayMs = 86400000;
+  const hour = 12;
+
+  /** I giorni della baseline (0-80) e quelli del picco (81-94). */
+  const baselineDays = 81;
+  const spikeDays = 14;
+  /** I giorni di silenzio, dentro la baseline. */
+  const silenceDays = [40, 41, 42];
+
+  /** Gli artisti noti della baseline: 2 per genere. */
+  const baselineArtists = [
+    { id: 'ar-evt-a1', genres: ['pop'] },
+    { id: 'ar-evt-a2', genres: ['pop'] },
+    { id: 'ar-evt-a3', genres: ['rock'] },
+    { id: 'ar-evt-a4', genres: ['rock'] },
+    { id: 'ar-evt-a5', genres: ['jazz'] },
+    { id: 'ar-evt-a6', genres: ['jazz'] },
+  ];
+  /** L'artista che domina il picco, e i suoi 4 brani. */
+  const dominantArtist = { id: 'ar-evt-spike', genres: ['techno'] };
+  /** Gli artisti nuovi del picco: 4 al giorno, tutti diversi. */
+  const newArtistsPerDay = 4;
+
+  const artists = [];
+  const tracks = [];
+  const listens = [];
+  let counter = 0;
+
+  /** Aggiunge un brano all'elenco. */
+  const addTrack = (id, artistId, genres) => {
+    tracks.push({
+      id,
+      canonicalKey: `fuzzy:ck-evt-${id}`,
+      name: `Brano ${id.toUpperCase()}`,
+      artistId,
+      albumId: null,
+      durationMs: 240000,
+      isrc: null,
+      mbid: null,
+      explicit: false,
+      genres,
+      artworkUrl: null,
+      platformIds: { spotify: `sp-${id}` },
+      firstSeenAt: start,
+      lastSeenAt: start,
+      listenCount: 0,
+      spotifyId: `sp-${id}`,
+    });
+  };
+
+  /** Aggiunge un ascolto. */
+  const addListen = (id, trackId, startedAt) => {
+    listens.push({
+      id,
+      eventKey: `spotify:ek-evt-${id}`,
+      platform: 'spotify',
+      importId,
+      timestamp: startedAt + 240000,
+      startedAt,
+      durationMs: 240000,
+      trackId,
+      completed: true,
+      skipped: false,
+      shuffle: false,
+      offline: false,
+      incognito: false,
+      reasonStart: 'playbtn',
+      reasonEnd: 'trackdone',
+      deviceType: 'mobile',
+      deviceDetail: null,
+      ip: null,
+      country: 'IT',
+      city: null,
+      citySource: null,
+      cityConfidence: null,
+      day: new Date(startedAt).toISOString().slice(0, 10),
+    });
+  };
+
+  // --- Artisti e brani della baseline ---
+  for (const artist of baselineArtists) {
+    artists.push({
+      id: artist.id,
+      name: `Artista ${artist.id.toUpperCase()}`,
+      mbid: null,
+      genres: artist.genres,
+      spotifyId: `sp-${artist.id}`,
+    });
+    for (let t = 1; t <= 2; t += 1) {
+      addTrack(`tr-evt-${artist.id}-${t}`, artist.id, artist.genres);
+    }
+  }
+
+  // --- Ascolti della baseline ---
+  // Ogni giorno: `4 + (day % 4)` ascolti, distribuiti a rotazione su 4 dei 6
+  // artisti noti (ruotano di un posto al giorno). La rotazione cambia la
+  // **valence media del giorno** (il test assegna una valence per artista),
+  // mentre le quote per artista restano stabili: il detector a quota non
+  // deve scattare nella baseline.
+  for (let day = 0; day < baselineDays; day += 1) {
+    if (silenceDays.includes(day)) continue;
+    const count = 4 + (day % 4);
+    for (let j = 0; j < count; j += 1) {
+      counter += 1;
+      const artistIndex = (day + j) % baselineArtists.length;
+      const artist = baselineArtists[artistIndex];
+      const trackIndex = (j % 2) + 1;
+      const startedAt = start + day * dayMs + hour * 3600000 + j * 600000;
+      addListen(
+        `le-evt-${String(counter).padStart(5, '0')}`,
+        `tr-evt-${artist.id}-${trackIndex}`,
+        startedAt,
+      );
+    }
+  }
+
+  // --- Artisti e brani del picco ---
+  artists.push({
+    id: dominantArtist.id,
+    name: 'Artista Dominante',
+    mbid: null,
+    genres: dominantArtist.genres,
+    spotifyId: `sp-${dominantArtist.id}`,
+  });
+  for (let t = 1; t <= 4; t += 1) {
+    addTrack(`tr-evt-${dominantArtist.id}-${t}`, dominantArtist.id, dominantArtist.genres);
+  }
+
+  const spikeArtistIds = [];
+  for (let d = 0; d < spikeDays; d += 1) {
+    const day = baselineDays + d;
+    for (let n = 0; n < newArtistsPerDay; n += 1) {
+      const id = `ar-evt-new-${String(d + 1).padStart(2, '0')}-${n + 1}`;
+      spikeArtistIds.push(id);
+      artists.push({
+        id,
+        name: `Artista Nuovo ${String(d + 1).padStart(2, '0')}${n + 1}`,
+        mbid: null,
+        genres: ['house'],
+        spotifyId: `sp-${id}`,
+      });
+      addTrack(`tr-evt-${id}-1`, id, ['house']);
+    }
+  }
+
+  // --- Ascolti del picco ---
+  // 20 al giorno: 12 dell'artista dominante (che domina il 60% della
+  // finestra) e 8 di 4 artisti nuovi.
+  for (let d = 0; d < spikeDays; d += 1) {
+    const day = baselineDays + d;
+    const dayArtists = spikeArtistIds.slice(d * newArtistsPerDay, (d + 1) * newArtistsPerDay);
+    for (let j = 0; j < 20; j += 1) {
+      counter += 1;
+      const startedAt = start + day * dayMs + hour * 3600000 + j * 600000;
+      if (j < 12) {
+        const trackIndex = (j % 4) + 1;
+        addListen(
+          `le-evt-${String(counter).padStart(5, '0')}`,
+          `tr-evt-${dominantArtist.id}-${trackIndex}`,
+          startedAt,
+        );
+      } else {
+        const artistId = dayArtists[(j - 12) % dayArtists.length];
+        addListen(`le-evt-${String(counter).padStart(5, '0')}`, `tr-evt-${artistId}-1`, startedAt);
+      }
+    }
+  }
+
+  return {
+    _metadata: {
+      name: 'listening-spike',
+      version: '1.0',
+      session: 70,
+      generatedAt: new Date().toISOString(),
+      seed: null,
+      description:
+        'Picco di ascolto (Story 2.3): 81 giorni di baseline (4-7 ascolti/giorno, 3 giorni di silenzio) e poi 14 giorni di picco (20 ascolti/giorno, un artista dominante e 4 artisti nuovi al giorno). Verifica 04-ANALYSIS §6 (event detector): volume_spike, valence_drop, exploration, spike_artist, spike_genre, silence.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedInsights: {
+        eventTypes: [
+          'volume_spike',
+          'valence_drop',
+          'exploration',
+          'spike_artist',
+          'spike_genre',
+          'silence',
+        ],
+        spikeStart: 'giorno 81 dalla prima data (inizio del picco)',
+        spikeWindow: 'giorni 81-94 (14 giorni): la finestra di 14 giorni del detector è dentro il picco',
+        silenceDays: '3 giorni senza ascolti (giorni 40-42)',
+        baselineArtists: '6 artisti noti, nessun picco di quota nella baseline',
+      },
+      spec:
+        '02-DATA-SCHEMA.md v1.7 + 04-ANALYSIS-ALGORITHMS.md v1.2 §6 + 10-TESTING.md §3.3',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
@@ -27779,6 +28638,7 @@ const targets = {
   demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
   geo: () => buildGeoContextScenario(),
   era: () => buildEraShiftScenario(),
+  spike: () => buildListeningSpikeScenario(),
 };
 
 function writeJson(path, data) {
@@ -27818,6 +28678,7 @@ for (const t of targets_) {
   else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
   else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
   else if (t === 'era') out = resolve(SCENARIOS_DIR, 'era-shift.json');
+  else if (t === 'spike') out = resolve(SCENARIOS_DIR, 'listening-spike.json');
   else out = resolve(SCENARIOS_DIR, `${t}.json`);
   writeJson(out, data);
 }

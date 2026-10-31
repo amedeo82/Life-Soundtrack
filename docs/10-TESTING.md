@@ -1,6 +1,6 @@
 # 10 — Strategia di Testing
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 62 (2026-10-28, issue #187)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 62 (2026-10-28, issue #187), aggiornata nella Sessione 70 (2026-10-31, issue #214)
 
 ---
 
@@ -59,10 +59,11 @@ Tutti i fixture sono **deterministici** (seed mulberry32 fisso, default `0xC0FFE
 - `summer-roadtrip.json` — 5.000 eventi, giugno-agosto 2022; mood happy/excited; alta valence; per testare exploration event detector + mood
 - `geo-context.json` — 96 eventi, 4 settimane a Roma con casa/lavoro/spostamenti/viaggio/auto; per testare il classificatore di contesto L1 (`19-GEO-CONTEXT.md` §5, Story 1.6)
 - `era-shift.json` — 96 eventi, 16 settimane: 8 di *pop* diurno e poi 8 di *indie folk* notturno, con il **cambio di gusto al giorno 56**; per testare l'**era detector** (`04-ANALYSIS-ALGORITHMS.md` §5, Story 2.2): il confine è dichiarato e il rilevamento deve produrre **due** ere
+- `listening-spike.json` — 709 eventi, 95 giorni: 81 di **baseline** (4-7 ascolti al giorno, 6 artisti noti, 3 giorni di **silenzio** ai giorni 40-42) e poi 14 di **picco** (20 ascolti al giorno, un artista che domina il 60% e 4 artisti nuovi ogni giorno); per testare l'**event detector** (`04-ANALYSIS-ALGORITHMS.md` §6, Story 2.3): il picco è dichiarato e il rilevamento deve produrre **`volume_spike`, `valence_drop`, `exploration`, `spike_artist`, `spike_genre` e `silence`**
 
 Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi dopo l'analisi, secondo le spec di `04-ANALYSIS-ALGORITHMS.md`.
 
-> **Gli scenari "composti" servono a un algoritmo deterministico**: `geo-context` ed `era-shift` non usano il generatore casuale, ma una cronologia **composta a mano**: servono pattern che un generatore casuale non produce (casa/lavoro/viaggio per il contesto, un cambio di gusto netto per le ere). Su un fixture casuale il confine atteso non esiste, e il test non potrebbe dichiarare un risultato.
+> **Gli scenari "composti" servono a un algoritmo deterministico**: `geo-context`, `era-shift` e `listening-spike` non usano il generatore casuale, ma una cronologia **composta a mano**: servono pattern che un generatore casuale non produce (casa/lavoro/viaggio per il contesto, un cambio di gusto netto per le ere, un picco netto per gli eventi). Su un fixture casuale il confine atteso non esiste, e il test non potrebbe dichiarare un risultato.
 
 ### 3.4 Fixture demo mode
 
@@ -169,3 +170,4 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 | 0.1 | Sessione 3 | Prima versione |
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | 2026-10-28 (issue #187) | **§8 allineata alla spec `21-AUDIO-FEATURES.md`** (v1.0 🟢 APPROVED): la riga "FreqBlog / Musicae" — due placeholder mai esistiti come provider, già rimossi da `02§3.4` e dalla CSP di `12§2.1` — è sostituita dai **due mock reali** della pipeline audio features (**iTunes Search API** per l'anteprima audio di 30 s che alimenta Essentia.js, **AcousticBrainz** per il bonus sui MBID), con i fixture in `fixtures/api-mocks/itunes/` e `fixtures/api-mocks/acousticbrainz/` (`21§15.2`). Il resto della strategia di testing non cambia: `§2` (coverage ≥ 75% per `packages/core/enrichment/*`) e `§7` (invarianti `valence ∈ [0,1]`) sono già quelli richiesti dalla spec. Header allineato (era fermo a v1.0 dalla Sessione 3) |
+| 1.2 | 2026-10-31 (issue #214) | **§3.3 — il fixture di scenario dell'event detector**: `fixtures/scenarios/listening-spike.json` (709 eventi, 95 giorni) è una cronologia **composta**: 81 giorni di baseline (4-7 ascolti al giorno, 6 artisti noti, **3 giorni di silenzio** ai giorni 40-42) e 14 giorni di **picco** (20 ascolti al giorno, un artista che domina il 60% e 4 artisti nuovi ogni giorno). Serve perché l'event detector cerca **anomalie**: su un fixture casuale non ci sarebbe nessun salto dichiarato, e il test non potrebbe dichiarare un risultato (la lezione della Sessione 69). Il **profilo delle audio features** è **per artista** (dichiarato nel test): la baseline deve avere una varianza giornaliera della valence, altrimenti la deviazione standard sarebbe zero e lo z-score sulla valence non sarebbe definito. Aggiunto il fixture alla lista dei **composti** in §3.3 |

@@ -7,7 +7,7 @@
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti
- *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|geo|era|demo)
+ *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|geo|era|spike|demo)
  *   node scripts/generate-fixtures.mjs --seed 42       # seed custom (default 0xC0FFEE)
  *
  * Output:
@@ -19,6 +19,7 @@
  *   fixtures/scenarios/summer-roadtrip.json
  *   fixtures/scenarios/geo-context.json
  *   fixtures/scenarios/era-shift.json
+ *   fixtures/scenarios/listening-spike.json
  *   fixtures/demo-user.json         (1 anno di storia sintetica, demo mode §06)
  *
  * Vincoli: nessuna dipendenza esterna (Node ≥ 20 LTS, solo stdlib).
@@ -830,6 +831,238 @@ function buildEraShiftScenario() {
   };
 }
 
+/**
+ * Scenario **picco di ascolto (listening spike)** — Story 2.3,
+ * `04-ANALYSIS-ALGORITHMS.md` §6.
+ *
+ * L'event detector cerca **anomalie**: un picco, un crollo, un'esplosione di
+ * novità, un silenzio. Per verificarlo serve una cronologia con un'anomalia
+ * **a un istante noto**: i fixture di scenario esistenti sono generati
+ * casualmente, e nessuna anomalia netta renderebbe il rilevamento
+ * deterministico.
+ *
+ * Questo fixture è quindi una **cronologia composta**, deterministica e senza
+ * RNG:
+ *
+ * - **baseline** (giorni 0-80): 6 artisti noti, 4-7 ascolti al giorno
+ *   distribuiti a rotazione, 3 giorni di **silenzio** (giorni 40-42);
+ * - **picco** (giorni 81-94, due settimane): 20 ascolti al giorno, un artista
+ *   nuovo che domina (12/20) e 4 artisti nuovi ogni giorno.
+ *
+ * Le **audio features** sono sintetiche e le costruisce il test (come nel
+ * fixture `era-shift`): la pipeline di arricchimento (EPIC 4.1) non scrive
+ * ancora feature vere. Il profilo di valence è **per artista** (dichiarato
+ * nel test), così la baseline ha una varianza giornaliera non nulla: senza,
+ * la deviazione standard sarebbe zero e lo z-score sulla valence non sarebbe
+ * definito.
+ *
+ * Il piano è dichiarato in `expectedInsights` e verificato dai test dell'event
+ * detector (`packages/core/src/analysis/__tests__/event-scenarios.test.ts`).
+ */
+function buildListeningSpikeScenario() {
+  const importId = 'imp-listening-spike-1';
+  const start = Date.UTC(2024, 0, 1);
+  const dayMs = 86400000;
+  const hour = 12;
+
+  /** I giorni della baseline (0-80) e quelli del picco (81-94). */
+  const baselineDays = 81;
+  const spikeDays = 14;
+  /** I giorni di silenzio, dentro la baseline. */
+  const silenceDays = [40, 41, 42];
+
+  /** Gli artisti noti della baseline: 2 per genere. */
+  const baselineArtists = [
+    { id: 'ar-evt-a1', genres: ['pop'] },
+    { id: 'ar-evt-a2', genres: ['pop'] },
+    { id: 'ar-evt-a3', genres: ['rock'] },
+    { id: 'ar-evt-a4', genres: ['rock'] },
+    { id: 'ar-evt-a5', genres: ['jazz'] },
+    { id: 'ar-evt-a6', genres: ['jazz'] },
+  ];
+  /** L'artista che domina il picco, e i suoi 4 brani. */
+  const dominantArtist = { id: 'ar-evt-spike', genres: ['techno'] };
+  /** Gli artisti nuovi del picco: 4 al giorno, tutti diversi. */
+  const newArtistsPerDay = 4;
+
+  const artists = [];
+  const tracks = [];
+  const listens = [];
+  let counter = 0;
+
+  /** Aggiunge un brano all'elenco. */
+  const addTrack = (id, artistId, genres) => {
+    tracks.push({
+      id,
+      canonicalKey: `fuzzy:ck-evt-${id}`,
+      name: `Brano ${id.toUpperCase()}`,
+      artistId,
+      albumId: null,
+      durationMs: 240000,
+      isrc: null,
+      mbid: null,
+      explicit: false,
+      genres,
+      artworkUrl: null,
+      platformIds: { spotify: `sp-${id}` },
+      firstSeenAt: start,
+      lastSeenAt: start,
+      listenCount: 0,
+      spotifyId: `sp-${id}`,
+    });
+  };
+
+  /** Aggiunge un ascolto. */
+  const addListen = (id, trackId, startedAt) => {
+    listens.push({
+      id,
+      eventKey: `spotify:ek-evt-${id}`,
+      platform: 'spotify',
+      importId,
+      timestamp: startedAt + 240000,
+      startedAt,
+      durationMs: 240000,
+      trackId,
+      completed: true,
+      skipped: false,
+      shuffle: false,
+      offline: false,
+      incognito: false,
+      reasonStart: 'playbtn',
+      reasonEnd: 'trackdone',
+      deviceType: 'mobile',
+      deviceDetail: null,
+      ip: null,
+      country: 'IT',
+      city: null,
+      citySource: null,
+      cityConfidence: null,
+      day: new Date(startedAt).toISOString().slice(0, 10),
+    });
+  };
+
+  // --- Artisti e brani della baseline ---
+  for (const artist of baselineArtists) {
+    artists.push({
+      id: artist.id,
+      name: `Artista ${artist.id.toUpperCase()}`,
+      mbid: null,
+      genres: artist.genres,
+      spotifyId: `sp-${artist.id}`,
+    });
+    for (let t = 1; t <= 2; t += 1) {
+      addTrack(`tr-evt-${artist.id}-${t}`, artist.id, artist.genres);
+    }
+  }
+
+  // --- Ascolti della baseline ---
+  // Ogni giorno: `4 + (day % 4)` ascolti, distribuiti a rotazione su 4 dei 6
+  // artisti noti (ruotano di un posto al giorno). La rotazione cambia la
+  // **valence media del giorno** (il test assegna una valence per artista),
+  // mentre le quote per artista restano stabili: il detector a quota non
+  // deve scattare nella baseline.
+  for (let day = 0; day < baselineDays; day += 1) {
+    if (silenceDays.includes(day)) continue;
+    const count = 4 + (day % 4);
+    for (let j = 0; j < count; j += 1) {
+      counter += 1;
+      const artistIndex = (day + j) % baselineArtists.length;
+      const artist = baselineArtists[artistIndex];
+      const trackIndex = (j % 2) + 1;
+      const startedAt = start + day * dayMs + hour * 3600000 + j * 600000;
+      addListen(
+        `le-evt-${String(counter).padStart(5, '0')}`,
+        `tr-evt-${artist.id}-${trackIndex}`,
+        startedAt,
+      );
+    }
+  }
+
+  // --- Artisti e brani del picco ---
+  artists.push({
+    id: dominantArtist.id,
+    name: 'Artista Dominante',
+    mbid: null,
+    genres: dominantArtist.genres,
+    spotifyId: `sp-${dominantArtist.id}`,
+  });
+  for (let t = 1; t <= 4; t += 1) {
+    addTrack(`tr-evt-${dominantArtist.id}-${t}`, dominantArtist.id, dominantArtist.genres);
+  }
+
+  const spikeArtistIds = [];
+  for (let d = 0; d < spikeDays; d += 1) {
+    const day = baselineDays + d;
+    for (let n = 0; n < newArtistsPerDay; n += 1) {
+      const id = `ar-evt-new-${String(d + 1).padStart(2, '0')}-${n + 1}`;
+      spikeArtistIds.push(id);
+      artists.push({
+        id,
+        name: `Artista Nuovo ${String(d + 1).padStart(2, '0')}${n + 1}`,
+        mbid: null,
+        genres: ['house'],
+        spotifyId: `sp-${id}`,
+      });
+      addTrack(`tr-evt-${id}-1`, id, ['house']);
+    }
+  }
+
+  // --- Ascolti del picco ---
+  // 20 al giorno: 12 dell'artista dominante (che domina il 60% della
+  // finestra) e 8 di 4 artisti nuovi.
+  for (let d = 0; d < spikeDays; d += 1) {
+    const day = baselineDays + d;
+    const dayArtists = spikeArtistIds.slice(d * newArtistsPerDay, (d + 1) * newArtistsPerDay);
+    for (let j = 0; j < 20; j += 1) {
+      counter += 1;
+      const startedAt = start + day * dayMs + hour * 3600000 + j * 600000;
+      if (j < 12) {
+        const trackIndex = (j % 4) + 1;
+        addListen(
+          `le-evt-${String(counter).padStart(5, '0')}`,
+          `tr-evt-${dominantArtist.id}-${trackIndex}`,
+          startedAt,
+        );
+      } else {
+        const artistId = dayArtists[(j - 12) % dayArtists.length];
+        addListen(`le-evt-${String(counter).padStart(5, '0')}`, `tr-evt-${artistId}-1`, startedAt);
+      }
+    }
+  }
+
+  return {
+    _metadata: {
+      name: 'listening-spike',
+      version: '1.0',
+      session: 70,
+      generatedAt: new Date().toISOString(),
+      seed: null,
+      description:
+        'Picco di ascolto (Story 2.3): 81 giorni di baseline (4-7 ascolti/giorno, 3 giorni di silenzio) e poi 14 giorni di picco (20 ascolti/giorno, un artista dominante e 4 artisti nuovi al giorno). Verifica 04-ANALYSIS §6 (event detector): volume_spike, valence_drop, exploration, spike_artist, spike_genre, silence.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedInsights: {
+        eventTypes: [
+          'volume_spike',
+          'valence_drop',
+          'exploration',
+          'spike_artist',
+          'spike_genre',
+          'silence',
+        ],
+        spikeStart: 'giorno 81 dalla prima data (inizio del picco)',
+        spikeWindow:
+          'giorni 81-94 (14 giorni): la finestra di 14 giorni del detector è dentro il picco',
+        silenceDays: '3 giorni senza ascolti (giorni 40-42)',
+        baselineArtists: '6 artisti noti, nessun picco di quota nella baseline',
+      },
+      spec: '02-DATA-SCHEMA.md v1.7 + 04-ANALYSIS-ALGORITHMS.md v1.2 §6 + 10-TESTING.md §3.3',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
@@ -986,6 +1219,7 @@ const targets = {
   demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
   geo: () => buildGeoContextScenario(),
   era: () => buildEraShiftScenario(),
+  spike: () => buildListeningSpikeScenario(),
 };
 
 function writeJson(path, data) {
@@ -1025,6 +1259,7 @@ for (const t of targets_) {
   else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
   else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
   else if (t === 'era') out = resolve(SCENARIOS_DIR, 'era-shift.json');
+  else if (t === 'spike') out = resolve(SCENARIOS_DIR, 'listening-spike.json');
   else out = resolve(SCENARIOS_DIR, `${t}.json`);
   writeJson(out, data);
 }
