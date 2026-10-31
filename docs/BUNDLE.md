@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 18:22
+> Data: 2026-10-31 19:27
 > Totale file: 130
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 129 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1897.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 18:23
+- Dimensione totale: 1902.9 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 19:27
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -890,9 +890,9 @@ Le tre ripetizioni erano tutte riconducibili a due cause:
 1. **Il trigger `push: branches: [main]` senza filtro** rieseguiva l'**intera** pipeline su ogni
    merge, duplicando la validazione che la PR aveva già fatto sullo stesso albero. Ora il trigger
    `push` è **filtrato per path** sui 5 file che i **writer automatici** modificano
-   (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`):
-   sono gli unici commit che arrivano su `main` **senza essere mai passati da una PR**. Su un merge
-   umano la pipeline non gira più.
+   (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`).
+   Su un merge umano che non li tocca la pipeline **non gira**: l'albero che arriva su `main` è
+   lo stesso che la PR ha già validato. Su un merge che li tocca girano **solo i job leggeri**.
 2. **Il doc-sync PR** (che porta `pr:` e `merged_commit:`, noti solo **dopo** il merge) girava
    l'intera pipeline su file **solo `.md`**. Ora il job `detect-code` verifica se **almeno un**
    file cambiato non è un `.md`: se sono tutti `.md`, i 3 job `node-*` non installano le
@@ -900,9 +900,21 @@ Le tre ripetizioni erano tutte riconducibili a due cause:
    conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è
    **fail-safe**: se il detector fallisce, i gate girano comunque.
 
-Su `push` su `main` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza
-`pnpm install`): i 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'` perché
-su `main` il codice non è cambiato rispetto a quanto già validato dalla PR.
+Su `push` su `main` girano **solo i job leggeri** (misurato sul merge di PR #227: **42 s**, con i 3
+job `node-*` **skipped** a 0 s, contro i 172 s della pipeline sequenziale originale): i 3 job
+`node-*` sono condizionati a `github.event_name == 'pull_request'` perché su `main` il codice non
+è cambiato rispetto a quanto già validato dalla PR.
+
+> ⚠️ **I commit dei writer automatici non attivano la CI, e non è colpa del filtro.** GitHub non
+> crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository (comportamento
+> documentato, per impedire i loop ricorsivi), e i due writer pushano con `secrets.GITHUB_TOKEN`.
+> Verificato sui dati: i loro commit non hanno **mai** attivato una run `CI`, nemmeno quando il
+> trigger `push` era privo di filtro. L'integrità di `main` dopo i writer è garantita dai writer
+> stessi (idempotenti, conservati da `git diff --quiet`, e con il `workflow_run` di `auto-bundle`
+> che rigenera il bundle **dopo** l'agregator — issue #149). Un check indipendente sullo stato
+> finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml`: **+1 run leggera per merge**,
+> un trade-off fra copertura e numero di run che spetta al project owner.
+> Dettaglio in `docs/12-DEVOPS.md §9.14.10`.
 
 Cinque cose da sapere quando si legge una pipeline verde:
 
@@ -9561,6 +9573,48 @@ per il regex JavaScript. Ora le righe sono normalizzate una volta sola.
 | 74-4 | **Un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex e non avrebbe intercettato un YAML rotto | Controllo di validità YAML + normalizzazione CRLF, con test di regressione |
 | 74-5 | **Il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern con `$` smettono di matchiare | Normalizzare il fine-riga una volta sola, prima di qualsiasi controllo |
 
+## Il merge di PR #227 e la verifica sul runner
+
+Dopo il merge (2026-10-31T18:22:26Z, commit `51f4076`) la run `CI` su `main` è durata **42 s** con
+i 3 job `node-*` **skipped** (0 s, nessuna installazione di dipendenze) e gli 11 gate verdi —
+contro i **172 s** della pipeline sequenziale originale.
+
+### ⚠️ Correzione a una premessa di questa sessione
+
+Questa sessione aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei
+**writer automatici** fossero «gli unici che arrivano su `main` senza essere mai passati da una PR»
+e che il filtro li catturasse. La premessa è corretta, **la conseguenza pratica no**: quei commit
+**non attivano nessuna run**, e non è colpa del filtro.
+
+**GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (il
+comportamento documentato che impedisce i loop ricorsivi; l'unica eccezione è
+`workflow_dispatch`/`repository_dispatch`). I due writer pushano con `secrets.GITHUB_TOKEN`
+(`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`).
+
+Verificato sui dati dell'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`,
+`04c76fd`) **non** hanno mai attivato una run `CI` — né prima né dopo questa sessione, nemmeno
+quando il trigger `push` era privo di filtro. Gli unici workflow che si attivano sui loro commit
+sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce: è esattamente il
+workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer (issue #149).
+
+**Conseguenze, e scelte:**
+
+- Il filtro per path, nella pratica, serve a **saltare** la CI sui merge umani che non toccano i 5
+  file aggregati — non a catturare i commit dei writer.
+- **L'integrità di `main` dopo i writer non è garantita dalla CI**, ma dai writer stessi: ciascuno
+  è idempotente, è conservato da `git diff --quiet` prima del push, e il `workflow_run` di
+  `auto-bundle` rigenera il bundle **dopo** l'aggregator, riparando da solo il caso dell'ordinamento
+  invertito (issue #149).
+- Volere **anche** un check indipendente sullo stato finale di `main` richiederebbe un trigger
+  `workflow_run` su `ci.yml` per i due writer: **+1 run leggera per merge**. È un trade-off fra
+  copertura e numero di run, e la scelta è del project owner: **non è stato fatto**.
+
+**Lesson**: una premessa corretta può avere una conseguenza pratica falsa. «I commit dei writer
+sono gli unici che non passano da una PR» ⇒ «il filtro li cattura» sembra ovvio, ma fra la premessa
+e la conseguenza c'è il comportamento di GitHub sui push fatti col `GITHUB_TOKEN`. La verifica va
+fatta **sui dati**, non per deduzione: è stato controllato l'API GitHub run per run, e i commit dei
+writer non hanno *mai* attivato una `CI`.
+
 ## Documenti aggiornati
 
 - `docs/12-DEVOPS.md` §9.10 (27 gate su 12 job), **§9.14.10** (nuova: l'anatomia del ciclo e le
@@ -10010,7 +10064,7 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 
 > Status: 🟡 DRAFT
 > Versione: 2.29
-> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati (Sessione 74)
+> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge + correzione: i commit dei writer non attivano la CI (GITHUB_TOKEN) (Sessione 74)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -11184,6 +11238,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: tempo pareggio della pipeline **172 s → 73 s** (misurato sul runner: 112 s con 9 job, **73 s** con i 3 job `node` separati); `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). **Due correzioni nate dalla prima CI della PR** (che vale come test): 73-8 **parallelizzare i job e parallelizzare i task interni sono due cose diverse** — i 4 task turbo in un'unica invocazione (52,7 → 32,8 s) facevano scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` sul runner a 2 vCPU (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion) ⇒ i 4 task restano sequenziali; 73-9 **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale (`git clone` del bare repo senza branch esistente non fa il checkout di nessun branch ⇒ «src refspec main does not match any») ⇒ `git init -b main` esplicito in tutte e 3 le suite che creano repository temporanei, con riproduzione locale del difetto. Consegnati: `ci.yml` (11 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
 | 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
 | 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
+| 2.29b | 2026-10-31 (issue #224) | **§41 (correzione) La CI girava 4 volte per ogni merge — e una premessa da correggere** (Sessione 74, merge di PR #227, commit `51f4076`): la run `CI` su `main` dopo il merge è durata **42 s** con i 3 job `node-*` **skipped** (0 s, nessuna installazione) e gli 11 gate verdi, contro i **172 s** della pipeline sequenziale originale. **Correzione**: la Sessione 74 aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei **writer automatici** fossero «gli unici che arrivano su `main` senza passare da una PR» e che il filtro li catturasse — la premessa è corretta, **la conseguenza pratica no**: quei commit **non attivano nessuna run**, e non è colpa del filtro. **GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (comportamento documentato, per impedire i loop ricorsivi; unica eccezione `workflow_dispatch`/`repository_dispatch`), e i due writer pushano con `secrets.GITHUB_TOKEN` (`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`). Verificato run per run sull'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`, `04c76fd`) **non** hanno **mai** attivato una run `CI` — né prima né dopo la Sessione 74, nemmeno col trigger `push` privo di filtro; gli unici workflow che si attivano su quei commit sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce (è il workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer, issue #149). **Conseguenze**: il filtro per path serve a **saltare** la CI sui merge umani che non toccano i 5 file aggregati, non a catturare i commit dei writer; **l'integrità di `main` dopo i writer è garantita dai writer stessi** (idempotenti, conservati da `git diff --quiet`, col `workflow_run` di `auto-bundle` che rigenera il bundle dopo l'aggregator); un check indipendente sullo stato finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml` ⇒ **+1 run leggera per merge**, trade-off fra copertura e numero di run che spetta al project owner (**non è stato fatto**). **Lesson**: una premessa corretta può avere una conseguenza pratica falsa — la verifica va fatta **sui dati**, non per deduzione |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -25354,13 +25409,49 @@ logico. I dati (API GitHub, 2026-10-31, PR #222 → #223):
 
 | Causa | Correzione |
 |---|---|
-| Il trigger `push: branches: [main]` senza filtro rieseguiva l'**intera** pipeline su ogni merge | Il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`). Sono gli unici commit che arrivano su `main` **senza essere mai passati da una PR**. Su un merge umano la pipeline non gira più: l'albero che arriva su `main` è lo stesso che la PR ha già validato |
-| Su `push` giravano anche i 3 job `node-*` (73 s + 3 installazioni di dipendenze) | Su `push` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza `pnpm install`). I 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'`: su `main` il codice non è cambiato rispetto a quanto già validato dalla PR |
+| Il trigger `push: branches: [main]` senza filtro faceva rieseguire l'**intera** pipeline su ogni merge | Il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`). Su un merge umano che non li tocca la pipeline **non gira**: l'albero che arriva su `main` è lo stesso che la PR ha già validato. Su un merge che li tocca girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~42 s con tutti i gate di controllo, ~21 s se si restringono a quelli strettamente necessari) |
+| Su `push` giravano anche i 3 job `node-*` (73 s + 3 installazioni di dipendenze) | I 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'`: su `main` il codice non è cambiato rispetto a quanto già validato dalla PR |
 | Il doc-sync PR (che porta il numero di PR e l'hash di merge, noti solo **dopo** il merge) girava l'intera pipeline su file **solo `.md`** | Un job `detect-code` calcola se **almeno un** file cambiato non è un `.md`; se tutti lo sono, i 3 job `node-*` non installano le dipendenze e non eseguono i task (il job **riusce**, non viene saltato: `quality` resta fail-closed senza casi speciali). La regola è conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è **fail-safe**: se il detector fallisce, `has_code` resta vuoto e i gate girano comunque |
-| Il secondo run di `auto-bundle` girava anche quando l'agregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main` (vedi §9.14.4) |
+| Il secondo run di `auto-bundle` girava anche quando l'aggregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main` (vedi §9.14.4) |
 
 **Il risultato**: per ogni cambiamento logico la CI passa da **4 run completi** a **1 run completo
-+ 1 ridotto + 2-3 run leggeri**, e da **292 s** a ~**125 s**.
++ 1 ridotto + 2-3 run leggeri**, e da **292 s** a ~**125 s**. Misurato sul merge di PR #227
+(2026-10-31T18:22:29Z): la run `CI` su `main` è durata **42 s** con i 3 job `node-*` **skipped**
+(0 s, nessuna installazione di dipendenze), contro i **172 s** della pipeline sequenziale
+originale.
+
+##### ⚠️ I commit dei writer automatici **non** attivano la CI — e non è colpa del filtro
+
+Il filtro per path è stato motivato con l'idea che i commit dei writer automatici siano «gli unici
+che arrivano su `main` senza essere passati da una PR». L'idea è corretta, ma **la conseguenza
+pratica non è**: quei commit **non attivano nessuna run**, e non è colpa del filtro.
+
+GitHub **non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (è il
+comportamento documentato che impedisce i loop ricorsivi; l'unica eccezione è
+`workflow_dispatch`/`repository_dispatch`). I due writer pushano con `secrets.GITHUB_TOKEN`:
+
+```yaml
+# .github/workflows/auto-state-aggregate.yml:54 e auto-bundle.yml:101
+token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Verificato sui dati (API GitHub): i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`,
+`04c76fd`) **non** hanno mai attivato una run `CI` — né prima né dopo questa sessione, nemmeno
+quando il trigger `push` era privo di filtro. Gli unici workflow che si attivano sui loro commit
+sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce: è esattamente il
+workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer (issue #149).
+
+**Conseguenze, e scelte**:
+
+- Il filtro per path, nella pratica, serve a **saltare** la CI sui merge umani che non toccano i 5
+  file aggregati — non a catturare i commit dei writer.
+- **L'integrità di `main` dopo i writer non è garantita dalla CI**, ma dai writer stessi: ciascuno
+  è idempotente, è conservato da `git diff --quiet` prima del push, e il `workflow_run` di
+  `auto-bundle` (che sopravvive alla soppressione) rigenera il bundle **dopo** l'agregator,
+  riparando da solo il caso dell'ordinamento invertito (issue #149).
+- Volere **anche** un check indipendente sullo stato finale di `main` richiederebbe un trigger
+  `workflow_run` su `ci.yml` per i due writer: **+1 run leggera per merge**. È un trade-off
+  fra copertura e numero di run, e la scelta è del project owner (non è stato fatto).
 
 **Cosa NON è stato fatto e perché:**
 
