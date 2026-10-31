@@ -7,8 +7,17 @@
  * iniettati dall'app, così i test non toccano mai la rete.
  */
 
-export type { CityResult, CacheStorage, GeoConfig, GeoDeps, GeoLookup, GeoPolicy } from './types';
-export { CITY_CONFIDENCE_THRESHOLD, CITY_DB_STALE_MS, GeoError } from './types';
+export {
+  CITY_CONFIDENCE_THRESHOLD,
+  CITY_DB_STALE_MS,
+  GeoError,
+  type CityResult,
+  type CacheStorage,
+  type GeoConfig,
+  type GeoDeps,
+  type GeoLookup,
+  type GeoPolicy,
+} from './types';
 export {
   createMmdbLookup,
   createDisabledLookup,

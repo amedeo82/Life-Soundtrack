@@ -13,55 +13,33 @@ import {
   type GeoConfig,
   type GeoDeps,
   type GeoLookup,
-} from '../geo/index';
+} from '../types';
 import {
   createMmdbLookup,
   createDisabledLookup,
   createGeoPolicy,
   deriveCity,
   isDbStale,
-} from '../geo/index';
+} from '../mmdb';
 
-/** Un client HTTP finto che registra le chiamate e restituisce risposte predefinite. */
+/** Una risposta HTTP finta. */
 interface FakeHttpResponse {
   status: number;
-  body: string;
   headers: Readonly<Record<string, string>>;
+  body: string;
   bytes?: ArrayBuffer;
 }
 
+/** Un client HTTP finto che registra le chiamate. */
 class FakeHttpClient {
   readonly calls: { url: string; responseType?: string | undefined }[] = [];
-  private handler: (
-    url: string,
-    init?: { responseType?: 'text' | 'binary' },
-  ) => FakeHttpResponse | Promise<FakeHttpResponse>;
-
-  constructor(
-    handler: (
-      url: string,
-      init?: { responseType?: 'text' | 'binary' },
-    ) => FakeHttpResponse | Promise<FakeHttpResponse>,
-  ) {
-    this.handler = handler;
-  }
-
+  constructor(private handler: (url: string) => FakeHttpResponse | Promise<FakeHttpResponse>) {}
   async request(
     url: string,
-    init?: {
-      method?: string;
-      headers?: Readonly<Record<string, string>>;
-      body?: string;
-      responseType?: 'text' | 'binary';
-    },
-  ): Promise<{
-    status: number;
-    headers: Readonly<Record<string, string>>;
-    body: string;
-    bytes?: ArrayBuffer;
-  }> {
+    init?: { responseType?: 'text' | 'binary' },
+  ): Promise<FakeHttpResponse> {
     this.calls.push({ url, responseType: init?.responseType });
-    return this.handler(url, init);
+    return this.handler(url);
   }
 }
 
@@ -112,13 +90,32 @@ class FakeLogger {
   debug(msg: string): void {
     this.messages.push(`debug: ${msg}`);
   }
+  info(msg: string): void {
+    this.messages.push(`info: ${msg}`);
+  }
   warn(msg: string): void {
     this.messages.push(`warn: ${msg}`);
   }
+  error(msg: string): void {
+    this.messages.push(`error: ${msg}`);
+  }
 }
 
-/** Crea le dipendenze per il modulo geo. */
-function makeDeps(overrides: Partial<GeoDeps> = {}): GeoDeps & {
+/** Una configurazione di test valida. */
+function makeConfig(overrides: Partial<GeoConfig> = {}): GeoConfig {
+  return {
+    dbIpHost: 'https://download.db-ip.com',
+    mmdbPath: '/free/dbip-city-lite-2024.mmdb',
+    cacheKey: 'geo:mmdb:2024',
+    settingsKey: 'geo:mmdb:buildDate',
+    urlSettingsKey: 'geo:mmdb:url',
+    ...overrides,
+  };
+}
+
+/** Crea le dipendenze per il modulo geo, con i fake esposti per i test. */
+function makeDeps(): {
+  deps: GeoDeps;
   http: FakeHttpClient;
   cache: FakeCacheStorage;
   clock: FakeClock;
@@ -133,19 +130,14 @@ function makeDeps(overrides: Partial<GeoDeps> = {}): GeoDeps & {
   const cache = new FakeCacheStorage();
   const clock = new FakeClock();
   const logger = new FakeLogger();
-  return { http, cache, clock, logger, ...overrides };
-}
-
-/** Una configurazione di test valida. */
-function makeConfig(overrides: Partial<GeoConfig> = {}): GeoConfig {
-  return {
-    dbIpHost: 'https://download.db-ip.com',
-    mmdbPath: '/free/dbip-city-lite-2024.mmdb',
-    cacheKey: 'geo:mmdb:2024',
-    settingsKey: 'geo:mmdb:buildDate',
-    urlSettingsKey: 'geo:mmdb:url',
-    ...overrides,
+  const deps: GeoDeps = {
+    http,
+    cache,
+    clock,
+    logger,
+    policy: createGeoPolicy({ retainCity: true } as never),
   };
+  return { deps, http, cache, clock, logger };
 }
 
 describe('createDisabledLookup', () => {
@@ -257,9 +249,9 @@ describe('isDbStale', () => {
 
 describe('createMmdbLookup - download on-demand', () => {
   it('scarica il database al primo lookup', async () => {
-    const { http, cache, clock, logger } = makeDeps();
+    const { deps, http, cache } = makeDeps();
     const config = makeConfig();
-    const lookup = createMmdbLookup({ http, cache, clock, logger }, config);
+    const lookup = createMmdbLookup(deps, config);
 
     expect(lookup.isAvailable()).toBe(false);
 
@@ -267,21 +259,21 @@ describe('createMmdbLookup - download on-demand', () => {
 
     // Il download è avvenuto (chiamata HTTP)
     expect(http.calls.length).toBe(1);
-    expect(http.calls[0].url).toBe('https://download.db-ip.com/free/dbip-city-lite-2024.mmdb');
-    expect(http.calls[0].responseType).toBe('binary');
+    expect(http.calls[0]!.url).toBe('https://download.db-ip.com/free/dbip-city-lite-2024.mmdb');
+    expect(http.calls[0]!.responseType).toBe('binary');
 
     // Salvato in cache
     expect(cache.puts.length).toBe(1);
-    expect(cache.puts[0].key).toBe('https://download.db-ip.com/free/dbip-city-lite-2024.mmdb');
+    expect(cache.puts[0]!.url).toBe('https://download.db-ip.com/free/dbip-city-lite-2024.mmdb');
 
     // Ora è disponibile
     expect(lookup.isAvailable()).toBe(true);
   });
 
   it('non riscarica se già disponibile', async () => {
-    const { http } = makeDeps();
+    const { deps, http } = makeDeps();
     const config = makeConfig();
-    const lookup = createMmdbLookup({ http }, config);
+    const lookup = createMmdbLookup(deps, config);
 
     await lookup.lookup('8.8.8.8');
     await lookup.lookup('1.1.1.1');
@@ -291,18 +283,27 @@ describe('createMmdbLookup - download on-demand', () => {
 
   it("gestisce l'errore di download", async () => {
     const http = new FakeHttpClient(async () => ({ status: 404, headers: {}, body: '' }));
-    const { cache, clock, logger } = makeDeps({ http });
+    const cache = new FakeCacheStorage();
+    const clock = new FakeClock();
+    const logger = new FakeLogger();
+    const deps: GeoDeps = {
+      http,
+      cache,
+      clock,
+      logger,
+      policy: createGeoPolicy({ retainCity: true } as never),
+    };
     const config = makeConfig();
-    const lookup = createMmdbLookup({ http, cache, clock, logger }, config);
+    const lookup = createMmdbLookup(deps, config);
 
     await expect(lookup.lookup('8.8.8.8')).rejects.toThrow();
     expect(lookup.isAvailable()).toBe(false);
   });
 
   it('usa Cache Storage se disponibile', async () => {
-    const { http, cache } = makeDeps();
+    const { deps, cache } = makeDeps();
     const config = makeConfig();
-    const lookup = createMmdbLookup({ http, cache }, config);
+    const lookup = createMmdbLookup(deps, config);
 
     await lookup.lookup('8.8.8.8');
 
