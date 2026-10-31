@@ -7606,7 +7606,7 @@ Due scelte della spec sono state prese sul serio, al punto da renderle
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #234)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```

@@ -123,7 +123,7 @@
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
-| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | - |
+| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 

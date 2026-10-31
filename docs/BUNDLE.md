@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 22:36
+> Data: 2026-10-31 22:38
 > Totale file: 137
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2293,7 +2293,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
-| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | - |
+| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -10055,7 +10055,7 @@ Due scelte della spec sono state prese sul serio, al punto da renderle
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #234)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```
@@ -16951,7 +16951,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/233-home-timeline
-pr: 0
+pr: 234
 claim: kilo-HP-ELITEBOOK-progress
 cross_refs: [233, 231, 216]
 tags: [ui, timeline, home]
@@ -18178,7 +18178,7 @@ priority: B
 depends_on: []
 issue: 233
 branch: "feat/233-home-timeline"
-pr: 0
+pr: 234
 claim: kilo-HP-ELITEBOOK-progress
 spec_refs:
   - docs/06-UX-FLOWS-STATES.md
@@ -26473,7 +26473,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 3.1 - Home + Timeline | done | #0 | - | ui |
+| 3.1 - Home + Timeline | done | #234 | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |

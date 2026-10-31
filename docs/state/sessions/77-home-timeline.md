@@ -5,7 +5,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/233-home-timeline
-pr: 0
+pr: 234
 claim: kilo-HP-ELITEBOOK-progress
 cross_refs: [233, 231, 216]
 tags: [ui, timeline, home]
