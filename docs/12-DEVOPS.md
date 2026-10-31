@@ -947,7 +947,28 @@ git init + 3 config: 261ms
    (ora convertito con `cygpath -w`) e il mock `gh` (script bash, non eseguibile dal `pwsh` nativo
    su Windows: aggiunto un wrapper `gh.cmd`).
 
-#### 9.14.6 Cosa NON è stato fatto (e perché)
+#### 9.14.6 L'ordine dei due generatori è vincolante *(unFinding della Sessione 73)*
+
+`docs/INDEX.md` è **sia** un file in `$files` del generatore del bundle **sia** un target
+dell'agregator. I due script non sono quindi indipendenti, e **l'ordine conta**:
+
+```
+pwsh scripts/aggregate-state.ps1     # 1° : scrive i blocchi AGGREGATE-* in INDEX.md
+pwsh scripts/generate-bundle.ps1     # 2° : copia INDEX.md (con i blocchi nuovi) dentro BUNDLE.md
+```
+
+Nell'ordine inverso la copia di `docs/INDEX.md` dentro `docs/BUNDLE.md` resta stale rispetto ai
+blocchi appena riscritti, e `generate-bundle.ps1 -Check` **fallisce** con «non è in sync» anche se
+entrambi i generatori hanno girato e nessuno dei due file è corrotto. È la stessa classe dell'
+ordinamento fra i due writer di `main` (issue #149), in versione locale — e il `pre-push` hook
+rigenera il bundle **da solo**, quindi se l'aggregator non ha girato dopo l'ultima modifica a
+`docs/INDEX.md` il bundle ne copia una versione vecchia.
+
+**Regola operativa**: quando tocchi `docs/state/`, `docs/INDEX.md`, `docs/SESSIONS.md`,
+`docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'agregator e **poi** il generatore, e
+verifica **entrambi** i check. La sequenza è stabile (verificata su 3 cicli consecutivi).
+
+#### 9.14.7 Cosa NON è stato fatto (e perché)
 
 - **Typecheck duplicato**: `apps/web` esegue `tsc --noEmit` sia in `typecheck` sia in `build`
   (che lo precede). Si risolve togliendo il `tsc --noEmit` dallo script di `build`, ma è una

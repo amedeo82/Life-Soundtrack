@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 17:01
+> Data: 2026-10-31 17:09
 > Totale file: 129
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 128 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1858.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 17:00
+- Dimensione totale: 1860.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 17:09
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -637,6 +637,33 @@ Se l'audit elenca worktree attive o branch `feat/*` / `fix/*` merged-orfani, ese
    Exit code 0 = in sync, 1 = da rigenerare, 2 = file dichiarati mancanti.
 
 3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
+
+### ⚠️ L'ordine dei due generatori è vincolante *(Sessione 73, issue #224)*
+
+`docs/INDEX.md` è **sia** un file in `$files` **sia** un target dell'aggregator. Quindi:
+
+```
+pwsh scripts/aggregate-state.ps1     # 1° : scrive i blocchi AGGREGATE-* in INDEX.md
+pwsh scripts/generate-bundle.ps1     # 2° : copia INDEX.md (con i blocchi nuovi) dentro BUNDLE.md
+```
+
+Nell'ordine inverso (`generate-bundle` prima) la copia di `docs/INDEX.md` dentro `docs/BUNDLE.md`
+resta **stale** rispetto ai blocchi appena riscritti, e `generate-bundle.ps1 -Check` **fallisce**
+con «non è in sync» anche se i due generatori hanno girato entrambi e nessuno dei due file è
+"rotto". È la stessa classe dell'ordinamento fra i due writer di `main` (issue #149), in versione
+locale: il `pre-push` hook rigenera il bundle da solo, quindi se l'aggregator non ha girato dopo
+l'ultima modifica a `docs/INDEX.md` il bundle ne copia una versione vecchia.
+
+**Regola operativa**: quando tocchi `docs/state/`, `docs/INDEX.md`, `docs/SESSIONS.md`,
+`docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'aggregator e **poi** il generatore del
+bundle, e verifica **entrambi** i check:
+
+```powershell
+pwsh scripts/aggregate-state.ps1
+pwsh scripts/generate-bundle.ps1
+pwsh scripts/aggregate-state.ps1 -Check    # exit 0
+pwsh scripts/generate-bundle.ps1 -Check    # exit 0
+```
 
 Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
 
@@ -2099,7 +2126,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
 | 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ✅ | #219 |
 | 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ✅ | #223 |
-| 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | - |
+| 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -9200,7 +9227,7 @@ fra il lavoro proprio e quello altrui.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #225)
 - **Claim**: `kilo-HP-ELITEBOOK-perf73`
 
 ```
@@ -25002,7 +25029,28 @@ git init + 3 config: 261ms
    (ora convertito con `cygpath -w`) e il mock `gh` (script bash, non eseguibile dal `pwsh` nativo
    su Windows: aggiunto un wrapper `gh.cmd`).
 
-#### 9.14.6 Cosa NON è stato fatto (e perché)
+#### 9.14.6 L'ordine dei due generatori è vincolante *(unFinding della Sessione 73)*
+
+`docs/INDEX.md` è **sia** un file in `$files` del generatore del bundle **sia** un target
+dell'agregator. I due script non sono quindi indipendenti, e **l'ordine conta**:
+
+```
+pwsh scripts/aggregate-state.ps1     # 1° : scrive i blocchi AGGREGATE-* in INDEX.md
+pwsh scripts/generate-bundle.ps1     # 2° : copia INDEX.md (con i blocchi nuovi) dentro BUNDLE.md
+```
+
+Nell'ordine inverso la copia di `docs/INDEX.md` dentro `docs/BUNDLE.md` resta stale rispetto ai
+blocchi appena riscritti, e `generate-bundle.ps1 -Check` **fallisce** con «non è in sync» anche se
+entrambi i generatori hanno girato e nessuno dei due file è corrotto. È la stessa classe dell'
+ordinamento fra i due writer di `main` (issue #149), in versione locale — e il `pre-push` hook
+rigenera il bundle **da solo**, quindi se l'aggregator non ha girato dopo l'ultima modifica a
+`docs/INDEX.md` il bundle ne copia una versione vecchia.
+
+**Regola operativa**: quando tocchi `docs/state/`, `docs/INDEX.md`, `docs/SESSIONS.md`,
+`docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'agregator e **poi** il generatore, e
+verifica **entrambi** i check. La sequenza è stabile (verificata su 3 cicli consecutivi).
+
+#### 9.14.7 Cosa NON è stato fatto (e perché)
 
 - **Typecheck duplicato**: `apps/web` esegue `tsc --noEmit` sia in `typecheck` sia in `build`
   (che lo precede). Si risolve togliendo il `tsc --noEmit` dallo script di `build`, ma è una

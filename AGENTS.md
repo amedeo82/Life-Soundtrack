@@ -607,6 +607,33 @@ Se l'audit elenca worktree attive o branch `feat/*` / `fix/*` merged-orfani, ese
 
 3. **Workflow di manutenzione completo**: vedi `docs/12-DEVOPS.md §9`.
 
+### ⚠️ L'ordine dei due generatori è vincolante *(Sessione 73, issue #224)*
+
+`docs/INDEX.md` è **sia** un file in `$files` **sia** un target dell'aggregator. Quindi:
+
+```
+pwsh scripts/aggregate-state.ps1     # 1° : scrive i blocchi AGGREGATE-* in INDEX.md
+pwsh scripts/generate-bundle.ps1     # 2° : copia INDEX.md (con i blocchi nuovi) dentro BUNDLE.md
+```
+
+Nell'ordine inverso (`generate-bundle` prima) la copia di `docs/INDEX.md` dentro `docs/BUNDLE.md`
+resta **stale** rispetto ai blocchi appena riscritti, e `generate-bundle.ps1 -Check` **fallisce**
+con «non è in sync» anche se i due generatori hanno girato entrambi e nessuno dei due file è
+"rotto". È la stessa classe dell'ordinamento fra i due writer di `main` (issue #149), in versione
+locale: il `pre-push` hook rigenera il bundle da solo, quindi se l'aggregator non ha girato dopo
+l'ultima modifica a `docs/INDEX.md` il bundle ne copia una versione vecchia.
+
+**Regola operativa**: quando tocchi `docs/state/`, `docs/INDEX.md`, `docs/SESSIONS.md`,
+`docs/11-BACKLOG.md` o `README.md`, lancia **prima** l'aggregator e **poi** il generatore del
+bundle, e verifica **entrambi** i check:
+
+```powershell
+pwsh scripts/aggregate-state.ps1
+pwsh scripts/generate-bundle.ps1
+pwsh scripts/aggregate-state.ps1 -Check    # exit 0
+pwsh scripts/generate-bundle.ps1 -Check    # exit 0
+```
+
 Non serve intervenire sullo script se modifichi solo il **contenuto** di un file già elencato (lo script lo rilegge). Intervieni solo se aggiungi/rimuovi file.
 
 ### 📦 D.26.3 — Bundle regeneration obbligatoria in stessa PR *(lesson learned)*
