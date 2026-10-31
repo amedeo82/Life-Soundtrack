@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 13:45
+> Data: 2026-10-31 13:48
 > Totale file: 127
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2038,7 +2038,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
-| 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ❌ | - |
+| 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ❌ | #219 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -8869,7 +8869,7 @@ esplicitamente.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #219)
 - **Claim**: `kilo-hp-elitebook-lrm6`
 
 ```
@@ -14680,7 +14680,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: docs/218-powershell-7-baseline
-pr: 0
+pr: 219
 claim: kilo-hp-elitebook-lrm6
 cross_refs: [104, 63, 42]
 tags: [devops, docs]

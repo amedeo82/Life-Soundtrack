@@ -7,7 +7,7 @@ merged: false
 merged_commit: ""
 merged_date: ""
 branch: docs/218-powershell-7-baseline
-pr: 0
+pr: 219
 claim: kilo-hp-elitebook-lrm6
 cross_refs: [104, 63, 42]
 tags: [devops, docs]

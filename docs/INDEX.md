@@ -117,7 +117,7 @@
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
-| 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ❌ | - |
+| 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ❌ | #219 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 

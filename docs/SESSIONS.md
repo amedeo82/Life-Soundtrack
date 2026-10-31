@@ -6752,7 +6752,7 @@ esplicitamente.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #219)
 - **Claim**: `kilo-hp-elitebook-lrm6`
 
 ```
