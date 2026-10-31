@@ -1,24 +1,24 @@
 /* Design tokens: design/tokens.json v0.2 + 15-DESIGN-SYSTEM.md (DRAFT §2-3 promozionato per Story 0.4, opzione C). */
 :root {
-  --ls-bg-base: #0A0E1A;
+  --ls-bg-base: #0a0e1a;
   --ls-bg-surface: #131829;
-  --ls-bg-elevated: #1A2138;
+  --ls-bg-elevated: #1a2138;
   --ls-border-subtle: rgba(139, 92, 246, 0.25);
-  --ls-border-active: #8B5CF6;
-  --ls-text-primary: #FFFFFF;
-  --ls-text-secondary: #94A3B8;
-  --ls-text-muted: #64748B;
-  --ls-brand-violet: #8B5CF6;
-  --ls-brand-magenta: #EC4899;
-  --ls-brand-amber: #F59E0B;
-  --ls-brand-gradient: linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #F59E0B 100%);
-  --ls-mood-sad: #3B82F6;
-  --ls-mood-angry: #EF4444;
-  --ls-mood-neutral: #8B5CF6;
-  --ls-mood-calm: #10B981;
-  --ls-mood-happy: #F59E0B;
-  --ls-mood-excited: #EC4899;
-  --ls-platform-spotify: #1DB954;
+  --ls-border-active: #8b5cf6;
+  --ls-text-primary: #ffffff;
+  --ls-text-secondary: #94a3b8;
+  --ls-text-muted: #64748b;
+  --ls-brand-violet: #8b5cf6;
+  --ls-brand-magenta: #ec4899;
+  --ls-brand-amber: #f59e0b;
+  --ls-brand-gradient: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f59e0b 100%);
+  --ls-mood-sad: #3b82f6;
+  --ls-mood-angry: #ef4444;
+  --ls-mood-neutral: #8b5cf6;
+  --ls-mood-calm: #10b981;
+  --ls-mood-happy: #f59e0b;
+  --ls-mood-excited: #ec4899;
+  --ls-platform-spotify: #1db954;
   --ls-spacing-xs: 0.25rem;
   --ls-spacing-sm: 0.5rem;
   --ls-spacing-md: 1rem;
@@ -34,12 +34,15 @@
   --ls-shadow-glow-md: 0 0 20px rgba(139, 92, 246, 0.4);
   --ls-transition-fast: 100ms ease-out;
   --ls-transition-base: 200ms ease-in-out;
-  --ls-font-display: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ls-font-display:
+    'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --ls-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --ls-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   background: var(--ls-bg-base);
   color: var(--ls-text-primary);
@@ -47,9 +50,14 @@ html, body, #root {
   min-height: 100vh;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-:focus-visible { outline: 2px solid var(--ls-border-active); outline-offset: 2px; }
+:focus-visible {
+  outline: 2px solid var(--ls-border-active);
+  outline-offset: 2px;
+}
 
 .onboarding-shell {
   display: grid;
@@ -124,7 +132,10 @@ html, body, #root {
   text-align: center;
 }
 
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btn-primary {
   background: var(--ls-brand-gradient);
@@ -169,16 +180,18 @@ html, body, #root {
   border-radius: var(--ls-radius-lg);
   padding: var(--ls-spacing-xl) var(--ls-spacing-md);
   text-align: center;
-  transition: border-color var(--ls-transition-fast), background var(--ls-transition-fast);
+  transition:
+    border-color var(--ls-transition-fast),
+    background var(--ls-transition-fast);
   background: rgba(255, 255, 255, 0.02);
 }
 
-.drop-zone[data-active="true"] {
+.drop-zone[data-active='true'] {
   border-color: var(--ls-border-active);
   background: rgba(139, 92, 246, 0.08);
 }
 
-.drop-zone[data-disabled="true"] {
+.drop-zone[data-disabled='true'] {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -216,7 +229,11 @@ html, body, #root {
   cursor: pointer;
 }
 
-.toggle input { accent-color: var(--ls-brand-violet); width: 1.1rem; height: 1.1rem; }
+.toggle input {
+  accent-color: var(--ls-brand-violet);
+  width: 1.1rem;
+  height: 1.1rem;
+}
 
 .toggle label {
   color: var(--ls-text-secondary);
@@ -238,16 +255,18 @@ html, body, #root {
   border-radius: var(--ls-radius-xl);
   padding: var(--ls-spacing-xl);
   text-align: center;
-  transition: border-color var(--ls-transition-fast), box-shadow var(--ls-transition-fast);
+  transition:
+    border-color var(--ls-transition-fast),
+    box-shadow var(--ls-transition-fast);
   cursor: pointer;
   position: relative;
 }
 
-.platform-card[role="button"] {
+.platform-card[role='button'] {
   outline: none;
 }
 
-.platform-card:hover:not([data-status="done"]) {
+.platform-card:hover:not([data-status='done']) {
   border-color: var(--ls-border-active);
 }
 
@@ -258,10 +277,21 @@ html, body, #root {
   border-style: solid;
 }
 
-.platform-card--validating { border-color: var(--ls-text-muted); }
-.platform-card--parsing { border-color: var(--ls-brand-violet); box-shadow: var(--ls-shadow-glow-sm); }
-.platform-card--done { border-color: var(--ls-platform-spotify); background: #111a15; }
-.platform-card--error { border-color: var(--ls-mood-angry); background: #1a0f10; }
+.platform-card--validating {
+  border-color: var(--ls-text-muted);
+}
+.platform-card--parsing {
+  border-color: var(--ls-brand-violet);
+  box-shadow: var(--ls-shadow-glow-sm);
+}
+.platform-card--done {
+  border-color: var(--ls-platform-spotify);
+  background: #111a15;
+}
+.platform-card--error {
+  border-color: var(--ls-mood-angry);
+  background: #1a0f10;
+}
 
 .platform-card__header {
   display: flex;
@@ -307,12 +337,16 @@ html, body, #root {
   margin: 0 auto var(--ls-spacing-sm) auto;
 }
 
-@keyframes ls-spin { to { transform: rotate(360deg); } }
+@keyframes ls-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .platform-card__progress {
   width: 100%;
   height: 6px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: var(--ls-radius-full);
   overflow: hidden;
   margin-bottom: var(--ls-spacing-sm);
@@ -374,7 +408,9 @@ html, body, #root {
   transition: opacity var(--ls-transition-fast);
 }
 
-.drop-zone-overlay.visible { opacity: 1; }
+.drop-zone-overlay.visible {
+  opacity: 1;
+}
 
 /* ---------- Processing ---------- */
 .processing-ring {
@@ -421,6 +457,128 @@ html, body, #root {
 }
 
 @media (max-width: 768px) {
-  .onboarding-card { padding: var(--ls-spacing-lg); }
-  .onboarding-shell { padding: var(--ls-spacing-lg); }
+  .onboarding-card {
+    padding: var(--ls-spacing-lg);
+  }
+  .onboarding-shell {
+    padding: var(--ls-spacing-lg);
+  }
+}
+
+/* ---------- Nastro contesto (Story 3.4, 19-GEO-CONTEXT §8.2) ---------- */
+/*
+ * Il nastro e' una striscia orizzontale sotto le EraBand: un segmento per
+ * ContextPeriod, colorato per `kind`. Il colore viene dal design system
+ * (`design/tokens.json`) ed e' applicato inline dal componente, perche' il
+ * nastro puo' essere montato su superfici diverse (Timeline, dettaglio).
+ */
+.context-ribbon {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-spacing-sm);
+  width: 100%;
+}
+
+.context-ribbon__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ls-spacing-md);
+  align-items: center;
+}
+
+.context-ribbon__filters label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ls-spacing-xs);
+}
+
+.context-ribbon__segments {
+  display: flex;
+  gap: var(--ls-spacing-xs);
+  overflow-x: auto;
+  padding-bottom: var(--ls-spacing-xs);
+}
+
+.context-ribbon__segment {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-spacing-xs);
+  min-width: 8rem;
+  padding: var(--ls-spacing-sm);
+  background: var(--ls-bg-surface);
+  border: 1px solid var(--ls-border-subtle);
+  border-left-width: 3px;
+  border-radius: var(--ls-radius-md);
+  color: var(--ls-text-primary);
+  font-family: var(--ls-font-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--ls-transition-fast),
+    background var(--ls-transition-fast);
+}
+
+.context-ribbon__segment:hover {
+  background: var(--ls-bg-elevated);
+}
+
+.context-ribbon__kind {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ls-text-secondary);
+}
+
+.context-ribbon__location,
+.context-ribbon__label {
+  font-size: 0.875rem;
+  color: var(--ls-text-primary);
+}
+
+.context-ribbon__pips {
+  display: inline-flex;
+  gap: var(--ls-spacing-xs);
+  align-items: center;
+}
+
+.context-ribbon__pip {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--ls-radius-full);
+  background: var(--ls-text-muted);
+}
+
+.context-ribbon__pips-label {
+  font-size: 0.75rem;
+  color: var(--ls-text-muted);
+}
+
+/* ---------- Dettaglio del periodo (Story 3.4) ---------- */
+.context-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-spacing-md);
+  padding: var(--ls-spacing-lg);
+  background: var(--ls-bg-surface);
+  border: 1px solid var(--ls-border-subtle);
+  border-radius: var(--ls-radius-lg);
+}
+
+.context-detail__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ls-spacing-xs) var(--ls-spacing-md);
+  margin: 0;
+}
+
+.context-detail__facts dt {
+  color: var(--ls-text-secondary);
+  font-size: 0.875rem;
+}
+
+.context-detail__facts dd {
+  margin: 0;
+  color: var(--ls-text-primary);
 }

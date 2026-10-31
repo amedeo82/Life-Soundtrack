@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 22:07
-> Totale file: 134
+> Data: 2026-10-31 22:18
+> Totale file: 135
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 133 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2009.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 22:05
+- Totale file: 134 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2027 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 22:18
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 84 |
+| docs/ | 85 |
 | scripts/ | 23 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1367,27 +1367,26 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 68%** - 19 story completate su 28 - effort pesato 68% - **mancano 9 step**
+**Implementazione: 71%** - 20 story completate su 28 - effort pesato 71% - **mancano 8 step**
 
-`████████████████████░░░░░░░░░░` 68%
+`█████████████████████░░░░░░░░░` 71%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 3 - UI/UX | 1 | 4 | 25% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 19 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 20 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (9):
+**Step ancora da implementare** (8):
 - 3.1 Home + Timeline - da fare (size XL)
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
-- 3.4 Nastro contesto (Timeline) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
@@ -1398,39 +1397,39 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Test end-to-end dell'app | EPIC 3 (4 story) | 1/4 - in corso |
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S75)
+**Analisi della sessione corrente** (S76)
 
 ### Numeri
 
-- **Implementazione: 68%** — 19 story completate su 28 · effort pesato 68% · **mancano 9 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
 - **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
-- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
+- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
 - **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
 
-> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura (dopo il merge che
-> ha chiuso la 4.4): se il blocco e l'analisi divergono, il primo e' la fonte di verita' — la
-> percentuale e' un dato calcolato, la prosa e' un commento.
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
+> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
+> la prosa e' un commento.
 
-### Salute tecnica (verificata su `main`)
+### Salute tecnica (verificata in questa worktree)
 
-`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
 
 ### Procedura introdotta con questa sessione
 
-1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
-2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
-3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
-4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
-5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
+2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
+3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
+4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -1441,9 +1440,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **3.4** — Nastro contesto (Timeline) (priority `I`, vedi `docs/11-BACKLOG.md`).
+_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
 
-Sorgente: `docs/state/stories/3.4-context-ribbon.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2189,7 +2188,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 62 (v1.4) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 67 (v0.9) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`) |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 76 (v0.12) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`); v0.12: §2.12h **materializzata** con le 36 chiavi `timeline.context.*` della Story 3.4 (la sezione era dichiarata dal changelog 0.9 ma non scritta) |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
@@ -2290,6 +2289,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
+| 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2329,10 +2329,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **52** (merge: 40)
-- Stories migrate in state/stories: **20** (done: 19)
-- Ultima sessione migrata: **S75** - Indicatore di avanzamento automatico (issue #216)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **53** (merge: 40)
+- Stories migrate in state/stories: **20** (done: 20)
+- Ultima sessione migrata: **S76** - Nastro contesto (Story 3.4, issue #231)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2345,27 +2345,26 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 68%** - 19 story completate su 28 - effort pesato 68% - **mancano 9 step**
+**Implementazione: 71%** - 20 story completate su 28 - effort pesato 71% - **mancano 8 step**
 
-`████████████████████░░░░░░░░░░` 68%
+`█████████████████████░░░░░░░░░` 71%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 3 - UI/UX | 1 | 4 | 25% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 19 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 20 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (9):
+**Step ancora da implementare** (8):
 - 3.1 Home + Timeline - da fare (size XL)
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
-- 3.4 Nastro contesto (Timeline) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
@@ -2376,39 +2375,39 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Test end-to-end dell'app | EPIC 3 (4 story) | 1/4 - in corso |
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S75)
+**Analisi della sessione corrente** (S76)
 
 ### Numeri
 
-- **Implementazione: 68%** — 19 story completate su 28 · effort pesato 68% · **mancano 9 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
 - **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
-- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
+- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
 - **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
 
-> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura (dopo il merge che
-> ha chiuso la 4.4): se il blocco e l'analisi divergono, il primo e' la fonte di verita' — la
-> percentuale e' un dato calcolato, la prosa e' un commento.
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
+> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
+> la prosa e' un commento.
 
-### Salute tecnica (verificata su `main`)
+### Salute tecnica (verificata in questa worktree)
 
-`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
 
 ### Procedura introdotta con questa sessione
 
-1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
-2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
-3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
-4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
-5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
+2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
+3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
+4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2432,7 +2431,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 70, issue #214): la **Story 2.3 (Event Detector) è completata** — il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore e valence/energy medie ponderate; detector a **z-score** su griglia settimanale — baseline 60gg, finestra 14gg, soglia 2.0; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e soggetto), la persistenza degli insight `event` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** degli eventi, il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). Con la 2.3 l'**EPIC 2** è completo: 2.1 (mood), 2.2 (ere), 2.3 (eventi), 2.4 (ricordi). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 già disponibile. Dietro: la tranche dell'EPIC 3 (**UI**, che includerà la schermata ⑧ degli eventi) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.3: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'evento** (Story 3.x).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 76, issue #231): la **tranche geo è chiusa** — la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76: il nastro con un segmento per `ContextPeriod` e il dettaglio del periodo con le azioni utente) sono completate, e con la 3.4 l'**EPIC 3** (UI) passa a 1/4. **Prossimo passo**: la **3.1** (Home + Timeline, `[SIZE:XL]`) — è il pezzo che manca per **montare** il nastro sotto le `EraBand` e per sbloccare il test **end-to-end** dell'app: senza Timeline l'app resta onboarding + import, e si può testare il motore ma non l'esperienza «colonna sonora della mia vita». Dietro: la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi), il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -9945,6 +9944,106 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 - `docs/BUNDLE.md` — rigenerato
 ```
 
+### Sessione 76 - Nastro contesto (Story 3.4, issue #231)
+
+- **Data**: 2026-10-31
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK-progress`
+
+```
+
+# Sessione 76 — Nastro contesto (Story 3.4, issue #231)
+
+## Sintesi
+
+Il **nastro contesto** è la striscia che rende leggibile il contesto sotto le
+`EraBand` della Timeline: un segmento per `ContextPeriod`, il colore del
+`kind`, l'etichetta del paese, la città e i pips dei dispositivi. Il click su un
+segmento apre il **dettaglio del periodo**, dove l'utente conferma, corregge o
+ignora la classificazione: è il punto in cui il diario diventa personale
+(`19§4.3` — l'algoritmo propone, l'utente batte le spalle).
+
+La story era **lavorabile**: le due dipendenze sono soddisfatte (la **1.6**
+fondazione geo, Sessione 68; la **4.4** DB IP→città, issue #221) e il core
+espone gia' `ContextPeriod`, il classificatore L1 e `setContextPeriodVerdict`.
+La story e' dunque **interamente UI**: nessuna nuova logica di dominio.
+
+Due scelte della spec sono state prese sul serio, al punto da renderle
+**strutturali** invece che convenzionali:
+
+- **la regola di linguaggio** («la citta' e' sempre introdotta da un indicatore
+  di incertezza, il paese mai») vive in **un solo punto** del codice
+  (`describePeriodCity`): non in un template, non in tre componenti. Un test la
+  verifica in italiano e in inglese;
+- **nessuna mappa, nessuna rete**: il nastro riceve i periodi per props e non
+  conosce `fetch`. Il test lo dimostra con uno spy e con l'assenza di `img`,
+  `iframe` e `svg` nel DOM.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.76.1 | Il nastro e' un componente **presentazionale**: dati per props, azioni per callback | Lo rende testabile senza database (15 test, nessun mock di IndexedDB) e gli lascia la liberta' di essere montato dalla Timeline (Story 3.1) quando esistera: il nastro non conosce lo zoom, lo riceve (`visibleRange`) |
+| D.76.2 | La logica pura sta in un file separato (`contextRibbonModel.ts`), non nel file del componente | La regola `react-refresh/only-export-components` chiede che un file di componente esporti solo componenti; e, soprattutto, tiene la **regola di linguaggio** in un unico posto leggibile, non dispersa fra i JSX |
+| D.76.3 | Il view model espone `citySource` esplicito, con default «una citta' presente e non corretta e' una stima» | `ContextPeriod` (core) non porta la provenienza della citta': questa vive sull'evento (`ListenEvent.citySource`, `02§4.1`). Il nastro deve saperlo, perche' «circa *X*» e *X* sono due affermazioni diverse: il default dichiara la realta' (stimata finche' l'utente non corregge) senza mentire |
+| D.76.4 | Un segmento per `ContextPeriod`, **mai aggregati** | `19§5.3`: il periodo senza contesto determinato resta `unknown` e non viene aggregato. Il nastro non raggruppa nulla: due `unknown` sono due segmenti |
+| D.76.5 | Le azioni utente escono per callback (`onVerdict`), la persistenza resta del chiamante | Il modello del verdetto e' gia' quello di `Insight.status` (`pending`/`confirmed`/`corrected`/`dismissed`): il core espone `setContextPeriodVerdict`, la UI non conosce il DB |
+| D.76.6 | Un'etichetta vuota e' `null`, non `''` | «nessuna etichetta» e «etichetta vuota» sono la stessa cosa: il chiamante non deve distinguere i due casi |
+| D.76.7 | Il namespace `timeline.context.*` e' stato **materializzato** in `08§2.12h`, che il changelog 0.9 (Sessione 67) dichiarava ma non scriveva | La sezione mancante era un drift documentale: il namespace era promesso da tre sessioni e non esisteva. Le 36 chiavi sono ora nella spec e nei due locale |
+| D.76.8 | La città di un periodo **non** viene dedotta dal nome del paese, e il paese non viene dedotto dalla città | Il nastro mostra cio' che il core ha derivato: nessuna geografia inventata dalla UI |
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
+- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
+- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
+> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
+> la prosa e' un commento.
+
+### Salute tecnica (verificata in questa worktree)
+
+`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+
+### Procedura introdotta con questa sessione
+
+1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
+2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
+3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
+4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
+
+## Lesson learned
+
+- **Una sezione di spec promessa e non scritta e' un drift documentale**: `08§2.12h` era dichiarata dal changelog della Sessione 67 ma non esisteva. Le chiavi sono state materializzate solo quando qualcuno doveva **usarle**: la specifica segue l'implementazione, non la precede.
+- **La regola `react-refresh/only-export-components` non e' un capriccio**: separare il modello dal componente ha reso la regola di linguaggio leggibile in un file solo, e ha azzerato i warning del lint. Il vincolo di tooling, quando è ben posto, coincide con la chiarezza del dominio.
+- **Il default del view model deve essere dichiarato**: `citySource` non esiste su `ContextPeriod`, ma il nastro deve poter dire «circa *X*». Dichiarare il default in un unico punto (una citta' presente e non corretta e' una stima) evita che ogni call site decida per conto proprio.
+
+## Documenti aggiornati
+
+- `apps/web/src/components/ContextRibbon.tsx` (nuovo) — il nastro
+- `apps/web/src/components/ContextPeriodDetail.tsx` (nuovo) — il dettaglio del periodo
+- `apps/web/src/components/contextRibbonModel.ts` (nuovo) — modello puro e regola di localita'
+- `apps/web/src/__tests__/context-ribbon.test.tsx` (nuovo) — 15 test
+- `apps/web/src/i18n/locales/it.json`, `en.json` — 36 chiavi `timeline.context.*`
+- `apps/web/src/i18n/useT.ts`, `i18n/index.ts` — hook `useLanguage()` (le date del periodo si formattano nella lingua della UI)
+- `apps/web/src/onboarding/onboarding.css` — stili del nastro e del dettaglio
+- `docs/08-COPY-I18N.md` — §2.12h (nuova) + changelog 0.12
+- `docs/state/stories/3.4-context-ribbon.md` — `status: done`, task e acceptance criteria spuntati
+- `scripts/generate-bundle.ps1` — `$files` += il file di sessione
+- `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/18-DEV-LOG.md` — sezioni legacy allineate
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -11572,6 +11671,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
 | 2.29b | 2026-10-31 (issue #224) | **§41 (correzione) La CI girava 4 volte per ogni merge — e una premessa da correggere** (Sessione 74, merge di PR #227, commit `51f4076`): la run `CI` su `main` dopo il merge è durata **42 s** con i 3 job `node-*` **skipped** (0 s, nessuna installazione) e gli 11 gate verdi, contro i **172 s** della pipeline sequenziale originale. **Correzione**: la Sessione 74 aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei **writer automatici** fossero «gli unici che arrivano su `main` senza passare da una PR» e che il filtro li catturasse — la premessa è corretta, **la conseguenza pratica no**: quei commit **non attivano nessuna run**, e non è colpa del filtro. **GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (comportamento documentato, per impedire i loop ricorsivi; unica eccezione `workflow_dispatch`/`repository_dispatch`), e i due writer pushano con `secrets.GITHUB_TOKEN` (`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`). Verificato run per run sull'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`, `04c76fd`) **non** hanno **mai** attivato una run `CI` — né prima né dopo la Sessione 74, nemmeno col trigger `push` privo di filtro; gli unici workflow che si attivano su quei commit sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce (è il workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer, issue #149). **Conseguenze**: il filtro per path serve a **saltare** la CI sui merge umani che non toccano i 5 file aggregati, non a catturare i commit dei writer; **l'integrità di `main` dopo i writer è garantita dai writer stessi** (idempotenti, conservati da `git diff --quiet`, col `workflow_run` di `auto-bundle` che rigenera il bundle dopo l'aggregator); un check indipendente sullo stato finale di `main` richiederebbe un trigger `workflow_run` su `ci.yml` ⇒ **+1 run leggera per merge**, trade-off fra copertura e numero di run che spetta al project owner (**non è stato fatto**). **Lesson**: una premessa corretta può avere una conseguenza pratica falsa — la verifica va fatta **sui dati**, non per deduzione |
 | 2.29c | 2026-10-31 (issue #224) | **§41 (follow-up) I 5 gate che verificano gli script passano a `pull_request` only** (Sessione 74, su richiesta del project owner): misurato sul merge di PR #227, la run `CI` su `main` era **42-66 s** e il percorso critico era `gates-aggregate` (**50 s**) — un gate che su `main` **non è nemmeno richiesto** da `quality`, che su push esige solo `gates-docs` + `gates-workflows`. I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`, `gates-scripts`, `gates-procedure`) passano a `pull_request` only: su `main` quegli script non sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sullo stesso contenuto** ⇒ 27 s di tempo di runner sprecati per ogni merge. Su `push` su `main` restano **2 gate leggeri** (`gates-docs` ~11 s, `gates-workflows` ~7 s) più l'aggregatore `quality` (~3 s) ⇒ **~15 s** di tempo pareggio, contro i 42-66 s precedenti e i **172 s** della pipeline sequenziale originale. **Nessuna perdita di copertura**: i 27 gate restano 27 e ognuno gira dove serve (sulla PR che modifica il codice o gli script); `quality` su push continua a richiedere solo i 2 gate leggeri, su pull_request tutti. Documentazione: `12-DEVOPS.md` §9.10 (nuova colonna «Quando gira» per job), `AGENTS.md` (tabella della CI aggiornata) |
+| 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -16614,6 +16714,113 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 
 
 
+===== FILE: docs/state/sessions/76-nastro-contesto.md =====
+
+---
+number: 76
+title: "Nastro contesto (Story 3.4, issue #231)"
+date: 2026-10-31
+state: 🟡
+merged: false
+branch: feat/231-context-ribbon
+pr: 0
+claim: kilo-HP-ELITEBOOK-progress
+cross_refs: [231, 201, 221, 216]
+tags: [ui, geo, context]
+---
+
+# Sessione 76 — Nastro contesto (Story 3.4, issue #231)
+
+## Sintesi
+
+Il **nastro contesto** è la striscia che rende leggibile il contesto sotto le
+`EraBand` della Timeline: un segmento per `ContextPeriod`, il colore del
+`kind`, l'etichetta del paese, la città e i pips dei dispositivi. Il click su un
+segmento apre il **dettaglio del periodo**, dove l'utente conferma, corregge o
+ignora la classificazione: è il punto in cui il diario diventa personale
+(`19§4.3` — l'algoritmo propone, l'utente batte le spalle).
+
+La story era **lavorabile**: le due dipendenze sono soddisfatte (la **1.6**
+fondazione geo, Sessione 68; la **4.4** DB IP→città, issue #221) e il core
+espone gia' `ContextPeriod`, il classificatore L1 e `setContextPeriodVerdict`.
+La story e' dunque **interamente UI**: nessuna nuova logica di dominio.
+
+Due scelte della spec sono state prese sul serio, al punto da renderle
+**strutturali** invece che convenzionali:
+
+- **la regola di linguaggio** («la citta' e' sempre introdotta da un indicatore
+  di incertezza, il paese mai») vive in **un solo punto** del codice
+  (`describePeriodCity`): non in un template, non in tre componenti. Un test la
+  verifica in italiano e in inglese;
+- **nessuna mappa, nessuna rete**: il nastro riceve i periodi per props e non
+  conosce `fetch`. Il test lo dimostra con uno spy e con l'assenza di `img`,
+  `iframe` e `svg` nel DOM.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.76.1 | Il nastro e' un componente **presentazionale**: dati per props, azioni per callback | Lo rende testabile senza database (15 test, nessun mock di IndexedDB) e gli lascia la liberta' di essere montato dalla Timeline (Story 3.1) quando esistera: il nastro non conosce lo zoom, lo riceve (`visibleRange`) |
+| D.76.2 | La logica pura sta in un file separato (`contextRibbonModel.ts`), non nel file del componente | La regola `react-refresh/only-export-components` chiede che un file di componente esporti solo componenti; e, soprattutto, tiene la **regola di linguaggio** in un unico posto leggibile, non dispersa fra i JSX |
+| D.76.3 | Il view model espone `citySource` esplicito, con default «una citta' presente e non corretta e' una stima» | `ContextPeriod` (core) non porta la provenienza della citta': questa vive sull'evento (`ListenEvent.citySource`, `02§4.1`). Il nastro deve saperlo, perche' «circa *X*» e *X* sono due affermazioni diverse: il default dichiara la realta' (stimata finche' l'utente non corregge) senza mentire |
+| D.76.4 | Un segmento per `ContextPeriod`, **mai aggregati** | `19§5.3`: il periodo senza contesto determinato resta `unknown` e non viene aggregato. Il nastro non raggruppa nulla: due `unknown` sono due segmenti |
+| D.76.5 | Le azioni utente escono per callback (`onVerdict`), la persistenza resta del chiamante | Il modello del verdetto e' gia' quello di `Insight.status` (`pending`/`confirmed`/`corrected`/`dismissed`): il core espone `setContextPeriodVerdict`, la UI non conosce il DB |
+| D.76.6 | Un'etichetta vuota e' `null`, non `''` | «nessuna etichetta» e «etichetta vuota» sono la stessa cosa: il chiamante non deve distinguere i due casi |
+| D.76.7 | Il namespace `timeline.context.*` e' stato **materializzato** in `08§2.12h`, che il changelog 0.9 (Sessione 67) dichiarava ma non scriveva | La sezione mancante era un drift documentale: il namespace era promesso da tre sessioni e non esisteva. Le 36 chiavi sono ora nella spec e nei due locale |
+| D.76.8 | La città di un periodo **non** viene dedotta dal nome del paese, e il paese non viene dedotto dalla città | Il nastro mostra cio' che il core ha derivato: nessuna geografia inventata dalla UI |
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
+- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
+- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
+> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
+> la prosa e' un commento.
+
+### Salute tecnica (verificata in questa worktree)
+
+`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+
+### Procedura introdotta con questa sessione
+
+1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
+2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
+3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
+4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
+
+## Lesson learned
+
+- **Una sezione di spec promessa e non scritta e' un drift documentale**: `08§2.12h` era dichiarata dal changelog della Sessione 67 ma non esisteva. Le chiavi sono state materializzate solo quando qualcuno doveva **usarle**: la specifica segue l'implementazione, non la precede.
+- **La regola `react-refresh/only-export-components` non e' un capriccio**: separare il modello dal componente ha reso la regola di linguaggio leggibile in un file solo, e ha azzerato i warning del lint. Il vincolo di tooling, quando è ben posto, coincide con la chiarezza del dominio.
+- **Il default del view model deve essere dichiarato**: `citySource` non esiste su `ContextPeriod`, ma il nastro deve poter dire «circa *X*». Dichiarare il default in un unico punto (una citta' presente e non corretta e' una stima) evita che ogni call site decida per conto proprio.
+
+## Documenti aggiornati
+
+- `apps/web/src/components/ContextRibbon.tsx` (nuovo) — il nastro
+- `apps/web/src/components/ContextPeriodDetail.tsx` (nuovo) — il dettaglio del periodo
+- `apps/web/src/components/contextRibbonModel.ts` (nuovo) — modello puro e regola di localita'
+- `apps/web/src/__tests__/context-ribbon.test.tsx` (nuovo) — 15 test
+- `apps/web/src/i18n/locales/it.json`, `en.json` — 36 chiavi `timeline.context.*`
+- `apps/web/src/i18n/useT.ts`, `i18n/index.ts` — hook `useLanguage()` (le date del periodo si formattano nella lingua della UI)
+- `apps/web/src/onboarding/onboarding.css` — stili del nastro e del dettaglio
+- `docs/08-COPY-I18N.md` — §2.12h (nuova) + changelog 0.12
+- `docs/state/stories/3.4-context-ribbon.md` — `status: done`, task e acceptance criteria spuntati
+- `scripts/generate-bundle.ps1` — `$files` += il file di sessione
+- `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/18-DEV-LOG.md` — sezioni legacy allineate
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -17618,11 +17825,16 @@ id: "3.4"
 title: "Nastro contesto (Timeline)"
 phase: 3
 area: ui
-status: todo
+status: done
 priority: I
 depends_on: ["1.6", "4.4"]
+issue: 231
+branch: "feat/231-context-ribbon"
+pr: 0
+claim: kilo-HP-ELITEBOOK-progress
 spec_refs:
   - docs/19-GEO-CONTEXT.md
+  - docs/08-COPY-I18N.md
 ---
 
 ## Descrizione
@@ -17637,23 +17849,79 @@ utente (`confirmed` / etichetta / `dismissed`).
 nessun placeholder cartografico — la scala disponibile (paese, talvolta città)
 non giustifica una mappa, e un tile implicherebbe uscita di rete.
 
+## Stato
+
+✅ **DONE** — implementata nella Sessione 76 (issue **#231**, branch
+`feat/231-context-ribbon`, worktree `ls-231-context-ribbon`).
+
+Le due dipendenze sono soddisfatte: la **1.6** (fondazione geo — Sessione 68) e
+la **4.4** (DB IP→città — issue #221). Il core espone già `ContextPeriod`, il
+classificatore L1 e `setContextPeriodVerdict`: la story è **UI**, non motore.
+
+Consegnato:
+
+- **`apps/web/src/components/ContextRibbon.tsx`**: il nastro — un segmento per
+  `ContextPeriod`, colore per `kind` (token del design system), etichetta di
+  località, pips dei `deviceType`, filtri per `kind`/paese/dispositivo e il
+  `visibleRange` che lo **sincronizza con lo zoom** della Timeline;
+- **`apps/web/src/components/ContextPeriodDetail.tsx`**: il dettaglio del
+  periodo — dati, eventi coperti, etichetta utente e le tre azioni
+  (`confirmed` / `corrected` / `dismissed`), che escono per callback con lo
+  stesso modello di `Insight.status`;
+- **`apps/web/src/components/contextRibbonModel.ts`**: il modello puro (view
+  model, regola di località, visibilità, colori) — separato dal componente
+  perché la regola `react-refresh/only-export-components` chiede che un file di
+  componente esporti **solo** componenti, e perché la regola di linguaggio
+  debba vivere in **un solo punto**;
+- **36 chiavi i18n** `timeline.context.*` materializzate in `it`/`en`;
+- **15 test** nuovi in `@ls/web` (`context-ribbon.test.tsx`).
+
 ## Task
 
-- T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
-- T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
-- T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
-- T3.4.4 — Nessuna dipendenza cartografica e nessuna richiesta di rete per il nastro
+- [x] T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
+- [x] T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
+- [x] T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
+- [x] T3.4.4 — Nessuna dipendenza cartografica e nessuna richiesta di rete per il nastro
 
 ## Acceptance criteria
 
-- [ ] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
-- [ ] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
-- [ ] Il nastro **non** effettua richieste di rete e non carica alcuna mappa
-- [ ] Il periodo senza contesto determinato resta `unknown` e non viene aggregato (`19§5.3`)
+- [x] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
+- [x] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
+- [x] Il nastro **non** effettua richieste di rete e non carica alcuna mappa
+- [x] Il periodo senza contesto determinato resta `unknown` e non viene aggregato (`19§5.3`)
 
-## Documenti aggiornati
+## Scelte di implementazione
 
-- (nessuno: la story non è ancora iniziata)
+- **La regola di linguaggio vive in un solo punto.** `describePeriodCity`
+  (`contextRibbonModel.ts`) è l'unico posto che decide se la città entra con
+  «circa *X*» o piana: la stima (`citySource = 'dbip-lite'`) è sempre
+  introdotta dall'indicatore di incertezza, il paese non lo è mai, e una città
+  corretta a mano (`manual`) non è più una stima. Il test copre i tre casi, in
+  italiano e in inglese.
+- **La provenienza della città è esplicita nel view model.** `ContextPeriod`
+  (core) non porta `citySource`: la città stimata vive sull'evento
+  (`ListenEvent.citySource`, `02§4.1`). Il nastro deve saperlo, perché «circa
+  *X*» e *X* sono due affermazioni diverse: `toRibbonPeriod` applica la regola
+  di default (una città presente su un periodo **non corretto** è una stima) e
+  lascia la fonte esplicita quando la conosce.
+- **Un segmento per periodo, mai aggregato.** Il nastro non raggruppa: due
+  periodi `unknown` restano due segmenti (`19§5.3` — il periodo senza contesto
+  determinato non viene aggregato).
+- **Nessuna rete, per costruzione.** Il nastro riceve i periodi per props e non
+  conosce `fetch`: il test lo verifica con uno spy e con l'assenza di `img`,
+  `iframe` e `svg` nel DOM.
+- **Il componente è presentazionale.** Dati per props, azioni per callback: il
+  nastro è testabile senza database e la Timeline (Story 3.1) potrà montarlo
+  quando esisterà.
+
+## Documenti collegati
+
+- `docs/19-GEO-CONTEXT.md` §4.3 (`ContextPeriod`) · §5.3 · §8.2 (nastro) ·
+  §8.3 (copy)
+- `docs/08-COPY-I18N.md` §2.12h (`timeline.context.*`)
+- `docs/02-DATA-SCHEMA.md` §4.1 (`citySource`)
+- `docs/11-BACKLOG.md` Story 3.4
+- `docs/state/sessions/76-nastro-contesto.md`
 
 
 
@@ -23920,7 +24188,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.11 · Sessione 67 (2026-10-30, issue #201), aggiornata nelle Sessioni 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
+> Status: 🟡 DRAFT · Versione 0.12 · Sessione 76 (2026-10-31, issue #231), aggiornata nelle Sessioni 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -24400,6 +24668,68 @@ sono nel namespace `settings`, accanto alle altre chiavi del pannello Last.fm.
 | `settings.lastfm.authSaved` | Sessione autorizzata: la scrittura su Last.fm è abilitata | Session authorized: writing to Last.fm is enabled |
 | `settings.lastfm.authMissingToken` | Nell\'indirizzo incollato non c\'è un token: copia l\'intero indirizzo della pagina di reindirizzamento | There is no token in the pasted address: copy the whole redirect page address |
 
+### 2.12h `timeline.context.*` (Story 3.4 — nastro contesto, spec `19-GEO-CONTEXT.md` §8.2-8.3)
+
+Il **nastro contesto** della Timeline: un segmento per `ContextPeriod`, colorato
+per `kind`, con l'etichetta del paese, la città e i pips dei dispositivi; il
+click apre il **dettaglio del periodo**, dove l'utente può confermare,
+correggere o ignorare la classificazione.
+
+**Regola di linguaggio vincolante** (`19§8.3`): **la città è sempre introdotta
+da un indicatore di incertezza, il paese mai**. La città stimata dal database
+(`citySource = 'dbip-lite'`) si rende come «circa *X*»; il paese è un fatto e si
+rende come fatto. Una città corretta a mano (`citySource = 'manual'`) non è più
+una stima: l'indicatore di incertezza scompare.
+
+| Key | IT | EN |
+|-----|----|----|
+| `timeline.context.title` | Contesto | Context |
+| `timeline.context.kind.home` | Casa | Home |
+| `timeline.context.kind.work` | Lavoro | Work |
+| `timeline.context.kind.commute` | Spostamento | Commute |
+| `timeline.context.kind.car` | Auto | Car |
+| `timeline.context.kind.travel` | Viaggio | Travel |
+| `timeline.context.kind.away` | Fuori casa | Away |
+| `timeline.context.kind.unknown` | Non determinato | Undetermined |
+| `timeline.context.city.approx` | circa {{city}} | around {{city}} |
+| `timeline.context.unknown` | Sconosciuto | Unknown |
+| `timeline.context.empty` | Nessun contesto determinato in questo periodo | No context determined in this period |
+| `timeline.context.filter.all` | Tutti | All |
+| `timeline.context.filter.kind` | Contesto | Context |
+| `timeline.context.filter.country` | Paese | Country |
+| `timeline.context.filter.device` | Dispositivo | Device |
+| `timeline.context.device.mobile` | Telefono | Mobile |
+| `timeline.context.device.desktop` | Computer | Desktop |
+| `timeline.context.device.web` | Web | Web |
+| `timeline.context.device.speaker` | Speaker | Speaker |
+| `timeline.context.device.car` | Auto | Car |
+| `timeline.context.device.wearable` | Indossabile | Wearable |
+| `timeline.context.device.tv` | TV | TV |
+| `timeline.context.device.unknown` | Dispositivo sconosciuto | Unknown device |
+| `timeline.context.detail.title` | Dettaglio del periodo | Period detail |
+| `timeline.context.detail.country` | Paese | Country |
+| `timeline.context.detail.city` | Città | City |
+| `timeline.context.detail.eventsTitle` | Ascolti | Listens |
+| `timeline.context.detail.events_one` | {{count}} ascolto | {{count}} listen |
+| `timeline.context.detail.events_other` | {{count}} ascolti | {{count}} listens |
+| `timeline.context.detail.noEvents` | Nessun ascolto in questo periodo | No listens in this period |
+| `timeline.context.detail.status` | Stato | Status |
+| `timeline.context.status.pending` | Da rivedere | To review |
+| `timeline.context.status.confirmed` | Confermato | Confirmed |
+| `timeline.context.status.corrected` | Corretto | Corrected |
+| `timeline.context.status.dismissed` | Ignorato | Dismissed |
+| `timeline.context.action.label` | Etichetta | Label |
+| `timeline.context.action.labelPlaceholder` | Es. Casa di mia madre | e.g. My mother's house |
+| `timeline.context.action.confirm` | Conferma | Confirm |
+| `timeline.context.action.correct` | Correggi | Correct |
+| `timeline.context.action.dismiss` | Ignora | Dismiss |
+
+**Pluralizzazione**: `timeline.context.detail.events` segue §3 (`_one`/`_other`).
+
+**Dati, non copia**: i nomi dei paesi (`IT`, `FR`), i titoli dei brani e gli
+artisti sono **dati** e non si traducono; le chiavi `timeline.context.device.*`
+descrivono il *tipo* di dispositivo e sono invece parte dell'interfaccia.
+
 ### 2.17 `enrichment.*` (Story 4.1 — spec `21-AUDIO-FEATURES.md` §14)
 
 Namespace della pipeline delle **audio features**. Le **otto chiavi** sono
@@ -24496,6 +24826,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
 | 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |
 | 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |
+| 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
 
 
 
@@ -25045,7 +25376,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.31 · Sessione 70 (2026-10-31, issue #214) · la **Story 2.3 (Event Detector) è in review**: il motore in `packages/core/src/analysis/event/` rileva le anomalie della storia di ascolto (z-score su griglia settimanale, detector a quota, detector specialistici per silenzio ed esplorazione) e le rende insight di tipo `event` con `derivedVersion` e confidenza. Con la 2.3 l'**EPIC 2** è completo (2.1 mood, 2.2 ere, 2.3 eventi, 2.4 ricordi): il prossimo passo è la tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201). Fuori perimetro e dichiarato: la **UI degli eventi** (Story 3.x), la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.32 · Sessione 76 (2026-10-31, issue #231) · la **tranche geo è chiusa**: la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76) sono completate. Con la 3.4 l'**EPIC 3** (UI) parte: il nastro contesto e il dettaglio del periodo sono pronti, ma le schermate non esistono ancora — il prossimo passo è la **3.1** (Home + Timeline), che sblocca il test end-to-end dell'app. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -25495,18 +25826,20 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: Il nastro contesto sotto le `EraBand` della Timeline (schermata ⑦) e la schermata di dettaglio del periodo (⑧): un segmento per `ContextPeriod`, colore per `kind`, etichetta paese (+ «circa *città*» solo se la fonte non è manuale), pips dei dispositivi, filtri per `kind`/paese/dispositivo, azioni utente (`confirmed` / etichetta / `dismissed`).
 
-**Stato**: ⬚ **TODO** — la specifica è ratificata (`19` v1.0 🟢 §8.2-8.3, Sessione 67). **Nessuna mappa**: nessuna dipendenza cartografica, nessun tile online — la scala disponibile non lo giustifica e un tile implicherebbe uscita di rete.
+**Stato**: ✅ **DONE** — implementata nella Sessione 76 (issue **#231**, branch `feat/231-context-ribbon`). La specifica è ratificata (`19` v1.0 🟢 §8.2-8.3, Sessione 67). **Nessuna mappa**: nessuna dipendenza cartografica, nessun tile online — la scala disponibile non lo giustifica e un tile implicherebbe uscita di rete.
+
+Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segmento per `ContextPeriod`, colore per `kind`, pips dei dispositivi, filtri e sincronizzazione con lo zoom; il dettaglio del periodo (`ContextPeriodDetail.tsx`) con eventi, etichetta e le tre azioni utente; il namespace `timeline.context.*` materializzato in `08§2.12h` (36 chiavi, la sezione era **dichiarata** dal changelog 0.9 della Sessione 67 ma non scritta); **15 test** in `@ls/web`.
 
 **Task**:
-- T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
-- T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
-- T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
-- T3.4.4 — Nessuna dipendenza MapLibre/Leaflet e nessuna richiesta di rete per il nastro
+- [x] T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
+- [x] T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
+- [x] T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
+- [x] T3.4.4 — Nessuna dipendenza MapLibre/Leaflet e nessuna richiesta di rete per il nastro
 
 **Acceptance criteria** (da `19` v1.0 🟢):
-- [ ] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
-- [ ] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
-- [ ] Il nastro **non** effettua richieste di rete
+- [x] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
+- [x] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
+- [x] Il nastro **non** effettua richieste di rete
 
 **Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §8.2-8.3 · `docs/08-COPY-I18N.md` §2.12h · `docs/06-UX-FLOWS-STATES.md` (schermata ⑦)
 
@@ -25655,7 +25988,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
 11. **4.1** pipeline audio features (issue #188, ✅ **DONE**, PR #197 merged `7458220`) — la pipeline è **completata** (Sessione 64): cascata, provider, limiter, coda, stoccaggio, CSP e i18n (`21§4…§11`), con **142 test** in `@ls/core` e **15** in `@ls/web`. La spec è ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). Era il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: ha fornito le valence/energy senza le quali la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
-13. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1) è **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`); restano la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto), che dipendono da lei. Era la **prima story lavorabile**, e il blocco NEXT-STEP del README la indica: l'aggregatore ordina le story **migrate per id**, e «1.6» viene prima di «2.2». Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
+13. **1.6, 4.4, 3.4** geo e contesto di ascolto — **tranche chiusa** (Sessione 76, issue #231): dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201) sono state completate la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1 — Sessione 68, issue #205, PR #209, merge `68c27e5`), la **4.4** (DB MMDB on-demand + derivazione della città — issue #221) e la **3.4** (nastro contesto — Sessione 76, issue #231: il nastro e il dettaglio del periodo, con il namespace `timeline.context.*` materializzato). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città. Il blocco NEXT-STEP del README indica ora la **3.1** (Home + Timeline): con il nastro pronto, la Timeline è il pezzo che manca per montarlo e per sbloccare il test end-to-end
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
 15. **3.1, 3.2, 3.3** UI
 16. **5.1, 5.2** privacy
@@ -25673,9 +26006,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — restano le **3.x** (UI) |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — restano le **3.x** (UI), di cui la **3.4** (nastro contesto) è completata (Sessione 76, issue #231) |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
-| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO (1.6 completata) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
+| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
@@ -25778,7 +26111,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
+| 3.4 - Nastro contesto (Timeline) | done | #0 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |
 
