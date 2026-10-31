@@ -6579,8 +6579,8 @@ non può verificare un algoritmo che cerca un salto** — il salto deve essere
 ### Sessione 70 - Story 2.3 — Event Detector (issue #214)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #215 (5149b2c, 2026-10-31)
 - **Claim**: `kilo-HP-ELITEBOOK-7d3f`
 
 ```
@@ -6688,6 +6688,21 @@ che sono coperti dal detector a quota.
 - `pnpm run lint` · `pnpm run typecheck` · `pnpm run test` (611 test in
   `@ls/core`, 112 in `@ls/web`) · `pnpm run build` → verdi
 - `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `pwsh scripts/generate-bundle.ps1 --check` · `pwsh scripts/aggregate-state.ps1 --check` → exit 0
+
+## Esito post-merge
+
+La PR **#215** è **merged** in `main` il 2026-10-31T11:18:48Z (merge commit
+`5149b2c`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README; GitGuardian). L'issue **#214** è chiusa
+con `status:done` (applicato da `auto-status-done`, che ha pubblicato anche il
+commento `release: kilo-HP-ELITEBOOK-7d3f - PR #215 merged (5149b2c…)`).
+
+Il blocco NEXT-STEP del README ricade ora sulla **3.4** (nastro contesto) —
+che dichiara `[DEP:4.4]`: la tranche geo si fa prima nella **4.4** (il DB
+IP→città), e la 3.4 la consuma. Il blocco aggregato **non conosce le
+dipendenze** fra story (lesson 70-6), e la prosa del README lo dichiara
+esplicitamente.
 
 ## Lesson learned
 

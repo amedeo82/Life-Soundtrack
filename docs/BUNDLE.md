@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 11:19
+> Data: 2026-10-31 12:22
 > Totale file: 126
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 125 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1752.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 12:14
+- Dimensione totale: 1755.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 12:22
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -2019,7 +2019,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
-| 70 | Story 2.3 — Event Detector (issue #214) | 🟡 | ❌ | - |
+| 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2059,7 +2059,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **47** (merge: 37)
+- Sessioni migrate in state/sessions: **47** (merge: 38)
 - Stories migrate in state/stories: **20** (done: 18)
 - Ultima sessione migrata: **S70** - Story 2.3 — Event Detector (issue #214)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1
@@ -2087,7 +2087,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 70, issue #214): la **Story 2.3 (Event Detector) è completata** — il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore e valence/energy medie ponderate; detector a **z-score** su griglia settimanale — baseline 60gg, finestra 14gg, soglia 2.0; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e soggetto), la persistenza degli insight `event` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** degli eventi, il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). Con la 2.3 l'**EPIC 2** è completo: 2.1 (mood), 2.2 (ere), 2.3 (eventi), 2.4 (ricordi). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 già disponibile. Dietro: la tranche dell'EPIC 3 (**UI**, che includerà la schermata ⑧ degli eventi) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.3: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'evento** (Story 3.x).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 70, issue #214): la **Story 2.3 (Event Detector) è completata** — PR #215 merged il 2026-10-31T11:18:48Z (merge commit `5149b2c`): il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore e valence/energy medie ponderate; detector a **z-score** su griglia settimanale — baseline 60gg, finestra 14gg, soglia 2.0; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e soggetto), la persistenza degli insight `event` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** degli eventi, il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). Con la 2.3 l'**EPIC 2** è completo: 2.1 (mood), 2.2 (ere), 2.3 (eventi), 2.4 (ricordi). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 già disponibile. Dietro: la tranche dell'EPIC 3 (**UI**, che includerà la schermata ⑧ degli eventi) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.3: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'evento** (Story 3.x).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -8677,8 +8677,8 @@ non può verificare un algoritmo che cerca un salto** — il salto deve essere
 ### Sessione 70 - Story 2.3 — Event Detector (issue #214)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #215 (5149b2c, 2026-10-31)
 - **Claim**: `kilo-HP-ELITEBOOK-7d3f`
 
 ```
@@ -8786,6 +8786,21 @@ che sono coperti dal detector a quota.
 - `pnpm run lint` · `pnpm run typecheck` · `pnpm run test` (611 test in
   `@ls/core`, 112 in `@ls/web`) · `pnpm run build` → verdi
 - `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `pwsh scripts/generate-bundle.ps1 --check` · `pwsh scripts/aggregate-state.ps1 --check` → exit 0
+
+## Esito post-merge
+
+La PR **#215** è **merged** in `main` il 2026-10-31T11:18:48Z (merge commit
+`5149b2c`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README; GitGuardian). L'issue **#214** è chiusa
+con `status:done` (applicato da `auto-status-done`, che ha pubblicato anche il
+commento `release: kilo-HP-ELITEBOOK-7d3f - PR #215 merged (5149b2c…)`).
+
+Il blocco NEXT-STEP del README ricade ora sulla **3.4** (nastro contesto) —
+che dichiara `[DEP:4.4]`: la tranche geo si fa prima nella **4.4** (il DB
+IP→città), e la 3.4 la consuma. Il blocco aggregato **non conosce le
+dipendenze** fra story (lesson 70-6), e la prosa del README lo dichiara
+esplicitamente.
 
 ## Lesson learned
 
@@ -10219,9 +10234,9 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 ## 37. Issue #214 — Story 2.3: l'Event Detector (Sessione 70)
 
 **Branch**: `feat/214-event-detector`
-**PR**: **#215** (aperta il 2026-10-31)
+**PR**: **#215** (aperta il 2026-10-31) — **merged** il 2026-10-31T11:18:48Z (merge commit `5149b2c`)
 **Data**: 2026-10-31
-**Stato**: 🟡 **IN REVIEW** — implementazione completa e validata in locale
+**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -10239,7 +10254,13 @@ La seconda lezione è sulla **griglia**: una finestra troncata non è un dettagl
 
 La terza è sulla **forma dei dati assenti**: un assente non è uno zero. La regola che rende confrontabili il volume e la valence è la stessa — un giorno senza ascolti e un giorno senza feature **non esistono** nella mappa — e la sua conseguenza non è tecnica ma semantica: i buchi sono un **segnale** (il silenzio), non un valore mancante da colmare con uno zero.
 
-**Verifica**: `pnpm run lint`, `pnpm run typecheck`, `pnpm run test` (611 test in `@ls/core`, 112 in `@ls/web`) e `pnpm run build` verdi; `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 2.3) sarà in una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+**Verifica**: `pnpm run lint`, `pnpm run typecheck`, `pnpm run test` (611 test in `@ls/core`, 112 in `@ls/web`) e `pnpm run build` verdi; `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 2.3) è in una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+
+**§37 — esito post-merge della Story 2.3**: la PR #215 è **merged** in `main` il 2026-10-31T11:18:48Z (merge commit `5149b2c`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian). L'issue **#214** è chiusa con `status:done` (applicato da `auto-status-done`), le label `agent-ready` / `in-progress` / `status:in-review` sono rimosse e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-7d3f - PR #215 merged (5149b2c…)`).
+
+Il blocco NEXT-STEP del README ricade ora sulla **3.4** (nastro contesto), che dichiara `[DEP:4.4]`: la tranche geo si fa prima nella **4.4** (il DB IP→città, la specifica già ratificata) e **poi** nella 3.4, che la consuma. Il blocco aggregato filtra `done`/`blocked`/`wontdo` ma **non** conosce `depends_on`: la dipendenza è stata resa esplicita nella **prosa** del README (che è dell'agente, non dell'aggregatore), e il caso è dichiarato in `docs/state/sessions/70-event-detector.md` (lesson 70-6). Cambiare l'aggregatore è una modifica di **policy** (ADR-0008) e va trattata come issue a sé.
+
+La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il **fallimento noto**, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main`, merge verificato via `gh`, branch remoto già assente per `auto-branch-cleanup`, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` e `auto-bundle`.
 
 ---
 
@@ -10513,8 +10534,8 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/2.1-mood-tracker.md` | ✅ creata | Story 2.1 (Mood Tracker) — ⛔ **blocked**: senza le audio features dell'EPIC 4.1 il mood tracker non produce insight (decisione D-A.1); issue #180 (`needs-spec`) |
 | `state/stories/2.4-memory-engine.md` | ✅ creata | Story 2.4 (Memory Engine) — ✅ **done** (Sessione 61, issue #179, PR #185, merge `40ad0b7`): i 5 tipi di ricordo (`04§7.2`), il feed per rilevanza (`04§7.4`), la `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4) |
 | `state/stories/2.2-era-detector.md` | ✅ creata | Story 2.2 (Era Detector) — ✅ **done** (Sessione 69, issue #211): **change point detection** su firme settimanali (`04§5`, nessun clustering non supervisionato), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`) e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8) |
-| `state/sessions/70-event-detector.md` | ✅ creata | Sessione 70 (issue #214): **implementazione della Story 2.3** (Event Detector) — il detector a **z-score** su griglia settimanale, il detector a **quota** per `spike_artist`/`spike_genre`, i detector specialistici per `silence` ed `exploration`, il dedupe per tipo e soggetto, la persistenza degli eventi con `derivedVersion` (MIG-3) e il fixture di scenario `listening-spike.json` |
-| `state/stories/2.3-event-detector.md` | ✅ creata | Story 2.3 (Event Detector) — ✅ **done** (Sessione 70, issue #214): gli **otto** tipi di evento di `02§4` (`04§6`), il plug-in dell'orchestratore (`04§8.1`), la descrizione resa dal resolver i18n (`insight.event.*`, D-A.4) e il ricalcolo che sostituisce **l'insieme** degli eventi |
+| `state/sessions/70-event-detector.md` | ✅ creata | Sessione 70 (issue #214): **implementazione della Story 2.3** (Event Detector) — il detector a **z-score** su griglia settimanale, il detector a **quota** per `spike_artist`/`spike_genre`, i detector specialistici per `silence` ed `exploration`, il dedupe per tipo e soggetto, la persistenza degli eventi con `derivedVersion` (MIG-3) e il fixture di scenario `listening-spike.json`. **Merged** il 2026-10-31T11:18:48Z (PR #215, merge commit `5149b2c`) |
+| `state/stories/2.3-event-detector.md` | ✅ creata | Story 2.3 (Event Detector) — ✅ **done** (Sessione 70, issue #214, PR #215, merge `5149b2c`): gli **otto** tipi di evento di `02§4` (`04§6`), il plug-in dell'orchestratore (`04§8.1`), la descrizione resa dal resolver i18n (`insight.event.*`, D-A.4) e il ricalcolo che sostituisce **l'insieme** degli eventi |
 | `state/stories/4.1-audio-features.md` | ✅ creata | Story 4.1 (Pipeline audio features) — ⬚ **todo** (Sessione 62, issue #187): la spec `21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (ratificata al merge della PR di ratifica), le nove decisioni D-AF.1…D-AF.9 sono ratificate e l'issue di implementazione **#188** è `agent-ready`. `status: todo` ⇒ il blocco NEXT-STEP del README punta alla 4.1, primo anello della catena 4.1 → 2.1 → 2.2/2.3 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
@@ -14334,10 +14355,12 @@ non può verificare un algoritmo che cerca un salto** — il salto deve essere
 number: 70
 title: "Story 2.3 — Event Detector (issue #214)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
 branch: feat/214-event-detector
-pr: 0
+pr: 215
+merged_commit: 5149b2c
+merged_date: 2026-10-31
 claim: kilo-HP-ELITEBOOK-7d3f
 cross_refs: [214, 211, 180, 188, 178]
 tags: [analysis, phase-2]
@@ -14446,6 +14469,21 @@ che sono coperti dal detector a quota.
 - `pnpm run lint` · `pnpm run typecheck` · `pnpm run test` (611 test in
   `@ls/core`, 112 in `@ls/web`) · `pnpm run build` → verdi
 - `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `pwsh scripts/generate-bundle.ps1 --check` · `pwsh scripts/aggregate-state.ps1 --check` → exit 0
+
+## Esito post-merge
+
+La PR **#215** è **merged** in `main` il 2026-10-31T11:18:48Z (merge commit
+`5149b2c`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README; GitGuardian). L'issue **#214** è chiusa
+con `status:done` (applicato da `auto-status-done`, che ha pubblicato anche il
+commento `release: kilo-HP-ELITEBOOK-7d3f - PR #215 merged (5149b2c…)`).
+
+Il blocco NEXT-STEP del README ricade ora sulla **3.4** (nastro contesto) —
+che dichiara `[DEP:4.4]`: la tranche geo si fa prima nella **4.4** (il DB
+IP→città), e la 3.4 la consuma. Il blocco aggregato **non conosce le
+dipendenze** fra story (lesson 70-6), e la prosa del README lo dichiara
+esplicitamente.
 
 ## Lesson learned
 
@@ -15230,7 +15268,9 @@ priority: I
 depends_on: ["2.1"]
 issue: 214
 branch: "feat/214-event-detector"
-pr: 0
+pr: 215
+merged_commit: 5149b2c
+merged_date: 2026-10-31
 claim: kilo-HP-ELITEBOOK-7d3f
 spec_refs:
   - docs/04-ANALYSIS-ALGORITHMS.md
@@ -15249,10 +15289,9 @@ La story era **sbloccata**: la dipendenza `[DEP:2.1]` è soddisfatta dalla Story
 
 ## Stato
 
-✅ **DONE** — implementata nella Sessione 70 (issue **#214**, branch
-`feat/214-event-detector`, worktree `ls-214-event-detector`). Il merge commit
-viene scritto nel doc-sync di chiusura, dopo il merge della PR (non è noto al
-momento della stesura di questo file).
+✅ **DONE** — implementata nella Sessione 70 (issue **#214**, PR **#215**,
+branch `feat/214-event-detector`, worktree `ls-214-event-detector`).
+**Merged** il 2026-10-31T11:18:48Z (merge commit `5149b2c`).
 
 Consegnato:
 
@@ -22878,7 +22917,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.3 — Event Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
-**Stato**: ✅ **DONE — implementata nella Sessione 70** (issue #214, branch `feat/214-event-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.3 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e il §6 dichiara gli **otto tipi** di evento e i loro trigger. Consegnato: il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore, valence/energy medie ponderate, diversità e artisti nuovi; detector a **z-score** su griglia settimanale; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e per soggetto), la persistenza degli insight `event` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`), il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non viene prodotto alcun evento basato sulla valence. Dettagli e scelte dichiarate (D.70.1…D.70.8): `docs/state/stories/2.3-event-detector.md`.
+**Stato**: ✅ **DONE — implementata nella Sessione 70** (issue #214, PR #215 merged il 2026-10-31T11:18:48Z, merge commit `5149b2c`, branch `feat/214-event-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.3 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e il §6 dichiara gli **otto tipi** di evento e i loro trigger. Consegnato: il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore, valence/energy medie ponderate, diversità e artisti nuovi; detector a **z-score** su griglia settimanale; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e per soggetto), la persistenza degli insight `event` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`), il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non viene prodotto alcun evento basato sulla valence. Dettagli e scelte dichiarate (D.70.1…D.70.8): `docs/state/stories/2.3-event-detector.md`.
 
 **Acceptance criteria**:
 - [x] Rileva spike/crolli volume, valence drop/rise, exploration, silence
@@ -23213,7 +23252,7 @@ Ogni story deve avere label GitHub:
 | 1.6 - Fondazione geo e contesto di ascolto | done | #209 | `68c27e5` | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
-| 2.3 - Event Detector | done | #0 | - | analysis |
+| 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
