@@ -55,15 +55,19 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 
 ### Numeri
 
-- **Implementazione: 64%** — 18 story completate su 28 · effort pesato 64% · **mancano 10 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 1/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 68%** — 19 story completate su 28 · effort pesato 68% · **mancano 9 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo. Tutto coperto da test e verde.
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
 - **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
-- **Mancano 4.2/4.3/4.4** (lookup MusicBrainz, artwork, IP→citta') e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura (dopo il merge che
+> ha chiuso la 4.4): se il blocco e l'analisi divergono, il primo e' la fonte di verita' — la
+> percentuale e' un dato calcolato, la prosa e' un commento.
 
 ### Salute tecnica (verificata su `main`)
 

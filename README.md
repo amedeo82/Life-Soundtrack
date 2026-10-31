@@ -42,9 +42,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 64%** - 18 story completate su 28 - effort pesato 64% - **mancano 10 step**
+**Implementazione: 68%** - 19 story completate su 28 - effort pesato 68% - **mancano 9 step**
 
-`███████████████████░░░░░░░░░░░` 64%
+`████████████████████░░░░░░░░░░` 68%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
@@ -52,20 +52,19 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
 | EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
-| EPIC 4 - Arricchimento | 1 | 4 | 25% | in corso |
+| EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 18 done - 0 in corso - 10 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 19 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (10):
+**Step ancora da implementare** (9):
 - 3.1 Home + Timeline - da fare (size XL)
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.4 Nastro contesto (Timeline) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
-- 4.4 DB IP→città (geolocalizzazione locale) - da fare (size L)
 - 5.1 Privacy spec finale - da fare (size M)
 - 5.2 Export e purge - da fare (size M)
 - 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
@@ -78,19 +77,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S71)
+**Analisi della sessione corrente** (S73)
 
 ### Numeri
 
-- **Implementazione: 64%** — 18 story completate su 28 · effort pesato 64% · **mancano 10 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 1/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 68%** — 19 story completate su 28 · effort pesato 68% · **mancano 9 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo. Tutto coperto da test e verde.
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
 - **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
-- **Mancano 4.2/4.3/4.4** (lookup MusicBrainz, artwork, IP→citta') e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura (dopo il merge che
+> ha chiuso la 4.4): se il blocco e l'analisi divergono, il primo e' la fonte di verita' — la
+> percentuale e' un dato calcolato, la prosa e' un commento.
 
 ### Salute tecnica (verificata su `main`)
 
