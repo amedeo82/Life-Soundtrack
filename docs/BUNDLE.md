@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 12:13
+> Data: 2026-10-31 11:19
 > Totale file: 126
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -28469,12 +28469,12 @@ function buildListeningSpikeScenario() {
           'silence',
         ],
         spikeStart: 'giorno 81 dalla prima data (inizio del picco)',
-        spikeWindow: 'giorni 81-94 (14 giorni): la finestra di 14 giorni del detector è dentro il picco',
+        spikeWindow:
+          'giorni 81-94 (14 giorni): la finestra di 14 giorni del detector è dentro il picco',
         silenceDays: '3 giorni senza ascolti (giorni 40-42)',
         baselineArtists: '6 artisti noti, nessun picco di quota nella baseline',
       },
-      spec:
-        '02-DATA-SCHEMA.md v1.7 + 04-ANALYSIS-ALGORITHMS.md v1.2 §6 + 10-TESTING.md §3.3',
+      spec: '02-DATA-SCHEMA.md v1.7 + 04-ANALYSIS-ALGORITHMS.md v1.2 §6 + 10-TESTING.md §3.3',
     },
     listens,
     tracks,
