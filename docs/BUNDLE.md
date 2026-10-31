@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 18:10
+> Data: 2026-10-31 18:27
 > Totale file: 129
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 128 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1867.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 18:10
+- Dimensione totale: 1868.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 18:27
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -859,15 +859,18 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
 
-### 🏎️ La CI: 9 job in parallelo *(Sessione 73, issue #224)*
+### 🏎️ La CI: 11 job in parallelo *(Sessione 73, issue #224)*
 
 `ci.yml` è stato riorganizzato: era **un job unico con 18 step in sequenza** (misurato: **172 s**
-di tempo pareggio sul runner), ora è **9 job** di cui **8 girano in parallelo** e il nono (`quality`)
+di tempo pareggio sul runner), ora è **11 job** di cui **10 girano in parallelo** e l'undicesimo (`quality`)
 è il check aggregatore.
 
 | Job | Cosa contiene |
 |---|---|
-| `node` | `pnpm install` + i 4 task turbo (`lint`, `typecheck`, `test`, `build`), **sequenziali** |
+| 
+ode-lint-typecheck | pnpm install + lint + 	ypecheck |\n| 
+ode-test | pnpm install + 	est (**isolato**: nessun altro task CPU-bound condivide il processore) |\n| 
+ode-build | pnpm install + uild |
 | `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) |
 | `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) |
 | `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) |
@@ -888,7 +891,7 @@ Tre cose da sapere quando si legge una pipeline verde:
    `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo il job `node`
    installa le dipendenze npm.
 
-L'elenco completo dei 21 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
+L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
 `docs/12-DEVOPS.md §9.10`; le misure di prestazione in `§9.14`.
 
 ### Regola fondamentale — NO commit su `main`
@@ -1089,10 +1092,10 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.31 — **le procedure automatiche sono state misurate e velocizzate** (Sessione 73, issue #224). La Sessione 72 aveva **misurato** le procedure automatiche (tempi reali, difetti, copertura CI) ma le aveva solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»: l'audit è stato quindi **chiuso con le correzioni**. Il dato di partenza è il tempo pareggio reale del job `quality` (unico, 18 step in sequenza): **172 s** (run `41212641314`, 2026-10-31). Il risultato: **~85-95 s**, con **nessun gate** rimosso, indebolito o reso non-bloccante. Aggiunti:
-- **§"🏎️ La CI: 9 job in parallelo"** (nuova): `ci.yml` passa da 1 job sequenziale a **9 job** (8 in parallelo + `quality` aggregatore). Il check `CI / quality` **conserva il nome** ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato — senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo. I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node)
+*Ultimo aggiornamento: v1.31 — **le procedure automatiche sono state misurate e velocizzate** (Sessione 73, issue #224). La Sessione 72 aveva **misurato** le procedure automatiche (tempi reali, difetti, copertura CI) ma le aveva solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»: l'audit è stato quindi **chiuso con le correzioni**. Il dato di partenza è il tempo pareggio reale del job `quality` (unico, 18 step in sequenza): **172 s** (run `41212641314`, 2026-10-31). Il risultato: **~75 s**, con **nessun gate** rimosso, indebolito o reso non-bloccante. Aggiunti:
+- **§"🏎️ La CI: 11 job in parallelo"** (nuova): `ci.yml` passa da 1 job sequenziale a **11 job** (10 in parallelo + `quality` aggregatore). Il check `CI / quality` **conserva il nome** ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato — senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo. I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node)
 - **`package.json`**: nuovo script **`verify`** = `turbo run lint && turbo run typecheck && turbo run test && turbo run build` (i 4 gate del CI in una sola invocazione locale). Le 4 invocazioni `turbo run` **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU, `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`. È la classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca (`docs/12-DEVOPS.md §9.14.7`)
-- **`docs/12-DEVOPS.md` §9.10** (riscritta): l'elenco autorevole dei **21 gate** riorganizzati per job, con bloccante/non-bloccante e issue di riferimento
+- **`docs/12-DEVOPS.md` §9.10** (riscritta): l'elenco autorevole dei **26 gate** riorganizzati per job, con bloccante/non-bloccante e issue di riferimento
 - **`docs/12-DEVOPS.md` §9.13** (nuova sezione *Chiusura dell'audit*): le **5 suite che la CI non esegueva** sono ora in CI, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (i contatori vivevano dentro subshell ⇒ «0 passati, 0 falliti» e uscita sempre 0; ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** e S5 che **mutava il working tree**, `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows)
 - **`docs/12-DEVOPS.md` §9.14** (nuova): il profilo delle procedure automatiche, il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = **9,5 s per repo** → ~50 ms), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica. Il costo più alto della sessione **non era nella logica**: era nel numero di processi figli
 - **`scripts/generate-bundle.ps1`**: `StringBuilder` al posto di `$bundle += ...` (O(n²) → O(n) su ~2,4 MB), `ReadAllText` al posto di `Get-Content -Raw`, `.Replace()` al posto di `-replace` per il CRLF. **Output byte-identico** (SHA-256 verificato sullo stesso albero)
@@ -2032,7 +2035,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 73 (v1.5) | CI/CD, deploy, self-hosting — §9.14 **prestazioni delle procedure automatiche**: il profilo della pipeline (job `quality` 172 s → ~85-95 s), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica; §9.10 **elenco autorevole dei 21 gate su 9 job** (`ci.yml` parallelizzato, `quality` aggregatore fail-closed con il nome invariato); §9.13 **chiusura dell'audit**: le 5 suite che la CI non eseguiva sono ora in CI, con i difetti corretti (`test-safe-branch-switch.sh` fail-open, `test-appendline-lf-fix.ps1` S3 stale, `test-setup-worktree.sh` falliva su ogni piattaforma); §9.12 ambiente PowerShell locale: provenienza di `pwsh` (7.6.9, pacchetto MSIX/Store) e confine di encoding dei `.ps1`; §9.8f gate "fatti del README" (issue #161); §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 73 (v1.5) | CI/CD, deploy, self-hosting — §9.14 **prestazioni delle procedure automatiche**: il profilo della pipeline (tempo pareggio 172 s → ~75 s), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica; §9.10 **elenco autorevole dei 26 gate su 11 job** (`ci.yml` parallelizzato, `quality` aggregatore fail-closed con il nome invariato); §9.13 **chiusura dell'audit**: le 5 suite che la CI non eseguiva sono ora in CI, con i difetti corretti (`test-safe-branch-switch.sh` fail-open, `test-appendline-lf-fix.ps1` S3 stale, `test-setup-worktree.sh` falliva su ogni piattaforma); §9.12 ambiente PowerShell locale: provenienza di `pwsh` (7.6.9, pacchetto MSIX/Store) e confine di encoding dei `.ps1`; §9.8f gate "fatti del README" (issue #161); §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
@@ -2047,7 +2050,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.31 | Protocollo per agenti (Sessione 73: la CI a **9 job in parallelo** con `quality` aggregatore fail-closed e il check `CI / quality` invariato; il bundle rigenera una volta sola; Sessione 72: provenienza e confine di encoding di `pwsh` — F9-bis, `powershell` 5.1 non è un fallback ma un rischio di corruzione dei file globali; Sessione 71: baseline PowerShell 7 (`pwsh`); Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.31 | Protocollo per agenti (Sessione 73: la CI a **11 job in parallelo** con `quality` aggregatore fail-closed e il check `CI / quality` invariato; il bundle rigenera una volta sola; Sessione 72: provenienza e confine di encoding di `pwsh` — F9-bis, `powershell` 5.1 non è un fallback ma un rischio di corruzione dei file globali; Sessione 71: baseline PowerShell 7 (`pwsh`); Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.6 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati — P13: il costo delle procedure automatiche è quasi sempre nei **processi figli**, non nella logica; P11: baseline PowerShell 7 e forma canonica dei flag; P12: provenienza di `pwsh` e confine di encoding dei `.ps1` |
@@ -9260,7 +9263,7 @@ sequenza.
 
 | Procedura | Prima | Dopo | Δ |
 |---|---:|---:|---:|
-| **Job `quality` (tempo pareggio in CI)** | **172 s** | **~85-95 s** | **~−50 %** |
+| **Tempo pareggio della pipeline CI** | **172 s** | **~75 s** | **~−57 %** |
 | `test-bundle-check-idempotent.sh` | 53,0 s | 11,9 s | −77 % |
 | `test-aggregate-determinism.sh` | 48,2 s | 39,7 s | −18 % |
 | `test-issue-76-residue.sh` | 16,1 s | 11,5 s | −29 % |
@@ -9274,7 +9277,7 @@ sequenza.
 
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D.73.1 | La **CI passa da 1 job sequenziale a 9 job** (8 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
+| D.73.1 | La **CI passa da 1 job sequenziale a 11 job** (10 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
 | D.73.2 | `quality` conserva il **nome** del check ed è **fail-closed** | Senza il controllo esplicito sui risultati dei job dipendenti, `needs:` renderebbe `quality` *skipped* quando un job fallisce, e la branch protection può interpretare un check saltato come successo. Il nome invariato evita di dover cambiare la branch protection |
 | D.73.3 | I **5 job di gate non installano le dipendenze npm** | `scripts/validate-*.mjs` e `scripts/check-readme-facts.mjs` usano **solo i moduli built-in di node**; le suite bash usano `git` + `bash` + `pwsh`, tutti preinstallati sui runner GitHub. Installare npm in 5 job che non ne hanno bisogno era costo puro |
 | D.73.4 | I 4 task turbo restano **sequenziali**; la forma parallela (`turbo run lint typecheck test build`, 32,8 s) è stata implementata e poi **revertita** | Sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`: è la classe del lesson 30-1, e la soglia di un test time-sensitive è un **acceptance criterion** |
@@ -9358,7 +9361,7 @@ di scansione regex).
 
 | # | Osservazione | Azione |
 |---|--------------|--------|
-| 73-1 | **Il tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano 172 s anche se il lavoro utile era ~89 s | `ci.yml` a 9 job; `quality` aggregatore fail-closed con il nome invariato |
+| 73-1 | **Il tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano 172 s anche se il lavoro utile era ~89 s | `ci.yml` a 11 job; `quality` aggregatore fail-closed con il nome invariato |
 | 73-2 | **Il costo più alto era nel numero di processi, non nell'algoritmo**: 256 spawn per repo = 9,5 s, e nessun profiler di linguaggio lo avrebbe mostrato | `docs/17-DEV-NOTES.md` **P13**; suite riscritte con le builtin |
 | 73-3 | **Una suite che non può fallire costa anche quando non fallisce**: `test-safe-branch-switch.sh` consumava 6,7 s per niente, perché riportava «0 passati, 0 falliti» e usciva 0 sempre | Contatori su file condiviso; ora 11 assert e in CI |
 | 73-4 | **L'audit precedente aveva diagnosticato la piattaforma invece del difetto**: «su `ubuntu-latest` passerebbe» era falso — `mktemp` onora `TMPDIR` su ogni OS | Il difetto era il *cleanup*; la correzione è cross-platform e la suite ora gira ovunque |
@@ -9371,9 +9374,9 @@ di scansione regex).
 
 ## Documenti aggiornati
 
-- `AGENTS.md` (v1.30 → **v1.31**): nuova sezione **§"🏎️ La CI: 9 job in parallelo"**, nota sullo
+- `AGENTS.md` (v1.30 → **v1.31**): nuova sezione **§"🏎️ La CI: 11 job in parallelo"**, nota sullo
   skip del secondo run di `auto-bundle`, footer v1.31
-- `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (21 gate su 9 job), **§9.13** *Chiusura
+- `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (26 gate su 11 job), **§9.13** *Chiusura
   dell'audit*, **§9.14** (nuova) *Prestazioni delle procedure automatiche* — profilo, costo dei
   processi figli, tabella dei risultati, equivalenza dimostrata, il costo del parallelismo
   (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che non è stato fatto (§9.14.9);
@@ -11007,7 +11010,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.27 | 2026-10-31 (issue #221) | **§39 Story 4.4 — DB IP→città** (Sessione 72, claim `kilo-HP-EliteBook-ydy5o2`, PR #222 merged `e661e37`): 6 entry (39-1 il database MMDB (DB-IP Lite City, CC BY 4.0) è scaricato on-demand in Cache Storage al primo uso, non embedded nel bundle né nel precache (D-B.2); 39-2 l'host di download `https://download.db-ip.com` è dichiarato in `connect-src` della CSP applicata e in `12-DEVOPS.md` §2.1 (lezione issue #196: CSP applicata e spec devono coincidere); 39-3 la derivazione L2 avviene in `NormalizationPipeline` prima dello scarto dell'IP, usando `raw.ip` mai inviato in rete; 39-4 `cityConfidence` con soglia 0.6 (D-B.3): sotto, la città viene scartata (E16); 39-5 il toggle `retainCity` è opt-in (default false): senza, città null (E21); 39-6 il reader MMDB legge solo `city.names.en` per IPv4, con guard bounds per evitare `RangeError` su buffer corti/malformati). Consegnati: `packages/core/src/geo/` (tipi, lookup MMDB, policy retainCity, deriveCity, isDbStale + 17 test), `packages/core/src/adapters/pipeline.ts` (geoLookup/geoPolicy opzionali), `apps/web/src/security/` (DBIP_HOST, connect-src, meta CSP index.html), `docs/12-DEVOPS.md` (§2.1 CSP include download.db-ip.com). 10 test CSP + 17 test geo verdi in CI. |
 | 2.26 | 2026-10-31 (issue #218) | **§38 Issue #218 — baseline PowerShell 7 (pwsh) per gli script del repo** (Sessione 71, claim `kilo-hp-elitebook-lrm6`, PR #219): 4 entry (38-1 la documentazione prescriveva ancora il toolchain di **Windows PowerShell 5.1** — il README avvertiva che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `AGENTS.md` usava `--check` in una dozzina di punti — mentre `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usava `shell: pwsh` da sempre: **nessun gate confronta la documentazione con l'ambiente reale**; 38-2 il footer v1.20 di `AGENTS.md` dichiarava «tutti i `pwsh scripts/* --check` convertiti a `-Check`» ma il corpo del file non l'aveva mai ricevuto: la normalizzazione è un problema di **copertura**, non di spot-check; 38-3 `aggregate-state.ps1 --strict` era indicato come comando da eseguire ma il parametro **non è dichiarato** (il guard lo rifiuta con exit 2): un flag documentato che non esiste è peggio di un flag assente, e nessun gate lo segnala; 38-4 la motivazione dei due gate `-Check` warning-only era attribuita alla differenza **PS 5.1 vs 7**, che non esiste più: la residua è **di piattaforma**). Consegnati: il baseline `pwsh` dichiarato in `README.md` (requisiti), `17-DEV-NOTES.md` v0.4 (nuovo **P11**), `12-DEVOPS.md` v1.3 (§9.1, §9.7b, §9.8, §9.10), `13-ADR/0008` (vincoli implementativi), `13-ADR/0006`, `docs/state/_index.md`, `11-BACKLOG.md`, `AGENTS.md` v1.29 (session start checklist a 6 check con F9) e il nuovo state file `docs/state/sessions/71-powershell-7-baseline.md`. **Fuori perimetro, dichiarato**: nessuna modifica al codice degli script e nessun cambio alla semantica dei gate in CI — promuoverli a bloccanti è una decisione sul test strategy e spetta al project owner. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding) |
 
-| 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **9 job** (8 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: job `quality` **172 s → ~85-95 s**; `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). **Due correzioni nate dalla prima CI della PR** (che vale come test): 73-8 **parallelizzare i job e parallelizzare i task interni sono due cose diverse** — i 4 task turbo in un'unica invocazione (52,7 → 32,8 s) facevano scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` sul runner a 2 vCPU (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion) ⇒ i 4 task restano sequenziali; 73-9 **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale (`git clone` del bare repo senza branch esistente non fa il checkout di nessun branch ⇒ «src refspec main does not match any») ⇒ `git init -b main` esplicito in tutte e 3 le suite che creano repository temporanei, con riproduzione locale del difetto. Consegnati: `ci.yml` (9 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
+| 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: tempo pareggio della pipeline **172 s → ~75 s** (misurato sul runner: 112 s con 9 job, ~75 s con i 3 job `node` separati); `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). **Due correzioni nate dalla prima CI della PR** (che vale come test): 73-8 **parallelizzare i job e parallelizzare i task interni sono due cose diverse** — i 4 task turbo in un'unica invocazione (52,7 → 32,8 s) facevano scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` sul runner a 2 vCPU (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion) ⇒ i 4 task restano sequenziali; 73-9 **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale (`git clone` del bare repo senza branch esistente non fa il checkout di nessun branch ⇒ «src refspec main does not match any») ⇒ `git init -b main` esplicito in tutte e 3 le suite che creano repository temporanei, con riproduzione locale del difetto. Consegnati: `ci.yml` (11 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -11225,7 +11228,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/stories/2.2-era-detector.md` | ✅ creata | Story 2.2 (Era Detector) — ✅ **done** (Sessione 69, issue #211): **change point detection** su firme settimanali (`04§5`, nessun clustering non supervisionato), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`) e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8) |
 | `state/sessions/70-event-detector.md` | ✅ creata | Sessione 70 (issue #214): **implementazione della Story 2.3** (Event Detector) — il detector a **z-score** su griglia settimanale, il detector a **quota** per `spike_artist`/`spike_genre`, i detector specialistici per `silence` ed `exploration`, il dedupe per tipo e soggetto, la persistenza degli eventi con `derivedVersion` (MIG-3) e il fixture di scenario `listening-spike.json`. **Merged** il 2026-10-31T11:18:48Z (PR #215, merge commit `5149b2c`) |
 | `state/sessions/71-powershell-7-baseline.md` | ✅ creata | Sessione 71: **baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1` — la documentazione era rimasta ancorata al world di PS 5.1 anche se `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usa `shell: pwsh` da sempre. Forma canonica dei flag a singolo trattino (`-Check`), `AGENTS.md` v1.29 con la session start checklist a 6 check (F9: versione di PowerShell), rimosso il riferimento al flag `-Strict` (che non esiste in `aggregate-state.ps1`), `12-DEVOPS.md` v1.3 e `17-DEV-NOTES.md` v0.4 con il nuovo P11 |
-| `state/sessions/73-perf-procedure-automatiche.md` | ✅ creata | Sessione 73 (issue #224): **procedure automatiche misurate e velocizzate** — `ci.yml` da 1 job sequenziale (18 step, **172 s**) a **9 job** (8 in parallelo + `quality` aggregatore fail-closed con il nome invariato), `pnpm run verify` (4 task turbo in una sola invocazione), `generate-bundle.ps1` con `StringBuilder` (O(n²)→O(n), output byte-identico), `aggregate-state.ps1` con cache dei file di stato, le **5 suite** che la CI non eseguiva ora in CI (con i difetti corretti: `test-safe-branch-switch.sh` fail-open, `test-appendline-lf-fix.ps1` S3 stale, `test-setup-worktree.sh` falliva su ogni piattaforma) e il secondo run di `auto-bundle` saltato quando l'aggregator non ha prodotto un commit. `12-DEVOPS.md` v1.5 (nuova **§9.14**), `17-DEV-NOTES.md` v0.6 (nuovo **P13**), `AGENTS.md` v1.31 |
+| `state/sessions/73-perf-procedure-automatiche.md` | ✅ creata | Sessione 73 (issue #224): **procedure automatiche misurate e velocizzate** — `ci.yml` da 1 job sequenziale (18 step, **172 s**) a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il nome invariato), `pnpm run verify` (i 4 gate del CI in una sola invocazione locale), `generate-bundle.ps1` con `StringBuilder` (O(n²)→O(n), output byte-identico), `aggregate-state.ps1` con cache dei file di stato, le **5 suite** che la CI non eseguiva ora in CI (con i difetti corretti: `test-safe-branch-switch.sh` fail-open, `test-appendline-lf-fix.ps1` S3 stale, `test-setup-worktree.sh` falliva su ogni piattaforma) e il secondo run di `auto-bundle` saltato quando l'aggregator non ha prodotto un commit. `12-DEVOPS.md` v1.5 (nuova **§9.14**), `17-DEV-NOTES.md` v0.6 (nuovo **P13**), `AGENTS.md` v1.31 |
 | `state/stories/2.3-event-detector.md` | ✅ creata | Story 2.3 (Event Detector) — ✅ **done** (Sessione 70, issue #214, PR #215, merge `5149b2c`): gli **otto** tipi di evento di `02§4` (`04§6`), il plug-in dell'orchestratore (`04§8.1`), la descrizione resa dal resolver i18n (`insight.event.*`, D-A.4) e il ricalcolo che sostituisce **l'insieme** degli eventi |
 | `state/stories/4.1-audio-features.md` | ✅ creata | Story 4.1 (Pipeline audio features) — ⬚ **todo** (Sessione 62, issue #187): la spec `21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (ratificata al merge della PR di ratifica), le nove decisioni D-AF.1…D-AF.9 sono ratificate e l'issue di implementazione **#188** è `agent-ready`. `status: todo` ⇒ il blocco NEXT-STEP del README punta alla 4.1, primo anello della catena 4.1 → 2.1 → 2.2/2.3 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
@@ -24814,7 +24817,7 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 ### 9.10 Gate reali di `ci.yml`
 
 > **Sessione 73 (issue #224): la tabella è stata riscritta.** `ci.yml` non è più un job
-> unico con 18 step in sequenza: è **9 job** di cui 8 girano **in parallelo** e uno
+> unico con 18 step in sequenza: è **11 job** di cui **10 girano in parallelo** e uno
 > (`quality`) è il check aggregatore. La tabella qui sotto è l'elenco autorevole dei
 > gate, riorganizzati per job. §9.13 ha l'audit temporale; **§9.14** ha le misure di
 > prestazione prima/dopo.
@@ -24827,30 +24830,32 @@ protection può interpretare un check saltato come successo.
 
 | # | Job | Step / gate | Bloccante | Issue |
 |---|-----|-------------|:---------:|-------|
-| 1 | `node` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
-| 2 | `node` | `Lint` (`pnpm run lint`) | sì | — |
-| 3 | `node` | `Typecheck` (`pnpm run typecheck`) | sì | — |
-| 4 | `node` | `Test` (`pnpm run test`) | sì | — |
-| 5 | `node` | `Build` (`pnpm run build`) | sì | — |
-| 3 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
-| 4 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
-| 5 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
-| 6 | `gates-docs` | `Gate "fatti del README" fail-closed` | sì | **#161** |
-| 7 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | sì | #70 |
-| 8 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | sì | #104 |
-| 9 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
-| 10 | `gates-workflows` | `Copertura git add vs $targets` | sì | #136 |
-| 11 | `gates-workflows` | `Scope permissions: valide` | sì | **#135** |
-| 12 | `gates-workflows` | `Sync origin/main prima del push su main` | sì | **#140** |
-| 13 | `gates-workflows` | `Ordinamento dei writer di main` | sì | **#149** |
-| 14 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | sì | #76 |
-| 15 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | sì | #110 |
-| 16 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | sì | sessione 33 |
-| 17 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | sì | #53 |
-| 18 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
-| 19 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
-| 20 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
-| 21 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
+| 1 | `node-lint-typecheck` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
+| 2 | `node-lint-typecheck` | `Lint` (`pnpm run lint`) | sì | — |
+| 3 | `node-lint-typecheck` | `Typecheck` (`pnpm run typecheck`) | sì | — |
+| 4 | `node-test` | `Installa dipendenze` | sì | Story 0.1 |
+| 5 | `node-test` | `Test` (`pnpm run test`) | sì | — |
+| 6 | `node-build` | `Installa dipendenze` | sì | Story 0.1 |
+| 7 | `node-build` | `Build` (`pnpm run build`) | sì | — |
+| 8 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
+| 9 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+| 10 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
+| 11 | `gates-docs` | `Gate "fatti del README" fail-closed` | sì | **#161** |
+| 12 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | sì | #70 |
+| 13 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | sì | #104 |
+| 14 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
+| 15 | `gates-workflows` | `Copertura git add vs $targets` | sì | #136 |
+| 16 | `gates-workflows` | `Scope permissions: valide` | sì | **#135** |
+| 17 | `gates-workflows` | `Sync origin/main prima del push su main` | sì | **#140** |
+| 18 | `gates-workflows` | `Ordinamento dei writer di main` | sì | **#149** |
+| 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | sì | #76 |
+| 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | sì | #110 |
+| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | sì | sessione 33 |
+| 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | sì | #53 |
+| 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
+| 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
+| 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
+| 26 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
 
 I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check
 `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono
@@ -25050,7 +25055,7 @@ git init + 3 config: 261ms
 | `pwsh scripts/aggregate-state.ps1 -Check` | 1,23 s | **0,91 s** | −26 % |
 | `pwsh scripts/generate-bundle.ps1 -Check` | 1,37 s | **1,05 s** | −23 % |
 | 4 task turbo sequenziali (`lint`+`typecheck`+`test`+`build`) | 52,7 s | 52,7 s | invariato — la forma parallela (32,8 s) **rompeva il gate**, vedi §9.14.7 |
-| **Job `quality` di `ci.yml` (wall-clock)** | **172 s** | **~85-95 s** (8 job in parallelo) | **~−50 %** |
+| **Tempo pareggio della pipeline CI** | **172 s** | **~75 s** (10 job in parallelo) | **~−57 %** |
 | `auto-bundle` su merge che tocca `docs/state/` | 2 run (20 s + 22 s) | **1 run** (il secondo viene saltato) | −22 s di latenza post-merge |
 
 #### 9.14.4 Le modifiche, e perché sono equivalenti
@@ -25185,7 +25190,7 @@ non del progetto, e la CI la ha diversa da qualunque dev machine.
 | 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
 | 1.3 | Sessione 71 (2026-10-31) | **Baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1`. `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1: il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `§9.1` prescriveva «MAI `--check`», `§9.7b` descriveva il bug #104 come se fosse il caso normale e la motivazione dei due gate warning-only era attribuita alla differenza **PS 5.1 vs 7** invece che a quella **di piattaforma**. §9.1 riscritta: il doppio trattino in `pwsh` viene normalizzato sul singolo **prima** del binding, quindi `--check` e `-Check` sono equivalenti (verificato su pwsh 7.6.9); il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente. La forma canonica resta a **singolo trattino** (`-Check`), unica forma con comportamento identico su 5.1 e 7 e quella indicata dal guard fail-closed. §9.7b: il guard resta in piedi ma non scatta più nello scenario che l'ha motivato — protegge i flag davvero inesistenti e le invocazioni da shell 5.1. §9.10: la motivazione dei due step warning-only è riformulata — l'asse versione di PowerShell è chiuso, resta quello di piattaforma (dev Windows vs CI Linux). Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
 | 1.4 | Sessione 72 (2026-10-31) | **§9.12 Ambiente PowerShell locale** (nuova): provenienza dell'installazione verificata (`pwsh` **7.6.9**, pacchetto **MSIX/Store** `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, alias per-utente in `WindowsApps`, **nessun MSI** in `C:\Program Files\PowerShell\7` e nessuna voce di disinstallazione nel registro; pacchetto creato/aggiornato il 2026-10-26 09:38) con i comandi di verifica (`pwsh -NoProfile -c '$PSVersionTable.PSVersion'`, `winget list --id Microsoft.PowerShell`, `Get-AppxPackage Microsoft.PowerShell`). La sezione fissa anche il **confine**: `scripts/aggregate-state.ps1` è UTF-8 **senza BOM** e contiene 9 righe con caratteri non-ASCII ⇒ sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e `-Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in modalità scrittura il mojibake verrebbe scritto nei file globali; `generate-bundle.ps1` invece è immune (legge/scrive sempre con `-Encoding UTF8`). Il vincolo «ASCII-only nei `.ps1`» di `13-ADR/0008` viene corretto: riguarda il **parsing**, non solo la scrittura. Il fix dello script (rimuovere i letterali o aggiungere il BOM) è **decisione del project owner** (D.71.4) e non è applicato. **§9.13 Copertura CI delle suite di test locali** (nuova): 5 suite presenti in `scripts/` **non** eseguite da `ci.yml` (`test-post-merge.sh`, `test-setup-worktree.sh`, `test-safe-branch-switch.sh`, `test-pre-commit-clean-check.sh`, `test-appendline-lf-fix.ps1`), con tempi misurati e difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ "0 passati, 0 falliti" e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 **stale** (64 `AppendLine` sono il fix corrente, non una regressione) e S5 **muta il working tree**, `test-setup-worktree.sh` fallisce su Windows/Git Bash (mock `gh` non intercettato + path POSIX). I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili. Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
-| 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **9 job** di cui 8 in parallelo (`node`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **job `quality` 172 s → ~85-95 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
+| 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **11 job** di cui 10 in parallelo (`node-lint-typecheck`, `node-test`, `node-build`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **tempo pareggio della pipeline 172 s → ~75 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
 
 
 ===== FILE: docs/13-ADR/0001-pwa-first.md =====
@@ -35432,9 +35437,20 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # 1. Gate sui sorgenti TypeScript.
+  # 1. Gate sui sorgenti TypeScript, su 3 job paralleli.
+  #
+  # La misura sul runner (run 41223269637, 2026-10-31) diceva che il job
+  # `node` unico era il **percorso critico** della pipeline: 106 s di cui
+  # ~27 s di setup+install e ~80 s di task. I 3 job qui sotto isolano i
+  # task su runner diversi: il tempo pareggio diventa il max
+  # (~67 s) invece della somma (~106 s).
+  #
+  # L'installazione delle dipendenze viene rifatta in ciascun job: costa
+  # ~17 s per job ma **in parallelo**, quindi paga una volta sola sul
+  # percorso critico. Lo store pnpm e' condiviso dalla cache di
+  # `setup-node`, quindi il download avviene una sola volta per lockfile.
   # ---------------------------------------------------------------------------
-  node:
+  node-lint-typecheck:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35451,32 +35467,54 @@ jobs:
       - name: Installa dipendenze
         run: pnpm install --frozen-lockfile
 
-      # Sessione 73 (issue #224): i 4 gate (lint, typecheck, test, build) erano
-      # 4 invocazioni `turbo run <task>` SEQUENZIALI (52,7 s misurati), cioe'
-      # 4 round-trip di turbo uno dietro l'altro. Una singola invocazione con
-      # i 4 task lascia turbo costruire il task graph una volta sola e li
-      # eseguire in parallelo dove il grafo lo consente: 32,8 s misurati
-      # (-20 s, -38%).
-      #
-      # **MA** la forma parallela si e' rivelata sbagliata sul runner: il
-      # runner GitHub ha 2 vCPU, e `build` (vite build + tsc) in concorrenza
-      # con `test` ruba CPU al vitest: i 2 test di integrazione del fixture
-      # `db-seed/medium.json` (5000 eventi) sono scaduti per timeout
-      # ("Test timed out in 5000ms"). E' la stessa classe del lesson 30-1
-      # (il test di performance misurava il carico del runner, non il layer
-      # DB): la soglia dell'AC presuppone che il test giri isolato, e la
-      # soglia **non** si tocca.
-      #
-      # Quindi: `test` resta **isolato**, e gli altri tre task tornano
-      # sequenziali come prima. I 4 gate restano 4 e tutti bloccanti.
       - name: Lint
         run: pnpm run lint
 
       - name: Typecheck
         run: pnpm run typecheck
 
+  node-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installa dipendenze
+        run: pnpm install --frozen-lockfile
+
+      # `test` gira **isolato**: nessun altro task CPU-bound condivide il
+      # processore. Con i 4 task in un'unica invocazione turbo, `build`
+      # (vite + tsc) rubava CPU al vitest e i 2 test di integrazione del
+      # fixture `db-seed/medium.json` scadevano per timeout ("Test timed out
+      # in 5000ms"). La soglia di un test time-sensitive e' un acceptance
+      # criterion e non si tocca (lesson 30-1, `12-DEVOPS.md §9.14.7`).
       - name: Test
         run: pnpm run test
+
+  node-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installa dipendenze
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build
@@ -35752,7 +35790,9 @@ jobs:
   quality:
     if: always()
     needs:
-      - node
+      - node-lint-typecheck
+      - node-test
+      - node-build
       - gates-docs
       - gates-aggregate
       - gates-bundle
@@ -35767,7 +35807,7 @@ jobs:
       - name: Esito dei gate paralleli
         shell: bash
         run: |
-          results="${{ needs.node.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
           echo "Risultati: $results"
           failed=""
           for r in $results; do

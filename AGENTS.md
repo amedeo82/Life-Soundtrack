@@ -828,15 +828,18 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
 
-### 🏎️ La CI: 9 job in parallelo *(Sessione 73, issue #224)*
+### 🏎️ La CI: 11 job in parallelo *(Sessione 73, issue #224)*
 
 `ci.yml` è stato riorganizzato: era **un job unico con 18 step in sequenza** (misurato: **172 s**
-di tempo pareggio sul runner), ora è **9 job** di cui **8 girano in parallelo** e il nono (`quality`)
+di tempo pareggio sul runner), ora è **11 job** di cui **10 girano in parallelo** e l'undicesimo (`quality`)
 è il check aggregatore.
 
 | Job | Cosa contiene |
 |---|---|
-| `node` | `pnpm install` + i 4 task turbo (`lint`, `typecheck`, `test`, `build`), **sequenziali** |
+| 
+ode-lint-typecheck | pnpm install + lint + 	ypecheck |\n| 
+ode-test | pnpm install + 	est (**isolato**: nessun altro task CPU-bound condivide il processore) |\n| 
+ode-build | pnpm install + uild |
 | `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) |
 | `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) |
 | `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) |
@@ -857,7 +860,7 @@ Tre cose da sapere quando si legge una pipeline verde:
    `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo il job `node`
    installa le dipendenze npm.
 
-L'elenco completo dei 21 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
+L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
 `docs/12-DEVOPS.md §9.10`; le misure di prestazione in `§9.14`.
 
 ### Regola fondamentale — NO commit su `main`
@@ -1058,10 +1061,10 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.31 — **le procedure automatiche sono state misurate e velocizzate** (Sessione 73, issue #224). La Sessione 72 aveva **misurato** le procedure automatiche (tempi reali, difetti, copertura CI) ma le aveva solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»: l'audit è stato quindi **chiuso con le correzioni**. Il dato di partenza è il tempo pareggio reale del job `quality` (unico, 18 step in sequenza): **172 s** (run `41212641314`, 2026-10-31). Il risultato: **~85-95 s**, con **nessun gate** rimosso, indebolito o reso non-bloccante. Aggiunti:
-- **§"🏎️ La CI: 9 job in parallelo"** (nuova): `ci.yml` passa da 1 job sequenziale a **9 job** (8 in parallelo + `quality` aggregatore). Il check `CI / quality` **conserva il nome** ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato — senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo. I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node)
+*Ultimo aggiornamento: v1.31 — **le procedure automatiche sono state misurate e velocizzate** (Sessione 73, issue #224). La Sessione 72 aveva **misurato** le procedure automatiche (tempi reali, difetti, copertura CI) ma le aveva solo **documentate**: nessuna correzione, perché «aggiungere step alla CI e modificare la semantica di un gate sono decisioni sul test strategy» (D.72.5). Il project owner ha chiesto esplicitamente di «controllare tutte le procedure automatiche e renderle il più veloci possibili»: l'audit è stato quindi **chiuso con le correzioni**. Il dato di partenza è il tempo pareggio reale del job `quality` (unico, 18 step in sequenza): **172 s** (run `41212641314`, 2026-10-31). Il risultato: **~75 s**, con **nessun gate** rimosso, indebolito o reso non-bloccante. Aggiunti:
+- **§"🏎️ La CI: 11 job in parallelo"** (nuova): `ci.yml` passa da 1 job sequenziale a **11 job** (10 in parallelo + `quality` aggregatore). Il check `CI / quality` **conserva il nome** ed è **fail-closed**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato — senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo. I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node)
 - **`package.json`**: nuovo script **`verify`** = `turbo run lint && turbo run typecheck && turbo run test && turbo run build` (i 4 gate del CI in una sola invocazione locale). Le 4 invocazioni `turbo run` **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU, `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`. È la classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca (`docs/12-DEVOPS.md §9.14.7`)
-- **`docs/12-DEVOPS.md` §9.10** (riscritta): l'elenco autorevole dei **21 gate** riorganizzati per job, con bloccante/non-bloccante e issue di riferimento
+- **`docs/12-DEVOPS.md` §9.10** (riscritta): l'elenco autorevole dei **26 gate** riorganizzati per job, con bloccante/non-bloccante e issue di riferimento
 - **`docs/12-DEVOPS.md` §9.13** (nuova sezione *Chiusura dell'audit*): le **5 suite che la CI non esegueva** sono ora in CI, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (i contatori vivevano dentro subshell ⇒ «0 passati, 0 falliti» e uscita sempre 0; ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** e S5 che **mutava il working tree**, `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows)
 - **`docs/12-DEVOPS.md` §9.14** (nuova): il profilo delle procedure automatiche, il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = **9,5 s per repo** → ~50 ms), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica. Il costo più alto della sessione **non era nella logica**: era nel numero di processi figli
 - **`scripts/generate-bundle.ps1`**: `StringBuilder` al posto di `$bundle += ...` (O(n²) → O(n) su ~2,4 MB), `ReadAllText` al posto di `Get-Content -Raw`, `.Replace()` al posto di `-replace` per il CRLF. **Output byte-identico** (SHA-256 verificato sullo stesso albero)

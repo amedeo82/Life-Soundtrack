@@ -41,7 +41,7 @@ sequenza.
 
 | Procedura | Prima | Dopo | Δ |
 |---|---:|---:|---:|
-| **Job `quality` (tempo pareggio in CI)** | **172 s** | **~85-95 s** | **~−50 %** |
+| **Tempo pareggio della pipeline CI** | **172 s** | **~75 s** | **~−57 %** |
 | `test-bundle-check-idempotent.sh` | 53,0 s | 11,9 s | −77 % |
 | `test-aggregate-determinism.sh` | 48,2 s | 39,7 s | −18 % |
 | `test-issue-76-residue.sh` | 16,1 s | 11,5 s | −29 % |
@@ -55,7 +55,7 @@ sequenza.
 
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D.73.1 | La **CI passa da 1 job sequenziale a 9 job** (8 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
+| D.73.1 | La **CI passa da 1 job sequenziale a 11 job** (10 in parallelo + `quality` aggregatore) | Il tempo pareggio era la **somma** di lavoro indipendente. I 18 gate restano 18, con la stessa semantica bloccante/non-bloccante: nessun gate rimosso, indebolito o reso non-bloccante |
 | D.73.2 | `quality` conserva il **nome** del check ed è **fail-closed** | Senza il controllo esplicito sui risultati dei job dipendenti, `needs:` renderebbe `quality` *skipped* quando un job fallisce, e la branch protection può interpretare un check saltato come successo. Il nome invariato evita di dover cambiare la branch protection |
 | D.73.3 | I **5 job di gate non installano le dipendenze npm** | `scripts/validate-*.mjs` e `scripts/check-readme-facts.mjs` usano **solo i moduli built-in di node**; le suite bash usano `git` + `bash` + `pwsh`, tutti preinstallati sui runner GitHub. Installare npm in 5 job che non ne hanno bisogno era costo puro |
 | D.73.4 | I 4 task turbo restano **sequenziali**; la forma parallela (`turbo run lint typecheck test build`, 32,8 s) è stata implementata e poi **revertita** | Sul runner a 2 vCPU, `build` in concorrenza con `test` fa scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json`: è la classe del lesson 30-1, e la soglia di un test time-sensitive è un **acceptance criterion** |
@@ -139,7 +139,7 @@ di scansione regex).
 
 | # | Osservazione | Azione |
 |---|--------------|--------|
-| 73-1 | **Il tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano 172 s anche se il lavoro utile era ~89 s | `ci.yml` a 9 job; `quality` aggregatore fail-closed con il nome invariato |
+| 73-1 | **Il tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano 172 s anche se il lavoro utile era ~89 s | `ci.yml` a 11 job; `quality` aggregatore fail-closed con il nome invariato |
 | 73-2 | **Il costo più alto era nel numero di processi, non nell'algoritmo**: 256 spawn per repo = 9,5 s, e nessun profiler di linguaggio lo avrebbe mostrato | `docs/17-DEV-NOTES.md` **P13**; suite riscritte con le builtin |
 | 73-3 | **Una suite che non può fallire costa anche quando non fallisce**: `test-safe-branch-switch.sh` consumava 6,7 s per niente, perché riportava «0 passati, 0 falliti» e usciva 0 sempre | Contatori su file condiviso; ora 11 assert e in CI |
 | 73-4 | **L'audit precedente aveva diagnosticato la piattaforma invece del difetto**: «su `ubuntu-latest` passerebbe» era falso — `mktemp` onora `TMPDIR` su ogni OS | Il difetto era il *cleanup*; la correzione è cross-platform e la suite ora gira ovunque |
@@ -152,9 +152,9 @@ di scansione regex).
 
 ## Documenti aggiornati
 
-- `AGENTS.md` (v1.30 → **v1.31**): nuova sezione **§"🏎️ La CI: 9 job in parallelo"**, nota sullo
+- `AGENTS.md` (v1.30 → **v1.31**): nuova sezione **§"🏎️ La CI: 11 job in parallelo"**, nota sullo
   skip del secondo run di `auto-bundle`, footer v1.31
-- `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (21 gate su 9 job), **§9.13** *Chiusura
+- `docs/12-DEVOPS.md` (v1.4 → **1.5**): **§9.10** riscritta (26 gate su 11 job), **§9.13** *Chiusura
   dell'audit*, **§9.14** (nuova) *Prestazioni delle procedure automatiche* — profilo, costo dei
   processi figli, tabella dei risultati, equivalenza dimostrata, il costo del parallelismo
   (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che non è stato fatto (§9.14.9);
