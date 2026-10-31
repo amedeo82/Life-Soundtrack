@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 09:50
+> Data: 2026-10-31 10:53
 > Totale file: 124
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 123 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1705.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 09:50
+- Dimensione totale: 1706.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 10:53
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -2016,7 +2016,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
 | 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
-| 69 | Story 2.2 — Era Detector (issue #211) | 🟡 | ❌ | #212 |
+| 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2056,7 +2056,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **46** (merge: 36)
+- Sessioni migrate in state/sessions: **46** (merge: 37)
 - Stories migrate in state/stories: **20** (done: 17)
 - Ultima sessione migrata: **S69** - Story 2.2 — Era Detector (issue #211)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.4, 4.1
@@ -2084,7 +2084,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 69, issue #211): la **Story 2.2 (Era Detector) è completata** — issue #211, branch `feat/211-era-detector`: il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection** — nessun clustering non supervisionato, `04§5`), il mood dominante dell'era classificato dal **classificatore del mood tracker** (D.69.2), la persistenza degli insight `era` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8), il plug-in `createEraGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `era-shift.json` (confine dichiarato al giorno 56). Con la 2.2 l'**EPIC 2** ha completato 2.1, 2.2 e 2.4: restano la **2.3 (Event Detector)** e le 3.x (UI). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 ora disponibile; e, per il blocco NEXT-STEP del README (che ordina le story **per id**), la **2.3 (Event Detector)**, con la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.2 🟢 APPROVED). Dietro: la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.2: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'era** (Story 3.x).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 69, issue #211): la **Story 2.2 (Era Detector) è completata** — PR #212 merged il 2026-10-31T09:49:44Z (merge commit `3294aa4`): il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection** — nessun clustering non supervisionato, `04§5`), il mood dominante dell'era classificato dal **classificatore del mood tracker** (D.69.2), la persistenza degli insight `era` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8), il plug-in `createEraGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `era-shift.json` (confine dichiarato al giorno 56). Con la 2.2 l'**EPIC 2** ha completato 2.1, 2.2 e 2.4: restano la **2.3 (Event Detector)** e le 3.x (UI). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 ora disponibile; e, per il blocco NEXT-STEP del README (che ordina le story **per id**), la **2.3 (Event Detector)**, con la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.2 🟢 APPROVED). Dietro: la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.2: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'era** (Story 3.x).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -8516,8 +8516,8 @@ una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 ### Sessione 69 - Story 2.2 — Era Detector (issue #211)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #212)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #212 (3294aa4, 2026-10-31)
 - **Claim**: `kilo-HP-ELITEBOOK-4f2k`
 
 ```
@@ -10033,9 +10033,9 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 ## 36. Issue #211 — Story 2.2: l'Era Detector (Sessione 69)
 
 **Branch**: `feat/211-era-detector`
-**PR**: **#212** (aperta il 2026-10-31) — ⏳ in attesa di review
+**PR**: **#212** (aperta il 2026-10-31) — **merged** il 2026-10-31T09:49:44Z (merge commit `3294aa4`)
 **Data**: 2026-10-31
-**Stato**: 🟡 **IMPLEMENTATA** — in attesa di merge
+**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -10049,6 +10049,10 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 **Lesson learned**: un **algoritmo deterministico** si verifica con un fixture che contiene il **caso che l'algoritmo cerca** — non con un fixture generato a caso. Il caso reale è lo stesso della Sessione 68 (i fixture casuali non hanno un cluster da riconoscere): il `lockdown-2020` non ha un cambio di gusto, e il suo atteso era una congettura. Il fixture composto (`era-shift.json`, 96 eventi, confine dichiarato) rende l'atteso **verificabile**: due ere, con i mood dichiarati e il confine entro `stepDays` dal cambio reale.
 
 La seconda lezione è operativa e costa caro: **la shell non è un editor**. Un `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha corrotto un documento (mojibake + BOM) in un colpo solo, e il danno era invisibile a occhio nel terminale (che mostrava solo gli ultimi caratteri). Il rilevamento è venuto da un controllo esplicito (`BOM?` / `mojibake?` via node), e il ripristino da `git checkout --` è stato possibile perché il file non era ancora committato.
+
+**§36 — esito post-merge della Story 2.2**: la PR #212 è **merged** in `main` il 2026-10-31T09:49:44Z (merge commit `3294aa4`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian). L'issue **#211** è chiusa con `status:done` (applicato da `auto-status-done`), le label `agent-ready` / `in-progress` / `status:in-review` sono rimosse e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-4f2k - PR #212 merged (3294aa4…)`).
+
+La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il **fallimento noto**, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main`, merge verificato via `gh`, branch remoto già assente per `auto-branch-cleanup`, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` e `auto-bundle`.
 
 ---
 
@@ -13844,8 +13848,10 @@ manca dell'host che la CSP deve consentire.
 number: 69
 title: "Story 2.2 — Era Detector (issue #211)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: 3294aa4
+merged_date: 2026-10-31
 branch: feat/211-era-detector
 pr: 212
 claim: kilo-HP-ELITEBOOK-4f2k
@@ -14629,6 +14635,8 @@ depends_on: ["2.1"]
 issue: 211
 branch: "feat/211-era-detector"
 pr: 212
+merged_commit: 3294aa4
+merged_date: 2026-10-31
 claim: kilo-HP-ELITEBOOK-4f2k
 spec_refs:
   - docs/04-ANALYSIS-ALGORITHMS.md
@@ -14650,9 +14658,8 @@ l'era detector si appoggia (`moodDominant`, `avgValence`, `avgEnergy`).
 ## Stato
 
 ✅ **DONE** — implementata nella Sessione 69 (issue **#211**, PR **#212**,
-branch `feat/211-era-detector`, worktree `ls-211-era-detector`). Il merge
-commit viene scritto nel doc-sync di chiusura, dopo il merge della PR (non è
-noto al momento della stesura di questo file).
+branch `feat/211-era-detector`, worktree `ls-211-era-detector`). **Merged** il
+2026-10-31T09:49:44Z (merge commit `3294aa4`).
 
 Consegnato:
 
@@ -22236,7 +22243,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.2 — Era Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
-**Stato**: ✅ **DONE — implementata nella Sessione 69** (issue #211, branch `feat/211-era-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.2 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e l'algoritmo di §5 è **change point detection** su firme settimanali — non clustering non supervisionato. Consegnato: il motore in `packages/core/src/analysis/era/` (firme con distribuzione dei generi, top artist, valence/energy medie, quota notturna e tasso di ripetizione; similarità con cosine + Jaccard + distanza normalizzata; rilevamento dei change point; costruzione delle ere; filtro `minEraDays`), il **classificatore del mood tracker** per il mood dominante dell'era (D.69.2), la persistenza degli insight `era` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** delle ere (`replaceAllInsightsOfType`, D.69.8), il plug-in `createEraGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/era-shift.json` (8 settimane di *pop* + 8 di *indie folk*, confine dichiarato al giorno 56). **37 test** nuovi in `@ls/core`. Dettagli e scelte dichiarate (D.69.1…D.69.8): `docs/state/stories/2.2-era-detector.md`.
+**Stato**: ✅ **DONE — implementata nella Sessione 69** (issue #211, PR #212 merged il 2026-10-31T09:49:44Z, merge commit `3294aa4`, branch `feat/211-era-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.2 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e l'algoritmo di §5 è **change point detection** su firme settimanali — non clustering non supervisionato. Consegnato: il motore in `packages/core/src/analysis/era/` (firme con distribuzione dei generi, top artist, valence/energy medie, quota notturna e tasso di ripetizione; similarità con cosine + Jaccard + distanza normalizzata; rilevamento dei change point; costruzione delle ere; filtro `minEraDays`), il **classificatore del mood tracker** per il mood dominante dell'era (D.69.2), la persistenza degli insight `era` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** delle ere (`replaceAllInsightsOfType`, D.69.8), il plug-in `createEraGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/era-shift.json` (8 settimane di *pop* + 8 di *indie folk*, confine dichiarato al giorno 56). **37 test** nuovi in `@ls/core`. Dettagli e scelte dichiarate (D.69.1…D.69.8): `docs/state/stories/2.2-era-detector.md`.
 
 **Acceptance criteria**:
 - [x] **Algoritmo come specificato in `04-ANALYSIS-ALGORITHMS §5`** (sliding window + change point su similarity signature): parametri `windowDays=14`, `stepDays=7`, `similarityThreshold=0.65`, `minEraDays=14`, `weights={genre:0.5, artist:0.3, numeric:0.2}` (allineato alla spec, chiusura ambiguità "Bayesiano/PELT" in Sessione 13)
@@ -22579,7 +22586,7 @@ Ogni story deve avere label GitHub:
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
 | 1.6 - Fondazione geo e contesto di ascolto | done | #209 | `68c27e5` | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
-| 2.2 - Era Detector | done | #212 | - | analysis |
+| 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | todo | - | - | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
