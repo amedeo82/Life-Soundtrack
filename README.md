@@ -42,24 +42,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 71%** - 20 story completate su 28 - effort pesato 71% - **mancano 8 step**
+**Implementazione: 75%** - 21 story completate su 28 - effort pesato 77% - **mancano 7 step**
 
-`█████████████████████░░░░░░░░░` 71%
+`██████████████████████░░░░░░░░` 75%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 1 | 4 | 25% | in corso |
+| EPIC 3 - UI/UX | 2 | 4 | 50% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 20 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 21 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
-- 3.1 Home + Timeline - da fare (size XL)
+**Step ancora da implementare** (7):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 4.2 MusicBrainz lookup - da fare (size M)
@@ -72,22 +71,22 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 1/4 - in corso |
+| Test end-to-end dell'app | EPIC 3 (4 story) | 2/4 - in corso |
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S76)
+**Analisi della sessione corrente** (S77)
 
 ### Numeri
 
-- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
-- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
-- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
+- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
+- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
+- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
 - **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
 
@@ -97,14 +96,18 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 ### Salute tecnica (verificata in questa worktree)
 
-`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
+`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
 
 ### Procedura introdotta con questa sessione
 
-1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
-2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
-3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
-4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
+1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
+2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
+3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
+4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
+5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
+6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
+7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
+8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
