@@ -1,8 +1,8 @@
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.4
-> Ultima modifica: 2026-10-31 — baseline PowerShell 7 (`pwsh`) per gli script del repo (Sessione 71)
+> Versione: 0.5
+> Ultima modifica: 2026-10-31 — baseline PowerShell 7 (`pwsh`), provenienza dell'installazione e confine di encoding dei `.ps1` (Sessione 72)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
 
@@ -179,6 +179,53 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   fail-closed degli script indica come corretta. Se il gate riceve un flag che non riconosce,
   esce **2** (errore di parametro) e **non** 1 (drift): verificare sempre l'`exit code` **e** la
   riga `[OK] … in sync` nell'output. Vedi `docs/12-DEVOPS.md §9.1` e `§9.7b`.
+
+### P12 — Provenienza di `pwsh` e confine di encoding dei `.ps1`
+
+- **Sintomo**: due failure diverse con la stessa radice.
+  1. `powershell scripts/aggregate-state.ps1 -Check` (Windows PowerShell 5.1) esce **1** con
+     `[FAIL] README.md - blocco drift | Atteso: 620 chars, Trovato: 616 chars`, mentre
+     `pwsh scripts/aggregate-state.ps1 -Check` esce **0**. Il drift è **spurio**: nessun file
+     è cambiato.
+  2. In modalità scrittura (default), lo stesso comando sotto 5.1 **scrive** i letterali
+     corrotti nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`):
+     mojibake (`â€”` al posto di `—`) + BOM, la stessa classe di danno di lesson 36-6 e 69-5.
+- **Causa**: `scripts/aggregate-state.ps1` è **UTF-8 senza BOM** e contiene 9 righe con
+  caratteri non-ASCII (`—`, `§`, `→`, `✅`, `❌`). Il **parsing** del file sorgente dipende
+  dalla versione: 7 legge UTF-8, 5.1 legge ANSI (Windows-1252) e trasforma `—` (3 byte UTF-8)
+  in 3 caratteri `â€”`. La differenza di 4 caratteri fra "atteso" e "trovato" è esattamente
+  la somma delle sovradecodifiche (`—` +2, `§` +1, `à` +1). Nota: il vincolo «ASCII-only nel
+  codice PowerShell» già esiste in `docs/13-ADR/0008-lazy-state-aggregation.md`, ma riguardava
+  solo la **scrittura**; la **lettura del sorgente** dipende dal BOM ed è version-dipendente.
+- **Soluzione**:
+  - **Operativa**: `pwsh` va invocato **esplicitamente**. La shell di default di Windows
+    (`powershell`, 5.1) e la shell di default di molti tool sono 5.1: `pwsh` è un comando
+    diverso e va scritto per esteso. Il check F9 della session start checklist
+    (`pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'`) va eseguito **prima** di
+    invocare qualsiasi `.ps1` del repo.
+  - **Sul codice**: i `.ps1` del repo restano **ASCII-only** (o con BOM UTF-8 esplicito).
+    `aggregate-state.ps1` oggi non lo rispetta: il fix (rimuovere i 9 letterali non-ASCII,
+    oppure aggiungere il BOM) è manutenzione dello script e va deciso dal project owner.
+  - **Provenienza dell'installazione** (verificata il 2026-10-31): `pwsh` **7.6.9** è
+    installato come **pacchetto MSIX / Microsoft Store** (`Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`,
+    `SignatureKind: Store`), esposto tramite **alias per utente** in
+    `%LOCALAPPDATA%\Microsoft\WindowsApps\pwsh.exe` (reparse point da 0 byte). Non è un MSI:
+    `C:\Program Files\PowerShell\7` **non esiste** e non c'è alcuna voce di disinstallazione
+    del prodotto nel registro. Il pacchetto è stato creato/aggiornato il **2026-10-26 09:38**.
+    Verifiche:
+    ```powershell
+    pwsh -NoProfile -c '$PSVersionTable.PSVersion'   # 7.6.9
+    winget list --id Microsoft.PowerShell             # PowerShell 7.6.9.0
+    Get-AppxPackage Microsoft.PowerShell | Select-Object Version, SignatureKind, InstallLocation
+    ```
+    L'alias è visibile anche da Git Bash (`command -v pwsh` → `/c/Users/<user>/AppData/Local/Microsoft/WindowsApps/pwsh`),
+    quindi il `.githooks/pre-push` — che preferisce `pwsh` e usa `powershell` solo come
+    fallback — rigenera il bundle con l'engine corretto.
+- **Regola generale**: il baseline di un runtime non si dichiara solo nei documenti, si
+  **verifica**: prima di ogni sessione, il check F9 (`$PSVersionTable.PSVersion.Major` = 7).
+  E quando l'engine è scelto, la sua *provenienza* va documentata: «installato» senza dire
+  *come* (MSI, Store, scoop, chocolatey) lascia la macchina non riproducibile su un'altra
+  postazione (lesson 71-1: un toolchain installato non è un toolchain documentato).
 
 ## 4. Cosa NON è ancora implementato
 

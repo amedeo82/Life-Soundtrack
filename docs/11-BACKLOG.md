@@ -735,6 +735,6 @@ Ogni story deve avere label GitHub:
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
-| 4.4 - DB IP→città (geolocalizzazione locale) | todo | - | - | enrichment |
+| 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |
 
 <!-- AGGREGATE-STORIES-END -->
