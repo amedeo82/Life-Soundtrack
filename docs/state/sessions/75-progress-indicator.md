@@ -5,7 +5,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/216-progress-indicator
-pr: 0
+pr: 230
 claim: kilo-HPELITEBOOK-w0pl
 cross_refs: [216, 127, 52, 24]
 tags: [devops, tooling, adr-0008]

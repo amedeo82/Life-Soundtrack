@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 22:05
+> Data: 2026-10-31 22:07
 > Totale file: 134
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2289,7 +2289,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ✅ | #223 |
 | 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
-| 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | - |
+| 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -9852,7 +9852,7 @@ writer non hanno *mai* attivato una `CI`.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #230)
 - **Claim**: `kilo-HPELITEBOOK-w0pl`
 
 ```
@@ -16519,7 +16519,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/216-progress-indicator
-pr: 0
+pr: 230
 claim: kilo-HPELITEBOOK-w0pl
 cross_refs: [216, 127, 52, 24]
 tags: [devops, tooling, adr-0008]

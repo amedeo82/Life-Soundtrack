@@ -7409,7 +7409,7 @@ writer non hanno *mai* attivato una `CI`.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #230)
 - **Claim**: `kilo-HPELITEBOOK-w0pl`
 
 ```
