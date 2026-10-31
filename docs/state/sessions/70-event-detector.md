@@ -2,10 +2,12 @@
 number: 70
 title: "Story 2.3 — Event Detector (issue #214)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
 branch: feat/214-event-detector
-pr: 0
+pr: 215
+merged_commit: 5149b2c
+merged_date: 2026-10-31
 claim: kilo-HP-ELITEBOOK-7d3f
 cross_refs: [214, 211, 180, 188, 178]
 tags: [analysis, phase-2]
@@ -114,6 +116,21 @@ che sono coperti dal detector a quota.
 - `pnpm run lint` · `pnpm run typecheck` · `pnpm run test` (611 test in
   `@ls/core`, 112 in `@ls/web`) · `pnpm run build` → verdi
 - `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `pwsh scripts/generate-bundle.ps1 --check` · `pwsh scripts/aggregate-state.ps1 --check` → exit 0
+
+## Esito post-merge
+
+La PR **#215** è **merged** in `main` il 2026-10-31T11:18:48Z (merge commit
+`5149b2c`), CI verde (job `quality`: lint, typecheck, test, build e i gate su
+bundle, aggregator, workflow e README; GitGuardian). L'issue **#214** è chiusa
+con `status:done` (applicato da `auto-status-done`, che ha pubblicato anche il
+commento `release: kilo-HP-ELITEBOOK-7d3f - PR #215 merged (5149b2c…)`).
+
+Il blocco NEXT-STEP del README ricade ora sulla **3.4** (nastro contesto) —
+che dichiara `[DEP:4.4]`: la tranche geo si fa prima nella **4.4** (il DB
+IP→città), e la 3.4 la consuma. Il blocco aggregato **non conosce le
+dipendenze** fra story (lesson 70-6), e la prosa del README lo dichiara
+esplicitamente.
 
 ## Lesson learned
 

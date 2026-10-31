@@ -396,7 +396,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.3 — Event Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
-**Stato**: ✅ **DONE — implementata nella Sessione 70** (issue #214, branch `feat/214-event-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.3 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e il §6 dichiara gli **otto tipi** di evento e i loro trigger. Consegnato: il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore, valence/energy medie ponderate, diversità e artisti nuovi; detector a **z-score** su griglia settimanale; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e per soggetto), la persistenza degli insight `event` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`), il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non viene prodotto alcun evento basato sulla valence. Dettagli e scelte dichiarate (D.70.1…D.70.8): `docs/state/stories/2.3-event-detector.md`.
+**Stato**: ✅ **DONE — implementata nella Sessione 70** (issue #214, PR #215 merged il 2026-10-31T11:18:48Z, merge commit `5149b2c`, branch `feat/214-event-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.3 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e il §6 dichiara gli **otto tipi** di evento e i loro trigger. Consegnato: il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore, valence/energy medie ponderate, diversità e artisti nuovi; detector a **z-score** su griglia settimanale; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e per soggetto), la persistenza degli insight `event` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`), il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non viene prodotto alcun evento basato sulla valence. Dettagli e scelte dichiarate (D.70.1…D.70.8): `docs/state/stories/2.3-event-detector.md`.
 
 **Acceptance criteria**:
 - [x] Rileva spike/crolli volume, valence drop/rise, exploration, silence
@@ -731,7 +731,7 @@ Ogni story deve avere label GitHub:
 | 1.6 - Fondazione geo e contesto di ascolto | done | #209 | `68c27e5` | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
-| 2.3 - Event Detector | done | #0 | - | analysis |
+| 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |

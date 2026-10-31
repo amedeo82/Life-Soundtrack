@@ -1063,9 +1063,9 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 ## 37. Issue #214 — Story 2.3: l'Event Detector (Sessione 70)
 
 **Branch**: `feat/214-event-detector`
-**PR**: **#215** (aperta il 2026-10-31)
+**PR**: **#215** (aperta il 2026-10-31) — **merged** il 2026-10-31T11:18:48Z (merge commit `5149b2c`)
 **Data**: 2026-10-31
-**Stato**: 🟡 **IN REVIEW** — implementazione completa e validata in locale
+**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1083,7 +1083,13 @@ La seconda lezione è sulla **griglia**: una finestra troncata non è un dettagl
 
 La terza è sulla **forma dei dati assenti**: un assente non è uno zero. La regola che rende confrontabili il volume e la valence è la stessa — un giorno senza ascolti e un giorno senza feature **non esistono** nella mappa — e la sua conseguenza non è tecnica ma semantica: i buchi sono un **segnale** (il silenzio), non un valore mancante da colmare con uno zero.
 
-**Verifica**: `pnpm run lint`, `pnpm run typecheck`, `pnpm run test` (611 test in `@ls/core`, 112 in `@ls/web`) e `pnpm run build` verdi; `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 2.3) sarà in una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+**Verifica**: `pnpm run lint`, `pnpm run typecheck`, `pnpm run test` (611 test in `@ls/core`, 112 in `@ls/web`) e `pnpm run build` verdi; `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti. Il doc-sync di chiusura (frontmatter con `merged: true`, `merged_commit`, `merged_date` e lo stato ✅ DONE della story 2.3) è in una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
+
+**§37 — esito post-merge della Story 2.3**: la PR #215 è **merged** in `main` il 2026-10-31T11:18:48Z (merge commit `5149b2c`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian). L'issue **#214** è chiusa con `status:done` (applicato da `auto-status-done`), le label `agent-ready` / `in-progress` / `status:in-review` sono rimosse e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-7d3f - PR #215 merged (5149b2c…)`).
+
+Il blocco NEXT-STEP del README ricade ora sulla **3.4** (nastro contesto), che dichiara `[DEP:4.4]`: la tranche geo si fa prima nella **4.4** (il DB IP→città, la specifica già ratificata) e **poi** nella 3.4, che la consuma. Il blocco aggregato filtra `done`/`blocked`/`wontdo` ma **non** conosce `depends_on`: la dipendenza è stata resa esplicita nella **prosa** del README (che è dell'agente, non dell'aggregatore), e il caso è dichiarato in `docs/state/sessions/70-event-detector.md` (lesson 70-6). Cambiare l'aggregatore è una modifica di **policy** (ADR-0008) e va trattata come issue a sé.
+
+La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il **fallimento noto**, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main`, merge verificato via `gh`, branch remoto già assente per `auto-branch-cleanup`, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` e `auto-bundle`.
 
 ---
 
