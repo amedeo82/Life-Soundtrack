@@ -15,7 +15,7 @@
 import { createInstance, type i18n as I18nInstance, type Resource } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { detectLanguage, persistLanguage, type AppLanguage } from './detector';
-import { useT } from './useT';
+import { useT, useLanguage } from './useT';
 import en from './locales/en.json';
 import it from './locales/it.json';
 
@@ -87,7 +87,7 @@ export async function setLanguage(lang: AppLanguage, instance: I18nInstance = i1
   persistLanguage(lang);
 }
 
-export { useT };
+export { useT, useLanguage };
 export type { TFunction } from 'i18next';
 
 /**

@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.31 · Sessione 70 (2026-10-31, issue #214) · la **Story 2.3 (Event Detector) è in review**: il motore in `packages/core/src/analysis/event/` rileva le anomalie della storia di ascolto (z-score su griglia settimanale, detector a quota, detector specialistici per silenzio ed esplorazione) e le rende insight di tipo `event` con `derivedVersion` e confidenza. Con la 2.3 l'**EPIC 2** è completo (2.1 mood, 2.2 ere, 2.3 eventi, 2.4 ricordi): il prossimo passo è la tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201). Fuori perimetro e dichiarato: la **UI degli eventi** (Story 3.x), la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.32 · Sessione 76 (2026-10-31, issue #231) · la **tranche geo è chiusa**: la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76) sono completate. Con la 3.4 l'**EPIC 3** (UI) parte: il nastro contesto e il dettaglio del periodo sono pronti, ma le schermate non esistono ancora — il prossimo passo è la **3.1** (Home + Timeline), che sblocca il test end-to-end dell'app. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -450,18 +450,20 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: Il nastro contesto sotto le `EraBand` della Timeline (schermata ⑦) e la schermata di dettaglio del periodo (⑧): un segmento per `ContextPeriod`, colore per `kind`, etichetta paese (+ «circa *città*» solo se la fonte non è manuale), pips dei dispositivi, filtri per `kind`/paese/dispositivo, azioni utente (`confirmed` / etichetta / `dismissed`).
 
-**Stato**: ⬚ **TODO** — la specifica è ratificata (`19` v1.0 🟢 §8.2-8.3, Sessione 67). **Nessuna mappa**: nessuna dipendenza cartografica, nessun tile online — la scala disponibile non lo giustifica e un tile implicherebbe uscita di rete.
+**Stato**: ✅ **DONE** — implementata nella Sessione 76 (issue **#231**, branch `feat/231-context-ribbon`). La specifica è ratificata (`19` v1.0 🟢 §8.2-8.3, Sessione 67). **Nessuna mappa**: nessuna dipendenza cartografica, nessun tile online — la scala disponibile non lo giustifica e un tile implicherebbe uscita di rete.
+
+Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segmento per `ContextPeriod`, colore per `kind`, pips dei dispositivi, filtri e sincronizzazione con lo zoom; il dettaglio del periodo (`ContextPeriodDetail.tsx`) con eventi, etichetta e le tre azioni utente; il namespace `timeline.context.*` materializzato in `08§2.12h` (36 chiavi, la sezione era **dichiarata** dal changelog 0.9 della Sessione 67 ma non scritta); **15 test** in `@ls/web`.
 
 **Task**:
-- T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
-- T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
-- T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
-- T3.4.4 — Nessuna dipendenza MapLibre/Leaflet e nessuna richiesta di rete per il nastro
+- [x] T3.4.1 — Componente del nastro (segmenti, colori per `kind`, pips dei dispositivi), sincronizzato con lo zoom della Timeline
+- [x] T3.4.2 — Schermata di dettaglio del periodo: eventi, label, azioni utente
+- [x] T3.4.3 — Namespace `timeline.context.*` (`08§2.12h`): la città è **sempre** introdotta da un indicatore di incertezza, il paese mai
+- [x] T3.4.4 — Nessuna dipendenza MapLibre/Leaflet e nessuna richiesta di rete per il nastro
 
 **Acceptance criteria** (da `19` v1.0 🟢):
-- [ ] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
-- [ ] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
-- [ ] Il nastro **non** effettua richieste di rete
+- [x] Il nastro mostra il **paese**; la città compare solo come «circa *X*» e mai come fatto (`19§8.2`)
+- [x] Le azioni utente aggiornano lo `status` del periodo (`confirmed`/`corrected`/`dismissed`)
+- [x] Il nastro **non** effettua richieste di rete
 
 **Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §8.2-8.3 · `docs/08-COPY-I18N.md` §2.12h · `docs/06-UX-FLOWS-STATES.md` (schermata ⑦)
 
@@ -610,7 +612,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 10. **1.5** Scrobbling hub (Last.fm, ListenBrainz, Maloja)
 11. **4.1** pipeline audio features (issue #188, ✅ **DONE**, PR #197 merged `7458220`) — la pipeline è **completata** (Sessione 64): cascata, provider, limiter, coda, stoccaggio, CSP e i18n (`21§4…§11`), con **142 test** in `@ls/core` e **15** in `@ls/web`. La spec è ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). Era il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: ha fornito le valence/energy senza le quali la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
-13. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1) è **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`); restano la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto), che dipendono da lei. Era la **prima story lavorabile**, e il blocco NEXT-STEP del README la indica: l'aggregatore ordina le story **migrate per id**, e «1.6» viene prima di «2.2». Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
+13. **1.6, 4.4, 3.4** geo e contesto di ascolto — **tranche chiusa** (Sessione 76, issue #231): dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201) sono state completate la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1 — Sessione 68, issue #205, PR #209, merge `68c27e5`), la **4.4** (DB MMDB on-demand + derivazione della città — issue #221) e la **3.4** (nastro contesto — Sessione 76, issue #231: il nastro e il dettaglio del periodo, con il namespace `timeline.context.*` materializzato). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città. Il blocco NEXT-STEP del README indica ora la **3.1** (Home + Timeline): con il nastro pronto, la Timeline è il pezzo che manca per montarlo e per sbloccare il test end-to-end
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
 15. **3.1, 3.2, 3.3** UI
 16. **5.1, 5.2** privacy
@@ -628,9 +630,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — restano le **3.x** (UI) |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — restano le **3.x** (UI), di cui la **3.4** (nastro contesto) è completata (Sessione 76, issue #231) |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
-| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO (1.6 completata) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
+| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
@@ -733,7 +735,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 3.4 - Nastro contesto (Timeline) | todo | - | - | ui |
+| 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |
 

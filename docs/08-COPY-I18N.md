@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.11 · Sessione 67 (2026-10-30, issue #201), aggiornata nelle Sessioni 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
+> Status: 🟡 DRAFT · Versione 0.12 · Sessione 76 (2026-10-31, issue #231), aggiornata nelle Sessioni 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -480,6 +480,68 @@ sono nel namespace `settings`, accanto alle altre chiavi del pannello Last.fm.
 | `settings.lastfm.authSaved` | Sessione autorizzata: la scrittura su Last.fm è abilitata | Session authorized: writing to Last.fm is enabled |
 | `settings.lastfm.authMissingToken` | Nell\'indirizzo incollato non c\'è un token: copia l\'intero indirizzo della pagina di reindirizzamento | There is no token in the pasted address: copy the whole redirect page address |
 
+### 2.12h `timeline.context.*` (Story 3.4 — nastro contesto, spec `19-GEO-CONTEXT.md` §8.2-8.3)
+
+Il **nastro contesto** della Timeline: un segmento per `ContextPeriod`, colorato
+per `kind`, con l'etichetta del paese, la città e i pips dei dispositivi; il
+click apre il **dettaglio del periodo**, dove l'utente può confermare,
+correggere o ignorare la classificazione.
+
+**Regola di linguaggio vincolante** (`19§8.3`): **la città è sempre introdotta
+da un indicatore di incertezza, il paese mai**. La città stimata dal database
+(`citySource = 'dbip-lite'`) si rende come «circa *X*»; il paese è un fatto e si
+rende come fatto. Una città corretta a mano (`citySource = 'manual'`) non è più
+una stima: l'indicatore di incertezza scompare.
+
+| Key | IT | EN |
+|-----|----|----|
+| `timeline.context.title` | Contesto | Context |
+| `timeline.context.kind.home` | Casa | Home |
+| `timeline.context.kind.work` | Lavoro | Work |
+| `timeline.context.kind.commute` | Spostamento | Commute |
+| `timeline.context.kind.car` | Auto | Car |
+| `timeline.context.kind.travel` | Viaggio | Travel |
+| `timeline.context.kind.away` | Fuori casa | Away |
+| `timeline.context.kind.unknown` | Non determinato | Undetermined |
+| `timeline.context.city.approx` | circa {{city}} | around {{city}} |
+| `timeline.context.unknown` | Sconosciuto | Unknown |
+| `timeline.context.empty` | Nessun contesto determinato in questo periodo | No context determined in this period |
+| `timeline.context.filter.all` | Tutti | All |
+| `timeline.context.filter.kind` | Contesto | Context |
+| `timeline.context.filter.country` | Paese | Country |
+| `timeline.context.filter.device` | Dispositivo | Device |
+| `timeline.context.device.mobile` | Telefono | Mobile |
+| `timeline.context.device.desktop` | Computer | Desktop |
+| `timeline.context.device.web` | Web | Web |
+| `timeline.context.device.speaker` | Speaker | Speaker |
+| `timeline.context.device.car` | Auto | Car |
+| `timeline.context.device.wearable` | Indossabile | Wearable |
+| `timeline.context.device.tv` | TV | TV |
+| `timeline.context.device.unknown` | Dispositivo sconosciuto | Unknown device |
+| `timeline.context.detail.title` | Dettaglio del periodo | Period detail |
+| `timeline.context.detail.country` | Paese | Country |
+| `timeline.context.detail.city` | Città | City |
+| `timeline.context.detail.eventsTitle` | Ascolti | Listens |
+| `timeline.context.detail.events_one` | {{count}} ascolto | {{count}} listen |
+| `timeline.context.detail.events_other` | {{count}} ascolti | {{count}} listens |
+| `timeline.context.detail.noEvents` | Nessun ascolto in questo periodo | No listens in this period |
+| `timeline.context.detail.status` | Stato | Status |
+| `timeline.context.status.pending` | Da rivedere | To review |
+| `timeline.context.status.confirmed` | Confermato | Confirmed |
+| `timeline.context.status.corrected` | Corretto | Corrected |
+| `timeline.context.status.dismissed` | Ignorato | Dismissed |
+| `timeline.context.action.label` | Etichetta | Label |
+| `timeline.context.action.labelPlaceholder` | Es. Casa di mia madre | e.g. My mother's house |
+| `timeline.context.action.confirm` | Conferma | Confirm |
+| `timeline.context.action.correct` | Correggi | Correct |
+| `timeline.context.action.dismiss` | Ignora | Dismiss |
+
+**Pluralizzazione**: `timeline.context.detail.events` segue §3 (`_one`/`_other`).
+
+**Dati, non copia**: i nomi dei paesi (`IT`, `FR`), i titoli dei brani e gli
+artisti sono **dati** e non si traducono; le chiavi `timeline.context.device.*`
+descrivono il *tipo* di dispositivo e sono invece parte dell'interfaccia.
+
 ### 2.17 `enrichment.*` (Story 4.1 — spec `21-AUDIO-FEATURES.md` §14)
 
 Namespace della pipeline delle **audio features**. Le **otto chiavi** sono
@@ -576,3 +638,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
 | 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |
 | 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |
+| 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |

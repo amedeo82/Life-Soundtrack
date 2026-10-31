@@ -134,6 +134,7 @@ $files = @(
     "docs/state/sessions/73-perf-procedure-automatiche.md",
     "docs/state/sessions/74-ci-merge-once.md",
     "docs/state/sessions/75-progress-indicator.md",
+    "docs/state/sessions/76-nastro-contesto.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",

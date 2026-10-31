@@ -21,7 +21,7 @@
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 62 (v1.4) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 67 (v0.9) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`) |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 76 (v0.12) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`); v0.12: §2.12h **materializzata** con le 36 chiavi `timeline.context.*` della Story 3.4 (la sezione era dichiarata dal changelog 0.9 ma non scritta) |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
@@ -122,6 +122,7 @@
 | 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
+| 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -161,10 +162,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **52** (merge: 40)
-- Stories migrate in state/stories: **20** (done: 19)
-- Ultima sessione migrata: **S75** - Indicatore di avanzamento automatico (issue #216)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **53** (merge: 40)
+- Stories migrate in state/stories: **20** (done: 20)
+- Ultima sessione migrata: **S76** - Nastro contesto (Story 3.4, issue #231)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -177,27 +178,26 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 68%** - 19 story completate su 28 - effort pesato 68% - **mancano 9 step**
+**Implementazione: 71%** - 20 story completate su 28 - effort pesato 71% - **mancano 8 step**
 
-`████████████████████░░░░░░░░░░` 68%
+`█████████████████████░░░░░░░░░` 71%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 3 - UI/UX | 1 | 4 | 25% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 19 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 20 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (9):
+**Step ancora da implementare** (8):
 - 3.1 Home + Timeline - da fare (size XL)
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
-- 3.4 Nastro contesto (Timeline) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
@@ -208,39 +208,39 @@
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Test end-to-end dell'app | EPIC 3 (4 story) | 1/4 - in corso |
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S75)
+**Analisi della sessione corrente** (S76)
 
 ### Numeri
 
-- **Implementazione: 68%** — 19 story completate su 28 · effort pesato 68% · **mancano 9 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- **Implementazione: 71%** — 20 story completate su 28 · effort pesato 71% · **mancano 8 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 1/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
 - **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo e il DB IP→citta' (4.4). Tutto coperto da test e verde.
-- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **L'EPIC 3 e' partita (1/4)**: con il nastro contesto esiste il primo pezzo di UI oltre l'onboarding. Restano **3.1** (Home + Timeline, XL), **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi): il nastro e' pronto per essere montato sotto le `EraBand`, ma **le `EraBand` non esistono ancora** — Timeline arriva con la 3.1.
+- **Il gate che blocca il test end-to-end e' ancora la Timeline**: l'app resta onboarding + import; senza 3.1 non si puo' verificare l'esperienza "colonna sonora della mia vita" end-to-end. Il nastro e' il primo pezzo pronto di quel percorso.
 - **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
 - **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
 
-> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura (dopo il merge che
-> ha chiuso la 4.4): se il blocco e l'analisi divergono, il primo e' la fonte di verita' — la
-> percentuale e' un dato calcolato, la prosa e' un commento.
+> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
+> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
+> la prosa e' un commento.
 
-### Salute tecnica (verificata su `main`)
+### Salute tecnica (verificata in questa worktree)
 
-`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+`typecheck` ✅ · `lint` ✅ (0 warning: la separazione del modello e' quello che li ha azzerati) · `test` ✅ **127 test in `@ls/web`** (112 precedenti + 15 nuovi) · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
 
 ### Procedura introdotta con questa sessione
 
-1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
-2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
-3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
-4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
-5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+1. `apps/web/src/components/ContextRibbon.tsx` — il nastro (segmenti, colori, filtri, zoom).
+2. `apps/web/src/components/ContextPeriodDetail.tsx` — il dettaglio del periodo e le tre azioni.
+3. `apps/web/src/components/contextRibbonModel.ts` — il modello puro e la regola di localita'.
+4. `apps/web/src/__tests__/context-ribbon.test.tsx` — 15 test: regola di linguaggio (IT/EN), nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -264,7 +264,7 @@
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 70, issue #214): la **Story 2.3 (Event Detector) è completata** — il motore in `packages/core/src/analysis/event/` (metriche giornaliere con volume in ore e valence/energy medie ponderate; detector a **z-score** su griglia settimanale — baseline 60gg, finestra 14gg, soglia 2.0; detector a **quota** per `spike_artist`/`spike_genre`; detector specialistici per `silence` ed `exploration`; dedupe per tipo e soggetto), la persistenza degli insight `event` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** degli eventi, il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). Con la 2.3 l'**EPIC 2** è completo: 2.1 (mood), 2.2 (ere), 2.3 (eventi), 2.4 (ricordi). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 già disponibile. Dietro: la tranche dell'EPIC 3 (**UI**, che includerà la schermata ⑧ degli eventi) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.3: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'evento** (Story 3.x).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 76, issue #231): la **tranche geo è chiusa** — la **1.6** (fondazione geo, Sessione 68), la **4.4** (DB IP→città, issue #221) e la **3.4** (nastro contesto, Sessione 76: il nastro con un segmento per `ContextPeriod` e il dettaglio del periodo con le azioni utente) sono completate, e con la 3.4 l'**EPIC 3** (UI) passa a 1/4. **Prossimo passo**: la **3.1** (Home + Timeline, `[SIZE:XL]`) — è il pezzo che manca per **montare** il nastro sotto le `EraBand` e per sbloccare il test **end-to-end** dell'app: senza Timeline l'app resta onboarding + import, e si può testare il motore ma non l'esperienza «colonna sonora della mia vita». Dietro: la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi), il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
