@@ -7055,7 +7055,7 @@ sequenza.
 
 | Procedura | Prima | Dopo | Δ |
 |---|---:|---:|---:|
-| **Tempo pareggio della pipeline CI** | **172 s** | **~75 s** | **~−57 %** |
+| **Tempo pareggio della pipeline CI** | **172 s** | **73 s** | **−58 %** |
 | `test-bundle-check-idempotent.sh` | 53,0 s | 11,9 s | −77 % |
 | `test-aggregate-determinism.sh` | 48,2 s | 39,7 s | −18 % |
 | `test-issue-76-residue.sh` | 16,1 s | 11,5 s | −29 % |
