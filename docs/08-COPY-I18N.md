@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.9 · Sessione 67 (2026-10-30, issue #201)
+> Status: 🟡 DRAFT · Versione 0.10 · Sessione 67 (2026-10-30, issue #201), aggiornata nella Sessione 69 (2026-10-31, issue #211)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -97,7 +97,7 @@
 
 | Key | IT | EN |
 |-----|----|----|
-| `title` | Era {label} | {label} Era |
+| `title` | {label} | {label} |
 | `period` | {start} → {end} | {start} → {end} |
 | `topArtists` | Top artisti | Top artists |
 | `topSongs` | Top brani | Top songs |
@@ -105,6 +105,13 @@
 | `nightShare` | Ascolti notturni | Night listens |
 | `repeatRate` | Ripetizioni | Repeats |
 | `relive` | Rivivi questo periodo | Relive this period |
+
+> **`title` è un pass-through**: l'etichetta dell'era (`EraPayload.label`,
+> `02§4`) **contiene già** il prefisso «Era» — lo schema lo dichiara
+> (`es. "Era Malinconia"`) e `04-ANALYSIS-ALGORITHMS.md` §5.2 lo costruisce
+> così (`"Era " + mood + " " + topGenre`). Il titolo della schermata ⑧ è
+> quindi **l'etichetta stessa**: anteporre «Era» produrrebbe «Era Era
+> Malinconia Indie».
 
 ### 2.5 `explore.*`
 
@@ -338,12 +345,18 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 
 ### 2.15 `insight.*`
 
-I template degli insight: umore, eventi e **ricordi**. Le chiavi dei ricordi
-(`memory.*`) sono **vincolanti** dalla ratifica di `04-ANALYSIS-ALGORITHMS.md`
-v1.0 🟢 (§7.3.1, decisione D-A.4): il `text` del ricordo è una **stringa resa**
-alla generazione — il ricordo è uno snapshot e la lingua in cui è stato scritto
-è parte della memoria — ma il **template** è internazionalizzato, e la
-generazione non scrive mai stringhe italiane inline.
+I template degli insight: umore, eventi, **ere** e **ricordi**. Le chiavi dei
+ricordi (`memory.*`) sono **vincolanti** dalla ratifica di
+`04-ANALYSIS-ALGORITHMS.md` v1.0 🟢 (§7.3.1, decisione D-A.4): il `text` del
+ricordo è una **stringa resa** alla generazione — il ricordo è uno snapshot
+e la lingua in cui è stato scritto è parte della memoria — ma il **template**
+è internazionalizzato, e la generazione non scrive mai stringhe italiane
+inline.
+
+Lo stesso vale per l'**etichetta dell'era** (`era.*`, Story 2.2): `EraPayload.label`
+(`02§4`) è una stringa resa, costruita dal template `insight.era.label` a
+partire dal **nome localizzato** del mood (`insight.era.mood.*`) e dal genere
+più ascoltato — che è **dato**, non copia, e non viene tradotto.
 
 | Key | IT | EN |
 |-----|----|----|
@@ -358,6 +371,13 @@ generazione non scrive mai stringhe italiane inline.
 | `event.volume_drop` | Hai ascoltato molta meno musica del solito | You listened to much less music than usual |
 | `event.exploration` | Hai esplorato molti nuovi artisti | You explored many new artists |
 | `event.silence` | Periodo di silenzio musicale | Period of musical silence |
+| `era.label` | Era {mood} {genre} | {mood} {genre} Era |
+| `era.mood.sad` | Malinconia | Melancholy |
+| `era.mood.angry` | Rabbia | Anger |
+| `era.mood.neutral` | Neutro | Neutral |
+| `era.mood.calm` | Calma | Calm |
+| `era.mood.happy` | Felicità | Happiness |
+| `era.mood.excited` | Energia | Energy |
 | `memory.on_this_day` | {years} anni fa ascoltavi "{track}" di {artist} | {years} years ago you were listening to "{track}" by {artist} |
 | `memory.first_time` | {years} anni fa scoprivi {artist} | {years} years ago you discovered {artist} |
 | `memory.milestone.events` | Hai raggiunto {count} brani ascoltati! | You reached {count} tracks listened! |
@@ -542,3 +562,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.7 | Sessione 59 (2026-10-28, issue #178) | **§2.15 `insight.*` — i template dei ricordi** (`memory.onThisDay`, `memory.firstTime`, `memory.milestone.*`, `memory.return`, `memory.seasonal`, `memory.disclaimer*`): la ratifica di `04-ANALYSIS-ALGORITHMS.md` (v1.0 🟢 APPROVED) li dichiara **vincolanti** (D-A.4). Riga di changelog mancante: la modifica c'era (Sessione 59) ma il header e la tabella erano rimasti a **v0.6** — il drift è stato corretto dalla Sessione 62 (issue #187) |
 | 0.8 | Sessione 62 (2026-10-28, issue #187) | **§2.17 `enrichment.*` (nuova) — Story 4.1**: le **otto chiavi** della pipeline audio features elencate da `21-AUDIO-FEATURES.md` §14, con i testi IT ed EN: gli stati della pipeline (`queued`, `analyzing`, `done`, `estimated`, `no_audio`, `disabled`), l'avviso **prima** del download del WASM (`download.size`, ~6 MB una volta sola) e l'avviso aggregato in Settings (`error.aggregate`, con pluralizzazione §3). §1: il namespace `enrichment` aggiunto alla tabella dei namespace. Il **confine "stima ≠ misura"** è dichiarato nei testi: `enrichment.status.estimated` è l'unica chiave che può descrivere una feature euristica e non usa mai la parola "analizzato" (`21§12`, D-AF.4). Header allineato (era fermo a **v0.6** dal Sessione 58, mentre il changelog era già alla 0.5 e `docs/INDEX.md` dichiarava v0.7) |
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
+| 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |

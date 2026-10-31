@@ -7,13 +7,56 @@
 
 export {
   AnalysisPipeline,
+  createEraGenerator,
   createMemoryGenerator,
   createMoodGenerator,
   type AnalysisGenerator,
   type AnalysisInput,
+  type EraGeneratorOptions,
   type MemoryGeneratorOptions,
   type MoodGeneratorOptions,
 } from './pipeline';
+
+export { createTranslator, type TranslateFn, type TranslateParams, type Translator } from './i18n';
+
+export {
+  buildEras,
+  computeEraDerivedVersion,
+  computeSignature,
+  computeWeeklySignatures,
+  cosineSimilarity,
+  DEFAULT_ERA_CONFIG,
+  detectChangePoints,
+  EraEngine,
+  ERA_NIGHT_HOURS,
+  ERA_TEMPLATE_KEYS,
+  ERA_TOP_ARTISTS,
+  ERA_TOP_TRACKS,
+  eraDurationDays,
+  eraInsightId,
+  isNightHour,
+  jaccardSimilarity,
+  moodConfig,
+  normalizeDistribution,
+  numericSimilarity,
+  renderEraLabel,
+  resolveEraConfig,
+  signatureSimilarity,
+  topGenre,
+  topN,
+  topTrackIds,
+  type EraConfig,
+  type EraConfigOverrides,
+  type EraDraft,
+  type EraEngineOptions,
+  type EraInput,
+  type EraMoodThresholds,
+  type EraSignature,
+  type EraWeights,
+  type EraWindow,
+  type GeneratedEra,
+  type NumericSimilarity,
+} from './era';
 
 export {
   ANALYSIS_FEATURE_SOURCES,
@@ -53,7 +96,6 @@ export {
   computeMemoryScore,
   computeRecency,
   computeRelevance,
-  createTranslator,
   DAY_MS,
   DEFAULT_MEMORY_CONFIG,
   endOfUtcDay,
@@ -89,6 +131,4 @@ export {
   type MemoryTemplateParams,
   type MemoryWorkspace,
   type MemoryWorkspaceInput,
-  type TranslateFn,
-  type Translator,
 } from './memory';

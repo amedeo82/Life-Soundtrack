@@ -119,6 +119,55 @@ export async function replaceInsights(
   });
 }
 
+/** Opzioni di `replaceAllInsightsOfType`. */
+export interface ReplaceAllInsightsOfTypeOptions {
+  /** Tipo degli insight da sostituire. */
+  readonly type: InsightType;
+  /** Insight appena calcolati (l'insieme completo del tipo). */
+  readonly insights: Insight[];
+  /** `derivedVersion` corrente dei parametri. */
+  readonly derivedVersion: string;
+}
+
+/**
+ * Sostituisce **tutti** gli insight di un tipo con quelli appena calcolati.
+ *
+ * È la variante per gli algoritmi la cui segmentazione dipende **dall'intera
+ * storia**: le ere (04§5) sono calcolate sui confini dell'intero periodo, e
+ * un ricalcolo può spostarli. `replaceInsightsOfType` (che sostituisce solo
+ * i periodi ricalcolati) lascerebbe sopravvivere le ere i cui confini sono
+ * cambiati: gli insight vecchi avrebbero un `periodStart` diverso da quello
+ * dell'era nuova, e nessuno dei due meccanismi li rimuoverebbe.
+ *
+ * Qui si rimuovono **tutti** gli insight del tipo — qualunque versione
+ * abbiano — e si scrivono quelli nuovi, in una transazione: o il nuovo
+ * insieme è persistito, o resta il precedente.
+ */
+export async function replaceAllInsightsOfType(
+  db: LifeSoundtrackDB,
+  options: ReplaceAllInsightsOfTypeOptions,
+): Promise<ReplaceInsightsReport> {
+  return db.transaction('rw', [db.insights], async () => {
+    const existing = await db.insights.where('type').equals(options.type).toArray();
+    const stale = existing.filter((insight) => insight.derivedVersion !== options.derivedVersion);
+    const superseded = existing.filter(
+      (insight) => insight.derivedVersion === options.derivedVersion,
+    );
+    const removed = [...stale, ...superseded];
+    if (removed.length > 0) {
+      await db.insights.bulkDelete(removed.map((insight) => insight.id));
+    }
+    if (options.insights.length > 0) {
+      await db.insights.bulkPut(options.insights);
+    }
+    return {
+      inserted: options.insights.length,
+      removedStale: stale.length,
+      removedSuperseded: superseded.length,
+    };
+  });
+}
+
 /** Opzioni di `replaceInsightsOfType`. */
 export interface ReplaceInsightsOfTypeOptions {
   /** Tipo degli insight da sostituire. */

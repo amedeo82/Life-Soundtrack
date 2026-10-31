@@ -7,11 +7,16 @@
  * compare **nessuna** stringa italiana, solo la chiave del template e i suoi
  * parametri.
  *
- * Il core non dipende da i18next (05§9: `@ls/core/analysis` è puro TS e
- * gira nel Web Worker): l'app inietta il resolver tramite `Translator`.
+ * Il contratto del resolver è definito in `analysis/i18n.ts` (è condiviso
+ * con l'era detector): questo modulo ne riusa le esportazioni perché
+ * l'API pubblica del memory engine non cambia.
  */
 
 import type { MemoryTemplateParams } from './types';
+import type { Translator } from '../i18n';
+
+export { createTranslator } from '../i18n';
+export type { TranslateFn, Translator } from '../i18n';
 
 /** Chiavi dei template dei ricordi — `08-COPY-I18N.md` §2.15 (namespace `insight.*`). */
 export const MEMORY_TEMPLATE_KEYS = {
@@ -26,29 +31,6 @@ export const MEMORY_TEMPLATE_KEYS = {
 
 /** Chiave di un template di ricordo. */
 export type MemoryTemplateKey = (typeof MEMORY_TEMPLATE_KEYS)[keyof typeof MEMORY_TEMPLATE_KEYS];
-
-/** Funzione di traduzione fornita dall'app (i18next `t` nel caso dell'app web). */
-export type TranslateFn = (key: string, params?: MemoryTemplateParams) => string;
-
-/** Resolver i18n iniettato nel memory engine. */
-export interface Translator {
-  translate(key: string, params?: MemoryTemplateParams): string;
-}
-
-/**
- * Adatta una funzione di traduzione al contratto `Translator`.
- *
- * La funzione riceve i parametri così come sono: i template con plurali
- * (`insight.memory.milestone.events_one` / `_other`) richiedono il parametro
- * `count`, che il resolver deve passare al motore i18n sottostante.
- */
-export function createTranslator(translate: TranslateFn): Translator {
-  return {
-    translate(key, params) {
-      return translate(key, params);
-    },
-  };
-}
 
 /**
  * Rende il testo di un ricordo.

@@ -9,6 +9,7 @@
  */
 
 import type { Artist, ListenEvent, MemoryKind, Track } from '../../schema';
+import type { TranslateParams } from '../i18n';
 
 /**
  * Set di parametri del memory engine — 04§7.3.
@@ -71,8 +72,13 @@ export function resolveMemoryConfig(overrides: Partial<MemoryConfig> = {}): Memo
   };
 }
 
-/** Parametri interpolati in un template i18n — valori stringa o numerici. */
-export type MemoryTemplateParams = Record<string, string | number>;
+/**
+ * Parametri interpolati in un template i18n — valori stringa o numerici.
+ *
+ * È un alias del contratto condiviso `TranslateParams` (`analysis/i18n.ts`):
+ * il memory engine e l'era detector usano lo stesso resolver.
+ */
+export type MemoryTemplateParams = TranslateParams;
 
 /**
  * Ricordo **non ancora reso**: il produttore del ricordo decide il template

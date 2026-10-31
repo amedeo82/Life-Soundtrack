@@ -126,6 +126,7 @@ $files = @(
     "docs/state/sessions/65-mood-by-genre-ratifica.md",
     "docs/state/sessions/66-csp-terzo-host-itunes.md",
     "docs/state/sessions/67-ratifica-geo-licenza-agpl.md",
+    "docs/state/sessions/69-era-detector.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
