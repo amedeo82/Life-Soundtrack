@@ -12,27 +12,42 @@ concurrency:
 env:
   TURBO_TELEMETRY_DISABLED: 1
 
+# Sessione 73 (issue #224): la pipeline era un UNICO job sequenziale con 18
+# step, per una durata misurata di **172 s** (run 41212641314, 2026-10-31).
+# I gate erano in gran parte indipendenti fra loro, ma venivano eseguiti in
+# sequenza: il tempo pareggio era la SOMMA, non il massimo.
+#
+# La riorganizzazione mette in parallelo i gate che non dipendono l'uno
+# dall'altro. Nessun gate e' stato rimosso, reso non-bloccante o indebolito:
+# i 18 gate restano 18, con la stessa semantica bloccante/non-bloccante.
+#
+#   PRIMA (1 job, sequenziale)         DOPO (6 job in parallelo)
+#   ---------------------------------  ---------------------------------
+#   install + lint + typecheck         node            (install + 4 task turbo)
+#   + test + build              ~83 s
+#   + 18 gate sequenziali      ~89 s
+#   TOTALE                      ~172 s   TOTALE  ~ max(83, 40, 12, 12, 8, 6)
+#                                              ~= 85-95 s di tempo pareggio
+#
+# I 5 job di gate NON richiedono `pnpm install`: `scripts/validate-*.mjs` e
+# `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node, e le
+# suite bash usano git + bash + pwsh. Installare le dipendenze npm in 5 job
+# che non ne hanno bisogno era puro costo.
+#
+# Il job `quality` (l'ultimo) resta il **check aggregatore**: e' lui il check
+# che branch protection deve richiedere, e fallisce esplicitamente se uno
+# qualunque dei job paralleli e' fallito o saltato. Senza `if: always()` +
+# controllo esplicito, un job fallito produrrebbe un `quality` *skipped* (non
+# *failed*), che la branch protection puo' accettare come successo.
+
 jobs:
-  quality:
+  # ---------------------------------------------------------------------------
+  # 1. Gate sui sorgenti TypeScript.
+  # ---------------------------------------------------------------------------
+  node:
     runs-on: ubuntu-latest
-    # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
-    # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
-    # il job usa il default GitHub-managed token, che NON include lo scope
-    # `issues` — insufficiente per leggere le label. Aggiungiamo quindi
-    # `issues: read` (lettura label repo) + rendiamo `contents: read` esplicito.
-    # `GH_TOKEN` viene passato via env allo step (vedi sotto).
-    #
-    # Issue #135: `metadata: read` NON e' una scope dichiarabile. Non e' fra le
-    # scope documentate della GITHUB_TOKEN ed e' sempre concessa implicitamente:
-    # elencarla qui faceva fallire la VALIDAZIONE DEL FILE WORKFLOW, non un job —
-    # la run veniva creata, non partiva alcun job e finiva `failure` a 0s, su
-    # ogni push e su ogni pull_request dal 2026-10-21T16:21Z. Nessun `gh` check
-    # e nessun syntax-check YAML la intercetta: `js-yaml` la parse senza
-    # errori. Difesa strutturale: `scripts/validate-workflows.mjs` valida ora
-    # le scope di `permissions:` (gate bloccante dal #73).
     permissions:
       contents: read
-      issues: read
     steps:
       - uses: actions/checkout@v4
 
@@ -46,6 +61,24 @@ jobs:
       - name: Installa dipendenze
         run: pnpm install --frozen-lockfile
 
+      # Sessione 73 (issue #224): i 4 gate (lint, typecheck, test, build) erano
+      # 4 invocazioni `turbo run <task>` SEQUENZIALI (52,7 s misurati), cioe'
+      # 4 round-trip di turbo uno dietro l'altro. Una singola invocazione con
+      # i 4 task lascia turbo costruire il task graph una volta sola e li
+      # eseguire in parallelo dove il grafo lo consente: 32,8 s misurati
+      # (-20 s, -38%).
+      #
+      # **MA** la forma parallela si e' rivelata sbagliata sul runner: il
+      # runner GitHub ha 2 vCPU, e `build` (vite build + tsc) in concorrenza
+      # con `test` ruba CPU al vitest: i 2 test di integrazione del fixture
+      # `db-seed/medium.json` (5000 eventi) sono scaduti per timeout
+      # ("Test timed out in 5000ms"). E' la stessa classe del lesson 30-1
+      # (il test di performance misurava il carico del runner, non il layer
+      # DB): la soglia dell'AC presuppone che il test giri isolato, e la
+      # soglia **non** si tocca.
+      #
+      # Quindi: `test` resta **isolato**, e gli altri tre task tornano
+      # sequenziali come prima. I 4 gate restano 4 e tutti bloccanti.
       - name: Lint
         run: pnpm run lint
 
@@ -58,11 +91,94 @@ jobs:
       - name: Build
         run: pnpm run build
 
+  # ---------------------------------------------------------------------------
+  # 2. Gate sui generatori di documentazione e sul README.
+  #    Read-only: nessuno dei tre gate scrive nel working tree.
+  # ---------------------------------------------------------------------------
+  gates-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Bundle in sync
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 -Check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
-# Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
+      # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
+      # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
+      # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
+      # docs/state/ (vedi ADR-0008 e AGENTS.md sezione "Lazy-state aggregation").
+      # Nota: la strict-mode del check e intenzionalmente bloccante in teoria, ma
+      # PowerShell 5.1 (Windows dev) vs PowerShell 7 (Linux CI) producono output
+      # byte-diversi per casi specifici non riproducibili localmente. Tracking: #63.
+      #
+      # Issue #70: la causa root era il determinismo (ordinamento `$Id` invece di
+      # `$_.Id` + timestamp non-idempotente), ora risolta e coperta dal gate
+      # bloccante "Aggregator deterministico" (job gates-aggregate). Rimane
+      # warning per non bloccare finche' il fix di #63 (riscrittura
+      # cross-platform) non e' merged.
+      # Workaround temporaneo: warning non-bloccante. Fix completo richiede:
+      # (a) issue #66: riscrittura di scripts/aggregate-state.ps1 in Node.js
+      #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
+      # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
+      - name: Lazy-state in sync (ADR-0008)
+        run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+
+      # Issue #161: il README dichiarava 8 piattaforme importabili (Deezer, Tidal,
+      # SoundCloud inesistenti) e funzionalita' non implementate (audio features,
+      # analisi, mood, ricordi), mentre i merge delle Story 1.2 e 1.3 non l'avevano
+      # toccato: nessun gate confrontava la prosa con il codice, quindi il drift era
+      # silenzioso e la pipeline restava verde. Il gate e' READ-ONLY (non genera e
+      # non scrive): confronta l'elenco delle piattaforme del README con
+      # `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` + le classi in
+      # `packages/core/src/adapters/`, vieta le capability non implementate
+      # fuori dalla sezione roadmap, e vieta i conteggi duplicati in prosa.
+      # Fail-closed: exit 1 = drift, exit 2 = errore di ambiente.
+      - name: Fatti del README in sync con il codice (issue #161)
+        run: node scripts/check-readme-facts.mjs
+
+      # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
+      # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
+      # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
+      # (lesson 43-1): senza questo test, un refactor del gate potrebbe renderlo
+      # fail-open senza che nessuno se ne accorga.
+      - name: Gate "fatti del README" fail-closed (issue #161)
+        run: bash scripts/test-readme-facts-gate.sh
+
+  # ---------------------------------------------------------------------------
+  # 3. Gate di determinismo dell'aggregator (issue #70).
+  #    Il gate piu' pesante: 37 assert su repo git temporanei.
+  # ---------------------------------------------------------------------------
+  gates-aggregate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Issue #70: gate BLOCCANTE per il determinismo dell'agregator.
+      # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
+      # ordinamento per valore): il risultato non dipende dalla piattaforma, quindi
+      # questo test puo' fallire in modo utile, a differenza dei check --check sopra
+      # (che confrontano output prodotto su piattaforme diverse).
+      # Prima di questo gate il bug di ordinamento (`$Id` invece di `$_.Id`) e il
+      # timestamp non-idempotente restavano invisibili e producevano drift su main.
+      - name: Aggregator deterministico (issue #70)
+        run: bash scripts/test-aggregate-determinism.sh
+
+  # ---------------------------------------------------------------------------
+  # 4. Gate fail-closed dei flag del generatore del bundle (issue #104).
+  # ---------------------------------------------------------------------------
+  gates-bundle:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
       # In PowerShell 5.1 con `&`, `--check` veniva interpretato come
       # fine-dei-parametri + token posizionale, lasciando $Check=false e facendo
       # ricadere lo script in modalita' WRITING (riscrittura silenziosa di BUNDLE.md,
@@ -73,15 +189,15 @@ jobs:
       - name: Bundle check fail-closed (issue #104)
         run: bash scripts/test-bundle-check-idempotent.sh
 
-# Issue #70: gate BLOCCANTE per il determinismo dell'aggregator.
-      # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
-      # ordinamento per valore): il risultato non dipende dalla piattaforma, quindi
-      # questo test puo' fallire in modo utile, a differenza dei check --check sopra
-      # (che confrontano output prodotto su piattaforme diverse).
-      # Prima di questo gate il bug di ordinamento (`$Id` invece di `$_.Id`) e il
-      # timestamp non-idempotente restavano invisibili e producevano drift su main.
-      - name: Aggregator deterministico (issue #70)
-        run: bash scripts/test-aggregate-determinism.sh
+  # ---------------------------------------------------------------------------
+  # 5. Gate sui workflow GitHub Actions (validatore + 4 scenari negativi).
+  # ---------------------------------------------------------------------------
+  gates-workflows:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
 
       # Issue #73: nessun runner Actions locale, quindi un errore di sintassi JS
       # dentro un blocco `script:` di github-script si scoprirebbe solo dopo il push
@@ -105,9 +221,9 @@ jobs:
       # che fallisce — produce un workflow che GitHub rifiuta in fase di
       # validazione, quindi zero job e una run `failure` a 0s su ogni trigger.
       # Il gate di scope vive in validate-workflows.mjs (run precedente); questo
-      # test e' il suo scenario negativo — reintroduce `metadata: read` in una
-      # fixture e verifica che il gate esca 1 (un gate che passa sempre non
-      # e' un gate, lesson 43-1).
+      # test ne verifica lo scenario negativo — reintroduce `metadata: read` in una
+      # fixture e verifica che il gate esca 1 (un gate che passa sempre non e' un
+      # gate, lesson 43-1).
       - name: Scope `permissions:` valide (issue #135)
         run: bash scripts/test-workflow-permission-scopes.sh
 
@@ -135,6 +251,31 @@ jobs:
       - name: Ordinamento dei writer di `main` (issue #149)
         run: bash scripts/test-workflow-writer-ordering.sh
 
+  # ---------------------------------------------------------------------------
+  # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
+  # ---------------------------------------------------------------------------
+  gates-git:
+    runs-on: ubuntu-latest
+    # Issue #120: il gate `Label in sync con AGENTS.md (issue #110)` lancia
+    # `gh label list` che richiede `GH_TOKEN`. Senza permissions espliciti,
+    # il job usa il default GitHub-managed token, che NON include lo scope
+    # `issues` — insufficiente per leggere le label. Aggiungiamo quindi
+    # `issues: read` (lettura label repo) + rendiamo `contents: read` esplicito.
+    #
+    # Issue #135: `metadata: read` NON e' una scope dichiarabile. Non e' fra le
+    # scope documentate della GITHUB_TOKEN ed e' sempre concessa implicitamente:
+    # elencarla qui faceva fallire la VALIDAZIONE DEL FILE WORKFLOW, non un job —
+    # la run veniva creata, non partiva alcun job e finiva `failure` a 0s, su
+    # ogni push e su ogni pull_request dal 2026-10-21T16:21Z. Nessun `gh` check
+    # e nessun syntax-check YAML la intercetta: `js-yaml` la parse senza
+    # errori. Difesa strutturale: `scripts/validate-workflows.mjs` valida ora
+    # le scope di `permissions:` (gate bloccante dal #73).
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - uses: actions/checkout@v4
+
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
       # (orfano -> segnalato) sia quello di sicurezza (lavoro non pushato -> MAI
@@ -153,41 +294,100 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/validate-labels.mjs
 
-      # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
-      # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
-      # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
-      # docs/state/ (vedi ADR-0008 e AGENTS.md sezione "Lazy-state aggregation").
-      # Nota: la strict-mode del check e intenzionalmente bloccante in teoria, ma
-      # PowerShell 5.1 (Windows dev) vs PowerShell 7 (Linux CI) producono output
-      # byte-diversi per casi specifici non riproducibili localmente. Tracking: #63.
-      #
-      # Issue #70: la causa root era il determinismo (ordinamento `$Id` invece di
-      # `$_.Id` + timestamp non-idempotente), ora risolta e coperta dal gate
-      # bloccante "Aggregator deterministico" qui sopra. Rimane warning per non
-      # bloccare finche' il fix di #63 (riscrittura cross-platform) non e' merged.
-      # Workaround temporaneo: warning non-bloccante. Fix completo richiede:
-      # (a) issue #66: riscrittura di scripts/aggregate-state.ps1 in Node.js
-      #     cross-platform (deve preservare le garanzie di test-aggregate-determinism.sh);
-      # (b) issue #63: allineamento byte-per-byte PS 5.1 vs 7 nei check residui.
-      - name: Lazy-state in sync (ADR-0008)
-        run: pwsh scripts/aggregate-state.ps1 -Check || echo "::warning::aggregate-state check fallito, drift verra risolto da auto-state-aggregate post-merge"
+  # ---------------------------------------------------------------------------
+  # 7. Gate della procedura canonica post-merge (issue #76, sessione 33).
+  #
+  # `scripts/post-merge.ps1` e' la procedura PIU distruttiva del repo
+  # (`git push origin --delete`, `git branch -D`): non aveva alcuna copertura
+  # in CI (audit §9.13 di 12-DEVOPS.md, Sessione 72). La suite gira su repo
+  # git temporanei e non tocca il repository.
+  # ---------------------------------------------------------------------------
+  gates-scripts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
 
-      # Issue #161: il README dichiarava 8 piattaforme importabili (Deezer, Tidal,
-      # SoundCloud inesistenti) e funzionalita' non implementate (audio features,
-      # analisi, mood, ricordi), mentre i merge delle Story 1.2 e 1.3 non l'avevano
-      # toccato: nessun gate confrontava la prosa con il codice, quindi il drift era
-      # silenzioso e la pipeline restava verde. Il gate e' READ-ONLY (non genera e
-      # non scrive): confronta l'elenco delle piattaforme del README con
-      # `ACTIVE_PLATFORMS` + le classi adapter, vieta le capability non implementate
-      # fuori dalla sezione roadmap, e vieta i conteggi duplicati in prosa.
-      # Fall-closed: exit 1 = drift, exit 2 = errore di ambiente.
-      - name: Fatti del README in sync con il codice (issue #161)
-        run: node scripts/check-readme-facts.mjs
+      # T1..T9: merge commit + worktree, branch non mergato (exit 12), WIP
+      # tracked (exit 10), merge squash, main divergente (exit 11), audit
+      # -Check (exit 14), idempotenza, esecuzione da dentro la worktree
+      # (exit 15). Copre E3/E4/E5 e F7.
+      - name: Procedura canonica post-merge (sessione 33)
+        run: bash scripts/test-post-merge.sh
 
-      # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
-      # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
-      # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
-      # (lesson 43-1): senza questo test, un refactor del gate potrebbe renderlo
-      # fail-open senza che nessuno se ne accorga.
-      - name: Gate "fatti del README" fail-closed (issue #161)
-        run: bash scripts/test-readme-facts-gate.sh
+  # ---------------------------------------------------------------------------
+  # 8. Gate delle procedure di supporto: worktree, pre-commit, branch switch,
+  #    encoding LF. Anch'essi erano privi di copertura in CI (audit §9.13).
+  # ---------------------------------------------------------------------------
+  gates-procedure:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # S1..S8 su setup-worktree.ps1 (issue #53): issue inesistente, slug
+      # derivato, slug esplicito, path gia esistente, branch base mancante,
+      # idempotenza, -NoPush, -SkipGhCheck.
+      - name: Setup worktree (issue #53)
+        run: bash scripts/test-setup-worktree.sh
+
+      # Pre-commit hook: il check "clean check" del working tree (D3).
+      - name: Pre-commit clean check (sessione 23)
+        run: bash scripts/test-pre-commit-clean-check.sh
+
+      # safe-branch-switch.ps1 (issue #49): 3 scenari (pulito / tracked dirty /
+      # untracked dirty). Il conteggio degli assert vive su un file condiviso:
+      # dentro le subshell i contatori in memoria non arrivano al padre e la
+      # suite era fail-open (riportava "0 passati, 0 falliti").
+      - name: Safe branch switch (issue #49)
+        run: bash scripts/test-safe-branch-switch.sh
+
+      # issue #58: il path di scrittura dei generatori produce output LF-only.
+      # Gira su un fixture temporaneo: non tocca il working tree del repo.
+      - name: Encoding LF dei generatori (issue #58)
+        shell: pwsh
+        run: pwsh scripts/test-appendline-lf-fix.ps1
+
+  # ---------------------------------------------------------------------------
+  # 9. Check aggregatore (nome invariato: "CI / quality").
+  #
+  # E' il check che la branch protection deve richiedere. Fallisce in modo
+  # ESPLICITO se uno qualunque dei job paralleli e' fallito, annullato o
+  # saltato: senza questo controllo, `needs:` renderebbe `quality` *skipped*
+  # (non *failed*) quando un job dipendente fallisce, e la branch protection
+  # puo' interpretare un check saltato come successo.
+  # ---------------------------------------------------------------------------
+  quality:
+    if: always()
+    needs:
+      - node
+      - gates-docs
+      - gates-aggregate
+      - gates-bundle
+      - gates-workflows
+      - gates-git
+      - gates-scripts
+      - gates-procedure
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Esito dei gate paralleli
+        shell: bash
+        run: |
+          results="${{ needs.node.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          echo "Risultati: $results"
+          failed=""
+          for r in $results; do
+            case "$r" in
+              success) ;;
+              *) failed="$failed $r" ;;
+            esac
+          done
+          if [ -n "$failed" ]; then
+            echo "::error::Uno o piu' job di gate non sono verdi:$failed"
+            exit 1
+          fi
+          echo "Tutti i gate sono verdi."

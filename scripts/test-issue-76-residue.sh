@@ -36,16 +36,35 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
+# Identita' git per i repo temporanei, via env var invece di `git config`.
+# `git config` e' un processo separato: 4 spawn per ogni repo temporaneo.
+# Con le env var l'identita' e le impostazioni sono risolte da git senza
+# scrivere il file .git/config e senza spawn.
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+# `commit.gpgsign=false` + `core.autocrlf=false` iniettati via env: git >= 2.31
+# (CI: ubuntu-latest, dev: 2.56) legge GIT_CONFIG_COUNT/KEY_n/VALUE_n come
+# config addizionale per-process.
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
+export GIT_CONFIG_KEY_1="core.autocrlf"
+export GIT_CONFIG_VALUE_1="false"
+
 # Repo temporaneo con origin bare e 2 commit su main.
 make_repo() {
   local d="$1"
   mkdir -p "$d/origin.git"
-  git init -q --bare "$d/origin.git"
+  # `-b main`: branch iniziale esplicito, indipendente da
+  # `init.defaultBranch` (che sul runner GitHub e' `master`).
+  git init -q --bare -b main "$d/origin.git"
   git init -q -b main "$d/work"
   (
     cd "$d/work" || exit 1
-    git config user.email "t@t.local"; git config user.name "Test"
-    git config commit.gpgsign false; git config core.autocrlf false
+    # NB: identita', gpgsign e autocrlf arrivano dalle env var esportate in
+    # testa allo script: niente `git config` (4 processi per repo).
     printf 'a\n' > f.txt; git add f.txt; git commit -q -m "c1"
     git remote add origin "$d/origin.git"; git push -q -u origin main
     printf 'b\n' >> f.txt; git commit -q -am "c2"; git push -q origin main

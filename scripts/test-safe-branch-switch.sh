@@ -14,8 +14,26 @@ fi
 
 pass=0
 fail=0
-ok()   { echo "  [PASS] $1"; pass=$((pass + 1)); }
-ng()   { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+# Sessione 73 (issue #224): i tre scenari girano dentro subshell `( ... )`, e
+# gli incrementi di `pass`/`fail` dentro una subshell NON arrivano al padre:
+# la suite riportava "0 passati, 0 falliti" e `[ "$fail" -eq 0 ]` era sempre
+# vero, cioe' il gate NON poteva mai fallire (fail-open, lesson 43-1).
+# Correzione: ogni assert scrive una riga su un file di risultati condiviso;
+# il conteggio finale legge il file. I file sono append-only e gli scenari
+# girano in sequenza, quindi non c'e' interleaving.
+RESULTS="$(mktemp)"
+trap 'rm -f "$RESULTS"' EXIT
+ok()   { echo "  [PASS] $1"; echo "PASS" >> "$RESULTS"; }
+ng()   { echo "  [FAIL] $1"; echo "FAIL" >> "$RESULTS"; }
+
+# Identita' git via env var invece di `git config` (nessun subprocess).
+export GIT_AUTHOR_NAME="Test"
+export GIT_AUTHOR_EMAIL="t@t.local"
+export GIT_COMMITTER_NAME="Test"
+export GIT_COMMITTER_EMAIL="t@t.local"
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0="commit.gpgsign"
+export GIT_CONFIG_VALUE_0="false"
 
 run_ps() {
   pwsh -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@"
@@ -28,8 +46,7 @@ make_repo() {
   (
     cd "$d" || exit 1
     git init -q -b main
-    git config user.email "t@t.local"
-    git config user.name "Test"
+    # Identita' e gpgsign via env var (vedi header dello script).
     printf 'initial\n' > file.txt
     git add file.txt >/dev/null 2>&1
     git commit -q -m "chore: initial"
@@ -49,6 +66,7 @@ echo "=== Scenario 1: working tree pulito ==="
   [ $rc -eq 0 ] && ok "exit 0 su albero pulito" || { ng "exit !=0 su albero pulito"; cat /tmp/sbs-s1.out; }
   [ "$(git branch --show-current)" = "feature-x" ] && ok "su feature-x dopo switch" || { ng "non su feature-x"; git branch --show-current; }
   [ -z "$(git stash list)" ] && ok "nessuno stash su albero pulito" || { ng "stash inatteso su albero pulito"; git stash list; }
+  cd /; rm -rf "$D"
 )
 
 echo "=== Scenario 2: tracked dirty ==="
@@ -61,6 +79,7 @@ echo "=== Scenario 2: tracked dirty ==="
   [ "$(git branch --show-current)" = "feature-x" ] && ok "su feature-x dopo switch" || { ng "non su feature-x"; }
   [ -n "$(git stash list)" ] && ok "stash creato su tracked dirty" || { ng "nessuno stash su tracked dirty"; }
   [ "$(git show HEAD:file.txt)" = "branch work" ] && ok "tracked ripristinato allo stato committato" || { ng "tracked non ripristinato"; git show HEAD:file.txt; }
+  cd /; rm -rf "$D"
 )
 
 echo "=== Scenario 3: untracked dirty ==="
@@ -73,8 +92,13 @@ echo "=== Scenario 3: untracked dirty ==="
   [ "$(git branch --show-current)" = "feature-x" ] && ok "su feature-x dopo switch" || { ng "non su feature-x"; }
   [ -z "$(git stash list)" ] && ok "nessuno stash su solo untracked" || { ng "stash inatteso su solo untracked"; git stash list; }
   [ -f untracked.txt ] && ok "untracked preservato post-checkout" || { ng "untracked perso post-checkout"; }
+  cd /; rm -rf "$D"
 )
 
+# Contatore letto dal file di risultati: i contatori in memoria dei subshell
+# non arrivano al padre (vedi nota in testa allo script).
+pass=$(grep -c '^PASS$' "$RESULTS" 2>/dev/null || true)
+fail=$(grep -c '^FAIL$' "$RESULTS" 2>/dev/null || true)
 echo ""
 echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]

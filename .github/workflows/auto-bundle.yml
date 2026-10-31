@@ -116,7 +116,53 @@ jobs:
             git reset --hard origin/main
           }
 
+      # Sessione 73 (issue #224): il bundle rigenera DUE volte per merge che
+      # tocca `docs/state/**` — una sul `push`, una sul `workflow_run`
+      # (misurato: run 41212641340 push = 20 s, run 41212688495 workflow_run =
+      # 22 s). Il secondo run serve solo se l'aggregator ha prodotto un commit:
+      # e' quello il caso in cui i blocchi aggregati sono cambiati e il bundle
+      # li deve copiare. Se l'aggregator non ha committato nulla, `origin/main`
+      # e' ancora al commit su cui ha girato, e il run sul `push` ha gia'
+      # rigenerato il bundle da quello stato: il secondo run non trova nulla
+      # da fare (il guard idempotente scrive "gia' in sync") e costa 22 s di
+      # tempo di runner per niente.
+      #
+      # Il controllo e' esatto, non prudenziale: `workflow_run.head_sha` e' il
+      # commit su cui l'aggregator ha girato. Se `origin/main` e' diverso,
+      # l'aggregator ha pushato e il bundle va rigenerato. Se e' uguale,
+      # l'aggregator non ha prodotto nulla.
+      #
+      # NB: se l'aggregator e' fallito (conclusion != success) si rigenera
+      # comunque: un fallimento puo' aver lasciato i blocchi a meta'.
+      - name: Decide se la rigenerazione e' necessaria
+        id: needed
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'push') {
+            Write-Host "Trigger push: la rigenerazione e' sempre necessaria."
+            "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          } else {
+            $head = '${{ github.event.workflow_run.head_sha }}'
+            $conclusion = '${{ github.event.workflow_run.conclusion }}'
+            # `origin/main` dopo il fetch dello step precedente; FETCH_HEAD e' il
+            # fallback (il fetch lo scrive sempre, anche quando e' un no-op).
+            $current = (git rev-parse origin/main 2>$null).Trim()
+            if (-not $current) { $current = (git rev-parse FETCH_HEAD).Trim() }
+            Write-Host "aggregate: conclusion=$conclusion head_sha=$head ; origin/main=$current"
+            if ($conclusion -ne 'success') {
+              Write-Host "L'aggregator non e' andato a buon fine: rigenero comunque."
+              "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            } elseif ($head -and $current -eq $head) {
+              Write-Host "L'aggregator non ha prodotto alcun commit: il bundle e' gia' stato rigenerato dal run su push. Salto."
+              "needed=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            } else {
+              Write-Host "L'aggregator ha prodotto un commit: rigenero il bundle per allinearlo."
+              "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+            }
+          }
+
       - name: Rigenera BUNDLE.md
+        if: steps.needed.outputs.needed == 'true'
         shell: pwsh
         run: |
           Write-Host "::group::Regenerate BUNDLE.md"
@@ -126,7 +172,7 @@ jobs:
       # salta il commit. Evita commit-vuoto su push che non hanno cambiato
       # il contenuto effettivo di BUNDLE (es. aggiornamenti di metadata).
       - name: Verifica diff su docs/BUNDLE.md
-        if: always()
+        if: always() && steps.needed.outputs.needed == 'true'
         id: diff
         shell: pwsh
         run: |

@@ -3,11 +3,11 @@ number: 72
 title: "Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh"
 date: 2026-10-31
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
-branch: main
-pr: 0
+merged: true
+merged_commit: aa6100f
+merged_date: 2026-10-31
+branch: docs/4.4-post-merge-sync
+pr: 223
 claim: kilo-HP-ELITEBOOK-ced9
 cross_refs: [63, 104, 218, 43]
 tags: [devops, docs, audit]
@@ -136,6 +136,25 @@ letterali corrotti verrebbero **scritti** nei file globali.
 - `docs/INDEX.md` (sezioni legacy allineate): `12-DEVOPS.md` → Sessione 72 (v1.4), `AGENTS.md` →
   v1.30, `17-DEV-NOTES.md` → v0.5
 - `docs/BUNDLE.md`: rigenerato (`pwsh scripts/generate-bundle.ps1`) perché i file sopra sono in `$files`
+
+## Come è finita su `main`
+
+Il contenuto della sessione è arrivato su `main` **dentro il commit di doc-sync di un altro
+agente** (`2f5c1c2`, "docs: post-merge sync story 4.4 (pr 222)"), che ha incluso i file di
+documentazione non committati presenti nella working copy condivisa; la PR **#223**
+(`aa6100f`) li ha portati su `main`. Il frontmatter riflette quel percorso reale
+(`pr: 223`, `merged_commit: aa6100f`), non una PR dedicata.
+
+La PR **#224** (`docs/224-audit-procedure-automatiche`) contiene il **solo allineamento dei
+metadati** di questa sessione (frontmatter + rigenerazione di `SESSIONS.md` e `BUNDLE.md`),
+come il precedente "docs(state): allinea la Sessione 71 al numero di PR" della Sessione 71.
+
+**Lesson 72-6**: in una working copy condivisa, un `git add -A` dell'agente successivo può
+portare su `main` il lavoro documentale di un altro agente **senza messaggio di commit
+coerente**: il contenuto arriva, la tracciabilità no. Il rimedio non è evitare il
+doc-sync (che è il meccanismo voluto, ADR-0008) ma **non lasciare il WIP nella working copy
+condivisa**: la worktree dedicata (`setup-worktree.ps1`) è l'unico modo per tenere il confine
+fra il lavoro proprio e quello altrui.
 
 ## Verifica
 
