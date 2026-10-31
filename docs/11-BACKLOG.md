@@ -720,7 +720,7 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
-| 1.6 - Fondazione geo e contesto di ascolto | in_review | - | - | db |
+| 1.6 - Fondazione geo e contesto di ascolto | in_review | #209 | - | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.2 - Era Detector | todo | - | - | analysis |
 | 2.3 - Event Detector | todo | - | - | analysis |

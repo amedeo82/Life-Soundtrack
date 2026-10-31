@@ -6308,7 +6308,7 @@ manca dell'host che la CSP deve consentire.
 
 - **Data**: 2026-10-31
 - **Stato**: 👀
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #209)
 - **Claim**: `kilo-HP-ELITEBOOK-q7v2`
 
 ```

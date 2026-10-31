@@ -5,7 +5,7 @@ date: 2026-10-31
 state: 👀
 merged: false
 branch: feat/205-geo-context-foundation
-pr: 0
+pr: 209
 claim: kilo-HP-ELITEBOOK-q7v2
 cross_refs: [205, 201, 108, 109]
 tags: [privacy, db, analysis, phase-2]

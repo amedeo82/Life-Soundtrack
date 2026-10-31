@@ -1012,7 +1012,7 @@ mezzo del lavoro.
 ## 35. Issue #205 — Story 1.6: fondazione geo e contesto di ascolto (Sessione 68)
 
 **Branch**: `feat/205-geo-context-foundation`
-**PR**: da aprire (issue #205)
+**PR**: **#209** (aperta il 2026-10-31)
 **Data**: 2026-10-31
 **Stato**: 👀 **IN REVIEW** — implementazione completa, in attesa di review
 

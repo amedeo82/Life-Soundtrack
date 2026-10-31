@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 09:32
+> Data: 2026-10-31 09:37
 > Totale file: 123
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 122 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1673.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 09:32
+- Dimensione totale: 1673.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 09:37
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -2015,7 +2015,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟡 | ❌ | #203 |
 | 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
 | 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
-| 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 👀 | ❌ | - |
+| 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 👀 | ❌ | #209 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -8402,7 +8402,7 @@ manca dell'host che la CSP deve consentire.
 
 - **Data**: 2026-10-31
 - **Stato**: 👀
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #209)
 - **Claim**: `kilo-HP-ELITEBOOK-q7v2`
 
 ```
@@ -9827,7 +9827,7 @@ mezzo del lavoro.
 ## 35. Issue #205 — Story 1.6: fondazione geo e contesto di ascolto (Sessione 68)
 
 **Branch**: `feat/205-geo-context-foundation`
-**PR**: da aprire (issue #205)
+**PR**: **#209** (aperta il 2026-10-31)
 **Data**: 2026-10-31
 **Stato**: 👀 **IN REVIEW** — implementazione completa, in attesa di review
 
@@ -13798,6 +13798,10 @@ area: db
 status: in_review
 priority: I
 depends_on: ["0.2"]
+issue: 205
+branch: "feat/205-geo-context-foundation"
+pr: 209
+claim: "kilo-HP-ELITEBOOK-q7v2"
 spec_refs:
   - docs/19-GEO-CONTEXT.md
   - docs/13-ADR/0009-local-ip-geolocation.md
@@ -22095,7 +22099,7 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
-| 1.6 - Fondazione geo e contesto di ascolto | in_review | - | - | db |
+| 1.6 - Fondazione geo e contesto di ascolto | in_review | #209 | - | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.2 - Era Detector | todo | - | - | analysis |
 | 2.3 - Event Detector | todo | - | - | analysis |
@@ -26776,9 +26780,27 @@ function buildScenario({
 function buildGeoContextScenario() {
   const importId = 'imp-geo-context-1';
   const artists = [
-    { id: 'ar-geo-1', name: 'Artisti Geo Uno', mbid: null, genres: ['rock'], spotifyId: 'sp-ar-geo-1' },
-    { id: 'ar-geo-2', name: 'Artisti Geo Due', mbid: null, genres: ['pop'], spotifyId: 'sp-ar-geo-2' },
-    { id: 'ar-geo-3', name: 'Artisti Geo Tre', mbid: null, genres: ['jazz'], spotifyId: 'sp-ar-geo-3' },
+    {
+      id: 'ar-geo-1',
+      name: 'Artisti Geo Uno',
+      mbid: null,
+      genres: ['rock'],
+      spotifyId: 'sp-ar-geo-1',
+    },
+    {
+      id: 'ar-geo-2',
+      name: 'Artisti Geo Due',
+      mbid: null,
+      genres: ['pop'],
+      spotifyId: 'sp-ar-geo-2',
+    },
+    {
+      id: 'ar-geo-3',
+      name: 'Artisti Geo Tre',
+      mbid: null,
+      genres: ['jazz'],
+      spotifyId: 'sp-ar-geo-3',
+    },
   ];
   const tracks = [];
   for (let i = 1; i <= 12; i += 1) {
@@ -26849,46 +26871,97 @@ function buildGeoContextScenario() {
   };
 
   /** Casa: sera, sessioni lunghe (30 min), telefono. */
-  const home = (dayIndex) => session({ start: at(dayIndex, 20, 0), trackMs: 360000, n: 5, deviceType: 'mobile', country: 'IT' });
+  const home = (dayIndex) =>
+    session({
+      start: at(dayIndex, 20, 0),
+      trackMs: 360000,
+      n: 5,
+      deviceType: 'mobile',
+      country: 'IT',
+    });
   /** Lavoro: mattina, desktop, orario 09:30-10:00 (fascia lavorativa). */
-  const work = (dayIndex) => session({ start: at(dayIndex, 9, 30), trackMs: 300000, n: 6, deviceType: 'desktop', country: 'IT' });
+  const work = (dayIndex) =>
+    session({
+      start: at(dayIndex, 9, 30),
+      trackMs: 300000,
+      n: 6,
+      deviceType: 'desktop',
+      country: 'IT',
+    });
   /** Spostamento: mattina presto, telefono, sessioni brevi (8 min). */
-  const commute = (dayIndex) => session({ start: at(dayIndex, 8, 10), trackMs: 240000, n: 2, deviceType: 'mobile', country: 'IT' });
+  const commute = (dayIndex) =>
+    session({
+      start: at(dayIndex, 8, 10),
+      trackMs: 240000,
+      n: 2,
+      deviceType: 'mobile',
+      country: 'IT',
+    });
   /** Viaggio: tre giorni consecutivi in Germania. */
-  const travel = (dayIndex) => session({ start: at(dayIndex, 20, 0), trackMs: 360000, n: 5, deviceType: 'mobile', country: 'DE' });
+  const travel = (dayIndex) =>
+    session({
+      start: at(dayIndex, 20, 0),
+      trackMs: 360000,
+      n: 5,
+      deviceType: 'mobile',
+      country: 'DE',
+    });
   /** Auto: sera in auto (richiede `carDetectionConsent`). */
-  const car = (dayIndex) => session({ start: at(dayIndex, 20, 0), trackMs: 360000, n: 5, deviceType: 'car', country: 'IT' });
+  const car = (dayIndex) =>
+    session({
+      start: at(dayIndex, 20, 0),
+      trackMs: 360000,
+      n: 5,
+      deviceType: 'car',
+      country: 'IT',
+    });
 
   // Settimana 1 (1-7 aprile): casa + lavoro, un giorno di solo spostamento.
-  home(0); work(0);
-  home(1); work(1);
+  home(0);
+  work(0);
+  home(1);
+  work(1);
   commute(2);
-  home(3); work(3);
-  home(4); work(4);
+  home(3);
+  work(3);
+  home(4);
+  work(4);
   home(5);
   home(6);
   // Settimana 2 (8-14 aprile): casa + lavoro, un giorno di solo spostamento.
-  home(7); work(7);
-  commute(8); work(8);
-  home(9); work(9);
-  home(10); work(10);
-  home(11); work(11);
+  home(7);
+  work(7);
+  commute(8);
+  work(8);
+  home(9);
+  work(9);
+  home(10);
+  work(10);
+  home(11);
+  work(11);
   home(12);
   home(13);
   // Settimana 3 (15-21 aprile): tre giorni di viaggio in Germania, poi casa.
   travel(14);
   travel(15);
   travel(16);
-  home(17); work(17);
-  home(18); work(18);
+  home(17);
+  work(17);
+  home(18);
+  work(18);
   home(19);
   home(20);
   // Settimana 4 (22-28 aprile): casa + lavoro, un giorno in auto.
-  commute(21); work(21);
-  home(22); work(22);
-  car(23); work(23);
-  home(24); work(24);
-  home(25); work(25);
+  commute(21);
+  work(21);
+  home(22);
+  work(22);
+  car(23);
+  work(23);
+  home(24);
+  work(24);
+  home(25);
+  work(25);
   home(26);
   home(27);
 
@@ -27109,8 +27182,8 @@ for (const t of targets_) {
   // Mappa scenario name → filename canonico (10-TESTING §3.3)
   else if (t === 'lockdown') out = resolve(SCENARIOS_DIR, 'lockdown-2020.json');
   else if (t === 'breakup') out = resolve(SCENARIOS_DIR, 'breakup-oct2021.json');
-    else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
-    else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
+  else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
+  else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
   else out = resolve(SCENARIOS_DIR, `${t}.json`);
   writeJson(out, data);
 }
