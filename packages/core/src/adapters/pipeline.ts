@@ -3,6 +3,7 @@ import type { LifeSoundtrackDB } from '../db';
 import type { RawListenEvent } from './types';
 import { sha1Hex, uuid } from './crypto';
 import { canonicalKey, durationBucketMs, normalizeName } from './dedup';
+import { type GeoLookup, type GeoPolicy, deriveCity } from '../geo';
 
 /**
  * Pipeline di normalizzazione adapter → core — `05-ARCHITECTURE.md` §3.1.
@@ -93,7 +94,15 @@ export class NormalizationPipeline {
   /** Numero di Track distinte toccate in questa sessione (per `info.complete`). */
   private trackCount = 0;
 
-  constructor(db: LifeSoundtrackDB, importId: string, privacy: PrivacySettings) {
+  constructor(
+    db: LifeSoundtrackDB,
+    importId: string,
+    privacy: PrivacySettings,
+    /** Lookup MMDB per la derivazione L2 (Story 4.4): opzionale, se assente la città resta null. */
+    readonly geoLookup: GeoLookup | null = null,
+    /** Policy del toggle `retainCity`: derivata da `PrivacySettings` se non fornita. */
+    readonly geoPolicy: GeoPolicy | null = null,
+  ) {
     this.db = db;
     this.importId = importId;
     this.privacy = privacy;
@@ -102,6 +111,29 @@ export class NormalizationPipeline {
   /** Track distinte viste in sessione (messaggio §9 `info.complete`). */
   get uniqueTrackCount(): number {
     return this.trackCount;
+  }
+
+  /**
+   * Deriva i campi città (L2) dall'IP, rispettando il toggle `retainCity`
+   * e il database MMDB. Eseguito prima che l'IP venga azzerato dal toggle
+   * `retainIp` (il lookup usa `raw.ip` dell'evento, mai inviato in rete).
+   *
+   * Se il toggle è spento o il lookup non è disponibile, restituisce tutti i
+   * campi a null (edge case E21).
+   *
+   * @param ip - l'IP grezzo dall'evento (solo se `retainCity` è attivo).
+   * @returns `{ city, citySource, cityConfidence }` da unire nell'evento.
+   */
+  private async deriveCityFields(ip: string | null): Promise<{
+    city: string | null;
+    citySource: 'dbip-lite' | 'manual' | null;
+    cityConfidence: number | null;
+  }> {
+    const policy = this.geoPolicy ?? { isEnabled: () => this.privacy.retainCity === true };
+    if (!this.geoLookup) {
+      return { city: null, citySource: null, cityConfidence: null };
+    }
+    return deriveCity(this.geoLookup, policy, ip);
   }
 
   /**
@@ -140,11 +172,11 @@ export class NormalizationPipeline {
       // (02§3.8, issue #108): è il cuore del prodotto e non richiede consenso
       // esplicito. Il toggle `retainCountry` (default `true`) lo governa.
       country: this.privacy.retainCountry ? raw.country : null,
-      // Città (L2): derivata dal database geo on-demand, che è la Story 4.4.
-      // Finché il database non c'è la derivazione non avviene (E21).
-      city: null,
-      citySource: null,
-      cityConfidence: null,
+      // Città (L2): derivata dal database geo on-demand, prima che l'IP
+      // venga azzerato. Se `retainCity` è spento o il database non c'è,
+      // resta null (edge case E21, `19§10`). La confidenza sotto 0.6
+      // scarta la città (E16, D-B.3).
+      ...(await this.deriveCityFields(raw.ip)),
       day,
     };
   }
