@@ -1037,9 +1037,9 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 ## 36. Issue #211 — Story 2.2: l'Era Detector (Sessione 69)
 
 **Branch**: `feat/211-era-detector`
-**PR**: — (da aprire su questa branch)
+**PR**: **#212** (aperta il 2026-10-31) — ⏳ in attesa di review
 **Data**: 2026-10-31
-**Stato**: 🟡 **IMPLEMENTATA** — in attesa di review
+**Stato**: 🟡 **IMPLEMENTATA** — in attesa di merge
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|

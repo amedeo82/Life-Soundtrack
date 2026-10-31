@@ -5,7 +5,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/211-era-detector
-pr: 0
+pr: 212
 claim: kilo-HP-ELITEBOOK-4f2k
 cross_refs: [211, 205, 180, 178, 193]
 tags: [analysis, phase-2]

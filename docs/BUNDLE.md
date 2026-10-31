@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 10:38
+> Data: 2026-10-31 10:44
 > Totale file: 124
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9874,9 +9874,9 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 ## 36. Issue #211 — Story 2.2: l'Era Detector (Sessione 69)
 
 **Branch**: `feat/211-era-detector`
-**PR**: — (da aprire su questa branch)
+**PR**: **#212** (aperta il 2026-10-31) — ⏳ in attesa di review
 **Data**: 2026-10-31
-**Stato**: 🟡 **IMPLEMENTATA** — in attesa di review
+**Stato**: 🟡 **IMPLEMENTATA** — in attesa di merge
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -13688,7 +13688,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/211-era-detector
-pr: 0
+pr: 212
 claim: kilo-HP-ELITEBOOK-4f2k
 cross_refs: [211, 205, 180, 178, 193]
 tags: [analysis, phase-2]
@@ -14469,7 +14469,7 @@ priority: I
 depends_on: ["2.1"]
 issue: 211
 branch: "feat/211-era-detector"
-pr: 0
+pr: 212
 claim: kilo-HP-ELITEBOOK-4f2k
 spec_refs:
   - docs/04-ANALYSIS-ALGORITHMS.md
@@ -14490,10 +14490,10 @@ l'era detector si appoggia (`moodDominant`, `avgValence`, `avgEnergy`).
 
 ## Stato
 
-✅ **DONE** — implementata nella Sessione 69 (issue **#211**, branch
-`feat/211-era-detector`, worktree `ls-211-era-detector`). Il merge commit
-viene scritto nel doc-sync di chiusura, dopo il merge della PR (non è noto
-al momento della stesura di questo file).
+✅ **DONE** — implementata nella Sessione 69 (issue **#211**, PR **#212**,
+branch `feat/211-era-detector`, worktree `ls-211-era-detector`). Il merge
+commit viene scritto nel doc-sync di chiusura, dopo il merge della PR (non è
+noto al momento della stesura di questo file).
 
 Consegnato:
 
@@ -27457,7 +27457,8 @@ function buildEraShiftScenario() {
   };
 }
 
-function buildDemoUser({ seed }) {  // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
+function buildDemoUser({ seed }) {
+  // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
   const periodEnd = Date.UTC(2025, 0, 1);
   const rand = makeRng(seed);
