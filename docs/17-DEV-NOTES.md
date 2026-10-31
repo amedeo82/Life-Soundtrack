@@ -1,8 +1,8 @@
 # 17 — Note di sviluppo (toolchain & workflow)
 
 > Status: 🟡 DRAFT
-> Versione: 0.3
-> Ultima modifica: 2026-10-30 — licenza AGPL-3.0 e ratifica degli atti del Boss (Sessione 67, issue #201)
+> Versione: 0.4
+> Ultima modifica: 2026-10-31 — baseline PowerShell 7 (`pwsh`) per gli script del repo (Sessione 71)
 > Scopo: raccogliere i problemi già incontrati e risolti durante il setup, così che
 > nessuna sessione futura li ripeta. Collegato in `docs/INDEX.md` (Documenti di supporto).
 
@@ -20,9 +20,10 @@
 | `pnpm run build` | `tsc` → `dist/` per `@ls/core` e `@ls/ui`, `vite build` per `@ls/web` |
 | `pnpm run e2e` | Playwright su `apps/web` (al primo avvio serve `pnpm exec playwright install chromium`) |
 | `pnpm run format` / `format:check` | Prettier (i doc in `docs/`, `fixtures/`, `design/` sono esclusi via `.prettierignore`) |
-| `pwsh scripts/generate-bundle.ps1 --check` (CI) / `powershell scripts/generate-bundle.ps1 -Check` (locale Win PS 5.1) | Verifica sync bundle. ⚠ In PowerShell 5.1 il flag è `-Check`, non `--check` |
+| `pwsh scripts/generate-bundle.ps1 -Check` | Verifica sync bundle (exit 0 = in sync, 1 = drift, 2 = parametro/errore) |
+| `pwsh scripts/aggregate-state.ps1 -Check` | Verifica sync dei blocchi aggregati `AGGREGATE-*` (exit 0 = in sync) |
 
-Requisiti: Node ≥ 20 (testato su 20 LTS e 24), pnpm 9 (pinnato in `packageManager`).
+Requisiti: Node ≥ 20 (testato su 20 LTS e 24), pnpm 9 (pinnato in `packageManager`), **PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1`.
 
 ## 2. Struttura monorepo
 
@@ -70,9 +71,9 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   (`"../../packages/core/src/*"`) e prefisso `./` per i path interni (`"./src/*"`). Non
   rimettere `paths` in `packages/config/tsconfig/base.json`.
 
-### P3 — Line endings + timestamp: `--check` non deterministico su Windows
+### P3 — Line endings + timestamp: `-Check` non deterministico su Windows
 
-- **Sintomo**: `generate-bundle.ps1 --check` fallisce su Windows con "Lista file identica, ma
+- **Sintomo**: `generate-bundle.ps1 -Check` fallisce su Windows con "Lista file identica, ma
   contenuto cambiato" anche senza modifiche ai documenti. Fallisce ad ogni run se l'orologio
   di sistema cambia tra due esecuzioni.
 - **Causa**: (1) il bundle include una riga `> Data: <timestamp>` che cambia ad ogni run;
@@ -159,7 +160,26 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   carico delle licenze del bundle va verificato con il listino del package
   manager (`pnpm licenses list --prod`) nella story che introduce la
   dipendenza. L'obbligo del §13 — offrire il sorgente corrispondente agli
-  utenti che interagiscono in rete — è il requirement dell'issue **#202**.
+  utenti che interagiscono con l'app in rete — è il requirement dell'issue **#202**.
+
+### P11 — PowerShell 7 (`pwsh`) è il baseline: il singolo trattino è la forma canonica
+
+- **Sintomo**: `generate-bundle.ps1 --check` **riscrive** `docs/BUNDLE.md` invece di verificarlo e
+  l'agente crede di star controllando la sincronizzazione (lesson 40-1, 41-1). Oppure: un gate
+  invocato con il doppio trattino esce **2** e l'agente lo legge come "drift" invece che come
+  "parametro sconosciuto".
+- **Causa**: in **Windows PowerShell 5.1** il call operator `&` interpreta `--check` come
+  fine-dei-parametri + token posizionale `check`: `[switch]$Check` non si lega e lo script ricade
+  in modalità WRITING (fail-open, uscita 0). In **PowerShell 7** il doppio trattino viene
+  normalizzato sul singolo **prima** del binding: `--check` e `-Check` sono quindi equivalenti e
+  il guard fail-closed dell'issue #104 non scatta.
+- **Soluzione**: il baseline del repo è **PowerShell 7 (`pwsh`)** — va installato, non è un
+  fallback opzionale. Usare la forma a **singolo trattino** (`-Check`, `-List`, `-DryRun`,
+  `-Help`): è l'unica che si comporta allo stesso modo su 5.1 e 7, ed è quella che il guard
+  fail-closed degli script indica come corretta. Se il gate riceve un flag che non riconosce,
+  esce **2** (errore di parametro) e **non** 1 (drift): verificare sempre l'`exit code` **e** la
+  riga `[OK] … in sync` nell'output. Vedi `docs/12-DEVOPS.md §9.1` e `§9.7b`.
+
 ## 4. Cosa NON è ancora implementato
 
 Zod (validazione runtime: fuori perimetro Story 0.2, valutare con Story 0.3 adapter), Zustand,
