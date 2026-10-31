@@ -7506,7 +7506,7 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #232)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```

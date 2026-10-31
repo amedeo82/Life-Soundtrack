@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 22:18
+> Data: 2026-10-31 22:20
 > Totale file: 135
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 134 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2027 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 22:18
+- Dimensione totale: 2027.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 22:20
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -2289,7 +2289,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
 | 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
-| 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | - |
+| 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -9948,7 +9948,7 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #232)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```
@@ -16723,7 +16723,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/231-context-ribbon
-pr: 0
+pr: 232
 claim: kilo-HP-ELITEBOOK-progress
 cross_refs: [231, 201, 221, 216]
 tags: [ui, geo, context]
@@ -17830,7 +17830,7 @@ priority: I
 depends_on: ["1.6", "4.4"]
 issue: 231
 branch: "feat/231-context-ribbon"
-pr: 0
+pr: 232
 claim: kilo-HP-ELITEBOOK-progress
 spec_refs:
   - docs/19-GEO-CONTEXT.md
@@ -26111,7 +26111,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 3.4 - Nastro contesto (Timeline) | done | #0 | - | ui |
+| 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |
 

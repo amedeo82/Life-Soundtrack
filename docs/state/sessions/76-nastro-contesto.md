@@ -5,7 +5,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: feat/231-context-ribbon
-pr: 0
+pr: 232
 claim: kilo-HP-ELITEBOOK-progress
 cross_refs: [231, 201, 221, 216]
 tags: [ui, geo, context]
