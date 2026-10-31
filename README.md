@@ -42,15 +42,17 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **2.3** — Event Detector (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **3.4** — Nastro contesto (Timeline) (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/2.3-event-detector.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/3.4-context-ribbon.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 3.4, 4.4.
+Altre non-done e non bloccate in ordine di priorita backlog (id): 4.4.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
-Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md`.
+Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md".
+
+Il blocco **non conosce le dipendenze** fra story: la story indicata può dipenderne da un'altra non ancora fatta. Prima di claimarla, guarda `depends_on` nel suo file in `docs/state/stories/`. Oggi la **3.4** (nastro contesto) dichiara `[DEP:4.4]`: la tranche geo si fa nella **4.4** (il DB IP→città, la specifica già ratificata) e **poi** nella 3.4, che la consuma.
 
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)

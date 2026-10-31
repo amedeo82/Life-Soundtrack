@@ -190,6 +190,7 @@
   "insight.mood.excited": "High-energy period",
   "insight.mood.calm": "Relaxed period",
   "insight.event.spike_artist": "You discovered {{artist}} who dominated your listening",
+  "insight.event.spike_genre": "The {{genre}} genre dominated your listening",
   "insight.event.valence_drop": "Your music became more melancholic",
   "insight.event.valence_rise": "Your music became more cheerful",
   "insight.event.volume_spike": "You listened to much more music than usual",

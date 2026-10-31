@@ -4,15 +4,16 @@
  * Il codice dell'orchestratore è **il contratto**, i generatori sono
  * plug-in (decisione D-A.5): ogni generatore è indipendente dagli altri e
  * riceve gli stessi input. La tranche corrente implementa il **memory
- * engine** (04§7), il **mood tracker** (04§3) e l'**era detector** (04§5);
- * session segmentation, pattern analyzer ed event detector si aggiungeranno
- * senza modificare il contratto, come i sink di scrobbling si sono aggiunti
- * al registry senza modificare `PlatformAdapter` (ADR-0011 V1).
+ * engine** (04§7), il **mood tracker** (04§3), l'**era detector** (04§5) e
+ * l'**event detector** (04§6); session segmentation e pattern analyzer si
+ * aggiungeranno senza modificare il contratto, come i sink di scrobbling si
+ * sono aggiunti al registry senza modificare `PlatformAdapter` (ADR-0011 V1).
  */
 
 import type { Logger } from '../logger';
 import type { Artist, AudioFeatures, Insight, ListenEvent, Track } from '../schema';
 import { EraEngine, type EraConfigOverrides } from './era';
+import { EventEngine, type EventConfigOverrides } from './event';
 import type { Translator } from './i18n';
 import { MemoryEngine, type MemoryConfig } from './memory';
 import { MoodEngine, type MoodConfig, type MoodPeriod } from './mood';
@@ -185,6 +186,47 @@ export function createEraGenerator(options: EraGeneratorOptions): AnalysisGenera
         features: input.features ?? [],
       });
       return generated.map((era) => era.insight);
+    },
+  };
+}
+
+/** Opzioni del generatore di eventi. */
+export interface EventGeneratorOptions {
+  /** Resolver i18n iniettato dall'app (D-A.4): serve a rendere la descrizione. */
+  readonly translator: Translator;
+  /** Override dei parametri dell'event detector. */
+  readonly config?: EventConfigOverrides;
+  /**
+   * Logger per il warning aggregato sulle feature mancanti (04§1.4).
+   *
+   * Opzionale: senza logger il generatore non emette warning.
+   */
+  readonly logger?: Logger | undefined;
+}
+
+/**
+ * Adatta l'event detector al contratto del pipeline.
+ *
+ * Il generatore passa al motore gli ascolti, i brani, gli artisti e le
+ * feature ricevute: il filtro per sorgente (misurate o manuali) è applicato
+ * dal motore (`21-AUDIO-FEATURES.md` §12).
+ */
+export function createEventGenerator(options: EventGeneratorOptions): AnalysisGenerator {
+  return {
+    name: 'event',
+    async generate(input: AnalysisInput): Promise<Insight[]> {
+      const engine = new EventEngine({
+        translator: options.translator,
+        ...(options.config ? { config: options.config } : {}),
+        ...(options.logger ? { logger: options.logger } : {}),
+      });
+      const generated = await engine.generate({
+        listens: input.listens,
+        tracks: input.tracks,
+        artists: input.artists,
+        features: input.features ?? [],
+      });
+      return generated.map((event) => event.insight);
     },
   };
 }

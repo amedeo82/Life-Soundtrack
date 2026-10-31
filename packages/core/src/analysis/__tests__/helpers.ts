@@ -4,6 +4,7 @@ import type {
   Artist,
   AudioFeatures,
   EraPayload,
+  EventPayload,
   Insight,
   ListenEvent,
   MemoryPayload,
@@ -38,6 +39,7 @@ export const SCENARIOS = [
   'breakup-oct2021',
   'summer-roadtrip',
   'era-shift',
+  'listening-spike',
 ] as const;
 
 /** Carica un fixture di scenario. */
@@ -92,6 +94,18 @@ export function moodPayloadOf(insight: Insight): MoodPeriodPayload {
 export function eraPayloadOf(insight: Insight): EraPayload {
   if (insight.payload.kind !== 'era') {
     throw new Error(`Insight ${insight.id} is not an era insight`);
+  }
+  return insight.payload;
+}
+
+/**
+ * Payload di evento di un insight.
+ *
+ * Come `memoryPayloadOf`, ma per `EventPayload` (02§4).
+ */
+export function eventPayloadOf(insight: Insight): EventPayload {
+  if (insight.payload.kind !== 'event') {
+    throw new Error(`Insight ${insight.id} is not an event insight`);
   }
   return insight.payload;
 }
@@ -180,6 +194,50 @@ function mulberry32(seed: number): () => number {
 /** Arrotondamento a quattro decimali: numeri stabili nelle asserzioni. */
 function round4(value: number): number {
   return Math.round(value * 10_000) / 10_000;
+}
+
+/**
+ * Feature audio sintetiche con la valence **per artista**.
+ *
+ * L'event detector (04§6) ha bisogno di una **varianza giornaliera** della
+ * valence: senza, la deviazione standard della baseline sarebbe zero e lo
+ * z-score sulla valence non sarebbe definito (04§6.3). Un profilo per
+ * **genere** non basta — la variazione deve venire dal **mix** di artisti
+ * ascoltati nel giorno.
+ *
+ * Il profilo è dichiarato dal test, come nel fixture `era-shift`: la
+ * pipeline di arricchimento (EPIC 4.1) non scrive ancora feature vere.
+ *
+ * @param tracks - brani dello scenario.
+ * @param valenceByArtist - la valence di ciascun artista.
+ * @param fallbackValence - valence degli artisti non nel profilo.
+ * @param energy - energy comune a tutti i brani.
+ * @returns le feature, una per brano.
+ */
+export function syntheticFeaturesByArtist(
+  tracks: readonly Track[],
+  valenceByArtist: Readonly<Record<string, number>>,
+  fallbackValence: number,
+  energy = 0.5,
+): AudioFeatures[] {
+  return tracks.map((track) => ({
+    trackId: track.id,
+    valence: valenceByArtist[track.artistId] ?? fallbackValence,
+    energy,
+    danceability: null,
+    acousticness: null,
+    instrumentalness: null,
+    speechiness: null,
+    liveness: null,
+    tempo: null,
+    key: null,
+    mode: null,
+    loudness: null,
+    timeSignature: null,
+    source: 'essentia' as const,
+    fetchedAt: 0,
+    schemaVersion: 1,
+  }));
 }
 
 /** Carica i locale dell'app (chiavi piatte `namespace.scope.key`, 08§1). */
