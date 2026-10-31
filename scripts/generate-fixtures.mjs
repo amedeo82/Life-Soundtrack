@@ -7,7 +7,7 @@
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti
- *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|demo)
+ *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|geo|era|demo)
  *   node scripts/generate-fixtures.mjs --seed 42       # seed custom (default 0xC0FFEE)
  *
  * Output:
@@ -17,6 +17,8 @@
  *   fixtures/scenarios/lockdown-2020.json
  *   fixtures/scenarios/breakup-oct2021.json
  *   fixtures/scenarios/summer-roadtrip.json
+ *   fixtures/scenarios/geo-context.json
+ *   fixtures/scenarios/era-shift.json
  *   fixtures/demo-user.json         (1 anno di storia sintetica, demo mode §06)
  *
  * Vincoli: nessuna dipendenza esterna (Node ≥ 20 LTS, solo stdlib).
@@ -683,6 +685,151 @@ function buildGeoContextScenario() {
   };
 }
 
+/**
+ * Scenario **cambio di gusto (era shift)** — Story 2.2, `04-ANALYSIS-ALGORITHMS.md` §5.
+ *
+ * L'era detector segmenta la storia in **ere**: periodi prolungati con
+ * caratteristiche coerenti, separati da un cambiamento significativo. Per
+ * verificarlo serve una cronologia con un **cambio netto** a un istante
+ * noto: i fixture di scenario esistenti usano generi e ritmi casuali, e
+ * nessun cambio netto renderebbe il confine deterministico.
+ *
+ * Questo fixture è quindi una **cronologia composta**, deterministica e senza
+ * RNG: 8 settimane di *pop* diurno (3 artisti, 6 ascolti a settimana) e
+ * poi 8 settimane di *indie folk* notturno (altri 3 artisti, stessa
+ * cadenza). Il cambio di gusto è al **giorno 56** (settimana 9).
+ *
+ * Il piano è dichiarato in `expectedInsights` e verificato dai test dell'era
+ * detector (`packages/core/src/analysis/__tests__/era-scenarios.test.ts`).
+ */
+function buildEraShiftScenario() {
+  const importId = 'imp-era-shift-1';
+  const start = Date.UTC(2024, 0, 1);
+  const weeksPerPhase = 8;
+  const dayMs = 86400000;
+
+  /** Le due fasi: generi, artisti e ore degli ascolti. */
+  const phases = [
+    {
+      key: 'a',
+      genres: ['pop'],
+      hours: [9, 10, 11, 12, 13, 14],
+    },
+    {
+      key: 'b',
+      genres: ['indie', 'folk'],
+      hours: [22, 23, 0, 1, 2, 3],
+    },
+  ];
+
+  const artists = [];
+  const tracks = [];
+  for (const phase of phases) {
+    for (let i = 1; i <= 3; i += 1) {
+      artists.push({
+        id: `ar-era-${phase.key}${i}`,
+        name: `Artisti Era ${phase.key.toUpperCase()}${i}`,
+        mbid: null,
+        genres: phase.genres,
+        spotifyId: `sp-ar-era-${phase.key}${i}`,
+      });
+      for (let t = 1; t <= 2; t += 1) {
+        tracks.push({
+          id: `tr-era-${phase.key}${i}-${t}`,
+          canonicalKey: `fuzzy:ck-era-${phase.key}${i}-${t}`,
+          name: `Brano Era ${phase.key.toUpperCase()}${i}-${t}`,
+          artistId: `ar-era-${phase.key}${i}`,
+          albumId: null,
+          durationMs: 240000,
+          isrc: null,
+          mbid: null,
+          explicit: false,
+          genres: phase.genres,
+          artworkUrl: null,
+          platformIds: { spotify: `sp-tr-era-${phase.key}${i}-${t}` },
+          firstSeenAt: start,
+          lastSeenAt: start,
+          listenCount: 0,
+          spotifyId: `sp-tr-era-${phase.key}${i}-${t}`,
+        });
+      }
+    }
+  }
+
+  const listens = [];
+  let counter = 0;
+
+  /**
+   * Una settimana di ascolti: 6 slot (3 artisti × 2 brani), uno per giorno.
+   *
+   * Gli slot sono distanziati di un giorno: la cronologia è "sparse" ma
+   * regolare, e ogni finestra di 14 giorni contiene 12 ascolti — sopra la
+   * soglia `minEventsPerWindow` (5) di 04§5.3.
+   */
+  const week = (weekIndex, phase) => {
+    for (let slot = 0; slot < 6; slot += 1) {
+      counter += 1;
+      const artistIndex = (slot % 3) + 1;
+      const trackIndex = Math.floor(slot / 3) + 1;
+      const trackId = `tr-era-${phase.key}${artistIndex}-${trackIndex}`;
+      const day = weekIndex * 7 + (slot % 6);
+      const hour = phase.hours[slot];
+      const startedAt = start + day * dayMs + hour * 3600000;
+      const timestamp = startedAt + 240000;
+      listens.push({
+        id: `le-era-${String(counter).padStart(4, '0')}`,
+        eventKey: `spotify:ek-era-${String(counter).padStart(4, '0')}`,
+        platform: 'spotify',
+        importId,
+        timestamp,
+        startedAt,
+        durationMs: 240000,
+        trackId,
+        completed: true,
+        skipped: false,
+        shuffle: false,
+        offline: false,
+        incognito: false,
+        reasonStart: 'playbtn',
+        reasonEnd: 'trackdone',
+        deviceType: 'mobile',
+        deviceDetail: null,
+        ip: null,
+        country: 'IT',
+        city: null,
+        citySource: null,
+        cityConfidence: null,
+        day: new Date(startedAt).toISOString().slice(0, 10),
+      });
+    }
+  };
+
+  for (let w = 0; w < weeksPerPhase; w += 1) week(w, phases[0]);
+  for (let w = 0; w < weeksPerPhase; w += 1) week(weeksPerPhase + w, phases[1]);
+
+  return {
+    _metadata: {
+      name: 'era-shift',
+      version: '1.0',
+      session: 69,
+      generatedAt: new Date().toISOString(),
+      seed: null,
+      description:
+        'Cambio di gusto (Story 2.2): 8 settimane di pop diurno e 8 settimane di indie folk notturno, con il cambio al giorno 56 (settimana 9). Verifica 04-ANALYSIS §5 (era detector): change point detection, due ere disgiunte.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedInsights: {
+        eraCount: '2 ere (confine alla settimana 9: pop → indie folk)',
+        eraMoods: ['sad', 'happy'],
+        eraBoundary: 'giorno 56 dalla prima data (inizio della seconda era)',
+      },
+      spec: '02-DATA-SCHEMA.md v1.7 + 04-ANALYSIS-ALGORITHMS.md v1.0 §5 + 10-TESTING.md §3.3',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
@@ -838,6 +985,7 @@ const targets = {
   },
   demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
   geo: () => buildGeoContextScenario(),
+  era: () => buildEraShiftScenario(),
 };
 
 function writeJson(path, data) {
@@ -876,6 +1024,7 @@ for (const t of targets_) {
   else if (t === 'breakup') out = resolve(SCENARIOS_DIR, 'breakup-oct2021.json');
   else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
   else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
+  else if (t === 'era') out = resolve(SCENARIOS_DIR, 'era-shift.json');
   else out = resolve(SCENARIOS_DIR, `${t}.json`);
   writeJson(out, data);
 }

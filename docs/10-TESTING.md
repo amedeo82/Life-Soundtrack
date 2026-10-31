@@ -57,8 +57,12 @@ Tutti i fixture sono **deterministici** (seed mulberry32 fisso, default `0xC0FFE
 - `lockdown-2020.json` — 6.000 eventi, lockdown Italia (9 marzo → 31 maggio 2020); mood sad/calm dominante; ascolti notturni; per testare session segmentation + mood + pattern circadian
 - `breakup-oct2021.json` — 3.000 eventi, ottobre 2021; crollo valence, mood sad; per testare mood + valence_drop event detector + memory engine
 - `summer-roadtrip.json` — 5.000 eventi, giugno-agosto 2022; mood happy/excited; alta valence; per testare exploration event detector + mood
+- `geo-context.json` — 96 eventi, 4 settimane a Roma con casa/lavoro/spostamenti/viaggio/auto; per testare il classificatore di contesto L1 (`19-GEO-CONTEXT.md` §5, Story 1.6)
+- `era-shift.json` — 96 eventi, 16 settimane: 8 di *pop* diurno e poi 8 di *indie folk* notturno, con il **cambio di gusto al giorno 56**; per testare l'**era detector** (`04-ANALYSIS-ALGORITHMS.md` §5, Story 2.2): il confine è dichiarato e il rilevamento deve produrre **due** ere
 
 Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi dopo l'analisi, secondo le spec di `04-ANALYSIS-ALGORITHMS.md`.
+
+> **Gli scenari "composti" servono a un algoritmo deterministico**: `geo-context` ed `era-shift` non usano il generatore casuale, ma una cronologia **composta a mano**: servono pattern che un generatore casuale non produce (casa/lavoro/viaggio per il contesto, un cambio di gusto netto per le ere). Su un fixture casuale il confine atteso non esiste, e il test non potrebbe dichiarare un risultato.
 
 ### 3.4 Fixture demo mode
 

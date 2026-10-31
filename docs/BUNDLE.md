@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 09:47
-> Totale file: 123
+> Data: 2026-10-31 10:44
+> Totale file: 124
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -2068,8 +2068,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.0, `05` v1.4, `10` v1.1, `11` v1.6.30, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
-- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.9, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.20; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
+- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.31, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
+- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.10, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.21; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
@@ -2083,7 +2083,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 68, issue #205): la **Story 1.6 (fondazione geo e contesto di ascolto) è completata** — PR #209 merged il 2026-10-31 (merge commit `68c27e5`): il delta su `02` v1.7 (campi `city*`, entità `ContextPeriod`, tabella `contexts` nello schema Dexie v6, toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`) e il **classificatore L1** in `packages/core/src/context/` (regole R1..R7, soglia 0.5, `derivedVersion` dai parametri) con la persistenza dei periodi e il fixture di scenario geo. **EPIC 1 — Import core: 5/5 ✅** e tre story dell'EPIC 2/4 completate: la **2.4 (Memory Engine)** (issue **#179**, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, merge `7458220`, Sessione 64): la catena **4.1 (dati) → 2.1 (letture)** è chiusa. **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 ora disponibile. **Divergenza dichiarata** (la stessa della Sessione 67, §33 del DEV-LOG): il blocco NEXT-STEP del README ordina le story **per id** e indica quindi la **2.2** (Era Detector), mentre la **lista di priorità** di `11-BACKLOG.md` (posizione 13) mette la tranche geo **prima** delle 2.2/2.3 per la scelta del project owner («geo prima», Sessione 67): l'agente segue la **lista di priorità**, il blocco è un puntatore per id. Dietro: le **2.2 (Era Detector)** e **2.3 (Event Detector)**, con la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.0 🟢 APPROVED), poi la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 1.6: la **UI dei toggle** (Story 3.x) e la **derivazione L2** (Story 4.4).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 69, issue #211): la **Story 2.2 (Era Detector) è completata** — issue #211, branch `feat/211-era-detector`: il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection** — nessun clustering non supervisionato, `04§5`), il mood dominante dell'era classificato dal **classificatore del mood tracker** (D.69.2), la persistenza degli insight `era` con `derivedVersion` e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8), il plug-in `createEraGenerator` dell'orchestratore (`04§8.1`) e il fixture di scenario `era-shift.json` (confine dichiarato al giorno 56). Con la 2.2 l'**EPIC 2** ha completato 2.1, 2.2 e 2.4: restano la **2.3 (Event Detector)** e le 3.x (UI). **Prossimo passo**: la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201) e con la fondazione L1 ora disponibile; e, per il blocco NEXT-STEP del README (che ordina le story **per id**), la **2.3 (Event Detector)**, con la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.2 🟢 APPROVED). Dietro: la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 2.2: il **pattern analyzer** (`04§4`), la **session segmentation** (`04§2`) e la **UI dell'era** (Story 3.x).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -9871,7 +9871,30 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 
 ---
 
+## 36. Issue #211 — Story 2.2: l'Era Detector (Sessione 69)
+
+**Branch**: `feat/211-era-detector`
+**PR**: **#212** (aperta il 2026-10-31) — ⏳ in attesa di review
+**Data**: 2026-10-31
+**Stato**: 🟡 **IMPLEMENTATA** — in attesa di merge
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 36-1 | P | Il blocco NEXT-STEP del README indicava la **2.2** da due sessioni, ma **non esisteva alcuna issue `agent-ready`**: la story non era claimabile e nessun agente poteva lavorarla | L'apertura dell'issue di implementazione è un atto **manuale**: senza di essa il puntatore è un consiglio, non un lavoro | L'agente apre l'**issue #211** (`agent-ready`, con gli AC ricavati dalla spec ratificata) **prima** del claim, poi esegue la procedura ADR-0006. Il repository non aveva **nessuna** issue aperta: era la condizione che rendeva la 2.2 lavorabile | `AGENTS.md` §"🚀 Primo task" · issue #211 |
+| 36-2 | P | L'AC del backlog chiedeva «1 anno con **2 ere evidenti**» sul fixture `lockdown-2020.json`, ma quel fixture è **casuale** e non ha alcun cambio netto: il rilevamento produce **una sola era** | L'atteso («1-2 ere») era una **congettura** scritta nella Sessione 13, prima che l'algoritmo esistesse | Verifica spostata sul fixture giusto: `era-shift.json`, una cronologia **composta** (8 settimane di *pop* + 8 di *indie folk*, confine dichiarato al giorno 56). L'AC è stata riallineata e `lockdown-2020` resta verificato per le **invarianti** di `04§5.5` | `10§3.3` · `11-BACKLOG.md` Story 2.2 |
+| 36-3 | P | Il titolo della schermata dell'era avrebbe prodotto «**Era Era** Malinconia Indie» | `era.title` era «Era {label}», ma l'etichetta **contiene già** il prefisso «Era»: lo schema lo dichiara (`es. "Era Malinconia"`) e `04§5.2` lo costruisce così | `era.title` è un **pass-through** (`{label}`), allineato in `08§2.4` e nei locale `it`/`en`. La regola generale: quando la copy della UI e il payload dicono la stessa cosa, **la copy si adatta al payload** | `08§2.4` · `02§4` |
+| 36-4 | P | Un'era senza feature misurate avrebbe riempito `avgValence: 0` e prodotto un mood **falso** | `EraPayload.avgValence`/`avgEnergy` **non** sono nullable in `02§4`, e il payload è chiuso | Senza feature utilizzabili l'era **non viene prodotta** (D-A.1, lo stesso principio del mood tracker), con un **warning aggregato** e senza dati personali. Lo stesso vale per la quota notturna: è calcolata in UTC perché il payload dell'era non dichiara un `userTimezone` (D.69.4) | `04§1.4` · D.69.4 |
+| 36-5 | P | Il ricalcolo per periodo (`replaceInsightsOfType`) avrebbe lasciato **ere orfane** quando i confini si spostano | La segmentazione delle ere dipende **dall'intera storia**: un ricalcolo può spostare i confini, e le ere vecchie hanno un `periodStart` diverso da quello delle nuove | Aggiunto `replaceAllInsightsOfType` in `db/insights.ts`: sostituisce **l'insieme** del tipo in una transazione (D.69.8). Il nome dell'operazione dice già il perché | `db/insights.ts` |
+| 36-6 | P | Una riga di changelog aggiunta con `Get-Content -Raw` + `Set-Content -Encoding UTF8` in **PowerShell 5.1** ha **raddoppiato la codifica** del file (mojibake: `ðŸŸ¢`) e aggiunto un BOM | PowerShell 5.1 legge con l'encoding **predefinito** (ANSI), non UTF-8: i byte UTF-8 diventano caratteri latini e vengono riscritti come UTF-8 | File ripristinato con `git checkout --` e riscritto con l'editor. **Le scritture sui file UTF-8 del repository vanno fatte con gli strumenti che rispettano l'encoding**: la shell è per i comandi, non per il contenuto dei documenti | lesson 69-5 |
+
+**Lesson learned**: un **algoritmo deterministico** si verifica con un fixture che contiene il **caso che l'algoritmo cerca** — non con un fixture generato a caso. Il caso reale è lo stesso della Sessione 68 (i fixture casuali non hanno un cluster da riconoscere): il `lockdown-2020` non ha un cambio di gusto, e il suo atteso era una congettura. Il fixture composto (`era-shift.json`, 96 eventi, confine dichiarato) rende l'atteso **verificabile**: due ere, con i mood dichiarati e il confine entro `stepDays` dal cambio reale.
+
+La seconda lezione è operativa e costa caro: **la shell non è un editor**. Un `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha corrotto un documento (mojibake + BOM) in un colpo solo, e il danno era invisibile a occhio nel terminale (che mostrava solo gli ultimi caratteri). Il rilevamento è venuto da un controllo esplicito (`BOM?` / `mojibake?` via node), e il ripristino da `git checkout --` è stato possibile perché il file non era ancora committato.
+
+---
+
 | Versione | Data | Modifiche |
+|----------|------|-----------|
 |----------|------|-----------|
 | 0.1 | 2026-10-16 | Template iniziale + regole di compilazione (Sessione 10/11) |
 | 0.2 | 2026-10-16 | Sessione 11 — entry Story 0.1 con 8 problemi/fix/lesson (P0 toolchain) e stato accettazione; indice rapido per sintomo |
@@ -9917,6 +9940,7 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 | 2.22 | 2026-10-30 (issue #201) | **§33 Allineamento del "prossimo passo"** (follow-up post-merge della Sessione 67): il blocco NEXT-STEP generato indicava **1.6** (l'aggregatore ordina le story migrate **per id**, e «1.6» < «2.2») mentre la prosa di `INDEX.md` e la lista di priorità di `11-BACKLOG.md` indicavano **2.2/2.3**. Il project owner ha scelto **geo prima**: la tranche geo sale al posto 13 della lista di priorità e la prosa dell'INDEX è riallineata al puntatore. Nessuna modifica al codice dell'aggregatore, nessun gate nuovo. Documenti toccati: `11-BACKLOG.md` (v1.6.29), `docs/INDEX.md`, `docs/18-DEV-LOG.md` (v2.21) |
 | 2.24 | 2026-10-31 (issue #205) | **§35 Issue #205 — Story 1.6 implementata** (fondazione geo e contesto di ascolto, Sessione 68, claim kilo-HP-ELITEBOOK-q7v2): 7 entry (35-1 la **claim abbandonata** dell'issue #205 (worktree pulita, zero commit, nessun processo né sessione, TTL di 12h non ancora scaduto) è stata presa con takeover **documentato in issue** (stale-release: con l'evidenza + claim: riverificato come unico claim attivo) riprendendo la worktree esistente invece di crearne una gemella; 35-2 il **paese di riferimento** era sbagliato (DE invece di IT): la moda pesava i *chiavi* della mappa dei conteggi invece dei valori — aggiunto modeOfCounted; 35-3 il **viaggio** era riconosciuto solo dal terzo giorno: il conteggio dei giorni esteri guardava all'indietro dal giorno dello slot, ora copre l'intero *run*; 35-4 uno **spostamento** ricorrente veniva classificato home (R4 non aveva un vincolo di durazione): aggiunto homeMinSessionMs (25 min, la soglia di R6); 35-5 **way** non era prodotto da nessuna regola pur essendo un kind della tassonomia: è il complemento di R1 (R1-away, confidenza 0.5); 35-6 l'AC citava «**E22**» mentre la spec ratificata dichiara **E19**: allineati backlog e state file alla numerazione del documento 🟢; 35-7 il modulo context/ sta **fuori** da nalysis/ perché il layer di analisi è puro e non ha dipendenze dal DB ( 5§9): stessa forma di enrichment/, subpath @ls/core/context). Consegnati: il delta su  2-DATA-SCHEMA.md **v1.7** (campi city*, ContextPeriod, tabella contexts nello schema Dexie **v6**, toggle etainCountry/etainCity/etainDeviceType/etainDeviceDetail/deriveContext, MIG-5), il **classificatore L1** (regole R1..R7, soglia 0.5, derivedVersion dai parametri, slot = giorno locale × dispositivo) con la persistenza dei periodi (ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixtures/scenarios/geo-context.json, generato da scripts/generate-fixtures.mjs geo) e **39 test** nuovi in @ls/core |
 | 2.23 | 2026-10-30 (issue #201) | **§34 L'inventario del bundle resta stale su una PR solo-docs** (follow-up post-merge della Sessione 67): dopo il merge della PR #206 il blocco inventory di `docs/BUNDLE.md` dichiarava 1626.2 KB mentre i file in catalogo pesavano 1628.8 KB. Causa: `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`, quindi una PR che tocca solo `docs/` — i file **di cui l'inventario misura la dimensione** — non lo attiva, e il check dell'aggregator in CI è warning-only. Drift chiuso con una PR `docs:` separata (aggregator eseguito in locale); **la causa strutturale resta aperta** e va sottoposta al project owner: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo. Lezione: un dato derivato dalle **dimensioni** non si aggiorna da solo quando i **contenuti** cambiano |
+| 2.25 | 2026-10-31 (issue #211) | **§36 Issue #211 — Story 2.2 implementata** (Era Detector, Sessione 69, claim `kilo-HP-ELITEBOOK-4f2k`): 6 entry (36-1 il blocco NEXT-STEP non è un claim: senza issue `agent-ready` la story indicata non è lavorabile, e il repository non aveva nessuna issue aperta; 36-2 un fixture **casuale** non verifica un algoritmo che cerca un salto — il `lockdown-2020` non ha un cambio di gusto e il suo atteso era una congettura, perciò la verifica è stata spostata sul fixture composto `era-shift.json` (96 eventi, confine dichiarato al giorno 56); 36-3 il titolo della schermata avrebbe prodotto «Era Era Malinconia Indie»: la label contiene già il prefisso, `era.title` è diventato un pass-through; 36-4 senza feature misurate l’era non viene prodotta (`avgValence`/`avgEnergy` non sono nullable in `02§4`): niente segnali inventati (D-A.1); 36-5 il ricalcolo per periodo avrebbe lasciato ere orfane quando i confini si spostano → `replaceAllInsightsOfType`; 36-6 **la shell non è un editor**: `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha raddoppiato la codifica di un documento (mojibake + BOM), ripristinato con `git checkout --`). Consegnato: il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection**, filtro `minEraDays`), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`, D-A.4), il plug-in `createEraGenerator` (`04§8.1`) e **37 test** nuovi in `@ls/core`. Allineati `04` v1.2 (`§8.1`), `08` v0.10 (`insight.era.*`, `era.title`), `10` §3.3, `11` (Story 2.2 ✅, roadmap, priorità), `INDEX.md` (stato documenti e prossimo passo) |
 
 ---
 
@@ -10128,9 +10152,11 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/60-next-step-skip-blocked.md` | ✅ creata | Sessione 60 (issue #182): il blocco NEXT-STEP del README indica solo story **lavorabili** (esclude `done`, `blocked`, `wontdo`) — il puntatore è passato dalla 2.1 bloccata alla 2.4 implementabile |
 | `state/sessions/61-story-2-4-memory-engine.md` | ✅ creata | Sessione 61 (issue #179): **implementazione della Story 2.4** (Memory Engine) — i 5 generatori, il ranking per rilevanza, la persistenza degli insight `memory` con `derivedVersion` (MIG-3) e l'orchestratore minimale; PR #185 (merge `40ad0b7`) |
 | `state/sessions/62-epic-4-1-audio-features-spec.md` | ✅ creata | Sessione 62 (issue #187): **spec e ratifica dell'EPIC 4.1** (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED) con le nove decisioni chiuse (D-AF.1…D-AF.9) + allineamento dei documenti toccati + apertura dell'issue di implementazione **#188** (`agent-ready`) — **merged** (PR #190, `b1dd83e`), issue #187 chiusa con `status:done` |
+| `state/sessions/69-era-detector.md` | ✅ creata | Sessione 69 (issue #211): **implementazione della Story 2.2** (Era Detector) — le firme settimanali, la similarità (cosine + Jaccard + distanza normalizzata), il **change point detection**, la persistenza delle ere con `derivedVersion` (MIG-3) e il fixture di scenario `era-shift.json` |
 | `state/stories/1.5-scrobbling-hub.md` | ✅ creata | Story 1.5 (Scrobbling hub) — ✅ **done** (Sessione 58, issue #173): contratto `ScrobbleSink`, coda `scrobbleOutbox`, sink Last.fm/ListenBrainz, filtro di eleggibilità, sync incrementale, pannello UI, 31 casi di test |
 | `state/stories/2.1-mood-tracker.md` | ✅ creata | Story 2.1 (Mood Tracker) — ⛔ **blocked**: senza le audio features dell'EPIC 4.1 il mood tracker non produce insight (decisione D-A.1); issue #180 (`needs-spec`) |
 | `state/stories/2.4-memory-engine.md` | ✅ creata | Story 2.4 (Memory Engine) — ✅ **done** (Sessione 61, issue #179, PR #185, merge `40ad0b7`): i 5 tipi di ricordo (`04§7.2`), il feed per rilevanza (`04§7.4`), la `derivedVersion` calcolata dai parametri (`04§9`) e il testo reso dal resolver i18n (D-A.4) |
+| `state/stories/2.2-era-detector.md` | ✅ creata | Story 2.2 (Era Detector) — ✅ **done** (Sessione 69, issue #211): **change point detection** su firme settimanali (`04§5`, nessun clustering non supervisionato), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`) e il ricalcolo che sostituisce **l'insieme** delle ere (D.69.8) |
 | `state/stories/4.1-audio-features.md` | ✅ creata | Story 4.1 (Pipeline audio features) — ⬚ **todo** (Sessione 62, issue #187): la spec `21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (ratificata al merge della PR di ratifica), le nove decisioni D-AF.1…D-AF.9 sono ratificate e l'issue di implementazione **#188** è `agent-ready`. `status: todo` ⇒ il blocco NEXT-STEP del README punta alla 4.1, primo anello della catena 4.1 → 2.1 → 2.2/2.3 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
 | Stories 0.1, 0.2 | ✅ migrate | chiuse con #127, ADR-0008 V3 (2026-10-21) |
@@ -13653,6 +13679,171 @@ manca dell'host che la CSP deve consentire.
 
 
 
+===== FILE: docs/state/sessions/69-era-detector.md =====
+
+---
+number: 69
+title: "Story 2.2 — Era Detector (issue #211)"
+date: 2026-10-31
+state: 🟡
+merged: false
+branch: feat/211-era-detector
+pr: 212
+claim: kilo-HP-ELITEBOOK-4f2k
+cross_refs: [211, 205, 180, 178, 193]
+tags: [analysis, phase-2]
+---
+
+# Sessione 69 — Story 2.2: Era Detector (issue #211)
+
+## Sintesi
+
+La Story 2.2 implementa il **rilevatore di ere**: la segmentazione della
+storia di ascolto in periodi coerenti, secondo l'algoritmo di
+`docs/04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED** (§5, ratificata nella
+Sessione 59, issue #178).
+
+L'algoritmo è **change point detection** su firme settimanali, non clustering
+non supervisionato (esclusione dichiarata in `04§5`): si comparano le firme
+di finestre **adiacenti** e, dove la similarità crolla sotto la soglia, nasce
+un confine. Il risultato è deterministico per costruzione — nessun centroide,
+nessuna gerarchia, nessuna inizializzazione casuale.
+
+Il pacchettoconsegnato:
+
+- **il motore** (`packages/core/src/analysis/era/`): `signature.ts`,
+  `similarity.ts`, `detect.ts`, `engine.ts`, `derivedVersion.ts`, `i18n.ts`,
+  `types.ts`;
+- **la persistenza**: gli insight di tipo `era` con `derivedVersion` e il
+  ricalcolo che sostituisce **l'insieme** delle ere
+  (`replaceAllInsightsOfType`);
+- **il plug-in** `createEraGenerator` dell'orchestratore (`04§8.1`, D-A.5:
+  il contratto non cambia);
+- **il fixture di scenario** `fixtures/scenarios/era-shift.json`;
+- **37 test** nuovi in `@ls/core`.
+
+## Trigger
+
+Il blocco NEXT-STEP del README indicava la **2.2** come prima story
+lavorabile (è la prima non-done fra quelle migrate in `docs/state/stories/`),
+ma **non esisteva alcuna issue `agent-ready`**: il repository non aveva
+nessuna issue aperta, e la story non era claimabile. L'agent ha quindi
+aperto la **issue #211** (`size:L`, `agent-ready`, `area:analysis`,
+`phase-2`) con gli AC ricavati dalla spec ratificata, poi ha eseguito la
+procedura di claim (ADR-0006): label `in-progress` + commento `claim:
+kilo-HP-ELITEBOOK-4f2k`, riverificato come **unico** claim attivo.
+
+Worktree `ls-211-era-detector`, branch `feat/211-era-detector` (creata con
+`scripts/setup-worktree.ps1 211`, push early D.20.2).
+
+## Cosa è stato consegnato
+
+| Deliverable | Dove |
+|-------------|------|
+| Il **motore** dell'era detector | `packages/core/src/analysis/era/` |
+| Il plug-in dell'orchestratore | `createEraGenerator` in `analysis/pipeline.ts` |
+| Il ricalcolo dell'**insieme** delle ere | `replaceAllInsightsOfType` in `db/insights.ts` |
+| Il **contratto i18n** condiviso | `analysis/i18n.ts` (prima viveva nel memory engine) |
+| I **template** dell'etichetta | `insight.era.*` in `apps/web/src/i18n/locales/{it,en}.json` |
+| Il **fixture di scenario** | `fixtures/scenarios/era-shift.json` (`scripts/generate-fixtures.mjs era`) |
+| I **37 test** | `analysis/__tests__/era-{engine,persistence,scenarios}.test.ts` |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| **D.69.1** | L'algoritmo è **change point detection** su firme adiacenti: il numero di ere è quello dei confini rilevati | È l'algoritmo di `04§5.2` e l'AC «l'algoritmo **non** usa clustering non supervisionato». Il confronto è **locale** (finestra i e i+1), non globale: il rilevamento è incrementabile e il risultato non dipende dall'ordine di elaborazione |
+| **D.69.2** | Il mood dominante dell'era è classificato dal **classificatore del mood tracker** (`04§3.2`), con le **stesse soglie** | L'AC chiede che l'era porti «il mood dominante e le medie di valence/energy **lette dal mood tracker**». Classificare con lo stesso classificatore e le stesse soglie è ciò che rende le due letture coerenti: un'era «felice» non può coesistere con un mood `sad` dello stesso periodo. Le quattro soglie sono **parametri versionati** (`EraConfig.mood`): senza, un cambio delle soglie non renderebbe `stale` le ere (MIG-3) |
+| **D.69.3** | La **distribuzione dei generi** è una quota di **ascolti**: ogni genere del brano pesa `1/n`, e la somma è normalizzata a 1 | La spec non dice se la quota è per ascolti o per minuti, e `04§5.5` impone `sum ≈ 1.0`. La quota per ascolti è l'unica che non dipende dalla durata dichiarata dagli adapter (spesso assente): una durata mancante non deve spostare la distribuzione |
+| **D.69.4** | La **quota notturna** è calcolata in **UTC** (ore 0-5) | `EraPayload` (02§4) **non** trasporta un `userTimezone`, a differenza di `PatternPayload` (02§4): è il segnale che l'era non è legata al fuso. Il layer di analisi lavora su confini UTC (`analysis/datetime.ts`), e il mood tracker usa gli stessi confini |
+| **D.69.5** | Una metrica **senza dato** (valence o energy assenti) è **esclusa** dalla distanza normalizzata, e i pesi sono rinormalizzati sulle dimensioni disponibili | Trattare una valence assente come 0 falserebbe la similarità: una finestra senza feature sembrerebbe «triste». Con i default (0.5 + 0.3 + 0.2 = 1) la rinormalizzazione è un'identità, quindi la formula coincide con quella di `04§5.2` |
+| **D.69.6** | Il filtro `minEraDays` **lascia dei buchi**: un segmento scartato non viene fuso con il vicino | È il passo 4 dello pseudocodice (`eras.filter(...)`). Fondere i segmenti corti produrrebbe un'era che non corrisponde a nessun confine rilevato. L'invariante «∪ere = periodo totale» vale quindi **prima** del filtro: è la conseguenza dichiarata, non un difetto |
+| **D.69.7** | La `confidence` dell'era è la **copertura delle feature** del periodo | `04§5` non definisce `computeEraConfidence`. La copertura è l'unico dato disponibile, ed è la stessa semantica della `confidence` del mood tracker (D.63.8): dice quanto del periodo l'era copre. Il payload `02§4` è chiuso e non ha un campo score |
+| **D.69.8** | Il ricalcolo sostituisce **l'insieme** delle ere (`replaceAllInsightsOfType`), non solo quelle del periodo ricalcolato | La segmentazione dipende **dall'intera storia**: un ricalcolo può spostare i confini, e le ere vecchie avrebbero un `periodStart` diverso da quello delle nuove. Il ricalcolo per periodo (`replaceInsightsOfType`) le lascerebbe sopravvivere: due insiemi di ere incompatibili nello stesso DB |
+
+## Discrepanza rilevata
+
+L'AC del backlog dichiedeva «1 anno con **2 ere evidenti**
+(`fixtures/scenarios/lockdown-2020.json`)». Il fixture `lockdown-2020` è una
+cronologia **casuale**: generi e ritmi sorteggiati su 9 mesi, senza alcun
+cambio netto. Il rilevamento produce quindi **una sola era** — che è il
+comportamento giusto (il change point detection cerca un crollo della
+similarità, e in una cronologia priva di salti non ce n'è).
+
+La verifica dell'AC è stata quindi **spostata sul fixture giusto**: è stato
+scritto `fixtures/scenarios/era-shift.json`, una cronologia **composta**
+(8 settimane di *pop* diurno e 8 di *indie folk* notturno, con il cambio al
+giorno 56), e l'AC è stata allineata. Il fixture `lockdown-2020` resta
+verificato per le **invarianti** (`04§5.5`), che valgono su una cronologia
+non composta.
+
+La lezione è quella della Sessione 68: **un fixture generato casualmente
+non può verificare un algoritmo che cerca un salto** — il salto deve essere
+**dichiarato**.
+
+## Fuori perimetro e dichiarato
+
+- **Il pattern analyzer** (`04§4`): è un generatore a sé, non fa parte
+  della 2.2. La `nightShare` è la sua metrica (`04§4.3`) e l'era detector la
+  riusa con la propria definizione (UTC)
+- **L'event detector** (`04§6`): Story 2.3
+- **La session segmentation** (`04§2`): differita
+- **La UI dell'era** (schermata ⑧): Story 3.x. La label dell'era è una
+  stringa **resa** (D-A.4), con i template dichiarati in
+  `08-COPY-I18N.md` §2.15
+
+## Verifica
+
+- `pnpm run lint` · `pnpm run typecheck` · `pnpm run test` (568 test in
+  `@ls/core`, 112 in `@ls/web`) · `pnpm run build` → verdi
+- `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+
+## Lesson learned
+
+| # | Osservazione |
+|---|---|
+| 69-1 | **Il blocco NEXT-STEP non è un claim**: senza un'issue `agent-ready` la story indicata non è lavorabile. Il puntatore del README e la lista di priorità del backlog indicano la 2.2 da due sessioni, e in due sessioni nessun agente ha potuto lavorarla perché **l'issue non esisteva**. L'apertura dell'issue è il primo atto dell'agente, non un adempimento |
+| 69-2 | **Un fixture casuale non verifica un algoritmo che cerca un salto**: il `lockdown-2020` non ha un cambio di gusto, e il suo atteso («1-2 ere») era una congettura del 2026-10-16, scritta prima che l'algoritmo esistesse. La verifica è diventata possibile solo con un fixture **composto** (96 eventi, confine dichiarato) |
+| 69-3 | **Il payload dichiara il fuso, o non lo dichiara**: `PatternPayload` ha `userTimezone`, `EraPayload` no. Due payload che condividono una metrica (`nightShare`) dicono cose diverse su come sia calcolata: la differenza è nel **contratto**, non nel testo |
+| 69-4 | **Un ricalcolo che non copre l'insieme lascia dati orfani**: `replaceInsightsOfType` sostituisce i periodi ricalcolati, ma le ere dipendono dalla storia intera. Serve un'operazione dedicata (`replaceAllInsightsOfType`), e il nome dice già il perché |
+| 69-5 | **La documentazione va scritta con l'encoding giusto**: una riga di changelog aggiunta con `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha **raddoppiato** la codifica del file (mojibake) e aggiunto un BOM. Il file è stato ripristinato con `git checkout --` e riscritto con l'editor: in un repository con documentazione UTF-8 e accenti, le scritture vanno fatte con gli strumenti che rispettano l'encoding |
+
+## Documenti aggiornati
+
+- `packages/core/src/analysis/era/` — **nuovo** (7 file)
+- `packages/core/src/analysis/i18n.ts` — **nuovo** (contratto i18n condiviso)
+- `packages/core/src/analysis/memory/{i18n,types}.ts` — il contratto i18n
+  è riusato da `analysis/i18n.ts` (l'API pubblica del memory engine non
+  cambia)
+- `packages/core/src/analysis/pipeline.ts` — `createEraGenerator`
+- `packages/core/src/analysis/index.ts` · `packages/core/src/index.ts` —
+  gli export
+- `packages/core/src/db/{insights,index}.ts` — `replaceAllInsightsOfType`
+- `packages/core/src/analysis/__tests__/` — `era-engine`, `era-persistence`,
+  `era-scenarios` + `helpers.ts` (`eraPayloadOf`, il fixture `era-shift`)
+- `apps/web/src/i18n/locales/{it,en}.json` — le 8 chiavi `insight.era.*` e
+  l'allineamento di `era.title`
+- `fixtures/scenarios/era-shift.json` — **nuovo**
+- `scripts/generate-fixtures.mjs` — il builder `buildEraShiftScenario()`
+- `docs/04-ANALYSIS-ALGORITHMS.md` — v1.2 (`§8.1`)
+- `docs/08-COPY-I18N.md` — v0.10 (`§2.4`, `§2.15`)
+- `docs/10-TESTING.md` — §3.3 (i due fixture composti)
+- `docs/11-BACKLOG.md` — Story 2.2, la roadmap, la priorità, il changelog
+- `docs/state/stories/2.2-era-detector.md` — lo stato della story
+- `docs/state/sessions/69-era-detector.md` — **nuovo** (questo file)
+- `docs/state/_index.md` — la tabella di migration
+
+## Cross-refs
+
+- **#211** — l'issue di implementazione (claim `kilo-HP-ELITEBOOK-4f2k`)
+- **#178** — la ratifica di `04-ANALYSIS-ALGORITHMS.md` (D-A.1…D-A.5)
+- **#193** — l'emendamento D-A.6 (il mood-by-genre non esiste)
+- **#180** — la Story 2.1 (mood tracker), da cui dipende la 2.2
+- **#205** — la Story 1.6 (geo), l'ultima story completata prima di questa
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -14273,11 +14464,17 @@ id: "2.2"
 title: "Era Detector"
 phase: 2
 area: analysis
-status: todo
+status: done
 priority: I
 depends_on: ["2.1"]
+issue: 211
+branch: "feat/211-era-detector"
+pr: 212
+claim: kilo-HP-ELITEBOOK-4f2k
 spec_refs:
   - docs/04-ANALYSIS-ALGORITHMS.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/08-COPY-I18N.md
 ---
 
 ## Descrizione
@@ -14287,25 +14484,88 @@ coerenti (le «ere» dell'ascolto) con un algoritmo **deterministico e
 versionato** — change point detection, non clustering non supervisionato
 (l'esclusione è dichiarata in `04§5`).
 
-La story è **sbloccata**: la dipendenza `[DEP:2.1]` è soddisfatta dalla Story
-2.1 (Sessione 63, merge `d018a26`), che ha consegnato il mood su cui
+La story era **sbloccata**: la dipendenza `[DEP:2.1]` è soddisfatta dalla
+Story 2.1 (Sessione 63, merge `d018a26`), che ha consegnato il mood su cui
 l'era detector si appoggia (`moodDominant`, `avgValence`, `avgEnergy`).
+
+## Stato
+
+✅ **DONE** — implementata nella Sessione 69 (issue **#211**, PR **#212**,
+branch `feat/211-era-detector`, worktree `ls-211-era-detector`). Il merge
+commit viene scritto nel doc-sync di chiusura, dopo il merge della PR (non è
+noto al momento della stesura di questo file).
+
+Consegnato:
+
+- **il motore** (`packages/core/src/analysis/era/`): `signature.ts` (la firma
+  musicale: distribuzione dei generi, top artist, valence/energy medie,
+  quota notturna, tasso di ripetizione), `similarity.ts` (cosine + Jaccard +
+  distanza normalizzata), `detect.ts` (firme settimanali, change point
+  detection, costruzione delle ere), `engine.ts` (il motore e il plug-in
+  dell'orchestratore), `derivedVersion.ts`, `i18n.ts`, `types.ts`;
+- **la persistenza**: gli insight di tipo `era` con `derivedVersion`
+  (`04§9`) e il ricalcolo che sostituisce **l'insieme** delle ere
+  (`replaceAllInsightsOfType` in `packages/core/src/db/insights.ts`);
+- **il fixture di scenario** `fixtures/scenarios/era-shift.json` (96
+  ascolti, 16 settimane, cambio di gusto dichiarato al giorno 56), generato
+  da `scripts/generate-fixtures.mjs era`;
+- **37 test** nuovi in `@ls/core` (`era-engine`, `era-persistence`,
+  `era-scenarios`).
 
 ## Task
 
-- T2.2.1 — Implementare l'algoritmo di segmentazione secondo `04§5`
-- T2.2.2 — Persistenza delle ere con `derivedVersion` (MIG-3) e ricalcolo
-- T2.2.3 — Test sul fixture di scenario: a parità di `derivedVersion` le stesse ere
+- [x] T2.2.1 — Implementare l'algoritmo di segmentazione secondo `04§5`
+- [x] T2.2.2 — Persistenza delle ere con `derivedVersion` (MIG-3) e ricalcolo
+- [x] T2.2.3 — Test sul fixture di scenario: a parità di `derivedVersion` le stesse ere
 
 ## Acceptance criteria
 
-- [ ] Le ere sono deterministiche e ricalcolabili: stesso input, stesso output, stessa `derivedVersion` (`04§5`)
-- [ ] L'algoritmo **non** usa clustering non supervisionato (`04§5`)
-- [ ] Ogni era porta il mood dominante e le medie di valence/energy lette dal mood tracker (`04§3`, `04§5`)
+- [x] Le ere sono deterministiche e ricalcolabili: stesso input, stesso output, stessa `derivedVersion` (`04§5`)
+- [x] L'algoritmo **non** usa clustering non supervisionato (`04§5`)
+- [x] Ogni era porta il mood dominante e le medie di valence/energy lette dal mood tracker (`04§3`, `04§5`)
+- [x] Le ere sono disgiunte e ordinate, con `periodStart < periodEnd` (`04§5.5`)
+- [x] `sum(genreDistribution.values) ≈ 1.0` e `moodDominant ∈ {sad, angry, neutral, calm, happy, excited}` (`04§5.5`)
+- [x] La `derivedVersion` cambia quando cambia un parametro (`04§9`)
+- [x] Il generatore è un plug-in dell'orchestratore: il contratto del pipeline **non** cambia (`04§8.1`, D-A.5)
 
-## Documenti aggiornati
+## Scelte di implementazione
 
-- (nessuno: la story non è ancora iniziata)
+Le otto scelte che la spec non explicita sono dichiarate in
+`docs/state/sessions/69-era-detector.md` (D.69.1…D.69.8). In sintesi:
+
+- l'algoritmo è **change point detection** su firme adiacenti (D.69.1), e
+  il numero di ere è quello dei confini rilevati: nessun clustering, nessuna
+  inizializzazione casuale;
+- il **mood dominante** dell'era è classificato dal **classificatore del
+  mood tracker** (`04§3.2`), con le stesse soglie: l'era e il mood dello
+  stesso periodo non si contraddicono (D.69.2);
+- la **distribuzione dei generi** è una quota di ascolti, con ogni genere
+  del brano pesato `1/n` e la somma normalizzata a 1 (D.69.3);
+- la **quota notturna** è calcolata in **UTC**: il payload dell'era non
+  trasporta un `userTimezone`, a differenza di quello del pattern analyzer
+  (D.69.4);
+- una metrica **senza dato** (valence o energy assenti) è **esclusa** dalla
+  distanza normalizzata, e i pesi sono rinormalizzati sulle dimensioni
+  disponibili: una finestra senza feature non è trattata come se avesse
+  valence 0 (D.69.5);
+- il filtro `minEraDays` **lascia dei buchi**: un segmento scartato non
+  viene fuso con il vicino (D.69.6);
+- la `confidence` dell'era è la **copertura delle feature** del periodo,
+  con la stessa semantica del mood tracker (D.69.7);
+- il ricalcolo sostituisce **l'insieme** delle ere: la segmentazione
+  dipende dall'intera storia, e un confine spostato lascerebbe orfane le ere
+  vecchie (D.69.8).
+
+## Documenti collegati
+
+- `docs/04-ANALYSIS-ALGORITHMS.md` §5 (Era Detector) · §5.5 (invarianti) ·
+  §8.1 (perimetro della tranche) · §9 (derivedVersion registry)
+- `docs/02-DATA-SCHEMA.md` §3.6 (`Insight`) · §4 (`EraPayload`) · §6
+  (tabella `insights`) · §7 (MIG-3)
+- `docs/08-COPY-I18N.md` §2.4 (`era.*`) · §2.15 (`insight.era.*`)
+- `docs/10-TESTING.md` §3.3 (fixture di scenario)
+- `docs/11-BACKLOG.md` Story 2.2
+- `docs/state/sessions/69-era-detector.md`
 
 
 
@@ -18260,9 +18520,9 @@ Codici i18n (`08-COPY-I18N.md`) usati dall'adapter — namespace `adapter.lastfm
 
 # 04 — Algoritmi di Analisi
 
-> Status: 🟢 APPROVED · Versione 1.1 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30)
+> Status: 🟢 APPROVED · Versione 1.2 · Sessione 59 (2026-10-28), emendata nella Sessione 65 (2026-10-30), aggiornata nella Sessione 69 (2026-10-31)
 > Vincolante per: `packages/core/analysis/*` e relativi test
-> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12)
+> Issue di ratifica: #178 (decisioni D-A.1…D-A.5, §11) · Emendamento: #193 (D-A.6, §11.1) · Storie sbloccate: 2.4 (subito), 2.1 (dopo l'EPIC 4.1, §12) · Implementazioni: 2.4 (Sessione 61), 2.1 (Sessione 63), 2.2 (Sessione 69, issue #211)
 
 ---
 
@@ -19131,9 +19391,9 @@ La prima tranche (Story 2.4, e poi 2.1) implementa:
 |---|---|---|
 | **Memory engine** (§7) | ✅ in questa tranche | usa solo ascolti, brani e artisti |
 | **Mood tracker** (§3) | ✅ in questa tranche (Story 2.1, Sessione 63) | legge le feature **misurate o manuali**; senza audio features non produce insight (D-A.1, D-A.6, §12) |
+| **Era detector** (§5) | ✅ in questa tranche (Story 2.2, Sessione 69) | change point detection su firme settimanali; senza feature misurate o manuali non produce ere (D-A.1) |
 | Session segmentation (§2) | ⏭ differita | serve a `ListeningSession` (EPIC 2, tranche successiva) |
-| Pattern analyzer (§4) | ⏭ differita | Story 2.2 |
-| Era detector (§5) | ⏭ differita | Story 2.2 |
+| Pattern analyzer (§4) | ⏭ differita | il pattern analyzer è un generatore a sé (storia futura): `nightShare` è la sua metrica (§4.3) |
 | Event detector (§6) | ⏭ differita | Story 2.3 |
 
 L'orchestratore della tranche corrente chiama **solo** i generatori
@@ -19248,6 +19508,7 @@ appartengono a `04`.
 | 0.2 | Sessione 9 (2026-10-15) | Audit: §4.2 `computeCircadianPattern`/`Weekly`/`Seasonal` estesi con tutti i campi `PatternPayload` (`02§4` v1.1) — `peakDay`, `peakMonth`, `weekendShare`, `userTimezone`; campi non applicabili esplicitamente `null`; §4.5 invarianti aggiornate |
 | 1.0 | Sessione 59 (2026-10-28, issue #178) | 🟢 APPROVED — **ratifica del Boss al merge della PR**: le cinque decisioni aperte (§11, D-A.1…D-A.5) sono chiuse **come proposte**. **§7.2**: `return` e `seasonal` sono specificati (il silenzio è l'ultimo ascolto precedente dell'artista; la concentrazione stagionale è calcolata su 12 mesi) e `first_time` passa a **5 brani distinti** (`firstTimeMinTracks`, D-A.3); **§7.3**: i parametri allineati (`firstTimeMinTracks`, `seasonalMinEvents`) e il parametro `returnMinGapDays` dichiarato; **§7.3.1** (nuova): il `text` del ricordo è una stringa **resa** alla generazione con il template i18n `insight.memory.*` (D-A.4), non una chiave né una stringa italiana inline; **§8.1** (nuova): il perimetro della tranche — orchestratore minimale estensibile, solo i generatori implementati (D-A.5); **§9**: il registro dei parametri allineato; **§11** (nuova): le cinque decisioni con la motivazione; **§12** (nuova): il perimetro — la **Story 2.4** è implementabile subito, la **Story 2.1** aspetta le **audio features dell'EPIC 4.1** (D-A.1). Le formule, i parametri e i vinanti di §1…§10 restano quelli di v0.2, salvo le modifiche elencate |
 | 1.1 | Sessione 65 (2026-10-30, issue #193) | 🟢 APPROVED — **emendamento ratificato dal project owner** (opzione B): il fallback **mood-by-genre non esiste**. **§1.4**: la degradazione è riscritta sul comportamento reale — nessun insight mood senza feature misurate o manuali, **nessun proxy sul genere** e il warning **aggregato per periodo** ("X eventi senza audio features", solo conteggi); **§8.1**: il mood tracker passa da "in attesa dell'EPIC 4.1" a generatore della tranche; **§11.1** (nuova): la decisione **D-A.6** con la motivazione e gli effetti; **§12**: nota di stato (la tabella resta la fotografia della ratifica della Sessione 59). Il codice di `§3` **non cambia** nel calcolo: il mood tracker già restituiva `null` sotto `minEventsPerPeriod` (D.63.4); la modifica del comportamento è il **warning aggregato**, che `§1.4` dichiarava e il codice non emetteva. `21-AUDIO-FEATURES.md` §12 (punto 3) è allineato nella stessa PR |
+| 1.2 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 implementata** (era detector): **§8.1** l'era detector passa da "differita" a **generatore della tranche** (`packages/core/src/analysis/era/`). Il testo dell'algoritmo (§5.2-§5.5) **non cambia**: le scelte che la spec non explicita sono dichiarate in `docs/state/stories/2.2-era-detector.md` (D.69.1…D.69.7) e in `docs/state/sessions/69-era-detector.md`. **§9**: il config object dell'era detector comprende anche le **soglie del mood**, perché il mood dominante dell'era è classificato dal **classificatore del mood tracker** (D.69.2): senza, un cambio delle soglie non renderebbe `stale` le ere (MIG-3). **§4.3**: la `nightShare` è la metrica che l'era detector riusa (orari UTC, D.69.4) |
 
 
 ===== FILE: docs/05-ARCHITECTURE.md =====
@@ -20322,7 +20583,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.9 · Sessione 67 (2026-10-30, issue #201)
+> Status: 🟡 DRAFT · Versione 0.10 · Sessione 67 (2026-10-30, issue #201), aggiornata nella Sessione 69 (2026-10-31, issue #211)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -20419,7 +20680,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 
 | Key | IT | EN |
 |-----|----|----|
-| `title` | Era {label} | {label} Era |
+| `title` | {label} | {label} |
 | `period` | {start} → {end} | {start} → {end} |
 | `topArtists` | Top artisti | Top artists |
 | `topSongs` | Top brani | Top songs |
@@ -20427,6 +20688,13 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `nightShare` | Ascolti notturni | Night listens |
 | `repeatRate` | Ripetizioni | Repeats |
 | `relive` | Rivivi questo periodo | Relive this period |
+
+> **`title` è un pass-through**: l'etichetta dell'era (`EraPayload.label`,
+> `02§4`) **contiene già** il prefisso «Era» — lo schema lo dichiara
+> (`es. "Era Malinconia"`) e `04-ANALYSIS-ALGORITHMS.md` §5.2 lo costruisce
+> così (`"Era " + mood + " " + topGenre`). Il titolo della schermata ⑧ è
+> quindi **l'etichetta stessa**: anteporre «Era» produrrebbe «Era Era
+> Malinconia Indie».
 
 ### 2.5 `explore.*`
 
@@ -20660,12 +20928,18 @@ tradotte: sono valori dell'utente, e la UI li dichiara come dati locali.
 
 ### 2.15 `insight.*`
 
-I template degli insight: umore, eventi e **ricordi**. Le chiavi dei ricordi
-(`memory.*`) sono **vincolanti** dalla ratifica di `04-ANALYSIS-ALGORITHMS.md`
-v1.0 🟢 (§7.3.1, decisione D-A.4): il `text` del ricordo è una **stringa resa**
-alla generazione — il ricordo è uno snapshot e la lingua in cui è stato scritto
-è parte della memoria — ma il **template** è internazionalizzato, e la
-generazione non scrive mai stringhe italiane inline.
+I template degli insight: umore, eventi, **ere** e **ricordi**. Le chiavi dei
+ricordi (`memory.*`) sono **vincolanti** dalla ratifica di
+`04-ANALYSIS-ALGORITHMS.md` v1.0 🟢 (§7.3.1, decisione D-A.4): il `text` del
+ricordo è una **stringa resa** alla generazione — il ricordo è uno snapshot
+e la lingua in cui è stato scritto è parte della memoria — ma il **template**
+è internazionalizzato, e la generazione non scrive mai stringhe italiane
+inline.
+
+Lo stesso vale per l'**etichetta dell'era** (`era.*`, Story 2.2): `EraPayload.label`
+(`02§4`) è una stringa resa, costruita dal template `insight.era.label` a
+partire dal **nome localizzato** del mood (`insight.era.mood.*`) e dal genere
+più ascoltato — che è **dato**, non copia, e non viene tradotto.
 
 | Key | IT | EN |
 |-----|----|----|
@@ -20680,6 +20954,13 @@ generazione non scrive mai stringhe italiane inline.
 | `event.volume_drop` | Hai ascoltato molta meno musica del solito | You listened to much less music than usual |
 | `event.exploration` | Hai esplorato molti nuovi artisti | You explored many new artists |
 | `event.silence` | Periodo di silenzio musicale | Period of musical silence |
+| `era.label` | Era {mood} {genre} | {mood} {genre} Era |
+| `era.mood.sad` | Malinconia | Melancholy |
+| `era.mood.angry` | Rabbia | Anger |
+| `era.mood.neutral` | Neutro | Neutral |
+| `era.mood.calm` | Calma | Calm |
+| `era.mood.happy` | Felicità | Happiness |
+| `era.mood.excited` | Energia | Energy |
 | `memory.on_this_day` | {years} anni fa ascoltavi "{track}" di {artist} | {years} years ago you were listening to "{track}" by {artist} |
 | `memory.first_time` | {years} anni fa scoprivi {artist} | {years} years ago you discovered {artist} |
 | `memory.milestone.events` | Hai raggiunto {count} brani ascoltati! | You reached {count} tracks listened! |
@@ -20864,6 +21145,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.7 | Sessione 59 (2026-10-28, issue #178) | **§2.15 `insight.*` — i template dei ricordi** (`memory.onThisDay`, `memory.firstTime`, `memory.milestone.*`, `memory.return`, `memory.seasonal`, `memory.disclaimer*`): la ratifica di `04-ANALYSIS-ALGORITHMS.md` (v1.0 🟢 APPROVED) li dichiara **vincolanti** (D-A.4). Riga di changelog mancante: la modifica c'era (Sessione 59) ma il header e la tabella erano rimasti a **v0.6** — il drift è stato corretto dalla Sessione 62 (issue #187) |
 | 0.8 | Sessione 62 (2026-10-28, issue #187) | **§2.17 `enrichment.*` (nuova) — Story 4.1**: le **otto chiavi** della pipeline audio features elencate da `21-AUDIO-FEATURES.md` §14, con i testi IT ed EN: gli stati della pipeline (`queued`, `analyzing`, `done`, `estimated`, `no_audio`, `disabled`), l'avviso **prima** del download del WASM (`download.size`, ~6 MB una volta sola) e l'avviso aggregato in Settings (`error.aggregate`, con pluralizzazione §3). §1: il namespace `enrichment` aggiunto alla tabella dei namespace. Il **confine "stima ≠ misura"** è dichiarato nei testi: `enrichment.status.estimated` è l'unica chiave che può descrivere una feature euristica e non usa mai la parola "analizzato" (`21§12`, D-AF.4). Header allineato (era fermo a **v0.6** dal Sessione 58, mentre il changelog era già alla 0.5 e `docs/INDEX.md` dichiarava v0.7) |
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
+| 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |
 
 
 
@@ -21293,8 +21575,12 @@ Tutti i fixture sono **deterministici** (seed mulberry32 fisso, default `0xC0FFE
 - `lockdown-2020.json` — 6.000 eventi, lockdown Italia (9 marzo → 31 maggio 2020); mood sad/calm dominante; ascolti notturni; per testare session segmentation + mood + pattern circadian
 - `breakup-oct2021.json` — 3.000 eventi, ottobre 2021; crollo valence, mood sad; per testare mood + valence_drop event detector + memory engine
 - `summer-roadtrip.json` — 5.000 eventi, giugno-agosto 2022; mood happy/excited; alta valence; per testare exploration event detector + mood
+- `geo-context.json` — 96 eventi, 4 settimane a Roma con casa/lavoro/spostamenti/viaggio/auto; per testare il classificatore di contesto L1 (`19-GEO-CONTEXT.md` §5, Story 1.6)
+- `era-shift.json` — 96 eventi, 16 settimane: 8 di *pop* diurno e poi 8 di *indie folk* notturno, con il **cambio di gusto al giorno 56**; per testare l'**era detector** (`04-ANALYSIS-ALGORITHMS.md` §5, Story 2.2): il confine è dichiarato e il rilevamento deve produrre **due** ere
 
 Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi dopo l'analisi, secondo le spec di `04-ANALYSIS-ALGORITHMS.md`.
+
+> **Gli scenari "composti" servono a un algoritmo deterministico**: `geo-context` ed `era-shift` non usano il generatore casuale, ma una cronologia **composta a mano**: servono pattern che un generatore casuale non produce (casa/lavoro/viaggio per il contesto, un cambio di gusto netto per le ere). Su un fixture casuale il confine atteso non esiste, e il test non potrebbe dichiarare un risultato.
 
 ### 3.4 Fixture demo mode
 
@@ -21791,10 +22077,13 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ### Story 2.2 — Era Detector `[PHASE-2]` `[AREA:analysis]` `[PRI:I]` `[SIZE:L]` `[DEP:2.1]`
 
+**Stato**: ✅ **DONE — implementata nella Sessione 69** (issue #211, branch `feat/211-era-detector`). La spec `04-ANALYSIS-ALGORITHMS.md` è **v1.2 🟢 APPROVED** (la ratifica v1.0 è della Sessione 59, issue #178; l'emendamento D-A.6 è della Sessione 65) e l'algoritmo di §5 è **change point detection** su firme settimanali — non clustering non supervisionato. Consegnato: il motore in `packages/core/src/analysis/era/` (firme con distribuzione dei generi, top artist, valence/energy medie, quota notturna e tasso di ripetizione; similarità con cosine + Jaccard + distanza normalizzata; rilevamento dei change point; costruzione delle ere; filtro `minEraDays`), il **classificatore del mood tracker** per il mood dominante dell'era (D.69.2), la persistenza degli insight `era` con `derivedVersion` (`04§9`) e il ricalcolo che sostituisce **l'insieme** delle ere (`replaceAllInsightsOfType`, D.69.8), il plug-in `createEraGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/era-shift.json` (8 settimane di *pop* + 8 di *indie folk*, confine dichiarato al giorno 56). **37 test** nuovi in `@ls/core`. Dettagli e scelte dichiarate (D.69.1…D.69.8): `docs/state/stories/2.2-era-detector.md`.
+
 **Acceptance criteria**:
-- [ ] **Algoritmo come specificato in `04-ANALYSIS-ALGORITHMS §5`** (sliding window + change point su similarity signature): parametri `windowDays=14`, `stepDays=7`, `similarityThreshold=0.65`, `minEraDays=14`, `weights={genre:0.5, artist:0.3, numeric:0.2}` (allineato alla spec, chiusura ambiguità "Bayesiano/PELT" in Sessione 13)
-- [ ] EraPayload completo per ogni era (vedi `02-DATA-SCHEMA.md §4`): `label`, `moodDominant`, `topArtistIds`, `topTrackIds`, `genreDistribution`, `avgValence`, `avgEnergy`, `nightShare`, `repeatRate`
-- [ ] Test: 1 anno con 2 ere evidenti (`fixtures/scenarios/lockdown-2020.json`) → rilevate correttamente; invarianti `04§5.5` verificate (disgiunte e coprenti, `sum(genreDistribution)≈1.0`, `moodDominant ∈ enum`)
+- [x] **Algoritmo come specificato in `04-ANALYSIS-ALGORITHMS §5`** (sliding window + change point su similarity signature): parametri `windowDays=14`, `stepDays=7`, `similarityThreshold=0.65`, `minEraDays=14`, `weights={genre:0.5, artist:0.3, numeric:0.2}` (allineato alla spec, chiusura ambiguità "Bayesiano/PELT" in Sessione 13)
+- [x] EraPayload completo per ogni era (vedi `02-DATA-SCHEMA.md §4`): `label`, `moodDominant`, `topArtistIds`, `topTrackIds`, `genreDistribution`, `avgValence`, `avgEnergy`, `nightShare`, `repeatRate`
+- [x] Test: 2 ere evidenti (`fixtures/scenarios/era-shift.json`, confine dichiarato al giorno 56) → rilevate correttamente; invarianti `04§5.5` verificate (disgiunte e ordinate, `sum(genreDistribution)≈1.0`, `moodDominant ∈ enum`), anche su `fixtures/scenarios/lockdown-2020.json`
+- [x] **Niente segnali inventati** (D-A.1): senza feature misurate o manuali l'era non viene prodotta (`avgValence`/`avgEnergy` non sono nullable in `02§4`)
 
 ---
 
@@ -22013,7 +22302,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 11. **4.1** pipeline audio features (issue #188, ✅ **DONE**, PR #197 merged `7458220`) — la pipeline è **completata** (Sessione 64): cascata, provider, limiter, coda, stoccaggio, CSP e i18n (`21§4…§11`), con **142 test** in `@ls/core` e **15** in `@ls/web`. La spec è ratificata (`21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED, Sessione 62): le nove decisioni D-AF.1…D-AF.9 sono chiuse e gli AC sono riscritti (`21§16`). Era il **primo** anello della catena **4.1 → 2.1 → 2.2/2.3**: ha fornito le valence/energy senza le quali la **2.2** (era detector) non ha `moodDominant`/`avgValence`/`avgEnergy` e la **2.3** (event detector) non ha i signal di cui parlare
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **1.6, 4.4, 3.4** geo e contesto di ascolto — dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201): la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1) è **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`); restano la **4.4** (DB MMDB on-demand + derivazione della città) e la **3.4** (nastro contesto), che dipendono da lei. Era la **prima story lavorabile**, e il blocco NEXT-STEP del README la indica: l'aggregatore ordina le story **migrate per id**, e «1.6» viene prima di «2.2». Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città
-14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità
+14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) è **completata** (Sessione 69, issue #211): il blocco NEXT-STEP del README ricade ora sulla **2.3** (event detector), l'ultima story dell'EPIC 2 ancora lavorabile
 15. **3.1, 3.2, 3.3** UI
 16. **5.1, 5.2** privacy
 17. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
@@ -22030,7 +22319,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 completata** (Sessione 69, issue #211): restano **2.3** (event detector) e le 3.x |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO (1.6 completata) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -22105,6 +22394,7 @@ Ogni story deve avere label GitHub:
 | 1.6.27 | Sessione 66 (2026-10-30, issue #196) | **Ratifica del terzo host della CSP**: `docs/21-AUDIO-FEATURES.md` passa a **v1.1 🟢 APPROVED** con **D-AF.9 emendata** — `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview. La v1.0 elencava i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP applicata bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Il project owner ha ratificato l'opzione **A** (confermare il terzo host) fra le due proposte dall'issue #196: l'opzione B (rivedere D-AF.1) avrebbe lasciato la pipeline senza provider acustico. Allineati: l'AC della Story 4.1 (i **tre** host dichiarati), `12-DEVOPS.md` (v1.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti dichiarati) e i commenti del codice applicato (`apps/web/src/security/`). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 — la ratifica allinea la **dichiarazione** al codice |
 | 1.6.29 | Sessione 68 (2026-10-31, issue #205) | **§35 — esito post-merge della Story 1.6**: la PR #209 è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit `68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian) → l'issue #205 è chiusa con `status:done` e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate`, `auto-bundle`. La pulizia git locale è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il fallimento noto, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main`, merge verificato via `gh`, branch remoto già assente, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). La story 1.6 passa a ✅ **DONE** con `merged_commit` e `merged_date` nel frontmatter; la riga dell'EPIC geo nella roadmap torna a ⬚ TODO (restano **4.4** e **3.4**); il blocco NEXT-STEP del README ricade sulla **4.4**, la prima story lavorabile della tranche |
 | 1.6.28 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 implementata** (fondazione geo e contesto di ascolto): il delta su `02-DATA-SCHEMA.md` passa a **v1.7** (i tre campi derivati `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS`, i toggle `retainCountry` (**default true**: il paese è derivato e non identificativo — decisione del project owner sull'issue #108), `retainCity`/`retainDeviceDetail` (default false) e `retainDeviceType`/`deriveContext` (default true), la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e **MIG-5**: il ricalcolo del contesto è esplicito e non azzera i campi già persistiti). Il **classificatore L1** vive in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo, paese di riferimento = moda su 90gg con ≥30 eventi) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel` sopravvive al ricalcolo) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`, generato da `scripts/generate-fixtures.mjs geo`). **39 test** nuovi in `@ls/core`. Scelte dichiarate (`docs/state/stories/1.6-geo-foundation.md`): `away` come complemento di R1, R4 vincolata alla durata delle sessioni (25 minuti, la soglia di R6) perché uno spostamento ricorrente non venga classificato `home`, il viaggio riconosciuto sull'intero *run* di giorni esteri, il modulo in `context/` (il layer `analysis` è puro e non ha dipendenze dal DB), il fuso come dato in `settings` (`app.timezone`). Correzione di numerazione: l'AC citava «E22», la spec `19` dichiara **E19** |
+| 1.6.30 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 implementata** (Era Detector): il motore in `packages/core/src/analysis/era/` — firme settimanali (distribuzione dei generi, top artist, valence/energy medie, quota notturna, tasso di ripetizione), similarità (cosine + Jaccard + distanza normalizzata), **change point detection** (nessun clustering non supervisionato, `04§5`), costruzione delle ere e filtro `minEraDays`; il mood dominante dell’era è classificato dal **classificatore del mood tracker** (D.69.2); la persistenza sostituisce **l’insieme** delle ere (`replaceAllInsightsOfType`, D.69.8); il plug-in `createEraGenerator` dell’orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/era-shift.json` (confine dichiarato al giorno 56). **37 test** nuovi in `@ls/core`. Sezione Story 2.2: `**Stato**:` ✅ DONE e i **4 AC** spuntati; la riga roadmap «2-3» allineata (restano 2.3 e 3.x); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla **2.3**). `docs/04-ANALYSIS-ALGORITHMS.md` → **v1.2** (`§8.1`), `docs/08-COPY-I18N.md` → **v0.10** (namespace `insight.era.*`), `docs/10-TESTING.md` → **v1.2** (§3.3) |
 
 
 
@@ -26344,7 +26634,7 @@ versione riscritta, verificabile:
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti
- *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|demo)
+ *   node scripts/generate-fixtures.mjs minimal        # solo uno (minimal|medium|large|lockdown|breakup|summer|geo|era|demo)
  *   node scripts/generate-fixtures.mjs --seed 42       # seed custom (default 0xC0FFEE)
  *
  * Output:
@@ -26354,6 +26644,8 @@ versione riscritta, verificabile:
  *   fixtures/scenarios/lockdown-2020.json
  *   fixtures/scenarios/breakup-oct2021.json
  *   fixtures/scenarios/summer-roadtrip.json
+ *   fixtures/scenarios/geo-context.json
+ *   fixtures/scenarios/era-shift.json
  *   fixtures/demo-user.json         (1 anno di storia sintetica, demo mode §06)
  *
  * Vincoli: nessuna dipendenza esterna (Node ≥ 20 LTS, solo stdlib).
@@ -27020,6 +27312,151 @@ function buildGeoContextScenario() {
   };
 }
 
+/**
+ * Scenario **cambio di gusto (era shift)** — Story 2.2, `04-ANALYSIS-ALGORITHMS.md` §5.
+ *
+ * L'era detector segmenta la storia in **ere**: periodi prolungati con
+ * caratteristiche coerenti, separati da un cambiamento significativo. Per
+ * verificarlo serve una cronologia con un **cambio netto** a un istante
+ * noto: i fixture di scenario esistenti usano generi e ritmi casuali, e
+ * nessun cambio netto renderebbe il confine deterministico.
+ *
+ * Questo fixture è quindi una **cronologia composta**, deterministica e senza
+ * RNG: 8 settimane di *pop* diurno (3 artisti, 6 ascolti a settimana) e
+ * poi 8 settimane di *indie folk* notturno (altri 3 artisti, stessa
+ * cadenza). Il cambio di gusto è al **giorno 56** (settimana 9).
+ *
+ * Il piano è dichiarato in `expectedInsights` e verificato dai test dell'era
+ * detector (`packages/core/src/analysis/__tests__/era-scenarios.test.ts`).
+ */
+function buildEraShiftScenario() {
+  const importId = 'imp-era-shift-1';
+  const start = Date.UTC(2024, 0, 1);
+  const weeksPerPhase = 8;
+  const dayMs = 86400000;
+
+  /** Le due fasi: generi, artisti e ore degli ascolti. */
+  const phases = [
+    {
+      key: 'a',
+      genres: ['pop'],
+      hours: [9, 10, 11, 12, 13, 14],
+    },
+    {
+      key: 'b',
+      genres: ['indie', 'folk'],
+      hours: [22, 23, 0, 1, 2, 3],
+    },
+  ];
+
+  const artists = [];
+  const tracks = [];
+  for (const phase of phases) {
+    for (let i = 1; i <= 3; i += 1) {
+      artists.push({
+        id: `ar-era-${phase.key}${i}`,
+        name: `Artisti Era ${phase.key.toUpperCase()}${i}`,
+        mbid: null,
+        genres: phase.genres,
+        spotifyId: `sp-ar-era-${phase.key}${i}`,
+      });
+      for (let t = 1; t <= 2; t += 1) {
+        tracks.push({
+          id: `tr-era-${phase.key}${i}-${t}`,
+          canonicalKey: `fuzzy:ck-era-${phase.key}${i}-${t}`,
+          name: `Brano Era ${phase.key.toUpperCase()}${i}-${t}`,
+          artistId: `ar-era-${phase.key}${i}`,
+          albumId: null,
+          durationMs: 240000,
+          isrc: null,
+          mbid: null,
+          explicit: false,
+          genres: phase.genres,
+          artworkUrl: null,
+          platformIds: { spotify: `sp-tr-era-${phase.key}${i}-${t}` },
+          firstSeenAt: start,
+          lastSeenAt: start,
+          listenCount: 0,
+          spotifyId: `sp-tr-era-${phase.key}${i}-${t}`,
+        });
+      }
+    }
+  }
+
+  const listens = [];
+  let counter = 0;
+
+  /**
+   * Una settimana di ascolti: 6 slot (3 artisti × 2 brani), uno per giorno.
+   *
+   * Gli slot sono distanziati di un giorno: la cronologia è "sparse" ma
+   * regolare, e ogni finestra di 14 giorni contiene 12 ascolti — sopra la
+   * soglia `minEventsPerWindow` (5) di 04§5.3.
+   */
+  const week = (weekIndex, phase) => {
+    for (let slot = 0; slot < 6; slot += 1) {
+      counter += 1;
+      const artistIndex = (slot % 3) + 1;
+      const trackIndex = Math.floor(slot / 3) + 1;
+      const trackId = `tr-era-${phase.key}${artistIndex}-${trackIndex}`;
+      const day = weekIndex * 7 + (slot % 6);
+      const hour = phase.hours[slot];
+      const startedAt = start + day * dayMs + hour * 3600000;
+      const timestamp = startedAt + 240000;
+      listens.push({
+        id: `le-era-${String(counter).padStart(4, '0')}`,
+        eventKey: `spotify:ek-era-${String(counter).padStart(4, '0')}`,
+        platform: 'spotify',
+        importId,
+        timestamp,
+        startedAt,
+        durationMs: 240000,
+        trackId,
+        completed: true,
+        skipped: false,
+        shuffle: false,
+        offline: false,
+        incognito: false,
+        reasonStart: 'playbtn',
+        reasonEnd: 'trackdone',
+        deviceType: 'mobile',
+        deviceDetail: null,
+        ip: null,
+        country: 'IT',
+        city: null,
+        citySource: null,
+        cityConfidence: null,
+        day: new Date(startedAt).toISOString().slice(0, 10),
+      });
+    }
+  };
+
+  for (let w = 0; w < weeksPerPhase; w += 1) week(w, phases[0]);
+  for (let w = 0; w < weeksPerPhase; w += 1) week(weeksPerPhase + w, phases[1]);
+
+  return {
+    _metadata: {
+      name: 'era-shift',
+      version: '1.0',
+      session: 69,
+      generatedAt: new Date().toISOString(),
+      seed: null,
+      description:
+        'Cambio di gusto (Story 2.2): 8 settimane di pop diurno e 8 settimane di indie folk notturno, con il cambio al giorno 56 (settimana 9). Verifica 04-ANALYSIS §5 (era detector): change point detection, due ere disgiunte.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedInsights: {
+        eraCount: '2 ere (confine alla settimana 9: pop → indie folk)',
+        eraMoods: ['sad', 'happy'],
+        eraBoundary: 'giorno 56 dalla prima data (inizio della seconda era)',
+      },
+      spec: '02-DATA-SCHEMA.md v1.7 + 04-ANALYSIS-ALGORITHMS.md v1.0 §5 + 10-TESTING.md §3.3',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
@@ -27175,6 +27612,7 @@ const targets = {
   },
   demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
   geo: () => buildGeoContextScenario(),
+  era: () => buildEraShiftScenario(),
 };
 
 function writeJson(path, data) {
@@ -27213,6 +27651,7 @@ for (const t of targets_) {
   else if (t === 'breakup') out = resolve(SCENARIOS_DIR, 'breakup-oct2021.json');
   else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
   else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
+  else if (t === 'era') out = resolve(SCENARIOS_DIR, 'era-shift.json');
   else out = resolve(SCENARIOS_DIR, `${t}.json`);
   writeJson(out, data);
 }

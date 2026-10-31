@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import type {
   Artist,
   AudioFeatures,
+  EraPayload,
   Insight,
   ListenEvent,
   MemoryPayload,
@@ -32,7 +33,12 @@ export interface ScenarioFixture {
 }
 
 /** Nomi dei fixture di scenario disponibili. */
-export const SCENARIOS = ['lockdown-2020', 'breakup-oct2021', 'summer-roadtrip'] as const;
+export const SCENARIOS = [
+  'lockdown-2020',
+  'breakup-oct2021',
+  'summer-roadtrip',
+  'era-shift',
+] as const;
 
 /** Carica un fixture di scenario. */
 export function loadScenario(name: (typeof SCENARIOS)[number]): ScenarioFixture {
@@ -74,6 +80,18 @@ export function memoryPayloadOf(insight: Insight): MemoryPayload {
 export function moodPayloadOf(insight: Insight): MoodPeriodPayload {
   if (insight.payload.kind !== 'mood') {
     throw new Error(`Insight ${insight.id} is not a mood insight`);
+  }
+  return insight.payload;
+}
+
+/**
+ * Payload di era di un insight.
+ *
+ * Come `memoryPayloadOf`, ma per `EraPayload` (02§4).
+ */
+export function eraPayloadOf(insight: Insight): EraPayload {
+  if (insight.payload.kind !== 'era') {
+    throw new Error(`Insight ${insight.id} is not an era insight`);
   }
   return insight.payload;
 }
