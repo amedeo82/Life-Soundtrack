@@ -685,7 +685,7 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 ### 9.10 Gate reali di `ci.yml`
 
 > **Sessione 73 (issue #224): la tabella è stata riscritta.** `ci.yml` non è più un job
-> unico con 18 step in sequenza: è **9 job** di cui 8 girano **in parallelo** e uno
+> unico con 18 step in sequenza: è **11 job** di cui **10 girano in parallelo** e uno
 > (`quality`) è il check aggregatore. La tabella qui sotto è l'elenco autorevole dei
 > gate, riorganizzati per job. §9.13 ha l'audit temporale; **§9.14** ha le misure di
 > prestazione prima/dopo.
@@ -698,30 +698,32 @@ protection può interpretare un check saltato come successo.
 
 | # | Job | Step / gate | Bloccante | Issue |
 |---|-----|-------------|:---------:|-------|
-| 1 | `node` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
-| 2 | `node` | `Lint` (`pnpm run lint`) | sì | — |
-| 3 | `node` | `Typecheck` (`pnpm run typecheck`) | sì | — |
-| 4 | `node` | `Test` (`pnpm run test`) | sì | — |
-| 5 | `node` | `Build` (`pnpm run build`) | sì | — |
-| 3 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
-| 4 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
-| 5 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
-| 6 | `gates-docs` | `Gate "fatti del README" fail-closed` | sì | **#161** |
-| 7 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | sì | #70 |
-| 8 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | sì | #104 |
-| 9 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
-| 10 | `gates-workflows` | `Copertura git add vs $targets` | sì | #136 |
-| 11 | `gates-workflows` | `Scope permissions: valide` | sì | **#135** |
-| 12 | `gates-workflows` | `Sync origin/main prima del push su main` | sì | **#140** |
-| 13 | `gates-workflows` | `Ordinamento dei writer di main` | sì | **#149** |
-| 14 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | sì | #76 |
-| 15 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | sì | #110 |
-| 16 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | sì | sessione 33 |
-| 17 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | sì | #53 |
-| 18 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
-| 19 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
-| 20 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
-| 21 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
+| 1 | `node-lint-typecheck` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
+| 2 | `node-lint-typecheck` | `Lint` (`pnpm run lint`) | sì | — |
+| 3 | `node-lint-typecheck` | `Typecheck` (`pnpm run typecheck`) | sì | — |
+| 4 | `node-test` | `Installa dipendenze` | sì | Story 0.1 |
+| 5 | `node-test` | `Test` (`pnpm run test`) | sì | — |
+| 6 | `node-build` | `Installa dipendenze` | sì | Story 0.1 |
+| 7 | `node-build` | `Build` (`pnpm run build`) | sì | — |
+| 8 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
+| 9 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+| 10 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
+| 11 | `gates-docs` | `Gate "fatti del README" fail-closed` | sì | **#161** |
+| 12 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | sì | #70 |
+| 13 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | sì | #104 |
+| 14 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
+| 15 | `gates-workflows` | `Copertura git add vs $targets` | sì | #136 |
+| 16 | `gates-workflows` | `Scope permissions: valide` | sì | **#135** |
+| 17 | `gates-workflows` | `Sync origin/main prima del push su main` | sì | **#140** |
+| 18 | `gates-workflows` | `Ordinamento dei writer di main` | sì | **#149** |
+| 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | sì | #76 |
+| 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | sì | #110 |
+| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | sì | sessione 33 |
+| 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | sì | #53 |
+| 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
+| 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
+| 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
+| 26 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
 
 I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check
 `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono

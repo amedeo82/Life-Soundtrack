@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 18:10
+> Data: 2026-10-31 18:18
 > Totale file: 129
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 128 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1867.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 18:10
+- Dimensione totale: 1868.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 18:18
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -24814,7 +24814,7 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 ### 9.10 Gate reali di `ci.yml`
 
 > **Sessione 73 (issue #224): la tabella è stata riscritta.** `ci.yml` non è più un job
-> unico con 18 step in sequenza: è **9 job** di cui 8 girano **in parallelo** e uno
+> unico con 18 step in sequenza: è **11 job** di cui **10 girano in parallelo** e uno
 > (`quality`) è il check aggregatore. La tabella qui sotto è l'elenco autorevole dei
 > gate, riorganizzati per job. §9.13 ha l'audit temporale; **§9.14** ha le misure di
 > prestazione prima/dopo.
@@ -24827,30 +24827,32 @@ protection può interpretare un check saltato come successo.
 
 | # | Job | Step / gate | Bloccante | Issue |
 |---|-----|-------------|:---------:|-------|
-| 1 | `node` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
-| 2 | `node` | `Lint` (`pnpm run lint`) | sì | — |
-| 3 | `node` | `Typecheck` (`pnpm run typecheck`) | sì | — |
-| 4 | `node` | `Test` (`pnpm run test`) | sì | — |
-| 5 | `node` | `Build` (`pnpm run build`) | sì | — |
-| 3 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
-| 4 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
-| 5 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
-| 6 | `gates-docs` | `Gate "fatti del README" fail-closed` | sì | **#161** |
-| 7 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | sì | #70 |
-| 8 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | sì | #104 |
-| 9 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
-| 10 | `gates-workflows` | `Copertura git add vs $targets` | sì | #136 |
-| 11 | `gates-workflows` | `Scope permissions: valide` | sì | **#135** |
-| 12 | `gates-workflows` | `Sync origin/main prima del push su main` | sì | **#140** |
-| 13 | `gates-workflows` | `Ordinamento dei writer di main` | sì | **#149** |
-| 14 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | sì | #76 |
-| 15 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | sì | #110 |
-| 16 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | sì | sessione 33 |
-| 17 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | sì | #53 |
-| 18 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
-| 19 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
-| 20 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
-| 21 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
+| 1 | `node-lint-typecheck` | `Installa dipendenze` (`pnpm install --frozen-lockfile`) | sì | Story 0.1 |
+| 2 | `node-lint-typecheck` | `Lint` (`pnpm run lint`) | sì | — |
+| 3 | `node-lint-typecheck` | `Typecheck` (`pnpm run typecheck`) | sì | — |
+| 4 | `node-test` | `Installa dipendenze` | sì | Story 0.1 |
+| 5 | `node-test` | `Test` (`pnpm run test`) | sì | — |
+| 6 | `node-build` | `Installa dipendenze` | sì | Story 0.1 |
+| 7 | `node-build` | `Build` (`pnpm run build`) | sì | — |
+| 8 | `gates-docs` | `Bundle in sync` (`generate-bundle.ps1 -Check`) | **no** (`::warning::`) | #63 |
+| 9 | `gates-docs` | `Lazy-state in sync` (`aggregate-state.ps1 -Check`) | **no** (`::warning::`) | #63, #66 |
+| 10 | `gates-docs` | `Fatti del README in sync con il codice` (`check-readme-facts.mjs`) | sì | **#161** |
+| 11 | `gates-docs` | `Gate "fatti del README" fail-closed` | sì | **#161** |
+| 12 | `gates-aggregate` | `Aggregator deterministico` (`test-aggregate-determinism.sh`, 37 assert) | sì | #70 |
+| 13 | `gates-bundle` | `Bundle check fail-closed` (`test-bundle-check-idempotent.sh`, 12 assert) | sì | #104 |
+| 14 | `gates-workflows` | `Workflow Actions validi` (`validate-workflows.mjs`) | sì | #73 |
+| 15 | `gates-workflows` | `Copertura git add vs $targets` | sì | #136 |
+| 16 | `gates-workflows` | `Scope permissions: valide` | sì | **#135** |
+| 17 | `gates-workflows` | `Sync origin/main prima del push su main` | sì | **#140** |
+| 18 | `gates-workflows` | `Ordinamento dei writer di main` | sì | **#149** |
+| 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | sì | #76 |
+| 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | sì | #110 |
+| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | sì | sessione 33 |
+| 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | sì | #53 |
+| 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
+| 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
+| 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
+| 26 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
 
 I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check
 `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono
@@ -35432,9 +35434,20 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # 1. Gate sui sorgenti TypeScript.
+  # 1. Gate sui sorgenti TypeScript, su 3 job paralleli.
+  #
+  # La misura sul runner (run 41223269637, 2026-10-31) diceva che il job
+  # `node` unico era il **percorso critico** della pipeline: 106 s di cui
+  # ~27 s di setup+install e ~80 s di task. I 3 job qui sotto isolano i
+  # task su runner diversi: il tempo pareggio diventa il max
+  # (~67 s) invece della somma (~106 s).
+  #
+  # L'installazione delle dipendenze viene rifatta in ciascun job: costa
+  # ~17 s per job ma **in parallelo**, quindi paga una volta sola sul
+  # percorso critico. Lo store pnpm e' condiviso dalla cache di
+  # `setup-node`, quindi il download avviene una sola volta per lockfile.
   # ---------------------------------------------------------------------------
-  node:
+  node-lint-typecheck:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35451,32 +35464,54 @@ jobs:
       - name: Installa dipendenze
         run: pnpm install --frozen-lockfile
 
-      # Sessione 73 (issue #224): i 4 gate (lint, typecheck, test, build) erano
-      # 4 invocazioni `turbo run <task>` SEQUENZIALI (52,7 s misurati), cioe'
-      # 4 round-trip di turbo uno dietro l'altro. Una singola invocazione con
-      # i 4 task lascia turbo costruire il task graph una volta sola e li
-      # eseguire in parallelo dove il grafo lo consente: 32,8 s misurati
-      # (-20 s, -38%).
-      #
-      # **MA** la forma parallela si e' rivelata sbagliata sul runner: il
-      # runner GitHub ha 2 vCPU, e `build` (vite build + tsc) in concorrenza
-      # con `test` ruba CPU al vitest: i 2 test di integrazione del fixture
-      # `db-seed/medium.json` (5000 eventi) sono scaduti per timeout
-      # ("Test timed out in 5000ms"). E' la stessa classe del lesson 30-1
-      # (il test di performance misurava il carico del runner, non il layer
-      # DB): la soglia dell'AC presuppone che il test giri isolato, e la
-      # soglia **non** si tocca.
-      #
-      # Quindi: `test` resta **isolato**, e gli altri tre task tornano
-      # sequenziali come prima. I 4 gate restano 4 e tutti bloccanti.
       - name: Lint
         run: pnpm run lint
 
       - name: Typecheck
         run: pnpm run typecheck
 
+  node-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installa dipendenze
+        run: pnpm install --frozen-lockfile
+
+      # `test` gira **isolato**: nessun altro task CPU-bound condivide il
+      # processore. Con i 4 task in un'unica invocazione turbo, `build`
+      # (vite + tsc) rubava CPU al vitest e i 2 test di integrazione del
+      # fixture `db-seed/medium.json` scadevano per timeout ("Test timed out
+      # in 5000ms"). La soglia di un test time-sensitive e' un acceptance
+      # criterion e non si tocca (lesson 30-1, `12-DEVOPS.md §9.14.7`).
       - name: Test
         run: pnpm run test
+
+  node-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Installa dipendenze
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build
@@ -35752,7 +35787,9 @@ jobs:
   quality:
     if: always()
     needs:
-      - node
+      - node-lint-typecheck
+      - node-test
+      - node-build
       - gates-docs
       - gates-aggregate
       - gates-bundle
@@ -35767,7 +35804,7 @@ jobs:
       - name: Esito dei gate paralleli
         shell: bash
         run: |
-          results="${{ needs.node.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
           echo "Risultati: $results"
           failed=""
           for r in $results; do
