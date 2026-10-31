@@ -3,9 +3,9 @@ number: 71
 title: "Baseline PowerShell 7 (pwsh) per gli script del repo"
 date: 2026-10-31
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: 92f0d8e
+merged_date: 2026-10-31
 branch: docs/218-powershell-7-baseline
 pr: 219
 claim: kilo-hp-elitebook-lrm6
