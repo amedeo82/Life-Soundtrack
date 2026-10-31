@@ -7322,6 +7322,48 @@ per il regex JavaScript. Ora le righe sono normalizzate una volta sola.
 | 74-4 | **Un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex e non avrebbe intercettato un YAML rotto | Controllo di validità YAML + normalizzazione CRLF, con test di regressione |
 | 74-5 | **Il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern con `$` smettono di matchiare | Normalizzare il fine-riga una volta sola, prima di qualsiasi controllo |
 
+## Il merge di PR #227 e la verifica sul runner
+
+Dopo il merge (2026-10-31T18:22:26Z, commit `51f4076`) la run `CI` su `main` è durata **42 s** con
+i 3 job `node-*` **skipped** (0 s, nessuna installazione di dipendenze) e gli 11 gate verdi —
+contro i **172 s** della pipeline sequenziale originale.
+
+### ⚠️ Correzione a una premessa di questa sessione
+
+Questa sessione aveva motivato il filtro per path del trigger `push` con l'idea che i commit dei
+**writer automatici** fossero «gli unici che arrivano su `main` senza essere mai passati da una PR»
+e che il filtro li catturasse. La premessa è corretta, **la conseguenza pratica no**: quei commit
+**non attivano nessuna run**, e non è colpa del filtro.
+
+**GitHub non crea workflow run dai push effettuati con il `GITHUB_TOKEN` del repository** (il
+comportamento documentato che impedisce i loop ricorsivi; l'unica eccezione è
+`workflow_dispatch`/`repository_dispatch`). I due writer pushano con `secrets.GITHUB_TOKEN`
+(`auto-state-aggregate.yml:54`, `auto-bundle.yml:101`).
+
+Verificato sui dati dell'API GitHub: i commit dei writer (`3fe9483`, `e661e37`, `2f8d26d`,
+`04c76fd`) **non** hanno mai attivato una run `CI` — né prima né dopo questa sessione, nemmeno
+quando il trigger `push` era privo di filtro. Gli unici workflow che si attivano sui loro commit
+sono quelli con trigger `workflow_run`, che la soppressione **non** colpisce: è esattamente il
+workaround che `auto-bundle.yml` usa già per l'ordinamento dei writer (issue #149).
+
+**Conseguenze, e scelte:**
+
+- Il filtro per path, nella pratica, serve a **saltare** la CI sui merge umani che non toccano i 5
+  file aggregati — non a catturare i commit dei writer.
+- **L'integrità di `main` dopo i writer non è garantita dalla CI**, ma dai writer stessi: ciascuno
+  è idempotente, è conservato da `git diff --quiet` prima del push, e il `workflow_run` di
+  `auto-bundle` rigenera il bundle **dopo** l'aggregator, riparando da solo il caso dell'ordinamento
+  invertito (issue #149).
+- Volere **anche** un check indipendente sullo stato finale di `main` richiederebbe un trigger
+  `workflow_run` su `ci.yml` per i due writer: **+1 run leggera per merge**. È un trade-off fra
+  copertura e numero di run, e la scelta è del project owner: **non è stato fatto**.
+
+**Lesson**: una premessa corretta può avere una conseguenza pratica falsa. «I commit dei writer
+sono gli unici che non passano da una PR» ⇒ «il filtro li cattura» sembra ovvio, ma fra la premessa
+e la conseguenza c'è il comportamento di GitHub sui push fatti col `GITHUB_TOKEN`. La verifica va
+fatta **sui dati**, non per deduzione: è stato controllato l'API GitHub run per run, e i commit dei
+writer non hanno *mai* attivato una `CI`.
+
 ## Documenti aggiornati
 
 - `docs/12-DEVOPS.md` §9.10 (27 gate su 12 job), **§9.14.10** (nuova: l'anatomia del ciclo e le
