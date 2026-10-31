@@ -587,7 +587,7 @@ Obiettivo: allineare toolchain e dipendenze alle ultime major disponibili **a sv
 - [ ] Nessun warning `deprecated` sulle dipendenze dirette (root + workspace projects)
 - [ ] `pnpm run lint`, `pnpm run test`, `pnpm run build` verdi dopo il bump
 - [ ] `05-ARCHITECTURE.md` §8 e `12-DEVOPS.md` citano le versioni effettivamente in uso
-- [ ] `pwsh scripts/generate-bundle.ps1 --check` exit 0
+- [ ] `pwsh scripts/generate-bundle.ps1 -Check` exit 0
 
 **Dipendenze**: Story 0.1 (scheduling: **solo a implementazione conclusa**, mai a metà di altre story)
 **Spec**: `05-ARCHITECTURE.md` §8; `12-DEVOPS.md` §2-3; decisioni D.10.1/D.10.2 in `SESSIONS.md`

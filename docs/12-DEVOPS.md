@@ -1,6 +1,6 @@
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.2 · Sessione 67 (2026-10-30, issue #201) · gate "fatti del README"
+> Status: 🟡 DRAFT · Versione 1.3 · Sessione 71 (2026-10-31) · baseline PowerShell 7 (`pwsh`)
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -264,15 +264,14 @@ pwsh scripts/generate-bundle.ps1 -List     # stampa la lista dei file inclusi (a
 pwsh scripts/generate-bundle.ps1 -Help     # help completo
 ```
 
-> ⚠️ **PowerShell 5.1 + doppio trattino `--` (issue #104)**: usare sempre `-Check` /
-> `-List` / `-Help` (singolo trattino), **MAI** `--check` / `--list`. In Windows
-> PowerShell 5.1 il call operator `&` interpreta `--check` come fine-dei-parametri
-> + token posizionale `check`: `[switch]$Check` non si lega e lo script ricadeva
-> silenziosamente in modalità WRITING (riscrittura di `BUNDLE.md` + exit 0 = fail-open,
-> vedi §9.7b). Lo script ora esce **2** con messaggio esplicito se vede un flag
-> `--*`, ma è più semplice usare la sintassi corretta direttamente. Vale anche per
-> `scripts/aggregate-state.ps1 -Check` (stesso guard applicato). In PowerShell 7
-> (`pwsh`) `--check` viene normalizzato a `-Check` quindi non si vede il bug.
+> **Baseline PowerShell 7 (`pwsh`)** *(Sessione 71)*: gli script in `scripts/*.ps1` si invocano
+> con `pwsh`, non con `powershell` (Windows PowerShell 5.1). In `pwsh` il doppio trattino viene
+> normalizzato sul singolo **prima** del binding, quindi `--check` e `-Check` sono equivalenti:
+> il bug dell'issue #104 (fail-open: `--check` ricadeva in modalità WRITING) è **proprio di
+> 5.1** e non si reproduce con il baseline corrente. La forma **canonica** resta comunque quella
+> a **singolo trattino** (`-Check` / `-List` / `-Help`): è l'unica che si comporta allo stesso
+> modo su 5.1 e 7, ed è quella che il guard fail-closed indica come corretta. Se un gate riceve
+> un flag che non riconosce esce **2** (errore di parametro), **non** 1 (drift) — vedi §9.7b.
 
 ### 9.2 Quando aggiornare lo script
 
@@ -367,6 +366,16 @@ lì è ancora peggio (l'aggregator scrive 4 file globali, drift invisibile su
 `main`). Test di regressione in `scripts/test-bundle-check-idempotent.sh` (5+1 scenari
 bash su repo temporanei, gate bloccante in CI via `.github/workflows/ci.yml`).
 
+**Stato al baseline PowerShell 7** *(Sessione 71)*: il guard resta in piedi, ma
+nello scenario che l'ha motivato non scatta più. `pwsh` normalizza `--check` su
+`-check` **prima** del binding dei parametri, quindi `[switch]$Check` si lega e il
+flag non finisce né in `$args` né in `$MyInvocation.UnboundArguments`: il guard
+non vede nulla e lo script esegue il check richiesto (exit 0 se in sync). Il
+guard rimane utile per due casi reali: un **flag davvero inesistente** (`-Chek`,
+`--dryrun` senza il nome giusto) e l'invocazione da una shell **5.1**, dove il
+doppio trattino non viene normalizzato. Verificato su pwsh 7.6.9: `-Check` e
+`--check` danno lo stesso risultato e lo stesso exit code.
+
 ### 9.8 Semantica come gate CI
 
 Il flag `-Check` ha **semantica di fail-fast gate CI** (decisione cristallizzata in S32, issue #41 — formalizzazione dell'opzione A di `gh issue #10` chiusa in S17):
@@ -384,13 +393,13 @@ Il flag `-Check` ha **semantica di fail-fast gate CI** (decisione cristallizzata
 2. **Determinismo cross-tempo**: il check passa anche se lanciato a minuti/ore diverse dall'ultima rigenerazione, purché il contenuto sia semanticamente identico. La riga `> Data: ...` viene normalizzata a `> Data: 0000-00-00 00:00` prima del confronto.
 3. **Zero falsi positivi**: il check non fallisce MAI per sola differenza di timestamp o line endings.
 4. **Rilevamento drift reale**: ogni drift di `$files` (aggiunta/rimozione di file in scope) o di contenuto (modifica a un file incluso) viene rilevato con messaggio esplicito ("Da aggiungere al bundle: …", "Da rimuovere dal bundle: …", "Lista file identica, ma contenuto cambiato").
-5. **Fail-fast**: `--check` NON modifica mai `BUNDLE.md`; per la rigenerazione serve il flag di default (senza `--check`).
+5. **Fail-fast**: `-Check` NON modifica mai `BUNDLE.md`; per la rigenerazione serve il flag di default (senza `-Check`).
 
 **Integrazione CI** (`.github/workflows/ci.yml`):
 
 ```yaml
 - name: Bundle in sync
-  run: pwsh scripts/generate-bundle.ps1 --check
+  run: pwsh scripts/generate-bundle.ps1 -Check
 ```
 
 Il job `bundle-check` è un **CI gate bloccante**: PR con BUNDLE.md non in sync non possono essere mergate finché l'agente non rigenera il bundle nella stessa PR (o, in emergenza, con `--no-verify` documentando la ragione).
@@ -698,7 +707,7 @@ Elenco dei 18 step nominati del job `quality`, verificato riga per riga contro `
 | 17 | **`Fatti del README in sync con il codice`** (`check-readme-facts.mjs`) | sì | **#161** |
 | 18 | **`Gate "fatti del README" fail-closed`** | sì | **#161** |
 
-I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
+I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono divergere per casi non riproducibili localmente. L'asse **versione di PowerShell** è invece chiuso: dal baseline **PowerShell 7 (`pwsh`)** (Sessione 71) sia la dev machine che la CI girano lo stesso engine, quindi il confronto non soffre più della differenza PS 5.1 vs 7 che era la causa originale (issue #63). Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
 
 **Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
 
@@ -754,3 +763,4 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 1.0 | Sessione 62 (2026-10-28) | **§2.1 CSP** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED, issue #187): `connect-src` aggiunge i due host della pipeline delle audio features (D-AF.9) — `https://acousticbrainz.org` (bonus sui MBID) e `https://audio-ssl.itunes.apple.com` (download dell'anteprima audio di 30 s, analizzata **in locale**: i byte non escono e non vengono persistiti). Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`. `'wasm-unsafe-eval'` era già presente per Essentia.js e resta |
 | 1.1 | Sessione 66 (2026-10-30) | **§2.1 CSP**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (issue #196, ratifica del project owner). La v1.0 della spec `21-AUDIO-FEATURES.md` elencava in `connect-src` i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico — Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati (D.A.1). **D-AF.9 è emendata** (`21` v1.1): i **tre** host sono gli unici aggiunti. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della PR #197 (Sessione 64): la modifica è l'allineamento della **dichiarazione** al codice |
 | 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
+| 1.3 | Sessione 71 (2026-10-31) | **Baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1`. `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1: il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `§9.1` prescriveva «MAI `--check`», `§9.7b` descriveva il bug #104 come se fosse il caso normale e la motivazione dei due gate warning-only era attribuita alla differenza **PS 5.1 vs 7** invece che a quella **di piattaforma**. §9.1 riscritta: il doppio trattino in `pwsh` viene normalizzato sul singolo **prima** del binding, quindi `--check` e `-Check` sono equivalenti (verificato su pwsh 7.6.9); il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente. La forma canonica resta a **singolo trattino** (`-Check`), unica forma con comportamento identico su 5.1 e 7 e quella indicata dal guard fail-closed. §9.7b: il guard resta in piedi ma non scatta più nello scenario che l'ha motivato — protegge i flag davvero inesistenti e le invocazioni da shell 5.1. §9.10: la motivazione dei due step warning-only è riformulata — l'asse versione di PowerShell è chiuso, resta quello di piattaforma (dev Windows vs CI Linux). Nessuna modifica al codice degli script né alla semantica dei gate in CI. |

@@ -129,6 +129,7 @@ $files = @(
     "docs/state/sessions/68-geo-foundation.md",
     "docs/state/sessions/69-era-detector.md",
     "docs/state/sessions/70-event-detector.md",
+    "docs/state/sessions/71-powershell-7-baseline.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",

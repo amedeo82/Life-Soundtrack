@@ -47,7 +47,7 @@ Gli agenti di sviluppo condividono **lo stesso PAT del project owner** (AGENTS.m
 
 - **Positive**: la selezione del lavoro è disambiguata per costruzione anche con prompt generici; il claim è visibile nella UI GitHub (label + commenti) senza toccare `main`; la cascata distribuisce gli agenti su story diverse automaticamente; il TTL 12h recupera i claim di agenti morti; la stessa issue mantiene lo storico completo di claim/yield/release (audit trail).
 - **Negative**: finestra di race residua (secondi) tra il controllo delle candidate e la riverifica — chiusa deterministicamente dalla regola dell'ID commento più basso; richiede lo scope PAT `issues: read/write` per gli agenti di sviluppo; richiede che gli agenti seguano la procedura alla lettera (da qui la normativa in `AGENTS.md`, primo file letto).
-- **Mitigazioni**: la procedura è il passo 1 del "Primo task di un agente"; il check `--check` del bundle non è toccato; nessun impatto su codice o schema dati.
+- **Mitigazioni**: la procedura è il passo 1 del "Primo task di un agente"; il check `-Check` del bundle non è toccato; nessun impatto su codice o schema dati.
 
 ## Riferimenti
 
