@@ -42,11 +42,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **2.2** — Era Detector (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **2.3** — Event Detector (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/2.2-era-detector.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/2.3-event-detector.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 2.3, 3.4, 4.4.
+Altre non-done e non bloccate in ordine di priorita backlog (id): 3.4, 4.4.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
