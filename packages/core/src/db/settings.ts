@@ -34,6 +34,17 @@ export const LISTENBRAINZ_SETTINGS_KEY = 'listenbrainz.config';
 export const SCROBBLE_CURSOR_LISTENBRAINZ_KEY = 'scrobble.cursor.listenbrainz';
 
 /**
+ * Chiave del fuso orario dell'utente (Story 1.6, `19-GEO-CONTEXT.md` §5.3).
+ *
+ * Il classificatore di contesto usa l'ora **locale** ("ascolto la sera"): il
+ * fuso è un dato, non un parametro dell'algoritmo, quindi non entra nel
+ * `derivedVersion`. La spec chiede esplicitamente una **copia nelle
+ * impostazioni**: `PatternPayload.userTimezone` è un campo derivato e non
+ * può esserne la fonte.
+ */
+export const APP_TIMEZONE_SETTINGS_KEY = 'app.timezone';
+
+/**
  * Modalità del proxy Last.fm (D-SH.14).
  *
  * - `read-only` (default): il proxy inoltra solo GET → l'hub resta in sola
@@ -182,6 +193,23 @@ export async function saveScrobbleCursor(
     maxTs: cursor.maxTs,
     lastSyncedAt: cursor.lastSyncedAt,
   });
+}
+
+/**
+ * Carica il fuso orario dell'utente (IANA).
+ *
+ * Default `'UTC'`: è il confine che il resto del layer di analisi usa
+ * (`analysis/datetime.ts`), quindi un utente senza fuso impostato non vede
+ * il proprio orario spostato.
+ */
+export async function loadUserTimezone(db: LifeSoundtrackDB): Promise<string> {
+  const stored = await getSetting<string>(db, APP_TIMEZONE_SETTINGS_KEY);
+  return typeof stored === 'string' && stored.trim().length > 0 ? stored.trim() : 'UTC';
+}
+
+/** Salva il fuso orario dell'utente (IANA, es. `Europe/Rome`). */
+export async function saveUserTimezone(db: LifeSoundtrackDB, timezone: string): Promise<void> {
+  await setSetting(db, APP_TIMEZONE_SETTINGS_KEY, timezone.trim());
 }
 
 /**

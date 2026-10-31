@@ -12,12 +12,32 @@ import type { SpotifyStreamingRecord } from '../spotify/types';
  * con assert sul `deviceType` persistito.
  */
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
   syncCloud: false,
+};
+
+/**
+ * Impostazioni con la stringa grezza del dispositivo conservata.
+ *
+ * `retainDeviceDetail` (default `false`, `19-GEO-CONTEXT.md` §7.1) governa
+ * la persistenza di `deviceDetail`: è un dato **identificante**, quindi
+ * opt-in. I test che distinguono i record importati per la stringa del
+ * provider (`CarPlay`, `Android Auto`) hanno bisogno del consenso espresso:
+ * il gate `carDetectionConsent` è **separato** e resta il soggetto di questi
+ * test.
+ */
+const PRIVACY_WITH_DETAIL: PrivacySettings = {
+  ...PRIVACY_DEFAULTS,
+  retainDeviceDetail: true,
 };
 
 /** Record di streaming history con `platform` CarPlay (mapDeviceType → 'car'). */
@@ -107,45 +127,59 @@ describe('import Spotify — carDetectionConsent on/off sullo stesso record (iss
   });
 
   it('CarPlay: consenso OFF ⇒ deviceType `unknown`, consenso ON ⇒ `car`', async () => {
-    const off = await importWith(db, PRIVACY_OFF, [carPlayRecord]);
+    const off = await importWith(db, PRIVACY_WITH_DETAIL, [carPlayRecord]);
     expect(off.get('CarPlay')).toBe('unknown');
     expect(off.size).toBe(1);
 
-    const on = await importWith(db, { ...PRIVACY_OFF, carDetectionConsent: true }, [carPlayRecord]);
+    const on = await importWith(db, { ...PRIVACY_WITH_DETAIL, carDetectionConsent: true }, [
+      carPlayRecord,
+    ]);
     expect(on.get('CarPlay')).toBe('car');
   });
 
   it('Android Auto: stesso gate di CarPlay (entrambi i segnali citati in 02§3.8)', async () => {
-    const off = await importWith(db, PRIVACY_OFF, [androidAutoRecord]);
+    const off = await importWith(db, PRIVACY_WITH_DETAIL, [androidAutoRecord]);
     expect(off.get('Android Auto')).toBe('unknown');
 
-    const on = await importWith(db, { ...PRIVACY_OFF, carDetectionConsent: true }, [
+    const on = await importWith(db, { ...PRIVACY_WITH_DETAIL, carDetectionConsent: true }, [
       androidAutoRecord,
     ]);
     expect(on.get('Android Auto')).toBe('car');
   });
 
-  it('senza consenso la stringa grezza `deviceDetail` resta conservata', async () => {
-    await importWith(db, PRIVACY_OFF, [carPlayRecord]);
-    const listen = await db.listens.toCollection().first();
-    expect(listen?.deviceDetail).toBe('CarPlay');
-    expect(listen?.deviceType).toBe('unknown');
+  it('la stringa grezza `deviceDetail` è conservata solo con `retainDeviceDetail` (default false)', async () => {
+    await importWith(db, PRIVACY_WITH_DETAIL, [carPlayRecord]);
+    const kept = await db.listens.toCollection().first();
+    expect(kept?.deviceDetail).toBe('CarPlay');
+    expect(kept?.deviceType).toBe('unknown');
+
+    // Senza il consenso esplicito la stringa grezza non viene persistita:
+    // `deviceDetail` è un dato identificante (`19-GEO-CONTEXT.md` §7.1).
+    const db2 = new LifeSoundtrackDB(`car-consent-detail-${crypto.randomUUID()}`);
+    try {
+      await importWith(db2, PRIVACY_DEFAULTS, [carPlayRecord]);
+      const dropped = await db2.listens.toCollection().first();
+      expect(dropped?.deviceDetail).toBeNull();
+      expect(dropped?.deviceType).toBe('unknown');
+    } finally {
+      await db2.delete();
+    }
   });
 
   it('i deviceType non-auto sopravvivono al gate in entrambe le modalità', async () => {
     const records = [carPlayRecord, androidAutoRecord, mobileRecord];
-    const off = await importWith(db, PRIVACY_OFF, records);
+    const off = await importWith(db, PRIVACY_WITH_DETAIL, records);
     expect(off.get('iOS 16.4 (iPhone 13)')).toBe('mobile');
     expect(off.get('CarPlay')).toBe('unknown');
 
-    const on = await importWith(db, { ...PRIVACY_OFF, carDetectionConsent: true }, records);
+    const on = await importWith(db, { ...PRIVACY_WITH_DETAIL, carDetectionConsent: true }, records);
     expect(on.get('iOS 16.4 (iPhone 13)')).toBe('mobile');
     expect(on.get('CarPlay')).toBe('car');
     expect(on.get('Android Auto')).toBe('car');
   });
 
   it("nessun evento `deviceType='car'` resta in DB con consenso OFF", async () => {
-    await importWith(db, PRIVACY_OFF, [carPlayRecord, androidAutoRecord, mobileRecord]);
+    await importWith(db, PRIVACY_DEFAULTS, [carPlayRecord, androidAutoRecord, mobileRecord]);
     expect(await db.listens.filter((l) => l.deviceType === 'car').count()).toBe(0);
     expect(await db.listens.count()).toBe(3);
   });

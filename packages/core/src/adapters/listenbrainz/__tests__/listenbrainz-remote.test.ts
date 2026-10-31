@@ -12,8 +12,13 @@ import type { PrivacySettings } from '../../../schema';
 
 afterEach(closeAllDbs);
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -68,7 +73,7 @@ describe('sync incrementale ListenBrainz (casi 25, 26)', () => {
       adapter,
       token: 'user-token',
       username: 'utente',
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       userAgent: 'LifeSoundtrack/0.1.0 ( https://example.test/contact )',
       endpoint: 'https://lb.example.test',
     });
@@ -86,7 +91,7 @@ describe('sync incrementale ListenBrainz (casi 25, 26)', () => {
       adapter: adapter2,
       token: 'user-token',
       username: 'utente',
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       userAgent: 'LifeSoundtrack/0.1.0 ( https://example.test/contact )',
       endpoint: 'https://lb.example.test',
     });
@@ -107,7 +112,7 @@ describe('sync incrementale ListenBrainz (casi 25, 26)', () => {
       adapter,
       token: 'user-token',
       username: 'utente',
-      privacy: PRIVACY_OFF,
+      privacy: PRIVACY_DEFAULTS,
       userAgent: 'LifeSoundtrack/0.1.0 ( https://example.test/contact )',
       endpoint: 'https://lb.example.test',
     });
@@ -127,7 +132,7 @@ describe('sync incrementale ListenBrainz (casi 25, 26)', () => {
         adapter,
         token: '',
         username: 'utente',
-        privacy: PRIVACY_OFF,
+        privacy: PRIVACY_DEFAULTS,
         userAgent: 'LifeSoundtrack/0.1.0 ( https://example.test/contact )',
         endpoint: 'https://lb.example.test',
       }),

@@ -5,8 +5,13 @@ import { ImportScreen } from '../OnboardingRouter';
 import { i18n } from '../../i18n';
 import type { PrivacySettings } from '@core/schema';
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -52,7 +57,7 @@ describe('ImportScreen — validazione file e Importa tutto', () => {
         onImportAll={onImportAll}
         canImport={false}
         detecting={false}
-        privacy={PRIVACY_OFF}
+        privacy={PRIVACY_DEFAULTS}
       />,
     );
 
@@ -76,7 +81,7 @@ describe('ImportScreen — validazione file e Importa tutto', () => {
         onImportAll={onImportAll}
         canImport={false}
         detecting={false}
-        privacy={PRIVACY_OFF}
+        privacy={PRIVACY_DEFAULTS}
       />,
     );
 
@@ -104,7 +109,7 @@ describe('ImportScreen — validazione file e Importa tutto', () => {
         onImportAll={onImportAll}
         canImport={false}
         detecting={false}
-        privacy={PRIVACY_OFF}
+        privacy={PRIVACY_DEFAULTS}
       />,
     );
 

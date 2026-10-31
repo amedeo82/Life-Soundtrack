@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-30 18:28
+> Data: 2026-10-31 09:32
 > Totale file: 123
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 122 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1648.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-30 18:28
+- Dimensione totale: 1673.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 09:32
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1916,7 +1916,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 57 (v0.7) | Matrice piattaforme europee + campi dati — v0.7: rimandi al percorso di **scrittura** degli hub (§3.7-3.9, Story 1.5 ratificata) |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 57 (v1.6) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter; v1.6: §3.8 `scrobbleHubs: ScrobbleHubId[]` + §6.2 tabella `scrobbleOutbox` (schema Dexie v5, Story 1.5) |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 68 (v1.7) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter; v1.6: §3.8 `scrobbleHubs: ScrobbleHubId[]` + §6.2 tabella `scrobbleOutbox` (schema Dexie v5, Story 1.5); **v1.7 (Story 1.6)**: §3.2 i campi derivati `city*`, §3.8 i toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, §3.10 l'entità `ContextPeriod`, §6.3 la tabella `contexts` (schema Dexie v6) e §7 MIG-5 |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 57 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.2, S47/S57: token in scrittura, percorso incrementale) + Last.fm (🟢 v1.2, S50/S51/S57: percorso di scrittura, md5 D-SH.11, proxy D-SH.14) — **adapter implementati** in Sessione 52 (issue #155) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟢 APPROVED | Sessione 59 (v1.0) | Algoritmi di analisi (mood, ere, eventi, ricordi) — **ratificata** (Sessione 59, issue #178): i trigger dei 5 tipi di ricordo sono specificati, il perimetro della tranche è dichiarato; la Story 2.4 è implementata (Sessione 61) e la **2.1 è implementata** (Sessione 63, issue #180) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 62 (v1.4) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢) |
@@ -2015,6 +2015,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟡 | ❌ | #203 |
 | 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
 | 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
+| 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 👀 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2054,9 +2055,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **44** (merge: 35)
+- Sessioni migrate in state/sessions: **45** (merge: 35)
 - Stories migrate in state/stories: **20** (done: 15)
-- Ultima sessione migrata: **S67** - Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)
+- Ultima sessione migrata: **S68** - Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2067,7 +2068,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 11 documenti (`02` v1.6, `03-ADAPTERS/`, `04` v1.0, `05` v1.4, `10` v1.1, `11` v1.6.28, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
+- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.0, `05` v1.4, `10` v1.1, `11` v1.6.30, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
 - **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.9, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.20; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
@@ -2082,7 +2083,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 67, issue #201): **gli atti del project owner sono chiusi** — la ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED) e dell'ADR-0009 (v1.0 🟢 APPROVED) e l'applicazione della **licenza AGPL-3.0** (D-AF.2), che era l'ultimo atto pendente (l'obbligo del §13 resta il requisito aperto dell'issue **#202**). **EPIC 1 — Import core: 5/5 ✅** e tre story dell'EPIC 2/4 completate: la **2.4 (Memory Engine)** (issue **#179**, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, merge `7458220`, Sessione 64): la catena **4.1 (dati) → 2.1 (letture)** è chiusa. **Prossimo passo**: la tranche **geo**, la cui specifica è ratificata nella Sessione 67 (`19` v1.0 🟢, ADR-0009 v1.0 🟢) — **1.6** (fondazione geo: delta su `02` v1.7 e classificatore L1), **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto). La **1.6** è la prima story lavorabile, ed è quella che il blocco NEXT-STEP del README indica: l'aggregatore ordina le story **migrate per id**, e «1.6» viene prima di «2.2» (scelta del project owner: geo prima). Dietro di lei: le **2.2 (Era Detector)** e **2.3 (Event Detector)**, che hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.0 🟢 APPROVED) — hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. Poi la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole.
+- **Prossimo passo tecnico** (aggiornato alla Sessione 68, issue #205): la **Story 1.6 (fondazione geo e contesto di ascolto) è implementata e in review** — il delta su `02` v1.7 (campi `city*`, entità `ContextPeriod`, tabella `contexts` nello schema Dexie v6, toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`) e il **classificatore L1** in `packages/core/src/context/` (regole R1..R7, soglia 0.5, `derivedVersion` dai parametri) con la persistenza dei periodi e il fixture di scenario geo. **EPIC 1 — Import core: 5/5 ✅** e tre story dell'EPIC 2/4 completate: la **2.4 (Memory Engine)** (issue **#179**, merge `40ad0b7`), la **2.1 (Mood Tracker)** (issue **#180**, merge `d018a26`, Sessione 63) e la **4.1 (Pipeline audio features)** (issue **#188**, merge `7458220`, Sessione 64): la catena **4.1 (dati) → 2.1 (letture)** è chiusa. **Prossimo passo**: chiudere la review della **1.6** e poi la tranche **geo** — **4.4** (DB IP→città, on-demand, `[DEP:1.6]`) e **3.4** (nastro contesto, `[DEP:1.6, 4.4]`), entrambe con la specifica già ratificata (`19` v1.0 🟢, ADR-0009 v1.0 🟢, Sessione 67, issue #201). Dietro di loro: le **2.2 (Era Detector)** e **2.3 (Event Detector)**, che hanno la dipendenza `[DEP:2.1]` soddisfatta e le AC specificate in `04` (v1.0 🟢 APPROVED), poi la tranche dell'EPIC 3 (**UI**) e il **lookup MusicBrainz** (Story 4.2). L2 è il «condimento»: `retainCity` è **opt-in** e L0/L1 reggono da sole. Fuori perimetro e dichiarato nella 1.6: la **UI dei toggle** (Story 3.x) e la **derivazione L2** (Story 4.4).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -8397,6 +8398,98 @@ manca dell'host che la CSP deve consentire.
 - **#187 / #188** — la spec delle audio features e la sua implementazione (la catena 4.1 → 2.1)
 ```
 
+### Sessione 68 - Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205)
+
+- **Data**: 2026-10-31
+- **Stato**: 👀
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK-q7v2`
+
+```
+
+# Sessione 68 — Story 1.6: fondazione geo e contesto di ascolto (issue #205)
+
+## Sintesi
+
+La Story 1.6 applica il **delta ratificato nella Sessione 67** (`19-GEO-CONTEXT.md`
+v1.0 🟢 APPROVED): lo schema passa a **v1.7** (Dexie **v5→v6**) e nasce il
+**classificatore L1** del contesto di ascolto.
+
+Due deliverable distinti:
+
+- **il delta su `02-DATA-SCHEMA.md`**: i tre campi derivati `city`/`citySource`/
+  `cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la
+  tassonomia vincolante `CONTEXT_KINDS`, i toggle `retainCountry`/
+  `retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, la
+  tabella `contexts` (schema Dexie v6) e la politica **MIG-5** (il ricalcolo del
+  contesto è esplicito e non azzera i campi già persistiti);
+- **il classificatore L1** in `packages/core/src/context/`: le regole R1..R7
+  nell'ordine dichiarato, la soglia di aggregazione 0.5, i parametri
+  versionati (D-B.3) e la persistenza dei periodi con `recompute()` e
+  verdetto utente (`userLabel`).
+
+## Trigger
+
+Issue **#205** (`size:L`, `agent-ready`, `area:db`, `area:analysis`,
+`phase-2`), aperta dopo la ratifica della Sessione 67. La claim precedente
+(`kilo-HP-ELITEBOOK-fa3c`, 2026-10-30T21:21Z) era **abbandonata** — worktree
+pulita, zero commit, zero WIP, nessun processo né sessione attiva — e il TTL
+di 12 ore non era ancora scaduto: il takeover è documentato in issue con
+`stale-release:` (con l'evidenza) e poi `claim:` (`kilo-HP-ELITEBOOK-q7v2`),
+riverificato come unico claim attivo. Worktree `ls-205-geo-context-foundation`,
+branch `feat/205-geo-context-foundation` (ripresa della worktree abbandonata:
+non c'era WIP da preservare).
+
+## Cosa è stato consegnato
+
+- **Schema (`packages/core/src/schema/`)**: `ListenEvent.city*`, `PrivacySettings`
+  con i 5 toggle nuovi, `ContextPeriod` + `CONTEXT_KINDS`/`ContextKind`.
+- **DB (`packages/core/src/db/`)**: `DB_SCHEMA_V6` con la tabella `contexts`,
+  migrazione non distruttiva (upgrade che azzera i campi città sugli ascolti
+  esistenti), `loadUserTimezone`/`saveUserTimezone` (chiave `app.timezone`).
+- **Classificatore (`packages/core/src/context/`)**: `classifier.ts` (sessioni
+  derivate, slot = giorno locale × dispositivo, paese di riferimento, indice di
+  ricorrenza settimanale, R1..R7), `engine.ts` (periodi deterministici, id
+  `ctx-<kind>-<startTime>`), `storage.ts` (persistenza + verdetto utente),
+  `recompute.ts` (orchestratore), `localTime.ts` (ora locale via `Intl`, senza
+  dipendenze), `derivedVersion.ts` e `types.ts` (i parametri ratificati).
+- **Pipeline (`packages/core/src/adapters/pipeline.ts`)**: i toggle sono
+  applicati **in scrittura** (`applyDeviceTypeConsent`), il `country` resta
+  conservato indipendentemente da `retainIp` (issue #108).
+- **Fixture**: `fixtures/scenarios/geo-context.json`, generato da
+  `scripts/generate-fixtures.mjs geo` — 4 settimane di cronologia composta
+  (casa serale, lavoro diurno, spostamenti brevi, 3 giorni di viaggio in
+  Germania, una serata in auto).
+- **39 test** nuovi: regole R1..R7 una per una, fixture di scenario,
+  persistenza (`recompute()`, `stale`, verdetto utente, toggle
+  `deriveContext`, fuso) e toggle privacy nell'import.
+
+## Scelte dichiarate
+
+Sette scelte che la spec non explicita sono dichiarate in
+`docs/state/stories/1.6-geo-foundation.md` (S1..S7): `away` come complemento
+di R1, R4 vincolata alla durata delle sessioni (25 minuti) perché uno
+spostamento ricorrente non venga classificato `home`, il viaggio riconosciuto
+sull'intero *run* di giorni esteri, il modulo in `context/` (il layer
+`analysis` è puro e non ha dipendenze dal DB), il fuso come dato in
+`settings`, l'id deterministico del periodo e la forma del modulo.
+
+## Discrepanza rilevata
+
+L'AC del backlog e il state file citavano «**E22**» per la soglia di
+aggregazione, ma `19-GEO-CONTEXT.md` §10 (🟢 APPROVED) dichiara **E19**
+(«nessun cluster dominante»): la numerazione del documento ratificato vince e
+l'AC è stato allineato a **E19** nel backlog e nello state file.
+
+## Fuori perimetro e dichiarato
+
+- **L2 (città)**: la derivazione dal database MMDB on-demand è la Story 4.4;
+  questa story fissa solo il **contratto** (i campi esistono e sono nullable).
+- **UI dei toggle**: Story 3.x. I toggle esistono nello schema e sono applicati
+  in scrittura; l'interfaccia che li espone è un'altra tranche.
+- **Il nastro contesto**: Story 3.4 (consuma i `ContextPeriod`).
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -8723,7 +8816,7 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.22
+> Versione: 2.23
 > Ultima modifica: 2026-10-30 — §34 l'inventario del bundle resta stale su una PR solo-docs (follow-up post-merge della Sessione 67)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
@@ -9731,6 +9824,25 @@ mezzo del lavoro.
 
 **Lesson learned**: un dato derivato che dipende dai **contenuti** ha un ciclo di vita diverso da uno che dipende dalle **dimensioni**. Il primo si aggiorna da solo quando il file che lo contiene cambia; il secondo si aggiorna solo quando qualcuno lo **ricalcola**. I `paths:` del workflow coprono i primi e non i secondi: l'inventario delle dimensioni è il caso che resta scoperto, e nessun gate bloccante lo segnala (il check è warning-only per la incompatibilità residua PS 5.1 vs 7, issue #63). La lezione operativa: **quando un blocco generato contiene un dato derivato dalle dimensioni, il trigger del generatore deve coprire i file che lo cambiano** — non basta che il generatore giri «quando i dati cambiano».
 
+## 35. Issue #205 — Story 1.6: fondazione geo e contesto di ascolto (Sessione 68)
+
+**Branch**: `feat/205-geo-context-foundation`
+**PR**: da aprire (issue #205)
+**Data**: 2026-10-31
+**Stato**: 👀 **IN REVIEW** — implementazione completa, in attesa di review
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 35-1 | P | La claim dell'issue #205 era **abbandonata**: worktree pulita, zero commit, zero WIP, nessun processo né sessione attiva, e un TTL di 12 ore **non ancora scaduto** (10h25m) | La sessione precedente (`kilo-HP-ELITEBOOK-fa3c`) è stata interrotta dopo la creazione della worktree e il push early del branch (D.20.2), senza commit | Il takeover è stato **documentato in issue**: `stale-release:` con l'evidenza (lavoro assente, nessun processo) e poi `claim:` (`kilo-HP-ELITEBOOK-q7v2`), riverificato come **unico claim attivo** (il precedente era stato rilasciato). La worktree è stata ripresa (non ce n'era WIP da preservare) invece di crearne una gemella: due branch per la stessa issue avrebbero prodotto due PR | `AGENTS.md` §"🎫 Presa in carico" · issue #205 |
+| 35-2 | P | Il **paese di riferimento** risultava sbagliato (DE invece di IT): la moda dei paesi pesava ogni codice **una volta** invece che per numero di eventi | `modeOfCodes` riceveva le **chiavi** della mappa dei conteggi, non i valori: ogni paese aveva peso 1 e vinceva il minimo lessicografico | Aggiunto `modeOfCounted(counts)`: vince il codice con **più eventi**, a parità il minimo. Il classificatore è coperto dal test sul fixture geo, che falliva su questo punto | `packages/core/src/context/classifier.ts` |
+| 35-3 | P | Un viaggio di tre giorni veniva riconosciuto **solo dal terzo giorno**: i primi due risultavano `unknown` | Il conteggio dei giorni esteri era **all'indietro** (dal giorno dello slot), quindi il run non era ancora completo quando il classificatore guardava i primi giorni | Il conteggio è sull'intero **run** (all'indietro e in avanti): la classificazione è calcolata sulla cronologia completa, non in streaming. Il viaggio è `travel` per tutti i suoi giorni | `19§5.2` R3 · scelta dichiarata S3 |
+| 35-4 | P | Uno **spostamento** ricorrente (mobile, sessioni da 8 minuti, ogni mattina) veniva classificato `home`: soddisfa R4 («stessa fascia oraria» + «≥60% delle settimane») | R4 non ha un vincolo di **durata**: la soglia dei 25 minuti esiste solo in R6, che non poteva scattare perché R4 vinceva prima | Aggiunto il parametro `homeMinSessionMs` (default 25 minuti, la stessa soglia di R6): un cluster di sessioni brevi non è un cluster domestico. **Scelta dichiarata** (S2), da sottoporre al project owner in review | `packages/core/src/context/types.ts` |
+| 35-5 | P | `away` non era prodotto da nessuna regola, pur essendo un `kind` della tassonomia | R1 dichiara `unknown` quando mancano **sia** il paese **sia** un dispositivo utile; il caso complementare (nessun paese, dispositivo utile) non è coperto da nessuna regola | Implementato come **complemento di R1** (`R1-away`) con confidenza 0.5 (parametro `awayConfidence`). **Scelta dichiarata** (S1): è il kind che `19§4.3` riserva al «periodo senza dati di paese» | `19§4.3` · scelta dichiarata S1 |
+| 35-6 | P | L'AC del backlog e il state file citavano «**E22**» per la soglia di aggregazione, ma la spec ratificata dichiara **E19** | La numerazione degli edge case era stata cambiata nella Sessione 67 (E19..E24), ma il backlog e lo state file erano rimasti indietro | Allineati backlog e state file a **E19**: la numerazione del documento 🟢 APPROVED vince. Il refuso è dichiarato nelle due sedi | `19§10` · `docs/state/stories/1.6-geo-foundation.md` |
+| 35-7 | P | Il modulo `context/` è stato creato **fuori** da `analysis/`, contro la forma degli altri algoritmi | Il layer `analysis` è **puro** e non ha dipendenze dal DB (`05§9`: gira nel Web Worker), ma il contesto ha bisogno dei due (motore + tabella `contexts`) | Il modulo segue la forma di `enrichment/` (porte + orchestratore + storage Dexie) ed espone il subpath `@ls/core/context`. **Scelta dichiarata** (S7) | `05§9` · scelta dichiarata S7 |
+
+**Lesson learned**: le regole deterministiche hanno un difetto che i test casuali non trovano: **una regola che non scatta mai** e **una regola che scatta troppo spesso** si somigliano, e la seconda è più pericolosa della prima. R4 senza il vincolo di duranza non era «una regola che scatta troppo spesso»: era una regola che **rubava** il caso di R6. Il difetto è emerso solo scrivendo il **fixture di scenario** con una cronologia composta (gli scenario esistenti usano paese e dispositivo casuali, e per il contesto non hanno nessun cluster da riconoscere). La regola operativa: **un classificatore a regole si verifica con un fixture che contiene il caso ambiguo**, non con un fixture generato a caso.
+
 ---
 
 | Versione | Data | Modifiche |
@@ -9777,6 +9889,7 @@ mezzo del lavoro.
 | 2.20 | 2026-10-30 (issue #196) | **§31 Issue #196 — ratifica del terzo host della CSP** (Sessione 66, claim `kilo-hp-elitebook-jrka`): 4 entry (31-1 **due AC della stessa spec non potevano essere veri insieme** — D-AF.1 prescrive `GET https://itunes.apple.com/search` e D-AF.9 elencava in `connect-src` solo l'API AB e il **CDN** dei file audio: l'host che **risponde** alla ricerca è un terzo host; le due decisioni erano state ratificate nella stessa PR (Sessione 62) senza che nessuna le confrontasse con l'endpoint che la prima richiede, e il conflitto è emerso due sessioni dopo, quando qualcuno ha dovuto implementare la ricerca; il project owner ha **ratificato l'opzione A** — `https://itunes.apple.com` entra in `connect-src` e **D-AF.9 è emendata** nella **v1.1** di `21-AUDIO-FEATURES.md`; l'opzione B (rivedere D-AF.1) non aveva alternative — Spotify `audio_features` è morto e MusicKit costa 99 $/anno — e l'opzione C (accettare la degradazione) avrebbe lasciato il mood tracker senza dati misurati, che D.A.1 vieta; 31-2 **il gate della CSP confrontava due artefatti della stessa costante** (la costante e il tag `<meta>`, che da essa è generato: i due non possono divergere) mentre la `connect-src` **dichiarata** in `12-DEVOPS.md` non era confrontata con nessuno — il test legge ora il blocco del documento e lo confronta con la costante; 31-3 la CSP vive in `12§5.1` ma tutto il progetto la cita come `12§2.1`: riferimento ereditato dalla v0.1 della spec, **non corretto** (fuori perimetro dell'issue), registrato come osservazione; 31-4 la sessione 65 era già pre-allocata da un altro agente (issue #193): la Sessione 66 usa il numero successivo). Consegnati: `21` v1.1 🟢 APPROVED (header, §2.1, §3, §10.2, §16, §18), `12` v1.1 (la CSP con i tre host), `11-BACKLOG.md` v1.6.27, `docs/INDEX.md` (righe `11`, `12`, `21` e "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti), la sessione 66 e i commenti del codice applicato (`apps/web/src/security/`) — **la CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197, la ratifica allinea la **dichiarazione** al codice |
 | 2.21 | 2026-10-30 (issue #201) | **§32 Atti del Boss — ratifica di `19-GEO-CONTEXT` + ADR-0009 e licenza AGPL-3.0** (Sessione 67, claim `kilo-HP-EliteBook-b7x2`): 6 entry (32-1 gli edge case geo erano **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** da ListenBrainz (E11..E13) e Last.fm (E14..E18): rinumerati in **E19..E24**; 32-2 il delta su `02` era ancorato a **v1.3 / Dexie v2→v3** mentre lo schema è **v1.6 / Dexie v5**: riallineato, e la sua applicazione è dichiarata deliverable della Story 1.6; 32-3 la **revoca di D.39.8** era dichiarata ma **mai applicata** (`youtube-music.md` diceva ancora «sempre scartati al parse»): applicata, `locationInfos` dietro il toggle `ytLocationInfos`; 32-4 la motivazione su MaxMind GeoLite2 legava l'obiezione alla licenza **Apache-2.0** dell'app: riscritta — l'obiezione è la EULA di MaxMind, indipendente dalla licenza dell'app; 32-5 `19§12` elencava come aperto un punto **già deciso** (issue #108): chiuso; 32-6 la **CSP applicata** non dichiara l'host da cui arriva il WASM di Essentia, che `21§6.5` dà come scaricato on-demand: dichiarato come requisito della story di implementazione, con la lezione della issue #196). Consegnati: `LICENSE` (AGPL-3.0 canonico), `package.json` (`"license"`), `README.md`, `19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, e l'allineamento di `03-ADAPTERS/youtube-music.md` (v2.0), `01-PLATFORMS.md` (v0.8), `09-PRIVACY-SECURITY.md` (v0.7), `08-COPY-I18N.md` (v0.9), `12-DEVOPS.md` (v1.2, §5.3 licenza e offerta del sorgente), `17-DEV-NOTES.md` (v0.3, P10), `21-AUDIO-FEATURES.md` (v1.2, §19 punto 1 chiuso), `11-BACKLOG.md` (v1.6.28, tre story geo), `docs/INDEX.md`, e i 6 nuovi state file (sessione 67 + le story 2.2, 2.3, 1.6, 4.4, 3.4). Aperta l'issue **#202**: l'offerta del sorgente richiesta dal §13 della licenza |
 | 2.22 | 2026-10-30 (issue #201) | **§33 Allineamento del "prossimo passo"** (follow-up post-merge della Sessione 67): il blocco NEXT-STEP generato indicava **1.6** (l'aggregatore ordina le story migrate **per id**, e «1.6» < «2.2») mentre la prosa di `INDEX.md` e la lista di priorità di `11-BACKLOG.md` indicavano **2.2/2.3**. Il project owner ha scelto **geo prima**: la tranche geo sale al posto 13 della lista di priorità e la prosa dell'INDEX è riallineata al puntatore. Nessuna modifica al codice dell'aggregatore, nessun gate nuovo. Documenti toccati: `11-BACKLOG.md` (v1.6.29), `docs/INDEX.md`, `docs/18-DEV-LOG.md` (v2.21) |
+| 2.24 | 2026-10-31 (issue #205) | **§35 Issue #205 — Story 1.6 implementata** (fondazione geo e contesto di ascolto, Sessione 68, claim kilo-HP-ELITEBOOK-q7v2): 7 entry (35-1 la **claim abbandonata** dell'issue #205 (worktree pulita, zero commit, nessun processo né sessione, TTL di 12h non ancora scaduto) è stata presa con takeover **documentato in issue** (stale-release: con l'evidenza + claim: riverificato come unico claim attivo) riprendendo la worktree esistente invece di crearne una gemella; 35-2 il **paese di riferimento** era sbagliato (DE invece di IT): la moda pesava i *chiavi* della mappa dei conteggi invece dei valori — aggiunto modeOfCounted; 35-3 il **viaggio** era riconosciuto solo dal terzo giorno: il conteggio dei giorni esteri guardava all'indietro dal giorno dello slot, ora copre l'intero *run*; 35-4 uno **spostamento** ricorrente veniva classificato home (R4 non aveva un vincolo di durazione): aggiunto homeMinSessionMs (25 min, la soglia di R6); 35-5 **way** non era prodotto da nessuna regola pur essendo un kind della tassonomia: è il complemento di R1 (R1-away, confidenza 0.5); 35-6 l'AC citava «**E22**» mentre la spec ratificata dichiara **E19**: allineati backlog e state file alla numerazione del documento 🟢; 35-7 il modulo context/ sta **fuori** da nalysis/ perché il layer di analisi è puro e non ha dipendenze dal DB ( 5§9): stessa forma di enrichment/, subpath @ls/core/context). Consegnati: il delta su  2-DATA-SCHEMA.md **v1.7** (campi city*, ContextPeriod, tabella contexts nello schema Dexie **v6**, toggle etainCountry/etainCity/etainDeviceType/etainDeviceDetail/deriveContext, MIG-5), il **classificatore L1** (regole R1..R7, soglia 0.5, derivedVersion dai parametri, slot = giorno locale × dispositivo) con la persistenza dei periodi (ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixtures/scenarios/geo-context.json, generato da scripts/generate-fixtures.mjs geo) e **39 test** nuovi in @ls/core |
 | 2.23 | 2026-10-30 (issue #201) | **§34 L'inventario del bundle resta stale su una PR solo-docs** (follow-up post-merge della Sessione 67): dopo il merge della PR #206 il blocco inventory di `docs/BUNDLE.md` dichiarava 1626.2 KB mentre i file in catalogo pesavano 1628.8 KB. Causa: `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`, quindi una PR che tocca solo `docs/` — i file **di cui l'inventario misura la dimensione** — non lo attiva, e il check dell'aggregator in CI è warning-only. Drift chiuso con una PR `docs:` separata (aggregator eseguito in locale); **la causa strutturale resta aperta** e va sottoposta al project owner: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo. Lezione: un dato derivato dalle **dimensioni** non si aggiorna da solo quando i **contenuti** cambiano |
 
 ---
@@ -13682,7 +13795,7 @@ id: "1.6"
 title: "Fondazione geo e contesto di ascolto"
 phase: 2
 area: db
-status: todo
+status: in_review
 priority: I
 depends_on: ["0.2"]
 spec_refs:
@@ -13718,15 +13831,73 @@ schema e L1, che **reggono da sole** anche senza database.
 
 ## Acceptance criteria
 
-- [ ] Il classificatore produce gli stessi periodi a parità di input e di `derivedVersion` (`19§5.2`)
-- [ ] Un periodo sotto la soglia 0.5 **non** viene aggregato (`19§5.3`, E22)
-- [ ] `country` resta derivato e conservato indipendentemente da `retainIp` (issue #108)
-- [ ] La classificazione `car` è impossibile senza `carDetectionConsent` (`19§5.3`, issue #109)
-- [ ] Le soglie sono **parametri di config** e la loro variazione produce un bump di `derivedVersion` (D-B.3)
+- [x] Il classificatore produce gli stessi periodi a parità di input e di `derivedVersion` (`19§5.2`)
+- [x] Un periodo sotto la soglia 0.5 **non** viene aggregato (`19§5.3`, E19)
+- [x] `country` resta derivato e conservato indipendentemente da `retainIp` (issue #108)
+- [x] La classificazione `car` è impossibile senza `carDetectionConsent` (`19§5.3`, issue #109)
+- [x] Le soglie sono **parametri di config** e la loro variazione produce un bump di `derivedVersion` (D-B.3)
+
+> Nota di numerazione: l'AC del backlog e questo file citavano «E22», ma
+> `19-GEO-CONTEXT.md` §10 (doc 🟢 APPROVED) dichiara **E19** per «nessun
+> cluster dominante». La numerazione del documento ratificato vince: qui e
+> nel backlog l'AC è allineato a **E19**. Non c'è E22 in `19`.
+
+## Scelte dichiarate
+
+Le scelte seguenti **non** sono esplicitate nella spec: sono state prese per
+implementare `19§5` senza inventare una tassonomia nuova, e sono qui dichiarate
+per la revisione del project owner.
+
+- **S1 — `away` è il complemento di R1.** R1 dichiara `unknown` quando
+  mancano **sia** il paese **sia** un dispositivo utile; il caso complementare
+  (nessun paese, ma un dispositivo utile) non può essere `unknown`, perché la
+  tassonomia di `19§4.3` riserva `away` al «periodo senza dati di paese». Il
+  classificatore lo classifica `away` con confidenza **0.5** (parametro
+  `awayConfidence`): è aggregato, ma con la confidenza più bassa consentita.
+  Il nome della regola interna è `R1-away`.
+- **S2 — R4 è vincolata alla durata delle sessioni** (`homeMinSessionMs`,
+  default 25 minuti, la stessa soglia di R6). Senza questo vincolo uno
+  **spostamento** che si ripete ogni mattina (mobile, sessioni da 8 minuti)
+  soddisferebbe R4 («stessa fascia oraria» + «≥60% delle settimane») e
+  verrebbe classificato `home` invece di `commute`: il parametro rende le due
+  regole complementari invece che sovrapposte.
+- **S3 — il viaggio è riconosciuto sull'intero *run* di giorni esteri.** R3
+  richiede «≥3 giorni fuori dal paese di riferimento»: il calcolo usa la
+  lunghezza dell'intero run di giorni consecutivi (calcolata sulla cronologia
+  completa, non in streaming), quindi un viaggio di tre giorni è `travel` per
+  tutti e tre i giorni e non solo per l'ultimo.
+- **S4 — l'unità di classificazione è lo slot (giorno locale × dispositivo)**,
+  e i `ContextPeriod` sono aggregazioni di slot dello stesso `kind` adiacenti
+  (gap ≤ `periodGapMs`, default 24h). I periodi di kind diversi possono
+  **sovrapporsi** nel tempo (l'utente lavora la mattina e ascolta a casa la
+  sera): il nastro futuro (`19§8.2`) filtra per `kind`, quindi la sovrapposizione
+  è un modello di prima classe, non un errore.
+- **S5 — il fuso orario è un dato, non un parametro.** `19§5.3` chiede una
+  copia nelle impostazioni: la chiave `app.timezone` in `settings` (IANA,
+  default `UTC`). Non entra nel `derivedVersion`: cambia i risultati ma non
+  l'algoritmo.
+- **S6 — `ContextPeriod.id` è deterministico** (`ctx-<kind>-<startTime>`): il
+  ricalcolo aggiorna il periodo, non lo duplica.
+- **S7 — il modulo è `packages/core/src/context/`, non `analysis/`.** Il layer
+  `analysis` è puro e non ha dipendenze dal DB (`05§9`: gira nel Web Worker);
+  il contesto ha bisogno dei due. È la stessa forma del pacchetto
+  `enrichment/` (porte + orchestratore + storage Dexie). Entry point:
+  `@ls/core/context`.
+
+## Verifiche
+
+- Test del classificatore (regole R1..R7 una per una): `packages/core/src/context/__tests__/classifier.test.ts`
+- Test sul **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`,
+  generato da `scripts/generate-fixtures.mjs geo`): `packages/core/src/context/__tests__/scenarios.test.ts`
+- Test di persistenza (`recompute()`, `stale`, verdetto utente, toggle `deriveContext`, fuso): `packages/core/src/context/__tests__/persistence.test.ts`
+- Test dei toggle privacy nell'import: `packages/core/src/adapters/__tests__/privacy-toggles.test.ts`
 
 ## Documenti aggiornati
 
-- (nessuno: la story non è ancora iniziata)
+- `docs/02-DATA-SCHEMA.md` → v1.7 (delta su `ListenEvent`, `PrivacySettings`, `ContextPeriod`, tabella `contexts`, MIG-5)
+- `docs/11-BACKLOG.md` → sezione legacy della Story 1.6 (stato in review)
+- `docs/INDEX.md` → sezione legacy (versione di `02`, prossimo passo)
+- `docs/18-DEV-LOG.md` → entry di sessione
 
 
 
@@ -15677,7 +15848,7 @@ Specifica: `19-GEO-CONTEXT.md` v1.0 🟢 APPROVED §2, §7.1 · `13-ADR/0009-loc
 
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.6 · Sessione 57 (2026-10-27)
+> Status: 🟢 APPROVED · Versione 1.7 · Sessione 68 (2026-10-31)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -15745,12 +15916,24 @@ Regola: `timestamp` = **momento in cui l'ascolto si conclude**; `startedAt` = in
       deviceType: DeviceType;
       deviceDetail: string | null;
       ip: string | null;         // conservato SOLO se PrivacySettings.retainIp
-      country: string | null;    // ISO 3166-1 alpha-2, sempre derivato      
+      country: string | null;    // ISO 3166-1 alpha-2, derivato, conservato
+                                 // indipendentemente da retainIp (§3.8)
+      city: string | null;       // città STIMATA (L2), null finché il DB geo
+                                 // non c'è (19§4.1, E21)
+      citySource: 'dbip-lite' | 'manual' | null;  // provenance della stima
+      cityConfidence: number | null;  // 0..1, sotto 0.6 la città è scartata
       day: string;             // 'YYYY-MM-DD' (derivato, indicizzato)
     }
 
 **eventKey** = `platform + ':' + (sourceEventId ?? sha1(trackId|timestamp|durationMs))`
 Calcolato dall'adapter. Garantisce import idempotenti.
+
+**I tre campi `city*`** (v1.7, Story 1.6) sono **derivati**, non raccolti:
+la città viene stimata dal database geo locale a partire dall'IP già
+presente nell'export (`19-GEO-CONTEXT.md` §4.1). Senza database geo — o senza
+consenso `retainCity` — restano `null`. La derivazione è la **Story 4.4**:
+questa versione fissa solo il **contratto** (i campi esistono, sono
+nullable, e hanno una provenance esplicita).
 
 ### 3.3 Track / Artist / Album
 
@@ -15890,15 +16073,36 @@ Calcolato dall'adapter. Garantisce import idempotenti.
       addedAt: number | null;
     }
 
-### 3.8 PrivacySettings (toggle espliciti, default off)
+### 3.8 PrivacySettings (toggle espliciti)
 
     export interface PrivacySettings {
       retainIp: boolean;          // default false; toggle ESPLICITO dell'utente
+      retainCountry: boolean;     // default TRUE; persistenza del paese derivato
+      retainCity: boolean;        // default false; derivazione e persistenza della città (L2)
+      retainDeviceType: boolean;  // default true; persistenza del tipo di dispositivo
+      retainDeviceDetail: boolean;// default false; persistenza della stringa grezza del device
+      deriveContext: boolean;     // default true; classificazione del contesto di ascolto (L1)
       enrichMetadata: boolean;    // default false; arricchimento metadati brani
       carDetectionConsent: boolean; // default false; rilevamento ascolti in auto (es. Bluetooth/Battery)
       scrobbleHubs: ScrobbleHubId[]; // default []; hub di scrobbling scelti (tipo DEDICATO — vedi sotto)
       syncCloud: boolean;         // default false; sync E2E opzionale (Fase 2, ADR-0005)
     }
+
+**I default non sono tutti `off`** (v1.7, Story 1.6 — decisione del project
+owner sull'issue #108, ratificata in `19-GEO-CONTEXT.md` §7.1):
+
+| Toggle | Default | Perché |
+|---|---|---|
+| `retainIp` | `false` | dato identificante: l'IP resta nel file dell'utente, non nel DB |
+| `retainCountry` | **`true`** | dato **derivato**, non identificante, e cuore del prodotto: metterlo a `false` sarebbe una regressione di feature, non un rafforzamento della privacy |
+| `retainCity` | `false` | dato **stimato**, accuratezza scarsa su IP mobili, più sensibile del paese: opt-in |
+| `retainDeviceType` | `true` | 8 valori granulari, nessun identificativo |
+| `retainDeviceDetail` | `false` | è la **stringa grezza** del provider (`"iPhone di Mario"`): dato identificante, opt-in |
+| `deriveContext` | `true` | non raccoglie nulla di nuovo: opera su dati già conservati (`country`, `deviceType`, timestamp) |
+
+Il `country` resta quindi **conservato indipendentemente da `retainIp`**:
+retainere l'IP e conservare il paese sono due decisioni separate. Il toggle
+`retainCountry` li disaccoppia esplicitamente.
 
 **`ScrobbleHubId` è un tipo dedicato, non `PlatformId`** (ratificato dalla spec
 `20-SCROBBLING-HUB.md` v1.0 🟢, D-SH.2 e ADR-0011 🟢 v1.0 §"I vincoli", V7):
@@ -15949,6 +16153,39 @@ Quando `carDetectionConsent` è true (default false):
       resultCount: number | null; // null se non disponibile
       context: 'manual' | 'browse' | 'recommendation';
     }
+
+### 3.10 ContextPeriod (derivato, con verdetto utente) — v1.7
+
+    export const CONTEXT_KINDS = [
+      'home', 'work', 'commute', 'car', 'travel', 'away', 'unknown',
+    ] as const;
+    export type ContextKind = (typeof CONTEXT_KINDS)[number];
+
+    export interface ContextPeriod {
+      id: string;              // deterministico: il ricalcolo non crea duplicati
+      startTime: number;       // unix ms UTC, inizio del periodo
+      endTime: number;         // unix ms UTC, fine del periodo
+      kind: ContextKind;       // contesto dedotto (L1) o tassonomia del periodo
+      country: string | null;  // ISO 3166-1 alpha-2
+      city: string | null;     // città stimata (L2, Story 4.4): null in questa tranche
+      eventCount: number;      // ascolti coperti
+      deviceTypes: DeviceType[];
+      confidence: number;      // 0..1 — sotto 0.5 il periodo non viene aggregato
+      derivedVersion: string;  // hash dei parametri dell'algoritmo (MIG-3)
+      status: 'pending' | 'confirmed' | 'corrected' | 'dismissed';
+      userLabel: string | null;  // etichetta libera: "Casa di mia madre"
+      createdAt: number;
+    }
+
+Il contesto **non sta sull'evento**: si ripeterebbe identico su migliaia di
+righe. Sta su un **periodo**, ricostruibile con `recompute()` (MIG-2) e
+versionato come gli insight (MIG-3). La tassonomia dei `kind` è vincolante
+(`19-GEO-CONTEXT.md` §4.3): `unknown` non è un errore, è la dichiarazione
+"i segnali non bastano".
+
+Il **verdetto dell'utente** (`status` ≠ `pending`, `userLabel`) è stabile: un
+ricalcolo non cancella un periodo confermato, corretto o scartato, e non ne
+duplica uno sovrapposto (E20).
 
 Regole di persistenza:
 - Solo se `PrivacySettings.enrichMetadata` è true OPPURE il consenso specifico è attivo
@@ -16167,12 +16404,58 @@ modificata e nessun dato viene perso; la tabella nasce vuota.
 `settings`), nessun contesto di ascolto, nessun IP, nessun device (il payload è
 chiuso per costruzione, `05§4.2` V8).
 
+### 6.3 Tabella `contexts` (schema v6 — Story 1.6)
+
+I **periodi di contesto** (`19-GEO-CONTEXT.md` §4.3) hanno stato per elemento,
+confidenza, versione degli algoritmi e verdetto dell'utente: sono quindi una
+tabella a sé, non una chiave/valore in `settings` → **schema Dexie v6**.
+
+    db.version(6).stores({
+      ...v5,
+      contexts: '&id, kind, startTime, endTime, derivedVersion, status',
+    });
+
+| Campo | Tipo | Note |
+|-------|------|------|
+| `id` | string | **PK**: deterministico (`ctx-<kind>-<startTime>`) → il ricalcolo aggiorna, non duplica |
+| `startTime` | number | ts (unix ms UTC) di inizio del periodo |
+| `endTime` | number | ts (unix ms UTC) di fine del periodo |
+| `kind` | `ContextKind` | indice: il nastro filtra per contesto (`19§8.2`) |
+| `country` | string \| null | ISO 3166-1 alpha-2 |
+| `city` | string \| null | città stimata (L2, Story 4.4): null in questa tranche |
+| `eventCount` | number | ascolti coperti |
+| `deviceTypes` | `DeviceType[]` | dispositivi presenti nel periodo |
+| `confidence` | number | 0..1 — sotto 0.5 il periodo non viene aggregato (E19) |
+| `derivedVersion` | string | hash dei parametri dell'algoritmo (MIG-3) |
+| `status` | `'pending' \| 'confirmed' \| 'corrected' \| 'dismissed'` | verdetto dell'utente |
+| `userLabel` | string \| null | etichetta libera: "Casa di mia madre" |
+| `createdAt` | number | ts di creazione |
+
+**Tabella derivata** (MIG-2): `contexts` è ricostruibile da `listens` con
+`recompute()`. Un drop non perde nulla.
+
+**Migrazione non distruttiva** (MIG-1): la tabella nasce vuota e nessuna
+tabella esistente viene modificata. L'unica-touch è l'upgrade che azzera i
+tre campi `city*` sugli ascolti già persistiti:
+
+    db.version(6).stores({...}).upgrade(tx =>
+      tx.table('listens').toCollection().modify(l => {
+        l.city = l.city ?? null;
+        l.citySource = l.citySource ?? null;
+        l.cityConfidence = l.cityConfidence ?? null;
+      }))
+
+La città è una **derivazione** (L2) che nasce solo con il database geo
+on-demand (Story 4.4): sugli ascolti già persistiti non può essere nota, e
+`null` significa "dato assente", non "dato perso".
+
 ## 7. Politiche di migrazione e ricalcolo
 
 - **MIG-1**: ogni cambio schema = `db.version(n+1).stores({...}).upgrade(tx => ...)`; mai drop di tabelle utente
-- **MIG-2**: tabelle derivate (`sessions`, `insights`) sono **ricostruibili**: comando `recompute()` le rigenera da `listens` + `features`
+- **MIG-2**: tabelle derivate (`sessions`, `insights`, `contexts`) sono **ricostruibili**: comando `recompute()` le rigenera da `listens` + `features`
 - **MIG-3**: ogni modifica ai parametri di analisi cambia `derivedVersion` (hash del config); insight con version vecchia sono marcati `stale` e ricalcolati al prossimo avvio
 - **MIG-4**: i contatori denormalizzati (`listenCount`) sono ricalcolabili con `recount()`; servono solo per performance UI
+- **MIG-5** (v1.7): il ricalcolo dei **periodi di contesto** è **esplicito** — un re-import con toggle diversi **non** azzera i campi già persistiti (E20). I periodi con verdetto dell'utente (`status` ≠ `pending`) sono preservati e i periodi nuovi che li sovrappongono vengono scartati
 
 ## 8. Cosa NON è nello schema (decisioni esplicite)
 
@@ -16227,6 +16510,7 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.4 | Sessione 52 (2026-10-26, issue #155) | §6.1 (nuova): tabella `settings` (chiave/valore) nello schema Dexie **v4** — proxy CORS Last.fm, `api_key`, username, per-utente e locali (`09§4`). Migrazione non distruttiva (MIG-1), nessuna modifica alle tabelle dati. §3.1: il contratto `RawListenEvent` riceve due campi **additivi e opzionali** — `sourceArtistMbid` (→ `Artist.mbid`, richiesto dalle spec `03-ADAPTERS/lastfm.md` §3.1.2 e `listenbrainz.md` §3.1.2) e `sourceTrackDurationMs` (durata **catalogo**, solo hint sulla `Track`: non entra nel bucket DEDUP-3, altrimenti uno stesso brano finirebbe in due `Track` distinte) |
 | 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 57, issue #172)* |
 | 1.6 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **§3.8** — `scrobbleHubs` passa da `PlatformId[]` al **tipo dedicato** `ScrobbleHubId` (`'lastfm' \| 'listenbrainz'`), con la semantica del toggle (default `[]`, consenso per-hub indipendente dagli altri toggle, revoca che svuota la coda del hub, configurazione per-utente in `settings`); **§6.2 (nuova)** — tabella `scrobbleOutbox` nello schema Dexie **v5** (PK `hub\|eventKey`, indice per `hub`/`status`/`createdAt`/`nextAttemptAt`, payload senza segreti, write-ahead `in_flight`), con la garanzia di idempotenza per costruzione (G-SH.1) e il caso residuo dichiarato (doppio scrobble possibile, mai una perdita). Migrazione **non distruttiva** (MIG-1). Il tipo `ScrobblePayload` e il contratto `ScrobbleSink` sono in `05§4.2` (ADR-0011 🟢 v1.0) |
+| 1.7 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 — fondazione geo e contesto di ascolto** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): **§3.2** — tre campi derivati `city` / `citySource` / `cityConfidence` su `ListenEvent` (la città è una *stima* L2, non un fatto: la derivazione è la Story 4.4); **§3.8** — `PrivacySettings` con i toggle `retainCountry` (default **true**: il paese è derivato e non identificativo, decisione del project owner sull'issue #108), `retainCity` (default false), `retainDeviceType` (default true), `retainDeviceDetail` (default false: la stringa grezza del provider è identificante) e `deriveContext` (default true), con la semantica dichiarata che **il `country` è conservato indipendentemente da `retainIp`**; **§3.10 (nuova)** — `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS` (`home`, `work`, `commute`, `car`, `travel`, `away`, `unknown`), il verdetto utente (`status` + `userLabel`) e la soglia 0.5 (E19); **§6.3 (nuova)** — tabella `contexts` nello schema Dexie **v6** (tabella derivata, ricostruibile con `recompute()`, MIG-2) con migrazione non distruttiva che azzera i campi città sugli ascolti esistenti; **§7** — MIG-5: il ricalcolo del contesto è **esplicito** e non azzera i campi già persistiti (E20) |
 
 
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
@@ -20555,7 +20839,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 
 # 09 — Privacy & Security
 
-> Status: 🟡 DRAFT · Versione 0.7 · Sessione 67 (2026-10-30, issue #201)
+> Status: 🟡 DRAFT · Versione 0.8 · Sessione 68 (2026-10-31, issue #205)
 > ⚠️ **AVVISO**: Questo documento è una bozza tecnica-legale. La privacy policy
 > (§7) DEVE essere revisionata da un professionista legale qualificato prima
 > del lancio pubblico. Questo documento non costituisce consulenza legale.
@@ -20665,7 +20949,8 @@ Definire:
 | Cronologia ascolti (brano, artista, timestamp, durata) | Dati personali | Export utente | Sì (locale) | Consenso esplicito (art. 6.1.a) |
 | Paese di connessione | Dati personali (derivato, non identificativo) | Derivato da IP | Sì (locale) | Necessario al servizio — consenso solo per `retainIp` |
 | Indirizzo IP | Dati personali | Export piattaforma | Solo se `retainIp` | Consenso esplicito |
-| Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale), `car` solo se `carDetectionConsent` | Consenso esplicito |
+| Tipo dispositivo | Dati personali | Export piattaforma | Sì (locale) se `retainDeviceType` (default **true**), `car` solo se `carDetectionConsent` | Consenso esplicito (toggle `retainDeviceType`, `carDetectionConsent`) |
+| **Stringa del dispositivo** (`deviceDetail`, es. «iPhone di Mario») | Dati personali (**identificanti**) | Export piattaforma | **Solo se `retainDeviceDetail`** (default **false**) | Consenso esplicito (toggle `retainDeviceDetail`) |
 | **Città stimata** (`city`, `citySource`, `cityConfidence`) | Dati derivati (potenzialmente sensibili) | Derivato localmente dall'IP via DB-MMDB locale (`13-ADR/0009`) | Sì (locale), **solo se `retainCity`** | Consenso esplicito (toggle `retainCity`) |
 | **Contesto dedotto** (`ContextPeriod`: casa/lavoro/viaggio, etichetta dell'utente) | Dati derivati (potenzialmente sensibili) | Calcolo locale sugli eventi | Sì (locale); `userLabel` solo se l'utente lo scrive | Consenso esplicito (toggle `deriveContext`) |
 | **Database geo locale** (`.mmdb`, DB-IP Lite City) | **Non è dato personale** | File pubblico scaricato dall'utente | Sì (locale, Cache Storage) | — |
@@ -20910,6 +21195,7 @@ email).
 | 0.4 | 2026-10-26 (issue #144) | §4: cinque righe nuove per Last.fm (username, API key, shared secret, session key `sk`, URL del proxy) — tutte locali (Dexie), mai nel bundle, mai nei log. §7.2: nota sul **proxy** — è di fiducia dell'utente, vede la sua API key, e l'import da file ne evita l'esposizione |
 | 0.5 | 2026-10-27 (issue #172) | **Story 1.5 — percorso di scrittura ratificato** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED, `05§4.2` ADR-0011 🟢 v1.0): §3.3 — la riga "Brano + timestamp ascolto" dichiara il **payload esatto** e il fatto che sia **chiuso per costruzione** (nessun campo per contesto, device, IP o insight: `retainIp` non è applicabile alla scrittura); §4 — tre righe nuove (payload di scrobbling, coda `scrobbleOutbox`, User Token e `sk` **in scrittura**) e una nota che chiarisce dove stanno i segreti (storage locale, mai nel payload né nei log) e cosa succede alla coda quando il consenso viene revocato. Header allineato (era fermo a v0.2 dal Sessione 6, mentre il changelog era già alla 0.4) |
 | 0.6 | 2026-10-28 (issue #187) | Allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): §3.1 il diagramma del flusso di rete non cita più **FreqBlog** (provider mai esistito, già rimosso da `02§3.4` e dalla CSP) ma i tre host reali (MusicBrainz, iTunes Search API, AcousticBrainz), e dichiara che l'anteprima audio di 30 s viene **analizzata in locale e non persiste**; §3.3 le tre righe di "cosa esce" (query per nome brano + artista, MBID, anteprima audio elaborata in locale); §4 le due righe mancanti dell'inventario (**audio features** e **query di ricerca** per l'arricchimento); §7.4 il testo pubblico della privacy policy aggiorna i servizi e dichiara il trattamento locale dell'anteprima. La riga **0.1** ("Prima versione completa") è stata riposizionata **in cima** alla tabella: era stata appesa fra la 0.4 e la 0.5 |
+| 0.8 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 — fondazione geo e contesto di ascolto**: §4 — la riga «Tipo dispositivo» dichiara il toggle etainDeviceType (default **true**: 8 valori granulari, nessun identificativo) e nasce la riga «**Stringa del dispositivo**» (deviceDetail, es. «iPhone di Mario»): dato **identificante**, quindi **opt-in** (etainDeviceDetail, default **false**) — prima era conservato senza consenso. Il country resta derivato e conservato indipendentemente da etainIp (opzione A, issue #108), ma il toggle etainCountry (default **true**) lo dichiara esplicitamente |
 | 0.7 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §3.1 — la nota sulla derivazione della **città** (derivata dall'IP prima dello scarto, conservata solo come dato derivato, condizionata al database MMDB scaricato on-demand, sempre stimata); §4 — tre righe di inventario nuove (`city`/`citySource`/`cityConfidence`, `ContextPeriod` con l'etichetta dell'utente, database geo locale che **non è dato personale**); §7.2 — il paragrafo pubblico sulla città stimata e sul suo essere «circa *X*». |
 
 
@@ -21089,7 +21375,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.29 · Sessione 67 (2026-10-30, issue #201) · la **Story 4.1 (Pipeline audio features) è completata** (PR #197 merged il 2026-10-30, merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (senza React, D-AF.5) contiene il contratto `AudioFeatureProvider`, la cascata `cache → Essentia.js → AcousticBrainz → euristico`, la normalizzazione dichiarata, i limiter (MusicBrainz 1 req/s, AcousticBrainz dagli header `X-RateLimit-*`), la coda con i tre trigger e il budget, e lo stoccaggio (TTL 90 giorni, LRU); la CSP dichiarata in `12§2.1` è applicata al bundle e le 8 chiavi `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en`. La **Story 2.1 (Mood Tracker)** è il consumer finale: il percorso dati è chiuso e la catena **4.1 (dati) → 2.1 (letture)** è completa. Fuori perimetro e dichiarato: la UI (Story 3.x) e il lookup MusicBrainz (Story 4.2). Il **cambio di licenza AGPL-3.0** (D-AF.2) è **stato eseguito** (Sessione 67, issue #201): il repository è passato ad AGPL-3.0 e l'obbligo del §13 è il requisito aperto dell'issue #202
+> Status: 🟢 APPROVED · Versione 1.6.30 · Sessione 68 (2026-10-31, issue #205) · la **Story 1.6 (Fondazione geo e contesto di ascolto) è in review**: il delta su `02-DATA-SCHEMA.md` è applicato (v1.7 — campi `city*` su `ListenEvent`, entità `ContextPeriod`, tabella `contexts` nello schema Dexie v6, toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`) e il **classificatore L1** vive in `packages/core/src/context/` (regole R1..R7, soglia 0.5, `derivedVersion` dai parametri) con la persistenza dei periodi e il fixture di scenario geo. L'implementazione è in review sulla PR dell'issue #205; le story **4.4** (DB IP→città) e **3.4** (nastro contesto) restano da fare e **dipendono da questa**: il livello L2 è opt-in (`retainCity` default OFF) e L0/L1 reggono da sole. Fuori perimetro e dichiarato: la UI dei toggle (Story 3.x) e la derivazione L2 (Story 4.4). La **ratifica della spec geo** (`19-GEO-CONTEXT.md` v1.0 🟢 e `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201) era il presupposto di questa story ed è stata eseguita allora
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -21441,7 +21727,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: La base dati del contesto di ascolto: il delta su `02-DATA-SCHEMA.md` (v1.7, Dexie v5→v6) con i campi `city`/`citySource`/`cityConfidence` e l'entità derivata `ContextPeriod` (tabella `contexts`), i toggle `retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, e il classificatore **L1** (contesto dedotto: casa, lavoro, viaggio) come algoritmo deterministico e versionato.
 
-**Stato**: ⬚ **TODO** — la specifica è **ratificata** (`docs/19-GEO-CONTEXT.md` v1.0 🟢 APPROVED, Sessione 67, issue #201; `docs/13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED). L'implementazione non è iniziata: manca l'issue di claim. Il **delta su `02`** è ratificato come decisione e viene applicato **in questa story** (v1.7, Dexie v5→v6), come avvenuto per la `21` nella Story 4.1.
+**Stato**: 👀 **IN REVIEW — implementata nella Sessione 68** (issue #205). Consegnato: il **delta su `02-DATA-SCHEMA.md` v1.7** (i campi `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia `CONTEXT_KINDS`, i toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e MIG-5 sul ricalcolo esplicito), il **classificatore L1** in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel`) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`). Il **delta su `02`** era ratificato come decisione ed è stato applicato **in questa story**, come avvenuto per la `21` nella Story 4.1. Dettagli e scelte dichiarate: `docs/state/stories/1.6-geo-foundation.md`.
 
 **Task**:
 - T1.6.1 — Applicare il delta a `02-DATA-SCHEMA.md` (v1.7): `city`/`citySource`/`cityConfidence` su `ListenEvent`, `ContextPeriod`, tabella `contexts`, toggle, migrazione Dexie v5→v6
@@ -21450,10 +21736,10 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - T1.6.4 — Test sul fixture di scenario: il classificatore è ricalcolabile e deterministico a parità di `derivedVersion`
 
 **Acceptance criteria** (da `19` v1.0 🟢):
-- [ ] Il classificatore produce gli stessi periodi a parità di input e di `derivedVersion` (`19§5.2`)
-- [ ] Un periodo sotto la soglia 0.5 **non** viene aggregato (`19§5.3`, E22)
-- [ ] `country` resta derivato e conservato indipendentemente da `retainIp` (issue #108)
-- [ ] `car` è classificabile solo con `carDetectionConsent` attivo (`19§5.3`)
+- [x] Il classificatore produce gli stessi periodi a parità di input e di `derivedVersion` (`19§5.2`)
+- [x] Un periodo sotto la soglia 0.5 **non** viene aggregato (`19§5.3`, **E19** — la numerazione del documento ratificato; il backlog citava «E22», che non esiste in `19`)
+- [x] `country` resta derivato e conservato indipendentemente da `retainIp` (issue #108)
+- [x] `car` è classificabile solo con `carDetectionConsent` attivo (`19§5.3`)
 
 **Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §4, §5, §7 · `docs/13-ADR/0009-local-ip-geolocation.md` (v1.0 🟢 APPROVED) · `docs/02-DATA-SCHEMA.md` §3.8 · `docs/09-PRIVACY-SECURITY.md` §3.1, §4
 
@@ -21714,7 +22000,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 |------|-------|-------|------|
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
-| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ⬚ TODO | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1, la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
+| 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | 👀 IN REVIEW (1.6) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **implementata e in review** (Sessione 61, issue #205) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in), la **3.4** disegna il nastro contesto. L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
@@ -21785,6 +22071,7 @@ Ogni story deve avere label GitHub:
 | 1.6.25 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 implementata** (Pipeline audio features): il pacchetto `packages/core/src/enrichment/` è nato — **senza React** (D-AF.5), con il contratto `AudioFeatureProvider` (`fetch(track, context)`: il `Track` di `02§3.3` non porta il nome dell'artista, e la ricerca del preview lo richiede, D-AF.1), la **cascata** `cache → Essentia.js → AcousticBrainz → euristico` con i salti dichiarati (`21§5.1`) e la regola "l'import non attende mai la rete", la **normalizzazione** DEAM `[1,9] → [0,1]` con clamp e warning (E8, `10§7`), la **derivazione** mood → valence/energy di AcousticBrainz con i pesi dichiarati (`21§7.3`, D-AF.8), il **fallback euristico** che stima tempo/ballabilità/acustica dal genere e **non** stima valence/energy (`21§8.1`), i **limiter** (MusicBrainz 1 req/s a intervallo fisso, AcousticBrainz **dagli header** `X-RateLimit-*` senza costanti, D-AF.6), la **coda** con i tre trigger, il budget di 5 min/giorno, la concurrency 1 e l'interrompibilità (`21§5.2`, D-AF.7), lo **stoccaggio** (TTL 90 giorni per AB, `schemaVersion`, LRU a 50.000 righe) e il subpath `@ls/core/enrichment`. Tutte le dipendenze esterne sono **porte iniettate** (HTTP, clock, sleep, storage, policy): i **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) non chiamano mai la rete (`10§8`). La **CSP** dichiarata in `12§2.1` è applicata al bundle (`apps/web/src/security/csp.ts` + header Vite + tag `<meta>`) e le **8 chiavi** `enrichment.*` (`08§2.17`) sono materializzate in `it`/`en` (15 test in `@ls/web`). **Contraddizione dichiarata**: D-AF.1 impone la ricerca `GET https://itunes.apple.com/search`, ma D-AF.9 elenca in `connect-src` solo i due host che **non** sono quello della ricerca → la CSP applicata include il terzo host e il conflitto è segnalato all'issue **#196** (`needs-spec`). Fuori perimetro e dichiarato: la UI (Story 3.x), il lookup MusicBrainz (Story 4.2, di cui è consegnato il limiter) e il cambio di licenza AGPL-3.0 (D-AF.2, atto del Boss) |
 | 1.6.26 | Sessione 64 (2026-10-30, issue #188) | **Story 4.1 completata** (Pipeline audio features, PR #197 merged, merge commit `7458220`): la sezione Story passa a ✅ **DONE** e `docs/state/stories/4.1-audio-features.md` ha `status: done` con `merged_commit` e `merged_date`; `docs/state/sessions/64-audio-features-pipeline.md` ha `state: 🟢`, `merged: true` e la sezione "Esito post-merge". La PR è stata merged in `main` il 2026-10-30T11:24:49Z con CI verde (22 step del job `quality`); l'issue **#188** è chiusa con `status:done` e le label `agent-ready`/`in-progress`/`status:in-review` rimosse da `auto-status-done`, che ha pubblicato anche il commento `release:`. Automazioni post-merge: `auto-branch-cleanup` (branch remoto eliminato), `auto-state-aggregate` (`9c3a13f`) e `auto-bundle` (`1062c04`). La pulizia git locale (worktree `ls-188-feat-enrichment-pipeline-audio-features`, branch `feat/188-feat-enrichment-pipeline-audio-features`) è stata fatta con `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con "Result too large" (path lunghi con `node_modules` su Windows) e la rimozione è passata da `rd /s /q` con prefisso `\\?\`; `post-merge.ps1 -Check` esce 0. La riga dell'EPIC 4 nella roadmap torna a ⬚ TODO (restano 4.2, 4.3 e i generi) e il blocco NEXT-STEP del README ricade sul fallback "nessuna story non-done e non bloccata migrata" — **risposta corretta**, non una regressione: le 2.2/2.3 dipendono dalla 2.1 (`[DEP:2.1]`) e non hanno uno state file. Aperta dal lavoro l'issue **#196** (`needs-spec`): la contraddizione fra D-AF.1 e D-AF.9 sulla CSP. La **lista di priorità** degli agenti mette la 4.1 e la 2.1 come **completate** |
 | 1.6.27 | Sessione 66 (2026-10-30, issue #196) | **Ratifica del terzo host della CSP**: `docs/21-AUDIO-FEATURES.md` passa a **v1.1 🟢 APPROVED** con **D-AF.9 emendata** — `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview. La v1.0 elencava i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP applicata bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati — D.A.1). Il project owner ha ratificato l'opzione **A** (confermare il terzo host) fra le due proposte dall'issue #196: l'opzione B (rivedere D-AF.1) avrebbe lasciato la pipeline senza provider acustico. Allineati: l'AC della Story 4.1 (i **tre** host dichiarati), `12-DEVOPS.md` (v1.1), `docs/INDEX.md` (le righe `12` e `21`, il "Prossimo passo tecnico"), `docs/state/stories/4.1-audio-features.md` (AC e limiti dichiarati) e i commenti del codice applicato (`apps/web/src/security/`). **La CSP applicata al bundle non cambia**: l'host della ricerca era già in `connect-src` dal merge della PR #197 — la ratifica allinea la **dichiarazione** al codice |
+| 1.6.28 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 implementata** (fondazione geo e contesto di ascolto): il delta su `02-DATA-SCHEMA.md` passa a **v1.7** (i tre campi derivati `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS`, i toggle `retainCountry` (**default true**: il paese è derivato e non identificativo — decisione del project owner sull'issue #108), `retainCity`/`retainDeviceDetail` (default false) e `retainDeviceType`/`deriveContext` (default true), la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e **MIG-5**: il ricalcolo del contesto è esplicito e non azzera i campi già persistiti). Il **classificatore L1** vive in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo, paese di riferimento = moda su 90gg con ≥30 eventi) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel` sopravvive al ricalcolo) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`, generato da `scripts/generate-fixtures.mjs geo`). **39 test** nuovi in `@ls/core`. Scelte dichiarate (`docs/state/stories/1.6-geo-foundation.md`): `away` come complemento di R1, R4 vincolata alla durata delle sessioni (25 minuti, la soglia di R6) perché uno spostamento ricorrente non venga classificato `home`, il viaggio riconosciuto sull'intero *run* di giorni esteri, il modulo in `context/` (il layer `analysis` è puro e non ha dipendenze dal DB), il fuso come dato in `settings` (`app.timezone`). Correzione di numerazione: l'AC citava «E22», la spec `19` dichiara **E19** |
 
 
 
@@ -21808,7 +22095,7 @@ Ogni story deve avere label GitHub:
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
-| 1.6 - Fondazione geo e contesto di ascolto | todo | - | - | db |
+| 1.6 - Fondazione geo e contesto di ascolto | in_review | - | - | db |
 | 2.1 - Mood Tracker giornaliero | done | #192 | `d018a26` | analysis |
 | 2.2 - Era Detector | todo | - | - | analysis |
 | 2.3 - Event Detector | todo | - | - | analysis |
@@ -26473,6 +26760,164 @@ function buildScenario({
   };
 }
 
+/**
+ * Scenario **geo e contesto di ascolto** — Story 1.6, `19-GEO-CONTEXT.md` §5.
+ *
+ * I fixture di scenario esistenti usano paese e dispositivo **casuali**:
+ * per il classificatore di contesto servono pattern realistici (casa, lavoro,
+ * spostamento, viaggio, auto), altrimenti non c'è nessun cluster da
+ * riconoscere. Questo fixture è quindi una **cronologia composta**,
+ * deterministica e senza RNG: 4 settimane di un ascoltatore a Roma
+ * (Europe/Rome) con una settimana di viaggio in Germania.
+ *
+ * Il piano è dichiarato in `expectedContexts` e verificato dai test del
+ * classificatore (`packages/core/src/context/__tests__/`).
+ */
+function buildGeoContextScenario() {
+  const importId = 'imp-geo-context-1';
+  const artists = [
+    { id: 'ar-geo-1', name: 'Artisti Geo Uno', mbid: null, genres: ['rock'], spotifyId: 'sp-ar-geo-1' },
+    { id: 'ar-geo-2', name: 'Artisti Geo Due', mbid: null, genres: ['pop'], spotifyId: 'sp-ar-geo-2' },
+    { id: 'ar-geo-3', name: 'Artisti Geo Tre', mbid: null, genres: ['jazz'], spotifyId: 'sp-ar-geo-3' },
+  ];
+  const tracks = [];
+  for (let i = 1; i <= 12; i += 1) {
+    const artist = artists[(i - 1) % artists.length];
+    tracks.push({
+      id: `tr-geo-${String(i).padStart(2, '0')}`,
+      canonicalKey: `fuzzy:ck-geo-${String(i).padStart(2, '0')}`,
+      name: `Brano Geo ${String(i).padStart(2, '0')}`,
+      artistId: artist.id,
+      albumId: null,
+      durationMs: 240000,
+      isrc: null,
+      mbid: null,
+      explicit: false,
+      genres: artist.genres,
+      artworkUrl: null,
+      platformIds: { spotify: `sp-tr-geo-${String(i).padStart(2, '0')}` },
+      firstSeenAt: Date.UTC(2024, 3, 1),
+      lastSeenAt: Date.UTC(2024, 3, 1),
+      listenCount: 0,
+      spotifyId: `sp-tr-geo-${String(i).padStart(2, '0')}`,
+    });
+  }
+
+  const listens = [];
+  let counter = 0;
+
+  /** Orario locale (Europe/Rome = UTC+2 in aprile 2024) → istante UTC. */
+  const at = (dayIndex, hour, minute) => Date.UTC(2024, 3, 1 + dayIndex, hour - 2, minute);
+
+  /**
+   * Emette una sessione di ascolto: `n` tracce consecutive.
+   * La durata della sessione (`end - start`) è ciò che il classificatore
+   * usa per distinguere una sessione domestica da uno spostamento.
+   */
+  const session = ({ start, trackMs, n, deviceType, country }) => {
+    for (let i = 0; i < n; i += 1) {
+      counter += 1;
+      const track = tracks[(counter - 1) % tracks.length];
+      const timestamp = start + (i + 1) * trackMs;
+      const durationMs = trackMs;
+      listens.push({
+        id: `le-geo-${String(counter).padStart(4, '0')}`,
+        eventKey: `spotify:ek-geo-${String(counter).padStart(4, '0')}`,
+        platform: 'spotify',
+        importId,
+        timestamp,
+        startedAt: timestamp - durationMs,
+        durationMs,
+        trackId: track.id,
+        completed: true,
+        skipped: false,
+        shuffle: false,
+        offline: false,
+        incognito: false,
+        reasonStart: 'playbtn',
+        reasonEnd: 'trackdone',
+        deviceType,
+        deviceDetail: null,
+        ip: null,
+        country,
+        city: null,
+        citySource: null,
+        cityConfidence: null,
+        day: new Date(timestamp).toISOString().slice(0, 10),
+      });
+    }
+  };
+
+  /** Casa: sera, sessioni lunghe (30 min), telefono. */
+  const home = (dayIndex) => session({ start: at(dayIndex, 20, 0), trackMs: 360000, n: 5, deviceType: 'mobile', country: 'IT' });
+  /** Lavoro: mattina, desktop, orario 09:30-10:00 (fascia lavorativa). */
+  const work = (dayIndex) => session({ start: at(dayIndex, 9, 30), trackMs: 300000, n: 6, deviceType: 'desktop', country: 'IT' });
+  /** Spostamento: mattina presto, telefono, sessioni brevi (8 min). */
+  const commute = (dayIndex) => session({ start: at(dayIndex, 8, 10), trackMs: 240000, n: 2, deviceType: 'mobile', country: 'IT' });
+  /** Viaggio: tre giorni consecutivi in Germania. */
+  const travel = (dayIndex) => session({ start: at(dayIndex, 20, 0), trackMs: 360000, n: 5, deviceType: 'mobile', country: 'DE' });
+  /** Auto: sera in auto (richiede `carDetectionConsent`). */
+  const car = (dayIndex) => session({ start: at(dayIndex, 20, 0), trackMs: 360000, n: 5, deviceType: 'car', country: 'IT' });
+
+  // Settimana 1 (1-7 aprile): casa + lavoro, un giorno di solo spostamento.
+  home(0); work(0);
+  home(1); work(1);
+  commute(2);
+  home(3); work(3);
+  home(4); work(4);
+  home(5);
+  home(6);
+  // Settimana 2 (8-14 aprile): casa + lavoro, un giorno di solo spostamento.
+  home(7); work(7);
+  commute(8); work(8);
+  home(9); work(9);
+  home(10); work(10);
+  home(11); work(11);
+  home(12);
+  home(13);
+  // Settimana 3 (15-21 aprile): tre giorni di viaggio in Germania, poi casa.
+  travel(14);
+  travel(15);
+  travel(16);
+  home(17); work(17);
+  home(18); work(18);
+  home(19);
+  home(20);
+  // Settimana 4 (22-28 aprile): casa + lavoro, un giorno in auto.
+  commute(21); work(21);
+  home(22); work(22);
+  car(23); work(23);
+  home(24); work(24);
+  home(25); work(25);
+  home(26);
+  home(27);
+
+  return {
+    _metadata: {
+      name: 'geo-context',
+      version: '1.0',
+      session: 61,
+      generatedAt: new Date().toISOString(),
+      seed: null,
+      description:
+        'Contesto di ascolto (Story 1.6): 4 settimane a Roma (Europe/Rome) con casa serale, lavoro diurno da desktop, spostamenti brevi, 3 giorni di viaggio in Germania e una serata in auto. Verifica 19-GEO-CONTEXT §5 (classificatore L1) e la persistenza dei periodi.',
+      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+      expectedContexts: {
+        home: 'periodi serali (mobile, 20:00, sessioni da 30 min) — confidenza 0.7',
+        work: 'periodi diurni feriali (desktop, 09:30) — confidenza 0.6',
+        commute: 'spostamenti brevi (mobile, 08:10) — confidenza 0.4, sotto soglia: NON aggregati',
+        travel: '3 giorni consecutivi in DE — confidenza 0.9',
+        car: 'una serata in auto — confidenza 0.9, solo con carDetectionConsent',
+        away: 'nessuno (tutti gli ascolti hanno un paese)',
+      },
+      spec: '02-DATA-SCHEMA.md v1.7 + 19-GEO-CONTEXT.md v1.0 + 10-TESTING.md §3.3',
+    },
+    listens,
+    tracks,
+    artists,
+  };
+}
+
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
@@ -26627,6 +27072,7 @@ const targets = {
     });
   },
   demo: () => buildDemoUser({ seed: SEED ^ 0x2468 }),
+  geo: () => buildGeoContextScenario(),
 };
 
 function writeJson(path, data) {
@@ -26663,7 +27109,8 @@ for (const t of targets_) {
   // Mappa scenario name → filename canonico (10-TESTING §3.3)
   else if (t === 'lockdown') out = resolve(SCENARIOS_DIR, 'lockdown-2020.json');
   else if (t === 'breakup') out = resolve(SCENARIOS_DIR, 'breakup-oct2021.json');
-  else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
+    else if (t === 'summer') out = resolve(SCENARIOS_DIR, 'summer-roadtrip.json');
+    else if (t === 'geo') out = resolve(SCENARIOS_DIR, 'geo-context.json');
   else out = resolve(SCENARIOS_DIR, `${t}.json`);
   writeJson(out, data);
 }

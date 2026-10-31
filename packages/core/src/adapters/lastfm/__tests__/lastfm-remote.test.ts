@@ -17,8 +17,13 @@ const PAGE2 = fileURLToPath(
   new URL('../../../../../../fixtures/synthetic-history/lastfm-page2-sample.json', import.meta.url),
 );
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -116,7 +121,7 @@ describe('LastfmAdapter — percorso API (parseRemote?, ADR-0010)', () => {
       db,
       adapter,
       { endpoint: 'https://proxy.example.invalid', credentials: { apiKey: 'key-123' } },
-      { privacy: PRIVACY_OFF },
+      { privacy: PRIVACY_DEFAULTS },
     );
 
     // 4 + 2 track, meno 1 nowplaying e 1 senza artista (E.LF.9).
@@ -169,7 +174,7 @@ describe('LastfmAdapter — percorso API (parseRemote?, ADR-0010)', () => {
       db,
       adapter,
       { endpoint: 'https://proxy.example.invalid' },
-      { privacy: PRIVACY_OFF },
+      { privacy: PRIVACY_DEFAULTS },
     );
     expect(summary.eventsParsed).toBe(3);
     // Solo due warning: il brano in riproduzione è scartato in silenzio
@@ -439,7 +444,7 @@ describe('LastfmAdapter — percorso API (parseRemote?, ADR-0010)', () => {
       db,
       adapter,
       { endpoint: 'https://proxy.example.invalid', signal: controller.signal },
-      { privacy: PRIVACY_OFF },
+      { privacy: PRIVACY_DEFAULTS },
     );
     expect(summary.status).toBe('partial');
     expect(summary.eventsInserted).toBeGreaterThan(0);

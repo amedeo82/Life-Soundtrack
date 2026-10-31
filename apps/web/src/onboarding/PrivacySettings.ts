@@ -1,7 +1,12 @@
 /**
  * Persistenza `PrivacySettings` (02-DATA-SCHEMA.md §3.8) in localStorage.
- * Chiave `ls:privacy`. Tutti i toggle default `false` (nessun consenso
- * implicito) — coerenza privacy-by-design.
+ * Chiave `ls:privacy`.
+ *
+ * I default **non** sono tutti `off`: i toggle che descrivono dati già
+ * conservati e non identificativi (`retainCountry`, `retainDeviceType`) sono
+ * `true`, quelli che riguardano dati identificanti o stimati (`retainIp`,
+ * `retainCity`, `retainDeviceDetail`) sono `false`
+ * (19-GEO-CONTEXT.md §7.1, decisione del project owner sull'issue #108).
  */
 import type { PrivacySettings } from '@core/schema';
 
@@ -9,6 +14,11 @@ const STORAGE_KEY = 'ls:privacy';
 
 export const DEFAULT_PRIVACY: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],

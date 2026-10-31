@@ -34,6 +34,28 @@ export function applyCarConsent(deviceType: DeviceType, consent: boolean): Devic
   return consent || deviceType !== 'car' ? deviceType : 'unknown';
 }
 
+/**
+ * Gate di persistenza del **dispositivo** — 02-DATA-SCHEMA.md §3.8,
+ * 19-GEO-CONTEXT.md §7.1 (Story 1.6).
+ *
+ * `retainDeviceType` (default `true`) governa la persistenza del tipo di
+ * dispositivo: 8 valori granulari, nessun identificativo, quindi è un dato
+ * non identificativo e resta conservato. Senza il consenso, il tipo degrada
+ * a `unknown` come ogni altro dato non autorizzato.
+ *
+ * `retainDeviceDetail` (default `false`) governa invece la **stringa grezza**
+ * del provider (`"iPhone di Mario"`): è un dato identificante, quindi
+ * opt-in. Il gate è applicato in scrittura, come il gate `car`.
+ */
+export function applyDeviceTypeConsent(
+  deviceType: DeviceType,
+  retainDeviceType: boolean,
+  carConsent: boolean,
+): DeviceType {
+  const consented = applyCarConsent(deviceType, carConsent);
+  return retainDeviceType ? consented : 'unknown';
+}
+
 /** Cache di sessione per la risoluzione DEDUP (05§3.1 step 3). */
 export class NormalizationPipeline {
   private readonly db: LifeSoundtrackDB;
@@ -107,10 +129,22 @@ export class NormalizationPipeline {
       incognito: raw.incognito,
       reasonStart: raw.reasonStart,
       reasonEnd: raw.reasonEnd,
-      deviceType: applyCarConsent(raw.deviceType, this.privacy.carDetectionConsent),
-      deviceDetail: raw.deviceDetail,
+      deviceType: applyDeviceTypeConsent(
+        raw.deviceType,
+        this.privacy.retainDeviceType,
+        this.privacy.carDetectionConsent,
+      ),
+      deviceDetail: this.privacy.retainDeviceDetail ? raw.deviceDetail : null,
       ip: this.privacy.retainIp ? raw.ip : null,
-      country: raw.country,
+      // Il paese è derivato e **conservato indipendentemente** da `retainIp`
+      // (02§3.8, issue #108): è il cuore del prodotto e non richiede consenso
+      // esplicito. Il toggle `retainCountry` (default `true`) lo governa.
+      country: this.privacy.retainCountry ? raw.country : null,
+      // Città (L2): derivata dal database geo on-demand, che è la Story 4.4.
+      // Finché il database non c'è la derivazione non avviene (E21).
+      city: null,
+      citySource: null,
+      cityConfidence: null,
       day,
     };
   }

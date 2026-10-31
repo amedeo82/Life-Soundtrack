@@ -283,15 +283,18 @@ describe('schema Dexie v5 (caso 27)', () => {
       deviceDetail: null,
       ip: null,
       country: null,
+      city: null,
+      citySource: null,
+      cityConfidence: null,
       day: '2024-03-15',
     });
     await v4.close();
 
-    // Riapertura con lo schema corrente (v5): il dato c'è ancora e la coda è
+    // Riapertura con lo schema corrente: il dato c'è ancora e la coda è
     // stata creata.
     const v5 = new LifeSoundtrackDB(name);
     await v5.open();
-    expect(v5.verno).toBe(5);
+    expect(v5.verno).toBe(6);
     expect(await v5.listens.count()).toBe(1);
     expect(v5.tables.some((table) => table.name === 'scrobbleOutbox')).toBe(true);
     await v5.delete();

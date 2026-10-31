@@ -5,8 +5,13 @@ import { LastfmPanel } from '../LastfmPanel';
 import { i18n } from '../../i18n';
 import type { PrivacySettings } from '@core/schema';
 
-const PRIVACY_OFF: PrivacySettings = {
+const PRIVACY_DEFAULTS: PrivacySettings = {
   retainIp: false,
+  retainCountry: true,
+  retainCity: false,
+  retainDeviceType: true,
+  retainDeviceDetail: false,
+  deriveContext: true,
   enrichMetadata: false,
   carDetectionConsent: false,
   scrobbleHubs: [],
@@ -16,7 +21,7 @@ const PRIVACY_OFF: PrivacySettings = {
 const renderPanel = (): void => {
   render(
     <I18nextProvider i18n={i18n}>
-      <LastfmPanel privacy={PRIVACY_OFF} />
+      <LastfmPanel privacy={PRIVACY_DEFAULTS} />
     </I18nextProvider>,
   );
 };

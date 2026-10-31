@@ -11,6 +11,7 @@ export {
   DB_SCHEMA_V3,
   DB_SCHEMA_V4,
   DB_SCHEMA_V5,
+  DB_SCHEMA_V6,
   LifeSoundtrackDB,
   openDb,
 } from './db';
@@ -20,6 +21,7 @@ export {
  * Storage locale (Dexie), mai nel bundle, mai nei log.
  */
 export {
+  APP_TIMEZONE_SETTINGS_KEY,
   EMPTY_LASTFM_CONFIG,
   EMPTY_LISTENBRAINZ_CONFIG,
   EMPTY_SCROBBLE_CURSOR,
@@ -33,9 +35,11 @@ export {
   loadLastfmConfig,
   loadListenbrainzConfig,
   loadScrobbleCursor,
+  loadUserTimezone,
   saveLastfmConfig,
   saveListenbrainzConfig,
   saveScrobbleCursor,
+  saveUserTimezone,
   setSetting,
   type AppSetting,
   type LastfmConfig,

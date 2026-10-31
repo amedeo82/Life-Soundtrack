@@ -1,6 +1,6 @@
 /**
  * Schema dati unificato — source of truth.
- * Rispecchia `docs/02-DATA-SCHEMA.md` §3 (interfacce) e §4 (payload insight), v1.2 APPROVED.
+ * Rispecchia `docs/02-DATA-SCHEMA.md` §3 (interfacce) e §4 (payload insight), v1.7 APPROVED.
  * Vincolante per adapter (03), analisi (04), db (core/db) e test (10).
  */
 
@@ -50,6 +50,34 @@ export const MOOD_IDS = ['sad', 'angry', 'neutral', 'calm', 'happy', 'excited'] 
 
 export type MoodId = (typeof MOOD_IDS)[number];
 
+/**
+ * Contesti dedotti (L1) — 19-GEO-CONTEXT.md §4.3.
+ *
+ * La tassonomia è **vincolante**: i `kind` non sono etichette libere, sono
+ * l'vocabolario del nastro contesto (Story 3.4). `unknown` non è un errore:
+ * è la dichiarazione "i segnali non bastano" (E19) — l'algoritmo non indovina.
+ */
+export const CONTEXT_KINDS = [
+  'home',
+  'work',
+  'commute',
+  'car',
+  'travel',
+  'away',
+  'unknown',
+] as const;
+
+export type ContextKind = (typeof CONTEXT_KINDS)[number];
+
+/**
+ * Provenance della città derivata (L2) — 19-GEO-CONTEXT.md §4.1.
+ *
+ * - `dbip-lite`: stimata dal database MMDB locale → la UI la introduce con
+ *   «circa *X*» e **mai** come fatto;
+ * - `manual`: corretta dall'utente → la UI smette di dire «circa».
+ */
+export type CitySource = 'dbip-lite' | 'manual';
+
 /** Evento di ascolto: l'atomo dello schema. 02-DATA-SCHEMA.md §3.2. */
 export interface ListenEvent {
   /** UUID interno. */
@@ -82,6 +110,18 @@ export interface ListenEvent {
   ip: string | null;
   /** ISO 3166-1 alpha-2, sempre derivato (privacy-by-design, §3.8). */
   country: string | null;
+  /**
+   * Città **stimata** (L2) — 19-GEO-CONTEXT.md §4.1.
+   *
+   * Non è un campo GPS: è una derivazione granulare dell'IP già presente
+   * nell'export. `null` quando la derivazione non è avvenuta (database geo
+   * assente, E21) o quando la confidenza è sotto soglia (0.6, E16).
+   */
+  city: string | null;
+  /** Provenance della città: stimata dal DB locale o corretta a mano. */
+  citySource: CitySource | null;
+  /** Confidenza della stima 0..1; sotto 0.6 la città viene scartata. */
+  cityConfidence: number | null;
   /** 'YYYY-MM-DD' UTC, derivato da timestamp, indicizzato. */
   day: string;
 }
@@ -206,6 +246,42 @@ export interface Insight {
   createdAt: number;
 }
 
+/**
+ * Periodo di contesto (derivato) — 19-GEO-CONTEXT.md §4.3.
+ *
+ * Il contesto **non sta sull'evento**: si ripeterebbe identico su migliaia di
+ * righe. Sta su un periodo, ricostruibile con `recompute()` (MIG-2) e
+ * versionato come gli insight (MIG-3).
+ */
+export interface ContextPeriod {
+  /** Id deterministico: il ricalcolo non deve creare duplicati. */
+  id: string;
+  /** Unix ms UTC — inizio del periodo. */
+  startTime: number;
+  /** Unix ms UTC — fine del periodo. */
+  endTime: number;
+  /** Contesto dedotto (L1) o tassonomia del periodo. */
+  kind: ContextKind;
+  /** Paese del periodo (ISO 3166-1 alpha-2), null se assente. */
+  country: string | null;
+  /** Città stimata del periodo (L2, Story 4.4): null in questa tranche. */
+  city: string | null;
+  /** Ascolti coperti dal periodo. */
+  eventCount: number;
+  /** Dispositivi presenti nel periodo. */
+  deviceTypes: DeviceType[];
+  /** 0..1 — sotto 0.5 il periodo non viene aggregato (19§5.3, E19). */
+  confidence: number;
+  /** Hash dei parametri dell'algoritmo (MIG-3). */
+  derivedVersion: string;
+  /** Verdetto utente: stesso modello di `Insight.status`. */
+  status: 'pending' | 'confirmed' | 'corrected' | 'dismissed';
+  /** Etichetta dell'utente: "Casa di mia madre", "Parigi, aprile". */
+  userLabel: string | null;
+  /** Unix ms UTC — creazione del periodo. */
+  createdAt: number;
+}
+
 /** Esito di un import. 02-DATA-SCHEMA.md §3.7. */
 export interface ImportRecord {
   id: string;
@@ -253,12 +329,50 @@ export interface PlaylistItem {
 }
 
 /**
- * Toggle privacy espliciti, tutti default off. 02-DATA-SCHEMA.md §3.8.
+ * Toggle privacy espliciti. 02-DATA-SCHEMA.md §3.8.
  * Non ha una tabella Dexie dedicata (§6): è persistito al livello app.
+ *
+ * I default **non** sono tutti `off`: `retainCountry` e `retainDeviceType`
+ * sono `true` perché descrivono dati già conservati e non identificativi
+ * (19-GEO-CONTEXT.md §7.1, decisione del project owner sull'issue #108:
+ * metterli a `false` sarebbe una regressione di feature, non un rafforzamento
+ * della privacy). `retainIp`, `retainCity`, `retainDeviceDetail` restano
+ * `off`: sono dati identificanti o stimati.
  */
 export interface PrivacySettings {
   /** Default false; toggle ESPLICITO dell'utente. */
   retainIp: boolean;
+  /**
+   * Default **true**; persistenza del paese derivato.
+   *
+   * Il `country` è derivato e conservato **indipendentemente** da
+   * `retainIp` (02§3.8, issue #108): non richiede consenso esplicito.
+   */
+  retainCountry: boolean;
+  /**
+   * Default false; derivazione e persistenza della **città** (L2).
+   *
+   * Dato stimato, accuratezza scarsa su IP mobili, più sensibile del paese:
+   * è **opt-in**. Senza database geo la derivazione non avveniene comunque
+   * (E21, Story 4.4).
+   */
+  retainCity: boolean;
+  /** Default true; persistenza di `deviceType` (8 valori, nessun identificativo). */
+  retainDeviceType: boolean;
+  /**
+   * Default false; persistenza di `deviceDetail`.
+   *
+   * È la **stringa grezza** del provider (`"iPhone di Mario"`): dato
+   * identificante, quindi opt-in.
+   */
+  retainDeviceDetail: boolean;
+  /**
+   * Default true; classificazione del contesto di ascolto (L1).
+   *
+   * Non raccoglie nulla di nuovo: opera su dati già conservati
+   * (`country`, `deviceType`, timestamp).
+   */
+  deriveContext: boolean;
   /** Default false; arricchimento metadati brani. */
   enrichMetadata: boolean;
   /** Default false; rilevamento ascolti in auto (consenso dedicato, D.2.2). */
