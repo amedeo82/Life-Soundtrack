@@ -7022,7 +7022,7 @@ fra il lavoro proprio e quello altrui.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #225)
 - **Claim**: `kilo-HP-ELITEBOOK-perf73`
 
 ```
