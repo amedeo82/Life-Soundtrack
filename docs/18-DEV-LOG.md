@@ -1037,9 +1037,9 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 ## 36. Issue #211 — Story 2.2: l'Era Detector (Sessione 69)
 
 **Branch**: `feat/211-era-detector`
-**PR**: **#212** (aperta il 2026-10-31) — ⏳ in attesa di review
+**PR**: **#212** (aperta il 2026-10-31) — **merged** il 2026-10-31T09:49:44Z (merge commit `3294aa4`)
 **Data**: 2026-10-31
-**Stato**: 🟡 **IMPLEMENTATA** — in attesa di merge
+**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1053,6 +1053,10 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 **Lesson learned**: un **algoritmo deterministico** si verifica con un fixture che contiene il **caso che l'algoritmo cerca** — non con un fixture generato a caso. Il caso reale è lo stesso della Sessione 68 (i fixture casuali non hanno un cluster da riconoscere): il `lockdown-2020` non ha un cambio di gusto, e il suo atteso era una congettura. Il fixture composto (`era-shift.json`, 96 eventi, confine dichiarato) rende l'atteso **verificabile**: due ere, con i mood dichiarati e il confine entro `stepDays` dal cambio reale.
 
 La seconda lezione è operativa e costa caro: **la shell non è un editor**. Un `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha corrotto un documento (mojibake + BOM) in un colpo solo, e il danno era invisibile a occhio nel terminale (che mostrava solo gli ultimi caratteri). Il rilevamento è venuto da un controllo esplicito (`BOM?` / `mojibake?` via node), e il ripristino da `git checkout --` è stato possibile perché il file non era ancora committato.
+
+**§36 — esito post-merge della Story 2.2**: la PR #212 è **merged** in `main` il 2026-10-31T09:49:44Z (merge commit `3294aa4`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian). L'issue **#211** è chiusa con `status:done` (applicato da `auto-status-done`), le label `agent-ready` / `in-progress` / `status:in-review` sono rimosse e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-4f2k - PR #212 merged (3294aa4…)`).
+
+La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il **fallimento noto**, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main`, merge verificato via `gh`, branch remoto già assente per `auto-branch-cleanup`, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` e `auto-bundle`.
 
 ---
 

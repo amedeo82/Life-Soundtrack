@@ -6421,8 +6421,8 @@ una PR `docs:` separata: il merge commit si conosce solo dopo il merge.
 ### Sessione 69 - Story 2.2 — Era Detector (issue #211)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #212)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #212 (3294aa4, 2026-10-31)
 - **Claim**: `kilo-HP-ELITEBOOK-4f2k`
 
 ```

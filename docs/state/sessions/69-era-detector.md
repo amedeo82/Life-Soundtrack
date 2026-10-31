@@ -2,8 +2,10 @@
 number: 69
 title: "Story 2.2 — Era Detector (issue #211)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: 3294aa4
+merged_date: 2026-10-31
 branch: feat/211-era-detector
 pr: 212
 claim: kilo-HP-ELITEBOOK-4f2k
