@@ -1012,9 +1012,9 @@ mezzo del lavoro.
 ## 35. Issue #205 — Story 1.6: fondazione geo e contesto di ascolto (Sessione 68)
 
 **Branch**: `feat/205-geo-context-foundation`
-**PR**: **#209** (aperta il 2026-10-31)
+**PR**: **#209** (aperta il 2026-10-31) — **merged** il 2026-10-31T08:40:45Z (merge commit `68c27e5`)
 **Data**: 2026-10-31
-**Stato**: 👀 **IN REVIEW** — implementazione completa, in attesa di review
+**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1027,6 +1027,10 @@ mezzo del lavoro.
 | 35-7 | P | Il modulo `context/` è stato creato **fuori** da `analysis/`, contro la forma degli altri algoritmi | Il layer `analysis` è **puro** e non ha dipendenze dal DB (`05§9`: gira nel Web Worker), ma il contesto ha bisogno dei due (motore + tabella `contexts`) | Il modulo segue la forma di `enrichment/` (porte + orchestratore + storage Dexie) ed espone il subpath `@ls/core/context`. **Scelta dichiarata** (S7) | `05§9` · scelta dichiarata S7 |
 
 **Lesson learned**: le regole deterministiche hanno un difetto che i test casuali non trovano: **una regola che non scatta mai** e **una regola che scatta troppo spesso** si somigliano, e la seconda è più pericolosa della prima. R4 senza il vincolo di duranza non era «una regola che scatta troppo spesso»: era una regola che **rubava** il caso di R6. Il difetto è emerso solo scrivendo il **fixture di scenario** con una cronologia composta (gli scenario esistenti usano paese e dispositivo casuali, e per il contesto non hanno nessun cluster da riconoscere). La regola operativa: **un classificatore a regole si verifica con un fixture che contiene il caso ambiguo**, non con un fixture generato a caso.
+
+**§35 — esito post-merge della Story 1.6**: la PR #209 è **merged** in `main` il 2026-10-31T08:40:45Z (merge commit `68c27e5`), CI verde (job `quality`: lint, typecheck, test, build e i gate su bundle, aggregator, workflow e README; GitGuardian). L'issue **#205** è chiusa con `status:done` (applicato da `auto-status-done`), le label `agent-ready` / `in-progress` / `status:in-review` sono rimosse e il commento `release:` è automatico (`release: kilo-HP-ELITEBOOK-q7v2 - PR #209 merged (68c27e5…)`).
+
+La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree remove` ha di nuovo fallito con **Result too large** (path lunghi con `node_modules` su Windows) e la rimozione è avvenuta con `rd /s /q` e prefisso `\\?\` — il **fallimento noto**, non una regressione; i passi restanti sono passati (`main` allineato a `origin/main` `68c27e5`, merge verificato via `gh`, branch remoto già assente per `auto-branch-cleanup`, branch locale eliminato con `git branch -d`, prune + audit `post-merge.ps1 -Check` a 0). Automazioni post-merge: `auto-status-done`, `auto-branch-cleanup`, `auto-state-aggregate` e `auto-bundle`.
 
 ---
 
