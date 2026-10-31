@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 19:15
+> Data: 2026-10-31 18:22
 > Totale file: 130
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -33657,9 +33657,22 @@ let pushers = 0;
 // Elenco preso da "Workflow syntax for GitHub Actions" -> permissions.
 // `metadata` e' volutamente assente: e' sempre attiva e non dichiarabile.
 const PERMISSION_SCOPES = [
-  'actions', 'artifact-metadata', 'attestations', 'checks', 'code-quality',
-  'contents', 'deployments', 'discussions', 'id-token', 'issues', 'models',
-  'packages', 'pages', 'pull-requests', 'security-events', 'statuses',
+  'actions',
+  'artifact-metadata',
+  'attestations',
+  'checks',
+  'code-quality',
+  'contents',
+  'deployments',
+  'discussions',
+  'id-token',
+  'issues',
+  'models',
+  'packages',
+  'pages',
+  'pull-requests',
+  'security-events',
+  'statuses',
   'vulnerability-alerts',
 ];
 const PERMISSION_SCOPE_SET = new Set(PERMISSION_SCOPES);
@@ -33701,13 +33714,13 @@ const PUSH_MAIN_RE = /^\s*git\s+push\s+origin\s+main\s*$/;
 // valido — per questo i corpi dei block scalar sono esclusi dal controllo.
 function checkYamlScalars(lines, file) {
   let fails = 0;
-  let blockIndent = -1;   // >= 0: siamo dentro il corpo di un block scalar
+  let blockIndent = -1; // >= 0: siamo dentro il corpo di un block scalar
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (blockIndent >= 0) {
       if (line.trim() === '') continue;
       const indent = line.match(/^\s*/)[0].length;
-      if (indent > blockIndent) continue;   // ancora dentro il blocco
+      if (indent > blockIndent) continue; // ancora dentro il blocco
       blockIndent = -1;
     }
     const m = line.match(/^(\s*)(?:-\s+)?([A-Za-z0-9_"'-]+):(?:\s+(.*))?$/);
@@ -33721,13 +33734,13 @@ function checkYamlScalars(lines, file) {
       blockIndent = m[1].length;
       continue;
     }
-    if (value.startsWith('"') || value.startsWith("'")) continue;   // quotato: valido
-    if (value.startsWith('[') || value.startsWith('{')) continue;   // flow: valido
+    if (value.startsWith('"') || value.startsWith("'")) continue; // quotato: valido
+    if (value.startsWith('[') || value.startsWith('{')) continue; // flow: valido
     if (/: /.test(value)) {
       console.error(
         `[FAIL] ${file}: riga ${i + 1}: scalare semplice non quotato che contiene ": " — ` +
-        `YAML non valido, GitHub rifiuterebbe il file (run con 0 job). ` +
-        `Usa un block scalar (|) o quota il valore.`
+          `YAML non valido, GitHub rifiuterebbe il file (run con 0 job). ` +
+          `Usa un block scalar (|) o quota il valore.`,
       );
       fails++;
     }
@@ -33735,12 +33748,12 @@ function checkYamlScalars(lines, file) {
   return fails;
 }
 
-for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
+for (const file of readdirSync(dir).filter((f) => f.endsWith('.yml'))) {
   const full = join(dir, file);
   const text = readFileSync(full, 'utf8');
 
   // Tab usati per l'indentazione sono illegali in YAML.
-  const tabLine = text.split('\n').findIndex(l => /^\s*\t/.test(l)) + 1;
+  const tabLine = text.split('\n').findIndex((l) => /^\s*\t/.test(l)) + 1;
   if (tabLine > 0) {
     console.error(`[FAIL] ${file}: tab nell'indentazione alla riga ${tabLine}`);
     failures++;
@@ -33754,7 +33767,7 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
   // `main` — non matcherebbero piu', e i controlli fallirebbero in SILENZIO
   // su un file CRLF. Il `\r` non e' un terminatore di riga per il regex
   // JavaScript: `.` non lo matcha.
-  const lines = text.split('\n').map(l => (l.endsWith('\r') ? l.slice(0, -1) : l));
+  const lines = text.split('\n').map((l) => (l.endsWith('\r') ? l.slice(0, -1) : l));
 
   // Issue #135: le scope dichiarate in `permissions:` devono essere reali.
   failures += checkPermissionScopes(lines, file);
@@ -33770,9 +33783,12 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
     const body = [];
     for (let j = i + 1; j < lines.length; j++) {
       const line = lines[j];
-      if (line.trim() === '') { body.push(''); continue; }
+      if (line.trim() === '') {
+        body.push('');
+        continue;
+      }
       const indent = line.match(/^\s*/)[0].length;
-      if (indent <= baseIndent) break;   // uscita dal blocco scalare
+      if (indent <= baseIndent) break; // uscita dal blocco scalare
       body.push(line.slice(baseIndent + 2));
     }
     // github-script avvolge il codice in una arrow function async, quindi
@@ -33792,12 +33808,20 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
     writeFileSync(tmp, wrapped, 'utf8');
     try {
       execFileSync(process.execPath, ['--check', tmp], { stdio: 'pipe' });
-      console.log(`[OK] ${file}: blocco script alla riga ${i + 1} (${js.split('\n').length} righe JS) sintatticamente valido`);
+      console.log(
+        `[OK] ${file}: blocco script alla riga ${i + 1} (${js.split('\n').length} righe JS) sintatticamente valido`,
+      );
     } catch (e) {
-      console.error(`[FAIL] ${file}: script alla riga ${i + 1} non valido:\n${e.stderr?.toString() || e.message}`);
+      console.error(
+        `[FAIL] ${file}: script alla riga ${i + 1} non valido:\n${e.stderr?.toString() || e.message}`,
+      );
       failures++;
     } finally {
-      try { unlinkSync(tmp); } catch { /* noop */ }
+      try {
+        unlinkSync(tmp);
+      } catch {
+        /* noop */
+      }
     }
   }
 }
@@ -33833,7 +33857,7 @@ function extractGitAddPaths(text) {
     const cleaned = raw.replace(/\s*2>&1\s*\|\s*Out-Null\s*$/, '').replace(/\s*2>&1\s*$/, '');
     const m = cleaned.match(/^\s*git add\s+(.+?)\s*$/);
     if (!m) continue;
-    return m[1].split(/\s+/).filter(t => t && !t.startsWith('-'));
+    return m[1].split(/\s+/).filter((t) => t && !t.startsWith('-'));
   }
   return null;
 }
@@ -33843,7 +33867,7 @@ function extractGitAddPaths(text) {
 // sotto la radice (`.` copre tutto).
 function isStaged(target, staged) {
   if (staged.includes(target)) return true;
-  return staged.some(p => p === '.' || p === './' || (p.endsWith('/') && target.startsWith(p)));
+  return staged.some((p) => p === '.' || p === './' || (p.endsWith('/') && target.startsWith(p)));
 }
 
 const repoRoot = resolve(dir, '..', '..');
@@ -33859,29 +33883,40 @@ if (existsSync(aggregatorRoot)) {
     }
     const scriptPath = join(repoRoot, script);
     if (!existsSync(scriptPath)) {
-      console.error(`[FAIL] ${workflow}: ${script} non trovato, la copertura \`git add\` non e' verificabile`);
+      console.error(
+        `[FAIL] ${workflow}: ${script} non trovato, la copertura \`git add\` non e' verificabile`,
+      );
       failures++;
       continue;
     }
     const targets = extractAggregatorTargets(readFileSync(scriptPath, 'utf8'));
     const staged = extractGitAddPaths(readFileSync(wfPath, 'utf8'));
     if (!targets || targets.length === 0) {
-      console.error(`[FAIL] ${workflow}: nessun target estratto da $targets in ${script} (la forma dell'array e' cambiata?)`);
+      console.error(
+        `[FAIL] ${workflow}: nessun target estratto da $targets in ${script} (la forma dell'array e' cambiata?)`,
+      );
       failures++;
       continue;
     }
     if (!staged) {
-      console.error(`[FAIL] ${workflow}: nessuna riga \`git add\` trovata, i target dell'aggregator non verrebbero committati`);
+      console.error(
+        `[FAIL] ${workflow}: nessuna riga \`git add\` trovata, i target dell'aggregator non verrebbero committati`,
+      );
       failures++;
       continue;
     }
-    const missing = targets.filter(t => !isStaged(t, staged));
+    const missing = targets.filter((t) => !isStaged(t, staged));
     if (missing.length > 0) {
-      console.error(`[FAIL] ${workflow}: la riga \`git add\` NON copre ${missing.length}/${targets.length} $targets di ${script}:`);
-      for (const t of missing) console.error(`         mancante: ${t} (generato dal blocco aggregato, mai committato)`);
+      console.error(
+        `[FAIL] ${workflow}: la riga \`git add\` NON copre ${missing.length}/${targets.length} $targets di ${script}:`,
+      );
+      for (const t of missing)
+        console.error(`         mancante: ${t} (generato dal blocco aggregato, mai committato)`);
       failures++;
     } else {
-      console.log(`[OK] ${workflow}: la riga \`git add\` copre tutti i ${targets.length} $targets di ${script}`);
+      console.log(
+        `[OK] ${workflow}: la riga \`git add\` copre tutti i ${targets.length} $targets di ${script}`,
+      );
     }
   }
 }
@@ -33922,7 +33957,9 @@ function checkPermissionScopes(lines, file) {
 
     if (inline !== '') {
       if (!PERMISSION_SHORTHANDS.has(inline)) {
-        console.error(`[FAIL] ${file}:${i + 1}: \`permissions: ${inline}\` non e' una forma ammessa (usa un blocco scope, \`{}\`, \`read-all\` o \`write-all\`)`);
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`permissions: ${inline}\` non e' una forma ammessa (usa un blocco scope, \`{}\`, \`read-all\` o \`write-all\`)`,
+        );
         bad++;
       }
       continue;
@@ -33937,18 +33974,22 @@ function checkPermissionScopes(lines, file) {
       if (trimmed === '' || trimmed.startsWith('#')) continue;
       if (raw.match(/^\s*/)[0].length <= baseIndent) break;
       const entry = raw.match(/^\s*([A-Za-z0-9_-]+):\s*(\S+)\s*(?:#.*)?$/);
-      if (!entry) break;   // forma non `scope: valore` (flow mapping): niente da validare
+      if (!entry) break; // forma non `scope: valore` (flow mapping): niente da validare
       const [, scope, value] = entry;
       entries++;
       if (!PERMISSION_SCOPE_SET.has(scope)) {
-        console.error(`[FAIL] ${file}:${j + 1}: scope \`${scope}\` non valida in \`permissions:\` — GitHub rifiuta l'intero workflow (\`Unexpected value '${scope}'\`), la run viene creata con 0 job e fallisce a 0s su ogni trigger.`);
+        console.error(
+          `[FAIL] ${file}:${j + 1}: scope \`${scope}\` non valida in \`permissions:\` — GitHub rifiuta l'intero workflow (\`Unexpected value '${scope}'\`), la run viene creata con 0 job e fallisce a 0s su ogni trigger.`,
+        );
         console.error(`         scope valide: ${PERMISSION_SCOPES.join(', ')}`);
         bad++;
         continue;
       }
       const allowed = PERMISSION_RESTRICTED.get(scope) || PERMISSION_VALUES;
       if (!allowed.has(value)) {
-        console.error(`[FAIL] ${file}:${j + 1}: scope \`${scope}\` accetta solo ${[...allowed].join('|')}, trovato \`${value || '(vuoto)'}\``);
+        console.error(
+          `[FAIL] ${file}:${j + 1}: scope \`${scope}\` accetta solo ${[...allowed].join('|')}, trovato \`${value || '(vuoto)'}\``,
+        );
         bad++;
       }
     }
@@ -33982,17 +34023,25 @@ function checkPermissionScopes(lines, file) {
 // contratto: un sync dopo il push non serve a niente.
 
 function checkPushSync(lines, file) {
-  const pushAt = lines.findIndex(l => PUSH_MAIN_RE.test(l));
-  if (pushAt < 0) return 0;   // non e' un writer di `main`: niente da tassare
+  const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l));
+  if (pushAt < 0) return 0; // non e' un writer di `main`: niente da tassare
   pushers++;
   const before = lines.slice(0, pushAt).join('\n');
-  if (SYNC_FORMS.some(re => re.test(before))) {
-    console.log(`[OK] ${file}:${pushAt + 1}: \`git push origin main\` preceduto da una sincronizzazione con origin/main`);
+  if (SYNC_FORMS.some((re) => re.test(before))) {
+    console.log(
+      `[OK] ${file}:${pushAt + 1}: \`git push origin main\` preceduto da una sincronizzazione con origin/main`,
+    );
     return 0;
   }
-  console.error(`[FAIL] ${file}:${pushAt + 1}: \`git push origin main\` senza sincronizzazione preventiva con \`origin/main\`.`);
-  console.error(`       Con piu' workflow che pushano su \`main\` (auto-bundle + auto-state-aggregate), il checkout di default e' il \`github.sha\` del merge commit: se l'altra ha gia' pushato, questo push viene rifiutato con \`non-fast-forward\` e i blocchi aggregati restano indietro senza che nessun gate se ne accorga.`);
-  console.error(`       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push.`);
+  console.error(
+    `[FAIL] ${file}:${pushAt + 1}: \`git push origin main\` senza sincronizzazione preventiva con \`origin/main\`.`,
+  );
+  console.error(
+    `       Con piu' workflow che pushano su \`main\` (auto-bundle + auto-state-aggregate), il checkout di default e' il \`github.sha\` del merge commit: se l'altra ha gia' pushato, questo push viene rifiutato con \`non-fast-forward\` e i blocchi aggregati restano indietro senza che nessun gate se ne accorga.`,
+  );
+  console.error(
+    `       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push.`,
+  );
   return 1;
 }
 
@@ -34047,20 +34096,27 @@ function extractWorkflowRunTargets(text) {
     const indent = raw.match(/^\s*/)[0].length;
     const trimmed = raw.trim();
     if (!inOn) {
-      if (/^on:\s*$/.test(trimmed)) { inOn = true; onIndent = indent; }
+      if (/^on:\s*$/.test(trimmed)) {
+        inOn = true;
+        onIndent = indent;
+      }
       continue;
     }
     if (indent <= onIndent && trimmed !== '' && !trimmed.startsWith('#')) {
       // uscita dal blocco `on:`
-      inOn = false; inRun = false;
+      inOn = false;
+      inRun = false;
       continue;
     }
     if (!inRun) {
-      if (/^workflow_run:\s*$/.test(trimmed)) { inRun = true; runIndent = indent; }
+      if (/^workflow_run:\s*$/.test(trimmed)) {
+        inRun = true;
+        runIndent = indent;
+      }
       continue;
     }
     if (indent <= runIndent && trimmed !== '' && !trimmed.startsWith('#')) {
-      inRun = false;   // uscita dal blocco `workflow_run:`
+      inRun = false; // uscita dal blocco `workflow_run:`
       continue;
     }
     const m = trimmed.match(/^workflows:\s*\[(.*)\]\s*$/);
@@ -34084,11 +34140,15 @@ function checkWriterOrdering(dir) {
     // copertura `git add` ne porta solo uno). Tassarle produrrebbe un falso
     // positivo su un check che qui non ha niente da dire.
     if (!existsSync(consumerPath)) {
-      console.log(`[SKIP] ${consumer}: assente dalla directory ispezionata, il check di ordinamento non e' applicabile`);
+      console.log(
+        `[SKIP] ${consumer}: assente dalla directory ispezionata, il check di ordinamento non e' applicabile`,
+      );
       continue;
     }
     if (!existsSync(producerPath)) {
-      console.error(`[FAIL] ${consumer}: il workflow produttore ${producer} non esiste, l'ordinamento non e' verificabile`);
+      console.error(
+        `[FAIL] ${consumer}: il workflow produttore ${producer} non esiste, l'ordinamento non e' verificabile`,
+      );
       bad++;
       continue;
     }
@@ -34096,15 +34156,25 @@ function checkWriterOrdering(dir) {
     const producerText = readFileSync(producerPath, 'utf8');
     const targets = extractWorkflowRunTargets(consumerText);
     if (!targets) {
-      console.error(`[FAIL] ${consumer}: nessun trigger \`workflow_run:\` con \`workflows:\` trovato.`);
-      console.error(`       Senza di esso i due writer di \`main\` restano serializzati ma NON ordinati: \`${consumer}\` puo' copiare blocchi aggregati stale da \`${producer}\` (caso reale: PR #147, 2026-10-26T12:50Z, drift di 6 righe in docs/BUNDLE.md).`);
-      console.error(`       Aggiungi un blocco \`workflow_run:\` con \`workflows: ["${producerName}"]\` e \`types: [completed]\`.`);
+      console.error(
+        `[FAIL] ${consumer}: nessun trigger \`workflow_run:\` con \`workflows:\` trovato.`,
+      );
+      console.error(
+        `       Senza di esso i due writer di \`main\` restano serializzati ma NON ordinati: \`${consumer}\` puo' copiare blocchi aggregati stale da \`${producer}\` (caso reale: PR #147, 2026-10-26T12:50Z, drift di 6 righe in docs/BUNDLE.md).`,
+      );
+      console.error(
+        `       Aggiungi un blocco \`workflow_run:\` con \`workflows: ["${producerName}"]\` e \`types: [completed]\`.`,
+      );
       bad++;
       continue;
     }
     if (!targets.includes(producerName)) {
-      console.error(`[FAIL] ${consumer}: il trigger \`workflow_run:\` non include \`${producerName}\` (trovati: ${targets.join(', ') || 'nessuno'}).`);
-      console.error(`       Il bundle deve rigenerarsi DOPO che \`${producer}\` ha committato i blocchi aggregati, altrimenti copia il contenuto stale.`);
+      console.error(
+        `[FAIL] ${consumer}: il trigger \`workflow_run:\` non include \`${producerName}\` (trovati: ${targets.join(', ') || 'nessuno'}).`,
+      );
+      console.error(
+        `       Il bundle deve rigenerarsi DOPO che \`${producer}\` ha committato i blocchi aggregati, altrimenti copia il contenuto stale.`,
+      );
       bad++;
       continue;
     }
@@ -34112,12 +34182,18 @@ function checkWriterOrdering(dir) {
     // una disallineazione non da' errore, ma il trigger semplicemente non scatta.
     const actualName = extractWorkflowName(producerText);
     if (actualName !== producerName) {
-      console.error(`[FAIL] ${consumer}: \`workflows: ["${producerName}"]\` non combacia con il \`name:\` reale di ${producer} ("${actualName}").`);
-      console.error(`       Il trigger \`workflow_run\` non scatterebbe MAI: silenzioso, senza errore di GitHub.`);
+      console.error(
+        `[FAIL] ${consumer}: \`workflows: ["${producerName}"]\` non combacia con il \`name:\` reale di ${producer} ("${actualName}").`,
+      );
+      console.error(
+        `       Il trigger \`workflow_run\` non scatterebbe MAI: silenzioso, senza errore di GitHub.`,
+      );
       bad++;
       continue;
     }
-    console.log(`[OK] ${consumer}: trigger \`workflow_run\` su "${producerName}" presente e allineato al \`name:\` di ${producer}`);
+    console.log(
+      `[OK] ${consumer}: trigger \`workflow_run\` su "${producerName}" presente e allineato al \`name:\` di ${producer}`,
+    );
   }
   return bad;
 }
@@ -34129,8 +34205,11 @@ function checkWriterOrdering(dir) {
 
 failures += checkWriterOrdering(dir);
 
-console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`);
+console.log(
+  `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`,
+);
 process.exit(failures === 0 ? 0 : 1);
+
 
 
 ===== FILE: scripts/test-workflow-git-add-coverage.sh =====
