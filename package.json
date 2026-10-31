@@ -17,6 +17,7 @@
     "e2e": "turbo run e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "progress": "pwsh scripts/aggregate-state.ps1 -Progress",
     "prepare": "husky",
     "postinstall": "node scripts/setup-hooks.js",
     "setup-hooks": "node scripts/setup-hooks.js"

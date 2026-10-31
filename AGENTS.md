@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.28 — Sessione 60 (2026-10-28)**
+> **Versione 1.29 — Sessione 71 (2026-10-31)**
 
 ---
 
@@ -544,7 +544,8 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
 - [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
-- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (9/9) — **gate bloccante in CI**
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (53 assert, T1..T14) — **gate bloccante in CI**
+- [ ] Se ho scritto una sessione: il file `docs/state/sessions/<N>-<slug>.md` ha la sezione **`## Analisi di avanzamento`** (numeri, cosa è pronto, cosa manca, salute tecnica): è ciò che il blocco `AGGREGATE-PROGRESS` rende al project owner (issue #216)
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
 
@@ -750,7 +751,7 @@ Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; qua
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
-| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136) |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**`, `docs/11-BACKLOG.md` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) + il blocco **PROGRESS** in `README.md` e `docs/INDEX.md` (V4, issue #216) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136); i `paths:` devono coprire tutti gli **input** del blocco PROGRESS (catalogo del backlog + state): lo verifica lo stesso validatore (issue #216) |
 | `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group. Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
@@ -764,13 +765,14 @@ Dettagli e motivazioni:
 
 4. **`stale-claim-sweeper`** applica il TTL di 12h di ADR-0006, che era documentato ma non controllato da nulla. Non rimuove la label di proposito: un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer. Segnala e lascia decidere.
 
-I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica **cinque** controlli indipendenti sul testo dei workflow:
+I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica **sei** controlli indipendenti sul testo dei workflow:
 
 1. **Sintassi JS dei blocchi `script:` di `github-script`**, emulando il wrapper `async` reale (issue #73): senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
 2. **Copertura `git add` vs `$targets`** dell'agregator (issue #136): vedi §"🔄 Lazy-state aggregation → Target V1 + V2 + V3".
 3. **Scope dichiarate in `permissions:`** (issue #135): ogni chiave deve essere una scope reale della `GITHUB_TOKEN`, ogni valore `read`/`write`/`none`. Una scope inesistente — per esempio `metadata`, che è sempre concessa e **non** è dichiarabile — non produce un job che fallisce: GitHub *rifiuta il file in fase di validazione*, quindi la run viene creata con `jobs: 0` e finisce `failure` a 0 secondi, senza log e senza annotazioni via API. Il sintomo è indistinguibile da "Actions rotta per billing" ed è la ragione per cui #135 ha spento tutti i gate di `ci.yml` per ~22 ore senza che nessuno se ne accorgesse. Test di scenario negativo: `scripts/test-workflow-permission-scopes.sh`.
 4. **Sync con `origin/main` prima del push** (issue #140): ogni workflow che contiene `git push origin main` deve aver allineato il workspace a `origin/main` **prima** del push. Il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit: quando l'altra workflow ha già pushato sullo stesso merge, il push viene rifiutato con `non-fast-forward` e i blocchi aggregati restano indietro **in silenzio** (merge verde, CI verde, stato falso). `auto-state-aggregate.yml` ne era privo ed è stato il motivo per cui il doc-sync della Story 1.2 non è mai arrivato su `main`. Test di scenario negativo: `scripts/test-workflow-push-sync.sh`.
 5. **Ordinamento fra i due writer di `main`** (issue #149): `auto-bundle.yml` deve dichiarare un trigger `workflow_run` su `auto-state-aggregate`, e il nome in `workflows:` deve combaciare con il `name:` reale del producer. Il concurrency group serializza i *run* ma **non ne impone l'ordine**, e `auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica: senza il trigger, il bundle può copiare blocchi aggregati stale (caso reale: merge della PR #147, drift di 6 righe in `docs/BUNDLE.md`, silenzioso perché il gate sul bundle è warning-only). `workflow_run` è agganciato alla *conclusione* del workflow e quindi sopravvive alla soppressione del GITHUB_TOKEN. Test di scenario negativo: `scripts/test-workflow-writer-ordering.sh`.
+6. **Copertura dei trigger rispetto agli input del blocco PROGRESS** (issue #216): i `paths:` di `auto-state-aggregate.yml` devono comprendere `docs/11-BACKLOG.md` (il catalogo delle story: denominatore della percentuale) e `docs/state/**` (stato delle story + analisi della sessione). Senza il path del backlog, l'indicatore di avanzamento resta fermo con un denominatore vecchio — e nessun gate se ne accorge, perché il `-Check` confronta il blocco con i file *di quel momento*. Test di scenario negativo: T14 in `scripts/test-aggregate-determinism.sh`.
 
 ### Livello 2 — Issue (release + label)
 
@@ -860,7 +862,7 @@ bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
 
 **Quando scatta**: ogni PR che aggiunge o rimuove una piattaforma importabile, o che dichiara una capability nel README, aggiorna la prosa del README **nella stessa PR** e fa passare il gate. Una PR che cambia `ACTIVE_PLATFORMS` senza toccare il README è una PR che il gate blocca — è esattamente il drift che l'issue #161 ha chiuso.
 
-### Target V1 + V2 + V3
+### Target V1 + V2 + V3 + V4
 
 | File | Blocchi gestiti | Versione |
 |------|----------------|----------|
@@ -870,12 +872,31 @@ bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->` | V2 |
 | `docs/BUNDLE.md` | `<!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->` | V2 |
 | `README.md` | `<!-- AGGREGATE-NEXT-STEP-{START,END} -->` | V3 (issue #127) |
+| `README.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
+| `docs/INDEX.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
 
 **Vincolante (issue #136)**: la riga `git add` di `.github/workflows/auto-state-aggregate.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
 
+**Vincolante (issue #216)**: i `paths:` del workflow devono comprendere **tutti gli input** del blocco che generano (`docs/11-BACKLOG.md` = catalogo, `docs/state/**` = stato e analisi). Il blocco PROGRESS dipende dal backlog: senza quel path nei trigger, l'indicatore resterebbe fermo con un denominatore vecchio, e nessun gate se ne accorgerebbe (il `-Check` confronta il blocco con i file *di quel momento*, non con la data dell'ultima modifica del catalogo). Il gate è il sesto controllo di `scripts/validate-workflows.mjs`; vedi `docs/12-DEVOPS.md` §9.8h.
+
+### Indicatore di avanzamento (V4, issue #216)
+
+Il blocco `<!-- AGGREGATE-PROGRESS-* -->` (in `README.md` e `docs/INDEX.md`) risponde alla domanda "a che punto siamo": percentuale di implementazione, `X story completate su Y`, gli **Z step rimanenti**, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione corrente.
+
+```powershell
+pwsh scripts/aggregate-state.ps1 -Progress   # read-only: stampa l'indicatore
+pnpm run progress                             # stesso, via npm script
+```
+
+**Il denominatore è il catalogo del backlog** (`docs/11-BACKLOG.md`, heading `### Story <id> … [SIZE:…]`), **non** i soli state file: questi esistono solo per le story claimate, e calcolare su quelli darebbe ~90% con 8 story mai scritte. La percentuale è calcolata in story e **pesata per effort** (S=1, M=2, L=3, XL=4).
+
+**Obbligo per gli agenti**: ogni sessione chiude con la sezione **`## Analisi di avanzamento`** nel file di sessione (`docs/state/sessions/<N>-<slug>.md`). L'aggregator la rende dentro il blocco, accanto ai numeri calcolati: l'analisi narrativa e i numeri nello stesso posto, senza doppio lavoro. La sezione risponde a: numeri, cosa è pronto, cosa manca, salute tecnica, gate per il test.
+
+**Fail-closed**: uno state file che descrive una story **assente dal backlog** fa fallire l'aggregazione (exit 2) **prima** di scrivere qualsiasi blocco, con il messaggio che cita i path da riallineare. Una percentuale falsa è peggio di nessuna percentuale.
+
 ### Eccezione
 
-Le PR di introduzione V1 (`#24`, S25), V2 (`#52`, S29) e V3 (`#127`, S42) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
+Le PR di introduzione V1 (`#24`, S25), V2 (`#52`, S29), V3 (`#127`, S42) e V4 (`#216`, S71) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
 
 ### Pattern `state/`
 
@@ -913,7 +934,7 @@ L'aggregator è la linfa dorsale del workflow parallelo: se produce output diver
 | **`Dimensione totale` coerente cross-platform** (issue #88): il calcolo normalizza CRLF->LF via `Get-Content -Raw` + `GetByteCount(($text -replace "`r`n","`n"))`, in modo che la dimensione sia la stessa su Windows (`core.autocrlf=true`, 14 file CRLF sul disco) e su Linux (LF committed). Senza normalizzazione, `--check` su Windows mostrava un drift spurio di ~2.3 KB rispetto a origin/main | Conseguenza dell'autocrlf Windows: la dimensione su disco (CRLF) divergeva dai byte committed (LF) per ognuno dei 14 file di testo con EOL conversion abilitata; il `Get-Item .Length` riportava i byte CRLF. Il fix trasforma l'aggregator in cross-platform-deterministic, chiudendo la radice del warning `#63` (PS 5.1 vs 7 incompatibilita residue) per il blocco BUNDLE | T8 (3 assert) |
 
 ```bash
-bash scripts/test-aggregate-determinism.sh    # 34 assert (T1..T11), gate bloccante in CI
+bash scripts/test-aggregate-determinism.sh    # 53 assert (T1..T14), gate bloccante in CI
 ```
 
 **T3 da solo non basta** *(issue #142)*: verifica l'idempotenza con due run ravvicinati, ma il timestamp ha granularità al minuto — se i due run cadono su minuti diversi il test fallisce **per l'orologio, non per il codice** (è successo sul run `39818043647`, 16:55 → 16:56). **T11** verifica la stessa garanzia senza orologio: semina un *sentinel* nella riga del timestamp, esegue l'aggregator e verifica che il valore venga riusato; la contro-prova verifica che il timestamp si aggiorni quando il blocco cambia davvero. Stessa struttura per `> Data:` in `test-bundle-check-idempotent.sh` (T7).
@@ -982,7 +1003,17 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.28 — il blocco NEXT-STEP del README indicava una story **bloccata** (issue #182). `scripts/aggregate-state.ps1` filtra ora anche `blocked` (STOP) e `wontdo` (NO) accanto a `done`: il blocco indica la prima story **lavorabile**, non una dipendenza esterna irrisolvibile. Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle audio features dell'EPIC 4.1 (decisione D-A.1, Sessione 59) e il puntatore era finito su di lei, mentre la story implementabile era la 2.4 (Memory Engine, issue #179). La regola è coperta da due sub-test nuovi in `scripts/test-aggregate-determinism.sh` (T10e, T10f) che **falliscono senza il fix**: un gate che passa sempre non è un gate (lesson 43-1). Il messaggio di fallback e la riga delle "altre candidate" dicono ora "non-done e non bloccate".
+*Ultimo aggiornamento: v1.29 — il project owner chiedeva un indicatore di avanzamento **automatico** ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si sarebbe letto ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 64% — 18 done, 10 step rimanenti. Aggiunti:
+- `scripts/aggregate-state.ps1` **V4**: blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con percentuale (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), `X/Y` completate, **Z step rimanenti**, tabella per EPIC, elenco degli step, **gate di testabilità** (e2e = EPIC 3, motore = EPIC 2, dati reali = 5.2) e l'**analisi della sessione corrente**; modalità read-only `-Progress` (`pnpm run progress`)
+- **Fail-closed del denominatore**: uno state file che il backlog non dichiara ⇒ exit 2 con i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale
+- `docs/state/sessions/<N>-<slug>.md`: nuova sezione **`## Analisi di avanzamento`**, resa dentro il blocco — l'analisi narrativa e i numeri calcolati nello stesso posto, senza doppio lavoro
+- `.github/workflows/auto-state-aggregate.yml`: `docs/11-BACKLOG.md` nei `paths:` (il blocco dipende dal catalogo)
+- `scripts/validate-workflows.mjs`: **sesto** controllo — i `paths:` del workflow devono coprire tutti gli input del blocco PROGRESS; senza, l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio
+- `scripts/test-aggregate-determinism.sh`: **T12** (numeri e denominatore), **T12b** (analisi resa), **T13** (fail-closed: exit non-zero, messaggio, nessuna scrittura), **T14** (idempotenza + scenario negativo sui trigger)
+- `docs/12-DEVOPS.md` §9.8h (nuova) + changelog 1.3; `docs/state/_index.md` (schema + aggregazione); `docs/18-DEV-LOG.md` §38; `docs/BUNDLE.md` rigenerato
+- `package.json`: script `progress`
+
+*Precedente v1.28 — il blocco NEXT-STEP del README indicava una story **bloccata** (issue #182). `scripts/aggregate-state.ps1` filtra ora anche `blocked` (STOP) e `wontdo` (NO) accanto a `done`: il blocco indica la prima story **lavorabile**, non una dipendenza esterna irrisolvibile. Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle audio features dell'EPIC 4.1 (decisione D-A.1, Sessione 59) e il puntatore era finito su di lei, mentre la story implementabile era la 2.4 (Memory Engine, issue #179). La regola è coperta da due sub-test nuovi in `scripts/test-aggregate-determinism.sh` (T10e, T10f) che **falliscono senza il fix**: un gate che passa sempre non è un gate (lesson 43-1). Il messaggio di fallback e la riga delle "altre candidate" dicono ora "non-done e non bloccate".
 
 *Ultimo aggiornamento: v1.27 — la prosa del `README.md` non aveva **nessun gate** (Sessione 54, issue #161). Il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti: le classi adapter non ci sono), audio features e analisi/mood/ricordi come feature presenti (nessuna implementata), e un conteggio di stato (`EPIC 0 7/7`) che l'aggregatore ricalcola altrove; la prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14), perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice. Fallimento **silenzioso**: pipeline verde, README falso. La causa radice era di ownership: `README.md` è un file ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) ma la regola di D.38.1 copriva solo i file globali, e il README non era in nessuna tabella di ownership. Aggiunti:
 - `scripts/check-readme-facts.mjs` (nuovo): gate **read-only** che confronta la prosa del README con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` (`apps/web/src/onboarding/OnboardingRouter.tsx`) e con le classi in `packages/core/src/adapters/`; vieta le capability non implementate fuori dalla sezione roadmap; vieta i conteggi duplicati in prosa. Exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). **Nessuna modalità di scrittura**: un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dal #149

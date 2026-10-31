@@ -1,5 +1,6 @@
 // Estrae i blocchi `script:` dai workflow e li syntax-checka con node.
-// Verifica anche che le scope dichiarate in `permissions:` siano valide (issue #135).
+// Verifica anche che le scope dichiarate in `permissions:` siano valide (issue #135)
+// e che i trigger `paths:` coprano tutti gli input dei blocchi aggregati (issue #216).
 // Uso: node scripts/validate-workflows.mjs [dir]
 // Serve a catturare errori JS nei workflow github-script prima del push,
 // dato che non esiste un runner GitHub Actions locale.
@@ -426,6 +427,163 @@ function checkWriterOrdering(dir) {
 //  il check viene eseguito in fondo al file, dopo le dichiarazioni)
 
 failures += checkWriterOrdering(dir);
+
+// === Issue #216 — i trigger del workflow devono coprire gli input dei blocchi ===
+//
+// Il blocco `AGGREGATE-PROGRESS-*` (ADR-0008 V4, issue #216) calcola la percentuale
+// di implementazione su TRE sorgenti: lo stato delle story (`docs/state/stories/`),
+// il CATALOGO delle story (`docs/11-BACKLOG.md`, il denominatore) e il generatore
+// stesso (`scripts/aggregate-state.ps1`).
+//
+// `auto-state-aggregate.yml` dichiarava in `paths:` solo i primi due: una story
+// nuova nel backlog (o un EPIC nuovo) non avrebbe fatto scattare il workflow, e
+// l'indicatore sarebbe rimasto fermo su una percentuale falsa. E' la stessa classe
+// di fallimento silenzioso chiusa dall'issue #136 per la riga `git add`, applicata
+// ai trigger invece che allo staging.
+//
+// Il check richiede che ogni sorgente sia coperta da almeno un pattern di `paths:`:
+// "se questo file cambia, il workflow deve scattare".
+
+const AGGREGATOR_TRIGGER_INPUTS = [
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'docs/state/stories/3.1-home-timeline.md',
+    why: 'stato di una story (frontmatter `status`)',
+  },
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'docs/state/sessions/71-progress-indicator.md',
+    why: 'stato di una sessione (analisi narrativa + blocco SESSIONS)',
+  },
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'docs/11-BACKLOG.md',
+    why: 'catalogo delle story = denominatore della percentuale (issue #216, AC2)',
+  },
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'scripts/aggregate-state.ps1',
+    why: 'il generatore stesso',
+  },
+];
+
+/**
+ * Converte un pattern di `paths:` (globo GitHub) in espressione regolare.
+ * `**` copre zero o piu' segmenti, `*` copre un segmento, `?` un carattere.
+ */
+function pathPatternToRegExp(pattern) {
+  let out = '';
+  for (let i = 0; i < pattern.length; i++) {
+    const c = pattern[i];
+    if (c === '*') {
+      if (pattern[i + 1] === '*') {
+        if (pattern[i + 2] === '/') {
+          out += '(?:[^/]+/)*';
+          i += 2;
+        } else {
+          out += '.*';
+          i += 1;
+        }
+      } else {
+        out += '[^/]*';
+      }
+      continue;
+    }
+    if (c === '?') {
+      out += '[^/]';
+      continue;
+    }
+    out += c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  }
+  return new RegExp(`^${out}$`);
+}
+
+/**
+ * Estrae la lista `paths:` del blocco `on.push` di un file YAML.
+ * Ritorna null se il blocco non esiste.
+ */
+function extractPushPaths(text) {
+  const lines = text.split('\n');
+  let inOn = false;
+  let onIndent = -1;
+  let inPush = false;
+  let pushIndent = -1;
+  let inPaths = false;
+  let pathsIndent = -1;
+  const paths = [];
+  for (const raw of lines) {
+    const indent = raw.match(/^\s*/)[0].length;
+    const trimmed = raw.trim();
+    if (trimmed === '' || trimmed.startsWith('#')) continue;
+    if (!inOn) {
+      if (/^on:\s*$/.test(trimmed)) {
+        inOn = true;
+        onIndent = indent;
+      }
+      continue;
+    }
+    if (indent <= onIndent) break;          // uscita dal blocco `on:`
+    if (!inPush) {
+      if (/^push:\s*$/.test(trimmed)) {
+        inPush = true;
+        pushIndent = indent;
+      }
+      continue;
+    }
+    if (indent <= pushIndent) break;         // uscita dal blocco `push:`
+    if (!inPaths) {
+      if (/^paths:\s*$/.test(trimmed)) {
+        inPaths = true;
+        pathsIndent = indent;
+      }
+      continue;
+    }
+    if (indent <= pathsIndent) break;        // uscita dal blocco `paths:`
+    const m = trimmed.match(/^-\s*(.+?)\s*$/);
+    if (m) paths.push(m[1].replace(/^["']|["']$/g, ''));
+  }
+  return paths.length > 0 ? paths : null;
+}
+
+function checkTriggerCoverage(dir) {
+  let bad = 0;
+  const byWorkflow = new Map();
+  for (const input of AGGREGATOR_TRIGGER_INPUTS) {
+    if (!byWorkflow.has(input.workflow)) byWorkflow.set(input.workflow, []);
+    byWorkflow.get(input.workflow).push(input);
+  }
+  for (const [workflow, inputs] of byWorkflow) {
+    const wfPath = join(dir, workflow);
+    if (!existsSync(wfPath)) {
+      console.log(`[SKIP] ${workflow}: assente dalla directory ispezionata, il check di copertura dei trigger non e' applicabile`);
+      continue;
+    }
+    const paths = extractPushPaths(readFileSync(wfPath, 'utf8'));
+    if (!paths) {
+      console.error(`[FAIL] ${workflow}: nessun blocco \`paths:\` trovato sotto \`on.push\`.`);
+      console.error('       Il workflow non scatterebbe mai su un cambio degli input dei blocchi aggregati: l\'indicatore resterebbe fermo mentre le sue sorgenti cambiano.');
+      bad++;
+      continue;
+    }
+    const uncovered = inputs.filter(
+      input => !paths.some(pattern => pathPatternToRegExp(pattern).test(input.path)),
+    );
+    if (uncovered.length > 0) {
+      console.error(`[FAIL] ${workflow}: i trigger \`paths:\` NON coprono ${uncovered.length}/${inputs.length} input dei blocchi aggregati:`);
+      for (const input of uncovered) {
+        console.error(`         NON coprono ${input.path} (${input.why})`);
+      }
+      console.error(`         Filtri dichiarati: ${paths.join(', ')}`);
+      console.error('         Senza copertura il blocco generato resta fermo mentre la sua sorgente cambia: percentuale falsa, in silenzio.');
+      bad++;
+    } else {
+      console.log(`[OK] ${workflow}: i trigger \`paths:\` coprono tutti i ${inputs.length} input dei blocchi aggregati`);
+    }
+  }
+  return bad;
+}
+
+failures += checkTriggerCoverage(dir);
 
 console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`);
 process.exit(failures === 0 ? 0 : 1);

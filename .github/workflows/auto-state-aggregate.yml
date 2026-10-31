@@ -6,6 +6,14 @@ name: auto-state-aggregate
 # modificano direttamente i file globali, ogni PR modifica solo docs/state/ e la
 # GH Action lo aggrega automaticamente su `main`.
 #
+# Issue #216: il blocco `AGGREGATE-PROGRESS` (indicatore di avanzamento) dipende
+# anche dal CATALOGO delle story in `docs/11-BACKLOG.md`: senza quel path nei
+# trigger, una story nuova dichiarata nel backlog lascerebbe l'indicatore fermo
+# con un denominatore vecchio, senza che alcun gate se ne accorga. Il gate che
+# confronta i trigger con gli input del blocco e'
+# `scripts/validate-workflows.mjs` (bloccante in CI, vedi `docs/12-DEVOPS.md`
+# 9.8h).
+#
 # NB (issue #136): l'elenco dei path in `git add` DEVE contenere TUTTI i `$targets`
 # di scripts/aggregate-state.ps1. La lista tenuta qui e la lista tenuta li'
 # descrivevano lo stesso insieme di file senza nessun gate che le confrontasse:
@@ -24,6 +32,13 @@ on:
     paths:
       - 'docs/state/**/*.md'
       - 'scripts/aggregate-state.ps1'
+      # Issue #216 (ADR-0008 V4): `docs/11-BACKLOG.md` e' il CATALOGO delle
+      # story (denominatore della percentuale di implementazione). Senza questo
+      # trigger, una story nuova nel backlog lascerebbe l'indicatore fermo
+      # senza che nessuno se ne accorga. Il gate che verifica la copertura dei
+      # trigger rispetto agli input del blocco e' `scripts/validate-workflows.mjs`
+      # (bloccante in CI, vedi `docs/12-DEVOPS.md` 9.8h).
+      - 'docs/11-BACKLOG.md'
 
 # Companion di auto-bundle.yml: condividono il group post-merge-main con
 # cancel-in-progress: false, cosi' le due rigenerazioni (blocchi AGGREGATE-*
@@ -135,6 +150,7 @@ jobs:
                        -m "  - docs/INDEX.md: <!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->" `
                        -m "  - docs/BUNDLE.md: <!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->" `
                        -m "  - README.md: <!-- AGGREGATE-NEXT-STEP-{START,END} -->" `
+                       -m "  - README.md + docs/INDEX.md: <!-- AGGREGATE-PROGRESS-{START,END} --> (V4, issue #216)" `
                        -m "" `
                        -m "Skips if aggregator output already in sync."
           git push origin main

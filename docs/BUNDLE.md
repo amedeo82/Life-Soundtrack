@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 11:19
-> Totale file: 126
+> Data: 2026-10-31 16:06
+> Totale file: 127
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 125 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1752.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 12:14
+- Totale file: 126 (incluso 4 file aggregator-managed)
+- Dimensione totale: 1810 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 15:57
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 79 |
+| docs/ | 80 |
 | scripts/ | 20 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.28 — Sessione 60 (2026-10-28)**
+> **Versione 1.29 — Sessione 71 (2026-10-31)**
 
 ---
 
@@ -575,7 +575,8 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
 - [ ] `pwsh scripts/generate-bundle.ps1 --check` esce con exit code 0
 - [ ] `pwsh scripts/aggregate-state.ps1 --check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
-- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (9/9) — **gate bloccante in CI**
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (53 assert, T1..T14) — **gate bloccante in CI**
+- [ ] Se ho scritto una sessione: il file `docs/state/sessions/<N>-<slug>.md` ha la sezione **`## Analisi di avanzamento`** (numeri, cosa è pronto, cosa manca, salute tecnica): è ciò che il blocco `AGGREGATE-PROGRESS` rende al project owner (issue #216)
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
 
@@ -781,7 +782,7 @@ Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; qua
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
-| `auto-state-aggregate` | push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136) |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**`, `docs/11-BACKLOG.md` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) + il blocco **PROGRESS** in `README.md` e `docs/INDEX.md` (V4, issue #216) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136); i `paths:` devono coprire tutti gli **input** del blocco PROGRESS (catalogo del backlog + state): lo verifica lo stesso validatore (issue #216) |
 | `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group. Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
@@ -795,13 +796,14 @@ Dettagli e motivazioni:
 
 4. **`stale-claim-sweeper`** applica il TTL di 12h di ADR-0006, che era documentato ma non controllato da nulla. Non rimuove la label di proposito: un agente che lavora da >12h su un task pesante non deve perdere la claim per merito del timer. Segnala e lascia decidere.
 
-I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica **cinque** controlli indipendenti sul testo dei workflow:
+I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/workflows`, che applica **sei** controlli indipendenti sul testo dei workflow:
 
 1. **Sintassi JS dei blocchi `script:` di `github-script`**, emulando il wrapper `async` reale (issue #73): senza, un errore JS in un workflow si scoprirebbe solo a runtime, dopo il merge.
 2. **Copertura `git add` vs `$targets`** dell'agregator (issue #136): vedi §"🔄 Lazy-state aggregation → Target V1 + V2 + V3".
 3. **Scope dichiarate in `permissions:`** (issue #135): ogni chiave deve essere una scope reale della `GITHUB_TOKEN`, ogni valore `read`/`write`/`none`. Una scope inesistente — per esempio `metadata`, che è sempre concessa e **non** è dichiarabile — non produce un job che fallisce: GitHub *rifiuta il file in fase di validazione*, quindi la run viene creata con `jobs: 0` e finisce `failure` a 0 secondi, senza log e senza annotazioni via API. Il sintomo è indistinguibile da "Actions rotta per billing" ed è la ragione per cui #135 ha spento tutti i gate di `ci.yml` per ~22 ore senza che nessuno se ne accorgesse. Test di scenario negativo: `scripts/test-workflow-permission-scopes.sh`.
 4. **Sync con `origin/main` prima del push** (issue #140): ogni workflow che contiene `git push origin main` deve aver allineato il workspace a `origin/main` **prima** del push. Il concurrency group `post-merge-main` serializza i *run*, non i *checkout*, e `actions/checkout` senza `with: ref:` mette il workspace sul `github.sha` del merge commit: quando l'altra workflow ha già pushato sullo stesso merge, il push viene rifiutato con `non-fast-forward` e i blocchi aggregati restano indietro **in silenzio** (merge verde, CI verde, stato falso). `auto-state-aggregate.yml` ne era privo ed è stato il motivo per cui il doc-sync della Story 1.2 non è mai arrivato su `main`. Test di scenario negativo: `scripts/test-workflow-push-sync.sh`.
 5. **Ordinamento fra i due writer di `main`** (issue #149): `auto-bundle.yml` deve dichiarare un trigger `workflow_run` su `auto-state-aggregate`, e il nome in `workflows:` deve combaciare con il `name:` reale del producer. Il concurrency group serializza i *run* ma **non ne impone l'ordine**, e `auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica: senza il trigger, il bundle può copiare blocchi aggregati stale (caso reale: merge della PR #147, drift di 6 righe in `docs/BUNDLE.md`, silenzioso perché il gate sul bundle è warning-only). `workflow_run` è agganciato alla *conclusione* del workflow e quindi sopravvive alla soppressione del GITHUB_TOKEN. Test di scenario negativo: `scripts/test-workflow-writer-ordering.sh`.
+6. **Copertura dei trigger rispetto agli input del blocco PROGRESS** (issue #216): i `paths:` di `auto-state-aggregate.yml` devono comprendere `docs/11-BACKLOG.md` (il catalogo delle story: denominatore della percentuale) e `docs/state/**` (stato delle story + analisi della sessione). Senza il path del backlog, l'indicatore di avanzamento resta fermo con un denominatore vecchio — e nessun gate se ne accorge, perché il `-Check` confronta il blocco con i file *di quel momento*. Test di scenario negativo: T14 in `scripts/test-aggregate-determinism.sh`.
 
 ### Livello 2 — Issue (release + label)
 
@@ -891,7 +893,7 @@ bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
 
 **Quando scatta**: ogni PR che aggiunge o rimuove una piattaforma importabile, o che dichiara una capability nel README, aggiorna la prosa del README **nella stessa PR** e fa passare il gate. Una PR che cambia `ACTIVE_PLATFORMS` senza toccare il README è una PR che il gate blocca — è esattamente il drift che l'issue #161 ha chiuso.
 
-### Target V1 + V2 + V3
+### Target V1 + V2 + V3 + V4
 
 | File | Blocchi gestiti | Versione |
 |------|----------------|----------|
@@ -901,12 +903,31 @@ bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
 | `docs/INDEX.md` | `<!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->` | V2 |
 | `docs/BUNDLE.md` | `<!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->` | V2 |
 | `README.md` | `<!-- AGGREGATE-NEXT-STEP-{START,END} -->` | V3 (issue #127) |
+| `README.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
+| `docs/INDEX.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
 
 **Vincolante (issue #136)**: la riga `git add` di `.github/workflows/auto-state-aggregate.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
 
+**Vincolante (issue #216)**: i `paths:` del workflow devono comprendere **tutti gli input** del blocco che generano (`docs/11-BACKLOG.md` = catalogo, `docs/state/**` = stato e analisi). Il blocco PROGRESS dipende dal backlog: senza quel path nei trigger, l'indicatore resterebbe fermo con un denominatore vecchio, e nessun gate se ne accorgerebbe (il `-Check` confronta il blocco con i file *di quel momento*, non con la data dell'ultima modifica del catalogo). Il gate è il sesto controllo di `scripts/validate-workflows.mjs`; vedi `docs/12-DEVOPS.md` §9.8h.
+
+### Indicatore di avanzamento (V4, issue #216)
+
+Il blocco `<!-- AGGREGATE-PROGRESS-* -->` (in `README.md` e `docs/INDEX.md`) risponde alla domanda "a che punto siamo": percentuale di implementazione, `X story completate su Y`, gli **Z step rimanenti**, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione corrente.
+
+```powershell
+pwsh scripts/aggregate-state.ps1 -Progress   # read-only: stampa l'indicatore
+pnpm run progress                             # stesso, via npm script
+```
+
+**Il denominatore è il catalogo del backlog** (`docs/11-BACKLOG.md`, heading `### Story <id> … [SIZE:…]`), **non** i soli state file: questi esistono solo per le story claimate, e calcolare su quelli darebbe ~90% con 8 story mai scritte. La percentuale è calcolata in story e **pesata per effort** (S=1, M=2, L=3, XL=4).
+
+**Obbligo per gli agenti**: ogni sessione chiude con la sezione **`## Analisi di avanzamento`** nel file di sessione (`docs/state/sessions/<N>-<slug>.md`). L'aggregator la rende dentro il blocco, accanto ai numeri calcolati: l'analisi narrativa e i numeri nello stesso posto, senza doppio lavoro. La sezione risponde a: numeri, cosa è pronto, cosa manca, salute tecnica, gate per il test.
+
+**Fail-closed**: uno state file che descrive una story **assente dal backlog** fa fallire l'aggregazione (exit 2) **prima** di scrivere qualsiasi blocco, con il messaggio che cita i path da riallineare. Una percentuale falsa è peggio di nessuna percentuale.
+
 ### Eccezione
 
-Le PR di introduzione V1 (`#24`, S25), V2 (`#52`, S29) e V3 (`#127`, S42) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
+Le PR di introduzione V1 (`#24`, S25), V2 (`#52`, S29), V3 (`#127`, S42) e V4 (`#216`, S71) sono le uniche che toccano direttamente i file globali (necessario per inserire i marker `<!-- AGGREGATE-* -->`). Dopo S29, vietato modificare i blocchi globali a mano.
 
 ### Pattern `state/`
 
@@ -944,7 +965,7 @@ L'aggregator è la linfa dorsale del workflow parallelo: se produce output diver
 | **`Dimensione totale` coerente cross-platform** (issue #88): il calcolo normalizza CRLF->LF via `Get-Content -Raw` + `GetByteCount(($text -replace "`r`n","`n"))`, in modo che la dimensione sia la stessa su Windows (`core.autocrlf=true`, 14 file CRLF sul disco) e su Linux (LF committed). Senza normalizzazione, `--check` su Windows mostrava un drift spurio di ~2.3 KB rispetto a origin/main | Conseguenza dell'autocrlf Windows: la dimensione su disco (CRLF) divergeva dai byte committed (LF) per ognuno dei 14 file di testo con EOL conversion abilitata; il `Get-Item .Length` riportava i byte CRLF. Il fix trasforma l'aggregator in cross-platform-deterministic, chiudendo la radice del warning `#63` (PS 5.1 vs 7 incompatibilita residue) per il blocco BUNDLE | T8 (3 assert) |
 
 ```bash
-bash scripts/test-aggregate-determinism.sh    # 34 assert (T1..T11), gate bloccante in CI
+bash scripts/test-aggregate-determinism.sh    # 53 assert (T1..T14), gate bloccante in CI
 ```
 
 **T3 da solo non basta** *(issue #142)*: verifica l'idempotenza con due run ravvicinati, ma il timestamp ha granularità al minuto — se i due run cadono su minuti diversi il test fallisce **per l'orologio, non per il codice** (è successo sul run `39818043647`, 16:55 → 16:56). **T11** verifica la stessa garanzia senza orologio: semina un *sentinel* nella riga del timestamp, esegue l'aggregator e verifica che il valore venga riusato; la contro-prova verifica che il timestamp si aggiorni quando il blocco cambia davvero. Stessa struttura per `> Data:` in `test-bundle-check-idempotent.sh` (T7).
@@ -1013,7 +1034,17 @@ Tutti e 5 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.28 — il blocco NEXT-STEP del README indicava una story **bloccata** (issue #182). `scripts/aggregate-state.ps1` filtra ora anche `blocked` (STOP) e `wontdo` (NO) accanto a `done`: il blocco indica la prima story **lavorabile**, non una dipendenza esterna irrisolvibile. Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle audio features dell'EPIC 4.1 (decisione D-A.1, Sessione 59) e il puntatore era finito su di lei, mentre la story implementabile era la 2.4 (Memory Engine, issue #179). La regola è coperta da due sub-test nuovi in `scripts/test-aggregate-determinism.sh` (T10e, T10f) che **falliscono senza il fix**: un gate che passa sempre non è un gate (lesson 43-1). Il messaggio di fallback e la riga delle "altre candidate" dicono ora "non-done e non bloccate".
+*Ultimo aggiornamento: v1.29 — il project owner chiedeva un indicatore di avanzamento **automatico** ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si sarebbe letto ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 64% — 18 done, 10 step rimanenti. Aggiunti:
+- `scripts/aggregate-state.ps1` **V4**: blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con percentuale (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), `X/Y` completate, **Z step rimanenti**, tabella per EPIC, elenco degli step, **gate di testabilità** (e2e = EPIC 3, motore = EPIC 2, dati reali = 5.2) e l'**analisi della sessione corrente**; modalità read-only `-Progress` (`pnpm run progress`)
+- **Fail-closed del denominatore**: uno state file che il backlog non dichiara ⇒ exit 2 con i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale
+- `docs/state/sessions/<N>-<slug>.md`: nuova sezione **`## Analisi di avanzamento`**, resa dentro il blocco — l'analisi narrativa e i numeri calcolati nello stesso posto, senza doppio lavoro
+- `.github/workflows/auto-state-aggregate.yml`: `docs/11-BACKLOG.md` nei `paths:` (il blocco dipende dal catalogo)
+- `scripts/validate-workflows.mjs`: **sesto** controllo — i `paths:` del workflow devono coprire tutti gli input del blocco PROGRESS; senza, l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio
+- `scripts/test-aggregate-determinism.sh`: **T12** (numeri e denominatore), **T12b** (analisi resa), **T13** (fail-closed: exit non-zero, messaggio, nessuna scrittura), **T14** (idempotenza + scenario negativo sui trigger)
+- `docs/12-DEVOPS.md` §9.8h (nuova) + changelog 1.3; `docs/state/_index.md` (schema + aggregazione); `docs/18-DEV-LOG.md` §38; `docs/BUNDLE.md` rigenerato
+- `package.json`: script `progress`
+
+*Precedente v1.28 — il blocco NEXT-STEP del README indicava una story **bloccata** (issue #182). `scripts/aggregate-state.ps1` filtra ora anche `blocked` (STOP) e `wontdo` (NO) accanto a `done`: il blocco indica la prima story **lavorabile**, non una dipendenza esterna irrisolvibile. Il caso reale: la Story 2.1 (Mood Tracker) è bloccata dalle audio features dell'EPIC 4.1 (decisione D-A.1, Sessione 59) e il puntatore era finito su di lei, mentre la story implementabile era la 2.4 (Memory Engine, issue #179). La regola è coperta da due sub-test nuovi in `scripts/test-aggregate-determinism.sh` (T10e, T10f) che **falliscono senza il fix**: un gate che passa sempre non è un gate (lesson 43-1). Il messaggio di fallback e la riga delle "altre candidate" dicono ora "non-done e non bloccate".
 
 *Ultimo aggiornamento: v1.27 — la prosa del `README.md` non aveva **nessun gate** (Sessione 54, issue #161). Il README dichiarava 8 piattaforme importabili (Deezer, Tidal, SoundCloud inesistenti: le classi adapter non ci sono), audio features e analisi/mood/ricordi come feature presenti (nessuna implementata), e un conteggio di stato (`EPIC 0 7/7`) che l'aggregatore ricalcola altrove; la prosa era rimasta quella del bootstrap (`ebdab9d`, 2026-10-14), perché i merge delle Story 1.2 (`2e1a4cc`) e 1.3 (`7afbf03`) non avevano toccato il README e nessuno dei 16 gate di `ci.yml` confrontava la prosa con il codice. Fallimento **silenzioso**: pipeline verde, README falso. La causa radice era di ownership: `README.md` è un file ibrido (blocco `AGGREGATE-NEXT-STEP-*` generato + prosa scritta a mano) ma la regola di D.38.1 copriva solo i file globali, e il README non era in nessuna tabella di ownership. Aggiunti:
 - `scripts/check-readme-facts.mjs` (nuovo): gate **read-only** che confronta la prosa del README con `ACTIVE_PLATFORMS` + `ADAPTER_FACTORIES` (`apps/web/src/onboarding/OnboardingRouter.tsx`) e con le classi in `packages/core/src/adapters/`; vieta le capability non implementate fuori dalla sezione roadmap; vieta i conteggi duplicati in prosa. Exit 0 = in sync, 1 = drift, 2 = errore di ambiente (fail-closed). **Nessuna modalità di scrittura**: un secondo writer sullo stesso file riprodurrebbe la race fra i writer di `main` risolta dal #149
@@ -1171,6 +1202,77 @@ Non ancora implementato — la roadmap completa, con lo stato di ogni story, è 
 Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) è gestito dai blocchi aggregati di [`docs/INDEX.md`](docs/INDEX.md) (`<!-- AGGREGATE-INDEX-STATUS-* -->`) e di [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md) (`<!-- AGGREGATE-STORIES-* -->`) — quelli, e non questo README, sono la **fonte di verità** per `status`, conteggi e roadmap. La sezione `11-BACKLOG.md` §"Stato di avanzamento — roadmap delle story non ancora completate" elenca cosa manca.
 
 > Le sezioni legacy dei documenti globali (stato, conteggi, versioni, riferimenti) vanno allineate nella **stessa PR** che cambia i fatti che dichiarano: vedi [`AGENTS.md`](AGENTS.md) §"Chi può scrivere cosa nei file globali".
+
+### Indicatore di avanzamento
+
+<!-- AGGREGATE-PROGRESS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+**Implementazione: 64%** - 18 story completate su 28 - effort pesato 64% - **mancano 10 step**
+
+`███████████████████░░░░░░░░░░░` 64%
+
+| EPIC | Completate | Totale | % | Stato |
+|------|-----------|--------|---|-------|
+| EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
+| EPIC 1 - Import core | 6 | 6 | 100% | completo |
+| EPIC 2 - Analisi | 4 | 4 | 100% | completo |
+| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 4 - Arricchimento | 1 | 4 | 25% | in corso |
+| EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
+| EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
+
+**Distribuzione**: 18 done - 0 in corso - 10 da fare - 0 bloccate - 0 annullate
+
+**Step ancora da implementare** (10):
+- 3.1 Home + Timeline - da fare (size XL)
+- 3.2 Ricordi + Share - da fare (size L)
+- 3.3 Esplora + Analisi - da fare (size L)
+- 3.4 Nastro contesto (Timeline) - da fare (size M)
+- 4.2 MusicBrainz lookup - da fare (size M)
+- 4.3 Artwork enrichment - da fare (size M)
+- 4.4 DB IP→città (geolocalizzazione locale) - da fare (size L)
+- 5.1 Privacy spec finale - da fare (size M)
+- 5.2 Export e purge - da fare (size M)
+- 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
+
+**Gate di testabilità**
+
+| Gate | Requisito | Stato |
+|------|-----------|-------|
+| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
+| Test con dati personali reali | 5.2 | 0/1 - non ancora |
+
+**Analisi della sessione corrente** (S71)
+
+### Numeri
+
+- **Implementazione: 64%** — 18 story completate su 28 · effort pesato 64% · **mancano 10 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 1/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo. Tutto coperto da test e verde.
+- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **Mancano 4.2/4.3/4.4** (lookup MusicBrainz, artwork, IP→citta') e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+### Salute tecnica (verificata su `main`)
+
+`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+
+### Procedura introdotta con questa sessione
+
+1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
+2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
+3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
+4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
+5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+
+<!-- AGGREGATE-PROGRESS-END -->
 
 ### Prossima story
 
@@ -2020,6 +2122,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟡 | ❌ | - |
+| 71 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2059,14 +2162,85 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **47** (merge: 37)
+- Sessioni migrate in state/sessions: **48** (merge: 37)
 - Stories migrate in state/stories: **20** (done: 18)
-- Ultima sessione migrata: **S70** - Story 2.3 — Event Detector (issue #214)
+- Ultima sessione migrata: **S71** - Indicatore di avanzamento automatico (issue #216)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
 <!-- AGGREGATE-INDEX-STATUS-END -->
+
+### Indicatore di avanzamento
+
+<!-- AGGREGATE-PROGRESS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+**Implementazione: 64%** - 18 story completate su 28 - effort pesato 64% - **mancano 10 step**
+
+`███████████████████░░░░░░░░░░░` 64%
+
+| EPIC | Completate | Totale | % | Stato |
+|------|-----------|--------|---|-------|
+| EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
+| EPIC 1 - Import core | 6 | 6 | 100% | completo |
+| EPIC 2 - Analisi | 4 | 4 | 100% | completo |
+| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 4 - Arricchimento | 1 | 4 | 25% | in corso |
+| EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
+| EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
+
+**Distribuzione**: 18 done - 0 in corso - 10 da fare - 0 bloccate - 0 annullate
+
+**Step ancora da implementare** (10):
+- 3.1 Home + Timeline - da fare (size XL)
+- 3.2 Ricordi + Share - da fare (size L)
+- 3.3 Esplora + Analisi - da fare (size L)
+- 3.4 Nastro contesto (Timeline) - da fare (size M)
+- 4.2 MusicBrainz lookup - da fare (size M)
+- 4.3 Artwork enrichment - da fare (size M)
+- 4.4 DB IP→città (geolocalizzazione locale) - da fare (size L)
+- 5.1 Privacy spec finale - da fare (size M)
+- 5.2 Export e purge - da fare (size M)
+- 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
+
+**Gate di testabilità**
+
+| Gate | Requisito | Stato |
+|------|-----------|-------|
+| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
+| Test con dati personali reali | 5.2 | 0/1 - non ancora |
+
+**Analisi della sessione corrente** (S71)
+
+### Numeri
+
+- **Implementazione: 64%** — 18 story completate su 28 · effort pesato 64% · **mancano 10 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 1/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo. Tutto coperto da test e verde.
+- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **Mancano 4.2/4.3/4.4** (lookup MusicBrainz, artwork, IP→citta') e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+### Salute tecnica (verificata su `main`)
+
+`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+
+### Procedura introdotta con questa sessione
+
+1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
+2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
+3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
+4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
+5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+
+<!-- AGGREGATE-PROGRESS-END -->
 
 ### Dettaglio (legacy — allineato alla Sessione 38, issue #90)
 
@@ -2078,6 +2252,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
 - **Implementazione**: 🟢 **Fase 0 tecnica completa: 7/7 story merged** — 0.1 scaffold (PR #2 `c0fb0a4`) · 0.2 schema DB Dexie (PR #4 `fa09b06`) · 0.3 adapter Spotify (PR #28 `3dc9654`) · 0.4 UI import onboarding (PR #71 `0a8e83f`) · 0.5 PWA e service worker (PR #19 `3fa3c0d`) · 0.6 i18n (PR #22 `5235c88`) · 0.7 operations runbook (PR #64 `b44420b`). Dettaglio per story in `docs/state/stories/` (fonte di verità) e `docs/18-DEV-LOG.md`.
+- **Indicatore di avanzamento** (V4, issue #216, Sessione 71): percentuale di implementazione, `X/Y` story completate, **step rimanenti**, tabella per EPIC, **gate di testabilità** e analisi della sessione corrente → blocco aggregato `<!-- AGGREGATE-PROGRESS-* -->` **qui sopra** (e nel `README.md`). I numeri vivono lì: non duplicarli qui. Per l'anteprima read-only: `pwsh scripts/aggregate-state.ps1 -Progress`.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).
@@ -8831,6 +9006,99 @@ che sono coperti dal detector a quota.
   questa
 ```
 
+### Sessione 71 - Indicatore di avanzamento automatico (issue #216)
+
+- **Data**: 2026-10-31
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HPELITEBOOK-w0pl`
+
+```
+
+# Sessione 71 — Indicatore di avanzamento automatico (issue #216)
+
+## Sintesi
+
+Il project owner chiede un indicatore che dica, **in qualsiasi momento e senza
+intervento manuale**, "a che punto siamo": percentuale di implementazione,
+step completati su totale, step rimanenti, e un'analisi del tipo di quella
+redatta a mano a fine sessione.
+
+La risposta e' un'estensione di ADR-0008 (V4): `scripts/aggregate-state.ps1`
+genera un nuovo blocco `<!-- AGGREGATE-PROGRESS-START/END -->` in `README.md` e
+`docs/INDEX.md` con
+
+- la **percentuale di implementazione** (in story e pesata per effort),
+- il conteggio **X story completate su Y** e gli **Z step rimanenti**,
+- la **tabella per EPIC** con la percentuale di ciascuno,
+- l'**elenco degli step ancora da implementare**,
+- i **gate di testabilita'** (test end-to-end dell'app, motore di analisi,
+  test con dati personali reali),
+- l'**analisi della sessione corrente**, resa dalla sezione
+  `## Analisi di avanzamento` di questo file.
+
+La procedura e' **veloce** (legge ~30 file markdown, scrive 2 blocchi: meno di
+un secondo) ed **automatica**: il workflow `auto-state-aggregate` rigenera il
+blocco a ogni merge su `main`, e il gate CI `aggregate-state.ps1 -Check`
+verifica che il blocco a mano sia allineato (fail-closed). In locale:
+`pnpm run progress` stampa l'indicatore senza scrivere nulla.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.71.1 | Il **denominatore** e' il catalogo completo delle story dichiarate in `docs/11-BACKLOG.md` (28 story), non i soli state file (20) | I state file esistono solo per le story claimate: calcolare la percentuale su quella fonte darebbe 100% con 8 story mai scritte. Il backlog e' la roadmap APPROVED ed e' l'unica fonte che dichiara tutte le story; lo **stato** di ciascuna resta nei state file (ADR-0008: la sorgente atomica dello stato e' `docs/state/`) |
+| D.71.2 | Percentuale **pesata per effort** con pesi S=1, M=2, L=3, XL=4, letti dal tag `[SIZE:...]` degli heading `### Story` | Una story `XL` (3.1 Home + Timeline) non vale una `S`: senza il peso, la percentuale dichiara "quasi finito" mentre manca il pezzo piu' grosso. Le Story 5.1 e 5.2 non hanno il tag: default `M`, dichiarato nel codice |
+| D.71.3 | **Fail-closed**: uno state file che descrive una story assente dal backlog interrompe l'aggregazione con un codice di uscita non-zero | Una percentuale falsa e' peggio di nessuna percentuale: il denominatore sbagliato produrrebbe un indicatore verde mentre il lavoro manca. Il messaggio dice cosa riallineare |
+| D.71.4 | L'analisi narrativa vive nella **sezione `## Analisi di avanzamento`** del file di sessione ed e' resa dal blocco | Il report finale e' "la mia analisi + i numeri" senza doppio lavoro: l'agente scrive l'analisi a fine implementazione (dove la scrive oggi), l'agregator la rende accanto ai numeri calcolati |
+| D.71.5 | I **gate di testabilita'** sono dichiarati nel codice (`$ProgressGates`), non dedotti | Il project owner vuole sapere *quando puo' testare l'app*: "EPIC 3 completo" e' una milestone che va detta, non dedotta da una euristica |
+| D.71.6 | Il sorgente dello script resta **ASCII**: lettere accentate e caratteri della barra costruiti a runtime | PS 5.1 su file UTF-8 senza BOM legge i non-ASCII con la codepage ANSI (issue #63): i caratteri costruiti a runtime sono immuni |
+| D.71.7 | Il blocco e' scritto in **due target** (`README.md` e `docs/INDEX.md`) con lo stesso contenuto | Il README e' la porta d'ingresso per l'owner; l'INDEX e' lo stato canonico del progetto. Due marker distinti, un solo generatore: nessun secondo writer (la race fra i writer di `main` e' chiusa dall'issue #149) |
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 64%** — 18 story completate su 28 · effort pesato 64% · **mancano 10 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 1/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo. Tutto coperto da test e verde.
+- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **Mancano 4.2/4.3/4.4** (lookup MusicBrainz, artwork, IP→citta') e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+### Salute tecnica (verificata su `main`)
+
+`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+
+### Procedura introdotta con questa sessione
+
+1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
+2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
+3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
+4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
+5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+
+## Lesson learned
+
+- **Il denominatore era il vero buco, non la percentuale**: la prima versione calcolava sui 20 state file e l'indicatore sarebbe stato "86% completato" mentre mancano 10 story. La domanda "quanto manca" si risponde solo con un catalogo completo.
+- **`return , $array` dentro una funzione che il chiamante avvolge in `@(...)` produce un array di un elemento**: il conteggio delle story risultava 1 e ogni state file risultava "orfano". Il wrapper serve quando il chiamante NON racchiude in `@()`.
+- Il fail-closed sul catalogo ha trasformato un errore silenzioso (percentuale falsa) in un errore rumoroso e localizzato.
+
+## Documenti aggiornati
+
+- `scripts/aggregate-state.ps1` — V4: catalogo, modello di avanzamento, report, blocco `AGGREGATE-PROGRESS-*`, modalita' `-Progress`
+- `.github/workflows/auto-state-aggregate.yml` — trigger `paths:` esteso a `docs/11-BACKLOG.md`; messaggio di commit aggiornato
+- `scripts/validate-workflows.mjs` — sesto controllo: copertura dei trigger rispetto agli input del blocco
+- `scripts/test-aggregate-determinism.sh` — T12/T13/T14 (percentuali, fail-closed, idempotenza del blocco)
+- `README.md`, `docs/INDEX.md` — marker del nuovo blocco (README e' anche il posto dove l'owner legge l'indicatore)
+- `package.json` — script `progress`
+- `docs/12-DEVOPS.md`, `docs/state/_index.md`, `AGENTS.md` — sezione del blocco, schema, obbligo di scrivere l'analisi a fine sessione
+- `docs/BUNDLE.md` — rigenerato
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -10243,6 +10511,30 @@ La terza è sulla **forma dei dati assenti**: un assente non è uno zero. La reg
 
 ---
 
+## 38. Issue #216 — L'indicatore di avanzamento automatico (Sessione 71)
+
+**Branch**: `feat/216-progress-indicator`
+**PR**: **#217** (aperta il 2026-10-31)
+**Data**: 2026-10-31
+**Stato**: 🟡 **IN REVIEW** — implementazione completa e validata in locale
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 38-1 | P | La percentuale di implementazione si poteva calcolare in due modi, e quello ovvio dava una risposta **falsa**: sui soli state file in `docs/state/stories/` si leggeva ~90%, con 8 story del backlog **mai scritte** | I state file esistono solo per le story **claimate**: la loro enumerazione non è il backlog. Un denominatore ricavato da «ciò che è stato toccato» misura l'attività, non il lavoro | Il **denominatore** è il catalogo del backlog (gli heading `### Story <id> … [SIZE:…]` di `docs/11-BACKLOG.md`, 28 story); lo **stato** resta nei state file. Risultato: 18/28 = **64%**, 10 step rimanenti | D.71.1 |
+| 38-2 | P | Una story `XL` (3.1 Home + Timeline) pesava quanto una `S`: la percentuale dichiarava «quasi finito» mentre manca il pezzo più grosso | Il conteggio delle story non distingue il costo delle story | Percentuale calcolata **due volte**: in story e **pesata per effort** (S=1, M=2, L=3, XL=4, letti dal tag `[SIZE:…]`) | D.71.2 |
+| 38-3 | P | Uno state file che descriveva una story assente dal backlog avrebbe reso il denominatore falso **senza che nulla se ne accorgesse** | Nessun controllo confrontava lo stato con il catalogo | **Fail-closed**: l'aggregazione esce con codice 2 e il messaggio cita i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale | D.71.3 |
+| 38-4 | P | Il blocco PROGRESS dipende dal backlog, ma il workflow scattava solo su `docs/state/**`: una story nuova nel backlog avrebbe lasciato l'indicatore **fermo** con un denominatore vecchio — in silenzio | I `paths:` del workflow non erano confrontati con gli **input** del blocco che generano | `docs/11-BACKLOG.md` aggiunto ai `paths:` + **sesto controllo** in `scripts/validate-workflows.mjs` (i trigger devono coprire tutti gli input). Il `-Check` non bastava: confronta il blocco con i file *di quel momento*, non con la data dell'ultima modifica del catalogo | D.71.7 · `docs/12-DEVOPS.md` §9.8h |
+| 38-5 | P | La prima versione contava **1 sola story**: il denominatore falsato a 1, e ogni state file risultava «orfano» | `return , $items.ToArray()` dentro una funzione che il chiamante avvolge in `@(...)`: il wrapper produce un array di **un elemento** (l'array stesso) | Il wrapper serve quando il chiamante **non** racchiude in `@()`: con il wrapper, `@(...)` avrebbe un unico elemento. Il conteggio torna a 28 | D.71.1 |
+| 38-6 | P | Il report generato dal PowerShell avrebbe scritto caratteri non-ASCII in un sorgente UTF-8 senza BOM: PS 5.1 li legge con la codepage ANSI (issue #63) | Il sorgente è letto da due versioni di PowerShell con convenzioni di encoding diverse | Il sorgente resta **ASCII**: le lettere accentate e i caratteri della barra sono costruiti a runtime (`[char]0x00E0`, `[char]0x2588`) | D.71.6 |
+
+**Lesson learned**: il buco non era la percentuale, era il **denominatore**. Un indicatore di avanzamento è utile solo se la fonte del denominatore è dichiarata: senza, «64%» e «90%» sono entrambi numeri, e il lettore non ha modo di sapere quale sia vero. E un indicatore che non si aggiorna da solo è peggio di un indicatore assente: dà la sensazione di una misura affidabile mentre il dato è vecchio — da qui il fail-closed sul trigger, non un semplice promemoria.
+
+La seconda lezione è sulla **forma dell'errore**: `return , $array` sembrava innocuo (è un idiom di PowerShell per impedire l'enumerazione) e ha falsato il denominatore in un modo che nessun errore segnalava. Il sintomo era visibile solo nel numero finale, e solo se qualcuno confrontava la percentuale con il backlog a mano.
+
+**Verifica**: `bash scripts/test-aggregate-determinism.sh` → **53 assert, 0 falliti** (T12/T12b/T13/T14 inclusi); `node scripts/validate-workflows.mjs .github/workflows` → 6 controlli, 0 fallimenti; `pwsh scripts/aggregate-state.ps1 -Check` → exit 0; `pwsh scripts/aggregate-state.ps1 -Progress` → 64%, 18/28, 10 step rimanenti; `node scripts/check-readme-facts.mjs` → 0 fallimenti.
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 |----------|------|-----------|
@@ -10297,6 +10589,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.23 | 2026-10-30 (issue #201) | **§34 L'inventario del bundle resta stale su una PR solo-docs** (follow-up post-merge della Sessione 67): dopo il merge della PR #206 il blocco inventory di `docs/BUNDLE.md` dichiarava 1626.2 KB mentre i file in catalogo pesavano 1628.8 KB. Causa: `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`, quindi una PR che tocca solo `docs/` — i file **di cui l'inventario misura la dimensione** — non lo attiva, e il check dell'aggregator in CI è warning-only. Drift chiuso con una PR `docs:` separata (aggregator eseguito in locale); **la causa strutturale resta aperta** e va sottoposta al project owner: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo. Lezione: un dato derivato dalle **dimensioni** non si aggiorna da solo quando i **contenuti** cambiano |
 | 2.24 | 2026-10-31 (issue #214) | **§37 Story 2.3 implementata** (Event Detector): il motore in `packages/core/src/analysis/event/` — metriche giornaliere (volume in ore, valence/energy medie ponderate, diversità, artisti nuovi), detector a **z-score** su griglia settimanale (baseline 60gg, finestra 14gg, soglia 2.0), detector a **quota** per `spike_artist`/`spike_genre` (dominanza + rapporto 2× sulla baseline), detector specialistici per `silence` ed `exploration`, dedupe per tipo e soggetto; la persistenza sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`); il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non c'è alcun evento basato sulla valence. **43 test** nuovi in `@ls/core`. 7 problemi/fix/lesson (37-1…37-7): l'issue `agent-ready` mancante, il **trigger** di `04§6.2` che rende ogni variazione un picco, la **finestra troncata** che produce un `volume_drop` garantito, il giorno **senza ascolti** che non è uno zero, il **rapporto infinito** di un artista nuovo, il **dedupe** per tipo e per soggetto, la baseline di due giorni |
 | 2.25 | 2026-10-31 (issue #211) | **§36 Issue #211 — Story 2.2 implementata** (Era Detector, Sessione 69, claim `kilo-HP-ELITEBOOK-4f2k`): 6 entry (36-1 il blocco NEXT-STEP non è un claim: senza issue `agent-ready` la story indicata non è lavorabile, e il repository non aveva nessuna issue aperta; 36-2 un fixture **casuale** non verifica un algoritmo che cerca un salto — il `lockdown-2020` non ha un cambio di gusto e il suo atteso era una congettura, perciò la verifica è stata spostata sul fixture composto `era-shift.json` (96 eventi, confine dichiarato al giorno 56); 36-3 il titolo della schermata avrebbe prodotto «Era Era Malinconia Indie»: la label contiene già il prefisso, `era.title` è diventato un pass-through; 36-4 senza feature misurate l’era non viene prodotta (`avgValence`/`avgEnergy` non sono nullable in `02§4`): niente segnali inventati (D-A.1); 36-5 il ricalcolo per periodo avrebbe lasciato ere orfane quando i confini si spostano → `replaceAllInsightsOfType`; 36-6 **la shell non è un editor**: `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha raddoppiato la codifica di un documento (mojibake + BOM), ripristinato con `git checkout --`). Consegnato: il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection**, filtro `minEraDays`), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`, D-A.4), il plug-in `createEraGenerator` (`04§8.1`) e **37 test** nuovi in `@ls/core`. Allineati `04` v1.2 (`§8.1`), `08` v0.10 (`insight.era.*`, `era.title`), `10` §3.3, `11` (Story 2.2 ✅, roadmap, priorità), `INDEX.md` (stato documenti e prossimo passo) |
+| 2.26 | 2026-10-31 (issue #216) | **§38 Issue #216 — l'indicatore di avanzamento automatico** (Sessione 71, claim `kilo-HPELITEBOOK-w0pl`): 6 entry (38-1 il **denominatore** della percentuale: sui soli state file si leggeva ~90% con 8 story mai scritte — il denominatore è il **catalogo** del backlog (28 story) e lo stato resta nei state file; 38-2 la percentuale è calcolata anche **pesata per effort** (S=1, M=2, L=3, XL=4) perché una story `XL` non vale una `S`; 38-3 **fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 **prima** di scrivere (niente scritture a metà); 38-4 i `paths:` del workflow non coprivano `docs/11-BACKLOG.md`: l'indicatore sarebbe restato fermo con un denominatore vecchio, in silenzio — risolto con il path + il **sesto** controllo di `validate-workflows.mjs`; 38-5 `return , $items.ToArray()` falsava il denominatore a 1 (il wrapper serve quando il chiamante **non** avvolge in `@(...)`); 38-6 il sorgente PowerShell resta ASCII (accenti e barra costruiti a runtime) per l'issue #63). Consegnati: il blocco `AGGREGATE-PROGRESS-*` in `README.md` e `docs/INDEX.md` (percentuale, `X/Y`, **Z step rimanenti**, tabella EPIC, **gate di testabilità**, analisi della sessione), la sezione `## Analisi di avanzamento` nei file di sessione, la modalità read-only `-Progress` (`pnpm run progress`), i test **T12/T12b/T13/T14** (53 assert) e la documentazione (`12-DEVOPS` §9.8h, `state/_index.md`, `AGENTS.md` v1.29) |
 
 ---
 
@@ -10413,6 +10706,9 @@ claim: kilo-...                      # agent-ID che ha fatto claim
 ## Decisioni
 [tabella D.X.Y — Motivazione]
 
+## Analisi di avanzamento
+[analisi dello stato del progetto: numeri, cosa è pronto, cosa manca, salute tecnica]
+
 ## Lesson learned
 [tabella osservazioni]
 
@@ -10465,9 +10761,36 @@ Eseguita da `scripts/aggregate-state.ps1`:
 pwsh scripts/aggregate-state.ps1          # rigenera SESSIONS.md, 11-BACKLOG.md "Stato di avanzamento"
 pwsh scripts/aggregate-state.ps1 --check  # verifica sync (CI gate)
 pwsh scripts/aggregate-state.ps1 --list   # lista file sorgente
+pwsh scripts/aggregate-state.ps1 -Progress # stampa l'indicatore di avanzamento (non scrive)
 ```
 
 Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su `push: branches: [main]` (non-bloccante: committa direttamente eventuali diff di INDEX/SESSIONS/BACKLOG/BUNDLE).
+
+### Indicatore di avanzamento (V4, issue #216)
+
+Il blocco `<!-- AGGREGATE-PROGRESS-* -->` (in `README.md` e `docs/INDEX.md`) rende
+la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la
+tabella per EPIC, i gate di testabilità e **l'analisi della sessione corrente**.
+
+**Il denominatore è il catalogo del backlog** (gli heading `### Story <id> …`
+di `docs/11-BACKLOG.md`), non i soli state file: questi ultimi esistono solo per
+le story claimate, e calcolare su quelli darebbe ~90% con 8 story mai scritte.
+Lo **stato** di ciascuna story resta nei state file (questa directory).
+
+**La sezione `## Analisi di avanzamento`** di un file di sessione è resa dentro
+il blocco: è il posto dove l'agente scrive, a fine implementazione, l'analisi
+narrativa dello stato del progetto (numeri, cosa è pronto, cosa manca, salute
+tecnica). I numeri del blocco sono calcolati; l'analisi è scritta. Insieme danno
+"l'analisi + i numeri" nello stesso posto, senza doppio lavoro.
+
+```powershell
+pwsh scripts/aggregate-state.ps1 -Progress   # read-only: stampa l'indicatore
+pnpm run progress                             # stesso, via npm script
+```
+
+Un state file che descrive una story **assente dal backlog** fa fallire
+l'aggregazione (exit 2, prima di qualsiasi scrittura): una percentuale falsa è
+peggio di nessuna percentuale.
 
 ---
 
@@ -14492,6 +14815,106 @@ che sono coperti dal detector a quota.
 
 
 
+===== FILE: docs/state/sessions/71-progress-indicator.md =====
+
+---
+number: 71
+title: "Indicatore di avanzamento automatico (issue #216)"
+date: 2026-10-31
+state: 🟡
+merged: false
+branch: feat/216-progress-indicator
+pr: 0
+claim: kilo-HPELITEBOOK-w0pl
+cross_refs: [216, 127, 52, 24]
+tags: [devops, tooling, adr-0008]
+---
+
+# Sessione 71 — Indicatore di avanzamento automatico (issue #216)
+
+## Sintesi
+
+Il project owner chiede un indicatore che dica, **in qualsiasi momento e senza
+intervento manuale**, "a che punto siamo": percentuale di implementazione,
+step completati su totale, step rimanenti, e un'analisi del tipo di quella
+redatta a mano a fine sessione.
+
+La risposta e' un'estensione di ADR-0008 (V4): `scripts/aggregate-state.ps1`
+genera un nuovo blocco `<!-- AGGREGATE-PROGRESS-START/END -->` in `README.md` e
+`docs/INDEX.md` con
+
+- la **percentuale di implementazione** (in story e pesata per effort),
+- il conteggio **X story completate su Y** e gli **Z step rimanenti**,
+- la **tabella per EPIC** con la percentuale di ciascuno,
+- l'**elenco degli step ancora da implementare**,
+- i **gate di testabilita'** (test end-to-end dell'app, motore di analisi,
+  test con dati personali reali),
+- l'**analisi della sessione corrente**, resa dalla sezione
+  `## Analisi di avanzamento` di questo file.
+
+La procedura e' **veloce** (legge ~30 file markdown, scrive 2 blocchi: meno di
+un secondo) ed **automatica**: il workflow `auto-state-aggregate` rigenera il
+blocco a ogni merge su `main`, e il gate CI `aggregate-state.ps1 -Check`
+verifica che il blocco a mano sia allineato (fail-closed). In locale:
+`pnpm run progress` stampa l'indicatore senza scrivere nulla.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.71.1 | Il **denominatore** e' il catalogo completo delle story dichiarate in `docs/11-BACKLOG.md` (28 story), non i soli state file (20) | I state file esistono solo per le story claimate: calcolare la percentuale su quella fonte darebbe 100% con 8 story mai scritte. Il backlog e' la roadmap APPROVED ed e' l'unica fonte che dichiara tutte le story; lo **stato** di ciascuna resta nei state file (ADR-0008: la sorgente atomica dello stato e' `docs/state/`) |
+| D.71.2 | Percentuale **pesata per effort** con pesi S=1, M=2, L=3, XL=4, letti dal tag `[SIZE:...]` degli heading `### Story` | Una story `XL` (3.1 Home + Timeline) non vale una `S`: senza il peso, la percentuale dichiara "quasi finito" mentre manca il pezzo piu' grosso. Le Story 5.1 e 5.2 non hanno il tag: default `M`, dichiarato nel codice |
+| D.71.3 | **Fail-closed**: uno state file che descrive una story assente dal backlog interrompe l'aggregazione con un codice di uscita non-zero | Una percentuale falsa e' peggio di nessuna percentuale: il denominatore sbagliato produrrebbe un indicatore verde mentre il lavoro manca. Il messaggio dice cosa riallineare |
+| D.71.4 | L'analisi narrativa vive nella **sezione `## Analisi di avanzamento`** del file di sessione ed e' resa dal blocco | Il report finale e' "la mia analisi + i numeri" senza doppio lavoro: l'agente scrive l'analisi a fine implementazione (dove la scrive oggi), l'agregator la rende accanto ai numeri calcolati |
+| D.71.5 | I **gate di testabilita'** sono dichiarati nel codice (`$ProgressGates`), non dedotti | Il project owner vuole sapere *quando puo' testare l'app*: "EPIC 3 completo" e' una milestone che va detta, non dedotta da una euristica |
+| D.71.6 | Il sorgente dello script resta **ASCII**: lettere accentate e caratteri della barra costruiti a runtime | PS 5.1 su file UTF-8 senza BOM legge i non-ASCII con la codepage ANSI (issue #63): i caratteri costruiti a runtime sono immuni |
+| D.71.7 | Il blocco e' scritto in **due target** (`README.md` e `docs/INDEX.md`) con lo stesso contenuto | Il README e' la porta d'ingresso per l'owner; l'INDEX e' lo stato canonico del progetto. Due marker distinti, un solo generatore: nessun secondo writer (la race fra i writer di `main` e' chiusa dall'issue #149) |
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 64%** — 18 story completate su 28 · effort pesato 64% · **mancano 10 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 1/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo. Tutto coperto da test e verde.
+- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **Mancano 4.2/4.3/4.4** (lookup MusicBrainz, artwork, IP→citta') e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+### Salute tecnica (verificata su `main`)
+
+`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+
+### Procedura introdotta con questa sessione
+
+1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
+2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
+3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
+4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
+5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+
+## Lesson learned
+
+- **Il denominatore era il vero buco, non la percentuale**: la prima versione calcolava sui 20 state file e l'indicatore sarebbe stato "86% completato" mentre mancano 10 story. La domanda "quanto manca" si risponde solo con un catalogo completo.
+- **`return , $array` dentro una funzione che il chiamante avvolge in `@(...)` produce un array di un elemento**: il conteggio delle story risultava 1 e ogni state file risultava "orfano". Il wrapper serve quando il chiamante NON racchiude in `@()`.
+- Il fail-closed sul catalogo ha trasformato un errore silenzioso (percentuale falsa) in un errore rumoroso e localizzato.
+
+## Documenti aggiornati
+
+- `scripts/aggregate-state.ps1` — V4: catalogo, modello di avanzamento, report, blocco `AGGREGATE-PROGRESS-*`, modalita' `-Progress`
+- `.github/workflows/auto-state-aggregate.yml` — trigger `paths:` esteso a `docs/11-BACKLOG.md`; messaggio di commit aggiornato
+- `scripts/validate-workflows.mjs` — sesto controllo: copertura dei trigger rispetto agli input del blocco
+- `scripts/test-aggregate-determinism.sh` — T12/T13/T14 (percentuali, fail-closed, idempotenza del blocco)
+- `README.md`, `docs/INDEX.md` — marker del nuovo blocco (README e' anche il posto dove l'owner legge l'indicatore)
+- `package.json` — script `progress`
+- `docs/12-DEVOPS.md`, `docs/state/_index.md`, `AGENTS.md` — sezione del blocco, schema, obbligo di scrivere l'analisi a fine sessione
+- `docs/BUNDLE.md` — rigenerato
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -15800,18 +16223,29 @@ warning `cityLowConfidence` (E19), copy «circa *X*» e correzione manuale
       - docs/INDEX.md: AGGREGATE-INDEX-STATUS-* + AGGREGATE-INDEX-ROADMAP-*
       - docs/BUNDLE.md: AGGREGATE-BUNDLE-INVENTORY-*
 
+    V4 (issue #216 S70):
+      - README.md + docs/INDEX.md: AGGREGATE-PROGRESS-*
+        Indicatore di avanzamento: percentuale di implementazione (story e
+        pesata per effort), story completate su totale, step rimanenti,
+        tabella per EPIC, gate di testabilita' e analisi della sessione
+        corrente. Il denominatore e' il catalogo completo delle story
+        dichiarate in docs/11-BACKLOG.md; lo stato di ciascuna story arriva
+        dai file in docs/state/stories/.
+
     Modalita d'uso:
       (default)        Scrive i blocchi aggregati nei marker designati (idempotente)
       --check          Confronta lo stato calcolato con i marker esistenti; exit 0 se allineato, 1 se drift
       --dry-run        Calcola ma non scrive; stampa il diff previsto
       --list           Lista i file sorgente e i blocchi target
+      --progress       Stampa l'indicatore di avanzamento senza scrivere nulla
       --help           Mostra questo help
 
 .EXAMPLE
-    pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2
+    pwsh scripts/aggregate-state.ps1                 # aggiorna tutti i target V1+V2+V4
     pwsh scripts/aggregate-state.ps1 --check         # CI gate: --check exit 0
     pwsh scripts/aggregate-state.ps1 --dry-run       # preview senza scrivere
     pwsh scripts/aggregate-state.ps1 --list           # audit: cosa verrebbe letto/scritto?
+    pwsh scripts/aggregate-state.ps1 --progress       # "a che punto siamo?" senza toccare il repo
 
 .NOTES
     ## Blocchi marcati (regex-based)
@@ -15841,6 +16275,11 @@ warning `cityLowConfidence` (E19), copy «circa *X*» e correzione manuale
         ... inventario file + timestamp ...
         <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
 
+    In `README.md` e `docs/INDEX.md`:
+        <!-- AGGREGATE-PROGRESS-START -->
+        ... indicatore di avanzamento (percentuale, X/Y, Z rimanenti) ...
+        <!-- AGGREGATE-PROGRESS-END -->
+
     ## Idempotenza
 
     Rieseguire lo script con le stesse sources produce lo stesso output (modulo
@@ -15861,6 +16300,7 @@ param(
     [switch]$Check,
     [switch]$DryRun,
     [switch]$List,
+    [switch]$Progress,
     [switch]$Help
 )
 
@@ -15917,6 +16357,13 @@ $markerBundleInventoryEnd   = "${lt}${bangs} AGGREGATE-BUNDLE-INVENTORY-END --${
 # `docs/state/stories/*.md` (frontmatter `status`).
 $markerNextStepStart       = "${lt}${bangs} AGGREGATE-NEXT-STEP-START --${gt}"
 $markerNextStepEnd         = "${lt}${bangs} AGGREGATE-NEXT-STEP-END --${gt}"
+# V4 (ADR-0008 V4, issue #216): blocco "Indicatore di avanzamento" con la
+# percentuale di implementazione, il conteggio delle story completate e
+# rimanenti, i gate di testabilita' e l'analisi della sessione corrente.
+# Denominatore: il catalogo completo delle story dichiarate in
+# `docs/11-BACKLOG.md` (non solo le story con state file).
+$markerProgressStart       = "${lt}${bangs} AGGREGATE-PROGRESS-START --${gt}"
+$markerProgressEnd         = "${lt}${bangs} AGGREGATE-PROGRESS-END --${gt}"
 
 $targets = @(
     @{ Path = "docs/SESSIONS.md";   Start = $markerSessionsStart;        End = $markerSessionsEnd },
@@ -15924,7 +16371,9 @@ $targets = @(
     @{ Path = "docs/INDEX.md";      Start = $markerIndexStatusStart;     End = $markerIndexStatusEnd },
     @{ Path = "docs/INDEX.md";      Start = $markerIndexRoadmapStart;    End = $markerIndexRoadmapEnd },
     @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd },
-    @{ Path = "README.md";          Start = $markerNextStepStart;        End = $markerNextStepEnd }
+    @{ Path = "README.md";          Start = $markerNextStepStart;        End = $markerNextStepEnd },
+    @{ Path = "README.md";          Start = $markerProgressStart;        End = $markerProgressEnd },
+    @{ Path = "docs/INDEX.md";      Start = $markerProgressStart;        End = $markerProgressEnd }
 )
 
 # === Helpers ===
@@ -16109,6 +16558,7 @@ function Get-Calculated-Block {
     if ($Start -eq $markerIndexRoadmapStart)    { return Build-Block-IndexRoadmap }
     if ($Start -eq $markerBundleInventoryStart) { return Build-Block-BundleInventory }
     if ($Start -eq $markerNextStepStart)        { return Build-Block-NextStep }
+    if ($Start -eq $markerProgressStart)        { return Build-Block-Progress }
     throw "Unknown marker: $Start"
 }
 
@@ -16363,6 +16813,329 @@ function Build-Block-NextStep {
     return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
 }
 
+# === ADR-0008 V4 (issue #216) — indicatore di avanzamento ===
+
+# Pesi di effort per la percentuale pesata: i tag `[SIZE:...]` vivono negli
+# heading `### Story` di `docs/11-BACKLOG.md` (le Story 5.1 e 5.2 non hanno il
+# tag: default M, dichiarato qui perche' il default e' una decisione, non un
+# accidento del parser).
+$ProgressSizeWeights = @{ 'S' = 1; 'M' = 2; 'L' = 3; 'XL' = 4 }
+$ProgressDefaultSize = 'M'
+
+# Gate di testabilita': milestone che il project owner vuole poter verificare.
+# Un gate e' soddisfatto quando TUTTE le story indicate sono `done`.
+# Dichiarati qui (unico posto) perche' il blocco li rende leggibili senza
+# doverli ricalcolare a mano a ogni sessione.
+$ProgressGates = @(
+    @{ Label = "Test end-to-end dell'app";       Epic = '3' },
+    @{ Label = "Motore di analisi completo";     Epic = '2' },
+    @{ Label = "Test con dati personali reali";  Stories = @('5.2') }
+)
+
+function Get-SizeWeight {
+    param([string]$Size)
+    if ($Size -and $ProgressSizeWeights.ContainsKey($Size)) { return $ProgressSizeWeights[$Size] }
+    return $ProgressSizeWeights[$ProgressDefaultSize]
+}
+
+function Get-Percent {
+    param([double]$Value)
+    # MidpointRounding.AwayFromZero: il default di [math]::Round in PowerShell
+    # e' il bankers' rounding (0.5 -> 0), mentre la lettura umana di una
+    # percentuale arrotonda .5 per eccesso (e `Math.round` in JavaScript
+    # fa lo stesso). Senza l'esplicito, lo stesso input produceva percentuali
+    # diverse a seconda del linguaggio che leggeva il blocco.
+    return [int][math]::Round($Value, 0, [System.MidpointRounding]::AwayFromZero)
+}
+
+function Get-RoadmapCatalogue {
+    # Catalogo delle story: letto dagli heading "### Story <id> ..." di
+    # `docs/11-BACKLOG.md`.
+    #
+    # Perche' il backlog e non `docs/state/stories/`: i state file esistono
+    # solo per le story gia' claimate (20 su 28 al 2026-10-31). Calcolare la
+    # percentuale su quella sola fonte darebbe un denominatore falsato: il
+    # 100% sarebbe raggiunto con 8 story mai scritte. Il backlog e' la roadmap
+    # APPROVED e dichiara TUTTE le story, quindi e' il denominatore giusto; lo
+    # stato di ciascuna story arriva dai state file (ASSR-0008: la sorgente
+    # atomica dello stato resta `docs/state/`).
+    $backlog = Join-Path $repoRoot "docs/11-BACKLOG.md"
+    if (-not (Test-Path $backlog)) { return @() }
+    $text = Get-Content -LiteralPath $backlog -Raw -Encoding UTF8
+
+    $epicNames = @{}
+    foreach ($m in [regex]::Matches($text, '(?m)^##\s+EPIC\s+(?<id>\d+)\s+[-\u2013\u2014]\s*(?<name>[^\r\n(]+)')) {
+        $epicNames[$m.Groups['id'].Value] = $m.Groups['name'].Value.Trim()
+    }
+
+    $items = New-Object System.Collections.Generic.List[object]
+    foreach ($m in [regex]::Matches($text, '(?m)^###\s+Story\s+(?<id>\d+\.\d+)\s+[-\u2013\u2014]\s*(?<rest>[^\r\n]*)$')) {
+        $id   = $m.Groups['id'].Value
+        $rest = $m.Groups['rest'].Value
+        # Il titolo finisce dove iniziano i tag `[PHASE-...]`.
+        $cut = $rest.IndexOf('`[')
+        $title = if ($cut -ge 0) { $rest.Substring(0, $cut).Trim() } else { $rest.Trim() }
+        $sizeMatch = [regex]::Match($rest, '\[SIZE:(?<size>[A-Za-z]+)\]')
+        $size = if ($sizeMatch.Success) { $sizeMatch.Groups['size'].Value.ToUpperInvariant() } else { $ProgressDefaultSize }
+        $epic = ($id -split '\.')[0]
+        $epicName = if ($epicNames.ContainsKey($epic)) { $epicNames[$epic] } else { "EPIC $epic" }
+        [void]$items.Add([PSCustomObject]@{
+            Id       = $id
+            Title    = $title
+            Epic     = $epic
+            EpicName = $epicName
+            Size     = $size
+        })
+    }
+    # NB: senza il wrapper `,` l'array viene enumerato dal pipeline e il
+    # chiamante riceve gli elementi uno a uno (con `@(...)` tornano gli item).
+    # Con il wrapper, `@(...)` avrebbe un unico elemento (l'array) e il
+    # conteggio delle story sarebbe 1: il denominatore falsato.
+    return $items.ToArray()
+}
+
+function Get-ProgressModel {
+    # Il modello viene calcolato una volta per run: la verifica di coerenza
+    # (fail-closed sul catalogo) deve scattare PRIMA delle scritture, quindi
+    # viene calcolata in preflight e riusata dal report.
+    if ($null -ne $script:ProgressModelCache) { return $script:ProgressModelCache }
+
+    $catalogue = @(Get-RoadmapCatalogue)
+
+    # Stato delle story migrate: frontmatter `status` dei file in
+    # `docs/state/stories/`. Una story senza state file non e' mai stata
+    # claimata: vale `todo`.
+    $states = @{}
+    foreach ($f in @(Get-StateStoryFiles)) {
+        $content = Get-Content -LiteralPath $f.Path -Raw -Encoding UTF8
+        $parsed = Parse-Frontmatter $content
+        if ($null -eq $parsed) { continue }
+        $id = if ($parsed.Frontmatter['id']) { $parsed.Frontmatter['id'] } else { $f.Base }
+        $status = if ($parsed.Frontmatter['status']) { $parsed.Frontmatter['status'] } else { 'todo' }
+        $states[$id] = [PSCustomObject]@{ Status = $status; Base = $f.Base }
+    }
+
+    if ($catalogue.Count -eq 0) {
+        # Nessun catalogo (backlog assente): il blocco resta un placeholder
+        # invece di far fallire l'aggregazione. Nel repo reale il backlog
+        # esiste sempre: questa via serve ai repo di test.
+        $script:ProgressModelCache = [PSCustomObject]@{ Available = $false; Total = 0; Rows = @() }
+        return $script:ProgressModelCache
+    }
+
+    # Fail-closed (issue #216, AC3): uno state file che descrive una story
+    # assente dal backlog rende il denominatore sbagliato, e una percentuale
+    # falsa e' peggio di nessuna percentuale. Interrompe l'aggregazione con
+    # un messaggio che dice cosa riallineare.
+    $catalogueIds = @{}
+    foreach ($c in $catalogue) { $catalogueIds[$c.Id] = $true }
+    $orphans = @()
+    foreach ($id in @($states.Keys | Sort-Object)) {
+        if (-not $catalogueIds.ContainsKey($id)) { $orphans += $id }
+    }
+    if ($orphans.Count -gt 0) {
+        # Fail-closed esplicito: `exit 2` termina lo script con codice non-zero
+        # e il messaggio dice cosa riallineare. Una `throw` lascerebbe l'errore
+        # al wrapping di PowerShell (exit 1 + stack trace): il codice non-zero
+        # ci sarebbe, ma il messaggio utile no.
+        Write-Host ("[FAIL] $($orphans.Count) state file di story che il backlog non dichiara: " +
+                    ($orphans -join ', ') +
+                    ". Il denominatore della percentuale sarebbe sbagliato: riallineare docs/11-BACKLOG.md e docs/state/stories/ (issue #216, AC3).") -ForegroundColor Red
+        exit 2
+    }
+
+    $rows = New-Object System.Collections.Generic.List[object]
+    $done = 0; $inProgress = 0; $todo = 0; $blocked = 0; $wontdo = 0
+    $weightDone = 0; $weightTotal = 0
+    foreach ($c in $catalogue) {
+        $status = if ($states.ContainsKey($c.Id)) { $states[$c.Id].Status } else { 'todo' }
+        $w = Get-SizeWeight $c.Size
+        $weightTotal += $w
+        if ($status -eq 'done') { $done++; $weightDone += $w }
+        elseif ($status -eq 'in_progress' -or $status -eq 'in_review') { $inProgress++ }
+        elseif ($status -eq 'blocked') { $blocked++ }
+        elseif ($status -eq 'wontdo') { $wontdo++ }
+        else { $todo++ }
+        [void]$rows.Add([PSCustomObject]@{
+            Id       = $c.Id
+            Title    = $c.Title
+            Epic     = $c.Epic
+            EpicName = $c.EpicName
+            Size     = $c.Size
+            Status   = $status
+            Weight   = $w
+        })
+    }
+
+    $total = $catalogue.Count
+    $percent = if ($total -gt 0) { Get-Percent (100.0 * $done / $total) } else { 0 }
+    $percentWeighted = if ($weightTotal -gt 0) { Get-Percent (100.0 * $weightDone / $weightTotal) } else { 0 }
+
+    # Raggruppamento per EPIC (ordinamento numerico: 0, 1, 2, ... e non
+    # lessicografico, che metterebbe "10" prima di "2").
+    $epics = New-Object System.Collections.Generic.List[object]
+    foreach ($grp in @($rows | Group-Object -Property Epic | Sort-Object { [int]$_.Name })) {
+        $epicDone = @($grp.Group | Where-Object { $_.Status -eq 'done' }).Count
+        $epicRows = @($grp.Group)
+        $epicTotal = $epicRows.Count
+        $epicPercent = if ($epicTotal -gt 0) { Get-Percent (100.0 * $epicDone / $epicTotal) } else { 0 }
+        $epicName = $epicRows[0].EpicName
+        [void]$epics.Add([PSCustomObject]@{
+            Epic     = $grp.Name
+            EpicName = $epicName
+            Done     = $epicDone
+            Total    = $epicTotal
+            Percent  = $epicPercent
+        })
+    }
+
+    $model = [PSCustomObject]@{
+        Available       = $true
+        Total           = $total
+        Done            = $done
+        InProgress      = $inProgress
+        Todo            = $todo
+        Blocked         = $blocked
+        Wontdo          = $wontdo
+        Remaining       = $total - $done - $wontdo
+        Percent         = $percent
+        PercentWeighted = $percentWeighted
+        WeightDone      = $weightDone
+        WeightTotal     = $weightTotal
+        Rows            = $rows.ToArray()
+        Epics           = $epics.ToArray()
+    }
+    $script:ProgressModelCache = $model
+    return $model
+}
+
+function Get-StatusLabel {
+    param([string]$Status)
+    switch ($Status) {
+        'done'        { return 'completata' }
+        'in_progress' { return 'in corso' }
+        'in_review'   { return 'in review' }
+        'blocked'     { return 'bloccata' }
+        'wontdo'      { return 'annullata' }
+        default       { return 'da fare' }
+    }
+}
+
+function Get-LatestSessionAnalysis {
+    # Analisi narrativa dell'ultima sessione: sezione "## Analisi di avanzamento"
+    # dentro `docs/state/sessions/<N>-*.md`. E' il posto dove l'agente scrive
+    # l'analisi di fine implementazione: l'aggregator la rende accanto ai
+    # numeri, cosi' il report finale e' "la mia analisi + i numeri" senza
+    # doppio lavoro manuale.
+    $sessions = @(Get-StateSessionFiles)
+    if ($sessions.Count -eq 0) { return $null }
+    $latest = $sessions[-1]
+    $content = Get-Content -LiteralPath $latest.Path -Raw -Encoding UTF8
+    $m = [regex]::Match($content, '(?ms)^##\s+Analisi di avanzamento\s*\r?\n(.*?)(?=^##\s|\z)')
+    if (-not $m.Success) { return $null }
+    $text = $m.Groups[1].Value.Trim()
+    if ([string]::IsNullOrWhiteSpace($text)) { return $null }
+    $parsed = Parse-Frontmatter $content
+    $number = if ($parsed -and $parsed.Frontmatter['number']) { $parsed.Frontmatter['number'] } else { '?' }
+    return [PSCustomObject]@{ Number = $number; Text = $text }
+}
+
+function Get-ProgressReport {
+    # Corpo del report (senza marker): numeri, tabella per EPIC, story
+    # rimanenti, gate di testabilita' e analisi della sessione corrente.
+    #
+    # Le lettere accentate sono costruite a runtime: il sorgente resta ASCII
+    # (PS 5.1 su file UTF-8 senza BOM legge i non-ASCII con la codepage ANSI,
+    # vedi issue #63).
+    $accA = [char]0x00E0   # a con accento grave
+    $accE = [char]0x00E8   # e con accento grave
+    $model = Get-ProgressModel
+    $sb = New-Object System.Text.StringBuilder
+    if (-not $model.Available) {
+        [void]$sb.AppendLine('_Catalogo delle story non disponibile: `docs/11-BACKLOG.md` non e'' leggibile._')
+        return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+    }
+
+    # Barra di avanzamento: 30 celle, caratteri costruiti a runtime per non
+    # introdurre byte non-ASCII nel sorgente (PS 5.1 su file UTF-8 senza BOM
+    # legge i non-ASCII con la codepage ANSI: vedi issue #63).
+    $barWidth = 30
+    $filled = [int][math]::Round($barWidth * $model.Percent / 100.0)
+    if ($filled -lt 0) { $filled = 0 }
+    if ($filled -gt $barWidth) { $filled = $barWidth }
+    $bar = ([string][char]0x2588) * $filled + ([string][char]0x2591) * ($barWidth - $filled)
+
+    [void]$sb.AppendLine("**Implementazione: $($model.Percent)%** - $($model.Done) story completate su $($model.Total) - effort pesato $($model.PercentWeighted)% - **mancano $($model.Remaining) step**")
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("``$bar`` $($model.Percent)%")
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('| EPIC | Completate | Totale | % | Stato |')
+    [void]$sb.AppendLine('|------|-----------|--------|---|-------|')
+    foreach ($e in $model.Epics) {
+        $state = if ($e.Done -eq $e.Total) { 'completo' } elseif ($e.Done -gt 0) { 'in corso' } else { 'da fare' }
+        [void]$sb.AppendLine("| EPIC $($e.Epic) - $($e.EpicName) | $($e.Done) | $($e.Total) | $($e.Percent)% | $state |")
+    }
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("**Distribuzione**: $($model.Done) `done` - $($model.InProgress) in corso - $($model.Todo) da fare - $($model.Blocked) bloccate - $($model.Wontdo) annullate")
+    [void]$sb.AppendLine('')
+
+    $remaining = @($model.Rows | Where-Object { $_.Status -ne 'done' -and $_.Status -ne 'wontdo' })
+    if ($remaining.Count -eq 0) {
+        [void]$sb.AppendLine("**Step ancora da implementare**: nessuno - il piano del backlog $accE completo.")
+    } else {
+        [void]$sb.AppendLine("**Step ancora da implementare** ($($remaining.Count)):")
+        foreach ($r in $remaining) {
+            [void]$sb.AppendLine("- $($r.Id) $($r.Title) - $(Get-StatusLabel $r.Status) (size $($r.Size))")
+        }
+    }
+    [void]$sb.AppendLine('')
+
+    [void]$sb.AppendLine("**Gate di testabilit$accA**")
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('| Gate | Requisito | Stato |')
+    [void]$sb.AppendLine('|------|-----------|-------|')
+    foreach ($g in $ProgressGates) {
+        if ($g.Epic) {
+            $rows = @($model.Rows | Where-Object { $_.Epic -eq $g.Epic })
+            $done = @($rows | Where-Object { $_.Status -eq 'done' }).Count
+            $total = $rows.Count
+            $req = "EPIC $($g.Epic) ($total story)"
+        } else {
+            $rows = @($model.Rows | Where-Object { $g.Stories -contains $_.Id })
+            $done = @($rows | Where-Object { $_.Status -eq 'done' }).Count
+            $total = $rows.Count
+            $req = ($g.Stories -join ', ')
+        }
+        $state = if ($total -gt 0 -and $done -eq $total) { 'soddisfatto' } elseif ($done -gt 0) { 'in corso' } else { 'non ancora' }
+        [void]$sb.AppendLine("| $($g.Label) | $req | $done/$total - $state |")
+    }
+    [void]$sb.AppendLine('')
+
+    $analysis = Get-LatestSessionAnalysis
+    if ($analysis) {
+        [void]$sb.AppendLine("**Analisi della sessione corrente** (S$($analysis.Number))")
+        [void]$sb.AppendLine('')
+        [void]$sb.AppendLine($analysis.Text)
+    } else {
+        [void]$sb.AppendLine('**Analisi della sessione corrente**: non ancora registrata (sezione `## Analisi di avanzamento` nel file di sessione).')
+    }
+
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+}
+
+function Build-Block-Progress {
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine($markerProgressStart)
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('> Blocco auto-generato da `' + 'scripts/aggregate-state.ps1' + '` (V4, ADR-0008, issue #216).')
+    [void]$sb.AppendLine('> Rigenerare con `' + 'pwsh scripts/aggregate-state.ps1' + '`. NON editare a mano.')
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine((Get-ProgressReport))
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine($markerProgressEnd)
+    return ($sb.ToString().TrimEnd([char]10, [char]13)) -replace "`r`n", "`n"
+}
+
 function Find-Block {
     param([string]$Content, [string]$Start, [string]$End)
     $sIdx = $Content.IndexOf($Start)
@@ -16403,6 +17176,13 @@ function Sync-MutableTimestamp {
 }
 
 function Apply-Blocks {
+    # Issue #216: il fail-closed del denominatore (state file che il backlog non
+    # dichiara) deve scattare PRIMA di scrivere qualsiasi blocco: se scattasse
+    # dentro il ciclo, il run avrebbe gia' riscritto i primi target e poi
+    # abbandonerebbe il repo a meta' (blocchi aggiornati, blocco progress
+    # assente). La validazione costa una decina di file: e' trascurabile.
+    $null = Get-ProgressModel
+
     # Issue #105: avvisa SEMPRE di eventuali collisioni di `Number` tra i file
     # state/sessions/, anche se l'applicazione dei blocchi va a buon fine (il
     # drift e' gia' su `main`, l'allineamento non lo risolve - serve un
@@ -16464,6 +17244,11 @@ function Test-Blocks {
     # Il check deve uscire non-zero per rendere il problema visibile al
     # gate CI e al `auto-state-aggregate` workflow.
     $drift = $false
+
+    # Issue #216: lo stesso fail-closed del denominatore scatta in --check: uno
+    # state file che il backlog non dichiara rende il denominatore sbagliato e
+    # il check deve dirlo invece di passare su un blocco formalmente "in sync".
+    $null = Get-ProgressModel
 
     $dupes = Find-DuplicateSessionNumbers
     if ($dupes.Count -gt 0) {
@@ -16537,6 +17322,20 @@ if ($List) {
     Write-Host ""
     Write-Host "Target files (blocchi gestiti):" -ForegroundColor Cyan
     foreach ($t in $targets) { Write-Host "  $($t.Path)  markers=[$($t.Start) ... $($t.End)]" -ForegroundColor Cyan }
+    exit 0
+}
+
+# === Progress mode (issue #216) ===
+#
+# Stampa l'indicatore di avanzamento senza scrivere nulla: il project owner
+# puo' chiedere "a che punto siamo" in qualunque momento senza toccare il
+# repo. Stessa sorgente di verita' del blocco aggregato: catalogo del
+# backlog + stato dei state file.
+
+if ($Progress) {
+    Write-Host ""
+    Write-Host (Get-ProgressReport) -ForegroundColor Cyan
+    Write-Host ""
     exit 0
 }
 
@@ -23854,6 +24653,73 @@ Il test (`scripts/test-readme-facts-gate.sh`) copre i 9 casi in cui il gate deve
 
 ---
 
+### 9.8h Indicatore di avanzamento automatico (issue #216)
+
+Il blocco `<!-- AGGREGATE-PROGRESS-* -->` risponde a una domanda che nessuno
+strumento del repository poneva: **"a che punto siamo?"** — percentuale di
+implementazione, story completate su totale, step rimanenti, e l'analisi
+narrativa della sessione. È il blocco che il project owner legge per decidere
+se il progetto è testabile.
+
+**Il buco che lo rendeva necessario**: la percentuale si può calcolare in due
+modi, e quello sbagliato dà una risposta falsa.
+
+| Denominatore possibile | Numeri al 2026-10-31 | Perché è sbagliato |
+|---|---|---|
+| I soli state file in `docs/state/stories/` | 20 file, 18 `done` → **90%** | i state file esistono **solo per le story claimate**: 8 story del backlog non hanno mai un state file. Il 100% sarebbe raggiunto con metà del backlog mai scritto |
+| Il catalogo delle story in `docs/11-BACKLOG.md` | 28 story, 18 `done` → **64%** | ✅ il denominatore giusto: il backlog APPROVED dichiara tutte le story |
+
+Il denominatore è il **catalogo del backlog** (gli heading `### Story <id> …`
+con il tag `[SIZE:…]`); lo **stato** di ciascuna story resta nei state file
+(ADR-0008: la sorgente atomica dello stato è `docs/state/`).
+
+**Che cosa contiene il blocco**:
+
+| Parte | Contenuto |
+|---|---|
+| Percentuale | in story (X/Y) e **pesata per effort** (S=1, M=2, L=3, XL=4): una story `XL` non vale una `S` |
+| Conteggio | `X story completate su Y` + `mancano Z step` |
+| Tabella EPIC | completate / totale / % per ciascun EPIC |
+| Step rimanenti | l'elenco delle story non fatte, con la size |
+| Gate di testabilità | milestone dichiarate (`EPIC 3` per l'e2e, `EPIC 2` per il motore, `5.2` per i dati reali) con stato `soddisfatto` / `in corso` / `non ancora` |
+| Analisi della sessione | la sezione `## Analisi di avanzamento` del file di sessione più recente, resa **dentro** il blocco: i numeri calcolati e l'analisi narrativa nello stesso posto |
+
+**Il fail-closed del denominatore**: uno state file che descrive una story
+**assente dal backlog** rende il denominatore falso → il run esce con codice
+2 e il messaggio cita i path da riallineare. Una percentuale falsa è peggio
+di nessuna percentuale. Il controllo avviene **prima** di scrivere qualsiasi
+blocco (niente scritture a metà). Se il backlog non ha proprio heading
+`### Story` (repo di test, o backlog in forma diversa), il blocco resta un
+placeholder: l'aggregazione non si blocca.
+
+**Il trigger è parte del contratto**: il blocco dipende dal backlog, quindi
+`auto-state-aggregate.yml` deve scattare anche quando il backlog cambia. Senza
+`docs/11-BACKLOG.md` nei `paths:`, una story nuova lascerebbe l'indicatore
+fermo con un denominatore vecchio — e nessun gate se ne accorgerebbe, perché
+il gate `-Check` confronta il blocco con i file *di quel momento*, non con la
+data dell'ultima modifica del catalogo. Il sesto controllo di
+`scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input
+del blocco e **fallisce** se non li coprono.
+
+```powershell
+pwsh scripts/aggregate-state.ps1 -Progress   # stampa l'indicatore, non scrive
+pnpm run progress                             # stesso, via npm script
+bash scripts/test-aggregate-determinism.sh    # T12/T12b/T13/T14
+```
+
+**T12** verifica i numeri (50% in story, 70% pesato, 2 step rimanenti, la
+tabella EPIC) e l'elenco degli step; **T12b** verifica che l'analisi della
+sessione venga resa; **T13** verifica il fail-closed (exit non-zero, messaggio
+che cita lo state file orfano, **nessun** blocco scritto); **T14** verifica
+l'idempotenza del blocco e la copertura dei trigger (scenario negativo: il
+validatore deve segnalare il path mancante).
+
+**Regola generale**: un indicatore di avanzamento è utile solo se il suo
+denominatore è dichiarato. Senza la fonte del denominatore, "64%" e "90%" sono
+entrambi numeri, e il lettore non ha modo di sapere quale sia vero.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -23927,7 +24793,7 @@ Elenco dei 18 step nominati del job `quality`, verificato riga per riga contro `
 
 I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
 
-**Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
+**Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Cinque sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149) e `Copertura dei trigger del blocco progress` (#216, vedi §9.8h).
 
 ---
 
@@ -23981,6 +24847,7 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 1.0 | Sessione 62 (2026-10-28) | **§2.1 CSP** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED, issue #187): `connect-src` aggiunge i due host della pipeline delle audio features (D-AF.9) — `https://acousticbrainz.org` (bonus sui MBID) e `https://audio-ssl.itunes.apple.com` (download dell'anteprima audio di 30 s, analizzata **in locale**: i byte non escono e non vengono persistiti). Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`. `'wasm-unsafe-eval'` era già presente per Essentia.js e resta |
 | 1.1 | Sessione 66 (2026-10-30) | **§2.1 CSP**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (issue #196, ratifica del project owner). La v1.0 della spec `21-AUDIO-FEATURES.md` elencava in `connect-src` i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico — Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati (D.A.1). **D-AF.9 è emendata** (`21` v1.1): i **tre** host sono gli unici aggiunti. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della PR #197 (Sessione 64): la modifica è l'allineamento della **dichiarazione** al codice |
 | 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
+| 1.3 | Sessione 71 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger). Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). **§9.10** aggiornata: cinque sub-gate nel validatore. |
 
 
 
@@ -30739,6 +31606,23 @@ echo "Risultati: $pass passati, $fail falliti"
 #       valore venga riusato: con il riuso assente fallisce sempre. La contro-prova
 #       verifica la direzione opposta (contenuto cambiato -> il timestamp si
 #       aggiorna), cosi' un riuso cieco non puo' passare.
+#   T12 indicatore di avanzamento (ADR-0008 V4, issue #216): la percentuale e'
+#       calcolata sul CATALOGO del backlog (gli heading `### Story ... [SIZE:...]`
+#       di docs/11-BACKLOG.md), non sui soli state file: 2 story done su 4
+#       catalogo = 50% in story, 70% pesato per effort (L=3, S=1, XL=4, M=2),
+#       2 step rimanenti, tabella per EPIC. T12b verifica che la sezione
+#       `## Analisi di avanzamento` della sessione piu' recente venga resa dentro
+#       il blocco (l'analisi narrativa + i numeri calcolati nello stesso posto).
+#   T13 fail-closed del denominatore: uno state file che descrive una story
+#       assente dal backlog rende il denominatore falso: il run deve uscire
+#       con codice non-zero, il messaggio deve citare lo state file orfano e
+#       NESSUN blocco deve essere stato scritto (il fail-closed scatta prima
+#       delle scritture, non a meta').
+#   T14 idempotenza del blocco progress + copertura dei trigger: due run
+#       consecutivi non producono diff e `--check` esce 0; i `paths:` del
+#       workflow `auto-state-aggregate` devono comprendere gli input del blocco
+#       (catalogo del backlog + state): scenario negativo che rimuove
+#       `docs/11-BACKLOG.md` dai trigger e verifica che il validatore lo segnali.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -30865,6 +31749,60 @@ story_ids_in_backlog() {
   sed -n '/AGGREGATE-STORIES-START/,/AGGREGATE-STORIES-END/p' "$1/docs/11-BACKLOG.md" \
     | grep -o '| [0-9][0-9.]* - ' | sed 's/| //; s/ - //' | tr '\n' ' '
 }
+
+# === Fixture ADR-0008 V4 (issue #216): indicatore di avanzamento ===
+
+# Catalogo delle story: e' la fonte del DENOMINATORE (i state file esistono
+# solo per le story claimate: calcolare su quelli darebbe 100% con metà del
+# backlog mai scritto). I heading `### Story` portano il tag `[SIZE:...]`.
+make_backlog() {
+  mkdir -p "$1/docs"
+  cat > "$1/docs/11-BACKLOG.md" <<'EOF'
+# BACKLOG
+
+## EPIC 0 — Fondamenta (Fase 0 tecnica)
+
+### Story 0.1 — Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[SIZE:L]`
+
+### Story 0.2 — Schema DB e layer Dexie `[PHASE-0]` `[AREA:db]` `[SIZE:S]`
+
+### Story 0.3 — PWA e service worker `[PHASE-0]` `[AREA:devops]` `[SIZE:XL]`
+
+## EPIC 1 — Import core (Fase 1)
+
+### Story 1.1 — Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[SIZE:M]`
+
+<!-- AGGREGATE-STORIES-START -->
+<!-- AGGREGATE-STORIES-END -->
+EOF
+}
+
+# Repo con 4 story nel catalogo, 2 done (0.1, 0.3) e 2 senza state file (todo).
+# Pesi: L=3, S=1, XL=4, M=2 => totale 10, done 3+4=7 => 70% pesato, 50% in story.
+make_progress_repo() {
+  local d="$1"
+  mkdir -p "$d/docs/state/sessions" "$d/docs/state/stories" "$d/scripts"
+  cp "$SCRIPT" "$d/scripts/aggregate-state.ps1"
+  (
+    cd "$d" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    write_story 0.1 "setup" "Setup monorepo e toolchain" done "#1" "devops"
+    write_story 0.3 "pwa" "PWA e service worker" done "#2" "devops"
+    write_session 30 "trenta" "Sessione trenta" "?"
+  )
+}
+
+# I marker del blocco progress (V4) nei due target: README.md e docs/INDEX.md.
+add_progress_markers() {
+  printf '\n<!-- AGGREGATE-PROGRESS-START -->\n<!-- AGGREGATE-PROGRESS-END -->\n' >> "$1/README.md"
+  printf '\n<!-- AGGREGATE-PROGRESS-START -->\n<!-- AGGREGATE-PROGRESS-END -->\n' >> "$1/docs/INDEX.md"
+}
+
+progress_block() {
+  sed -n '/AGGREGATE-PROGRESS-START/,/AGGREGATE-PROGRESS-END/p' "$1"
+}
+
 
 session_numbers_in_roadmap() {
   sed -n '/AGGREGATE-INDEX-ROADMAP-START/,/AGGREGATE-INDEX-ROADMAP-END/p' "$1/docs/INDEX.md" \
@@ -31356,6 +32294,169 @@ EOF
   cd /; rm -rf "$D"
 }
 
+echo "=== T12: percentuale di implementazione (denominatore = catalogo del backlog) ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  BLOCK="$(progress_block "$D/README.md")"
+
+  if echo "$BLOCK" | grep -q '\*\*Implementazione: 50%\*\*'; then
+    ok "percentuale in story: 50% (2 done su 4)"
+  else
+    ng "percentuale in story non trovata: $(echo "$BLOCK" | grep -i 'Implementazione')"
+  fi
+  if echo "$BLOCK" | grep -q '2 story completate su 4'; then
+    ok "conteggio: 2 story completate su 4"
+  else
+    ng "conteggio story completate errato"
+  fi
+  if echo "$BLOCK" | grep -q 'effort pesato 70%'; then
+    ok "percentuale pesata per effort: 70% (3+4 su 3+1+4+2)"
+  else
+    ng "percentuale pesata errata: $(echo "$BLOCK" | grep -i 'pesato')"
+  fi
+  if echo "$BLOCK" | grep -q 'mancano 2 step'; then
+    ok "step rimanenti: 2 (denominatore = 4 story del catalogo, non 2 state file)"
+  else
+    ng "step rimanenti errati: $(echo "$BLOCK" | grep -i 'mancano')"
+  fi
+  if echo "$BLOCK" | grep -q '| EPIC 0 - Fondamenta | 2 | 3 | 67% |'; then
+    ok "tabella per EPIC: EPIC 0 = 2/3 (67%)"
+  else
+    ng "riga EPIC 0 non trovata: $(echo "$BLOCK" | grep 'EPIC 0')"
+  fi
+
+  STEPS="$(echo "$BLOCK" | grep '^- [0-9]')"
+  if echo "$STEPS" | grep -q '^- 0.2 Schema DB e layer Dexie - da fare (size S)' \
+     && echo "$STEPS" | grep -q '^- 1.1 Adapter YouTube Music - da fare (size M)'; then
+    ok "elenco degli step rimanenti: contiene 0.2 e 1.1 (non le story done)"
+  else
+    ng "elenco degli step rimanenti errato: $STEPS"
+  fi
+  if echo "$STEPS" | grep -qE '^- 0\.1 |^- 0\.3 '; then
+    ng "l'elenco degli step rimanenti include story gia' done"
+  else
+    ok "l'elenco degli step rimanenti non include story done"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T12b: analisi della sessione resa dentro il blocco ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  cat > docs/state/sessions/31-con-analisi.md <<'EOF'
+---
+number: 31
+title: "Sessione con analisi"
+date: 2026-10-31
+state: 🟡
+pr: 0
+---
+
+# Sessione 31
+
+## Analisi di avanzamento
+
+Il motore e' completo, manca la UI.
+EOF
+  run_agg >/dev/null 2>&1
+  BLOCK="$(progress_block "$D/README.md")"
+  if echo "$BLOCK" | grep -q 'Analisi della sessione corrente.*S31' \
+     && echo "$BLOCK" | grep -q 'Il motore e.* completo, manca la UI'; then
+    ok "analisi della sessione resa nel blocco (S31)"
+  else
+    ng "analisi della sessione non resa: $(echo "$BLOCK" | grep -i 'Analisi della sessione')"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T13: fail-closed sul denominatore (state file che il backlog non dichiara) ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  write_story 9.9 "fantasma" "Story inesistente nel backlog" todo "#999" "devops"
+
+  out="$(run_agg 2>&1)"; rc=$?
+  if [ "$rc" -ne 0 ]; then
+    ok "run fallito con codice non-zero (rc=$rc) quando lo stato e' incoerente col backlog"
+  else
+    ng "run riuscito nonostante lo state file orfano: il denominatore sarebbe falso"
+  fi
+  if echo "$out" | grep -q 'state file di story che il backlog non dichiara' \
+     && echo "$out" | grep -q '9.9'; then
+    ok "messaggio esplicito: cita lo state file orfano (9.9)"
+  else
+    ng "messaggio non utile: $out"
+  fi
+  if grep -q 'Implementazione:' README.md; then
+    ng "il blocco progress e' stato scritto nonostante il fail-closed"
+  else
+    ok "nessun blocco scritto: il fail-closed scatta prima delle scritture"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T14: idempotenza del blocco progress + copertura dei trigger ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "baseline" >/dev/null 2>&1
+  FIRST_HASH="$(git hash-object README.md)"
+
+  sleep 1
+  run_agg >/dev/null 2>&1
+  SECOND_HASH="$(git hash-object README.md)"
+  if [ "$FIRST_HASH" = "$SECOND_HASH" ]; then
+    ok "blocco progress idempotente: hash README.md invariato tra due run"
+  else
+    ng "blocco progress non idempotente: $FIRST_HASH -> $SECOND_HASH"
+  fi
+  if git diff --quiet; then
+    ok "nessun diff tra due run consecutivi"
+  else
+    ng "diff nonostante l'idempotenza"; git diff --stat
+  fi
+
+  out="$(run_agg --check 2>&1)"; rc=$?
+  if [ "$rc" -eq 0 ]; then
+    ok "--check exit 0 dopo la scrittura del blocco progress"
+  else
+    ng "--check exit $rc dopo la scrittura"; echo "$out" | tail -6
+  fi
+
+  cd /; rm -rf "$D"
+
+  # Copertura dei trigger: i path del workflow devono comprendere gli input del
+  # blocco progress (catalogo del backlog + state). Senza `docs/11-BACKLOG.md`
+  # l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio.
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  if command -v node >/dev/null 2>&1 && [ -d "$REPO_ROOT/.github/workflows" ]; then
+    D="$(mktemp -d)"; mkdir -p "$D/.github"
+    cp -R "$REPO_ROOT/.github/workflows" "$D/.github/workflows"
+
+    node "$REPO_ROOT/scripts/validate-workflows.mjs" "$D/.github/workflows" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      ok "validatore: workflow di riferimento senza drift (controllo positivo)"
+    else
+      ng "validatore: segnala drift sul workflow di riferimento (falso positivo)"
+    fi
+
+    sed -i.bak "/docs\/11-BACKLOG.md/d" "$D/.github/workflows/auto-state-aggregate.yml"
+    out="$(node "$REPO_ROOT/scripts/validate-workflows.mjs" "$D/.github/workflows" 2>&1)"; rc=$?
+    if [ "$rc" -ne 0 ] && echo "$out" | grep -q 'NON coprono docs/11-BACKLOG.md'; then
+      ok "validatore: segnala il path mancante nei trigger (scenario negativo)"
+    else
+      ng "validatore: non ha segnalato il path mancante (rc=$rc): $out"
+    fi
+
+    cd /; rm -rf "$D"
+  else
+    echo "  [SKIP] node non disponibile: copertura dei trigger non verificata"
+  fi
+}
+
 echo ""
 echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]
@@ -31734,7 +32835,8 @@ echo "Risultati: $pass passati, $fail falliti"
 ===== FILE: scripts/validate-workflows.mjs =====
 
 // Estrae i blocchi `script:` dai workflow e li syntax-checka con node.
-// Verifica anche che le scope dichiarate in `permissions:` siano valide (issue #135).
+// Verifica anche che le scope dichiarate in `permissions:` siano valide (issue #135)
+// e che i trigger `paths:` coprano tutti gli input dei blocchi aggregati (issue #216).
 // Uso: node scripts/validate-workflows.mjs [dir]
 // Serve a catturare errori JS nei workflow github-script prima del push,
 // dato che non esiste un runner GitHub Actions locale.
@@ -32162,8 +33264,166 @@ function checkWriterOrdering(dir) {
 
 failures += checkWriterOrdering(dir);
 
+// === Issue #216 — i trigger del workflow devono coprire gli input dei blocchi ===
+//
+// Il blocco `AGGREGATE-PROGRESS-*` (ADR-0008 V4, issue #216) calcola la percentuale
+// di implementazione su TRE sorgenti: lo stato delle story (`docs/state/stories/`),
+// il CATALOGO delle story (`docs/11-BACKLOG.md`, il denominatore) e il generatore
+// stesso (`scripts/aggregate-state.ps1`).
+//
+// `auto-state-aggregate.yml` dichiarava in `paths:` solo i primi due: una story
+// nuova nel backlog (o un EPIC nuovo) non avrebbe fatto scattare il workflow, e
+// l'indicatore sarebbe rimasto fermo su una percentuale falsa. E' la stessa classe
+// di fallimento silenzioso chiusa dall'issue #136 per la riga `git add`, applicata
+// ai trigger invece che allo staging.
+//
+// Il check richiede che ogni sorgente sia coperta da almeno un pattern di `paths:`:
+// "se questo file cambia, il workflow deve scattare".
+
+const AGGREGATOR_TRIGGER_INPUTS = [
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'docs/state/stories/3.1-home-timeline.md',
+    why: 'stato di una story (frontmatter `status`)',
+  },
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'docs/state/sessions/71-progress-indicator.md',
+    why: 'stato di una sessione (analisi narrativa + blocco SESSIONS)',
+  },
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'docs/11-BACKLOG.md',
+    why: 'catalogo delle story = denominatore della percentuale (issue #216, AC2)',
+  },
+  {
+    workflow: 'auto-state-aggregate.yml',
+    path: 'scripts/aggregate-state.ps1',
+    why: 'il generatore stesso',
+  },
+];
+
+/**
+ * Converte un pattern di `paths:` (globo GitHub) in espressione regolare.
+ * `**` copre zero o piu' segmenti, `*` copre un segmento, `?` un carattere.
+ */
+function pathPatternToRegExp(pattern) {
+  let out = '';
+  for (let i = 0; i < pattern.length; i++) {
+    const c = pattern[i];
+    if (c === '*') {
+      if (pattern[i + 1] === '*') {
+        if (pattern[i + 2] === '/') {
+          out += '(?:[^/]+/)*';
+          i += 2;
+        } else {
+          out += '.*';
+          i += 1;
+        }
+      } else {
+        out += '[^/]*';
+      }
+      continue;
+    }
+    if (c === '?') {
+      out += '[^/]';
+      continue;
+    }
+    out += c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  }
+  return new RegExp(`^${out}$`);
+}
+
+/**
+ * Estrae la lista `paths:` del blocco `on.push` di un file YAML.
+ * Ritorna null se il blocco non esiste.
+ */
+function extractPushPaths(text) {
+  const lines = text.split('\n');
+  let inOn = false;
+  let onIndent = -1;
+  let inPush = false;
+  let pushIndent = -1;
+  let inPaths = false;
+  let pathsIndent = -1;
+  const paths = [];
+  for (const raw of lines) {
+    const indent = raw.match(/^\s*/)[0].length;
+    const trimmed = raw.trim();
+    if (trimmed === '' || trimmed.startsWith('#')) continue;
+    if (!inOn) {
+      if (/^on:\s*$/.test(trimmed)) {
+        inOn = true;
+        onIndent = indent;
+      }
+      continue;
+    }
+    if (indent <= onIndent) break;          // uscita dal blocco `on:`
+    if (!inPush) {
+      if (/^push:\s*$/.test(trimmed)) {
+        inPush = true;
+        pushIndent = indent;
+      }
+      continue;
+    }
+    if (indent <= pushIndent) break;         // uscita dal blocco `push:`
+    if (!inPaths) {
+      if (/^paths:\s*$/.test(trimmed)) {
+        inPaths = true;
+        pathsIndent = indent;
+      }
+      continue;
+    }
+    if (indent <= pathsIndent) break;        // uscita dal blocco `paths:`
+    const m = trimmed.match(/^-\s*(.+?)\s*$/);
+    if (m) paths.push(m[1].replace(/^["']|["']$/g, ''));
+  }
+  return paths.length > 0 ? paths : null;
+}
+
+function checkTriggerCoverage(dir) {
+  let bad = 0;
+  const byWorkflow = new Map();
+  for (const input of AGGREGATOR_TRIGGER_INPUTS) {
+    if (!byWorkflow.has(input.workflow)) byWorkflow.set(input.workflow, []);
+    byWorkflow.get(input.workflow).push(input);
+  }
+  for (const [workflow, inputs] of byWorkflow) {
+    const wfPath = join(dir, workflow);
+    if (!existsSync(wfPath)) {
+      console.log(`[SKIP] ${workflow}: assente dalla directory ispezionata, il check di copertura dei trigger non e' applicabile`);
+      continue;
+    }
+    const paths = extractPushPaths(readFileSync(wfPath, 'utf8'));
+    if (!paths) {
+      console.error(`[FAIL] ${workflow}: nessun blocco \`paths:\` trovato sotto \`on.push\`.`);
+      console.error('       Il workflow non scatterebbe mai su un cambio degli input dei blocchi aggregati: l\'indicatore resterebbe fermo mentre le sue sorgenti cambiano.');
+      bad++;
+      continue;
+    }
+    const uncovered = inputs.filter(
+      input => !paths.some(pattern => pathPatternToRegExp(pattern).test(input.path)),
+    );
+    if (uncovered.length > 0) {
+      console.error(`[FAIL] ${workflow}: i trigger \`paths:\` NON coprono ${uncovered.length}/${inputs.length} input dei blocchi aggregati:`);
+      for (const input of uncovered) {
+        console.error(`         NON coprono ${input.path} (${input.why})`);
+      }
+      console.error(`         Filtri dichiarati: ${paths.join(', ')}`);
+      console.error('         Senza copertura il blocco generato resta fermo mentre la sua sorgente cambia: percentuale falsa, in silenzio.');
+      bad++;
+    } else {
+      console.log(`[OK] ${workflow}: i trigger \`paths:\` coprono tutti i ${inputs.length} input dei blocchi aggregati`);
+    }
+  }
+  return bad;
+}
+
+failures += checkTriggerCoverage(dir);
+
 console.log(`\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`);
 process.exit(failures === 0 ? 0 : 1);
+
 
 
 ===== FILE: scripts/test-workflow-git-add-coverage.sh =====

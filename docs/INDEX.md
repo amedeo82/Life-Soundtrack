@@ -117,6 +117,7 @@
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟡 | ❌ | - |
+| 71 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -156,14 +157,85 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **47** (merge: 37)
+- Sessioni migrate in state/sessions: **48** (merge: 37)
 - Stories migrate in state/stories: **20** (done: 18)
-- Ultima sessione migrata: **S70** - Story 2.3 — Event Detector (issue #214)
+- Ultima sessione migrata: **S71** - Indicatore di avanzamento automatico (issue #216)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
 <!-- AGGREGATE-INDEX-STATUS-END -->
+
+### Indicatore di avanzamento
+
+<!-- AGGREGATE-PROGRESS-START -->
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
+> Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
+
+**Implementazione: 64%** - 18 story completate su 28 - effort pesato 64% - **mancano 10 step**
+
+`███████████████████░░░░░░░░░░░` 64%
+
+| EPIC | Completate | Totale | % | Stato |
+|------|-----------|--------|---|-------|
+| EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
+| EPIC 1 - Import core | 6 | 6 | 100% | completo |
+| EPIC 2 - Analisi | 4 | 4 | 100% | completo |
+| EPIC 3 - UI/UX | 0 | 4 | 0% | da fare |
+| EPIC 4 - Arricchimento | 1 | 4 | 25% | in corso |
+| EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
+| EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
+
+**Distribuzione**: 18 done - 0 in corso - 10 da fare - 0 bloccate - 0 annullate
+
+**Step ancora da implementare** (10):
+- 3.1 Home + Timeline - da fare (size XL)
+- 3.2 Ricordi + Share - da fare (size L)
+- 3.3 Esplora + Analisi - da fare (size L)
+- 3.4 Nastro contesto (Timeline) - da fare (size M)
+- 4.2 MusicBrainz lookup - da fare (size M)
+- 4.3 Artwork enrichment - da fare (size M)
+- 4.4 DB IP→città (geolocalizzazione locale) - da fare (size L)
+- 5.1 Privacy spec finale - da fare (size M)
+- 5.2 Export e purge - da fare (size M)
+- 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
+
+**Gate di testabilità**
+
+| Gate | Requisito | Stato |
+|------|-----------|-------|
+| Test end-to-end dell'app | EPIC 3 (4 story) | 0/4 - non ancora |
+| Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
+| Test con dati personali reali | 5.2 | 0/1 - non ancora |
+
+**Analisi della sessione corrente** (S71)
+
+### Numeri
+
+- **Implementazione: 64%** — 18 story completate su 28 · effort pesato 64% · **mancano 10 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 0/4 · EPIC 4 (Arricchimento) 1/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **Il motore e' completo**: ingest da 5 piattaforme, dedup post-enrichment, scrobbling hub con coda e retry, pipeline audio features, mood tracker, era detector, memory engine, event detector, fondazione geo. Tutto coperto da test e verde.
+- **Manca la UI (EPIC 3, 0/4)**: Home + Timeline, Ricordi + Share, Esplora + Analisi, nastro contesto. Finche' EPIC 3 e' vuota l'app e' solo onboarding/import: si puo' testare il motore, non l'esperienza "colonna sonora della tua vita". **Questo e' il gate che blocca il test end-to-end.**
+- **Mancano 4.2/4.3/4.4** (lookup MusicBrainz, artwork, IP→citta') e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
+- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+
+### Salute tecnica (verificata su `main`)
+
+`typecheck` ✅ · `lint` ✅ · `build` ✅ (PWA generata, 13 asset in precache) · `test` ✅ **686 test** (574 `@ls/core` + 112 `@ls/web`) + 2 test di performance (10k eventi < 500 ms) · **e2e: un solo smoke test** (`apps/web/e2e/smoke.spec.ts`).
+
+### Procedura introdotta con questa sessione
+
+1. `scripts/aggregate-state.ps1` calcola l'indicatore (catalogo del backlog + stato dei state file) e lo scrive in `README.md` e `docs/INDEX.md`.
+2. Il workflow `auto-state-aggregate` lo rigenera a **ogni merge** su `main` (i trigger `paths:` ora includono anche `docs/11-BACKLOG.md`: il catalogo delle story e' un input del blocco).
+3. Il gate CI `aggregate-state.ps1 -Check` verifica l'allineamento e **fallisce** se il blocco e' stale.
+4. `scripts/validate-workflows.mjs` (nuovo sesto controllo) verifica che i `paths:` del workflow coprano **tutti** gli input del blocco: senza, una story nuova nel backlog lascerebbe l'indicatore fermo senza che nessuno se ne accorga.
+5. `pnpm run progress` stampa l'indicatore a richiesta, senza scrivere nulla.
+
+<!-- AGGREGATE-PROGRESS-END -->
 
 ### Dettaglio (legacy — allineato alla Sessione 38, issue #90)
 
@@ -175,6 +247,7 @@
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
 - **Implementazione**: 🟢 **Fase 0 tecnica completa: 7/7 story merged** — 0.1 scaffold (PR #2 `c0fb0a4`) · 0.2 schema DB Dexie (PR #4 `fa09b06`) · 0.3 adapter Spotify (PR #28 `3dc9654`) · 0.4 UI import onboarding (PR #71 `0a8e83f`) · 0.5 PWA e service worker (PR #19 `3fa3c0d`) · 0.6 i18n (PR #22 `5235c88`) · 0.7 operations runbook (PR #64 `b44420b`). Dettaglio per story in `docs/state/stories/` (fonte di verità) e `docs/18-DEV-LOG.md`.
+- **Indicatore di avanzamento** (V4, issue #216, Sessione 71): percentuale di implementazione, `X/Y` story completate, **step rimanenti**, tabella per EPIC, **gate di testabilità** e analisi della sessione corrente → blocco aggregato `<!-- AGGREGATE-PROGRESS-* -->` **qui sopra** (e nel `README.md`). I numeri vivono lì: non duplicarli qui. Per l'anteprima read-only: `pwsh scripts/aggregate-state.ps1 -Progress`.
 - **Sessione 13** — consolidamento doc **merged in `main`** (PR #3, merge commit `10ecde5`, 2026-10-16): chiusi M13 (PlatformCard 5 stati), M5 (`artworkUrl` in 02 v1.2 + Story 4.3), C6 (fixture Spotify v1.1), V1 (7 fixture + `scripts/generate-fixtures.mjs`); allineata Story 2.2 AC. Gate D.12.1 post-merge applicato senza drift (`18-DEV-LOG.md §5`).
 - **Sessione 17** — governance post-merge **merged in `main`** (PR #8, merge commit `a9f31a3`, 2026-10-17, follow-up bundle `e514404`): `AGENTS.md` **v1.2** con §"♻️ Pulizia branch post-merge" obbligatoria + auto-check; **branch remoti stale eliminati** (`origin/feat/0.2-dexie-schema`, `origin/feat/0.2-schema-db-dexie` → zero branch remoti oltre a `main`); **label GitHub di progetto creati** (`agent-ready`, `needs-spec`, `docs`, `phase-0`, `area:*`, `priority:*`, `size:*`); **3 issue `agent-ready` aperte** per il lavoro parallelo della Fase 0: #5 (Story 0.6 i18n), #6 (Story 0.3 Adapter Spotify), #7 (Story 0.5 PWA); follow-up #9 (questo sync) e #10 (bundle-check, `needs-spec`).
 - **Sessione 18** — protocollo claim (ADR-0006) **merged in `main`** (PR #12, merge commit `2891cb5`, 2026-10-17): `AGENTS.md` **v1.3** con §"🎫 Presa in carico delle story (claim)" (procedura `gh` completa: claim, riverifica, yield, stale-release, release) + §"🚀 Primo task" riscritta claim-first + label `in-progress` in tabella + PAT esteso a `issues: read/write`; `11-BACKLOG.md` **v1.3.0** con §"Priorità di lavorazione" ora claim-first; `docs/13-ADR/0006-multi-agent-task-claiming.md` 🟢 APPROVED v1.0 (8 regole, alternative considerate, conseguenze); gate D.12.1 applicato senza drift, branch `feat/11-task-claiming-protocol` eliminato (policy §♻️).

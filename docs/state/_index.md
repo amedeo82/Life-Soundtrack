@@ -104,6 +104,9 @@ claim: kilo-...                      # agent-ID che ha fatto claim
 ## Decisioni
 [tabella D.X.Y — Motivazione]
 
+## Analisi di avanzamento
+[analisi dello stato del progetto: numeri, cosa è pronto, cosa manca, salute tecnica]
+
 ## Lesson learned
 [tabella osservazioni]
 
@@ -156,9 +159,36 @@ Eseguita da `scripts/aggregate-state.ps1`:
 pwsh scripts/aggregate-state.ps1          # rigenera SESSIONS.md, 11-BACKLOG.md "Stato di avanzamento"
 pwsh scripts/aggregate-state.ps1 --check  # verifica sync (CI gate)
 pwsh scripts/aggregate-state.ps1 --list   # lista file sorgente
+pwsh scripts/aggregate-state.ps1 -Progress # stampa l'indicatore di avanzamento (non scrive)
 ```
 
 Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su `push: branches: [main]` (non-bloccante: committa direttamente eventuali diff di INDEX/SESSIONS/BACKLOG/BUNDLE).
+
+### Indicatore di avanzamento (V4, issue #216)
+
+Il blocco `<!-- AGGREGATE-PROGRESS-* -->` (in `README.md` e `docs/INDEX.md`) rende
+la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la
+tabella per EPIC, i gate di testabilità e **l'analisi della sessione corrente**.
+
+**Il denominatore è il catalogo del backlog** (gli heading `### Story <id> …`
+di `docs/11-BACKLOG.md`), non i soli state file: questi ultimi esistono solo per
+le story claimate, e calcolare su quelli darebbe ~90% con 8 story mai scritte.
+Lo **stato** di ciascuna story resta nei state file (questa directory).
+
+**La sezione `## Analisi di avanzamento`** di un file di sessione è resa dentro
+il blocco: è il posto dove l'agente scrive, a fine implementazione, l'analisi
+narrativa dello stato del progetto (numeri, cosa è pronto, cosa manca, salute
+tecnica). I numeri del blocco sono calcolati; l'analisi è scritta. Insieme danno
+"l'analisi + i numeri" nello stesso posto, senza doppio lavoro.
+
+```powershell
+pwsh scripts/aggregate-state.ps1 -Progress   # read-only: stampa l'indicatore
+pnpm run progress                             # stesso, via npm script
+```
+
+Un state file che descrive una story **assente dal backlog** fa fallire
+l'aggregazione (exit 2, prima di qualsiasi scrittura): una percentuale falsa è
+peggio di nessuna percentuale.
 
 ---
 

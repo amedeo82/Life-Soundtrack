@@ -44,6 +44,23 @@
 #       valore venga riusato: con il riuso assente fallisce sempre. La contro-prova
 #       verifica la direzione opposta (contenuto cambiato -> il timestamp si
 #       aggiorna), cosi' un riuso cieco non puo' passare.
+#   T12 indicatore di avanzamento (ADR-0008 V4, issue #216): la percentuale e'
+#       calcolata sul CATALOGO del backlog (gli heading `### Story ... [SIZE:...]`
+#       di docs/11-BACKLOG.md), non sui soli state file: 2 story done su 4
+#       catalogo = 50% in story, 70% pesato per effort (L=3, S=1, XL=4, M=2),
+#       2 step rimanenti, tabella per EPIC. T12b verifica che la sezione
+#       `## Analisi di avanzamento` della sessione piu' recente venga resa dentro
+#       il blocco (l'analisi narrativa + i numeri calcolati nello stesso posto).
+#   T13 fail-closed del denominatore: uno state file che descrive una story
+#       assente dal backlog rende il denominatore falso: il run deve uscire
+#       con codice non-zero, il messaggio deve citare lo state file orfano e
+#       NESSUN blocco deve essere stato scritto (il fail-closed scatta prima
+#       delle scritture, non a meta').
+#   T14 idempotenza del blocco progress + copertura dei trigger: due run
+#       consecutivi non producono diff e `--check` esce 0; i `paths:` del
+#       workflow `auto-state-aggregate` devono comprendere gli input del blocco
+#       (catalogo del backlog + state): scenario negativo che rimuove
+#       `docs/11-BACKLOG.md` dai trigger e verifica che il validatore lo segnali.
 #
 # I test girano su repo temporanei con i propri file state/, quindi non toccano
 # il repo reale. Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
@@ -170,6 +187,60 @@ story_ids_in_backlog() {
   sed -n '/AGGREGATE-STORIES-START/,/AGGREGATE-STORIES-END/p' "$1/docs/11-BACKLOG.md" \
     | grep -o '| [0-9][0-9.]* - ' | sed 's/| //; s/ - //' | tr '\n' ' '
 }
+
+# === Fixture ADR-0008 V4 (issue #216): indicatore di avanzamento ===
+
+# Catalogo delle story: e' la fonte del DENOMINATORE (i state file esistono
+# solo per le story claimate: calcolare su quelli darebbe 100% con metà del
+# backlog mai scritto). I heading `### Story` portano il tag `[SIZE:...]`.
+make_backlog() {
+  mkdir -p "$1/docs"
+  cat > "$1/docs/11-BACKLOG.md" <<'EOF'
+# BACKLOG
+
+## EPIC 0 — Fondamenta (Fase 0 tecnica)
+
+### Story 0.1 — Setup monorepo e toolchain `[PHASE-0]` `[AREA:devops]` `[SIZE:L]`
+
+### Story 0.2 — Schema DB e layer Dexie `[PHASE-0]` `[AREA:db]` `[SIZE:S]`
+
+### Story 0.3 — PWA e service worker `[PHASE-0]` `[AREA:devops]` `[SIZE:XL]`
+
+## EPIC 1 — Import core (Fase 1)
+
+### Story 1.1 — Adapter YouTube Music `[PHASE-1]` `[AREA:adapter]` `[SIZE:M]`
+
+<!-- AGGREGATE-STORIES-START -->
+<!-- AGGREGATE-STORIES-END -->
+EOF
+}
+
+# Repo con 4 story nel catalogo, 2 done (0.1, 0.3) e 2 senza state file (todo).
+# Pesi: L=3, S=1, XL=4, M=2 => totale 10, done 3+4=7 => 70% pesato, 50% in story.
+make_progress_repo() {
+  local d="$1"
+  mkdir -p "$d/docs/state/sessions" "$d/docs/state/stories" "$d/scripts"
+  cp "$SCRIPT" "$d/scripts/aggregate-state.ps1"
+  (
+    cd "$d" || exit 1
+    git init -q -b main
+    git config user.email "t@t.local"; git config user.name "Test"; git config commit.gpgsign false
+    write_story 0.1 "setup" "Setup monorepo e toolchain" done "#1" "devops"
+    write_story 0.3 "pwa" "PWA e service worker" done "#2" "devops"
+    write_session 30 "trenta" "Sessione trenta" "?"
+  )
+}
+
+# I marker del blocco progress (V4) nei due target: README.md e docs/INDEX.md.
+add_progress_markers() {
+  printf '\n<!-- AGGREGATE-PROGRESS-START -->\n<!-- AGGREGATE-PROGRESS-END -->\n' >> "$1/README.md"
+  printf '\n<!-- AGGREGATE-PROGRESS-START -->\n<!-- AGGREGATE-PROGRESS-END -->\n' >> "$1/docs/INDEX.md"
+}
+
+progress_block() {
+  sed -n '/AGGREGATE-PROGRESS-START/,/AGGREGATE-PROGRESS-END/p' "$1"
+}
+
 
 session_numbers_in_roadmap() {
   sed -n '/AGGREGATE-INDEX-ROADMAP-START/,/AGGREGATE-INDEX-ROADMAP-END/p' "$1/docs/INDEX.md" \
@@ -659,6 +730,169 @@ EOF
   fi
 
   cd /; rm -rf "$D"
+}
+
+echo "=== T12: percentuale di implementazione (denominatore = catalogo del backlog) ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  BLOCK="$(progress_block "$D/README.md")"
+
+  if echo "$BLOCK" | grep -q '\*\*Implementazione: 50%\*\*'; then
+    ok "percentuale in story: 50% (2 done su 4)"
+  else
+    ng "percentuale in story non trovata: $(echo "$BLOCK" | grep -i 'Implementazione')"
+  fi
+  if echo "$BLOCK" | grep -q '2 story completate su 4'; then
+    ok "conteggio: 2 story completate su 4"
+  else
+    ng "conteggio story completate errato"
+  fi
+  if echo "$BLOCK" | grep -q 'effort pesato 70%'; then
+    ok "percentuale pesata per effort: 70% (3+4 su 3+1+4+2)"
+  else
+    ng "percentuale pesata errata: $(echo "$BLOCK" | grep -i 'pesato')"
+  fi
+  if echo "$BLOCK" | grep -q 'mancano 2 step'; then
+    ok "step rimanenti: 2 (denominatore = 4 story del catalogo, non 2 state file)"
+  else
+    ng "step rimanenti errati: $(echo "$BLOCK" | grep -i 'mancano')"
+  fi
+  if echo "$BLOCK" | grep -q '| EPIC 0 - Fondamenta | 2 | 3 | 67% |'; then
+    ok "tabella per EPIC: EPIC 0 = 2/3 (67%)"
+  else
+    ng "riga EPIC 0 non trovata: $(echo "$BLOCK" | grep 'EPIC 0')"
+  fi
+
+  STEPS="$(echo "$BLOCK" | grep '^- [0-9]')"
+  if echo "$STEPS" | grep -q '^- 0.2 Schema DB e layer Dexie - da fare (size S)' \
+     && echo "$STEPS" | grep -q '^- 1.1 Adapter YouTube Music - da fare (size M)'; then
+    ok "elenco degli step rimanenti: contiene 0.2 e 1.1 (non le story done)"
+  else
+    ng "elenco degli step rimanenti errato: $STEPS"
+  fi
+  if echo "$STEPS" | grep -qE '^- 0\.1 |^- 0\.3 '; then
+    ng "l'elenco degli step rimanenti include story gia' done"
+  else
+    ok "l'elenco degli step rimanenti non include story done"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T12b: analisi della sessione resa dentro il blocco ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  cat > docs/state/sessions/31-con-analisi.md <<'EOF'
+---
+number: 31
+title: "Sessione con analisi"
+date: 2026-10-31
+state: 🟡
+pr: 0
+---
+
+# Sessione 31
+
+## Analisi di avanzamento
+
+Il motore e' completo, manca la UI.
+EOF
+  run_agg >/dev/null 2>&1
+  BLOCK="$(progress_block "$D/README.md")"
+  if echo "$BLOCK" | grep -q 'Analisi della sessione corrente.*S31' \
+     && echo "$BLOCK" | grep -q 'Il motore e.* completo, manca la UI'; then
+    ok "analisi della sessione resa nel blocco (S31)"
+  else
+    ng "analisi della sessione non resa: $(echo "$BLOCK" | grep -i 'Analisi della sessione')"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T13: fail-closed sul denominatore (state file che il backlog non dichiara) ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  write_story 9.9 "fantasma" "Story inesistente nel backlog" todo "#999" "devops"
+
+  out="$(run_agg 2>&1)"; rc=$?
+  if [ "$rc" -ne 0 ]; then
+    ok "run fallito con codice non-zero (rc=$rc) quando lo stato e' incoerente col backlog"
+  else
+    ng "run riuscito nonostante lo state file orfano: il denominatore sarebbe falso"
+  fi
+  if echo "$out" | grep -q 'state file di story che il backlog non dichiara' \
+     && echo "$out" | grep -q '9.9'; then
+    ok "messaggio esplicito: cita lo state file orfano (9.9)"
+  else
+    ng "messaggio non utile: $out"
+  fi
+  if grep -q 'Implementazione:' README.md; then
+    ng "il blocco progress e' stato scritto nonostante il fail-closed"
+  else
+    ok "nessun blocco scritto: il fail-closed scatta prima delle scritture"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T14: idempotenza del blocco progress + copertura dei trigger ==="
+{
+  D="$(mktemp -d)"; make_progress_repo "$D"; make_targets "$D"; make_backlog "$D"; add_progress_markers "$D"; cd "$D" || exit 1
+  run_agg >/dev/null 2>&1
+  git add -A >/dev/null 2>&1; git commit -q -m "baseline" >/dev/null 2>&1
+  FIRST_HASH="$(git hash-object README.md)"
+
+  sleep 1
+  run_agg >/dev/null 2>&1
+  SECOND_HASH="$(git hash-object README.md)"
+  if [ "$FIRST_HASH" = "$SECOND_HASH" ]; then
+    ok "blocco progress idempotente: hash README.md invariato tra due run"
+  else
+    ng "blocco progress non idempotente: $FIRST_HASH -> $SECOND_HASH"
+  fi
+  if git diff --quiet; then
+    ok "nessun diff tra due run consecutivi"
+  else
+    ng "diff nonostante l'idempotenza"; git diff --stat
+  fi
+
+  out="$(run_agg --check 2>&1)"; rc=$?
+  if [ "$rc" -eq 0 ]; then
+    ok "--check exit 0 dopo la scrittura del blocco progress"
+  else
+    ng "--check exit $rc dopo la scrittura"; echo "$out" | tail -6
+  fi
+
+  cd /; rm -rf "$D"
+
+  # Copertura dei trigger: i path del workflow devono comprendere gli input del
+  # blocco progress (catalogo del backlog + state). Senza `docs/11-BACKLOG.md`
+  # l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio.
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  if command -v node >/dev/null 2>&1 && [ -d "$REPO_ROOT/.github/workflows" ]; then
+    D="$(mktemp -d)"; mkdir -p "$D/.github"
+    cp -R "$REPO_ROOT/.github/workflows" "$D/.github/workflows"
+
+    node "$REPO_ROOT/scripts/validate-workflows.mjs" "$D/.github/workflows" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      ok "validatore: workflow di riferimento senza drift (controllo positivo)"
+    else
+      ng "validatore: segnala drift sul workflow di riferimento (falso positivo)"
+    fi
+
+    sed -i.bak "/docs\/11-BACKLOG.md/d" "$D/.github/workflows/auto-state-aggregate.yml"
+    out="$(node "$REPO_ROOT/scripts/validate-workflows.mjs" "$D/.github/workflows" 2>&1)"; rc=$?
+    if [ "$rc" -ne 0 ] && echo "$out" | grep -q 'NON coprono docs/11-BACKLOG.md'; then
+      ok "validatore: segnala il path mancante nei trigger (scenario negativo)"
+    else
+      ng "validatore: non ha segnalato il path mancante (rc=$rc): $out"
+    fi
+
+    cd /; rm -rf "$D"
+  else
+    echo "  [SKIP] node non disponibile: copertura dei trigger non verificata"
+  fi
 }
 
 echo ""

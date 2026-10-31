@@ -627,6 +627,73 @@ Il test (`scripts/test-readme-facts-gate.sh`) copre i 9 casi in cui il gate deve
 
 ---
 
+### 9.8h Indicatore di avanzamento automatico (issue #216)
+
+Il blocco `<!-- AGGREGATE-PROGRESS-* -->` risponde a una domanda che nessuno
+strumento del repository poneva: **"a che punto siamo?"** — percentuale di
+implementazione, story completate su totale, step rimanenti, e l'analisi
+narrativa della sessione. È il blocco che il project owner legge per decidere
+se il progetto è testabile.
+
+**Il buco che lo rendeva necessario**: la percentuale si può calcolare in due
+modi, e quello sbagliato dà una risposta falsa.
+
+| Denominatore possibile | Numeri al 2026-10-31 | Perché è sbagliato |
+|---|---|---|
+| I soli state file in `docs/state/stories/` | 20 file, 18 `done` → **90%** | i state file esistono **solo per le story claimate**: 8 story del backlog non hanno mai un state file. Il 100% sarebbe raggiunto con metà del backlog mai scritto |
+| Il catalogo delle story in `docs/11-BACKLOG.md` | 28 story, 18 `done` → **64%** | ✅ il denominatore giusto: il backlog APPROVED dichiara tutte le story |
+
+Il denominatore è il **catalogo del backlog** (gli heading `### Story <id> …`
+con il tag `[SIZE:…]`); lo **stato** di ciascuna story resta nei state file
+(ADR-0008: la sorgente atomica dello stato è `docs/state/`).
+
+**Che cosa contiene il blocco**:
+
+| Parte | Contenuto |
+|---|---|
+| Percentuale | in story (X/Y) e **pesata per effort** (S=1, M=2, L=3, XL=4): una story `XL` non vale una `S` |
+| Conteggio | `X story completate su Y` + `mancano Z step` |
+| Tabella EPIC | completate / totale / % per ciascun EPIC |
+| Step rimanenti | l'elenco delle story non fatte, con la size |
+| Gate di testabilità | milestone dichiarate (`EPIC 3` per l'e2e, `EPIC 2` per il motore, `5.2` per i dati reali) con stato `soddisfatto` / `in corso` / `non ancora` |
+| Analisi della sessione | la sezione `## Analisi di avanzamento` del file di sessione più recente, resa **dentro** il blocco: i numeri calcolati e l'analisi narrativa nello stesso posto |
+
+**Il fail-closed del denominatore**: uno state file che descrive una story
+**assente dal backlog** rende il denominatore falso → il run esce con codice
+2 e il messaggio cita i path da riallineare. Una percentuale falsa è peggio
+di nessuna percentuale. Il controllo avviene **prima** di scrivere qualsiasi
+blocco (niente scritture a metà). Se il backlog non ha proprio heading
+`### Story` (repo di test, o backlog in forma diversa), il blocco resta un
+placeholder: l'aggregazione non si blocca.
+
+**Il trigger è parte del contratto**: il blocco dipende dal backlog, quindi
+`auto-state-aggregate.yml` deve scattare anche quando il backlog cambia. Senza
+`docs/11-BACKLOG.md` nei `paths:`, una story nuova lascerebbe l'indicatore
+fermo con un denominatore vecchio — e nessun gate se ne accorgerebbe, perché
+il gate `-Check` confronta il blocco con i file *di quel momento*, non con la
+data dell'ultima modifica del catalogo. Il sesto controllo di
+`scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input
+del blocco e **fallisce** se non li coprono.
+
+```powershell
+pwsh scripts/aggregate-state.ps1 -Progress   # stampa l'indicatore, non scrive
+pnpm run progress                             # stesso, via npm script
+bash scripts/test-aggregate-determinism.sh    # T12/T12b/T13/T14
+```
+
+**T12** verifica i numeri (50% in story, 70% pesato, 2 step rimanenti, la
+tabella EPIC) e l'elenco degli step; **T12b** verifica che l'analisi della
+sessione venga resa; **T13** verifica il fail-closed (exit non-zero, messaggio
+che cita lo state file orfano, **nessun** blocco scritto); **T14** verifica
+l'idempotenza del blocco e la copertura dei trigger (scenario negativo: il
+validatore deve segnalare il path mancante).
+
+**Regola generale**: un indicatore di avanzamento è utile solo se il suo
+denominatore è dichiarato. Senza la fonte del denominatore, "64%" e "90%" sono
+entrambi numeri, e il lettore non ha modo di sapere quale sia vero.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -700,7 +767,7 @@ Elenco dei 18 step nominati del job `quality`, verificato riga per riga contro `
 
 I due step non bloccanti sono warning per l'incompatibilità residua PowerShell 5.1 (dev Windows) vs PowerShell 7 (CI Linux): i check `-Check` confrontano output prodotto su piattaforme diverse e possono divergere per casi non riproducibili localmente. Ogni **gate di copertura e di schema** è invece bloccante, perché confronta dati prodotti nella stessa piattaforma.
 
-**Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Quattro sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140) e `Ordinamento dei writer di main` (#149).
+**Verifica**: i 18 step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). Cinque sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149) e `Copertura dei trigger del blocco progress` (#216, vedi §9.8h).
 
 ---
 
@@ -754,3 +821,4 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 1.0 | Sessione 62 (2026-10-28) | **§2.1 CSP** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED, issue #187): `connect-src` aggiunge i due host della pipeline delle audio features (D-AF.9) — `https://acousticbrainz.org` (bonus sui MBID) e `https://audio-ssl.itunes.apple.com` (download dell'anteprima audio di 30 s, analizzata **in locale**: i byte non escono e non vengono persistiti). Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`. `'wasm-unsafe-eval'` era già presente per Essentia.js e resta |
 | 1.1 | Sessione 66 (2026-10-30) | **§2.1 CSP**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (issue #196, ratifica del project owner). La v1.0 della spec `21-AUDIO-FEATURES.md` elencava in `connect-src` i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico — Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati (D.A.1). **D-AF.9 è emendata** (`21` v1.1): i **tre** host sono gli unici aggiunti. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della PR #197 (Sessione 64): la modifica è l'allineamento della **dichiarazione** al codice |
 | 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
+| 1.3 | Sessione 71 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger). Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). **§9.10** aggiornata: cinque sub-gate nel validatore. |
