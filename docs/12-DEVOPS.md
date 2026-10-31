@@ -1,6 +1,6 @@
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.3 · Sessione 71 (2026-10-31) · baseline PowerShell 7 (`pwsh`)
+> Status: 🟡 DRAFT · Versione 1.4 · Sessione 72 (2026-10-31) · baseline PowerShell 7 (`pwsh`) + confine di encoding dei `.ps1`
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -178,7 +178,7 @@ Content-Security-Policy:
   script-src 'self' 'wasm-unsafe-eval'; 
   style-src 'self' 'unsafe-inline'; 
   img-src 'self' data: https:; 
-  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org https://acousticbrainz.org https://audio-ssl.itunes.apple.com https://itunes.apple.com; 
+  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org https://acousticbrainz.org https://audio-ssl.itunes.apple.com https://itunes.apple.com https://download.db-ip.com; 
   worker-src 'self' blob:;
   frame-ancestors 'none';
 ```
@@ -187,7 +187,7 @@ Content-Security-Policy:
 **Aggiornamento (Sessione 62, spec `21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED)**: la pipeline delle audio features ha due host in più, entrambi dichiarati nella spec (D-AF.9): `https://acousticbrainz.org` per il bonus sui MBID e `https://audio-ssl.itunes.apple.com` per il **download dell'anteprima audio di 30 s**, che viene analizzata in locale e non esce dal dispositivo. Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`.
 
 **Aggiornamento (Sessione 66, spec `21-AUDIO-FEATURES.md` v1.1 🟢 APPROVED, issue #196)**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (`GET https://itunes.apple.com/search`). La v1.0 della spec elencava i due host che **non** sono quello della ricerca: la CSP bloccava la richiesta e la pipeline degradava sempre ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate). Il project owner ha **ratificato il terzo host** (D-AF.9 emendata): i **tre** host sono gli unici aggiunti, nessun altro servizio entra in `connect-src`. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della Story 4.1: questa è l'allineamento della **dichiarazione** al codice.
-**Nota (Sessione 67, `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED, D-B.2)**: il download on-demand del database geo introduce **un host nuovo** che qui **non è ancora dichiarato**. L'host va aggiunto a `connect-src` — e il file scaricato servito da un'origine dichiarata in `script-src` — **nella story che implementa la Story 4.4**, insieme al codice che lo scarica. La regola è quella imparata con la issue #196: la CSP applicata e la spec devono dire la stessa cosa; un host usato dal codice e non dichiarato è una richiesta bloccata.
+**Nota (Sessione 67, `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED, D-B.2)**: il download on-demand del database geo introduce **un host nuovo**, dichiarato in `connect-src` nella Story 4.4: `https://download.db-ip.com`. L'host è servito da un'origine dichiarata in `connect-src` e il file scaricato non entra in `script-src` (non è eseguito). La regola è quella imparata con la issue #196: la CSP applicata e la spec devono dire la stessa cosa; un host usato dal codice e non dichiarato è una richiesta bloccata.
 
 ### 5.2 Altri Headers di Sicurezza
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
@@ -747,6 +747,77 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 
 ---
 
+### 9.12 Ambiente PowerShell locale: provenienza, verifica e confine di encoding
+
+La Sessione 71 (issue #218) ha dichiarato **PowerShell 7 (`pwsh`)** come baseline del repo. Questa sezione ne fissa la **provenienza** (un runtime installato ma non riproducibile non è un toolchain documentato — lesson 71-1) e il **confine oltre il quale l'ambiente non è più sicuro**: sotto Windows PowerShell 5.1 i `.ps1` del repo non solo fall-open sul flag, ma **interpretano diversamente il proprio sorgente**.
+
+#### Provenienza (verificata il 2026-10-31)
+
+| Aspetto | Valore |
+|---|---|
+| Versione | **7.6.9** (`PSEdition: Core`) |
+| Tipo di installazione | pacchetto **MSIX / Microsoft Store** — `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, `SignatureKind: Store` |
+| Percorso reale | `C:\Program Files\WindowsApps\Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe` |
+| Alias invocabile | `%LOCALAPPDATA%\Microsoft\WindowsApps\pwsh.exe` (App Execution Alias, reparse point da 0 byte) |
+| MSI in `C:\Program Files\PowerShell\7` | **assente** — e nessuna voce di disinstallazione del prodotto nel registro |
+| Data del pacchetto | creato/aggiornato il **2026-10-26 09:38** (l'installazione MSI citata da lesson 42-1 non è più quella attiva) |
+| Visibilità da Git Bash | sì — `command -v pwsh` → `/c/Users/<user>/AppData/Local/Microsoft/WindowsApps/pwsh` (quindi il `.githooks/pre-push` sceglie `pwsh`, non il fallback 5.1) |
+
+Verifiche:
+
+```powershell
+pwsh -NoProfile -c '$PSVersionTable.PSVersion'                  # 7.6.9
+winget list --id Microsoft.PowerShell                            # PowerShell 7.6.9.0
+Get-AppxPackage Microsoft.PowerShell | Select Version, SignatureKind, InstallLocation
+```
+
+#### Il confine: `powershell` (5.1) non è un fallback, è un rischio di corruzione
+
+`scripts/aggregate-state.ps1` è **UTF-8 senza BOM** e contiene 9 righe con caratteri non-ASCII (`—`, `§`, `→`, `✅`, `❌`). Il **parsing del sorgente** dipende dall'engine: `pwsh` 7 legge UTF-8, Windows PowerShell 5.1 legge ANSI (Windows-1252) e trasforma `—` (3 byte UTF-8) in `â€”` (3 caratteri). La divergenza è misurata:
+
+| Comando | Esito | Tempo | Note |
+|---|---|---|---|
+| `pwsh scripts/aggregate-state.ps1 -Check` | **exit 0** | 2,09 s | tutti i blocchi in sync |
+| `powershell scripts/aggregate-state.ps1 -Check` | **exit 1** | 1,81 s | `[FAIL] README.md - blocco drift \| Atteso: 620 chars, Trovato: 616 chars` — drift **spurio** (4 caratteri = `—` +2, `§` +1, `à` +1) |
+| `pwsh scripts/generate-bundle.ps1 -Check` | exit 0 | 1,79 s | 126 file in sync |
+| `powershell scripts/generate-bundle.ps1 -Check` | exit 0 | 2,43 s | `generate-bundle.ps1` legge e scrive sempre con `-Encoding UTF8` ⇒ **immune** |
+
+In **modalità scrittura** (default) la stessa invocazione sotto 5.1 **scrive** i letterali corrotti nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`): mojibake + BOM, la classe di danno di lesson 36-6 e 69-5.
+
+**Regole**:
+
+1. **`pwsh` va invocato esplicitamente**: `powershell` (5.1) è la shell di default di Windows e di molti tool — `pwsh` è un binario diverso e va scritto per esteso.
+2. **Il check F9 della session start checklist** (`pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'` → 7) va eseguito **prima** di qualunque `.ps1` del repo.
+3. **I `.ps1` del repo restano ASCII-only** (o con BOM UTF-8 esplicito). Il vincolo già esiste in `docs/13-ADR/0008-lazy-state-aggregation.md`; la Sessione 72 ne ha corretto la motivazione: riguarda il **parsing** del sorgente, non solo la scrittura del file prodotto.
+4. **Stato attuale** (misurato): `scripts/aggregate-state.ps1` **viola** la regola (9 righe non-ASCII, nessun BOM). Il fix (rimuovere i letterali, oppure aggiungere il BOM) è manutenzione dello script e **decisione del project owner** (D.71.4: la semantica dei gate non si cambia d'autorità).
+
+**Implicazione per i due gate warning-only** (step 6 e 16 di `ci.yml`): la divergenza residua non è fra versioni di PowerShell — la CI gira `pwsh` come la dev machine — ma fra **encoding del sorgente** e **piattaforma** (CRLF/autocrlf, separatori di path). Con il fix di cui al punto 4, la motivazione del warning-only si riduce a "piattaforma" e i due gate potranno diventare bloccanti: **decisione del project owner**, non applicata qui.
+
+---
+
+### 9.13 Copertura CI delle suite di test locali
+
+`ci.yml` esegue **13 script di verifica** (§9.10). In `scripts/` esistono però **5 suite di test che la CI non esegue**, e due di esse hanno difetti che la CI non può intercettare proprio perché non le esegue. Audit del 2026-10-31 (tutti i tempi misurati sulla dev machine, `bash` = Git Bash, `pwsh` 7.6.9):
+
+| Suite | In CI | Tempo | Esito misurato | Difetto rilevato |
+|---|:---:|---:|---|---|
+| `test-aggregate-determinism.sh` | sì (step 8) | 56,0 s | 37 assert, 0 falliti | — (costo più alto del gate) |
+| `test-bundle-check-idempotent.sh` | sì (step 7) | 60,4 s | 12 assert, 0 falliti | — (costo più alto del gate) |
+| `test-issue-76-residue.sh` | sì (step 14) | 16,1 s | 9 assert, 0 falliti | — |
+| `test-readme-facts-gate.sh` | sì (step 18) | 3,7 s | 12 assert, 0 falliti | — |
+| `test-workflow-*.sh` (4 suite) | sì (step 9-13) | 2,0-3,0 s | 8-15 assert, 0 falliti | — |
+| `test-post-merge.sh` | **no** | 52,4 s | 29 assert, 0 falliti | la procedura **più distruttiva** del repo (`git push origin --delete`, `git branch -D`) non ha copertura in CI |
+| `test-setup-worktree.sh` | **no** | 2,9 s | **exit 1** | fallisce su Windows/Git Bash (S1: il mock `gh` non viene intercettato → lo script non fallisce come deve; S2: path POSIX `mktemp` non risolto). Su `ubuntu-latest` (CI) passerebbe |
+| `test-safe-branch-switch.sh` | **no** | 6,7 s | exit 0 con **"0 passati, 0 falliti"** | **fail-open**: i tre scenari girano in subshell `( … )`, quindi gli incrementi di `pass`/`fail` non arrivano al padre e `[ "$fail" -eq 0 ]` è sempre vero ⇒ il gate non può mai fallire (lesson 43-1) |
+| `test-pre-commit-clean-check.sh` | **no** | 4,7 s | 8 assert, 0 falliti | — |
+| `test-appendline-lf-fix.ps1` | **no** | 6,1 s | **exit 1** (4/5) | S3 asserisce che `aggregate-state.ps1` non contenga `AppendLine`: l'aspettativa è **superata** (l'attuale fix normalizza CRLF→LF in scrittura, non elimina `AppendLine`) ⇒ test stale. In più lo scenario S5 **muta il working tree** (`git checkout -- docs/SESSIONS.md` + run dell'aggregator) |
+
+**Costi**: i due gate più pesanti (`test-aggregate-determinism.sh` + `test-bundle-check-idempotent.sh`) valgono **116,4 s** su ~213 s di gate sequenziali: ogni uno crea decine di repo git temporanei e lancia `pwsh` altrettante volte. Sono indipendenti fra loro e potrebbero girare in parallelo (o in job separati), riducendo il tempo pareggio della pipeline di circa 2 minuti.
+
+**Perché non è stato corretto qui**: aggiungere step a `ci.yml` e modificare la semantica di un gate (da assente a bloccante) sono decisioni sul **test strategy**, che il protocollo riserva al project owner (D.71.4). I difetti sopra sono **segnalati** con evidenza misurata; il fix (`test-safe-branch-switch.sh` con i contatori riportati fuori dalle subshell, `test-appendline-lf-fix.ps1` con S3 allineato al fix corrente e senza effetti collaterali sul working tree, `test-setup-worktree.sh` portato a girare su Windows) è una PR di manutenzione a sé.
+
+---
+
 ## Changelog
 
 | Versione | Data | Modifiche |
@@ -764,3 +835,4 @@ bash scripts/test-bundle-check-idempotent.sh # T7 incluso
 | 1.1 | Sessione 66 (2026-10-30) | **§2.1 CSP**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (issue #196, ratifica del project owner). La v1.0 della spec `21-AUDIO-FEATURES.md` elencava in `connect-src` i due host che **non** sono quello della ricerca (l'API di AcousticBrainz e il **CDN** dei file audio): la CSP bloccava `GET https://itunes.apple.com/search` e la pipeline degradava **sempre** ad AcousticBrainz/euristico — Essentia mai chiamabile, `valence`/`energy` mai misurate, mood tracker senza dati (D.A.1). **D-AF.9 è emendata** (`21` v1.1): i **tre** host sono gli unici aggiunti. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della PR #197 (Sessione 64): la modifica è l'allineamento della **dichiarazione** al codice |
 | 1.2 | Sessione 67 (2026-10-30, issue #201) | **§5.3 Licenza e offerta del sorgente (AGPL-3.0)** (nuova): il repository passa da Apache-2.0 ad **AGPL-3.0** (D-AF.2, `21-AUDIO-FEATURES.md` §2.4, ratificata dal project owner); l'obbligo del **§13** (offerta del Corresponding Source agli utenti che interagiscono in rete) è il requirement dell'issue **#202**, non ancora implementato. **§5.1 CSP**: nota sul **nuovo host** che il download on-demand del database geo introduce (D-B.2, `13-ADR/0009` v1.0 🟢) — va dichiarato nella story 4.4 insieme al codice che lo scarica, con la regola imparata dalla issue #196 (la CSP applicata e la spec devono dire la stessa cosa). |
 | 1.3 | Sessione 71 (2026-10-31) | **Baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1`. `pwsh` era già disponibile sulla dev machine dalla Sessione 42 (lesson 42-1, pwsh 7.6.7) e la CI usa `shell: pwsh` da sempre, ma la **documentazione** era rimasta ancorata al world di PS 5.1: il README avvertiva ancora che «senza `pwsh`» i gate richiedevano il singolo trattino, `§9.1` prescriveva «MAI `--check`», `§9.7b` descriveva il bug #104 come se fosse il caso normale e la motivazione dei due gate warning-only era attribuita alla differenza **PS 5.1 vs 7** invece che a quella **di piattaforma**. §9.1 riscritta: il doppio trattino in `pwsh` viene normalizzato sul singolo **prima** del binding, quindi `--check` e `-Check` sono equivalenti (verificato su pwsh 7.6.9); il fail-open dell'issue #104 è un bug di **5.1** e non si reproduce con il baseline corrente. La forma canonica resta a **singolo trattino** (`-Check`), unica forma con comportamento identico su 5.1 e 7 e quella indicata dal guard fail-closed. §9.7b: il guard resta in piedi ma non scatta più nello scenario che l'ha motivato — protegge i flag davvero inesistenti e le invocazioni da shell 5.1. §9.10: la motivazione dei due step warning-only è riformulata — l'asse versione di PowerShell è chiuso, resta quello di piattaforma (dev Windows vs CI Linux). Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
+| 1.4 | Sessione 72 (2026-10-31) | **§9.12 Ambiente PowerShell locale** (nuova): provenienza dell'installazione verificata (`pwsh` **7.6.9**, pacchetto **MSIX/Store** `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, alias per-utente in `WindowsApps`, **nessun MSI** in `C:\Program Files\PowerShell\7` e nessuna voce di disinstallazione nel registro; pacchetto creato/aggiornato il 2026-10-26 09:38) con i comandi di verifica (`pwsh -NoProfile -c '$PSVersionTable.PSVersion'`, `winget list --id Microsoft.PowerShell`, `Get-AppxPackage Microsoft.PowerShell`). La sezione fissa anche il **confine**: `scripts/aggregate-state.ps1` è UTF-8 **senza BOM** e contiene 9 righe con caratteri non-ASCII ⇒ sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e `-Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in modalità scrittura il mojibake verrebbe scritto nei file globali; `generate-bundle.ps1` invece è immune (legge/scrive sempre con `-Encoding UTF8`). Il vincolo «ASCII-only nei `.ps1`» di `13-ADR/0008` viene corretto: riguarda il **parsing**, non solo la scrittura. Il fix dello script (rimuovere i letterali o aggiungere il BOM) è **decisione del project owner** (D.71.4) e non è applicato. **§9.13 Copertura CI delle suite di test locali** (nuova): 5 suite presenti in `scripts/` **non** eseguite da `ci.yml` (`test-post-merge.sh`, `test-setup-worktree.sh`, `test-safe-branch-switch.sh`, `test-pre-commit-clean-check.sh`, `test-appendline-lf-fix.ps1`), con tempi misurati e difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ "0 passati, 0 falliti" e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 **stale** (64 `AppendLine` sono il fix corrente, non una regressione) e S5 **muta il working tree**, `test-setup-worktree.sh` fallisce su Windows/Git Bash (mock `gh` non intercettato + path POSIX). I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili. Nessuna modifica al codice degli script né alla semantica dei gate in CI. |

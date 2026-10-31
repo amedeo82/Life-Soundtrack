@@ -308,6 +308,7 @@ function findIPv4(buffer: ArrayBuffer, nodeOffset: number, ipNum: number): numbe
   let offset = nodeOffset;
 
   for (let bit = 31; bit >= 0; bit--) {
+    if (offset + 8 > view.byteLength) return null;
     const bitValue = (ipNum >>> bit) & 1;
     const leftPtr = view.getUint32(offset, true);
     const rightPtr = view.getUint32(offset + 4, true);

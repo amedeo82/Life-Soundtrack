@@ -9,7 +9,7 @@ import {
   DEV_SCRIPT_SOURCES,
   buildCsp,
 } from '../csp';
-import { ACOUSTICBRAINZ_HOST, ITUNES_AUDIO_HOST, ITUNES_SEARCH_HOST } from '../hosts';
+import { ACOUSTICBRAINZ_HOST, DBIP_HOST, ITUNES_AUDIO_HOST, ITUNES_SEARCH_HOST } from '../hosts';
 
 /**
  * La CSP applicata al bundle — `21-AUDIO-FEATURES.md` §10.2 (D-AF.9),
@@ -46,6 +46,7 @@ describe('Content Security Policy (12§2.1, 21§10.2)', () => {
       ACOUSTICBRAINZ_HOST,
       ITUNES_AUDIO_HOST,
       ITUNES_SEARCH_HOST,
+      DBIP_HOST,
     ]);
     expect([...CSP_DIRECTIVES['connect-src']]).toEqual([...allowed]);
   });
