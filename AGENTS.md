@@ -828,28 +828,52 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
 
-### 🏎️ La CI: 11 job in parallelo *(Sessione 73, issue #224)*
+### 🏎️ La CI: 12 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74)*
 
-`ci.yml` è stato riorganizzato: era **un job unico con 18 step in sequenza** (misurato: **172 s**
-di tempo pareggio sul runner), ora è **11 job** di cui **10 girano in parallelo** e l'undicesimo (`quality`)
-è il check aggregatore.
+`ci.yml` era **un job unico con 18 step in sequenza** (misurato: **172 s** di tempo pareggio sul
+runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il check aggregatore.
 
-| Job | Cosa contiene |
-|---|---|
-| 
-ode-lint-typecheck | pnpm install + lint + 	ypecheck |\n| 
-ode-test | pnpm install + 	est (**isolato**: nessun altro task CPU-bound condivide il processore) |\n| 
-ode-build | pnpm install + uild |
-| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) |
-| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) |
-| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) |
-| `gates-workflows` | `validate-workflows.mjs` + i 4 test di scenario negativo dei workflow |
-| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` |
-| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo |
-| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` |
-| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato |
+| Job | Cosa contiene | Quando gira |
+|---|---|---|
+| `detect-code` | la PR tocca file di codice o solo `.md`? | solo `pull_request` |
+| `node-lint-typecheck` | `pnpm install` + `lint` + `typecheck` | solo `pull_request` |
+| `node-test` | `pnpm install` + `test` (**isolato**: nessun altro task CPU-bound condivide il processore) | solo `pull_request` |
+| `node-build` | `pnpm install` + `build` | solo `pull_request` |
+| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | sempre |
+| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | sempre |
+| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | sempre |
+| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | sempre |
+| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | sempre |
+| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | sempre |
+| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | sempre |
+| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | sempre |
 
-Tre cose da sapere quando si legge una pipeline verde:
+**Perché la pipeline non gira più 4 volte per ogni cambiamento logico** (Sessione 74). Il ciclo era:
+
+```
+PR  →  CI (pull_request)  →  merge  →  CI (push)  →  doc-sync PR  →  CI (pull_request)  →  merge  →  CI (push)
+```
+
+Le tre ripetizioni erano tutte riconducibili a due cause:
+
+1. **Il trigger `push: branches: [main]` senza filtro** rieseguiva l'**intera** pipeline su ogni
+   merge, duplicando la validazione che la PR aveva già fatto sullo stesso albero. Ora il trigger
+   `push` è **filtrato per path** sui 5 file che i **writer automatici** modificano
+   (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`):
+   sono gli unici commit che arrivano su `main` **senza essere mai passati da una PR**. Su un merge
+   umano la pipeline non gira più.
+2. **Il doc-sync PR** (che porta `pr:` e `merged_commit:`, noti solo **dopo** il merge) girava
+   l'intera pipeline su file **solo `.md`**. Ora il job `detect-code` verifica se **almeno un**
+   file cambiato non è un `.md`: se sono tutti `.md`, i 3 job `node-*` non installano le
+   dipendenze e non eseguono i task (il job **riusce**, non viene saltato). La regola è
+   conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è
+   **fail-safe**: se il detector fallisce, i gate girano comunque.
+
+Su `push` su `main` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza
+`pnpm install`): i 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'` perché
+su `main` il codice non è cambiato rispetto a quanto già validato dalla PR.
+
+Cinque cose da sapere quando si legge una pipeline verde:
 
 1. **Il check da richiedere in branch protection resta `CI / quality`**: conserva il nome ed è
    l'aggregatore. I nuovi job hanno nomi propri e possono essere richiesti singolarmente.
@@ -857,8 +881,14 @@ Tre cose da sapere quando si legge una pipeline verde:
    `needs:` renderebbe `quality` *skipped* quando un job dipendente fallisce, e la branch
    protection può interpretare un check saltato come successo.
 3. **I gate non richiedono `pnpm install`**: `scripts/validate-*.mjs` e
-   `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo il job `node`
-   installa le dipendenze npm.
+   `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo i 3 job `node-*`
+   installano le dipendenze npm, e solo su `pull_request`.
+4. **Il doc-sync PR resta**: esiste perché `pr:` e `merged_commit:` sono noti solo dopo il merge.
+   Eliminarlo richiederebbe un cambio allo schema del frontmatter, che è una decisione del
+   project owner (`docs/12-DEVOPS.md §9.14.10`).
+5. **`validate-workflows.mjs` valida anche la sintassi YAML** (Sessione 74): un file workflow che
+   GitHub rifiuta in fase di validazione non produce un job che fallisce, ma una run con `jobs: 0`
+   e `failure` a 0 secondi — la firma del failure mode dell'issue #135.
 
 L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
 `docs/12-DEVOPS.md §9.10`; le misure di prestazione in `§9.14`.

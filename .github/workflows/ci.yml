@@ -2,8 +2,24 @@ name: CI
 
 on:
   pull_request:
+  # Sessione 74: il trigger `push: branches: [main]` senza filtro faceva
+  # rieseguire l'INTERA pipeline su ogni merge, duplicando la validazione
+  # che la PR aveva gia' fatto sullo stesso albero (4 run di CI per ogni
+  # cambiamento logico: PR, merge, doc-sync PR, merge del doc-sync).
+  #
+  # Il push su `main` scatta solo per i file che i **writer automatici**
+  # modificano: sono gli unici commit che arrivano su `main` senza essere
+  # mai passati da una PR, e quindi gli unici che non sono gia' validati.
+  # Per un merge umano la pipeline non gira piu': l'albero che arriva su
+  # `main` e' lo stesso che la PR ha gia' validato.
   push:
     branches: [main]
+    paths:
+      - 'docs/BUNDLE.md'
+      - 'docs/SESSIONS.md'
+      - 'docs/11-BACKLOG.md'
+      - 'docs/INDEX.md'
+      - 'README.md'
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -42,6 +58,60 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # 0. Rilevamento: la PR tocca file di codice?
+  #
+  # Il ciclo di merge del repo prevede due PR: quella di implementazione e il
+  # doc-sync finale (che porta il numero di PR e l'hash di merge, noti solo
+  # DOPO il merge). Il doc-sync tocca **solo file `.md`**: farci girare
+  # lint, typecheck, test e build su un cambiamento di sola documentazione
+  # e' lavoro sprecato (~68 s di job + 3 installazioni di dipendenze).
+  #
+  # La regola e' deliberatamente conservativa: i gate sul codice girano
+  # **solo se ALmeno un file cambiato non e' un `.md`**. Qualunque file
+  # `.ts`, `.tsx`, `.js`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate.
+  #
+  # Fail-safe: se questo job fallisce, `has_code` resta vuoto e la condizione
+  # `!= 'false'` dei job di codice e' vera => i gate girano comunque. Un
+  # detector rotto non puo' mai far saltare la validazione.
+  # ---------------------------------------------------------------------------
+  detect-code:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      has_code: ${{ steps.detect.outputs.has_code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Rileva i file di codice cambiati
+        id: detect
+        shell: bash
+        run: |
+          set -uo pipefail
+          base="origin/${{ github.base_ref }}"
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" 2>/dev/null || true
+          if ! git rev-parse --verify --quiet "$base" >/dev/null 2>&1; then
+            base="FETCH_HEAD"
+          fi
+          changed="$(git diff --name-only "$base" HEAD 2>/dev/null || true)"
+          echo "File cambiati rispetto a $base:"
+          printf '%s\n' "$changed" | sed 's/^/  /'
+          if [ -z "$changed" ]; then
+            # Nessun file rilevato: non si sa nulla => si assume codice
+            # (fail-safe: i gate girano).
+            echo "has_code=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s\n' "$changed" | grep -qv '\.md$'; then
+            echo "C'e' almeno un file non-'.md': i gate sul codice girano."
+            echo "has_code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tutti i file cambiati sono '.md': i gate sul codice non sono applicabili."
+            echo "has_code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ---------------------------------------------------------------------------
   # 1. Gate sui sorgenti TypeScript, su 3 job paralleli.
   #
   # La misura sul runner (run 41223269637, 2026-10-31) diceva che il job
@@ -54,8 +124,14 @@ jobs:
   # ~17 s per job ma **in parallelo**, quindi paga una volta sola sul
   # percorso critico. Lo store pnpm e' condiviso dalla cache di
   # `setup-node`, quindi il download avviene una sola volta per lockfile.
+  #
+  # I 3 job girano **solo su pull_request**: su `main` il codice non e'
+  # cambiato rispetto a quanto gia' validato dalla PR, e i gate che restano
+  # (bundle, lazy-state, README, workflow) sono gia' coperti dai job leggeri.
   # ---------------------------------------------------------------------------
   node-lint-typecheck:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -70,15 +146,25 @@ jobs:
           cache: pnpm
 
       - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm install --frozen-lockfile
 
       - name: Lint
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run lint
 
       - name: Typecheck
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run typecheck
 
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: lint e typecheck non sono applicabili."
+
   node-test:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -93,6 +179,7 @@ jobs:
           cache: pnpm
 
       - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm install --frozen-lockfile
 
       # `test` gira **isolato**: nessun altro task CPU-bound condivide il
@@ -102,9 +189,17 @@ jobs:
       # in 5000ms"). La soglia di un test time-sensitive e' un acceptance
       # criterion e non si tocca (lesson 30-1, `12-DEVOPS.md §9.14.7`).
       - name: Test
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run test
 
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: i test non sono applicabili."
+
   node-build:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -119,10 +214,17 @@ jobs:
           cache: pnpm
 
       - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run build
+
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: il build non e' applicabile."
 
   # ---------------------------------------------------------------------------
   # 2. Gate sui generatori di documentazione e sul README.
@@ -284,6 +386,16 @@ jobs:
       - name: Ordinamento dei writer di `main` (issue #149)
         run: bash scripts/test-workflow-writer-ordering.sh
 
+      # Sessione 74: validita' YAML dei file workflow. Un file che GitHub
+      # rifiuta in fase di validazione non produce un job che fallisce:
+      # produce una run con `jobs: 0`, `conclusion: failure` a 0 secondi,
+      # nessun log e nessuna annotazione via API — la stessa firma del
+      # failure mode dell'issue #135, indistinguibile da "Actions rotta".
+      # Lo scalare semplice (non quotato) che contiene ": " e' la forma
+      # invalida piu' comune.
+      - name: Validita' YAML dei workflow (sessione 74)
+        run: bash scripts/test-workflow-yaml-scalars.sh
+
   # ---------------------------------------------------------------------------
   # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
   # ---------------------------------------------------------------------------
@@ -384,17 +496,24 @@ jobs:
         run: pwsh scripts/test-appendline-lf-fix.ps1
 
   # ---------------------------------------------------------------------------
-  # 9. Check aggregatore (nome invariato: "CI / quality").
+  # 10. Check aggregatore (nome invariato: "CI / quality").
   #
   # E' il check che la branch protection deve richiedere. Fallisce in modo
   # ESPLICITO se uno qualunque dei job paralleli e' fallito, annullato o
   # saltato: senza questo controllo, `needs:` renderebbe `quality` *skipped*
   # (non *failed*) quando un job dipendente fallisce, e la branch protection
   # puo' interpretare un check saltato come successo.
+  #
+  # Su `pull_request` si esigono TUTTI i job. Su `push` su `main` (che scatta
+  # solo per i file dei writer automatici) si esigono i job **leggeri**: i 3
+  # job `node-*` sono saltati perche' su `main` il codice non e' cambiato
+  # rispetto a quanto gia' validato dalla PR, e il loro 'skipped' e' atteso
+  # — non un errore. I job di gate, invece, girano e devono essere verdi.
   # ---------------------------------------------------------------------------
   quality:
     if: always()
     needs:
+      - detect-code
       - node-lint-typecheck
       - node-test
       - node-build
@@ -412,7 +531,12 @@ jobs:
       - name: Esito dei gate paralleli
         shell: bash
         run: |
-          results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          else
+            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }}"
+          fi
+          echo "Evento: ${{ github.event_name }}"
           echo "Risultati: $results"
           failed=""
           for r in $results; do

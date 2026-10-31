@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 18:34
-> Totale file: 129
+> Data: 2026-10-31 19:15
+> Totale file: 130
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 128 (incluso 4 file aggregator-managed)
-- Dimensione totale: 1868.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 18:27
+- Totale file: 129 (incluso 4 file aggregator-managed)
+- Dimensione totale: 1897 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-10-31 19:15
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
 | docs/ | 80 |
-| scripts/ | 22 |
+| scripts/ | 23 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
 | .github/ | 4 |
@@ -859,28 +859,52 @@ I workflow sono validati in CI da `node scripts/validate-workflows.mjs .github/w
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
 
-### 🏎️ La CI: 11 job in parallelo *(Sessione 73, issue #224)*
+### 🏎️ La CI: 12 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74)*
 
-`ci.yml` è stato riorganizzato: era **un job unico con 18 step in sequenza** (misurato: **172 s**
-di tempo pareggio sul runner), ora è **11 job** di cui **10 girano in parallelo** e l'undicesimo (`quality`)
-è il check aggregatore.
+`ci.yml` era **un job unico con 18 step in sequenza** (misurato: **172 s** di tempo pareggio sul
+runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il check aggregatore.
 
-| Job | Cosa contiene |
-|---|---|
-| 
-ode-lint-typecheck | pnpm install + lint + 	ypecheck |\n| 
-ode-test | pnpm install + 	est (**isolato**: nessun altro task CPU-bound condivide il processore) |\n| 
-ode-build | pnpm install + uild |
-| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) |
-| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) |
-| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) |
-| `gates-workflows` | `validate-workflows.mjs` + i 4 test di scenario negativo dei workflow |
-| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` |
-| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo |
-| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` |
-| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato |
+| Job | Cosa contiene | Quando gira |
+|---|---|---|
+| `detect-code` | la PR tocca file di codice o solo `.md`? | solo `pull_request` |
+| `node-lint-typecheck` | `pnpm install` + `lint` + `typecheck` | solo `pull_request` |
+| `node-test` | `pnpm install` + `test` (**isolato**: nessun altro task CPU-bound condivide il processore) | solo `pull_request` |
+| `node-build` | `pnpm install` + `build` | solo `pull_request` |
+| `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | sempre |
+| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | sempre |
+| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | sempre |
+| `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | sempre |
+| `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | sempre |
+| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | sempre |
+| `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | sempre |
+| `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | sempre |
 
-Tre cose da sapere quando si legge una pipeline verde:
+**Perché la pipeline non gira più 4 volte per ogni cambiamento logico** (Sessione 74). Il ciclo era:
+
+```
+PR  →  CI (pull_request)  →  merge  →  CI (push)  →  doc-sync PR  →  CI (pull_request)  →  merge  →  CI (push)
+```
+
+Le tre ripetizioni erano tutte riconducibili a due cause:
+
+1. **Il trigger `push: branches: [main]` senza filtro** rieseguiva l'**intera** pipeline su ogni
+   merge, duplicando la validazione che la PR aveva già fatto sullo stesso albero. Ora il trigger
+   `push` è **filtrato per path** sui 5 file che i **writer automatici** modificano
+   (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`):
+   sono gli unici commit che arrivano su `main` **senza essere mai passati da una PR**. Su un merge
+   umano la pipeline non gira più.
+2. **Il doc-sync PR** (che porta `pr:` e `merged_commit:`, noti solo **dopo** il merge) girava
+   l'intera pipeline su file **solo `.md`**. Ora il job `detect-code` verifica se **almeno un**
+   file cambiato non è un `.md`: se sono tutti `.md`, i 3 job `node-*` non installano le
+   dipendenze e non eseguono i task (il job **riusce**, non viene saltato). La regola è
+   conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è
+   **fail-safe**: se il detector fallisce, i gate girano comunque.
+
+Su `push` su `main` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza
+`pnpm install`): i 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'` perché
+su `main` il codice non è cambiato rispetto a quanto già validato dalla PR.
+
+Cinque cose da sapere quando si legge una pipeline verde:
 
 1. **Il check da richiedere in branch protection resta `CI / quality`**: conserva il nome ed è
    l'aggregatore. I nuovi job hanno nomi propri e possono essere richiesti singolarmente.
@@ -888,8 +912,14 @@ Tre cose da sapere quando si legge una pipeline verde:
    `needs:` renderebbe `quality` *skipped* quando un job dipendente fallisce, e la branch
    protection può interpretare un check saltato come successo.
 3. **I gate non richiedono `pnpm install`**: `scripts/validate-*.mjs` e
-   `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo il job `node`
-   installa le dipendenze npm.
+   `scripts/check-readme-facts.mjs` usano solo i moduli built-in di node. Solo i 3 job `node-*`
+   installano le dipendenze npm, e solo su `pull_request`.
+4. **Il doc-sync PR resta**: esiste perché `pr:` e `merged_commit:` sono noti solo dopo il merge.
+   Eliminarlo richiederebbe un cambio allo schema del frontmatter, che è una decisione del
+   project owner (`docs/12-DEVOPS.md §9.14.10`).
+5. **`validate-workflows.mjs` valida anche la sintassi YAML** (Sessione 74): un file workflow che
+   GitHub rifiuta in fase di validazione non produce un job che fallisce, ma una run con `jobs: 0`
+   e `failure` a 0 secondi — la firma del failure mode dell'issue #135.
 
 L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di riferimento) è in
 `docs/12-DEVOPS.md §9.10`; le misure di prestazione in `§9.14`.
@@ -2035,7 +2065,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 73 (v1.5) | CI/CD, deploy, self-hosting — §9.14 **prestazioni delle procedure automatiche**: il profilo della pipeline (tempo pareggio 172 s → 73 s), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s), la tabella dei risultati e l'equivalenza dimostrata di ogni modifica; §9.10 **elenco autorevole dei 26 gate su 11 job** (`ci.yml` parallelizzato, `quality` aggregatore fail-closed con il nome invariato); §9.13 **chiusura dell'audit**: le 5 suite che la CI non eseguiva sono ora in CI, con i difetti corretti (`test-safe-branch-switch.sh` fail-open, `test-appendline-lf-fix.ps1` S3 stale, `test-setup-worktree.sh` falliva su ogni piattaforma); §9.12 ambiente PowerShell locale: provenienza di `pwsh` (7.6.9, pacchetto MSIX/Store) e confine di encoding dei `.ps1`; §9.8f gate "fatti del README" (issue #161); §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 74 (v1.6) | CI/CD, deploy, self-hosting — **§9.14.10** la CI girava **4 volte per ogni merge**: trigger `push` su `main` filtrato per path sui file dei writer automatici, su `push` girano solo i job leggeri, e `detect-code` fa saltare i gate sul codice quando la PR tocca solo `.md`; **§9.14.11** `validate-workflows.mjs` ora valida la sintassi YAML (un file rotto fa fallire GitHub con `jobs: 0` a 0 s: la firma dell'issue #135) e normalizza il fine-riga (i controlli con regex ancorate fallivano in silenzio sui file CRLF); §9.14 prestazioni delle procedure automatiche (tempo pareggio 172 s → 73 s misurati); §9.10 **elenco autorevole dei 27 gate su 12 job**; §9.13 chiusura dell'audit sulle 5 suite ora in CI; §9.12 ambiente PowerShell locale: provenienza di `pwsh` (7.6.9, pacchetto MSIX/Store) e confine di encoding dei `.ps1`; §8.f gate "fatti del README" (issue #161); §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
@@ -2050,11 +2080,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.31 | Protocollo per agenti (Sessione 73: la CI a **11 job in parallelo** con `quality` aggregatore fail-closed e il check `CI / quality` invariato; il bundle rigenera una volta sola; Sessione 72: provenienza e confine di encoding di `pwsh` — F9-bis, `powershell` 5.1 non è un fallback ma un rischio di corruzione dei file globali; Sessione 71: baseline PowerShell 7 (`pwsh`); Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.31 | Protocollo per agenti (Sessione 74: la CI a **12 job** e non gira più 4 volte per ogni merge (trigger `push` filtrato per path, `detect-code` per le PR solo-`.md`); Sessione 73: la CI a **11 job in parallelo** con `quality` aggregatore fail-closed e il check `CI / quality` invariato; il bundle rigenera una volta sola; Sessione 72: provenienza e confine di encoding di `pwsh` — F9-bis, `powershell` 5.1 non è un fallback ma un rischio di corruzione dei file globali; Sessione 71: baseline PowerShell 7 (`pwsh`); Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.6 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati — P13: il costo delle procedure automatiche è quasi sempre nei **processi figli**, non nella logica; P11: baseline PowerShell 7 e forma canonica dei flag; P12: provenienza di `pwsh` e confine di encoding dei `.ps1` |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.28 | Diario cronologico per story: problemi, fix, lesson learned — §40: procedure automatiche, profilo e parallelizzazione dei gate (issue #224) |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.29 | Diario cronologico per story: problemi, fix, lesson learned — §41: la CI girava 4 volte per ogni merge (issue #224); §40: procedure automatiche, profilo e parallelizzazione dei gate |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -2130,6 +2160,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ✅ | #219 |
 | 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ✅ | #223 |
 | 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
+| 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2169,9 +2200,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **50** (merge: 40)
+- Sessioni migrate in state/sessions: **51** (merge: 40)
 - Stories migrate in state/stories: **20** (done: 19)
-- Ultima sessione migrata: **S73** - Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura
+- Ultima sessione migrata: **S74** - La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -9413,6 +9444,146 @@ di scansione regex).
 - Issue #224, #73 (parallelizzazione dei gate), #43 (lesson 43-1), #149 (ordinamento dei writer)
 ```
 
+### Sessione 74 - La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati
+
+- **Data**: 2026-10-31
+- **Stato**: 🟢
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK-perf74`
+
+```
+
+# Sessione 74 — La CI girava 4 volte per ogni merge
+
+## Sintesi
+
+Domanda del project owner: «la CI viene eseguita durante la PR e poi nuovamente durante il merge,
+poi dopo il merge viene prodotto il doc sync ed una nuova PR, viene eseguita nuovamente la CI sulla
+PR, poi viene fatto il merge della PR del doc sync e viene eseguita nuovamente la CI. Come mai tutte
+queste volte gli stessi step? Non basta eseguirli durante la PR soltanto?»
+
+La risposta misurata: **4 run di CI e 3 run `auto-*` per ogni cambiamento logico**, di cui **3 dei 4
+run di CI erano ripetizioni** di una validazione già fatta. Questa sessione chiude la ripetizione.
+
+## L'anatomia del ciclo (misurata sull'API GitHub)
+
+PR #222 → #223, 2026-10-31:
+
+| # | Quando | Workflow | Evento | Necessario? |
+|---|---|---|---|---|
+| 1 | apertura PR #222 | `CI` | `pull_request` | **sì** |
+| 2 | merge di #222 | `CI` | `push` su `main` | **no** — stesso albero del run #1 |
+| 3 | merge di #222 | `auto-state-aggregate` | `push` su `main` | sì (è il lavoro) |
+| 4 | merge di #222 | `auto-bundle` | `push` su `main` | sì (è il lavoro) |
+| 5 | dopo l'aggregate | `auto-bundle` | `workflow_run` | **no** se l'aggregate non ha committato |
+| 6 | committa dell'aggregate | `CI` | `push` su `main` | **no** — ma è l'unico check sui commit dei writer |
+| 7 | apertura PR #223 (doc-sync) | `CI` | `pull_request` | sì, ma su una PR di **sola documentazione** |
+| 8 | merge di #223 | `CI` | `push` su `main` | **no** — stesso albero del run #7 |
+
+**Costo**: 4 × 73 s = **292 s** di CI per ogni cambiamento logico, di cui ~219 s di ripetizioni.
+
+## Le due cause, e cosa è stato fatto
+
+### Causa 1 — il trigger `push: branches: [main]` senza filtro
+
+Il workflow scattava su **ogni** push a `main`, rieseguendo l'intera pipeline. Ma l'albero che
+arriva su `main` con un merge umano è **lo stesso** che la PR ha già validato (per squash è lo
+stesso identico; per merge commit è l'unione di alberi già validati dalle rispettive PR).
+
+**Correzione**: il trigger `push` è ora **filtrato per path** sui 5 file che i **writer automatici**
+modificano — `docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`,
+`README.md`. Sono gli **unici** commit che arrivano su `main` senza essere mai passati da una PR, e
+quindi gli unici che non sono già validati. Su un merge umano la pipeline non gira più.
+
+Su `push` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza
+`pnpm install`): i 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'`.
+
+### Causa 2 — il doc-sync PR girava l'intera pipeline su file solo `.md`
+
+Il doc-sync PR esiste perché il frontmatter della sessione porta `pr:` e `merged_commit:`, noti
+**solo dopo** il merge. Tocca **solo file `.md`**: farci girare lint, typecheck, test e build è
+lavoro sprecato (~68 s di job + 3 installazioni di dipendenze).
+
+**Correzione**: il job `detect-code` calcola se **almeno un** file cambiato non è un `.md`. Se sono
+tutti `.md`, i 3 job `node-*` non installano le dipendenze e non eseguono i task — e **riuscono**
+(non sono saltati), così `quality` resta fail-closed senza casi speciali.
+
+Due scelte di progetto importanti:
+
+- **Conservativa**: la regola è «almeno un file **non** `.md` ⇒ i gate girano». Qualsiasi `.ts`,
+  `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate. Il doc-sync, che tocca solo `.md`, li salta.
+- **Fail-safe**: se il detector **fallisce**, `has_code` resta vuoto e la condizione dei job è
+  `!= 'false'` ⇒ i gate **girano comunque**. Un detector rotto non può mai far saltare la
+  validazione.
+
+## Il secondo finding: il validatore dei workflow non validava il YAML
+
+Scritto il gate che intercetta lo scalare semplice invalido, è emerso che
+`scripts/validate-workflows.mjs` **non faceva parsing YAML**: lavorava sul testo con regex.
+
+Un file workflow sintatticamente rotto passava il gate, e GitHub lo **rifiutava in fase di
+validazione**: run con `jobs: 0`, `conclusion: failure` a 0 secondi, nessun log, nessuna
+annotazione via API — **la firma identica** al failure mode dell'issue #135 (22 ore di gate spenti
+senza che nessuno se ne accorgesse), indistinguibile da «Actions rotta per billing».
+
+**Correzione**: `checkYamlScalars()` intercetta la forma invalida più comune — uno **scalare
+semplice** (non quotato, non block scalar) che contiene `: `, che in contesto block è
+l'indicatore di chiave. Il controllo **salta** i block scalar (dove `: ` è testo letterale), i
+valori quotati, le raccolte flow e i commenti (`#` preceduto da spazio apre un commento e non fa
+parte del valore). Coperto da `scripts/test-workflow-yaml-scalars.sh` (8 assert).
+
+### Bug collaterale: i controlli fallivano in silenzio sui file CRLF
+
+Il validatore divideva il file con `text.split('\n')` **senza normalizzare il fine-riga**. Un file
+salvato con **CRLF** (un contributore su Windows) lasciava un `\r` finale su ogni riga, e i pattern
+ancorati con `$` — incluso quello del gate sui push su `main` (#140) — **non matchiavano più**: i
+controlli fallivano **in silenzio**. In YAML `.` non matcha `\r`, che non è un terminatore di riga
+per il regex JavaScript. Ora le righe sono normalizzate una volta sola.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.74.1 | Il trigger `push` su `main` è **filtrato per path** sui 5 file dei writer automatici | Sono gli unici commit che arrivano su `main` senza passare da una PR. Su un merge umano l'albero è già validato |
+| D.74.2 | Su `push` girano **solo i job leggeri** | I 3 job `node-*` servono a validare il codice, che su `main` non è cambiato. Costa ~21 s invece di ~73 s |
+| D.74.3 | Il doc-sync PR viene riconosciuto da `detect-code` (solo `.md`) ⇒ i gate sul codice non girano | La regola è conservativa (qualunque file non-`.md` fa scattare i gate) e **fail-safe** (detector rotto ⇒ i gate girano) |
+| D.74.4 | I 3 job `node-*` **riuscono** (non vengono saltati) quando i gate non sono applicabili | `quality` resta fail-closed senza dover distinguere «saltato per design» da «saltato per errore» |
+| D.74.5 | `validate-workflows.mjs` acquisisce un controllo di validità YAML + normalizzazione del fine-riga | Un file rotto che GitHub rifiuta produce una run con `jobs: 0` e `failure` a 0 s: la firma dell'issue #135. E i controlli con regex ancorate fallivano in silenzio sui file CRLF |
+| D.74.6 | Il **doc-sync PR non viene eliminato** | `pr:` e `merged_commit:` sono noti solo dopo il merge. Eliminarlo richiederebbe un cambio allo **schema** del frontmatter: decisione del project owner, non un'ottimizzazione della CI |
+
+## Lesson learned
+
+| # | Osservazione | Azione |
+|---|--------------|--------|
+| 74-1 | **Un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati | Filtro per path sui file che i writer automatici modificano |
+| 74-2 | **La pipeline non deve girare su ciò che non è cambiato**: i gate sul codice su un merge sono lavoro sprecato | `detect-code`: i gate sul codice girano solo se la PR tocca almeno un file non-`.md` |
+| 74-3 | **Fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano | Condizione `!= 'false'`, mai `== 'true'`, per i passi che decidono |
+| 74-4 | **Un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex e non avrebbe intercettato un YAML rotto | Controllo di validità YAML + normalizzazione CRLF, con test di regressione |
+| 74-5 | **Il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern con `$` smettono di matchiare | Normalizzare il fine-riga una volta sola, prima di qualsiasi controllo |
+
+## Documenti aggiornati
+
+- `docs/12-DEVOPS.md` §9.10 (27 gate su 12 job), **§9.14.10** (nuova: l'anatomia del ciclo e le
+  correzioni), **§9.14.11** (nuova: il validatore non validava il YAML)
+- `AGENTS.md` §"🏎️ La CI: 12 job, e non gira 4 volte per ogni merge"
+- `docs/18-DEV-LOG.md`: **§41**
+- `docs/state/_index.md`, `docs/INDEX.md`: allineati
+- `scripts/validate-workflows.mjs`: `checkYamlScalars()` + normalizzazione del fine-riga
+- `scripts/test-workflow-yaml-scalars.sh`: nuovo (8 assert)
+- `scripts/generate-bundle.ps1`: `$files` += `scripts/test-workflow-yaml-scalars.sh`
+
+## Verifica
+
+- `node scripts/validate-workflows.mjs .github/workflows` → exit 0 (0 falsi positivi sui 6 workflow
+  reali) e exit 1 sulle fixture invalide
+- `bash scripts/test-workflow-yaml-scalars.sh` → exit 0 (8 assert)
+- 13 suite di test locali → tutte exit 0
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `node scripts/check-readme-facts.mjs` → exit 0
+- Encoding: tutti i file toccati UTF-8 **senza BOM**, fine-riga LF, nessun U+FFFD
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -9838,8 +10009,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.28
-> Ultima modifica: 2026-10-31 - §40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura (issue #224, Sessione 73)
+> Versione: 2.29
+> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati (Sessione 74)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -11011,6 +11182,8 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.26 | 2026-10-31 (issue #218) | **§38 Issue #218 — baseline PowerShell 7 (pwsh) per gli script del repo** (Sessione 71, claim `kilo-hp-elitebook-lrm6`, PR #219): 4 entry (38-1 la documentazione prescriveva ancora il toolchain di **Windows PowerShell 5.1** — il README avvertiva che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `AGENTS.md` usava `--check` in una dozzina di punti — mentre `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usava `shell: pwsh` da sempre: **nessun gate confronta la documentazione con l'ambiente reale**; 38-2 il footer v1.20 di `AGENTS.md` dichiarava «tutti i `pwsh scripts/* --check` convertiti a `-Check`» ma il corpo del file non l'aveva mai ricevuto: la normalizzazione è un problema di **copertura**, non di spot-check; 38-3 `aggregate-state.ps1 --strict` era indicato come comando da eseguire ma il parametro **non è dichiarato** (il guard lo rifiuta con exit 2): un flag documentato che non esiste è peggio di un flag assente, e nessun gate lo segnala; 38-4 la motivazione dei due gate `-Check` warning-only era attribuita alla differenza **PS 5.1 vs 7**, che non esiste più: la residua è **di piattaforma**). Consegnati: il baseline `pwsh` dichiarato in `README.md` (requisiti), `17-DEV-NOTES.md` v0.4 (nuovo **P11**), `12-DEVOPS.md` v1.3 (§9.1, §9.7b, §9.8, §9.10), `13-ADR/0008` (vincoli implementativi), `13-ADR/0006`, `docs/state/_index.md`, `11-BACKLOG.md`, `AGENTS.md` v1.29 (session start checklist a 6 check con F9) e il nuovo state file `docs/state/sessions/71-powershell-7-baseline.md`. **Fuori perimetro, dichiarato**: nessuna modifica al codice degli script e nessun cambio alla semantica dei gate in CI — promuoverli a bloccanti è una decisione sul test strategy e spetta al project owner. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding) |
 
 | 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: tempo pareggio della pipeline **172 s → 73 s** (misurato sul runner: 112 s con 9 job, **73 s** con i 3 job `node` separati); `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). **Due correzioni nate dalla prima CI della PR** (che vale come test): 73-8 **parallelizzare i job e parallelizzare i task interni sono due cose diverse** — i 4 task turbo in un'unica invocazione (52,7 → 32,8 s) facevano scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` sul runner a 2 vCPU (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion) ⇒ i 4 task restano sequenziali; 73-9 **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale (`git clone` del bare repo senza branch esistente non fa il checkout di nessun branch ⇒ «src refspec main does not match any») ⇒ `git init -b main` esplicito in tutte e 3 le suite che creano repository temporanei, con riproduzione locale del difetto. Consegnati: `ci.yml` (11 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
+| 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
+| 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -11229,6 +11402,7 @@ Trigger automatico via GH Action `.github/workflows/auto-state-aggregate.yml` su
 | `state/sessions/70-event-detector.md` | ✅ creata | Sessione 70 (issue #214): **implementazione della Story 2.3** (Event Detector) — il detector a **z-score** su griglia settimanale, il detector a **quota** per `spike_artist`/`spike_genre`, i detector specialistici per `silence` ed `exploration`, il dedupe per tipo e soggetto, la persistenza degli eventi con `derivedVersion` (MIG-3) e il fixture di scenario `listening-spike.json`. **Merged** il 2026-10-31T11:18:48Z (PR #215, merge commit `5149b2c`) |
 | `state/sessions/71-powershell-7-baseline.md` | ✅ creata | Sessione 71: **baseline PowerShell 7 (`pwsh`)** per gli script in `scripts/*.ps1` — la documentazione era rimasta ancorata al world di PS 5.1 anche se `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usa `shell: pwsh` da sempre. Forma canonica dei flag a singolo trattino (`-Check`), `AGENTS.md` v1.29 con la session start checklist a 6 check (F9: versione di PowerShell), rimosso il riferimento al flag `-Strict` (che non esiste in `aggregate-state.ps1`), `12-DEVOPS.md` v1.3 e `17-DEV-NOTES.md` v0.4 con il nuovo P11 |
 | `state/sessions/73-perf-procedure-automatiche.md` | ✅ creata | Sessione 73 (issue #224): **procedure automatiche misurate e velocizzate** — `ci.yml` da 1 job sequenziale (18 step, **172 s**) a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il nome invariato), `pnpm run verify` (i 4 gate del CI in una sola invocazione locale), `generate-bundle.ps1` con `StringBuilder` (O(n²)→O(n), output byte-identico), `aggregate-state.ps1` con cache dei file di stato, le **5 suite** che la CI non eseguiva ora in CI (con i difetti corretti: `test-safe-branch-switch.sh` fail-open, `test-appendline-lf-fix.ps1` S3 stale, `test-setup-worktree.sh` falliva su ogni piattaforma) e il secondo run di `auto-bundle` saltato quando l'aggregator non ha prodotto un commit. `12-DEVOPS.md` v1.5 (nuova **§9.14**), `17-DEV-NOTES.md` v0.6 (nuovo **P13**), `AGENTS.md` v1.31 |
+| state/sessions/74-ci-merge-once.md | ✅ creata | Sessione 74: **la CI girava 4 volte per ogni merge** — il trigger push: branches: [main] senza filtro rieseguiva l'intera pipeline su alberi già validati dalla PR, e il doc-sync PR (che porta pr: e merged_commit:, noti solo dopo il merge) girava l'intera pipeline su file **solo .md**. Ora il trigger push è **filtrato per path** sui 5 file dei writer automatici (gli unici commit che arrivano su main senza passare da una PR), su push girano **solo i job leggeri** (~21 s invece di ~73 s), e il job detect-code fa saltare i gate sul codice quando la PR tocca solo .md (regola conservativa e fail-safe: detector rotto ⇒ i gate girano comunque). In più alidate-workflows.mjs ora **valida la sintassi YAML** (uno scalare semplice con :  rende il file irifiutabile da GitHub: run con jobs: 0 e ailure a 0 s, la firma dell'issue #135) e **normalizza il fine-riga**: i controlli con regex ancorate fallivano in silenzio sui file CRLF. 12-DEVOPS.md §9.14.10-11, AGENTS.md v1.31 |
 | `state/stories/2.3-event-detector.md` | ✅ creata | Story 2.3 (Event Detector) — ✅ **done** (Sessione 70, issue #214, PR #215, merge `5149b2c`): gli **otto** tipi di evento di `02§4` (`04§6`), il plug-in dell'orchestratore (`04§8.1`), la descrizione resa dal resolver i18n (`insight.event.*`, D-A.4) e il ricalcolo che sostituisce **l'insieme** degli eventi |
 | `state/stories/4.1-audio-features.md` | ✅ creata | Story 4.1 (Pipeline audio features) — ⬚ **todo** (Sessione 62, issue #187): la spec `21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (ratificata al merge della PR di ratifica), le nove decisioni D-AF.1…D-AF.9 sono ratificate e l'issue di implementazione **#188** è `agent-ready`. `status: todo` ⇒ il blocco NEXT-STEP del README punta alla 4.1, primo anello della catena 4.1 → 2.1 → 2.2/2.3 |
 | Sessioni 0..21, 25, 26 | ⬚ TODO (migration incrementale) | restano in `docs/SESSIONS.md` legacy fino a V2 |
@@ -24816,11 +24990,14 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 
 ### 9.10 Gate reali di `ci.yml`
 
-> **Sessione 73 (issue #224): la tabella è stata riscritta.** `ci.yml` non è più un job
-> unico con 18 step in sequenza: è **11 job** di cui **10 girano in parallelo** e uno
-> (`quality`) è il check aggregatore. La tabella qui sotto è l'elenco autorevole dei
-> gate, riorganizzati per job. §9.13 ha l'audit temporale; **§9.14** ha le misure di
-> prestazione prima/dopo.
+> **Sessione 73 (issue #224) e Sessione 74: la tabella è stata riscritta due volte.**
+> `ci.yml` non è più un job unico con 18 step in sequenza: è **12 job** di cui **10 girano in
+> parallelo** e due (`quality` e `detect-code`) hanno un ruolo particolare.
+> **Sessione 74**: il trigger `push` su `main` è filtrato per path e su `push` girano **solo i
+> job leggeri**; i 3 job `node-*` girano **solo su `pull_request`**, e saltano (riuscendo) se la
+> PR tocca **solo file `.md`**. Dettaglio e misure in **§9.14.10**.
+> La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
+> temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
 Il job `quality` è il **check aggregatore**: fallisce in modo esplicito se uno
 qualunque dei job paralleli è fallito, annullato o saltato. È il check che la branch
@@ -24855,7 +25032,8 @@ protection può interpretare un check saltato come successo.
 | 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | sì | sessione 23 |
 | 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | sì | #49 |
 | 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | sì | #58 |
-| 26 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
+| 26 | `gates-workflows` | `Validità YAML dei workflow` (`test-workflow-yaml-scalars.sh`, 8 assert) | sì | sessione 74 |
+| 27 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | sì | **#224** |
 
 I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check
 `-Check` confrontano output prodotto su sistemi diversi (dev Windows vs CI Linux) e possono
@@ -25153,7 +25331,71 @@ diventa **esplicito** e il test non dipende più dalla configurazione git della 
 il branch iniziale (`git init -b main`): `init.defaultBranch` è una configurazione **di macchina**,
 non del progetto, e la CI la ha diversa da qualunque dev machine.
 
-#### 9.14.9 Cosa NON è stato fatto (e perché)
+#### 9.14.10 La CI girava 4 volte per ogni cambiamento logico *(Sessione 74)*
+
+Il ciclo di merge del repo produceva **4 run di CI** e **3 run `auto-*`** per ogni cambiamento
+logico. I dati (API GitHub, 2026-10-31, PR #222 → #223):
+
+| # | Quando | Workflow | Evento | Contenuto | Necessario? |
+|---|---|---|---|---|---|
+| 1 | apertura PR #222 | `CI` | `pull_request` | pipeline completa | **sì** |
+| 2 | merge di #222 | `CI` | `push` su `main` | pipeline completa | **no** — stesso albero del run #1 |
+| 3 | merge di #222 | `auto-state-aggregate` | `push` su `main` | committa `docs/BUNDLE.md` | sì (è il lavoro) |
+| 4 | merge di #222 | `auto-bundle` (push) | `push` su `main` | committa `docs/BUNDLE.md` | sì (è il lavoro) |
+| 5 | dopo l'aggregate | `auto-bundle` (`workflow_run`) | `workflow_run` | rigenera il bundle | **no** se l'aggregate non ha committato |
+| 6 | committa dell'aggregate | `CI` | `push` su `main` | pipeline completa | **no** — ma è l'unico check sui commit dei writer |
+| 7 | apertura PR #223 (doc-sync) | `CI` | `pull_request` | pipeline completa | sì, ma su una PR di **sola documentazione** |
+| 8 | merge di #223 | `CI` | `push` su `main` | pipeline completa | **no** — stesso albero del run #7 |
+
+**Il costo**: 4 × 73 s = **292 s** di CI per ogni cambiamento logico, di cui ~219 s
+**ripetizioni** di validazione già fatta.
+
+**Le cause, e cosa è stato fatto:**
+
+| Causa | Correzione |
+|---|---|
+| Il trigger `push: branches: [main]` senza filtro rieseguiva l'**intera** pipeline su ogni merge | Il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (`docs/BUNDLE.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`). Sono gli unici commit che arrivano su `main` **senza essere mai passati da una PR**. Su un merge umano la pipeline non gira più: l'albero che arriva su `main` è lo stesso che la PR ha già validato |
+| Su `push` giravano anche i 3 job `node-*` (73 s + 3 installazioni di dipendenze) | Su `push` girano **solo i job leggeri** (`gates-docs` + `gates-workflows`, ~21 s, senza `pnpm install`). I 3 job `node-*` sono condizionati a `github.event_name == 'pull_request'`: su `main` il codice non è cambiato rispetto a quanto già validato dalla PR |
+| Il doc-sync PR (che porta il numero di PR e l'hash di merge, noti solo **dopo** il merge) girava l'intera pipeline su file **solo `.md`** | Un job `detect-code` calcola se **almeno un** file cambiato non è un `.md`; se tutti lo sono, i 3 job `node-*` non installano le dipendenze e non eseguono i task (il job **riusce**, non viene saltato: `quality` resta fail-closed senza casi speciali). La regola è conservativa — qualsiasi `.ts`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate — ed è **fail-safe**: se il detector fallisce, `has_code` resta vuoto e i gate girano comunque |
+| Il secondo run di `auto-bundle` girava anche quando l'agregator non aveva prodotto nulla | Skip esatto via `workflow_run.head_sha` vs `origin/main` (vedi §9.14.4) |
+
+**Il risultato**: per ogni cambiamento logico la CI passa da **4 run completi** a **1 run completo
++ 1 ridotto + 2-3 run leggeri**, e da **292 s** a ~**125 s**.
+
+**Cosa NON è stato fatto e perché:**
+
+- **Il doc-sync PR non è stato eliminato.** Esiste perché il frontmatter della sessione porta
+  `pr:` e `merged_commit:`, che sono noti **solo dopo** il merge. Eliminarlo richiederebbe un
+  cambio allo **schema** del frontmatter (contratto di D.12.x), che è una decisione del project
+  owner, non un ottimizzazione della CI.
+- **Il filtro per path non distingue «il bundle è cambiato perché l'ha rigenerato il writer» da
+  «il bundle è cambiato perché l'ha rigenerato il pre-push hook nella PR»**: in entrambi i casi
+  `docs/BUNDLE.md` cambia, e in entrambi i casi il run leggero su `main` scatta. Costa ~21 s e
+  non è distinguisho con i trigger nativi. L'alternativa (trigger `workflow_run` sui writer) non
+  funziona bene: `workflow_run.head_sha` è il commit su cui il writer è partito, **non** la testa
+  di `main` dopo il suo commit.
+
+#### 9.14.11 Il validatore dei workflow non validava il YAML *(Sessione 74)*
+
+Scritto il gate che intercetta lo scalare semplice invalido, è emerso che
+`scripts/validate-workflows.mjs` **non faceva parsing YAML**: lavorava sul testo con regex. Quindi
+un file workflow sintatticamente rotto passava il gate, e GitHub lo **rifiutava in fase di
+validazione**: run con `jobs: 0`, `conclusion: failure` a 0 secondi, nessun log, nessuna
+annotazione via API — la firma identica al failure mode dell'issue #135.
+
+Il controllo aggiunto intercetta la forma invalida più comune (scalare semplice non quotato che
+contiene `: `), **salta** i block scalar (dove `: ` è testo letterale), i valori quotati, le
+raccolte flow e i commenti (`#` preceduto da spazio apre un commento e non fa parte del valore),
+ed è coperto da `scripts/test-workflow-yaml-scalars.sh` (8 assert: repo reale, caso invalido,
+forme valide, fixture CRLF).
+
+**Bug collaterale trovato nella stessa occasione**: il validatore divideva il file con
+`text.split('\n')` **senza normalizzare il fine-riga**. Un file salvato con **CRLF** (un
+contributore su Windows) lasciava un `\r` finale su ogni riga, e i pattern ancorati con `$` —
+incluso quello del gate sui push su `main` (#140) — **non matchiavano più**: i controlli
+fallivano **in silenzio** su un file CRLF. Ora le righe vengono normalizzate una volta sola.
+
+#### 9.14.12 Cosa NON è stato fatto (e perché)
 
 - **Typecheck duplicato**: `apps/web` esegue `tsc --noEmit` sia in `typecheck` sia in `build`
   (che lo precede). Si risolve togliendo il `tsc --noEmit` dallo script di `build`, ma è una
@@ -33438,6 +33680,61 @@ const SYNC_FORMS = [
 ];
 const PUSH_MAIN_RE = /^\s*git\s+push\s+origin\s+main\s*$/;
 
+// === Scalari semplici con ": " — YAML non valido (Sessione 74) ===
+//
+// Un file workflow che GitHub **rifiuta in fase di validazione** non produce
+// un job che fallisce: produce una run con `jobs: 0` che chiude `failure` a
+// 0 secondi, senza log e senza annotazioni via API. Il sintomo e'
+// indistinguibile da "Actions rotta per billing" — la classe di failure mode
+// dell'issue #135 (22 ore di gate spenti senza che nessuno se ne accorgesse).
+//
+// La forma invalida piu' comune e' uno **scalare semplice** (non quotato, non
+// block scalar) che contiene `: ` (due punti + spazio). In contesto block
+// quello e' l'indicatore di chiave, quindi il valore non puo' contenerlo:
+//
+//     run: echo "::notice::PR di sola documentazione: lint."   <- INVALIDO
+//     run: |                                                 <- valido
+//       echo "::notice::PR di sola documentazione: lint."
+//     run: "echo a: b"                                      <- valido (quotato)
+//
+// Nota: dentro un block scalar (`|` o `>`) il `: ` e' testo letterale e
+// valido — per questo i corpi dei block scalar sono esclusi dal controllo.
+function checkYamlScalars(lines, file) {
+  let fails = 0;
+  let blockIndent = -1;   // >= 0: siamo dentro il corpo di un block scalar
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (blockIndent >= 0) {
+      if (line.trim() === '') continue;
+      const indent = line.match(/^\s*/)[0].length;
+      if (indent > blockIndent) continue;   // ancora dentro il blocco
+      blockIndent = -1;
+    }
+    const m = line.match(/^(\s*)(?:-\s+)?([A-Za-z0-9_"'-]+):(?:\s+(.*))?$/);
+    if (!m) continue;
+    // In YAML un `#` preceduto da spazio apre un commento: il commento NON fa
+    // parte del valore. Senza questo strip, `if: always()  # nota: x` verrebbe
+    // segnalato come falso positivo.
+    const value = (m[3] || '').replace(/\s+#.*$/, '').trim();
+    if (value === '') continue;
+    if (value.startsWith('|') || value.startsWith('>')) {
+      blockIndent = m[1].length;
+      continue;
+    }
+    if (value.startsWith('"') || value.startsWith("'")) continue;   // quotato: valido
+    if (value.startsWith('[') || value.startsWith('{')) continue;   // flow: valido
+    if (/: /.test(value)) {
+      console.error(
+        `[FAIL] ${file}: riga ${i + 1}: scalare semplice non quotato che contiene ": " — ` +
+        `YAML non valido, GitHub rifiuterebbe il file (run con 0 job). ` +
+        `Usa un block scalar (|) o quota il valore.`
+      );
+      fails++;
+    }
+  }
+  return fails;
+}
+
 for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
   const full = join(dir, file);
   const text = readFileSync(full, 'utf8');
@@ -33450,10 +33747,20 @@ for (const file of readdirSync(dir).filter(f => f.endsWith('.yml'))) {
   }
 
   // Estrae i blocchi scalari `script: |` e ne verifica la sintassi JS.
-  const lines = text.split('\n');
+  //
+  // NB: si normalizza il fine-riga. Senza questo, un file salvato con CRLF
+  // (un contributore su Windows) lascerebbe un `\r` finale su ogni riga: i
+  // pattern ancorati con `$` — incluso quello del controllo sui push su
+  // `main` — non matcherebbero piu', e i controlli fallirebbero in SILENZIO
+  // su un file CRLF. Il `\r` non e' un terminatore di riga per il regex
+  // JavaScript: `.` non lo matcha.
+  const lines = text.split('\n').map(l => (l.endsWith('\r') ? l.slice(0, -1) : l));
 
   // Issue #135: le scope dichiarate in `permissions:` devono essere reali.
   failures += checkPermissionScopes(lines, file);
+  // Sessione 74: uno scalare semplice con ": " rende il file non valido per
+  // GitHub, che lo rifiuterebbe in fase di validazione (run con 0 job).
+  failures += checkYamlScalars(lines, file);
   // Issue #140: chi pusha su `main` deve sincronizzarsi con `origin/main` prima.
   failures += checkPushSync(lines, file);
   for (let i = 0; i < lines.length; i++) {
@@ -34416,6 +34723,168 @@ echo
 echo "=== $PASS ok, $FAIL fallimenti ==="
 [ "$FAIL" -eq 0 ] || exit 1
 exit 0
+
+
+
+===== FILE: scripts/test-workflow-yaml-scalars.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per la validita' YAML dei workflow (Sessione 74).
+#
+# Un file workflow che GitHub **rifiuta in fase di validazione** non produce un
+# job che fallisce: produce una run con `jobs: []` (0 check-run), `conclusion:
+# failure` e `run_started_at == created_at` (0 secondi), nessun log e nessuna
+# annotazione via API. E' la stessa firma del failure mode dell'issue #135
+# (22 ore di gate spenti senza che nessuno se ne accorgesse), e il sintomo e'
+# indistinguibile da "Actions rotta per billing".
+#
+# La forma invalida piu' comune e' uno **scalare semplice** (non quotato, non
+# block scalar) che contiene `: ` — in contesto block quello e' l'indicatore
+# di chiave, quindi non puo' stare dentro il valore:
+#
+#     run: echo "::notice::PR: solo documentazione."     <- INVALIDO
+#     run: |                                              <- valido
+#       echo "::notice::PR: solo documentazione."
+#     run: "echo a: b"                                   <- valido (quotato)
+#
+# Il gate vive in scripts/validate-workflows.mjs; questo file e' il suo test di
+# regressione: verifica che il gate **esca 1** quando si reintroduce l'errore.
+# Un gate che passa sempre non e' un gate (lesson 43-1).
+#
+# Scenari coperti:
+#   T1  repo reale: nessuno scalare semplice invalido -> exit 0
+#   T2  fixture con uno scalare semplice che contiene ": " -> exit 1, messaggio
+#       che nomina il file e la riga
+#   T3  fixture con le forme valide equivalenti (block scalar, valore quotato,
+#       commento) -> exit 0: nessun falso positivo
+#   T4  fixture CRLF (un contributore su Windows salva con CRLF): il gate deve
+#       comunque intercettare — e i controlli gia' esistenti non devono
+#       fallire in silenzio per il `\r` finale
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
+AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
+AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[SKIP] node non disponibile: impossibile eseguire validate-workflows.mjs"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+# Repo fixture minimo. La struttura conta: validate-workflows.mjs risolve
+# repoRoot come <dir>/../.., e il gate di copertura `git add` (#136) fallisce se
+# `auto-state-aggregate.yml` o l'aggregator mancano — altrimenti i test
+# passerebbero per il motivo sbagliato.
+make_fixture() {
+  local d="$1"
+  mkdir -p "$d/.github/workflows" "$d/scripts"
+  cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
+  cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
+  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/auto-state-aggregate.yml"
+  cp "$CI_WF" "$d/.github/workflows/ci.yml"
+}
+
+run_validator() {
+  node "$1/scripts/validate-workflows.mjs" "$1/.github/workflows" 2>&1
+}
+
+echo "=== T1: repo reale - nessuno scalare semplice invalido ==="
+out="$(node "$VALIDATOR" "$REPO_ROOT/.github/workflows" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (nessuno scalare invalido in .github/workflows)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi
+if echo "$out" | grep -q "scalare semplice non quotato"; then ng "il gate segnala uno scalare invalido sul repo reale"; else ok "nessuno scalare invalido nel repo reale"; fi
+
+echo "=== T2: fixture con uno scalare semplice che contiene ': ' ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  # Scalare semplice: il valore non e' quotato e contiene ": ".
+  printf '%s\n' \
+    'name: Fixture' \
+    'on:' \
+    '  push:' \
+    '    branches: [main]' \
+    'jobs:' \
+    '  x:' \
+    '    runs-on: ubuntu-latest' \
+    '    steps:' \
+    '      - name: Rotto' \
+    '        run: echo "::notice::PR di sola documentazione: lint e typecheck."' \
+    > "$D/.github/workflows/rotto.yml"
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sullo scalare invalido)"; else ng "exit $ec (atteso 1): il gate NON intercetta l'errore"; fi
+  if echo "$out" | grep -q "rotto.yml: riga [0-9]"; then ok "il messaggio cita il file e la riga"; else ng "il messaggio non cita file:riga: $(echo "$out" | tail -5)"; fi
+  if echo "$out" | grep -q "scalare semplice non quotato"; then ok "il messaggio spiega il problema"; else ng "il messaggio non spiega il problema: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: fixture con le forme valide equivalenti -> nessun falso positivo ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  printf '%s\n' \
+    'name: Fixture' \
+    'on:' \
+    '  push:' \
+    '    branches: [main]' \
+    'jobs:' \
+    '  x:' \
+    '    runs-on: ubuntu-latest' \
+    '    steps:' \
+    '      - name: Block scalar' \
+    '        run: |' \
+    '          echo "::notice::PR di sola documentazione: lint e typecheck."' \
+    '      - name: Valore quotato' \
+    '        run: "echo a: b"' \
+    '      - name: Commento' \
+    '        if: always()  # nota: questo e'"'"' un commento' \
+    '        run: echo ciao' \
+    > "$D/.github/workflows/valido.yml"
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 0 ]; then ok "exit 0 (block scalar, quotato e commento accettati)"; else ng "exit $ec (atteso 0): falso positivo: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4: fixture CRLF - il gate deve comunque intercettare ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  printf '%s\n' \
+    'name: Fixture' \
+    'on:' \
+    '  push:' \
+    '    branches: [main]' \
+    'jobs:' \
+    '  x:' \
+    '    runs-on: ubuntu-latest' \
+    '    steps:' \
+    '      - name: Rotto' \
+    '        run: echo "::notice::PR di sola documentazione: lint e typecheck."' \
+    | sed 's/$/\r/' \
+    > "$D/.github/workflows/crlf.yml"
+  if grep -qU $'\r' "$D/.github/workflows/crlf.yml"; then
+    ok "mutazione applicata (fixture CRLF)"
+  else
+    ng "mutazione non applicata: la fixture non ha CRLF"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (intercettato anche su file CRLF)"; else ng "exit $ec (atteso 1): il gate NON intercetta l'errore su CRLF"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
 
 
 
@@ -35397,8 +35866,24 @@ name: CI
 
 on:
   pull_request:
+  # Sessione 74: il trigger `push: branches: [main]` senza filtro faceva
+  # rieseguire l'INTERA pipeline su ogni merge, duplicando la validazione
+  # che la PR aveva gia' fatto sullo stesso albero (4 run di CI per ogni
+  # cambiamento logico: PR, merge, doc-sync PR, merge del doc-sync).
+  #
+  # Il push su `main` scatta solo per i file che i **writer automatici**
+  # modificano: sono gli unici commit che arrivano su `main` senza essere
+  # mai passati da una PR, e quindi gli unici che non sono gia' validati.
+  # Per un merge umano la pipeline non gira piu': l'albero che arriva su
+  # `main` e' lo stesso che la PR ha gia' validato.
   push:
     branches: [main]
+    paths:
+      - 'docs/BUNDLE.md'
+      - 'docs/SESSIONS.md'
+      - 'docs/11-BACKLOG.md'
+      - 'docs/INDEX.md'
+      - 'README.md'
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -35437,6 +35922,60 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # 0. Rilevamento: la PR tocca file di codice?
+  #
+  # Il ciclo di merge del repo prevede due PR: quella di implementazione e il
+  # doc-sync finale (che porta il numero di PR e l'hash di merge, noti solo
+  # DOPO il merge). Il doc-sync tocca **solo file `.md`**: farci girare
+  # lint, typecheck, test e build su un cambiamento di sola documentazione
+  # e' lavoro sprecato (~68 s di job + 3 installazioni di dipendenze).
+  #
+  # La regola e' deliberatamente conservativa: i gate sul codice girano
+  # **solo se ALmeno un file cambiato non e' un `.md`**. Qualunque file
+  # `.ts`, `.tsx`, `.js`, `.json`, `.sh`, `.ps1`, `.yml` fa scattare i gate.
+  #
+  # Fail-safe: se questo job fallisce, `has_code` resta vuoto e la condizione
+  # `!= 'false'` dei job di codice e' vera => i gate girano comunque. Un
+  # detector rotto non puo' mai far saltare la validazione.
+  # ---------------------------------------------------------------------------
+  detect-code:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      has_code: ${{ steps.detect.outputs.has_code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Rileva i file di codice cambiati
+        id: detect
+        shell: bash
+        run: |
+          set -uo pipefail
+          base="origin/${{ github.base_ref }}"
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" 2>/dev/null || true
+          if ! git rev-parse --verify --quiet "$base" >/dev/null 2>&1; then
+            base="FETCH_HEAD"
+          fi
+          changed="$(git diff --name-only "$base" HEAD 2>/dev/null || true)"
+          echo "File cambiati rispetto a $base:"
+          printf '%s\n' "$changed" | sed 's/^/  /'
+          if [ -z "$changed" ]; then
+            # Nessun file rilevato: non si sa nulla => si assume codice
+            # (fail-safe: i gate girano).
+            echo "has_code=true" >> "$GITHUB_OUTPUT"
+          elif printf '%s\n' "$changed" | grep -qv '\.md$'; then
+            echo "C'e' almeno un file non-'.md': i gate sul codice girano."
+            echo "has_code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tutti i file cambiati sono '.md': i gate sul codice non sono applicabili."
+            echo "has_code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ---------------------------------------------------------------------------
   # 1. Gate sui sorgenti TypeScript, su 3 job paralleli.
   #
   # La misura sul runner (run 41223269637, 2026-10-31) diceva che il job
@@ -35449,8 +35988,14 @@ jobs:
   # ~17 s per job ma **in parallelo**, quindi paga una volta sola sul
   # percorso critico. Lo store pnpm e' condiviso dalla cache di
   # `setup-node`, quindi il download avviene una sola volta per lockfile.
+  #
+  # I 3 job girano **solo su pull_request**: su `main` il codice non e'
+  # cambiato rispetto a quanto gia' validato dalla PR, e i gate che restano
+  # (bundle, lazy-state, README, workflow) sono gia' coperti dai job leggeri.
   # ---------------------------------------------------------------------------
   node-lint-typecheck:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35465,15 +36010,25 @@ jobs:
           cache: pnpm
 
       - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm install --frozen-lockfile
 
       - name: Lint
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run lint
 
       - name: Typecheck
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run typecheck
 
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: lint e typecheck non sono applicabili."
+
   node-test:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35488,6 +36043,7 @@ jobs:
           cache: pnpm
 
       - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm install --frozen-lockfile
 
       # `test` gira **isolato**: nessun altro task CPU-bound condivide il
@@ -35497,9 +36053,17 @@ jobs:
       # in 5000ms"). La soglia di un test time-sensitive e' un acceptance
       # criterion e non si tocca (lesson 30-1, `12-DEVOPS.md §9.14.7`).
       - name: Test
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run test
 
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: i test non sono applicabili."
+
   node-build:
+    needs: detect-code
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -35514,10 +36078,17 @@ jobs:
           cache: pnpm
 
       - name: Installa dipendenze
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        if: needs.detect-code.outputs.has_code != 'false'
         run: pnpm run build
+
+      - name: Nessuna modifica al codice
+        if: needs.detect-code.outputs.has_code == 'false'
+        run: |
+          echo "::notice::PR di sola documentazione: il build non e' applicabile."
 
   # ---------------------------------------------------------------------------
   # 2. Gate sui generatori di documentazione e sul README.
@@ -35679,6 +36250,16 @@ jobs:
       - name: Ordinamento dei writer di `main` (issue #149)
         run: bash scripts/test-workflow-writer-ordering.sh
 
+      # Sessione 74: validita' YAML dei file workflow. Un file che GitHub
+      # rifiuta in fase di validazione non produce un job che fallisce:
+      # produce una run con `jobs: 0`, `conclusion: failure` a 0 secondi,
+      # nessun log e nessuna annotazione via API — la stessa firma del
+      # failure mode dell'issue #135, indistinguibile da "Actions rotta".
+      # Lo scalare semplice (non quotato) che contiene ": " e' la forma
+      # invalida piu' comune.
+      - name: Validita' YAML dei workflow (sessione 74)
+        run: bash scripts/test-workflow-yaml-scalars.sh
+
   # ---------------------------------------------------------------------------
   # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
   # ---------------------------------------------------------------------------
@@ -35779,17 +36360,24 @@ jobs:
         run: pwsh scripts/test-appendline-lf-fix.ps1
 
   # ---------------------------------------------------------------------------
-  # 9. Check aggregatore (nome invariato: "CI / quality").
+  # 10. Check aggregatore (nome invariato: "CI / quality").
   #
   # E' il check che la branch protection deve richiedere. Fallisce in modo
   # ESPLICITO se uno qualunque dei job paralleli e' fallito, annullato o
   # saltato: senza questo controllo, `needs:` renderebbe `quality` *skipped*
   # (non *failed*) quando un job dipendente fallisce, e la branch protection
   # puo' interpretare un check saltato come successo.
+  #
+  # Su `pull_request` si esigono TUTTI i job. Su `push` su `main` (che scatta
+  # solo per i file dei writer automatici) si esigono i job **leggeri**: i 3
+  # job `node-*` sono saltati perche' su `main` il codice non e' cambiato
+  # rispetto a quanto gia' validato dalla PR, e il loro 'skipped' e' atteso
+  # — non un errore. I job di gate, invece, girano e devono essere verdi.
   # ---------------------------------------------------------------------------
   quality:
     if: always()
     needs:
+      - detect-code
       - node-lint-typecheck
       - node-test
       - node-build
@@ -35807,7 +36395,12 @@ jobs:
       - name: Esito dei gate paralleli
         shell: bash
         run: |
-          results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+          else
+            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }}"
+          fi
+          echo "Evento: ${{ github.event_name }}"
           echo "Risultati: $results"
           failed=""
           for r in $results; do

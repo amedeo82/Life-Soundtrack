@@ -252,6 +252,14 @@ $files = @(
     # che il gate esca 1; un caso verifica che il nome dichiarato nel trigger
     # combaci con il `name:` reale del producer.
     "scripts/test-workflow-writer-ordering.sh",
+    # Gate sulla validita' YAML dei file workflow (Sessione 74): uno scalare
+    # semplice (non quotato) che contiene ": " rende il file non valido per
+    # GitHub, che lo rifiuta in fase di validazione: la run si chiude `failure`
+    # a 0 secondi con `jobs: 0`, nessun log e nessuna annotazione via API —
+    # la stessa firma del failure mode dell'issue #135. Il gate intercetta
+    # anche i file CRLF (i controlli con regex ancorate a `$` fallivano in
+    # silenzio per il `\r` finale).
+    "scripts/test-workflow-yaml-scalars.sh",
     # Gate "fatti del README" (Sessione 54 / issue #161): confronta la prosa del
     # README con il codice (ACTIVE_PLATFORMS + ADAPTER_FACTORIES + le classi in
     # packages/core/src/adapters), vieta le capability non implementate fuori dalla
