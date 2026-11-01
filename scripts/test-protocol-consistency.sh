@@ -207,6 +207,15 @@ write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
 | 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" "- [ ] Ho letto \`AGENTS.md\`"
 run_scenario "T8" "checklist duplicata dal PR template (D8)" "1"
 
+# T9: un riferimento ROTTO ma **citato** dentro un backtick non e' un
+# puntamento: non si verifica (issue #254). Il testo della Sessione 80
+# riportava `AGENTS.md §V1` come esempio di un riferimento gia' corretto, e
+# l'aggregator lo aveva copiato nel blocco AGGREGATE-PROGRESS: il gate lo
+# contava come drift e lasciava `main` rosso.
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi \`AGENTS.md §\"Sezione che non esiste\"\`." "-Check" ""
+run_scenario "T9" "riferimento rotto citato dentro un backtick (C4)" "0"
+
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
 

@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 15:33
+> Data: 2026-11-01 16:38
 > Totale file: 146
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -12320,8 +12320,9 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 
 **Branch**: `feat/252-gate-protocollo-coerenza`
 **Issue di tracking**: **#252** (lotto I2-b dell'epic #248)
+**PR**: **#253** — **merged** il 2026-11-01T15:33:04Z (merge commit `1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca`)
 **Data**: 2026-11-01
-**Stato**: 🟡 in corso
+**Stato**: ✅ **MERGED**
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -12331,6 +12332,10 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 80-4 | L | Il primo giro di un gate appena scritto produce **falsi positivi prima che veri problemi**: 2 dei 5 riferimenti segnalati erano in realtà rimandi ad altri documenti (`§9.8b di docs/12-DEVOPS.md`) o a sottosezioni (`§"A → B"`) | L'attribuzione per "menzione di documento più vicina" non era implementata: ogni `§` di una riga finiva attribuito all'ultimo `AGENTS.md` citato, e le sottosezioni venivano lette come titoli interi | L'attribuzione è per **menzione più vicina** (con documenti senza estensione riconosciuti) e la freccia `→` introduce un percorso, non un titolo. Ordine di lavoro: **prima far passare il gate sullo stato vero del repository** (che è sano), poi giudicare i fallimenti | `scripts/check-protocol-consistency.mjs` |
 | 80-5 | L | Un gate è **non vacuo** solo se lo si esegue su un caso reale già esistente, non su una fixture costruita apposta | Una fixture dimostra che il gate funziona; un caso reale dimostra che c'era qualcosa da trovare | `check-aggregate-blocks.mjs` eseguito sulla **PR #249 reale** (base `5e98866` → merge `2478a9a`): **5 violazioni** — la PR aveva committato i blocchi rigenerati in locale. La **PR #250** aveva la stessa violazione ed è stata corretta prima del merge | PR #249 · PR #250 |
 | 80-6 | L | Il checkout del gate in CI deve avere **la base**, non solo il merge commit | `actions/checkout` con `fetch-depth: 1` non ha `origin/main`: il confronto base-vs-PR non può girare, e il gate passerebbe sempre | `fetch-depth: 0` nel job `gates-protocol`. È il dettaglio che distingue un gate che verifica da un gate che passa sempre (lesson 43-1) | `.github/workflows/ci.yml` |
+
+| 80-7 | L | Il workflow `auto-session-merge-state.yml` è **fallito** (exit 2) perché nessun file di sessione dichiarava `pr: 253`: il doc-sync in-branch era stato scritto con `pr: 0`, e il numero della PR esiste solo **dopo** l'apertura | La precondizione è corretta (`apply-merge-state.mjs` deve poter trovare il file di sessione della PR), ma è fragile: richiede un **commit successivo** sulla branch dopo l'apertura della PR — una azione che il protocollo non prescrive esplicitamente e che nella Sessione 79 era stata fatta per caso | Il `pr:` va scritto **prima** del merge, in un commit successivo sulla stessa branch, e la procedura va detta esplicitamente in `AGENTS.md` (sezione "Fine di un'implementazione"). Difetto di processo, non di codice: il workflow ha fatto esattamente il suo lavoro (fall-closed con un messaggio che dice cosa fare) | `docs/state/sessions/80-*.md` · `docs/13-ADR/0012` |
+
+| 80-8 | L | Il gate C4 ha segnalato come **rotto** un riferimento che era solo una **citazione** (`` `AGENTS.md §V1` ``, riportato nella Sessione 80 come esempio di un riferimento già corretto): l'aggregator lo aveva copiato nel blocco `AGGREGATE-PROGRESS` di `docs/INDEX.md` e **`main` è restato rosso** | Il gate non distingueva un **puntamento** («vedi AGENTS.md §"Presa in carico"») da una **citazione** («correggevo `AGENTS.md §V1`»): la stessa sintassi, due usi diversi | Un riferimento dentro un backtick è una citazione, non un link: si salta (parsing markdown dell'inline-code, numero di backtick dispari). Il fix **non indebolisce** il controllo: il riferimento rotto realmente esistente (`scripts/generate-fixtures.mjs`) non è quotato e resta rilevato. Scenario di test T9 | issue **#254** · `scripts/check-protocol-consistency.mjs` |
 
 **Lesson learned**: la prima lezione è sulla **forma della verifica**. Il gate dei blocchi aggregati non confronta «il blocco è coerente con il calcolato» (che è la forma del check esistente, e che per definizione soffre della differenza di piattaforma): confronta «**il blocco è stato toccato**». Sono due domande diverse, con due soglie diverse, e solo la seconda è rispondibile in modo **testuale** — quindi immune dall'incompatibilità PS 5.1/PS 7 che tiene quel check in modalità warning da quattro mesi, e quindi bloccante. Una regola che non può essere verificata in modo affidabile non è una regola verificata: è una regola dichiarata.
 
@@ -17995,10 +18000,12 @@ verificato con un'ispezione mirata dei file citati.
 number: 80
 title: "Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca"
+merged_date: "2026-11-01T15:33:04Z"
 branch: feat/252-gate-protocollo-coerenza
-pr: 0
+pr: 253
 claim: kilo-hp-elitebook-1a2b
 tags: [devops, governance, tooling]
 ---
@@ -18006,6 +18013,16 @@ tags: [devops, governance, tooling]
 # Sessione 80 — Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)
 
 > **Issue di tracking**: #252 (lotto I2-b dell'epic #248). **Branch**: `feat/252-gate-protocollo-coerenza`.
+> **PR**: **#253** — **merged** il 2026-11-01T15:33:04Z (merge commit `1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca`).
+>
+> **Nota (doc-sync di chiusura)**: il frontmatter è stato allineato al merge **dopo** il merge, con
+> `node scripts/apply-merge-state.mjs --pr 253` — lo stesso strumento deterministico del workflow
+> `auto-session-merge-state.yml`. Il workflow **è girato** (questa volta non è stato annullato dal
+> concurrency group), ma è **fallito sulla precondizione**: nessun file di sessione dichiarava
+> `pr: 253`, perché il doc-sync in-branch era stato scritto con `pr: 0`. La precondizione è corretta
+> e utile — ma è fragile: il `pr:` va scritto **prima** del merge, in un commit successivo sulla
+> stessa branch (come fatto per la Sessione 79). Difetto di processo tracciato in `docs/18-DEV-LOG.md`
+> §46 (80-7).
 >
 > Secondo lotto dell'epic #248: non chiude altri drift, **chiude la classe di drift**. Nella
 > Sessione 79 ne erano stati chiusi 8, uno per uno: senza un gate che li confronti, tornano.
@@ -18083,6 +18100,7 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 | Il primo giro di un gate appena scritto finds **falsi positivi** prima che veri problemi: 2 «riferimenti rotti» erano in realtà riferimenti ad altri documenti (attribuzione per menzione più vicina) e riferimenti a sottosezioni (freccia `→`) | L'ordine è: prima far passare il gate sullo stato **vero** del repository (che è sano), poi giudicare i fallimenti. Un gate che segnala 20 problemi e 15 sono sue bug non viene ascoltato quando ne segnala 21 e 20 sono suoi bug |
 | La prova che un gate non è vacuo si fa su **un caso reale già esistente**, non su una fixture | `check-aggregate-blocks.mjs` è stato eseguito sulla PR #249 reale: 5 violazioni. Una fixture costruita apposta avrebbe dimostrato che il gate funziona, non che c'era qualcosa da trovare |
 | Il **checkout del gate in CI** deve avere la base, non solo il merge commit | `fetch-depth: 0`: senza, `origin/main` non esiste e il confronto base-vs-PR non può girare. È il dettaglio che distingue un gate che passa sempre da un gate che verifica |
+| Un **riferimento citato** dentro un backtick non è un puntamento: il gate C4 lo contava come drift e aveva lasciato `main` rosso | I riferimenti dentro backtick sono citazioni (es. «correggevo il riferimento `AGENTS.md §V1`»), non link: non si verificano. La regola è il parsing markdown dell'inline-code (numero di backtick dispari ⇒ dentro un codice inline). Issue #254, con scenario di test T9 |
 
 ## Documenti aggiornati
 
@@ -40261,6 +40279,10 @@ function extractRefs(text, selfIsAgents) {
     }
     let idx = -1;
     while ((idx = line.indexOf('§', idx + 1)) !== -1) {
+      // un riferimento dentro un backtick e' una *citazione* (es. si riporta un
+      // rimando rotto come esempio), non un puntamento: non si verifica
+      const backticksBefore = (line.slice(0, idx).match(/`/g) || []).length;
+      if (backticksBefore % 2 === 1) continue;
       const last = mentions.filter((x) => x.at < idx).pop();
       if (!last) continue;
       const isAgents = /(^|\/)AGENTS\.md$/.test(last.name);
@@ -40853,6 +40875,15 @@ run_scenario "T7" "flag citato inesistente (C5)" "1"
 write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
 | 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" "- [ ] Ho letto \`AGENTS.md\`"
 run_scenario "T8" "checklist duplicata dal PR template (D8)" "1"
+
+# T9: un riferimento ROTTO ma **citato** dentro un backtick non e' un
+# puntamento: non si verifica (issue #254). Il testo della Sessione 80
+# riportava `AGENTS.md §V1` come esempio di un riferimento gia' corretto, e
+# l'aggregator lo aveva copiato nel blocco AGGREGATE-PROGRESS: il gate lo
+# contava come drift e lasciava `main` rosso.
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi \`AGENTS.md §\"Sezione che non esiste\"\`." "-Check" ""
+run_scenario "T9" "riferimento rotto citato dentro un backtick (C4)" "0"
 
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"

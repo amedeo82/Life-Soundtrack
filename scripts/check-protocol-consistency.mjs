@@ -305,6 +305,10 @@ function extractRefs(text, selfIsAgents) {
     }
     let idx = -1;
     while ((idx = line.indexOf('§', idx + 1)) !== -1) {
+      // un riferimento dentro un backtick e' una *citazione* (es. si riporta un
+      // rimando rotto come esempio), non un puntamento: non si verifica
+      const backticksBefore = (line.slice(0, idx).match(/`/g) || []).length;
+      if (backticksBefore % 2 === 1) continue;
       const last = mentions.filter((x) => x.at < idx).pop();
       if (!last) continue;
       const isAgents = /(^|\/)AGENTS\.md$/.test(last.name);
