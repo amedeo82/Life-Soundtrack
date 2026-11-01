@@ -141,6 +141,7 @@ $files = @(
     "docs/state/sessions/80-gate-protocollo-coerenza.md",
     "docs/state/sessions/81-claim-atomico.md",
     "docs/state/sessions/82-catena-post-merge.md",
+    "docs/state/sessions/83-rifinitura-agents.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
