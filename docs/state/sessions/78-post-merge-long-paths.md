@@ -3,8 +3,10 @@ number: 78
 title: "Rimozione worktree long-path-safe (procedura post-merge)"
 date: 2026-10-31
 state: 🟡
-merged: false
-branch: fix/post-merge-long-paths
+merged: true
+merged_commit: "08a0b4da74ee3639d061ac714d07267e75d2eac8"
+merged_date: "2026-11-01T09:58:20Z"
+branch: fix/235-post-merge-long-paths
 pr: 236
 claim: kilo-HP-ELITEBOOK-longpath
 cross_refs: [216]
@@ -18,6 +20,10 @@ tags: [devops, tooling]
 > ho applicato il workaround `rd /s /q "\\?\"` documentato nel DEV-LOG, ma è un
 > difetto ricorrente della procedura»). Lavoro di manutenzione della procedura
 > canonica, non di una story: nessun claim su issue, nessun backlog.
+>
+> **Branch**: `fix/235-post-merge-long-paths` — **PR**: **#236** (aperta il
+> 2026-11-01) — **merged** il 2026-11-01T09:58:20Z (merge commit `08a0b4d`)
+> — issue di tracking: **#235** (`status:done`)
 
 ## Sintesi
 
