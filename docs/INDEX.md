@@ -124,7 +124,7 @@
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
-| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ❌ | - |
+| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ❌ | #236 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 

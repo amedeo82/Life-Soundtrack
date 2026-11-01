@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 01:08
+> Data: 2026-11-01 10:54
 > Totale file: 138
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2328,7 +2328,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
-| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ❌ | - |
+| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ❌ | #236 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -10200,7 +10200,7 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #236)
 - **Claim**: `kilo-HP-ELITEBOOK-longpath`
 
 ```
@@ -17299,7 +17299,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: fix/post-merge-long-paths
-pr: 0
+pr: 236
 claim: kilo-HP-ELITEBOOK-longpath
 cross_refs: [216]
 tags: [devops, tooling]

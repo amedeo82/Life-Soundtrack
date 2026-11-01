@@ -5,7 +5,7 @@ date: 2026-10-31
 state: 🟡
 merged: false
 branch: fix/post-merge-long-paths
-pr: 0
+pr: 236
 claim: kilo-HP-ELITEBOOK-longpath
 cross_refs: [216]
 tags: [devops, tooling]
