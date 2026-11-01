@@ -75,42 +75,28 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S80)
+**Analisi della sessione corrente** (S82)
 
-**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
-restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
-4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
-Questa sessione è lavoro di **governance** su un'epic (#248), non una story del backlog.
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort 77%), restano
+**7 step**. Lavoro di **governance** su un'issue dedicata, non story di backlog.
 
-**Il numero che conta.** I gate del repository passano da **26** a **30** (4 nuovi step nel job
-`gates-protocol`), e il **protocollo agenti** passa da **0** a **2** gate che lo verificano. Per la
-prima volta ogni regola normativa di `AGENTS.md` che può essere confrontata con la realtà **ha un
-gate**: il principio di ADR-0012 («una regola senza gate è un consiglio») smette di essere un
-principio e diventa un inventario.
+**Cosa è pronto.** Tre concurrency group separati; `apply-merge-state.mjs` advisory quando non c'è
+sessione; step di verifica e auto-riparazione in `auto-bundle.yml`; `post-merge.ps1` che stampa il
+numero della PR; i commenti dei tre workflow e di `ci.yml` allineati alla semantica reale.
 
-**Cosa è pronto.** I due gate (6 + 1 controlli), le due suite di scenario negativo (8 + 6
-scenari), il job `gates-protocol` in `ci.yml` (4 step bloccanti + `fetch-depth: 0`), la nuova
-sezione §"✅ Il contratto del protocollo: regola ⟺ gate" in `AGENTS.md` (v1.34 → v1.35), il
-catalogo dei gate in `docs/12-DEVOPS.md §9.10` (13 job, 31 step), 3 riferimenti rotti corretti in
-`AGENTS.md`, 1 riferimento stale corretto in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`, che
-non esiste più dalla ristrutturazione v1.0).
+**Cosa manca.** Il lotto **I3** dell'epic #248 (rifinitura di `AGENTS.md` a ~400 righe con 77
+anchor invariati). Nessun altro difetto noto della catena post-merge.
 
-**Cosa manca.** Il lotto **I2-c** (`agent-claim.ps1` con claim e riverifica in sequenza atomica,
-`agent-pr.ps1`, `check-claim-state.mjs`) e il lotto **I3** (rifinitura di `AGENTS.md` a ~400 righe
-con 77 anchor invariati — il gate C4 ne è la rete di sicurezza). Resta aperta l'issue **#251**
-(la catena post-merge si annulla da sola: il concurrency group `post-merge-main` cancella i run in
-attesa invece di accodarli — misurato nel merge della PR #249).
+**Salute tecnica.** Worktree attiva su `feat/251-catena-post-merge`. Claim riverificato sull'issue
+#251 (commento `6560302917`, unico claim). Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Salute tecnica.** Worktree attiva su `feat/252-gate-protocollo-coerenza`. Claim riverificato
-sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
-`node scripts/check-aggregate-blocks.mjs` (0 violazioni). `pwsh` 7.6.9.
-
-**Gate di testabilità.** `node scripts/check-protocol-consistency.mjs` (6 check, 0 falliti) ·
-`node scripts/check-aggregate-blocks.mjs` (0 violazioni) ·
-`bash scripts/test-protocol-consistency.sh` (8 scenari, 0 falliti) ·
-`bash scripts/test-aggregate-blocks.sh` (6 scenari, 0 falliti) ·
-`pwsh scripts/aggregate-state.ps1 -Check` (exit 0) · `pwsh scripts/generate-bundle.ps1 -Check`
-(exit 0) · `node scripts/validate-workflows.mjs .github/workflows` (0 falliti).
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
+`bash scripts/test-post-merge.sh` → 47 assert, 0 falliti ·
+`bash scripts/test-workflow-writer-ordering.sh` → 6/0 ·
+`bash scripts/test-workflow-git-add-coverage.sh` → 8/0 ·
+`bash scripts/test-workflow-push-sync.sh` → 15/0 ·
+`node scripts/apply-merge-state.mjs --pr 9999` → exit 0 con warning ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
