@@ -7719,7 +7719,7 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #236)
+- **Merged**: ✅ PR #236 (08a0b4da74ee3639d061ac714d07267e75d2eac8, 2026-11-01T09:58:20Z)
 - **Claim**: `kilo-HP-ELITEBOOK-longpath`
 
 ```
@@ -7731,6 +7731,10 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 > ho applicato il workaround `rd /s /q "\\?\"` documentato nel DEV-LOG, ma è un
 > difetto ricorrente della procedura»). Lavoro di manutenzione della procedura
 > canonica, non di una story: nessun claim su issue, nessun backlog.
+>
+> **Branch**: `fix/235-post-merge-long-paths` — **PR**: **#236** (aperta il
+> 2026-11-01) — **merged** il 2026-11-01T09:58:20Z (merge commit `08a0b4d`)
+> — issue di tracking: **#235** (`status:done`)
 
 ## Sintesi
 

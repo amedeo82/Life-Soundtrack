@@ -124,7 +124,7 @@
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
-| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ❌ | #236 |
+| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ✅ | #236 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -164,7 +164,7 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **55** (merge: 40)
+- Sessioni migrate in state/sessions: **55** (merge: 41)
 - Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S78** - Rimozione worktree long-path-safe (procedura post-merge)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
