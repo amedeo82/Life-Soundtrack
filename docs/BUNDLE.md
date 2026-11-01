@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 17:48
+> Data: 2026-11-01 17:50
 > Totale file: 154
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -18678,7 +18678,7 @@ title: "La race sul push risolta: retry con ri-sincronizzazione e contratto del 
 date: 2026-11-01
 state: 🟡
 merged: false
-branch: feat/262-push-race-retry
+branch: feat/261-push-race-retry
 pr: 0
 claim: kilo-hp-elitebook-6d4e
 tags: [devops, governance, tooling]
@@ -18687,7 +18687,7 @@ tags: [devops, governance, tooling]
 # Sessione 84 — La race sul push: retry con ri-sincronizzazione
 
 > **Issue di tracking**: #261 (terzo punto, rimasto aperto dal merge delle PR #258/#260).
-> **Branch**: `feat/262-push-race-retry`.
+> **Branch**: `feat/261-push-race-retry`.
 
 ## Sintesi
 

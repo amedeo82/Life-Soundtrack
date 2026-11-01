@@ -1,10 +1,10 @@
----
+﻿---
 number: 84
 title: "La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato"
 date: 2026-11-01
 state: 🟡
 merged: false
-branch: feat/262-push-race-retry
+branch: feat/261-push-race-retry
 pr: 0
 claim: kilo-hp-elitebook-6d4e
 tags: [devops, governance, tooling]
@@ -13,7 +13,7 @@ tags: [devops, governance, tooling]
 # Sessione 84 — La race sul push: retry con ri-sincronizzazione
 
 > **Issue di tracking**: #261 (terzo punto, rimasto aperto dal merge delle PR #258/#260).
-> **Branch**: `feat/262-push-race-retry`.
+> **Branch**: `feat/261-push-race-retry`.
 
 ## Sintesi
 
