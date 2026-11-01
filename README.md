@@ -75,36 +75,37 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S78)
+**Analisi della sessione corrente** (S79)
 
-### Numeri
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
+restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
+4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
+Questa sessione non implementa story di prodotto: chiude lavoro di **governance** su un'epic
+(#248) che non è una story del backlog. Il protocollo agenti passa da **0 gate** a **0 gate
+nuovi in questa PR** — i gate che lo rendono verificabile (I2-b: coerenza del protocollo e
+invarianti ADR-0008) e gli script che lo rendono atomico (I2-c: claim, PR) sono i lotti
+successivi dell'epic, descritti in ADR-0012 §"Stato dell'implementazione".
 
-- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
+**Cosa è pronto.** ADR-0012 scritta e approvata; **8 drift chiusi** (D1 versione in `docs/INDEX.md`,
+D2 `phase-post`, D3 exit 14, D4 `-Check` a tratto singolo, D5 ordine worktree/claim, D6 cifre come
+puntatori, D7 query senza `jq` esterno, D8 checklist unica); fallback PS 5.1 rimosso dal
+`pre-push`; `pre-commit` separato in invariante bloccante + igiene advisory; PR template
+completato con le 10 voci che mancavano.
 
-### Cosa e' pronto e cosa manca
+**Cosa manca.** I2-b (`check-protocol-consistency.mjs`, `check-aggregate-blocks.mjs` + test
+negativi), I2-c (`agent-claim.ps1`, `agent-pr.ps1`, `check-claim-state.mjs`), I3 (rifinitura di
+`AGENTS.md` a ~400 righe con 77 anchor invariati).
 
-- **La procedura post-merge non si blocca più su Windows**: la rimozione della
-  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
-  ha un exit code e un messaggio espliciti.
-- Le **story** del backlog non cambiano: questa sessione è manutenzione della
-  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
-  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
-  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
-  dipendenze a ultime major.
-- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
-  condividi ha ancora schermate vuote.
+**Salute tecnica.** Worktree attiva su `feat/248-protocollo-contratto-verificato` (push early
+eseguito). Claim riverificato: ID commento `6559382507`, unico claim sull'issue #248. Nessun
+blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9 (baseline). Gate eseguiti prima del merge:
+`generate-bundle.ps1 -Check` (exit 0), `aggregate-state.ps1 -Check` (exit 0),
+`check-readme-facts.mjs` (exit 0), `test-pre-commit-clean-check.sh` (14 assert, 0 falliti).
 
-> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
-> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
-
-### Salute tecnica (verificata in questa sessione)
-
-`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
-nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
-solo in `scripts/`, `AGENTS.md` e `docs/`.
+**Gate di testabilità.** La verifica della sessione è automatica: i gate di `ci.yml` (bloccanti)
+più `bash scripts/test-post-merge.sh` e `bash scripts/test-setup-worktree.sh` per la parte di
+hook. Il criterio di accettazione della I2-a è che **nessuno degli 8 drift sia riproducibile**:
+verificato con un'ispezione mirata dei file citati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

@@ -13,30 +13,45 @@ Closes #
 
 ## Checklist di auto-revisione
 
-L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le caselle non spuntate sono blocker per il merge.
+> **Unico artifact della checklist PR** (decisione D3 di ADR-0012): questa sezione è la sola
+> copia. `AGENTS.md` rimanda qui e non ne contiene una copia — due copie divergono in silenzio
+> (è successo: 22 voci per parte, 2 identiche al testo). Le caselle non spuntate sono blocker
+> per il merge.
 
 ### Documentazione letta
 
 - [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
 - [ ] Ho letto la specifica della story (link nell'issue)
+- [ ] Ho verificato che l'issue #N è in `status:in-review` o `in-progress` (claim valido, ADR-0006)
 
 ### Codice e test
 
+- [ ] Il codice rispetta lo schema dati (`docs/02-DATA-SCHEMA.md`)
+- [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
+- [ ] Ho usato i fixture di `fixtures/synthetic-history/`
+- [ ] Coverage rispettata per area modificata (vedi `docs/10-TESTING.md`)
+- [ ] JSDoc su tutte le funzioni pubbliche
+- [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` passa in locale
 - [ ] `pnpm run typecheck` passa in locale
 - [ ] `pnpm run test` passa in locale (no test saltati senza motivo)
 - [ ] `pnpm run build` passa in locale
-- [ ] Coverage rispettata per area modificata (vedi `docs/10-TESTING.md`)
 
 ### Documentazione di stato (ADR-0008 V1 + V2)
 
 - [ ] **NON** ho modificato i blocchi `<!-- AGGREGATE-* -->` di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
 - [ ] Se ho cambiato un blocco aggregato per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
 - [ ] **Ho allineato le sezioni legacy** dei file globali che questa PR rende false: conteggi/versione/"Prossimo step tecnico" in `docs/INDEX.md`, tabella "roadmap delle story non ancora completate" e righe `**Stato**:` in `docs/11-BACKLOG.md` (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali")
+- [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
+- [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
+- [ ] Se ho scritto una sessione: il file `docs/state/sessions/<N>-<slug>.md` ha la sezione **`## Analisi di avanzamento`** (numeri, cosa è pronto, cosa manca, salute tecnica): è ciò che il blocco `AGGREGATE-PROGRESS` rende al project owner (issue #216)
 - [ ] Se ho aggiunto o rimosso un file in `docs/`, ho aggiornato la tabella documenti di `docs/INDEX.md` e l'array `$files` di `scripts/generate-bundle.ps1`
+- [ ] Se la PR tocca `docs/state/sessions/` o crea un nuovo `<N>-<slug>.md`, ho pre-allocato `N` con la procedura in `docs/state/_index.md` (issue #105): nessun `[FAIL] numeri di sessione duplicati` appare nell'output di `-Check`.
 - [ ] `pwsh scripts/generate-bundle.ps1 -Check` exit 0
 - [ ] `pwsh scripts/aggregate-state.ps1 -Check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
-- [ ] Se la PR tocca `docs/state/sessions/` o crea un nuovo `<N>-<slug>.md`, ho pre-allocato `N` con la procedura in `docs/state/_index.md` (issue #105): nessun `[FAIL] numeri di sessione duplicati` appare nell'output di `-Check`.
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (scenari T1..T14) — **gate bloccante in CI**
+- [ ] Se ho toccato `README.md` o le piattaforme importabili: `node scripts/check-readme-facts.mjs` exit 0 (gate bloccante in CI, issue #161)
+- [ ] `node scripts/check-merge-state.mjs` exit 0 — il frontmatter di `docs/state/sessions/*.md` è coerente con lo stato reale delle PR (gate bloccante in CI, issue #239)
 
 ### Issue tracking
 

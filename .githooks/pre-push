@@ -3,6 +3,13 @@
 # 1. BUNDLE auto-regen se `docs/` e' cambiato (D4, G4 mitigation)
 # 2. Base-stale warning se il branch e' > 5 commit dietro origin/main (D5, G3 mitigation)
 #
+# Sessione 79 (issue #248, decisione D-79.7 di ADR-0012): il fallback a Windows
+# PowerShell 5.1 e' stato RIMOSSO. Sotto 5.1 il *parsing* dei .ps1 UTF-8 senza BOM
+# sovradecodifica (F9-bis, vedi docs/12-DEVOPS.md 9.12) e il mojibake verrebbe
+# SCRITTO in docs/BUNDLE.md e committato da questo hook: l'hook che esiste per
+# prevenire il drift lo causava. Se pwsh 7 non e' disponibile, il bundle NON viene
+# rigenerato: si avvisa e si prosegue.
+#
 # Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
 # Bypass: git push --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git push ...)
 
@@ -27,22 +34,36 @@ if [ -n "$changed_docs" ]; then
   echo "[pre-push] docs/ modificato rispetto a origin/${remote_branch}. Rigenero BUNDLE.md..."
 
   regen_ok=0
+  regen_failed=0
+
   if command -v pwsh >/dev/null 2>&1; then
-    if pwsh scripts/generate-bundle.ps1 >/dev/null 2>&1; then
-      echo "[pre-push] BUNDLE.md rigenerato con pwsh"
-      regen_ok=1
+    ps_major="$(pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major' 2>/dev/null | tr -d '\r[:space:]')"
+    if [ -n "$ps_major" ] && [ "$ps_major" -ge 7 ] 2>/dev/null; then
+      if pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+        echo "[pre-push] BUNDLE.md rigenerato con pwsh $ps_major"
+        regen_ok=1
+      else
+        regen_failed=1
+      fi
+    else
+      echo "[pre-push] WARN: serve PowerShell 7 (pwsh); versione trovata: ${ps_major:-assente}."
+      echo "[pre-push]   BUNDLE.md NON rigenerato: sotto Windows PowerShell 5.1 il parsing dei .ps1"
+      echo "[pre-push]   sovradecodifica e il mojibake verrebbe SCRITTO nel bundle (F9-bis)."
+      echo "[pre-push]   Rigenera a mano con pwsh 7: pwsh scripts/generate-bundle.ps1"
     fi
-  elif command -v powershell >/dev/null 2>&1; then
-    if powershell -ExecutionPolicy Bypass -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
-      echo "[pre-push] BUNDLE.md rigenerato con powershell"
-      regen_ok=1
-    fi
+  else
+    echo "[pre-push] WARN: pwsh non trovato nel PATH."
+    echo "[pre-push]   BUNDLE.md NON rigenerato: 'powershell' (5.1) non e' un fallback accettabile"
+    echo "[pre-push]   perche' corrompe il bundle (F9-bis). Rigenera a mano con pwsh 7:"
+    echo "[pre-push]   pwsh scripts/generate-bundle.ps1"
   fi
 
-  if [ "$regen_ok" -eq 0 ]; then
-    echo "[pre-push] WARN: BUNDLE.md non rigenerato (pwsh/powershell non disponibili o script fallito)."
-    echo "[pre-push] Aggiungi manualmente: pwsh scripts/generate-bundle.ps1"
-  else
+  if [ "$regen_ok" -eq 0 ] && [ "$regen_failed" -eq 1 ]; then
+    echo "[pre-push] WARN: pwsh scripts/generate-bundle.ps1 e' fallito."
+    echo "[pre-push]   Rigenera a mano e committa docs/BUNDLE.md nella stessa PR."
+  fi
+
+  if [ "$regen_ok" -eq 1 ]; then
     # Se BUNDLE.md e' cambiato, committalo
     if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
       git add docs/BUNDLE.md
