@@ -44,7 +44,7 @@
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.2 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.3 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 
 ## Design & mockup
 | Cartella | Contenuto |
