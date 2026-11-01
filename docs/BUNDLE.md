@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 16:17
+> Data: 2026-11-01 17:26
 > Totale file: 153
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 152 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2263.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-01 16:17
+- Dimensione totale: 2264.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-01 17:26
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -2089,9 +2089,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
 | 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟢 | ✅ | #249 |
 | 80 | Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b) | 🟢 | ✅ | #253 |
-| 81 | Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c) | 🟡 | ❌ | - |
-| 82 | La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251) | 🟡 | ❌ | - |
-| 83 | AGENTS.md: il contratto senza la storia (rifinitura I3) | 🟡 | ❌ | - |
+| 81 | Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c) | 🟢 | ✅ | #257 |
+| 82 | La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251) | 🟢 | ✅ | #258 |
+| 83 | AGENTS.md: il contratto senza la storia (rifinitura I3) | 🟢 | ✅ | #260 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2131,7 +2131,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **60** (merge: 57)
+- Sessioni migrate in state/sessions: **60** (merge: 60)
 - Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S83** - AGENTS.md: il contratto senza la storia (rifinitura I3)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
@@ -10353,8 +10353,8 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 ### Sessione 81 - Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #257 (f6fb8c056d9f69ba196b4443c79e98040bbeaab1, 2026-11-01T15:56:50Z)
 - **Claim**: `kilo-hp-elitebook-7f3c`
 
 ```
@@ -10431,8 +10431,8 @@ Il terzo è la parte che chiude la classe di difetto, perché verifica in CI que
 ### Sessione 82 - La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #258 (a07c7b04f74426f63545889f4b19652ab8225b36, 2026-11-01T16:04:24Z)
 - **Claim**: `kilo-hp-elitebook-1c9d`
 
 ```
@@ -10526,8 +10526,8 @@ anchor invariati). Nessun altro difetto noto della catena post-merge.
 ### Sessione 83 - AGENTS.md: il contratto senza la storia (rifinitura I3)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #260 (5d49fe959efd6333efb40f09a2cc87d07fae1dd2, 2026-11-01T16:16:44Z)
 - **Claim**: `kilo-hp-elitebook-4e7b`
 
 ```
@@ -18360,10 +18360,12 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 number: 81
 title: "Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "f6fb8c056d9f69ba196b4443c79e98040bbeaab1"
+merged_date: "2026-11-01T15:56:50Z"
 branch: feat/256-claim-atomico
-pr: 0
+pr: 257
 claim: kilo-hp-elitebook-7f3c
 tags: [devops, governance, tooling]
 ---
@@ -18444,10 +18446,12 @@ Il terzo è la parte che chiude la classe di difetto, perché verifica in CI que
 number: 82
 title: "La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "a07c7b04f74426f63545889f4b19652ab8225b36"
+merged_date: "2026-11-01T16:04:24Z"
 branch: feat/251-catena-post-merge
-pr: 0
+pr: 258
 claim: kilo-hp-elitebook-1c9d
 tags: [devops, governance, tooling]
 ---
@@ -18545,10 +18549,12 @@ anchor invariati). Nessun altro difetto noto della catena post-merge.
 number: 83
 title: "AGENTS.md: il contratto senza la storia (rifinitura I3)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "5d49fe959efd6333efb40f09a2cc87d07fae1dd2"
+merged_date: "2026-11-01T16:16:44Z"
 branch: feat/259-rifinitura-agents
-pr: 0
+pr: 260
 claim: kilo-hp-elitebook-4e7b
 tags: [devops, governance, docs]
 ---
@@ -38888,7 +38894,9 @@ function checkPermissionScopes(lines, file) {
 // contratto: un sync dopo il push non serve a niente.
 
 function checkPushSync(lines, file) {
-  const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l));
+  // una push dentro un COMMENTO non e' una push: il commento che spiega la
+  // race menziona `git push origin main` senza eseguirla
+  const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l) && !l.trim().startsWith('#'));
   if (pushAt < 0) return 0; // non e' un writer di `main`: niente da tassare
   pushers++;
   const before = lines.slice(0, pushAt).join('\n');
@@ -39598,6 +39606,7 @@ echo "=== T2: fixture con lo step Sync rimosso da auto-state-aggregate.yml (bug 
   # Rimuove l'intero blocco dello step "Sync con origin/main" (dal `- name:` fino
   # alla riga prima del `- name:` successivo).
   perl -0777 -pi -e 's/^[ ]{6}- name: Sync con origin\/main\n(?:(?!^[ ]{6}- name: ).*\n)*//m' "$D/.github/workflows/auto-state-aggregate.yml"
+
   # Verifica lo step, non la stringa: l'header del workflow cita il nome dello
   # step anche nei commenti, quindi un grep grezzo darebbe un falso "non applicata".
   if grep -qE '^[ ]{6}- name: Sync con origin/main' "$D/.github/workflows/auto-state-aggregate.yml"; then
@@ -43842,8 +43851,14 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           pr_number="${{ github.event.pull_request.number }}"
-          echo "Applica stato di merge per PR #$pr_number"
-          node scripts/apply-merge-state.mjs --pr "$pr_number"
+          head_ref="${{ github.event.pull_request.head.ref }}"
+          echo "Applica stato di merge per PR #$pr_number (branch $head_ref)"
+          # --branch permette di trovare la sessione anche quando il doc-sync
+          # in-branch non ha ancora scritto `pr: N` (la sessione dichiara il
+          # proprio branch nel frontmatter): senza, la sessione non viene
+          # trovata e la chiusura resta silenziosamente pendente (misurato:
+          # sessioni 81-83 rimaste `pr: 0` dopo il merge delle PR #257/#258/#260).
+          node scripts/apply-merge-state.mjs --pr "$pr_number" --branch "$head_ref"
 
       - name: Rigenera blocchi aggregati
         run: |
@@ -43859,12 +43874,12 @@ jobs:
           git config user.email "kilo-bot[bot]@users.noreply.github.com"
           if ! git diff --quiet; then
             git add -A
-            git commit -m "chore: sync session merge state for PR #$pr_number
+            git commit -m "chore: sync session merge state for PR #${{ github.event.pull_request.number }}
 
             Apply merge state to session frontmatter and regenerate aggregated blocks.
 
             Merge commit: ${{ github.event.pull_request.merge_commit_sha }}
-            PR: #$pr_number"
+            PR: #${{ github.event.pull_request.number }}"
             git push origin HEAD:main
           else
             echo "Nessuna modifica da committare"

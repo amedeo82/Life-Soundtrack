@@ -45,8 +45,14 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           pr_number="${{ github.event.pull_request.number }}"
-          echo "Applica stato di merge per PR #$pr_number"
-          node scripts/apply-merge-state.mjs --pr "$pr_number"
+          head_ref="${{ github.event.pull_request.head.ref }}"
+          echo "Applica stato di merge per PR #$pr_number (branch $head_ref)"
+          # --branch permette di trovare la sessione anche quando il doc-sync
+          # in-branch non ha ancora scritto `pr: N` (la sessione dichiara il
+          # proprio branch nel frontmatter): senza, la sessione non viene
+          # trovata e la chiusura resta silenziosamente pendente (misurato:
+          # sessioni 81-83 rimaste `pr: 0` dopo il merge delle PR #257/#258/#260).
+          node scripts/apply-merge-state.mjs --pr "$pr_number" --branch "$head_ref"
 
       - name: Rigenera blocchi aggregati
         run: |
@@ -62,12 +68,12 @@ jobs:
           git config user.email "kilo-bot[bot]@users.noreply.github.com"
           if ! git diff --quiet; then
             git add -A
-            git commit -m "chore: sync session merge state for PR #$pr_number
+            git commit -m "chore: sync session merge state for PR #${{ github.event.pull_request.number }}
 
             Apply merge state to session frontmatter and regenerate aggregated blocks.
 
             Merge commit: ${{ github.event.pull_request.merge_commit_sha }}
-            PR: #$pr_number"
+            PR: #${{ github.event.pull_request.number }}"
             git push origin HEAD:main
           else
             echo "Nessuna modifica da committare"
