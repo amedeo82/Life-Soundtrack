@@ -792,6 +792,7 @@ if ($IssueNumber -gt 0) {
     Write-Host "[post-merge] ==============================================" -ForegroundColor Green
     $sha = if ($mergeCommitOid) { $mergeCommitOid } else { "<merge-commit-sha>" }
     Write-Host "[post-merge]   gh issue comment $IssueNumber --body `"release: <AGENT-ID> - PR mergata ($sha)`"" -ForegroundColor Cyan
+    Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr $IssueNumber    # applica stato merge sessione (issue #239)" -ForegroundColor Cyan
     Write-Host "[post-merge]   pwsh scripts/aggregate-state.ps1 --check    # stato doc (exit 0 = in sync)" -ForegroundColor Cyan
     Write-Host "[post-merge]   pwsh scripts/generate-bundle.ps1 --check   # bundle (exit 0 = in sync)" -ForegroundColor Cyan
 } else {

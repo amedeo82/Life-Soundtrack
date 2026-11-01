@@ -298,6 +298,10 @@ $files = @(
     # quando $files o un file coperto da esso cambia (issue #115 follow-up
     # di PR #113). Companion di auto-state-aggregate.yml.
     ".github/workflows/auto-bundle.yml",
+    # Workflow post-merge che applica lo stato di merge alle sessioni
+    # (issue #239): aggiorna merged/merged_commit/merged_date/state nel
+    # frontmatter della sessione e rigenera i blocchi aggregati.
+    ".github/workflows/auto-session-merge-state.yml",
     "fixtures/synthetic-history/spotify-sample.json",
     "fixtures/synthetic-history/youtube-sample.json",
     "fixtures/synthetic-history/apple-music-sample.csv",

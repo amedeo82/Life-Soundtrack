@@ -1,17 +1,17 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 12:16
-> Totale file: 138
+> Data: 2026-11-01 14:02
+> Totale file: 139
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 137 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2092.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-01 12:16
+- Totale file: 138 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2095 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-01 14:03
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -20,7 +20,7 @@
 | scripts/ | 23 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
-| .github/ | 4 |
+| .github/ | 5 |
 | root/ | 3 |
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
@@ -599,6 +599,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 - [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
 - [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
 - [ ] **Se ho toccato `README.md` o le piattaforme importabili**: la prosa del README è in sync con il codice — `node scripts/check-readme-facts.mjs` esce 0 (gate bloccante in CI, issue #161). Le capability non implementate stanno nella sezione roadmap, i conteggi non sono duplicati in prosa (vedi §"Ownership del `README.md`")
+- [ ] **Lo stato di merge delle sessioni è in sync con GitHub** — `node scripts/check-merge-state.mjs` esce 0 (gate bloccante in CI, issue #239). Il frontmatter di `docs/state/sessions/*.md` riporta `merged`, `merged_commit`, `merged_date`, `state` coerenti con le PR mergiate
 - [ ] **Il body della PR contiene la keyword di chiusura come riga nuda e una sola volta** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick, fuori dalle checklist e senza ripetizioni**, così GitHub chiude l'issue al merge e `auto-status-done` non transiziona issue non collegate (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
 - [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
 - [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
@@ -832,12 +833,13 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### Livello 1 — Automazioni GH Action (no intervento manuale)
 
-Dopo il merge di una PR su `main` girano **cinque** workflow (al 2026-10-21; quattro PR-chiusi + due su push a main con concurrency group condiviso). Tre scattano sul `pull_request: closed` e due sono push-trigger serializzati.
+Dopo il merge di una PR su `main` girano **sei** workflow. Quattro scattano sul `pull_request: closed` e due sono push-trigger serializzati.
 
 | Workflow | Trigger | Cosa fa |
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
+| `auto-session-merge-state` (issue #239) | PR merged | Applica lo stato di merge al frontmatter della sessione (`merged`, `merged_commit`, `merged_date`, `state: 🟢`), rigenera i blocchi aggregati e il bundle. Condivide il concurrency group `post-merge-main` con `auto-state-aggregate` e `auto-bundle`. |
 | `auto-state-aggregate` | push su `main` con paths `docs/state/**`, `docs/11-BACKLOG.md` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) + il blocco **PROGRESS** in `README.md` e `docs/INDEX.md` (V4, issue #216) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136); i `paths:` devono coprire tutti gli **input** del blocco PROGRESS (catalogo del backlog + state): lo verifica lo stesso validatore (issue #216) |
 | `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group. Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
@@ -34904,6 +34906,7 @@ if ($IssueNumber -gt 0) {
     Write-Host "[post-merge] ==============================================" -ForegroundColor Green
     $sha = if ($mergeCommitOid) { $mergeCommitOid } else { "<merge-commit-sha>" }
     Write-Host "[post-merge]   gh issue comment $IssueNumber --body `"release: <AGENT-ID> - PR mergata ($sha)`"" -ForegroundColor Cyan
+    Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr $IssueNumber    # applica stato merge sessione (issue #239)" -ForegroundColor Cyan
     Write-Host "[post-merge]   pwsh scripts/aggregate-state.ps1 --check    # stato doc (exit 0 = in sync)" -ForegroundColor Cyan
     Write-Host "[post-merge]   pwsh scripts/generate-bundle.ps1 --check   # bundle (exit 0 = in sync)" -ForegroundColor Cyan
 } else {
@@ -39833,6 +39836,13 @@ jobs:
       - name: Gate "fatti del README" fail-closed (issue #161)
         run: bash scripts/test-readme-facts-gate.sh
 
+      # Issue #239: gate "stato di merge delle sessioni" — confronta il frontmatter
+      # di docs/state/sessions/*.md con lo stato reale delle PR via API GitHub.
+      # Fail-closed: exit 0 = in sync, exit 1 = drift, exit 2 = errore di ambiente.
+      # Read-only: non genera e non scrive nulla (come check-readme-facts.mjs).
+      - name: Stato di merge delle sessioni in sync con GitHub (issue #239)
+        run: node scripts/check-merge-state.mjs
+
   # ---------------------------------------------------------------------------
   # 3. Gate di determinismo dell'aggregator (issue #70).
   #    Il gate piu' pesante: 37 assert su repo git temporanei.
@@ -40355,6 +40365,72 @@ jobs:
                        -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-main."
           git push origin main
 
+
+
+===== FILE: .github/workflows/auto-session-merge-state.yml =====
+
+name: Auto session merge state
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+concurrency:
+  group: post-merge-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  apply-merge-state:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync con origin/main
+        run: |
+          git fetch origin main
+          git rebase origin/main || git reset --hard origin/main
+
+      - name: Applica lo stato di merge alla sessione
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          pr_number="${{ github.event.pull_request.number }}"
+          echo "Applica stato di merge per PR #$pr_number"
+          node scripts/apply-merge-state.mjs --pr "$pr_number"
+
+      - name: Rigenera blocchi aggregati
+        run: |
+          pwsh scripts/aggregate-state.ps1
+
+      - name: Rigenera bundle
+        run: |
+          pwsh scripts/generate-bundle.ps1
+
+      - name: Committa e pusha se modificato
+        run: |
+          git config user.name "kilo-bot[bot]"
+          git config user.email "kilo-bot[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore: sync session merge state for PR #$pr_number
+
+            Apply merge state to session frontmatter and regenerate aggregated blocks.
+
+            Merge commit: ${{ github.event.pull_request.merge_commit_sha }}
+            PR: #$pr_number"
+            git push origin HEAD:main
+          else
+            echo "Nessuna modifica da committare"
+          fi
 
 
 ===== FILE: fixtures/synthetic-history/spotify-sample.json =====

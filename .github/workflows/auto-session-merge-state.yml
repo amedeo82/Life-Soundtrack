@@ -1,0 +1,62 @@
+name: Auto session merge state
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+concurrency:
+  group: post-merge-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  apply-merge-state:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync con origin/main
+        run: |
+          git fetch origin main
+          git rebase origin/main || git reset --hard origin/main
+
+      - name: Applica lo stato di merge alla sessione
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          pr_number="${{ github.event.pull_request.number }}"
+          echo "Applica stato di merge per PR #$pr_number"
+          node scripts/apply-merge-state.mjs --pr "$pr_number"
+
+      - name: Rigenera blocchi aggregati
+        run: |
+          pwsh scripts/aggregate-state.ps1
+
+      - name: Rigenera bundle
+        run: |
+          pwsh scripts/generate-bundle.ps1
+
+      - name: Committa e pusha se modificato
+        run: |
+          git config user.name "kilo-bot[bot]"
+          git config user.email "kilo-bot[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore: sync session merge state for PR #$pr_number
+
+            Apply merge state to session frontmatter and regenerate aggregated blocks.
+
+            Merge commit: ${{ github.event.pull_request.merge_commit_sha }}
+            PR: #$pr_number"
+            git push origin HEAD:main
+          else
+            echo "Nessuna modifica da committare"
+          fi
