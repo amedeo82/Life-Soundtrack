@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 15:28
-> Totale file: 141
+> Data: 2026-11-01 16:31
+> Totale file: 146
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.34 — Sessione 79 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.35 — Sessione 80 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -50,6 +50,34 @@ Quando ricevi un task su questo repository, segui questo ordine:
 8. **La specifica del task** (linkata nell'issue)
 
 **Non saltare questi passi.** Il contesto è essenziale.
+
+## ✅ Il contratto del protocollo: regola ⟺ gate
+
+> **Decisione di struttura**: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md).
+> **Ogni regola normativa scende da L2 (protocollo) a L3 (applicazione)**: una regola in questo
+> file deve avere un **gate** in `scripts/` che la verifica, e il gate deve avere una regola qui.
+> **Una regola senza gate è un consiglio; un gate senza regola è un segreto.**
+
+Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`, bloccante su
+`pull_request`). La tabella è l'elenco completo di ciò che la macchina controlla:
+
+| Regola vincolante | Gate che la enforce | Drift che chiude |
+|--------------------|---------------------|-----------------|
+| La versione dichiarata qui è quella dichiarata in `docs/INDEX.md` | `check-protocol-consistency.mjs` (C1) | D1 |
+| La tabella «Label disponibili» è l'elenco che `scripts/validate-labels.mjs` si aspetta | C2 | D2 |
+| La tabella degli exit code elenca **tutti** i codici emessi dagli script che li dichiarano | C3 | D3 |
+| Ogni riferimento `§"…"` di questo file risolve a un heading **esistente** | C4 | anchor |
+| Ogni `scripts/<file>` e ogni flag `-<Flag>` citati **esistono davvero** | C5 | D7 |
+| La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
+| I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
+
+```bash
+node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
+node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
+```
+
+**Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
+Un gate modificato per far passare una PR è un gate che non è più un gate.
 
 ## 🔄 Handoff tra conversazioni AI
 
@@ -258,7 +286,7 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
-- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina di stati delle issue (status:*)")
+- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 - **Push early obbligatorio**: dopo `git checkout -b feat/<N>-<desc>`, eseguire `git push -u origin <branch>` (anche con zero commit). Visibilità + backup + anti-collision. Vedi §"🪝 Pre-commit hook" per il setup / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 ## ♻️ Pulizia branch post-merge — procedura canonica *(vincolante)*
@@ -841,7 +869,7 @@ Il vecchio flusso `git checkout -b feat/<N>-<slug>` su main è **deprecato** ma 
 
 - ⚠️ **NON È RACCOMANDATO** per lavoro parallelo (causa esattamente i failure mode E3/E4/E5)
 - Le difese advisory (`.githooks/post-checkout` + `scripts/safe-branch-switch.ps1`) restano in piedi come safety net ma sono **ridondanti** se la worktree è usata correttamente
-- Vedi §"⚠️ Deprecazione" per il piano di rimozione
+- Vedi §"🌳 Worktree workflow" per il flusso consigliato e le difese che sostituiscono il checkout manuale
 
 ### Cleanup della worktree (post-merge)
 
@@ -1001,7 +1029,7 @@ L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di r
 
 **Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `auto-state-aggregate`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
 
-Vedi §"🛡️ Hardening multi-agente" (S21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
+Vedi `docs/18-DEV-LOG.md` §20 (Sessione 20, hardening multi-agente) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
 
 ## 🔄 Lazy-state aggregation (D.24.x + D.29.x + D.30.x)
 
@@ -1208,7 +1236,13 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.34 — **il protocollo diventa un contratto verificato** (Sessione 79, issue #248). `AGENTS.md` era l'unico artefatto di governance del repo **senza generatore e senza gate**: 1328 righe, 77 anchor, 643 citazioni, **0** controlli automatici — mentre il README ha `check-readme-facts.mjs`, le sessioni `check-merge-state.mjs`, i workflow `validate-workflows.mjs`, le label `validate-labels.mjs`, i blocchi aggregati `aggregate-state.ps1`. Il drift che ne conseguiva era **misurato, non ipotetico**: 8 casi. Chiusi in questa versione (il **meccanismo** che li chiude per sempre è il gate di coerenza, lotto I2-b):
+*Ultimo aggiornamento: v1.35 — **il protocollo diventa un contratto verificato** (Sessione 80, issue #248). La Sessione 79 aveva chiuso 8 drift misurati fra `AGENTS.md` e la realtà, ma li aveva chiusi **una volta**: senza un gate che li confronti, tornano. Il protocollo era l'unico artefatto di governance del repo **senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella exit code), mentre README, sessioni, workflow, label e blocchi aggregati ne avevano uno ciascuno. Ora ne ha due:
+- **`scripts/check-protocol-consistency.mjs`** (read-only, 6 check): versione dichiarata ↔ `docs/INDEX.md` (C1), tabella label ↔ `validate-labels.mjs` (C2), tabella exit code ↔ i `exit N` reali degli script (C3), **integrità degli anchor** — ogni `§"…"` deve risolvere a un heading esistente (C4), esistenza degli script e dei flag citati (C5), nessuna checklist duplicata (C6). Il primo giro ha trovato **3 riferimenti rotti** che nessuno aveva notato: un typo («Macchina **di** stati» invece di «a stati»), una sezione «⚠️ Deprecazione» che non esiste, e un rimando a «🛡️ Hardening multi-agente» (rinominata). C4 è la rete di sicurezza che rende sicuro il lotto I3 (rifinitura del file)
+- **`scripts/check-aggregate-blocks.mjs`** (read-only, **bloccante**): confronta i blocchi `AGGREGATE-*` della PR con quelli della base. È un controllo **testuale**, quindi immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore ⇒ la regola V1 di ADR-0008 diventa verificabile. Verifica non vacua: applicato alla PR #249 reale (base `5e98866` → merge `2478a9a`) rileva **5 violazioni** — la PR aveva committato i blocchi rigenerati in locale. La PR #250 aveva la stessa violazione ed è stata corretta
+- **`scripts/test-protocol-consistency.sh`** (8 scenari: 1 positivo + 7 negativi, uno per check) e **`scripts/test-aggregate-blocks.sh`** (6 scenari): un gate che passa sempre non è un gate (lesson 43-1)
+- Nuova sezione **§"✅ Il contratto del protocollo: regola ⟺ gate"**: la tabella regola ⟺ gate ⟺ drift chiuso. È la forma che rende la regola «ogni regola scende a un gate» leggibile da un agente in 30 secondi
+
+*Precedente v1.34 — **il protocollo diventa un contratto verificato** (Sessione 79, issue #248). `AGENTS.md` era l'unico artefatto di governance del repo **senza generatore e senza gate**: 1328 righe, 77 anchor, 643 citazioni, **0** controlli automatici — mentre il README ha `check-readme-facts.mjs`, le sessioni `check-merge-state.mjs`, i workflow `validate-workflows.mjs`, le label `validate-labels.mjs`, i blocchi aggregati `aggregate-state.ps1`. Il drift che ne conseguiva era **misurato, non ipotetico**: 8 casi. Chiusi in questa versione (il **meccanismo** che li chiude per sempre è il gate di coerenza, lotto I2-b):
 - **D1** `docs/INDEX.md` dichiarava «v1.27» mentre il file era a v1.33 → allineato
 - **D2** la tabella label non elencava `phase-post`, che il gate `validate-labels.mjs` si aspetta → allineata
 - **D3** `scripts/post-merge.ps1` documentava «Exit 1» mentre il codice esce **14** → allineato
@@ -2274,11 +2308,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.34 | Protocollo per agenti — **v1.34 (Sessione 79, issue #248)**: il protocollo diventa un *contratto verificato* (**[`ADR-0012`](13-ADR/0012-agent-protocol-contract.md)**: ogni regola scende a un gate; 8 drift chiusi; checklist PR = unico artifact nel PR template; il claim diventa atomico con riverifica deterministica; `pwsh` 7 obbligatorio, mai il fallback 5.1). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.35 | Protocollo per agenti — **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate nuovi, bloccanti in CI: `check-protocol-consistency.mjs` e `check-aggregate-blocks.mjs`; **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md)). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.8 | Diario cronologico per story: problemi, fix, lesson learned — §45: Sessione 79, protocollo agenti come contratto verificato (ADR-0012, issue #248). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.9 | Diario cronologico per story: problemi, fix, lesson learned — §46: Sessione 80, il protocollo agenti come contratto verificato (2 gate nuovi, issue #252). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -12167,6 +12201,32 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
 | 2.31 | 2026-10-31 (issue #233) | **§43 Story 3.1 — Home + Timeline** (Sessione 77, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (77-1 **il modello è puro, i componenti sono presentazionali**: tutta la logica — i quattro numeri della Home, la bar week, i bucket per granularità, le serie di volume e mood, le bande di era, il zoom progressivo — sta in `apps/web/src/screens/homeTimelineModel.ts`, senza React né DOM, riutilizzando il **vocabolario temporale del core** (`@core/analysis`): la Timeline non introduce un secondo calendario (lesson 27-7). I 19 test girano senza IndexedDB né `fake-indexeddb`, perché la logica non li tocca; 77-2 **«il dato mancante non è zero»**: il bucket vuoto **esiste** e vale 0 (una linea che salta i buchi suggerirebbe continuità che i dati non hanno) e il **mood non viene interpolato** nei bucket senza dati; l'area del volume è chiusa sul **minimo** del dominio e non su zero, perché un ascolto non riparte da zero minuti e un'area che scende a zero inventerebbe un silenzio; 77-3 **nessuna libreria di chart**: i tre grafici (StreamChart, MoodLine, BarWeek) sono **SVG scritti a mano**, con la geometria in un file puro e testato (`chartGeometry.ts`) e il contratto a11y della spec (`07§2.7`): `<title>`, `<desc>` e una **tabella dati nascosta** per screen reader. Introdurre una dipendenza di grafici sarebbe una decisione di **stack**, non di story; 77-4 **la scelta fra onboarding e app è legata ai dati**: `App.tsx` interroga il database (ci sono ascolti?) invece di usare un flag in `localStorage`, che mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo; 77-5 **le soglie di stato sono in un punto solo**: 100 eventi per la Home e 6 mesi per la Timeline (`06§2.6-2.7`) sono dichiarati in `useHomeTimelineData.ts`, non nelle due schermate). Consegnati: `apps/web/src/screens/{homeTimelineModel.ts,Home.tsx,Timeline.tsx,AppShell.tsx}`, `apps/web/src/components/{StatCard,MemoryCard,BarWeek,EraBand,StreamChart,MoodLine}.tsx` + `chartGeometry.ts`, `apps/web/src/hooks/{useCountUp.ts,useHomeTimelineData.ts}`, il cablaggio di `App.tsx` e `OnboardingRouter.tsx`, 11 chiavi i18n nuove (namespace `nav` incluso), gli stili in `onboarding.css`, `08-COPY-I18N.md` v0.13 e lo stato della story 3.1 (`done`). Con la 3.1 l'**EPIC 3** passa a 2/4 e l'indicatore di avanzamento (issue #216) a **75%** — 21 story su 28, 7 step rimanenti |
 | 2.32 | 2026-10-31 (Sessione 78) | **§44 Difetto ricorrente: la rimozione della worktree su Windows** (nessuna issue dedicata; segnalato dal project owner): `scripts/post-merge.ps1` si fermava al passo 1 con «Filename too long» / «Result too large» — `git worktree remove --force` cancellava l'albero senza il prefisso `\\?\` e la worktree con `node_modules` aveva path > MAX_PATH. Il rimedio **manuale** (`rd /s /q "\\?\"` + `git worktree prune`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è una procedura mancante. Fix su tre livelli dentro lo script — **L1** `git -c core.longpaths=true worktree remove --force` (causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale tocca **solo** directory che sono worktree di questo repo (working copy principale e antenati mai toccati → **exit 16**) e `git status` fallito = WIP sconosciuto = stop (**exit 10**); `git status` ora gira con `core.longpaths=true`. Difetto scoperto mentre si scriveva la rete: `Invoke-CmdVerbatim` non passava `/c` a `cmd.exe` ⇒ shell interattiva, comando non eseguito, **exit 0** — un successo che non aveva fatto nulla; `/c` aggiunto e L3 coperto da un test che lo **forza** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`). Test: `test-post-merge.sh` **T10..T14** (shim di `git` che fallisce solo su `worktree remove`, guardia sulla working copy, path lunghi reali, catena L1→L2→L3 su PS 5.1, L3 forzata) → **47 assert, 0 falliti**. `AGENTS.md` v1.33 (nuova sezione sul difetto + exit 16), `12-DEVOPS.md` §9.8i + changelog 1.7, `docs/state/sessions/78-post-merge-long-paths.md`. **PR #236 merged il 2026-11-01** (merge commit `08a0b4d`), issue di tracking **#235** (`status:done`) — l'issue è stata creata in fase di chiusura, perché il difetto non ne aveva una e il protocollo pretende una PR = una issue |
+## 46. Il protocollo agenti come contratto verificato (Sessione 80)
+
+**Branch**: `feat/252-gate-protocollo-coerenza`
+**Issue di tracking**: **#252** (lotto I2-b dell'epic #248)
+**Data**: 2026-11-01
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 80-1 | P | `AGENTS.md` era l'unico artefatto di governance **senza gate**: 0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella exit code — mentre README, sessioni, workflow, label, blocchi aggregati e bundle ne avevano uno ciascuno | La Sessione 79 aveva chiuso **8 drift misurati**, ma li aveva chiusi **una volta**: senza un gate che li confronti, tornano. Il principio di ADR-0012 («una regola senza gate è un consiglio») era una dichiarazione, non un meccanismo | **`scripts/check-protocol-consistency.mjs`** (read-only, 6 check: versione, label, exit code, **integrità degli anchor**, script/flag citati, checklist duplicate) + **`scripts/check-aggregate-blocks.mjs`** (bloccante) + job CI `gates-protocol` | `docs/13-ADR/0012` · `AGENTS.md` §"✅ Il contratto del protocollo" |
+| 80-2 | P | **3 riferimenti rotti in `AGENTS.md`** che nessuno aveva notato in 78 sessioni: «Macchina **di** stati delle issue» (typo, la sezione si chiama «a stati»), «§"⚠️ Deprecazione"» (sezione inesistente), «§"🛡️ Hardening multi-agente"» (rinominata in «Session start checklist») | Un rimando a una sezione inesistente è **indistinguibile** da uno valido finché nessuno lo clicca: la documentazione non ha un meccanismo che noti la rottura del proprio link | Il gate C4 verifica che ogni `AGENTS.md §"…"` risolva a un heading esistente; i 3 riferimenti corretti. Il gate **è** la verifica: la correzione è stata fatta sul documento, non sul gate | `scripts/check-protocol-consistency.mjs` |
+| 80-3 | P | La regola V1 di ADR-0008 («mai modificare i blocchi `AGGREGATE-*` a mano») era **violabile in silenzio**: il check in CI è warning-only perché confronta *contenuti calcolati* e soffre dell'incompatibilità PS 5.1/PS 7 (issue #63) ⇒ il drift veniva auto-corretto post-merge e la violazione **merge-e senza che il reviewer la vedesse** | La regola che serve non è «il blocco è coerente con il calcolato» ma «**il blocco non è stato toccato**»: una domanda **testuale**, che non soffre di alcuna incompatibilità di piattaforma | **`scripts/check-aggregate-blocks.mjs`**: confronta i blocchi della PR con quelli della base, ed è quindi **bloccante** (decisione D4 del project owner). Esente `AGGREGATE-BUNDLE-INVENTORY` (il suo contenuto è una misura delle dimensioni, non uno stato) | `docs/13-ADR/0008` V1 |
+| 80-4 | L | Il primo giro di un gate appena scritto produce **falsi positivi prima che veri problemi**: 2 dei 5 riferimenti segnalati erano in realtà rimandi ad altri documenti (`§9.8b di docs/12-DEVOPS.md`) o a sottosezioni (`§"A → B"`) | L'attribuzione per "menzione di documento più vicina" non era implementata: ogni `§` di una riga finiva attribuito all'ultimo `AGENTS.md` citato, e le sottosezioni venivano lette come titoli interi | L'attribuzione è per **menzione più vicina** (con documenti senza estensione riconosciuti) e la freccia `→` introduce un percorso, non un titolo. Ordine di lavoro: **prima far passare il gate sullo stato vero del repository** (che è sano), poi giudicare i fallimenti | `scripts/check-protocol-consistency.mjs` |
+| 80-5 | L | Un gate è **non vacuo** solo se lo si esegue su un caso reale già esistente, non su una fixture costruita apposta | Una fixture dimostra che il gate funziona; un caso reale dimostra che c'era qualcosa da trovare | `check-aggregate-blocks.mjs` eseguito sulla **PR #249 reale** (base `5e98866` → merge `2478a9a`): **5 violazioni** — la PR aveva committato i blocchi rigenerati in locale. La **PR #250** aveva la stessa violazione ed è stata corretta prima del merge | PR #249 · PR #250 |
+| 80-6 | L | Il checkout del gate in CI deve avere **la base**, non solo il merge commit | `actions/checkout` con `fetch-depth: 1` non ha `origin/main`: il confronto base-vs-PR non può girare, e il gate passerebbe sempre | `fetch-depth: 0` nel job `gates-protocol`. È il dettaglio che distingue un gate che verifica da un gate che passa sempre (lesson 43-1) | `.github/workflows/ci.yml` |
+
+**Lesson learned**: la prima lezione è sulla **forma della verifica**. Il gate dei blocchi aggregati non confronta «il blocco è coerente con il calcolato» (che è la forma del check esistente, e che per definizione soffre della differenza di piattaforma): confronta «**il blocco è stato toccato**». Sono due domande diverse, con due soglie diverse, e solo la seconda è rispondibile in modo **testuale** — quindi immune dall'incompatibilità PS 5.1/PS 7 che tiene quel check in modalità warning da quattro mesi, e quindi bloccante. Una regola che non può essere verificata in modo affidabile non è una regola verificata: è una regola dichiarata.
+
+La seconda lezione è sul **tempo di costruzione del gate**: il primo giro ha segnalato 5 riferimenti, di cui 3 erano problemi veri del protocollo e 2 erano bug del gate. L'ordine conta — far passare il gate sullo stato **vero** del repository prima di giudicare i fallimenti, altrimenti si finisce per «correggere» il gate invece del documento, e il gate smette di essere una verifica.
+
+La terza è sulla **non vacuità**: un gate che non è mai stato eseguito su un caso reale non è un gate, è un'`assert` che non è mai stata esercitata. La prova più economica è eseguire il gate nuovo su una **PR già mergiata**: se non trova niente, il gate è sospetto; se trova 5 violazioni, il gate è vero e la regola V1 era già stata violata senza che nessuno lo vedesse.
+
+**Verifica**: `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti (84 riferimenti, 78 heading) · `node scripts/check-aggregate-blocks.mjs` → 0 violazioni · `bash scripts/test-protocol-consistency.sh` → 8 scenari, 0 falliti · `bash scripts/test-aggregate-blocks.sh` → 6 scenari, 0 falliti · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
 ## 45. Protocollo agenti come contratto verificato (Sessione 79)
 
 **Branch**: `feat/248-protocollo-contratto-verificato`
@@ -12199,6 +12259,7 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
+| 2.34 | 2026-11-01 (issue #252) | **§46 Sessione 80 — il protocollo agenti come contratto verificato (I2-b)**: `AGENTS.md` era l'unico artefatto di governance **senza gate** ⇒ 2 gate read-only nuovi, `check-protocol-consistency.mjs` (6 check: versione, tabella label, tabella exit code, **integrità degli anchor**, esistenza di script e flag citati, checklist unica) e `check-aggregate-blocks.mjs` (**bloccante**: la regola V1 di ADR-0008 verificata in modo **testuale**, immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore), con le suite di scenario negativo (8 + 6) e il job CI `gates-protocol` (4 step, `fetch-depth: 0`). Il primo giro ha trovato **3 riferimenti rotti in `AGENTS.md`** (typo «Macchina **di** stati», sezione «⚠️ Deprecazione» inesistente, rimando a «🛡️ Hardening multi-agente» rinominata) e **1 riferimento stale** in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`). Prova di non-vacuità: il gate dei blocchi applicato alla **PR #249 reale** rileva **5 violazioni** (la PR aveva committato i blocchi rigenerati in locale) ⇒ la regola V1 era violabile in silenzio; la **PR #250** aveva la stessa violazione ed è stata corretta. `AGENTS.md` v1.35 (nuova sezione §"✅ Il contratto del protocollo: regola ⟺ gate"), `docs/12-DEVOPS.md §9.10` a 13 job / 31 step |
 
 ---
 
@@ -17810,6 +17871,116 @@ verificato con un'ispezione mirata dei file citati.
 - `scripts/generate-bundle.ps1`: `$files` += ADR-0012 + sessione 79
 - `docs/INDEX.md`: versione di `AGENTS.md`, riga ADR-0012, riga `18-DEV-LOG.md`
 - `docs/18-DEV-LOG.md`: entry della sessione 79
+
+
+
+===== FILE: docs/state/sessions/80-gate-protocollo-coerenza.md =====
+
+---
+number: 80
+title: "Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)"
+date: 2026-11-01
+state: 🟡
+merged: false
+branch: feat/252-gate-protocollo-coerenza
+pr: 0
+claim: kilo-hp-elitebook-1a2b
+tags: [devops, governance, tooling]
+---
+
+# Sessione 80 — Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)
+
+> **Issue di tracking**: #252 (lotto I2-b dell'epic #248). **Branch**: `feat/252-gate-protocollo-coerenza`.
+>
+> Secondo lotto dell'epic #248: non chiude altri drift, **chiude la classe di drift**. Nella
+> Sessione 79 ne erano stati chiusi 8, uno per uno: senza un gate che li confronti, tornano.
+
+## Sintesi
+
+Il protocollo agenti aveva una proprietà che nessun altro artefatto di governance del repo aveva: **nessun gate**. Il README ha `check-readme-facts.mjs`, le sessioni `check-merge-state.mjs`, i workflow `validate-workflows.mjs`, le label `validate-labels.mjs`, i blocchi aggregati `aggregate-state.ps1`, il bundle `generate-bundle.ps1`. `AGENTS.md` — 1328 righe, 77 anchor, 643 citazioni — no.
+
+Questa sessione aggiunge i due gate che mancavano, entrambi **read-only** (non generano e non scrivono nulla) e entrambi con il proprio **scenario negativo** (un gate che passa sempre non è un gate, lesson 43-1):
+
+| Gate | Controlli | Drift coperti |
+|------|-----------|---------------|
+| `scripts/check-protocol-consistency.mjs` | 6 | D1, D2, D3, D7, D8 + integrità degli anchor |
+| `scripts/check-aggregate-blocks.mjs` | 1 (bloccante) | regola V1 di ADR-0008 |
+
+Il primo giro del gate di coerenza ha trovato **3 riferimenti rotti in `AGENTS.md`** che nessuno aveva notato in 78 sessioni: un typo («Macchina **di** stati» invece di «a stati»), un rimando a una sezione «⚠️ Deprecazione» che non esiste, e un rimando a «🛡️ Hardening multi-agente» (rinominata in «Session start checklist»). Sono il tipo di difetto che la documentazione non può notare da sola: un rimando a una sezione inesistente è indistinguibile da un rimando valido finché nessuno lo clicca.
+
+Il gate dei blocchi aggregati ha una **prova di non-vacuità**: applicato alla **PR #249 reale** (base `5e98866` → merge commit `2478a9a`) rileva **5 violazioni** — la PR aveva committato i blocchi `AGGREGATE-*` rigenerati in locale, violando la regola V1 di ADR-0008. La **PR #250** (doc-sync di chiusura della Sessione 79) aveva la stessa violazione ed è stata corretta prima di questo merge.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-80.1 | Il gate dei blocchi confronta **base vs PR**, non "contenuto calcolato vs contenuto su disco" | La regola V1 di ADR-0008 è «il blocco non è stato toccato»: è una domanda **testuale**, e quindi immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore (issue #63). Perciò può essere **bloccante** (decisione D4 del project owner) |
+| D-80.2 | `AGGREGATE-BUNDLE-INVENTORY` è **esente** | Il suo contenuto è una **misura** (le dimensioni dei file in catalogo), non uno stato: cambia con qualsiasi modifica di contenuto, e il `pre-push` lo rigenera da solo. Gli altri 7 blocchi sono stati, e la loro unica sorgente è l'agregator, post-merge |
+| D-80.3 | I **documenti storici** non sono verificati (footer changelog di `AGENTS.md`, `docs/18-DEV-LOG.md`, `docs/SESSIONS.md`, `docs/BUNDLE.md`) | Un riferimento a una sezione **come era all'epoca** («La CI: 11 job» quando oggi sono 12) non è un drift: è un record. Verificarli produrrebbe solo falsi positivi |
+| D-80.4 | Il riferimento a un altro documento è attribuito al **documento citato più vicino** | Una riga può citare più documenti (`AGENTS.md §"x" e docs/12-DEVOPS.md §9.10`): ogni `§` appartiene all'ultimo citato prima di lui |
+| D-80.5 | Il gate C4 verifica i riferimenti **anche dentro `AGENTS.md`** | I riferimenti interni non citano il file stesso: senza questo, il gate ne ignorava la maggior parte |
+| D-80.6 | I flag citati sono verificati **solo dentro i blocchi di codice** | Una flag citata in prosa per dire che *non esiste* (es. `-Strict`, che il protocollo dichiara inesistente) non è un riferimento da verificare |
+| D-80.7 | C6 confronta le voci di checklist **con il contenuto del PR template**, non con la loro presenza | `AGENTS.md` ha 3 voci di checklist **proprie** (i criteri di accettazione di un'issue): non sono un duplicato. Il duplicato è la *copia* di una voce del template |
+| D-80.8 | Il job CI è `gates-protocol`, con `fetch-depth: 0` | Serve il confronto con `origin/main`; non richiede `pnpm install` (solo moduli built-in di node) |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
+restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
+4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
+Questa sessione è lavoro di **governance** su un'epic (#248), non una story del backlog.
+
+**Il numero che conta.** I gate del repository passano da **26** a **30** (4 nuovi step nel job
+`gates-protocol`), e il **protocollo agenti** passa da **0** a **2** gate che lo verificano. Per la
+prima volta ogni regola normativa di `AGENTS.md` che può essere confrontata con la realtà **ha un
+gate**: il principio di ADR-0012 («una regola senza gate è un consiglio») smette di essere un
+principio e diventa un inventario.
+
+**Cosa è pronto.** I due gate (6 + 1 controlli), le due suite di scenario negativo (8 + 6
+scenari), il job `gates-protocol` in `ci.yml` (4 step bloccanti + `fetch-depth: 0`), la nuova
+sezione §"✅ Il contratto del protocollo: regola ⟺ gate" in `AGENTS.md` (v1.34 → v1.35), il
+catalogo dei gate in `docs/12-DEVOPS.md §9.10` (13 job, 31 step), 3 riferimenti rotti corretti in
+`AGENTS.md`, 1 riferimento stale corretto in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`, che
+non esiste più dalla ristrutturazione v1.0).
+
+**Cosa manca.** Il lotto **I2-c** (`agent-claim.ps1` con claim e riverifica in sequenza atomica,
+`agent-pr.ps1`, `check-claim-state.mjs`) e il lotto **I3** (rifinitura di `AGENTS.md` a ~400 righe
+con 77 anchor invariati — il gate C4 ne è la rete di sicurezza). Resta aperta l'issue **#251**
+(la catena post-merge si annulla da sola: il concurrency group `post-merge-main` cancella i run in
+attesa invece di accodarli — misurato nel merge della PR #249).
+
+**Salute tecnica.** Worktree attiva su `feat/252-gate-protocollo-coerenza`. Claim riverificato
+sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
+`node scripts/check-aggregate-blocks.mjs` (0 violazioni). `pwsh` 7.6.9.
+
+**Gate di testabilità.** `node scripts/check-protocol-consistency.mjs` (6 check, 0 falliti) ·
+`node scripts/check-aggregate-blocks.mjs` (0 violazioni) ·
+`bash scripts/test-protocol-consistency.sh` (8 scenari, 0 falliti) ·
+`bash scripts/test-aggregate-blocks.sh` (6 scenari, 0 falliti) ·
+`pwsh scripts/aggregate-state.ps1 -Check` (exit 0) · `pwsh scripts/generate-bundle.ps1 -Check`
+(exit 0) · `node scripts/validate-workflows.mjs .github/workflows` (0 falliti).
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un **rimando** a una sezione inesistente è indistinguibile da uno valido finché nessuno lo clicca: 3 in 78 sessioni, e nessun gate li aveva visti | Il gate C4 verifica gli anchor **come parte del gate di coerenza**, non come controllo separato: un controllo in più significa un posto in più dove può non essere eseguito |
+| Il primo giro di un gate appena scritto finds **falsi positivi** prima che veri problemi: 2 «riferimenti rotti» erano in realtà riferimenti ad altri documenti (attribuzione per menzione più vicina) e riferimenti a sottosezioni (freccia `→`) | L'ordine è: prima far passare il gate sullo stato **vero** del repository (che è sano), poi giudicare i fallimenti. Un gate che segnala 20 problemi e 15 sono sue bug non viene ascoltato quando ne segnala 21 e 20 sono suoi bug |
+| La prova che un gate non è vacuo si fa su **un caso reale già esistente**, non su una fixture | `check-aggregate-blocks.mjs` è stato eseguito sulla PR #249 reale: 5 violazioni. Una fixture costruita apposta avrebbe dimostrato che il gate funziona, non che c'era qualcosa da trovare |
+| Il **checkout del gate in CI** deve avere la base, non solo il merge commit | `fetch-depth: 0`: senza, `origin/main` non esiste e il confronto base-vs-PR non può girare. È il dettaglio che distingue un gate che passa sempre da un gate che verifica |
+
+## Documenti aggiornati
+
+- `scripts/check-protocol-consistency.mjs` (nuovo) · `scripts/check-aggregate-blocks.mjs` (nuovo)
+- `scripts/test-protocol-consistency.sh` (nuovo) · `scripts/test-aggregate-blocks.sh` (nuovo)
+- `scripts/generate-fixtures.mjs`: riferimento stale `AGENTS.md §V1` → `02-DATA-SCHEMA.md`
+- `.github/workflows/ci.yml`: nuovo job `gates-protocol` (4 step) + aggregatore `quality`
+- `AGENTS.md` v1.34 → v1.35: nuova sezione §"✅ Il contratto del protocollo: regola ⟺ gate"; 3
+  riferimenti rotti corretti
+- `docs/12-DEVOPS.md §9.10`: catalogo dei gate (13 job, 31 step) + sezione sul job `gates-protocol`
+- `docs/18-DEV-LOG.md` §46
+- `scripts/generate-bundle.ps1`: `$files` += i 4 nuovi script + la sessione 80
+- `docs/INDEX.md`: versione di `AGENTS.md`, riga `13-ADR/`, riga `18-DEV-LOG.md`
 
 
 
@@ -28043,6 +28214,8 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > **Sessione 74**: il trigger `push` su `main` è filtrato per path e su `push` girano **solo i
 > job leggeri**; i 3 job `node-*` girano **solo su `pull_request`**, e saltano (riuscendo) se la
 > PR tocca **solo file `.md`**. Dettaglio e misure in **§9.14.10**.
+> **Sessione 80 (issue #248)**: aggiunto il job `gates-protocol` (4 step) → **13 job**, 11 in
+> parallelo. Il protocollo agenti diventa un **contratto verificato** (ADR-0012).
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
@@ -28080,7 +28253,31 @@ protection può interpretare un check saltato come successo.
 | 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | solo PR | sì | #49 |
 | 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | solo PR | sì | #58 |
 | 26 | `gates-workflows` | `Validità YAML dei workflow` (`test-workflow-yaml-scalars.sh`, 8 assert) | solo PR | sì | sessione 74 |
-| 27 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
+| 27 | `gates-protocol` | `Coerenza del protocollo agenti` (`check-protocol-consistency.mjs`, 6 check) | solo PR | sì | **#248** |
+| 28 | `gates-protocol` | `Gate "coerenza del protocollo" fail-closed` (`test-protocol-consistency.sh`, 8 scenari) | solo PR | sì | **#248** |
+| 29 | `gates-protocol` | `Blocchi aggregati intoccabili` (`check-aggregate-blocks.mjs`) | solo PR | sì | **#248** |
+| 30 | `gates-protocol` | `Gate "blocchi aggregati" fail-closed` (`test-aggregate-blocks.sh`, 6 scenari) | solo PR | sì | **#248** |
+| 31 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
+
+**Il job `gates-protocol`** (Sessione 80, issue #248, ADR-0012) è il primo enforcement del
+protocollo: fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di governance del repo
+**senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella
+exit code). I due gate che contiene sono **read-only** (non generano e non scrivono nulla):
+
+- `check-protocol-consistency.mjs` — 6 controlli, uno per ciascun drift chiuso nella Sessione 79:
+  versione dichiarata ↔ `docs/INDEX.md` (D1), tabella label ↔ `validate-labels.mjs` (D2), tabella
+  exit code ↔ letterali `exit N` degli script (D3), **integrità degli anchor** (ogni
+  `AGENTS.md §"…"` deve risolvere a un heading esistente), esistenza degli script e dei flag citati
+  (D7), assenza di checklist duplicate (D8). Exit 0 = in sync, 1 = drift, 2 = errore d'ambiente.
+- `check-aggregate-blocks.mjs` — confronta i blocchi `<!-- AGGREGATE-* -->` della PR con quelli
+  della base: **testuale**, quindi immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only
+  il check aggregatore, e quindi **bloccante** (regola V1 di ADR-0008). È la prima verifica della
+  regola V1: fino adesso la violazione «blocchi modificati a mano» merge-e in silenzio, perché il
+  drift veniva auto-corretto post-merge. Esente: `AGGREGATE-BUNDLE-INVENTORY` (il suo contenuto è
+  una misura delle dimensioni dei file, non uno stato).
+
+Il job usa `fetch-depth: 0` (serve il confronto con `origin/main`) e **non richiede `pnpm install`**
+(solo moduli built-in di node).
 
 **Verifica**: gli step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). **Sette** sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149), `Validità YAML dei workflow` (Sessione 74), `Copertura dei trigger del blocco progress` (#216, vedi §9.8h) e la sintassi JS dei blocchi `script:` (#73).
 
@@ -32130,7 +32327,7 @@ versione riscritta, verificabile:
  * scripts/generate-fixtures.mjs
  *
  * Generatore deterministico di fixture sintetici per test DB e analisi.
- * Source of truth: AGENTS.md §V1 (audit 2026-10-15) + 10-TESTING §3.2/§3.3/§3.4 + 06-UX §2.14.
+ * Source of truth: 02-DATA-SCHEMA.md + 10-TESTING.md §3.2/§3.3/§3.4 + 06-UX-FLOWS-STATES.md §2.14 (audit 2026-10-15).
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti
@@ -39640,6 +39837,1073 @@ exit 0
 
 
 
+===== FILE: scripts/check-protocol-consistency.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate "coerenza del protocollo" (issue #248, ADR-0012).
+ *
+ * `AGENTS.md` era l'unico artefatto di governance del repo SENZA generatore e
+ * SENZA gate: 1328 righe, 77 anchor, 643 citazioni, 0 controlli automatici.
+ * Tutti gli altri ne hanno uno (`check-readme-facts.mjs` per il README,
+ * `check-merge-state.mjs` per le sessioni, `validate-workflows.mjs` per i
+ * workflow, `validate-labels.mjs` per le label, `aggregate-state.ps1` per i
+ * blocchi aggregati, `generate-bundle.ps1` per il bundle).
+ *
+ * Questo gate e' il meccanismo che chiude per sempre i drift misurati nella
+ * Sessione 79 (D1-D8): confronta i fatti *normativi* del protocollo con la
+ * realta' del repository. Un drift che non ha un gate e' un drift che torna.
+ *
+ * Il gate e' **read-only**: non genera e non scrive nulla.
+ *
+ * Controlli (uno per drift chiuso nella Sessione 79):
+ *   C1  versione di AGENTS.md == versione dichiarata in docs/INDEX.md
+ *   C2  tabella "Label disponibili" == elenco atteso di validate-labels.mjs
+ *   C3  tabella exit code == letterali `exit N` dei script che li emettono
+ *   C4  ogni riferimento `AGENTS.md §"..."` risolve a un heading esistente
+ *   C5  ogni `scripts/<file>` e ogni flag `-<Flag>` citati esistono davvero
+ *   C6  nessuna checklist duplicata: AGENTS.md non contiene copie delle voci
+ *       del PR template (un solo artifact, decisione D3 del project owner)
+ *
+ * Uso: node scripts/check-protocol-consistency.mjs [--root <dir>]
+ *
+ * Exit code: 0 = in sync, 1 = drift, 2 = errore di ambiente (file mancante).
+ */
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { join, resolve, relative, sep } from 'node:path';
+
+const argv = process.argv.slice(2);
+const rootIdx = argv.indexOf('--root');
+const root = resolve(rootIdx >= 0 ? argv[rootIdx + 1] : '.');
+
+let failures = 0;
+
+function fail(message) {
+  console.error(`[FAIL] ${message}`);
+  failures++;
+}
+
+function ok(message) {
+  console.log(`[OK] ${message}`);
+}
+
+function requireFile(path, label) {
+  if (!existsSync(path)) {
+    console.error(`[FAIL] ${label}: file non trovato: ${path}`);
+    process.exit(2);
+  }
+  return readFileSync(path, 'utf8');
+}
+
+function listFiles(dir, filter, acc = []) {
+  if (!existsSync(dir)) return acc;
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    const st = statSync(full);
+    if (st.isDirectory()) {
+      listFiles(full, filter, acc);
+    } else if (filter(full)) {
+      acc.push(full);
+    }
+  }
+  return acc;
+}
+
+/** Riduce un titolo a una chiave confrontabile (via emoji, punteggiatura, backtick). */
+function normalizeTitle(text) {
+  return text
+    .replace(/`/g, '')
+    .replace(/[^\p{L}\p{N}\s]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+// ---------------------------------------------------------------------------
+// C1 - versione dichiarata
+// ---------------------------------------------------------------------------
+
+function checkVersion() {
+  const agents = requireFile(join(root, 'AGENTS.md'), 'C1');
+  const index = requireFile(join(root, 'docs', 'INDEX.md'), 'C1');
+
+  const inAgents = agents.match(/\*\*Versione\s+(\d+\.\d+)/);
+  if (!inAgents) {
+    fail('C1: AGENTS.md non dichiara una versione nel formato "**Versione X.Y"');
+    return;
+  }
+  const inIndex = index.match(/\[\s*`?\.\.\/AGENTS\.md`?\]\([^)]*\)\s*\|[^|]*?v(\d+\.\d+)/);
+  if (!inIndex) {
+    fail('C1: docs/INDEX.md non dichiara la versione di AGENTS.md nella riga "Documenti di supporto"');
+    return;
+  }
+  if (inAgents[1] !== inIndex[1]) {
+    fail(`C1: versione disallineata — AGENTS.md dichiara v${inAgents[1]}, docs/INDEX.md dichiara v${inIndex[1]}`);
+    return;
+  }
+  ok(`C1: versione di AGENTS.md in sync (v${inAgents[1]})`);
+}
+
+// ---------------------------------------------------------------------------
+// C2 - tabella label vs gate delle label
+// ---------------------------------------------------------------------------
+
+/** Espande `phase-0 … phase-6` in [phase-0, ..., phase-6]. */
+function expandRange(from, to) {
+  const out = [];
+  const num = (s) => {
+    const m = s.match(/(\d+)$/);
+    return m ? Number(m[1]) : NaN;
+  };
+  const a = num(from);
+  const b = num(to);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return [];
+  const prefix = from.replace(/\d+$/, '');
+  for (let i = a; i <= b; i++) out.push(`${prefix}${i}`);
+  return out;
+}
+
+/** Valori label citati in una cella della tabella. */
+function labelsFromCell(cell) {
+  const out = [];
+  let rest = cell;
+  const rangeRe = /`([^`]+)`\s*…\s*`([^`]+)`/g;
+  let m;
+  while ((m = rangeRe.exec(cell)) !== null) {
+    out.push(...expandRange(m[1], m[2]));
+    rest = rest.replace(m[0], ' ');
+  }
+  for (const raw of rest.match(/`([^`]+)`/g) || []) {
+    const value = raw.replace(/`/g, '').trim();
+    if (/^[a-z][a-z0-9-]*(?:[:/][a-z0-9-]+)*$/i.test(value)) out.push(value);
+  }
+  return out;
+}
+
+function checkLabelTable() {
+  const agents = requireFile(join(root, 'AGENTS.md'), 'C2');
+  const gateSrc = requireFile(join(root, 'scripts', 'validate-labels.mjs'), 'C2');
+
+  // --- tabella "Label disponibili" di AGENTS.md
+  const section = agents.match(/### Label disponibili[\s\S]*?(?=\n#{2,4} |\n\n\n)/);
+  if (!section) {
+    fail('C2: sezione "### Label disponibili" non trovata in AGENTS.md');
+    return;
+  }
+  const documentedLabels = new Map();
+  for (const line of section[0].split(/\r?\n/)) {
+    const m = line.match(/^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|/);
+    if (!m) continue;
+    const labels = labelsFromCell(m[2]);
+    if (labels.length) documentedLabels.set(m[1].trim(), labels);
+  }
+  if (documentedLabels.size === 0) {
+    fail('C2: nessuna riga di label trovata nella tabella "Label disponibili"');
+    return;
+  }
+
+  // --- elenco atteso nel gate
+  const expected = new Map();
+  const gateRe = /^\s*'?([^\n:']+?)'?:\s*\[([^\]]*)\]/gm;
+  let m;
+  while ((m = gateRe.exec(gateSrc)) !== null) {
+    const category = m[1].trim();
+    const labels = m[2]
+      .split(',')
+      .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+      .filter(Boolean);
+    if (labels.length) expected.set(category, labels);
+  }
+  if (expected.size === 0) {
+    fail('C2: elenco atteso non trovato in scripts/validate-labels.mjs');
+    return;
+  }
+
+  let drift = 0;
+  for (const [category, labels] of expected) {
+    const doc = documentedLabels.get(category);
+    if (!doc) {
+      fail(`C2: la tabella di AGENTS.md non dichiara la categoria "${category}" (il gate la si aspetta)`);
+      drift++;
+      continue;
+    }
+    const missing = labels.filter((l) => !doc.includes(l));
+    const extra = doc.filter((l) => !labels.includes(l));
+    if (missing.length || extra.length) {
+      const parts = [];
+      if (missing.length) parts.push(`mancano nel documento: ${missing.join(', ')}`);
+      if (extra.length) parts.push(`non previste dal gate: ${extra.join(', ')}`);
+      fail(`C2: categoria "${category}" disallineata — ${parts.join('; ')}`);
+      drift++;
+    }
+  }
+  if (drift === 0) {
+    ok(`C2: tabella label in sync con validate-labels.mjs (${expected.size} categorie)`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// C3 - tabella exit code vs script
+// ---------------------------------------------------------------------------
+
+function checkExitCodes() {
+  const agents = requireFile(join(root, 'AGENTS.md'), 'C3');
+  const postMerge = requireFile(join(root, 'scripts', 'post-merge.ps1'), 'C3');
+
+  const section = agents.match(/### Exit code[^\n]*\n([\s\S]*?)\n\n/);
+  if (!section) {
+    fail('C3: tabella "Exit code" non trovata in AGENTS.md');
+    return;
+  }
+  const documented = new Set();
+  for (const line of section[1].split(/\r?\n/)) {
+    const m = line.match(/^\|\s*(\d+)\s*\|/);
+    if (m) documented.add(Number(m[1]));
+  }
+  if (documented.size === 0) {
+    fail('C3: nessun exit code nella tabella di AGENTS.md');
+    return;
+  }
+
+  // letterali `exit N` delle righe di CODICE (i commenti non sono contratto)
+  const emitted = new Set();
+  for (const line of postMerge.split(/\r?\n/)) {
+    if (line.trim().startsWith('#')) continue;
+    for (const m of line.matchAll(/\bexit\s+(\d+)/g)) emitted.add(Number(m[1]));
+  }
+
+  const missing = [...emitted].filter((c) => !documented.has(c)).sort((a, b) => a - b);
+  const extra = [...documented].filter((c) => !emitted.has(c)).sort((a, b) => a - b);
+  if (missing.length || extra.length) {
+    const parts = [];
+    if (missing.length) parts.push(`emessi dallo script ma non documentati: ${missing.join(', ')}`);
+    if (extra.length) parts.push(`documentati ma non emessi: ${extra.join(', ')}`);
+    fail(`C3: tabella exit code disallineata con scripts/post-merge.ps1 — ${parts.join('; ')}`);
+    return;
+  }
+  ok(`C3: tabella exit code in sync con post-merge.ps1 (${emitted.size} codici)`);
+}
+
+// ---------------------------------------------------------------------------
+// C4 - integrita' degli anchor
+// ---------------------------------------------------------------------------
+
+/**
+ * File in cui i riferimenti ad AGENTS.md sono "vivi".
+ * Esclusi i documenti storici (18-DEV-LOG, SESSIONS) e i derivati (BUNDLE):
+ * un riferimento a una sezione rinominata in un diario storico non e' un drift.
+ */
+const LIVE_SCAN = [
+  { label: 'AGENTS.md', path: 'AGENTS.md' },
+  { label: '.github/', dir: '.github', exts: ['.md', '.yml', '.yaml'] },
+  { label: 'scripts/', dir: 'scripts', exts: ['.mjs', '.ps1', '.sh'], skipFiles: ['check-protocol-consistency.mjs'] },
+  {
+    label: 'docs/',
+    dir: 'docs',
+    exts: ['.md'],
+    skipFiles: ['18-DEV-LOG.md', 'SESSIONS.md', 'BUNDLE.md'],
+    skipDirs: ['state'],
+  },
+];
+
+function extractHeadings(text) {
+  const headings = [];
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.match(/^#{2,4}\s+(.+?)\s*$/);
+    if (m) headings.push(m[1]);
+  }
+  return headings;
+}
+
+/**
+ * Riferimenti `AGENTS.md §...` presenti in una riga.
+ *
+ * L'attribuzione e' per "menzione di documento piu' vicina": una riga puo' citare
+ * piu' documenti (`AGENTS.md §"x" e docs/12-DEVOPS.md §9.10`) e ogni `§`
+ * appartiene all'ultimo documento citato prima di lui. Sono riconosciute sia le
+ * menzioni con estensione (`18-DEV-LOG.md`) sia quelle senza (`18-DEV-LOG`),
+ * che altrimenti verrebbero attribuite al documento citato prima.
+ */
+function extractRefs(text, selfIsAgents) {
+  const refs = [];
+  const lines = text.split(/\r?\n/);
+  // il footer di AGENTS.md e' un CHANGELOG: i suoi riferimenti descrivono le
+  // sezioni come erano all'epoca ("La CI: 11 job" quando oggi sono 12) e non
+  // sono un contratto. Non si verificano.
+  const historyStart = selfIsAgents
+    ? lines.findIndex((l) => /^\*Ultimo aggiornamento:/.test(l.trim()))
+    : -1;
+  lines.forEach((line, i) => {
+    if (historyStart >= 0 && i > historyStart) return;
+    const mentions = [];
+    // dentro AGENTS.md ogni riferimento e' ad AGENTS.md, salvo che una riga
+    // citi prima un altro documento (l'attribuzione e' per menzione piu' vicina)
+    if (selfIsAgents) mentions.push({ at: -1, name: 'AGENTS.md' });
+    const mentionRe = /([A-Za-z0-9_.-]*\.md|\b\d{2}-[A-Z][A-Za-z-]*)/g;
+    let m;
+    while ((m = mentionRe.exec(line)) !== null) {
+      mentions.push({ at: m.index, name: m[1] });
+    }
+    let idx = -1;
+    while ((idx = line.indexOf('§', idx + 1)) !== -1) {
+      const last = mentions.filter((x) => x.at < idx).pop();
+      if (!last) continue;
+      const isAgents = /(^|\/)AGENTS\.md$/.test(last.name);
+      if (!isAgents) continue;
+      const rest = line.slice(idx + 1);
+      // se subito dopo il § c'e' un altro documento, il riferimento e' suo
+      // (es. "§9.8b di `docs/12-DEVOPS.md`")
+      const ahead = rest.slice(0, 40);
+      const aheadMention = ahead.match(/([A-Za-z0-9_.-]*\.md|\b\d{2}-[A-Z][A-Za-z-]*)/);
+      if (aheadMention && !/(^|\/)AGENTS\.md$/.test(aheadMention[1])) continue;
+      const quoted = rest.match(/^\s*["“]([^"”\n]+)["”]/);
+      if (quoted) {
+        // "Sezione → sottosezione": la freccia introduce un percorso, non un titolo
+        const ref = quoted[1].split('→')[0].trim();
+        if (ref) refs.push({ ref, line: i + 1 });
+        continue;
+      }
+      const bare = rest.match(/^\s*([^,\n§`()"/]{1,60})/);
+      if (bare) {
+        const t = bare[1].split(' (')[0].split('→')[0].replace(/[.\s]+$/, '');
+        if (t) refs.push({ ref: t, line: i + 1 });
+      }
+    }
+  });
+  return refs;
+}
+
+function checkAnchors() {
+  const agents = requireFile(join(root, 'AGENTS.md'), 'C4');
+  const headings = extractHeadings(agents).map((h) => normalizeTitle(h));
+  if (headings.length === 0) {
+    fail('C4: nessun heading trovato in AGENTS.md');
+    return;
+  }
+
+  const broken = [];
+  let total = 0;
+
+  for (const target of LIVE_SCAN) {
+    let files = [];
+    if (target.path) {
+      files = [join(root, target.path)];
+    } else {
+      files = listFiles(join(root, target.dir), (f) => {
+        const rel = relative(root, f).split(sep).join('/');
+        if (target.skipFiles && target.skipFiles.some((s) => rel.endsWith(`/${s}`) || rel === s)) return false;
+        if (target.skipDirs && target.skipDirs.some((d) => rel.includes(`/${d}/`))) return false;
+        return target.exts.some((e) => f.endsWith(e));
+      });
+    }
+    for (const file of files) {
+      if (!existsSync(file)) continue;
+      const text = readFileSync(file, 'utf8');
+      const selfIsAgents = /(^|\/)AGENTS\.md$/.test(file.replace(/\\/g, '/'));
+      for (const { ref, line } of extractRefs(text, selfIsAgents)) {
+        const key = normalizeTitle(ref);
+        if (key.length < 2) continue;
+        total++;
+        const resolved = headings.some((h) => h.startsWith(key) || key.startsWith(h));
+        if (!resolved) {
+          broken.push(`${relative(root, file).replace(/\\/g, '/')}:${line} -> §${ref}`);
+        }
+      }
+    }
+  }
+
+  if (broken.length) {
+    fail(`C4: ${broken.length} riferimenti ad AGENTS.md non risolvono a un heading esistente:`);
+    for (const b of broken) console.error(`       ${b}`);
+    return;
+  }
+  ok(`C4: integrita' degli anchor — ${total} riferimenti, tutti risolti (${headings.length} heading)`);
+}
+
+// ---------------------------------------------------------------------------
+// C5 - script e flag citati esistono
+// ---------------------------------------------------------------------------
+
+/** Blocchi di codice (fenced) di un testo markdown. */
+function fencedBlocks(text) {
+  const blocks = [];
+  const re = /```[^\n]*\n([\s\S]*?)```/g;
+  let m;
+  while ((m = re.exec(text)) !== null) blocks.push(m[1]);
+  return blocks;
+}
+
+/** Flag dichiarati nel blocco `param(...)` di uno script PowerShell. */
+function declaredFlags(ps1) {
+  const start = ps1.indexOf('param(');
+  if (start === -1) return new Set();
+  const end = ps1.indexOf('\n)', start);
+  const block = ps1.slice(start, end === -1 ? undefined : end);
+  const flags = new Set();
+  for (const m of block.matchAll(/\[\s*([^\]]*)\]\s*\$(\w+)/g)) {
+    if (/(switch|string|int|long|double|bool|ValidateSet|ValidateNotNull|ValidateRange)/i.test(m[1])) {
+      flags.add(m[2].toLowerCase());
+    }
+  }
+  return flags;
+}
+
+function checkScriptsAndFlags() {
+  const agents = requireFile(join(root, 'AGENTS.md'), 'C5');
+  const code = fencedBlocks(agents).join('\n');
+
+  // 1. gli script citati esistono
+  const scripts = new Set();
+  for (const m of code.matchAll(/\bscripts\/[A-Za-z0-9._-]+/g)) scripts.add(m[0]);
+  let missingScripts = 0;
+  for (const s of scripts) {
+    if (!existsSync(join(root, s))) {
+      fail(`C5: lo script citato non esiste: ${s}`);
+      missingScripts++;
+    }
+  }
+
+  // 2. i flag citati sono dichiarati dallo script
+  const flagRe = /\bpwsh\s+(scripts\/[A-Za-z0-9._-]+\.ps1)\s+((?:-{1,2}[A-Za-z][\w-]*\s*)+)/g;
+  let missingFlags = 0;
+  for (const m of code.matchAll(flagRe)) {
+    const full = join(root, m[1]);
+    if (!existsSync(full)) continue;
+    const declared = declaredFlags(readFileSync(full, 'utf8'));
+    if (declared.size === 0) continue;
+    for (const raw of m[2].trim().split(/\s+/)) {
+      const name = raw.replace(/^-+/, '').toLowerCase();
+      if (name.length < 2) continue; // alias di una lettera (es. -h): non verificabile
+      if (!declared.has(name)) {
+        fail(`C5: il flag "${raw}" citato per ${m[1]} non e' dichiarato come parametro`);
+        missingFlags++;
+      }
+    }
+  }
+
+  if (missingScripts === 0 && missingFlags === 0) {
+    ok(`C5: script e flag citati esistono (${scripts.size} script verificati)`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// C6 - nessuna checklist duplicata
+// ---------------------------------------------------------------------------
+
+function checkNoDuplicateChecklist() {
+  const agents = requireFile(join(root, 'AGENTS.md'), 'C6');
+  const template = requireFile(join(root, '.github', 'pull_request_template.md'), 'C6');
+
+  // le sezioni che devono contenere solo un puntatore (nessuna copia)
+  const pointerSections = ['Checklist di auto-revisione PR', 'Checklist PR aggiuntiva'];
+  const lines = agents.split(/\r?\n/);
+  let section = '';
+  const itemsInPointerSections = [];
+  const allItems = [];
+  lines.forEach((line, i) => {
+    const heading = line.match(/^#{2,4}\s+(.+?)\s*$/);
+    if (heading) section = heading[1];
+    const item = line.match(/^\s*[-*]\s+\[[ xX]\]\s+(.+?)\s*$/);
+    if (!item) return;
+    allItems.push({ text: item[1], line: i + 1 });
+    if (pointerSections.some((s) => section.includes(s))) {
+      itemsInPointerSections.push({ text: item[1], line: i + 1 });
+    }
+  });
+
+  let drift = 0;
+  if (itemsInPointerSections.length) {
+    fail(`C6: la sezione "Checklist di auto-revisione PR" contiene ${itemsInPointerSections.length} voci: l'unico artifact e' .github/pull_request_template.md (decisione D3 di ADR-0012), AGENTS.md deve rimandare.`);
+    for (const i of itemsInPointerSections.slice(0, 5)) console.error(`       riga ${i.line}: ${i.text}`);
+    drift++;
+  }
+
+  // nessuna voce di AGENTS.md puo' essere una copia di una voce del template
+  const templateItems = new Set(
+    template
+      .split(/\r?\n/)
+      .map((l) => l.match(/^\s*[-*]\s+\[[ xX]\]\s+(.+?)\s*$/))
+      .filter(Boolean)
+      .map((m) => normalizeTitle(m[1])),
+  );
+  const duplicated = allItems.filter((i) => templateItems.has(normalizeTitle(i.text)));
+  if (duplicated.length) {
+    fail(`C6: ${duplicated.length} voci di AGENTS.md sono copie di voci del PR template (un solo artifact).`);
+    for (const i of duplicated.slice(0, 5)) console.error(`       riga ${i.line}: ${i.text}`);
+    drift++;
+  }
+
+  if (drift === 0) {
+    ok(`C6: nessuna checklist duplicata in AGENTS.md (${allItems.length} voci proprie, unico artifact: il PR template)`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Esecuzione
+// ---------------------------------------------------------------------------
+
+console.log("[INFO] check-protocol-consistency: coerenza del protocollo agenti vs realta' del repository");
+
+checkVersion();
+checkLabelTable();
+checkExitCodes();
+checkAnchors();
+checkScriptsAndFlags();
+checkNoDuplicateChecklist();
+
+console.log(`\n[INFO] check-protocol-consistency: 6 check, ${failures} falliti`);
+process.exit(failures === 0 ? 0 : 1);
+
+
+
+===== FILE: scripts/check-aggregate-blocks.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate "blocchi aggregati intoccabili" (issue #248, ADR-0012 regola 4).
+ *
+ * ADR-0008 stabilisce che i blocchi `<!-- AGGREGATE-* -->` dei file globali
+ * hanno **un solo scrittore**: `scripts/aggregate-state.ps1`. La regola V1 e'
+ * "mai modificare i blocchi aggregati a mano".
+ *
+ * Finche' la regola resta solo prosa, e' violabile in silenzio: il check in CI
+ * (`aggregate-state.ps1 -Check`) e' **warning-only**, perche' confronta
+ * *contenuti calcolati* e soffre dell'incompatibilita' residua PS 5.1 / PS 7
+ * (issue #63). Il drift viene quindi auto-corretto post-merge e la violazione
+ * **merge-e senza che il reviewer la veda**.
+ *
+ * Ma la regola che serve qui non e' "il blocco e' coerente con il calcolato":
+ * e' "**il blocco non e' stato toccato**". E' una domanda **testuale**, quindi
+ * non soffre di alcuna incompatibilita' di piattaforma: puo' essere
+ * **bloccante** (decisione D4 del project owner).
+ *
+ * Il gate confronta i blocchi aggregati della PR con quelli della base:
+ *   - base senza blocchi  -> caso di introduzione (ADR-0008): INFO, non fail
+ *   - blocco aggiunto o rimosso -> FAIL
+ *   - blocco modificato             -> FAIL
+ *
+ * Un blocco e' **esente** quando il suo contenuto e' una misura del repository
+ * e non uno stato: `AGGREGATE-BUNDLE-INVENTORY` (le dimensioni dei file in
+ * catalogo cambiano con qualsiasi modifica di contenuto, e il `pre-push` lo
+ * rigenera automaticamente). Tutti gli altri blocchi sono **stati** e la loro
+ * unica sorgente e' l'aggregator, post-merge.
+ *
+ * Uso: node scripts/check-aggregate-blocks.mjs [--base <ref>] [--head <ref>]
+ *                                            [--root <dir>]
+ *
+ * Exit code: 0 = nessuna violazione, 1 = violazione, 2 = errore di ambiente.
+ */
+import { readFileSync, existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+
+const argv = process.argv.slice(2);
+function arg(name, fallback) {
+  const i = argv.indexOf(name);
+  return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : fallback;
+}
+const base = arg('--base', 'origin/main');
+const head = arg('--head', 'HEAD');
+const root = resolve(arg('--root', '.'));
+
+/** Blocchi il cui contenuto e' una misura del repository, non uno stato. */
+const EXEMPT = new Set(['AGGREGATE-BUNDLE-INVENTORY']);
+
+let failures = 0;
+
+function fail(message) {
+  console.error(`[FAIL] ${message}`);
+  failures++;
+}
+
+function ok(message) {
+  console.log(`[OK] ${message}`);
+}
+
+function info(message) {
+  console.log(`[INFO] ${message}`);
+}
+
+function git(args, allowFail = false) {
+  try {
+    return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  } catch (err) {
+    if (allowFail) return null;
+    console.error(`[FAIL] git ${args.join(' ')}: ${String(err.stderr || err.message).trim()}`);
+    process.exit(2);
+  }
+}
+
+/** Paths dei file con blocchi aggregati, presi dalla lista dei target dell'aggregator. */
+function aggregatorTargets() {
+  const script = join(root, 'scripts', 'aggregate-state.ps1');
+  if (!existsSync(script)) {
+    console.error(`[FAIL] scripts/aggregate-state.ps1 non trovato: la lista dei target e' la sua`);
+    process.exit(2);
+  }
+  const source = readFileSync(script, 'utf8');
+  const paths = new Set();
+  for (const m of source.matchAll(/Path\s*=\s*"([^"]+)"/g)) paths.add(m[1]);
+  if (paths.size === 0) {
+    console.error('[FAIL] nessun target trovato in scripts/aggregate-state.ps1');
+    process.exit(2);
+  }
+  return [...paths];
+}
+
+/** Contenuto di un file a un dato ref (null se il file non esiste a quel ref). */
+function fileAt(ref, path) {
+  const out = git(['show', `${ref}:${path}`], true);
+  return out === null ? null : out;
+}
+
+/** Blocchi aggregati di un testo: nome -> contenuto. */
+function extractBlocks(text) {
+  const blocks = new Map();
+  if (!text) return blocks;
+  const re = /<!--\s*(AGGREGATE-[A-Z0-9-]+)-START\s*-->([\s\S]*?)<!--\s*\1-END\s*-->/g;
+  for (const m of text.matchAll(re)) blocks.set(m[1], m[2]);
+  return blocks;
+}
+
+console.log(`[INFO] check-aggregate-blocks: blocchi AGGREGATE-* intoccabili nella PR (base=${base}, head=${head})`);
+
+// il base deve esistere come oggetto git
+if (git(['cat-file', '-e', `${base}^{commit}`], true) === null) {
+  console.log(`[INFO] base ${base} non presente localmente: lo recupero da origin...`);
+  const fetched = git(['fetch', '--no-tags', '--depth=1', 'origin', base], true);
+  if (fetched === null || git(['cat-file', '-e', `${base}^{commit}`], true) === null) {
+    console.error(`[FAIL] base non recuperabile: ${base}`);
+    process.exit(2);
+  }
+}
+
+const targets = aggregatorTargets();
+let compared = 0;
+let blocksSeen = 0;
+
+for (const path of targets) {
+  const baseText = fileAt(base, path);
+  const headText = fileAt(head, path);
+  if (baseText === null && headText === null) continue;
+  if (baseText === null) {
+    info(`${path}: file nuovo nella PR (nessun blocco da confrontare)`);
+    continue;
+  }
+
+  const baseBlocks = extractBlocks(baseText);
+  const headBlocks = extractBlocks(headText);
+
+  if (baseBlocks.size === 0) {
+    info(`${path}: nessun blocco aggregato nella base (caso di introduzione ADR-0008)`);
+    continue;
+  }
+  compared++;
+
+  for (const [name, content] of headBlocks) {
+    blocksSeen++;
+    if (!baseBlocks.has(name)) {
+      fail(`${path}: blocco "${name}" aggiunto nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+      continue;
+    }
+    if (EXEMPT.has(name)) continue;
+    if (baseBlocks.get(name) !== content) {
+      fail(`${path}: blocco "${name}" modificato a mano nella PR (regola V1 di ADR-0008). I blocchi si cambiano solo in docs/state/<propria>/* e vengono rigenerati dall'aggregator post-merge`);
+    }
+  }
+
+  for (const name of baseBlocks.keys()) {
+    if (!headBlocks.has(name)) {
+      fail(`${path}: blocco "${name}" rimosso nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+    }
+  }
+}
+
+if (compared === 0) {
+  info('nessun file con blocchi aggregati da confrontare');
+}
+
+console.log(`\n[INFO] check-aggregate-blocks: ${compared} file confrontati, ${blocksSeen} blocchi, ${failures} violazioni`);
+process.exit(failures === 0 ? 0 : 1);
+
+
+
+===== FILE: scripts/test-protocol-consistency.sh =====
+
+#!/usr/bin/env bash
+# Test di scenario per scripts/check-protocol-consistency.mjs (issue #248, ADR-0012).
+#
+# Il gate confronta i fatti normativi del protocollo con la realta' del
+# repository. Un gate che passa sempre non e' un gate (lesson 43-1): qui ogni
+# controllo ha UN scenario che lo fa fallire, oltre a quello che lo fa passare.
+#
+# Esegui con: bash scripts/test-protocol-consistency.sh
+# Richiede: bash, node.
+
+set -u
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+GATE="$SCRIPT_DIR/check-protocol-consistency.mjs"
+
+if [ ! -f "$GATE" ]; then
+  echo "[FAIL] gate non trovato: $GATE"
+  exit 2
+fi
+
+WORK=$(mktemp -d)
+trap "rm -rf '$WORK'" EXIT
+REPO="$WORK/repo"
+mkdir -p "$REPO/docs" "$REPO/scripts" "$REPO/.github"
+
+# ---------------------------------------------------------------------------
+# Fixture: un repository minimale ma coerente
+# ---------------------------------------------------------------------------
+
+write_fixture() {
+  local agents_version="$1"
+  local labels_row="$2"
+  local exit_rows="$3"
+  local extra_ref="$4"
+  local extra_flag="${5:--Check}"
+  local checklist_item="${6:-}"
+
+  cat > "$REPO/AGENTS.md" <<'EOF'
+# 🤖 Protocollo di test
+
+> **Versione __AGENTS_VERSION__ — Sessione 80 (2026-11-01)**
+
+## 🎫 Presa in carico delle story
+
+Regola di coordinazione.
+
+### Label disponibili
+
+| Categoria | Label | Significato |
+|-----------|-------|-------------|
+__LABELS_ROW__
+
+### Exit code (utili a hook e CI)
+
+| Code | Significato |
+|------|-------------|
+__EXIT_ROWS__
+
+## 📦 Appendice
+
+__EXTRA_REF__
+
+```powershell
+pwsh scripts/post-merge.ps1 __EXTRA_FLAG__
+```
+EOF
+
+  cat > "$REPO/docs/INDEX.md" <<'EOF'
+# Indice
+
+| Documento | Stato | Note |
+|-----------|-------|------|
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v__AGENTS_VERSION__ | protocollo |
+EOF
+
+  cat > "$REPO/scripts/validate-labels.mjs" <<'EOF'
+const expectedByCategory = {
+  Fase: ['phase-0', 'phase-1', 'phase-2', 'phase-post'],
+  Area: ['area:devops'],
+  'Priorità': ['priority:important'],
+  Size: ['size:M'],
+  Gate: ['agent-ready'],
+  'Status (post-claim)': ['status:done'],
+  Tipo: ['docs'],
+};
+EOF
+
+  cat > "$REPO/scripts/post-merge.ps1" <<'EOF'
+param(
+    [switch]$Check
+)
+exit 0
+exit 14
+EOF
+
+  cat > "$REPO/.github/pull_request_template.md" <<'EOF'
+## Checklist
+
+- [ ] Ho letto `AGENTS.md`
+EOF
+
+  # sostituzioni (via node: i valori contengono backtick e `|`, che la shell
+  # interpreterebbe come command substitution)
+  replace_in "$REPO/AGENTS.md" "__AGENTS_VERSION__" "$agents_version"
+  replace_in "$REPO/docs/INDEX.md" "__AGENTS_VERSION__" "$agents_version"
+  replace_in "$REPO/AGENTS.md" "__LABELS_ROW__" "$labels_row"
+  replace_in "$REPO/AGENTS.md" "__EXIT_ROWS__" "$exit_rows"
+  replace_in "$REPO/AGENTS.md" "__EXTRA_REF__" "$extra_ref"
+  replace_in "$REPO/AGENTS.md" "__EXTRA_FLAG__" "$extra_flag"
+
+  if [ -n "$checklist_item" ]; then
+    printf '\n%s\n' "$checklist_item" >> "$REPO/AGENTS.md"
+  fi
+}
+
+# Sostituzione letterale in un file, senza passare dalla shell.
+replace_in() {
+  node -e '
+    const fs = require("fs");
+    const [f, k, v] = process.argv.slice(1);
+    fs.writeFileSync(f, fs.readFileSync(f, "utf8").split(k).join(v));
+  ' "$1" "$2" "$3"
+}
+
+PASS=0
+FAIL=0
+
+run_scenario() {
+  local id="$1" desc="$2" expected_exit="$3"
+
+  node "$GATE" --root "$REPO" > "$WORK/out.txt" 2>&1
+  local actual_exit=$?
+
+  local status="OK"
+  if [ "$actual_exit" != "$expected_exit" ]; then
+    status="FAIL"
+  fi
+
+  printf "%-3s %-52s | expected=%-3s | actual=%-3s (%s)\n" \
+    "$id" "$desc" "$expected_exit" "$actual_exit" "$status"
+
+  if [ "$status" = "OK" ]; then
+    PASS=$((PASS+1))
+  else
+    FAIL=$((FAIL+1))
+    sed 's/^/       | /' "$WORK/out.txt" | head -6
+  fi
+}
+
+LABELS_OK='| Fase | `phase-0` … `phase-2`, `phase-post` | Fase |
+| Area | `area:devops` | Area |
+| Priorità | `priority:important` | Priorità |
+| Size | `size:M` | Size |
+| Gate | `agent-ready` | Gate |
+| Status (post-claim) | `status:done` | Status |
+| Tipo | `docs` | Tipo |'
+
+# T1: repository coerente -> il gate passa
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" ""
+run_scenario "T1" "repository coerente" "0"
+
+# T2: versione disallineata fra AGENTS.md e docs/INDEX.md (drift D1)
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" ""
+sed -i 's/| 🟢 v1.34 |/| 🟢 v1.27 |/' "$REPO/docs/INDEX.md"
+run_scenario "T2" "versione disallineata in docs/INDEX.md (D1)" "1"
+
+# T3: tabella label senza phase-post (drift D2)
+write_fixture "1.34" '| Fase | `phase-0` … `phase-2` | Fase |
+| Area | `area:devops` | Area |
+| Priorità | `priority:important` | Priorità |
+| Size | `size:M` | Size |
+| Gate | `agent-ready` | Gate |
+| Status (post-claim) | `status:done` | Status |
+| Tipo | `docs` | Tipo |' "| 0 | tutto pulito |
+| 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" ""
+run_scenario "T3" "tabella label senza phase-post (D2)" "1"
+
+# T4: exit code emesso dallo script ma non documentato (drift D3)
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" ""
+run_scenario "T4" "exit code non documentato (D3)" "1"
+
+# T5: riferimento ad AGENTS.md che non risolve a un heading
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi §\"Sezione che non esiste\"." "-Check" ""
+run_scenario "T5" "riferimento rotto a un heading (C4)" "1"
+
+# T6: script citato che non esiste (drift D7)
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" ""
+cat >> "$REPO/AGENTS.md" <<'EOF'
+
+```bash
+node scripts/script-che-non-esiste.mjs
+```
+EOF
+run_scenario "T6" "script citato inesistente (C5)" "1"
+
+# T7: flag citato che lo script non dichiara
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-FlagInesistente" ""
+run_scenario "T7" "flag citato inesistente (C5)" "1"
+
+# T8: voce di checklist copiata dal PR template (drift D8)
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi §\"🎫 Presa in carico delle story\"." "-Check" "- [ ] Ho letto \`AGENTS.md\`"
+run_scenario "T8" "checklist duplicata dal PR template (D8)" "1"
+
+echo "---"
+echo "Pass: $PASS   Fail: $FAIL"
+
+if [ "$FAIL" -eq 0 ]; then
+  echo "ALL PASS"
+  exit 0
+else
+  echo "FAILURES"
+  exit 1
+fi
+
+
+
+===== FILE: scripts/test-aggregate-blocks.sh =====
+
+#!/usr/bin/env bash
+# Test di scenario per scripts/check-aggregate-blocks.mjs (issue #248, ADR-0012 regola 4).
+#
+# Il gate verifica che una PR non modifichi i blocchi `<!-- AGGREGATE-* -->` dei
+# file globali: hanno un solo scrittore (`scripts/aggregate-state.ps1`), che
+# rigenera post-merge. La regola V1 di ADR-0008 ("mai modificare i blocchi
+# aggregati a mano") era finora garantita solo da un check warning-only.
+#
+# Un gate che passa sempre non e' un gate (lesson 43-1): qui ogni caso ha uno
+# scenario che lo fa fallire, oltre a quelli che lo fanno passare.
+#
+# Esegui con: bash scripts/test-aggregate-blocks.sh
+# Richiede: bash, git, node.
+
+set -u
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+GATE="$SCRIPT_DIR/check-aggregate-blocks.mjs"
+
+if [ ! -f "$GATE" ]; then
+  echo "[FAIL] gate non trovato: $GATE"
+  exit 2
+fi
+
+WORK=$(mktemp -d)
+trap "rm -rf '$WORK'" EXIT
+REPO="$WORK/repo"
+mkdir -p "$REPO/docs" "$REPO/scripts"
+
+cd "$REPO"
+git init -q -b main
+git config user.email "test@example.com"
+git config user.name "Test"
+git config core.autocrlf false
+git config core.eol lf
+
+# --- fixture: l'aggregator (per la lista dei target) e un file con blocchi ---
+cat > scripts/aggregate-state.ps1 <<'EOF'
+$targets = @(
+    @{ Path = "docs/INDEX.md";      Start = $markerIndexStatusStart; End = $markerIndexStatusEnd },
+    @{ Path = "docs/BUNDLE.md";     Start = $markerBundleInventoryStart; End = $markerBundleInventoryEnd }
+)
+EOF
+
+cat > docs/INDEX.md <<'EOF'
+# Indice
+
+<!-- AGGREGATE-INDEX-STATUS-START -->
+stato: verde
+<!-- AGGREGATE-INDEX-STATUS-END -->
+EOF
+
+cat > docs/BUNDLE.md <<'EOF'
+# Bundle
+
+<!-- AGGREGATE-BUNDLE-INVENTORY-START -->
+inventario: 1 file
+<!-- AGGREGATE-BUNDLE-INVENTORY-END -->
+EOF
+
+git add -A
+git commit -q -m "base"
+BASE=$(git rev-parse HEAD)
+
+PASS=0
+FAIL=0
+
+run_scenario() {
+  local id="$1" desc="$2" expected_exit="$3"
+
+  node "$GATE" --root "$REPO" --base "$BASE" --head HEAD > "$WORK/out.txt" 2>&1
+  local actual_exit=$?
+
+  local status="OK"
+  if [ "$actual_exit" != "$expected_exit" ]; then
+    status="FAIL"
+  fi
+
+  printf "%-3s %-52s | expected=%-3s | actual=%-3s (%s)\n" \
+    "$id" "$desc" "$expected_exit" "$actual_exit" "$status"
+
+  if [ "$status" = "OK" ]; then
+    PASS=$((PASS+1))
+  else
+    FAIL=$((FAIL+1))
+    sed 's/^/       | /' "$WORK/out.txt" | head -6
+  fi
+}
+
+# T1: nessuna modifica ai blocchi -> passa
+run_scenario "T1" "nessuna modifica ai blocchi" "0"
+
+# T2: blocco di stato modificato a mano -> fallisce
+sed -i 's/stato: verde/stato: rosso/' docs/INDEX.md
+git add -A && git commit -q -m "modifica manuale del blocco"
+run_scenario "T2" "blocco di stato modificato a mano" "1"
+git reset -q --hard "$BASE"
+
+# T3: blocco aggiunto -> fallisce
+cat >> docs/INDEX.md <<'EOF'
+
+<!-- AGGREGATE-NUOVO-START -->
+inventato
+<!-- AGGREGATE-NUOVO-END -->
+EOF
+git add -A && git commit -q -m "aggiunta di un blocco"
+run_scenario "T3" "blocco aggiunto a mano" "1"
+git reset -q --hard "$BASE"
+
+# T4: blocco rimosso -> fallisce
+python3 - <<'EOF' 2>/dev/null || sed -i '/AGGREGATE-INDEX-STATUS-START/,/AGGREGATE-INDEX-STATUS-END/d' docs/INDEX.md
+import re
+p = "docs/INDEX.md"
+s = open(p, encoding="utf-8").read()
+s = re.sub(r"<!-- AGGREGATE-INDEX-STATUS-START -->.*?<!-- AGGREGATE-INDEX-STATUS-END -->\n", "", s, flags=re.S)
+open(p, "w", encoding="utf-8").write(s)
+EOF
+git add -A && git commit -q -m "rimozione di un blocco"
+run_scenario "T4" "blocco rimosso" "1"
+git reset -q --hard "$BASE"
+
+# T5: blocco esente (inventario = misura, non stato) modificato -> passa
+sed -i 's/inventario: 1 file/inventario: 2 file/' docs/BUNDLE.md
+git add -A && git commit -q -m "inventario aggiornato"
+run_scenario "T5" "blocco esente (inventario) modificato" "0"
+git reset -q --hard "$BASE"
+
+# T6: file che non contiene blocchi -> passa
+cat > docs/NUOVO.md <<'EOF'
+# Documento nuovo
+
+Nessun blocco aggregato qui.
+EOF
+git add -A && git commit -q -m "file nuovo senza blocchi"
+run_scenario "T6" "file nuovo senza blocchi aggregati" "0"
+git reset -q --hard "$BASE"
+
+echo "---"
+echo "Pass: $PASS   Fail: $FAIL"
+
+if [ "$FAIL" -eq 0 ]; then
+  echo "ALL PASS"
+  exit 0
+else
+  echo "FAILURES"
+  exit 1
+fi
+
+
+
 ===== FILE: scripts/setup-hooks.js =====
 
 #!/usr/bin/env node
@@ -40486,6 +41750,44 @@ jobs:
   # 3. Gate di determinismo dell'aggregator (issue #70).
   #    Il gate piu' pesante: 37 assert su repo git temporanei.
   # ---------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
+  # gates-protocol: il protocollo agenti come CONTRATTO VERIFICATO (issue #248,
+  # ADR-0012). Fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di
+  # governance del repo SENZA gate: 0 controlli automatici su 643 citazioni,
+  # 77 anchor, una tabella label e una tabella exit code.
+  #
+  # I due gate qui sotto sono READ-ONLY (non generano e non scrivono nulla):
+  #   - check-protocol-consistency.mjs confronta i fatti normativi del
+  #     protocollo con la realta' (6 controlli, uno per drift chiuso in S79)
+  #   - check-aggregate-blocks.mjs confronta i blocchi `AGGREGATE-*` della PR
+  #     con quelli della base: e' un controllo TESTUALE, quindi immune
+  #     all'incompatibilita' PS 5.1 / PS 7 che tiene warning-only il check
+  #     aggregatore, e puo' essere bloccante (regola V1 di ADR-0008)
+  #
+  # `fetch-depth: 0` serve al confronto con origin/main.
+  # ---------------------------------------------------------------------------
+  gates-protocol:
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Coerenza del protocollo agenti (issue #248)
+        run: node scripts/check-protocol-consistency.mjs
+
+      - name: Gate "coerenza del protocollo" fail-closed (issue #248)
+        run: bash scripts/test-protocol-consistency.sh
+
+      - name: Blocchi aggregati intoccabili (issue #248)
+        run: node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD
+
+      - name: Gate "blocchi aggregati" fail-closed (issue #248)
+        run: bash scripts/test-aggregate-blocks.sh
+
   gates-aggregate:
     # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
     # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
@@ -40751,6 +42053,7 @@ jobs:
       - node-test
       - node-build
       - gates-docs
+      - gates-protocol
       - gates-aggregate
       - gates-bundle
       - gates-workflows
@@ -40765,7 +42068,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
           else
             results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }}"
           fi
