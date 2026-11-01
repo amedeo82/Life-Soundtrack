@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 15:48
+> Data: 2026-11-01 15:50
 > Totale file: 141
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2359,7 +2359,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟢 | ✅ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
-| 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟡 | ❌ | - |
+| 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟡 | ❌ | #249 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -10406,7 +10406,7 @@ solo in `scripts/`, `AGENTS.md` e `docs/`.
 
 - **Data**: 2026-11-01
 - **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ❌ non ancora mergiato (PR #249)
 - **Claim**: `kilo-hp-elitebook-ef4d`
 
 ```
@@ -10414,6 +10414,7 @@ solo in `scripts/`, `AGENTS.md` e `docs/`.
 # Sessione 79 — Protocollo agenti come contratto verificato (ADR-0012)
 
 > **Issue di tracking**: #248 (epic). **Branch**: `feat/248-protocollo-contratto-verificato`.
+> **PR**: **#249** (aperta il 2026-11-01).
 >
 > La sessione è il primo lotto dell'epic #248: **ADR-0012** (la decisione) + **I2-a** (chiusura
 > dei drift misurati). I lotti successivi (gate di coerenza, claim atomico, rifinitura di
@@ -17703,7 +17704,7 @@ date: 2026-11-01
 state: 🟡
 merged: false
 branch: feat/248-protocollo-contratto-verificato
-pr: 0
+pr: 249
 claim: kilo-hp-elitebook-ef4d
 tags: [devops, governance, tooling]
 ---
@@ -17711,6 +17712,7 @@ tags: [devops, governance, tooling]
 # Sessione 79 — Protocollo agenti come contratto verificato (ADR-0012)
 
 > **Issue di tracking**: #248 (epic). **Branch**: `feat/248-protocollo-contratto-verificato`.
+> **PR**: **#249** (aperta il 2026-11-01).
 >
 > La sessione è il primo lotto dell'epic #248: **ADR-0012** (la decisione) + **I2-a** (chiusura
 > dei drift misurati). I lotti successivi (gate di coerenza, claim atomico, rifinitura di

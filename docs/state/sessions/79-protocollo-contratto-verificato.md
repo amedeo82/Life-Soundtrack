@@ -5,7 +5,7 @@ date: 2026-11-01
 state: 🟡
 merged: false
 branch: feat/248-protocollo-contratto-verificato
-pr: 0
+pr: 249
 claim: kilo-hp-elitebook-ef4d
 tags: [devops, governance, tooling]
 ---
@@ -13,6 +13,7 @@ tags: [devops, governance, tooling]
 # Sessione 79 — Protocollo agenti come contratto verificato (ADR-0012)
 
 > **Issue di tracking**: #248 (epic). **Branch**: `feat/248-protocollo-contratto-verificato`.
+> **PR**: **#249** (aperta il 2026-11-01).
 >
 > La sessione è il primo lotto dell'epic #248: **ADR-0012** (la decisione) + **I2-a** (chiusura
 > dei drift misurati). I lotti successivi (gate di coerenza, claim atomico, rifinitura di

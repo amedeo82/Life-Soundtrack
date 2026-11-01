@@ -125,7 +125,7 @@
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟢 | ✅ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
-| 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟡 | ❌ | - |
+| 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟡 | ❌ | #249 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
