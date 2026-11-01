@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 15:41
-> Totale file: 146
+> Data: 2026-11-01 16:51
+> Totale file: 151
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.35 — Sessione 80 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.36 — Sessione 81 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -70,6 +70,8 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Ogni `scripts/<file>` e ogni flag `-<Flag>` citati **esistono davvero** | C5 | D7 |
 | La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
+| La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
+| Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -802,10 +804,22 @@ git push
 
 1. Leggi questo file
 2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
-3. **Crea la worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4. **Attenzione**: lo script valida che l'issue non abbia già `in-progress`, quindi va eseguito **prima** del claim (o con `-SkipGhCheck` se hai già claimato tu).
-4. **Claima** l'issue (ADR-0006): `gh issue edit <N> --add-label in-progress` + commento `claim: <AGENT-ID> (UTC <timestamp>)`, poi **riverifica** (vince chi ha il commento con ID GitHub più basso)
-5. Leggi la specifica del task e implementa con test (nella worktree)
-6. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
+3. **Crea la worktree isolata e prendi in carico l'issue** con **un solo comando** (Sessione 81, issue #256):
+
+   ```bash
+   pwsh scripts/agent-claim.ps1 <N>
+   ```
+
+   Lo script esegue in sequenza atomica: validazione dell'issue → worktree (`setup-worktree.ps1`) → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico** del commento più basso, letto dall'API REST) → file di stato dell'agente. Se la riverifica è persa, rimuove la label, posta `yield:` ed esce con codice 4. **Non** copiare a mano i comandi `gh`: la procedura manuale era la principale occasione di dimenticanza del protocollo (vedi §"🎫 Presa in carico delle story").
+
+4. Leggi la specifica del task e implementa con test (nella worktree)
+5. **Apri la PR** con **un solo comando** che verifica i gate locali, controlla la keyword di chiusura, crea la PR, transiziona le label e scrive `pr: N` nel file di sessione:
+
+   ```bash
+   pwsh scripts/agent-pr.ps1 -IssueNumber <N>
+   ```
+
+   Il campo `pr: N` è la precondizione del workflow post-merge `auto-session-merge-state.yml`: scriverlo a mano dopo l'apertura della PR è stato il motivo di due fallimenti della catena post-merge (Sessione 80, issue #254).
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -1236,7 +1250,13 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.35 — **il protocollo diventa un contratto verificato** (Sessione 80, issue #248). La Sessione 79 aveva chiuso 8 drift misurati fra `AGENTS.md` e la realtà, ma li aveva chiusi **una volta**: senza un gate che li confronti, tornano. Il protocollo era l'unico artefatto di governance del repo **senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella exit code), mentre README, sessioni, workflow, label e blocchi aggregati ne avevano uno ciascuno. Ora ne ha due:
+*Ultimo aggiornamento: v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
+- **`scripts/agent-claim.ps1`**: presa in carico **atomica** — validazione dell'issue → worktree → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico REST** più basso, non il `node_id` GraphQL né `created_at`) → file di stato dell'agente (nella directory git della worktree: non è un file untracked, non confonde il `pre-commit`, sparisce con la worktree). Se la riverifica è persa rimuove la label, posta `yield:` ed esce 4. Exit 3 = issue già claimata
+- **`scripts/agent-pr.ps1`**: apertura **verificata** — gate locali bloccanti, **una sola** keyword di chiusura nuda, creazione della PR, transizione delle label (`agent-ready` → `status:in-review`) e **scrittura di `pr: N` nel file di sessione** con push: era la precondizione che ha fatto fallire il workflow post-merge due volte (Sessione 80, issue #254)
+- **`scripts/check-claim-state.mjs`** (read-only, bloccante in CI): la PR è coerente con **branch ↔ issue ↔ keyword di chiusura ↔ stato dell'issue ↔ claim** (C1-C5), e **una branch `docs/*` tocca solo file sotto `docs/`** (C4): nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa — la classe diventa impossibile, non solo sgradita. 11 scenari di test (`scripts/test-claim-state.sh`)
+- §"🚀 Primo task di un agente": la worktree, il claim e l'apertura della PR sono **tre comandi** (`agent-claim.ps1` → implementa → `agent-pr.ps1`), non una sequenza da ricordare a memoria
+
+*Precedente v1.35 — **il protocollo diventa un contratto verificato** (Sessione 80, issue #248). La Sessione 79 aveva chiuso 8 drift misurati fra `AGENTS.md` e la realtà, ma li aveva chiusi **una volta**: senza un gate che li confronti, tornano. Il protocollo era l'unico artefatto di governance del repo **senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella exit code), mentre README, sessioni, workflow, label e blocchi aggregati ne avevano uno ciascuno. Ora ne ha due:
 - **`scripts/check-protocol-consistency.mjs`** (read-only, 6 check): versione dichiarata ↔ `docs/INDEX.md` (C1), tabella label ↔ `validate-labels.mjs` (C2), tabella exit code ↔ i `exit N` reali degli script (C3), **integrità degli anchor** — ogni `§"…"` deve risolvere a un heading esistente (C4), esistenza degli script e dei flag citati (C5), nessuna checklist duplicata (C6). Il primo giro ha trovato **3 riferimenti rotti** che nessuno aveva notato: un typo («Macchina **di** stati» invece di «a stati»), una sezione «⚠️ Deprecazione» che non esiste, e un rimando a «🛡️ Hardening multi-agente» (rinominata). C4 è la rete di sicurezza che rende sicuro il lotto I3 (rifinitura del file)
 - **`scripts/check-aggregate-blocks.mjs`** (read-only, **bloccante**): confronta i blocchi `AGGREGATE-*` della PR con quelli della base. È un controllo **testuale**, quindi immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore ⇒ la regola V1 di ADR-0008 diventa verificabile. Verifica non vacua: applicato alla PR #249 reale (base `5e98866` → merge `2478a9a`) rileva **5 violazioni** — la PR aveva committato i blocchi rigenerati in locale. La PR #250 aveva la stessa violazione ed è stata corretta
 - **`scripts/test-protocol-consistency.sh`** (8 scenari: 1 positivo + 7 negativi, uno per check) e **`scripts/test-aggregate-blocks.sh`** (6 scenari): un gate che passa sempre non è un gate (lesson 43-1)
@@ -2313,11 +2333,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.35 | Protocollo per agenti — **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate nuovi, bloccanti in CI: `check-protocol-consistency.mjs` e `check-aggregate-blocks.mjs`; **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md)). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.36 | Protocollo per agenti — **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.9 | Diario cronologico per story: problemi, fix, lesson learned — §46: Sessione 80, il protocollo agenti come contratto verificato (2 gate nuovi, issue #252). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.0 | Diario cronologico per story: problemi, fix, lesson learned — §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -12327,6 +12347,32 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
 | 2.31 | 2026-10-31 (issue #233) | **§43 Story 3.1 — Home + Timeline** (Sessione 77, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (77-1 **il modello è puro, i componenti sono presentazionali**: tutta la logica — i quattro numeri della Home, la bar week, i bucket per granularità, le serie di volume e mood, le bande di era, il zoom progressivo — sta in `apps/web/src/screens/homeTimelineModel.ts`, senza React né DOM, riutilizzando il **vocabolario temporale del core** (`@core/analysis`): la Timeline non introduce un secondo calendario (lesson 27-7). I 19 test girano senza IndexedDB né `fake-indexeddb`, perché la logica non li tocca; 77-2 **«il dato mancante non è zero»**: il bucket vuoto **esiste** e vale 0 (una linea che salta i buchi suggerirebbe continuità che i dati non hanno) e il **mood non viene interpolato** nei bucket senza dati; l'area del volume è chiusa sul **minimo** del dominio e non su zero, perché un ascolto non riparte da zero minuti e un'area che scende a zero inventerebbe un silenzio; 77-3 **nessuna libreria di chart**: i tre grafici (StreamChart, MoodLine, BarWeek) sono **SVG scritti a mano**, con la geometria in un file puro e testato (`chartGeometry.ts`) e il contratto a11y della spec (`07§2.7`): `<title>`, `<desc>` e una **tabella dati nascosta** per screen reader. Introdurre una dipendenza di grafici sarebbe una decisione di **stack**, non di story; 77-4 **la scelta fra onboarding e app è legata ai dati**: `App.tsx` interroga il database (ci sono ascolti?) invece di usare un flag in `localStorage`, che mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo; 77-5 **le soglie di stato sono in un punto solo**: 100 eventi per la Home e 6 mesi per la Timeline (`06§2.6-2.7`) sono dichiarati in `useHomeTimelineData.ts`, non nelle due schermate). Consegnati: `apps/web/src/screens/{homeTimelineModel.ts,Home.tsx,Timeline.tsx,AppShell.tsx}`, `apps/web/src/components/{StatCard,MemoryCard,BarWeek,EraBand,StreamChart,MoodLine}.tsx` + `chartGeometry.ts`, `apps/web/src/hooks/{useCountUp.ts,useHomeTimelineData.ts}`, il cablaggio di `App.tsx` e `OnboardingRouter.tsx`, 11 chiavi i18n nuove (namespace `nav` incluso), gli stili in `onboarding.css`, `08-COPY-I18N.md` v0.13 e lo stato della story 3.1 (`done`). Con la 3.1 l'**EPIC 3** passa a 2/4 e l'indicatore di avanzamento (issue #216) a **75%** — 21 story su 28, 7 step rimanenti |
 | 2.32 | 2026-10-31 (Sessione 78) | **§44 Difetto ricorrente: la rimozione della worktree su Windows** (nessuna issue dedicata; segnalato dal project owner): `scripts/post-merge.ps1` si fermava al passo 1 con «Filename too long» / «Result too large» — `git worktree remove --force` cancellava l'albero senza il prefisso `\\?\` e la worktree con `node_modules` aveva path > MAX_PATH. Il rimedio **manuale** (`rd /s /q "\\?\"` + `git worktree prune`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è una procedura mancante. Fix su tre livelli dentro lo script — **L1** `git -c core.longpaths=true worktree remove --force` (causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale tocca **solo** directory che sono worktree di questo repo (working copy principale e antenati mai toccati → **exit 16**) e `git status` fallito = WIP sconosciuto = stop (**exit 10**); `git status` ora gira con `core.longpaths=true`. Difetto scoperto mentre si scriveva la rete: `Invoke-CmdVerbatim` non passava `/c` a `cmd.exe` ⇒ shell interattiva, comando non eseguito, **exit 0** — un successo che non aveva fatto nulla; `/c` aggiunto e L3 coperto da un test che lo **forza** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`). Test: `test-post-merge.sh` **T10..T14** (shim di `git` che fallisce solo su `worktree remove`, guardia sulla working copy, path lunghi reali, catena L1→L2→L3 su PS 5.1, L3 forzata) → **47 assert, 0 falliti**. `AGENTS.md` v1.33 (nuova sezione sul difetto + exit 16), `12-DEVOPS.md` §9.8i + changelog 1.7, `docs/state/sessions/78-post-merge-long-paths.md`. **PR #236 merged il 2026-11-01** (merge commit `08a0b4d`), issue di tracking **#235** (`status:done`) — l'issue è stata creata in fase di chiusura, perché il difetto non ne aveva una e il protocollo pretende una PR = una issue |
+## 47. Il claim diventa verificabile (Sessione 81)
+
+**Branch**: `feat/256-claim-atomico`
+**Issue di tracking**: **#256** (lotto I2-c dell'epic #248)
+**Data**: 2026-11-01
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 81-1 | P | ADR-0006 ha 8 regole **vincolanti** sul claim e **zero** enforcement: `in-progress`, `claim:` e `status:in-review` non compaiono in alcun gate ⇒ due agenti potevano implementare la stessa story senza che nulla se ne accorgesse | Il claim era implementato come **prosa**: nessun comando lo esegueva, nessun gate lo verificava. La «race chiusa» di ADR-0006 era chiusa solo nel testo | **`scripts/agent-claim.ps1`** (sequenza atomica: validazione → worktree → label → commento → riverifica → file di stato, con rollback e `yield:`) + **`scripts/check-claim-state.mjs`** (gate bloccante: branch ↔ issue ↔ keyword ↔ stato ↔ claim) | ADR-0006 · ADR-0012 regola 5 |
+| 81-2 | P | La **riverifica** era il passo più fragile del protocollo: l'agente doveva scaricare i commenti, ordinarli per ID e decidere «vince il più basso» **a mano** — con `gh issue view --json comments` che restituisce i **node id** GraphQL, non confrontabili | Due API diverse, due tipi di id, e il protocollo non dice quale usare | La riverifica è **codice**: `agent-claim.ps1` ordina per **ID numerico REST** e decide da solo (exit 4 + `yield:` se persa). Il gate verifica inoltre che il claim vincente non abbia un `yield:` | `AGENTS.md` §"Presa in carico delle story" |
+| 81-3 | P | La precondizione del workflow post-merge (`auto-session-merge-state.yml` cerca un file di sessione che dichiari `pr: <N>`) è **fallita due volte** in due merge (Sessione 80 con `pr: 0`, issue #254) | Il numero della PR esiste solo **dopo** l'apertura: la scrittura era un passo manuale che il protocollo non prescriveva | **`agent-pr.ps1` scrive `pr: N`** nel file di sessione e lo pusha: la verifica non è più delegata a chi deve ricordarsi di scrivere un campo | `auto-session-merge-state.yml` · issue #254 |
+| 81-4 | P | Nel merge della PR #249 **due script di un altro task** erano finiti in una PR di doc-sync: un `git add -A` nella working copy **condivisa** aveva preso i file non tracciati che stavo scrivendo | La causa è meccanica, non distrazione: due task nella stessa working copy | **C4 del gate**: una branch `docs/*` tocca **solo** file sotto `docs/`. Il leak diventa impossibile, non solo sgradito | PR #250 · `check-claim-state.mjs` |
+| 81-5 | L | Il test con il **mock `gh` in bash** non girava: su Windows un file senza estensione non è eseguibile, e `execFileSync` trovava il `gh` **vero** nel PATH → il test passava sui dati reali del repository (PR #1!) | Il mock era pensato per Linux; il porting a Windows l'ha reso un test che **non poteva fallire** | Il gate accetta i dati da **file JSON** (`--pr-json`, `--issue-json`, `--comments-json`): i test sono identici su Windows e Linux, senza dipendere da come il sistema operativo risolve un eseguibile | `scripts/test-claim-state.sh` (T1..T11) |
+| 81-6 | L | Un protocollo che prescrive una sequenza di **tre** comandi manuali ha tre occasioni di dimenticanza; una che ne prescrive **uno** ne ha una | La riduzione del numero di passi manuali è la prevenzione più economica che esista: nessuna verifica serve se l'azione non può essere dimenticata | Il flusso è `agent-claim.ps1` → implementa → `agent-pr.ps1`: due comandi, ognuno con i propri check interni | `AGENTS.md` §"Primo task di un agente" |
+
+**Lesson learned**: la prima lezione è sulla **differenza fra una regola e una procedura**. ADR-0006 prescriveva il claim in modo completo e corretto: issue aperta, label, commento, riverifica, TTL, ordine di backlog, divieto di doppio claim. Nulla di tutto ciò era applicato da un programma. Una regola che nessuno esegue per conto proprio è un **auspicio**: il costo di eseguirla è sempre più alto del costo di saltarla, quindi viene saltata — e il giorno in cui due agenti lo saltano insieme, la race che la regola dichiarava chiusa si riapre. Il passaggio da regola a procedura non è stato un lavoro di codice: è stato mettere ogni passo dentro un comando che fallisce quando il passo non è stato eseguito.
+
+La seconda lezione è sulla **forma del test**. Il mock di `gh` in bash funzionava su Linux e falliva su Windows in un modo che sembrava innocuo: il PATH risolveva il `gh` vero, il test passava, ma stava verificando i dati del **repository reale** (la PR #1, un merge del 2026). Un test che non può fallire è peggio di nessun test, perché dà una garanzia falsa a chi lo legge. La correzione non è stata "far funzionare il mock", ma **non dipendere dal mock**: il gate legge i dati da file JSON, e il test è lo stesso su ogni piattaforma.
+
+La terza è sul **leak**. Il file di un altro task finito in una PR di doc-sync non è stato un errore di attenzione: è stato un `git add -A` eseguito in una directory dove stavo lavorando a due cose. La reazione naturale è «stai più attento», che non è una misura. La reazione corretta è rendere la combinazione **impossibile**: una branch `docs/` che tocca solo `docs/` è una regola che un gate può verificare in tre righe di codice.
+
+**Verifica**: `node scripts/check-claim-state.mjs` → 0 violazioni · `bash scripts/test-claim-state.sh` → 11 scenari, 0 falliti · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti · `node scripts/check-aggregate-blocks.mjs` → 0 violazioni · `node scripts/check-merge-state.mjs` → 0 falliti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti.
+
+---
+
 ## 46. Il protocollo agenti come contratto verificato (Sessione 80)
 
 **Branch**: `feat/252-gate-protocollo-coerenza`
@@ -12391,6 +12437,7 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 |----------|------|-----------|
 | 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
 | 2.34 | 2026-11-01 (issue #252) | **§46 Sessione 80 — il protocollo agenti come contratto verificato (I2-b)**: `AGENTS.md` era l'unico artefatto di governance **senza gate** ⇒ 2 gate read-only nuovi, `check-protocol-consistency.mjs` (6 check: versione, tabella label, tabella exit code, **integrità degli anchor**, esistenza di script e flag citati, checklist unica) e `check-aggregate-blocks.mjs` (**bloccante**: la regola V1 di ADR-0008 verificata in modo **testuale**, immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore), con le suite di scenario negativo (8 + 6) e il job CI `gates-protocol` (4 step, `fetch-depth: 0`). Il primo giro ha trovato **3 riferimenti rotti in `AGENTS.md`** (typo «Macchina **di** stati», sezione «⚠️ Deprecazione» inesistente, rimando a «🛡️ Hardening multi-agente» rinominata) e **1 riferimento stale** in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`). Prova di non-vacuità: il gate dei blocchi applicato alla **PR #249 reale** rileva **5 violazioni** (la PR aveva committato i blocchi rigenerati in locale) ⇒ la regola V1 era violabile in silenzio; la **PR #250** aveva la stessa violazione ed è stata corretta. `AGENTS.md` v1.35 (nuova sezione §"✅ Il contratto del protocollo: regola ⟺ gate"), `docs/12-DEVOPS.md §9.10` a 13 job / 31 step |
+| 2.35 | 2026-11-01 (issue #256) | **§47 Sessione 81 — il claim diventa verificabile (I2-c)**: ADR-0006 ha 8 regole **vincolanti** sul claim e **zero** enforcement ⇒ due agenti potevano implementare la stessa story senza che nulla se ne accorgesse. Aggiunti `scripts/agent-claim.ps1` (presa in carico **atomica**: validazione → worktree → label → commento → **riverifica deterministica** con l'ID numerico REST più basso → file di stato dell'agente nella directory git della worktree; `yield:` + rollback se la riverifica è persa), `scripts/agent-pr.ps1` (apertura **verificata**: gate locali, una sola keyword di chiusura nuda, transizione delle label e **scrittura di `pr: N` nel file di sessione** — era la precondizione che aveva fatto fallire il workflow post-merge due volte) e `scripts/check-claim-state.mjs` (gate bloccante: branch ↔ issue ↔ keyword ↔ stato ↔ claim, più **C4**: una branch `docs/*` tocca solo `docs/` — nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa). 11 scenari di test (`test-claim-state.sh`), con i dati da file JSON invece che da un mock `gh` in bash: su Windows un file senza estensione non è eseguibile e il PATH chiamava il `gh` vero, quindi il test passava sui dati reali del repository. `AGENTS.md` v1.36 (il flusso è `agent-claim.ps1` → implementa → `agent-pr.ps1`: due comandi invece di una sequenza manuale) | 
 
 ---
 
@@ -18125,6 +18172,90 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 - `docs/18-DEV-LOG.md` §46
 - `scripts/generate-bundle.ps1`: `$files` += i 4 nuovi script + la sessione 80
 - `docs/INDEX.md`: versione di `AGENTS.md`, riga `13-ADR/`, riga `18-DEV-LOG.md`
+
+
+
+===== FILE: docs/state/sessions/81-claim-atomico.md =====
+
+---
+number: 81
+title: "Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c)"
+date: 2026-11-01
+state: 🟡
+merged: false
+branch: feat/256-claim-atomico
+pr: 0
+claim: kilo-hp-elitebook-7f3c
+tags: [devops, governance, tooling]
+---
+
+# Sessione 81 — Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c)
+
+> **Issue di tracking**: #256 (lotto I2-c dell'epic #248). **Branch**: `feat/256-claim-atomico`.
+>
+> Terzo lotto dell'epic #248: rende **verificabile** il protocollo di claim (ADR-0006), che
+> aveva 8 regole *vincolanti* e **zero** enforcement.
+
+## Sintesi
+
+ADR-0006 dichiara di aver chiuso la race «due agenti sulla stessa story» prescrivendo un claim con una riverifica. Ma il claim era **solo prosa**: nessun comando lo eseguiva, nessun gate lo verificava. La sequenza reale era: lanciare `setup-worktree.ps1`, **copiare a mano** due comandi `gh` (label + commento), poi **interpretare a mano** la riverifica («vince chi ha l'ID più basso»). Tre occasioni di dimenticanza, e la conseguenza — due agenti che implementano la stessa story — non era rilevabile da nessuna parte.
+
+Questa sessione chiude il buco con tre artefatti:
+
+| Artefatto | Ruolo |
+|-----------|-------|
+| `scripts/agent-claim.ps1` | presa in carico **atomica**: validazione, worktree, label, commento, **riverifica deterministica**, file di stato; con rollback e `yield:` se si perde |
+| `scripts/agent-pr.ps1` | apertura **verificata**: gate locali, una sola keyword di chiusura nuda, creazione della PR, transizione delle label, **scrittura di `pr: N` nella sessione** |
+| `scripts/check-claim-state.mjs` | gate CI **bloccante**: la PR è coerente con branch, issue, keyword, stato dell'issue e claim |
+
+Il terzo è la parte che chiude la classe di difetto, perché verifica in CI quello che prima era un promemoria: *una PR senza claim è una PR che non doveva esistere*.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-81.1 | Il claim è **una sequenza atomica** con exit code distinti (3 = già claimata, 4 = persa la riverifica) | La riverifica manuale era il punto più fragile: l'agente doveva confrontare gli ID a mano. Ora è codice: l'ID **numerico REST** più basso vince (non il `node_id` GraphQL, non `created_at`) |
+| D-81.2 | In caso di perdita della riverifica: si **rimuove** la label `in-progress` e si posta `yield:` | Il claim non deve lasciare l'issue bloccata: un lose deve restituire l'issue alla pool, non tenerla in ostaggio |
+| D-81.3 | Il file di stato dell'agente vive nella **directory git della worktree**, non nel working tree | Così non è un file untracked (non confonde l'hook `pre-commit`), non serve `.gitignore`, e sparisce con la worktree |
+| D-81.4 | `agent-pr.ps1` **scrive `pr: N` nel file di sessione e lo pusha** | La precondizione del workflow `auto-session-merge-state.yml` (un file di sessione che dichiari `pr: <N>`) era fragile: l'ho fatta fallire due volte in due merge (Sessione 80, issue #254). Ora è **automatico** e non può dimenticarsi |
+| D-81.5 | `agent-pr.ps1` verifica i gate locali **prima** di aprire la PR | La checklist della PR era 22 voci manuali: la parte che si può automatizzare (gate locali, keyword di chiusura, transizione label) non deve dipendere dalla memoria dell'agente |
+| D-81.6 | Una **branch `docs/*` tocca solo file sotto `docs/`** (gate C4) | Nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync: un `git add -A` nella working copy condivisa aveva preso i file non tracciati. Il gate rende la classe impossibile, non solo sgradita |
+| D-81.7 | Il gate è **read-only** e non scrive su GitHub | Un gate che modifica lo stato è un secondo scrittore: la stessa lezione di ADR-0008 e di ADR-0003 (i due writer di `main`) |
+| D-81.8 | Il gate accetta i dati da **file JSON** (`--pr-json` ecc.) oltre che da `gh` | Un mock `gh` in bash non è eseguibile su Windows senza estensione, e il PATH finirebbe per chiamare il `gh` vero: i test devono essere identici su Windows e Linux |
+| D-81.9 | Su una PR **chiusa o mergiata** il gate non si applica | Lo stato dell'issue cambia al merge (`status:done`): il gate vale per le PR aperte |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%), restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup · 4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain). Lavoro di **governance** su un'epic (#248), non story di backlog.
+
+**Il numero che conta.** Il protocollo agenti passa da **2** gate (Sessione 80) a **3**, e per la prima volta il **claim** è verificato: `in-progress`, `claim:` e `status:in-review` non sono più solo parole in un file, sono condizioni che un gate blocca. Con il lotto I3 la ristrutturazione di `AGENTS.md` potrà procedere perché ogni riferimento interno è sotto gate.
+
+**Cosa è pronto.** I due script (`agent-claim.ps1`, `agent-pr.ps1`), il gate (`check-claim-state.mjs`) con **11 scenari** di test (T1..T11, uno per controllo più il caso non applicabile), il wiring CI (2 step nel job `gates-protocol`), la sezione §"✅ Il contratto del protocollo" aggiornata con la riga del gate del claim, e la procedura di §"🌳 Worktree workflow" che indica i due comandi.
+
+**Cosa manca.** Il lotto **I3** (rifinitura di `AGENTS.md` a ~400 righe con 77 anchor invariati — il gate C4 di `check-protocol-consistency.mjs` ne è la rete di sicurezza) e l'issue **#251** (la catena post-merge si annulla da sola: il concurrency group `post-merge-main` *cancella* i run in attesa invece di accodarli; e il workflow `auto-session-merge-state.yml` fallisce quando la PR non ha un file di sessione).
+
+**Salute tecnica.** Worktree attiva su `feat/256-claim-atomico`. Claim riverificato sull'issue #256 (commento `6560178971`, unico claim). Nessun blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9.
+
+**Gate di testabilità.** `node scripts/check-claim-state.mjs` → 0 violazioni · `bash scripts/test-claim-state.sh` → 11 scenari, 0 falliti · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti · `node scripts/check-aggregate-blocks.mjs` → 0 violazioni · `node scripts/check-merge-state.mjs` → 0 falliti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0 · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Il test con il **mock `gh` in bash** non girava: su Windows un file senza estensione non è eseguibile, e `execFileSync` trovava il `gh` vero nel PATH → il test passava sui dati reali del repository | Il gate accetta i dati da **file JSON**: i test sono identici su Windows e Linux e non dipendono da come il sistema operativo risolve un eseguibile. *Un test che non può fallire è peggio di nessun test: dà una falsa garanzia* |
+| La precondizione `pr: N` del workflow post-merge è fallita **due volte** in due merge (Sessione 80 e issue #254): entrambe le volte per un `pr: 0` | La verifica non va delegata a chi deve ricordarsi di scrivere un campo: va **fatta dall'azione stessa**. `agent-pr.ps1` scrive `pr: N` e lo pusha — il campo non può più mancare |
+| Il claim manuale era una catena di **tre** occasioni di dimenticanza (comando, comando, interpretazione) | Ogni occasione di dimenticanza è un bug in attesa. La sequenza va resa **atomica** e il suo esito **verificabile**, non affidata alla memoria |
+| Il leak della PR #250 (file di un altro task in una PR di doc-sync) è nato da una causa **meccanica**, non da distrazione: `git add -A` in una working copy condivisa | La prevenzione non è «stai attento»: è una **regola verificabile**. La regola «una branch `docs/*` tocca solo `docs/`» è banale da verificare e chiude la classe |
+
+## Documenti aggiornati
+
+- `scripts/agent-claim.ps1` (nuovo) · `scripts/agent-pr.ps1` (nuovo) · `scripts/check-claim-state.mjs` (nuovo) · `scripts/test-claim-state.sh` (nuovo)
+- `.github/workflows/ci.yml`: 2 step nel job `gates-protocol` (claim gate + suite)
+- `AGENTS.md` v1.35 → v1.36: la riga del gate del claim nella tabella del contratto, la procedura di worktree/claim/PR con i due comandi
+- `docs/12-DEVOPS.md §9.10`: catalogo dei gate (13 job, 33 step)
+- `docs/18-DEV-LOG.md` §47
+- `scripts/generate-bundle.ps1`: `$files` += i 4 nuovi script + la sessione 81
+- `docs/INDEX.md`: versione di `AGENTS.md`, riga `18-DEV-LOG.md`
 
 
 
@@ -28422,6 +28553,19 @@ exit code). I due gate che contiene sono **read-only** (non generano e non scriv
 
 Il job usa `fetch-depth: 0` (serve il confronto con `origin/main`) e **non richiede `pnpm install`**
 (solo moduli built-in di node).
+
+**Sessione 81 (issue #256): il claim è verificabile.** ADR-0006 ha 8 regole *vincolanti* sul claim
+(issue aperta, label `in-progress`, commento `claim:`, riverifica con l'ID più basso, TTL, ordine
+di backlog, nessun doppio claim, nessuna issue già `status:*`) che fino alla Sessione 80 non
+avevano **nessun enforcement**: due agenti potevano implementare la stessa story senza che nulla
+se ne accorgesse. Il gate `check-claim-state.mjs` (step 31) verifica che la PR sia coerente con
+**branch ↔ issue ↔ keyword di chiusura ↔ stato dell'issue ↔ claim**, e vieta che una branch
+`docs/*` tocchi file fuori da `docs/` (il leak della PR #250: due script di un altro task finiti
+in una PR di doc-sync per un `git add -A` nella working copy condivisa). È **read-only**: non
+scrive su GitHub. Il gate accetta i dati da file JSON (`--pr-json`, `--issue-json`,
+`--comments-json`) oltre che da `gh`: i test devono essere identici su Windows e Linux, e un mock
+`gh` in bash non è eseguibile su Windows senza estensione (il PATH finirebbe per chiamare il `gh`
+vero — un test che non può fallire dà una falsa garanzia).
 
 **Verifica**: gli step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). **Sette** sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149), `Validità YAML dei workflow` (Sessione 74), `Copertura dei trigger del blocco progress` (#216, vedi §9.8h) e la sintassi JS dei blocchi `script:` (#73).
 
@@ -41061,6 +41205,716 @@ fi
 
 
 
+===== FILE: scripts/agent-claim.ps1 =====
+
+<#
+.SYNOPSIS
+    Presa in carico atomica di una story: worktree + label + claim + riverifica.
+
+.DESCRIPTION
+    ADR-0006 ha 8 regole VINCOLANTI sul claim, ma fino alla Sessione 80 non
+    aveva alcun enforcement: la presa in carico era prosa, e due agenti
+    potevano implementare la stessa story senza che nulla se ne accorgesse.
+
+    Questo script esegue la presa in carico come sequenza atomica:
+
+      1. valida l'issue (esiste, aperta, `agent-ready`, NON `in-progress`)
+      2. crea la worktree isolata (delega a scripts/setup-worktree.ps1)
+      3. aggiunge la label `in-progress`
+      4. posta il commento `claim: <agent-id> (UTC <ts>) -- worktree: <path>`
+      5. RIVERIFICA: scarica i commenti di claim e verifica che il proprio
+         abbia l'ID NUMERICO (API REST) piu' basso: vince chi ha commentato
+         per primo. Il discriminatore e' l'id numerico, non il node_id GraphQL
+         e non created_at (vedi AGENTS.md §"Presa in carico delle story").
+      6. scrive il file di stato dell'agente (usato da hook e script)
+      7. in caso di perdita: rimuove la label, posta `yield:` ed esce
+
+    Il file di stato vive FUORI dal working tree (nella directory git della
+    worktree): non e' un file untracked, quindi non confonde l'hook
+    pre-commit, e sparisce con la worktree.
+
+.PARAMETER IssueNumber
+    Numero dell'issue da prendere in carico.
+
+.PARAMETER Slug
+    Slug del branch (default: derivato dal titolo dell'issue).
+
+.PARAMETER AgentId
+    Identificatore dell'agente (default: <tool>-<hostname>-<4 caratteri>).
+
+.PARAMETER SkipWorktree
+    Non creare la worktree (l'agente lavora gia' in una worktree).
+
+.PARAMETER DryRun
+    Stampa cosa farebbe, senza toccare GitHub ne il filesystem.
+
+.EXAMPLE
+    pwsh scripts/agent-claim.ps1 256
+    pwsh scripts/agent-claim.ps1 256 -DryRun
+#>
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true, Position = 0)]
+    [int]$IssueNumber,
+    [string]$Slug = "",
+    [string]$AgentId = "",
+    [switch]$SkipWorktree,
+    [switch]$DryRun
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$repoSlug = (& gh repo view --json nameWithOwner --jq .nameWithOwner).Trim()
+$repoApi = "repos/$repoSlug"
+
+function Say([string]$msg, [string]$color = "Gray") { Write-Host "[agent-claim] $msg" -ForegroundColor $color }
+function Die([int]$code, [string]$msg) { Write-Host "[agent-claim] ERRORE: $msg" -ForegroundColor Red; exit $code }
+
+# --- agent id ---------------------------------------------------------------
+if ([string]::IsNullOrWhiteSpace($AgentId)) {
+    $hostName = $env:COMPUTERNAME.ToLowerInvariant()
+    $AgentId = "kilo-$hostName-$([guid]::NewGuid().ToString('N').Substring(0,4))"
+}
+
+# --- 1. validazione dell'issue --------------------------------------------
+Say "issue #$IssueNumber ..." "Cyan"
+$issueRaw = & gh issue view $IssueNumber --json number,title,state,labels 2>$null
+if ($LASTEXITCODE -ne 0) { Die 2 "issue #$IssueNumber non trovata o non accessibile" }
+$issue = $issueRaw | ConvertFrom-Json
+if ($issue.state -ne "OPEN") { Die 3 "issue #$IssueNumber non e' aperta (stato: $($issue.state))" }
+$labels = @($issue.labels | ForEach-Object { $_.name })
+if ($labels -notcontains "agent-ready") { Die 3 "issue #$IssueNumber non ha la label 'agent-ready' (labels: $($labels -join ', '))" }
+if ($labels -contains "in-progress") { Die 3 "issue #$IssueNumber ha gia' la label 'in-progress': qualcun altro l'ha presa in carico" }
+if ($labels -match '^status:') { Die 3 "issue #$IssueNumber ha gia' una label status:* ($($labels -join ', '))" }
+
+$title = $issue.title
+Say "titolo: $title" "DarkGray"
+
+if ([string]::IsNullOrWhiteSpace($Slug)) {
+    $base = ($title.ToLower() -replace '[^a-z0-9\-]+', '-') -replace '^-+|-+$', ''
+    if ($base.Length -gt 40) { $base = $base.Substring(0, 40).TrimEnd('-') }
+    $Slug = $base
+}
+
+# --- 2. worktree ------------------------------------------------------------
+$worktreePath = $repoRoot
+if (-not $SkipWorktree) {
+    $worktreeParent = Split-Path -Parent $repoRoot
+    $wtName = "ls-$IssueNumber-$Slug"
+    $worktreePath = Join-Path $worktreeParent $wtName
+    if (Test-Path $worktreePath) {
+        Say "worktree gia' presente: $worktreePath" "Yellow"
+    }
+    else {
+        Say "creo la worktree: $worktreePath" "Cyan"
+        if (-not $DryRun) {
+            & pwsh -NoProfile -File (Join-Path $PSScriptRoot "setup-worktree.ps1") $IssueNumber -Slug $Slug | Out-Host
+            if ($LASTEXITCODE -ne 0) { Die 1 "setup-worktree.ps1 e' fallito (exit $LASTEXITCODE)" }
+        }
+    }
+}
+
+# --- 3./4. label e commento di claim ---------------------------------------
+if ($DryRun) {
+    Say "[DRY-RUN] aggiungerei 'in-progress' e posterei il commento di claim" "Yellow"
+    Say "[DRY-RUN] farei la riverifica e scriverei il file di stato" "Yellow"
+    exit 0
+}
+
+Say "aggiungo la label 'in-progress' ..." "Cyan"
+& gh issue edit $IssueNumber --add-label "in-progress" | Out-Null
+if ($LASTEXITCODE -ne 0) { Die 1 "impossibile aggiungere la label 'in-progress'" }
+
+$timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$claimBody = "claim: $AgentId (UTC $timestamp) -- worktree: $worktreePath"
+Say "posterei il commento di claim" "Cyan"
+& gh issue comment $IssueNumber --body $claimBody | Out-Null
+if ($LASTEXITCODE -ne 0) { Die 1 "impossibile postare il commento di claim" }
+
+# --- 5. riverifica (deterministica) ----------------------------------------
+Say "riverifico i claim..." "Cyan"
+$commentsRaw = & gh api "$repoApi/issues/$IssueNumber/comments" 2>$null
+if ($LASTEXITCODE -ne 0) { Die 2 "impossibile leggere i commenti dell'issue" }
+$allComments = @($commentsRaw | ConvertFrom-Json)
+$claims = @($allComments | Where-Object { $_.body -like "claim:*" } | Sort-Object { [int64]$_.id })
+if ($claims.Count -eq 0) { Die 2 "nessun commento di claim trovato dopo la propria presa in carico" }
+$mine = @($claims | Where-Object { $_.body -like "*$AgentId*" })
+if ($mine.Count -eq 0) { Die 2 "il proprio commento di claim non e' stato trovato fra i commenti" }
+$mineId = [int64]$mine[0].id
+$lowestId = [int64]($claims | ForEach-Object { [int64]$_.id } | Measure-Object -Minimum).Minimum
+
+if ($mineId -ne $lowestId) {
+    Say "RIVERIFICA PERSA: un altro claim ha un ID piu' basso ($lowestId < $mineId) -> yield" "Red"
+    & gh issue edit $IssueNumber --remove-label "in-progress" | Out-Null
+    & gh issue comment $IssueNumber --body "yield: l'agente $AgentId ha rinunciato (claim $mineId, ID piu' basso in carico: $lowestId)" | Out-Null
+    exit 4
+}
+Say "riverifica OK: il claim $mineId e' il piu' basso" "Green"
+
+# --- 6. file di stato dell'agente ------------------------------------------
+$gitDir = (& git -C $worktreePath rev-parse --absolute-git-dir).Trim()
+$stateDir = $gitDir
+$stateFile = Join-Path $stateDir "agent-state.json"
+$branch = (& git -C $worktreePath rev-parse --abbrev-ref HEAD).Trim()
+$state = [ordered]@{
+    issue       = $IssueNumber
+    agent_id    = $AgentId
+    branch      = $branch
+    worktree    = $worktreePath
+    claimed_at  = $timestamp
+    claim_id    = $mineId
+    pr          = $null
+    session     = $null
+}
+$state | ConvertTo-Json | Set-Content -Path $stateFile -Encoding utf8
+Say "file di stato: $stateFile" "DarkGray"
+
+# --- 7. prossimi passi ------------------------------------------------------
+Say "claim acquisito su #$IssueNumber (branch $branch)" "Green"
+Write-Host ""
+Write-Host "[agent-claim] prossimi passi:" -ForegroundColor Cyan
+Write-Host "  1. cd `"$worktreePath`""
+Write-Host "  2. implementa la story"
+Write-Host "  3. pwsh scripts/agent-pr.ps1 -IssueNumber $IssueNumber   (apre la PR e scrive 'pr:' nella sessione)"
+Write-Host ""
+exit 0
+
+
+
+===== FILE: scripts/agent-pr.ps1 =====
+
+<#
+.SYNOPSIS
+    Apertura verificata di una pull request (claim -> PR in modo deterministico).
+
+.DESCRIPTION
+    Apre la PR della story che l'agente ha claimato, dopo aver verificato che
+    lo stato locale sia coerente. Sostituisce la sequenza manuale
+    "apri la PR -> togli agent-ready -> metti status:in-review -> ricordati di
+    scrivere `pr: N` nella sessione", che era la fonte di due difetti:
+
+      * la transizione delle label era spesso dimenticata;
+      * il file di sessione restava con `pr: 0`, e il workflow post-merge
+        `auto-session-merge-state.yml` falliva perche' non trovava nessun
+        file di sessione corrispondente alla PR (misurato due volte).
+
+    Sequenza:
+      1. legge il file di stato dell'agente e verifica la branch
+      2. esegue i gate locali bloccanti
+      3. verifica che il body contenga UNA sola keyword di chiusura, nuda
+      4. crea la PR
+      5. transiziona le label (`agent-ready` -> `status:in-review`)
+      6. scrive `pr: N` nel file di sessione e lo pusha  <-- chiude la
+         precondizione del workflow post-merge
+
+.PARAMETER IssueNumber
+    Numero dell'issue (deve coincidere con la branch e con la keyword di chiusura).
+
+.PARAMETER Title
+    Titolo della PR (default: "<tipo>: <titolo issue> (#N)").
+
+.PARAMETER BodyFile
+    File con il body della PR (default: .github/pull_request_template.md).
+
+.PARAMETER Base
+    Branch di base (default: main).
+
+.PARAMETER SkipChecks
+    Salta i gate locali (emergenza).
+
+.PARAMETER DryRun
+    Verifica e stampa, senza creare nulla.
+#>
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)]
+    [int]$IssueNumber,
+    [string]$Title = "",
+    [string]$BodyFile = "",
+    [string]$Base = "main",
+    [switch]$SkipChecks,
+    [switch]$DryRun
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$repoSlug = (& gh repo view --json nameWithOwner --jq .nameWithOwner).Trim()
+
+function Say([string]$msg, [string]$color = "Gray") { Write-Host "[agent-pr] $msg" -ForegroundColor $color }
+function Die([int]$code, [string]$msg) { Write-Host "[agent-pr] ERRORE: $msg" -ForegroundColor Red; exit $code }
+
+# --- 1. stato dell'agente e branch ------------------------------------------
+$gitDir = (& git rev-parse --absolute-git-dir).Trim()
+$stateFile = Join-Path $gitDir "agent-state.json"
+if (-not (Test-Path $stateFile)) {
+    Die 3 "nessun file di stato dell'agente ($stateFile): la worktree non e' stata creata da agent-claim.ps1"
+}
+$state = (Get-Content $stateFile -Raw | ConvertFrom-Json)
+if ([int]$state.issue -ne $IssueNumber) {
+    Die 3 "il file di stato dichiara l'issue #$($state.issue), non #$IssueNumber"
+}
+$branch = $state.branch
+if ($branch -notmatch "^(feat|fix)/$IssueNumber-") {
+    Die 3 "la branch '$branch' non corrisponde all'issue #$IssueNumber (atteso feat/$IssueNumber-... o fix/$IssueNumber-...)"
+}
+Say "issue #$IssueNumber, branch $branch, agent $($state.agent_id)" "DarkGray"
+
+# --- 2. gate locali bloccanti ----------------------------------------------
+if (-not $SkipChecks) {
+    Say "eseguo i gate locali..." "Cyan"
+    $failures = @()
+    $node = "node"
+
+    & $node (Join-Path $repoRoot "scripts/check-protocol-consistency.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "check-protocol-consistency.mjs" }
+
+    & $node (Join-Path $repoRoot "scripts/check-merge-state.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "check-merge-state.mjs" }
+
+    & $node (Join-Path $repoRoot "scripts/check-aggregate-blocks.mjs") --base "origin/$Base" --head HEAD | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "check-aggregate-blocks.mjs" }
+
+    # il bundle deve essere in sync nella stessa PR (regola D.26.3)
+    & pwsh -NoProfile -File (Join-Path $repoRoot "scripts/generate-bundle.ps1") -Check | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "generate-bundle.ps1 -Check" }
+
+    if ($failures.Count -gt 0) {
+        Write-Host "[agent-pr] ERRORE: gate locali falliti: $($failures -join ', ')" -ForegroundColor Red
+        exit 1
+    }
+    Say "gate locali verdi" "Green"
+}
+
+# --- 3. body e keyword di chiusura ------------------------------------------
+if ([string]::IsNullOrWhiteSpace($BodyFile)) {
+    $BodyFile = Join-Path $repoRoot ".github/pull_request_template.md"
+}
+if (-not (Test-Path $BodyFile)) { Die 2 "file del body non trovato: $BodyFile" }
+$body = Get-Content $BodyFile -Raw
+
+$naked = @([regex]::Matches($body, "(?m)^\s*(Closes|Fixes|Resolves)\s+#(\d+)\s*$"))
+$allKeywords = @([regex]::Matches($body, "(?i)\b(Closes|Fixes|Resolves)\s+#(\d+)"))
+if ($naked.Count -ne 1) {
+    Die 1 "il body deve contenere UNA sola keyword di chiusura nuda (trovate $($naked.Count)); una keyword dentro backtick o una casella di checklist non chiude l'issue"
+}
+$closedIssue = [int]$naked[0].Groups[2].Value
+if ($closedIssue -ne $IssueNumber) {
+    Die 1 "la keyword di chiusura punta a #$closedIssue ma l'issue in carico e' #$IssueNumber"
+}
+if ($allKeywords.Count -ne $naked.Count) {
+    Die 1 "la keyword di chiusura compare $($allKeywords.Count) volte in tutto e $($naked.Count) volte nuda: le occorrenze dentro backtick vanno rimosse"
+}
+Say "keyword di chiusura: #$closedIssue (nuda, unica)" "Green"
+
+if ([string]::IsNullOrWhiteSpace($Title)) {
+    $issueTitle = (& gh issue view $IssueNumber --json title --jq .title).Trim()
+    $kind = if ($branch -like "fix/*") { "fix" } else { "feat" }
+    $Title = "$kind`: $issueTitle (#$IssueNumber)"
+}
+
+if ($DryRun) {
+    Say "[DRY-RUN] aprirei la PR '$Title' verso $Base" "Yellow"
+    exit 0
+}
+
+# --- 4. creazione della PR --------------------------------------------------
+Say "creo la PR..." "Cyan"
+$prUrl = (& gh pr create --base $Base --head $branch --title $Title --body-file $BodyFile | Select-Object -Last 1).Trim()
+if ($LASTEXITCODE -ne 0) { Die 1 "gh pr create e' fallito" }
+if ($prUrl -notmatch "/pull/(\d+)") { Die 1 "impossibile ricavare il numero della PR dall'output: $prUrl" }
+$prNumber = [int]$Matches[1]
+Say "PR #$prNumber aperta: $prUrl" "Green"
+
+# --- 5. transizione delle label ---------------------------------------------
+Say "transizione delle label: agent-ready -> status:in-review" "Cyan"
+& gh issue edit $IssueNumber --remove-label "agent-ready" --add-label "status:in-review" | Out-Null
+if ($LASTEXITCODE -ne 0) { Die 1 "impossibile transizionare le label dell'issue #$IssueNumber" }
+
+# --- 6. scrivere `pr: N` nel file di sessione -------------------------------
+# Il workflow post-merge `auto-session-merge-state.yml` cerca un file di
+# sessione che dichiari `pr: <N>`: senza questo passaggio il workflow
+# fallisce (precondizione non soddisfatta) e la sessione resta aperta.
+$sessionFile = $null
+if ($state.PSObject.Properties.Name -contains "session" -and $state.session) {
+    $candidate = Join-Path $repoRoot $state.session
+    if (Test-Path $candidate) { $sessionFile = $candidate }
+}
+if (-not $sessionFile) {
+    $candidates = Get-ChildItem (Join-Path $repoRoot "docs/state/sessions") -Filter "*.md" -File |
+        Where-Object { (Get-Content $_.FullName -Raw) -match "(?m)^branch:\s*$([regex]::Escape($branch))\s*$" }
+    if ($candidates.Count -eq 1) { $sessionFile = $candidates[0].FullName }
+}
+
+if ($sessionFile) {
+    $relative = $sessionFile.Replace((Resolve-Path $repoRoot).Path + "\", "").Replace("\", "/")
+    Say "scrivo 'pr: $prNumber' in $relative" "Cyan"
+    $content = Get-Content $sessionFile -Raw
+    if ($content -match "(?m)^pr:\s*\d+\s*$") {
+        $content = $content -replace "(?m)^pr:\s*\d+\s*$", "pr: $prNumber"
+    }
+    else {
+        $content = $content -replace "(?m)^(merged:\s*.*)$", "`$1`npr: $prNumber"
+    }
+    $content | Set-Content -Path $sessionFile -Encoding utf8 -NoNewline
+    & git add $relative | Out-Null
+    & git commit -q -m "docs(state): scrive 'pr: $prNumber' nella sessione ($relative)" | Out-Null
+    if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare l'aggiornamento della sessione" }
+    & git push | Out-Null
+    if ($LASTEXITCODE -ne 0) { Die 1 "impossibile pushare l'aggiornamento della sessione" }
+    Say "sessione aggiornata e pushata" "Green"
+}
+else {
+    Say "NESSUN file di sessione per questa branch: la PR non avra' una sessione (il workflow post-merge lo segnalera' come assente)" "Yellow"
+}
+
+# --- 7. prossimi passi ------------------------------------------------------
+Write-Host ""
+Write-Host "[agent-pr] prossimi passi:" -ForegroundColor Cyan
+Write-Host "  1. attendi la review (CI: 13 check)"
+Write-Host "  2. al merge: pwsh scripts/post-merge.ps1 -Branch $branch -IssueNumber $IssueNumber"
+Write-Host ""
+exit 0
+
+
+
+===== FILE: scripts/check-claim-state.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate "coerenza claim <-> issue <-> branch <-> PR" (issue #256, ADR-0012 regola 5).
+ *
+ * ADR-0006 ha 8 regole VINCOLANTI sul claim, ma fino alla Sessione 80 non
+ * aveva alcun enforcement: `in-progress`, `claim:` e `status:in-review` non
+ * compaiono in alcun gate. Due agenti potevano implementare la stessa story
+ * senza che nulla se ne accorgesse — esattamente la race che ADR-0006 dichiara
+ * di aver chiuso. La sola difesa era la prosa.
+ *
+ * Questo gate e' READ-ONLY: non scrive nulla su GitHub.
+ *
+ * Controlli:
+ *   C1  la branch dichiara l'issue (feat|fix/<N>-...) e la keyword di chiusura
+ *       e' nuda, unica, e punta a quell'issue
+ *   C2  l'issue e' in `status:in-review` (o `in-progress`): la transizione di
+ *       stato e' avvenuta
+ *   C3  l'issue ha un commento di `claim:` e non e' stata lasciata per un
+ *       `yield:` — il protocollo di claim e' verificato, non solo dichiarato
+ *   C4  una branch `docs/<slug>` tocca SOLO file sotto `docs/`: un doc-sync
+ *       non puo' portare con se' il codice di un altro task (il leak della
+ *       PR #250: due script finiti in una PR di doc-sync per un `git add -A`
+ *       nella working copy condivisa)
+ *   C5  nessuna keyword di chiusura extra (niente occorrenze dentro backtick
+ *       o caselle di checklist: GitHub chiude solo le keyword nude)
+ *
+ * Uso: node scripts/check-claim-state.mjs [--pr <N>] [--repo <owner/name>]
+ *
+ * Exit code: 0 = coerente, 1 = violazione, 2 = errore di ambiente.
+ */
+import { execFileSync } from 'node:child_process';
+import { readFileSync, existsSync } from 'node:fs';
+
+const argv = process.argv.slice(2);
+function arg(name, fallback) {
+  const i = argv.indexOf(name);
+  return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : fallback;
+}
+
+let failures = 0;
+const fail = (m) => { console.error(`[FAIL] ${m}`); failures++; };
+const ok = (m) => console.log(`[OK] ${m}`);
+const info = (m) => console.log(`[INFO] ${m}`);
+
+function gh(args) {
+  try {
+    return execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  } catch (err) {
+    console.error(`[FAIL] gh ${args.join(' ')}: ${String(err.stderr || err.message).trim()}`);
+    process.exit(2);
+  }
+}
+
+function ghJson(args) {
+  const out = gh(args);
+  try {
+    return JSON.parse(out);
+  } catch {
+    console.error('[FAIL] output JSON non valido da gh');
+    process.exit(2);
+  }
+}
+
+/**
+ * Dati del gate: da GitHub (via gh) oppure da file JSON.
+ *
+ * I file servono ai test: rendono il gate verificabile senza rete e senza
+ * dipendere da come il sistema operativo risolve un eseguibile chiamato
+ * `gh` (su Windows un mock bash senza estensione non e' eseguibile, e il
+ * PATH finirebbe per chiamare il gh vero).
+ */
+function readJsonFile(path, label) {
+  if (!path) return null;
+  if (!existsSync(path)) {
+    console.error(`[FAIL] ${label}: file non trovato: ${path}`);
+    process.exit(2);
+  }
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    console.error(`[FAIL] ${label}: JSON non valido in ${path}`);
+    process.exit(2);
+  }
+}
+
+// --- individuazione della PR -------------------------------------------------
+let prNumber = arg('--pr', process.env.PR_NUMBER || '');
+if (!prNumber) {
+  const ref = process.env.GITHUB_REF || '';
+  const m = ref.match(/refs\/pull\/(\d+)\//);
+  if (m) prNumber = m[1];
+}
+if (!prNumber) {
+  console.error('[FAIL] numero della PR non determinabile: passare --pr <N>');
+  process.exit(2);
+}
+
+console.log(`[INFO] check-claim-state: coerenza claim/issue/branch/PR (PR #${prNumber})`);
+
+const prFile = arg('--pr-json', '');
+const issueFile = arg('--issue-json', '');
+const commentsFile = arg('--comments-json', '');
+
+const pr = prFile ? readJsonFile(prFile, 'PR') : ghJson(['pr', 'view', String(prNumber), '--json', 'headRefName,body,files,state,number']);
+const branch = pr.headRefName || '';
+const body = pr.body || '';
+const files = (pr.files || []).map((f) => f.path);
+
+info(`branch: ${branch} — ${files.length} file`);
+
+// su una PR chiusa o mergiata lo stato dell'issue e' gia' cambiato
+// (status:done): il gate vale per le PR aperte
+if (pr.state !== 'OPEN') {
+  console.log(`[INFO] check-claim-state: PR #${prNumber} e' ${pr.state} — il gate vale per le PR aperte`);
+  console.log('\n[INFO] check-claim-state: 0 violazioni');
+  process.exit(0);
+}
+
+// --- C5: keyword di chiusura -------------------------------------------------
+const naked = [...body.matchAll(/(?:^|\n)\s*(Closes|Fixes|Resolves)\s+#(\d+)\s*(?:\n|$)/g)];
+const all = [...body.matchAll(/\b(Closes|Fixes|Resolves)\s+#(\d+)/gi)];
+
+// --- C1: branch <-> issue ----------------------------------------------------
+let issueNumber = null;
+const branchMatch = branch.match(/^(?:feat|fix)\/(\d+)-/);
+if (branchMatch) {
+  issueNumber = Number(branchMatch[1]);
+} else if (!branch.startsWith('docs/')) {
+  fail(`C1: la branch "${branch}" non e' nel formato richiesto (feat/<N>-... | fix/<N>-... | docs/<slug>)`);
+}
+
+if (issueNumber !== null) {
+  if (naked.length !== 1) {
+    fail(`C1: la keyword di chiusura deve comparire UNA volta come riga nuda nella branch ${branch} (trovate ${naked.length})`);
+  } else if (Number(naked[0][2]) !== issueNumber) {
+    fail(`C1: la keyword di chiusura punta a #${naked[0][2]} ma la branch dichiara l'issue #${issueNumber}`);
+  } else {
+    ok(`C1: branch ${branch} e keyword di chiusura #${issueNumber} coerenti`);
+  }
+} else if (branch.startsWith('docs/')) {
+  info(`C1: branch docs/ — nessun issue da collegare (naked=${naked.length})`);
+}
+
+if (all.length !== naked.length) {
+  fail(`C5: la keyword di chiusura compare ${all.length} volte ma solo ${naked.length} sono nude: le occorrenze dentro backtick o checklist non chiudono l'issue`);
+} else {
+  ok('C5: nessuna keyword di chiusura extra (naked = totale)');
+}
+
+// --- C4: una branch docs/ tocca solo docs/ ----------------------------------
+if (branch.startsWith('docs/')) {
+  const fuori = files.filter((f) => !f.startsWith('docs/'));
+  if (fuori.length) {
+    fail(`C4: la branch "${branch}" e' un doc-sync ma tocca ${fuori.length} file fuori da docs/: ${fuori.slice(0, 8).join(', ')}${fuori.length > 8 ? ' …' : ''}`);
+  } else {
+    ok(`C4: branch docs/ — tutti i ${files.length} file sono sotto docs/`);
+  }
+}
+
+// --- C2/C3: stato dell'issue e claim -----------------------------------------
+if (issueNumber !== null) {
+  const issue = issueFile ? readJsonFile(issueFile, 'issue') : ghJson(['issue', 'view', String(issueNumber), '--json', 'state,labels']);
+  const labels = (issue.labels || []).map((l) => l.name);
+  const inReview = labels.includes('status:in-review');
+  const inProgress = labels.includes('in-progress');
+  if (issue.state !== 'OPEN') {
+    fail(`C2: l'issue #${issueNumber} non e' aperta (stato: ${issue.state})`);
+  } else if (!inReview && !inProgress) {
+    fail(`C2: l'issue #${issueNumber} non e' in 'status:in-review' ne' in 'in-progress' (labels: ${labels.join(', ')})`);
+  } else {
+    ok(`C2: issue #${issueNumber} in stato coerente (${inReview ? 'status:in-review' : 'in-progress'})`);
+  }
+
+  // i commenti di claim (API REST: l'id numerico e' il discriminante)
+  const comments = commentsFile ? readJsonFile(commentsFile, 'comments') : ghJson(['api', `repos/{owner}/{repo}/issues/${issueNumber}/comments`]);
+  const claimComments = comments.filter((c) => c.body && c.body.startsWith('claim:'));
+  const yieldComments = comments.filter((c) => c.body && c.body.startsWith('yield:'));
+
+  if (claimComments.length === 0) {
+    fail(`C3: l'issue #${issueNumber} non ha nessun commento di claim: — la regola di ADR-0006 ("nessun lavoro senza claim valido") non e' verificabile`);
+  } else {
+    const winner = claimComments.sort((a, b) => Number(a.id) - Number(b.id))[0];
+    const yielded = yieldComments.some((y) => {
+      const m = y.body.match(/agente\s+(\S+)/);
+      return m && winner.body.includes(m[1]);
+    });
+    if (yielded) {
+      fail(`C3: l'agente del claim vincente (commento ${winner.id}) ha postato un yield: — la story non e' stata presa in carico`);
+    } else {
+      ok(`C3: claim valido (commento ${winner.id}, ${claimComments.length} claim in totale)`);
+    }
+  }
+}
+
+console.log(`\n[INFO] check-claim-state: ${failures} violazioni`);
+process.exit(failures === 0 ? 0 : 1);
+
+
+
+===== FILE: scripts/test-claim-state.sh =====
+
+#!/usr/bin/env bash
+# Test di scenario per scripts/check-claim-state.mjs (issue #256, ADR-0012 regola 5).
+#
+# Il gate verifica che il protocollo di claim (ADR-0006) sia rispettato:
+# branch <-> issue <-> keyword di chiusura <-> stato dell'issue <-> claim.
+# Fino alla Sessione 80 queste regole erano solo prosa.
+#
+# I dati arrivano da file JSON (--pr-json/--issue-json/--comments-json): il
+# test non tocca GitHub e funziona identico su Windows e Linux (un mock `gh`
+# bash non e' eseguibile su Windows senza estensione, e il PATH finirebbe per
+# chiamare il gh vero).
+#
+# Esegui con: bash scripts/test-claim-state.sh
+# Richiede: bash, node.
+
+set -u
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+GATE="$SCRIPT_DIR/check-claim-state.mjs"
+
+if [ ! -f "$GATE" ]; then
+  echo "[FAIL] gate non trovato: $GATE"
+  exit 2
+fi
+
+WORK=$(mktemp -d)
+trap "rm -rf '$WORK'" EXIT
+
+PASS=0
+FAIL=0
+
+# scenario <id> <descrizione> <expected exit> <pr json> <issue json> <comments json>
+scenario() {
+  local id="$1" desc="$2" expected_exit="$3"
+  printf '%s' "$4" > "$WORK/pr.json"
+  printf '%s' "$5" > "$WORK/issue.json"
+  printf '%s' "$6" > "$WORK/comments.json"
+
+  node "$GATE" --pr 1 --pr-json "$WORK/pr.json" --issue-json "$WORK/issue.json" \
+    --comments-json "$WORK/comments.json" > "$WORK/out.txt" 2>&1
+  local actual_exit=$?
+
+  local status="OK"
+  if [ "$actual_exit" != "$expected_exit" ]; then
+    status="FAIL"
+  fi
+
+  printf "%-3s %-52s | expected=%-3s | actual=%-3s (%s)\n" \
+    "$id" "$desc" "$expected_exit" "$actual_exit" "$status"
+
+  if [ "$status" = "OK" ]; then
+    PASS=$((PASS+1))
+  else
+    FAIL=$((FAIL+1))
+    sed 's/^/       | /' "$WORK/out.txt" | head -6
+  fi
+}
+
+# i newline sono espressi come \n: dentro il JSON devono essere escape
+PR_BODY_OK='## Sintesi\n\nCloses #7\n\n- [x] fatto'
+ISSUE_OK='{"state":"OPEN","labels":[{"name":"agent-ready"},{"name":"status:in-review"}]}'
+COMMENTS_OK='[{"id":100,"body":"claim: kilo-hp-abc (UTC 2026-11-01T10:00:00Z)"},{"id":101,"body":"altro commento"}]'
+
+# T1: tutto coerente
+scenario "T1" "branch, keyword, stato e claim coerenti" "0" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T2: branch senza numero di issue
+scenario "T2" "branch fuori dal pattern feat|fix/<N>-" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feature/coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T3: keyword di chiusura assente
+scenario "T3" "keyword di chiusura assente" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"## Sintesi\n\nnessuna chiusura","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T4: keyword di chiusura dentro backtick (non nuda)
+scenario "T4" "keyword di chiusura non nuda" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"## Sintesi\n\n`Closes #7`","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T5: keyword che punta a un'altra issue
+scenario "T5" "keyword di chiusura su un'altra issue" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"Closes #9","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T6: issue non transizionata a status:in-review
+scenario "T6" "issue senza status:in-review" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  '{"state":"OPEN","labels":[{"name":"agent-ready"}]}' "$COMMENTS_OK"
+
+# T7: issue senza nessun claim
+scenario "T7" "issue senza commento di claim" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" '[{"id":101,"body":"commento qualsiasi"}]'
+
+# T8: l'agente vincente ha fatto yield
+scenario "T8" "claim vincente con yield" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" '[{"id":100,"body":"claim: kilo-hp-abc (UTC 2026-11-01T10:00:00Z)"},{"id":102,"body":"yield: l-agente kilo-hp-abc ha rinunciato (claim 100)"}]'
+
+# T9: branch docs/ che tocca file fuori docs/
+scenario "T9" "branch docs/ con file fuori docs/" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"docs/session-7-merge-state","body":"## Sintesi\n\nnessuna chiusura","files":[{"path":"docs/state/sessions/7-x.md"},{"path":"scripts/agent-claim.ps1"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T10: branch docs/ che tocca solo docs/
+scenario "T10" "branch docs/ con soli file docs/" "0" \
+  '{"number":1,"state":"OPEN","headRefName":"docs/session-7-merge-state","body":"## Sintesi\n\nnessuna chiusura","files":[{"path":"docs/state/sessions/7-x.md"},{"path":"docs/BUNDLE.md"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T11: PR gia' mergiata -> il gate non si applica
+scenario "T11" "PR mergiata (gate non applicabile)" "0" \
+  '{"number":1,"state":"MERGED","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+echo "---"
+echo "Pass: $PASS   Fail: $FAIL"
+
+if [ "$FAIL" -eq 0 ]; then
+  echo "ALL PASS"
+  exit 0
+else
+  echo "FAILURES"
+  exit 1
+fi
+
+
+
 ===== FILE: scripts/setup-hooks.js =====
 
 #!/usr/bin/env node
@@ -41944,6 +42798,19 @@ jobs:
 
       - name: Gate "blocchi aggregati" fail-closed (issue #248)
         run: bash scripts/test-aggregate-blocks.sh
+
+      # Il protocollo di claim (ADR-0006) aveva 8 regole vincolanti e ZERO
+      # enforcement: due agenti potevano implementare la stessa story senza
+      # che nulla se ne accorgesse (issue #256). Il gate verifica che la PR
+      # sia coerente con branch, issue, keyword di chiusura, stato dell'issue
+      # e claim — e che una branch `docs/*` tocchi solo `docs/`.
+      - name: Coerenza claim/issue/branch (issue #256)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-claim-state.mjs --pr ${{ github.event.pull_request.number }}
+
+      - name: Gate "coerenza del claim" fail-closed (issue #256)
+        run: bash scripts/test-claim-state.sh
 
   gates-aggregate:
     # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"

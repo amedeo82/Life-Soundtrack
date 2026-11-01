@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.35 — Sessione 80 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.36 — Sessione 81 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -39,6 +39,8 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Ogni `scripts/<file>` e ogni flag `-<Flag>` citati **esistono davvero** | C5 | D7 |
 | La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
+| La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
+| Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -771,10 +773,22 @@ git push
 
 1. Leggi questo file
 2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
-3. **Crea la worktree isolata** con `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow" qui sotto) — **non usare** `git checkout -b` sul main repo. La worktree elimina i failure mode E3/E4/E5 (DATA-LOSS post-merge) documentati in D.26.4. **Attenzione**: lo script valida che l'issue non abbia già `in-progress`, quindi va eseguito **prima** del claim (o con `-SkipGhCheck` se hai già claimato tu).
-4. **Claima** l'issue (ADR-0006): `gh issue edit <N> --add-label in-progress` + commento `claim: <AGENT-ID> (UTC <timestamp>)`, poi **riverifica** (vince chi ha il commento con ID GitHub più basso)
-5. Leggi la specifica del task e implementa con test (nella worktree)
-6. Apri PR dalla worktree (rimuovendo `agent-ready` e aggiungendo `status:in-review` all'issue) con `Closes #N` nel body
+3. **Crea la worktree isolata e prendi in carico l'issue** con **un solo comando** (Sessione 81, issue #256):
+
+   ```bash
+   pwsh scripts/agent-claim.ps1 <N>
+   ```
+
+   Lo script esegue in sequenza atomica: validazione dell'issue → worktree (`setup-worktree.ps1`) → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico** del commento più basso, letto dall'API REST) → file di stato dell'agente. Se la riverifica è persa, rimuove la label, posta `yield:` ed esce con codice 4. **Non** copiare a mano i comandi `gh`: la procedura manuale era la principale occasione di dimenticanza del protocollo (vedi §"🎫 Presa in carico delle story").
+
+4. Leggi la specifica del task e implementa con test (nella worktree)
+5. **Apri la PR** con **un solo comando** che verifica i gate locali, controlla la keyword di chiusura, crea la PR, transiziona le label e scrive `pr: N` nel file di sessione:
+
+   ```bash
+   pwsh scripts/agent-pr.ps1 -IssueNumber <N>
+   ```
+
+   Il campo `pr: N` è la precondizione del workflow post-merge `auto-session-merge-state.yml`: scriverlo a mano dopo l'apertura della PR è stato il motivo di due fallimenti della catena post-merge (Sessione 80, issue #254).
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -1205,7 +1219,13 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.35 — **il protocollo diventa un contratto verificato** (Sessione 80, issue #248). La Sessione 79 aveva chiuso 8 drift misurati fra `AGENTS.md` e la realtà, ma li aveva chiusi **una volta**: senza un gate che li confronti, tornano. Il protocollo era l'unico artefatto di governance del repo **senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella exit code), mentre README, sessioni, workflow, label e blocchi aggregati ne avevano uno ciascuno. Ora ne ha due:
+*Ultimo aggiornamento: v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
+- **`scripts/agent-claim.ps1`**: presa in carico **atomica** — validazione dell'issue → worktree → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico REST** più basso, non il `node_id` GraphQL né `created_at`) → file di stato dell'agente (nella directory git della worktree: non è un file untracked, non confonde il `pre-commit`, sparisce con la worktree). Se la riverifica è persa rimuove la label, posta `yield:` ed esce 4. Exit 3 = issue già claimata
+- **`scripts/agent-pr.ps1`**: apertura **verificata** — gate locali bloccanti, **una sola** keyword di chiusura nuda, creazione della PR, transizione delle label (`agent-ready` → `status:in-review`) e **scrittura di `pr: N` nel file di sessione** con push: era la precondizione che ha fatto fallire il workflow post-merge due volte (Sessione 80, issue #254)
+- **`scripts/check-claim-state.mjs`** (read-only, bloccante in CI): la PR è coerente con **branch ↔ issue ↔ keyword di chiusura ↔ stato dell'issue ↔ claim** (C1-C5), e **una branch `docs/*` tocca solo file sotto `docs/`** (C4): nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa — la classe diventa impossibile, non solo sgradita. 11 scenari di test (`scripts/test-claim-state.sh`)
+- §"🚀 Primo task di un agente": la worktree, il claim e l'apertura della PR sono **tre comandi** (`agent-claim.ps1` → implementa → `agent-pr.ps1`), non una sequenza da ricordare a memoria
+
+*Precedente v1.35 — **il protocollo diventa un contratto verificato** (Sessione 80, issue #248). La Sessione 79 aveva chiuso 8 drift misurati fra `AGENTS.md` e la realtà, ma li aveva chiusi **una volta**: senza un gate che li confronti, tornano. Il protocollo era l'unico artefatto di governance del repo **senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella exit code), mentre README, sessioni, workflow, label e blocchi aggregati ne avevano uno ciascuno. Ora ne ha due:
 - **`scripts/check-protocol-consistency.mjs`** (read-only, 6 check): versione dichiarata ↔ `docs/INDEX.md` (C1), tabella label ↔ `validate-labels.mjs` (C2), tabella exit code ↔ i `exit N` reali degli script (C3), **integrità degli anchor** — ogni `§"…"` deve risolvere a un heading esistente (C4), esistenza degli script e dei flag citati (C5), nessuna checklist duplicata (C6). Il primo giro ha trovato **3 riferimenti rotti** che nessuno aveva notato: un typo («Macchina **di** stati» invece di «a stati»), una sezione «⚠️ Deprecazione» che non esiste, e un rimando a «🛡️ Hardening multi-agente» (rinominata). C4 è la rete di sicurezza che rende sicuro il lotto I3 (rifinitura del file)
 - **`scripts/check-aggregate-blocks.mjs`** (read-only, **bloccante**): confronta i blocchi `AGGREGATE-*` della PR con quelli della base. È un controllo **testuale**, quindi immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore ⇒ la regola V1 di ADR-0008 diventa verificabile. Verifica non vacua: applicato alla PR #249 reale (base `5e98866` → merge `2478a9a`) rileva **5 violazioni** — la PR aveva committato i blocchi rigenerati in locale. La PR #250 aveva la stessa violazione ed è stata corretta
 - **`scripts/test-protocol-consistency.sh`** (8 scenari: 1 positivo + 7 negativi, uno per check) e **`scripts/test-aggregate-blocks.sh`** (6 scenari): un gate che passa sempre non è un gate (lesson 43-1)

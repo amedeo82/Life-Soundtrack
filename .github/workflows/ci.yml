@@ -335,6 +335,19 @@ jobs:
       - name: Gate "blocchi aggregati" fail-closed (issue #248)
         run: bash scripts/test-aggregate-blocks.sh
 
+      # Il protocollo di claim (ADR-0006) aveva 8 regole vincolanti e ZERO
+      # enforcement: due agenti potevano implementare la stessa story senza
+      # che nulla se ne accorgesse (issue #256). Il gate verifica che la PR
+      # sia coerente con branch, issue, keyword di chiusura, stato dell'issue
+      # e claim — e che una branch `docs/*` tocchi solo `docs/`.
+      - name: Coerenza claim/issue/branch (issue #256)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check-claim-state.mjs --pr ${{ github.event.pull_request.number }}
+
+      - name: Gate "coerenza del claim" fail-closed (issue #256)
+        run: bash scripts/test-claim-state.sh
+
   gates-aggregate:
     # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
     # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
