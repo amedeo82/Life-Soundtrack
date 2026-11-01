@@ -7892,8 +7892,8 @@ solo in `scripts/`, `AGENTS.md` e `docs/`.
 ### Sessione 79 - Protocollo agenti come contratto verificato (ADR-0012)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #249)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #249 (2478a9a5cf122c350bf26034f502dbab6e8f134f, 2026-11-01T14:55:25Z)
 - **Claim**: `kilo-hp-elitebook-ef4d`
 
 ```
