@@ -1236,9 +1236,11 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 ## 45. Protocollo agenti come contratto verificato (Sessione 79)
 
 **Branch**: `feat/248-protocollo-contratto-verificato`
-**Issue di tracking**: **#248** (epic)
+**PR**: **#249** — **merged** il 2026-11-01T14:55:25Z (merge commit `2478a9a5cf122c350bf26034f502dbab6e8f134f`) — issue di tracking: **#248** (`status:done`)
 **Data**: 2026-11-01
-**Stato**: 🟡 in corso (lotto I1 + I2-a; i lotti I2-b, I2-c e I3 sono descritti in ADR-0012 §"Stato dell'implementazione")
+**Stato**: ✅ **MERGED** — lotto I1 + I2-a dell'epic #248; i lotti I2-b, I2-c e I3 sono descritti in ADR-0012 §"Stato dell'implementazione"
+
+> **Nota (doc-sync di chiusura)**: il frontmatter di questa sessione è stato allineato al merge **dopo** il merge, con `node scripts/apply-merge-state.mjs --pr 249` — perché il workflow `auto-session-merge-state.yml` che fa questo passo **non ha mai girato con successo**: la sua prima esecuzione (#243) è fallita sulla precondizione (nessun file di sessione dichiarava `pr: 243`) e la seconda (#249) è stata **annullata** dal concurrency group `post-merge-main`. I tre writer di `main` non si accodano: se ne partono insieme, **uno vince e gli altri due vengono annullati** (`cancel-in-progress: false` *cancella* i run pending precedenti dello stesso group). Difetto tracciato e aperto come issue dedicata; misura e semantica in §45.
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
