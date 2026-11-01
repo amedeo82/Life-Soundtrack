@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 16:16
+> Data: 2026-11-01 15:28
 > Totale file: 141
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2359,7 +2359,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟢 | ✅ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
-| 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟡 | ❌ | #249 |
+| 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟢 | ✅ | #249 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2399,7 +2399,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **56** (merge: 55)
+- Sessioni migrate in state/sessions: **56** (merge: 56)
 - Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S79** - Protocollo agenti come contratto verificato (ADR-0012)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
@@ -10405,8 +10405,8 @@ solo in `scripts/`, `AGENTS.md` e `docs/`.
 ### Sessione 79 - Protocollo agenti come contratto verificato (ADR-0012)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #249)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #249 (2478a9a5cf122c350bf26034f502dbab6e8f134f, 2026-11-01T14:55:25Z)
 - **Claim**: `kilo-hp-elitebook-ef4d`
 
 ```
@@ -32130,7 +32130,7 @@ versione riscritta, verificabile:
  * scripts/generate-fixtures.mjs
  *
  * Generatore deterministico di fixture sintetici per test DB e analisi.
- * Source of truth: 02-DATA-SCHEMA.md + 10-TESTING.md §3.2/§3.3/§3.4 + 06-UX-FLOWS-STATES.md §2.14 (audit 2026-10-15).
+ * Source of truth: AGENTS.md §V1 (audit 2026-10-15) + 10-TESTING §3.2/§3.3/§3.4 + 06-UX §2.14.
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti
