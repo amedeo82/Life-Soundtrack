@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 17:36
+> Data: 2026-11-01 16:41
 > Totale file: 153
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2089,9 +2089,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
 | 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟢 | ✅ | #249 |
 | 80 | Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b) | 🟢 | ✅ | #253 |
-| 81 | Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c) | 🟡 | ❌ | - |
-| 82 | La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251) | 🟡 | ❌ | - |
-| 83 | AGENTS.md: il contratto senza la storia (rifinitura I3) | 🟡 | ❌ | - |
+| 81 | Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c) | 🟢 | ✅ | #257 |
+| 82 | La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251) | 🟢 | ✅ | #258 |
+| 83 | AGENTS.md: il contratto senza la storia (rifinitura I3) | 🟢 | ✅ | #260 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2131,7 +2131,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **60** (merge: 57)
+- Sessioni migrate in state/sessions: **60** (merge: 60)
 - Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S83** - AGENTS.md: il contratto senza la storia (rifinitura I3)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
@@ -10353,8 +10353,8 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 ### Sessione 81 - Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #257 (f6fb8c056d9f69ba196b4443c79e98040bbeaab1, 2026-11-01T15:56:50Z)
 - **Claim**: `kilo-hp-elitebook-7f3c`
 
 ```
@@ -10431,8 +10431,8 @@ Il terzo è la parte che chiude la classe di difetto, perché verifica in CI que
 ### Sessione 82 - La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #258 (a07c7b04f74426f63545889f4b19652ab8225b36, 2026-11-01T16:04:24Z)
 - **Claim**: `kilo-hp-elitebook-1c9d`
 
 ```
@@ -10526,8 +10526,8 @@ anchor invariati). Nessun altro difetto noto della catena post-merge.
 ### Sessione 83 - AGENTS.md: il contratto senza la storia (rifinitura I3)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #260 (5d49fe959efd6333efb40f09a2cc87d07fae1dd2, 2026-11-01T16:16:44Z)
 - **Claim**: `kilo-hp-elitebook-4e7b`
 
 ```

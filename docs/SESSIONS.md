@@ -8115,8 +8115,8 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 ### Sessione 81 - Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #257 (f6fb8c056d9f69ba196b4443c79e98040bbeaab1, 2026-11-01T15:56:50Z)
 - **Claim**: `kilo-hp-elitebook-7f3c`
 
 ```
@@ -8193,8 +8193,8 @@ Il terzo è la parte che chiude la classe di difetto, perché verifica in CI que
 ### Sessione 82 - La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #258 (a07c7b04f74426f63545889f4b19652ab8225b36, 2026-11-01T16:04:24Z)
 - **Claim**: `kilo-hp-elitebook-1c9d`
 
 ```
@@ -8288,8 +8288,8 @@ anchor invariati). Nessun altro difetto noto della catena post-merge.
 ### Sessione 83 - AGENTS.md: il contratto senza la storia (rifinitura I3)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #260 (5d49fe959efd6333efb40f09a2cc87d07fae1dd2, 2026-11-01T16:16:44Z)
 - **Claim**: `kilo-hp-elitebook-4e7b`
 
 ```
