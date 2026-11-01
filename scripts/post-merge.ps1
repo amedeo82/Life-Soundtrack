@@ -664,6 +664,7 @@ if ($aheadCount -and $aheadCount -ne "0") {
 Write-Step "4/7 Verifica merge di '$Branch'"
 
 $mergeCommitOid = $null
+$prNumber = $null
 $verified = $false
 $verifySource = ""
 
@@ -678,6 +679,7 @@ if ($IssueNumber -gt 0 -and (Get-Command gh -ErrorAction SilentlyContinue)) {
                 $verified = $true
                 $verifySource = "gh: PR #$($prs[0].number) merged il $($prs[0].mergedAt)"
                 $mergeCommitOid = $prs[0].mergeCommit.oid
+                $prNumber = $prs[0].number
             }
         } catch {
             Write-Warn "output gh non parsabile: $($_.Exception.Message)"
@@ -792,7 +794,15 @@ if ($IssueNumber -gt 0) {
     Write-Host "[post-merge] ==============================================" -ForegroundColor Green
     $sha = if ($mergeCommitOid) { $mergeCommitOid } else { "<merge-commit-sha>" }
     Write-Host "[post-merge]   gh issue comment $IssueNumber --body `"release: <AGENT-ID> - PR mergata ($sha)`"" -ForegroundColor Cyan
-    Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr $IssueNumber    # applica stato merge sessione (issue #239)" -ForegroundColor Cyan
+    # Il numero della PR NON e' il numero dell'issue: i due coincidono solo
+    # per convenzione. Il comando qui sotto accetta il numero della PR.
+    if ($prNumber) {
+        Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr $prNumber    # applica stato merge sessione (issue #239)" -ForegroundColor Cyan
+    }
+    else {
+        Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr <NUMERO-PR>   # applica stato merge sessione (issue #239)" -ForegroundColor Yellow
+        Write-Host "[post-merge]     (numero della PR non determinato: risolvilo con 'gh pr list --head $Branch --state merged')" -ForegroundColor Yellow
+    }
     Write-Host "[post-merge]   pwsh scripts/aggregate-state.ps1 -Check    # stato doc (exit 0 = in sync)" -ForegroundColor Cyan
     Write-Host "[post-merge]   pwsh scripts/generate-bundle.ps1 -Check   # bundle (exit 0 = in sync)" -ForegroundColor Cyan
 } else {

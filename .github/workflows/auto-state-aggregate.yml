@@ -1,3 +1,15 @@
+#
+# CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
+# condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
+# GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job
+# or workflow in the concurrency group will be cancelled"*). Con un group
+# condiviso, dei writer partendo insieme uno vinceva il lock e gli altri
+# venivano annullati senza eseguire nulla (misurato nel merge della PR #249:
+# auto-state-aggregate e auto-session-merge-state annullati in 1 s e 4 s).
+# L'ordinamento non dipende dal group ma dalla catena dei push
+# (merge -> sessione -> aggregate -> bundle): l'ultimo run arriva sullo
+# stato finale, e il guard `git diff --quiet` rende ogni writer idempotente.
+#
 name: auto-state-aggregate
 
 # Rigenera i blocchi aggregati in docs/SESSIONS.md + docs/11-BACKLOG.md + docs/INDEX.md + docs/BUNDLE.md + README.md
@@ -40,7 +52,7 @@ on:
       # (bloccante in CI, vedi `docs/12-DEVOPS.md` 9.8h).
       - 'docs/11-BACKLOG.md'
 
-# Companion di auto-bundle.yml: condividono il group post-merge-main con
+# Companion di auto-bundle.yml: condividono il group post-merge-aggregate con
 # cancel-in-progress: false, cosi' le due rigenerazioni (blocchi AGGREGATE-*
 # vs sezioni FILE di BUNDLE.md) sono serializzate. Vedi auto-bundle.yml per
 # il caso d'uso che ha motivato questa aggiunta (issue #115, follow-up di
@@ -53,7 +65,7 @@ on:
 # fallisce con `non-fast-forward` e i blocchi aggregati non vengono committati.
 # Sintesi e gate di regressione: `scripts/test-workflow-push-sync.sh`.
 concurrency:
-  group: post-merge-main
+  group: post-merge-aggregate
   cancel-in-progress: false
 
 jobs:
@@ -70,7 +82,7 @@ jobs:
           fetch-depth: 0
 
       # Issue #140: questa workflow e `auto-bundle.yml` scattano sullo STESSO
-      # push a `main` e condividono il concurrency group `post-merge-main`, ma il
+      # push a `main` e condividono il concurrency group `post-merge-aggregate`, ma il
       # group serializza i *run*, non i *checkout*: `actions/checkout` senza
       # `ref:` mette il workspace sul `github.sha` del merge commit, non sulla
       # testa corrente di `main`. Se l'altra workflow ha gia' pushato quando

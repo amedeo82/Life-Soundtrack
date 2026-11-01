@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   pull_request:
@@ -439,7 +439,7 @@ jobs:
         run: bash scripts/test-workflow-permission-scopes.sh
 
       # Issue #140: due workflow pushano su `main` (auto-bundle + auto-state-aggregate)
-      # e condividono il concurrency group `post-merge-main`, che serializza i *run*
+      # e hanno ciascuno il PROPRIO concurrency group (`post-merge-<writer>`): con `cancel-in-progress: false` GitHub non accoda i run in attesa, li CANCELLA (issue #251)
       # ma non i *checkout*: senza un sync con `origin/main` prima del push, il secondo
       # writer pusha da un checkout stale e il push viene rifiutato con
       # `non-fast-forward`. Il fallimento e' silenzioso (il merge sembra riuscito, i

@@ -199,13 +199,19 @@ function patchFrontmatter(text, updates) {
 const files = listSessionFiles();
 const found = findSession(files);
 if (!found) {
-  abort(
-    `nessun file di sessione corrisponde alla PR #${prNumber}` +
+  // Nessun file di sessione per questa PR: e' legittimo (una PR `fix` senza
+  // sessione, o una PR che non ha ancora scritto `pr:`). Non e' un errore:
+  // fallire qui rendeva rosso il workflow post-merge per una PR che non ha
+  // niente da chiudere (misurato: issue #254, Sessione 81). La verifica
+  // della precondizione resta fail-closed dove conta: il gate
+  // `check-merge-state.mjs` segnala le sessioni mergiate senza stato.
+  console.log(
+    `[WARN] nessun file di sessione corrisponde alla PR #${prNumber}` +
       (branchArg ? ` (branch "${branchArg}")` : '') +
-      '. Il doc-sync in-branch deve scrivere `pr: ' +
-      prNumber +
-      '` nel file di sessione (oppure il workflow deve passare --branch).',
+      ': niente da applicare. Se la PR ha una sessione, il doc-sync in-branch ' +
+      `deve scrivere \`pr: ${prNumber}\` nel file di sessione.`,
   );
+  process.exit(0);
 }
 
 const session = found.file;

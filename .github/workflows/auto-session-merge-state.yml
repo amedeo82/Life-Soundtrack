@@ -1,3 +1,15 @@
+#
+# CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
+# condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
+# GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job
+# or workflow in the concurrency group will be cancelled"*). Con un group
+# condiviso, dei writer partendo insieme uno vinceva il lock e gli altri
+# venivano annullati senza eseguire nulla (misurato nel merge della PR #249:
+# auto-state-aggregate e auto-session-merge-state annullati in 1 s e 4 s).
+# L'ordinamento non dipende dal group ma dalla catena dei push
+# (merge -> sessione -> aggregate -> bundle): l'ultimo run arriva sullo
+# stato finale, e il guard `git diff --quiet` rende ogni writer idempotente.
+#
 name: Auto session merge state
 
 on:
@@ -6,7 +18,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: post-merge-main
+  group: post-merge-session
   cancel-in-progress: false
 
 permissions:
