@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 16:51
+> Data: 2026-11-01 15:57
 > Totale file: 151
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -42782,6 +42782,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
+      issues: read
     steps:
       - uses: actions/checkout@v4
         with:
