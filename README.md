@@ -75,28 +75,30 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S82)
+**Analisi della sessione corrente** (S83)
 
-**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort 77%), restano
-**7 step**. Lavoro di **governance** su un'issue dedicata, non story di backlog.
+**Numeri.** L'implementazione non cambia: **75%** (21 story su 28, effort 77%), restano **7 step**.
+Lavoro di **governance** su un'epic (#248).
 
-**Cosa è pronto.** Tre concurrency group separati; `apply-merge-state.mjs` advisory quando non c'è
-sessione; step di verifica e auto-riparazione in `auto-bundle.yml`; `post-merge.ps1` che stampa il
-numero della PR; i commenti dei tre workflow e di `ci.yml` allineati alla semantica reale.
+**Il numero che conta.** `AGENTS.md` scende da 1410 a **1091 righe** e — soprattutto — non contiene
+più **storia**: ogni sezione è o una **regola** (con il gate che la enforce) o un **puntatore** a
+un file che è il proprietario del dettaglio. Il file è tornato a essere un contratto.
 
-**Cosa manca.** Il lotto **I3** dell'epic #248 (rifinitura di `AGENTS.md` a ~400 righe con 77
-anchor invariati). Nessun altro difetto noto della catena post-merge.
+**Cosa è pronto.** Changelog del protocollo spostato nel DEV-LOG; 5 sezioni di rationale ridotte a
+puntatori; 2 sezioni in duplicato ridotte al minimo; i 77 anchor **invariati**.
 
-**Salute tecnica.** Worktree attiva su `feat/251-catena-post-merge`. Claim riverificato sull'issue
-#251 (commento `6560302917`, unico claim). Nessun blocco `AGGREGATE-*` modificato a mano.
+**Cosa manca.** Nulla dell'epic #248: con questo lotto i quattro lotti (I1, I2-a, I2-b, I2-c) e
+questo (I3) sono completi. Il lavoro residuo è la **doc-sync di chiusura** delle sessioni (la
+catena post-merge la fa, e la Sessione 82 l'ha resa advisory).
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
-`bash scripts/test-post-merge.sh` → 47 assert, 0 falliti ·
-`bash scripts/test-workflow-writer-ordering.sh` → 6/0 ·
-`bash scripts/test-workflow-git-add-coverage.sh` → 8/0 ·
-`bash scripts/test-workflow-push-sync.sh` → 15/0 ·
-`node scripts/apply-merge-state.mjs --pr 9999` → exit 0 con warning ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+**Salute tecnica.** Worktree attiva su `feat/259-rifinitura-agents`. Claim riverificato sull'issue
+#259. Nessun blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9.
+
+**Gate di testabilità.** `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti (**C4:
+gli 77 anchor sono intatti e tutte le citazioni esterne risolvono**) · `node
+scripts/check-aggregate-blocks.mjs` → 0 violazioni · `node scripts/check-merge-state.mjs` → 0
+falliti · `node scripts/check-readme-facts.mjs` → 0 falliti · `pwsh
+scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
