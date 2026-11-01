@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 14:02
+> Data: 2026-11-01 13:18
 > Totale file: 139
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -39788,6 +39788,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
 
@@ -39840,7 +39841,10 @@ jobs:
       # di docs/state/sessions/*.md con lo stato reale delle PR via API GitHub.
       # Fail-closed: exit 0 = in sync, exit 1 = drift, exit 2 = errore di ambiente.
       # Read-only: non genera e non scrive nulla (come check-readme-facts.mjs).
+      # Richiede GITHUB_TOKEN per accedere all'API GitHub.
       - name: Stato di merge delle sessioni in sync con GitHub (issue #239)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/check-merge-state.mjs
 
   # ---------------------------------------------------------------------------
