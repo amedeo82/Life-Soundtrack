@@ -387,7 +387,9 @@ function checkPermissionScopes(lines, file) {
 // contratto: un sync dopo il push non serve a niente.
 
 function checkPushSync(lines, file) {
-  const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l));
+  // una push dentro un COMMENTO non e' una push: il commento che spiega la
+  // race menziona `git push origin main` senza eseguirla
+  const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l) && !l.trim().startsWith('#'));
   if (pushAt < 0) return 0; // non e' un writer di `main`: niente da tassare
   pushers++;
   const before = lines.slice(0, pushAt).join('\n');

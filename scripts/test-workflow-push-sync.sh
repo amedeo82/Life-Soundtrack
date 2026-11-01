@@ -94,6 +94,7 @@ echo "=== T2: fixture con lo step Sync rimosso da auto-state-aggregate.yml (bug 
   # Rimuove l'intero blocco dello step "Sync con origin/main" (dal `- name:` fino
   # alla riga prima del `- name:` successivo).
   perl -0777 -pi -e 's/^[ ]{6}- name: Sync con origin\/main\n(?:(?!^[ ]{6}- name: ).*\n)*//m' "$D/.github/workflows/auto-state-aggregate.yml"
+
   # Verifica lo step, non la stringa: l'header del workflow cita il nome dello
   # step anche nei commenti, quindi un grep grezzo darebbe un falso "non applicata".
   if grep -qE '^[ ]{6}- name: Sync con origin/main' "$D/.github/workflows/auto-state-aggregate.yml"; then

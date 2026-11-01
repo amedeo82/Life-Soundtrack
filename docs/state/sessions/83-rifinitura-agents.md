@@ -2,10 +2,12 @@
 number: 83
 title: "AGENTS.md: il contratto senza la storia (rifinitura I3)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "5d49fe959efd6333efb40f09a2cc87d07fae1dd2"
+merged_date: "2026-11-01T16:16:44Z"
 branch: feat/259-rifinitura-agents
-pr: 0
+pr: 260
 claim: kilo-hp-elitebook-4e7b
 tags: [devops, governance, docs]
 ---

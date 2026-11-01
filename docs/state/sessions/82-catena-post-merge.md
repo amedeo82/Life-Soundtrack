@@ -2,10 +2,12 @@
 number: 82
 title: "La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "a07c7b04f74426f63545889f4b19652ab8225b36"
+merged_date: "2026-11-01T16:04:24Z"
 branch: feat/251-catena-post-merge
-pr: 0
+pr: 258
 claim: kilo-hp-elitebook-1c9d
 tags: [devops, governance, tooling]
 ---

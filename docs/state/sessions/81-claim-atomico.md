@@ -2,10 +2,12 @@
 number: 81
 title: "Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "f6fb8c056d9f69ba196b4443c79e98040bbeaab1"
+merged_date: "2026-11-01T15:56:50Z"
 branch: feat/256-claim-atomico
-pr: 0
+pr: 257
 claim: kilo-hp-elitebook-7f3c
 tags: [devops, governance, tooling]
 ---
