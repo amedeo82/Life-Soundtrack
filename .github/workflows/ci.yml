@@ -286,7 +286,10 @@ jobs:
       # di docs/state/sessions/*.md con lo stato reale delle PR via API GitHub.
       # Fail-closed: exit 0 = in sync, exit 1 = drift, exit 2 = errore di ambiente.
       # Read-only: non genera e non scrive nulla (come check-readme-facts.mjs).
+      # Richiede GITHUB_TOKEN per accedere all'API GitHub.
       - name: Stato di merge delle sessioni in sync con GitHub (issue #239)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/check-merge-state.mjs
 
   # ---------------------------------------------------------------------------
