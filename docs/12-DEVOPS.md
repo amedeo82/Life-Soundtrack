@@ -871,6 +871,19 @@ exit code). I due gate che contiene sono **read-only** (non generano e non scriv
 Il job usa `fetch-depth: 0` (serve il confronto con `origin/main`) e **non richiede `pnpm install`**
 (solo moduli built-in di node).
 
+**Sessione 81 (issue #256): il claim è verificabile.** ADR-0006 ha 8 regole *vincolanti* sul claim
+(issue aperta, label `in-progress`, commento `claim:`, riverifica con l'ID più basso, TTL, ordine
+di backlog, nessun doppio claim, nessuna issue già `status:*`) che fino alla Sessione 80 non
+avevano **nessun enforcement**: due agenti potevano implementare la stessa story senza che nulla
+se ne accorgesse. Il gate `check-claim-state.mjs` (step 31) verifica che la PR sia coerente con
+**branch ↔ issue ↔ keyword di chiusura ↔ stato dell'issue ↔ claim**, e vieta che una branch
+`docs/*` tocchi file fuori da `docs/` (il leak della PR #250: due script di un altro task finiti
+in una PR di doc-sync per un `git add -A` nella working copy condivisa). È **read-only**: non
+scrive su GitHub. Il gate accetta i dati da file JSON (`--pr-json`, `--issue-json`,
+`--comments-json`) oltre che da `gh`: i test devono essere identici su Windows e Linux, e un mock
+`gh` in bash non è eseguibile su Windows senza estensione (il PATH finirebbe per chiamare il `gh`
+vero — un test che non può fallire dà una falsa garanzia).
+
 **Verifica**: gli step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). **Sette** sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149), `Validità YAML dei workflow` (Sessione 74), `Copertura dei trigger del blocco progress` (#216, vedi §9.8h) e la sintassi JS dei blocchi `script:` (#73).
 
 I due step non bloccanti sono warning per l'incompatibilità **residua di piattaforma**: i check

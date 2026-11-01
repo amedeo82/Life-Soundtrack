@@ -139,6 +139,7 @@ $files = @(
     "docs/state/sessions/78-post-merge-long-paths.md",
     "docs/state/sessions/79-protocollo-contratto-verificato.md",
     "docs/state/sessions/80-gate-protocollo-coerenza.md",
+    "docs/state/sessions/81-claim-atomico.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -301,6 +302,22 @@ $files = @(
     # Test di regressione del gate "blocchi aggregati" (T1..T6): blocco modificato,
     # aggiunto, rimosso (falliscono) e blocco esente (passa).
     "scripts/test-aggregate-blocks.sh",
+    # Claim atomico (Sessione 81 / issue #256, ADR-0012 regola 5): worktree +
+    # label + commento di claim + riverifica deterministica (vince l'id numerico
+    # REST piu' basso) + file di stato, in sequenza atomica con rollback.
+    "scripts/agent-claim.ps1",
+    # Apertura verificata della PR (Sessione 81 / issue #256): verifica i gate
+    # locali, crea la PR, transiziona le label e scrive `pr: N` nel file di
+    # sessione (chiude la precondizione che faceva fallire il workflow
+    # post-merge `auto-session-merge-state.yml`).
+    "scripts/agent-pr.ps1",
+    # Gate "coerenza claim/issue/branch" (Sessione 81 / issue #256): rende
+    # verificabili le 8 regole vincolanti di ADR-0006 (che erano solo prosa) e
+    # vieta che una branch `docs/*` porti con se' il codice di un altro task.
+    "scripts/check-claim-state.mjs",
+    # Test di regressione del gate "coerenza del claim" (T1..T11): ogni
+    # controllo ha il suo scenario negativo.
+    "scripts/test-claim-state.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",
