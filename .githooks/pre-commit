@@ -3,6 +3,17 @@
 # Previene commit accidentali su branch non conformi alla naming convention.
 # (D3) Aggiunto check working tree clean per mitigare F5 stash collision.
 #
+# Sessione 79 (issue #248, decisione D-79.6 di ADR-0012): il hook separa
+# INVARIANTE (bloccante) e IGIENE (advisory).
+#   - INVARIANTE: pattern del branch (F1, F7)            -> abort
+#   - IGIENE:     working tree pulito (F5, stash collision) -> warning
+# Il check "clean tree" era bloccante e impediva anche i commit parziali
+# (committare un sottoinsieme di file): l'unica via d'uscita era --no-verify,
+# che disabilita ANCHE il check del branch. La funzione di quel check e'
+# mitigata strutturalmente dalla worktree (issue #53), che e' il default.
+# Per ripristinare il comportamento bloccante:
+#   LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit -m "..."
+#
 # Setup: git config core.hooksPath .githooks
 # Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
 
@@ -13,55 +24,77 @@ if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
   exit 0
 fi
 
-# Check 1 (D3): working tree senza modifiche UNSTAGED (F5 stash collision mitigation)
-# Componenti del check:
-#   - `git diff --quiet`              = unstaged tracked changes (working tree vs index)
-#   - `git ls-files --others ...`     = untracked files (esclude .gitignore)
-# NON usare `git diff HEAD` per il primo confronto: includerebbe anche le staged
-# changes e bloccherebbe ogni commit normale. Vedi fix Sessione 23 / issue #20.
-if ! git diff --quiet 2>/dev/null \
-   || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
-  echo "[pre-commit] ERRORE: working tree ha modifiche non committate (unstaged o untracked)."
-  echo "  Le STAGED changes sono OK (sono il payload del commit);"
-  echo "  ma UNSTAGED modifications o file untracked inquinano la working copy"
-  echo "  e abilitano F5 stash collision."
-  echo ""
-  echo "  Risolvi con:"
-  echo "    git add -A && git commit -m 'fix: wip'   # includi tutto"
-  echo "    # oppure"
-  echo "    git stash push -u -m 'wip'               # metti da parte (include untracked)"
-  echo "    git stash pop                            # recupera dopo il commit"
-  echo ""
-  echo "  Bypass emergenza (solo cherry-pick/hotfix): git commit --no-verify"
-  exit 1
-fi
-
 current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
 
+# ---------------------------------------------------------------------------
+# INVARIANTE 1 — detached HEAD (bloccante)
+# ---------------------------------------------------------------------------
 if [ -z "$current_branch" ]; then
   echo "[pre-commit] ERRORE: detached HEAD. Crea un branch prima di committare:"
   echo "  git checkout -b feat/<N>-<desc>  (o fix/<N>-<desc> o docs/<desc>)"
   exit 1
 fi
 
+# ---------------------------------------------------------------------------
+# INVARIANTE 2 — pattern del branch (bloccante)
 # Pattern ammessi:
 # - main (per admin / doc-sync)
 # - docs/* (per branch di documentazione senza issue number)
 # - feat/<N>-* o fix/<N>-* (per issue con numero)
+# ---------------------------------------------------------------------------
 if [[ "$current_branch" =~ ^main$ ]] \
    || [[ "$current_branch" =~ ^docs/.+ ]] \
    || [[ "$current_branch" =~ ^feat/[0-9]+-.+ ]] \
    || [[ "$current_branch" =~ ^fix/[0-9]+-.+ ]]; then
-  exit 0
+  :
+else
+  echo "[pre-commit] ERRORE: branch '$current_branch' non matcha il pattern del workflow agenti."
+  echo "  Pattern ammessi:"
+  echo "    - main                  (solo per admin/doc-sync)"
+  echo "    - docs/<desc>           (branch di documentazione)"
+  echo "    - feat/<N>-<desc>       (feature legata a issue #N)"
+  echo "    - fix/<N>-<desc>        (bugfix legato a issue #N)"
+  echo ""
+  echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
+  echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
+  exit 1
 fi
 
-echo "[pre-commit] ERRORE: branch '$current_branch' non matcha il pattern del workflow agenti."
-echo "  Pattern ammessi:"
-echo "    - main                  (solo per admin/doc-sync)"
-echo "    - docs/<desc>           (branch di documentazione)"
-echo "    - feat/<N>-<desc>       (feature legata a issue #N)"
-echo "    - fix/<N>-<desc>        (bugfix legato a issue #N)"
-echo ""
-echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
-echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
-exit 1
+# ---------------------------------------------------------------------------
+# IGIENE — working tree pulito (advisory; bloccante con LIFE_SOUNDTRACK_STRICT_CLEAN=1)
+# Componenti del check:
+#   - `git diff --quiet`              = unstaged tracked changes (working tree vs index)
+#   - `git ls-files --others ...`     = untracked files (esclude .gitignore)
+# NON usare `git diff HEAD` per il primo confronto: includerebbe anche le staged
+# changes e bloccherebbe ogni commit normale. Vedi fix Sessione 23 / issue #20.
+# ---------------------------------------------------------------------------
+if ! git diff --quiet 2>/dev/null \
+   || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+  if [ "${LIFE_SOUNDTRACK_STRICT_CLEAN:-0}" = "1" ]; then
+    echo "[pre-commit] ERRORE: working tree ha modifiche non committate (unstaged o untracked)."
+    echo "  Le STAGED changes sono OK (sono il payload del commit);"
+    echo "  ma UNSTAGED modifications o file untracked inquinano la working copy"
+    echo "  e abilitano F5 stash collision."
+    echo ""
+    echo "  Risolvi con:"
+    echo "    git add -A && git commit -m 'fix: wip'   # includi tutto"
+    echo "    # oppure"
+    echo "    git stash push -u -m 'wip'               # metti da parte (include untracked)"
+    echo "    git stash pop                            # recupera dopo il commit"
+    echo ""
+    echo "  Bypass emergenza (solo cherry-pick/hotfix): git commit --no-verify"
+    exit 1
+  fi
+
+  echo "[pre-commit] WARN: working tree ha modifiche non committate (unstaged o untracked)."
+  echo "  Non blocca il commit: F5 (stash collision) e' mitigato dalla worktree, e bloccare"
+  echo "  qui impedirebbe i commit parziali (l'unica via d'uscita, --no-verify, disattiverebbe"
+  echo "  anche il check del branch). Vedi ADR-0012, decisione D-79.6."
+  echo ""
+  echo "  Suggerimento: committa tutto quello che hai (git add -A) oppure metti da parte"
+  echo "  (git stash push -u -m 'wip') per non perdere il lavoro."
+  echo ""
+  echo "  Per il comportamento bloccante: LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit ..."
+fi
+
+exit 0

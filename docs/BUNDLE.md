@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 13:18
-> Totale file: 139
+> Data: 2026-11-01 15:48
+> Totale file: 141
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 138 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2095 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-01 14:03
+- Totale file: 140 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2135.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-01 15:48
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 88 |
+| docs/ | 90 |
 | scripts/ | 23 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.33 — Sessione 78 (2026-10-31)**
+> **Versione 1.34 — Sessione 79 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -108,7 +108,7 @@ Una issue può essere lavorata da un agente **solo se**:
 
 | Categoria | Label | Significato |
 |-----------|-------|-------------|
-| Fase | `phase-0` … `phase-6` | Fase della roadmap |
+| Fase | `phase-0` … `phase-6`, `phase-post` | Fase della roadmap |
 | Area | `area:adapter`, `area:analysis`, `area:ui`, `area:ux`, `area:db`, `area:enrichment`, `area:privacy`, `area:devops` | Modulo coinvolto |
 | Priorità | `priority:blocker`, `priority:important`, `priority:later` | Ordine di lavoro |
 | Size | `size:S`, `size:M`, `size:L`, `size:XL` | Stima relativa |
@@ -122,7 +122,9 @@ Le label `agent-ready` e `status:*` sono **mutuamente esclusive**: un'issue ha l
 
 ## 🎫 Presa in carico delle story (claim)
 
-**Regola vincolante (ADR-0006): nessun agente inizia a lavorare una story senza un claim valido.** Il claim è il meccanismo che impedisce a più agenti paralleli di scegliere e implementare la stessa issue. È il primo gesto operativo, **prima** di leggere la spec dettagliata e creare il branch.
+**Regola vincolante (ADR-0006): nessun agente inizia a lavorare una story senza un claim valido.** Il claim è il meccanismo che impedisce a più agenti paralleli di scegliere e implementare la stessa issue. È il primo gesto di **coordinazione**: avviene prima di leggere la spec dettagliata e prima di scrivere codice.
+
+**Ordine fisico (worktree → claim)**: la worktree viene creata **prima** del claim, perché `scripts/setup-worktree.ps1` **rifiuta** un'issue che ha già la label `in-progress` (validare il claim prima significherebbe doverlo togliere per creare la worktree). La worktree crea il branch, ma **non prende la story**: il branch è un segnale secondario, non un lock (ADR-0006). La sequenza completa è in §"🚀 Primo task di un agente".
 
 ### Identificativo agente
 
@@ -133,7 +135,18 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 1. **Elenca le issue candidabili** — aperte, `agent-ready`, **senza** label `in-progress` e **senza** alcuna `status:*` (vedi §"📦 Macchina a stati delle issue"):
 
    ```powershell
-   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels | jq '[.[] | select(([.labels[].name] | any(startswith('status:')) | not))]'
+   # `gh` ha un filtro jq INTEGRATO: NON serve `jq` come tool esterno
+   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels `
+     --jq '.[] | select([.labels[].name] | any(. == "in-progress" or startswith("status:")) | not)'
+   ```
+
+   Alternativa senza alcuna dipendenza esterna (filtraggio in PowerShell):
+
+   ```powershell
+   gh issue list --state open --label agent-ready --limit 20 --json number,title,labels |
+     ConvertFrom-Json |
+     Where-Object { $n = @($_.labels | ForEach-Object { $_.name }); -not ($n -contains 'in-progress') -and -not ($n -match '^status:') } |
+     ForEach-Object { "$($_.number) $($_.title)" }
    ```
 
    Filtra via quelle che hanno `in-progress` oppure una qualsiasi `status:*` tra le label.
@@ -151,6 +164,14 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 
    ```powershell
    gh api repos/amedeo82/Life-Soundtrack/issues/<N>/comments --jq '.[] | select(.body | startswith("claim:")) | {id, created_at, body}'
+   ```
+
+   **Il discriminatore è l'`id` NUMERICO dell'API REST**, non il `node_id` GraphQL (`IC_kwDOV…`) e non `created_at`: `gh issue view --json comments` restituisce il `node_id`, che **non** è confrontabile per ordine. Perciò la riverifica va letta da `gh api` (REST). Variante senza dipendenze esterne:
+
+   ```powershell
+   $claims = (gh api "repos/amedeo82/Life-Soundtrack/issues/<N>/comments" | ConvertFrom-Json) |
+     Where-Object { $_.body -like 'claim:*' } | Sort-Object { [int64]$_.id }
+   $min = ($claims | ForEach-Object { [int64]$_.id } | Measure-Object -Minimum).Minimum
    ```
 
    - **Vinci**: procedi — branch `feat/<N>-<descrizione>` e resto del protocollo.
@@ -357,7 +378,7 @@ Il fallback è **testato** (`scripts/test-post-merge.sh`, T10..T14): uno shim di
 ### Copertura dei test
 
 ```bash
-bash scripts/test-post-merge.sh    # 14 scenari / 47 assert su repo git temporanei (T1..T14)
+bash scripts/test-post-merge.sh    # 14 scenari (T1..T14) su repo git temporanei — il conteggio degli assert è nell'output della suite
 ```
 
 | Scenario | Cosa dimostra |
@@ -580,33 +601,32 @@ Usare il bypass solo in caso di emergenza (cherry-pick, hotfix, fix urgente) e d
 - **F1**: commit accidentale su `main` → abort
 - **F7**: commit su branch dopo merge (dimenticanza di `git checkout main && git pull`) → abort
 
+### Invariante vs igiene *(Sessione 79, decisione D-79.6 di ADR-0012)*
+
+Il hook separa due cose che erano accoppiate:
+
+| Tipo | Controllo | Esito |
+|------|-----------|-------|
+| **Invariante** | il branch corrente rispetta il pattern del workflow agenti (F1, F7) | **bloccante** (abort) |
+| **Igiene** | working tree senza modifiche unstaged / file untracked (F5) | **advisory**: warning, il commit passa |
+
+**Perché**: il check "clean tree" bloccava anche i **commit parziali** (committare un sottoinsieme di file), e l'unica via d'uscita era `--no-verify`, che **disabilita anche il check del branch** (F1/F7): un agente che voleva committare due file ne finiva per perdere la protezione che conta. La funzione di quel check (F5, collisione di stash) è mitigata **strutturalmente** dalla worktree (issue #53), che è il default dal 2026-10-17.
+
+Il comportamento bloccante resta disponibile per chi lo vuole:
+
+```bash
+LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit -m "..."   # il check "clean tree" torna bloccante
+```
+
 Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5, F8) e del perché alcune difese richiedono worktree (scelta NO del Boss, Sessione 20 D.20.1).
 
 ## 📝 Checklist di auto-revisione PR
 
-> **Template GitHub**: il file `.github/pull_request_template.md` (introdotto in Sessione 27, issue #51, P2) rende questa checklist interattiva in GitHub. Le caselle non spuntate sono blocker per il merge.
+> **La checklist operativa della PR è in [`.github/pull_request_template.md`](.github/pull_request_template.md)** — è l'**unico** artifact: GitHub la rende interattiva e le caselle non spuntate sono blocker per il merge. **Non copiarla qui**: due copie divergono in silenzio (misurato: 22 voci per parte, solo 2 identiche al testo — decisione D3 di [`ADR-0012`](docs/13-ADR/0012-agent-protocol-contract.md)).
 >
 > **Branch protection**: il Boss applichera (post-merge #51) `branch protection` su `main` che richiede review Boss + CI verde. Vedi §"📤 Post-merge actions" → "Branch protection Boss-only".
-
-- [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
-- [ ] **Lavoro eseguito in worktree dedicata**: `pwsh scripts/setup-worktree.ps1 <N>` (vedi §"🌳 Worktree workflow")
-- [ ] Il codice rispetta lo schema dati (`02-DATA-SCHEMA.md`)
-- [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
-- [ ] Ho usato i fixture di `fixtures/synthetic-history/`
-- [ ] JSDoc su tutte le funzioni pubbliche
-- [ ] Nessun dato personale hardcoded, nessun log di PII
-- [ ] `pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm run build` passano in locale
-- [ ] **NON ho modificato i blocchi `<!-- AGGREGATE-* -->`** di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
-- [ ] **Ho allineato le sezioni legacy** che la mia PR rende false: stato/count/versioni/riferimenti in `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" e righe `**Stato**:` in `11-BACKLOG.md` (vedi §"Chi può scrivere cosa nei file globali")
-- [ ] **Se ho toccato `README.md` o le piattaforme importabili**: la prosa del README è in sync con il codice — `node scripts/check-readme-facts.mjs` esce 0 (gate bloccante in CI, issue #161). Le capability non implementate stanno nella sezione roadmap, i conteggi non sono duplicati in prosa (vedi §"Ownership del `README.md`")
-- [ ] **Lo stato di merge delle sessioni è in sync con GitHub** — `node scripts/check-merge-state.mjs` esce 0 (gate bloccante in CI, issue #239). Il frontmatter di `docs/state/sessions/*.md` riporta `merged`, `merged_commit`, `merged_date`, `state` coerenti con le PR mergiate
-- [ ] **Il body della PR contiene la keyword di chiusura come riga nuda e una sola volta** — `Closes #N` (o `Fixes #N` / `Resolves #N`), **fuori da backtick, fuori dalle checklist e senza ripetizioni**, così GitHub chiude l'issue al merge e `auto-status-done` non transiziona issue non collegate (vedi §"📦 Macchina a stati delle issue (status:*)" → "Chiusura al merge")
-- [ ] **Se ho aperto la PR**: prima dell'apertura ho rimosso `agent-ready` e aggiunto `status:in-review` all'issue (vedi §"📦 Macchina a stati delle issue (status:*)")
-- [ ] **Se ho aggiunto/rimosso/rinominato un file in `docs/`, `fixtures/` o root**: ho aggiornato l'array `$files` in `scripts/generate-bundle.ps1` e rigenerato `docs/BUNDLE.md` nella stessa PR
-- [ ] `pwsh scripts/generate-bundle.ps1 -Check` esce con exit code 0
-- [ ] `pwsh scripts/aggregate-state.ps1 -Check` esce con exit code 0 (se ho toccato `docs/state/` o file di stato)
-- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (53 assert, T1..T14) — **gate bloccante in CI**
-- [ ] Se ho scritto una sessione: il file `docs/state/sessions/<N>-<slug>.md` ha la sezione **`## Analisi di avanzamento`** (numeri, cosa è pronto, cosa manca, salute tecnica): è ciò che il blocco `AGGREGATE-PROGRESS` rende al project owner (issue #216)
+>
+> **Cosa contiene la checklist** (per sapere se un requisito è coperto senza aprire il template): documentazione letta · codice e test (schema dati, fixture, JSDoc, PII, lint/typecheck/test/build) · documentazione di stato (blocchi `AGGREGATE-*`, sezioni legacy, `docs/state/`, `$files` + bundle, aggregatore, `check-readme-facts.mjs`, `check-merge-state.mjs`, determinismo) · issue tracking (keyword `Closes #N`, transizione label) · git workflow (branch, worktree, working tree, push early, Conventional Commits).
 
 ### Checklist di sincronizzazione documentazione al merge *(obbligatoria)*
 
@@ -747,7 +767,7 @@ git push
         ├── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
         ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
         ├── check-readme-facts.mjs  ← gate read-only: confronta la prosa del README con il codice (issue #161)
-        ├── test-post-merge.sh      ← 14 scenari (T1..T14, 47 assert) su repo temporanei che coprono E3/E4/E5/F7 + squash + rimozione long-path
+        ├── test-post-merge.sh      ← 14 scenari (T1..T14) su repo temporanei che coprono E3/E4/E5/F7 + squash + rimozione long-path
         └── test-readme-facts-gate.sh ← 9 scenari (T1..T9) sul gate "fatti del README" (issue #161)
 
 ## 🚀 Primo task di un agente
@@ -905,10 +925,10 @@ runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il 
 | `node-build` | `pnpm install` + `build` | solo `pull_request` |
 | `gates-docs` | bundle in sync, lazy-state in sync, fatti del README (+ il suo scenario negativo) | **sempre** |
 | `gates-workflows` | `validate-workflows.mjs` + i 5 test di scenario negativo dei workflow | **sempre** |
-| `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | solo `pull_request` |
-| `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | solo `pull_request` |
+| `gates-aggregate` | `test-aggregate-determinism.sh` (scenari T1..T14) | solo `pull_request` |
+| `gates-bundle` | `test-bundle-check-idempotent.sh` (scenari T1..T12) | solo `pull_request` |
 | `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | solo `pull_request` |
-| `gates-scripts` | `test-post-merge.sh` (47 assert) — la procedura più distruttiva del repo | solo `pull_request` |
+| `gates-scripts` | `test-post-merge.sh` (scenari T1..T14) — la procedura più distruttiva del repo | solo `pull_request` |
 | `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | solo `pull_request` |
 | `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | **sempre** |
 
@@ -1120,7 +1140,7 @@ L'aggregator è la linfa dorsale del workflow parallelo: se produce output diver
 | **`Dimensione totale` coerente cross-platform** (issue #88): il calcolo normalizza CRLF->LF via `Get-Content -Raw` + `GetByteCount(($text -replace "`r`n","`n"))`, in modo che la dimensione sia la stessa su Windows (`core.autocrlf=true`, 14 file CRLF sul disco) e su Linux (LF committed). Senza normalizzazione, `-Check` su Windows mostrava un drift spurio di ~2.3 KB rispetto a origin/main | Conseguenza dell'autocrlf Windows: la dimensione su disco (CRLF) divergeva dai byte committed (LF) per ognuno dei 14 file di testo con EOL conversion abilitata; il `Get-Item .Length` riportava i byte CRLF. Il fix trasforma l'aggregator in cross-platform-deterministic, chiudendo la radice del warning `#63` (differenza di **piattaforma**) per il blocco BUNDLE | T8 (3 assert) |
 
 ```bash
-bash scripts/test-aggregate-determinism.sh    # 53 assert (T1..T14), gate bloccante in CI
+bash scripts/test-aggregate-determinism.sh    # scenari T1..T14, gate bloccante in CI
 ```
 
 **T3 da solo non basta** *(issue #142)*: verifica l'idempotenza con due run ravvicinati, ma il timestamp ha granularità al minuto — se i due run cadono su minuti diversi il test fallisce **per l'orologio, non per il codice** (è successo sul run `39818043647`, 16:55 → 16:56). **T11** verifica la stessa garanzia senza orologio: semina un *sentinel* nella riga del timestamp, esegue l'aggregator e verifica che il valore venga riusato; la contro-prova verifica che il timestamp si aggiorni quando il blocco cambia davvero. Stessa struttura per `> Data:` in `test-bundle-check-idempotent.sh` (T7).
@@ -1156,13 +1176,7 @@ Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` s
 
 ### Checklist PR aggiuntiva (D.24.x + D.29.x + D.30.x)
 
-- [ ] **NON** ho modificato i blocchi `<!-- AGGREGATE-* -->` di `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/BUNDLE.md` (a meno che non sia la PR di introduzione ADR-0008 stessa)
-- [ ] Ho allineato le **sezioni legacy** dei file globali che la mia PR rende false (vedi §"Chi può scrivere cosa nei file globali")
-- [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
-- [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
-- [ ] Ho eseguito `pwsh scripts/aggregate-state.ps1 -Check` localmente: exit 0
-- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (determinismo + idempotenza, issue #70)
-- [ ] Se ho aggiunto un nuovo file in `docs/state/` o `scripts/aggregate-state.ps1`, ho aggiornato `scripts/generate-bundle.ps1` `$files` + rigenerato `BUNDLE.md`
+> Le voci di questa checklist (blocchi `AGGREGATE-*`, sezioni legacy, `docs/state/sessions/` e `docs/state/stories/`, aggregatore `-Check`, determinismo, `$files` + bundle) sono **tutte** nella checklist unica del PR template — vedi §"📝 Checklist di auto-revisione PR". Qui resta solo il **riferimento alla procedura**, non una seconda copia.
 
 ## 🛡️ Session start checklist
 
@@ -1194,7 +1208,20 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.33 — **la rimozione della worktree non fallisce più su Windows** (Sessione 78). `git worktree remove --force` cancellava la worktree chiamando le API Win32 **senza il prefisso `\\?\`**: con `node_modules` e path > MAX_PATH (260 caratteri) falliva con «Filename too long» / «Result too large» e la procedura si fermava a metà (git aveva già deregistrato la worktree, la directory restava). Il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è un difetto della procedura, non un incidente. Aggiunti:
+*Ultimo aggiornamento: v1.34 — **il protocollo diventa un contratto verificato** (Sessione 79, issue #248). `AGENTS.md` era l'unico artefatto di governance del repo **senza generatore e senza gate**: 1328 righe, 77 anchor, 643 citazioni, **0** controlli automatici — mentre il README ha `check-readme-facts.mjs`, le sessioni `check-merge-state.mjs`, i workflow `validate-workflows.mjs`, le label `validate-labels.mjs`, i blocchi aggregati `aggregate-state.ps1`. Il drift che ne conseguiva era **misurato, non ipotetico**: 8 casi. Chiusi in questa versione (il **meccanismo** che li chiude per sempre è il gate di coerenza, lotto I2-b):
+- **D1** `docs/INDEX.md` dichiarava «v1.27» mentre il file era a v1.33 → allineato
+- **D2** la tabella label non elencava `phase-post`, che il gate `validate-labels.mjs` si aspetta → allineata
+- **D3** `scripts/post-merge.ps1` documentava «Exit 1» mentre il codice esce **14** → allineato
+- **D4** `scripts/post-merge.ps1` stampava `--check` (doppio trattino = fail-open su PS 5.1, issue #104) → `-Check`
+- **D5** contraddizione interna fra «il claim è il primo gesto operativo, prima di creare il branch» e «worktree prima del claim» → l'ordine è dichiarato per esteso (la worktree crea il branch ma **non** prende la story)
+- **D6** cifre di assert incoerenti (53 vs 37) su un valore **dinamico** → le cifre diventano puntatori («vedi l'output della suite»), come prescrive D.38.1
+- **D7** la query dei candidati usava `| jq` — **`jq` non è installato** sull'ambiente di riferimento → usa il `--jq` **integrato** di `gh`, con variante PowerShell senza dipendenze
+- **D8** la checklist PR era **duplicata** (22 voci in `AGENTS.md`, 22 nel PR template, **2 identiche al testo**) → **un solo artifact**: `.github/pull_request_template.md`, che ora contiene tutte le voci (comprese le 5 che mancavano). `AGENTS.md` rimanda
+- **`pre-push`**: rimosso il fallback a Windows PowerShell 5.1, che poteva **scrivere mojibake in `docs/BUNDLE.md`** e committarlo (F9-bis). Senza `pwsh` 7 il bundle non viene rigenerato: avvisa e prosegue
+- **`pre-commit`**: separati **invariante** (pattern del branch → bloccante) e **igiene** (working tree pulito → advisory). Il check bloccante impediva i commit parziali e l'unica via d'uscita (`--no-verify`) disabilitava anche F1/F7. Comportamento bloccante ripristinabile con `LIFE_SOUNDTRACK_STRICT_CLEAN=1`
+- **Decisione di struttura**: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md) — 8 regole vincolanti: *ogni regola normativa scende da L2 (protocollo) a L3 (applicazione): regola in `AGENTS.md` ⟺ gate in `scripts/` ⟺ hook o workflow che la applica*
+
+*Precedente v1.33 — **la rimozione della worktree non fallisce più su Windows** (Sessione 78). `git worktree remove --force` cancellava la worktree chiamando le API Win32 **senza il prefisso `\\?\`**: con `node_modules` e path > MAX_PATH (260 caratteri) falliva con «Filename too long» / «Result too large» e la procedura si fermava a metà (git aveva già deregistrato la worktree, la directory restava). Il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è un difetto della procedura, non un incidente. Aggiunti:
 - `scripts/post-merge.ps1`: rimozione **long-path-safe** su tre livelli — **L1** `git -c core.longpaths=true worktree remove --force` (la **causa radice**: git usa il prefisso `\\?\`), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e **non segue le junction**), **L3** `cmd /c rd /s /q "\\?\"` (rete per Windows PowerShell 5.1). Se la worktree era ancora registrata dopo la rimozione manuale, `git worktree prune` la deregistra
 - **Guardie di sicurezza**: il fallback manuale è consentito **solo** su una directory che è davvero una worktree di questo repo (registrata da `git worktree list`, o con il marker `.git` che punta a `.git/worktrees/`): la working copy principale e i suoi antenati non sono mai toccati (`-WorktreePath` sulla working copy → **exit 16**, nessuna cancellazione). Se `git status` nella worktree fallisce, lo stato WIP è **sconosciuto** e la procedura si ferma (exit 10) invece di cancellare alla cieca
 - **Exit code 16**: rimozione della worktree fallita (git **e** fallback) — nessuna azione distruttiva, la procedura stampa il comando manuale
@@ -1439,36 +1466,37 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S78)
+**Analisi della sessione corrente** (S79)
 
-### Numeri
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
+restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
+4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
+Questa sessione non implementa story di prodotto: chiude lavoro di **governance** su un'epic
+(#248) che non è una story del backlog. Il protocollo agenti passa da **0 gate** a **0 gate
+nuovi in questa PR** — i gate che lo rendono verificabile (I2-b: coerenza del protocollo e
+invarianti ADR-0008) e gli script che lo rendono atomico (I2-c: claim, PR) sono i lotti
+successivi dell'epic, descritti in ADR-0012 §"Stato dell'implementazione".
 
-- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
+**Cosa è pronto.** ADR-0012 scritta e approvata; **8 drift chiusi** (D1 versione in `docs/INDEX.md`,
+D2 `phase-post`, D3 exit 14, D4 `-Check` a tratto singolo, D5 ordine worktree/claim, D6 cifre come
+puntatori, D7 query senza `jq` esterno, D8 checklist unica); fallback PS 5.1 rimosso dal
+`pre-push`; `pre-commit` separato in invariante bloccante + igiene advisory; PR template
+completato con le 10 voci che mancavano.
 
-### Cosa e' pronto e cosa manca
+**Cosa manca.** I2-b (`check-protocol-consistency.mjs`, `check-aggregate-blocks.mjs` + test
+negativi), I2-c (`agent-claim.ps1`, `agent-pr.ps1`, `check-claim-state.mjs`), I3 (rifinitura di
+`AGENTS.md` a ~400 righe con 77 anchor invariati).
 
-- **La procedura post-merge non si blocca più su Windows**: la rimozione della
-  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
-  ha un exit code e un messaggio espliciti.
-- Le **story** del backlog non cambiano: questa sessione è manutenzione della
-  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
-  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
-  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
-  dipendenze a ultime major.
-- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
-  condividi ha ancora schermate vuote.
+**Salute tecnica.** Worktree attiva su `feat/248-protocollo-contratto-verificato` (push early
+eseguito). Claim riverificato: ID commento `6559382507`, unico claim sull'issue #248. Nessun
+blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9 (baseline). Gate eseguiti prima del merge:
+`generate-bundle.ps1 -Check` (exit 0), `aggregate-state.ps1 -Check` (exit 0),
+`check-readme-facts.mjs` (exit 0), `test-pre-commit-clean-check.sh` (14 assert, 0 falliti).
 
-> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
-> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
-
-### Salute tecnica (verificata in questa sessione)
-
-`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
-nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
-solo in `scripts/`, `AGENTS.md` e `docs/`.
+**Gate di testabilità.** La verifica della sessione è automatica: i gate di `ci.yml` (bloccanti)
+più `bash scripts/test-post-merge.sh` e `bash scripts/test-setup-worktree.sh` per la parte di
+hook. Il criterio di accettazione della I2-a è che **nessuno degli 8 drift sia riproducibile**:
+verificato con un'ispezione mirata dei file citati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2232,7 +2260,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 56 (0001-0011) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; **0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0**) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 79 (0001-0012) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; 0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0; **0012 protocollo agenti come contratto verificato APPROVED v1.0**, Sessione 79, issue #248) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
@@ -2246,11 +2274,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.27 | Protocollo per agenti (Sessione 54: ownership del `README.md` — due owner, due regole, un gate read-only; issue #161; Sessione 47: i due writer di `main` serializzati ma non ordinati, issue #149; Sessione 38: ownership *blocchi aggregati vs sezioni legacy*, keyword di chiusura `Closes #N`; Sessione 35: automazioni post-merge; Sessione 34: determinismo aggregator; Sessione 33: procedura canonica post-merge; Sessione 27: worktree come default; Sessione 21: catena doc-sync + GH Action; Sessione 19: macchina a stati `status:*` [ADR-0007]; Sessione 18: claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.34 | Protocollo per agenti — **v1.34 (Sessione 79, issue #248)**: il protocollo diventa un *contratto verificato* (**[`ADR-0012`](13-ADR/0012-agent-protocol-contract.md)**: ogni regola scende a un gate; 8 drift chiusi; checklist PR = unico artifact nel PR template; il claim diventa atomico con riverifica deterministica; `pwsh` 7 obbligatorio, mai il fallback 5.1). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.7 | Diario cronologico per story: problemi, fix, lesson learned — §25: ratifica della spec dell'analisi (issue #178) |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.8 | Diario cronologico per story: problemi, fix, lesson learned — §45: Sessione 79, protocollo agenti come contratto verificato (ADR-0012, issue #248). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -2331,6 +2359,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟢 | ✅ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
+| 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2370,9 +2399,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **55** (merge: 55)
+- Sessioni migrate in state/sessions: **56** (merge: 55)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S78** - Rimozione worktree long-path-safe (procedura post-merge)
+- Ultima sessione migrata: **S79** - Protocollo agenti come contratto verificato (ADR-0012)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2419,36 +2448,37 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S78)
+**Analisi della sessione corrente** (S79)
 
-### Numeri
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
+restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
+4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
+Questa sessione non implementa story di prodotto: chiude lavoro di **governance** su un'epic
+(#248) che non è una story del backlog. Il protocollo agenti passa da **0 gate** a **0 gate
+nuovi in questa PR** — i gate che lo rendono verificabile (I2-b: coerenza del protocollo e
+invarianti ADR-0008) e gli script che lo rendono atomico (I2-c: claim, PR) sono i lotti
+successivi dell'epic, descritti in ADR-0012 §"Stato dell'implementazione".
 
-- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
+**Cosa è pronto.** ADR-0012 scritta e approvata; **8 drift chiusi** (D1 versione in `docs/INDEX.md`,
+D2 `phase-post`, D3 exit 14, D4 `-Check` a tratto singolo, D5 ordine worktree/claim, D6 cifre come
+puntatori, D7 query senza `jq` esterno, D8 checklist unica); fallback PS 5.1 rimosso dal
+`pre-push`; `pre-commit` separato in invariante bloccante + igiene advisory; PR template
+completato con le 10 voci che mancavano.
 
-### Cosa e' pronto e cosa manca
+**Cosa manca.** I2-b (`check-protocol-consistency.mjs`, `check-aggregate-blocks.mjs` + test
+negativi), I2-c (`agent-claim.ps1`, `agent-pr.ps1`, `check-claim-state.mjs`), I3 (rifinitura di
+`AGENTS.md` a ~400 righe con 77 anchor invariati).
 
-- **La procedura post-merge non si blocca più su Windows**: la rimozione della
-  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
-  ha un exit code e un messaggio espliciti.
-- Le **story** del backlog non cambiano: questa sessione è manutenzione della
-  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
-  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
-  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
-  dipendenze a ultime major.
-- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
-  condividi ha ancora schermate vuote.
+**Salute tecnica.** Worktree attiva su `feat/248-protocollo-contratto-verificato` (push early
+eseguito). Claim riverificato: ID commento `6559382507`, unico claim sull'issue #248. Nessun
+blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9 (baseline). Gate eseguiti prima del merge:
+`generate-bundle.ps1 -Check` (exit 0), `aggregate-state.ps1 -Check` (exit 0),
+`check-readme-facts.mjs` (exit 0), `test-pre-commit-clean-check.sh` (14 assert, 0 falliti).
 
-> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
-> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
-
-### Salute tecnica (verificata in questa sessione)
-
-`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
-nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
-solo in `scripts/`, `AGENTS.md` e `docs/`.
+**Gate di testabilità.** La verifica della sessione è automatica: i gate di `ci.yml` (bloccanti)
+più `bash scripts/test-post-merge.sh` e `bash scripts/test-setup-worktree.sh` per la parte di
+hook. Il criterio di accettazione della I2-a è che **nessuno degli 8 drift sia riproducibile**:
+verificato con un'ispezione mirata dei file citati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -10372,6 +10402,113 @@ solo in `scripts/`, `AGENTS.md` e `docs/`.
 - `docs/state/sessions/78-post-merge-long-paths.md` — questo file
 ```
 
+### Sessione 79 - Protocollo agenti come contratto verificato (ADR-0012)
+
+- **Data**: 2026-11-01
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-hp-elitebook-ef4d`
+
+```
+
+# Sessione 79 — Protocollo agenti come contratto verificato (ADR-0012)
+
+> **Issue di tracking**: #248 (epic). **Branch**: `feat/248-protocollo-contratto-verificato`.
+>
+> La sessione è il primo lotto dell'epic #248: **ADR-0012** (la decisione) + **I2-a** (chiusura
+> dei drift misurati). I lotti successivi (gate di coerenza, claim atomico, rifinitura di
+> `AGENTS.md`) sono descritti in ADR-0012 §"Stato dell'implementazione" e restano da fare.
+
+## Sintesi
+
+`AGENTS.md` era l'unico artefatto di governance del repository **senza generatore e senza gate**.
+Tutti gli altri ne hanno uno: `check-readme-facts.mjs` per il README, `check-merge-state.mjs` per
+le sessioni, `validate-workflows.mjs` per i workflow, `validate-labels.mjs` per le label,
+`aggregate-state.ps1` per i blocchi aggregati, `generate-bundle.ps1` per il bundle. Il drift che ne
+consegue è stato **misurato** prima di fare qualsiasi modifica: otto drift concreti (D1-D8) e tre
+difetti strutturali del flusso automatico, nessuno ipotetico.
+
+Il project owner ha deciso (2026-11-01) cinque punti: il contratto resta in **due file**
+(`AGENTS.md` + ADR-0012) e non in una directory di moduli; la **storia** va in `docs/18-DEV-LOG.md`;
+la **checklist PR** ha un solo artifact (il PR template); il gate di integrità degli `AGGREGATE-*`
+diventa **bloccante**; il **claim** diventa un comando atomico che esegue claim e riverifica in
+sequenza.
+
+La sessione scrive l'ADR-0012 e chiude i drift D1-D8, più due difetti che erano emersi leggendo
+il flusso automatico: il fallback a Windows PowerShell 5.1 nel `pre-push` (che poteva **scrivere
+mojibake in `docs/BUNDLE.md`** e committarlo) e il `pre-commit` che, bloccando i commit parziali,
+spingeva gli agenti verso `--no-verify` — cioè verso la disattivazione anche del check del branch.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-79.1 | Il protocollo resta in **2 file** (`AGENTS.md` + ADR-0012), non in `modules/`+`checklists/`+`references/` | Ogni file aggiunto è un elenco da mantenere a mano in `generate-bundle.ps1` e `docs/INDEX.md`: la classe di drift di issue #136. Lo split non chiude nessuno degli 8 drift misurati e rompe 29 riferimenti `§"…"` + 8 citazioni dagli script |
+| D-79.2 | La **storia** del protocollo va in `docs/18-DEV-LOG.md` | Il repo ha già tre sedi di storia (`SESSIONS.md`, `18-DEV-LOG.md`, `BUNDLE.md`); una quarta (`CHANGELOG-AGENTS.md`) sarebbe un nuovo drift |
+| D-79.3 | La **checklist PR** vive solo in `.github/pull_request_template.md` | L'artefatto interattivo che GitHub rende bloccante al merge non conteneva 5 gate dichiarati vincolanti; `AGENTS.md` ne conteneva una copia con 10 voci diverse. Due copie ⇒ due fonti di verità |
+| D-79.4 | `check-aggregate-blocks.mjs` sarà **bloccante** | È un controllo **testuale** (Node puro): non soffre dell'incompatibilità PS 5.1/PS 7 che giustifica il warning-only di `aggregate-state -Check`, quindi può bloccare senza rischi di falso positivo cross-platform |
+| D-79.5 | `agent-claim.ps1` farà **claim + riverifica in sequenza atomica** | La riverifica era il passo più fragile del protocollo (interpretazione manuale dell'ID commento più basso) ed è deterministica: diventa codice con exit code |
+| D-79.6 | Il `pre-commit` **separa le invarianti dall'igiene**: pattern del branch bloccante, working tree pulito advisory (opt-in `LIFE_SOUNDTRACK_STRICT_CLEAN=1`) | Il check "clean tree" bloccava i commit parziali e l'unico escape (`--no-verify`) disabilitava anche F1/F7. La sua funzione (F5) è mitigata strutturalmente dalla worktree (issue #53) |
+| D-79.7 | Il fallback a **Windows PowerShell 5.1 è vietato** in script e hook | Sotto 5.1 il parsing sovradecodifica i `.ps1` UTF-8 senza BOM (F9-bis): il mojibake finisce scritto nei file globali. Se `pwsh` non c'è, lo script non scrive: avvisa e esce |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
+restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
+4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
+Questa sessione non implementa story di prodotto: chiude lavoro di **governance** su un'epic
+(#248) che non è una story del backlog. Il protocollo agenti passa da **0 gate** a **0 gate
+nuovi in questa PR** — i gate che lo rendono verificabile (I2-b: coerenza del protocollo e
+invarianti ADR-0008) e gli script che lo rendono atomico (I2-c: claim, PR) sono i lotti
+successivi dell'epic, descritti in ADR-0012 §"Stato dell'implementazione".
+
+**Cosa è pronto.** ADR-0012 scritta e approvata; **8 drift chiusi** (D1 versione in `docs/INDEX.md`,
+D2 `phase-post`, D3 exit 14, D4 `-Check` a tratto singolo, D5 ordine worktree/claim, D6 cifre come
+puntatori, D7 query senza `jq` esterno, D8 checklist unica); fallback PS 5.1 rimosso dal
+`pre-push`; `pre-commit` separato in invariante bloccante + igiene advisory; PR template
+completato con le 10 voci che mancavano.
+
+**Cosa manca.** I2-b (`check-protocol-consistency.mjs`, `check-aggregate-blocks.mjs` + test
+negativi), I2-c (`agent-claim.ps1`, `agent-pr.ps1`, `check-claim-state.mjs`), I3 (rifinitura di
+`AGENTS.md` a ~400 righe con 77 anchor invariati).
+
+**Salute tecnica.** Worktree attiva su `feat/248-protocollo-contratto-verificato` (push early
+eseguito). Claim riverificato: ID commento `6559382507`, unico claim sull'issue #248. Nessun
+blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9 (baseline). Gate eseguiti prima del merge:
+`generate-bundle.ps1 -Check` (exit 0), `aggregate-state.ps1 -Check` (exit 0),
+`check-readme-facts.mjs` (exit 0), `test-pre-commit-clean-check.sh` (14 assert, 0 falliti).
+
+**Gate di testabilità.** La verifica della sessione è automatica: i gate di `ci.yml` (bloccanti)
+più `bash scripts/test-post-merge.sh` e `bash scripts/test-setup-worktree.sh` per la parte di
+hook. Il criterio di accettazione della I2-a è che **nessuno degli 8 drift sia riproducibile**:
+verificato con un'ispezione mirata dei file citati.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Il drift non era «AGENTS.md è troppo lungo»: era «nessuno confronta `AGENTS.md` con la realtà». La lunghezza è il sintomo, l'assenza di gate è la causa | Le decisioni di ristrutturazione (D-79.1) sono state prese **dopo** aver misurato i drift, non prima |
+| La query dei candidati (`\| jq`) **non gira sull'ambiente di riferimento**: `jq` non è installato. Il filtro equivalente con il `--jq` integrato di `gh` funziona | Ogni comando del protocollo deve essere eseguibile **senza tool opzionali**; i gate che lo fanno (`check-readme-facts.mjs`, `validate-labels.mjs`) usano solo i moduli built-in di node |
+| `gh issue view --json comments` restituisce i **node id** GraphQL (`IC_kwDOV…`), non l'ID numerico che ADR-0006 usa come discriminatore. Il discriminatore si legge solo dall'API REST (`gh api`) | La riverifica automatizzata deve usare `gh api repos/<owner>/<repo>/issues/<N>/comments` e ordinare per `id` numerico — non per `node_id` né per `created_at` |
+| Un hook che esiste per prevenire il drift può **causarlo**: il `pre-push` rigenerava il bundle con PS 5.1, che scrive mojibake | Gli hook che scrivono file devono avere la stessa baseline degli script che dichiarano: `pwsh` 7, o niente |
+| Due gate identici con wording diverso divergono: **22 voci per parte, 2 identiche** | Il gate di coerenza deve vietare il duplicato (D3 del owner), non solo segnalarlo |
+
+## Documenti aggiornati
+
+- `docs/13-ADR/0012-agent-protocol-contract.md` (nuovo)
+- `docs/state/sessions/79-protocollo-contratto-verificato.md` (nuovo)
+- `AGENTS.md` (v1.33 → v1.34): tabella label, ordine worktree/claim, query senza `jq`, cifre come
+  puntatori, checklist ridotta a puntatore, regole d'oro del pre-commit, footer
+- `.github/pull_request_template.md`: checklist completata (unico artifact)
+- `.githooks/pre-push`: fallback PS 5.1 rimosso
+- `.githooks/pre-commit`: invariante (branch) bloccante, igiene (clean tree) advisory
+- `.githooks/README.md`: failure mode coperti e comportamento aggiornati
+- `scripts/post-merge.ps1`: exit code documentato (14), flag canonici (`-Check`)
+- `scripts/generate-bundle.ps1`: `$files` += ADR-0012 + sessione 79
+- `docs/INDEX.md`: versione di `AGENTS.md`, riga ADR-0012, riga `18-DEV-LOG.md`
+- `docs/18-DEV-LOG.md`: entry della sessione 79
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -12029,10 +12166,42 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
 | 2.31 | 2026-10-31 (issue #233) | **§43 Story 3.1 — Home + Timeline** (Sessione 77, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (77-1 **il modello è puro, i componenti sono presentazionali**: tutta la logica — i quattro numeri della Home, la bar week, i bucket per granularità, le serie di volume e mood, le bande di era, il zoom progressivo — sta in `apps/web/src/screens/homeTimelineModel.ts`, senza React né DOM, riutilizzando il **vocabolario temporale del core** (`@core/analysis`): la Timeline non introduce un secondo calendario (lesson 27-7). I 19 test girano senza IndexedDB né `fake-indexeddb`, perché la logica non li tocca; 77-2 **«il dato mancante non è zero»**: il bucket vuoto **esiste** e vale 0 (una linea che salta i buchi suggerirebbe continuità che i dati non hanno) e il **mood non viene interpolato** nei bucket senza dati; l'area del volume è chiusa sul **minimo** del dominio e non su zero, perché un ascolto non riparte da zero minuti e un'area che scende a zero inventerebbe un silenzio; 77-3 **nessuna libreria di chart**: i tre grafici (StreamChart, MoodLine, BarWeek) sono **SVG scritti a mano**, con la geometria in un file puro e testato (`chartGeometry.ts`) e il contratto a11y della spec (`07§2.7`): `<title>`, `<desc>` e una **tabella dati nascosta** per screen reader. Introdurre una dipendenza di grafici sarebbe una decisione di **stack**, non di story; 77-4 **la scelta fra onboarding e app è legata ai dati**: `App.tsx` interroga il database (ci sono ascolti?) invece di usare un flag in `localStorage`, che mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo; 77-5 **le soglie di stato sono in un punto solo**: 100 eventi per la Home e 6 mesi per la Timeline (`06§2.6-2.7`) sono dichiarati in `useHomeTimelineData.ts`, non nelle due schermate). Consegnati: `apps/web/src/screens/{homeTimelineModel.ts,Home.tsx,Timeline.tsx,AppShell.tsx}`, `apps/web/src/components/{StatCard,MemoryCard,BarWeek,EraBand,StreamChart,MoodLine}.tsx` + `chartGeometry.ts`, `apps/web/src/hooks/{useCountUp.ts,useHomeTimelineData.ts}`, il cablaggio di `App.tsx` e `OnboardingRouter.tsx`, 11 chiavi i18n nuove (namespace `nav` incluso), gli stili in `onboarding.css`, `08-COPY-I18N.md` v0.13 e lo stato della story 3.1 (`done`). Con la 3.1 l'**EPIC 3** passa a 2/4 e l'indicatore di avanzamento (issue #216) a **75%** — 21 story su 28, 7 step rimanenti |
 | 2.32 | 2026-10-31 (Sessione 78) | **§44 Difetto ricorrente: la rimozione della worktree su Windows** (nessuna issue dedicata; segnalato dal project owner): `scripts/post-merge.ps1` si fermava al passo 1 con «Filename too long» / «Result too large» — `git worktree remove --force` cancellava l'albero senza il prefisso `\\?\` e la worktree con `node_modules` aveva path > MAX_PATH. Il rimedio **manuale** (`rd /s /q "\\?\"` + `git worktree prune`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è una procedura mancante. Fix su tre livelli dentro lo script — **L1** `git -c core.longpaths=true worktree remove --force` (causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale tocca **solo** directory che sono worktree di questo repo (working copy principale e antenati mai toccati → **exit 16**) e `git status` fallito = WIP sconosciuto = stop (**exit 10**); `git status` ora gira con `core.longpaths=true`. Difetto scoperto mentre si scriveva la rete: `Invoke-CmdVerbatim` non passava `/c` a `cmd.exe` ⇒ shell interattiva, comando non eseguito, **exit 0** — un successo che non aveva fatto nulla; `/c` aggiunto e L3 coperto da un test che lo **forza** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`). Test: `test-post-merge.sh` **T10..T14** (shim di `git` che fallisce solo su `worktree remove`, guardia sulla working copy, path lunghi reali, catena L1→L2→L3 su PS 5.1, L3 forzata) → **47 assert, 0 falliti**. `AGENTS.md` v1.33 (nuova sezione sul difetto + exit 16), `12-DEVOPS.md` §9.8i + changelog 1.7, `docs/state/sessions/78-post-merge-long-paths.md`. **PR #236 merged il 2026-11-01** (merge commit `08a0b4d`), issue di tracking **#235** (`status:done`) — l'issue è stata creata in fase di chiusura, perché il difetto non ne aveva una e il protocollo pretende una PR = una issue |
+## 45. Protocollo agenti come contratto verificato (Sessione 79)
+
+**Branch**: `feat/248-protocollo-contratto-verificato`
+**Issue di tracking**: **#248** (epic)
+**Data**: 2026-11-01
+**Stato**: 🟡 in corso (lotto I1 + I2-a; i lotti I2-b, I2-c e I3 sono descritti in ADR-0012 §"Stato dell'implementazione")
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 79-1 | P | `AGENTS.md` era l'**unico** artefatto di governance del repo **senza generatore e senza gate**: 1328 righe, 77 anchor, 643 citazioni, 0 marker `AGGREGATE-*`, 0 controlli automatici. Tutti gli altri ne hanno uno (`check-readme-facts.mjs`, `check-merge-state.mjs`, `validate-workflows.mjs`, `validate-labels.mjs`, `aggregate-state.ps1`, `generate-bundle.ps1`) | Il protocollo è cresciuto per **addizione organica** (78 sessioni) e nessuno ha mai applicato al documento la regola che il repo si era già dato per i **file globali** (ADR-0008, D.38.1): *un fatto, un proprietario, un gate* | **ADR-0012**: principio «ogni regola normativa scende da L2 (protocollo) a L3 (applicazione)». Il gate è il lotto I2-b | `docs/13-ADR/0012-agent-protocol-contract.md` |
+| 79-2 | P | **8 drift misurati** fra documento e realtà: versione dichiarata false in `docs/INDEX.md` (v1.27 vs v1.33), `phase-post` assente dalla tabella label, exit code documentato come 1 e implementato come 14, `--check` stampato dal generatore di istruzioni, contraddizione interna fra «claim prima» e «worktree prima», cifre di assert incoerenti (53 vs 37) su un valore dinamico, query dei candidati che richiede `jq` (tool **non installato** sull'ambiente di riferimento), checklist PR duplicata (22 voci per parte, **2 identiche al testo**) | Ogni drift è una **seconda fonte di verità** senza un gate che la confronti: è la classe che l'issue #161 aveva chiuso per il README, mai applicata al protocollo | Chiusi tutti e 8 in `AGENTS.md` + `docs/INDEX.md` + `scripts/post-merge.ps1` + `.github/pull_request_template.md`; il **meccanismo** che li chiude per sempre è il gate di coerenza (lotto I2-b) | `AGENTS.md` v1.34 · `docs/INDEX.md` |
+| 79-3 | P | Il **protocollo di claim** (ADR-0006, 8 regole *vincolanti*) non aveva **nessun enforcement**: `in-progress`, `claim` e `status:in-review` non compaiono in `ci.yml` né in alcun gate. Due agenti potevano implementare la stessa story senza che nulla se ne accorgesse | Il claim è stato implementato come **prosa**: nessun comando lo esegue, nessun gate lo verifica | **I2-c**: `agent-claim.ps1` esegue claim + riverifica in sequenza atomica, con la riverifica come **codice** (vince l'ID commento REST più basso) e `check-claim-state.mjs` in CI | `docs/13-ADR/0006` · ADR-0012 regola 5 |
+| 79-4 | P | L'invariante ADR-0008 («mai modificare i blocchi `AGGREGATE-*` a mano») era **violabile in silenzio**: il check in CI è **warning-only** perché il drift è auto-fixato post-merge ⇒ la violazione merge-e e il reviewer non la vede | Il gate aggregatore confronta **contenuti calcolati**, quindi soffre dell'incompatibilità residua PS 5.1/PS 7 (issue #63) che ne giustifica il warning-only. Ma la regola che serve qui è **testuale**: «questa PR ha toccato un blocco `AGGREGATE-*`?» | **I2-b**: `check-aggregate-blocks.mjs` in Node puro (nessuna dipendenza da PowerShell ⇒ cross-platform) ⇒ può essere **bloccante** (decisione D4 del project owner) | `docs/13-ADR/0008` · ADR-0012 regola 4 |
+| 79-5 | P | Il `pre-push` **poteva corrompere il bundle**: usava `powershell` (5.1) come fallback se `pwsh` mancava, e sotto 5.1 il *parsing* dei `.ps1` sovradecodifica (F9-bis) ⇒ il mojibake veniva **scritto in `docs/BUNDLE.md`** e committato | Il fallback era stato scritto prima del baseline `pwsh` (Sessione 71) e nessun gate confrontava gli hook con la baseline dichiarata | Fallback **rimosso**: senza `pwsh` 7 il bundle **non** viene rigenerato (avviso + exit 0). `pwsh` 7 è ora un requisito esplicito degli hook | `.githooks/pre-push` · ADR-0012 regola 7 |
+| 79-6 | P | Il `pre-commit` bloccava anche i **commit parziali**, e l'unica via d'uscita (`--no-verify`) disabilitava **anche** il check del branch (F1/F7): un agente che voleva committare due file perdeva la protezione che conta | I due controlli erano accoppiati in un unico abort, senza distinzione fra **invariante** e **igiene** | Separati: pattern del branch **bloccante**, working tree pulito **advisory** (F5 è mitigato strutturalmente dalla worktree, issue #53). Comportamento bloccante ripristinabile con `LIFE_SOUNDTRACK_STRICT_CLEAN=1`. Test esteso con 6 scenari sul comportamento reale del hook (H1..H6) | `.githooks/pre-commit` · `scripts/test-pre-commit-clean-check.sh` |
+| 79-7 | L | `gh issue view --json comments` restituisce i **node id** GraphQL (`IC_kwDOV…`), non l'ID numerico che ADR-0006 usa come discriminatore: un agente che li confrontasse (o che ordinasse per `created_at`) chiuderebbe la riverifica su un dato **non confrontabile** | Due API diverse, due tipi di id, e il protocollo non dice quale usare | Il protocollo dichiara esplicitamente il discriminatore (**`id` numerico dell'API REST**) e dà la variante senza dipendenze esterne. La riverifica automatizzata userà `gh api` | `AGENTS.md` §"Presa in carico delle story" |
+
+**Lesson learned**: la prima lezione è sul **metodo**: nessuna delle decisioni di ristrutturazione è stata presa prima di **misurare** il drift. L'ipotesi iniziale («il file è troppo lungo») era vera ma non era la causa: la causa era l'assenza di enforcement, e la prova è che lo split in 12 file — la soluzione intuitiva — non chiude nessuno degli 8 drift misurati. Misurare prima ha trasformato una discussione di gusti («modules/ o no») in una decisione verificabile («una regola senza gate è un consiglio»).
+
+La seconda lezione è sulla **forma del fallback**: il `pre-push` è nato come difesa (regenerare il bundle) e ha finito per causare il danno che la difesa doveva prevenire, perché il fallback a PS 5.1 era stato scritto **prima** del baseline `pwsh` e nessuno lo aveva confrontato con la baseline. Una difesa che usa un engine diverso da quello dichiarato non è una difesa: è un secondo scrittore con regole diverse.
+
+La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, si è creato un incentivino a usare `--no-verify` — cioè a disattivare anche la protezione che conta. Separare l'invariante dall'igiene non è una questione di stile: è stato ciò che ha reso il check del branch usabile senza che gli agenti lo aggirassero.
+
+**Verifica**: `bash scripts/test-pre-commit-clean-check.sh` → **14 assert, 0 falliti** (8 scenari sull'espressione del check + 6 sul comportamento reale del hook: invariante bloccante, igiene advisory, `STRICT_CLEAN` bloccante, bypass); `pwsh scripts/aggregate-state.ps1 -Check` → exit 0; `pwsh scripts/generate-bundle.ps1 -Check` → exit 0; `node scripts/check-readme-facts.mjs` → exit 0.
+
+---
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
+
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
 tra conversazioni AI e durante l'audit di Sessione (vedi `AGENTS.md` §"Fine di un'implementazione").*
+
 
 
 
@@ -17522,6 +17691,119 @@ solo in `scripts/`, `AGENTS.md` e `docs/`.
   gate `gates-scripts`
 - `docs/18-DEV-LOG.md` — §44 + changelog 2.32
 - `docs/state/sessions/78-post-merge-long-paths.md` — questo file
+
+
+
+===== FILE: docs/state/sessions/79-protocollo-contratto-verificato.md =====
+
+---
+number: 79
+title: "Protocollo agenti come contratto verificato (ADR-0012)"
+date: 2026-11-01
+state: 🟡
+merged: false
+branch: feat/248-protocollo-contratto-verificato
+pr: 0
+claim: kilo-hp-elitebook-ef4d
+tags: [devops, governance, tooling]
+---
+
+# Sessione 79 — Protocollo agenti come contratto verificato (ADR-0012)
+
+> **Issue di tracking**: #248 (epic). **Branch**: `feat/248-protocollo-contratto-verificato`.
+>
+> La sessione è il primo lotto dell'epic #248: **ADR-0012** (la decisione) + **I2-a** (chiusura
+> dei drift misurati). I lotti successivi (gate di coerenza, claim atomico, rifinitura di
+> `AGENTS.md`) sono descritti in ADR-0012 §"Stato dell'implementazione" e restano da fare.
+
+## Sintesi
+
+`AGENTS.md` era l'unico artefatto di governance del repository **senza generatore e senza gate**.
+Tutti gli altri ne hanno uno: `check-readme-facts.mjs` per il README, `check-merge-state.mjs` per
+le sessioni, `validate-workflows.mjs` per i workflow, `validate-labels.mjs` per le label,
+`aggregate-state.ps1` per i blocchi aggregati, `generate-bundle.ps1` per il bundle. Il drift che ne
+consegue è stato **misurato** prima di fare qualsiasi modifica: otto drift concreti (D1-D8) e tre
+difetti strutturali del flusso automatico, nessuno ipotetico.
+
+Il project owner ha deciso (2026-11-01) cinque punti: il contratto resta in **due file**
+(`AGENTS.md` + ADR-0012) e non in una directory di moduli; la **storia** va in `docs/18-DEV-LOG.md`;
+la **checklist PR** ha un solo artifact (il PR template); il gate di integrità degli `AGGREGATE-*`
+diventa **bloccante**; il **claim** diventa un comando atomico che esegue claim e riverifica in
+sequenza.
+
+La sessione scrive l'ADR-0012 e chiude i drift D1-D8, più due difetti che erano emersi leggendo
+il flusso automatico: il fallback a Windows PowerShell 5.1 nel `pre-push` (che poteva **scrivere
+mojibake in `docs/BUNDLE.md`** e committarlo) e il `pre-commit` che, bloccando i commit parziali,
+spingeva gli agenti verso `--no-verify` — cioè verso la disattivazione anche del check del branch.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-79.1 | Il protocollo resta in **2 file** (`AGENTS.md` + ADR-0012), non in `modules/`+`checklists/`+`references/` | Ogni file aggiunto è un elenco da mantenere a mano in `generate-bundle.ps1` e `docs/INDEX.md`: la classe di drift di issue #136. Lo split non chiude nessuno degli 8 drift misurati e rompe 29 riferimenti `§"…"` + 8 citazioni dagli script |
+| D-79.2 | La **storia** del protocollo va in `docs/18-DEV-LOG.md` | Il repo ha già tre sedi di storia (`SESSIONS.md`, `18-DEV-LOG.md`, `BUNDLE.md`); una quarta (`CHANGELOG-AGENTS.md`) sarebbe un nuovo drift |
+| D-79.3 | La **checklist PR** vive solo in `.github/pull_request_template.md` | L'artefatto interattivo che GitHub rende bloccante al merge non conteneva 5 gate dichiarati vincolanti; `AGENTS.md` ne conteneva una copia con 10 voci diverse. Due copie ⇒ due fonti di verità |
+| D-79.4 | `check-aggregate-blocks.mjs` sarà **bloccante** | È un controllo **testuale** (Node puro): non soffre dell'incompatibilità PS 5.1/PS 7 che giustifica il warning-only di `aggregate-state -Check`, quindi può bloccare senza rischi di falso positivo cross-platform |
+| D-79.5 | `agent-claim.ps1` farà **claim + riverifica in sequenza atomica** | La riverifica era il passo più fragile del protocollo (interpretazione manuale dell'ID commento più basso) ed è deterministica: diventa codice con exit code |
+| D-79.6 | Il `pre-commit` **separa le invarianti dall'igiene**: pattern del branch bloccante, working tree pulito advisory (opt-in `LIFE_SOUNDTRACK_STRICT_CLEAN=1`) | Il check "clean tree" bloccava i commit parziali e l'unico escape (`--no-verify`) disabilitava anche F1/F7. La sua funzione (F5) è mitigata strutturalmente dalla worktree (issue #53) |
+| D-79.7 | Il fallback a **Windows PowerShell 5.1 è vietato** in script e hook | Sotto 5.1 il parsing sovradecodifica i `.ps1` UTF-8 senza BOM (F9-bis): il mojibake finisce scritto nei file globali. Se `pwsh` non c'è, lo script non scrive: avvisa e esce |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
+restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
+4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
+Questa sessione non implementa story di prodotto: chiude lavoro di **governance** su un'epic
+(#248) che non è una story del backlog. Il protocollo agenti passa da **0 gate** a **0 gate
+nuovi in questa PR** — i gate che lo rendono verificabile (I2-b: coerenza del protocollo e
+invarianti ADR-0008) e gli script che lo rendono atomico (I2-c: claim, PR) sono i lotti
+successivi dell'epic, descritti in ADR-0012 §"Stato dell'implementazione".
+
+**Cosa è pronto.** ADR-0012 scritta e approvata; **8 drift chiusi** (D1 versione in `docs/INDEX.md`,
+D2 `phase-post`, D3 exit 14, D4 `-Check` a tratto singolo, D5 ordine worktree/claim, D6 cifre come
+puntatori, D7 query senza `jq` esterno, D8 checklist unica); fallback PS 5.1 rimosso dal
+`pre-push`; `pre-commit` separato in invariante bloccante + igiene advisory; PR template
+completato con le 10 voci che mancavano.
+
+**Cosa manca.** I2-b (`check-protocol-consistency.mjs`, `check-aggregate-blocks.mjs` + test
+negativi), I2-c (`agent-claim.ps1`, `agent-pr.ps1`, `check-claim-state.mjs`), I3 (rifinitura di
+`AGENTS.md` a ~400 righe con 77 anchor invariati).
+
+**Salute tecnica.** Worktree attiva su `feat/248-protocollo-contratto-verificato` (push early
+eseguito). Claim riverificato: ID commento `6559382507`, unico claim sull'issue #248. Nessun
+blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9 (baseline). Gate eseguiti prima del merge:
+`generate-bundle.ps1 -Check` (exit 0), `aggregate-state.ps1 -Check` (exit 0),
+`check-readme-facts.mjs` (exit 0), `test-pre-commit-clean-check.sh` (14 assert, 0 falliti).
+
+**Gate di testabilità.** La verifica della sessione è automatica: i gate di `ci.yml` (bloccanti)
+più `bash scripts/test-post-merge.sh` e `bash scripts/test-setup-worktree.sh` per la parte di
+hook. Il criterio di accettazione della I2-a è che **nessuno degli 8 drift sia riproducibile**:
+verificato con un'ispezione mirata dei file citati.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Il drift non era «AGENTS.md è troppo lungo»: era «nessuno confronta `AGENTS.md` con la realtà». La lunghezza è il sintomo, l'assenza di gate è la causa | Le decisioni di ristrutturazione (D-79.1) sono state prese **dopo** aver misurato i drift, non prima |
+| La query dei candidati (`\| jq`) **non gira sull'ambiente di riferimento**: `jq` non è installato. Il filtro equivalente con il `--jq` integrato di `gh` funziona | Ogni comando del protocollo deve essere eseguibile **senza tool opzionali**; i gate che lo fanno (`check-readme-facts.mjs`, `validate-labels.mjs`) usano solo i moduli built-in di node |
+| `gh issue view --json comments` restituisce i **node id** GraphQL (`IC_kwDOV…`), non l'ID numerico che ADR-0006 usa come discriminatore. Il discriminatore si legge solo dall'API REST (`gh api`) | La riverifica automatizzata deve usare `gh api repos/<owner>/<repo>/issues/<N>/comments` e ordinare per `id` numerico — non per `node_id` né per `created_at` |
+| Un hook che esiste per prevenire il drift può **causarlo**: il `pre-push` rigenerava il bundle con PS 5.1, che scrive mojibake | Gli hook che scrivono file devono avere la stessa baseline degli script che dichiarano: `pwsh` 7, o niente |
+| Due gate identici con wording diverso divergono: **22 voci per parte, 2 identiche** | Il gate di coerenza deve vietare il duplicato (D3 del owner), non solo segnalarlo |
+
+## Documenti aggiornati
+
+- `docs/13-ADR/0012-agent-protocol-contract.md` (nuovo)
+- `docs/state/sessions/79-protocollo-contratto-verificato.md` (nuovo)
+- `AGENTS.md` (v1.33 → v1.34): tabella label, ordine worktree/claim, query senza `jq`, cifre come
+  puntatori, checklist ridotta a puntatore, regole d'oro del pre-commit, footer
+- `.github/pull_request_template.md`: checklist completata (unico artifact)
+- `.githooks/pre-push`: fallback PS 5.1 rimosso
+- `.githooks/pre-commit`: invariante (branch) bloccante, igiene (clean tree) advisory
+- `.githooks/README.md`: failure mode coperti e comportamento aggiornati
+- `scripts/post-merge.ps1`: exit code documentato (14), flag canonici (`-Check`)
+- `scripts/generate-bundle.ps1`: `$files` += ADR-0012 + sessione 79
+- `docs/INDEX.md`: versione di `AGENTS.md`, riga ADR-0012, riga `18-DEV-LOG.md`
+- `docs/18-DEV-LOG.md`: entry della sessione 79
 
 
 
@@ -29313,6 +29595,172 @@ La ratifica di questo contratto dentro `05-ARCHITECTURE.md` §4 è l'atto che qu
 
 
 
+===== FILE: docs/13-ADR/0012-agent-protocol-contract.md =====
+
+# ADR-0012 — Protocollo agenti come contratto verificato
+
+> Status: 🟢 APPROVED · Versione 1.0 · Sessione 79 (2026-11-01)
+> Decisioni prese dal project owner in sessione interattiva (D1-D5), il 2026-11-01.
+
+## Contesto
+
+Il protocollo agenti vive in un unico file, `AGENTS.md` (1328 righe, 21 sezioni `##` + 56 `###`,
+77 anchor, 643 citazioni in 49 file + 304 nel bundle). È l'**unico** artefatto di governance del
+repository che **non ha né un generatore né un gate**: non contiene marker `AGGREGATE-*`, e nessuno
+dei 26 gate di `ci.yml` lo confronta con la realtà. Tutti gli altri lo hanno —
+`check-readme-facts.mjs` per il README (issue #161), `check-merge-state.mjs` per le sessioni
+(issue #239), `validate-workflows.mjs` per i workflow (7 controlli), `validate-labels.mjs` per le
+label, `aggregate-state.ps1` per i blocchi aggregati (ADR-0008), `generate-bundle.ps1` per il
+bundle.
+
+Il drift che ne consegue non è ipotetico: è **misurato e attuale**.
+
+| # | Drift | Prova |
+|---|-------|-------|
+| D1 | Versione dichiarata false | `docs/INDEX.md` dichiara «v1.27», `AGENTS.md` dichiara «v1.33» |
+| D2 | Tabella label vs gate | `scripts/validate-labels.mjs` include `phase-post`; la tabella di `AGENTS.md` no |
+| D3 | Exit code | `scripts/post-merge.ps1` documenta «Exit 1»; il codice esce **14** |
+| D4 | Flag non canonici | `scripts/post-merge.ps1` stampa `--check` (doppio trattino ⇒ fail-open su PS 5.1, issue #104) |
+| D5 | Contraddizione interna | «il claim è il primo gesto operativo, prima … di creare il branch» vs «worktree prima del claim» |
+| D6 | Cifre incoerenti | «53 assert» in tre punti vs «37 assert» in uno; il numero vero è dinamico (lo stampa la suite) |
+| D7 | Comando non eseguibile | la query dei candidati usa `\| jq` — **`jq` non è installato** sull'ambiente di riferimento |
+| D8 | Checklist sdoppiata | `AGENTS.md` 22 voci vs `.github/pull_request_template.md` 22 voci → **solo 2 identiche al testo** |
+
+Tre difetti strutturali del flusso automatico:
+
+1. **Il protocollo di claim (ADR-0006, 8 regole vincolanti) non ha enforcement.** `in-progress`,
+   `claim` e `status:in-review` non compaiono mai in `ci.yml` né in alcun gate: due agenti possono
+   implementare la stessa story senza che nulla se ne accorga — esattamente la race che ADR-0006
+   dichiara di aver chiuso.
+2. **Le invarianti ADR-0008 sono warning-only.** `ci.yml` esegue `aggregate-state.ps1 -Check` in
+   modalità warning perché il drift è auto-fixato post-merge: la regola «mai modificare i blocchi
+   `AGGREGATE-*` a mano» è quindi violabile e la violazione **merge-e in silenzio**, invisibile al
+   reviewer.
+3. **Il `pre-push` può corrompere il bundle.** `.githooks/pre-push` usa `powershell` (5.1) come
+   fallback se `pwsh` manca; sotto 5.1 il *parsing* dei `.ps1` sovradecodifica (F9-bis,
+   `docs/12-DEVOPS.md §9.12`) e il mojibake viene **scritto in `docs/BUNDLE.md`** e committato
+   dall'hook che esiste per prevenire il drift.
+
+A questo si aggiunge un difetto di ergonomia: il `pre-commit` blocca anche i **commit parziali**
+(untracked/unstaged), e l'escape hatch `--no-verify` disabilita **anche** il check del branch
+(F1/F7). Un agente chevuole committare un sottoinsieme di file è quindi incentivato a usare
+`--no-verify` e a perdere la protezione che conta.
+
+## Decisione
+
+Adottiamo il principio seguente, che governa ogni decisione successiva sul protocollo:
+
+> **Ogni regola normativa scende da L2 (protocollo) a L3 (applicazione).**
+> Regola in `AGENTS.md` ⟺ gate in `scripts/` ⟺ hook o workflow che la applica.
+> Una regola senza gate è un consiglio. Un gate senza regola è un segreto.
+
+Le regole vincolanti sono:
+
+1. **Il protocollo resta in due file, non in una directory.** `AGENTS.md` è il *contratto* (le
+   regole, i comandi, i gate); questa ADR è la *decisione* (contesto, alternative, conseguenze).
+   Non si introducono `modules/`, `checklists/` o `references/`: ogni file aggiunto è un elenco
+   da mantenere a mano in `scripts/generate-bundle.ps1` e in `docs/INDEX.md` — la classe di drift
+   che ADR-0008 ha già imparato a riconoscere (issue #136).
+2. **Gli anchor di `AGENTS.md` sono un'API pubblica.** I 77 heading (`##`/`###`) sono referenziati
+   da 29 citazioni esterne nella forma `§"Titolo"` e da 8 script. **Nessun heading viene rinominato
+   o spostato** senza aggiornare i referenti nello stesso PR; un gate di integrità degli anchor
+   (`scripts/check-protocol-consistency.mjs`) verifica che ogni `§"…"` citato in `.github/`,
+   `docs/` e `scripts/` risolva a un heading esistente. È il presupposto che rende sicuro
+   qualunque refactor futuro del file.
+3. **Una checklist, un artifact.** La checklist operativa della PR vive **solo** in
+   `.github/pull_request_template.md` (che GitHub rende interattiva e che la branch protection
+   tratta come blocker). `AGENTS.md` non ne contiene una copia: ne rimanda. Il gate di coerenza
+   vieta il duplicato.
+4. **Le invarianti ADR-0008 diventano bloccanti, e il controllo è testuale.** Un controllo
+   testuale (Node puro, nessuna dipendenza da PowerShell) non soffre dell'incompatibilità
+   PS 5.1/PS 7 che giustifica il warning-only di `aggregate-state -Check`: la verifica «questa PR
+   ha modificato un blocco `<!-- AGGREGATE-*-START/END -->`?» è cross-platform per costruzione e
+   può quindi essere bloccante. `scripts/check-aggregate-blocks.mjs`.
+5. **Il claim diventa un comando atomico con riverifica deterministica.** `scripts/agent-claim.ps1`
+   esegue in sequenza: validazione dell'issue, creazione della worktree, label `in-progress`,
+   commento `claim:`, **riverifica** (vince l'ID commento GitHub più basso, letto dall'API REST) e
+   scrittura del file di stato. La riverifica non è più un passo interpretato a mano: è codice con
+   exit code. **Nessuna dipendenza da `jq` esterno**: il filtro usa il `--jq` integrato di `gh` o
+   `ConvertFrom-Json`.
+6. **Il `pre-commit` separa le invarianti dall'igiene.** Il **pattern del branch** resta bloccante
+   (F1, F7). Il controllo «working tree pulito» diventa **advisory** (warning, exit 0): la sua
+   funzione (F5, stash collision) è mitigata strutturalmente dalla worktree (issue #53), e il suo
+   costo (blocca i commit parziali e spinge verso `--no-verify`) è superiore al beneficio. Il
+   comportamento bloccante resta disponibile via `LIFE_SOUNDTRACK_STRICT_CLEAN=1`.
+7. **Nessun `.ps1` senza `pwsh` 7.** Il fallback a Windows PowerShell 5.1 è **vietato** in tutti
+   gli script e hook: `powershell` (5.1) non è un fallback, è un rischio di corruzione (F9-bis).
+   Se `pwsh` non è disponibile, lo script **non scrive**: avvisa e esce.
+8. **Le cifre non si duplicano.** Un numero che cambia a ogni esecuzione di una suite (assert,
+   durate, conteggi di test) non viene scritto in `AGENTS.md`: ci si mette un **puntatore**
+   («vedi l'output della suite»), come prescrive già D.38.1 per i dati aggregati.
+
+## Alternative considerate
+
+- **Split del protocollo in `modules/` + `checklists/` + `references/`** (12 file, entry point
+  snello): scartata. Il vantaggio percepito (leggibilità) è pagato con 12 elenchi manuali da
+  mantenere — la classe di drift di issue #136 — e con la rottura di 29 riferimenti `§"…"` e di 8
+  citazioni dagli script. Nessuno dei 6 drift misurati verrebbe chiuso. Scartata anche l'opzione
+  YAML/JSON: i dati strutturati diventano una seconda fonte di verità rispetto ai gate, che il
+  repository non sa ancora manutenere.
+- **Changelog del protocollo in un file separato** (`CHANGELOG-AGENTS.md`): scartata. Il
+  repository ha già tre sedi di storia (`docs/SESSIONS.md`, `docs/18-DEV-LOG.md`,
+  `docs/BUNDLE.md`); una quarta sarebbe un nuovo drift. La storia va in `docs/18-DEV-LOG.md`, che
+  è già il diario di problemi/fix/lesson.
+- **Lasciare il claim manuale e limitarsi a documentarlo meglio**: scartata. Il rischio residuo
+  (due agenti sulla stessa story) è il più grave in assoluto e l'automazione è deterministica,
+  quindi il costo è basso rispetto al beneficio.
+- **Estendere il gate di coerenza a tutti i documenti** (`12-DEVOPS.md`, `11-BACKLOG.md`,
+  `18-DEV-LOG.md`): **differita**. È la generalizzazione corretta (gli stessi documenti dichiarano
+  cifre non verificabili), ma richiede che il gate legga tabelle eterogenee in tre formati diversi:
+  decisione separata, da prendere dopo che il gate su `AGENTS.md` è consolidato.
+- **Rendere bloccante anche `aggregate-state.ps1 -Check` in CI**: scartata per ora. L'incompatibilità
+  residua di piattaforma (issue #63) è ancora aperta; il controllo testuale della regola 4 copre
+  invece il caso che conta (la violazione manuale), senza toccare la semantica dei gate esistenti.
+
+## Conseguenze attese
+
+- **Positive**: i 6+2 drift misurati vengono chiusi e il meccanismo che li chiude è permanente
+  (gate, non prosa); la riverifica del claim diventa deterministica e non più interpretazione
+  manuale; le invarianti ADR-0008 smettono di essere violabili in silenzio; l'hook `pre-push` non
+  può più corrompere il bundle; il `pre-commit` smette di spingere verso `--no-verify`.
+- **Negative**: due script in più e due gate in più da mantenere (costo proporzionato, non
+  moltiplicato come nello split a 12 file); il claim diventa un comando che va ricordato di usare
+  (`agent-claim.ps1` al posto di `setup-worktree.ps1` + 2 comandi `gh` copiati a mano); il
+  comportamento del `pre-commit` sulla working tree sporca cambia (warning invece di abort) e va
+  comunicato agli agenti.
+- **Mitigazioni**: il file di stato dell'agente (`.git/worktrees/<nome>/agent-state.json`) consente
+  a hook e script di sapere issue/agent/worktree senza chiedere, riducendo la necessità di
+  procedura manuale; ogni gate ha il suo test di scenario negativo (un gate che passa sempre non è
+  un gate, lesson 43-1).
+
+## Stato dell'implementazione
+
+| Lotto | Contenuto | Stato |
+|-------|-----------|-------|
+| I1 | Questa ADR + `docs/state/sessions/79-protocollo-contratto-verificato.md` | in corso |
+| I2-a | Chiusura dei drift D1-D8 + fallback PS 5.1 vietato + commit parziale ammesso | in corso |
+| I2-b | `check-protocol-consistency.mjs` + `check-aggregate-blocks.mjs` + test negativi | da fare |
+| I2-c | `agent-claim.ps1` + `agent-pr.ps1` + `check-claim-state.mjs` | da fare |
+| I3 | Rifinitura di `AGENTS.md` (77 anchor invariati) | da fare |
+
+## Riferimenti
+
+- `AGENTS.md` §"📝 Checklist di auto-revisione PR" (ora un puntatore al PR template)
+- `docs/13-ADR/0006-multi-agent-task-claiming.md` (regole di claim: rese verificabili, non ridisegnate)
+- `docs/13-ADR/0007-issue-state-machine.md` (macchina a stati `status:*`: resa verificabile)
+- `docs/13-ADR/0008-lazy-state-aggregation.md` (invariant dei blocchi aggregati: resa bloccante)
+- `docs/12-DEVOPS.md §9.10` (catalogo autorevole dei gate) · `§9.12` (confine di encoding PS 5.1)
+- `docs/18-DEV-LOG.md` (sede della storia del protocollo, decisione D2)
+- Issue #248 (epic), Sessione 79 in `docs/state/sessions/`
+
+## Changelog
+
+| Versione | Data | Modifiche |
+|----------|------|-----------|
+| 1.0 | Sessione 79 (2026-11-01) | Primo rilascio: 8 regole vincolanti (2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori) |
+
+
+
 ===== FILE: docs/14-GLOSSARY.md =====
 
 # 14 — Glossario di Dominio
@@ -33113,17 +33561,40 @@ process.stdout.write('[icons] OK: 4 icone scritte in apps/web/public/icons/\n');
 ===== FILE: scripts/test-pre-commit-clean-check.sh =====
 
 #!/usr/bin/env bash
-# Test per Check 1 di .githooks/pre-commit (D3 working tree unstaged-only).
-# Verifica 6 scenari che il check FIXED distingua correttamente modifiche
-# unstaged da staged, e che il check BUGGY (pre-fix) fallisca sui casi normali.
+# Test per il pre-commit hook (.githooks/pre-commit).
+#
+# Parte 1: verifica che l'espressione del check "clean tree" (D3 working tree
+# unstaged-only) distingua correttamente modifiche unstaged da staged, e che il
+# check BUGGY (pre-fix) fallisca sui casi normali.
+#
+# Parte 2 (Sessione 79, issue #248, ADR-0012 D-79.6): verifica il COMPORTAMENTO
+# del hook reale — invariante (pattern del branch) BLOCCANTE e igiene (working
+# tree pulito) ADVISORY, con opt-in LIFE_SOUNDTRACK_STRICT_CLEAN=1.
+# Un gate che passa sempre non è un gate (lesson 43-1): senza questa parte il
+# refactor del pre-commit potrebbe essere fail-open senza che nessuno se ne accorga.
 #
 # Esegui con: bash scripts/test-pre-commit-clean-check.sh
 # Richiede: bash, git.
 
 set -u
 
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+HOOK_SRC="$REPO_ROOT/.githooks/pre-commit"
+
+if [ ! -f "$HOOK_SRC" ]; then
+  echo "[FAIL] hook non trovato: $HOOK_SRC"
+  exit 2
+fi
+
 WORK=$(mktemp -d)
 trap "rm -rf '$WORK'" EXIT
+
+# Il hook viene copilotto FUORI dal repo di test: dentro creerebbe file
+# untracked, che il check "clean tree" segnalerebbe come sporco in ogni scenario.
+HOOK_COPY="$WORK/pre-commit-hook"
+cp "$HOOK_SRC" "$HOOK_COPY"
+chmod +x "$HOOK_COPY"
 
 cd "$WORK"
 git init -q -b main testrepo
@@ -33157,12 +33628,6 @@ reset_to_clean() {
   # Stato pulito: tracked file = HEAD, nessun untracked
   printf 'v0\n' > file.txt
   git add file.txt
-  git diff --quiet && git diff --cached --quiet && echo "BUG: not clean after reset" >&2
-}
-
-assert_clean_state() {
-  # Verifica che il tree sia effettivamente pulito
-  git diff --quiet && git diff --cached --quiet || echo "WARN: state not clean" >&2
 }
 
 run_scenario() {
@@ -33203,9 +33668,47 @@ run_scenario() {
   fi
 }
 
+# ---------------------------------------------------------------------------
+# Parte 2: comportamento REALE del hook
+# ---------------------------------------------------------------------------
+
+# Esegue il hook (dal cwd = repo di test) e restituisce il suo exit code.
+run_hook() {
+  local env_prefix="$1"
+  ( export $env_prefix; bash "$HOOK_COPY" >/dev/null 2>&1 )
+  echo $?
+}
+
+run_hook_scenario() {
+  local id="$1" desc="$2" setup_action="$3" env_prefix="$4" expected_exit="$5"
+
+  reset_to_clean
+  # -B: ricrea/reset del branch, così lo scenario non dipende dall'ordine
+  git checkout -q -B feat/1-test
+  eval "$setup_action"
+
+  local actual_exit
+  actual_exit=$(run_hook "$env_prefix")
+
+  local status="OK"
+  if [ "$actual_exit" != "$expected_exit" ]; then
+    status="FAIL"
+  fi
+
+  printf "%-3s %-46s | expected exit=%-3s | actual=%-3s (%s)\n" \
+    "$id" "$desc" "$expected_exit" "$actual_exit" "$status"
+
+  if [ "$status" = "OK" ]; then
+    PASS=$((PASS+1))
+  else
+    FAIL=$((FAIL+1))
+  fi
+}
+
 PASS=0
 FAIL=0
 
+# --- Parte 1: espressione del check "clean tree" -----------------------------
 run_scenario "S1" "clean working tree, no staged, no unstaged"  ":" "no"
 run_scenario "S2" "staged changes only (NORMAL COMMIT FLOW)" \
   "printf 'staged\n' > file.txt && git add file.txt" \
@@ -33228,6 +33731,31 @@ run_scenario "S7" "modifica a file tracked ma NON staged" \
 run_scenario "S8" "piffero: solo differenza in mode (chmod)" \
   "chmod 644 file.txt" \
   "no"
+
+# --- Parte 2: comportamento del hook ----------------------------------------
+# H1: invariante — branch non conforme => BLOCCANTE (exit 1)
+run_hook_scenario "H1" "branch non conforme (invariant) => abort" \
+  "git checkout -q -B feature/no-issue-number" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "1"
+
+# H2: igiene — tree sporco in modalita' default => ADVISORY (exit 0)
+run_hook_scenario "H2" "tree sporco, default => advisory (no abort)" \
+  "printf 'dirty\n' > file.txt" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "0"
+
+# H3: igiene — tree sporco con STRICT_CLEAN => BLOCCANTE (exit 1)
+run_hook_scenario "H3" "tree sporco, STRICT_CLEAN=1 => abort" \
+  "printf 'dirty\n' > file.txt" "LIFE_SOUNDTRACK_STRICT_CLEAN=1" "1"
+
+# H4: tutto pulito e branch conforme => exit 0
+run_hook_scenario "H4" "tree pulito, branch conforme => ok" \
+  ":" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "0"
+
+# H5: file untracked in modalita' default => ADVISORY (exit 0)
+run_hook_scenario "H5" "file untracked, default => advisory (no abort)" \
+  "touch untracked-h5.txt" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "0"
+
+# H6: bypass esplicito => exit 0 anche con invariante violata
+run_hook_scenario "H6" "branch non conforme + SKIP_HOOKS=1 => ok" \
+  "git checkout -q -B feature/no-issue-number" "LIFE_SOUNDTRACK_SKIP_HOOKS=1" "0"
 
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
@@ -34155,7 +34683,7 @@ exit 0
 
 .PARAMETER Check
     Modalita' audit: non modifica nulla, elenca i branch/worktree stale e le deriva' stato.
-    Exit 1 se c'e' qualcosa da pulire, 0 se tutto e' pulito. Usabile come gate locale/CI.
+    Exit 14 se c'e' qualcosa da pulire, 0 se tutto e' pulito. Usabile come gate locale/CI.
 
 .PARAMETER DryRun
     Stampa i comandi che verrebbero eseguiti senza eseguirli.
@@ -34907,8 +35435,8 @@ if ($IssueNumber -gt 0) {
     $sha = if ($mergeCommitOid) { $mergeCommitOid } else { "<merge-commit-sha>" }
     Write-Host "[post-merge]   gh issue comment $IssueNumber --body `"release: <AGENT-ID> - PR mergata ($sha)`"" -ForegroundColor Cyan
     Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr $IssueNumber    # applica stato merge sessione (issue #239)" -ForegroundColor Cyan
-    Write-Host "[post-merge]   pwsh scripts/aggregate-state.ps1 --check    # stato doc (exit 0 = in sync)" -ForegroundColor Cyan
-    Write-Host "[post-merge]   pwsh scripts/generate-bundle.ps1 --check   # bundle (exit 0 = in sync)" -ForegroundColor Cyan
+    Write-Host "[post-merge]   pwsh scripts/aggregate-state.ps1 -Check    # stato doc (exit 0 = in sync)" -ForegroundColor Cyan
+    Write-Host "[post-merge]   pwsh scripts/generate-bundle.ps1 -Check   # bundle (exit 0 = in sync)" -ForegroundColor Cyan
 } else {
     Write-Step ""
     Write-Host "[post-merge] Branch '$Branch' eliminato (locale + remoto). Ricorda il commento release: sull'issue." -ForegroundColor Green
@@ -39153,6 +39681,17 @@ process.exit(0);
 # Previene commit accidentali su branch non conformi alla naming convention.
 # (D3) Aggiunto check working tree clean per mitigare F5 stash collision.
 #
+# Sessione 79 (issue #248, decisione D-79.6 di ADR-0012): il hook separa
+# INVARIANTE (bloccante) e IGIENE (advisory).
+#   - INVARIANTE: pattern del branch (F1, F7)            -> abort
+#   - IGIENE:     working tree pulito (F5, stash collision) -> warning
+# Il check "clean tree" era bloccante e impediva anche i commit parziali
+# (committare un sottoinsieme di file): l'unica via d'uscita era --no-verify,
+# che disabilita ANCHE il check del branch. La funzione di quel check e'
+# mitigata strutturalmente dalla worktree (issue #53), che e' il default.
+# Per ripristinare il comportamento bloccante:
+#   LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit -m "..."
+#
 # Setup: git config core.hooksPath .githooks
 # Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
 
@@ -39163,58 +39702,80 @@ if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
   exit 0
 fi
 
-# Check 1 (D3): working tree senza modifiche UNSTAGED (F5 stash collision mitigation)
-# Componenti del check:
-#   - `git diff --quiet`              = unstaged tracked changes (working tree vs index)
-#   - `git ls-files --others ...`     = untracked files (esclude .gitignore)
-# NON usare `git diff HEAD` per il primo confronto: includerebbe anche le staged
-# changes e bloccherebbe ogni commit normale. Vedi fix Sessione 23 / issue #20.
-if ! git diff --quiet 2>/dev/null \
-   || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
-  echo "[pre-commit] ERRORE: working tree ha modifiche non committate (unstaged o untracked)."
-  echo "  Le STAGED changes sono OK (sono il payload del commit);"
-  echo "  ma UNSTAGED modifications o file untracked inquinano la working copy"
-  echo "  e abilitano F5 stash collision."
-  echo ""
-  echo "  Risolvi con:"
-  echo "    git add -A && git commit -m 'fix: wip'   # includi tutto"
-  echo "    # oppure"
-  echo "    git stash push -u -m 'wip'               # metti da parte (include untracked)"
-  echo "    git stash pop                            # recupera dopo il commit"
-  echo ""
-  echo "  Bypass emergenza (solo cherry-pick/hotfix): git commit --no-verify"
-  exit 1
-fi
-
 current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
 
+# ---------------------------------------------------------------------------
+# INVARIANTE 1 — detached HEAD (bloccante)
+# ---------------------------------------------------------------------------
 if [ -z "$current_branch" ]; then
   echo "[pre-commit] ERRORE: detached HEAD. Crea un branch prima di committare:"
   echo "  git checkout -b feat/<N>-<desc>  (o fix/<N>-<desc> o docs/<desc>)"
   exit 1
 fi
 
+# ---------------------------------------------------------------------------
+# INVARIANTE 2 — pattern del branch (bloccante)
 # Pattern ammessi:
 # - main (per admin / doc-sync)
 # - docs/* (per branch di documentazione senza issue number)
 # - feat/<N>-* o fix/<N>-* (per issue con numero)
+# ---------------------------------------------------------------------------
 if [[ "$current_branch" =~ ^main$ ]] \
    || [[ "$current_branch" =~ ^docs/.+ ]] \
    || [[ "$current_branch" =~ ^feat/[0-9]+-.+ ]] \
    || [[ "$current_branch" =~ ^fix/[0-9]+-.+ ]]; then
-  exit 0
+  :
+else
+  echo "[pre-commit] ERRORE: branch '$current_branch' non matcha il pattern del workflow agenti."
+  echo "  Pattern ammessi:"
+  echo "    - main                  (solo per admin/doc-sync)"
+  echo "    - docs/<desc>           (branch di documentazione)"
+  echo "    - feat/<N>-<desc>       (feature legata a issue #N)"
+  echo "    - fix/<N>-<desc>        (bugfix legato a issue #N)"
+  echo ""
+  echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
+  echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
+  exit 1
 fi
 
-echo "[pre-commit] ERRORE: branch '$current_branch' non matcha il pattern del workflow agenti."
-echo "  Pattern ammessi:"
-echo "    - main                  (solo per admin/doc-sync)"
-echo "    - docs/<desc>           (branch di documentazione)"
-echo "    - feat/<N>-<desc>       (feature legata a issue #N)"
-echo "    - fix/<N>-<desc>        (bugfix legato a issue #N)"
-echo ""
-echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
-echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
-exit 1
+# ---------------------------------------------------------------------------
+# IGIENE — working tree pulito (advisory; bloccante con LIFE_SOUNDTRACK_STRICT_CLEAN=1)
+# Componenti del check:
+#   - `git diff --quiet`              = unstaged tracked changes (working tree vs index)
+#   - `git ls-files --others ...`     = untracked files (esclude .gitignore)
+# NON usare `git diff HEAD` per il primo confronto: includerebbe anche le staged
+# changes e bloccherebbe ogni commit normale. Vedi fix Sessione 23 / issue #20.
+# ---------------------------------------------------------------------------
+if ! git diff --quiet 2>/dev/null \
+   || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+  if [ "${LIFE_SOUNDTRACK_STRICT_CLEAN:-0}" = "1" ]; then
+    echo "[pre-commit] ERRORE: working tree ha modifiche non committate (unstaged o untracked)."
+    echo "  Le STAGED changes sono OK (sono il payload del commit);"
+    echo "  ma UNSTAGED modifications o file untracked inquinano la working copy"
+    echo "  e abilitano F5 stash collision."
+    echo ""
+    echo "  Risolvi con:"
+    echo "    git add -A && git commit -m 'fix: wip'   # includi tutto"
+    echo "    # oppure"
+    echo "    git stash push -u -m 'wip'               # metti da parte (include untracked)"
+    echo "    git stash pop                            # recupera dopo il commit"
+    echo ""
+    echo "  Bypass emergenza (solo cherry-pick/hotfix): git commit --no-verify"
+    exit 1
+  fi
+
+  echo "[pre-commit] WARN: working tree ha modifiche non committate (unstaged o untracked)."
+  echo "  Non blocca il commit: F5 (stash collision) e' mitigato dalla worktree, e bloccare"
+  echo "  qui impedirebbe i commit parziali (l'unica via d'uscita, --no-verify, disattiverebbe"
+  echo "  anche il check del branch). Vedi ADR-0012, decisione D-79.6."
+  echo ""
+  echo "  Suggerimento: committa tutto quello che hai (git add -A) oppure metti da parte"
+  echo "  (git stash push -u -m 'wip') per non perdere il lavoro."
+  echo ""
+  echo "  Per il comportamento bloccante: LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit ..."
+fi
+
+exit 0
 
 
 
@@ -39224,6 +39785,13 @@ exit 1
 # Pre-push hook:
 # 1. BUNDLE auto-regen se `docs/` e' cambiato (D4, G4 mitigation)
 # 2. Base-stale warning se il branch e' > 5 commit dietro origin/main (D5, G3 mitigation)
+#
+# Sessione 79 (issue #248, decisione D-79.7 di ADR-0012): il fallback a Windows
+# PowerShell 5.1 e' stato RIMOSSO. Sotto 5.1 il *parsing* dei .ps1 UTF-8 senza BOM
+# sovradecodifica (F9-bis, vedi docs/12-DEVOPS.md 9.12) e il mojibake verrebbe
+# SCRITTO in docs/BUNDLE.md e committato da questo hook: l'hook che esiste per
+# prevenire il drift lo causava. Se pwsh 7 non e' disponibile, il bundle NON viene
+# rigenerato: si avvisa e si prosegue.
 #
 # Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
 # Bypass: git push --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git push ...)
@@ -39249,22 +39817,36 @@ if [ -n "$changed_docs" ]; then
   echo "[pre-push] docs/ modificato rispetto a origin/${remote_branch}. Rigenero BUNDLE.md..."
 
   regen_ok=0
+  regen_failed=0
+
   if command -v pwsh >/dev/null 2>&1; then
-    if pwsh scripts/generate-bundle.ps1 >/dev/null 2>&1; then
-      echo "[pre-push] BUNDLE.md rigenerato con pwsh"
-      regen_ok=1
+    ps_major="$(pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major' 2>/dev/null | tr -d '\r[:space:]')"
+    if [ -n "$ps_major" ] && [ "$ps_major" -ge 7 ] 2>/dev/null; then
+      if pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+        echo "[pre-push] BUNDLE.md rigenerato con pwsh $ps_major"
+        regen_ok=1
+      else
+        regen_failed=1
+      fi
+    else
+      echo "[pre-push] WARN: serve PowerShell 7 (pwsh); versione trovata: ${ps_major:-assente}."
+      echo "[pre-push]   BUNDLE.md NON rigenerato: sotto Windows PowerShell 5.1 il parsing dei .ps1"
+      echo "[pre-push]   sovradecodifica e il mojibake verrebbe SCRITTO nel bundle (F9-bis)."
+      echo "[pre-push]   Rigenera a mano con pwsh 7: pwsh scripts/generate-bundle.ps1"
     fi
-  elif command -v powershell >/dev/null 2>&1; then
-    if powershell -ExecutionPolicy Bypass -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
-      echo "[pre-push] BUNDLE.md rigenerato con powershell"
-      regen_ok=1
-    fi
+  else
+    echo "[pre-push] WARN: pwsh non trovato nel PATH."
+    echo "[pre-push]   BUNDLE.md NON rigenerato: 'powershell' (5.1) non e' un fallback accettabile"
+    echo "[pre-push]   perche' corrompe il bundle (F9-bis). Rigenera a mano con pwsh 7:"
+    echo "[pre-push]   pwsh scripts/generate-bundle.ps1"
   fi
 
-  if [ "$regen_ok" -eq 0 ]; then
-    echo "[pre-push] WARN: BUNDLE.md non rigenerato (pwsh/powershell non disponibili o script fallito)."
-    echo "[pre-push] Aggiungi manualmente: pwsh scripts/generate-bundle.ps1"
-  else
+  if [ "$regen_ok" -eq 0 ] && [ "$regen_failed" -eq 1 ]; then
+    echo "[pre-push] WARN: pwsh scripts/generate-bundle.ps1 e' fallito."
+    echo "[pre-push]   Rigenera a mano e committa docs/BUNDLE.md nella stessa PR."
+  fi
+
+  if [ "$regen_ok" -eq 1 ]; then
     # Se BUNDLE.md e' cambiato, committalo
     if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
       git add docs/BUNDLE.md
@@ -39373,8 +39955,29 @@ Da quel momento tutti i commit passano attraverso `pre-commit`.
   - `main` (solo per admin / doc-sync)
   - `docs/<desc>` (branch di documentazione)
   - `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
-  
+
   Se il branch non matcha, il commit viene abortito con un messaggio esplicativo.
+
+- **`pre-push`**: rigenera `docs/BUNDLE.md` se `docs/` è cambiato, e avvisa se il branch è >5 commit dietro `origin/main`.
+
+- **`post-checkout`**: **advisory** — avvisa se un checkout tra branch ha lasciato modifiche tracked nella working tree (mitiga E3/E4/E5, issue #45).
+
+## Invariante vs igiene *(Sessione 79, issue #248, ADR-0012 D-79.6)*
+
+Il `pre-commit` distingue due classi di controllo:
+
+| Tipo | Controllo | Esito |
+|------|-----------|-------|
+| **Invariante** | pattern del branch (F1, F7) | **bloccante** (abort) |
+| **Igiene** | working tree senza modifiche unstaged / file untracked (F5) | **advisory** (warning, il commit passa) |
+
+**Perché la classe "igiene" è passata da bloccante a advisory**: il check impediva anche i **commit parziali** (committare un sottoinsieme di file), e l'unica via d'uscita era `--no-verify`, che **disabilita anche il check del branch** — un agente che voleva committare due file finiva per perdere la protezione che conta. La funzione del check (F5, collisione di stash) è mitigata **strutturalmente** dalla worktree, che è il default dal 2026-10-17 (issue #53).
+
+Il comportamento bloccante resta disponibile:
+
+```bash
+LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit -m "..."   # il check "clean tree" torna bloccante
+```
 
 ## Bypass (emergenza)
 
@@ -39385,16 +39988,26 @@ LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...     # salta via env var (CI, cherry-
 
 Usare il bypass solo in caso di emergenza (cherry-pick, hotfix, fix urgente). Documentare la ragione nel messaggio di commit.
 
+> Attenzione: `--no-verify` disabilita **tutti** i check del `pre-commit`, incluso l'invariante sul branch. Se serve solo saltare l'igiene, si può — ma il branch deve essere comunque conforme.
+
+## PowerShell 7 obbligatorio *(Sessione 79, ADR-0012 D-79.7)*
+
+Il `pre-push` **non usa** Windows PowerShell 5.1 come fallback per rigenerare il bundle: sotto 5.1 il *parsing* dei `.ps1` UTF-8 senza BOM sovradecodifica (F9-bis, `docs/12-DEVOPS.md §9.12`) e il mojibake verrebbe **scritto in `docs/BUNDLE.md`** e committato — l'hook che esiste per prevenire il drift lo causava. Se `pwsh` 7 non è disponibile, il bundle **non** viene rigenerato: l'hook avvisa e prosegue.
+
+```bash
+pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'   # deve stampare 7 o maggiore
+```
+
 ## Failure mode coperti
 
-- **F1**: commit accidentale su `main` → abort
-- **F7**: commit su branch dopo merge (l'agente dimentica di fare `git checkout main && git pull`) → abort
-- **F5** (parziale): modifiche unstaged o file untracked nella working tree prima del commit → abort. **Importante**: il check rileva solo **unstaged tracked** (`git diff`) e **untracked non esclusi da .gitignore** (`git ls-files --others --exclude-standard`). Le **staged changes** sono il payload del commit e passano il check. Fix Sessione 23 / issue #20.
+- **F1**: commit accidentale su `main` → abort (invariante)
+- **F7**: commit su branch dopo merge (l'agente dimentica di fare `git checkout main && git pull`) → abort (invariante)
+- **F5** (parziale, ora advisory): modifiche unstaged o file untracked nella working tree prima del commit → warning. **Importante**: il check rileva solo **unstaged tracked** (`git diff`) e **untracked non esclusi da .gitignore** (`git ls-files --others --exclude-standard`). Le **staged changes** sono il payload del commit e passano il check. Fix Sessione 23 / issue #20; comportamento reso advisory nella Sessione 79 (issue #248).
 
 ## Failure mode NON coperti (vedi AGENTS.md §"🛡️ Hardening multi-agente")
 
 - **F3**: file conflict in working copy (richiede worktree, scelta NO)
-- **F5**: stash collision (mitigato indirettamente da `git status` clean check nella session-start checklist)
+- **F5** (residuo): stash collision nella working copy condivisa — mitigato dal default "worktree" (issue #53)
 - **F8**: force push accidentale (mitigato da "no force push" in AGENTS.md §"🌳 Git workflow")
 
 
@@ -39416,30 +40029,45 @@ Closes #
 
 ## Checklist di auto-revisione
 
-L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le caselle non spuntate sono blocker per il merge.
+> **Unico artifact della checklist PR** (decisione D3 di ADR-0012): questa sezione è la sola
+> copia. `AGENTS.md` rimanda qui e non ne contiene una copia — due copie divergono in silenzio
+> (è successo: 22 voci per parte, 2 identiche al testo). Le caselle non spuntate sono blocker
+> per il merge.
 
 ### Documentazione letta
 
 - [ ] Ho letto `AGENTS.md` e i documenti linkati dal task
 - [ ] Ho letto la specifica della story (link nell'issue)
+- [ ] Ho verificato che l'issue #N è in `status:in-review` o `in-progress` (claim valido, ADR-0006)
 
 ### Codice e test
 
+- [ ] Il codice rispetta lo schema dati (`docs/02-DATA-SCHEMA.md`)
+- [ ] Ho scritto test che coprono il caso felice e almeno 2 edge case
+- [ ] Ho usato i fixture di `fixtures/synthetic-history/`
+- [ ] Coverage rispettata per area modificata (vedi `docs/10-TESTING.md`)
+- [ ] JSDoc su tutte le funzioni pubbliche
+- [ ] Nessun dato personale hardcoded, nessun log di PII
 - [ ] `pnpm run lint` passa in locale
 - [ ] `pnpm run typecheck` passa in locale
 - [ ] `pnpm run test` passa in locale (no test saltati senza motivo)
 - [ ] `pnpm run build` passa in locale
-- [ ] Coverage rispettata per area modificata (vedi `docs/10-TESTING.md`)
 
 ### Documentazione di stato (ADR-0008 V1 + V2)
 
 - [ ] **NON** ho modificato i blocchi `<!-- AGGREGATE-* -->` di `docs/INDEX.md`, `docs/SESSIONS.md`, `docs/11-BACKLOG.md` o `docs/BUNDLE.md` (regola ADR-0008: lo stato si cambia solo in `docs/state/<propria>/*`)
 - [ ] Se ho cambiato un blocco aggregato per errore, l'ho riportato in `docs/state/` e ho annullato la modifica diretta
 - [ ] **Ho allineato le sezioni legacy** dei file globali che questa PR rende false: conteggi/versione/"Prossimo step tecnico" in `docs/INDEX.md`, tabella "roadmap delle story non ancora completate" e righe `**Stato**:` in `docs/11-BACKLOG.md` (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali")
+- [ ] Se la PR tocca una sessione, ho aggiornato/creato il file `docs/state/sessions/<N>-<slug>.md` corrispondente
+- [ ] Se la PR chiude una story, ho aggiornato/creato `docs/state/stories/<id>-<slug>.md` con frontmatter aggiornato (stato, PR number, merge_commit, merged_date)
+- [ ] Se ho scritto una sessione: il file `docs/state/sessions/<N>-<slug>.md` ha la sezione **`## Analisi di avanzamento`** (numeri, cosa è pronto, cosa manca, salute tecnica): è ciò che il blocco `AGGREGATE-PROGRESS` rende al project owner (issue #216)
 - [ ] Se ho aggiunto o rimosso un file in `docs/`, ho aggiornato la tabella documenti di `docs/INDEX.md` e l'array `$files` di `scripts/generate-bundle.ps1`
+- [ ] Se la PR tocca `docs/state/sessions/` o crea un nuovo `<N>-<slug>.md`, ho pre-allocato `N` con la procedura in `docs/state/_index.md` (issue #105): nessun `[FAIL] numeri di sessione duplicati` appare nell'output di `-Check`.
 - [ ] `pwsh scripts/generate-bundle.ps1 -Check` exit 0
 - [ ] `pwsh scripts/aggregate-state.ps1 -Check` exit 0 (o non applicabile se non ho toccato `docs/state/`)
-- [ ] Se la PR tocca `docs/state/sessions/` o crea un nuovo `<N>-<slug>.md`, ho pre-allocato `N` con la procedura in `docs/state/_index.md` (issue #105): nessun `[FAIL] numeri di sessione duplicati` appare nell'output di `-Check`.
+- [ ] Se ho toccato `scripts/aggregate-state.ps1`: `bash scripts/test-aggregate-determinism.sh` passa (scenari T1..T14) — **gate bloccante in CI**
+- [ ] Se ho toccato `README.md` o le piattaforme importabili: `node scripts/check-readme-facts.mjs` exit 0 (gate bloccante in CI, issue #161)
+- [ ] `node scripts/check-merge-state.mjs` exit 0 — il frontmatter di `docs/state/sessions/*.md` è coerente con lo stato reale delle PR (gate bloccante in CI, issue #239)
 
 ### Issue tracking
 
@@ -39471,6 +40099,7 @@ L'autore della PR deve compilare questa checklist PRIMA di chiedere review. Le c
 - Rischio: (es. "modifica a DB index → migration test E2E richiesto")
 - Blocker noti: (es. "richiede merge di PR #54 prima")
 - File di governance toccati (richiede review Boss): [ ] `AGENTS.md` [ ] ADR/* [ ] `scripts/*` [ ] `.github/workflows/*`
+
 
 
 ===== FILE: .github/CODEOWNERS =====

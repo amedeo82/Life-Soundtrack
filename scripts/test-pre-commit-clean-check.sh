@@ -1,15 +1,38 @@
 #!/usr/bin/env bash
-# Test per Check 1 di .githooks/pre-commit (D3 working tree unstaged-only).
-# Verifica 6 scenari che il check FIXED distingua correttamente modifiche
-# unstaged da staged, e che il check BUGGY (pre-fix) fallisca sui casi normali.
+# Test per il pre-commit hook (.githooks/pre-commit).
+#
+# Parte 1: verifica che l'espressione del check "clean tree" (D3 working tree
+# unstaged-only) distingua correttamente modifiche unstaged da staged, e che il
+# check BUGGY (pre-fix) fallisca sui casi normali.
+#
+# Parte 2 (Sessione 79, issue #248, ADR-0012 D-79.6): verifica il COMPORTAMENTO
+# del hook reale — invariante (pattern del branch) BLOCCANTE e igiene (working
+# tree pulito) ADVISORY, con opt-in LIFE_SOUNDTRACK_STRICT_CLEAN=1.
+# Un gate che passa sempre non è un gate (lesson 43-1): senza questa parte il
+# refactor del pre-commit potrebbe essere fail-open senza che nessuno se ne accorga.
 #
 # Esegui con: bash scripts/test-pre-commit-clean-check.sh
 # Richiede: bash, git.
 
 set -u
 
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+HOOK_SRC="$REPO_ROOT/.githooks/pre-commit"
+
+if [ ! -f "$HOOK_SRC" ]; then
+  echo "[FAIL] hook non trovato: $HOOK_SRC"
+  exit 2
+fi
+
 WORK=$(mktemp -d)
 trap "rm -rf '$WORK'" EXIT
+
+# Il hook viene copilotto FUORI dal repo di test: dentro creerebbe file
+# untracked, che il check "clean tree" segnalerebbe come sporco in ogni scenario.
+HOOK_COPY="$WORK/pre-commit-hook"
+cp "$HOOK_SRC" "$HOOK_COPY"
+chmod +x "$HOOK_COPY"
 
 cd "$WORK"
 git init -q -b main testrepo
@@ -43,12 +66,6 @@ reset_to_clean() {
   # Stato pulito: tracked file = HEAD, nessun untracked
   printf 'v0\n' > file.txt
   git add file.txt
-  git diff --quiet && git diff --cached --quiet && echo "BUG: not clean after reset" >&2
-}
-
-assert_clean_state() {
-  # Verifica che il tree sia effettivamente pulito
-  git diff --quiet && git diff --cached --quiet || echo "WARN: state not clean" >&2
 }
 
 run_scenario() {
@@ -89,9 +106,47 @@ run_scenario() {
   fi
 }
 
+# ---------------------------------------------------------------------------
+# Parte 2: comportamento REALE del hook
+# ---------------------------------------------------------------------------
+
+# Esegue il hook (dal cwd = repo di test) e restituisce il suo exit code.
+run_hook() {
+  local env_prefix="$1"
+  ( export $env_prefix; bash "$HOOK_COPY" >/dev/null 2>&1 )
+  echo $?
+}
+
+run_hook_scenario() {
+  local id="$1" desc="$2" setup_action="$3" env_prefix="$4" expected_exit="$5"
+
+  reset_to_clean
+  # -B: ricrea/reset del branch, così lo scenario non dipende dall'ordine
+  git checkout -q -B feat/1-test
+  eval "$setup_action"
+
+  local actual_exit
+  actual_exit=$(run_hook "$env_prefix")
+
+  local status="OK"
+  if [ "$actual_exit" != "$expected_exit" ]; then
+    status="FAIL"
+  fi
+
+  printf "%-3s %-46s | expected exit=%-3s | actual=%-3s (%s)\n" \
+    "$id" "$desc" "$expected_exit" "$actual_exit" "$status"
+
+  if [ "$status" = "OK" ]; then
+    PASS=$((PASS+1))
+  else
+    FAIL=$((FAIL+1))
+  fi
+}
+
 PASS=0
 FAIL=0
 
+# --- Parte 1: espressione del check "clean tree" -----------------------------
 run_scenario "S1" "clean working tree, no staged, no unstaged"  ":" "no"
 run_scenario "S2" "staged changes only (NORMAL COMMIT FLOW)" \
   "printf 'staged\n' > file.txt && git add file.txt" \
@@ -114,6 +169,31 @@ run_scenario "S7" "modifica a file tracked ma NON staged" \
 run_scenario "S8" "piffero: solo differenza in mode (chmod)" \
   "chmod 644 file.txt" \
   "no"
+
+# --- Parte 2: comportamento del hook ----------------------------------------
+# H1: invariante — branch non conforme => BLOCCANTE (exit 1)
+run_hook_scenario "H1" "branch non conforme (invariant) => abort" \
+  "git checkout -q -B feature/no-issue-number" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "1"
+
+# H2: igiene — tree sporco in modalita' default => ADVISORY (exit 0)
+run_hook_scenario "H2" "tree sporco, default => advisory (no abort)" \
+  "printf 'dirty\n' > file.txt" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "0"
+
+# H3: igiene — tree sporco con STRICT_CLEAN => BLOCCANTE (exit 1)
+run_hook_scenario "H3" "tree sporco, STRICT_CLEAN=1 => abort" \
+  "printf 'dirty\n' > file.txt" "LIFE_SOUNDTRACK_STRICT_CLEAN=1" "1"
+
+# H4: tutto pulito e branch conforme => exit 0
+run_hook_scenario "H4" "tree pulito, branch conforme => ok" \
+  ":" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "0"
+
+# H5: file untracked in modalita' default => ADVISORY (exit 0)
+run_hook_scenario "H5" "file untracked, default => advisory (no abort)" \
+  "touch untracked-h5.txt" "LIFE_SOUNDTRACK_SKIP_HOOKS=0" "0"
+
+# H6: bypass esplicito => exit 0 anche con invariante violata
+run_hook_scenario "H6" "branch non conforme + SKIP_HOOKS=1 => ok" \
+  "git checkout -q -B feature/no-issue-number" "LIFE_SOUNDTRACK_SKIP_HOOKS=1" "0"
 
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
