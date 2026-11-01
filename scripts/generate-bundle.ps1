@@ -138,6 +138,7 @@ $files = @(
     "docs/state/sessions/77-home-timeline.md",
     "docs/state/sessions/78-post-merge-long-paths.md",
     "docs/state/sessions/79-protocollo-contratto-verificato.md",
+    "docs/state/sessions/80-gate-protocollo-coerenza.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -282,6 +283,24 @@ $files = @(
     # gate esca 1; un caso verifica che la capability nella roadmap non sia un
     # falso positivo e uno che il file mancante dia exit 2 (errore di ambiente).
     "scripts/test-readme-facts-gate.sh",
+    # Gate "coerenza del protocollo" (Sessione 80 / issue #248, ADR-0012): confronta
+    # i fatti normativi di AGENTS.md con la realta' del repository (6 check: versione
+    # dichiarata, tabella label, tabella exit code, integrita' degli anchor,
+    # esistenza di script e flag citati, checklist unica). READ-ONLY. Gate
+    # bloccante in CI (job `gates-protocol`).
+    "scripts/check-protocol-consistency.mjs",
+    # Gate "blocchi aggregati intoccabili" (Sessione 80 / issue #248): confronta i
+    # blocchi `<!-- AGGREGATE-* -->` della PR con quelli della base. Il controllo e'
+    # TESTUALE, quindi immune all'incompatibilita' PS 5.1 / PS 7 che tiene
+    # warning-only il check aggregatore: puo' essere bloccante (regola V1 di ADR-0008).
+    "scripts/check-aggregate-blocks.mjs",
+    # Test di regressione del gate "coerenza del protocollo" (T1..T8): ogni check ha
+    # uno scenario che lo fa fallire, piu' il caso positivo. Un gate che passa
+    # sempre non e' un gate (lesson 43-1).
+    "scripts/test-protocol-consistency.sh",
+    # Test di regressione del gate "blocchi aggregati" (T1..T6): blocco modificato,
+    # aggiunto, rimosso (falliscono) e blocco esente (passa).
+    "scripts/test-aggregate-blocks.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",

@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.34 — Sessione 79 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.35 — Sessione 80 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -19,6 +19,34 @@ Quando ricevi un task su questo repository, segui questo ordine:
 8. **La specifica del task** (linkata nell'issue)
 
 **Non saltare questi passi.** Il contesto è essenziale.
+
+## ✅ Il contratto del protocollo: regola ⟺ gate
+
+> **Decisione di struttura**: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md).
+> **Ogni regola normativa scende da L2 (protocollo) a L3 (applicazione)**: una regola in questo
+> file deve avere un **gate** in `scripts/` che la verifica, e il gate deve avere una regola qui.
+> **Una regola senza gate è un consiglio; un gate senza regola è un segreto.**
+
+Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`, bloccante su
+`pull_request`). La tabella è l'elenco completo di ciò che la macchina controlla:
+
+| Regola vincolante | Gate che la enforce | Drift che chiude |
+|--------------------|---------------------|-----------------|
+| La versione dichiarata qui è quella dichiarata in `docs/INDEX.md` | `check-protocol-consistency.mjs` (C1) | D1 |
+| La tabella «Label disponibili» è l'elenco che `scripts/validate-labels.mjs` si aspetta | C2 | D2 |
+| La tabella degli exit code elenca **tutti** i codici emessi dagli script che li dichiarano | C3 | D3 |
+| Ogni riferimento `§"…"` di questo file risolve a un heading **esistente** | C4 | anchor |
+| Ogni `scripts/<file>` e ogni flag `-<Flag>` citati **esistono davvero** | C5 | D7 |
+| La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
+| I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
+
+```bash
+node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
+node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
+```
+
+**Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
+Un gate modificato per far passare una PR è un gate che non è più un gate.
 
 ## 🔄 Handoff tra conversazioni AI
 
@@ -227,7 +255,7 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
-- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina di stati delle issue (status:*)")
+- **Body PR**: includere `Closes #N` / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 - **Push early obbligatorio**: dopo `git checkout -b feat/<N>-<desc>`, eseguire `git push -u origin <branch>` (anche con zero commit). Visibilità + backup + anti-collision. Vedi §"🪝 Pre-commit hook" per il setup / `Fixes #N` / `Resolves #N` per la issue che questa PR risolve (vedi §"📦 Macchina a stati delle issue (status:*)")
 
 ## ♻️ Pulizia branch post-merge — procedura canonica *(vincolante)*
@@ -810,7 +838,7 @@ Il vecchio flusso `git checkout -b feat/<N>-<slug>` su main è **deprecato** ma 
 
 - ⚠️ **NON È RACCOMANDATO** per lavoro parallelo (causa esattamente i failure mode E3/E4/E5)
 - Le difese advisory (`.githooks/post-checkout` + `scripts/safe-branch-switch.ps1`) restano in piedi come safety net ma sono **ridondanti** se la worktree è usata correttamente
-- Vedi §"⚠️ Deprecazione" per il piano di rimozione
+- Vedi §"🌳 Worktree workflow" per il flusso consigliato e le difese che sostituiscono il checkout manuale
 
 ### Cleanup della worktree (post-merge)
 
@@ -970,7 +998,7 @@ L'elenco completo dei 26 gate (per job, con bloccante/non-bloccante e issue di r
 
 **Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `auto-state-aggregate`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
 
-Vedi §"🛡️ Hardening multi-agente" (S21) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
+Vedi `docs/18-DEV-LOG.md` §20 (Sessione 20, hardening multi-agente) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
 
 ## 🔄 Lazy-state aggregation (D.24.x + D.29.x + D.30.x)
 
@@ -1177,7 +1205,13 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.34 — **il protocollo diventa un contratto verificato** (Sessione 79, issue #248). `AGENTS.md` era l'unico artefatto di governance del repo **senza generatore e senza gate**: 1328 righe, 77 anchor, 643 citazioni, **0** controlli automatici — mentre il README ha `check-readme-facts.mjs`, le sessioni `check-merge-state.mjs`, i workflow `validate-workflows.mjs`, le label `validate-labels.mjs`, i blocchi aggregati `aggregate-state.ps1`. Il drift che ne conseguiva era **misurato, non ipotetico**: 8 casi. Chiusi in questa versione (il **meccanismo** che li chiude per sempre è il gate di coerenza, lotto I2-b):
+*Ultimo aggiornamento: v1.35 — **il protocollo diventa un contratto verificato** (Sessione 80, issue #248). La Sessione 79 aveva chiuso 8 drift misurati fra `AGENTS.md` e la realtà, ma li aveva chiusi **una volta**: senza un gate che li confronti, tornano. Il protocollo era l'unico artefatto di governance del repo **senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella exit code), mentre README, sessioni, workflow, label e blocchi aggregati ne avevano uno ciascuno. Ora ne ha due:
+- **`scripts/check-protocol-consistency.mjs`** (read-only, 6 check): versione dichiarata ↔ `docs/INDEX.md` (C1), tabella label ↔ `validate-labels.mjs` (C2), tabella exit code ↔ i `exit N` reali degli script (C3), **integrità degli anchor** — ogni `§"…"` deve risolvere a un heading esistente (C4), esistenza degli script e dei flag citati (C5), nessuna checklist duplicata (C6). Il primo giro ha trovato **3 riferimenti rotti** che nessuno aveva notato: un typo («Macchina **di** stati» invece di «a stati»), una sezione «⚠️ Deprecazione» che non esiste, e un rimando a «🛡️ Hardening multi-agente» (rinominata). C4 è la rete di sicurezza che rende sicuro il lotto I3 (rifinitura del file)
+- **`scripts/check-aggregate-blocks.mjs`** (read-only, **bloccante**): confronta i blocchi `AGGREGATE-*` della PR con quelli della base. È un controllo **testuale**, quindi immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore ⇒ la regola V1 di ADR-0008 diventa verificabile. Verifica non vacua: applicato alla PR #249 reale (base `5e98866` → merge `2478a9a`) rileva **5 violazioni** — la PR aveva committato i blocchi rigenerati in locale. La PR #250 aveva la stessa violazione ed è stata corretta
+- **`scripts/test-protocol-consistency.sh`** (8 scenari: 1 positivo + 7 negativi, uno per check) e **`scripts/test-aggregate-blocks.sh`** (6 scenari): un gate che passa sempre non è un gate (lesson 43-1)
+- Nuova sezione **§"✅ Il contratto del protocollo: regola ⟺ gate"**: la tabella regola ⟺ gate ⟺ drift chiuso. È la forma che rende la regola «ogni regola scende a un gate» leggibile da un agente in 30 secondi
+
+*Precedente v1.34 — **il protocollo diventa un contratto verificato** (Sessione 79, issue #248). `AGENTS.md` era l'unico artefatto di governance del repo **senza generatore e senza gate**: 1328 righe, 77 anchor, 643 citazioni, **0** controlli automatici — mentre il README ha `check-readme-facts.mjs`, le sessioni `check-merge-state.mjs`, i workflow `validate-workflows.mjs`, le label `validate-labels.mjs`, i blocchi aggregati `aggregate-state.ps1`. Il drift che ne conseguiva era **misurato, non ipotetico**: 8 casi. Chiusi in questa versione (il **meccanismo** che li chiude per sempre è il gate di coerenza, lotto I2-b):
 - **D1** `docs/INDEX.md` dichiarava «v1.27» mentre il file era a v1.33 → allineato
 - **D2** la tabella label non elencava `phase-post`, che il gate `validate-labels.mjs` si aspetta → allineata
 - **D3** `scripts/post-merge.ps1` documentava «Exit 1» mentre il codice esce **14** → allineato

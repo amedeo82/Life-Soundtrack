@@ -806,6 +806,8 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > **Sessione 74**: il trigger `push` su `main` è filtrato per path e su `push` girano **solo i
 > job leggeri**; i 3 job `node-*` girano **solo su `pull_request`**, e saltano (riuscendo) se la
 > PR tocca **solo file `.md`**. Dettaglio e misure in **§9.14.10**.
+> **Sessione 80 (issue #248)**: aggiunto il job `gates-protocol` (4 step) → **13 job**, 11 in
+> parallelo. Il protocollo agenti diventa un **contratto verificato** (ADR-0012).
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
@@ -843,7 +845,31 @@ protection può interpretare un check saltato come successo.
 | 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | solo PR | sì | #49 |
 | 25 | `gates-procedure` | `Encoding LF dei generatori` (`test-appendline-lf-fix.ps1`, 5 scenari) | solo PR | sì | #58 |
 | 26 | `gates-workflows` | `Validità YAML dei workflow` (`test-workflow-yaml-scalars.sh`, 8 assert) | solo PR | sì | sessione 74 |
-| 27 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
+| 27 | `gates-protocol` | `Coerenza del protocollo agenti` (`check-protocol-consistency.mjs`, 6 check) | solo PR | sì | **#248** |
+| 28 | `gates-protocol` | `Gate "coerenza del protocollo" fail-closed` (`test-protocol-consistency.sh`, 8 scenari) | solo PR | sì | **#248** |
+| 29 | `gates-protocol` | `Blocchi aggregati intoccabili` (`check-aggregate-blocks.mjs`) | solo PR | sì | **#248** |
+| 30 | `gates-protocol` | `Gate "blocchi aggregati" fail-closed` (`test-aggregate-blocks.sh`, 6 scenari) | solo PR | sì | **#248** |
+| 31 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
+
+**Il job `gates-protocol`** (Sessione 80, issue #248, ADR-0012) è il primo enforcement del
+protocollo: fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di governance del repo
+**senza gate** (0 controlli automatici su 643 citazioni, 77 anchor, una tabella label, una tabella
+exit code). I due gate che contiene sono **read-only** (non generano e non scrivono nulla):
+
+- `check-protocol-consistency.mjs` — 6 controlli, uno per ciascun drift chiuso nella Sessione 79:
+  versione dichiarata ↔ `docs/INDEX.md` (D1), tabella label ↔ `validate-labels.mjs` (D2), tabella
+  exit code ↔ letterali `exit N` degli script (D3), **integrità degli anchor** (ogni
+  `AGENTS.md §"…"` deve risolvere a un heading esistente), esistenza degli script e dei flag citati
+  (D7), assenza di checklist duplicate (D8). Exit 0 = in sync, 1 = drift, 2 = errore d'ambiente.
+- `check-aggregate-blocks.mjs` — confronta i blocchi `<!-- AGGREGATE-* -->` della PR con quelli
+  della base: **testuale**, quindi immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only
+  il check aggregatore, e quindi **bloccante** (regola V1 di ADR-0008). È la prima verifica della
+  regola V1: fino adesso la violazione «blocchi modificati a mano» merge-e in silenzio, perché il
+  drift veniva auto-corretto post-merge. Esente: `AGGREGATE-BUNDLE-INVENTORY` (il suo contenuto è
+  una misura delle dimensioni dei file, non uno stato).
+
+Il job usa `fetch-depth: 0` (serve il confronto con `origin/main`) e **non richiede `pnpm install`**
+(solo moduli built-in di node).
 
 **Verifica**: gli step della tabella corrispondono 1:1 ai `- name:` presenti in `ci.yml` (nessuno nell'elenco manca, nessuno nel file è assente dall'elenco). **Sette** sub-gate girano dentro `validate-workflows.mjs`, che è lo step 9: `Copertura git add vs $targets` (#136), `Scope permissions: valide` (#135), `Sync origin/main prima del push su main` (#140), `Ordinamento dei writer di main` (#149), `Validità YAML dei workflow` (Sessione 74), `Copertura dei trigger del blocco progress` (#216, vedi §9.8h) e la sintassi JS dei blocchi `script:` (#73).
 

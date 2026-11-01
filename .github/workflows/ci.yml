@@ -297,6 +297,44 @@ jobs:
   # 3. Gate di determinismo dell'aggregator (issue #70).
   #    Il gate piu' pesante: 37 assert su repo git temporanei.
   # ---------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
+  # gates-protocol: il protocollo agenti come CONTRATTO VERIFICATO (issue #248,
+  # ADR-0012). Fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di
+  # governance del repo SENZA gate: 0 controlli automatici su 643 citazioni,
+  # 77 anchor, una tabella label e una tabella exit code.
+  #
+  # I due gate qui sotto sono READ-ONLY (non generano e non scrivono nulla):
+  #   - check-protocol-consistency.mjs confronta i fatti normativi del
+  #     protocollo con la realta' (6 controlli, uno per drift chiuso in S79)
+  #   - check-aggregate-blocks.mjs confronta i blocchi `AGGREGATE-*` della PR
+  #     con quelli della base: e' un controllo TESTUALE, quindi immune
+  #     all'incompatibilita' PS 5.1 / PS 7 che tiene warning-only il check
+  #     aggregatore, e puo' essere bloccante (regola V1 di ADR-0008)
+  #
+  # `fetch-depth: 0` serve al confronto con origin/main.
+  # ---------------------------------------------------------------------------
+  gates-protocol:
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Coerenza del protocollo agenti (issue #248)
+        run: node scripts/check-protocol-consistency.mjs
+
+      - name: Gate "coerenza del protocollo" fail-closed (issue #248)
+        run: bash scripts/test-protocol-consistency.sh
+
+      - name: Blocchi aggregati intoccabili (issue #248)
+        run: node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD
+
+      - name: Gate "blocchi aggregati" fail-closed (issue #248)
+        run: bash scripts/test-aggregate-blocks.sh
+
   gates-aggregate:
     # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
     # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su
@@ -562,6 +600,7 @@ jobs:
       - node-test
       - node-build
       - gates-docs
+      - gates-protocol
       - gates-aggregate
       - gates-bundle
       - gates-workflows
@@ -576,7 +615,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
           else
             results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }}"
           fi
