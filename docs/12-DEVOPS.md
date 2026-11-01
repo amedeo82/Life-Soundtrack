@@ -871,6 +871,17 @@ exit code). I due gate che contiene sono **read-only** (non generano e non scriv
 Il job usa `fetch-depth: 0` (serve il confronto con `origin/main`) e **non richiede `pnpm install`**
 (solo moduli built-in di node).
 
+**Il gate `checkPushSync` e la race fra i writer** (Sessione 84, issue #261): con i concurrency
+group separati i tre writer di `main` corrono in parallelo e due push possono incrociarsi:
+quello che perde la race viene **rifiutato** (non-fast-forward) e i blocchi restano indietro.
+Il gate accetta **due** strategie di ri-sincronizzazione: **preventiva** (uno step "Sync con
+origin/main" prima della push) **oppure** **retry** (un ciclo che ri-sincronizza e riprova,
+3 tentativi). La ri-sincronizzazione dentro il retry e' un **fallback**: la push e' gia'
+fallita quando scatta. Il gate riconosce il retry solo se la ri-sincronizzazione sta dentro
+il ciclo che contiene la push, e una push citata in un **commento** non e' una push.
+Scenari di test: `scripts/test-workflow-push-sync.sh` (T2: il retry copre la race; T2b:
+nessuna strategia -> il gate fallisce).
+
 **Sessione 81 (issue #256): il claim è verificabile.** ADR-0006 ha 8 regole *vincolanti* sul claim
 (issue aperta, label `in-progress`, commento `claim:`, riverifica con l'ID più basso, TTL, ordine
 di backlog, nessun doppio claim, nessuna issue già `status:*`) che fino alla Sessione 80 non

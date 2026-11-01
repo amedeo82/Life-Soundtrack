@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 16:41
-> Totale file: 153
+> Data: 2026-11-01 17:50
+> Totale file: 154
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -2006,7 +2006,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.2 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.3 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -12478,6 +12478,28 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
 | 2.31 | 2026-10-31 (issue #233) | **§43 Story 3.1 — Home + Timeline** (Sessione 77, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (77-1 **il modello è puro, i componenti sono presentazionali**: tutta la logica — i quattro numeri della Home, la bar week, i bucket per granularità, le serie di volume e mood, le bande di era, il zoom progressivo — sta in `apps/web/src/screens/homeTimelineModel.ts`, senza React né DOM, riutilizzando il **vocabolario temporale del core** (`@core/analysis`): la Timeline non introduce un secondo calendario (lesson 27-7). I 19 test girano senza IndexedDB né `fake-indexeddb`, perché la logica non li tocca; 77-2 **«il dato mancante non è zero»**: il bucket vuoto **esiste** e vale 0 (una linea che salta i buchi suggerirebbe continuità che i dati non hanno) e il **mood non viene interpolato** nei bucket senza dati; l'area del volume è chiusa sul **minimo** del dominio e non su zero, perché un ascolto non riparte da zero minuti e un'area che scende a zero inventerebbe un silenzio; 77-3 **nessuna libreria di chart**: i tre grafici (StreamChart, MoodLine, BarWeek) sono **SVG scritti a mano**, con la geometria in un file puro e testato (`chartGeometry.ts`) e il contratto a11y della spec (`07§2.7`): `<title>`, `<desc>` e una **tabella dati nascosta** per screen reader. Introdurre una dipendenza di grafici sarebbe una decisione di **stack**, non di story; 77-4 **la scelta fra onboarding e app è legata ai dati**: `App.tsx` interroga il database (ci sono ascolti?) invece di usare un flag in `localStorage`, che mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo; 77-5 **le soglie di stato sono in un punto solo**: 100 eventi per la Home e 6 mesi per la Timeline (`06§2.6-2.7`) sono dichiarati in `useHomeTimelineData.ts`, non nelle due schermate). Consegnati: `apps/web/src/screens/{homeTimelineModel.ts,Home.tsx,Timeline.tsx,AppShell.tsx}`, `apps/web/src/components/{StatCard,MemoryCard,BarWeek,EraBand,StreamChart,MoodLine}.tsx` + `chartGeometry.ts`, `apps/web/src/hooks/{useCountUp.ts,useHomeTimelineData.ts}`, il cablaggio di `App.tsx` e `OnboardingRouter.tsx`, 11 chiavi i18n nuove (namespace `nav` incluso), gli stili in `onboarding.css`, `08-COPY-I18N.md` v0.13 e lo stato della story 3.1 (`done`). Con la 3.1 l'**EPIC 3** passa a 2/4 e l'indicatore di avanzamento (issue #216) a **75%** — 21 story su 28, 7 step rimanenti |
 | 2.32 | 2026-10-31 (Sessione 78) | **§44 Difetto ricorrente: la rimozione della worktree su Windows** (nessuna issue dedicata; segnalato dal project owner): `scripts/post-merge.ps1` si fermava al passo 1 con «Filename too long» / «Result too large» — `git worktree remove --force` cancellava l'albero senza il prefisso `\\?\` e la worktree con `node_modules` aveva path > MAX_PATH. Il rimedio **manuale** (`rd /s /q "\\?\"` + `git worktree prune`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è una procedura mancante. Fix su tre livelli dentro lo script — **L1** `git -c core.longpaths=true worktree remove --force` (causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale tocca **solo** directory che sono worktree di questo repo (working copy principale e antenati mai toccati → **exit 16**) e `git status` fallito = WIP sconosciuto = stop (**exit 10**); `git status` ora gira con `core.longpaths=true`. Difetto scoperto mentre si scriveva la rete: `Invoke-CmdVerbatim` non passava `/c` a `cmd.exe` ⇒ shell interattiva, comando non eseguito, **exit 0** — un successo che non aveva fatto nulla; `/c` aggiunto e L3 coperto da un test che lo **forza** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`). Test: `test-post-merge.sh` **T10..T14** (shim di `git` che fallisce solo su `worktree remove`, guardia sulla working copy, path lunghi reali, catena L1→L2→L3 su PS 5.1, L3 forzata) → **47 assert, 0 falliti**. `AGENTS.md` v1.33 (nuova sezione sul difetto + exit 16), `12-DEVOPS.md` §9.8i + changelog 1.7, `docs/state/sessions/78-post-merge-long-paths.md`. **PR #236 merged il 2026-11-01** (merge commit `08a0b4d`), issue di tracking **#235** (`status:done`) — l'issue è stata creata in fase di chiusura, perché il difetto non ne aveva una e il protocollo pretende una PR = una issue |
+## 50. La race sul push: retry con ri-sincronizzazione (Sessione 84)
+
+**Branch**: `feat/262-push-race-retry`
+**Issue di tracking**: **#261**
+**Data**: 2026-11-01
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 84-1 | P | Con i concurrency group separati i writer di `main` corrono in parallelo: il push dell'aggregator e' stato **rifiutato** (non-fast-forward, misurato il 2026-11-01T16:17:07Z) e i blocchi aggregati sono rimasti indietro | La separazione dei group (Sessione 82) ha eliminato le annullazioni ma ha tolto anche l'esclusione reciproca: due push possono incrociarsi | **Retry con ri-sincronizzazione** in ogni writer (3 tentativi: fetch → rebase → rigenera → riprova): il writer che perde la race si riallinea. Il `git add` esplicito dei target viene rifatto dopo il rebase | issue #261 |
+| 84-2 | L | Il gate `checkPushSync` accettava **solo** la sincronizzazione preventiva, e rifiutava la forma piu' robusta | Il contratto era una forma, non un requisito | Il contratto e' «una strategia di ri-sincronizzazione»: **preventiva** (step precedente) **oppure** **retry** (ciclo). Il retry e' riconosciuto solo se la ri-sincronizzazione sta **dentro** il ciclo che contiene la push: una sincronizzazione tardiva non e' una strategia (il push e' gia' fallito) | `scripts/validate-workflows.mjs` |
+| 84-3 | L | Le fixture dei test fissavano una **forma** invece di un **comportamento**: T2 (sync preventivo rimosso) si aspettava che il gate fallisse | Il contratto del gate e' cambiato, la fixture no | T2 ora si aspetta che il gate **passi** (il retry copre la race) ed e' stato aggiunto **T2b** (nessuna strategia -> il gate fallisce). La copertura `git add` rimuove il target da **tutte** le righe `git add` (con il retry ce n'e' piu' di una) | `scripts/test-workflow-push-sync.sh` (19 assert) |
+| 84-4 | L | Una push citata in un **commento** veniva contata come una push dal gate | Il pattern era ancorato alla riga intera, ma i commenti che spiegano la race citano il comando | Il pattern non e' piu' ancorato e i commenti sono esclusi esplicitamente | `scripts/validate-workflows.mjs` |
+
+**Lesson learned**: la lezione principale e' sulla **forma del contratto**. Il gate chiedeva «c'e' un sync preventivo?», cioe' una **forma**; il requisito vero e' «il writer non puo' perdere un aggiornamento», cioe' un **comportamento**. Le due forme (sync preventivo e retry) sono complementari: la prima evita il tentativo fallito, la seconda copre la corsa persa. Un contratto espresso come comportamento ammette piu' forme corrette; espresso come forma ne ammette una sola e rifiuta le altre perche' non le riconosce.
+
+La seconda lezione e' sulle **fixture**: T2 si aspettava che il gate fallisse quando il sync preventivo mancava, e cosi' ha **bloccato** la soluzione corretta. Un test che fissa una forma invece di un comportamento diventa, col tempo, un ostacolo alla correzione: e' successo anche con il test della checklist PR (22 voci per parte, 2 identiche) e con quello del bundle. Quando il contratto cambia, la fixture deve cambiare con lui — ed e' il contratto a dover essere scritto per primo.
+
+**Verifica**: `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati, 0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → 19 assert, 0 falliti · `bash scripts/test-workflow-git-add-coverage.sh` → 8 assert, 0 falliti · `bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti · `node scripts/check-readme-facts.mjs` → 0 falliti.
+
+---
+
 ## 49. AGENTS.md: il contratto senza la storia (Sessione 83)
 
 **Branch**: `feat/259-rifinitura-agents`
@@ -12614,6 +12636,7 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 |----------|------|-----------|
 | 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
 | 2.34 | 2026-11-01 (issue #252) | **§46 Sessione 80 — il protocollo agenti come contratto verificato (I2-b)**: `AGENTS.md` era l'unico artefatto di governance **senza gate** ⇒ 2 gate read-only nuovi, `check-protocol-consistency.mjs` (6 check: versione, tabella label, tabella exit code, **integrità degli anchor**, esistenza di script e flag citati, checklist unica) e `check-aggregate-blocks.mjs` (**bloccante**: la regola V1 di ADR-0008 verificata in modo **testuale**, immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore), con le suite di scenario negativo (8 + 6) e il job CI `gates-protocol` (4 step, `fetch-depth: 0`). Il primo giro ha trovato **3 riferimenti rotti in `AGENTS.md`** (typo «Macchina **di** stati», sezione «⚠️ Deprecazione» inesistente, rimando a «🛡️ Hardening multi-agente» rinominata) e **1 riferimento stale** in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`). Prova di non-vacuità: il gate dei blocchi applicato alla **PR #249 reale** rileva **5 violazioni** (la PR aveva committato i blocchi rigenerati in locale) ⇒ la regola V1 era violabile in silenzio; la **PR #250** aveva la stessa violazione ed è stata corretta. `AGENTS.md` v1.35 (nuova sezione §"✅ Il contratto del protocollo: regola ⟺ gate"), `docs/12-DEVOPS.md §9.10` a 13 job / 31 step |
+| 2.38 | 2026-11-01 (issue #261) | **§50 Sessione 84 — la race sul push**: con i concurrency group separati i tre writer di `main` corrono in parallelo e il push dell'aggregator è stato **rifiutato** (non-fast-forward, misurato il 2026-11-01T16:17:07Z) ⇒ i blocchi aggregati restavano indietro. Fix: **retry con ri-sincronizzazione** in ogni writer (3 tentativi: fetch → rebase → rigenera → riprova) e **contratto del gate `checkPushSync` aggiornato**: una strategia di ri-sincronizzazione basta, se è **preventiva** (step precedente) **oppure** un **retry** (sync dentro il ciclo che contiene la push); una sync tardiva non è una strategia (la push è già fallita) e una push citata in un commento non è una push. Fixture aggiornate al contratto: T2 ora si aspetta che il gate **passi** (il retry copre la race), **T2b** (nessuna strategia) si aspetta che **fallisca**; la copertura `git add` rimuove il target da tutte le righe `git add` |
 | 2.37 | 2026-11-01 (issue #259) | **§49 Sessione 83 — AGENTS.md: il contratto senza la storia (I3)**: `AGENTS.md` era cresciuto fino a **1410 righe** (procedure, rationale, storia e lezioni nello stesso file) → applicata la decisione D2: la **storia delle versioni** va in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo») e `AGENTS.md` resta il **contratto**. **1410 → 1091 righe (−23%)**, **77 anchor invariati** (il gate C4 verifica che tutte le 29 citazioni esterne e le 8 dipendenze dagli script risolvano ancora). Ridotte a puntatore 5 sezioni di rationale (D.26.4, D.45.1, la trappola dello stash mirato, il difetto ricorrente della worktree) e **de-duplicate** 2 sezioni che erano copie di `docs/12-DEVOPS.md §9.10` (il catalogo dei gate, 84 righe; l’inventario delle automazioni, 40 righe): la duplicazione, non la lunghezza, era la riduzione più preziosa. `AGENTS.md` v1.38 |
 | 2.36 | 2026-11-01 (issue #251) | **§48 Sessione 82 — la catena post-merge si auto-ripara**: i tre writer di `main` condividevano il concurrency group `post-merge-main`, ma con `cancel-in-progress: false` GitHub **non accoda** i run in attesa: li **cancella** (misurato nel merge della PR #249: `auto-state-aggregate` annullato in 1 s, `auto-session-merge-state` in 4 s, senza un solo job — la catena funzionava per caso, confermato tre volte sui merge #249, #253, #255). Correzioni: **concurrency group propri** per ciascun writer (l'ordinamento viene dalla catena dei push, non dal group); `apply-merge-state.mjs` **advisory** quando la PR non ha un file di sessione (prima rendeva rosso il workflow per un'assenza che non è un errore); **step di verifica e auto-riparazione** in `auto-bundle.yml` (l'ultimo writer garantisce che `main` sia coerente, rigenerando e committando se i check falliscono); `post-merge.ps1` stampa il numero della **PR** e non dell'issue (i due coincidono solo per convenzione: il suggerimento era non eseguibile). `AGENTS.md` v1.37 |
 | 2.35 | 2026-11-01 (issue #256) | **§47 Sessione 81 — il claim diventa verificabile (I2-c)**: ADR-0006 ha 8 regole **vincolanti** sul claim e **zero** enforcement ⇒ due agenti potevano implementare la stessa story senza che nulla se ne accorgesse. Aggiunti `scripts/agent-claim.ps1` (presa in carico **atomica**: validazione → worktree → label → commento → **riverifica deterministica** con l'ID numerico REST più basso → file di stato dell'agente nella directory git della worktree; `yield:` + rollback se la riverifica è persa), `scripts/agent-pr.ps1` (apertura **verificata**: gate locali, una sola keyword di chiusura nuda, transizione delle label e **scrittura di `pr: N` nel file di sessione** — era la precondizione che aveva fatto fallire il workflow post-merge due volte) e `scripts/check-claim-state.mjs` (gate bloccante: branch ↔ issue ↔ keyword ↔ stato ↔ claim, più **C4**: una branch `docs/*` tocca solo `docs/` — nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa). 11 scenari di test (`test-claim-state.sh`), con i dati da file JSON invece che da un mock `gh` in bash: su Windows un file senza estensione non è eseguibile e il PATH chiamava il `gh` vero, quindi il test passava sui dati reali del repository. `AGENTS.md` v1.36 (il flusso è `agent-claim.ps1` → implementa → `agent-pr.ps1`: due comandi invece di una sequenza manuale) | 
@@ -18644,6 +18667,94 @@ scripts/generate-bundle.ps1 -Check` → exit 0.
 - `docs/18-DEV-LOG.md`: sezione «Changelog del protocollo (`AGENTS.md`)» (la storia delle versioni) + §49
 - `scripts/generate-bundle.ps1`: `$files` += la sessione 83
 - `docs/INDEX.md`: versione di `AGENTS.md`, riga `18-DEV-LOG.md`
+
+
+
+===== FILE: docs/state/sessions/84-push-race-retry.md =====
+
+---
+number: 84
+title: "La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato"
+date: 2026-11-01
+state: 🟡
+merged: false
+branch: feat/261-push-race-retry
+pr: 0
+claim: kilo-hp-elitebook-6d4e
+tags: [devops, governance, tooling]
+---
+
+# Sessione 84 — La race sul push: retry con ri-sincronizzazione
+
+> **Issue di tracking**: #261 (terzo punto, rimasto aperto dal merge delle PR #258/#260).
+> **Branch**: `feat/261-push-race-retry`.
+
+## Sintesi
+
+Con i concurrency group separati (Sessione 82) i tre writer di `main` **non si annullano più**
+(era il difetto #251) ma **corrono in parallelo**: due push su `main` possono incrociarsi e
+quello che perde la race viene **rifiutato** (non-fast-forward). Misurato il 2026-11-01T16:17:07Z:
+
+```
+[main 8aa607e] chore(state): auto-aggregate from docs/state/ (ADR-0008 V2)
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/amedeo82/Life-Soundtrack'
+```
+
+Il push dell'aggregator è stato perso → i blocchi aggregati sono rimasti indietro. La catena
+riparava comunque (lo step di verifica e auto-riparazione in `auto-bundle.yml`), ma il fallimento
+era **rumoroso** e il risultato dipendeva dalla fortuna.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-84.1 | Ogni writer che pusha su `main` ha un **retry con ri-sincronizzazione** (3 tentativi: fetch → rebase → rigenera → riprova) | Il writer che perde la race si riallinea e riprova: il fallimento diventa un ritardo, non una perdita. Il `git add` esplicito della lista dei target viene rifatto dopo il rebase (i file staged dal rebase non sono gli stessi) |
+| D-84.2 | Il gate `checkPushSync` accetta **due** strategie: **preventiva** (sync in uno step precedente) **oppure** **retry** (sync dentro il ciclo che contiene la push) | Il contratto è «una strategia di ri-sincronizzazione», non «un sync preventivo»: il retry è più forte (copre anche la corsa persa), il sync preventivo è più economico (evita il tentativo fallito). Sono complementari |
+| D-84.3 | Il retry è riconosciuto solo se la ri-sincronizzazione sta **dentro il ciclo** che contiene la push | Una sincronizzazione «tardiva» (dopo la push, fuori da un ciclo) non è una strategia: il push è già fallito. Senza questo criterio il gate accetterebbe la forma che il test scenario «sync dopo il push» considera un bug |
+| D-84.4 | La push dentro un **commento** non è una push | Il commento che spiega la race cita il comando senza eseguirlo: il gate deve guardare il codice, non la prosa |
+| D-84.5 | Le fixture dei test sono aggiornate al nuovo contratto | T2 (sync preventivo rimosso, retry presente) → il gate **passa** (il retry copre la race); **T2b** (nessuna strategia) → il gate **fallisce**. La copertura `git add` (T2 di `test-workflow-git-add-coverage.sh`) ora rimuove il target da **tutte** le righe `git add`, perché con il retry ce n'è più di una |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **75%** (21 story su 28, effort 77%), restano **7 step**.
+Lavoro di **governance**.
+
+**Cosa è pronto.** Il retry nei due writer (`auto-state-aggregate.yml`, `auto-bundle.yml`); il
+contratto del gate `checkPushSync` esteso alle due strategie, con il riconoscimento del ciclo; il
+gate che distingue i commenti dal codice; tre suite di scenario aggiornate (19 + 8 + 6 assert).
+
+**Cosa manca.** Nulla sul tema: con il retry, la race non può più perdere un writer. L'unica
+residua è **cosmetica**: il commit del retry usa la stessa identità bot e lo stesso messaggio dei
+commits precedenti, quindi nella history di `main` non si distingue «commit del writer» da
+«commit del retry». Separare i due messaggi renderebbe la diagnosi post-mortem più immediata.
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
+
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati,
+0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → **19 assert, 0 falliti** ·
+`bash scripts/test-workflow-git-add-coverage.sh` → **8 assert, 0 falliti** ·
+`bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-readme-facts.mjs` → 0 falliti.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Sostituire l'esclusione reciproca con la **convergenza** non basta: i writer devono poter **recuperare** dalla race | La lezione è la stessa di ADR-0008 in un altro contesto: l'invariante è sullo **stato finale**, non sul numero di run. Un protocollo che prevede il fallimento e non prevede il recupero è un protocollo che produce stati casuali |
+| Il contratto di un gate deve dire **cosa** deve essere vero, non **come** | «Ogni writer deve avere una strategia di ri-sincronizzazione» accetta due forme; «deve esserci un sync preventivo» ne accetta una sola e rifiuta la più robusta. Il criterio del ciclo (D-84.3) serve a non allargare il contratto fino a includere forme che non proteggono |
+| Le fixture dei test sono un **contratto esecutivo**: quando il contratto cambia, la fixture deve cambiare con lui | T2 è passata da «il gate deve fallire» a «il gate deve passare»: senza quel cambiamento il test avrebbe bloccato la soluzione corretta. Un test che fissa una forma invece di un comportamento diventa un ostacolo |
+
+## Documenti aggiornati
+
+- `.github/workflows/auto-state-aggregate.yml`, `auto-bundle.yml`: retry con ri-sincronizzazione
+- `scripts/validate-workflows.mjs`: contratto del gate `checkPushSync` (preventiva **oppure** retry),
+  push nei commenti ignorata
+- `scripts/test-workflow-push-sync.sh`: T2 (retry) e **T2b** (nessuna strategia) · 19 assert
+- `scripts/test-workflow-git-add-coverage.sh`: la mutazione rimuove il target da tutte le righe `git add`
+- `docs/12-DEVOPS.md §9.10`: il contratto del gate · `docs/18-DEV-LOG.md` §50
+- `scripts/generate-bundle.ps1`: `$files` += la sessione 84 · `docs/INDEX.md`
 
 
 
@@ -28942,6 +29053,17 @@ exit code). I due gate che contiene sono **read-only** (non generano e non scriv
 Il job usa `fetch-depth: 0` (serve il confronto con `origin/main`) e **non richiede `pnpm install`**
 (solo moduli built-in di node).
 
+**Il gate `checkPushSync` e la race fra i writer** (Sessione 84, issue #261): con i concurrency
+group separati i tre writer di `main` corrono in parallelo e due push possono incrociarsi:
+quello che perde la race viene **rifiutato** (non-fast-forward) e i blocchi restano indietro.
+Il gate accetta **due** strategie di ri-sincronizzazione: **preventiva** (uno step "Sync con
+origin/main" prima della push) **oppure** **retry** (un ciclo che ri-sincronizza e riprova,
+3 tentativi). La ri-sincronizzazione dentro il retry e' un **fallback**: la push e' gia'
+fallita quando scatta. Il gate riconosce il retry solo se la ri-sincronizzazione sta dentro
+il ciclo che contiene la push, e una push citata in un **commento** non e' una push.
+Scenari di test: `scripts/test-workflow-push-sync.sh` (T2: il retry copre la race; T2b:
+nessuna strategia -> il gate fallisce).
+
 **Sessione 81 (issue #256): il claim è verificabile.** ADR-0006 ha 8 regole *vincolanti* sul claim
 (issue aperta, label `in-progress`, commento `claim:`, riverifica con l'ID più basso, TTL, ordine
 di backlog, nessun doppio claim, nessuna issue già `status:*`) che fino alla Sessione 80 non
@@ -38562,7 +38684,10 @@ const SYNC_FORMS = [
   /git\s+reset\s+--hard\s+origin\/main\b/,
   /git\s+pull\s+(?:--rebase\s+)?origin\s+main\b/,
 ];
-const PUSH_MAIN_RE = /^\s*git\s+push\s+origin\s+main\s*$/;
+// La push a `main` puo' comparire anche dentro un ciclo di retry
+// (`if git push origin main; then`): il pattern non e' piu' ancorato alla riga.
+// Le righe di COMMENTO sono escluse dal controllo (vedi checkPushSync).
+const PUSH_MAIN_RE = /git\s+push\s+origin\s+main\b/;
 
 // === Scalari semplici con ": " — YAML non valido (Sessione 74) ===
 //
@@ -38895,16 +39020,66 @@ function checkPermissionScopes(lines, file) {
 
 function checkPushSync(lines, file) {
   // una push dentro un COMMENTO non e' una push: il commento che spiega la
-  // race menziona `git push origin main` senza eseguirla
+  // race menziona `git push origin main` senza eseguirla. E la push puo'
+  // stare dentro un ciclo di retry (`if git push origin main; then`).
   const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l) && !l.trim().startsWith('#'));
   if (pushAt < 0) return 0; // non e' un writer di `main`: niente da tassare
   pushers++;
-  const before = lines.slice(0, pushAt).join('\n');
-  if (SYNC_FORMS.some((re) => re.test(before))) {
+
+  // lo step che contiene la push (dal suo `- name:` fino al successivo)
+  let stepStart = pushAt;
+  for (let i = pushAt - 1; i >= 0; i--) {
+    if (/^\s{6}- name: /.test(lines[i])) {
+      stepStart = i;
+      break;
+    }
+  }
+  let stepEnd = lines.length;
+  for (let i = pushAt + 1; i < lines.length; i++) {
+    if (/^\s{6}- name: /.test(lines[i])) {
+      stepEnd = i;
+      break;
+    }
+  }
+  const before = lines.slice(0, stepStart).join('\n'); // gli step precedenti
+  const wholeStep = lines.slice(stepStart, stepEnd).join('\n'); // lo step della push
+  const hasSync = (text) => SYNC_FORMS.some((re) => re.test(text));
+
+  if (hasSync(before)) {
     console.log(
       `[OK] ${file}:${pushAt + 1}: \`git push origin main\` preceduto da una sincronizzazione con origin/main`,
     );
     return 0;
+  }
+  // Strategia di ri-sincronizzazione RETRY: la ri-sincronizzazione deve
+  // stare DENTRO il ciclo (for/while) che contiene la push, e il push deve
+  // stare dentro quel ciclo (issue #261: i writer girano in parallelo e due
+  // push su `main` possono incrociarsi -> il writer ri-sincronizza e riprova).
+  // Una sincronizzazione "tardiva" (dopo la push, ma fuori da un ciclo)
+  // NON e' una strategia: il push e' gia' fallito.
+  const loopRe = /^\s*(for|while|until)\b.*\bdo\s*$/;
+  let loopStart = -1;
+  for (let i = pushAt; i >= stepStart; i--) {
+    if (loopRe.test(lines[i])) {
+      loopStart = i;
+      break;
+    }
+  }
+  if (loopStart >= 0) {
+    let loopEnd = lines.length;
+    for (let i = pushAt + 1; i < stepEnd; i++) {
+      if (/^\s*done\s*$/.test(lines[i])) {
+        loopEnd = i;
+        break;
+      }
+    }
+    const loop = lines.slice(loopStart, loopEnd).join('\n');
+    if (hasSync(loop)) {
+      console.log(
+        `[OK] ${file}:${pushAt + 1}: \`git push origin main\` protetto da un retry con ri-sincronizzazione`,
+      );
+      return 0;
+    }
   }
   console.error(
     `[FAIL] ${file}:${pushAt + 1}: \`git push origin main\` senza sincronizzazione preventiva con \`origin/main\`.`,
@@ -38913,7 +39088,7 @@ function checkPushSync(lines, file) {
     `       Con piu' workflow che pushano su \`main\` (auto-bundle + auto-state-aggregate), il checkout di default e' il \`github.sha\` del merge commit: se l'altra ha gia' pushato, questo push viene rifiutato con \`non-fast-forward\` e i blocchi aggregati restano indietro senza che nessun gate se ne accorga.`,
   );
   console.error(
-    `       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push.`,
+    `       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push, OPPURE un retry con ri-sincronizzazione dentro lo step della push.`,
   );
   return 1;
 }
@@ -39308,7 +39483,10 @@ echo "=== T2: fixture senza README.md nella riga \`git add\` (reintroduzione del
 {
   D="$(mktemp -d)"; make_fixture "$D"
   # Reintroduce esattamente il bug: toglie README.md dalla riga git add.
-  sed -i.bak 's#^\([[:space:]]*git add .*\) README\.md #\1 #' "$D/.github/workflows/auto-state-aggregate.yml"
+  # La riga `git add` deve coprire TUTTI i $targets: la mutazione li rimuove
+  # da OGNI riga `git add` del workflow (con il retry ce n'e' piu' di una:
+  # quella preventiva e quella dentro il ciclo di ri-sincronizzazione).
+  sed -i.bak '/git add/ s#README\.md##g' "$D/.github/workflows/auto-state-aggregate.yml"
   if grep -qE '^[[:space:]]*git add .*README\.md' "$D/.github/workflows/auto-state-aggregate.yml"; then
     ng "mutazione non applicata: README.md e' ancora nella riga git add"
   else
@@ -39600,7 +39778,7 @@ else
 fi
 if echo "$out" | grep -q "2 writer di main verificati"; then ok "il riepilogo conta 2 writer di main"; else ng "il riepilogo non conta 2 writer di main: $(echo "$out" | tail -3)"; fi
 
-echo "=== T2: fixture con lo step Sync rimosso da auto-state-aggregate.yml (bug #140) ==="
+echo "=== T2: fixture con lo step Sync rimosso ma con il retry (issue #261) ==="
 {
   D="$(mktemp -d)"; make_fixture "$D"
   # Rimuove l'intero blocco dello step "Sync con origin/main" (dal `- name:` fino
@@ -39615,8 +39793,46 @@ echo "=== T2: fixture con lo step Sync rimosso da auto-state-aggregate.yml (bug 
     ok "mutazione applicata (step Sync rimosso)"
   fi
 
+  # Il contratto del gate (issue #261): una strategia di ri-sincronizzazione e'
+  # sufficiente se e' PREVENTIVA (step precedente) OPPURE un RETRY dentro lo
+  # step della push. Con il retry presente il writer non puo' perdere la race:
+  # ri-sincronizza e riprova.
   out="$(run_validator "$D")"; ec=$?
-  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sul writer senza sync)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
+  if [ $ec -eq 0 ]; then ok "exit 0 (il retry copre la race: strategia di ri-sincronizzazione presente)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
+  if echo "$out" | grep -q "auto-state-aggregate.yml:[0-9]*: .git push origin main. protetto da un retry con ri-sincronizzazione"; then
+    ok "il messaggio dichiara la strategia adottata (retry)"
+  else
+    ng "il messaggio non dichiara il retry: $(echo "$out" | tail -6)"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T2b: fixture senza NESSUNA strategia di ri-sincronizzazione (bug #140) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  # Rimuove sia lo step "Sync con origin/main" sia il blocco di retry: senza
+  # nessuna strategia, il writer perde la race e i blocchi restano indietro.
+  perl -0777 -pi -e 's/^[ ]{6}- name: Sync con origin\/main\n(?:(?!^[ ]{6}- name: ).*\n)*//m' "$D/.github/workflows/auto-state-aggregate.yml"
+  # Sostituisce il ciclo di retry con una push secca: la fixture deve avere
+  # un writer che pusha su `main` senza ALCUNA strategia di ri-sincronizzazione
+  # (neppure il retry, che contiene il push al suo interno).
+  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
+  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
+
+  if grep -q "for attempt in 1 2 3" "$D/.github/workflows/auto-state-aggregate.yml"; then
+    ng "mutazione non applicata: il retry e' ancora presente nella fixture"
+  else
+    ok "mutazione applicata (sync e retry rimossi)"
+  fi
+  if grep -q "git push origin main" "$D/.github/workflows/auto-state-aggregate.yml"; then
+    ok "la fixture contiene ancora un writer che pusha su main"
+  else
+    ng "la fixture non contiene piu' nessun writer: la mutazione ha rimosso anche la push"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sul writer senza alcuna strategia)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
   if echo "$out" | grep -q "auto-state-aggregate.yml:[0-9]*: .git push origin main. senza sincronizzazione preventiva"; then
     ok "il messaggio nomina il file, la riga e l'assenza di sync"
   else
@@ -43763,7 +43979,18 @@ jobs:
                        -m "" `
                        -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
                        -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-bundle."
-          git push origin main
+          # Retry con ri-sincronizzazione (stessa race dei writer su `main`, issue #261)
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              break
+            fi
+            Write-Host "[auto-bundle] push rifiutato (tentativo $attempt): ri-sincronizzo"
+            git fetch origin main
+            git rebase origin/main
+            if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
+            pwsh scripts/generate-bundle.ps1
+            git add docs/BUNDLE.md
+          done
       # Verifica finale dello stato: l'ultimo writer della catena garantisce
       # che `main` sia coerente. Se i check falliscono (per es. porque' un
       # writer precedente e' stato annullato dal concurrency group, issue #251),

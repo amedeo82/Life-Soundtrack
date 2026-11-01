@@ -165,4 +165,17 @@ jobs:
                        -m "  - README.md + docs/INDEX.md: <!-- AGGREGATE-PROGRESS-{START,END} --> (V4, issue #216)" `
                        -m "" `
                        -m "Skips if aggregator output already in sync."
-          git push origin main
+          # Retry con ri-sincronizzazione: i writer girano in parallelo (issue #261)
+          # e due push su `main` possono incrociarsi -> push non-fast-forward.
+          # Il writer che perde la race si riallinea e riprova.
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              break
+            fi
+            Write-Host "[auto-state-aggregate] push rifiutato (tentativo $attempt): ri-sincronizzo"
+            git fetch origin main
+            git rebase origin/main
+            if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
+            pwsh scripts/aggregate-state.ps1
+            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md
+          done

@@ -224,7 +224,18 @@ jobs:
                        -m "" `
                        -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
                        -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-bundle."
-          git push origin main
+          # Retry con ri-sincronizzazione (stessa race dei writer su `main`, issue #261)
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              break
+            fi
+            Write-Host "[auto-bundle] push rifiutato (tentativo $attempt): ri-sincronizzo"
+            git fetch origin main
+            git rebase origin/main
+            if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
+            pwsh scripts/generate-bundle.ps1
+            git add docs/BUNDLE.md
+          done
       # Verifica finale dello stato: l'ultimo writer della catena garantisce
       # che `main` sia coerente. Se i check falliscono (per es. porque' un
       # writer precedente e' stato annullato dal concurrency group, issue #251),

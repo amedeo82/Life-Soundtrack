@@ -62,7 +62,10 @@ echo "=== T2: fixture senza README.md nella riga \`git add\` (reintroduzione del
 {
   D="$(mktemp -d)"; make_fixture "$D"
   # Reintroduce esattamente il bug: toglie README.md dalla riga git add.
-  sed -i.bak 's#^\([[:space:]]*git add .*\) README\.md #\1 #' "$D/.github/workflows/auto-state-aggregate.yml"
+  # La riga `git add` deve coprire TUTTI i $targets: la mutazione li rimuove
+  # da OGNI riga `git add` del workflow (con il retry ce n'e' piu' di una:
+  # quella preventiva e quella dentro il ciclo di ri-sincronizzazione).
+  sed -i.bak '/git add/ s#README\.md##g' "$D/.github/workflows/auto-state-aggregate.yml"
   if grep -qE '^[[:space:]]*git add .*README\.md' "$D/.github/workflows/auto-state-aggregate.yml"; then
     ng "mutazione non applicata: README.md e' ancora nella riga git add"
   else

@@ -55,7 +55,10 @@ const SYNC_FORMS = [
   /git\s+reset\s+--hard\s+origin\/main\b/,
   /git\s+pull\s+(?:--rebase\s+)?origin\s+main\b/,
 ];
-const PUSH_MAIN_RE = /^\s*git\s+push\s+origin\s+main\s*$/;
+// La push a `main` puo' comparire anche dentro un ciclo di retry
+// (`if git push origin main; then`): il pattern non e' piu' ancorato alla riga.
+// Le righe di COMMENTO sono escluse dal controllo (vedi checkPushSync).
+const PUSH_MAIN_RE = /git\s+push\s+origin\s+main\b/;
 
 // === Scalari semplici con ": " — YAML non valido (Sessione 74) ===
 //
@@ -388,16 +391,66 @@ function checkPermissionScopes(lines, file) {
 
 function checkPushSync(lines, file) {
   // una push dentro un COMMENTO non e' una push: il commento che spiega la
-  // race menziona `git push origin main` senza eseguirla
+  // race menziona `git push origin main` senza eseguirla. E la push puo'
+  // stare dentro un ciclo di retry (`if git push origin main; then`).
   const pushAt = lines.findIndex((l) => PUSH_MAIN_RE.test(l) && !l.trim().startsWith('#'));
   if (pushAt < 0) return 0; // non e' un writer di `main`: niente da tassare
   pushers++;
-  const before = lines.slice(0, pushAt).join('\n');
-  if (SYNC_FORMS.some((re) => re.test(before))) {
+
+  // lo step che contiene la push (dal suo `- name:` fino al successivo)
+  let stepStart = pushAt;
+  for (let i = pushAt - 1; i >= 0; i--) {
+    if (/^\s{6}- name: /.test(lines[i])) {
+      stepStart = i;
+      break;
+    }
+  }
+  let stepEnd = lines.length;
+  for (let i = pushAt + 1; i < lines.length; i++) {
+    if (/^\s{6}- name: /.test(lines[i])) {
+      stepEnd = i;
+      break;
+    }
+  }
+  const before = lines.slice(0, stepStart).join('\n'); // gli step precedenti
+  const wholeStep = lines.slice(stepStart, stepEnd).join('\n'); // lo step della push
+  const hasSync = (text) => SYNC_FORMS.some((re) => re.test(text));
+
+  if (hasSync(before)) {
     console.log(
       `[OK] ${file}:${pushAt + 1}: \`git push origin main\` preceduto da una sincronizzazione con origin/main`,
     );
     return 0;
+  }
+  // Strategia di ri-sincronizzazione RETRY: la ri-sincronizzazione deve
+  // stare DENTRO il ciclo (for/while) che contiene la push, e il push deve
+  // stare dentro quel ciclo (issue #261: i writer girano in parallelo e due
+  // push su `main` possono incrociarsi -> il writer ri-sincronizza e riprova).
+  // Una sincronizzazione "tardiva" (dopo la push, ma fuori da un ciclo)
+  // NON e' una strategia: il push e' gia' fallito.
+  const loopRe = /^\s*(for|while|until)\b.*\bdo\s*$/;
+  let loopStart = -1;
+  for (let i = pushAt; i >= stepStart; i--) {
+    if (loopRe.test(lines[i])) {
+      loopStart = i;
+      break;
+    }
+  }
+  if (loopStart >= 0) {
+    let loopEnd = lines.length;
+    for (let i = pushAt + 1; i < stepEnd; i++) {
+      if (/^\s*done\s*$/.test(lines[i])) {
+        loopEnd = i;
+        break;
+      }
+    }
+    const loop = lines.slice(loopStart, loopEnd).join('\n');
+    if (hasSync(loop)) {
+      console.log(
+        `[OK] ${file}:${pushAt + 1}: \`git push origin main\` protetto da un retry con ri-sincronizzazione`,
+      );
+      return 0;
+    }
   }
   console.error(
     `[FAIL] ${file}:${pushAt + 1}: \`git push origin main\` senza sincronizzazione preventiva con \`origin/main\`.`,
@@ -406,7 +459,7 @@ function checkPushSync(lines, file) {
     `       Con piu' workflow che pushano su \`main\` (auto-bundle + auto-state-aggregate), il checkout di default e' il \`github.sha\` del merge commit: se l'altra ha gia' pushato, questo push viene rifiutato con \`non-fast-forward\` e i blocchi aggregati restano indietro senza che nessun gate se ne accorga.`,
   );
   console.error(
-    `       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push.`,
+    `       Aggiungi uno step "Sync con origin/main" (git fetch origin main + git rebase origin/main, con fallback \`git reset --hard origin/main\`) PRIMA del push, OPPURE un retry con ri-sincronizzazione dentro lo step della push.`,
   );
   return 1;
 }

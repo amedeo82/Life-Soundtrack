@@ -88,7 +88,7 @@ else
 fi
 if echo "$out" | grep -q "2 writer di main verificati"; then ok "il riepilogo conta 2 writer di main"; else ng "il riepilogo non conta 2 writer di main: $(echo "$out" | tail -3)"; fi
 
-echo "=== T2: fixture con lo step Sync rimosso da auto-state-aggregate.yml (bug #140) ==="
+echo "=== T2: fixture con lo step Sync rimosso ma con il retry (issue #261) ==="
 {
   D="$(mktemp -d)"; make_fixture "$D"
   # Rimuove l'intero blocco dello step "Sync con origin/main" (dal `- name:` fino
@@ -103,8 +103,46 @@ echo "=== T2: fixture con lo step Sync rimosso da auto-state-aggregate.yml (bug 
     ok "mutazione applicata (step Sync rimosso)"
   fi
 
+  # Il contratto del gate (issue #261): una strategia di ri-sincronizzazione e'
+  # sufficiente se e' PREVENTIVA (step precedente) OPPURE un RETRY dentro lo
+  # step della push. Con il retry presente il writer non puo' perdere la race:
+  # ri-sincronizza e riprova.
   out="$(run_validator "$D")"; ec=$?
-  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sul writer senza sync)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
+  if [ $ec -eq 0 ]; then ok "exit 0 (il retry copre la race: strategia di ri-sincronizzazione presente)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
+  if echo "$out" | grep -q "auto-state-aggregate.yml:[0-9]*: .git push origin main. protetto da un retry con ri-sincronizzazione"; then
+    ok "il messaggio dichiara la strategia adottata (retry)"
+  else
+    ng "il messaggio non dichiara il retry: $(echo "$out" | tail -6)"
+  fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T2b: fixture senza NESSUNA strategia di ri-sincronizzazione (bug #140) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  # Rimuove sia lo step "Sync con origin/main" sia il blocco di retry: senza
+  # nessuna strategia, il writer perde la race e i blocchi restano indietro.
+  perl -0777 -pi -e 's/^[ ]{6}- name: Sync con origin\/main\n(?:(?!^[ ]{6}- name: ).*\n)*//m' "$D/.github/workflows/auto-state-aggregate.yml"
+  # Sostituisce il ciclo di retry con una push secca: la fixture deve avere
+  # un writer che pusha su `main` senza ALCUNA strategia di ri-sincronizzazione
+  # (neppure il retry, che contiene il push al suo interno).
+  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
+  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
+
+  if grep -q "for attempt in 1 2 3" "$D/.github/workflows/auto-state-aggregate.yml"; then
+    ng "mutazione non applicata: il retry e' ancora presente nella fixture"
+  else
+    ok "mutazione applicata (sync e retry rimossi)"
+  fi
+  if grep -q "git push origin main" "$D/.github/workflows/auto-state-aggregate.yml"; then
+    ok "la fixture contiene ancora un writer che pusha su main"
+  else
+    ng "la fixture non contiene piu' nessun writer: la mutazione ha rimosso anche la push"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sul writer senza alcuna strategia)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
   if echo "$out" | grep -q "auto-state-aggregate.yml:[0-9]*: .git push origin main. senza sincronizzazione preventiva"; then
     ok "il messaggio nomina il file, la riga e l'assenza di sync"
   else
