@@ -2,10 +2,12 @@
 number: 80
 title: "Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca"
+merged_date: "2026-11-01T15:33:04Z"
 branch: feat/252-gate-protocollo-coerenza
-pr: 0
+pr: 253
 claim: kilo-hp-elitebook-1a2b
 tags: [devops, governance, tooling]
 ---
@@ -13,6 +15,16 @@ tags: [devops, governance, tooling]
 # Sessione 80 — Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)
 
 > **Issue di tracking**: #252 (lotto I2-b dell'epic #248). **Branch**: `feat/252-gate-protocollo-coerenza`.
+> **PR**: **#253** — **merged** il 2026-11-01T15:33:04Z (merge commit `1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca`).
+>
+> **Nota (doc-sync di chiusura)**: il frontmatter è stato allineato al merge **dopo** il merge, con
+> `node scripts/apply-merge-state.mjs --pr 253` — lo stesso strumento deterministico del workflow
+> `auto-session-merge-state.yml`. Il workflow **è girato** (questa volta non è stato annullato dal
+> concurrency group), ma è **fallito sulla precondizione**: nessun file di sessione dichiarava
+> `pr: 253`, perché il doc-sync in-branch era stato scritto con `pr: 0`. La precondizione è corretta
+> e utile — ma è fragile: il `pr:` va scritto **prima** del merge, in un commit successivo sulla
+> stessa branch (come fatto per la Sessione 79). Difetto di processo tracciato in `docs/18-DEV-LOG.md`
+> §46 (80-7).
 >
 > Secondo lotto dell'epic #248: non chiude altri drift, **chiude la classe di drift**. Nella
 > Sessione 79 ne erano stati chiusi 8, uno per uno: senza un gate che li confronti, tornano.
@@ -90,6 +102,7 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 | Il primo giro di un gate appena scritto finds **falsi positivi** prima che veri problemi: 2 «riferimenti rotti» erano in realtà riferimenti ad altri documenti (attribuzione per menzione più vicina) e riferimenti a sottosezioni (freccia `→`) | L'ordine è: prima far passare il gate sullo stato **vero** del repository (che è sano), poi giudicare i fallimenti. Un gate che segnala 20 problemi e 15 sono sue bug non viene ascoltato quando ne segnala 21 e 20 sono suoi bug |
 | La prova che un gate non è vacuo si fa su **un caso reale già esistente**, non su una fixture | `check-aggregate-blocks.mjs` è stato eseguito sulla PR #249 reale: 5 violazioni. Una fixture costruita apposta avrebbe dimostrato che il gate funziona, non che c'era qualcosa da trovare |
 | Il **checkout del gate in CI** deve avere la base, non solo il merge commit | `fetch-depth: 0`: senza, `origin/main` non esiste e il confronto base-vs-PR non può girare. È il dettaglio che distingue un gate che passa sempre da un gate che verifica |
+| Un **riferimento citato** dentro un backtick non è un puntamento: il gate C4 lo contava come drift e aveva lasciato `main` rosso | I riferimenti dentro backtick sono citazioni (es. «correggevo il riferimento `AGENTS.md §V1`»), non link: non si verificano. La regola è il parsing markdown dell'inline-code (numero di backtick dispari ⇒ dentro un codice inline). Issue #254, con scenario di test T9 |
 
 ## Documenti aggiornati
 
