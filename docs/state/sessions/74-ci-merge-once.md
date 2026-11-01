@@ -3,11 +3,11 @@ number: 74
 title: "La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati"
 date: 2026-10-31
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "51f407692b8bf63524c281af51b1a9a2d5b81776"
+merged_date: "2026-10-31T18:22:26Z"
 branch: docs/224-ci-merge-once
-pr: 0
+pr: 227
 claim: kilo-HP-ELITEBOOK-perf74
 cross_refs: [224, 135, 140, 149, 43]
 tags: [devops, ci, performance, coverage]

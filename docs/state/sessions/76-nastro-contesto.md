@@ -2,8 +2,10 @@
 number: 76
 title: "Nastro contesto (Story 3.4, issue #231)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "bc959d3a932ab2d4210ae0f243b59f598d9cbc8d"
+merged_date: "2026-10-31T21:21:25Z"
 branch: feat/231-context-ribbon
 pr: 232
 claim: kilo-HP-ELITEBOOK-progress

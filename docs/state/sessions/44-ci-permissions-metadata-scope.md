@@ -3,9 +3,9 @@ number: 44
 title: "ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135)"
 date: 2026-10-22
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "cb508528e34a7ab6364e5cdaf47dab86638616f4"
+merged_date: "2026-10-22T15:19:17Z"
 branch: fix/135-ci-permissions-metadata-scope
 pr: 138
 claim: kilo-HP-ELITEBOOK-f0mj

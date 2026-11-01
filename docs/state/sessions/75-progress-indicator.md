@@ -2,8 +2,10 @@
 number: 75
 title: "Indicatore di avanzamento automatico (issue #216)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "4e8cd4b8efe307f0d6bd20b23531d1d578bd5051"
+merged_date: "2026-10-31T21:08:45Z"
 branch: feat/216-progress-indicator
 pr: 230
 claim: kilo-HPELITEBOOK-w0pl

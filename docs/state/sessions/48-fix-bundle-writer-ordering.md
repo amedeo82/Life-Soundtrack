@@ -2,12 +2,12 @@
 number: 48
 title: "Fix race fra i due writer di main (issue #149)"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "d155799014e1ee9617cdee2b040afb18180187c9"
+merged_date: "2026-10-26T15:35:29Z"
 branch: fix/149-bundle-writer-ordering
-pr: null
+pr: 151
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [149]
 tags: [devops, bug, fix]

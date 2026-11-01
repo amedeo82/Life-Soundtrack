@@ -2,8 +2,10 @@
 number: 77
 title: "Home + Timeline (Story 3.1, issue #233)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "815ce171f9bfd70133d0a788d6e15f717624a290"
+merged_date: "2026-10-31T21:41:34Z"
 branch: feat/233-home-timeline
 pr: 234
 claim: kilo-HP-ELITEBOOK-progress

@@ -3,9 +3,9 @@ number: 43
 title: "auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136)"
 date: 2026-10-22
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "ac4d706ea6eb5a21763b73d302b3b3a4b4ce652b"
+merged_date: "2026-10-22T14:44:27Z"
 branch: fix/136-readme-next-step-git-add
 pr: 137
 claim: kilo-HP-ELITEBOOK-0a1b

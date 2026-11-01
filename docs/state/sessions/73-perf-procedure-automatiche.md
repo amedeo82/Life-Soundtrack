@@ -3,9 +3,9 @@ number: 73
 title: "Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura"
 date: 2026-10-31
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "c705cd19290563f9bce2e30af1a32c032d75ef19"
+merged_date: "2026-10-31T17:13:09Z"
 branch: docs/224-audit-procedure-automatiche
 pr: 225
 claim: kilo-HP-ELITEBOOK-perf73

@@ -2,10 +2,12 @@
 number: 66
 title: "Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili"
 date: 2026-10-30
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "66c39628939918902d7fde378ae297096f05f2ac"
+merged_date: "2026-10-30T15:57:14Z"
 branch: feat/196-csp-itunes-search-host
-pr: 0
+pr: 200
 claim: kilo-hp-elitebook-jrka
 cross_refs: [196, 188, 187]
 tags: [privacy, devops, phase-2]
