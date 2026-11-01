@@ -2541,7 +2541,7 @@ E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #134)
+- **Merged**: ✅ PR #134 (457f677520dd6c80b26795acb20797441a2a302a, 2026-10-22T13:41:23Z)
 - **Claim**: `-`
 
 ```
@@ -2680,7 +2680,7 @@ la Story 1.1 che non ha aggiunto il proprio state file a `$files`.
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #137)
+- **Merged**: ✅ PR #137 (ac4d706ea6eb5a21763b73d302b3b3a4b4ce652b, 2026-10-22T14:44:27Z)
 - **Claim**: `kilo-HP-ELITEBOOK-0a1b`
 
 ```
@@ -2809,7 +2809,7 @@ lo notasse. È la stessa classe di drift di #86/#88, applicata agli strumenti.
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #138)
+- **Merged**: ✅ PR #138 (cb508528e34a7ab6364e5cdaf47dab86638616f4, 2026-10-22T15:19:17Z)
 - **Claim**: `kilo-HP-ELITEBOOK-f0mj`
 
 ```
@@ -3007,7 +3007,7 @@ file applicativo è stato toccato** — PR #138 non contiene codice in `apps/` o
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #141)
+- **Merged**: ✅ PR #141 (62a30712d1a4752fbaa4405189bf62ba3da73113, 2026-10-22T16:57:29Z)
 - **Claim**: `kilo-hp-elitebook-gq0i`
 
 ```
@@ -3179,7 +3179,7 @@ toccato** (nessuna modifica in `apps/` o `packages/`); i gate li eseguirà `ci.y
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #143)
+- **Merged**: ✅ PR #143 (21c2c680ea325a7c69c657f0349e0bed3bd73b66, 2026-10-22T17:25:42Z)
 - **Claim**: `kilo-hp-elitebook-gq0i`
 
 ```
@@ -3499,8 +3499,8 @@ segreto da gestire» — era semplicemente falsa: servono `api_key` **e**
 ### Sessione 48 - Fix race fra i due writer di main (issue #149)
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #null)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #151 (d155799014e1ee9617cdee2b040afb18180187c9, 2026-10-26T15:35:29Z)
 - **Claim**: `kilo-HP-ELITEBOOK-lb47`
 
 ```
@@ -5875,8 +5875,8 @@ contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
 ### Sessione 65 - Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193)
 
 - **Data**: 2026-10-30
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #203)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #203 (1ad513947641b6f92e0542fc0f9348ee77d95139, 2026-10-30T17:31:45Z)
 - **Claim**: `kilo-HP-EliteBook-f1a7`
 
 ```
@@ -6017,8 +6017,8 @@ insight — un atto molto più grosso di una riga di spec.
 ### Sessione 66 - Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili
 
 - **Data**: 2026-10-30
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #200 (66c39628939918902d7fde378ae297096f05f2ac, 2026-10-30T15:57:14Z)
 - **Claim**: `kilo-hp-elitebook-jrka`
 
 ```
@@ -6161,8 +6161,8 @@ lo confronta con il file (lesson 28-1).
 ### Sessione 67 - Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)
 
 - **Data**: 2026-10-30
-- **Stato**: 👀
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #204 (b02a80d2d60bf9075809bccda5ffad9b0075c6e7, 2026-10-30T16:42:25Z)
 - **Claim**: `kilo-HP-EliteBook-b7x2`
 
 ```
@@ -7022,7 +7022,7 @@ fra il lavoro proprio e quello altrui.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #225)
+- **Merged**: ✅ PR #225 (c705cd19290563f9bce2e30af1a32c032d75ef19, 2026-10-31T17:13:09Z)
 - **Claim**: `kilo-HP-ELITEBOOK-perf73`
 
 ```
@@ -7209,7 +7209,7 @@ di scansione regex).
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ✅ PR #227 (51f407692b8bf63524c281af51b1a9a2d5b81776, 2026-10-31T18:22:26Z)
 - **Claim**: `kilo-HP-ELITEBOOK-perf74`
 
 ```
@@ -7408,8 +7408,8 @@ writer non hanno *mai* attivato una `CI`.
 ### Sessione 75 - Indicatore di avanzamento automatico (issue #216)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #230)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #230 (4e8cd4b8efe307f0d6bd20b23531d1d578bd5051, 2026-10-31T21:08:45Z)
 - **Claim**: `kilo-HPELITEBOOK-w0pl`
 
 ```
@@ -7505,8 +7505,8 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 ### Sessione 76 - Nastro contesto (Story 3.4, issue #231)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #232)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #232 (bc959d3a932ab2d4210ae0f243b59f598d9cbc8d, 2026-10-31T21:21:25Z)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```
@@ -7605,8 +7605,8 @@ Due scelte della spec sono state prese sul serio, al punto da renderle
 ### Sessione 77 - Home + Timeline (Story 3.1, issue #233)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #234)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #234 (815ce171f9bfd70133d0a788d6e15f717624a290, 2026-10-31T21:41:34Z)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```
@@ -7718,7 +7718,7 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 ### Sessione 78 - Rimozione worktree long-path-safe (procedura post-merge)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
+- **Stato**: 🟢
 - **Merged**: ✅ PR #236 (08a0b4da74ee3639d061ac714d07267e75d2eac8, 2026-11-01T09:58:20Z)
 - **Claim**: `kilo-HP-ELITEBOOK-longpath`
 

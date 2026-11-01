@@ -2,7 +2,7 @@
 number: 78
 title: "Rimozione worktree long-path-safe (procedura post-merge)"
 date: 2026-10-31
-state: 🟡
+state: 🟢
 merged: true
 merged_commit: "08a0b4da74ee3639d061ac714d07267e75d2eac8"
 merged_date: "2026-11-01T09:58:20Z"

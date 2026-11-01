@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 11:07
+> Data: 2026-11-01 12:16
 > Totale file: 138
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 137 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2089.4 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-01 11:06
+- Dimensione totale: 2092.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-01 12:16
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -2292,13 +2292,13 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 39 | Specifica adapter YouTube Music (Story 1.1) | 🟢 | ✅ | #97 |
 | 40 | Specifica adapter Apple Music (Story 1.2) | 🟢 | ✅ | #100 |
 | 41 | Geo & contesto di ascolto: specifica e ADR | 🟢 | ✅ | #102 |
-| 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ❌ | #134 |
-| 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ❌ | #137 |
-| 44 | ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135) | 🟢 | ❌ | #138 |
-| 45 | auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140) | 🟢 | ❌ | #141 |
-| 46 | Idempotenza dell'aggregator non implementata nel path di scrittura: T3 falliva a intermittenza (issue #142) | 🟢 | ❌ | #143 |
+| 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ✅ | #134 |
+| 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ✅ | #137 |
+| 44 | ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135) | 🟢 | ✅ | #138 |
+| 45 | auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140) | 🟢 | ✅ | #141 |
+| 46 | Idempotenza dell'aggregator non implementata nel path di scrittura: T3 falliva a intermittenza (issue #142) | 🟢 | ✅ | #143 |
 | 47 | Spec adapter ListenBrainz + Last.fm (Story 1.3) | 🟢 | ✅ | #146 |
-| 48 | Fix race fra i due writer di main (issue #149) | 🟡 | ❌ | #null |
+| 48 | Fix race fra i due writer di main (issue #149) | 🟢 | ✅ | #151 |
 | 49 | ADR-0010 — Sorgenti remote nel contratto degli adapter | 🟢 | ✅ | #152 |
 | 50 | Spec adapter Last.fm (Story 1.3) | 🟢 | ✅ | #154 |
 | 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟢 | ✅ | #156 |
@@ -2315,20 +2315,20 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
 | 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ✅ | #192 |
 | 64 | Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188) | 🟢 | ✅ | #197 |
-| 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟡 | ❌ | #203 |
-| 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
-| 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
+| 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟢 | ✅ | #203 |
+| 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟢 | ✅ | #200 |
+| 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 🟢 | ✅ | #204 |
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
 | 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ✅ | #219 |
 | 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ✅ | #223 |
-| 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
-| 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
-| 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
-| 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
-| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
-| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ✅ | #236 |
+| 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ✅ | #225 |
+| 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ✅ | #227 |
+| 75 | Indicatore di avanzamento automatico (issue #216) | 🟢 | ✅ | #230 |
+| 76 | Nastro contesto (Story 3.4, issue #231) | 🟢 | ✅ | #232 |
+| 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
+| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2368,7 +2368,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **55** (merge: 41)
+- Sessioni migrate in state/sessions: **55** (merge: 55)
 - Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S78** - Rimozione worktree long-path-safe (procedura post-merge)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
@@ -5022,7 +5022,7 @@ E11 (IP non risolvibile → `city = null`), **E12 (IP riservati o CGNAT RFC1918/
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #134)
+- **Merged**: ✅ PR #134 (457f677520dd6c80b26795acb20797441a2a302a, 2026-10-22T13:41:23Z)
 - **Claim**: `-`
 
 ```
@@ -5161,7 +5161,7 @@ la Story 1.1 che non ha aggiunto il proprio state file a `$files`.
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #137)
+- **Merged**: ✅ PR #137 (ac4d706ea6eb5a21763b73d302b3b3a4b4ce652b, 2026-10-22T14:44:27Z)
 - **Claim**: `kilo-HP-ELITEBOOK-0a1b`
 
 ```
@@ -5290,7 +5290,7 @@ lo notasse. È la stessa classe di drift di #86/#88, applicata agli strumenti.
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #138)
+- **Merged**: ✅ PR #138 (cb508528e34a7ab6364e5cdaf47dab86638616f4, 2026-10-22T15:19:17Z)
 - **Claim**: `kilo-HP-ELITEBOOK-f0mj`
 
 ```
@@ -5488,7 +5488,7 @@ file applicativo è stato toccato** — PR #138 non contiene codice in `apps/` o
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #141)
+- **Merged**: ✅ PR #141 (62a30712d1a4752fbaa4405189bf62ba3da73113, 2026-10-22T16:57:29Z)
 - **Claim**: `kilo-hp-elitebook-gq0i`
 
 ```
@@ -5660,7 +5660,7 @@ toccato** (nessuna modifica in `apps/` o `packages/`); i gate li eseguirà `ci.y
 
 - **Data**: 2026-10-22
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #143)
+- **Merged**: ✅ PR #143 (21c2c680ea325a7c69c657f0349e0bed3bd73b66, 2026-10-22T17:25:42Z)
 - **Claim**: `kilo-hp-elitebook-gq0i`
 
 ```
@@ -5980,8 +5980,8 @@ segreto da gestire» — era semplicemente falsa: servono `api_key` **e**
 ### Sessione 48 - Fix race fra i due writer di main (issue #149)
 
 - **Data**: 2026-10-26
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #null)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #151 (d155799014e1ee9617cdee2b040afb18180187c9, 2026-10-26T15:35:29Z)
 - **Claim**: `kilo-HP-ELITEBOOK-lb47`
 
 ```
@@ -8356,8 +8356,8 @@ contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
 ### Sessione 65 - Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193)
 
 - **Data**: 2026-10-30
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #203)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #203 (1ad513947641b6f92e0542fc0f9348ee77d95139, 2026-10-30T17:31:45Z)
 - **Claim**: `kilo-HP-EliteBook-f1a7`
 
 ```
@@ -8498,8 +8498,8 @@ insight — un atto molto più grosso di una riga di spec.
 ### Sessione 66 - Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili
 
 - **Data**: 2026-10-30
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #200 (66c39628939918902d7fde378ae297096f05f2ac, 2026-10-30T15:57:14Z)
 - **Claim**: `kilo-hp-elitebook-jrka`
 
 ```
@@ -8642,8 +8642,8 @@ lo confronta con il file (lesson 28-1).
 ### Sessione 67 - Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)
 
 - **Data**: 2026-10-30
-- **Stato**: 👀
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #204 (b02a80d2d60bf9075809bccda5ffad9b0075c6e7, 2026-10-30T16:42:25Z)
 - **Claim**: `kilo-HP-EliteBook-b7x2`
 
 ```
@@ -9503,7 +9503,7 @@ fra il lavoro proprio e quello altrui.
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #225)
+- **Merged**: ✅ PR #225 (c705cd19290563f9bce2e30af1a32c032d75ef19, 2026-10-31T17:13:09Z)
 - **Claim**: `kilo-HP-ELITEBOOK-perf73`
 
 ```
@@ -9690,7 +9690,7 @@ di scansione regex).
 
 - **Data**: 2026-10-31
 - **Stato**: 🟢
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Merged**: ✅ PR #227 (51f407692b8bf63524c281af51b1a9a2d5b81776, 2026-10-31T18:22:26Z)
 - **Claim**: `kilo-HP-ELITEBOOK-perf74`
 
 ```
@@ -9889,8 +9889,8 @@ writer non hanno *mai* attivato una `CI`.
 ### Sessione 75 - Indicatore di avanzamento automatico (issue #216)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #230)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #230 (4e8cd4b8efe307f0d6bd20b23531d1d578bd5051, 2026-10-31T21:08:45Z)
 - **Claim**: `kilo-HPELITEBOOK-w0pl`
 
 ```
@@ -9986,8 +9986,8 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 ### Sessione 76 - Nastro contesto (Story 3.4, issue #231)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #232)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #232 (bc959d3a932ab2d4210ae0f243b59f598d9cbc8d, 2026-10-31T21:21:25Z)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```
@@ -10086,8 +10086,8 @@ Due scelte della spec sono state prese sul serio, al punto da renderle
 ### Sessione 77 - Home + Timeline (Story 3.1, issue #233)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #234)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #234 (815ce171f9bfd70133d0a788d6e15f717624a290, 2026-10-31T21:41:34Z)
 - **Claim**: `kilo-HP-ELITEBOOK-progress`
 
 ```
@@ -10199,7 +10199,7 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 ### Sessione 78 - Rimozione worktree long-path-safe (procedura post-merge)
 
 - **Data**: 2026-10-31
-- **Stato**: 🟡
+- **Stato**: 🟢
 - **Merged**: ✅ PR #236 (08a0b4da74ee3639d061ac714d07267e75d2eac8, 2026-11-01T09:58:20Z)
 - **Claim**: `kilo-HP-ELITEBOOK-longpath`
 
@@ -12152,6 +12152,38 @@ claim: kilo-...                      # agent-ID che ha fatto claim
 [bullet list file modificati]
 ```
 
+### Invariante: una sessione con PR mergiata è una sessione chiusa *(vincolante)*
+
+Il frontmatter di `state/sessions/<N>-<slug>.md` descrive **lo stato del lavoro**, e la sua forma post-merge è determinata da un fatto verificabile: **la PR è stata mergiata in `main`**.
+
+| Campo | Valore richiesto quando la PR è mergiata |
+|-------|-------------------------------------------|
+| `state` | `🟢` (lavoro chiuso) |
+| `merged` | `true` |
+| `merged_commit` | SHA del merge commit (l'antenato **non** coincide con il merge commit in caso di squash: usare il commit di merge, non l'ultimo commit del branch) |
+| `merged_date` | data del merge in ISO-8601 UTC |
+| `pr` | numero della PR (non `0`, non `null`) |
+
+**Fonte di verità**: lo stato della PR su GitHub (`gh pr view <N> --json state,mergedAt,mergeCommit`), **mai** il branch locale né la presenza del file. Una sessione senza PR (`pr: 0`) resta `merged: false`: non c'è merge commit da citare.
+
+**Quando si aggiorna**: nel **doc-sync di merge**, cioè nella stessa PR che chiude la sessione quando possibile, e con una PR `docs:` di follow-up quando il merge commit è noto solo dopo il merge (è il caso normale: il merge commit esiste solo dopo il merge). Il doc-sync nel branch copre `pr:`; il merge commit e la data si scrivono dopo.
+
+**Perché è vincolante**: senza questi campi il blocco aggregato in `docs/SESSIONS.md` (e in `docs/INDEX.md`) dichiara falsamente «❌ non ancora mergiato (PR #N)» per una sessione già in `main` — lo stesso drift che l'aggregatore non può rilevare, perché confronta il blocco con i file *di quel momento* e non con lo stato delle PR.
+
+**Audit periodico** (fail-closed manuale, da eseguire dopo ogni batch di merge):
+
+```powershell
+Get-ChildItem docs/state/sessions/*.md | ForEach-Object {
+  $t = Get-Content $_.FullName -Encoding UTF8 -TotalCount 20
+  $pr = (($t | Select-String '^pr:').Line -replace '^pr:\s*','')
+  $mg = (($t | Select-String '^merged:').Line -replace '^merged:\s*','')
+  if ($pr -match '^\d+$' -and [int]$pr -gt 0) {
+    $s = gh pr view $pr --json state --jq .state 2>$null
+    if ($s -eq 'MERGED' -and $mg -ne 'true') { "$($_.Name): pr=$pr merged=$mg -> da correggere" }
+  }
+}
+```
+
 ### `state/stories/<id>-<slug>.md`
 
 ```markdown
@@ -12824,12 +12856,12 @@ segreto da gestire» — era semplicemente falsa: servono `api_key` **e**
 number: 48
 title: "Fix race fra i due writer di main (issue #149)"
 date: 2026-10-26
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "d155799014e1ee9617cdee2b040afb18180187c9"
+merged_date: "2026-10-26T15:35:29Z"
 branch: fix/149-bundle-writer-ordering
-pr: null
+pr: 151
 claim: kilo-HP-ELITEBOOK-lb47
 cross_refs: [149]
 tags: [devops, bug, fix]
@@ -15353,8 +15385,10 @@ contraddizione fra D-AF.1 e D-AF.9 sulla CSP (l'host della ricerca iTunes non
 number: 65
 title: "Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193)"
 date: 2026-10-30
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "1ad513947641b6f92e0542fc0f9348ee77d95139"
+merged_date: "2026-10-30T17:31:45Z"
 branch: feat/193-mood-genre
 pr: 203
 claim: kilo-HP-EliteBook-f1a7
@@ -15502,10 +15536,12 @@ insight — un atto molto più grosso di una riga di spec.
 number: 66
 title: "Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili"
 date: 2026-10-30
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "66c39628939918902d7fde378ae297096f05f2ac"
+merged_date: "2026-10-30T15:57:14Z"
 branch: feat/196-csp-itunes-search-host
-pr: 0
+pr: 200
 claim: kilo-hp-elitebook-jrka
 cross_refs: [196, 188, 187]
 tags: [privacy, devops, phase-2]
@@ -15653,10 +15689,12 @@ lo confronta con il file (lesson 28-1).
 number: 67
 title: "Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)"
 date: 2026-10-30
-state: 👀
-merged: false
+state: 🟢
+merged: true
+merged_commit: "b02a80d2d60bf9075809bccda5ffad9b0075c6e7"
+merged_date: "2026-10-30T16:42:25Z"
 branch: feat/201-ratifica-geo-licenza-agpl
-pr: 0
+pr: 204
 claim: kilo-HP-EliteBook-b7x2
 cross_refs: [201, 202, 196, 193, 108, 187, 188]
 tags: [privacy, devops, phase-2]
@@ -16567,9 +16605,9 @@ number: 73
 title: "Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura"
 date: 2026-10-31
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "c705cd19290563f9bce2e30af1a32c032d75ef19"
+merged_date: "2026-10-31T17:13:09Z"
 branch: docs/224-audit-procedure-automatiche
 pr: 225
 claim: kilo-HP-ELITEBOOK-perf73
@@ -16763,11 +16801,11 @@ number: 74
 title: "La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati"
 date: 2026-10-31
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "51f407692b8bf63524c281af51b1a9a2d5b81776"
+merged_date: "2026-10-31T18:22:26Z"
 branch: docs/224-ci-merge-once
-pr: 0
+pr: 227
 claim: kilo-HP-ELITEBOOK-perf74
 cross_refs: [224, 135, 140, 149, 43]
 tags: [devops, ci, performance, coverage]
@@ -16971,8 +17009,10 @@ writer non hanno *mai* attivato una `CI`.
 number: 75
 title: "Indicatore di avanzamento automatico (issue #216)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "4e8cd4b8efe307f0d6bd20b23531d1d578bd5051"
+merged_date: "2026-10-31T21:08:45Z"
 branch: feat/216-progress-indicator
 pr: 230
 claim: kilo-HPELITEBOOK-w0pl
@@ -17075,8 +17115,10 @@ verifica che il blocco a mano sia allineato (fail-closed). In locale:
 number: 76
 title: "Nastro contesto (Story 3.4, issue #231)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "bc959d3a932ab2d4210ae0f243b59f598d9cbc8d"
+merged_date: "2026-10-31T21:21:25Z"
 branch: feat/231-context-ribbon
 pr: 232
 claim: kilo-HP-ELITEBOOK-progress
@@ -17182,8 +17224,10 @@ Due scelte della spec sono state prese sul serio, al punto da renderle
 number: 77
 title: "Home + Timeline (Story 3.1, issue #233)"
 date: 2026-10-31
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "815ce171f9bfd70133d0a788d6e15f717624a290"
+merged_date: "2026-10-31T21:41:34Z"
 branch: feat/233-home-timeline
 pr: 234
 claim: kilo-HP-ELITEBOOK-progress
@@ -17302,7 +17346,7 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 number: 78
 title: "Rimozione worktree long-path-safe (procedura post-merge)"
 date: 2026-10-31
-state: 🟡
+state: 🟢
 merged: true
 merged_commit: "08a0b4da74ee3639d061ac714d07267e75d2eac8"
 merged_date: "2026-11-01T09:58:20Z"

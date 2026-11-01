@@ -88,13 +88,13 @@
 | 39 | Specifica adapter YouTube Music (Story 1.1) | 🟢 | ✅ | #97 |
 | 40 | Specifica adapter Apple Music (Story 1.2) | 🟢 | ✅ | #100 |
 | 41 | Geo & contesto di ascolto: specifica e ADR | 🟢 | ✅ | #102 |
-| 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ❌ | #134 |
-| 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ❌ | #137 |
-| 44 | ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135) | 🟢 | ❌ | #138 |
-| 45 | auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140) | 🟢 | ❌ | #141 |
-| 46 | Idempotenza dell'aggregator non implementata nel path di scrittura: T3 falliva a intermittenza (issue #142) | 🟢 | ❌ | #143 |
+| 42 | Approvazione spec Apple Music (Story 1.2) | 🟢 | ✅ | #134 |
+| 43 | auto-state-aggregate committa il blocco NEXT-STEP del README (issue #136) | 🟢 | ✅ | #137 |
+| 44 | ci.yml non esegue piu' nessun job: `metadata: read` non e' una scope dichiarabile (issue #135) | 🟢 | ✅ | #138 |
+| 45 | auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140) | 🟢 | ✅ | #141 |
+| 46 | Idempotenza dell'aggregator non implementata nel path di scrittura: T3 falliva a intermittenza (issue #142) | 🟢 | ✅ | #143 |
 | 47 | Spec adapter ListenBrainz + Last.fm (Story 1.3) | 🟢 | ✅ | #146 |
-| 48 | Fix race fra i due writer di main (issue #149) | 🟡 | ❌ | #null |
+| 48 | Fix race fra i due writer di main (issue #149) | 🟢 | ✅ | #151 |
 | 49 | ADR-0010 — Sorgenti remote nel contratto degli adapter | 🟢 | ✅ | #152 |
 | 50 | Spec adapter Last.fm (Story 1.3) | 🟢 | ✅ | #154 |
 | 51 | Promozione spec Last.fm a APPROVED v1.0 + issue di implementazione 1.3 | 🟢 | ✅ | #156 |
@@ -111,20 +111,20 @@
 | 62 | Spec dell'EPIC 4.1 — pipeline audio features: provider, privacy, stoccaggio, costi (issue #187) | 🟢 | ✅ | #190 |
 | 63 | Story 2.1 — Mood Tracker: il mood di giorno, settimana e mese (issue #180) | 🟢 | ✅ | #192 |
 | 64 | Story 4.1 — Pipeline audio features: provider, privacy, stoccaggio, costi (issue #188) | 🟢 | ✅ | #197 |
-| 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟡 | ❌ | #203 |
-| 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟡 | ❌ | - |
-| 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 👀 | ❌ | - |
+| 65 | Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193) | 🟢 | ✅ | #203 |
+| 66 | Ratifica del terzo host della CSP (issue #196): D-AF.1 e D-AF.9 erano incompatibili | 🟢 | ✅ | #200 |
+| 67 | Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201) | 🟢 | ✅ | #204 |
 | 68 | Story 1.6 — Fondazione geo e contesto di ascolto (delta su 02 v1.7 e classificatore L1) (issue #205) | 🟢 | ✅ | #209 |
 | 69 | Story 2.2 — Era Detector (issue #211) | 🟢 | ✅ | #212 |
 | 70 | Story 2.3 — Event Detector (issue #214) | 🟢 | ✅ | #215 |
 | 71 | Baseline PowerShell 7 (pwsh) per gli script del repo | 🟢 | ✅ | #219 |
 | 72 | Audit delle procedure automatiche: tempi reali, correttezza e confine di encoding di pwsh | 🟢 | ✅ | #223 |
-| 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ❌ | #225 |
-| 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ❌ | - |
-| 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
-| 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
-| 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
-| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ✅ | #236 |
+| 73 | Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura | 🟢 | ✅ | #225 |
+| 74 | La CI girava 4 volte per ogni merge: trigger su main filtrato per path e gate sul codice condizionati | 🟢 | ✅ | #227 |
+| 75 | Indicatore di avanzamento automatico (issue #216) | 🟢 | ✅ | #230 |
+| 76 | Nastro contesto (Story 3.4, issue #231) | 🟢 | ✅ | #232 |
+| 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
+| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -164,7 +164,7 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **55** (merge: 41)
+- Sessioni migrate in state/sessions: **55** (merge: 55)
 - Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S78** - Rimozione worktree long-path-safe (procedura post-merge)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4

@@ -3,9 +3,9 @@ number: 42
 title: "Approvazione spec Apple Music (Story 1.2)"
 date: 2026-10-22
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "457f677520dd6c80b26795acb20797441a2a302a"
+merged_date: "2026-10-22T13:41:23Z"
 branch: docs/132-approve-apple-music-spec
 pr: 134
 claim: ""

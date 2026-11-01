@@ -3,9 +3,9 @@ number: 45
 title: "auto-state-aggregate fallisce con `non-fast-forward`: il doc-sync della Story 1.2 resta fuori da `main` (issue #140)"
 date: 2026-10-22
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "62a30712d1a4752fbaa4405189bf62ba3da73113"
+merged_date: "2026-10-22T16:57:29Z"
 branch: fix/140-auto-state-aggregate-race
 pr: 141
 claim: kilo-hp-elitebook-gq0i

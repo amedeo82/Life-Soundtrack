@@ -2,10 +2,12 @@
 number: 67
 title: "Atti del Boss: ratifica di 19-GEO-CONTEXT + ADR-0009 e licenza AGPL-3.0 (issue #201)"
 date: 2026-10-30
-state: 👀
-merged: false
+state: 🟢
+merged: true
+merged_commit: "b02a80d2d60bf9075809bccda5ffad9b0075c6e7"
+merged_date: "2026-10-30T16:42:25Z"
 branch: feat/201-ratifica-geo-licenza-agpl
-pr: 0
+pr: 204
 claim: kilo-HP-EliteBook-b7x2
 cross_refs: [201, 202, 196, 193, 108, 187, 188]
 tags: [privacy, devops, phase-2]

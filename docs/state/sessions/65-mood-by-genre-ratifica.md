@@ -2,8 +2,10 @@
 number: 65
 title: "Ratifica del fallback mood-by-genre: il fallback non esiste (issue #193)"
 date: 2026-10-30
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "1ad513947641b6f92e0542fc0f9348ee77d95139"
+merged_date: "2026-10-30T17:31:45Z"
 branch: feat/193-mood-genre
 pr: 203
 claim: kilo-HP-EliteBook-f1a7

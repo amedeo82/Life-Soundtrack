@@ -3,9 +3,9 @@ number: 46
 title: "Idempotenza dell'aggregator non implementata nel path di scrittura: T3 falliva a intermittenza (issue #142)"
 date: 2026-10-22
 state: 🟢
-merged: false
-merged_commit: ""
-merged_date: ""
+merged: true
+merged_commit: "21c2c680ea325a7c69c657f0349e0bed3bd73b66"
+merged_date: "2026-10-22T17:25:42Z"
 branch: fix/142-aggregator-timestamp-reuse
 pr: 143
 claim: kilo-hp-elitebook-gq0i

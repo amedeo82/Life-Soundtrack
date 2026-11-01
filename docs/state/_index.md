@@ -114,6 +114,38 @@ claim: kilo-...                      # agent-ID che ha fatto claim
 [bullet list file modificati]
 ```
 
+### Invariante: una sessione con PR mergiata è una sessione chiusa *(vincolante)*
+
+Il frontmatter di `state/sessions/<N>-<slug>.md` descrive **lo stato del lavoro**, e la sua forma post-merge è determinata da un fatto verificabile: **la PR è stata mergiata in `main`**.
+
+| Campo | Valore richiesto quando la PR è mergiata |
+|-------|-------------------------------------------|
+| `state` | `🟢` (lavoro chiuso) |
+| `merged` | `true` |
+| `merged_commit` | SHA del merge commit (l'antenato **non** coincide con il merge commit in caso di squash: usare il commit di merge, non l'ultimo commit del branch) |
+| `merged_date` | data del merge in ISO-8601 UTC |
+| `pr` | numero della PR (non `0`, non `null`) |
+
+**Fonte di verità**: lo stato della PR su GitHub (`gh pr view <N> --json state,mergedAt,mergeCommit`), **mai** il branch locale né la presenza del file. Una sessione senza PR (`pr: 0`) resta `merged: false`: non c'è merge commit da citare.
+
+**Quando si aggiorna**: nel **doc-sync di merge**, cioè nella stessa PR che chiude la sessione quando possibile, e con una PR `docs:` di follow-up quando il merge commit è noto solo dopo il merge (è il caso normale: il merge commit esiste solo dopo il merge). Il doc-sync nel branch copre `pr:`; il merge commit e la data si scrivono dopo.
+
+**Perché è vincolante**: senza questi campi il blocco aggregato in `docs/SESSIONS.md` (e in `docs/INDEX.md`) dichiara falsamente «❌ non ancora mergiato (PR #N)» per una sessione già in `main` — lo stesso drift che l'aggregatore non può rilevare, perché confronta il blocco con i file *di quel momento* e non con lo stato delle PR.
+
+**Audit periodico** (fail-closed manuale, da eseguire dopo ogni batch di merge):
+
+```powershell
+Get-ChildItem docs/state/sessions/*.md | ForEach-Object {
+  $t = Get-Content $_.FullName -Encoding UTF8 -TotalCount 20
+  $pr = (($t | Select-String '^pr:').Line -replace '^pr:\s*','')
+  $mg = (($t | Select-String '^merged:').Line -replace '^merged:\s*','')
+  if ($pr -match '^\d+$' -and [int]$pr -gt 0) {
+    $s = gh pr view $pr --json state --jq .state 2>$null
+    if ($s -eq 'MERGED' -and $mg -ne 'true') { "$($_.Name): pr=$pr merged=$mg -> da correggere" }
+  }
+}
+```
+
 ### `state/stories/<id>-<slug>.md`
 
 ```markdown
