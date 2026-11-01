@@ -10,6 +10,7 @@
 
       0. Zero-WIP guard        -> evita E3/E4/E5 (transizioni distruttive con working tree sporco)
       1. Worktree PRIMA       -> `git branch -d` fallisce se il branch e' checked-out in una worktree
+                                (rimozione long-path-safe: `core.longpaths=true` + fallback nativo pwsh 7)
       2. fetch --prune        -> `origin/main` deve contenere il merge commit, altrimenti i check mentono
       3. allineamento `main`   -> `git checkout main` + `git merge --ff-only origin/main`
       4. verifica merge       -> contro `origin/main` e/o via `gh` (robusta al merge squash)
@@ -82,6 +83,12 @@
       13 `git branch -d` rifiutato e contenuto non riconosciuto come gia' presente in base
       14 `-Check` ha trovato residui post-merge da pulire
       15 esecuzione tentata da dentro una worktree invece che dalla working copy principale
+      16 rimozione della worktree fallita (git E fallback long-path): nessuna azione distruttiva
+
+    Variabili d'ambiente:
+      LIFE_SOUNDTRACK_WT_REMOVAL=rd  forza il fallback `rd /s /q "\\?\"` al
+        posto della rimozione nativa di PowerShell (hook di test: esercita la
+        rete di sicurezza per Windows PowerShell 5.1)
 
     Compatibilita': PowerShell 5.1+ (Windows PowerShell) e PowerShell 7+.
 #>
@@ -123,6 +130,19 @@ if ($helpRequested) {
 # vengono gestiti tramite gli exit code, non tramite le eccezioni PowerShell.
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Rilevamento piattaforma: su Windows la rimozione della worktree usa il
+# fallback long-path-safe (`rd /s /q "\\?\"`), su altri sistemi la rimozione
+# ricorsiva standard.
+$script:OnWindows = ($env:OS -eq "Windows_NT")
+
+# Primitive di rimozione usata dal fallback: "" (default) = nativa di
+# PowerShell, "rd" = `rd /s /q "\\?\"` via cmd.exe. Il forzaggio esiste per
+# esercitare la rete di sicurezza nei test (LIFE_SOUNDTRACK_WT_REMOVAL=rd).
+$script:RemovalPrimitive = ""
+if ($env:LIFE_SOUNDTRACK_WT_REMOVAL) {
+    $script:RemovalPrimitive = $env:LIFE_SOUNDTRACK_WT_REMOVAL.ToLowerInvariant()
+}
 
 function Write-Step { param([string]$Message, [string]$Color = "Cyan"); Write-Host "[post-merge] $Message" -ForegroundColor $Color }
 function Write-Ok   { param([string]$Message); Write-Host "[post-merge]   OK   $Message" -ForegroundColor Green }
@@ -204,6 +224,199 @@ function Normalize-Path {
     param([string]$Path)
     if (-not $Path) { return "" }
     return ($Path -replace '\\', '/').TrimEnd('/').ToLowerInvariant()
+}
+
+# =====================================================================
+# Rimozione worktree long-path-safe
+#
+# Difetto ricorrente (Windows): `git worktree remove --force` cancella la
+# worktree chiamando le API Win32 senza il prefisso `\\?\`, quindi fallisce
+# con "Filename too long" / "Result too large" quando la worktree contiene
+# `node_modules` con path > MAX_PATH (260 caratteri).
+#
+# La rimozione e' difesa su tre livelli:
+#   L1  `git -c core.longpaths=true worktree remove --force` -> git usa il
+#       prefisso `\\?\` internamente e rimuove l'albero correttamente.
+#   L2  fallback nativo: `Remove-Item -Recurse -Force`. PowerShell 7 e'
+#       long-path-aware (manifest `longPathAware` + .NET Core): cancella
+#       alberi con path > MAX_PATH senza prefisso e senza processi esterni.
+#       Non segue le junction: il contenuto collegato resta intatto.
+#   L3  rete di sicurezza per Windows PowerShell 5.1 (non long-path-aware):
+#       `rd /s /q "\\?\<path>"` via cmd.exe, che non segue le junction.
+#
+# Il fallback manuale e' consentito SOLO su una directory che e' davvero
+# una worktree di questo repo (registrata da `git worktree list`, o con il
+# marker `.git` che punta a `.git/worktrees/` di questo repo): la working
+# copy principale e i suoi antenati non sono mai toccati.
+# =====================================================================
+
+function Get-FullPath {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) { return "" }
+    try { return [System.IO.Path]::GetFullPath($Path) } catch { return $Path }
+}
+
+function Get-ExtendedPath {
+    param([string]$Path)
+    $abs = Get-FullPath $Path
+    if ($abs.StartsWith('\\?\')) { return $abs }
+    if ($abs.StartsWith('\\')) { return '\\?\UNC\' + $abs.Substring(2) }
+    return '\\?\' + $abs
+}
+
+function Invoke-CmdVerbatim {
+    # Esegue cmd.exe con una riga di comando passata VERBATIM: evita le
+    # regole di quoting di PowerShell verso cmd (che trasformerebbero
+    # `rd /s /q "C:\percorso con spazi"` in un argomento illeggibile).
+    # Il comando va eseguito con `/c`: senza, cmd.exe apre una shell
+    # interattiva (banner + prompt), non esegue nulla e restituisce 0.
+    param([string]$Arguments)
+
+    $cmdExe = Join-Path $env:SystemRoot "System32\cmd.exe"
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $cmdExe
+    $psi.Arguments = "/c $Arguments"
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+    $proc = [System.Diagnostics.Process]::Start($psi)
+    $stdout = $proc.StandardOutput.ReadToEnd()
+    $stderr = $proc.StandardError.ReadToEnd()
+    $proc.WaitForExit()
+    return [pscustomobject]@{ ExitCode = $proc.ExitCode; Output = (($stdout + $stderr) -replace "`r", "").Trim() }
+}
+
+function Remove-LongPathTree {
+    # Cancella un albero di directory che la rimozione standard non porta a
+    # termine per via dei path > MAX_PATH. Restituisce $true se la directory
+    # non esiste piu' alla fine.
+    param([string]$Path)
+
+    $abs = Get-FullPath $Path
+    if (-not (Test-Path -LiteralPath $abs)) { return $true }
+
+    # L2: rimozione nativa di PowerShell 7 (.NET Core long-path-aware).
+    # `Remove-Item -Recurse` NON segue le junction: il contenuto collegato
+    # (es. il store di pnpm) resta intatto.
+    # Il primitive puo' essere forzato con LIFE_SOUNDTRACK_WT_REMOVAL=rd per
+    # esercitare la rete di sicurezza L3 anche quando L2 basterebbe.
+    $removed = $false
+    if ($script:RemovalPrimitive -ne "rd") {
+        try {
+            Remove-Item -LiteralPath $abs -Recurse -Force -ErrorAction Stop
+            $removed = $true
+        } catch {
+            Write-Host "[post-merge]         Remove-Item non riuscito: $($_.Exception.Message)" -ForegroundColor DarkGray
+        }
+    }
+
+    if (-not $removed) {
+        if (-not $script:OnWindows) {
+            return $false
+        }
+        # L3: rete di sicurezza per Windows PowerShell 5.1 (non long-path-aware).
+        # toglie l'attributo read-only: `rd` fallisce sui file read-only.
+        $ro = [int][System.IO.FileAttributes]::ReadOnly
+        try {
+            foreach ($f in [System.IO.Directory]::EnumerateFiles($abs, '*', [System.IO.SearchOption]::AllDirectories)) {
+                $a = [int][System.IO.File]::GetAttributes($f)
+                if (($a -band $ro) -ne 0) { [System.IO.File]::SetAttributes($f, ($a -band (-bnot $ro))) }
+            }
+        } catch {
+            Write-Host "[post-merge]         attributi read-only non rimossi su tutti i file: $($_.Exception.Message)" -ForegroundColor DarkGray
+        }
+        # `rd` non segue le junction (a differenza di una ricorsione .NET):
+        # il contenuto collegato resta intatto.
+        $res = Invoke-CmdVerbatim ("rd /s /q `"{0}`"" -f (Get-ExtendedPath $abs))
+        if ($res.ExitCode -ne 0) {
+            Write-Host "[post-merge]         rd /s /q fallito (exit $($res.ExitCode)): $($res.Output)" -ForegroundColor DarkGray
+            return $false
+        }
+    }
+
+    return -not (Test-Path -LiteralPath $abs)
+}
+
+function Test-SafeRemovalTarget {
+    # La working copy principale (e qualunque suo antenato) non e' mai un
+    # target ammesso per la rimozione manuale.
+    param([string]$Path, [string]$RepoRoot)
+
+    $t = Normalize-Path (Get-FullPath $Path)
+    $r = Normalize-Path (Get-FullPath $RepoRoot)
+    if (-not $t -or -not $r) { return $false }
+    if ($t -eq $r) { return $false }
+    if ($r.StartsWith("$t/")) { return $false }
+    return $true
+}
+
+function Test-WorktreeMarker {
+    # True se la directory contiene il file `.git` di una worktree collegata
+    # che punta a `.git/worktrees/` di QUESTO repo.
+    param([string]$Path, [string]$RepoRoot)
+
+    $abs = Get-FullPath $Path
+    $marker = Join-Path $abs ".git"
+    if (-not (Test-Path -LiteralPath $marker -PathType Leaf)) { return $false }
+
+    $content = $null
+    try { $content = [System.IO.File]::ReadAllText($marker) } catch { return $false }
+
+    $line = ($content -split "`r?`n" | Where-Object { $_ -match '^\s*gitdir:' } | Select-Object -First 1)
+    if (-not $line) { return $false }
+
+    $gitdir = (($line -replace '^\s*gitdir:\s*', '')).Trim().Trim('"')
+    if (-not $gitdir) { return $false }
+
+    $admin = Get-FullPath (Join-Path (Get-FullPath (Join-Path $RepoRoot ".git")) "worktrees")
+    return (Normalize-Path (Get-FullPath $gitdir)).StartsWith((Normalize-Path $admin) + "/")
+}
+
+function Remove-WorktreeSafely {
+    # Rimuove la worktree: prima con git (path lunghi abilitati), poi con il
+    # fallback manuale long-path-safe. Non lascia mai un mezzo rimpiacimento:
+    # in caso di fallimento restituisce Success=$false e il chiamante esce 16.
+    param([string]$Path, [string]$RepoRoot)
+
+    $abs = Get-FullPath $Path
+    if (-not $abs) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "percorso vuoto" }
+    }
+
+    # La directory e' gia' sparita: basta deregistrare la worktree.
+    if (-not (Test-Path -LiteralPath $abs)) {
+        Invoke-Git -GitArgs @("worktree", "prune") -Quiet -AllowFail | Out-Null
+        return [pscustomobject]@{ Success = $true; Method = "gia' assente"; Detail = "" }
+    }
+
+    # L1: git con core.longpaths=true (risolve "Filename too long" / "Result too large")
+    $res = Invoke-Git -GitArgs @("-c", "core.longpaths=true", "worktree", "remove", "--force", $abs) -AllowFail
+    if ($res.ExitCode -eq 0) {
+        return [pscustomobject]@{ Success = $true; Method = "git (core.longpaths=true)"; Detail = "" }
+    }
+    Write-Warn "git worktree remove fallito: $($res.Output)"
+
+    # L2: fallback manuale, consentito solo su una worktree di questo repo
+    if (-not (Test-SafeRemovalTarget -Path $abs -RepoRoot $RepoRoot)) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "target non sicuro per la rimozione manuale" }
+    }
+
+    $registered = @((Get-Worktrees) | Where-Object {
+        -not $_.Main -and (Normalize-Path $_.Path) -eq (Normalize-Path $abs)
+    })
+    if (-not $registered -and -not (Test-WorktreeMarker -Path $abs -RepoRoot $RepoRoot)) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "la directory non e' una worktree di questo repo" }
+    }
+
+    if (-not (Remove-LongPathTree -Path $abs)) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "rimozione manuale fallita" }
+    }
+
+    # La worktree era ancora registrata: `prune` la deregistra, altrimenti
+    # `git branch -d` continuerebbe a vederla come checked-out.
+    Invoke-Git -GitArgs @("worktree", "prune") -Quiet -AllowFail | Out-Null
+    return [pscustomobject]@{ Success = $true; Method = "fallback long-path-safe"; Detail = "" }
 }
 
 # === Preflight ===
@@ -355,28 +568,57 @@ if ($dirty.Count -gt 0) {
 Write-Step "1/7 Worktree"
 $targetWt = $worktrees | Where-Object { $_.Branch -eq $Branch -and -not $_.Main } | Select-Object -First 1
 
+$wtPath = $null
 if ($targetWt) {
     $wtPath = if ($WorktreePath) { $WorktreePath } else { $targetWt.Path }
+} elseif ($WorktreePath -and (Test-Path -LiteralPath $WorktreePath)) {
+    $wtPath = $WorktreePath
+}
+
+if ($wtPath) {
+    # Zero-WIP anche nella worktree: se `git status` fallisce (per esempio
+    # per path lunghi) lo stato WIP e' SCONOSCIUTO e non si procede.
     $wtDirty = @()
+    $wtStatusCode = 0
     if (-not $script:DryRun -and (Test-Path -LiteralPath $wtPath)) {
         $global:LASTEXITCODE = 0
-        $raw = & git -C $wtPath status --porcelain 2>&1
+        $raw = & git -c core.longpaths=true -C $wtPath status --porcelain 2>&1
+        $wtStatusCode = $LASTEXITCODE
         $wtDirty = @(($raw | Out-String) -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -notmatch '^\?\?' })
     }
 
-    if ($wtDirty.Count -gt 0 -and -not $Force) {
+    if ($wtStatusCode -ne 0) {
+        Write-Warn "git status nella worktree '$wtPath' fallito (exit $wtStatusCode): lo stato WIP e' sconosciuto"
+        if (-not $Force) {
+            Write-Err "non posso verificare se la worktree contiene WIP non committato: procedura interrotta (nessuna azione distruttiva)."
+            Write-Host "[post-merge]   Rilancia con -Force solo se il lavoro e' gia' pushato/commitato altrove." -ForegroundColor Yellow
+            exit 10
+        }
+        Write-Warn "-Force attivo: procedo senza sapere se la worktree contiene WIP (rischio DATA-LOSS)"
+    } elseif ($wtDirty.Count -gt 0 -and -not $Force) {
         Write-Err "worktree '$wtPath' ha modifiche non committate: non la rimuovo (potrebbe contenere WIP)."
         $wtDirty | ForEach-Object { Write-Host "[post-merge]         $_" -ForegroundColor DarkGray }
         Write-Host "[post-merge]   Se il lavoro e' gia' stato pushato/commitato altrove, usa -Force." -ForegroundColor Yellow
         exit 10
     }
 
-    Write-Warn "branch '$Branch' e' checked-out nella worktree '$wtPath': la rimuovo PRIMA del delete locale"
-    Invoke-Git -GitArgs @("worktree", "remove", "--force", $wtPath) | Out-Null
-    Write-Ok "worktree rimossa: $wtPath"
-} elseif ($WorktreePath -and (Test-Path -LiteralPath $WorktreePath)) {
-    Write-Step "rimozione worktree esplicita: $WorktreePath"
-    Invoke-Git -GitArgs @("worktree", "remove", "--force", $WorktreePath) | Out-Null
+    if ($targetWt) {
+        Write-Warn "branch '$Branch' e' checked-out nella worktree '$wtPath': la rimuovo PRIMA del delete locale"
+    } else {
+        Write-Step "rimozione worktree esplicita: $wtPath"
+    }
+
+    $rm = Remove-WorktreeSafely -Path $wtPath -RepoRoot $repoRoot
+    if (-not $rm.Success) {
+        Write-Err "rimozione worktree fallita: $wtPath ($($rm.Detail))"
+        Write-Host "[post-merge]   La worktree e' INTATTA: nessuna azione distruttiva eseguita." -ForegroundColor Yellow
+        Write-Host "[post-merge]   Rimozione manuale (pwsh 7, path lunghi supportati):" -ForegroundColor Yellow
+        Write-Host "[post-merge]     Remove-Item -LiteralPath '$wtPath' -Recurse -Force" -ForegroundColor Cyan
+        Write-Host "[post-merge]   (Windows PowerShell 5.1: cmd /c rd /s /q `"\\?\$wtPath`")" -ForegroundColor Cyan
+        Write-Host "[post-merge]   poi: git worktree prune" -ForegroundColor Cyan
+        exit 16
+    }
+    Write-Ok "worktree rimossa: $wtPath (metodo: $($rm.Method))"
 } else {
     Write-Ok "nessuna worktree associata a '$Branch'"
 }

@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.32 — Sessione 75 (2026-10-31)**
+> **Versione 1.33 — Sessione 78 (2026-10-31)**
 
 ---
 
@@ -222,7 +222,7 @@ Dopo il merge di una PR su `main` l'agente che ha mergiato (o, in mancanza, il r
 | # | Passo | Operazione | Failure mode prevenuto |
 |---|-------|------------|------------------------|
 | 0 | Zero-WIP guard | `git status --porcelain` filtrato sulle righe tracked: se sporco, `stash push -u` o stop (exit 10) | E3/E4/E5 — transizione distruttiva con lavoro non committato (issue #45) |
-| 1 | Worktree **prima** del delete locale | `git worktree remove --force <path>` (auto-rilevata da `git worktree list`) | `git branch -d` fallisce se il branch è checked-out in una worktree |
+| 1 | Worktree **prima** del delete locale | `git worktree remove --force <path>` (auto-rilevata da `git worktree list`), in modalità **long-path-safe** (vedi §"Difetto ricorrente: la rimozione della worktree su Windows") | `git branch -d` fallisce se il branch è checked-out in una worktree |
 | 2 | Fetch | `git fetch origin --prune` | `origin/main` non contiene il merge commit: ogni check successivo mente |
 | 3 | Allineamento `main` | `git checkout main` + `git merge --ff-only origin/main` | E4 (branch inquinato), F7 (lavorare da main stale), `not fully merged` |
 | 4 | Verifica merge | `gh pr list --head <branch> --state merged` (autorevole) **oppure** `git merge-base --is-ancestor <branch> origin/main` | cancellazione di un branch **non** mergato → perdita di lavoro |
@@ -253,7 +253,10 @@ Lo script è **idempotente**: rieseguirlo su un branch già eliminato esce 0 sen
 # 0. zero-WIP: se `git status --porcelain` mostra righe tracked, STAI FERMO (o stash -u)
 # 1. worktree PRIMA (obbligatorio se il branch è checked-out li)
 git worktree list                      # individuare la worktree del branch
-git worktree remove --force ../ls-<N>-<slug>
+git -c core.longpaths=true worktree remove --force ../ls-<N>-<slug>
+#    se fallisce con "Filename too long" / "Result too large" (path lunghi):
+#    Remove-Item -LiteralPath '<path>' -Recurse -Force   # pwsh 7, long-path-aware
+#    git worktree prune
 
 # 2. fetch: senza questo, `origin/main` non contiene il merge commit
 git fetch origin --prune
@@ -277,6 +280,26 @@ git remote prune origin
 git worktree prune
 ```
 
+### Difetto ricorrente: la rimozione della worktree su Windows («Result too large»)
+
+`git worktree remove --force` chiama le API Win32 **senza il prefisso `\\?\`**: quando la worktree contiene `node_modules` con path più lunghi di MAX_PATH (260 caratteri), la cancellazione fallisce con «Filename too long» / «Result too large» e la procedura si ferma a metà (git ha già deregistrato la worktree, la directory è rimasta indietro). Il rimedio manuale (`rd /s /q "\\?\<path>"` + `git worktree prune`) era finito nel DEV-LOG di ogni sessione: era un **workaround** ripetuto, non una procedura.
+
+La procedura canonica lo risolve su **tre livelli**, tutti dentro `scripts/post-merge.ps1`:
+
+| Livello | Meccanismo | Quando interviene |
+|---------|-----------|-------------------|
+| L1 | `git -c core.longpaths=true worktree remove --force` | sempre: abilita in git il prefisso `\\?\` — è la **causa radice** |
+| L2 | `Remove-Item -LiteralPath <path> -Recurse -Force` | se L1 fallisce: PowerShell 7 è long-path-aware (manifest `longPathAware` + .NET Core) e **non segue le junction** |
+| L3 | `cmd /c rd /s /q "\\?\<path>"` + `git worktree prune` | se L2 fallisce: rete per Windows PowerShell 5.1 (non long-path-aware) |
+
+Regole di sicurezza del fallback:
+
+- la rimozione manuale è consentita **solo** su una directory che è davvero una worktree di questo repo (registrata da `git worktree list`, o con il marker `.git` che punta a `.git/worktrees/`): **la working copy principale e i suoi antenati non sono mai toccati** (`-WorktreePath` sulla working copy → exit 16, nessuna cancellazione);
+- se `git status` nella worktree fallisce, lo stato WIP è **sconosciuto**: la procedura si ferma (exit 10) invece di cancellare alla cieca;
+- se nessun livello rimuove la worktree, la procedura esce **16** senza alcuna azione distruttiva e stampa il comando manuale.
+
+Il fallback è **testato** (`scripts/test-post-merge.sh`, T10..T14): uno shim di `git` che fallisce **solo** su `worktree remove` rende deterministico il caso del fallback su ogni piattaforma, e gli scenari Windows-only T12/T13/T14 coprono i path lunghi reali e la catena L1→L2→L3.
+
 ### Regole di sicurezza (non negoziabili)
 
 - **Mai** `git push --delete` o `git branch -D` prima del passo 4. Nel dubbio: `-Check` + `gh pr list`.
@@ -298,11 +321,12 @@ git worktree prune
 | 13 | `git branch -d` rifiutato con contenuto non in base | ispeziona `git cherry`, poi `-D` **solo se** il lavoro è altrove |
 | 14 | `-Check`: residui post-merge presenti | esegui la procedura sui branch elencati |
 | 15 | eseguito da dentro una worktree | rilancia dalla working copy principale |
+| 16 | rimozione della worktree fallita (git **e** fallback long-path): **nessuna azione distruttiva** | rimuovi la worktree a mano (vedi §"Difetto ricorrente") e rilancia |
 
 ### Copertura dei test
 
 ```bash
-bash scripts/test-post-merge.sh    # 9 scenari su repo git temporanei (T1..T9)
+bash scripts/test-post-merge.sh    # 14 scenari / 47 assert su repo git temporanei (T1..T14)
 ```
 
 | Scenario | Cosa dimostra |
@@ -316,6 +340,11 @@ bash scripts/test-post-merge.sh    # 9 scenari su repo git temporanei (T1..T9)
 | T7 | audit `-Check`: exit 14 con residui, exit 0 dopo la pulizia |
 | T8 | idempotenza della procedura |
 | T9 | esecuzione da dentro la worktree: exit 15, branch intatto |
+| T10 | `git worktree remove` che **fallisce** (shim): la procedura usa il fallback long-path-safe, deregistra la worktree e completa (exit 0) |
+| T11 | `-WorktreePath` sulla **working copy principale**: rimozione rifiutata, exit 16, repo e branch intatti |
+| T12 | path **> MAX_PATH** dentro la worktree (Windows): rimozione riuscita |
+| T13 | catena completa su Windows PowerShell 5.1: L1 e L2 falliscono, interviene L3 (`rd /s /q "\\?\"`) |
+| T14 | rete di sicurezza L3 **forzata** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`): rimozione riuscita |
 
 **Eccezioni** (NON eliminare):
 
@@ -686,7 +715,7 @@ git push
         ├── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
         ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
         ├── check-readme-facts.mjs  ← gate read-only: confronta la prosa del README con il codice (issue #161)
-        ├── test-post-merge.sh      ← 9 scenari (T1..T9) su repo temporanei che coprono E3/E4/E5/F7 + squash
+        ├── test-post-merge.sh      ← 14 scenari (T1..T14, 47 assert) su repo temporanei che coprono E3/E4/E5/F7 + squash + rimozione long-path
         └── test-readme-facts-gate.sh ← 9 scenari (T1..T9) sul gate "fatti del README" (issue #161)
 
 ## 🚀 Primo task di un agente
@@ -846,7 +875,7 @@ runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il 
 | `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | solo `pull_request` |
 | `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | solo `pull_request` |
 | `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | solo `pull_request` |
-| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | solo `pull_request` |
+| `gates-scripts` | `test-post-merge.sh` (47 assert) — la procedura più distruttiva del repo | solo `pull_request` |
 | `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | solo `pull_request` |
 | `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | **sempre** |
 
@@ -1132,7 +1161,15 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.32 — **l'indicatore di avanzamento automatico** (Sessione 75, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 68% — 19 done, 9 step rimanenti. Aggiunti:
+*Ultimo aggiornamento: v1.33 — **la rimozione della worktree non fallisce più su Windows** (Sessione 78). `git worktree remove --force` cancellava la worktree chiamando le API Win32 **senza il prefisso `\\?\`**: con `node_modules` e path > MAX_PATH (260 caratteri) falliva con «Filename too long» / «Result too large» e la procedura si fermava a metà (git aveva già deregistrato la worktree, la directory restava). Il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è un difetto della procedura, non un incidente. Aggiunti:
+- `scripts/post-merge.ps1`: rimozione **long-path-safe** su tre livelli — **L1** `git -c core.longpaths=true worktree remove --force` (la **causa radice**: git usa il prefisso `\\?\`), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e **non segue le junction**), **L3** `cmd /c rd /s /q "\\?\"` (rete per Windows PowerShell 5.1). Se la worktree era ancora registrata dopo la rimozione manuale, `git worktree prune` la deregistra
+- **Guardie di sicurezza**: il fallback manuale è consentito **solo** su una directory che è davvero una worktree di questo repo (registrata da `git worktree list`, o con il marker `.git` che punta a `.git/worktrees/`): la working copy principale e i suoi antenati non sono mai toccati (`-WorktreePath` sulla working copy → **exit 16**, nessuna cancellazione). Se `git status` nella worktree fallisce, lo stato WIP è **sconosciuto** e la procedura si ferma (exit 10) invece di cancellare alla cieca
+- **Exit code 16**: rimozione della worktree fallita (git **e** fallback) — nessuna azione distruttiva, la procedura stampa il comando manuale
+- `scripts/test-post-merge.sh`: **T10..T14** (47 assert in tutto). T10 usa uno **shim di `git`** che fallisce solo su `worktree remove`: rende deterministico il caso del fallback su ogni piattaforma. T11 verifica la guardia sulla working copy principale, T12 i path lunghi reali (Windows), T13 la catena L1→L2→L3 su Windows PowerShell 5.1, T14 la rete L3 **forzata** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`)
+- `AGENTS.md`: nuova sezione §"Difetto ricorrente: la rimozione della worktree su Windows" (i tre livelli, le guardie, l'exit 16), passo 1 della tabella e dell'equivalente manuale allineati, tabella degli exit code e copertura dei test aggiornate
+- `docs/12-DEVOPS.md` §9.8i (nuova) · `docs/18-DEV-LOG.md` §44 · `docs/state/sessions/78-post-merge-long-paths.md`
+
+*Precedente v1.32 — **l'indicatore di avanzamento automatico** (Sessione 75, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 68% — 19 done, 9 step rimanenti. Aggiunti:
 - `scripts/aggregate-state.ps1` **V4**: blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con percentuale (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), `X/Y` completate, **Z step rimanenti**, tabella per EPIC, elenco degli step, **gate di testabilità** (e2e = EPIC 3, motore = EPIC 2, dati reali = 5.2) e l'**analisi della sessione corrente**; modalità read-only `-Progress` (`pnpm run progress`)
 - **Fail-closed del denominatore**: uno state file che il backlog non dichiara ⇒ exit 2 con i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale
 - `docs/state/sessions/<N>-<slug>.md`: nuova sezione **`## Analisi di avanzamento`**, resa dentro il blocco — l'analisi narrativa e i numeri calcolati nello stesso posto, senza doppio lavoro

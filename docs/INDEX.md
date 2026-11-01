@@ -124,6 +124,7 @@
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
+| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ❌ | #236 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -163,9 +164,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **54** (merge: 40)
+- Sessioni migrate in state/sessions: **55** (merge: 40)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S77** - Home + Timeline (Story 3.1, issue #233)
+- Ultima sessione migrata: **S78** - Rimozione worktree long-path-safe (procedura post-merge)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -212,39 +213,36 @@
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S77)
+**Analisi della sessione corrente** (S78)
 
 ### Numeri
 
 - **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
-- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
-- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
-- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
-- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+- **La procedura post-merge non si blocca più su Windows**: la rimozione della
+  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
+  ha un exit code e un messaggio espliciti.
+- Le **story** del backlog non cambiano: questa sessione è manutenzione della
+  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
+  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
+  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
+  dipendenze a ultime major.
+- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
+  condividi ha ancora schermate vuote.
 
-> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
-> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
-> la prosa e' un commento.
+> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
+> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
 
-### Salute tecnica (verificata in questa worktree)
+### Salute tecnica (verificata in questa sessione)
 
-`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
-
-### Procedura introdotta con questa sessione
-
-1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
-2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
-3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
-4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
-5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
-6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
-7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
-8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
+`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
+solo in `scripts/`, `AGENTS.md` e `docs/`.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
