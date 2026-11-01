@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 15:57
-> Totale file: 151
+> Data: 2026-11-01 17:02
+> Totale file: 152
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.36 — Sessione 81 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.37 — Sessione 82 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -901,9 +901,9 @@ Dopo il merge di una PR su `main` girano **sei** workflow. Quattro scattano sul 
 |----------|---------|---------|
 | `auto-status-done` | PR merged | Applica `status:done` alle issue chiuse dalla PR (`Closes/Fixes/Resolves`) e **rimuove `agent-ready`, `in-progress` e `status:in-review`**; emette il commento `release:` estraendo l'agent-id dalla claim `claim:` dell'issue |
 | `auto-branch-cleanup` | PR merged | Elimina il **branch remoto** della PR, con guard su `main`/`release/*`/`hotfix/*`, sui branch di fork e sui branch usati come base di un'altra PR aperta |
-| `auto-session-merge-state` (issue #239) | PR merged | Applica lo stato di merge al frontmatter della sessione (`merged`, `merged_commit`, `merged_date`, `state: 🟢`), rigenera i blocchi aggregati e il bundle. Condivide il concurrency group `post-merge-main` con `auto-state-aggregate` e `auto-bundle`. |
-| `auto-state-aggregate` | push su `main` con paths `docs/state/**`, `docs/11-BACKLOG.md` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) + il blocco **PROGRESS** in `README.md` e `docs/INDEX.md` (V4, issue #216) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-main`** (con `cancel-in-progress: false`) introdotto in issue #115 per serializzare con `auto-bundle.yml`. La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136); i `paths:` devono coprire tutti gli **input** del blocco PROGRESS (catalogo del backlog + state): lo verifica lo stesso validatore (issue #216) |
-| `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, serializzato via stesso concurrency group. Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
+| `auto-session-merge-state` (issue #239) | PR merged | Applica lo stato di merge al frontmatter della sessione (`merged`, `merged_commit`, `merged_date`, `state: 🟢`), rigenera i blocchi aggregati e il bundle. **Concurrency group `post-merge-session`** (proprio): dal 2026-11-01 ogni writer ha il **proprio** group — con `cancel-in-progress: false` GitHub **non accoda** i run in attesa, li **cancella** (issue #251). |
+| `auto-state-aggregate` | push su `main` con paths `docs/state/**`, `docs/11-BACKLOG.md` o `scripts/aggregate-state.ps1` | Rigenera i blocchi `<!-- AGGREGATE-* -->` in `docs/SESSIONS.md` + `docs/11-BACKLOG.md` (V1) + `docs/INDEX.md` + `docs/BUNDLE.md` (V2) + `README.md` (V3, issue #127; committato a partire da issue #136) + il blocco **PROGRESS** in `README.md` e `docs/INDEX.md` (V4, issue #216) e committa il diff con identity `kilo-bot[bot]`. **Concurrency group `post-merge-aggregate`** (proprio, dal 2026-11-01 — issue #251: prima condivideva `post-merge-main` con gli altri due writer, e con `cancel-in-progress: false` GitHub **cancellava** i run in attesa invece di accodarli: misurato nel merge della PR #249, due writer annullati in 1 s e 4 s senza eseguire nulla). La riga `git add` deve coprire **tutti** i `$targets` di `scripts/aggregate-state.ps1`: lo verifica `scripts/validate-workflows.mjs` (issue #136); i `paths:` devono coprire tutti gli **input** del blocco PROGRESS (catalogo del backlog + state): lo verifica lo stesso validatore (issue #216) |
+| `auto-bundle` (issue #115) | push su `main` con paths che coprono `$files` (vedi §9.8b di `docs/12-DEVOPS.md`) **+ `workflow_run` su `auto-state-aggregate` completato** (issue #149) | Rigenera il **contenuto FILE** di `docs/BUNDLE.md` (`===== FILE: ... =====` sezioni) eseguendo `pwsh scripts/generate-bundle.ps1`. Idempotente via `git diff --quiet docs/BUNDLE.md`. Companion di `auto-state-aggregate`, con **concurrency group proprio** `post-merge-bundle` (issue #251): l'ordinamento non viene dal group ma dalla **catena dei push** (merge → sessione → aggregate → bundle). Il trigger `workflow_run` (issue #149) garantisce che rigeneri **dopo** che l'aggregate ha committato i blocchi: il concurrency group serializza i run ma non ne impone l'ordine, e il bundle copia il contenuto dei file che l'aggregate modifica |
 | `stale-claim-sweeper` | cron giornaliero + dispatch manuale | Elenca in job summary le claim `in-progress` ferme da >12h (TTL di ADR-0006). **Advisory**: non rimuove label — il rilascio resta una decisione dell'agente che subentra |
 
 > **Sessione 73 (issue #224) — il bundle rigenera una volta sola.** `auto-bundle` ha due trigger
@@ -1250,7 +1250,13 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
+*Ultimo aggiornamento: v1.37 — **la catena post-merge si auto-ripara** (Sessione 82, issue #251). I tre writer di `main` condividevano il concurrency group `post-merge-main`, ma con `cancel-in-progress: false` GitHub **non accoda** i run in attesa: li **cancella** («any previously pending job or workflow in the concurrency group will be cancelled»). Misurato nel merge della PR #249: `auto-state-aggregate` annullato in 1 s e `auto-session-merge-state` in 4 s, **senza un solo job** — la catena funzionava per caso, non per progetto (confermato tre volte: merge #249, #253, #255). Correzioni:
+- **Concurrency group propri** per ciascun writer (`post-merge-session`, `post-merge-aggregate`, `post-merge-bundle`): nessun writer può più annullare un altro. L'**ordinamento** non dipende dal group ma dalla **catena dei push** (merge → sessione → aggregate → bundle): l'ultimo run arriva sullo stato finale
+- `scripts/apply-merge-state.mjs`: l'assenza di un file di sessione per la PR è ora **advisory** (exit 0 + warning) invece che un fallimento — una PR `fix` senza sessione non ha niente da chiudere, e il suo fallimento rendeva rosso il workflow post-merge (issue #254)
+- `auto-bundle.yml`: **step di verifica e auto-riparazione** (2 tentativi) — l'ultimo writer garantisce che `main` sia coerente: se `aggregate-state.ps1 -Check` o `generate-bundle.ps1 -Check` falliscono, rigenera e committa invece di lasciare lo stato stale in silenzio
+- `scripts/post-merge.ps1`: il comando `apply-merge-state` stampava il numero dell'**issue** al posto di quello della **PR** — i due coincidono solo per convenzione, e il suggerimento era non eseguibile quando differivano (issue #252 → PR #253). Ora il numero della PR viene letto dalla verifica di merge già presente
+
+*Precedente v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
 - **`scripts/agent-claim.ps1`**: presa in carico **atomica** — validazione dell'issue → worktree → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico REST** più basso, non il `node_id` GraphQL né `created_at`) → file di stato dell'agente (nella directory git della worktree: non è un file untracked, non confonde il `pre-commit`, sparisce con la worktree). Se la riverifica è persa rimuove la label, posta `yield:` ed esce 4. Exit 3 = issue già claimata
 - **`scripts/agent-pr.ps1`**: apertura **verificata** — gate locali bloccanti, **una sola** keyword di chiusura nuda, creazione della PR, transizione delle label (`agent-ready` → `status:in-review`) e **scrittura di `pr: N` nel file di sessione** con push: era la precondizione che ha fatto fallire il workflow post-merge due volte (Sessione 80, issue #254)
 - **`scripts/check-claim-state.mjs`** (read-only, bloccante in CI): la PR è coerente con **branch ↔ issue ↔ keyword di chiusura ↔ stato dell'issue ↔ claim** (C1-C5), e **una branch `docs/*` tocca solo file sotto `docs/`** (C4): nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa — la classe diventa impossibile, non solo sgradita. 11 scenari di test (`scripts/test-claim-state.sh`)
@@ -2333,11 +2339,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.36 | Protocollo per agenti — **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.37 | Protocollo per agenti — **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.0 | Diario cronologico per story: problemi, fix, lesson learned — §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.1 | Diario cronologico per story: problemi, fix, lesson learned — §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -12347,6 +12353,30 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
 | 2.31 | 2026-10-31 (issue #233) | **§43 Story 3.1 — Home + Timeline** (Sessione 77, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (77-1 **il modello è puro, i componenti sono presentazionali**: tutta la logica — i quattro numeri della Home, la bar week, i bucket per granularità, le serie di volume e mood, le bande di era, il zoom progressivo — sta in `apps/web/src/screens/homeTimelineModel.ts`, senza React né DOM, riutilizzando il **vocabolario temporale del core** (`@core/analysis`): la Timeline non introduce un secondo calendario (lesson 27-7). I 19 test girano senza IndexedDB né `fake-indexeddb`, perché la logica non li tocca; 77-2 **«il dato mancante non è zero»**: il bucket vuoto **esiste** e vale 0 (una linea che salta i buchi suggerirebbe continuità che i dati non hanno) e il **mood non viene interpolato** nei bucket senza dati; l'area del volume è chiusa sul **minimo** del dominio e non su zero, perché un ascolto non riparte da zero minuti e un'area che scende a zero inventerebbe un silenzio; 77-3 **nessuna libreria di chart**: i tre grafici (StreamChart, MoodLine, BarWeek) sono **SVG scritti a mano**, con la geometria in un file puro e testato (`chartGeometry.ts`) e il contratto a11y della spec (`07§2.7`): `<title>`, `<desc>` e una **tabella dati nascosta** per screen reader. Introdurre una dipendenza di grafici sarebbe una decisione di **stack**, non di story; 77-4 **la scelta fra onboarding e app è legata ai dati**: `App.tsx` interroga il database (ci sono ascolti?) invece di usare un flag in `localStorage`, che mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo; 77-5 **le soglie di stato sono in un punto solo**: 100 eventi per la Home e 6 mesi per la Timeline (`06§2.6-2.7`) sono dichiarati in `useHomeTimelineData.ts`, non nelle due schermate). Consegnati: `apps/web/src/screens/{homeTimelineModel.ts,Home.tsx,Timeline.tsx,AppShell.tsx}`, `apps/web/src/components/{StatCard,MemoryCard,BarWeek,EraBand,StreamChart,MoodLine}.tsx` + `chartGeometry.ts`, `apps/web/src/hooks/{useCountUp.ts,useHomeTimelineData.ts}`, il cablaggio di `App.tsx` e `OnboardingRouter.tsx`, 11 chiavi i18n nuove (namespace `nav` incluso), gli stili in `onboarding.css`, `08-COPY-I18N.md` v0.13 e lo stato della story 3.1 (`done`). Con la 3.1 l'**EPIC 3** passa a 2/4 e l'indicatore di avanzamento (issue #216) a **75%** — 21 story su 28, 7 step rimanenti |
 | 2.32 | 2026-10-31 (Sessione 78) | **§44 Difetto ricorrente: la rimozione della worktree su Windows** (nessuna issue dedicata; segnalato dal project owner): `scripts/post-merge.ps1` si fermava al passo 1 con «Filename too long» / «Result too large» — `git worktree remove --force` cancellava l'albero senza il prefisso `\\?\` e la worktree con `node_modules` aveva path > MAX_PATH. Il rimedio **manuale** (`rd /s /q "\\?\"` + `git worktree prune`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è una procedura mancante. Fix su tre livelli dentro lo script — **L1** `git -c core.longpaths=true worktree remove --force` (causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale tocca **solo** directory che sono worktree di questo repo (working copy principale e antenati mai toccati → **exit 16**) e `git status` fallito = WIP sconosciuto = stop (**exit 10**); `git status` ora gira con `core.longpaths=true`. Difetto scoperto mentre si scriveva la rete: `Invoke-CmdVerbatim` non passava `/c` a `cmd.exe` ⇒ shell interattiva, comando non eseguito, **exit 0** — un successo che non aveva fatto nulla; `/c` aggiunto e L3 coperto da un test che lo **forza** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`). Test: `test-post-merge.sh` **T10..T14** (shim di `git` che fallisce solo su `worktree remove`, guardia sulla working copy, path lunghi reali, catena L1→L2→L3 su PS 5.1, L3 forzata) → **47 assert, 0 falliti**. `AGENTS.md` v1.33 (nuova sezione sul difetto + exit 16), `12-DEVOPS.md` §9.8i + changelog 1.7, `docs/state/sessions/78-post-merge-long-paths.md`. **PR #236 merged il 2026-11-01** (merge commit `08a0b4d`), issue di tracking **#235** (`status:done`) — l'issue è stata creata in fase di chiusura, perché il difetto non ne aveva una e il protocollo pretende una PR = una issue |
+## 48. La catena post-merge si auto-ripara (Sessione 82)
+
+**Branch**: `feat/251-catena-post-merge`
+**Issue di tracking**: **#251**
+**Data**: 2026-11-01
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 82-1 | P | I tre writer di `main` condividevano il concurrency group `post-merge-main`, ma con `cancel-in-progress: false` GitHub **non accoda** i run in attesa: li **cancella**. Misurato nel merge della PR #249: `auto-state-aggregate` annullato in **1 s** e `auto-session-merge-state` in **4 s**, **senza un solo job** | La semantica era stata letta al contrario per mesi: il group, introdotto per serializzare (issue #115), **annullava** i perdenti | Ogni writer ha il **proprio** group (`post-merge-session`, `post-merge-aggregate`, `post-merge-bundle`): nessuno può più annullare un altro. L'**ordinamento** non viene dal group ma dalla **catena dei push** (merge → sessione → aggregate → bundle) | issue #251 |
+| 82-2 | P | Il frontmatter della Sessione 79 restò `merged: false` per una PR già mergiata ⇒ il gate bloccante `check-merge-state.mjs` **fallì su `main`** | Effetto diretto di 82-1: il writer che chiude la sessione era quello annullato | La catena si **auto-ripara**: `auto-bundle.yml` chiude con uno step di **verifica e auto-riparazione** (2 tentativi) — se `aggregate-state.ps1 -Check` o `generate-bundle.ps1 -Check` falliscono, rigenera e committa invece di lasciare lo stato stale in silenzio | `auto-bundle.yml` |
+| 82-3 | P | `auto-session-merge-state.yml` **falliva** (exit 2) su una PR che non ha un file di sessione (una `fix`): il workflow post-merge diventava rosso per un'assenza che non è un errore | Il fall-closed era applicato anche al caso "non c'è niente da fare" | L'assenza di una sessione è **advisory** (exit 0 + warning). Il fail-closed resta dove il fallo è un fallo: un file di sessione che esiste ma non dichiara la PR è un difetto | `scripts/apply-merge-state.mjs` |
+| 82-4 | P | `post-merge.ps1` stampava `apply-merge-state.mjs --pr <N>` con il numero dell'**issue** al posto di quello della **PR**: il suggerimento era **non eseguibile** quando i due differivano (issue #252 → PR #253) | Numero dell'issue e numero della PR coincidono solo per convenzione; nessuno dei due comandi lo dichiarava | Il numero della PR viene letto dalla verifica di merge già presente nello script; quando non è determinabile il comando lo dice invece di mentire | `scripts/post-merge.ps1` |
+
+**Lesson learned**: la prima lezione è sulla **semantica delle impostazioni**. `cancel-in-progress: false` sembra dire "non interrompere" e in realtà dice "non accodare, **annulla** i pending". Un'impostazione di due righe con una semantica opposta a quella documentata è un difetto di specifica, non di codice — e la specifica era sbagliata in un punto che nessun test copriva. Il dato che l'ha svelata era banale: i run annullati duravano 1 e 4 secondi e non avevano **nessun job**. Nessun codice da modificare: è bastato guardare la durata.
+
+La seconda lezione è sulla **catena che si auto-ripara**. La correzione «i writer non si annullano più» lascia comunque una finestra in cui uno dei tre non gira (un crash, un timeout, un runner perso). Il vero invariant è sullo **stato finale**, non sul numero di run: l'ultimo writer verifica che `main` sia coerente e, se non lo è, rigenera e committa. La catena non è più una sequenza di passi che si sperano tutti: è una sequenza che **si verifica alla fine**.
+
+La terza è sul **fail-closed selettivo**. Il fallimento del workflow post-merge su una PR senza sessione era un rumore che ha fatto perdere più tempo di un errore di danno: rendeva rosso un check senza che nulla fosse rotto. Il fail-closed va applicato **dove il fallo è un fallo** — l'assenza di una sessione è un *fatto*, non un errore.
+
+**Verifica**: `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti · `bash scripts/test-post-merge.sh` → 47 assert, 0 falliti · `bash scripts/test-workflow-writer-ordering.sh` → 6/0 · `bash scripts/test-workflow-git-add-coverage.sh` → 8/0 · `bash scripts/test-workflow-push-sync.sh` → 15/0 · `node scripts/apply-merge-state.mjs --pr 9999` → exit 0 con warning · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
 ## 47. Il claim diventa verificabile (Sessione 81)
 
 **Branch**: `feat/256-claim-atomico`
@@ -12437,6 +12467,7 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 |----------|------|-----------|
 | 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
 | 2.34 | 2026-11-01 (issue #252) | **§46 Sessione 80 — il protocollo agenti come contratto verificato (I2-b)**: `AGENTS.md` era l'unico artefatto di governance **senza gate** ⇒ 2 gate read-only nuovi, `check-protocol-consistency.mjs` (6 check: versione, tabella label, tabella exit code, **integrità degli anchor**, esistenza di script e flag citati, checklist unica) e `check-aggregate-blocks.mjs` (**bloccante**: la regola V1 di ADR-0008 verificata in modo **testuale**, immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore), con le suite di scenario negativo (8 + 6) e il job CI `gates-protocol` (4 step, `fetch-depth: 0`). Il primo giro ha trovato **3 riferimenti rotti in `AGENTS.md`** (typo «Macchina **di** stati», sezione «⚠️ Deprecazione» inesistente, rimando a «🛡️ Hardening multi-agente» rinominata) e **1 riferimento stale** in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`). Prova di non-vacuità: il gate dei blocchi applicato alla **PR #249 reale** rileva **5 violazioni** (la PR aveva committato i blocchi rigenerati in locale) ⇒ la regola V1 era violabile in silenzio; la **PR #250** aveva la stessa violazione ed è stata corretta. `AGENTS.md` v1.35 (nuova sezione §"✅ Il contratto del protocollo: regola ⟺ gate"), `docs/12-DEVOPS.md §9.10` a 13 job / 31 step |
+| 2.36 | 2026-11-01 (issue #251) | **§48 Sessione 82 — la catena post-merge si auto-ripara**: i tre writer di `main` condividevano il concurrency group `post-merge-main`, ma con `cancel-in-progress: false` GitHub **non accoda** i run in attesa: li **cancella** (misurato nel merge della PR #249: `auto-state-aggregate` annullato in 1 s, `auto-session-merge-state` in 4 s, senza un solo job — la catena funzionava per caso, confermato tre volte sui merge #249, #253, #255). Correzioni: **concurrency group propri** per ciascun writer (l'ordinamento viene dalla catena dei push, non dal group); `apply-merge-state.mjs` **advisory** quando la PR non ha un file di sessione (prima rendeva rosso il workflow per un'assenza che non è un errore); **step di verifica e auto-riparazione** in `auto-bundle.yml` (l'ultimo writer garantisce che `main` sia coerente, rigenerando e committando se i check falliscono); `post-merge.ps1` stampa il numero della **PR** e non dell'issue (i due coincidono solo per convenzione: il suggerimento era non eseguibile). `AGENTS.md` v1.37 |
 | 2.35 | 2026-11-01 (issue #256) | **§47 Sessione 81 — il claim diventa verificabile (I2-c)**: ADR-0006 ha 8 regole **vincolanti** sul claim e **zero** enforcement ⇒ due agenti potevano implementare la stessa story senza che nulla se ne accorgesse. Aggiunti `scripts/agent-claim.ps1` (presa in carico **atomica**: validazione → worktree → label → commento → **riverifica deterministica** con l'ID numerico REST più basso → file di stato dell'agente nella directory git della worktree; `yield:` + rollback se la riverifica è persa), `scripts/agent-pr.ps1` (apertura **verificata**: gate locali, una sola keyword di chiusura nuda, transizione delle label e **scrittura di `pr: N` nel file di sessione** — era la precondizione che aveva fatto fallire il workflow post-merge due volte) e `scripts/check-claim-state.mjs` (gate bloccante: branch ↔ issue ↔ keyword ↔ stato ↔ claim, più **C4**: una branch `docs/*` tocca solo `docs/` — nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa). 11 scenari di test (`test-claim-state.sh`), con i dati da file JSON invece che da un mock `gh` in bash: su Windows un file senza estensione non è eseguibile e il PATH chiamava il `gh` vero, quindi il test passava sui dati reali del repository. `AGENTS.md` v1.36 (il flusso è `agent-claim.ps1` → implementa → `agent-pr.ps1`: due comandi invece di una sequenza manuale) | 
 
 ---
@@ -18256,6 +18287,107 @@ Il terzo è la parte che chiude la classe di difetto, perché verifica in CI que
 - `docs/18-DEV-LOG.md` §47
 - `scripts/generate-bundle.ps1`: `$files` += i 4 nuovi script + la sessione 81
 - `docs/INDEX.md`: versione di `AGENTS.md`, riga `18-DEV-LOG.md`
+
+
+
+===== FILE: docs/state/sessions/82-catena-post-merge.md =====
+
+---
+number: 82
+title: "La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251)"
+date: 2026-11-01
+state: 🟡
+merged: false
+branch: feat/251-catena-post-merge
+pr: 0
+claim: kilo-hp-elitebook-1c9d
+tags: [devops, governance, tooling]
+---
+
+# Sessione 82 — La catena post-merge si auto-ripara (issue #251)
+
+> **Issue di tracking**: #251. **Branch**: `feat/251-catena-post-merge`.
+> Lotto indipendente dell'epic #248: chiude il difetto della **catena di automazione post-merge**,
+> scoperto misurando i run del merge della PR #249.
+
+## Sintesi
+
+Tre workflow scrivono su `main` dopo ogni merge: `auto-session-merge-state` (chiude la sessione),
+`auto-state-aggregate` (rigenera i blocchi `AGGREGATE-*`), `auto-bundle` (rigenera il contenuto
+FILE del bundle). I tre condividevano il concurrency group `post-merge-main`, e la semantica
+documentata di GitHub è stata letta male per mesi:
+
+> con `cancel-in-progress: false`, GitHub **non accoda** i run in attesa: li **cancella**
+> (*«any previously pending job or workflow in the concurrency group will be cancelled»*).
+
+Il group, quindi, non serializzava i tre writer: ne **annullava** due. Misurato nel merge della
+PR #249 (`2478a9a`, 2026-11-01T14:55:28Z):
+
+| run | workflow | esito | durata |
+|-----|----------|-------|--------|
+| `41318575856` | `auto-bundle` | success | 19 s |
+| `41318575925` | `auto-state-aggregate` | **cancelled** | **1 s** |
+| `41318576222` | `auto-session-merge-state` | **cancelled** | **4 s** |
+
+I due run annullati non avevano **nessun job**: erano stati cancellati in attesa. Conseguenza
+misurata: il frontmatter della Sessione 79 restò `merged: false` per una PR già mergiata, e il
+gate bloccante `check-merge-state.mjs` **fallì su `main`**.
+
+Il difetto è stato **confermato tre volte** (merge #249, #253, #255): a ogni merge uno dei tre
+writer viene annullato. La catena funzionava **per caso**, non per progetto.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-82.1 | Ogni writer ha il **proprio** concurrency group (`post-merge-session`, `post-merge-aggregate`, `post-merge-bundle`) | Con group separati non c'è più competizione: nessun writer può annullare un altro. L'**ordinamento** non dipende dal group ma dalla **catena dei push** (merge → sessione → aggregate → bundle): l'ultimo run arriva sullo stato finale |
+| D-82.2 | `apply-merge-state.mjs` esce **0 con un warning** quando nessun file di sessione corrisponde alla PR | Una PR **senza** sessione (una `fix`, o una PR che non scrive `pr:`) non ha niente da chiudere: fallire rendeva rosso il workflow post-merge per un motivo che non è un errore (misurato: issue #254) |
+| D-82.3 | `auto-bundle.yml` chiude la catena con una **verifica e auto-riparazione** (2 tentativi) | L'ultimo writer garantisce che `main` sia coerente: se i check non passano, rigenera e committa. La catena si **auto-ripara** invece di lasciare lo stato stale in silenzio |
+| D-82.4 | `post-merge.ps1` stampa il numero della **PR** (non dell'issue) nel comando `apply-merge-state` | I due numeri coincidono solo per convenzione: il suggerimento era **non eseguibile** quando differivano (misurato: issue #252 → PR #253). Ora il numero della PR viene letto dalla verifica di merge già presente |
+| D-82.5 | Il comportamento di `-Check` di `apply-merge-state.mjs` resta **fail-closed** quando un file di sessione esiste ma non dichiara la PR | La precondizione `pr: N` resta verificata: è `agent-pr.ps1` (Sessione 81) a scriverla, non l'agente a mano |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort 77%), restano
+**7 step**. Lavoro di **governance** su un'issue dedicata, non story di backlog.
+
+**Cosa è pronto.** Tre concurrency group separati; `apply-merge-state.mjs` advisory quando non c'è
+sessione; step di verifica e auto-riparazione in `auto-bundle.yml`; `post-merge.ps1` che stampa il
+numero della PR; i commenti dei tre workflow e di `ci.yml` allineati alla semantica reale.
+
+**Cosa manca.** Il lotto **I3** dell'epic #248 (rifinitura di `AGENTS.md` a ~400 righe con 77
+anchor invariati). Nessun altro difetto noto della catena post-merge.
+
+**Salute tecnica.** Worktree attiva su `feat/251-catena-post-merge`. Claim riverificato sull'issue
+#251 (commento `6560302917`, unico claim). Nessun blocco `AGGREGATE-*` modificato a mano.
+
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
+`bash scripts/test-post-merge.sh` → 47 assert, 0 falliti ·
+`bash scripts/test-workflow-writer-ordering.sh` → 6/0 ·
+`bash scripts/test-workflow-git-add-coverage.sh` → 8/0 ·
+`bash scripts/test-workflow-push-sync.sh` → 15/0 ·
+`node scripts/apply-merge-state.mjs --pr 9999` → exit 0 con warning ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| La semantica di `cancel-in-progress: false` è stata letta al contrario per mesi: il group **non accodava**, **annullava** | Un'impostazione di 2 righe con una semantica opposta a quella documentata è un difetto di **specifica**, non di codice. La lezione non è «leggere la documentazione»: è **misurare il comportamento** (i run cancellati duravano 1 s e 4 s senza un solo job: il dato era lì) |
+| Il group era stato introdotto per **serializzare** i writer (issue #115) e per un anno ha fatto il contrario di quello che serviva | Una misura che protegge una cosa e ne rompe un'altra va guardata **per ciò che protegge**, non per ciò che intende proteggere |
+| Un errore di *rumore* (workflow rosso per una PR che non ha sessione) ha fatto perdere più tempo di un errore di *danno* | Il fail-closed va applicato **dove il fallo è un fallo**: l'assenza di una sessione è un fatto, non un errore |
+| Il numero della PR e il numero dell'issue sono numeri diversi, e il protocollo li usava come se fossero lo stesso | Ogni comando che accetta un identificatore deve dichiarare ** quale accetta. Il suggerimento stampato da `post-merge.ps1` era semplicemente non eseguibile |
+
+## Documenti aggiornati
+
+- `.github/workflows/auto-session-merge-state.yml`, `auto-state-aggregate.yml`, `auto-bundle.yml`:
+  concurrency group propri + nota di-header sul perché
+- `.github/workflows/auto-bundle.yml`: step «Verifica e auto-riparazione dello stato (issue #251)»
+- `scripts/apply-merge-state.mjs`: assenza di sessione → advisory (exit 0)
+- `scripts/post-merge.ps1`: il numero della PR nel comando `apply-merge-state`
+- `AGENTS.md` v1.36 → v1.37: la sezione §"📤 Post-merge actions" allineata alla semantica reale
+- `docs/12-DEVOPS.md §9.10` + `docs/18-DEV-LOG.md` §48 · `docs/INDEX.md`
+- `scripts/generate-bundle.ps1`: `$files` += la sessione 82
 
 
 
@@ -35797,6 +35929,7 @@ if ($aheadCount -and $aheadCount -ne "0") {
 Write-Step "4/7 Verifica merge di '$Branch'"
 
 $mergeCommitOid = $null
+$prNumber = $null
 $verified = $false
 $verifySource = ""
 
@@ -35811,6 +35944,7 @@ if ($IssueNumber -gt 0 -and (Get-Command gh -ErrorAction SilentlyContinue)) {
                 $verified = $true
                 $verifySource = "gh: PR #$($prs[0].number) merged il $($prs[0].mergedAt)"
                 $mergeCommitOid = $prs[0].mergeCommit.oid
+                $prNumber = $prs[0].number
             }
         } catch {
             Write-Warn "output gh non parsabile: $($_.Exception.Message)"
@@ -35925,7 +36059,15 @@ if ($IssueNumber -gt 0) {
     Write-Host "[post-merge] ==============================================" -ForegroundColor Green
     $sha = if ($mergeCommitOid) { $mergeCommitOid } else { "<merge-commit-sha>" }
     Write-Host "[post-merge]   gh issue comment $IssueNumber --body `"release: <AGENT-ID> - PR mergata ($sha)`"" -ForegroundColor Cyan
-    Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr $IssueNumber    # applica stato merge sessione (issue #239)" -ForegroundColor Cyan
+    # Il numero della PR NON e' il numero dell'issue: i due coincidono solo
+    # per convenzione. Il comando qui sotto accetta il numero della PR.
+    if ($prNumber) {
+        Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr $prNumber    # applica stato merge sessione (issue #239)" -ForegroundColor Cyan
+    }
+    else {
+        Write-Host "[post-merge]   node scripts/apply-merge-state.mjs --pr <NUMERO-PR>   # applica stato merge sessione (issue #239)" -ForegroundColor Yellow
+        Write-Host "[post-merge]     (numero della PR non determinato: risolvilo con 'gh pr list --head $Branch --state merged')" -ForegroundColor Yellow
+    }
     Write-Host "[post-merge]   pwsh scripts/aggregate-state.ps1 -Check    # stato doc (exit 0 = in sync)" -ForegroundColor Cyan
     Write-Host "[post-merge]   pwsh scripts/generate-bundle.ps1 -Check   # bundle (exit 0 = in sync)" -ForegroundColor Cyan
 } else {
@@ -42903,7 +43045,7 @@ jobs:
         run: bash scripts/test-workflow-permission-scopes.sh
 
       # Issue #140: due workflow pushano su `main` (auto-bundle + auto-state-aggregate)
-      # e condividono il concurrency group `post-merge-main`, che serializza i *run*
+      # e hanno ciascuno il PROPRIO concurrency group (`post-merge-<writer>`): con `cancel-in-progress: false` GitHub non accoda i run in attesa, li CANCELLA (issue #251)
       # ma non i *checkout*: senza un sync con `origin/main` prima del push, il secondo
       # writer pusha da un checkout stale e il push viene rifiutato con
       # `non-fast-forward`. Il fallimento e' silenzioso (il merge sembra riuscito, i
@@ -43117,6 +43259,18 @@ jobs:
 
 ===== FILE: .github/workflows/auto-bundle.yml =====
 
+#
+# CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
+# condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
+# GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job
+# or workflow in the concurrency group will be cancelled"*). Con un group
+# condiviso, dei writer partendo insieme uno vinceva il lock e gli altri
+# venivano annullati senza eseguire nulla (misurato nel merge della PR #249:
+# auto-state-aggregate e auto-session-merge-state annullati in 1 s e 4 s).
+# L'ordinamento non dipende dal group ma dalla catena dei push
+# (merge -> sessione -> aggregate -> bundle): l'ultimo run arriva sullo
+# stato finale, e il guard `git diff --quiet` rende ogni writer idempotente.
+#
 name: auto-bundle
 
 # Rigenera il contenuto FILE di docs/BUNDLE.md (===== FILE: ... =====) dopo un
@@ -43141,7 +43295,7 @@ name: auto-bundle
 # idempotente (commit solo se la rigenerazione produce un diff reale).
 #
 # Companion (non-bloccante): se auto-state-aggregate corre in parallelo sullo
-# stesso push, condividono il concurrency group `post-merge-main` (con
+# stesso push, condividono il concurrency group `post-merge-bundle` (con
 # cancel-in-progress: false). In questo modo le due rigenerazioni sono
 # serializzate: la seconda parte solo dopo che la prima ha pushato. Senza
 # la serializzazione, le due workflow potrebbero fare commit di BUNDLE.md
@@ -43180,7 +43334,7 @@ on:
 
   # === Issue #149 — trigger `workflow_run`: il bundle rigenera DOPO l'aggregate ===
   #
-  # Il concurrency group `post-merge-main` (piu' in basso) serializza i due
+  # Il concurrency group `post-merge-bundle` (piu' in basso) serializza i due
   # writer di `main`, ma NON ne impone l'ordine: quale workflow ottenga prima
   # il lock non e' deterministico. `auto-bundle` copia il contenuto dei file
   # che `auto-state-aggregate` modifica: se il bundle gira PRIMA, copia i blocchi
@@ -43205,7 +43359,7 @@ on:
 # Serialize with auto-state-aggregate: stesso gruppo, no cancel-in-progress
 # (le nuove run restano in coda dietro a quella in corso).
 concurrency:
-  group: post-merge-main
+  group: post-merge-bundle
   cancel-in-progress: false
 
 jobs:
@@ -43330,13 +43484,60 @@ jobs:
                        -m "automaticamente senza richiedere rigenerazione manuale nella stessa PR." `
                        -m "" `
                        -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
-                       -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-main."
+                       -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-bundle."
           git push origin main
+      # Verifica finale dello stato: l'ultimo writer della catena garantisce
+      # che `main` sia coerente. Se i check falliscono (per es. porque' un
+      # writer precedente e' stato annullato dal concurrency group, issue #251),
+      # rigenera e committa — la catena si auto-ripara invece di lasciare lo
+      # stato stale in silenzio (issue #251).
+      - name: Verifica e auto-riparazione dello stato (issue #251)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          for ($i = 1; $i -le 2; $i++) {
+            pwsh scripts/aggregate-state.ps1 -Check | Out-Host
+            $aggOk = $LASTEXITCODE -eq 0
+            pwsh scripts/generate-bundle.ps1 -Check | Out-Host
+            $bundleOk = $LASTEXITCODE -eq 0
+            if ($aggOk -and $bundleOk) {
+              Write-Host "[auto-bundle] stato in sync (tentativo $i)"
+              exit 0
+            }
+            Write-Host "[auto-bundle] stato NON in sync (aggregatore=$aggOk bundle=$bundleOk): rigenero (tentativo $i)"
+            git fetch origin main
+            git rebase origin/main 2>$null; if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
+            pwsh scripts/aggregate-state.ps1 | Out-Host
+            pwsh scripts/generate-bundle.ps1 | Out-Host
+            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md
+            if (-not (git diff --cached --quiet)) {
+              git config user.name "kilo-bot[bot]"
+              git config user.email "kilo-bot@kilo.local"
+              git commit -m "chore(state): auto-riparazione dei blocchi aggregati (issue #251)" `
+                           -m "I check post-merge (aggregate-state -Check / generate-bundle -Check) non erano in sync." `
+                           -m "Rigenerati dall'ultimo writer della catena: la catena post-merge si auto-ripara invece di lasciare lo stato stale."
+              git push origin HEAD:main
+            }
+          }
+          Write-Host "[auto-bundle] ATTENZIONE: lo stato non e' in sync neppure dopo 2 tentativi (issue #251): verifica manualmente"
+          exit 0
 
 
 
 ===== FILE: .github/workflows/auto-session-merge-state.yml =====
 
+#
+# CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
+# condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
+# GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job
+# or workflow in the concurrency group will be cancelled"*). Con un group
+# condiviso, dei writer partendo insieme uno vinceva il lock e gli altri
+# venivano annullati senza eseguire nulla (misurato nel merge della PR #249:
+# auto-state-aggregate e auto-session-merge-state annullati in 1 s e 4 s).
+# L'ordinamento non dipende dal group ma dalla catena dei push
+# (merge -> sessione -> aggregate -> bundle): l'ultimo run arriva sullo
+# stato finale, e il guard `git diff --quiet` rende ogni writer idempotente.
+#
 name: Auto session merge state
 
 on:
@@ -43345,7 +43546,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: post-merge-main
+  group: post-merge-session
   cancel-in-progress: false
 
 permissions:

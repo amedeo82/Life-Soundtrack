@@ -1,3 +1,15 @@
+﻿#
+# CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
+# condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
+# GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job
+# or workflow in the concurrency group will be cancelled"*). Con un group
+# condiviso, dei writer partendo insieme uno vinceva il lock e gli altri
+# venivano annullati senza eseguire nulla (misurato nel merge della PR #249:
+# auto-state-aggregate e auto-session-merge-state annullati in 1 s e 4 s).
+# L'ordinamento non dipende dal group ma dalla catena dei push
+# (merge -> sessione -> aggregate -> bundle): l'ultimo run arriva sullo
+# stato finale, e il guard `git diff --quiet` rende ogni writer idempotente.
+#
 name: auto-bundle
 
 # Rigenera il contenuto FILE di docs/BUNDLE.md (===== FILE: ... =====) dopo un
@@ -22,7 +34,7 @@ name: auto-bundle
 # idempotente (commit solo se la rigenerazione produce un diff reale).
 #
 # Companion (non-bloccante): se auto-state-aggregate corre in parallelo sullo
-# stesso push, condividono il concurrency group `post-merge-main` (con
+# stesso push, condividono il concurrency group `post-merge-bundle` (con
 # cancel-in-progress: false). In questo modo le due rigenerazioni sono
 # serializzate: la seconda parte solo dopo che la prima ha pushato. Senza
 # la serializzazione, le due workflow potrebbero fare commit di BUNDLE.md
@@ -61,7 +73,7 @@ on:
 
   # === Issue #149 — trigger `workflow_run`: il bundle rigenera DOPO l'aggregate ===
   #
-  # Il concurrency group `post-merge-main` (piu' in basso) serializza i due
+  # Il concurrency group `post-merge-bundle` (piu' in basso) serializza i due
   # writer di `main`, ma NON ne impone l'ordine: quale workflow ottenga prima
   # il lock non e' deterministico. `auto-bundle` copia il contenuto dei file
   # che `auto-state-aggregate` modifica: se il bundle gira PRIMA, copia i blocchi
@@ -86,7 +98,7 @@ on:
 # Serialize with auto-state-aggregate: stesso gruppo, no cancel-in-progress
 # (le nuove run restano in coda dietro a quella in corso).
 concurrency:
-  group: post-merge-main
+  group: post-merge-bundle
   cancel-in-progress: false
 
 jobs:
@@ -211,5 +223,40 @@ jobs:
                        -m "automaticamente senza richiedere rigenerazione manuale nella stessa PR." `
                        -m "" `
                        -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
-                       -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-main."
+                       -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-bundle."
           git push origin main
+      # Verifica finale dello stato: l'ultimo writer della catena garantisce
+      # che `main` sia coerente. Se i check falliscono (per es. porque' un
+      # writer precedente e' stato annullato dal concurrency group, issue #251),
+      # rigenera e committa — la catena si auto-ripara invece di lasciare lo
+      # stato stale in silenzio (issue #251).
+      - name: Verifica e auto-riparazione dello stato (issue #251)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          for ($i = 1; $i -le 2; $i++) {
+            pwsh scripts/aggregate-state.ps1 -Check | Out-Host
+            $aggOk = $LASTEXITCODE -eq 0
+            pwsh scripts/generate-bundle.ps1 -Check | Out-Host
+            $bundleOk = $LASTEXITCODE -eq 0
+            if ($aggOk -and $bundleOk) {
+              Write-Host "[auto-bundle] stato in sync (tentativo $i)"
+              exit 0
+            }
+            Write-Host "[auto-bundle] stato NON in sync (aggregatore=$aggOk bundle=$bundleOk): rigenero (tentativo $i)"
+            git fetch origin main
+            git rebase origin/main 2>$null; if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
+            pwsh scripts/aggregate-state.ps1 | Out-Host
+            pwsh scripts/generate-bundle.ps1 | Out-Host
+            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md
+            if (-not (git diff --cached --quiet)) {
+              git config user.name "kilo-bot[bot]"
+              git config user.email "kilo-bot@kilo.local"
+              git commit -m "chore(state): auto-riparazione dei blocchi aggregati (issue #251)" `
+                           -m "I check post-merge (aggregate-state -Check / generate-bundle -Check) non erano in sync." `
+                           -m "Rigenerati dall'ultimo writer della catena: la catena post-merge si auto-ripara invece di lasciare lo stato stale."
+              git push origin HEAD:main
+            }
+          }
+          Write-Host "[auto-bundle] ATTENZIONE: lo stato non e' in sync neppure dopo 2 tentativi (issue #251): verifica manualmente"
+          exit 0
