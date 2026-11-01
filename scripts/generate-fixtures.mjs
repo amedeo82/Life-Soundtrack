@@ -3,7 +3,7 @@
  * scripts/generate-fixtures.mjs
  *
  * Generatore deterministico di fixture sintetici per test DB e analisi.
- * Source of truth: AGENTS.md §V1 (audit 2026-10-15) + 10-TESTING §3.2/§3.3/§3.4 + 06-UX §2.14.
+ * Source of truth: 02-DATA-SCHEMA.md + 10-TESTING.md §3.2/§3.3/§3.4 + 06-UX-FLOWS-STATES.md §2.14 (audit 2026-10-15).
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti

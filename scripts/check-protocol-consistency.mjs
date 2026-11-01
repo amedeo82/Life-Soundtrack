@@ -283,11 +283,21 @@ function extractHeadings(text) {
  * menzioni con estensione (`18-DEV-LOG.md`) sia quelle senza (`18-DEV-LOG`),
  * che altrimenti verrebbero attribuite al documento citato prima.
  */
-function extractRefs(text) {
+function extractRefs(text, selfIsAgents) {
   const refs = [];
   const lines = text.split(/\r?\n/);
+  // il footer di AGENTS.md e' un CHANGELOG: i suoi riferimenti descrivono le
+  // sezioni come erano all'epoca ("La CI: 11 job" quando oggi sono 12) e non
+  // sono un contratto. Non si verificano.
+  const historyStart = selfIsAgents
+    ? lines.findIndex((l) => /^\*Ultimo aggiornamento:/.test(l.trim()))
+    : -1;
   lines.forEach((line, i) => {
+    if (historyStart >= 0 && i > historyStart) return;
     const mentions = [];
+    // dentro AGENTS.md ogni riferimento e' ad AGENTS.md, salvo che una riga
+    // citi prima un altro documento (l'attribuzione e' per menzione piu' vicina)
+    if (selfIsAgents) mentions.push({ at: -1, name: 'AGENTS.md' });
     const mentionRe = /([A-Za-z0-9_.-]*\.md|\b\d{2}-[A-Z][A-Za-z-]*)/g;
     let m;
     while ((m = mentionRe.exec(line)) !== null) {
@@ -300,14 +310,21 @@ function extractRefs(text) {
       const isAgents = /(^|\/)AGENTS\.md$/.test(last.name);
       if (!isAgents) continue;
       const rest = line.slice(idx + 1);
+      // se subito dopo il § c'e' un altro documento, il riferimento e' suo
+      // (es. "§9.8b di `docs/12-DEVOPS.md`")
+      const ahead = rest.slice(0, 40);
+      const aheadMention = ahead.match(/([A-Za-z0-9_.-]*\.md|\b\d{2}-[A-Z][A-Za-z-]*)/);
+      if (aheadMention && !/(^|\/)AGENTS\.md$/.test(aheadMention[1])) continue;
       const quoted = rest.match(/^\s*["“]([^"”\n]+)["”]/);
       if (quoted) {
-        refs.push({ ref: quoted[1], line: i + 1 });
+        // "Sezione → sottosezione": la freccia introduce un percorso, non un titolo
+        const ref = quoted[1].split('→')[0].trim();
+        if (ref) refs.push({ ref, line: i + 1 });
         continue;
       }
       const bare = rest.match(/^\s*([^,\n§`()"/]{1,60})/);
       if (bare) {
-        const t = bare[1].split(' (')[0].replace(/[.\s]+$/, '');
+        const t = bare[1].split(' (')[0].split('→')[0].replace(/[.\s]+$/, '');
         if (t) refs.push({ ref: t, line: i + 1 });
       }
     }
@@ -341,7 +358,8 @@ function checkAnchors() {
     for (const file of files) {
       if (!existsSync(file)) continue;
       const text = readFileSync(file, 'utf8');
-      for (const { ref, line } of extractRefs(text)) {
+      const selfIsAgents = /(^|\/)AGENTS\.md$/.test(file.replace(/\\/g, '/'));
+      for (const { ref, line } of extractRefs(text, selfIsAgents)) {
         const key = normalizeTitle(ref);
         if (key.length < 2) continue;
         total++;
