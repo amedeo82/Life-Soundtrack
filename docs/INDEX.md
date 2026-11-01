@@ -126,6 +126,7 @@
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
 | 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟢 | ✅ | #249 |
+| 80 | Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -165,9 +166,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **56** (merge: 56)
+- Sessioni migrate in state/sessions: **57** (merge: 56)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S79** - Protocollo agenti come contratto verificato (ADR-0012)
+- Ultima sessione migrata: **S80** - Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -214,37 +215,42 @@
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S79)
+**Analisi della sessione corrente** (S80)
 
 **Numeri.** L'implementazione non cambia: **75%** (21 story completate su 28, effort pesato 77%),
 restano **7 step** (3.2 Ricordi + Share · 3.3 Esplora + Analisi · 4.2 MusicBrainz lookup ·
 4.3 Artwork enrichment · 5.1 Privacy spec finale · 5.2 Export e purge · 6.1 Upgrade toolchain).
-Questa sessione non implementa story di prodotto: chiude lavoro di **governance** su un'epic
-(#248) che non è una story del backlog. Il protocollo agenti passa da **0 gate** a **0 gate
-nuovi in questa PR** — i gate che lo rendono verificabile (I2-b: coerenza del protocollo e
-invarianti ADR-0008) e gli script che lo rendono atomico (I2-c: claim, PR) sono i lotti
-successivi dell'epic, descritti in ADR-0012 §"Stato dell'implementazione".
+Questa sessione è lavoro di **governance** su un'epic (#248), non una story del backlog.
 
-**Cosa è pronto.** ADR-0012 scritta e approvata; **8 drift chiusi** (D1 versione in `docs/INDEX.md`,
-D2 `phase-post`, D3 exit 14, D4 `-Check` a tratto singolo, D5 ordine worktree/claim, D6 cifre come
-puntatori, D7 query senza `jq` esterno, D8 checklist unica); fallback PS 5.1 rimosso dal
-`pre-push`; `pre-commit` separato in invariante bloccante + igiene advisory; PR template
-completato con le 10 voci che mancavano.
+**Il numero che conta.** I gate del repository passano da **26** a **30** (4 nuovi step nel job
+`gates-protocol`), e il **protocollo agenti** passa da **0** a **2** gate che lo verificano. Per la
+prima volta ogni regola normativa di `AGENTS.md` che può essere confrontata con la realtà **ha un
+gate**: il principio di ADR-0012 («una regola senza gate è un consiglio») smette di essere un
+principio e diventa un inventario.
 
-**Cosa manca.** I2-b (`check-protocol-consistency.mjs`, `check-aggregate-blocks.mjs` + test
-negativi), I2-c (`agent-claim.ps1`, `agent-pr.ps1`, `check-claim-state.mjs`), I3 (rifinitura di
-`AGENTS.md` a ~400 righe con 77 anchor invariati).
+**Cosa è pronto.** I due gate (6 + 1 controlli), le due suite di scenario negativo (8 + 6
+scenari), il job `gates-protocol` in `ci.yml` (4 step bloccanti + `fetch-depth: 0`), la nuova
+sezione §"✅ Il contratto del protocollo: regola ⟺ gate" in `AGENTS.md` (v1.34 → v1.35), il
+catalogo dei gate in `docs/12-DEVOPS.md §9.10` (13 job, 31 step), 3 riferimenti rotti corretti in
+`AGENTS.md`, 1 riferimento stale corretto in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`, che
+non esiste più dalla ristrutturazione v1.0).
 
-**Salute tecnica.** Worktree attiva su `feat/248-protocollo-contratto-verificato` (push early
-eseguito). Claim riverificato: ID commento `6559382507`, unico claim sull'issue #248. Nessun
-blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9 (baseline). Gate eseguiti prima del merge:
-`generate-bundle.ps1 -Check` (exit 0), `aggregate-state.ps1 -Check` (exit 0),
-`check-readme-facts.mjs` (exit 0), `test-pre-commit-clean-check.sh` (14 assert, 0 falliti).
+**Cosa manca.** Il lotto **I2-c** (`agent-claim.ps1` con claim e riverifica in sequenza atomica,
+`agent-pr.ps1`, `check-claim-state.mjs`) e il lotto **I3** (rifinitura di `AGENTS.md` a ~400 righe
+con 77 anchor invariati — il gate C4 ne è la rete di sicurezza). Resta aperta l'issue **#251**
+(la catena post-merge si annulla da sola: il concurrency group `post-merge-main` cancella i run in
+attesa invece di accodarli — misurato nel merge della PR #249).
 
-**Gate di testabilità.** La verifica della sessione è automatica: i gate di `ci.yml` (bloccanti)
-più `bash scripts/test-post-merge.sh` e `bash scripts/test-setup-worktree.sh` per la parte di
-hook. Il criterio di accettazione della I2-a è che **nessuno degli 8 drift sia riproducibile**:
-verificato con un'ispezione mirata dei file citati.
+**Salute tecnica.** Worktree attiva su `feat/252-gate-protocollo-coerenza`. Claim riverificato
+sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
+`node scripts/check-aggregate-blocks.mjs` (0 violazioni). `pwsh` 7.6.9.
+
+**Gate di testabilità.** `node scripts/check-protocol-consistency.mjs` (6 check, 0 falliti) ·
+`node scripts/check-aggregate-blocks.mjs` (0 violazioni) ·
+`bash scripts/test-protocol-consistency.sh` (8 scenari, 0 falliti) ·
+`bash scripts/test-aggregate-blocks.sh` (6 scenari, 0 falliti) ·
+`pwsh scripts/aggregate-state.ps1 -Check` (exit 0) · `pwsh scripts/generate-bundle.ps1 -Check`
+(exit 0) · `node scripts/validate-workflows.mjs .github/workflows` (0 falliti).
 
 <!-- AGGREGATE-PROGRESS-END -->
 
