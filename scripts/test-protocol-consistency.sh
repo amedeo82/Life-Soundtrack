@@ -216,6 +216,13 @@ write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
 | 14 | residui |" "Vedi \`AGENTS.md §\"Sezione che non esiste\"\`." "-Check" ""
 run_scenario "T9" "riferimento rotto citato dentro un backtick (C4)" "0"
 
+# T10: un riferimento NUMERICO (§9.8b) che appartiene a un altro documento non
+# e' un riferimento ad AGENTS.md: la riga cita `docs/12-DEVOPS.md`, quindi il
+# gate non lo cerca fra gli heading di AGENTS.md (issue #259).
+write_fixture "1.34" "$LABELS_OK" "| 0 | tutto pulito |
+| 14 | residui |" "Vedi \`docs/12-DEVOPS.md\` §9.8b e \`18-DEV-LOG.md\` §49: Sessione 83." "-Check" ""
+run_scenario "T10" "riferimento numerico di un altro documento (C4)" "0"
+
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
 

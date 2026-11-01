@@ -309,10 +309,6 @@ function extractRefs(text, selfIsAgents) {
       // rimando rotto come esempio), non un puntamento: non si verifica
       const backticksBefore = (line.slice(0, idx).match(/`/g) || []).length;
       if (backticksBefore % 2 === 1) continue;
-      const last = mentions.filter((x) => x.at < idx).pop();
-      if (!last) continue;
-      const isAgents = /(^|\/)AGENTS\.md$/.test(last.name);
-      if (!isAgents) continue;
       const rest = line.slice(idx + 1);
       // se subito dopo il § c'e' un altro documento, il riferimento e' suo
       // (es. "§9.8b di `docs/12-DEVOPS.md`")
@@ -321,6 +317,8 @@ function extractRefs(text, selfIsAgents) {
       if (aheadMention && !/(^|\/)AGENTS\.md$/.test(aheadMention[1])) continue;
       const quoted = rest.match(/^\s*["“]([^"”\n]+)["”]/);
       if (quoted) {
+        const last = mentions.filter((x) => x.at < idx).pop();
+        if (!last || !/(^|\/)AGENTS\.md$/.test(last.name)) continue;
         // "Sezione → sottosezione": la freccia introduce un percorso, non un titolo
         const ref = quoted[1].split('→')[0].trim();
         if (ref) refs.push({ ref, line: i + 1 });
@@ -329,7 +327,21 @@ function extractRefs(text, selfIsAgents) {
       const bare = rest.match(/^\s*([^,\n§`()"/]{1,60})/);
       if (bare) {
         const t = bare[1].split(' (')[0].split('→')[0].replace(/[.\s]+$/, '');
-        if (t) refs.push({ ref: t, line: i + 1 });
+        if (!t) continue;
+        // un riferimento NUMERICO (§49, §9.8b, "§49: Sessione 83") e' una
+        // sezione numerata di un documento: se la riga cita un documento
+        // diverso da AGENTS.md, quel riferimento non e' ad AGENTS.md
+        if (/^\d/.test(t)) {
+          const real = mentions.filter((x) => x.at >= 0);
+          const others = real.filter((x) => !/(^|\/)AGENTS\.md$/.test(x.name));
+          if (others.length > 0) continue;
+          if (!real.some((x) => /(^|\/)AGENTS\.md$/.test(x.name))) continue;
+        }
+        else {
+          const last = mentions.filter((x) => x.at < idx).pop();
+          if (!last || !/(^|\/)AGENTS\.md$/.test(last.name)) continue;
+        }
+        refs.push({ ref: t, line: i + 1 });
       }
     }
   });
