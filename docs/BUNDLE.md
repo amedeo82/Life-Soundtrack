@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 16:38
+> Data: 2026-11-01 15:41
 > Totale file: 146
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2399,7 +2399,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟢 | ✅ | #234 |
 | 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟢 | ✅ | #236 |
 | 79 | Protocollo agenti come contratto verificato (ADR-0012) | 🟢 | ✅ | #249 |
-| 80 | Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b) | 🟡 | ❌ | - |
+| 80 | Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b) | 🟢 | ✅ | #253 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2439,7 +2439,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **57** (merge: 56)
+- Sessioni migrate in state/sessions: **57** (merge: 57)
 - Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S80** - Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
@@ -10558,8 +10558,8 @@ verificato con un'ispezione mirata dei file citati.
 ### Sessione 80 - Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)
 
 - **Data**: 2026-11-01
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #253 (1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca, 2026-11-01T15:33:04Z)
 - **Claim**: `kilo-hp-elitebook-1a2b`
 
 ```
@@ -10567,6 +10567,16 @@ verificato con un'ispezione mirata dei file citati.
 # Sessione 80 — Gate di coerenza del protocollo e blocchi aggregati intoccabili (I2-b)
 
 > **Issue di tracking**: #252 (lotto I2-b dell'epic #248). **Branch**: `feat/252-gate-protocollo-coerenza`.
+> **PR**: **#253** — **merged** il 2026-11-01T15:33:04Z (merge commit `1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca`).
+>
+> **Nota (doc-sync di chiusura)**: il frontmatter è stato allineato al merge **dopo** il merge, con
+> `node scripts/apply-merge-state.mjs --pr 253` — lo stesso strumento deterministico del workflow
+> `auto-session-merge-state.yml`. Il workflow **è girato** (questa volta non è stato annullato dal
+> concurrency group), ma è **fallito sulla precondizione**: nessun file di sessione dichiarava
+> `pr: 253`, perché il doc-sync in-branch era stato scritto con `pr: 0`. La precondizione è corretta
+> e utile — ma è fragile: il `pr:` va scritto **prima** del merge, in un commit successivo sulla
+> stessa branch (come fatto per la Sessione 79). Difetto di processo tracciato in `docs/18-DEV-LOG.md`
+> §46 (80-7).
 >
 > Secondo lotto dell'epic #248: non chiude altri drift, **chiude la classe di drift**. Nella
 > Sessione 79 ne erano stati chiusi 8, uno per uno: senza un gate che li confronti, tornano.
@@ -10644,6 +10654,7 @@ sull'issue #252. Nessun blocco `AGGREGATE-*` modificato a mano: verificato con
 | Il primo giro di un gate appena scritto finds **falsi positivi** prima che veri problemi: 2 «riferimenti rotti» erano in realtà riferimenti ad altri documenti (attribuzione per menzione più vicina) e riferimenti a sottosezioni (freccia `→`) | L'ordine è: prima far passare il gate sullo stato **vero** del repository (che è sano), poi giudicare i fallimenti. Un gate che segnala 20 problemi e 15 sono sue bug non viene ascoltato quando ne segnala 21 e 20 sono suoi bug |
 | La prova che un gate non è vacuo si fa su **un caso reale già esistente**, non su una fixture | `check-aggregate-blocks.mjs` è stato eseguito sulla PR #249 reale: 5 violazioni. Una fixture costruita apposta avrebbe dimostrato che il gate funziona, non che c'era qualcosa da trovare |
 | Il **checkout del gate in CI** deve avere la base, non solo il merge commit | `fetch-depth: 0`: senza, `origin/main` non esiste e il confronto base-vs-PR non può girare. È il dettaglio che distingue un gate che passa sempre da un gate che verifica |
+| Un **riferimento citato** dentro un backtick non è un puntamento: il gate C4 lo contava come drift e aveva lasciato `main` rosso | I riferimenti dentro backtick sono citazioni (es. «correggevo il riferimento `AGENTS.md §V1`»), non link: non si verificano. La regola è il parsing markdown dell'inline-code (numero di backtick dispari ⇒ dentro un codice inline). Issue #254, con scenario di test T9 |
 
 ## Documenti aggiornati
 
