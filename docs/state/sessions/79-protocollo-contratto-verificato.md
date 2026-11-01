@@ -2,8 +2,10 @@
 number: 79
 title: "Protocollo agenti come contratto verificato (ADR-0012)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "2478a9a5cf122c350bf26034f502dbab6e8f134f"
+merged_date: "2026-11-01T14:55:25Z"
 branch: feat/248-protocollo-contratto-verificato
 pr: 249
 claim: kilo-hp-elitebook-ef4d

@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 15:50
+> Data: 2026-11-01 16:16
 > Totale file: 141
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 140 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2135.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-01 15:48
+- Dimensione totale: 2136.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-01 16:01
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -12170,9 +12170,11 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 ## 45. Protocollo agenti come contratto verificato (Sessione 79)
 
 **Branch**: `feat/248-protocollo-contratto-verificato`
-**Issue di tracking**: **#248** (epic)
+**PR**: **#249** — **merged** il 2026-11-01T14:55:25Z (merge commit `2478a9a5cf122c350bf26034f502dbab6e8f134f`) — issue di tracking: **#248** (`status:done`)
 **Data**: 2026-11-01
-**Stato**: 🟡 in corso (lotto I1 + I2-a; i lotti I2-b, I2-c e I3 sono descritti in ADR-0012 §"Stato dell'implementazione")
+**Stato**: ✅ **MERGED** — lotto I1 + I2-a dell'epic #248; i lotti I2-b, I2-c e I3 sono descritti in ADR-0012 §"Stato dell'implementazione"
+
+> **Nota (doc-sync di chiusura)**: il frontmatter di questa sessione è stato allineato al merge **dopo** il merge, con `node scripts/apply-merge-state.mjs --pr 249` — perché il workflow `auto-session-merge-state.yml` che fa questo passo **non ha mai girato con successo**: la sua prima esecuzione (#243) è fallita sulla precondizione (nessun file di sessione dichiarava `pr: 243`) e la seconda (#249) è stata **annullata** dal concurrency group `post-merge-main`. I tre writer di `main` non si accodano: se ne partono insieme, **uno vince e gli altri due vengono annullati** (`cancel-in-progress: false` *cancella* i run pending precedenti dello stesso group). Difetto tracciato e aperto come issue dedicata; misura e semantica in §45.
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -17701,8 +17703,10 @@ solo in `scripts/`, `AGENTS.md` e `docs/`.
 number: 79
 title: "Protocollo agenti come contratto verificato (ADR-0012)"
 date: 2026-11-01
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "2478a9a5cf122c350bf26034f502dbab6e8f134f"
+merged_date: "2026-11-01T14:55:25Z"
 branch: feat/248-protocollo-contratto-verificato
 pr: 249
 claim: kilo-hp-elitebook-ef4d
@@ -32126,7 +32130,7 @@ versione riscritta, verificabile:
  * scripts/generate-fixtures.mjs
  *
  * Generatore deterministico di fixture sintetici per test DB e analisi.
- * Source of truth: AGENTS.md §V1 (audit 2026-10-15) + 10-TESTING §3.2/§3.3/§3.4 + 06-UX §2.14.
+ * Source of truth: 02-DATA-SCHEMA.md + 10-TESTING.md §3.2/§3.3/§3.4 + 06-UX-FLOWS-STATES.md §2.14 (audit 2026-10-15).
  *
  * Usage:
  *   node scripts/generate-fixtures.mjs                # genera tutti
