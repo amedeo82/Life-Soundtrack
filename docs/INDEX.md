@@ -130,6 +130,7 @@
 | 81 | Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c) | 🟢 | ✅ | #257 |
 | 82 | La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251) | 🟢 | ✅ | #258 |
 | 83 | AGENTS.md: il contratto senza la storia (rifinitura I3) | 🟢 | ✅ | #260 |
+| 84 | La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -169,9 +170,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **60** (merge: 60)
+- Sessioni migrate in state/sessions: **61** (merge: 60)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S83** - AGENTS.md: il contratto senza la storia (rifinitura I3)
+- Ultima sessione migrata: **S84** - La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -218,30 +219,28 @@
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S83)
+**Analisi della sessione corrente** (S84)
 
 **Numeri.** L'implementazione non cambia: **75%** (21 story su 28, effort 77%), restano **7 step**.
-Lavoro di **governance** su un'epic (#248).
+Lavoro di **governance**.
 
-**Il numero che conta.** `AGENTS.md` scende da 1410 a **1091 righe** e — soprattutto — non contiene
-più **storia**: ogni sezione è o una **regola** (con il gate che la enforce) o un **puntatore** a
-un file che è il proprietario del dettaglio. Il file è tornato a essere un contratto.
+**Cosa è pronto.** Il retry nei due writer (`auto-state-aggregate.yml`, `auto-bundle.yml`); il
+contratto del gate `checkPushSync` esteso alle due strategie, con il riconoscimento del ciclo; il
+gate che distingue i commenti dal codice; tre suite di scenario aggiornate (19 + 8 + 6 assert).
 
-**Cosa è pronto.** Changelog del protocollo spostato nel DEV-LOG; 5 sezioni di rationale ridotte a
-puntatori; 2 sezioni in duplicato ridotte al minimo; i 77 anchor **invariati**.
+**Cosa manca.** Nulla sul tema: con il retry, la race non può più perdere un writer. L'unica
+residua è **cosmetica**: il commit del retry usa la stessa identità bot e lo stesso messaggio dei
+commits precedenti, quindi nella history di `main` non si distingue «commit del writer» da
+«commit del retry». Separare i due messaggi renderebbe la diagnosi post-mortem più immediata.
 
-**Cosa manca.** Nulla dell'epic #248: con questo lotto i quattro lotti (I1, I2-a, I2-b, I2-c) e
-questo (I3) sono completi. Il lavoro residuo è la **doc-sync di chiusura** delle sessioni (la
-catena post-merge la fa, e la Sessione 82 l'ha resa advisory).
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Salute tecnica.** Worktree attiva su `feat/259-rifinitura-agents`. Claim riverificato sull'issue
-#259. Nessun blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9.
-
-**Gate di testabilità.** `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti (**C4:
-gli 77 anchor sono intatti e tutte le citazioni esterne risolvono**) · `node
-scripts/check-aggregate-blocks.mjs` → 0 violazioni · `node scripts/check-merge-state.mjs` → 0
-falliti · `node scripts/check-readme-facts.mjs` → 0 falliti · `pwsh
-scripts/generate-bundle.ps1 -Check` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati,
+0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → **19 assert, 0 falliti** ·
+`bash scripts/test-workflow-git-add-coverage.sh` → **8 assert, 0 falliti** ·
+`bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-readme-facts.mjs` → 0 falliti.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

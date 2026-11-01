@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-01 17:50
+> Data: 2026-11-01 16:59
 > Totale file: 154
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,14 +9,14 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 152 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2264.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-01 17:26
+- Totale file: 153 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2280.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-01 16:59
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 94 |
+| docs/ | 95 |
 | scripts/ | 31 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1201,30 +1201,28 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S83)
+**Analisi della sessione corrente** (S84)
 
 **Numeri.** L'implementazione non cambia: **75%** (21 story su 28, effort 77%), restano **7 step**.
-Lavoro di **governance** su un'epic (#248).
+Lavoro di **governance**.
 
-**Il numero che conta.** `AGENTS.md` scende da 1410 a **1091 righe** e — soprattutto — non contiene
-più **storia**: ogni sezione è o una **regola** (con il gate che la enforce) o un **puntatore** a
-un file che è il proprietario del dettaglio. Il file è tornato a essere un contratto.
+**Cosa è pronto.** Il retry nei due writer (`auto-state-aggregate.yml`, `auto-bundle.yml`); il
+contratto del gate `checkPushSync` esteso alle due strategie, con il riconoscimento del ciclo; il
+gate che distingue i commenti dal codice; tre suite di scenario aggiornate (19 + 8 + 6 assert).
 
-**Cosa è pronto.** Changelog del protocollo spostato nel DEV-LOG; 5 sezioni di rationale ridotte a
-puntatori; 2 sezioni in duplicato ridotte al minimo; i 77 anchor **invariati**.
+**Cosa manca.** Nulla sul tema: con il retry, la race non può più perdere un writer. L'unica
+residua è **cosmetica**: il commit del retry usa la stessa identità bot e lo stesso messaggio dei
+commits precedenti, quindi nella history di `main` non si distingue «commit del writer» da
+«commit del retry». Separare i due messaggi renderebbe la diagnosi post-mortem più immediata.
 
-**Cosa manca.** Nulla dell'epic #248: con questo lotto i quattro lotti (I1, I2-a, I2-b, I2-c) e
-questo (I3) sono completi. Il lavoro residuo è la **doc-sync di chiusura** delle sessioni (la
-catena post-merge la fa, e la Sessione 82 l'ha resa advisory).
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Salute tecnica.** Worktree attiva su `feat/259-rifinitura-agents`. Claim riverificato sull'issue
-#259. Nessun blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9.
-
-**Gate di testabilità.** `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti (**C4:
-gli 77 anchor sono intatti e tutte le citazioni esterne risolvono**) · `node
-scripts/check-aggregate-blocks.mjs` → 0 violazioni · `node scripts/check-merge-state.mjs` → 0
-falliti · `node scripts/check-readme-facts.mjs` → 0 falliti · `pwsh
-scripts/generate-bundle.ps1 -Check` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati,
+0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → **19 assert, 0 falliti** ·
+`bash scripts/test-workflow-git-add-coverage.sh` → **8 assert, 0 falliti** ·
+`bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-readme-facts.mjs` → 0 falliti.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2092,6 +2090,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 81 | Claim atomico, apertura PR verificata e gate di coerenza claim↔issue↔branch (I2-c) | 🟢 | ✅ | #257 |
 | 82 | La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251) | 🟢 | ✅ | #258 |
 | 83 | AGENTS.md: il contratto senza la storia (rifinitura I3) | 🟢 | ✅ | #260 |
+| 84 | La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2131,9 +2130,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **60** (merge: 60)
+- Sessioni migrate in state/sessions: **61** (merge: 60)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S83** - AGENTS.md: il contratto senza la storia (rifinitura I3)
+- Ultima sessione migrata: **S84** - La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2180,30 +2179,28 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S83)
+**Analisi della sessione corrente** (S84)
 
 **Numeri.** L'implementazione non cambia: **75%** (21 story su 28, effort 77%), restano **7 step**.
-Lavoro di **governance** su un'epic (#248).
+Lavoro di **governance**.
 
-**Il numero che conta.** `AGENTS.md` scende da 1410 a **1091 righe** e — soprattutto — non contiene
-più **storia**: ogni sezione è o una **regola** (con il gate che la enforce) o un **puntatore** a
-un file che è il proprietario del dettaglio. Il file è tornato a essere un contratto.
+**Cosa è pronto.** Il retry nei due writer (`auto-state-aggregate.yml`, `auto-bundle.yml`); il
+contratto del gate `checkPushSync` esteso alle due strategie, con il riconoscimento del ciclo; il
+gate che distingue i commenti dal codice; tre suite di scenario aggiornate (19 + 8 + 6 assert).
 
-**Cosa è pronto.** Changelog del protocollo spostato nel DEV-LOG; 5 sezioni di rationale ridotte a
-puntatori; 2 sezioni in duplicato ridotte al minimo; i 77 anchor **invariati**.
+**Cosa manca.** Nulla sul tema: con il retry, la race non può più perdere un writer. L'unica
+residua è **cosmetica**: il commit del retry usa la stessa identità bot e lo stesso messaggio dei
+commits precedenti, quindi nella history di `main` non si distingue «commit del writer» da
+«commit del retry». Separare i due messaggi renderebbe la diagnosi post-mortem più immediata.
 
-**Cosa manca.** Nulla dell'epic #248: con questo lotto i quattro lotti (I1, I2-a, I2-b, I2-c) e
-questo (I3) sono completi. Il lavoro residuo è la **doc-sync di chiusura** delle sessioni (la
-catena post-merge la fa, e la Sessione 82 l'ha resa advisory).
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Salute tecnica.** Worktree attiva su `feat/259-rifinitura-agents`. Claim riverificato sull'issue
-#259. Nessun blocco `AGGREGATE-*` modificato a mano. `pwsh` 7.6.9.
-
-**Gate di testabilità.** `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti (**C4:
-gli 77 anchor sono intatti e tutte le citazioni esterne risolvono**) · `node
-scripts/check-aggregate-blocks.mjs` → 0 violazioni · `node scripts/check-merge-state.mjs` → 0
-falliti · `node scripts/check-readme-facts.mjs` → 0 falliti · `pwsh
-scripts/generate-bundle.ps1 -Check` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati,
+0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → **19 assert, 0 falliti** ·
+`bash scripts/test-workflow-git-add-coverage.sh` → **8 assert, 0 falliti** ·
+`bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-readme-facts.mjs` → 0 falliti.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -10617,6 +10614,88 @@ scripts/generate-bundle.ps1 -Check` → exit 0.
 - `docs/18-DEV-LOG.md`: sezione «Changelog del protocollo (`AGENTS.md`)» (la storia delle versioni) + §49
 - `scripts/generate-bundle.ps1`: `$files` += la sessione 83
 - `docs/INDEX.md`: versione di `AGENTS.md`, riga `18-DEV-LOG.md`
+```
+
+### Sessione 84 - La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato
+
+- **Data**: 2026-11-01
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-hp-elitebook-6d4e`
+
+```
+
+# Sessione 84 — La race sul push: retry con ri-sincronizzazione
+
+> **Issue di tracking**: #261 (terzo punto, rimasto aperto dal merge delle PR #258/#260).
+> **Branch**: `feat/261-push-race-retry`.
+
+## Sintesi
+
+Con i concurrency group separati (Sessione 82) i tre writer di `main` **non si annullano più**
+(era il difetto #251) ma **corrono in parallelo**: due push su `main` possono incrociarsi e
+quello che perde la race viene **rifiutato** (non-fast-forward). Misurato il 2026-11-01T16:17:07Z:
+
+```
+[main 8aa607e] chore(state): auto-aggregate from docs/state/ (ADR-0008 V2)
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/amedeo82/Life-Soundtrack'
+```
+
+Il push dell'aggregator è stato perso → i blocchi aggregati sono rimasti indietro. La catena
+riparava comunque (lo step di verifica e auto-riparazione in `auto-bundle.yml`), ma il fallimento
+era **rumoroso** e il risultato dipendeva dalla fortuna.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-84.1 | Ogni writer che pusha su `main` ha un **retry con ri-sincronizzazione** (3 tentativi: fetch → rebase → rigenera → riprova) | Il writer che perde la race si riallinea e riprova: il fallimento diventa un ritardo, non una perdita. Il `git add` esplicito della lista dei target viene rifatto dopo il rebase (i file staged dal rebase non sono gli stessi) |
+| D-84.2 | Il gate `checkPushSync` accetta **due** strategie: **preventiva** (sync in uno step precedente) **oppure** **retry** (sync dentro il ciclo che contiene la push) | Il contratto è «una strategia di ri-sincronizzazione», non «un sync preventivo»: il retry è più forte (copre anche la corsa persa), il sync preventivo è più economico (evita il tentativo fallito). Sono complementari |
+| D-84.3 | Il retry è riconosciuto solo se la ri-sincronizzazione sta **dentro il ciclo** che contiene la push | Una sincronizzazione «tardiva» (dopo la push, fuori da un ciclo) non è una strategia: il push è già fallito. Senza questo criterio il gate accetterebbe la forma che il test scenario «sync dopo il push» considera un bug |
+| D-84.4 | La push dentro un **commento** non è una push | Il commento che spiega la race cita il comando senza eseguirlo: il gate deve guardare il codice, non la prosa |
+| D-84.5 | Le fixture dei test sono aggiornate al nuovo contratto | T2 (sync preventivo rimosso, retry presente) → il gate **passa** (il retry copre la race); **T2b** (nessuna strategia) → il gate **fallisce**. La copertura `git add` (T2 di `test-workflow-git-add-coverage.sh`) ora rimuove il target da **tutte** le righe `git add`, perché con il retry ce n'è più di una |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **75%** (21 story su 28, effort 77%), restano **7 step**.
+Lavoro di **governance**.
+
+**Cosa è pronto.** Il retry nei due writer (`auto-state-aggregate.yml`, `auto-bundle.yml`); il
+contratto del gate `checkPushSync` esteso alle due strategie, con il riconoscimento del ciclo; il
+gate che distingue i commenti dal codice; tre suite di scenario aggiornate (19 + 8 + 6 assert).
+
+**Cosa manca.** Nulla sul tema: con il retry, la race non può più perdere un writer. L'unica
+residua è **cosmetica**: il commit del retry usa la stessa identità bot e lo stesso messaggio dei
+commits precedenti, quindi nella history di `main` non si distingue «commit del writer» da
+«commit del retry». Separare i due messaggi renderebbe la diagnosi post-mortem più immediata.
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
+
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati,
+0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → **19 assert, 0 falliti** ·
+`bash scripts/test-workflow-git-add-coverage.sh` → **8 assert, 0 falliti** ·
+`bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-readme-facts.mjs` → 0 falliti.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Sostituire l'esclusione reciproca con la **convergenza** non basta: i writer devono poter **recuperare** dalla race | La lezione è la stessa di ADR-0008 in un altro contesto: l'invariante è sullo **stato finale**, non sul numero di run. Un protocollo che prevede il fallimento e non prevede il recupero è un protocollo che produce stati casuali |
+| Il contratto di un gate deve dire **cosa** deve essere vero, non **come** | «Ogni writer deve avere una strategia di ri-sincronizzazione» accetta due forme; «deve esserci un sync preventivo» ne accetta una sola e rifiuta la più robusta. Il criterio del ciclo (D-84.3) serve a non allargare il contratto fino a includere forme che non proteggono |
+| Le fixture dei test sono un **contratto esecutivo**: quando il contratto cambia, la fixture deve cambiare con lui | T2 è passata da «il gate deve fallire» a «il gate deve passare»: senza quel cambiamento il test avrebbe bloccato la soluzione corretta. Un test che fissa una forma invece di un comportamento diventa un ostacolo |
+
+## Documenti aggiornati
+
+- `.github/workflows/auto-state-aggregate.yml`, `auto-bundle.yml`: retry con ri-sincronizzazione
+- `scripts/validate-workflows.mjs`: contratto del gate `checkPushSync` (preventiva **oppure** retry),
+  push nei commenti ignorata
+- `scripts/test-workflow-push-sync.sh`: T2 (retry) e **T2b** (nessuna strategia) · 19 assert
+- `scripts/test-workflow-git-add-coverage.sh`: la mutazione rimuove il target da tutte le righe `git add`
+- `docs/12-DEVOPS.md §9.10`: il contratto del gate · `docs/18-DEV-LOG.md` §50
+- `scripts/generate-bundle.ps1`: `$files` += la sessione 84 · `docs/INDEX.md`
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
