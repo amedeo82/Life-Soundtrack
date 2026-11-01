@@ -10,12 +10,26 @@
 #   T6 main locale divergente: nessuna azione distruttiva
 #   T7 audit -Check: segnala i residui, esce pulito quando tutto e' pulito
 #   T8 idempotenza della procedura
+#   T9 esecuzione da dentro la worktree: exit 15, branch intatto
+#   T10 rimozione worktree con `git worktree remove` che fallisce: la
+#      procedura deve usare il fallback long-path-safe ed uscire 0
+#   T11 -WorktreePath sulla working copy principale: nessuna cancellazione
+#      (guard di sicurezza del fallback manuale), exit 16
+#   T12 path lunghi (> MAX_PATH) dentro la worktree: rimozione riuscita
+#      (Windows: e' il caso "Filename too long" / "Result too large")
+#   T13 catena completa su Windows PowerShell 5.1: L1 (git) e L2 (Remove-Item)
+#      falliscono, interviene L3 (`rd /s /q "\\?\"`)
+#   T14 rete di sicurezza L3 forzata (LIFE_SOUNDTRACK_WT_REMOVAL=rd)
 #
 # Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SCRIPT="$SCRIPT_DIR/post-merge.ps1"
+
+is_windows() {
+  [ "${OS:-}" = "Windows_NT" ] || uname -s 2>/dev/null | grep -qiE 'mingw|msys|cygwin'
+}
 
 if command -v pwsh >/dev/null 2>&1; then
   PS="pwsh"
@@ -39,6 +53,53 @@ ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 run_ps() {
   "$PS" -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
   return $?
+}
+
+run_ps51() {
+  powershell -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
+  return $?
+}
+
+# Installa uno shim di `git` che fallisce SOLO su `worktree remove`,
+# simulando l'errore Windows "Filename too long" / "Result too large".
+# Tutto il resto e' delegato al git vero. Esporta SHIM_DIR.
+install_git_shim() {
+  SHIM_DIR="$(mktemp -d)"
+  REAL_GIT="$(command -v git)"
+  if is_windows; then
+    cat > "$SHIM_DIR/git.cmd" <<EOF
+@echo off
+echo %* | findstr /C:"worktree remove" >nul && (
+  echo error: failed to delete: Filename too long 1>&2
+  exit /b 255
+)
+"$(cygpath -w "$REAL_GIT")" %*
+EOF
+  else
+    cat > "$SHIM_DIR/git" <<EOF
+#!/usr/bin/env bash
+prev=""
+for a in "\$@"; do
+  if [ "\$a" = "remove" ] && [ "\$prev" = "worktree" ]; then
+    echo "error: failed to delete: Filename too long" >&2
+    exit 255
+  fi
+  prev="\$a"
+done
+exec "$REAL_GIT" "\$@"
+EOF
+    chmod +x "$SHIM_DIR/git"
+  fi
+}
+
+# Crea dentro la worktree un albero con path > MAX_PATH (simula node_modules).
+# Windows-only: su POSIX il limite MAX_PATH non esiste.
+make_long_paths() {
+  local wt="$1" win_wt ps_cmd
+  is_windows || return 1
+  win_wt="$(cygpath -w "$wt")"
+  ps_cmd="\$p = Join-Path '$win_wt' 'node_modules'; for (\$i=0; \$i -lt 8; \$i++) { \$p = Join-Path \$p ('seg' + ('x' * 40)) }; [System.IO.Directory]::CreateDirectory(\$p) | Out-Null; [System.IO.File]::WriteAllText((Join-Path \$p 'file.js'), 'x')"
+  pwsh -NoProfile -Command "$ps_cmd" >/dev/null 2>&1
 }
 
 branch_exists_locally() { git rev-parse --verify --quiet "refs/heads/$1" >/dev/null 2>&1; }
@@ -266,6 +327,120 @@ echo "=== T9: esecuzione da dentro la worktree (deve rifiutarsi) ==="
   if branch_exists_locally feat/x; then ok "branch intatto"; else ng "branch eliminato da dentro la worktree"; fi
 
   cd /; rm -rf "$D"
+}
+
+echo "=== T10: git worktree remove fallisce -> fallback long-path-safe ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+
+  # Shim di `git`: fallisce SOLO su `worktree remove`, simulando l'errore
+  # Windows "Filename too long" / "Result too large"; tutto il resto e'
+  # delegato al git vero. E' il modo deterministico di esercitare il
+  # fallback su ogni piattaforma (su Windows il caso reale e' il path
+  # lungo, coperto da T12 e T13).
+  install_git_shim
+
+  OLD_PATH="$PATH"
+  export PATH="$SHIM_DIR:$PATH"
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  export PATH="$OLD_PATH"
+
+  if [ $rc -eq 0 ]; then ok "exit 0 nonostante il fallimento di git worktree remove"; else ng "exit $rc invece di 0"; echo "$out" | tail -20; fi
+  if [ ! -d "$D/wt" ]; then ok "worktree rimossa dal filesystem via fallback"; else ng "worktree ancora presente"; fi
+  if git worktree list | grep -q "$D/wt"; then ng "worktree ancora registrata"; else ok "worktree deregistrata (prune)"; fi
+  if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+  if branch_exists_remotely feat/x; then ng "branch remoto ancora presente"; else ok "branch remoto eliminato"; fi
+
+  cd /; rm -rf "$D" "$SHIM_DIR"
+}
+
+echo "=== T11: -WorktreePath sulla working copy principale (mai cancellare) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+
+  out="$(run_ps -Branch feat/x -WorktreePath "$D/work")"; rc=$?
+  if [ $rc -eq 16 ]; then ok "exit 16 (rimozione rifiutata)"; else ng "exit $rc invece di 16"; echo "$out" | tail -20; fi
+  if [ -f "$D/work/file.txt" ]; then ok "working copy principale intatta"; else ng "working copy principale cancellata"; fi
+  if [ -d "$D/wt" ]; then ok "worktree reale non toccata"; else ng "worktree reale rimossa"; fi
+  if branch_exists_locally feat/x; then ok "branch intatto"; else ng "branch eliminato"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T12: path lunghi (> MAX_PATH) dentro la worktree ==="
+{
+  if ! is_windows; then
+    echo "  [SKIP] scenario Windows-only (path lunghi): su POSIX il limite MAX_PATH non esiste"
+  else
+    D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+    do_merge_commit
+
+    if make_long_paths "$D/wt"; then
+      out="$(run_ps -Branch feat/x)"; rc=$?
+      if [ $rc -eq 0 ]; then ok "exit 0 con path lunghi nella worktree"; else ng "exit $rc invece di 0"; echo "$out" | tail -20; fi
+      if [ ! -d "$D/wt" ]; then ok "worktree rimossa (path lunghi)"; else ng "worktree ancora presente"; fi
+      if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+    else
+      echo "  [SKIP] creazione dell'albero con path lunghi non riuscita"
+    fi
+
+    cd /; rm -rf "$D"
+  fi
+}
+
+echo "=== T13: catena completa su Windows PowerShell 5.1 (L1+L2 falliscono -> L3 rd) ==="
+{
+  if ! is_windows; then
+    echo "  [SKIP] scenario Windows-only (Windows PowerShell 5.1 + path lunghi)"
+  elif ! command -v powershell >/dev/null 2>&1; then
+    echo "  [SKIP] Windows PowerShell 5.1 non disponibile"
+  else
+    D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+    do_merge_commit
+
+    if make_long_paths "$D/wt"; then
+      install_git_shim
+      OLD_PATH="$PATH"
+      export PATH="$SHIM_DIR:$PATH"
+      # Windows PowerShell 5.1 non e' long-path-aware: `Remove-Item` fallisce
+      # sui path > MAX_PATH -> deve intervenire il fallback `rd /s /q "\\?\"`.
+      out="$(run_ps51 -Branch feat/x)"; rc=$?
+      export PATH="$OLD_PATH"
+
+      if [ $rc -eq 0 ]; then ok "exit 0 con la catena L1+L2+L3"; else ng "exit $rc invece di 0"; echo "$out" | tail -25; fi
+      if [ ! -d "$D/wt" ]; then ok "worktree rimossa (catena completa)"; else ng "worktree ancora presente"; fi
+      if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+    else
+      echo "  [SKIP] creazione dell'albero con path lunghi non riuscita"
+    fi
+
+    cd /; rm -rf "$D" "$SHIM_DIR"
+  fi
+}
+
+echo "=== T14: rete di sicurezza L3 (rd /s /q \"\\\\?\\\") forzata ==="
+{
+  if ! is_windows; then
+    echo "  [SKIP] scenario Windows-only (cmd rd con prefisso \\?\ )"
+  else
+    D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+    do_merge_commit
+
+    # L1 fallisce (shim) e L2 viene saltata: deve intervenire L3.
+    install_git_shim
+    OLD_PATH="$PATH"
+    export PATH="$SHIM_DIR:$PATH"
+    out="$(LIFE_SOUNDTRACK_WT_REMOVAL=rd run_ps -Branch feat/x)"; rc=$?
+    export PATH="$OLD_PATH"
+
+    if [ $rc -eq 0 ]; then ok "exit 0 con la rimozione via rd"; else ng "exit $rc invece di 0"; echo "$out" | tail -25; fi
+    if [ ! -d "$D/wt" ]; then ok "worktree rimossa via rd"; else ng "worktree ancora presente"; fi
+    if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+
+    cd /; rm -rf "$D" "$SHIM_DIR"
+  fi
 }
 
 echo ""

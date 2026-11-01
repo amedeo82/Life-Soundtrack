@@ -1,6 +1,6 @@
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.4 · Sessione 72 (2026-10-31) · baseline PowerShell 7 (`pwsh`) + confine di encoding dei `.ps1`
+> Status: 🟡 DRAFT · Versione 1.7 · Sessione 78 (2026-10-31) · baseline PowerShell 7 (`pwsh`) + rimozione worktree long-path-safe
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -703,6 +703,55 @@ entrambi numeri, e il lettore non ha modo di sapere quale sia vero.
 
 ---
 
+### 9.8i Rimozione worktree long-path-safe nella procedura post-merge (Sessione 78)
+
+La procedura canonica post-merge (`scripts/post-merge.ps1`) deve **smontare la
+worktree** prima di eliminare il branch locale. Su Windows quel passo falliva
+in modo prevedibile: `git worktree remove --force` cancella l'albero chiamando
+le API Win32 **senza il prefisso `\\?\`**, quindi con `node_modules` e path >
+MAX_PATH (260 caratteri) la cancellazione si interrompe con «Filename too long»
+/ «Result too large». Lo stato lasciato indietro è scomodo: git **ha già
+deregistrato** la worktree (l'errore arriva dopo), la directory è rimasta, e il
+branch risulta ancora «checked-out» per `git branch -d`.
+
+La rimozione manuale (`rd /s /q "\\?\<path>"` + `git worktree prune`) era finita
+nel DEV-LOG di **sette** sessioni consecutive: un workaround ripetuto è un
+difetto della procedura.
+
+**Tre livelli**, tutti dentro lo script:
+
+| Livello | Meccanismo | Perché |
+|---------|-----------|--------|
+| L1 | `git -c core.longpaths=true worktree remove --force` | abilita in git il prefisso `\\?\`: è la **causa radice**, e la risolve senza toccare il filesystem a mano |
+| L2 | `Remove-Item -LiteralPath <path> -Recurse -Force` | PowerShell 7 è **long-path-aware** (manifest `longPathAware` + .NET Core): cancella alberi oltre MAX_PATH senza prefisso e senza processi esterni. **Non segue le junction** (il contenuto collegato, es. lo store di pnpm, resta intatto) — a differenza di `Directory.Delete`, che sulle junction fallisce |
+| L3 | `cmd /c rd /s /q "\\?\<path>"` + `git worktree prune` | rete per **Windows PowerShell 5.1**, che non è long-path-aware. `rd` non segue le junction |
+
+**Guardie** (il fallback manuale è la parte pericolosa):
+
+- il target deve essere **una worktree di questo repo**: registrata da
+  `git worktree list`, oppure con il marker `.git` che punta a
+  `.git/worktrees/` del repo. La working copy principale e i suoi antenati non
+  sono mai toccati → `-WorktreePath` sulla working copy = **exit 16**, nessuna
+  cancellazione;
+- se `git status` nella worktree **fallisce**, lo stato WIP è sconosciuto: la
+  procedura si ferma (exit 10) invece di cancellare alla cieca;
+- se nessun livello rimuove la worktree: **exit 16**, zero azioni distruttive,
+  e lo script stampa il comando manuale.
+
+**Verifica**: `bash scripts/test-post-merge.sh` → **47 assert, 0 falliti**
+(T10..T14 nuovi). T10 è il caso che rende il fallback **deterministico**: uno
+shim di `git` che fallisce **solo** su `worktree remove`, installato nel `PATH`
+dello scenario. T12/T13/T14 sono Windows-only (path lunghi reali, catena
+L1→L2→L3 su Windows PowerShell 5.1, rete L3 forzata via
+`LIFE_SOUNDTRACK_WT_REMOVAL=rd`).
+
+**Regola generale**: un workaround che compare in sette sessioni consecutive
+non è un workaround: è una procedura mancante. Il sintomo — «funziona se
+faccio così a mano» — è la firma di un difetto **nello script**, non della
+macchina.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -788,7 +837,7 @@ protection può interpretare un check saltato come successo.
 | 18 | `gates-workflows` | `Ordinamento dei writer di main` | solo PR | sì | **#149** |
 | 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | solo PR | sì | #76 |
 | 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | solo PR | sì | #110 |
-| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | solo PR | sì | sessione 33 |
+| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 47 assert) | solo PR | sì | sessione 33 |
 | 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | solo PR | sì | #53 |
 | 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | solo PR | sì | sessione 23 |
 | 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | solo PR | sì | #49 |
@@ -1233,3 +1282,4 @@ fallivano **in silenzio** su un file CRLF. Ora le righe vengono normalizzate una
 | 1.4 | Sessione 72 (2026-10-31) | **§9.12 Ambiente PowerShell locale** (nuova): provenienza dell'installazione verificata (`pwsh` **7.6.9**, pacchetto **MSIX/Store** `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, alias per-utente in `WindowsApps`, **nessun MSI** in `C:\Program Files\PowerShell\7` e nessuna voce di disinstallazione nel registro; pacchetto creato/aggiornato il 2026-10-26 09:38) con i comandi di verifica (`pwsh -NoProfile -c '$PSVersionTable.PSVersion'`, `winget list --id Microsoft.PowerShell`, `Get-AppxPackage Microsoft.PowerShell`). La sezione fissa anche il **confine**: `scripts/aggregate-state.ps1` è UTF-8 **senza BOM** e contiene 9 righe con caratteri non-ASCII ⇒ sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e `-Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in modalità scrittura il mojibake verrebbe scritto nei file globali; `generate-bundle.ps1` invece è immune (legge/scrive sempre con `-Encoding UTF8`). Il vincolo «ASCII-only nei `.ps1`» di `13-ADR/0008` viene corretto: riguarda il **parsing**, non solo la scrittura. Il fix dello script (rimuovere i letterali o aggiungere il BOM) è **decisione del project owner** (D.71.4) e non è applicato. **§9.13 Copertura CI delle suite di test locali** (nuova): 5 suite presenti in `scripts/` **non** eseguite da `ci.yml` (`test-post-merge.sh`, `test-setup-worktree.sh`, `test-safe-branch-switch.sh`, `test-pre-commit-clean-check.sh`, `test-appendline-lf-fix.ps1`), con tempi misurati e difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ "0 passati, 0 falliti" e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 **stale** (64 `AppendLine` sono il fix corrente, non una regressione) e S5 **muta il working tree**, `test-setup-worktree.sh` fallisce su Windows/Git Bash (mock `gh` non intercettato + path POSIX). I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili. Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
 | 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **11 job** di cui 10 in parallelo (`node-lint-typecheck`, `node-test`, `node-build`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **tempo pareggio della pipeline 172 s → 73 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
 | 1.6 | Sessione 75 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74): la numerazione delle sessioni è univoca (issue #105). |
+| 1.7 | Sessione 78 (2026-10-31) | **§9.8i rimozione worktree long-path-safe nella procedura post-merge** (nuova): `git worktree remove --force` cancellava la worktree senza il prefisso `\\?\`, quindi falliva con «Filename too long» / «Result too large» quando la worktree conteneva `node_modules` con path > MAX_PATH — e il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive. Fix su tre livelli: **L1** `git -c core.longpaths=true worktree remove --force` (la causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale è consentito solo su una directory che è davvero una worktree di questo repo (working copy principale e antenati mai toccati → exit 16) e `git status` fallito = WIP sconosciuto = stop (exit 10). Test: `test-post-merge.sh` **T10..T14** (47 assert in tutto), con lo **shim di `git`** che rende deterministico il caso del fallback. **§9.10**: il gate `gates-scripts` passa da 29 a 47 assert. |

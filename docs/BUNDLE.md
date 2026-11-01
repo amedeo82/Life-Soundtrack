@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-10-31 22:38
-> Totale file: 137
+> Data: 2026-11-01 01:08
+> Totale file: 138
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 136 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2044 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-10-31 22:36
+- Totale file: 137 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2088.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-01 01:08
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 87 |
+| docs/ | 88 |
 | scripts/ | 23 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.32 — Sessione 75 (2026-10-31)**
+> **Versione 1.33 — Sessione 78 (2026-10-31)**
 
 ---
 
@@ -253,7 +253,7 @@ Dopo il merge di una PR su `main` l'agente che ha mergiato (o, in mancanza, il r
 | # | Passo | Operazione | Failure mode prevenuto |
 |---|-------|------------|------------------------|
 | 0 | Zero-WIP guard | `git status --porcelain` filtrato sulle righe tracked: se sporco, `stash push -u` o stop (exit 10) | E3/E4/E5 — transizione distruttiva con lavoro non committato (issue #45) |
-| 1 | Worktree **prima** del delete locale | `git worktree remove --force <path>` (auto-rilevata da `git worktree list`) | `git branch -d` fallisce se il branch è checked-out in una worktree |
+| 1 | Worktree **prima** del delete locale | `git worktree remove --force <path>` (auto-rilevata da `git worktree list`), in modalità **long-path-safe** (vedi §"Difetto ricorrente: la rimozione della worktree su Windows") | `git branch -d` fallisce se il branch è checked-out in una worktree |
 | 2 | Fetch | `git fetch origin --prune` | `origin/main` non contiene il merge commit: ogni check successivo mente |
 | 3 | Allineamento `main` | `git checkout main` + `git merge --ff-only origin/main` | E4 (branch inquinato), F7 (lavorare da main stale), `not fully merged` |
 | 4 | Verifica merge | `gh pr list --head <branch> --state merged` (autorevole) **oppure** `git merge-base --is-ancestor <branch> origin/main` | cancellazione di un branch **non** mergato → perdita di lavoro |
@@ -284,7 +284,10 @@ Lo script è **idempotente**: rieseguirlo su un branch già eliminato esce 0 sen
 # 0. zero-WIP: se `git status --porcelain` mostra righe tracked, STAI FERMO (o stash -u)
 # 1. worktree PRIMA (obbligatorio se il branch è checked-out li)
 git worktree list                      # individuare la worktree del branch
-git worktree remove --force ../ls-<N>-<slug>
+git -c core.longpaths=true worktree remove --force ../ls-<N>-<slug>
+#    se fallisce con "Filename too long" / "Result too large" (path lunghi):
+#    Remove-Item -LiteralPath '<path>' -Recurse -Force   # pwsh 7, long-path-aware
+#    git worktree prune
 
 # 2. fetch: senza questo, `origin/main` non contiene il merge commit
 git fetch origin --prune
@@ -308,6 +311,26 @@ git remote prune origin
 git worktree prune
 ```
 
+### Difetto ricorrente: la rimozione della worktree su Windows («Result too large»)
+
+`git worktree remove --force` chiama le API Win32 **senza il prefisso `\\?\`**: quando la worktree contiene `node_modules` con path più lunghi di MAX_PATH (260 caratteri), la cancellazione fallisce con «Filename too long» / «Result too large» e la procedura si ferma a metà (git ha già deregistrato la worktree, la directory è rimasta indietro). Il rimedio manuale (`rd /s /q "\\?\<path>"` + `git worktree prune`) era finito nel DEV-LOG di ogni sessione: era un **workaround** ripetuto, non una procedura.
+
+La procedura canonica lo risolve su **tre livelli**, tutti dentro `scripts/post-merge.ps1`:
+
+| Livello | Meccanismo | Quando interviene |
+|---------|-----------|-------------------|
+| L1 | `git -c core.longpaths=true worktree remove --force` | sempre: abilita in git il prefisso `\\?\` — è la **causa radice** |
+| L2 | `Remove-Item -LiteralPath <path> -Recurse -Force` | se L1 fallisce: PowerShell 7 è long-path-aware (manifest `longPathAware` + .NET Core) e **non segue le junction** |
+| L3 | `cmd /c rd /s /q "\\?\<path>"` + `git worktree prune` | se L2 fallisce: rete per Windows PowerShell 5.1 (non long-path-aware) |
+
+Regole di sicurezza del fallback:
+
+- la rimozione manuale è consentita **solo** su una directory che è davvero una worktree di questo repo (registrata da `git worktree list`, o con il marker `.git` che punta a `.git/worktrees/`): **la working copy principale e i suoi antenati non sono mai toccati** (`-WorktreePath` sulla working copy → exit 16, nessuna cancellazione);
+- se `git status` nella worktree fallisce, lo stato WIP è **sconosciuto**: la procedura si ferma (exit 10) invece di cancellare alla cieca;
+- se nessun livello rimuove la worktree, la procedura esce **16** senza alcuna azione distruttiva e stampa il comando manuale.
+
+Il fallback è **testato** (`scripts/test-post-merge.sh`, T10..T14): uno shim di `git` che fallisce **solo** su `worktree remove` rende deterministico il caso del fallback su ogni piattaforma, e gli scenari Windows-only T12/T13/T14 coprono i path lunghi reali e la catena L1→L2→L3.
+
 ### Regole di sicurezza (non negoziabili)
 
 - **Mai** `git push --delete` o `git branch -D` prima del passo 4. Nel dubbio: `-Check` + `gh pr list`.
@@ -329,11 +352,12 @@ git worktree prune
 | 13 | `git branch -d` rifiutato con contenuto non in base | ispeziona `git cherry`, poi `-D` **solo se** il lavoro è altrove |
 | 14 | `-Check`: residui post-merge presenti | esegui la procedura sui branch elencati |
 | 15 | eseguito da dentro una worktree | rilancia dalla working copy principale |
+| 16 | rimozione della worktree fallita (git **e** fallback long-path): **nessuna azione distruttiva** | rimuovi la worktree a mano (vedi §"Difetto ricorrente") e rilancia |
 
 ### Copertura dei test
 
 ```bash
-bash scripts/test-post-merge.sh    # 9 scenari su repo git temporanei (T1..T9)
+bash scripts/test-post-merge.sh    # 14 scenari / 47 assert su repo git temporanei (T1..T14)
 ```
 
 | Scenario | Cosa dimostra |
@@ -347,6 +371,11 @@ bash scripts/test-post-merge.sh    # 9 scenari su repo git temporanei (T1..T9)
 | T7 | audit `-Check`: exit 14 con residui, exit 0 dopo la pulizia |
 | T8 | idempotenza della procedura |
 | T9 | esecuzione da dentro la worktree: exit 15, branch intatto |
+| T10 | `git worktree remove` che **fallisce** (shim): la procedura usa il fallback long-path-safe, deregistra la worktree e completa (exit 0) |
+| T11 | `-WorktreePath` sulla **working copy principale**: rimozione rifiutata, exit 16, repo e branch intatti |
+| T12 | path **> MAX_PATH** dentro la worktree (Windows): rimozione riuscita |
+| T13 | catena completa su Windows PowerShell 5.1: L1 e L2 falliscono, interviene L3 (`rd /s /q "\\?\"`) |
+| T14 | rete di sicurezza L3 **forzata** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`): rimozione riuscita |
 
 **Eccezioni** (NON eliminare):
 
@@ -717,7 +746,7 @@ git push
         ├── aggregate-state.ps1      ← aggregatore lazy-state (ADR-0008): genera blocchi in SESSIONS.md + BACKLOG.md
         ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
         ├── check-readme-facts.mjs  ← gate read-only: confronta la prosa del README con il codice (issue #161)
-        ├── test-post-merge.sh      ← 9 scenari (T1..T9) su repo temporanei che coprono E3/E4/E5/F7 + squash
+        ├── test-post-merge.sh      ← 14 scenari (T1..T14, 47 assert) su repo temporanei che coprono E3/E4/E5/F7 + squash + rimozione long-path
         └── test-readme-facts-gate.sh ← 9 scenari (T1..T9) sul gate "fatti del README" (issue #161)
 
 ## 🚀 Primo task di un agente
@@ -877,7 +906,7 @@ runner). Ora è **12 job** di cui **10 girano in parallelo**, e `quality` è il 
 | `gates-aggregate` | `test-aggregate-determinism.sh` (37 assert) | solo `pull_request` |
 | `gates-bundle` | `test-bundle-check-idempotent.sh` (12 assert) | solo `pull_request` |
 | `gates-git` | `test-issue-76-residue.sh` + `validate-labels.mjs` | solo `pull_request` |
-| `gates-scripts` | `test-post-merge.sh` (29 assert) — la procedura più distruttiva del repo | solo `pull_request` |
+| `gates-scripts` | `test-post-merge.sh` (47 assert) — la procedura più distruttiva del repo | solo `pull_request` |
 | `gates-procedure` | `test-setup-worktree.sh`, `test-pre-commit-clean-check.sh`, `test-safe-branch-switch.sh`, `test-appendline-lf-fix.ps1` | solo `pull_request` |
 | `quality` | **aggregatore**: fallisce esplicitamente se un job parallelo è fallito, annullato o saltato | **sempre** |
 
@@ -1163,7 +1192,15 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Ultimo aggiornamento: v1.32 — **l'indicatore di avanzamento automatico** (Sessione 75, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 68% — 19 done, 9 step rimanenti. Aggiunti:
+*Ultimo aggiornamento: v1.33 — **la rimozione della worktree non fallisce più su Windows** (Sessione 78). `git worktree remove --force` cancellava la worktree chiamando le API Win32 **senza il prefisso `\\?\`**: con `node_modules` e path > MAX_PATH (260 caratteri) falliva con «Filename too long» / «Result too large» e la procedura si fermava a metà (git aveva già deregistrato la worktree, la directory restava). Il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è un difetto della procedura, non un incidente. Aggiunti:
+- `scripts/post-merge.ps1`: rimozione **long-path-safe** su tre livelli — **L1** `git -c core.longpaths=true worktree remove --force` (la **causa radice**: git usa il prefisso `\\?\`), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e **non segue le junction**), **L3** `cmd /c rd /s /q "\\?\"` (rete per Windows PowerShell 5.1). Se la worktree era ancora registrata dopo la rimozione manuale, `git worktree prune` la deregistra
+- **Guardie di sicurezza**: il fallback manuale è consentito **solo** su una directory che è davvero una worktree di questo repo (registrata da `git worktree list`, o con il marker `.git` che punta a `.git/worktrees/`): la working copy principale e i suoi antenati non sono mai toccati (`-WorktreePath` sulla working copy → **exit 16**, nessuna cancellazione). Se `git status` nella worktree fallisce, lo stato WIP è **sconosciuto** e la procedura si ferma (exit 10) invece di cancellare alla cieca
+- **Exit code 16**: rimozione della worktree fallita (git **e** fallback) — nessuna azione distruttiva, la procedura stampa il comando manuale
+- `scripts/test-post-merge.sh`: **T10..T14** (47 assert in tutto). T10 usa uno **shim di `git`** che fallisce solo su `worktree remove`: rende deterministico il caso del fallback su ogni piattaforma. T11 verifica la guardia sulla working copy principale, T12 i path lunghi reali (Windows), T13 la catena L1→L2→L3 su Windows PowerShell 5.1, T14 la rete L3 **forzata** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`)
+- `AGENTS.md`: nuova sezione §"Difetto ricorrente: la rimozione della worktree su Windows" (i tre livelli, le guardie, l'exit 16), passo 1 della tabella e dell'equivalente manuale allineati, tabella degli exit code e copertura dei test aggiornate
+- `docs/12-DEVOPS.md` §9.8i (nuova) · `docs/18-DEV-LOG.md` §44 · `docs/state/sessions/78-post-merge-long-paths.md`
+
+*Precedente v1.32 — **l'indicatore di avanzamento automatico** (Sessione 75, issue #216). Il project owner chiedeva un indicatore di avanzamento ("a che punto siamo?") e il repository non aveva nessuno strumento che lo producesse. La percentuale si poteva calcolare in due modi e quello sbagliato dava una risposta falsa: sui soli state file in `docs/state/stories/` si leggeva ~90% (i state file esistono solo per le story **claimate**: 8 story del backlog non ne hanno mai avuto uno), mentre il **catalogo** del backlog (`docs/11-BACKLOG.md`, 28 story) dà 68% — 19 done, 9 step rimanenti. Aggiunti:
 - `scripts/aggregate-state.ps1` **V4**: blocco `<!-- AGGREGATE-PROGRESS-* -->` in `README.md` e `docs/INDEX.md` con percentuale (in story e **pesata per effort**: S=1, M=2, L=3, XL=4), `X/Y` completate, **Z step rimanenti**, tabella per EPIC, elenco degli step, **gate di testabilità** (e2e = EPIC 3, motore = EPIC 2, dati reali = 5.2) e l'**analisi della sessione corrente**; modalità read-only `-Progress` (`pnpm run progress`)
 - **Fail-closed del denominatore**: uno state file che il backlog non dichiara ⇒ exit 2 con i path da riallineare, **prima** di scrivere qualsiasi blocco (niente scritture a metà). Una percentuale falsa è peggio di nessuna percentuale
 - `docs/state/sessions/<N>-<slug>.md`: nuova sezione **`## Analisi di avanzamento`**, resa dentro il blocco — l'analisi narrativa e i numeri calcolati nello stesso posto, senza doppio lavoro
@@ -1400,39 +1437,36 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S77)
+**Analisi della sessione corrente** (S78)
 
 ### Numeri
 
 - **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
-- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
-- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
-- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
-- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+- **La procedura post-merge non si blocca più su Windows**: la rimozione della
+  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
+  ha un exit code e un messaggio espliciti.
+- Le **story** del backlog non cambiano: questa sessione è manutenzione della
+  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
+  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
+  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
+  dipendenze a ultime major.
+- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
+  condividi ha ancora schermate vuote.
 
-> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
-> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
-> la prosa e' un commento.
+> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
+> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
 
-### Salute tecnica (verificata in questa worktree)
+### Salute tecnica (verificata in questa sessione)
 
-`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
-
-### Procedura introdotta con questa sessione
-
-1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
-2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
-3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
-4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
-5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
-6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
-7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
-8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
+`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
+solo in `scripts/`, `AGENTS.md` e `docs/`.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2294,6 +2328,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 75 | Indicatore di avanzamento automatico (issue #216) | 🟡 | ❌ | #230 |
 | 76 | Nastro contesto (Story 3.4, issue #231) | 🟡 | ❌ | #232 |
 | 77 | Home + Timeline (Story 3.1, issue #233) | 🟡 | ❌ | #234 |
+| 78 | Rimozione worktree long-path-safe (procedura post-merge) | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2333,9 +2368,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **54** (merge: 40)
+- Sessioni migrate in state/sessions: **55** (merge: 40)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S77** - Home + Timeline (Story 3.1, issue #233)
+- Ultima sessione migrata: **S78** - Rimozione worktree long-path-safe (procedura post-merge)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2382,39 +2417,36 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S77)
+**Analisi della sessione corrente** (S78)
 
 ### Numeri
 
 - **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
-- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Stack) 0/1
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
 
 ### Cosa e' pronto e cosa manca
 
-- **Il motore e' completo** e da questa sessione c'e' anche la **prima UI vera**: Home con i suoi quattro numeri, il ricordo del giorno e la bar week; Timeline con le ere, il volume, il mood, il nastro contesto e lo zoom. L'app non e' piu' solo onboarding: con dei dati importati si apre su Home.
-- **L'EPIC 3 e' a 2/4**: restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L). Il **dettaglio dell'era (⑧)** resta fuori dalla 3.1: e' la schermata successiva e non ha una sua story.
-- **Il gate end-to-end non e' ancora superato**: l'app ha la sua UI, ma il percorso completo «importa → guarda la timeline → esplora → condividi» ha ancora due schermate vuote (⑨, ⑪) e la ShareSheet (⑫).
-- **Mancano 4.2/4.3** (lookup MusicBrainz, artwork) e **5.1/5.2** (privacy spec finale, export & purge): senza export/purge non e' prudente testare con dati personali reali.
-- **6.1** (upgrade a ultime major) e' schedulata a fine implementazione per policy (D.10.2).
+- **La procedura post-merge non si blocca più su Windows**: la rimozione della
+  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
+  ha un exit code e un messaggio espliciti.
+- Le **story** del backlog non cambiano: questa sessione è manutenzione della
+  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
+  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
+  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
+  dipendenze a ultime major.
+- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
+  condividi ha ancora schermate vuote.
 
-> I numeri sopra sono quelli **calcolati** dal blocco al momento della stesura: se il blocco e
-> l'analisi divergono, il primo e' la fonte di verita' — la percentuale e' un dato calcolato,
-> la prosa e' un commento.
+> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
+> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
 
-### Salute tecnica (verificata in questa worktree)
+### Salute tecnica (verificata in questa sessione)
 
-`typecheck` ✅ · `lint` ✅ (0 warning) · `test` ✅ **146 test in `@ls/web`** (127 precedenti + 19 nuovi) e **628 in `@ls/core`** · `build` ✅ · `pnpm run verify` (lint + typecheck + test + build in una invocazione).
-
-### Procedura introdotta con questa sessione
-
-1. `apps/web/src/screens/homeTimelineModel.ts` — il modello puro: numeri, bar week, bucket, serie, bande, zoom.
-2. `apps/web/src/components/chartGeometry.ts` — la geometria SVG (scala, path, barre), pura e testata.
-3. `apps/web/src/components/StatCard.tsx` — count-up 600 ms all'hover, `role="status"`, `aria-label` con unita'.
-4. `apps/web/src/components/MemoryCard.tsx` — il ricordo del giorno, con artwork **opzionale** (l'artwork non esiste ancora: Story 4.3).
-5. `apps/web/src/components/BarWeek.tsx`, `EraBand.tsx`, `StreamChart.tsx`, `MoodLine.tsx` — i tre grafici e le bande, con `<title>`/`<desc>` e tabella nascosta.
-6. `apps/web/src/screens/Home.tsx`, `Timeline.tsx`, `AppShell.tsx` — le schermate e la navigazione.
-7. `apps/web/src/hooks/useHomeTimelineData.ts` — il cablaggio al database e le soglie di stato.
-8. `apps/web/src/App.tsx` — onboarding o app, deciso dai dati.
+`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
+solo in `scripts/`, `AGENTS.md` e `docs/`.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -10164,6 +10196,176 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 - `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/18-DEV-LOG.md` — sezioni legacy allineate
 ```
 
+### Sessione 78 - Rimozione worktree long-path-safe (procedura post-merge)
+
+- **Data**: 2026-10-31
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK-longpath`
+
+```
+
+# Sessione 78 — Rimozione worktree long-path-safe (procedura post-merge)
+
+> Sessione senza issue dedicata: il project owner ha segnalato il difetto
+> direttamente («post-merge.ps1 fallisce su Windows con “Result too large” …
+> ho applicato il workaround `rd /s /q "\\?\"` documentato nel DEV-LOG, ma è un
+> difetto ricorrente della procedura»). Lavoro di manutenzione della procedura
+> canonica, non di una story: nessun claim su issue, nessun backlog.
+
+## Sintesi
+
+La procedura canonica post-merge (`scripts/post-merge.ps1`) deve **smontare la
+worktree** prima di eliminare il branch locale. Su Windows quel passo falliva
+in modo prevedibile: `git worktree remove --force` cancella l'albero chiamando
+le API Win32 **senza il prefisso `\\?\`**, quindi con `node_modules` e path più
+lunghi di MAX_PATH (260 caratteri) la cancellazione si interrompe con
+«Filename too long» / «Result too large».
+
+Lo stato lasciato indietro è scomodo: git **ha già deregistrato** la worktree
+(l'errore arriva dopo la cancellazione fallita), la directory è rimasta, e il
+branch risulta ancora «checked-out» per `git branch -d`. La procedura si
+ferma, e l'agente deve finire il lavoro a mano.
+
+Il rimedio manuale (`rd /s /q "\\?\<path>"` + `git worktree prune`) era finito
+nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68),
+ognuna con la stessa formula. Un workaround che ricorre sette volte non è un
+workaround: è una **procedura mancante**.
+
+## Causa radice
+
+Tre fatti, non uno:
+
+1. **`git worktree remove` non è long-path-aware.** Su Windows Git for Windows
+   chiama le API Win32 senza il prefisso `\\?\`, salvo che sia attivo
+   `core.longpaths=true`. La procedura non lo attivava: con il default, la
+   cancellazione si spezza sul primo path oltre 260 caratteri.
+2. **PowerShell 7 è long-path-aware.** `pwsh.exe` dichiara `longPathAware` nel
+   proprio manifest e usa .NET Core: `Remove-Item -Recurse -Force` cancella
+   alberi oltre MAX_PATH **senza prefisso e senza processi esterni**. Misurato
+   su questa macchina: albero di 417 caratteri rimosso senza errori.
+3. **`Remove-Item` non segue le junction.** Verificato: un junction verso una
+   directory esterna viene **rimosso come link**, e il contenuto collegato
+   resta intatto — il comportamento giusto per `node_modules` con pnpm (i
+   package sono junction verso `.pnpm`). `Directory.Delete(path, true)` invece
+   **fallisce** sulle junction («Access to the path 'link' is denied»): la
+   ricorsione .NET non è il primitive giusto.
+
+## Soluzione
+
+Tre livelli dentro `scripts/post-merge.ps1`, dal più economico al più
+robusto:
+
+| Livello | Meccanismo | Ruolo |
+|---------|-----------|-------|
+| L1 | `git -c core.longpaths=true worktree remove --force` | **causa radice**: abilita in git il prefisso `\\?\` |
+| L2 | `Remove-Item -LiteralPath <path> -Recurse -Force` | **nativo** del runtime baseline (pwsh 7), non segue le junction |
+| L3 | `cmd /c rd /s /q "\\?\<path>"` + `git worktree prune` | **rete** per Windows PowerShell 5.1, che non è long-path-aware |
+
+Dopo una rimozione manuale, `git worktree prune` deregistra la worktree: senza,
+`git branch -d` continuerebbe a vederla come checked-out.
+
+## Guardie
+
+Il fallback manuale è una cancellazione ricorsiva: le guardie non sono
+decorative.
+
+- **Il target deve essere una worktree di questo repo**: registrata da
+  `git worktree list`, oppure con il marker `.git` che punta a
+  `.git/worktrees/` del repo. La working copy principale e i suoi antenati
+  sono esclusi per costruzione → `-WorktreePath` sulla working copy =
+  **exit 16**, zero cancellazioni.
+- **`git status` fallito = WIP sconosciuto**: il codice di uscita è ora
+  raccolto; se `git status` non può girare (path lunghi), la procedura si
+  ferma (exit 10) invece di interpretare l'output vuoto come «worktree
+  pulita». Il comando usa `git -c core.longpaths=true`.
+- **Nessun livello riesce = exit 16**: nessuna azione distruttiva, e lo script
+  stampa il comando manuale.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.78.1 | `core.longpaths=true` **per invocazione** (`git -c ...`), non nella config del repo | Risolve la causa radice senza mutare la configurazione locale dell'utente: l'opzione vale solo per il comando che ne ha bisogno |
+| D.78.2 | L2 usa `Remove-Item`, non `Directory.Delete` | `Remove-Item` non segue le junction (il contenuto collegato resta intatto); `Directory.Delete` fallisce sulle junction |
+| D.78.3 | L3 esiste solo per Windows PowerShell 5.1 | Il baseline del repo è `pwsh` (D.71.1); `cmd.exe` è una dipendenza da evitare nel percorso normale |
+| D.78.4 | Il fallback manuale è **consentito solo** su directory che sono worktree di questo repo | Una cancellazione ricorsiva senza guardie è il difetto più grave possibile in una procedura distruttiva |
+| D.78.5 | `git status` fallito = stop (exit 10), non "worktree pulita" | Uno stato WIP **sconosciuto** non è uno stato pulito: la differenza è la difesa fra E3/E4/E5 e una data loss |
+| D.78.6 | Hook di test `LIFE_SOUNDTRACK_WT_REMOVAL=rd` | Una rete di sicurezza non esercitata è una rete **non verificata**: T14 la forza, altrimenti il suo codice resterebbe mai eseguito |
+
+## Difetto trovato mentre si scriveva la rete
+
+`Invoke-CmdVerbatim` costruiva la riga di comando **senza il prefisso `/c`**:
+`cmd.exe` apriva una shell interattiva (banner + prompt), non eseguiva nulla e
+restituiva **0**. Un codice di uscita che dice «tutto bene» senza che sia
+successo nulla è il peggior tipo di successo: la rete L3 sembrava funzionante.
+Prefisso `/c` aggiunto, e il livello è coperto da un test che lo **forza**.
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **La procedura post-merge non si blocca più su Windows**: la rimozione della
+  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
+  ha un exit code e un messaggio espliciti.
+- Le **story** del backlog non cambiano: questa sessione è manutenzione della
+  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
+  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
+  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
+  dipendenze a ultime major.
+- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
+  condividi ha ancora schermate vuote.
+
+> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
+> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
+
+### Salute tecnica (verificata in questa sessione)
+
+`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
+solo in `scripts/`, `AGENTS.md` e `docs/`.
+
+## Lesson learned
+
+- **Il pattern è il segnale, non l'errore**: sette sessioni consecutive con la
+  stessa frase nel DEV-LOG non sono sette incidenti. Il sintomo da guardare è
+  «l'errore è **scomparso**»: un workaround che compare in sette sessioni di
+  fila dimostra che la procedura canonica non copre il caso.
+- **La domanda giusta è «perché fallisce», non «come faccio a mano»**: la
+  risposta (`core.longpaths=true` abilita in git il prefisso `\\?\`) è una riga
+  di opzioni e cancella il problema alla fonte. Il fallback manuale scende a
+  rete, non a meccanismo.
+- **Il runtime giusto vale più del trucco giusto**: la domanda «ma non si
+  potrebbe usare pwsh 7, che dovrebbe supportare i percorsi lunghi?» è
+  quella giusta. `cmd.exe` serve solo per 5.1, che non è il baseline: una
+  procedura che usa `cmd` per il caso normale ha una dipendenza che non serve.
+- **Una rete non esercitata è una rete non verificata**: il livello L3 era
+  morto (restituiva 0 senza fare nulla) e nessuno se n'era accorto, perché
+  nel caso normale L1 basta. Il forcing del primitive (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`)
+  è ciò che trasforma una rete da «presente» a «provata».
+
+## Documenti aggiornati
+
+- `scripts/post-merge.ps1` — rimozione long-path-safe su tre livelli, guardie,
+  exit 16, stato WIP sconosciuto
+- `scripts/test-post-merge.sh` — T10..T14 (shim di `git`, guardia sulla working
+  copy, path lunghi reali, catena L1→L2→L3, L3 forzata)
+- `AGENTS.md` — v1.33: nuova sezione §"Difetto ricorrente: la rimozione della
+  worktree su Windows", passo 1 della tabella e dell'equivalente manuale, exit
+  code 16, copertura dei test
+- `docs/12-DEVOPS.md` — §9.8i (nuova) + changelog 1.7 + conteggio assert del
+  gate `gates-scripts`
+- `docs/18-DEV-LOG.md` — §44 + changelog 2.32
+- `docs/state/sessions/78-post-merge-long-paths.md` — questo file
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -11727,6 +11929,31 @@ La seconda lezione è sulla **forma dell'errore**: `return , $array` sembrava in
 
 ---
 
+## 44. Difetto ricorrente: la rimozione della worktree su Windows (Sessione 78)
+
+**Data**: 2026-10-31
+**Stato**: 🟡 **implementazione completa e validata in locale** (nessuna issue dedicata: difetto della procedura, segnalato dal project owner)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 44-1 | P | `scripts/post-merge.ps1` si fermava al passo 1 con «Filename too long» / «Result too large»: la worktree non veniva smontata e i passi successivi (allineamento `main`, delete del branch) non partivano | `git worktree remove --force` cancella l'albero chiamando le API Win32 **senza il prefisso `\\?\`**: con `node_modules` e path > MAX_PATH (260 caratteri) la cancellazione si interrompe. Lo stato lasciato indietro è scomodo: git **ha già deregistrato** la worktree (l'errore arriva dopo), la directory è rimasta, e il branch risulta ancora «checked-out» per `git branch -d` | **L1**: `git -c core.longpaths=true worktree remove --force` — abilita in git il prefisso `\\?\`, cioè la **causa radice**. **L2**: `Remove-Item -LiteralPath <path> -Recurse -Force` — PowerShell 7 è long-path-aware (manifest `longPathAware` + .NET Core) e **non segue le junction** (a differenza di `Directory.Delete`, che sulle junction fallisce). **L3**: `cmd /c rd /s /q "\\?\<path>"` + `git worktree prune` — rete per Windows PowerShell 5.1 | `scripts/post-merge.ps1` |
+| 44-2 | P | Il rimedio era **manuale e ripetuto**: `rd /s /q "\\?\<path>"` finiva nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68), ogni volta con la formula «worktree rimossa con `rd`» | Nessuno aveva riconosciuto il pattern: il sintomo («funziona se lo faccio a mano») sembrava una particolarità della macchina, non un difetto della procedura. La procedura **non** aveva un fallback: il fallimento di `git worktree remove` era un errore non gestito | Il fallback è **dentro** la procedura, a tre livelli, con il metodo usato stampato in output (`worktree rimossa: <path> (metodo: ...)`) | `AGENTS.md` §"Difetto ricorrente: la rimozione della worktree su Windows" |
+| 44-3 | P | Il fallback manuale è una cancellazione ricorsiva: senza guardie, un `-WorktreePath` sbagliato può cancellare la **working copy principale** (o un suo antenato) | Il percorso arriva dall'utente (`-WorktreePath`) e il fallback non ne verificava la natura | Il fallback manuale è consentito **solo** su una directory che è **davvero** una worktree di questo repo: registrata da `git worktree list`, oppure con il marker `.git` che punta a `.git/worktrees/`. La working copy principale e i suoi antenati sono esclusi per costruzione → `-WorktreePath` sulla working copy = **exit 16**, zero cancellazioni | `scripts/post-merge.ps1` (`Test-SafeRemovalTarget`, `Test-WorktreeMarker`) |
+| 44-4 | P | `git status` nella worktree poteva **fallire** (path lunghi) e il codice di uscita veniva ignorato: la procedura interpretava l'output vuoto come «worktree pulita» e cancellava | Il codice di uscita di `git status` non era raccolto: `status --porcelain` su un errore restituisce comunque zero righe | Il codice di uscita è ora raccolto: se `git status` fallisce, lo stato WIP è **sconosciuto** e la procedura si ferma (exit 10) invece di cancellare alla cieca. Il comando usa `git -c core.longpaths=true` | `scripts/post-merge.ps1` |
+| 44-5 | P | Il livello L3 (`cmd rd`) era **morto**: l'invocazione non passava `/c` a `cmd.exe`, che apriva una shell interattiva (banner + prompt), non eseguiva nulla e restituiva **0** — un successo che non aveva cancellato nulla | `Invoke-CmdVerbatim` costruiva la riga di comando senza il prefisso `/c` | Prefisso `/c` aggiunto, e il livello è coperto da un test: `LIFE_SOUNDTRACK_WT_REMOVAL=rd` **forza** L3 (T14). La lezione: una rete di sicurezza che non è mai esercitata è una rete di sicurezza **non verificata** — e un `exit 0` che non ha fatto nulla è il peggior tipo di successo | `scripts/post-merge.ps1` · `scripts/test-post-merge.sh` T14 |
+
+**Lesson learned**: la prima lezione è sul **pattern**: sette sessioni consecutive con la stessa frase nel DEV-LOG («di nuovo `rd /s /q` con prefisso `\\?\`») non sono sette incidenti, sono **una procedura mancante**. Il segnale non è «l'errore è comparso», è «l'errore è **scomparso**»: un workaround che compare in sette sessioni di fila è la prova che la procedura canonica non copre il caso.
+
+La seconda lezione è sulla **causa radice**: la domanda giusta non è «come cancello la directory a mano», ma «**perché** `git worktree remove` fallisce». La risposta (`core.longpaths=true` abilita in git il prefisso `\\?\`) è una riga di opzioni e cancella il problema alla fonte: il fallback manuale diventa la rete, non il meccanismo.
+
+La terza è sul **potere del runtime**: la domanda «ma non si potrebbe usare pwsh 7, che dovrebbe supportare i percorsi lunghi?» è la domanda giusta. PowerShell 7 **è** long-path-aware (manifest `longPathAware` + .NET Core) e cancella alberi oltre MAX_PATH senza prefisso né processi esterni — e `Remove-Item` **non segue le junction**, mentre `Directory.Delete` fallisce. Il `cmd.exe` serve solo per Windows PowerShell 5.1, che non è il baseline del repo (D.71.1): la rete L3 è per quello, non per il caso normale.
+
+La quarta è sulla **forma del successo**: `Invoke-CmdVerbatim` restituiva `exit 0` senza aver eseguito il comando (una shell interattiva che legge da stdin a EOF). Un codice di uscita che dice «tutto bene» senza che sia successo nulla è più insidioso di un errore: il fallback sarebbe sembrato funzionante. Per questo il livello L3 ha un test che lo **forza** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`): una rete di sicurezza che non è mai esercitata è una rete non verificata.
+
+**Verifica**: `bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi: shim di `git` che fallisce solo su `worktree remove`, guardia sulla working copy principale, path lunghi reali su Windows, catena L1→L2→L3 su Windows PowerShell 5.1, L3 forzata); `pwsh scripts/aggregate-state.ps1 -Check` → exit 0; `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 |----------|------|-----------|
@@ -11793,6 +12020,7 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.29c | 2026-10-31 (issue #224) | **§41 (follow-up) I 5 gate che verificano gli script passano a `pull_request` only** (Sessione 74, su richiesta del project owner): misurato sul merge di PR #227, la run `CI` su `main` era **42-66 s** e il percorso critico era `gates-aggregate` (**50 s**) — un gate che su `main` **non è nemmeno richiesto** da `quality`, che su push esige solo `gates-docs` + `gates-workflows`. I 5 gate che verificano gli **script** (`gates-aggregate`, `gates-bundle`, `gates-git`, `gates-scripts`, `gates-procedure`) passano a `pull_request` only: su `main` quegli script non sono cambiati rispetto a quanto già validato dalla PR, e la PR ha eseguito **quegli stessi gate sullo stesso contenuto** ⇒ 27 s di tempo di runner sprecati per ogni merge. Su `push` su `main` restano **2 gate leggeri** (`gates-docs` ~11 s, `gates-workflows` ~7 s) più l'aggregatore `quality` (~3 s) ⇒ **~15 s** di tempo pareggio, contro i 42-66 s precedenti e i **172 s** della pipeline sequenziale originale. **Nessuna perdita di copertura**: i 27 gate restano 27 e ognuno gira dove serve (sulla PR che modifica il codice o gli script); `quality` su push continua a richiedere solo i 2 gate leggeri, su pull_request tutti. Documentazione: `12-DEVOPS.md` §9.10 (nuova colonna «Quando gira» per job), `AGENTS.md` (tabella della CI aggiornata) |
 | 2.30 | 2026-10-31 (issue #231) | **§42 Story 3.4 — il nastro contesto** (Sessione 76, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (76-1 **la regola di linguaggio deve vivere in un solo punto**: «la città è sempre introdotta da un indicatore di incertezza, il paese mai» (`19§8.3`) è stata implementata in `describePeriodCity` (`apps/web/src/components/contextRibbonModel.ts`) e non nei template: tre componenti che decidono per conto proprio avrebbero prodotto tre interpretazioni della stessa regola; 76-2 **`ContextPeriod` non porta `citySource`** — la provenienza della città vive sull'evento (`ListenEvent.citySource`, `02§4.1`): il view model del nastro la dichiara esplicitamente e `toRibbonPeriod` applica il default (una città presente su un periodo **non corretto** è una stima), perché «circa *X*» e *X* sono due affermazioni diverse; 76-3 **una sezione di spec promessa e non scritta**: `08§2.12h` era dichiarata dal changelog 0.9 (Sessione 67) ma **non esisteva** — il namespace `timeline.context.*` è stato materializzato adesso (36 chiavi in `it`/`en`), e la lezione è che la specifica segue l'implementazione: le chiavi sono state scritte quando qualcuno doveva **usarle**; 76-4 **la regola `react-refresh/only-export-components` coincide con la chiarezza del dominio**: separare il modello puro dal componente ha azzerato i 5 warning del lint e ha reso la regola di località leggibile in un file solo; 76-5 **il nastro non conosce lo zoom, lo riceve**: `visibleRange` è una prop, non un contesto interno — il nastro resta un componente presentazionale, testabile senza database, e la Timeline (Story 3.1) potrà montarlo quando esisterà). Consegnati: `apps/web/src/components/ContextRibbon.tsx` (il nastro), `ContextPeriodDetail.tsx` (il dettaglio del periodo e le tre azioni utente), `contextRibbonModel.ts` (il modello puro), `apps/web/src/__tests__/context-ribbon.test.tsx` (**15 test**: regola di linguaggio IT/EN, nessuna rete e nessuna mappa, `unknown` non aggregato, filtri, zoom, click, verdetti), 36 chiavi i18n, l'hook `useLanguage()`, gli stili del nastro, `08-COPY-I18N.md` v0.12 (§2.12h nuova) e lo stato della story 3.4 (`done`). Con la 3.4 l'**EPIC 3** passa a 1/4 e l'indicatore di avanzamento (issue #216) a **71%** — 20 story su 28, 8 step rimanenti |
 | 2.31 | 2026-10-31 (issue #233) | **§43 Story 3.1 — Home + Timeline** (Sessione 77, claim `kilo-HP-ELITEBOOK-progress`): 5 entry (77-1 **il modello è puro, i componenti sono presentazionali**: tutta la logica — i quattro numeri della Home, la bar week, i bucket per granularità, le serie di volume e mood, le bande di era, il zoom progressivo — sta in `apps/web/src/screens/homeTimelineModel.ts`, senza React né DOM, riutilizzando il **vocabolario temporale del core** (`@core/analysis`): la Timeline non introduce un secondo calendario (lesson 27-7). I 19 test girano senza IndexedDB né `fake-indexeddb`, perché la logica non li tocca; 77-2 **«il dato mancante non è zero»**: il bucket vuoto **esiste** e vale 0 (una linea che salta i buchi suggerirebbe continuità che i dati non hanno) e il **mood non viene interpolato** nei bucket senza dati; l'area del volume è chiusa sul **minimo** del dominio e non su zero, perché un ascolto non riparte da zero minuti e un'area che scende a zero inventerebbe un silenzio; 77-3 **nessuna libreria di chart**: i tre grafici (StreamChart, MoodLine, BarWeek) sono **SVG scritti a mano**, con la geometria in un file puro e testato (`chartGeometry.ts`) e il contratto a11y della spec (`07§2.7`): `<title>`, `<desc>` e una **tabella dati nascosta** per screen reader. Introdurre una dipendenza di grafici sarebbe una decisione di **stack**, non di story; 77-4 **la scelta fra onboarding e app è legata ai dati**: `App.tsx` interroga il database (ci sono ascolti?) invece di usare un flag in `localStorage`, che mentirebbe dopo una cancellazione dei dati o un import su un altro dispositivo; 77-5 **le soglie di stato sono in un punto solo**: 100 eventi per la Home e 6 mesi per la Timeline (`06§2.6-2.7`) sono dichiarati in `useHomeTimelineData.ts`, non nelle due schermate). Consegnati: `apps/web/src/screens/{homeTimelineModel.ts,Home.tsx,Timeline.tsx,AppShell.tsx}`, `apps/web/src/components/{StatCard,MemoryCard,BarWeek,EraBand,StreamChart,MoodLine}.tsx` + `chartGeometry.ts`, `apps/web/src/hooks/{useCountUp.ts,useHomeTimelineData.ts}`, il cablaggio di `App.tsx` e `OnboardingRouter.tsx`, 11 chiavi i18n nuove (namespace `nav` incluso), gli stili in `onboarding.css`, `08-COPY-I18N.md` v0.13 e lo stato della story 3.1 (`done`). Con la 3.1 l'**EPIC 3** passa a 2/4 e l'indicatore di avanzamento (issue #216) a **75%** — 21 story su 28, 7 step rimanenti |
+| 2.32 | 2026-10-31 (Sessione 78) | **§44 Difetto ricorrente: la rimozione della worktree su Windows** (nessuna issue dedicata; segnalato dal project owner): `scripts/post-merge.ps1` si fermava al passo 1 con «Filename too long» / «Result too large» — `git worktree remove --force` cancellava l'albero senza il prefisso `\\?\` e la worktree con `node_modules` aveva path > MAX_PATH. Il rimedio **manuale** (`rd /s /q "\\?\"` + `git worktree prune`) era finito nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68): un workaround ripetuto è una procedura mancante. Fix su tre livelli dentro lo script — **L1** `git -c core.longpaths=true worktree remove --force` (causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale tocca **solo** directory che sono worktree di questo repo (working copy principale e antenati mai toccati → **exit 16**) e `git status` fallito = WIP sconosciuto = stop (**exit 10**); `git status` ora gira con `core.longpaths=true`. Difetto scoperto mentre si scriveva la rete: `Invoke-CmdVerbatim` non passava `/c` a `cmd.exe` ⇒ shell interattiva, comando non eseguito, **exit 0** — un successo che non aveva fatto nulla; `/c` aggiunto e L3 coperto da un test che lo **forza** (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`). Test: `test-post-merge.sh` **T10..T14** (shim di `git` che fallisce solo su `worktree remove`, guardia sulla working copy, path lunghi reali, catena L1→L2→L3 su PS 5.1, L3 forzata) → **47 assert, 0 falliti**. `AGENTS.md` v1.33 (nuova sezione sul difetto + exit 16), `12-DEVOPS.md` §9.8i + changelog 1.7, `docs/state/sessions/78-post-merge-long-paths.md` |
 ---
 
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
@@ -17059,6 +17287,183 @@ dipendenza di chart sarebbe una decisione di **stack**, non di story.
 - `docs/state/stories/3.1-home-timeline.md` — `status: done`, task e acceptance criteria spuntati
 - `scripts/generate-bundle.ps1` — `$files` += il file di sessione e il file di story
 - `docs/11-BACKLOG.md`, `docs/INDEX.md`, `docs/18-DEV-LOG.md` — sezioni legacy allineate
+
+
+
+===== FILE: docs/state/sessions/78-post-merge-long-paths.md =====
+
+---
+number: 78
+title: "Rimozione worktree long-path-safe (procedura post-merge)"
+date: 2026-10-31
+state: 🟡
+merged: false
+branch: fix/post-merge-long-paths
+pr: 0
+claim: kilo-HP-ELITEBOOK-longpath
+cross_refs: [216]
+tags: [devops, tooling]
+---
+
+# Sessione 78 — Rimozione worktree long-path-safe (procedura post-merge)
+
+> Sessione senza issue dedicata: il project owner ha segnalato il difetto
+> direttamente («post-merge.ps1 fallisce su Windows con “Result too large” …
+> ho applicato il workaround `rd /s /q "\\?\"` documentato nel DEV-LOG, ma è un
+> difetto ricorrente della procedura»). Lavoro di manutenzione della procedura
+> canonica, non di una story: nessun claim su issue, nessun backlog.
+
+## Sintesi
+
+La procedura canonica post-merge (`scripts/post-merge.ps1`) deve **smontare la
+worktree** prima di eliminare il branch locale. Su Windows quel passo falliva
+in modo prevedibile: `git worktree remove --force` cancella l'albero chiamando
+le API Win32 **senza il prefisso `\\?\`**, quindi con `node_modules` e path più
+lunghi di MAX_PATH (260 caratteri) la cancellazione si interrompe con
+«Filename too long» / «Result too large».
+
+Lo stato lasciato indietro è scomodo: git **ha già deregistrato** la worktree
+(l'errore arriva dopo la cancellazione fallita), la directory è rimasta, e il
+branch risulta ancora «checked-out» per `git branch -d`. La procedura si
+ferma, e l'agente deve finire il lavoro a mano.
+
+Il rimedio manuale (`rd /s /q "\\?\<path>"` + `git worktree prune`) era finito
+nel DEV-LOG di **sette** sessioni consecutive (56, 57, 58, 61, 63, 64, 68),
+ognuna con la stessa formula. Un workaround che ricorre sette volte non è un
+workaround: è una **procedura mancante**.
+
+## Causa radice
+
+Tre fatti, non uno:
+
+1. **`git worktree remove` non è long-path-aware.** Su Windows Git for Windows
+   chiama le API Win32 senza il prefisso `\\?\`, salvo che sia attivo
+   `core.longpaths=true`. La procedura non lo attivava: con il default, la
+   cancellazione si spezza sul primo path oltre 260 caratteri.
+2. **PowerShell 7 è long-path-aware.** `pwsh.exe` dichiara `longPathAware` nel
+   proprio manifest e usa .NET Core: `Remove-Item -Recurse -Force` cancella
+   alberi oltre MAX_PATH **senza prefisso e senza processi esterni**. Misurato
+   su questa macchina: albero di 417 caratteri rimosso senza errori.
+3. **`Remove-Item` non segue le junction.** Verificato: un junction verso una
+   directory esterna viene **rimosso come link**, e il contenuto collegato
+   resta intatto — il comportamento giusto per `node_modules` con pnpm (i
+   package sono junction verso `.pnpm`). `Directory.Delete(path, true)` invece
+   **fallisce** sulle junction («Access to the path 'link' is denied»): la
+   ricorsione .NET non è il primitive giusto.
+
+## Soluzione
+
+Tre livelli dentro `scripts/post-merge.ps1`, dal più economico al più
+robusto:
+
+| Livello | Meccanismo | Ruolo |
+|---------|-----------|-------|
+| L1 | `git -c core.longpaths=true worktree remove --force` | **causa radice**: abilita in git il prefisso `\\?\` |
+| L2 | `Remove-Item -LiteralPath <path> -Recurse -Force` | **nativo** del runtime baseline (pwsh 7), non segue le junction |
+| L3 | `cmd /c rd /s /q "\\?\<path>"` + `git worktree prune` | **rete** per Windows PowerShell 5.1, che non è long-path-aware |
+
+Dopo una rimozione manuale, `git worktree prune` deregistra la worktree: senza,
+`git branch -d` continuerebbe a vederla come checked-out.
+
+## Guardie
+
+Il fallback manuale è una cancellazione ricorsiva: le guardie non sono
+decorative.
+
+- **Il target deve essere una worktree di questo repo**: registrata da
+  `git worktree list`, oppure con il marker `.git` che punta a
+  `.git/worktrees/` del repo. La working copy principale e i suoi antenati
+  sono esclusi per costruzione → `-WorktreePath` sulla working copy =
+  **exit 16**, zero cancellazioni.
+- **`git status` fallito = WIP sconosciuto**: il codice di uscita è ora
+  raccolto; se `git status` non può girare (path lunghi), la procedura si
+  ferma (exit 10) invece di interpretare l'output vuoto come «worktree
+  pulita». Il comando usa `git -c core.longpaths=true`.
+- **Nessun livello riesce = exit 16**: nessuna azione distruttiva, e lo script
+  stampa il comando manuale.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D.78.1 | `core.longpaths=true` **per invocazione** (`git -c ...`), non nella config del repo | Risolve la causa radice senza mutare la configurazione locale dell'utente: l'opzione vale solo per il comando che ne ha bisogno |
+| D.78.2 | L2 usa `Remove-Item`, non `Directory.Delete` | `Remove-Item` non segue le junction (il contenuto collegato resta intatto); `Directory.Delete` fallisce sulle junction |
+| D.78.3 | L3 esiste solo per Windows PowerShell 5.1 | Il baseline del repo è `pwsh` (D.71.1); `cmd.exe` è una dipendenza da evitare nel percorso normale |
+| D.78.4 | Il fallback manuale è **consentito solo** su directory che sono worktree di questo repo | Una cancellazione ricorsiva senza guardie è il difetto più grave possibile in una procedura distruttiva |
+| D.78.5 | `git status` fallito = stop (exit 10), non "worktree pulita" | Uno stato WIP **sconosciuto** non è uno stato pulito: la differenza è la difesa fra E3/E4/E5 e una data loss |
+| D.78.6 | Hook di test `LIFE_SOUNDTRACK_WT_REMOVAL=rd` | Una rete di sicurezza non esercitata è una rete **non verificata**: T14 la forza, altrimenti il suo codice resterebbe mai eseguito |
+
+## Difetto trovato mentre si scriveva la rete
+
+`Invoke-CmdVerbatim` costruiva la riga di comando **senza il prefisso `/c`**:
+`cmd.exe` apriva una shell interattiva (banner + prompt), non eseguiva nulla e
+restituiva **0**. Un codice di uscita che dice «tutto bene» senza che sia
+successo nulla è il peggior tipo di successo: la rete L3 sembrava funzionante.
+Prefisso `/c` aggiunto, e il livello è coperto da un test che lo **forza**.
+
+## Analisi di avanzamento
+
+### Numeri
+
+- **Implementazione: 75%** — 21 story completate su 28 · effort pesato 77% · **mancano 7 step**
+- EPIC 0 (Fondamenta) 7/7 · EPIC 1 (Import core) 6/6 · EPIC 2 (Analisi) 4/4 · EPIC 3 (UI/UX) 2/4 · EPIC 4 (Arricchimento) 2/4 · EPIC 5 (Privacy e legale) 0/2 · EPIC 6 (Manutenzione stack) 0/1
+
+### Cosa e' pronto e cosa manca
+
+- **La procedura post-merge non si blocca più su Windows**: la rimozione della
+  worktree è coperta da tre livelli, ciascuno testato, e il caso del fallback
+  ha un exit code e un messaggio espliciti.
+- Le **story** del backlog non cambiano: questa sessione è manutenzione della
+  procedura, non una story. Restano **7 step**: 3.2 Ricordi + Share,
+  3.3 Esplora + Analisi, 4.2 MusicBrainz lookup, 4.3 Artwork enrichment,
+  5.1 Privacy spec finale, 5.2 Export e purge, 6.1 Upgrade toolchain e
+  dipendenze a ultime major.
+- Il **gate end-to-end** resta l'obiettivo aperto: import → timeline → esplora →
+  condividi ha ancora schermate vuote.
+
+> I numeri sopra sono quelli **calcolati** dal blocco aggregato al momento della
+> stesura: se il blocco e l'analisi divergono, il primo e' la fonte di verita'.
+
+### Salute tecnica (verificata in questa sessione)
+
+`bash scripts/test-post-merge.sh` → **47 assert, 0 falliti** (T10..T14 nuovi) ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+nessuna modifica al codice applicativo (`apps/*`, `packages/*`): la change è
+solo in `scripts/`, `AGENTS.md` e `docs/`.
+
+## Lesson learned
+
+- **Il pattern è il segnale, non l'errore**: sette sessioni consecutive con la
+  stessa frase nel DEV-LOG non sono sette incidenti. Il sintomo da guardare è
+  «l'errore è **scomparso**»: un workaround che compare in sette sessioni di
+  fila dimostra che la procedura canonica non copre il caso.
+- **La domanda giusta è «perché fallisce», non «come faccio a mano»**: la
+  risposta (`core.longpaths=true` abilita in git il prefisso `\\?\`) è una riga
+  di opzioni e cancella il problema alla fonte. Il fallback manuale scende a
+  rete, non a meccanismo.
+- **Il runtime giusto vale più del trucco giusto**: la domanda «ma non si
+  potrebbe usare pwsh 7, che dovrebbe supportare i percorsi lunghi?» è
+  quella giusta. `cmd.exe` serve solo per 5.1, che non è il baseline: una
+  procedura che usa `cmd` per il caso normale ha una dipendenza che non serve.
+- **Una rete non esercitata è una rete non verificata**: il livello L3 era
+  morto (restituiva 0 senza fare nulla) e nessuno se n'era accorto, perché
+  nel caso normale L1 basta. Il forcing del primitive (`LIFE_SOUNDTRACK_WT_REMOVAL=rd`)
+  è ciò che trasforma una rete da «presente» a «provata».
+
+## Documenti aggiornati
+
+- `scripts/post-merge.ps1` — rimozione long-path-safe su tre livelli, guardie,
+  exit 16, stato WIP sconosciuto
+- `scripts/test-post-merge.sh` — T10..T14 (shim di `git`, guardia sulla working
+  copy, path lunghi reali, catena L1→L2→L3, L3 forzata)
+- `AGENTS.md` — v1.33: nuova sezione §"Difetto ricorrente: la rimozione della
+  worktree su Windows", passo 1 della tabella e dell'equivalente manuale, exit
+  code 16, copertura dei test
+- `docs/12-DEVOPS.md` — §9.8i (nuova) + changelog 1.7 + conteggio assert del
+  gate `gates-scripts`
+- `docs/18-DEV-LOG.md` — §44 + changelog 2.32
+- `docs/state/sessions/78-post-merge-long-paths.md` — questo file
 
 
 
@@ -26486,7 +26891,7 @@ Ogni story deve avere label GitHub:
 
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.4 · Sessione 72 (2026-10-31) · baseline PowerShell 7 (`pwsh`) + confine di encoding dei `.ps1`
+> Status: 🟡 DRAFT · Versione 1.7 · Sessione 78 (2026-10-31) · baseline PowerShell 7 (`pwsh`) + rimozione worktree long-path-safe
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -27189,6 +27594,55 @@ entrambi numeri, e il lettore non ha modo di sapere quale sia vero.
 
 ---
 
+### 9.8i Rimozione worktree long-path-safe nella procedura post-merge (Sessione 78)
+
+La procedura canonica post-merge (`scripts/post-merge.ps1`) deve **smontare la
+worktree** prima di eliminare il branch locale. Su Windows quel passo falliva
+in modo prevedibile: `git worktree remove --force` cancella l'albero chiamando
+le API Win32 **senza il prefisso `\\?\`**, quindi con `node_modules` e path >
+MAX_PATH (260 caratteri) la cancellazione si interrompe con «Filename too long»
+/ «Result too large». Lo stato lasciato indietro è scomodo: git **ha già
+deregistrato** la worktree (l'errore arriva dopo), la directory è rimasta, e il
+branch risulta ancora «checked-out» per `git branch -d`.
+
+La rimozione manuale (`rd /s /q "\\?\<path>"` + `git worktree prune`) era finita
+nel DEV-LOG di **sette** sessioni consecutive: un workaround ripetuto è un
+difetto della procedura.
+
+**Tre livelli**, tutti dentro lo script:
+
+| Livello | Meccanismo | Perché |
+|---------|-----------|--------|
+| L1 | `git -c core.longpaths=true worktree remove --force` | abilita in git il prefisso `\\?\`: è la **causa radice**, e la risolve senza toccare il filesystem a mano |
+| L2 | `Remove-Item -LiteralPath <path> -Recurse -Force` | PowerShell 7 è **long-path-aware** (manifest `longPathAware` + .NET Core): cancella alberi oltre MAX_PATH senza prefisso e senza processi esterni. **Non segue le junction** (il contenuto collegato, es. lo store di pnpm, resta intatto) — a differenza di `Directory.Delete`, che sulle junction fallisce |
+| L3 | `cmd /c rd /s /q "\\?\<path>"` + `git worktree prune` | rete per **Windows PowerShell 5.1**, che non è long-path-aware. `rd` non segue le junction |
+
+**Guardie** (il fallback manuale è la parte pericolosa):
+
+- il target deve essere **una worktree di questo repo**: registrata da
+  `git worktree list`, oppure con il marker `.git` che punta a
+  `.git/worktrees/` del repo. La working copy principale e i suoi antenati non
+  sono mai toccati → `-WorktreePath` sulla working copy = **exit 16**, nessuna
+  cancellazione;
+- se `git status` nella worktree **fallisce**, lo stato WIP è sconosciuto: la
+  procedura si ferma (exit 10) invece di cancellare alla cieca;
+- se nessun livello rimuove la worktree: **exit 16**, zero azioni distruttive,
+  e lo script stampa il comando manuale.
+
+**Verifica**: `bash scripts/test-post-merge.sh` → **47 assert, 0 falliti**
+(T10..T14 nuovi). T10 è il caso che rende il fallback **deterministico**: uno
+shim di `git` che fallisce **solo** su `worktree remove`, installato nel `PATH`
+dello scenario. T12/T13/T14 sono Windows-only (path lunghi reali, catena
+L1→L2→L3 su Windows PowerShell 5.1, rete L3 forzata via
+`LIFE_SOUNDTRACK_WT_REMOVAL=rd`).
+
+**Regola generale**: un workaround che compare in sette sessioni consecutive
+non è un workaround: è una procedura mancante. Il sintomo — «funziona se
+faccio così a mano» — è la firma di un difetto **nello script**, non della
+macchina.
+
+---
+
 ### 9.9 Scope `permissions:` valide (issue #135)
 
 Un errore che **non produce un job che fallisce** produce un workflow che GitHub *rifiuta in fase di validazione*. Dal 2026-10-21T16:21Z al 2026-10-22 `ci.yml` ha avuto esattamente questa firma.
@@ -27274,7 +27728,7 @@ protection può interpretare un check saltato come successo.
 | 18 | `gates-workflows` | `Ordinamento dei writer di main` | solo PR | sì | **#149** |
 | 19 | `gates-git` | `Residui post-merge` (`test-issue-76-residue.sh`, 9 assert) | solo PR | sì | #76 |
 | 20 | `gates-git` | `Label in sync con AGENTS.md` (`validate-labels.mjs`) | solo PR | sì | #110 |
-| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 29 assert) | solo PR | sì | sessione 33 |
+| 21 | `gates-scripts` | `Procedura canonica post-merge` (`test-post-merge.sh`, 47 assert) | solo PR | sì | sessione 33 |
 | 22 | `gates-procedure` | `Setup worktree` (`test-setup-worktree.sh`, 8 assert) | solo PR | sì | #53 |
 | 23 | `gates-procedure` | `Pre-commit clean check` (`test-pre-commit-clean-check.sh`, 8 assert) | solo PR | sì | sessione 23 |
 | 24 | `gates-procedure` | `Safe branch switch` (`test-safe-branch-switch.sh`, 11 assert) | solo PR | sì | #49 |
@@ -27719,6 +28173,7 @@ fallivano **in silenzio** su un file CRLF. Ora le righe vengono normalizzate una
 | 1.4 | Sessione 72 (2026-10-31) | **§9.12 Ambiente PowerShell locale** (nuova): provenienza dell'installazione verificata (`pwsh` **7.6.9**, pacchetto **MSIX/Store** `Microsoft.PowerShell_7.6.9.0_x64__8wekyb3d8bbwe`, alias per-utente in `WindowsApps`, **nessun MSI** in `C:\Program Files\PowerShell\7` e nessuna voce di disinstallazione nel registro; pacchetto creato/aggiornato il 2026-10-26 09:38) con i comandi di verifica (`pwsh -NoProfile -c '$PSVersionTable.PSVersion'`, `winget list --id Microsoft.PowerShell`, `Get-AppxPackage Microsoft.PowerShell`). La sezione fissa anche il **confine**: `scripts/aggregate-state.ps1` è UTF-8 **senza BOM** e contiene 9 righe con caratteri non-ASCII ⇒ sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e `-Check` esce **1** con drift spurio (attesi 620 char, trovati 616), mentre in modalità scrittura il mojibake verrebbe scritto nei file globali; `generate-bundle.ps1` invece è immune (legge/scrive sempre con `-Encoding UTF8`). Il vincolo «ASCII-only nei `.ps1`» di `13-ADR/0008` viene corretto: riguarda il **parsing**, non solo la scrittura. Il fix dello script (rimuovere i letterali o aggiungere il BOM) è **decisione del project owner** (D.71.4) e non è applicato. **§9.13 Copertura CI delle suite di test locali** (nuova): 5 suite presenti in `scripts/` **non** eseguite da `ci.yml` (`test-post-merge.sh`, `test-setup-worktree.sh`, `test-safe-branch-switch.sh`, `test-pre-commit-clean-check.sh`, `test-appendline-lf-fix.ps1`), con tempi misurati e difetti rilevati: `test-safe-branch-switch.sh` è **fail-open** (i contatori vivono dentro subshell ⇒ "0 passati, 0 falliti" e uscita sempre 0), `test-appendline-lf-fix.ps1` ha S3 **stale** (64 `AppendLine` sono il fix corrente, non una regressione) e S5 **muta il working tree**, `test-setup-worktree.sh` fallisce su Windows/Git Bash (mock `gh` non intercettato + path POSIX). I due gate più pesanti (`test-aggregate-determinism.sh` 56,0 s + `test-bundle-check-idempotent.sh` 60,4 s) valgono 116,4 s dei ~213 s di gate sequenziali e sono indipendenti ⇒ parallelizzabili. Nessuna modifica al codice degli script né alla semantica dei gate in CI. |
 | 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **11 job** di cui 10 in parallelo (`node-lint-typecheck`, `node-test`, `node-build`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **tempo pareggio della pipeline 172 s → 73 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
 | 1.6 | Sessione 75 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74): la numerazione delle sessioni è univoca (issue #105). |
+| 1.7 | Sessione 78 (2026-10-31) | **§9.8i rimozione worktree long-path-safe nella procedura post-merge** (nuova): `git worktree remove --force` cancellava la worktree senza il prefisso `\\?\`, quindi falliva con «Filename too long» / «Result too large» quando la worktree conteneva `node_modules` con path > MAX_PATH — e il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive. Fix su tre livelli: **L1** `git -c core.longpaths=true worktree remove --force` (la causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale è consentito solo su una directory che è davvero una worktree di questo repo (working copy principale e antenati mai toccati → exit 16) e `git status` fallito = WIP sconosciuto = stop (exit 10). Test: `test-post-merge.sh` **T10..T14** (47 assert in tutto), con lo **shim di `git`** che rende deterministico il caso del fallback. **§9.10**: il gate `gates-scripts` passa da 29 a 47 assert. |
 
 
 
@@ -33611,6 +34066,7 @@ exit 0
 
       0. Zero-WIP guard        -> evita E3/E4/E5 (transizioni distruttive con working tree sporco)
       1. Worktree PRIMA       -> `git branch -d` fallisce se il branch e' checked-out in una worktree
+                                (rimozione long-path-safe: `core.longpaths=true` + fallback nativo pwsh 7)
       2. fetch --prune        -> `origin/main` deve contenere il merge commit, altrimenti i check mentono
       3. allineamento `main`   -> `git checkout main` + `git merge --ff-only origin/main`
       4. verifica merge       -> contro `origin/main` e/o via `gh` (robusta al merge squash)
@@ -33683,6 +34139,12 @@ exit 0
       13 `git branch -d` rifiutato e contenuto non riconosciuto come gia' presente in base
       14 `-Check` ha trovato residui post-merge da pulire
       15 esecuzione tentata da dentro una worktree invece che dalla working copy principale
+      16 rimozione della worktree fallita (git E fallback long-path): nessuna azione distruttiva
+
+    Variabili d'ambiente:
+      LIFE_SOUNDTRACK_WT_REMOVAL=rd  forza il fallback `rd /s /q "\\?\"` al
+        posto della rimozione nativa di PowerShell (hook di test: esercita la
+        rete di sicurezza per Windows PowerShell 5.1)
 
     Compatibilita': PowerShell 5.1+ (Windows PowerShell) e PowerShell 7+.
 #>
@@ -33724,6 +34186,19 @@ if ($helpRequested) {
 # vengono gestiti tramite gli exit code, non tramite le eccezioni PowerShell.
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Rilevamento piattaforma: su Windows la rimozione della worktree usa il
+# fallback long-path-safe (`rd /s /q "\\?\"`), su altri sistemi la rimozione
+# ricorsiva standard.
+$script:OnWindows = ($env:OS -eq "Windows_NT")
+
+# Primitive di rimozione usata dal fallback: "" (default) = nativa di
+# PowerShell, "rd" = `rd /s /q "\\?\"` via cmd.exe. Il forzaggio esiste per
+# esercitare la rete di sicurezza nei test (LIFE_SOUNDTRACK_WT_REMOVAL=rd).
+$script:RemovalPrimitive = ""
+if ($env:LIFE_SOUNDTRACK_WT_REMOVAL) {
+    $script:RemovalPrimitive = $env:LIFE_SOUNDTRACK_WT_REMOVAL.ToLowerInvariant()
+}
 
 function Write-Step { param([string]$Message, [string]$Color = "Cyan"); Write-Host "[post-merge] $Message" -ForegroundColor $Color }
 function Write-Ok   { param([string]$Message); Write-Host "[post-merge]   OK   $Message" -ForegroundColor Green }
@@ -33805,6 +34280,199 @@ function Normalize-Path {
     param([string]$Path)
     if (-not $Path) { return "" }
     return ($Path -replace '\\', '/').TrimEnd('/').ToLowerInvariant()
+}
+
+# =====================================================================
+# Rimozione worktree long-path-safe
+#
+# Difetto ricorrente (Windows): `git worktree remove --force` cancella la
+# worktree chiamando le API Win32 senza il prefisso `\\?\`, quindi fallisce
+# con "Filename too long" / "Result too large" quando la worktree contiene
+# `node_modules` con path > MAX_PATH (260 caratteri).
+#
+# La rimozione e' difesa su tre livelli:
+#   L1  `git -c core.longpaths=true worktree remove --force` -> git usa il
+#       prefisso `\\?\` internamente e rimuove l'albero correttamente.
+#   L2  fallback nativo: `Remove-Item -Recurse -Force`. PowerShell 7 e'
+#       long-path-aware (manifest `longPathAware` + .NET Core): cancella
+#       alberi con path > MAX_PATH senza prefisso e senza processi esterni.
+#       Non segue le junction: il contenuto collegato resta intatto.
+#   L3  rete di sicurezza per Windows PowerShell 5.1 (non long-path-aware):
+#       `rd /s /q "\\?\<path>"` via cmd.exe, che non segue le junction.
+#
+# Il fallback manuale e' consentito SOLO su una directory che e' davvero
+# una worktree di questo repo (registrata da `git worktree list`, o con il
+# marker `.git` che punta a `.git/worktrees/` di questo repo): la working
+# copy principale e i suoi antenati non sono mai toccati.
+# =====================================================================
+
+function Get-FullPath {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) { return "" }
+    try { return [System.IO.Path]::GetFullPath($Path) } catch { return $Path }
+}
+
+function Get-ExtendedPath {
+    param([string]$Path)
+    $abs = Get-FullPath $Path
+    if ($abs.StartsWith('\\?\')) { return $abs }
+    if ($abs.StartsWith('\\')) { return '\\?\UNC\' + $abs.Substring(2) }
+    return '\\?\' + $abs
+}
+
+function Invoke-CmdVerbatim {
+    # Esegue cmd.exe con una riga di comando passata VERBATIM: evita le
+    # regole di quoting di PowerShell verso cmd (che trasformerebbero
+    # `rd /s /q "C:\percorso con spazi"` in un argomento illeggibile).
+    # Il comando va eseguito con `/c`: senza, cmd.exe apre una shell
+    # interattiva (banner + prompt), non esegue nulla e restituisce 0.
+    param([string]$Arguments)
+
+    $cmdExe = Join-Path $env:SystemRoot "System32\cmd.exe"
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $cmdExe
+    $psi.Arguments = "/c $Arguments"
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+    $proc = [System.Diagnostics.Process]::Start($psi)
+    $stdout = $proc.StandardOutput.ReadToEnd()
+    $stderr = $proc.StandardError.ReadToEnd()
+    $proc.WaitForExit()
+    return [pscustomobject]@{ ExitCode = $proc.ExitCode; Output = (($stdout + $stderr) -replace "`r", "").Trim() }
+}
+
+function Remove-LongPathTree {
+    # Cancella un albero di directory che la rimozione standard non porta a
+    # termine per via dei path > MAX_PATH. Restituisce $true se la directory
+    # non esiste piu' alla fine.
+    param([string]$Path)
+
+    $abs = Get-FullPath $Path
+    if (-not (Test-Path -LiteralPath $abs)) { return $true }
+
+    # L2: rimozione nativa di PowerShell 7 (.NET Core long-path-aware).
+    # `Remove-Item -Recurse` NON segue le junction: il contenuto collegato
+    # (es. il store di pnpm) resta intatto.
+    # Il primitive puo' essere forzato con LIFE_SOUNDTRACK_WT_REMOVAL=rd per
+    # esercitare la rete di sicurezza L3 anche quando L2 basterebbe.
+    $removed = $false
+    if ($script:RemovalPrimitive -ne "rd") {
+        try {
+            Remove-Item -LiteralPath $abs -Recurse -Force -ErrorAction Stop
+            $removed = $true
+        } catch {
+            Write-Host "[post-merge]         Remove-Item non riuscito: $($_.Exception.Message)" -ForegroundColor DarkGray
+        }
+    }
+
+    if (-not $removed) {
+        if (-not $script:OnWindows) {
+            return $false
+        }
+        # L3: rete di sicurezza per Windows PowerShell 5.1 (non long-path-aware).
+        # toglie l'attributo read-only: `rd` fallisce sui file read-only.
+        $ro = [int][System.IO.FileAttributes]::ReadOnly
+        try {
+            foreach ($f in [System.IO.Directory]::EnumerateFiles($abs, '*', [System.IO.SearchOption]::AllDirectories)) {
+                $a = [int][System.IO.File]::GetAttributes($f)
+                if (($a -band $ro) -ne 0) { [System.IO.File]::SetAttributes($f, ($a -band (-bnot $ro))) }
+            }
+        } catch {
+            Write-Host "[post-merge]         attributi read-only non rimossi su tutti i file: $($_.Exception.Message)" -ForegroundColor DarkGray
+        }
+        # `rd` non segue le junction (a differenza di una ricorsione .NET):
+        # il contenuto collegato resta intatto.
+        $res = Invoke-CmdVerbatim ("rd /s /q `"{0}`"" -f (Get-ExtendedPath $abs))
+        if ($res.ExitCode -ne 0) {
+            Write-Host "[post-merge]         rd /s /q fallito (exit $($res.ExitCode)): $($res.Output)" -ForegroundColor DarkGray
+            return $false
+        }
+    }
+
+    return -not (Test-Path -LiteralPath $abs)
+}
+
+function Test-SafeRemovalTarget {
+    # La working copy principale (e qualunque suo antenato) non e' mai un
+    # target ammesso per la rimozione manuale.
+    param([string]$Path, [string]$RepoRoot)
+
+    $t = Normalize-Path (Get-FullPath $Path)
+    $r = Normalize-Path (Get-FullPath $RepoRoot)
+    if (-not $t -or -not $r) { return $false }
+    if ($t -eq $r) { return $false }
+    if ($r.StartsWith("$t/")) { return $false }
+    return $true
+}
+
+function Test-WorktreeMarker {
+    # True se la directory contiene il file `.git` di una worktree collegata
+    # che punta a `.git/worktrees/` di QUESTO repo.
+    param([string]$Path, [string]$RepoRoot)
+
+    $abs = Get-FullPath $Path
+    $marker = Join-Path $abs ".git"
+    if (-not (Test-Path -LiteralPath $marker -PathType Leaf)) { return $false }
+
+    $content = $null
+    try { $content = [System.IO.File]::ReadAllText($marker) } catch { return $false }
+
+    $line = ($content -split "`r?`n" | Where-Object { $_ -match '^\s*gitdir:' } | Select-Object -First 1)
+    if (-not $line) { return $false }
+
+    $gitdir = (($line -replace '^\s*gitdir:\s*', '')).Trim().Trim('"')
+    if (-not $gitdir) { return $false }
+
+    $admin = Get-FullPath (Join-Path (Get-FullPath (Join-Path $RepoRoot ".git")) "worktrees")
+    return (Normalize-Path (Get-FullPath $gitdir)).StartsWith((Normalize-Path $admin) + "/")
+}
+
+function Remove-WorktreeSafely {
+    # Rimuove la worktree: prima con git (path lunghi abilitati), poi con il
+    # fallback manuale long-path-safe. Non lascia mai un mezzo rimpiacimento:
+    # in caso di fallimento restituisce Success=$false e il chiamante esce 16.
+    param([string]$Path, [string]$RepoRoot)
+
+    $abs = Get-FullPath $Path
+    if (-not $abs) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "percorso vuoto" }
+    }
+
+    # La directory e' gia' sparita: basta deregistrare la worktree.
+    if (-not (Test-Path -LiteralPath $abs)) {
+        Invoke-Git -GitArgs @("worktree", "prune") -Quiet -AllowFail | Out-Null
+        return [pscustomobject]@{ Success = $true; Method = "gia' assente"; Detail = "" }
+    }
+
+    # L1: git con core.longpaths=true (risolve "Filename too long" / "Result too large")
+    $res = Invoke-Git -GitArgs @("-c", "core.longpaths=true", "worktree", "remove", "--force", $abs) -AllowFail
+    if ($res.ExitCode -eq 0) {
+        return [pscustomobject]@{ Success = $true; Method = "git (core.longpaths=true)"; Detail = "" }
+    }
+    Write-Warn "git worktree remove fallito: $($res.Output)"
+
+    # L2: fallback manuale, consentito solo su una worktree di questo repo
+    if (-not (Test-SafeRemovalTarget -Path $abs -RepoRoot $RepoRoot)) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "target non sicuro per la rimozione manuale" }
+    }
+
+    $registered = @((Get-Worktrees) | Where-Object {
+        -not $_.Main -and (Normalize-Path $_.Path) -eq (Normalize-Path $abs)
+    })
+    if (-not $registered -and -not (Test-WorktreeMarker -Path $abs -RepoRoot $RepoRoot)) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "la directory non e' una worktree di questo repo" }
+    }
+
+    if (-not (Remove-LongPathTree -Path $abs)) {
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "rimozione manuale fallita" }
+    }
+
+    # La worktree era ancora registrata: `prune` la deregistra, altrimenti
+    # `git branch -d` continuerebbe a vederla come checked-out.
+    Invoke-Git -GitArgs @("worktree", "prune") -Quiet -AllowFail | Out-Null
+    return [pscustomobject]@{ Success = $true; Method = "fallback long-path-safe"; Detail = "" }
 }
 
 # === Preflight ===
@@ -33956,28 +34624,57 @@ if ($dirty.Count -gt 0) {
 Write-Step "1/7 Worktree"
 $targetWt = $worktrees | Where-Object { $_.Branch -eq $Branch -and -not $_.Main } | Select-Object -First 1
 
+$wtPath = $null
 if ($targetWt) {
     $wtPath = if ($WorktreePath) { $WorktreePath } else { $targetWt.Path }
+} elseif ($WorktreePath -and (Test-Path -LiteralPath $WorktreePath)) {
+    $wtPath = $WorktreePath
+}
+
+if ($wtPath) {
+    # Zero-WIP anche nella worktree: se `git status` fallisce (per esempio
+    # per path lunghi) lo stato WIP e' SCONOSCIUTO e non si procede.
     $wtDirty = @()
+    $wtStatusCode = 0
     if (-not $script:DryRun -and (Test-Path -LiteralPath $wtPath)) {
         $global:LASTEXITCODE = 0
-        $raw = & git -C $wtPath status --porcelain 2>&1
+        $raw = & git -c core.longpaths=true -C $wtPath status --porcelain 2>&1
+        $wtStatusCode = $LASTEXITCODE
         $wtDirty = @(($raw | Out-String) -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -notmatch '^\?\?' })
     }
 
-    if ($wtDirty.Count -gt 0 -and -not $Force) {
+    if ($wtStatusCode -ne 0) {
+        Write-Warn "git status nella worktree '$wtPath' fallito (exit $wtStatusCode): lo stato WIP e' sconosciuto"
+        if (-not $Force) {
+            Write-Err "non posso verificare se la worktree contiene WIP non committato: procedura interrotta (nessuna azione distruttiva)."
+            Write-Host "[post-merge]   Rilancia con -Force solo se il lavoro e' gia' pushato/commitato altrove." -ForegroundColor Yellow
+            exit 10
+        }
+        Write-Warn "-Force attivo: procedo senza sapere se la worktree contiene WIP (rischio DATA-LOSS)"
+    } elseif ($wtDirty.Count -gt 0 -and -not $Force) {
         Write-Err "worktree '$wtPath' ha modifiche non committate: non la rimuovo (potrebbe contenere WIP)."
         $wtDirty | ForEach-Object { Write-Host "[post-merge]         $_" -ForegroundColor DarkGray }
         Write-Host "[post-merge]   Se il lavoro e' gia' stato pushato/commitato altrove, usa -Force." -ForegroundColor Yellow
         exit 10
     }
 
-    Write-Warn "branch '$Branch' e' checked-out nella worktree '$wtPath': la rimuovo PRIMA del delete locale"
-    Invoke-Git -GitArgs @("worktree", "remove", "--force", $wtPath) | Out-Null
-    Write-Ok "worktree rimossa: $wtPath"
-} elseif ($WorktreePath -and (Test-Path -LiteralPath $WorktreePath)) {
-    Write-Step "rimozione worktree esplicita: $WorktreePath"
-    Invoke-Git -GitArgs @("worktree", "remove", "--force", $WorktreePath) | Out-Null
+    if ($targetWt) {
+        Write-Warn "branch '$Branch' e' checked-out nella worktree '$wtPath': la rimuovo PRIMA del delete locale"
+    } else {
+        Write-Step "rimozione worktree esplicita: $wtPath"
+    }
+
+    $rm = Remove-WorktreeSafely -Path $wtPath -RepoRoot $repoRoot
+    if (-not $rm.Success) {
+        Write-Err "rimozione worktree fallita: $wtPath ($($rm.Detail))"
+        Write-Host "[post-merge]   La worktree e' INTATTA: nessuna azione distruttiva eseguita." -ForegroundColor Yellow
+        Write-Host "[post-merge]   Rimozione manuale (pwsh 7, path lunghi supportati):" -ForegroundColor Yellow
+        Write-Host "[post-merge]     Remove-Item -LiteralPath '$wtPath' -Recurse -Force" -ForegroundColor Cyan
+        Write-Host "[post-merge]   (Windows PowerShell 5.1: cmd /c rd /s /q `"\\?\$wtPath`")" -ForegroundColor Cyan
+        Write-Host "[post-merge]   poi: git worktree prune" -ForegroundColor Cyan
+        exit 16
+    }
+    Write-Ok "worktree rimossa: $wtPath (metodo: $($rm.Method))"
 } else {
     Write-Ok "nessuna worktree associata a '$Branch'"
 }
@@ -34175,12 +34872,26 @@ exit 0
 #   T6 main locale divergente: nessuna azione distruttiva
 #   T7 audit -Check: segnala i residui, esce pulito quando tutto e' pulito
 #   T8 idempotenza della procedura
+#   T9 esecuzione da dentro la worktree: exit 15, branch intatto
+#   T10 rimozione worktree con `git worktree remove` che fallisce: la
+#      procedura deve usare il fallback long-path-safe ed uscire 0
+#   T11 -WorktreePath sulla working copy principale: nessuna cancellazione
+#      (guard di sicurezza del fallback manuale), exit 16
+#   T12 path lunghi (> MAX_PATH) dentro la worktree: rimozione riuscita
+#      (Windows: e' il caso "Filename too long" / "Result too large")
+#   T13 catena completa su Windows PowerShell 5.1: L1 (git) e L2 (Remove-Item)
+#      falliscono, interviene L3 (`rd /s /q "\\?\"`)
+#   T14 rete di sicurezza L3 forzata (LIFE_SOUNDTRACK_WT_REMOVAL=rd)
 #
 # Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SCRIPT="$SCRIPT_DIR/post-merge.ps1"
+
+is_windows() {
+  [ "${OS:-}" = "Windows_NT" ] || uname -s 2>/dev/null | grep -qiE 'mingw|msys|cygwin'
+}
 
 if command -v pwsh >/dev/null 2>&1; then
   PS="pwsh"
@@ -34204,6 +34915,53 @@ ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 run_ps() {
   "$PS" -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
   return $?
+}
+
+run_ps51() {
+  powershell -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" "$@" 2>&1
+  return $?
+}
+
+# Installa uno shim di `git` che fallisce SOLO su `worktree remove`,
+# simulando l'errore Windows "Filename too long" / "Result too large".
+# Tutto il resto e' delegato al git vero. Esporta SHIM_DIR.
+install_git_shim() {
+  SHIM_DIR="$(mktemp -d)"
+  REAL_GIT="$(command -v git)"
+  if is_windows; then
+    cat > "$SHIM_DIR/git.cmd" <<EOF
+@echo off
+echo %* | findstr /C:"worktree remove" >nul && (
+  echo error: failed to delete: Filename too long 1>&2
+  exit /b 255
+)
+"$(cygpath -w "$REAL_GIT")" %*
+EOF
+  else
+    cat > "$SHIM_DIR/git" <<EOF
+#!/usr/bin/env bash
+prev=""
+for a in "\$@"; do
+  if [ "\$a" = "remove" ] && [ "\$prev" = "worktree" ]; then
+    echo "error: failed to delete: Filename too long" >&2
+    exit 255
+  fi
+  prev="\$a"
+done
+exec "$REAL_GIT" "\$@"
+EOF
+    chmod +x "$SHIM_DIR/git"
+  fi
+}
+
+# Crea dentro la worktree un albero con path > MAX_PATH (simula node_modules).
+# Windows-only: su POSIX il limite MAX_PATH non esiste.
+make_long_paths() {
+  local wt="$1" win_wt ps_cmd
+  is_windows || return 1
+  win_wt="$(cygpath -w "$wt")"
+  ps_cmd="\$p = Join-Path '$win_wt' 'node_modules'; for (\$i=0; \$i -lt 8; \$i++) { \$p = Join-Path \$p ('seg' + ('x' * 40)) }; [System.IO.Directory]::CreateDirectory(\$p) | Out-Null; [System.IO.File]::WriteAllText((Join-Path \$p 'file.js'), 'x')"
+  pwsh -NoProfile -Command "$ps_cmd" >/dev/null 2>&1
 }
 
 branch_exists_locally() { git rev-parse --verify --quiet "refs/heads/$1" >/dev/null 2>&1; }
@@ -34433,9 +35191,124 @@ echo "=== T9: esecuzione da dentro la worktree (deve rifiutarsi) ==="
   cd /; rm -rf "$D"
 }
 
+echo "=== T10: git worktree remove fallisce -> fallback long-path-safe ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+
+  # Shim di `git`: fallisce SOLO su `worktree remove`, simulando l'errore
+  # Windows "Filename too long" / "Result too large"; tutto il resto e'
+  # delegato al git vero. E' il modo deterministico di esercitare il
+  # fallback su ogni piattaforma (su Windows il caso reale e' il path
+  # lungo, coperto da T12 e T13).
+  install_git_shim
+
+  OLD_PATH="$PATH"
+  export PATH="$SHIM_DIR:$PATH"
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  export PATH="$OLD_PATH"
+
+  if [ $rc -eq 0 ]; then ok "exit 0 nonostante il fallimento di git worktree remove"; else ng "exit $rc invece di 0"; echo "$out" | tail -20; fi
+  if [ ! -d "$D/wt" ]; then ok "worktree rimossa dal filesystem via fallback"; else ng "worktree ancora presente"; fi
+  if git worktree list | grep -q "$D/wt"; then ng "worktree ancora registrata"; else ok "worktree deregistrata (prune)"; fi
+  if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+  if branch_exists_remotely feat/x; then ng "branch remoto ancora presente"; else ok "branch remoto eliminato"; fi
+
+  cd /; rm -rf "$D" "$SHIM_DIR"
+}
+
+echo "=== T11: -WorktreePath sulla working copy principale (mai cancellare) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+
+  out="$(run_ps -Branch feat/x -WorktreePath "$D/work")"; rc=$?
+  if [ $rc -eq 16 ]; then ok "exit 16 (rimozione rifiutata)"; else ng "exit $rc invece di 16"; echo "$out" | tail -20; fi
+  if [ -f "$D/work/file.txt" ]; then ok "working copy principale intatta"; else ng "working copy principale cancellata"; fi
+  if [ -d "$D/wt" ]; then ok "worktree reale non toccata"; else ng "worktree reale rimossa"; fi
+  if branch_exists_locally feat/x; then ok "branch intatto"; else ng "branch eliminato"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T12: path lunghi (> MAX_PATH) dentro la worktree ==="
+{
+  if ! is_windows; then
+    echo "  [SKIP] scenario Windows-only (path lunghi): su POSIX il limite MAX_PATH non esiste"
+  else
+    D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+    do_merge_commit
+
+    if make_long_paths "$D/wt"; then
+      out="$(run_ps -Branch feat/x)"; rc=$?
+      if [ $rc -eq 0 ]; then ok "exit 0 con path lunghi nella worktree"; else ng "exit $rc invece di 0"; echo "$out" | tail -20; fi
+      if [ ! -d "$D/wt" ]; then ok "worktree rimossa (path lunghi)"; else ng "worktree ancora presente"; fi
+      if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+    else
+      echo "  [SKIP] creazione dell'albero con path lunghi non riuscita"
+    fi
+
+    cd /; rm -rf "$D"
+  fi
+}
+
+echo "=== T13: catena completa su Windows PowerShell 5.1 (L1+L2 falliscono -> L3 rd) ==="
+{
+  if ! is_windows; then
+    echo "  [SKIP] scenario Windows-only (Windows PowerShell 5.1 + path lunghi)"
+  elif ! command -v powershell >/dev/null 2>&1; then
+    echo "  [SKIP] Windows PowerShell 5.1 non disponibile"
+  else
+    D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+    do_merge_commit
+
+    if make_long_paths "$D/wt"; then
+      install_git_shim
+      OLD_PATH="$PATH"
+      export PATH="$SHIM_DIR:$PATH"
+      # Windows PowerShell 5.1 non e' long-path-aware: `Remove-Item` fallisce
+      # sui path > MAX_PATH -> deve intervenire il fallback `rd /s /q "\\?\"`.
+      out="$(run_ps51 -Branch feat/x)"; rc=$?
+      export PATH="$OLD_PATH"
+
+      if [ $rc -eq 0 ]; then ok "exit 0 con la catena L1+L2+L3"; else ng "exit $rc invece di 0"; echo "$out" | tail -25; fi
+      if [ ! -d "$D/wt" ]; then ok "worktree rimossa (catena completa)"; else ng "worktree ancora presente"; fi
+      if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+    else
+      echo "  [SKIP] creazione dell'albero con path lunghi non riuscita"
+    fi
+
+    cd /; rm -rf "$D" "$SHIM_DIR"
+  fi
+}
+
+echo "=== T14: rete di sicurezza L3 (rd /s /q \"\\\\?\\\") forzata ==="
+{
+  if ! is_windows; then
+    echo "  [SKIP] scenario Windows-only (cmd rd con prefisso \\?\ )"
+  else
+    D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+    do_merge_commit
+
+    # L1 fallisce (shim) e L2 viene saltata: deve intervenire L3.
+    install_git_shim
+    OLD_PATH="$PATH"
+    export PATH="$SHIM_DIR:$PATH"
+    out="$(LIFE_SOUNDTRACK_WT_REMOVAL=rd run_ps -Branch feat/x)"; rc=$?
+    export PATH="$OLD_PATH"
+
+    if [ $rc -eq 0 ]; then ok "exit 0 con la rimozione via rd"; else ng "exit $rc invece di 0"; echo "$out" | tail -25; fi
+    if [ ! -d "$D/wt" ]; then ok "worktree rimossa via rd"; else ng "worktree ancora presente"; fi
+    if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+
+    cd /; rm -rf "$D" "$SHIM_DIR"
+  fi
+}
+
 echo ""
 echo "Risultati: $pass passati, $fail falliti"
 [ "$fail" -eq 0 ]
+
 
 
 ===== FILE: scripts/safe-branch-switch.ps1 =====
