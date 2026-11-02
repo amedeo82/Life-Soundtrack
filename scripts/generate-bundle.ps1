@@ -161,6 +161,9 @@ $files = @(
     "docs/state/sessions/86-implementation-specs.md",
     "docs/state/sessions/87-encoding-remediation.md",
     "docs/state/sessions/88-post-merge-recovery.md",
+    # Sessione 90 (issue #284): automazioni post-merge deterministiche
+    # (writer unico, CI post-writer, generatori portabili).
+    "docs/state/sessions/90-automazioni-post-merge-definitive.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
