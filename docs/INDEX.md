@@ -137,6 +137,8 @@
 | 82 | La catena post-merge si auto-ripara: concurrency group propri, advisory e verifica finale (issue #251) | 🟢 | ✅ | #258 |
 | 83 | AGENTS.md: il contratto senza la storia (rifinitura I3) | 🟢 | ✅ | #260 |
 | 84 | La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato | 🟡 | ❌ | - |
+| 85 | Posizionamento competitivo verificato sul codice e priorità ricalcolate | 🟡 | ❌ | #273 |
+| 86 | Il pacchetto di specifiche implementabili delle 7 story rimanenti | 🟡 | ❌ | #273 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -176,9 +178,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **61** (merge: 60)
+- Sessioni migrate in state/sessions: **63** (merge: 60)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S84** - La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato
+- Ultima sessione migrata: **S86** - Il pacchetto di specifiche implementabili delle 7 story rimanenti
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -192,25 +194,27 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 75%** - 21 story completate su 28 - effort pesato 77% - **mancano 7 step**
+**Implementazione: 70%** - 21 story completate su 30 - effort pesato 72% - **mancano 9 step**
 
-`██████████████████████░░░░░░░░` 75%
+`█████████████████████░░░░░░░░░` 70%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
-| EPIC 2 - Analisi | 4 | 4 | 100% | completo |
-| EPIC 3 - UI/UX | 2 | 4 | 50% | in corso |
+| EPIC 2 - Analisi | 4 | 5 | 80% | in corso |
+| EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 21 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 21 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (7):
+**Step ancora da implementare** (9):
+- 2.5 Collegamento del pipeline di analisi all'app - da fare (size L)
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
+- 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
@@ -221,32 +225,46 @@
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (4 story) | 2/4 - in corso |
-| Motore di analisi completo | EPIC 2 (4 story) | 4/4 - soddisfatto |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
+| Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S84)
+**Analisi della sessione corrente** (S86)
 
-**Numeri.** L'implementazione non cambia: **75%** (21 story su 28, effort 77%), restano **7 step**.
-Lavoro di **governance**.
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
+Lavoro di **documentazione**: il catalogo non cresce, ma le 9 story rimanenti passano da «non lavorabili» a
+«lavorabili dopo ratifica».
 
-**Cosa è pronto.** Il retry nei due writer (`auto-state-aggregate.yml`, `auto-bundle.yml`); il
-contratto del gate `checkPushSync` esteso alle due strategie, con il riconoscimento del ciclo; il
-gate che distingue i commenti dal codice; tre suite di scenario aggiornate (19 + 8 + 6 assert).
+**Cosa è pronto.** Un pacchetto di 5 specifiche che copre tutte le story rimanenti, con: stato reale
+verificato, contratti, task numerati, AC verificabili, piano di test e 30 decisioni proposte
+(D-23.1…D-27.6). Il backlog punta a ciascuna; `INDEX.md` e il bundle li includono.
 
-**Cosa manca.** Nulla sul tema: con il retry, la race non può più perdere un writer. L'unica
-residua è **cosmetica**: il commit del retry usa la stessa identità bot e lo stesso messaggio dei
-commits precedenti, quindi nella history di `main` non si distingue «commit del writer» da
-«commit del retry». Separare i due messaggi renderebbe la diagnosi post-mortem più immediata.
+**Cosa manca.** La **ratifica** delle specifiche e delle decisioni (D-23.x…D-27.x): è l'atto del project
+owner, e senza di esso le story restano `⬚ TODO` e le issue non possono avere la label `agent-ready`.
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
+**Issue aperte — una per story** (regola «1 issue = 1 story»): ogni story ha una sola issue canonica,
+con la spec e la checklist già dentro.
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati,
-0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → **19 assert, 0 falliti** ·
-`bash scripts/test-workflow-git-add-coverage.sh` → **8 assert, 0 falliti** ·
-`bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti ·
+| Story | Issue | Note |
+|-------|-------|------|
+| 2.5 — Collegamento del pipeline di analisi | **#266** | nuova (Sessione 86), `needs-spec` fino alla ratifica |
+| 3.2 — Ricordi + Share | **#241** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 3.3 — Esplora + Analisi | **#240** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 3.5 — Anteprima e modalità demo | **#270** | nuova (Sessione 86), `needs-spec` fino alla ratifica |
+| 4.3 — Artwork enrichment | **#242** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 5.1 — Privacy spec finale | **#244** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 5.2 — Export e purge | **#246** | issue preesistente: senza label, ora complete |
+
+> Le **cinque issue duplicate** create inizialmente dalla Sessione 86 (#267, #268, #269, #271, #272) sono
+> state **chiuse come `status:wontdo`** con il rimando all'issue canonica.
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano; aggregatore e bundle
+rigenerati in quest'ordine (aggregator → generator).
+
+**Gate di testabilità (comandi).** `node scripts/check-readme-facts.mjs` → 0 falliti ·
 `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
-`node scripts/check-readme-facts.mjs` → 0 falliti.
+`node scripts/check-aggregate-blocks.mjs` → 0 violazioni ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
