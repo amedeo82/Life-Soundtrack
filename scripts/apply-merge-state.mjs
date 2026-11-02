@@ -121,23 +121,25 @@ function frontmatterValue(text, field) {
 }
 
 /**
- * Individua il file di sessione della PR. Ordine di ricerca:
+ * Individua i file di sessione della PR. Ordine di ricerca:
  *   1. `pr: <N>` (il doc-sync in-branch lo scrive: e' il legame esplicito)
  *   2. `branch: <ref>` (fallback: utile quando il doc-sync in-branch non ha
  *      ancora impostato `pr:`)
+ *
+ * **Piu' file per PR**: una PR puo' consegnare piu' blocchi di lavoro distinti
+ * (una sola issue, piu' sessioni). Il fatto e' inequivocabile — sono stati
+ * mergiati da quella PR — quindi lo stato di merge viene applicato a **tutti**
+ * i file che la dichiarano. Prima (issue #275) lo script abortiva, e al merge
+ * nessuna delle sessioni riceveva `merged: true`: i blocchi aggregati
+ * mostravano ancora «non ancora mergiato (PR #N)», il drift che il gate
+ * `check-merge-state.mjs` esiste per intercettare.
  */
-function findSession(files) {
+function findSessions(files) {
   const byPr = files.filter((f) => frontmatterValue(f.text, 'pr') === String(prNumber));
-  if (byPr.length === 1) return { file: byPr[0], matchedBy: 'pr' };
-  if (byPr.length > 1) {
-    abort(
-      `piu' file di sessione dichiarano \`pr: ${prNumber}\`: ${byPr.map((f) => f.file).join(', ')}. ` +
-        'Il gate `check-merge-state.mjs` segnalera la collisione: risolvi prima di applicare.',
-    );
-  }
+  if (byPr.length > 0) return { files: byPr, matchedBy: 'pr' };
   if (branchArg) {
     const byBranch = files.filter((f) => frontmatterValue(f.text, 'branch') === branchArg);
-    if (byBranch.length === 1) return { file: byBranch[0], matchedBy: 'branch' };
+    if (byBranch.length === 1) return { files: byBranch, matchedBy: 'branch' };
     if (byBranch.length > 1) {
       abort(
         `piu' file di sessione dichiarano \`branch: ${branchArg}\`: ${byBranch.map((f) => f.file).join(', ')}`,
@@ -197,7 +199,7 @@ function patchFrontmatter(text, updates) {
 }
 
 const files = listSessionFiles();
-const found = findSession(files);
+const found = findSessions(files);
 if (!found) {
   // Nessun file di sessione per questa PR: e' legittimo (una PR `fix` senza
   // sessione, o una PR che non ha ancora scritto `pr:`). Non e' un errore:
@@ -214,8 +216,6 @@ if (!found) {
   process.exit(0);
 }
 
-const session = found.file;
-
 // Merge commit e data: dagli argomenti, altrimenti dall'API.
 let sha = shaArg;
 let mergedAt = dateArg;
@@ -227,35 +227,44 @@ if (!sha || !mergedAt) {
   sha = sha || pr.merge_commit_sha;
   mergedAt = mergedAt || pr.merged_at;
 }
-if (!sha) abort(`merge commit sconosciuto per la PR #${prNumber}`);
-if (!mergedAt) abort(`data di merge sconosciuta per la PR #${prNumber}`);
+if (!sha) abort('merge commit sconosciuto per la PR #' + prNumber);
+if (!mergedAt) abort('data di merge sconosciuta per la PR #' + prNumber);
 
-const currentState = frontmatterValue(session.text, 'state');
-const updates = {
-  state: currentState === CLOSED_MARKER ? CLOSED_MARKER : CLOSED_MARKER,
-  merged: 'true',
-  merged_commit: `"${sha}"`,
-  merged_date: `"${mergedAt}"`,
-};
+for (const session of found.files) {
+  const currentState = frontmatterValue(session.text, 'state');
+  const updates = {
+    state: currentState === CLOSED_MARKER ? CLOSED_MARKER : CLOSED_MARKER,
+    merged: 'true',
+    merged_commit: `"${sha}"`,
+    merged_date: `"${mergedAt}"`,
+  };
 
-const patched = patchFrontmatter(session.text, updates);
-if (!patched) abort(`frontmatter non valido in ${session.file}`);
+  const patched = patchFrontmatter(session.text, updates);
+  if (!patched) abort('frontmatter non valido in ' + session.file);
 
-if (patched.changed.length === 0) {
-  console.log(
-    `[OK] ${session.file}: stato di merge gia' in sync (match su \`${found.matchedBy}\`)`,
-  );
-  process.exit(0);
-}
+  if (patched.changed.length === 0) {
+    console.log(
+      `[OK] ${session.file}: stato di merge gia' in sync (match su \`${found.matchedBy}\`)`,
+    );
+    continue;
+  }
 
-if (dryRun) {
-  console.log(`[INFO] ${session.file}: dry-run, nessuna scrittura`);
+  if (dryRun) {
+    console.log(`[INFO] ${session.file}: dry-run, nessuna scrittura`);
+    for (const line of patched.changed) console.log(`       ${line}`);
+    continue;
+  }
+
+  writeFileSync(session.full, patched.text, 'utf8');
+  console.log(`[OK] ${session.file}: stato di merge applicato (match su \`${found.matchedBy}\`)`);
   for (const line of patched.changed) console.log(`       ${line}`);
-  process.exit(0);
 }
 
-writeFileSync(session.full, patched.text, 'utf8');
-console.log(`[OK] ${session.file}: stato di merge applicato (match su \`${found.matchedBy}\`)`);
-for (const line of patched.changed) console.log(`       ${line}`);
+if (found.files.length > 1) {
+  console.log(
+    `[INFO] ${found.files.length} file di sessione dichiarano \`pr: ${prNumber}\`: ` +
+      "lo stato di merge e' stato applicato a tutti (una PR puo' consegnare piu' sessioni, issue #275)",
+  );
+}
 console.log('[INFO] ricorda di rigenerare i blocchi: aggregate-state.ps1 -> generate-bundle.ps1');
 process.exit(0);

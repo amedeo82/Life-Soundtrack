@@ -145,6 +145,7 @@ $files = @(
     "docs/state/sessions/84-push-race-retry.md",
     "docs/state/sessions/85-competitive-positioning.md",
     "docs/state/sessions/86-implementation-specs.md",
+    "docs/state/sessions/87-encoding-remediation.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -295,6 +296,25 @@ $files = @(
     # gate esca 1; un caso verifica che la capability nella roadmap non sia un
     # falso positivo e uno che il file mancante dia exit 2 (errore di ambiente).
     "scripts/test-readme-facts-gate.sh",
+    # Gate "encoding dei file tracciati" (Sessione 87 / issue #277): intercetta la
+    # corruzione SILENZIOSA che Windows PowerShell 5.1 introduce riscrivendo i file
+    # (doppia codifica = mojibake, BOM UTF-8, UTF-8 non valido). Nella Sessione 85
+    # due file di sessione erano stati riscritti in ANSI e il danno era finito in
+    # `main` senza che un comando fallisse. READ-ONLY in modalita' verifica;
+    # `--fix` ripara solo quando l'inversione e' inequivocabile. Gate bloccante in
+    # CI (job `gates-docs`) e nel pre-commit hook (INVARIANTE 3).
+    "scripts/check-encoding.mjs",
+    # Test di regressione del gate "encoding" (issue #277, T1..T7): file pulito
+    # (nessun falso positivo sugli accenti), BOM, mojibake, riparazione col --fix,
+    # UTF-8 non valido, allowlist e modo `--staged`.
+    "scripts/test-encoding-gate.mjs",
+    # Allowlist del gate "encoding": i file che documentano esempi di mojibake
+    # sono in WARN, non in errore (rimuoverli significherebbe cancellare la lezione).
+    "scripts/encoding-allowlist.txt",
+    # Test di regressione di apply-merge-state.mjs (issue #275): una PR puo'
+    # consegnare piu' file di sessione e lo stato di merge deve essere applicato
+    # a TUTTI (prima abortava: le sessioni restavano «non ancora mergiato»).
+    "scripts/test-apply-merge-state.mjs",
     # Gate "coerenza del protocollo" (Sessione 80 / issue #248, ADR-0012): confronta
     # i fatti normativi di AGENTS.md con la realta' del repository (6 check: versione
     # dichiarata, tabella label, tabella exit code, integrita' degli anchor,

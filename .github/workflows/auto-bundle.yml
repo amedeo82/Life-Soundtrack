@@ -1,4 +1,4 @@
-﻿#
+#
 # CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
 # condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
 # GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job

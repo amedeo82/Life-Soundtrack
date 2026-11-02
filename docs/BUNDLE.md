@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 12:01
-> Totale file: 162
+> Data: 2026-11-02 13:34
+> Totale file: 167
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 161 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2408.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-02 12:01
+- Totale file: 166 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2445.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-02 13:34
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 103 |
-| scripts/ | 31 |
+| docs/ | 104 |
+| scripts/ | 35 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
 | .github/ | 5 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.38 — Sessione 83 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.39 — Sessione 87 (2026-11-02)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -72,10 +72,12 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
+| I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
 node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
+node scripts/check-encoding.mjs                # encoding dei file tracciati, exit 0 = nessun mojibake/BOM
 ```
 
 **Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
@@ -1105,7 +1107,39 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 **F9 — PowerShell 7 (`pwsh`) è il baseline del repo** *(Sessione 71, rafforzato dalla Sessione 72)*: gli script in `scripts/*.ps1` si invocano con `pwsh`. Sotto Windows PowerShell 5.1 il doppio trattino non viene normalizzato e i gate con `--check` ricadono silenziosamente in modalità WRITING (fail-open, issue #104): verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output. La forma canonica dei flag resta a **singolo trattino** (`-Check`, `-List`, `-DryRun`). Vedi `docs/12-DEVOPS.md §9.1`.
 
-**F9-bis — `powershell` (5.1) non è un fallback: è un rischio di corruzione** *(Sessione 72)*. I `.ps1` del repo sono UTF-8 **senza BOM** e contengono letterali non-ASCII: sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e i blocchi calcolati non corrispondono più a quelli su disco (`aggregate-state.ps1 -Check` esce **1** con drift spurio: attesi 620 caratteri, trovati 616) — e in modalità scrittura il mojibake verrebbe **scritto** nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`). Regole: (a) scrivere **`pwsh`** per esteso, mai `powershell`; (b) eseguire il check F9 **prima** di qualunque `.ps1`; (c) i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito). Dettagli e misure: `docs/12-DEVOPS.md §9.12`, `docs/17-DEV-NOTES.md` P12.
+**F9-bis — `powershell` (5.1) non è un fallback: è un rischio di corruzione** *(Sessione 72, ampliato dalla Sessione 87 — issue #277)*. I `.ps1` del repo sono UTF-8 **senza BOM** e contengono letterali non-ASCII: sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e i blocchi calcolati non corrispondono più a quelli su disco (`aggregate-state.ps1 -Check` esce **1** con drift spurio: attesi 620 caratteri, trovati 616) — e in modalità scrittura il mojibake verrebbe **scritto** nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`). Regole: (a) scrivere **`pwsh`** per esteso, mai `powershell`; (b) eseguire il check F9 **prima** di qualunque `.ps1`; (c) i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito). Dettagli e misure: `docs/12-DEVOPS.md §9.12`, `docs/17-DEV-NOTES.md` P12.
+
+### 🧯 F9-ter — I file di testo: UTF-8 senza BOM, e mai scritti da una shell 5.1 *(Sessione 87, issue #277 — vincolante)*
+
+Il danno **non** arriva solo dal parsing dei `.ps1`: arriva da qualunque shell che **legge e riscrive** il contenuto di un file. È successo nella Sessione 85: due file di sessione sono stati riscritti in ANSI e il danno (40+ punti corrotti ciascuno) è **finito in `main`** senza che un solo comando fallisse.
+
+| Cosa fa | Windows PowerShell **5.1** | PowerShell **7** (`pwsh`) |
+|---------|---------------------------|--------------------------|
+| `Get-Content` (senza `-Encoding`) | decodifica con la **code page ANSI** → `à` diventa `Ã ` | decodifica UTF-8 → corretto |
+| `Set-Content -Encoding UTF8` | scrive **con BOM** (`EF BB BF`) | scrive senza BOM |
+| `Get-Content -Raw` → edit → `Set-Content` | **doppia codifica**: ogni accente, em-dash ed emoji diventa 3 caratteri | corretto |
+| `Out-File` / redirection `>` | ANSI + BOM | UTF-8 senza BOM |
+
+**Regole operative (non è un consiglio: c'è un gate)**:
+
+1. **Per modificare il contenuto di un file, non usare una shell**: usa gli strumenti file dedicati (read/edit/write) o un **script Node** (`node -e` / `scripts/*.mjs`). Il byte esatto è il requisito, e Node scrive UTF-8 senza BOM per default.
+2. **Se devi per forza usare PowerShell 5.1**: `Get-Content -LiteralPath <p> -Raw -Encoding UTF8` per leggere, e per scrivere **senza BOM**:
+   `[System.IO.File]::WriteAllText($p, $t, (New-Object System.Text.UTF8Encoding($false)))`.
+   Il solo `-Encoding UTF8` in scrittura **aggiunge il BOM**: è un errore, non un dettaglio.
+3. **Percorsi lunghi**: usa sempre `-LiteralPath` (le wildcard di `-Path` interpretano `[` e `]`), e per le operazioni distruttive sui path lunghi la procedura canonica è `scripts/post-merge.ps1` (fallback L1→L2→L3, coperto dai test T10..T14 di `scripts/test-post-merge.sh`).
+
+**Il gate** (bloccante in CI e nel pre-commit hook):
+
+```bash
+node scripts/check-encoding.mjs               # tutto il repository: exit 1 = mojibake / BOM / UTF-8 non valido
+node scripts/check-encoding.mjs --staged      # solo i file staged (pre-commit)
+node scripts/check-encoding.mjs --fix         # ripara dove l'inversione e' inequivocabile
+node scripts/test-encoding-gate.mjs           # 7 scenari (T1..T7) del gate
+```
+
+Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido**, **doppia codifica** (mojibake: `Ã`, `â€`, `Â` — la firma da cercare quando un file «si legge ma non ha senso»). I file che **documentano esempi** di mojibake (questa sezione, `docs/17-DEV-NOTES.md`, le lezioni nelle sessioni) sono in `scripts/encoding-allowlist.txt`: vengono segnalati in **WARN**, non in errore — rimuoverli significherebbe cancellare la lezione.
+
+**Se il gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate. `--fix` è il primo passo, ma riscrive solo quando l'inversione è **inequivocabile** (il testo rovesciato è UTF-8 valido e non contiene più firme): negli altri casi il file va corretto a mano e il gate lo dice.
 
 **Opzionale (se si ritorna dopo un merge di un altro agente)**: audit dei residui post-merge prima di iniziare lavoro nuovo — exit 14 indica branch/worktree merged-orfani da pulire con `pwsh scripts/post-merge.ps1 -Check` (vedi §"♻️ Pulizia branch post-merge").
 
@@ -1118,7 +1152,7 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Protocollo agenti v1.37 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.39 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2047,7 +2081,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.38 | Protocollo per agenti — **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.39 | Protocollo per agenti — **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -19450,6 +19484,119 @@ rigenerati in quest'ordine (aggregator → generator).
 
 
 
+===== FILE: docs/state/sessions/87-encoding-remediation.md =====
+
+---
+number: 87
+title: "Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione"
+date: 2026-11-02
+state: 🟡
+merged: false
+branch: feat/277-remediation-encoding-utf-8-senza-bom-e-m
+pr: 0
+claim: kilo-HP-ELITEBOOK-c87enc
+tags: [devops, remediation, encoding, protocollo]
+---
+
+# Sessione 87 — Remediation: encoding UTF-8 e tooling multi-sessione
+
+> **Oggetto**: due problemi emersi nelle Sessioni 85-87, entrambi fraducibili e
+> **silenziosi**: (1) la corruzione di encoding prodotta da Windows PowerShell 5.1,
+> che aveva gia' fatto danni in `main`; (2) il limite di `apply-merge-state.mjs`, che
+> assumeva un file di sessione per PR e aveva lasciato due sessioni senza stato di merge.
+
+## Sintesi
+
+| # | Problema | Root cause | Remediation |
+|---|----------|-----------|-------------|
+| 1 | **Mojibake + BOM** in file di testo | 5.1 decodifica con la code page ANSI (`Get-Content` senza `-Encoding`) e scrive **con BOM** (`Set-Content -Encoding UTF8`) | gate `check-encoding.mjs` (bloccante in CI e pre-commit), `--fix`, test T1..T7, allowlist, **F9-ter** in AGENTS.md, 4 BOM preesistenti rimossi |
+| 2 | `apply-merge-state.mjs` abortava con piu' file di sessione per PR | l'invariante del protocollo e' «una PR = una issue», non «una PR = una sessione» | lo stato di merge viene applicato a **tutti** i file che dichiarano la PR (#275) |
+
+## Cosa e' emerso verificando (Sessione 85-87)
+
+1. **Il danno era gia' in `main`**: i due file di sessione 85 e 86 erano stati riscritti in ANSI
+   (40+ punti corrotti ciascuno) dalla PR #273. Rilevato per caso, cercando `Ã|â€|Â`.
+2. **Il repository aveva 4 BOM UTF-8** preesistenti, mai notati: `.github/workflows/ci.yml`,
+   `.github/workflows/auto-bundle.yml`, `AGENTS.md` e `docs/state/sessions/84-push-race-retry.md`.
+   Rimossi in questa sessione.
+3. **Tutte le occorrenze di "mojibake" gia' presenti nel repository sono contenuto legittimo**:
+   sono i documenti che *descrivono* il problema (F9-bis, ADR-0008 §parsing, `17-DEV-NOTES` P12,
+   il DEV-LOG, le lezioni delle sessioni 72 e 86, il test di determinismo che greppa il mojibake).
+   Per questo esiste un'**allowlist**: i file che documentano esempi sono in WARN, non in errore —
+   rimuoverli significherebbe cancellare la lezione che li ha prodotti.
+4. **Lo scan inline in PowerShell 5.1 era esso stesso difettoso**: `git cat-file` restituiva una
+   stringa e non dei byte, quindi il cast a `byte[]` falliva 200 volte prima di produrre un
+   risultato ("nessun mojibake rilevato") che non valeva niente. **Il controllo dei byte deve
+   stare in Node**, non in una shell: e' il principio che ha prodotto il gate.
+5. `Set-Content -Encoding UTF8` in 5.1 aggiunge il **BOM**: il file risultava corretto a occhio
+   ma con 3 byte in piu' in testa — incompatibile con la convenzione del repo (UTF-8 senza BOM).
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-87.1 | Il gate di encoding è **bloccante** in CI e nel pre-commit hook | Un gate advisory è un consiglio: il danno di Sessione 85 è passato perche' nessuno lo guardava |
+| D-87.2 | La rilevazione del mojibake è **a coppia** (carattere-guida + carattere di continuazione cp1252), non a elenco di stringhe | Un carattere-guida isolato ("Ã") puo' essere legittimo (un nome proprio); la coppia ("Ã©", "â€”") non lo e' mai: nessun falso positivo sui documenti con accenti italiani |
+| D-87.3 | `--fix` riscrive **solo** quando l'inversione e' inequivocabile (testo rovesciato = UTF-8 valido e senza firme residue) | Una riparazione "quasi giusta" e' peggio di nessuna: il file sembra sistemato e resta corrotto |
+| D-87.4 | Allowlist esplicita (`scripts/encoding-allowlist.txt`) con il perche' accanto a ogni riga | I documenti che mostrano il mojibake sono la prevenzione della recidiva: toglierli dal gate significa renderli invisibili al controllo |
+| D-87.5 | `apply-merge-state.mjs` applica lo stato a **tutti** i file di sessione che dichiarano la PR | Il fatto e' inequivocabile (sono stati mergiati da quella PR); l'abort precedente lasciava le sessioni con «non ancora mergiato» per sempre |
+| D-87.6 | Il fix del tooling e' in una PR **separata** dal gate di encoding | Un cambio al tooling con un proprio test non viaggia dentro una PR che ne introduce un altro |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
+Lavoro di **devops/protocollo**: nessuna story di prodotto e' toccata, ma il repository perde una
+classe di danno **silenzioso**.
+
+**Cosa e' pronto.**
+- `scripts/check-encoding.mjs`: gate read-only con `--staged` e `--fix`; 3 classi di danno
+  (BOM, UTF-8 non valido, doppia codifica), allowlist con WARN.
+- `scripts/test-encoding-gate.mjs`: 7 scenari (T1..T7), 16 assert — incluso il caso T4, in cui il
+  `--fix` deve **riparare davvero** (`Città` ed em-dash ripristinati).
+- `.githooks/pre-commit`: INVARIANTE 3 (encoding dei file staged, bloccante).
+- `.github/workflows/ci.yml`: 2 step nuovi nel job `gates-docs` (gate + scenario negativo).
+- `AGENTS.md` **v1.39**: sezione **F9-ter** (la tabella dei default 5.1 vs 7, le 3 regole
+  operative, il gate, l'allowlist) e la riga nella tabella «regola vincolante ⟺ gate».
+- `scripts/apply-merge-state.mjs`: applica lo stato di merge a piu' file di sessione (#275).
+- 4 BOM preesistenti rimossi (CI, auto-bundle, AGENTS.md, sessione 84).
+- `docs/12-DEVOPS.md` §9.10: catalogo dei gate allineato (righe 32-33).
+
+**Cosa manca.** Nulla sul piano della remediation: il gate, il suo test (7 scenari, 16 assert), il
+test del tooling multi-sessione (3 scenari, 13 assert) e le istruzioni per gli agenti sono tutti in
+posto. Rimane solo la verifica in CI (i gate e i test girano su ogni PR) e la ratifica del merge.
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano; aggregatore e
+bundle rigenerati nell'ordine vincolante (aggregator → generator).
+
+**Gate di testabilità.** `node scripts/check-encoding.mjs` → 0 errori, 10 WARN in allowlist ·
+`node scripts/test-encoding-gate.mjs` → 16 assert, 0 falliti ·
+`node scripts/test-apply-merge-state.mjs` → 13 assert, 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs` → 0 violazioni ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| **5.1 non è un fallback: è un processo diverso** con default diversi | `Get-Content` e `Set-Content` hanno semantica diversa fra 5.1 e 7: la stessa identica riga di comando corruppe in uno e no nell'altro. E' il motivo per cui il danno e' entrato in `main` **senza errori**: il comando era riuscito |
+| Il rilevamento per caso (`Ã|â€|Â`) e' arrivato **dopo** il danno | Il gate che mancava era il vero deliverable: senza, il prossimo file riscritto in ANSI sarebbe tornato in `main` |
+| Uno scan fatto con lo strumento sbagliato produce una **falsa risposta** | Lo scan inline in 5.1 ha stampato "nessun mojibake" dopo 200 errori di cast: un controllo che non puo' fallire non e' un controllo |
+| I documenti che descrivono il bug sono essi stessi "il bug" per il gate | Servono due regole: il gate distingue **danno** da **contenuto**, e l'allowlist dichiara il perché. Senza il secondo, il primo produce rumore che finisce per essere ignorato |
+| Un presupposto non scritto in un tool diventa un **abort silenzioso** a valle | «una sessione per PR» non era nel protocollo: era nel codice. Il merge della PR #273 l'ha reso visibile — due sessioni rimaste «non mergiato» per sempre |
+
+## Documenti aggiornati
+
+- `scripts/check-encoding.mjs`, `scripts/test-encoding-gate.mjs`, `scripts/encoding-allowlist.txt` (nuovi)
+- `scripts/apply-merge-state.mjs` (issue #275: piu' file di sessione per PR) + `scripts/test-apply-merge-state.mjs` (T1..T3)
+- `.githooks/pre-commit` (INVARIANTE 3), `.github/workflows/ci.yml` (3 step: encoding, test encoding, test merge-state)
+- `AGENTS.md` v1.39 (F9-ter + tabella regola/gate), `docs/INDEX.md` (versione e riga AGENTS.md)
+- `docs/12-DEVOPS.md` §9.10 (catalogo dei gate: righe 32-33)
+- `docs/BUNDLE.md` (rigenerato)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -29823,6 +29970,17 @@ protection può interpretare un check saltato come successo.
 | 29 | `gates-protocol` | `Blocchi aggregati intoccabili` (`check-aggregate-blocks.mjs`) | solo PR | sì | **#248** |
 | 30 | `gates-protocol` | `Gate "blocchi aggregati" fail-closed` (`test-aggregate-blocks.sh`, 6 scenari) | solo PR | sì | **#248** |
 | 31 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
+| 32 | `gates-docs` | `Encoding dei file tracciati` (`check-encoding.mjs`) | solo PR | sì | **#277** |
+| 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
+
+> **Il gate "encoding"** (Sessione 87, issue #277) intercetta la corruzione **silenziosa** che
+> Windows PowerShell 5.1 introduce riscrivendo i file: doppia codifica (mojibake), BOM UTF-8,
+> UTF-8 non valido. Nella Sessione 85 due file di sessione sono stati riscritti in ANSI e il
+> danno è finito in `main` senza che un solo comando fallisse. Il gate è **read-only** in
+> modalità verifica (`--staged` per il pre-commit, `--fix` per la riparazione quando è
+> inequivocabile) e i file che *documentano* esempi di mojibake sono in
+> `scripts/encoding-allowlist.txt` (WARN, non errore). Istruzioni operative per gli agenti:
+> `AGENTS.md` §F9-ter.
 
 **Il job `gates-protocol`** (Sessione 80, issue #248, ADR-0012) è il primo enforcement del
 protocollo: fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di governance del repo
@@ -42925,6 +43083,653 @@ exit 0
 
 
 
+===== FILE: scripts/check-encoding.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate "encoding dei file tracciati" (issue #277).
+ *
+ * **Perche' esiste**: Windows PowerShell 5.1 decodifica i file con la **code
+ * page ANSI** quando `Get-Content` non ha `-Encoding`, e li riscrive **con il
+ * BOM** quando `Set-Content -Encoding UTF8`. Un file con accenti, em-dash o
+ * emoji diventa illegibile senza che nessun comando fallisca:
+ *
+ *     à  ->  "Ã " (U+00C3 + NBSP)      —  ->  "â€”"
+ *     €  ->  "â‚¬"                  ✅ ->  "ðŸ˜€"
+ *
+ * Il danno e' silenzioso: il file si apre, il diff e' plausibile, e il
+ * contenuto arriva in `main`. Nella Sessione 85 due file di sessione sono
+ * stati riscritti cosi' (40+ punti corrotti ciascuno) e il rilevamento e'
+ * avvenuto per caso, cercando la sequenza `Ã|â€|Â`.
+ *
+ * **Cosa controlla**:
+ *   1. **BOM UTF-8** in testa al file (lo aggiunge `Set-Content -Encoding UTF8` di 5.1)
+ *   2. **UTF-8 non valido** (byte sciolti, file troncato)
+ *   3. **mojibake**: doppia codifica UTF-8 -> cp1252, riconosciuta dalla coppia
+ *      carattere-guida + carattere di continuazione cp1252
+ *
+ * **Cosa NON fa**: non decide cosa sia "giusto": segnala. Il `--fix` ripara
+ * solo i casi in cui l'inversione e' **inequivocabile** (il testo rovesciato e'
+ * UTF-8 valido e non contiene piu' firme) e non tocca mai i file che non
+ * riesce a riparare: li lascia segnalati.
+ *
+ * Uso:
+ *   node scripts/check-encoding.mjs                 # tutto il repository (working tree)
+ *   node scripts/check-encoding.mjs --staged        # solo i file staged (pre-commit)
+ *   node scripts/check-encoding.mjs --fix           # ripara dove possibile
+ *
+ * Exit code: 0 = pulito, 1 = drift (mojibake / BOM / UTF-8 non valido),
+ *             2 = errore di ambiente (nessun repository git, file illeggibile).
+ */
+import { execFileSync } from 'node:child_process';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { join, resolve, extname } from 'node:path';
+
+const argv = process.argv.slice(2);
+function arg(name, fallback) {
+  const i = argv.indexOf(name);
+  return i !== -1 && argv[i + 1] !== undefined ? argv[i + 1] : fallback;
+}
+
+const ROOT = resolve(arg('--root', '.'));
+const STAGED = argv.includes('--staged');
+const FIX = argv.includes('--fix');
+const ALLOWLIST_FILE = join(ROOT, 'scripts', 'encoding-allowlist.txt');
+
+/**
+ * La tabella cp1252 (0x80-0x9F): i byte che il decoder ANSI di Windows
+ * mappa su caratteri Unicode. Serve in due direzioni: per riconoscere il
+ * mojibake e per invertirlo.
+ */
+const CP1252_HIGH = {
+  0x80: '\u20AC', 0x82: '\u201A', 0x83: '\u0192', 0x84: '\u201E', 0x85: '\u2026',
+  0x86: '\u2020', 0x87: '\u2021', 0x88: '\u02C6', 0x89: '\u2030', 0x8A: '\u0160',
+  0x8B: '\u2039', 0x8C: '\u0152', 0x8E: '\u017D', 0x91: '\u2018', 0x92: '\u2019',
+  0x93: '\u201C', 0x94: '\u201D', 0x95: '\u2022', 0x96: '\u2013', 0x97: '\u2014',
+  0x98: '\u02DC', 0x99: '\u2122', 0x9A: '\u0161', 0x9B: '\u203A', 0x9C: '\u0153',
+  0x9E: '\u017E', 0x9F: '\u0178',
+};
+const CP1252_REVERSE = new Map(
+  Object.entries(CP1252_HIGH).map(([byte, char]) => [char, Number(byte)]),
+);
+
+/** I caratteri cp1252 "alto" (0x80-0x9F), espressi come classe di caratteri. */
+const HIGH_CLASS =
+  '\\u0080-\\u00bf' +
+  '\\u0152\\u0153\\u0160\\u0161\\u0178\\u017d\\u017e\\u0192' +
+  '\\u02c6\\u02dc\\u20ac' +
+  '\\u2013\\u2014\\u2018\\u2019\\u201a\\u201c\\u201d\\u201e' +
+  '\\u2020\\u2021\\u2022\\u2026\\u2030\\u2039\\u203a\\u2122';
+
+/**
+ * Il mojibake e' una coppia: un carattere-guida (quello che la doppia
+ * codifica produce dal primo byte di una sequenza UTF-8) seguito da un
+ * carattere di continuazione. La coppia e' il segnale: un carattere-guida
+ * isolato ("Ã") puo' essere legittimo (un nome proprio), ma "Ã©" o "â€”"
+ * non lo sono mai.
+ */
+const MOJIBAKE_SOURCE = '[\\u00c2-\\u00c5\\u00d0\\u00d1\\u00e2\\u00ef\\u00f0][' + HIGH_CLASS + ']';
+
+function mojibakeMatches(text) {
+  const re = new RegExp(MOJIBAKE_SOURCE, 'g');
+  const out = [];
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const line = text.slice(0, m.index).split('\n').length;
+    out.push({ index: m.index, text: m[0], line });
+  }
+  return out;
+}
+
+function hasMojibake(text) {
+  return new RegExp(MOJIBAKE_SOURCE).test(text);
+}
+
+/** Inverte la doppia codifica su un testo; null se non e' reversibile. */
+function tryReverse(text) {
+  const bytes = [];
+  for (const char of text) {
+    const code = char.codePointAt(0);
+    if (CP1252_REVERSE.has(char)) {
+      bytes.push(CP1252_REVERSE.get(char));
+      continue;
+    }
+    if (code <= 0xff) {
+      bytes.push(code);
+      continue;
+    }
+    return null; // carattere non rappresentabile in cp1252: inversione impossibile
+  }
+  try {
+    const decoded = new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(bytes));
+    return decoded.replace(/^\uFEFF/, '');
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Ripara un testo: prima sul file intero, poi riga per riga (per i file
+ * solo parzialmente corrotti). Ritorna null se niente e' riparabile.
+ */
+function repair(text) {
+  const whole = tryReverse(text);
+  if (whole && !hasMojibake(whole)) return whole;
+
+  const eol = text.includes('\r\n') ? '\r\n' : '\n';
+  let changed = false;
+  const fixed = text.split(/\r?\n/).map((line) => {
+    if (!hasMojibake(line)) return line;
+    const reversed = tryReverse(line);
+    if (reversed && !hasMojibake(reversed)) {
+      changed = true;
+      return reversed;
+    }
+    return line;
+  });
+  return changed ? fixed.join(eol) : null;
+}
+
+const BINARY_EXTENSIONS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.pdf', '.zip', '.gz', '.7z',
+  '.mp3', '.wav', '.ogg', '.m4a', '.woff', '.woff2', '.ttf', '.eot', '.otf',
+  '.sqlite', '.db', '.mmdb', '.exe', '.dll', '.so', '.dylib', '.wasm',
+]);
+
+function git(args, encoding) {
+  return execFileSync('git', args, { cwd: ROOT, encoding: encoding ?? 'buffer' });
+}
+
+function listFiles() {
+  const args = STAGED
+    ? ['diff', '--cached', '--name-only', '--diff-filter=ACM', '-z']
+    : ['ls-files', '-z'];
+  return git(args).toString('utf8').split('\0').filter(Boolean);
+}
+
+function readContent(file) {
+  if (STAGED) return git(['show', `:${file}`]);
+  return readFileSync(join(ROOT, file));
+}
+
+function readAllowlist() {
+  if (!existsSync(ALLOWLIST_FILE)) return new Set();
+  const allowed = new Set();
+  for (const line of readFileSync(ALLOWLIST_FILE, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    allowed.add(trimmed.split('#')[0].trim());
+  }
+  return allowed;
+}
+
+const utf8Strict = new TextDecoder('utf-8', { fatal: true });
+
+function inspect(file, buffer) {
+  const findings = [];
+  if (buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
+    findings.push({ kind: 'bom', detail: 'BOM UTF-8 (EF BB BF) in testa al file' });
+  }
+  let text;
+  try {
+    text = utf8Strict.decode(buffer.subarray(buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf ? 3 : 0));
+  } catch {
+    findings.push({ kind: 'invalid-utf8', detail: 'byte non validi: il file non e\' UTF-8 valido' });
+    return { findings, text: null };
+  }
+  const matches = mojibakeMatches(text);
+  if (matches.length > 0) {
+    const preview = [...new Set(matches.map((m) => m.text))].slice(0, 4).join(' ');
+    findings.push({
+      kind: 'mojibake',
+      detail: `${matches.length} occorrenza/e di doppia codifica (righe ${[...new Set(matches.map((m) => m.line))].slice(0, 6).join(', ')}) — es. ${preview}`,
+    });
+  }
+  return { findings, text };
+}
+
+function main() {
+  let files;
+  try {
+    files = listFiles();
+  } catch (err) {
+    console.error(`[FAIL] impossibile elencare i file tracciati: ${String(err.message || err)}`);
+    process.exit(2);
+  }
+
+  const allowlist = readAllowlist();
+  let errors = 0;
+  let warnings = 0;
+  let fixed = 0;
+
+  for (const file of files) {
+    if (BINARY_EXTENSIONS.has(extname(file).toLowerCase())) continue;
+    let buffer;
+    try {
+      buffer = readContent(file);
+    } catch (err) {
+      console.error(`[FAIL] ${file}: illeggibile (${String(err.message || err)})`);
+      errors++;
+      continue;
+    }
+    if (buffer.length === 0) continue;
+    // controllo rapido: i binari senza estensione nota
+    if (buffer.subarray(0, 8000).includes(0)) continue;
+
+    const { findings, text } = inspect(file, buffer);
+    if (findings.length === 0) continue;
+
+    const allowed = allowlist.has(file);
+    const tag = allowed ? '[WARN]' : '[FAIL]';
+
+    for (const finding of findings) {
+      console.log(`${tag} ${file}: ${finding.detail}`);
+    }
+
+    if (!FIX || allowed || text === null) {
+      if (allowed) warnings++;
+      else errors++;
+      continue;
+    }
+
+    const repaired = repair(text);
+    if (repaired === null) {
+      errors++;
+      console.log(`[WARN] ${file}: non riparabile automaticamente (inversione non inequivocabile): correggi a mano`);
+      continue;
+    }
+    const stillBad = mojibakeMatches(repaired);
+    if (stillBad.length > 0) {
+      errors++;
+      console.log(`[WARN] ${file}: riparazione incompleta (${stillBad.length} occorrenza/e residue): correggi a mano`);
+      continue;
+    }
+    if (STAGED) {
+      errors++;
+      console.log(`[WARN] ${file}: --fix non puo' scrivere sui file staged: correggi il file nella working copy e ri-staga`);
+      continue;
+    }
+    writeFileSync(join(ROOT, file), repaired, 'utf8');
+    fixed++;
+    console.log(`[ok] ${file}: riparato (doppia codifica invertita, BOM rimosso)`);
+  }
+
+  console.log('');
+  if (fixed > 0) {
+    console.log(`[INFO] check-encoding: ${fixed} file riparati`);
+  }
+  if (errors === 0 && warnings === 0) {
+    console.log(`[OK] check-encoding: ${files.length} file esaminati, 0 problemi`);
+    process.exit(0);
+  }
+  console.log(
+    `[INFO] check-encoding: ${files.length} file esaminati, ${errors} con errori, ${warnings} in allowlist`,
+  );
+  process.exit(errors > 0 ? 1 : 0);
+}
+
+main();
+
+
+
+===== FILE: scripts/test-encoding-gate.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Test del gate "encoding dei file tracciati" (scripts/check-encoding.mjs).
+ *
+ * Ogni scenario costruisce un repository git temporaneo, ci scrive i file
+ * necessari e verifica l'uscita e l'output del gate. I file sono scritti
+ * **in byte**, non con le API di testo: il punto del gate e' proprio il
+ * contenuto dei byte.
+ *
+ * Uso: node scripts/test-encoding-gate.mjs
+ * Exit code: 0 = tutti gli scenari passano, 1 = almeno uno fallisce.
+ */
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const GATE = join(HERE, 'check-encoding.mjs');
+
+let failures = 0;
+let checks = 0;
+
+function ok(message) {
+  console.log(`[OK] ${message}`);
+}
+
+function fail(message) {
+  console.error(`[FAIL] ${message}`);
+  failures++;
+}
+
+function assert(condition, message) {
+  checks++;
+  if (condition) ok(message);
+  else fail(message);
+}
+
+/** Crea un repo git temporaneo con i file indicati (path -> Buffer). */
+function makeRepo(files) {
+  const dir = mkdtempSync(join(tmpdir(), 'ls-encoding-'));
+  execFileSync('git', ['init', '-q'], { cwd: dir });
+  for (const [path, content] of Object.entries(files)) {
+    const full = join(dir, path);
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, content);
+  }
+  execFileSync('git', ['add', '-A'], { cwd: dir });
+  return dir;
+}
+
+function runGate(dir, extra = []) {
+  try {
+    const stdout = execFileSync('node', [GATE, '--root', dir, ...extra], {
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return { code: 0, stdout };
+  } catch (err) {
+    return {
+      code: err.status ?? 2,
+      stdout: `${err.stdout ?? ''}${err.stderr ?? ''}`,
+    };
+  }
+}
+
+const BOM = Buffer.from([0xef, 0xbb, 0xbf]);
+const utf8 = (s) => Buffer.from(s, 'utf8');
+
+/** Doppia codifica: UTF-8 -> cp1252 -> UTF-8 (cosa fa PowerShell 5.1). */
+function doubleEncode(s) {
+  return utf8(
+    Buffer.from(s, 'utf8')
+      .toString('latin1')
+      .split('')
+      .map((c) => String.fromCharCode(c.charCodeAt(0) & 0xff))
+      .join(''),
+  );
+}
+
+const dirs = [];
+function cleanup() {
+  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+}
+process.on('exit', cleanup);
+
+// --- T1: file pulito con accenti legittimi -> exit 0 ------------------------
+{
+  const dir = makeRepo({
+    'docs/pulito.md': utf8('# Titolo\n\nTesto con accenti: città, perché, già.\nEm-dash — e virgolette “ciao”.\n'),
+  });
+  dirs.push(dir);
+  const res = runGate(dir);
+  assert(res.code === 0, `T1: file UTF-8 pulito -> exit 0 (ottenuto ${res.code})`);
+  assert(!res.stdout.includes('[FAIL]'), 'T1: nessun falso positivo sugli accenti legittimi');
+}
+
+// --- T2: BOM UTF-8 -> exit 1, finding "bom" ---------------------------------
+{
+  const dir = makeRepo({
+    'docs/bom.md': Buffer.concat([BOM, utf8('# Titolo\n')]),
+  });
+  dirs.push(dir);
+  const res = runGate(dir);
+  assert(res.code === 1, `T2: BOM -> exit 1 (ottenuto ${res.code})`);
+  assert(res.stdout.includes('BOM UTF-8'), 'T2: il finding nomina il BOM');
+}
+
+// --- T3: mojibake -> exit 1, finding "mojibake" -----------------------------
+{
+  const dir = makeRepo({
+    'docs/corrotto.md': doubleEncode('# Città\n\nPerché è così — con em-dash.\n'),
+  });
+  dirs.push(dir);
+  const res = runGate(dir);
+  assert(res.code === 1, `T3: mojibake -> exit 1 (ottenuto ${res.code})`);
+  assert(res.stdout.includes('doppia codifica'), 'T3: il finding nomina la doppia codifica');
+}
+
+// --- T4: --fix ripara il file e il gate passa poi ---------------------------
+{
+  const dir = makeRepo({
+    'docs/corrotto.md': doubleEncode('# Città\n\nPerché è così — con em-dash.\n'),
+  });
+  dirs.push(dir);
+  const before = runGate(dir);
+  assert(before.code === 1, 'T4: prima del fix il gate fallisce');
+  const fix = runGate(dir, ['--fix']);
+  assert(fix.code === 0, `T4: dopo --fix il gate passa (ottenuto ${fix.code})`);
+  const content = readFileSync(join(dir, 'docs/corrotto.md'), 'utf8');
+  assert(content.includes('Città'), 'T4: il testo accentato e\' stato ripristinato');
+  assert(content.includes('—'), 'T4: l\'em-dash e\' stato ripristinato');
+  assert(!content.includes('Ã'), 'T4: non resta mojibake nel file riparato');
+}
+
+// --- T5: UTF-8 non valido -> exit 1 -----------------------------------------
+{
+  const dir = makeRepo({
+    'docs/invalido.md': Buffer.concat([utf8('# Titolo\n'), Buffer.from([0xff, 0xfe, 0x41])]),
+  });
+  dirs.push(dir);
+  const res = runGate(dir);
+  assert(res.code === 1, `T5: UTF-8 non valido -> exit 1 (ottenuto ${res.code})`);
+  assert(res.stdout.includes('non e'), 'T5: il finding nomina la non validita\'');
+}
+
+// --- T6: allowlist -> WARN, exit 0 ------------------------------------------
+{
+  const dir = makeRepo({
+    'docs/esempio.md': doubleEncode('# Città\n'),
+    'scripts/encoding-allowlist.txt': utf8('docs/esempio.md  # documenta un esempio\n'),
+  });
+  dirs.push(dir);
+  const res = runGate(dir);
+  assert(res.code === 0, `T6: file in allowlist -> exit 0 (ottenuto ${res.code})`);
+  assert(res.stdout.includes('[WARN]'), 'T6: il file in allowlist e\' segnalato in WARN');
+}
+
+// --- T7: --staged guarda solo i file staged ---------------------------------
+{
+  const dir = makeRepo({
+    'docs/pulito.md': utf8('# Titolo\n'),
+    'docs/corrotto.md': doubleEncode('# Città\n'),
+  });
+  dirs.push(dir);
+  // il file corrotto non e' staged: il gate non deve vederlo
+  execFileSync('git', ['rm', '--cached', '-q', 'docs/corrotto.md'], { cwd: dir });
+  const res = runGate(dir, ['--staged']);
+  assert(res.code === 0, `T7: --staged ignora i file non staged (ottenuto ${res.code})`);
+}
+
+console.log('');
+if (failures === 0) {
+  console.log(`[OK] test-encoding-gate: ${checks} assert, 0 falliti`);
+  process.exit(0);
+}
+console.log(`[INFO] test-encoding-gate: ${checks} assert, ${failures} falliti`);
+process.exit(1);
+
+
+
+===== FILE: scripts/encoding-allowlist.txt =====
+
+# Allowlist del gate "encoding dei file tracciati" (scripts/check-encoding.mjs).
+#
+# Un file in elenco viene **segnalato in WARN** (non in errore) quando contiene
+# mojibake: sono file che documentano *esempi* di doppia codifica — rimuoverli
+# significherebbe cancellare la lezione che li ha prodotti.
+#
+# Formato: un path per riga, il commento dopo `#` spiega il perche'.
+# La riga viene letta con il path relativo alla root del repository.
+#
+# --- documentazione del problema (contengono esempi di mojibake di proposito) ---
+AGENTS.md                                  # F9-bis: la sezione sul rischio di 5.1 mostra le firme
+docs/12-DEVOPS.md                          # §9.12: ambiente PowerShell e letterali non-ASCII
+docs/13-ADR/0008-lazy-state-aggregation.md # ADR-0008 §parsing: ANSI vs UTF-8
+docs/17-DEV-NOTES.md                       # lesson 36-6 e 69-5: il danno e i suoi sintomi
+docs/18-DEV-LOG.md                         # cronologia del danno (sessione 36 e 72)
+docs/state/sessions/72-audit-procedure-automatiche-pwsh-encoding.md # la sessione che ha scoperto il difetto
+docs/state/sessions/86-implementation-specs.md                       # lesson learned della sessione 85
+scripts/test-aggregate-determinism.sh      # il test greppa il mojibake: e' un fixture, non un difetto
+# --- file generati che incorporano il contenuto dei file sopra -----------------
+docs/SESSIONS.md                          # aggregato delle sessioni (incorpora i testi sopra)
+docs/BUNDLE.md                             # snapshot di tutto il repository (incorpora i testi sopra)
+
+
+
+===== FILE: scripts/test-apply-merge-state.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Test di `scripts/apply-merge-state.mjs` (issue #275).
+ *
+ * Il caso che ha motivato il fix: una PR puo' consegnare **piu' file di sessione**
+ * (una sola issue, piu' blocchi di lavoro distinti). La versione precedente abortava
+ * e nessuna delle sessioni riceveva `merged: true`: i blocchi aggregati mostravano
+ * «non ancora mergiato (PR #N)» per sempre — il drift che il gate
+ * `check-merge-state.mjs` esiste per intercettare.
+ *
+ * Ogni scenario costruisce una directory con `docs/state/sessions/` e verifica
+ * l'uscita e il contenuto dei file. Lo SHA e la data sono passati come argomenti:
+ * il test non tocca la rete.
+ *
+ * Uso: node scripts/test-apply-merge-state.mjs
+ * Exit code: 0 = tutti gli scenari passano, 1 = almeno uno fallisce.
+ */
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const TOOL = join(HERE, 'apply-merge-state.mjs');
+const SHA = '89573176e80ef24b4f4015ab03fbd954de823b15';
+const DATE = '2026-11-02T11:42:46Z';
+
+let failures = 0;
+let checks = 0;
+
+function ok(message) {
+  console.log(`[OK] ${message}`);
+}
+
+function fail(message) {
+  console.error(`[FAIL] ${message}`);
+  failures++;
+}
+
+function assert(condition, message) {
+  checks++;
+  if (condition) ok(message);
+  else fail(message);
+}
+
+const dirs = [];
+function cleanup() {
+  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+}
+process.on('exit', cleanup);
+
+function makeRepo(sessionFiles) {
+  const dir = mkdtempSync(join(tmpdir(), 'ls-merge-state-'));
+  for (const [name, content] of Object.entries(sessionFiles)) {
+    const full = join(dir, 'docs', 'state', 'sessions', name);
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, content);
+  }
+  return dir;
+}
+
+function runTool(dir, prNumber) {
+  try {
+    const stdout = execFileSync(
+      'node',
+      [TOOL, '--pr', String(prNumber), '--sha', SHA, '--date', DATE, '--root', dir],
+      { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] },
+    );
+    return { code: 0, stdout };
+  } catch (err) {
+    return {
+      code: err.status ?? 2,
+      stdout: `${err.stdout ?? ''}${err.stderr ?? ''}`,
+    };
+  }
+}
+
+const session = (number, pr) =>
+  [
+    '---',
+    `number: ${number}`,
+    'title: "Sessione di test"',
+    'date: 2026-11-02',
+    'state: 🟡',
+    'merged: false',
+    'branch: feat/test',
+    `pr: ${pr}`,
+    '---',
+    '',
+    '# Sessione di test',
+    '',
+  ].join('\n');
+
+// --- T1: una sessione con pr: N ---------------------------------------------
+{
+  const dir = makeRepo({ '10-unica.md': session(10, 273) });
+  dirs.push(dir);
+  const res = runTool(dir, 273);
+  assert(res.code === 0, `T1: una sessione -> exit 0 (ottenuto ${res.code})`);
+  const content = readFileSync(join(dir, 'docs', 'state', 'sessions', '10-unica.md'), 'utf8');
+  assert(content.includes('merged: true'), 'T1: merged: true applicato');
+  assert(content.includes(SHA), 'T1: merged_commit applicato');
+  assert(content.includes(DATE), 'T1: merged_date applicato');
+  assert(content.includes('state: 🟢'), 'T1: stato chiuso (🟢)');
+}
+
+// --- T2: DUE sessioni con lo stesso pr: N (il caso dell'issue #275) ----------
+{
+  const dir = makeRepo({
+    '11-prima.md': session(11, 273),
+    '12-seconda.md': session(12, 273),
+  });
+  dirs.push(dir);
+  const res = runTool(dir, 273);
+  assert(res.code === 0, `T2: due sessioni -> exit 0, nessun abort (ottenuto ${res.code})`);
+  for (const name of ['11-prima.md', '12-seconda.md']) {
+    const content = readFileSync(join(dir, 'docs', 'state', 'sessions', name), 'utf8');
+    assert(content.includes('merged: true'), `T2: ${name}: merged: true applicato`);
+    assert(content.includes(SHA), `T2: ${name}: merged_commit applicato`);
+  }
+  assert(
+    res.stdout.includes('lo stato di merge e\' stato applicato a tutti'),
+    'T2: il log dichiara l\'applicazione a tutte le sessioni',
+  );
+}
+
+// --- T3: nessuna sessione per la PR -> WARN, exit 0 -------------------------
+{
+  const dir = makeRepo({ '13-altra.md': session(13, 999) });
+  dirs.push(dir);
+  const res = runTool(dir, 273);
+  assert(res.code === 0, `T3: nessuna sessione -> exit 0 (ottenuto ${res.code})`);
+  assert(res.stdout.includes('[WARN]'), 'T3: l\'assenza e\' un WARN, non un errore');
+}
+
+console.log('');
+if (failures === 0) {
+  console.log(`[OK] test-apply-merge-state: ${checks} assert, 0 falliti`);
+  process.exit(0);
+}
+console.log(`[INFO] test-apply-merge-state: ${checks} assert, ${failures} falliti`);
+process.exit(1);
+
+
+
 ===== FILE: scripts/check-protocol-consistency.mjs =====
 
 #!/usr/bin/env node
@@ -44799,7 +45604,31 @@ set -e
 
 # Skip se variabile d'ambiente disattivata
 if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+# ---------------------------------------------------------------------------
+# INVARIANTE 3 — encoding dei file staged (bloccante)
+# Sessione 87 (issue #277): Windows PowerShell 5.1 riscrive i file in ANSI
+# (doppia codifica) e aggiunge il BOM, in silenzio. Il gate "check-encoding"
+# intercetta il danno PRIMA che entri nel commit.
+# I file che documentano esempi di mojibake sono in scripts/encoding-allowlist.txt
+# e vengono segnalati in WARN (non bloccano).
+# ---------------------------------------------------------------------------
+if [ -f scripts/check-encoding.mjs ]; then
+  if ! encoding_output=$(node scripts/check-encoding.mjs --staged 2>&1); then
+    echo "$encoding_output"
+    echo ""
+    echo "[pre-commit] ERRORE: encoding non valido nei file staged (mojibake / BOM / UTF-8 non valido)."
+    echo "  Ripara con:  node scripts/check-encoding.mjs --fix"
+    echo "  (il --fix riscrive solo quando l'inversione e' inequivocabile;"
+    echo "   negli altri casi il file va corretto a mano)."
+    echo ""
+    echo "  Dettagli: AGENTS.md sezione F9-ter."
+    exit 1
+  fi
+  echo "$encoding_output" | grep -q '^\[WARN\]' && echo "[pre-commit] WARN: encoding in allowlist (documentazione di esempi)."
   exit 0
+fi
+
+exit 0
 fi
 
 current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
@@ -45558,6 +46387,23 @@ jobs:
       - name: Fatti del README in sync con il codice (issue #161)
         run: node scripts/check-readme-facts.mjs
 
+      # Issue #277: Windows PowerShell 5.1 riscrive i file in ANSI (doppia
+      # codifica) e aggiunge il BOM, in silenzio: nella Sessione 85 il danno e'
+      # finito in main dentro due file di sessione senza che un comando
+      # fallisse. Il gate e' READ-ONLY e intercetta tre classi di danno:
+      # BOM UTF-8, UTF-8 non valido, mojibake (doppia codifica).
+      # I file che documentano esempi di mojibake sono in
+      # scripts/encoding-allowlist.txt e risultano in WARN, non in errore.
+      # Fail-closed: exit 1 = drift, exit 2 = errore di ambiente.
+      - name: Encoding dei file tracciati (issue #277)
+        run: node scripts/check-encoding.mjs
+
+      # Il gate vive in check-encoding.mjs (step precedente); questo test ne
+      # verifica lo scenario NEGATIVO — reintroduce BOM, mojibake e UTF-8 non
+      # valido in fixture temporanee e verifica che il gate fallisca (T1..T7).
+      - name: Gate "encoding" fail-closed (issue #277)
+        run: node scripts/test-encoding-gate.mjs
+
       # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
       # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
       # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
@@ -45619,6 +46465,14 @@ jobs:
 
       - name: Gate "blocchi aggregati" fail-closed (issue #248)
         run: bash scripts/test-aggregate-blocks.sh
+
+      # Issue #275: apply-merge-state.mjs assumeva un file di sessione per PR e
+      # abortava quando una PR ne consegnava piu' di uno (caso reale: PR #273,
+      # issue #265): al merge nessuna delle due sessioni riceveva `merged: true`
+      # e i blocchi aggregati le mostravano ancora «non ancora mergiato».
+      # Il test verifica lo stato applicato a una e a piu' sessioni (T1..T3).
+      - name: Stato di merge su piu' sessioni per PR (issue #275)
+        run: node scripts/test-apply-merge-state.mjs
 
       # Il protocollo di claim (ADR-0006) aveva 8 regole vincolanti e ZERO
       # enforcement: due agenti potevano implementare la stessa story senza

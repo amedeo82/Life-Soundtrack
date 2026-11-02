@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   pull_request:
@@ -275,6 +275,23 @@ jobs:
       - name: Fatti del README in sync con il codice (issue #161)
         run: node scripts/check-readme-facts.mjs
 
+      # Issue #277: Windows PowerShell 5.1 riscrive i file in ANSI (doppia
+      # codifica) e aggiunge il BOM, in silenzio: nella Sessione 85 il danno e'
+      # finito in main dentro due file di sessione senza che un comando
+      # fallisse. Il gate e' READ-ONLY e intercetta tre classi di danno:
+      # BOM UTF-8, UTF-8 non valido, mojibake (doppia codifica).
+      # I file che documentano esempi di mojibake sono in
+      # scripts/encoding-allowlist.txt e risultano in WARN, non in errore.
+      # Fail-closed: exit 1 = drift, exit 2 = errore di ambiente.
+      - name: Encoding dei file tracciati (issue #277)
+        run: node scripts/check-encoding.mjs
+
+      # Il gate vive in check-encoding.mjs (step precedente); questo test ne
+      # verifica lo scenario NEGATIVO — reintroduce BOM, mojibake e UTF-8 non
+      # valido in fixture temporanee e verifica che il gate fallisca (T1..T7).
+      - name: Gate "encoding" fail-closed (issue #277)
+        run: node scripts/test-encoding-gate.mjs
+
       # Il gate vive in check-readme-facts.mjs (step precedente); questo test ne
       # verifica lo scenario NEGATIVO — reintroduce il drift in una fixture e
       # verifica che il gate esca 1. Un gate che passa sempre non e' un gate
@@ -336,6 +353,14 @@ jobs:
 
       - name: Gate "blocchi aggregati" fail-closed (issue #248)
         run: bash scripts/test-aggregate-blocks.sh
+
+      # Issue #275: apply-merge-state.mjs assumeva un file di sessione per PR e
+      # abortava quando una PR ne consegnava piu' di uno (caso reale: PR #273,
+      # issue #265): al merge nessuna delle due sessioni riceveva `merged: true`
+      # e i blocchi aggregati le mostravano ancora «non ancora mergiato».
+      # Il test verifica lo stato applicato a una e a piu' sessioni (T1..T3).
+      - name: Stato di merge su piu' sessioni per PR (issue #275)
+        run: node scripts/test-apply-merge-state.mjs
 
       # Il protocollo di claim (ADR-0006) aveva 8 regole vincolanti e ZERO
       # enforcement: due agenti potevano implementare la stessa story senza

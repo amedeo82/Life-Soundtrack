@@ -21,7 +21,31 @@ set -e
 
 # Skip se variabile d'ambiente disattivata
 if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+# ---------------------------------------------------------------------------
+# INVARIANTE 3 — encoding dei file staged (bloccante)
+# Sessione 87 (issue #277): Windows PowerShell 5.1 riscrive i file in ANSI
+# (doppia codifica) e aggiunge il BOM, in silenzio. Il gate "check-encoding"
+# intercetta il danno PRIMA che entri nel commit.
+# I file che documentano esempi di mojibake sono in scripts/encoding-allowlist.txt
+# e vengono segnalati in WARN (non bloccano).
+# ---------------------------------------------------------------------------
+if [ -f scripts/check-encoding.mjs ]; then
+  if ! encoding_output=$(node scripts/check-encoding.mjs --staged 2>&1); then
+    echo "$encoding_output"
+    echo ""
+    echo "[pre-commit] ERRORE: encoding non valido nei file staged (mojibake / BOM / UTF-8 non valido)."
+    echo "  Ripara con:  node scripts/check-encoding.mjs --fix"
+    echo "  (il --fix riscrive solo quando l'inversione e' inequivocabile;"
+    echo "   negli altri casi il file va corretto a mano)."
+    echo ""
+    echo "  Dettagli: AGENTS.md sezione F9-ter."
+    exit 1
+  fi
+  echo "$encoding_output" | grep -q '^\[WARN\]' && echo "[pre-commit] WARN: encoding in allowlist (documentazione di esempi)."
   exit 0
+fi
+
+exit 0
 fi
 
 current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")

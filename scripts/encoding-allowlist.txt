@@ -1,0 +1,21 @@
+# Allowlist del gate "encoding dei file tracciati" (scripts/check-encoding.mjs).
+#
+# Un file in elenco viene **segnalato in WARN** (non in errore) quando contiene
+# mojibake: sono file che documentano *esempi* di doppia codifica — rimuoverli
+# significherebbe cancellare la lezione che li ha prodotti.
+#
+# Formato: un path per riga, il commento dopo `#` spiega il perche'.
+# La riga viene letta con il path relativo alla root del repository.
+#
+# --- documentazione del problema (contengono esempi di mojibake di proposito) ---
+AGENTS.md                                  # F9-bis: la sezione sul rischio di 5.1 mostra le firme
+docs/12-DEVOPS.md                          # §9.12: ambiente PowerShell e letterali non-ASCII
+docs/13-ADR/0008-lazy-state-aggregation.md # ADR-0008 §parsing: ANSI vs UTF-8
+docs/17-DEV-NOTES.md                       # lesson 36-6 e 69-5: il danno e i suoi sintomi
+docs/18-DEV-LOG.md                         # cronologia del danno (sessione 36 e 72)
+docs/state/sessions/72-audit-procedure-automatiche-pwsh-encoding.md # la sessione che ha scoperto il difetto
+docs/state/sessions/86-implementation-specs.md                       # lesson learned della sessione 85
+scripts/test-aggregate-determinism.sh      # il test greppa il mojibake: e' un fixture, non un difetto
+# --- file generati che incorporano il contenuto dei file sopra -----------------
+docs/SESSIONS.md                          # aggregato delle sessioni (incorpora i testi sopra)
+docs/BUNDLE.md                             # snapshot di tutto il repository (incorpora i testi sopra)

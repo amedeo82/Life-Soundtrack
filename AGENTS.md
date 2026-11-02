@@ -1,7 +1,7 @@
-﻿# 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
+# 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.38 — Sessione 83 (2026-11-01)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.39 — Sessione 87 (2026-11-02)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
 
 ---
 
@@ -41,10 +41,12 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
+| I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
 node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
+node scripts/check-encoding.mjs                # encoding dei file tracciati, exit 0 = nessun mojibake/BOM
 ```
 
 **Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
@@ -1074,7 +1076,39 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 **F9 — PowerShell 7 (`pwsh`) è il baseline del repo** *(Sessione 71, rafforzato dalla Sessione 72)*: gli script in `scripts/*.ps1` si invocano con `pwsh`. Sotto Windows PowerShell 5.1 il doppio trattino non viene normalizzato e i gate con `--check` ricadono silenziosamente in modalità WRITING (fail-open, issue #104): verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output. La forma canonica dei flag resta a **singolo trattino** (`-Check`, `-List`, `-DryRun`). Vedi `docs/12-DEVOPS.md §9.1`.
 
-**F9-bis — `powershell` (5.1) non è un fallback: è un rischio di corruzione** *(Sessione 72)*. I `.ps1` del repo sono UTF-8 **senza BOM** e contengono letterali non-ASCII: sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e i blocchi calcolati non corrispondono più a quelli su disco (`aggregate-state.ps1 -Check` esce **1** con drift spurio: attesi 620 caratteri, trovati 616) — e in modalità scrittura il mojibake verrebbe **scritto** nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`). Regole: (a) scrivere **`pwsh`** per esteso, mai `powershell`; (b) eseguire il check F9 **prima** di qualunque `.ps1`; (c) i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito). Dettagli e misure: `docs/12-DEVOPS.md §9.12`, `docs/17-DEV-NOTES.md` P12.
+**F9-bis — `powershell` (5.1) non è un fallback: è un rischio di corruzione** *(Sessione 72, ampliato dalla Sessione 87 — issue #277)*. I `.ps1` del repo sono UTF-8 **senza BOM** e contengono letterali non-ASCII: sotto 5.1 il **parsing del sorgente** li sovradecodifica (`—` → `â€”`) e i blocchi calcolati non corrispondono più a quelli su disco (`aggregate-state.ps1 -Check` esce **1** con drift spurio: attesi 620 caratteri, trovati 616) — e in modalità scrittura il mojibake verrebbe **scritto** nei file globali (`README.md`, `SESSIONS.md`, `INDEX.md`, `11-BACKLOG.md`). Regole: (a) scrivere **`pwsh`** per esteso, mai `powershell`; (b) eseguire il check F9 **prima** di qualunque `.ps1`; (c) i nuovi `.ps1` restano **ASCII-only** (o con BOM UTF-8 esplicito). Dettagli e misure: `docs/12-DEVOPS.md §9.12`, `docs/17-DEV-NOTES.md` P12.
+
+### 🧯 F9-ter — I file di testo: UTF-8 senza BOM, e mai scritti da una shell 5.1 *(Sessione 87, issue #277 — vincolante)*
+
+Il danno **non** arriva solo dal parsing dei `.ps1`: arriva da qualunque shell che **legge e riscrive** il contenuto di un file. È successo nella Sessione 85: due file di sessione sono stati riscritti in ANSI e il danno (40+ punti corrotti ciascuno) è **finito in `main`** senza che un solo comando fallisse.
+
+| Cosa fa | Windows PowerShell **5.1** | PowerShell **7** (`pwsh`) |
+|---------|---------------------------|--------------------------|
+| `Get-Content` (senza `-Encoding`) | decodifica con la **code page ANSI** → `à` diventa `Ã ` | decodifica UTF-8 → corretto |
+| `Set-Content -Encoding UTF8` | scrive **con BOM** (`EF BB BF`) | scrive senza BOM |
+| `Get-Content -Raw` → edit → `Set-Content` | **doppia codifica**: ogni accente, em-dash ed emoji diventa 3 caratteri | corretto |
+| `Out-File` / redirection `>` | ANSI + BOM | UTF-8 senza BOM |
+
+**Regole operative (non è un consiglio: c'è un gate)**:
+
+1. **Per modificare il contenuto di un file, non usare una shell**: usa gli strumenti file dedicati (read/edit/write) o un **script Node** (`node -e` / `scripts/*.mjs`). Il byte esatto è il requisito, e Node scrive UTF-8 senza BOM per default.
+2. **Se devi per forza usare PowerShell 5.1**: `Get-Content -LiteralPath <p> -Raw -Encoding UTF8` per leggere, e per scrivere **senza BOM**:
+   `[System.IO.File]::WriteAllText($p, $t, (New-Object System.Text.UTF8Encoding($false)))`.
+   Il solo `-Encoding UTF8` in scrittura **aggiunge il BOM**: è un errore, non un dettaglio.
+3. **Percorsi lunghi**: usa sempre `-LiteralPath` (le wildcard di `-Path` interpretano `[` e `]`), e per le operazioni distruttive sui path lunghi la procedura canonica è `scripts/post-merge.ps1` (fallback L1→L2→L3, coperto dai test T10..T14 di `scripts/test-post-merge.sh`).
+
+**Il gate** (bloccante in CI e nel pre-commit hook):
+
+```bash
+node scripts/check-encoding.mjs               # tutto il repository: exit 1 = mojibake / BOM / UTF-8 non valido
+node scripts/check-encoding.mjs --staged      # solo i file staged (pre-commit)
+node scripts/check-encoding.mjs --fix         # ripara dove l'inversione e' inequivocabile
+node scripts/test-encoding-gate.mjs           # 7 scenari (T1..T7) del gate
+```
+
+Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido**, **doppia codifica** (mojibake: `Ã`, `â€`, `Â` — la firma da cercare quando un file «si legge ma non ha senso»). I file che **documentano esempi** di mojibake (questa sezione, `docs/17-DEV-NOTES.md`, le lezioni nelle sessioni) sono in `scripts/encoding-allowlist.txt`: vengono segnalati in **WARN**, non in errore — rimuoverli significherebbe cancellare la lezione.
+
+**Se il gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate. `--fix` è il primo passo, ma riscrive solo quando l'inversione è **inequivocabile** (il testo rovesciato è UTF-8 valido e non contiene più firme): negli altri casi il file va corretto a mano e il gate lo dice.
 
 **Opzionale (se si ritorna dopo un merge di un altro agente)**: audit dei residui post-merge prima di iniziare lavoro nuovo — exit 14 indica branch/worktree merged-orfani da pulire con `pwsh scripts/post-merge.ps1 -Check` (vedi §"♻️ Pulizia branch post-merge").
 
@@ -1087,4 +1121,4 @@ Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **pr
 
 ---
 
-*Protocollo agenti v1.37 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.39 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
