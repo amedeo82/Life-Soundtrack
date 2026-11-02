@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 13:34
+> Data: 2026-11-02 14:44
 > Totale file: 169
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -46693,6 +46693,14 @@ on:
       - 'docs/11-BACKLOG.md'
       - 'docs/INDEX.md'
       - 'README.md'
+      # Issue #281: `auto-session-merge-state.yml` e' un writer di main come
+      # gli altri, e scrive in `docs/state/sessions/`: senza questo path i suoi
+      # commit non triggavano la pipeline, e la race fra merge e applicazione
+      # dello stato di merge lasciava `main` rosso (il gate `check-merge-state`
+      # e' fail-closed e chiudeva `gates-docs`). Con il path, l'ultimo run su
+      # `main` e' quello del writer, ed e' verde: nessun controllo e' indebolito,
+      # la pipeline semplicemente re-valida lo stato che il writer ha applicato.
+      - 'docs/state/**'
 
 concurrency:
   group: ci-${{ github.ref }}
