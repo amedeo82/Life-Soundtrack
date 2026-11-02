@@ -5,7 +5,7 @@ date: 2026-11-02
 state: 🟡
 merged: false
 branch: feat/284-automazioni-post-merge-definitive-writer
-pr: 0
+pr: 285
 claim: kilo-HP-ELITEBOOK-c90auto
 tags: [devops, ci, workflow, determinism]
 ---
