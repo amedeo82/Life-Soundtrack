@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 13:34
+> Data: 2026-11-02 13:37
 > Totale file: 167
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -19493,7 +19493,7 @@ date: 2026-11-02
 state: 🟡
 merged: false
 branch: feat/277-remediation-encoding-utf-8-senza-bom-e-m
-pr: 0
+pr: 278
 claim: kilo-HP-ELITEBOOK-c87enc
 tags: [devops, remediation, encoding, protocollo]
 ---

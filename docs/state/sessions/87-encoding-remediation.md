@@ -5,7 +5,7 @@ date: 2026-11-02
 state: 🟡
 merged: false
 branch: feat/277-remediation-encoding-utf-8-senza-bom-e-m
-pr: 0
+pr: 278
 claim: kilo-HP-ELITEBOOK-c87enc
 tags: [devops, remediation, encoding, protocollo]
 ---
