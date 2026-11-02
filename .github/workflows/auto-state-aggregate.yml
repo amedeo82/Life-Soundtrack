@@ -152,30 +152,31 @@ jobs:
             Write-Host "Nothing to commit (staged diff is empty)"
             exit 0
           }
-          git commit -m "chore(state): auto-aggregate from docs/state/ (ADR-0008 V2)" `
-                       -m "Triggered by .github/workflows/auto-state-aggregate.yml on push to main." `
-                       -m "Source: docs/state/sessions/*.md + docs/state/stories/*.md (frontmatter)." `
-                       -m "Target blocks:" `
-                       -m "  - docs/SESSIONS.md: <!-- AGGREGATE-SESSIONS-{START,END} -->" `
-                       -m "  - docs/11-BACKLOG.md: <!-- AGGREGATE-STORIES-{START,END} -->" `
-                       -m "  - docs/INDEX.md: <!-- AGGREGATE-INDEX-STATUS-{START,END} -->" `
-                       -m "  - docs/INDEX.md: <!-- AGGREGATE-INDEX-ROADMAP-{START,END} -->" `
-                       -m "  - docs/BUNDLE.md: <!-- AGGREGATE-BUNDLE-INVENTORY-{START,END} -->" `
-                       -m "  - README.md: <!-- AGGREGATE-NEXT-STEP-{START,END} -->" `
-                       -m "  - README.md + docs/INDEX.md: <!-- AGGREGATE-PROGRESS-{START,END} --> (V4, issue #216)" `
-                       -m "" `
-                       -m "Skips if aggregator output already in sync."
-          # Retry con ri-sincronizzazione: i writer girano in parallelo (issue #261)
-          # e due push su `main` possono incrociarsi -> push non-fast-forward.
-          # Il writer che perde la race si riallinea e riprova.
-          for attempt in 1 2 3; do
-            if git push origin main; then
-              break
-            fi
+          # Issue #279: il ciclo di retry era **sintassi bash** dentro uno step
+          # `shell: pwsh` -> ParserError alla riga 28 dello script generato e i
+          # blocchi aggregati non venivano mai committati dal writer. Riscritto in
+          # sintassi PowerShell (`for` / `if`), mantenendo la ri-sincronizzazione
+          # introdotta per la race fra writer (issue #261).
+          $commitArgs = @(
+            '-m', 'chore(state): auto-aggregate from docs/state/ (ADR-0008 V2)',
+            '-m', 'Triggered by .github/workflows/auto-state-aggregate.yml on push to main.',
+            '-m', 'Source: docs/state/sessions/*.md + docs/state/stories/*.md (frontmatter).',
+            '-m', 'Target blocks: docs/SESSIONS.md, docs/11-BACKLOG.md, docs/INDEX.md, docs/BUNDLE.md, README.md',
+            '-m', 'Skips if aggregator output already in sync.'
+          )
+          $pushed = $false
+          for ($attempt = 1; $attempt -le 3 -and -not $pushed; $attempt++) {
+            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md scripts/aggregate-state.ps1 docs/state/ 2>&1 | Out-Null
+            git commit @commitArgs 2>&1 | Out-Null
+            git push origin main
+            if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
             Write-Host "[auto-state-aggregate] push rifiutato (tentativo $attempt): ri-sincronizzo"
             git fetch origin main
             git rebase origin/main
             if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
             pwsh scripts/aggregate-state.ps1
-            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md
-          done
+          }
+          if (-not $pushed) {
+            Write-Host "[auto-state-aggregate] push fallito dopo 3 tentativi"
+            exit 1
+          }

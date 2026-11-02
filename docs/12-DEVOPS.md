@@ -852,6 +852,17 @@ protection può interpretare un check saltato come successo.
 | 31 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
 | 32 | `gates-docs` | `Encoding dei file tracciati` (`check-encoding.mjs`) | solo PR | sì | **#277** |
 | 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
+| 34 | `gates-workflows` | `Sintassi dei blocchi `run:` dei workflow` (`check-workflow-syntax.mjs`) | solo PR | sì | **#279** |
+
+> **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
+> che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
+> fallisce a **runtime**, con un `ParserError` che arriva dopo il checkout e lascia `main` rosso.
+> Misurato il 2026-11-02 su `auto-state-aggregate.yml` (i blocchi aggregati non venivano piu'
+> committati) e su `auto-bundle.yml` (il bundle non veniva piu' committato): due writer della
+> stessa catena, rotti lo stesso giorno. Il gate estrae ogni blocco `run:` con il suo `shell:`
+> effettivo e lo syntax-checka con il parser dello shell dichiarato (`pwsh` -> parser di
+> PowerShell, `bash` -> `bash -n`), neutralizzando le espressioni `${{ ... }}` (GitHub le
+> interpola prima dell'esecuzione).
 
 > **Il gate "encoding"** (Sessione 87, issue #277) intercetta la corruzione **silenziosa** che
 > Windows PowerShell 5.1 introduce riscrivendo i file: doppia codifica (mojibake), BOM UTF-8,

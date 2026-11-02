@@ -1,23 +1,23 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 12:52
-> Totale file: 167
+> Data: 2026-11-02 14:31
+> Totale file: 169
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 166 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2446.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-02 12:52
+- Totale file: 168 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2464.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-02 14:13
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 104 |
-| scripts/ | 35 |
+| docs/ | 105 |
+| scripts/ | 36 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
 | .github/ | 5 |
@@ -19580,8 +19580,10 @@ rigenerati in quest'ordine (aggregator → generator).
 number: 87
 title: "Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "63588098730d0db887130ee7b8639345baa6dc71"
+merged_date: "2026-11-02T12:51:43Z"
 branch: feat/277-remediation-encoding-utf-8-senza-bom-e-m
 pr: 278
 claim: kilo-HP-ELITEBOOK-c87enc
@@ -19683,6 +19685,116 @@ bundle rigenerati nell'ordine vincolante (aggregator → generator).
 - `.githooks/pre-commit` (INVARIANTE 3), `.github/workflows/ci.yml` (3 step: encoding, test encoding, test merge-state)
 - `AGENTS.md` v1.39 (F9-ter + tabella regola/gate), `docs/INDEX.md` (versione e riga AGENTS.md)
 - `docs/12-DEVOPS.md` §9.10 (catalogo dei gate: righe 32-33)
+- `docs/BUNDLE.md` (rigenerato)
+
+
+
+===== FILE: docs/state/sessions/88-post-merge-recovery.md =====
+
+---
+number: 88
+title: "Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge"
+date: 2026-11-02
+state: 🟡
+merged: false
+branch: fix/279-recovery-post-merge-stato-di-merge-della
+pr: 280
+claim: kilo-HP-ELITEBOOK-c88rec
+tags: [devops, recovery, workflow, protocollo]
+---
+
+# Sessione 88 — Recovery post-merge: la catena dei writer era rotta
+
+> **Oggetto**: il merge della PR #278 (Sessione 87, issue #277) ha lasciato `main`
+> **rosso**. La causa non era la PR: erano **due difetti preesistenti** della catena
+> post-merge, che nessun gate copriva e che nessuno aveva notato.
+
+## Sintesi
+
+| # | Difetto | Sintomo | Causa | Remediation |
+|---|---------|----------|-------|-------------|
+| 1 | `auto-session-merge-state` senza `pull-requests: read` | **HTTP 403** dall'API REST sui pull request: il workflow usciva 2 **prima** di applicare lo stato di merge | le `permissions:` del workflow coprivano `contents: write` e `issues: read`, ma la chiamata `GET /repos/{owner}/{repo}/pulls/{N}` richiede `pull-requests: read` | scope aggiunto |
+| 2 | `auto-state-aggregate` e `auto-bundle` con **sintassi bash** in step `shell: pwsh` | **ParserError** a runtime: i blocchi aggregati e il bundle non venivano piu' committati dal writer | il ciclo di retry (`for attempt in 1 2 3; do ... done`) era bash, dentro uno step PowerShell | riscritto in sintassi PowerShell + **gate** che syntax-checka ogni blocco `run:` |
+| 3 | Lo stato di merge della sessione 87 mai applicato | `main` rosso: «la PR #278 e' MERGED, ma il frontmatter dichiara `merged: false`» | conseguenza di (1) | recovery: stato applicato con `apply-merge-state.mjs` |
+
+## Cosa è emerso (e perché non era emerso prima)
+
+1. **Un gate sulla sintassi dei workflow non esisteva**: `validate-workflows.mjs` controlla YAML,
+   scope dei permessi, `paths:` e copertura del `git add` — **non** che lo script di uno step sia
+   sintatticamente valido nello shell che lo esegue. Il ParserError arrive a runtime, dopo il
+   checkout: il fallimento e' visibile solo su `main`, quando ormai il danno e' fatto.
+2. **La stessa classe di bug era in due workflow**: `auto-state-aggregate.yml` (i blocchi
+   aggregati) e `auto-bundle.yml` (il bundle). Entrambi hanno fallito lo stesso giorno: nessuno
+   dei due writer ha piu' committato nulla.
+3. **Il 403 e' la stessa classe di difetto delle sessioni 81-83**: il commento del workflow
+   `auto-session-merge-state.yml` lo segnalava gia' («vanno recuperate a mano») senza che nessuno
+   avesse aggiunto lo scope mancante.
+4. **Il gate `check-merge-state.mjs` ha fatto il suo lavoro**: e' fail-closed, e ha trasformato
+   «una sessione dimenticata» in «`main` rosso» — un sintomo che si vede, invece di un sintomo
+   che non si vede. Il drift silenzioso era l'altra meta' del problema (il gate di encoding, #277).
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-88.1 | Il fix dei due workflow e' in **una** PR di recovery, non in due | i due difetti sono la stessa classe: sintassi non validata rispetto allo shell dichiarato |
+| D-88.2 | Nuovo gate `check-workflow-syntax.mjs`: ogni blocco `run:` e' syntax-checkato con il **parser dello shell dichiarato** | Un ParserError a runtime su `main` e' il tipo di fallimento piu' costoso del repository: blocca la catena di writers e resta rosso |
+| D-88.3 | Le espressioni GitHub `${{ ... }}` sono neutralizzate prima del parsing | GitHub le interpola **prima** dell'esecuzione: il parser non deve giudicarne la sintassi (altrimenti ogni workflow che le usa risulterebbe invalido) |
+| D-88.4 | Il blocco bash viene **saltato** quando `bash` non e' utilizzabile (stub WSL su Windows) | saltare un controllo e' diverso da farlo fallire: il gate deve distinguere «file rotto» da «interprete assente». Sulla CI (ubuntu) il bash e' quello vero e il controllo e' completo |
+| D-88.5 | Lo stato di merge della sessione 87 viene applicato **nella PR di recovery**, non con un commit su `main` | `AGENTS.md`: niente commit su `main` dagli agenti; il recovery passa da una PR `docs:`/`fix:` |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
+Lavoro di **devops**: nessuna story di prodotto e' toccata, ma la catena post-merge — quella che
+scrive i blocchi aggregati, il bundle e lo stato di merge delle sessioni — smette di essere
+rottta.
+
+**Cosa e' pronto.**
+- `auto-session-merge-state.yml`: `pull-requests: read` aggiunto (era la causa del 403).
+- `auto-state-aggregate.yml` e `auto-bundle.yml`: ciclo di retry riscritto in **PowerShell**
+  (`for` / `if` / `break`), con `exit 1` se il push fallisce dopo 3 tentativi.
+- `scripts/check-workflow-syntax.mjs`: gate nuovo — estrae ogni blocco `run:` con il suo `shell:`
+  effettivo e lo syntax-checka (`pwsh` -> parser di PowerShell, `bash` -> `bash -n`); neutralizza
+  `${{ ... }}`; salta i blocchi bash quando l'interprete non e' utilizzabile.
+- `scripts/test-merge-state.mjs` non serve: il fix di `apply-merge-state.mjs` (issue #275) ha gia'
+  il suo test (`scripts/test-apply-merge-state.mjs`, T1..T3).
+- Stato di merge della sessione 87 applicato (`merged: true`, commit `63588098...`, data
+  `2026-11-02T12:51:43Z`): `check-merge-state.mjs` → 63 confronti, 0 falliti.
+
+**Cosa manca.** Nulla sul piano della remediation: i due difetti sono corretti, il terzo (lo stato
+di merge) e' recuperato, e il gate che li intercetta in futuro e' in CI. Il `main` torna verde
+quando questa PR viene mergiata e la catena post-merge — **ora funzionante** — ricostruisce i
+blocchi.
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano: li rigenera
+l'aggregatore post-merge (che, con il ParserError risolto, torna a scrivere).
+
+**Gate di testabilità.** `node scripts/check-workflow-syntax.mjs` → 11 blocchi pwsh verificati,
+0 non validi (10 blocchi bash saltati in locale: il bash di Windows e' lo stub WSL, la CI ha il
+vero) · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-merge-state.mjs` → 63 confronti, 0 falliti ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Il lint dei workflow validava **il file**, non **lo script che il file esegue** | Un workflow puo' essere YAML valido, avere tutti gli scope giusti, passare `validate-workflows`, e fallire a runtime con un ParserError. Il gate mancante era fra «il file e' ben scritto» e «lo script gira» |
+| Lo **stesso** difetto in due workflow che falliscono lo stesso giorno | Il primo fallimento (auto-state-aggregate) era gia' un sintomo; il secondo (auto-bundle) e' stato scambiato per rumore. Un sintomo che si ripete non e' rumore: e' una classe di bug |
+| Un gate fail-closed trasforma un difetto invisibile in uno **rosso** | `check-merge-state.mjs` non ha reso il merge-state piu' semplice da ottenere: ha reso **impossibile** non accorgersi che manca. Il costo e' un recovery; il beneficio e' che il drift non vive in `main` |
+| Il recupero non deve essere un commit su `main` | La via prevista (`AGENTS.md`, regola «NO commit su main») e' una PR di recovery: il risultato resta tracciato, revisabile e reversibile |
+
+## Documenti aggiornati
+
+- `.github/workflows/auto-session-merge-state.yml` (scope `pull-requests: read`)
+- `.github/workflows/auto-state-aggregate.yml`, `.github/workflows/auto-bundle.yml` (sintassi PowerShell)
+- `.github/workflows/ci.yml` (step «Sintassi dei blocchi `run:` dei workflow»)
+- `scripts/check-workflow-syntax.mjs` (nuovo)
+- `docs/state/sessions/87-encoding-remediation.md` (stato di merge recuperato)
+- `docs/12-DEVOPS.md` §9.10 (catalogo dei gate: nuova riga)
 - `docs/BUNDLE.md` (rigenerato)
 
 
@@ -30062,6 +30174,17 @@ protection può interpretare un check saltato come successo.
 | 31 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
 | 32 | `gates-docs` | `Encoding dei file tracciati` (`check-encoding.mjs`) | solo PR | sì | **#277** |
 | 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
+| 34 | `gates-workflows` | `Sintassi dei blocchi `run:` dei workflow` (`check-workflow-syntax.mjs`) | solo PR | sì | **#279** |
+
+> **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
+> che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
+> fallisce a **runtime**, con un `ParserError` che arriva dopo il checkout e lascia `main` rosso.
+> Misurato il 2026-11-02 su `auto-state-aggregate.yml` (i blocchi aggregati non venivano piu'
+> committati) e su `auto-bundle.yml` (il bundle non veniva piu' committato): due writer della
+> stessa catena, rotti lo stesso giorno. Il gate estrae ogni blocco `run:` con il suo `shell:`
+> effettivo e lo syntax-checka con il parser dello shell dichiarato (`pwsh` -> parser di
+> PowerShell, `bash` -> `bash -n`), neutralizzando le espressioni `${{ ... }}` (GitHub le
+> interpola prima dell'esecuzione).
 
 > **Il gate "encoding"** (Sessione 87, issue #277) intercetta la corruzione **silenziosa** che
 > Windows PowerShell 5.1 introduce riscrivendo i file: doppia codifica (mojibake), BOM UTF-8,
@@ -41488,7 +41611,11 @@ function checkPushSync(lines, file) {
   // push su `main` possono incrociarsi -> il writer ri-sincronizza e riprova).
   // Una sincronizzazione "tardiva" (dopo la push, ma fuori da un ciclo)
   // NON e' una strategia: il push e' gia' fallito.
-  const loopRe = /^\s*(for|while|until)\b.*\bdo\s*$/;
+  //
+  // Issue #279: il ciclo e' riconosciuto in **due** forme — quella bash
+  // (`for ...; do` / `done`) e quella PowerShell (`for (...) {` / `}`), che e'
+  // l'unica che parse dentro uno step `shell: pwsh`.
+  const loopRe = /^\s*(for|while|until|foreach)\b.*(?:\bdo\s*|\{\s*)$/;
   let loopStart = -1;
   for (let i = pushAt; i >= stepStart; i--) {
     if (loopRe.test(lines[i])) {
@@ -41498,8 +41625,16 @@ function checkPushSync(lines, file) {
   }
   if (loopStart >= 0) {
     let loopEnd = lines.length;
+    const loopIndent = lines[loopStart].match(/^\s*/)[0].length;
     for (let i = pushAt + 1; i < stepEnd; i++) {
+      // fine del ciclo: `done` (bash) oppure la graffa di chiusura all'indentazione
+      // del `for` (PowerShell: le graffe interne sono piu' annidate).
       if (/^\s*done\s*$/.test(lines[i])) {
+        loopEnd = i;
+        break;
+      }
+      const indent = lines[i].length - lines[i].trimStart().length;
+      if (lines[i].trim() === '}' && indent === loopIndent) {
         loopEnd = i;
         break;
       }
@@ -42248,10 +42383,14 @@ echo "=== T2b: fixture senza NESSUNA strategia di ri-sincronizzazione (bug #140)
   # Sostituisce il ciclo di retry con una push secca: la fixture deve avere
   # un writer che pusha su `main` senza ALCUNA strategia di ri-sincronizzazione
   # (neppure il retry, che contiene il push al suo interno).
-  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
-  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
+  # Issue #279: il ciclo di retry e' in sintassi PowerShell (gli step dei writer
+  # dichiarano `shell: pwsh`): la mutazione deve riconoscere quella forma, non
+  # piu' il ciclo bash (`for attempt in 1 2 3; do ... done`), che non parse e
+  # causava un ParserError a runtime (i writer non committavano piu' nulla).
+  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
+  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
 
-  if grep -q "for attempt in 1 2 3" "$D/.github/workflows/auto-state-aggregate.yml"; then
+  if grep -qF 'for ($attempt = 1;' "$D/.github/workflows/auto-state-aggregate.yml"; then
     ng "mutazione non applicata: il retry e' ancora presente nella fixture"
   else
     ok "mutazione applicata (sync e retry rimossi)"
@@ -43837,6 +43976,209 @@ if (failures === 0) {
 }
 console.log(`[INFO] test-apply-merge-state: ${checks} assert, ${failures} falliti`);
 process.exit(1);
+
+
+
+===== FILE: scripts/check-workflow-syntax.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate "sintassi dei blocchi `run:` dei workflow" (issue #279).
+ *
+ * **Perche' esiste**: uno step GitHub Actions che dichiara `shell: pwsh` ma
+ * contiene **sintassi bash** non fallisce al lint: fallisce **a runtime**, con
+ * un `ParserError` che arriva dopo il checkout e lascia `main` rotto. E' successo
+ * due volte di fila:
+ *
+ *   - `auto-state-aggregate.yml` -> i blocchi aggregati non venivano piu' committati
+ *   - `auto-bundle.yml` -> il bundle non veniva piu' committato
+ *
+ * Il controllo e' **statico**: ogni blocco `run:` viene estratto con il suo
+ * `shell:` effettivo e passato al parser dello shell dichiarato
+ * (`pwsh` -> parser di PowerShell; `bash` -> `bash -n`). Le espressioni GitHub
+ * `${{ ... }}` sono sostituite con un segnaposto: GitHub le interpola **prima**
+ * dell'esecuzione, e il parser non deve giudicarne la sintassi.
+ *
+ * Uso: node scripts/check-workflow-syntax.mjs [--dir <dir>]
+ * Exit code: 0 = sintassi valida, 1 = almeno un blocco non valido,
+ *             2 = errore di ambiente (parser non disponibile).
+ */
+import { readFileSync, readdirSync, existsSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+
+const argv = process.argv.slice(2);
+function arg(name, fallback) {
+  const i = argv.indexOf(name);
+  return i !== -1 && argv[i + 1] !== undefined ? argv[i + 1] : fallback;
+}
+
+const DIR = resolve(arg('--dir', '.github/workflows'));
+if (!existsSync(DIR)) {
+  console.error(`[FAIL] directory dei workflow non trovata: ${DIR}`);
+  process.exit(2);
+}
+
+/** Le espressioni GitHub sono interpolate prima dell'esecuzione: non le giudichiamo. */
+function neutralizeGithubExpressions(text) {
+  return text.replace(/\$\{\{[^}]*\}\}/g, '0');
+}
+
+/**
+ * Estrae gli step con `run:` dal YAML, per via linee: ogni step e' un blocco
+ * indentato che inizia con `- name:` (o `- uses:`) e puo' contenere `shell:` e
+ * `run: |`.
+ */
+function extractRunBlocks(text) {
+  const lines = text.split(/\r?\n/);
+  const blocks = [];
+  let i = 0;
+  while (i < lines.length) {
+    const stepMatch = lines[i].match(/^(\s*)- (name:|uses:)/);
+    if (!stepMatch) {
+      i++;
+      continue;
+    }
+    const stepIndent = stepMatch[1].length;
+    const stepStart = i;
+    let shell = null;
+    let run = null;
+    let runLine = null;
+    i++;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (line.trim() === '') {
+        i++;
+        continue;
+      }
+      const indent = line.length - line.trimStart().length;
+      if (indent <= stepIndent && /^\s*- /.test(line)) break; // step successivo
+      const shellMatch = line.match(/^\s*shell:\s*(\S+)\s*$/);
+      if (shellMatch) {
+        shell = shellMatch[1];
+        i++;
+        continue;
+      }
+      if (/^\s*run:\s*\|\s*$/.test(line)) {
+        const blockIndent = indent;
+        const body = [];
+        runLine = i + 1;
+        i++;
+        while (i < lines.length) {
+          const bodyLine = lines[i];
+          if (bodyLine.trim() === '') {
+            body.push('');
+            i++;
+            continue;
+          }
+          const bodyIndent = bodyLine.length - bodyLine.trimStart().length;
+          if (bodyIndent <= blockIndent) break;
+          body.push(bodyLine.slice(blockIndent + 2));
+          i++;
+        }
+        run = body.join('\n');
+        continue;
+      }
+      i++;
+    }
+    if (run !== null) {
+      blocks.push({ start: stepStart + 1, shell, run });
+    }
+  }
+  return blocks;
+}
+
+/** Lo shell di default: su `ubuntu-latest` e' bash; su Windows e' pwsh. */
+function defaultShell(runnerOs) {
+  return runnerOs === 'windows' ? 'pwsh' : 'bash';
+}
+
+function runnerOs(text) {
+  const m = text.match(/runs-on:\s*(\S+)/);
+  return m ? m[1] : 'ubuntu-latest';
+}
+
+/**
+ * Su Windows il comando `bash` puo' essere lo stub di WSL, che esce con un
+ * messaggio di installazione invece di eseguire lo script. In quel caso il
+ * controllo dei blocchi bash viene saltato (la CI, su ubuntu, ha il bash vero).
+ */
+function bashUsable() {
+  try {
+    const out = execFileSync('bash', ['--version'], {
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return /GNU bash/i.test(out);
+  } catch {
+    return false;
+  }
+}
+
+const BASH_USABLE = bashUsable();
+if (!BASH_USABLE) {
+  console.log('[SKIP] bash non utilizzabile su questa macchina (stub WSL?): i blocchi "shell: bash" non vengono verificati');
+}
+
+let failures = 0;
+let checked = 0;
+let skipped = 0;
+
+const tmpRoot = mkdtempSync(join(tmpdir(), 'ls-wf-syntax-'));
+
+for (const file of readdirSync(DIR).filter((f) => f.endsWith('.yml'))) {
+  const text = readFileSync(join(DIR, file), 'utf8');
+  const os = runnerOs(text);
+  for (const block of extractRunBlocks(text)) {
+    const shell = block.shell ?? defaultShell(os);
+    const script = neutralizeGithubExpressions(block.run);
+    const tmpFile = join(tmpRoot, `${file.replace(/[^a-z0-9]/gi, '_')}-${block.start}.${shell === 'pwsh' ? 'ps1' : 'sh'}`);
+    writeFileSync(tmpFile, script, 'utf8');
+
+    try {
+      if (shell === 'pwsh') {
+        execFileSync(
+          'pwsh',
+          [
+            '-NoProfile',
+            '-Command',
+            `$errors = $null; [System.Management.Automation.Language.Parser]::ParseFile('${tmpFile.replace(/'/g, "''")}', [ref]$null, [ref]$errors) | Out-Null; if ($errors -and $errors.Count -gt 0) { $errors | ForEach-Object { $_.Message }; exit 1 } else { exit 0 }`,
+          ],
+          { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] },
+        );
+        checked++;
+      } else {
+        if (!BASH_USABLE) {
+          skipped++;
+          continue;
+        }
+        execFileSync('bash', ['-n', tmpFile], { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+        checked++;
+      }
+    } catch (err) {
+      // Se l'interprete non c'e' (bash assente su un dev Windows), non e' un errore
+      // del file: si salta e lo si dichiara.
+      const message = String(err.stdout || err.stderr || err.message || '').trim();
+      if (err.code === 'ENOENT') {
+        skipped++;
+        console.log(`[SKIP] ${file}:${block.start} — interprete "${shell}" non disponibile`);
+        continue;
+      }
+      failures++;
+      console.error(`[FAIL] ${file}:${block.start} — blocco "run:" con shell "${shell}" non valido:`);
+      for (const line of message.split('\n').slice(0, 6)) console.error(`       ${line}`);
+    }
+  }
+}
+
+console.log('');
+if (failures > 0) {
+  console.log(`[INFO] check-workflow-syntax: ${checked} blocchi verificati, ${failures} non validi, ${skipped} saltati`);
+  process.exit(1);
+}
+console.log(`[OK] check-workflow-syntax: ${checked} blocchi verificati, 0 non validi${skipped > 0 ? `, ${skipped} saltati` : ''}`);
+process.exit(0);
 
 
 
@@ -46663,6 +47005,17 @@ jobs:
       - name: Workflow Actions validi (issue #73)
         run: node scripts/validate-workflows.mjs .github/workflows
 
+      # Issue #279: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
+      # non fallisce al lint: fallisce a RUNTIME, con un ParserError che arriva
+      # dopo il checkout e lascia `main` rotto (misurato il 2026-11-02 su
+      # auto-state-aggregate.yml e auto-bundle.yml: i blocchi aggregati e il
+      # bundle non venivano piu' committati). Qui ogni blocco `run:` viene
+      # syntax-checato con il parser dello shell dichiarato (pwsh -> parser di
+      # PowerShell, bash -> `bash -n`); le espressioni `${{ ... }}` sono
+      # neutralizzate perche' GitHub le interpola prima dell'esecuzione.
+      - name: Sintassi dei blocchi `run:` dei workflow (issue #279)
+        run: node scripts/check-workflow-syntax.mjs
+
       # Issue #136: la stessa classificazione del bundle, applicata agli strumenti.
       # La riga `git add` di auto-state-aggregate.yml e l'array `$targets` di
       # scripts/aggregate-state.ps1 descrivevano lo stesso insieme di file senza
@@ -47126,18 +47479,33 @@ jobs:
                        -m "" `
                        -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
                        -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-bundle."
-          # Retry con ri-sincronizzazione (stessa race dei writer su `main`, issue #261)
-          for attempt in 1 2 3; do
-            if git push origin main; then
-              break
-            fi
+          # Retry con ri-sincronizzazione (stessa race dei writer su `main`, issue #261).
+          # Issue #279: era **sintassi bash** dentro uno step `shell: pwsh` ->
+          # ParserError e il bundle non veniva mai committato. Riscritto in
+          # sintassi PowerShell (lo stesso fix di `auto-state-aggregate.yml`).
+          $pushed = $false
+          for ($attempt = 1; $attempt -le 3 -and -not $pushed; $attempt++) {
+            git add docs/BUNDLE.md
+            git commit -m "chore(bundle): auto-regen BUNDLE.md dopo merge di PR su main" `
+                         -m "Triggered by .github/workflows/auto-bundle.yml on push to main." `
+                         -m "Source: scripts/generate-bundle.ps1 (rigenera `$files da docs/globale)." `
+                         -m "Target: docs/BUNDLE.md (contenuto FILE: ===== FILE: foo.md =====)." `
+                         -m "" `
+                         -m "Questo workflow chiude la classe di drift BUNDLE.md identificata da PR #113:" `
+                         -m "  il bundle veniva rigenerato solo localmente e non committato su main." `
+                         -m "Rieseguito automaticamente ad ogni push su main."
+            git push origin main
+            if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
             Write-Host "[auto-bundle] push rifiutato (tentativo $attempt): ri-sincronizzo"
             git fetch origin main
             git rebase origin/main
             if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
             pwsh scripts/generate-bundle.ps1
-            git add docs/BUNDLE.md
-          done
+          }
+          if (-not $pushed) {
+            Write-Host "[auto-bundle] push fallito dopo 3 tentativi"
+            exit 1
+          }
       # Verifica finale dello stato: l'ultimo writer della catena garantisce
       # che `main` sia coerente. Se i check falliscono (per es. porque' un
       # writer precedente e' stato annullato dal concurrency group, issue #251),
@@ -47204,6 +47572,12 @@ concurrency:
 permissions:
   contents: write
   issues: read
+  # Issue #279: `apply-merge-state.mjs` chiama `GET /repos/{owner}/{repo}/pulls/{N}`
+  # per il merge commit e la data di merge. Senza `pull-requests: read` la
+  # chiamata risponde **403** e il workflow esce 2 prima di applicare lo stato:
+  # le sessioni restavano `merged: false` e il gate `check-merge-state.mjs`
+  # (fail-closed) teneva `main` rosso (misurato al merge della PR #278).
+  pull-requests: read
 
 jobs:
   apply-merge-state:

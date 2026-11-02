@@ -2,8 +2,10 @@
 number: 87
 title: "Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "63588098730d0db887130ee7b8639345baa6dc71"
+merged_date: "2026-11-02T12:51:43Z"
 branch: feat/277-remediation-encoding-utf-8-senza-bom-e-m
 pr: 278
 claim: kilo-HP-ELITEBOOK-c87enc

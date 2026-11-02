@@ -146,6 +146,7 @@ $files = @(
     "docs/state/sessions/85-competitive-positioning.md",
     "docs/state/sessions/86-implementation-specs.md",
     "docs/state/sessions/87-encoding-remediation.md",
+    "docs/state/sessions/88-post-merge-recovery.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -315,6 +316,14 @@ $files = @(
     # consegnare piu' file di sessione e lo stato di merge deve essere applicato
     # a TUTTI (prima abortava: le sessioni restavano «non ancora mergiato»).
     "scripts/test-apply-merge-state.mjs",
+    # Gate "sintassi dei blocchi run: dei workflow" (Sessione 88 / issue #279):
+    # uno step che dichiara `shell: pwsh` ma contiene sintassi bash fallisce a
+    # RUNTIME (ParserError) e lascia `main` rotto — misurato lo stesso giorno su
+    # auto-state-aggregate.yml e auto-bundle.yml, i due writer della catena.
+    # Qui ogni blocco `run:` e' syntax-checked con il parser dello shell
+    # dichiarato; le espressioni `${{ ... }}` sono neutralizzate (GitHub le
+    # interpola prima dell'esecuzione).
+    "scripts/check-workflow-syntax.mjs",
     # Gate "coerenza del protocollo" (Sessione 80 / issue #248, ADR-0012): confronta
     # i fatti normativi di AGENTS.md con la realta' del repository (6 check: versione
     # dichiarata, tabella label, tabella exit code, integrita' degli anchor,

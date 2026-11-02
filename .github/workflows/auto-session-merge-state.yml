@@ -24,6 +24,12 @@ concurrency:
 permissions:
   contents: write
   issues: read
+  # Issue #279: `apply-merge-state.mjs` chiama `GET /repos/{owner}/{repo}/pulls/{N}`
+  # per il merge commit e la data di merge. Senza `pull-requests: read` la
+  # chiamata risponde **403** e il workflow esce 2 prima di applicare lo stato:
+  # le sessioni restavano `merged: false` e il gate `check-merge-state.mjs`
+  # (fail-closed) teneva `main` rosso (misurato al merge della PR #278).
+  pull-requests: read
 
 jobs:
   apply-merge-state:

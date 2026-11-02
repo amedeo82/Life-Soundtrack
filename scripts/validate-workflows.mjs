@@ -428,7 +428,11 @@ function checkPushSync(lines, file) {
   // push su `main` possono incrociarsi -> il writer ri-sincronizza e riprova).
   // Una sincronizzazione "tardiva" (dopo la push, ma fuori da un ciclo)
   // NON e' una strategia: il push e' gia' fallito.
-  const loopRe = /^\s*(for|while|until)\b.*\bdo\s*$/;
+  //
+  // Issue #279: il ciclo e' riconosciuto in **due** forme — quella bash
+  // (`for ...; do` / `done`) e quella PowerShell (`for (...) {` / `}`), che e'
+  // l'unica che parse dentro uno step `shell: pwsh`.
+  const loopRe = /^\s*(for|while|until|foreach)\b.*(?:\bdo\s*|\{\s*)$/;
   let loopStart = -1;
   for (let i = pushAt; i >= stepStart; i--) {
     if (loopRe.test(lines[i])) {
@@ -438,8 +442,16 @@ function checkPushSync(lines, file) {
   }
   if (loopStart >= 0) {
     let loopEnd = lines.length;
+    const loopIndent = lines[loopStart].match(/^\s*/)[0].length;
     for (let i = pushAt + 1; i < stepEnd; i++) {
+      // fine del ciclo: `done` (bash) oppure la graffa di chiusura all'indentazione
+      // del `for` (PowerShell: le graffe interne sono piu' annidate).
       if (/^\s*done\s*$/.test(lines[i])) {
+        loopEnd = i;
+        break;
+      }
+      const indent = lines[i].length - lines[i].trimStart().length;
+      if (lines[i].trim() === '}' && indent === loopIndent) {
         loopEnd = i;
         break;
       }

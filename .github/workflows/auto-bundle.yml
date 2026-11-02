@@ -224,18 +224,33 @@ jobs:
                        -m "" `
                        -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
                        -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-bundle."
-          # Retry con ri-sincronizzazione (stessa race dei writer su `main`, issue #261)
-          for attempt in 1 2 3; do
-            if git push origin main; then
-              break
-            fi
+          # Retry con ri-sincronizzazione (stessa race dei writer su `main`, issue #261).
+          # Issue #279: era **sintassi bash** dentro uno step `shell: pwsh` ->
+          # ParserError e il bundle non veniva mai committato. Riscritto in
+          # sintassi PowerShell (lo stesso fix di `auto-state-aggregate.yml`).
+          $pushed = $false
+          for ($attempt = 1; $attempt -le 3 -and -not $pushed; $attempt++) {
+            git add docs/BUNDLE.md
+            git commit -m "chore(bundle): auto-regen BUNDLE.md dopo merge di PR su main" `
+                         -m "Triggered by .github/workflows/auto-bundle.yml on push to main." `
+                         -m "Source: scripts/generate-bundle.ps1 (rigenera `$files da docs/globale)." `
+                         -m "Target: docs/BUNDLE.md (contenuto FILE: ===== FILE: foo.md =====)." `
+                         -m "" `
+                         -m "Questo workflow chiude la classe di drift BUNDLE.md identificata da PR #113:" `
+                         -m "  il bundle veniva rigenerato solo localmente e non committato su main." `
+                         -m "Rieseguito automaticamente ad ogni push su main."
+            git push origin main
+            if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
             Write-Host "[auto-bundle] push rifiutato (tentativo $attempt): ri-sincronizzo"
             git fetch origin main
             git rebase origin/main
             if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
             pwsh scripts/generate-bundle.ps1
-            git add docs/BUNDLE.md
-          done
+          }
+          if (-not $pushed) {
+            Write-Host "[auto-bundle] push fallito dopo 3 tentativi"
+            exit 1
+          }
       # Verifica finale dello stato: l'ultimo writer della catena garantisce
       # che `main` sia coerente. Se i check falliscono (per es. porque' un
       # writer precedente e' stato annullato dal concurrency group, issue #251),
