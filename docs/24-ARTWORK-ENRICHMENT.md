@@ -1,8 +1,9 @@
 # 24 — Artwork enrichment
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **4.3** (`docs/11-BACKLOG.md` §"Story 4.3") · Area: `enrichment` · Size: M · **Priorità P0**
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §4, §8 (l'artwork è l'ancora visiva; è il moltiplicatore di 3.2 e 3.3)
@@ -185,7 +186,8 @@ Fixture: il pattern esistente `fixtures/api-mocks/itunes/*.json` va esteso con u
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: stato reale (nessun artwork nel repository), cascata proposta (iTunes → Cover Art Archive → placeholder), contratti del resolver e della persistenza, obbligo CSP, piano di test, D-24.1…D-24.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*

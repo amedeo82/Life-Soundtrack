@@ -1,8 +1,9 @@
 # 27 — Privacy, export e purge: la pagina dei dati e le impostazioni
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **5.1** (Privacy spec finale + pagina in-app) e **5.2** (Export e purge) — `docs/11-BACKLOG.md` · Area: `privacy`/`ui` · Size: M ciascuna
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §12, §13 · Specifiche tecniche: `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1
@@ -188,7 +189,8 @@ Da `08-COPY-I18N.md` ma assenti dai locale:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: stato reale (le 4 funzioni obbligatorie di `09§6.1`, 3 su 4 mancanti; Impostazioni e About dead code), contratti di export/purge/delete, doppia conferma, pagina privacy in 5 blocchi, 7 chiavi i18n mancanti, D-27.1…D-27.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*

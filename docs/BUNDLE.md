@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 11:43
+> Data: 2026-11-02 12:56
 > Totale file: 162
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -2028,12 +2028,12 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 19 | [`19-GEO-CONTEXT.md`](19-GEO-CONTEXT.md) | 🟢 APPROVED | Sessione 67 (v1.0) | Geo & contesto di ascolto: L0 paese / L1 contesto dedotto (casa, lavoro, viaggio) / L2 città stimata, toggle per-campo con override per import, nastro contesto — **ratificata** (Sessione 67, issue #201): i 3 punti aperti chiusi (DB geo **on-demand** D-B.2, soglie come **costanti misurabili** D-B.3, `retainCountry` già deciso con l'issue #108), gli edge case geo rinumerati **E19..E24** (E11..E18 erano già presi in `01-PLATFORMS.md` §5) e la revoca di D.39.8 applicata a `03-ADAPTERS/youtube-music.md` §7 |
 | 20 | [`20-SCROBBLING-HUB.md`](20-SCROBBLING-HUB.md) | 🟢 APPROVED | Sessione 57 (v1.0) | **Scrobbling hub (Story 1.5)**: protocollo di *scrittura* verso Last.fm e ListenBrainz — contratto `ScrobbleSink`, coda `scrobbleOutbox` (Dexie v5), consenso per-hub `scrobbleHubs`, rate limit per-hub, sync continua a cursore (issue #164); **ratificata** (Sessione 57, issue #172): le 4 decisioni aperte chiuse (D-SH.11…D-SH.14) → issue di implementazione **#173** |
 | 21 | [`21-AUDIO-FEATURES.md`](21-AUDIO-FEATURES.md) | 🟢 APPROVED | Sessione 66 (v1.1) | **Pipeline audio features (Story 4.1)**: contratto `AudioFeatureProvider`, cascata cache → Essentia.js (WASM) → AcousticBrainz → euristico, mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), normalizzazione DEAM [1,9] → [0,1], privacy e CSP, stoccaggio e invalidazione, costi reali misurati — **ratificata** (Sessione 62, issue #187, PR #190 `b1dd83e`): le 9 decisioni D-AF.1…D-AF.9 sono chiuse come proposte → issue di implementazione **#188** (`agent-ready`); **v1.1** (Sessione 66, issue #196): **D-AF.9 emendata**, la CSP ammette anche l'host della **ricerca** iTunes (senza il quale D-AF.1 non è applicabile) |
-| 22 | [`22-COMPETITIVE-POSITIONING.md`](22-COMPETITIVE-POSITIONING.md) | 🟡 DRAFT | Sessione 85 (v0.1) | **Posizionamento competitivo e priorità di prodotto**: i quattro differenziatori **verificati riga per riga contro il codice** (privacy locale 🟢 · multi-piattaforma 🟢 · retrospettiva 🟡 non ancora collegata all'app · analisi acustica 🟡 non ancora integrata), matrice dei competitor con lo stato reale, «cosa non siamo» (non siamo Last.fm), priorità ricalcolate (2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1) e decisioni proposte **D-22.1…D-22.7** |
-| 23 | [`23-ANALYSIS-PIPELINE.md`](23-ANALYSIS-PIPELINE.md) | 🟡 DRAFT | Sessione 86 (v0.1) | **Collegamento del pipeline di analisi all'app (Story 2.5, P0)**: i contratti reali di `AnalysisPipeline` / `runAnalysisPipeline`, la persistenza degli insight (`replace*` transazionali), i punti di innesto (`OnboardingRouter.handleImportAll`, `useHomeTimelineData`), lo stato vuoto `no-features`, il piano di test e le decisioni **D-23.1…D-23.6** |
-| 24 | [`24-ARTWORK-ENRICHMENT.md`](24-ARTWORK-ENRICHMENT.md) | 🟡 DRAFT | Sessione 86 (v0.1) | **Artwork enrichment (Story 4.3, P0)**: cascata iTunes → Cover Art Archive → placeholder deterministico, il ramo Spotify escluso (D-24.2), l'obbligo CSP (`coverartarchive.org`), il cursore in `settings` invece di una migrazione (D-24.3) e le decisioni **D-24.1…D-24.6** |
-| 25 | [`25-MEMORIES-SHARE-EXPLORE.md`](25-MEMORIES-SHARE-EXPLORE.md) | 🟡 DRAFT | Sessione 86 (v0.1) | **Ricordi, condivisione, Esplora e Analisi (Stories 3.2 e 3.3, P0)**: il feed dei ricordi, la card 1080×1350 generata in locale (canvas senza taint), il `ShareSheet` con Web Share API e fallback, il tagging manuale in `Insight.userNote` (con il vincolo di **preservazione al ricalcolo**), il `QuadrantChart` e l'«insight in prosa»; decisioni **D-25.1…D-25.6** |
-| 26 | [`26-ONBOARDING-DEMO.md`](26-ONBOARDING-DEMO.md) | 🟡 DRAFT | Sessione 86 (v0.1) | **Anteprima e modalità demo in onboarding (Story 3.5, P0)**: il DB demo separato, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche), il reveal con ≥3 righe reali e l'anno calcolato; decisioni **D-26.1…D-26.5** |
-| 27 | [`27-PRIVACY-DATA-SETTINGS.md`](27-PRIVACY-DATA-SETTINGS.md) | 🟡 DRAFT | Sessione 86 (v0.1) | **Privacy, export e purge (Stories 5.1 e 5.2, P1)**: la schermata Impostazioni (che **non esiste**), le quattro funzioni obbligatorie di `09§6.1` (3 su 4 mancanti), il montaggio della schermata About (**l'obbligo AGPL §13 oggi non è raggiungibile**), la doppia conferma e le 7 chiavi i18n assenti; decisioni **D-27.1…D-27.6** |
+| 22 | [`22-COMPETITIVE-POSITIONING.md`](22-COMPETITIVE-POSITIONING.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Posizionamento competitivo e priorità di prodotto**: i quattro differenziatori **verificati riga per riga contro il codice** (privacy locale 🟢 · multi-piattaforma 🟢 · retrospettiva 🟡 non ancora collegata all'app · analisi acustica 🟡 non ancora integrata), matrice dei competitor con lo stato reale, «cosa non siamo» (non siamo Last.fm), priorità ricalcolate (2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1) e decisioni proposte **D-22.1…D-22.7** |
+| 23 | [`23-ANALYSIS-PIPELINE.md`](23-ANALYSIS-PIPELINE.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Collegamento del pipeline di analisi all'app (Story 2.5, P0)**: i contratti reali di `AnalysisPipeline` / `runAnalysisPipeline`, la persistenza degli insight (`replace*` transazionali), i punti di innesto (`OnboardingRouter.handleImportAll`, `useHomeTimelineData`), lo stato vuoto `no-features`, il piano di test e le decisioni **D-23.1…D-23.6** |
+| 24 | [`24-ARTWORK-ENRICHMENT.md`](24-ARTWORK-ENRICHMENT.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Artwork enrichment (Story 4.3, P0)**: cascata iTunes → Cover Art Archive → placeholder deterministico, il ramo Spotify escluso (D-24.2), l'obbligo CSP (`coverartarchive.org`), il cursore in `settings` invece di una migrazione (D-24.3) e le decisioni **D-24.1…D-24.6** |
+| 25 | [`25-MEMORIES-SHARE-EXPLORE.md`](25-MEMORIES-SHARE-EXPLORE.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Ricordi, condivisione, Esplora e Analisi (Stories 3.2 e 3.3, P0)**: il feed dei ricordi, la card 1080×1350 generata in locale (canvas senza taint), il `ShareSheet` con Web Share API e fallback, il tagging manuale in `Insight.userNote` (con il vincolo di **preservazione al ricalcolo**), il `QuadrantChart` e l'«insight in prosa»; decisioni **D-25.1…D-25.6** |
+| 26 | [`26-ONBOARDING-DEMO.md`](26-ONBOARDING-DEMO.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Anteprima e modalità demo in onboarding (Story 3.5, P0)**: il DB demo separato, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche), il reveal con ≥3 righe reali e l'anno calcolato; decisioni **D-26.1…D-26.5** |
+| 27 | [`27-PRIVACY-DATA-SETTINGS.md`](27-PRIVACY-DATA-SETTINGS.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Privacy, export e purge (Stories 5.1 e 5.2, P1)**: la schermata Impostazioni (che **non esiste**), le quattro funzioni obbligatorie di `09§6.1` (3 su 4 mancanti), il montaggio della schermata About (**l'obbligo AGPL §13 oggi non è raggiungibile**), la doppia conferma e le 7 chiavi i18n assenti; decisioni **D-27.1…D-27.6** |
 
 ## Documenti di supporto
 | File | Stato | Descrizione |
@@ -2268,7 +2268,7 @@ rigenerati in quest'ordine (aggregator → generator).
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
 - **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.31, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
-- **Documenti DRAFT**: 16 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`, **`22`**, **`23`**, **`24`**, **`25`**, **`26`**, **`27`**) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.10, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.21; **`22` aggiunto nella Sessione 85** (posizionamento competitivo, DRAFT v0.1 con decisioni proposte D-22.1…D-22.7); **`23`–`27` aggiunti nella Sessione 86** (il **pacchetto di specifiche implementabili** delle 7 story rimanenti: D-23.1…D-27.6) — sono le specifiche che le successive sessioni di coding consumeranno dopo la ratifica; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
+- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.10, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.21; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
@@ -19145,8 +19145,10 @@ commits precedenti, quindi nella history di `main` non si distingue «commit del
 number: 85
 title: "Posizionamento competitivo verificato sul codice e priorità ricalcolate"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "89573176e80ef24b4f4015ab03fbd954de823b15"
+merged_date: "2026-11-02T11:42:46Z"
 branch: feat/265-docs-competitive-specs
 pr: 273
 claim: kilo-HP-ELITEBOOK-c85pos
@@ -19262,8 +19264,10 @@ bundle rigenerati in quest'ordine (aggregator → generator), come impone la pro
 number: 86
 title: "Il pacchetto di specifiche implementabili delle 7 story rimanenti"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "89573176e80ef24b4f4015ab03fbd954de823b15"
+merged_date: "2026-11-02T11:42:46Z"
 branch: feat/265-docs-competitive-specs
 pr: 273
 claim: kilo-HP-ELITEBOOK-c86sp
@@ -19271,6 +19275,20 @@ tags: [docs, strategy, specs]
 ---
 
 # Sessione 86 — Le specifiche delle 7 story rimanenti
+
+> **Nota sulle due sessioni in una PR**: la PR **#273** (merge `89573176`, 2026-11-02T11:42:46Z) ha consegnato
+> **due** file di sessione — la 85 (posizionamento competitivo) e questa (pacchetto di specifiche): erano due
+> blocchi di lavoro distinti, ma **una sola issue** (#265) e **una sola PR**, perché la ratifica delle specifiche
+> non poteva precedere la PR che le introduce. Entrambe dichiarano quindi `pr: 273` e lo stesso merge commit:
+> il fatto è vero (i due file sono stati mergiati da quella PR) e il gate `check-merge-state.mjs` lo verifica
+> senza problemi.
+> **Limite noto del tooling**: `scripts/apply-merge-state.mjs` assume **un file di sessione per PR** e aborta
+> quando ne trova due (è il motivo per cui, al merge della #273, nessuna delle due sessioni aveva ricevuto
+> `merged: true` e i blocchi aggregati le mostravano ancora «non ancora mergiato (PR #273)» — il drift che il
+> gate dell'issue #239 esiste per intercettare). Il limite e' tracciato come issue separata; la correzione
+> del tooling (applicare lo stato a **tutti** i file di sessione che dichiarano la PR) e' il fix appropriato e
+> non appartiene a una PR di documentazione.
+
 
 > **Oggetto**: la Sessione 85 ha prodotto il posizionamento competitivo e una priorità ricalcolata, ma le story
 > rimanenti **non erano lavorabili**: il protocollo richiede una specifica 🟢 APPROVED, e per 5 delle 7 story
@@ -19346,6 +19364,12 @@ verificato, contratti, task numerati, AC verificabili, piano di test e 30 decisi
 
 **Cosa manca.** La **ratifica** delle specifiche e delle decisioni (D-23.x…D-27.x): è l'atto del project
 owner, e senza di esso le story restano `⬚ TODO` e le issue non possono avere la label `agent-ready`.
+
+**Ratifica (Sessione 87, issue #274, PR #274).** Il project owner ha ratificato le 6 specifiche (`22`–`27`)
+**al merge della PR #273**: sono promosse a **🟢 APPROVED v1.0** e le loro decisioni (D-22.1…D-22.8,
+D-23.1…D-27.6) sono **vincolanti** per gli agenti. Le 7 story rimanenti hanno una sola issue canonica
+(`#266`, `#241`, `#240`, `#270`, `#242`, `#244`, `#246`) e le loro righe `**Spec**:` nel backlog puntano
+alla versione APPROVED. Le story **2.5** e **3.5** sono ora **pronte al claim**.
 
 **Issue aperte — una per story** (regola «1 issue = 1 story»): ogni story ha una sola issue canonica,
 con la spec e la checklist già dentro.
@@ -28489,7 +28513,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: I quattro motori di analisi sono implementati e testati in `packages/core/src/analysis/` (mood `mood/`, ere `era/`, eventi `event/`, ricordi `memory/`, con l'orchestratore `pipeline.ts`) e la persistenza degli insight esiste (`db/insights.ts`), ma **nessun codice in `apps/web` li esegue**: la Home **legge** gli insight (`apps/web/src/hooks/useHomeTimelineData.ts`) che nessuno **scrive**. Dopo un import pulito le sezioni mood, ere e ricordi restano vuote e i differenziatori narrativi del progetto — «dati storici + emozioni» — non sono visibili a nessuno. Questa story collega il core all'app: è il lavoro che trasforma «abbiamo gli algoritmi» in «l'app conosce la tua musica».
 
-**Stato**: ⬚ **TODO** — la specifica di collegamento è **scritta** (`docs/23-ANALYSIS-PIPELINE.md`, 🟡 DRAFT v0.1, Sessione 86) e diventa 🟢 APPROVED alla ratifica del project owner; dopo la ratifica l'agente apre l'issue di implementazione (`agent-ready`) e la lavora. La spec definisce i contratti reali del core (pipeline, persistenza, i18n), i punti di innesto nell'app, lo stato vuoto `no-features` e il piano di test
+**Stato**: ⬚ **TODO** — **pronta al claim**: la specifica di collegamento (`docs/23-ANALYSIS-PIPELINE.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante; l'agente prende in carico l'issue **#266** (`agent-ready`) e la lavora secondo la procedura di claim La spec definisce i contratti reali del core (pipeline, persistenza, i18n), i punti di innesto nell'app, lo stato vuoto `no-features` e il piano di test
 
 **Task**:
 - T2.5.1 — Trigger di esecuzione: dopo l'import e a richiesta, in **coda** (l'import non deve mai attendere l'analisi: `05§6.1`)
@@ -28510,7 +28534,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] La spec di collegamento è scritta e 🟢 APPROVED prima dell'implementazione (protocollo: `agent-ready` solo con spec approvata)
 
 **Dipendenze**: Story 2.1, 2.2, 2.3, 2.4 (tutte ✅ DONE) · la 4.1 è la sorgente delle feature
-**Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
+**Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
 **Issue**: #266 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
@@ -28549,7 +28573,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] L'utente può rinominare un'era rilevata automaticamente: il campo esiste già (`Insight.userNote`) ma **non** ha né UI né percorso di scrittura
 - [ ] i18n IT/EN per le nuove stringhe
 
-**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.2: feed, card canvas, ShareSheet, tagging manuale) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
+**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
 **Issue**: #241 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
@@ -28566,7 +28590,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] Gli insight visualizzati sono **persistiti** (nessuna lettura «a caldo» che non passi dalla tabella `insights`): la story consuma l'output della Story **2.5**
 - [ ] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
 
-**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.3: Esplora, QuadrantChart, InsightCard, deep-link interno) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
+**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
 **Issue**: #240 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
@@ -28597,7 +28621,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Descrizione**: L'onboarding oggi termina con un **contatore** di eventi (`apps/web/src/onboarding/OnboardingRouter.tsx`, schermata ⑤ Reveal): l'utente non vede mai il prodotto prima di usarlo, e il README dichiarava un'«anteprima del risultato» che il codice non ha. Il progetto ha già i mattoni: `fixtures/demo-user.json` (1 anno, 4500 eventi, 200 track, 30 artisti, `demoMode: true`) è previsto da `06-UX-FLOWS-STATES.md` §2.14 e la CTA «Scopri come funziona» esiste nelle stringhe i18n (`empty.cta.demo`) — ma **nessun file di codice li usa**. Questa story rende l'onboarding **spettacolare**: il diario di esempio *prima* dell'import, le prime righe della timeline reale *dopo*.
 
-**Stato**: ⬚ **TODO** — la specifica è **scritta** in `docs/26-ONBOARDING-DEMO.md` (🟡 DRAFT v0.1, Sessione 86) e diventa 🟢 APPROVED alla ratifica; dopo la ratifica l'agente apre l'issue di implementazione (`agent-ready`). La spec definisce il **DB demo separato**, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche) e il reveal con ≥3 righe reali.
+**Stato**: ⬚ **TODO** — **pronta al claim**: la specifica (`docs/26-ONBOARDING-DEMO.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante; l'agente prende in carico l'issue **#270** (`agent-ready`) e la lavora secondo la procedura di claim. La spec definisce il **DB demo separato**, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche) e il reveal con ≥3 righe reali.
 
 **Task**:
 - T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding (la stringa `empty.cta.demo` esiste ma non è renderizzata)
@@ -28615,7 +28639,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
 
 **Dipendenze**: Story 0.4 ✅ (onboarding), Story 3.1 ✅ (Home + Timeline) · **effetto pieno dipende dalla Story 2.5** (senza, la demo non ha ere né mood)
-**Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
+**Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
 **Issue**: #270 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
@@ -28676,7 +28700,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Placeholder gradient generato coerente con Mood (vedi `15-DESIGN-SYSTEM` §3 palette mood)
 
 **Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: Spotify Web API e iTunes Search coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
-**Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare: cascata iTunes → Cover Art Archive → placeholder, D-24.1…D-24.6) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
+**Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
 **Issue**: #242 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 **Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
@@ -28715,7 +28739,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Bozza privacy policy GDPR-compliant
 - [ ] **Pagina in-app «Come trattiamo i tuoi dati»**: per il lancio non serve un documento legale monumentale, serve una pagina chiara e onesta che dica (a) cosa resta sul dispositivo e cosa non esce mai, (b) che l'**unica** uscita è l'invio ai hub di scrobbling e solo se l'utente ha attivato quel hub (default: nessuno), (c) cosa succede ai dati quando li esporta o li cancella, (d) che il progetto è AGPL-3.0 e offre il sorgente (§13). La pagina utente è il documento (`09`) tradotto in linguaggio semplice — vedi `22-COMPETITIVE-POSITIONING.md` §13 (decisione D-22.7)
 
-**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.1: pagina in 5 blocchi, montaggio della schermata About, 7 chiavi i18n mancanti, drift `useDbHealth`) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13 · `docs/12-DEVOPS.md` §5.3 (AGPL §13)
+**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13 · `docs/12-DEVOPS.md` §5.3 (AGPL §13)
 **Issue**: #244 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
@@ -28727,7 +28751,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Export JSON completo (portabilità GDPR)
 - [ ] Cancellazione totale con doppia conferma
 
-**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.2: `exportAll` con manifest, CSV degli ascolti, `purgeInsights`, `deleteAll` transazionale, doppia conferma con parola chiave) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13, §3.4 · `docs/22-COMPETITIVE-POSITIONING.md` §12
+**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13, §3.4 · `docs/22-COMPETITIVE-POSITIONING.md` §12
 **Issue**: #246 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
@@ -33857,9 +33881,10 @@ versione riscritta, verificabile:
 
 # 22 — Posizionamento competitivo e priorità di prodotto
 
-> Status: 🟡 DRAFT
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 85 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Fonte: analisi competitiva del 2026-11-02 (confronto con Last.fm/VinVibe, Remi/Music Memory, Spotify Wrapped) verificata **riga per riga contro il codice** del repository
 
@@ -34080,11 +34105,12 @@ Una **correzzione necessaria**: `00-VISION.md` dichiarava ancora **Apache-2.0** 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 85 (2026-11-02) | Prima stesura: posizionamento competitivo verificato contro il codice, matrice dei competitor con lo stato reale, "cosa non siamo", differenziatori 1-4 con i gap dichiarati, priorità ricalcolate, D-22.1…D-22.7 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 | 0.2 | Sessione 86 (2026-11-02) | Aggiunta **D-22.8**: le 7 story rimanenti ricevono il pacchetto di specifiche implementabili `23`–`27` |
 
 ---
 
-*Questo documento è DRAFT. Le decisioni in §16 sono proposte e diventano vincolanti per gli agenti solo dopo approvazione di Boss.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*
 
 
 
@@ -34092,9 +34118,10 @@ Una **correzzione necessaria**: `00-VISION.md` dichiarava ancora **Apache-2.0** 
 
 # 23 — Collegamento del pipeline di analisi all'app
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner, cioè al merge della PR)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **2.5** (`docs/11-BACKLOG.md` §"Story 2.5") · Area: `analysis` · Size: L
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §7 (differenziatore 3 «retrospettiva storica» verificato 🟡)
@@ -34362,10 +34389,11 @@ I fixture esistenti sono riutilizzabili: `fixtures/scenarios/era-shift.json` (8+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: contratti reali del core (pipeline, persistenza, i18n, tipi), punti di innesto nell'app, runner da costruire, stato vuoto `no-features`, piano di test, D-23.1…D-23.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner. Fino ad allora è una proposta.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*
 
 
 
@@ -34373,9 +34401,10 @@ I fixture esistenti sono riutilizzabili: `fixtures/scenarios/era-shift.json` (8+
 
 # 24 — Artwork enrichment
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **4.3** (`docs/11-BACKLOG.md` §"Story 4.3") · Area: `enrichment` · Size: M · **Priorità P0**
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §4, §8 (l'artwork è l'ancora visiva; è il moltiplicatore di 3.2 e 3.3)
@@ -34558,10 +34587,11 @@ Fixture: il pattern esistente `fixtures/api-mocks/itunes/*.json` va esteso con u
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: stato reale (nessun artwork nel repository), cascata proposta (iTunes → Cover Art Archive → placeholder), contratti del resolver e della persistenza, obbligo CSP, piano di test, D-24.1…D-24.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*
 
 
 
@@ -34569,9 +34599,10 @@ Fixture: il pattern esistente `fixtures/api-mocks/itunes/*.json` va esteso con u
 
 # 25 — Ricordi, condivisione, Esplora e Analisi
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi) — `docs/11-BACKLOG.md` · Area: `ui`/`ux` · Size: L ciascuna
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §8, §10, §11
@@ -34834,10 +34865,11 @@ Azioni (tutte sul **Blob**, mai sull'URL remoto):
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: contratti di feed, card canvas, ShareSheet, tagging (con il vincolo di preservazione del `userNote` al ricalcolo), Esplora e Analisi; copy esistente già presente e da riusare; D-25.1…D-25.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*
 
 
 
@@ -34845,9 +34877,10 @@ Azioni (tutte sul **Blob**, mai sull'URL remoto):
 
 # 26 — Anteprima del risultato in onboarding (modalità demo)
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **3.5** (`docs/11-BACKLOG.md` §"Story 3.5") · Area: `ui` · Size: M · **Priorità P0 (piccola)**
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §9 · Requisito di UX: `docs/06-UX-FLOWS-STATES.md` §2.14
@@ -35027,10 +35060,11 @@ Modifiche a `scripts/generate-fixtures.mjs` (funzione `buildDemoUser`):
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: stato reale del fixture e del reveal, decisione del DB separato, loader e normalizzazione, estensione del generatore (albums + features deterministiche), piano di test, D-26.1…D-26.5 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*
 
 
 
@@ -35038,9 +35072,10 @@ Modifiche a `scripts/generate-fixtures.mjs` (funzione `buildDemoUser`):
 
 # 27 — Privacy, export e purge: la pagina dei dati e le impostazioni
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **5.1** (Privacy spec finale + pagina in-app) e **5.2** (Export e purge) — `docs/11-BACKLOG.md` · Area: `privacy`/`ui` · Size: M ciascuna
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §12, §13 · Specifiche tecniche: `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1
@@ -35226,10 +35261,11 @@ Da `08-COPY-I18N.md` ma assenti dai locale:
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: stato reale (le 4 funzioni obbligatorie di `09§6.1`, 3 su 4 mancanti; Impostazioni e About dead code), contratti di export/purge/delete, doppia conferma, pagina privacy in 5 blocchi, 7 chiavi i18n mancanti, D-27.1…D-27.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*
 
 
 

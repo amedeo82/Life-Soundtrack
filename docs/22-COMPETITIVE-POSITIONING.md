@@ -1,8 +1,9 @@
 # 22 — Posizionamento competitivo e priorità di prodotto
 
-> Status: 🟡 DRAFT
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 85 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Fonte: analisi competitiva del 2026-11-02 (confronto con Last.fm/VinVibe, Remi/Music Memory, Spotify Wrapped) verificata **riga per riga contro il codice** del repository
 
@@ -223,8 +224,9 @@ Una **correzzione necessaria**: `00-VISION.md` dichiarava ancora **Apache-2.0** 
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 85 (2026-11-02) | Prima stesura: posizionamento competitivo verificato contro il codice, matrice dei competitor con lo stato reale, "cosa non siamo", differenziatori 1-4 con i gap dichiarati, priorità ricalcolate, D-22.1…D-22.7 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 | 0.2 | Sessione 86 (2026-11-02) | Aggiunta **D-22.8**: le 7 story rimanenti ricevono il pacchetto di specifiche implementabili `23`–`27` |
 
 ---
 
-*Questo documento è DRAFT. Le decisioni in §16 sono proposte e diventano vincolanti per gli agenti solo dopo approvazione di Boss.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*

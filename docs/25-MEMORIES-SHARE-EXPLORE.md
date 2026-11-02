@@ -1,8 +1,9 @@
 # 25 — Ricordi, condivisione, Esplora e Analisi
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **3.2** (Ricordi + Share) e **3.3** (Esplora + Analisi) — `docs/11-BACKLOG.md` · Area: `ui`/`ux` · Size: L ciascuna
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §8, §10, §11
@@ -265,7 +266,8 @@ Azioni (tutte sul **Blob**, mai sull'URL remoto):
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: contratti di feed, card canvas, ShareSheet, tagging (con il vincolo di preservazione del `userNote` al ricalcolo), Esplora e Analisi; copy esistente già presente e da riusare; D-25.1…D-25.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*
