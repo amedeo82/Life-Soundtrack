@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 11:55
+> Data: 2026-11-02 12:38
 > Totale file: 162
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -18866,117 +18866,116 @@ commits precedenti, quindi nella history di `main` non si distingue «commit del
 
 ---
 number: 85
-title: "Posizionamento competitivo verificato sul codice e prioritÃ  ricalcolate"
+title: "Posizionamento competitivo verificato sul codice e priorità ricalcolate"
 date: 2026-11-02
-state: ðŸŸ¡
+state: 🟡
 merged: false
-branch: docs/competitive-positioning
+branch: feat/265-docs-competitive-specs
 pr: 273
 claim: kilo-HP-ELITEBOOK-c85pos
 tags: [docs, strategy, backlog]
 ---
 
-# Sessione 85 â€” Posizionamento competitivo e prioritÃ  ricalcolate
+# Sessione 85 — Posizionamento competitivo e priorità ricalcolate
 
 > **Oggetto**: un'analisi competitiva (del 2026-11-02) sul posizionamento di Life Soundtrack
-> rispetto a Last.fm/VinVibe, Remi/Music Memory e Spotify Wrapped, con una gerarchia di prioritÃ 
-> e cinque suggerimenti strategici. L'analisi Ã¨ stata **verificata riga per riga contro il codice**
+> rispetto a Last.fm/VinVibe, Remi/Music Memory e Spotify Wrapped, con una gerarchia di priorità
+> e cinque suggerimenti strategici. L'analisi è stata **verificata riga per riga contro il codice**
 > del repository e i risultati sono stati riflessi nella documentazione.
 
 ## Sintesi
 
 L'analisi individua **quattro differenziatori strutturali** (privacy-first locale, multi-piattaforma
-unificata, retrospettiva storica, analisi acustica locale) e propone un ordine di prioritÃ :
+unificata, retrospettiva storica, analisi acustica locale) e propone un ordine di priorità:
 artwork prima di MusicBrainz, Ricordi+Share ed Esplora+Analisi al primo posto, export e purge a
-prioritÃ  media, MusicBrainz e nuove piattaforme a bassa prioritÃ .
+priorità media, MusicBrainz e nuove piattaforme a bassa priorità.
 
 La verifica sul codice **conferma due differenziatori, ne smentisce due nella forma dichiarata e
-ne scopre un terzo, piÃ¹ grave**:
+ne scopre un terzo, più grave**:
 
 | Differenziatore | Verdetto |
 |-----------------|----------|
-| Privacy-first locale | ðŸŸ¢ reale, con la precisazione che l'unica uscita di rete Ã¨ l'invio ai hub di scrobbling, **solo** se l'utente lo attiva hub per hub |
-| Multi-piattaforma unificata | ðŸŸ¢ reale: 5 fonti importabili (Spotify, YouTube Music, Apple Music, ListenBrainz, Last.fm), tutte con adapter e factory |
-| Retrospettiva storica | ðŸŸ¡ **non ancora un prodotto**: i quattro motori di analisi sono scritti e testati in `packages/core/src/analysis/`, ma **nessun codice in `apps/web` li esegue** â€” la Home legge gli insight che nessuno scrive |
-| Analisi acustica locale | ðŸŸ¡ **non ancora un prodotto**: la porta Essentia e la cascata esistono in `packages/core/src/enrichment/`, ma `essentia` **non Ã¨ una dipendenza** (assente da ogni `package.json` e dal lockfile), il modulo WASM non viene mai caricato e il pacchetto non Ã¨ importato dall'app |
+| Privacy-first locale | 🟢 reale, con la precisazione che l'unica uscita di rete è l'invio ai hub di scrobbling, **solo** se l'utente lo attiva hub per hub |
+| Multi-piattaforma unificata | 🟢 reale: 5 fonti importabili (Spotify, YouTube Music, Apple Music, ListenBrainz, Last.fm), tutte con adapter e factory |
+| Retrospettiva storica | 🟡 **non ancora un prodotto**: i quattro motori di analisi sono scritti e testati in `packages/core/src/analysis/`, ma **nessun codice in `apps/web` li esegue** — la Home legge gli insight che nessuno scrive |
+| Analisi acustica locale | 🟡 **non ancora un prodotto**: la porta Essentia e la cascata esistono in `packages/core/src/enrichment/`, ma `essentia` **non è una dipendenza** (assente da ogni `package.json` e dal lockfile), il modulo WASM non viene mai caricato e il pacchetto non è importato dall'app |
 
-L'osservazione sull'export, il purge e la pagina privacy Ã¨ confermata: esistono stringhe i18n e
-funzioni di base (`purgeIp()`, `purgeScrobbleQueue()`), ma nessun flusso completo (il pannello
-`MaintenancePanel.tsx` non Ã¨ montato e i pulsanti sono placeholder).
+L'osservazione su export, purge e pagina privacy è confermata: esistono stringhe i18n e funzioni di
+base (`purgeIp()`, `purgeScrobbleQueue()`), ma nessun flusso completo (il pannello `MaintenancePanel.tsx`
+non è montato e i pulsanti sono placeholder).
 
-Ãˆ emerso inoltre che l'**onboarding non mostra il risultato**: la schermata di reveal mostra un
-contatore di eventi, mentre il README dichiarava un'Â«anteprima del risultatoÂ»; il dataset demo
-(`fixtures/demo-user.json`) e la CTA Â«Scopri come funzionaÂ» esistono ma **non sono usati da nessun
+È emerso inoltre che l'**onboarding non mostra il risultato**: la schermata di reveal mostra un
+contatore di eventi, mentre il README dichiarava un'«anteprima del risultato»; il dataset demo
+(`fixtures/demo-user.json`) e la CTA «Scopri come funziona» esistono ma **non sono usati da nessun
 file di codice**.
 
 ## Decisioni
 
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
-| D-85.1 | Nasce `docs/22-COMPETITIVE-POSITIONING.md` (ðŸŸ¡ DRAFT v0.1) come sede unica di posizionamento, "cosa non siamo" e prioritÃ  | Non esisteva un documento che rispondesse a Â«perchÃ© non Last.fmÂ» e Â«quale vantaggio Ã¨ veroÂ»: il posizionamento era sparso tra VISION e backlog, e la prioritÃ  era implicita |
+| D-85.1 | Nasce `docs/22-COMPETITIVE-POSITIONING.md` (🟡 DRAFT v0.1) come sede unica di posizionamento, "cosa non siamo" e priorità | Non esisteva un documento che rispondesse a «perché non Last.fm» e «quale vantaggio è vero»: il posizionamento era sparso tra VISION e backlog, e la priorità era implicita |
 | D-85.2 | Il backlog cresce di **due story**: **2.5** (collegamento del pipeline di analisi all'app) e **3.5** (anteprima/demo in onboarding) | Sono i due lavori che rendono visibili i differenziatori 3 e 4 e l'onboarding che deve mostrare la magia. Il catalogo passa da 28 a 30 story |
-| D-85.3 | L'ordine di lavorazione diventa **2.5 â†’ 4.3 â†’ 3.2 â†’ 3.3 â†’ 3.5 â†’ 5.2 â†’ 5.1 â†’ 4.2 â†’ 6.1** | L'ordine dell'analisi esterna Ã¨ corretto sul **valore**, non sull'ordine delle issue. Due correzioni: l'artwork non dipende dal lookup MusicBrainz e l'anteprima Ã¨ un lavoro piccolo ad alto rendimento |
-| D-85.4 | La **Story 4.3** perde il vincolo `[DEP:4.2]` e sale a **P0** | La cascata dell'artwork funziona senza MBID (Spotify Web API â†’ iTunes Search â†’ placeholder gradient); il lookup MusicBrainz migliora il catalogo ma non l'esperienza |
-| D-85.5 | La **Story 3.2** incorpora l'export **statico** del capitolo e il **tagging manuale**; la **3.3** richiede **insight in prosa**; la **5.1** richiede la **pagina in-app Â«Come trattiamo i tuoi datiÂ»** | La condivisione non puÃ² esporre il database: si esporta un capitolo. Il tagging manuale Ã¨ il ponte fra analisi automatica e autobiografia. L'Â«aha momentÂ» Ã¨ la frase, non il grafico. La privacy va tradotta in linguaggio utente |
-| D-85.6 | Il **README** viene riallineato al codice: tolte le due dichiarazioni non supportate (Â«anteprima del risultatoÂ», Â«strumenti di purgaÂ»), precisata la portata della privacy locale, aggiunta la sezione **Â«Cosa non siamoÂ»** e riscritta la roadmap | Il gate `check-readme-facts.mjs` confronta la prosa con il codice: Ã¨ drift esattamente il genere di drift che il gate Ã¨ nato per chiudere (issue #161) |
-| D-85.7 | `00-VISION.md` passa a v0.3: **licenza allineata ad AGPL-3.0** (la riga dichiarava ancora Apache-2.0, D.A.10 superata da D-AF.2 il 2026-10-30), "cosa NON Ã¨" esteso, stato reale dei cinque punti di differenziazione | Drift dichiarativo sul file che dichiara la **decisione strategica** piÃ¹ vincolante del progetto |
-| D-85.8 | L'AGPL-3.0 **non viene modificato** | La domanda Â«va bene AGPL?Â» Ã¨ giÃ  chiusa: D-AF.2 (ratifica 2026-10-30, issue #201), modello open-source puro senza monetizzazione (D.A.9), obbligo Â§13 implementato (issue #202). Il limite sui fork commerciali Ã¨ accettato di proposito |
+| D-85.3 | L'ordine di lavorazione diventa **2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1** | L'ordine dell'analisi esterna è corretto sul **valore**, non sull'ordine delle issue. Due correzioni: l'artwork non dipende dal lookup MusicBrainz e l'anteprima è un lavoro piccolo ad alto rendimento |
+| D-85.4 | La **Story 4.3** perde il vincolo `[DEP:4.2]` e sale a **P0** | La cascata dell'artwork funziona senza MBID (Spotify Web API → iTunes Search → placeholder gradient); il lookup MusicBrainz migliora il catalogo ma non l'esperienza |
+| D-85.5 | La **Story 3.2** incorpora l'export **statico** del capitolo e il **tagging manuale**; la **3.3** richiede **insight in prosa**; la **5.1** richiede la **pagina in-app «Come trattiamo i tuoi dati»** | La condivisione non può esporre il database: si esporta un capitolo. Il tagging manuale è il ponte fra analisi automatica e autobiografia. L'«aha moment» è la frase, non il grafico. La privacy va tradotta in linguaggio utente |
+| D-85.6 | Il **README** viene riallineato al codice: tolte le due dichiarazioni non supportate («anteprima del risultato», «strumenti di purga»), precisata la portata della privacy locale, aggiunta la sezione **«Cosa non siamo»** e riscritta la roadmap | Il gate `check-readme-facts.mjs` confronta la prosa con il codice: è drift esattamente il genere di drift che il gate è nato per chiudere (issue #161) |
+| D-85.7 | `00-VISION.md` passa a v0.3: **licenza allineata ad AGPL-3.0** (la riga dichiarava ancora Apache-2.0, D.A.10 superata da D-AF.2 il 2026-10-30), "cosa NON è" esteso, stato reale dei cinque punti di differenziazione | Drift dichiarativo sul file che dichiara la **decisione strategica** più vincolante del progetto |
+| D-85.8 | L'AGPL-3.0 **non viene modificato** | La domanda «va bene AGPL?» è già chiusa: D-AF.2 (ratifica 2026-10-30, issue #201), modello open-source puro senza monetizzazione (D.A.9), obbligo §13 implementato (issue #202). Il limite sui fork commerciali è accettato di proposito |
 
 ## Analisi di avanzamento
 
 **Numeri.** L'implementazione **scende al 70%**: **21 story su 30**, effort pesato **72%**, restano
-**9 step**. La percentuale scende perchÃ© il catalogo Ã¨ cresciuto di **due story oneste** (2.5 e 3.5)
+**9 step**. La percentuale scende perché il catalogo è cresciuto di **due story oneste** (2.5 e 3.5)
 che il backlog precedente non sapeva di avere: il denominator non era falsato, era **incompleto**.
 Lavoro di **documentazione e strategia**.
 
-**Cosa Ã¨ pronto.** La verifica competitiva Ã¨ completa e riproducibile: i quattro differenziatori
+**Cosa è pronto.** La verifica competitiva è completa e riproducibile: i quattro differenziatori
 hanno ciascuno un esito documentato con l'evidenza nel codice (`packages/core/src/analysis/`,
 `packages/core/src/enrichment/`, `packages/core/src/adapters/pipeline.ts`,
-`apps/web/src/onboarding/OnboardingRouter.tsx`). Il posizionamento Ã¨ in un documento solo
+`apps/web/src/onboarding/OnboardingRouter.tsx`). Il posizionamento è in un documento solo
 (`22-COMPETITIVE-POSITIONING.md`), il backlog ne riflette le conseguenze (2.5, 3.5, 4.3 P0,
-ordine di lavorazione), il README dice Â«cosa non siamoÂ» e non promette piÃ¹ ciÃ² che il codice non fa.
+ordine di lavorazione), il README dice «cosa non siamo» e non promette più ciò che il codice non fa.
 
 **Cosa manca.** Due cose, in ordine: (a) la **ratifica** delle sette decisioni proposte
-(D-22.1â€¦D-22.7) â€” il documento Ã¨ DRAFT e le story nuove non sono `agent-ready` senza spec
+(D-22.1…D-22.7) — il documento è DRAFT e le story nuove non sono `agent-ready` senza spec
 approvata; (b) l'apertura delle **issue** di implementazione per 2.5 e 3.5, che senza la
 specifica di collegamento del pipeline di analisi non possono essere lavorate.
 
-**Gate di testabilitÃ .** Il gate Â«motore di analisi completoÂ» passa da **4/4 a 4/5**: l'EPIC 2 ha
-i suoi quattro motori, ma non il **collegamento all'app** (2.5) â€” Ã¨ la prima volta che il gate
-dice la veritÃ  su quel Â«completoÂ». Il gate Â«test end-to-endÂ» resta 2/5 (EPIC 3: mancano 3.2, 3.3,
+**Gate di testabilità.** Il gate «motore di analisi completo» passa da **4/4 a 4/5**: l'EPIC 2 ha
+i suoi quattro motori, ma non il **collegamento all'app** (2.5) — è la prima volta che il gate
+dice la verità su quel «completo». Il gate «test end-to-end» resta 2/5 (EPIC 3: mancano 3.2, 3.3,
 3.5).
 
 **Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano; aggregatore e
-bundle rigenerati in quest'ordine (aggregator â†’ generator), come impone la procedura
-`AGENTS.md` Â§"L'ordine dei due generatori Ã¨ vincolante".
+bundle rigenerati in quest'ordine (aggregator → generator), come impone la procedura
+`AGENTS.md` §"L'ordine dei due generatori è vincolante".
 
-**Gate di testabilitÃ .** `node scripts/check-readme-facts.mjs` â†’ 0 falliti Â·
-`node scripts/check-protocol-consistency.mjs` â†’ 6 check, 0 falliti Â·
-`node scripts/check-aggregate-blocks.mjs` â†’ 0 violazioni Â·
-`pwsh scripts/aggregate-state.ps1 -Check` â†’ exit 0 Â·
-`pwsh scripts/generate-bundle.ps1 -Check` â†’ exit 0.
+**Gate di testabilità (comandi).** `node scripts/check-readme-facts.mjs` → 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs` → 0 violazioni ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ## Lesson learned
 
 | Osservazione | Conseguenza |
 |--------------|-------------|
-| Un'analisi competitiva esterna Ã¨ un'ipotesi, non uno stato: verificarla **riga per riga contro il codice** ne ha spostato due sui quattro differenziatori | Il rischio non era la qualitÃ  dell'analisi, era la sua **granularitÃ **: Â«analisi acustica localeÂ» Ã¨ vero a livello di port (`enrichment/essentia.ts`) e falso a livello di prodotto (nessuna dipendenza, nessun caricamento). La verifica ha separato i due piani |
-| Il drift piÃ¹ grave era **fra i moduli e l'app**, non fra i documenti | Quattro motori di analisi, una pipeline audio, 15 tabelle Dexie e una pipeline di import: tutto scritto e testato, e l'utente non vede niente. Il backlog dichiarava Â«EPIC 2 completoÂ» perchÃ© misura le **story**, non i **percorsi dati**: un EPIC puÃ² essere 4/4 e non produrre un solo insight |
-| Un gate sulla prosa del README non copre i gate sulla **prosa degli altri documenti** | Il README dichiarava un'anteprima e una purga inesistenti: il gate `check-readme-facts.mjs` li ha lasciati passare perchÃ© la sua lista di capability copre i nomi delle feature (valence, BPM, mood), non le frasi descrittive. Il gate Ã¨ una rete, non un muro: i documenti nuovi devono portare con sÃ© la verifica |
-| Il Â«non ancoraÂ» Ã¨ una promessa di **roadmap**, non una feature assente | L'analisi esterna trattava Â«analisi acustica localeÂ» e Â«ricordi + shareÂ» come la stessa cosa: la prima Ã¨ una capability pronta in core e non collegata, la seconda non esiste. Il backlog le distingueva giÃ ; il rischio era scrivere nel README una versione che le confonde |
+| Un'analisi competitiva esterna è un'ipotesi, non uno stato: verificarla **riga per riga contro il codice** ne ha spostato due sui quattro differenziatori | Il rischio non era la qualità dell'analisi, era la sua **granularità**: «analisi acustica locale» è vero a livello di port (`enrichment/essentia.ts`) e falso a livello di prodotto (nessuna dipendenza, nessun caricamento). La verifica ha separato i due piani |
+| Il drift più grave era **fra i moduli e l'app**, non fra i documenti | Quattro motori di analisi, una pipeline audio, 15 tabelle Dexie e una pipeline di import: tutto scritto e testato, e l'utente non vede niente. Il backlog dichiarava «EPIC 2 completo» perché misura le **story**, non i **percorsi dati**: un EPIC può essere 4/4 e non produrre un solo insight |
+| Un gate sulla prosa del README non copre i gate sulla **prosa degli altri documenti** | Il README dichiarava un'anteprima e una purga inesistenti: il gate `check-readme-facts.mjs` li ha lasciati passare perché la sua lista di capability copre i nomi delle feature (valence, BPM, mood), non le frasi descrittive. Il gate è una rete, non un muro: i documenti nuovi devono portare con sé la verifica |
+| Il «non ancora» è una promessa di **roadmap**, non una feature assente | L'analisi esterna trattava «analisi acustica locale» e «ricordi + share» come la stessa cosa: la prima è una capability pronta in core e non collegata, la seconda non esiste. Il backlog le distingueva già; il rischio era scrivere nel README una versione che le confonde |
 
 ## Documenti aggiornati
 
-- `docs/22-COMPETITIVE-POSITIONING.md` (nuovo, ðŸŸ¡ DRAFT v0.1): posizionamento, matrice dei competitor
-  con stato verificato, "cosa non siamo", prioritÃ  ricalcolate, D-22.1â€¦D-22.7
-- `docs/00-VISION.md`: v0.3 â€” licenza AGPL-3.0, "cosa NON Ã¨" esteso, stato reale dei differenziatori
-- `docs/11-BACKLOG.md`: v1.6.34 â€” Story **2.5** e **3.5** nuove, **4.3** P0 e senza `[DEP:4.2]`,
+- `docs/22-COMPETITIVE-POSITIONING.md` (nuovo, 🟡 DRAFT v0.1): posizionamento, matrice dei competitor
+  con stato verificato, "cosa non siamo", priorità ricalcolate, D-22.1…D-22.7
+- `docs/00-VISION.md`: v0.3 — licenza AGPL-3.0, "cosa NON è" esteso, stato reale dei differenziatori
+- `docs/11-BACKLOG.md`: v1.6.34 — Story **2.5** e **3.5** nuove, **4.3** P0 e senza `[DEP:4.2]`,
   AC di 3.2/3.3/5.1, ordine di lavorazione, tabella roadmap, changelog
-- `README.md`: sezione **Â«Cosa non siamoÂ»**, dichiarazioni non supportate corrette, roadmap riscritta
+- `README.md`: sezione **«Cosa non siamo»**, dichiarazioni non supportate corrette, roadmap riscritta
 - `docs/INDEX.md`: riga `22` + conteggio dei documenti DRAFT
 - `scripts/generate-bundle.ps1`: `$files` += `docs/22-COMPETITIVE-POSITIONING.md` e la sessione 85
 - `docs/BUNDLE.md`: rigenerato
-
 
 
 
@@ -18986,118 +18985,135 @@ bundle rigenerati in quest'ordine (aggregator â†’ generator), come impone l
 number: 86
 title: "Il pacchetto di specifiche implementabili delle 7 story rimanenti"
 date: 2026-11-02
-state: ðŸŸ¡
+state: 🟡
 merged: false
-branch: docs/implementation-specs
+branch: feat/265-docs-competitive-specs
 pr: 273
 claim: kilo-HP-ELITEBOOK-c86sp
 tags: [docs, strategy, specs]
 ---
 
-# Sessione 86 â€” Le specifiche delle 7 story rimanenti
+# Sessione 86 — Le specifiche delle 7 story rimanenti
 
-> **Oggetto**: la Sessione 85 ha prodotto il posizionamento competitivo e una prioritÃ  ricalcolata, ma le story
-> rimanenti **non erano lavorabili**: il protocollo richiede una specifica ðŸŸ¢ APPROVED, e per 5 delle 7 story
+> **Oggetto**: la Sessione 85 ha prodotto il posizionamento competitivo e una priorità ricalcolata, ma le story
+> rimanenti **non erano lavorabili**: il protocollo richiede una specifica 🟢 APPROVED, e per 5 delle 7 story
 > non esisteva. Questa sessione scrive **quel pacchetto di specifiche**, una per story, contro il codice reale.
 
 ## Sintesi
 
 Sono state scritte **cinque specifiche** che coprono le sette story rimanenti:
 
-| Spec | Story coperte | PrioritÃ  |
+| Spec | Story coperte | Priorità |
 |------|---------------|----------|
-| `docs/23-ANALYSIS-PIPELINE.md` | **2.5** â€” collegamento del pipeline di analisi all'app | ðŸ”´ P0 |
-| `docs/24-ARTWORK-ENRICHMENT.md` | **4.3** â€” artwork enrichment | ðŸ”´ P0 |
-| `docs/25-MEMORIES-SHARE-EXPLORE.md` | **3.2** â€” Ricordi + Share Â· **3.3** â€” Esplora + Analisi | ðŸ”´ P0 |
-| `docs/26-ONBOARDING-DEMO.md` | **3.5** â€” anteprima/demo in onboarding | ðŸ”´ P0 (piccola) |
-| `docs/27-PRIVACY-DATA-SETTINGS.md` | **5.1** â€” privacy spec + pagina in-app Â· **5.2** â€” export e purge | ðŸŸ¡ P1 |
+| `docs/23-ANALYSIS-PIPELINE.md` | **2.5** — collegamento del pipeline di analisi all'app | 🔴 P0 |
+| `docs/24-ARTWORK-ENRICHMENT.md` | **4.3** — artwork enrichment | 🔴 P0 |
+| `docs/25-MEMORIES-SHARE-EXPLORE.md` | **3.2** — Ricordi + Share · **3.3** — Esplora + Analisi | 🔴 P0 |
+| `docs/26-ONBOARDING-DEMO.md` | **3.5** — anteprima/demo in onboarding | 🔴 P0 (piccola) |
+| `docs/27-PRIVACY-DATA-SETTINGS.md` | **5.1** — privacy spec + pagina in-app · **5.2** — export e purge | 🟡 P1 |
 
 Ogni specifica contiene: lo **stato reale** (verificato sul codice, con i path), i **contratti** da costruire
 (firme TypeScript reali, nomi di file, indici Dexie, chiavi i18n), i **punti di innesto**, i **vincoli di
 privacy**, il **piano di test** con i file, gli **acceptance criteria** verificabili, i **task** numerati e le
-**decisioni proposte** (D-23.x â€¦ D-27.x) da ratificare.
+**decisioni proposte** (D-23.x … D-27.x) da ratificare.
 
-## Cosa Ã¨ emerso scrivendo le specifiche (e non era emerso prima)
+## Cosa è emerso scrivendo le specifiche (e non era emerso prima)
 
 1. **Il `userNote` degli insight verrebbe perso al primo ricalcolo.** `replaceAllInsightsOfType` (la via
    obbligatoria per le ere, `db/insights.ts:146`) **cancella e reinserisce** le righe: un'era rinominata
-   dall'utente perderebbe il nome. Il vincolo Ã¨ ora scritto in `23` Â§"Test" e `25` Â§"Test": la persistenza
+   dall'utente perderebbe il nome. Il vincolo è ora scritto in `23` §"Test" e `25` §"Test": la persistenza
    deve **leggere il `userNote` esistente** prima di sostituire.
 2. **La card condivisa avrebbe un canvas taintato.** Le copertine remote non inviano CORS: senza
-   `crossOrigin='anonymous'` + fallback al placeholder, `toBlob()` fallisce e la condivisione Ã¨ impossibile.
-   Vincolo scritto in `25` Â§"renderer della card".
-3. **La demo, senza feature, avrebbe mostrato il prodotto piÃ¹ povero.** Il fixture non ha `features`: i motori
-   di analisi non produrrebbero nÃ© ere nÃ© mood. La spec `26` (D-26.2) estende il generatore con `albums` e
+   `crossOrigin='anonymous'` + fallback al placeholder, `toBlob()` fallisce e la condivisione è impossibile.
+   Vincolo scritto in `25` §"renderer della card".
+3. **La demo, senza feature, avrebbe mostrato il prodotto più povero.** Il fixture non ha `features`: i motori
+   di analisi non produrrebbero né ere né mood. La spec `26` (D-26.2) estende il generatore con `albums` e
    `features` deterministiche (`source: 'manual'`, che l'analisi accetta).
-4. **La licenza AGPL Â§13 non Ã¨ oggi soddisfatta nell'app reale.** La schermata About esiste ma Ã¨ **dead code**
-   (importata solo dai test): l'obbligo di offerta del sorgente agli utenti che interagiscono via rete non Ã¨
-   raggiungibile. Ãˆ parte della Story 5.1 (`27` Â§D).
-5. **Tre delle quattro funzioni obbligatorie di `09Â§6.1` non esistono**: `exportAll`, `deleteAll`,
+4. **La licenza AGPL §13 non è oggi soddisfatta nell'app reale.** La schermata About esiste ma è **dead code**
+   (importata solo dai test): l'obbligo di offerta del sorgente agli utenti che interagiscono via rete non è
+   raggiungibile. È parte della Story 5.1 (`27` §D).
+5. **Tre delle quattro funzioni obbligatorie di `09§6.1` non esistono**: `exportAll`, `deleteAll`,
    `purgeInsights` (esiste solo `purgeIp`). E la schermata **Impostazioni non esiste**: `settings.data.export`,
    `settings.delete.*` sono copy mai renderizzato.
 6. **Sette chiavi i18n dichiarate in `08-COPY-I18N.md` non sono nei locale** (`settings.privacy.retainCountry`,
    `.retainCountryDesc`, `.retainCity`, `.retainCityDesc`, `.retainDeviceType`, `.retainDeviceDetail`,
-   `.deriveContext`): la pagina privacy non puÃ² essere completa senza di esse.
-7. **Il ramo Spotify della cascata artwork Ã¨ codice morto**: il progetto non ha OAuth per Spotify e gli export
+   `.deriveContext`): la pagina privacy non può essere completa senza di esse.
+7. **Il ramo Spotify della cascata artwork è codice morto**: il progetto non ha OAuth per Spotify e gli export
    non contengono copertine (D-24.2).
-8. **Il branch Spotify era nell'originale della 4.3**: la cascata reale diventa iTunes â†’ Cover Art Archive â†’
-   placeholder, con l'obbligo CSP di `coverartarchive.org` (che oggi non Ã¨ in `connect-src`).
+8. **Il branch Spotify era nell'originale della 4.3**: la cascata reale diventa iTunes → Cover Art Archive →
+   placeholder, con l'obbligo CSP di `coverartarchive.org` (che oggi non è in `connect-src`).
 9. **Un drift preesistente**: `apps/web/src/hooks/useDbHealth.ts:15` fissa `EXPECTED_SCHEMA_VERSION = 4`,
    mentre `db/health.ts:45` attende **6**.
-10. **Il reveal dichiara un anno falso**: passa `{ years: 1 }` anche su uno storico di sei anni (`26` Â§3).
+10. **Il reveal dichiara un anno falso**: passa `{ years: 1 }` anche su uno storico di sei anni (`26` §3).
 
 ## Decisioni
 
 | # | Decisione | Motivazione |
 |---|-----------|-------------|
 | D-86.1 | Una **specifica per story-cluster** (5 documenti per 7 story), non una per story | Le story 3.2 e 3.3, 5.1 e 5.2 condividono schermate, contratti e vincoli: due documenti avrebbero duplicato il contratto di navigazione e di i18n |
-| D-86.2 | Ogni specifica Ã¨ scritta **contro il codice reale**, con firme e path | Una specifica riportata dal backlog fa perdere alla sessione di coding il lavoro di re-interpretare: qui si dichiara **cosa esiste** e **cosa manca** |
-| D-86.3 | Le decisioni delle specifiche sono **proposte numerate** (D-23.xâ€¦D-27.x), non assunte | Il protocollo: una decisione ðŸŸ¢ APPROVED Ã¨ vincolante, una DRAFT Ã¨ una proposta. Il project owner ratifica al merge |
-| D-86.4 | Il backlog ora punta a una **spec** per ogni story rimanente (`**Spec**:` aggiornato) | Il protocollo richiede il link a una specifica approvata: senza, l'agente non puÃ² claimare |
-| D-86.5 | Nessuna modifica al codice in questa sessione | L'obiettivo Ã¨ rendere le story **lavorabili**, non implementarle: implementare senza ratifica delle specifiche significa implementare contro un'interpretazione |
-| D-86.6 | La spec `25` include il vincolo di **preservazione del `userNote`** al ricalcolo | Ãˆ un bug che sarebbe nato dalla 2.5 e scoperto solo dalla 3.2: scritto adesso, Ã¨ un test, non un difetto |
+| D-86.2 | Ogni specifica è scritta **contro il codice reale**, con firme e path | Una specifica riportata dal backlog fa perdere alla sessione di coding il lavoro di re-interpretare: qui si dichiara **cosa esiste** e **cosa manca** |
+| D-86.3 | Le decisioni delle specifiche sono **proposte numerate** (D-23.x…D-27.x), non assunte | Il protocollo: una decisione 🟢 APPROVED è vincolante, una DRAFT è una proposta. Il project owner ratifica al merge |
+| D-86.4 | Il backlog ora punta a una **spec** per ogni story rimanente (`**Spec**:` aggiornato) | Il protocollo richiede il link a una specifica approvata: senza, l'agente non può claimare |
+| D-86.5 | Nessuna modifica al codice in questa sessione | L'obiettivo è rendere le story **lavorabili**, non implementarle: implementare senza ratifica delle specifiche significa implementare contro un'interpretazione |
+| D-86.6 | La spec `25` include il vincolo di **preservazione del `userNote`** al ricalcolo | È un bug che sarebbe nato dalla 2.5 e scoperto solo dalla 3.2: scritto adesso, è un test, non un difetto |
+| D-86.7 | **Una issue per story**: le sette story hanno una sola issue canonica; le cinque issue inizialmente create in duplicato sono state chiuse come `status:wontdo` con il rimando all'issue canonica | La regola «1 issue = 1 story» vale anche per le issue nuove: #267, #268, #269, #271 e #272 duplicavano #242, #241, #240, #244 e #246, che gia' esistevano |
 
 ## Analisi di avanzamento
 
 **Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
-Lavoro di **documentazione**: il catalogo non cresce, ma le 9 story rimanenti passano da Â«non lavorabiliÂ» a
-Â«lavorabili dopo ratificaÂ».
+Lavoro di **documentazione**: il catalogo non cresce, ma le 9 story rimanenti passano da «non lavorabili» a
+«lavorabili dopo ratifica».
 
-**Cosa Ã¨ pronto.** Un pacchetto di 5 specifiche che copre tutte le story rimanenti, con: stato reale
+**Cosa è pronto.** Un pacchetto di 5 specifiche che copre tutte le story rimanenti, con: stato reale
 verificato, contratti, task numerati, AC verificabili, piano di test e 30 decisioni proposte
-(D-23.1â€¦D-27.6). Il backlog punta a ciascuna; `INDEX.md` e il bundle li includono.
+(D-23.1…D-27.6). Il backlog punta a ciascuna; `INDEX.md` e il bundle li includono.
 
-**Cosa manca.** La **ratifica** delle specifiche e delle decisioni (D-23.xâ€¦D-27.x): Ã¨ l'atto del project
-owner, e senza di esso le story restano `â¬š TODO` e le issue non possono avere la label `agent-ready`. Poi
-l'apertura delle issue di implementazione, una per story, con il link alla spec ratificata.
+**Cosa manca.** La **ratifica** delle specifiche e delle decisioni (D-23.x…D-27.x): è l'atto del project
+owner, e senza di esso le story restano `⬚ TODO` e le issue non possono avere la label `agent-ready`.
+
+**Issue aperte — una per story** (regola «1 issue = 1 story»): ogni story ha una sola issue canonica,
+con la spec e la checklist già dentro.
+
+| Story | Issue | Note |
+|-------|-------|------|
+| 2.5 — Collegamento del pipeline di analisi | **#266** | nuova (Sessione 86), `needs-spec` fino alla ratifica |
+| 3.2 — Ricordi + Share | **#241** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 3.3 — Esplora + Analisi | **#240** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 3.5 — Anteprima e modalità demo | **#270** | nuova (Sessione 86), `needs-spec` fino alla ratifica |
+| 4.3 — Artwork enrichment | **#242** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 5.1 — Privacy spec finale | **#244** | issue preesistente: corpo e checklist aggiornati con la spec |
+| 5.2 — Export e purge | **#246** | issue preesistente: senza label, ora complete |
+
+> Le **cinque issue duplicate** create inizialmente dalla Sessione 86 (#267, #268, #269, #271, #272) sono
+> state **chiuse come `status:wontdo`** con il rimando all'issue canonica.
 
 **Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano; aggregatore e bundle
-rigenerati in quest'ordine (aggregator â†’ generator).
+rigenerati in quest'ordine (aggregator → generator).
 
-**Gate di testabilitÃ .** `node scripts/check-readme-facts.mjs` â†’ 0 falliti Â·
-`node scripts/check-protocol-consistency.mjs` â†’ 6 check, 0 falliti Â·
-`node scripts/check-aggregate-blocks.mjs` â†’ 0 violazioni Â·
-`pwsh scripts/aggregate-state.ps1 -Check` â†’ exit 0 Â· `pwsh scripts/generate-bundle.ps1 -Check` â†’ exit 0.
+**Gate di testabilità (comandi).** `node scripts/check-readme-facts.mjs` → 0 falliti ·
+`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs` → 0 violazioni ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ## Lesson learned
 
 | Osservazione | Conseguenza |
 |--------------|-------------|
-| Una specifica Ã¨ Â«scrivere il futuroÂ», ma il futuro si scrive **contro il codice che c'Ã¨** | Ogni firma, ogni path e ogni chiave i18n delle 5 specifiche Ã¨ stato verificato sul repository: Ã¨ cosÃ¬ che sono emersi il `userNote` che il ricalcolo avrebbe perso, il canvas taintato, l'About irraggiungibile e le 7 chiavi mancanti |
-| La specifica Ã¨ il vero deliverable del lavoro di analisi | Senza di essa, Â«l'ordine di prioritÃ Â» Ã¨ un'opinione; con essa, ogni sessione di coding ha un contratto da rispettare e un confine da non superare |
-| I vincoli **piÃ¹ difficili** stanno nelle interfacce, non negli algoritmi | `replaceAllInsightsOfType` che cancella le righe, il canvas che si tainta, il CSP che blocca un host, `i18next` che ritorna `''` e fa lanciare i renderer: sono questi i punti in cui una story Â«facileÂ» si rompe |
+| Una specifica è «scrivere il futuro», ma il futuro si scrive **contro il codice che c'è** | Ogni firma, ogni path e ogni chiave i18n delle 5 specifiche è stato verificato sul repository: è così che sono emersi il `userNote` che il ricalcolo avrebbe perso, il canvas taintato, l'About irraggiungibile e le 7 chiavi mancanti |
+| La specifica è il vero deliverable del lavoro di analisi | Senza di essa, «l'ordine di priorità» è un'opinione; con essa, ogni sessione di coding ha un contratto da rispettare e un confine da non superare |
+| I vincoli **più difficili** stanno nelle interfacce, non negli algoritmi | `replaceAllInsightsOfType` che cancella le righe, il canvas che si tainta, il CSP che blocca un host, `i18next` che ritorna `''` e fa lanciare i renderer: sono questi i punti in cui una story «facile» si rompe |
+| Scrivere i file con una shell Windows 5.1 può **corromperli** in silenzio | Un `Get-Content`/`Set-Content` senza `-Encoding UTF8` ha riscritto i due file di sessione in ANSI (mojibake in 40+ punti) senza alcun errore: il controllo è il **conteggio di sequenze suspect** (`Ã`, `â€`, `Â`) prima del commit, non il fatto che il file si apra |
+| Un'issue creata in più per la stessa story è un **furto di lavoro** | Cinque issue duplicate (#267–#272) avrebbero frammentato la checklist della story fra due ticket: un agente che claima la #268 implementa metà di ciò che chiede la #241 |
 
 ## Documenti aggiornati
 
 - `docs/23-ANALYSIS-PIPELINE.md`, `docs/24-ARTWORK-ENRICHMENT.md`, `docs/25-MEMORIES-SHARE-EXPLORE.md`,
-  `docs/26-ONBOARDING-DEMO.md`, `docs/27-PRIVACY-DATA-SETTINGS.md` (nuovi, ðŸŸ¡ DRAFT v0.1)
-- `docs/11-BACKLOG.md`: `**Spec**:` delle story 2.5, 3.2, 3.3, 3.5, 4.3, 5.1, 5.2; `**Stato**:` di 2.5 e 3.5
-  (la spec esiste, in attesa di ratifica); changelog 1.6.34
+  `docs/26-ONBOARDING-DEMO.md`, `docs/27-PRIVACY-DATA-SETTINGS.md` (nuovi, 🟡 DRAFT v0.1)
+- `docs/11-BACKLOG.md`: `**Spec**:` e `**Issue**:` delle story 2.5, 3.2, 3.3, 3.5, 4.3, 5.1, 5.2;
+  `**Stato**:` di 2.5 e 3.5 (la spec esiste, in attesa di ratifica); changelog 1.6.34
 - `docs/22-COMPETITIVE-POSITIONING.md`: D-22.8 (il pacchetto di specifiche), mappa aggiornata, v0.2
-- `docs/INDEX.md`: righe `23`â€“`27`, conteggio dei documenti DRAFT
+- `docs/INDEX.md`: righe `23`–`27`, conteggio dei documenti DRAFT
 - `scripts/generate-bundle.ps1`: `$files` += i 5 documenti
 - `docs/BUNDLE.md`: rigenerato
-
 
 
 
@@ -28218,6 +28234,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Dipendenze**: Story 2.1, 2.2, 2.3, 2.4 (tutte ✅ DONE) · la 4.1 è la sorgente delle feature
 **Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
+**Issue**: #266 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
 
@@ -28256,6 +28273,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] i18n IT/EN per le nuove stringhe
 
 **Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.2: feed, card canvas, ShareSheet, tagging manuale) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
+**Issue**: #241 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 
@@ -28272,6 +28290,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
 
 **Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.3: Esplora, QuadrantChart, InsightCard, deep-link interno) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
+**Issue**: #240 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 
@@ -28320,6 +28339,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Dipendenze**: Story 0.4 ✅ (onboarding), Story 3.1 ✅ (Home + Timeline) · **effetto pieno dipende dalla Story 2.5** (senza, la demo non ha ere né mood)
 **Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
+**Issue**: #270 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
 
@@ -28380,6 +28400,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: Spotify Web API e iTunes Search coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
 **Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare: cascata iTunes → Cover Art Archive → placeholder, D-24.1…D-24.6) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
+**Issue**: #242 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 **Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
 ---
@@ -28418,6 +28439,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] **Pagina in-app «Come trattiamo i tuoi dati»**: per il lancio non serve un documento legale monumentale, serve una pagina chiara e onesta che dica (a) cosa resta sul dispositivo e cosa non esce mai, (b) che l'**unica** uscita è l'invio ai hub di scrobbling e solo se l'utente ha attivato quel hub (default: nessuno), (c) cosa succede ai dati quando li esporta o li cancella, (d) che il progetto è AGPL-3.0 e offre il sorgente (§13). La pagina utente è il documento (`09`) tradotto in linguaggio semplice — vedi `22-COMPETITIVE-POSITIONING.md` §13 (decisione D-22.7)
 
 **Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.1: pagina in 5 blocchi, montaggio della schermata About, 7 chiavi i18n mancanti, drift `useDbHealth`) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13 · `docs/12-DEVOPS.md` §5.3 (AGPL §13)
+**Issue**: #244 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 
@@ -28429,6 +28451,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Cancellazione totale con doppia conferma
 
 **Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.2: `exportAll` con manifest, CSV degli ascolti, `purgeInsights`, `deleteAll` transazionale, doppia conferma con parola chiave) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13, §3.4 · `docs/22-COMPETITIVE-POSITIONING.md` §12
+**Issue**: #246 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 

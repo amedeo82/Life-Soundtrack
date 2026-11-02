@@ -442,6 +442,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Dipendenze**: Story 2.1, 2.2, 2.3, 2.4 (tutte ✅ DONE) · la 4.1 è la sorgente delle feature
 **Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
+**Issue**: #266 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
 
@@ -480,6 +481,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] i18n IT/EN per le nuove stringhe
 
 **Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.2: feed, card canvas, ShareSheet, tagging manuale) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
+**Issue**: #241 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 
@@ -496,6 +498,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
 
 **Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.3: Esplora, QuadrantChart, InsightCard, deep-link interno) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
+**Issue**: #240 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 
@@ -544,6 +547,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Dipendenze**: Story 0.4 ✅ (onboarding), Story 3.1 ✅ (Home + Timeline) · **effetto pieno dipende dalla Story 2.5** (senza, la demo non ha ere né mood)
 **Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
+**Issue**: #270 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
 
@@ -604,6 +608,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: Spotify Web API e iTunes Search coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
 **Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare: cascata iTunes → Cover Art Archive → placeholder, D-24.1…D-24.6) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
+**Issue**: #242 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 **Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
 ---
@@ -642,6 +647,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] **Pagina in-app «Come trattiamo i tuoi dati»**: per il lancio non serve un documento legale monumentale, serve una pagina chiara e onesta che dica (a) cosa resta sul dispositivo e cosa non esce mai, (b) che l'**unica** uscita è l'invio ai hub di scrobbling e solo se l'utente ha attivato quel hub (default: nessuno), (c) cosa succede ai dati quando li esporta o li cancella, (d) che il progetto è AGPL-3.0 e offre il sorgente (§13). La pagina utente è il documento (`09`) tradotto in linguaggio semplice — vedi `22-COMPETITIVE-POSITIONING.md` §13 (decisione D-22.7)
 
 **Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.1: pagina in 5 blocchi, montaggio della schermata About, 7 chiavi i18n mancanti, drift `useDbHealth`) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13 · `docs/12-DEVOPS.md` §5.3 (AGPL §13)
+**Issue**: #244 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 
@@ -653,6 +659,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Cancellazione totale con doppia conferma
 
 **Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.2: `exportAll` con manifest, CSV degli ascolti, `purgeInsights`, `deleteAll` transazionale, doppia conferma con parola chiave) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13, §3.4 · `docs/22-COMPETITIVE-POSITIONING.md` §12
+**Issue**: #246 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
 
