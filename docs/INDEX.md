@@ -46,7 +46,7 @@
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.39 | Protocollo per agenti — **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.40 | Protocollo per agenti — **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -142,6 +142,7 @@
 | 87 | Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione | 🟢 | ✅ | #278 |
 | 88 | Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge | 🟢 | ✅ | #280 |
 | 89 | CI su main: i commit del writer dello stato di merge triggano la pipeline | 🟢 | ✅ | #282 |
+| 90 | Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -181,9 +182,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **66** (merge: 65)
+- Sessioni migrate in state/sessions: **67** (merge: 65)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S89** - CI su main: i commit del writer dello stato di merge triggano la pipeline
+- Ultima sessione migrata: **S90** - Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -232,29 +233,48 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S89)
+**Analisi della sessione corrente** (S90)
 
-**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
-Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
-senza spiegazione.
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
+restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
+non il codice applicativo.
 
-**Cosa e' pronto.**
-- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
-  che spiega la race e perche' il gate non viene indebolito.
-- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
-  il controllo esistente dell'issue #216 resta verde).
+**Cosa è pronto.**
+- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
+  aggregatore → bundle → verifica → un commit → un push).
+- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
+  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
+  `gates-portability` su due sistemi operativi.
+- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
+  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
+- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
+  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
+  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
+  nel bundle.
+- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
+  prodotti dai generatori con lo stato committato.
+- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
+  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
+  che non possa essere faked da un commento).
 
-**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
-il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
-deve essere verde.
+**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
+sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
+gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
+primo merge con questa architettura è la prova; le sessioni successive
+verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
+`main` rosso).
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
+mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
+del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
+scalari YAML, 15 sulle scope `permissions`.
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
-`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
+→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
+→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+`node scripts/check-generators-portable.mjs` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

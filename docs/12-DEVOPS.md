@@ -490,7 +490,7 @@ bash scripts/test-workflow-git-add-coverage.sh          # scenario negativo (gat
 
 ---
 
-### 9.8d Sync con `origin/main` dei writer di `main` (issue #140)
+### 9.8d Sync con `origin/main` dei writer di `main` (issue #140) — *superata da §9.8i (issue #284)*
 
 `auto-bundle.yml` (§9.8b) e `auto-state-aggregate.yml` sono i **due workflow che pushano su `main`**. Condividono il concurrency group `post-merge-main` con `cancel-in-progress: false`, pensato per serializzarli. La serializzazione, però, **non basta**.
 
@@ -523,7 +523,7 @@ bash scripts/test-workflow-push-sync.sh                 # scenario negativo (gat
 
 ---
 
-### 9.8e Ordinamento fra i due writer di `main` (issue #149)
+### 9.8e Ordinamento fra i due writer di `main` (issue #149) — *superata da §9.8i (issue #284)*
 
 Il concurrency group `post-merge-main` (§9.8d) **serializza** i due writer di `main`, ma **non ne impone l'ordine**: quale workflow ottenga prima il lock non è deterministico. Finora l'ordine non importava, perché i due writer producevano contenuti indipendenti. Con `auto-bundle.yml` (issue #115) l'importa: **`auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica**.
 
@@ -561,6 +561,57 @@ bash scripts/test-workflow-writer-ordering.sh           # scenario negativo (gat
 ```
 
 **Regola generale**: quando due workflow concorrono allo **stesso artefatto logico** — non solo allo stesso ref — la serializzazione non basta: serve che il secondo consumi l'output del primo *dopo* che il primo l'ha prodotto. Il concurrency group ordina i *run*, non gli *effetti*. Se il secondo workflow **legge** ciò che il primo **scrive**, il trigger corretto è `workflow_run` (agganciato alla conclusione), non `push` (agganciato all'evento, e soppresso quando l'evento nasce da un GITHUB_TOKEN).
+
+---
+
+### 9.8i Il writer unico e il passaggio post-writer (issue #284)
+
+> Questa sezione **sostituisce** §9.8d (sync fra due writer) e §9.8e
+> (ordinamento fra due writer): con il writer unico non ci sono piu' due
+> writer da sincronizzare ne' da ordinare. Le due sezioni restano come
+> cronaca dei difetti che quell'architettura aveva.
+
+L'architettura precedente aveva **tre** workflow che scrivevano su `main`
+(`auto-session-merge-state`, `auto-state-aggregate`, `auto-bundle`) e
+producevano tre failure mode indipendenti:
+
+| # | Failure mode | Misura |
+|---|--------------|--------|
+| 1 | Il commit del writer **non triggava la CI**: i writer pushano con `GITHUB_TOKEN` e GitHub sopprime i workflow `on: push` generati dal token stesso | PR #282 (2026-11-02): per `831b9e7` **non esiste alcuna run `CI`**; l'unica run su quel SHA e' `auto-bundle` (`workflow_run`) |
+| 2 | Tre writer sullo stesso `main`: push rifiutato (`! [rejected] main -> main`) e retry con `git rebase origin/main` **sui file generati** → conflitto in `docs/BUNDLE.md`, `docs/INDEX.md`, `docs/SESSIONS.md` | run `41456643986` (2026-11-02), fallito |
+| 3 | Il gate `check-merge-state.mjs` (fail-closed) girava sul merge commit, **prima** che il writer applicasse lo stato → `[FAIL]` e `main` rosso | run `41456643987` (2026-11-02), fallito |
+
+Il fix della issue #281 (PR #282) aggiungeva `docs/state/**` ai `paths:` del
+trigger `push`: **non puo' funzionare**, perche' l'evento `push` non viene
+generato (il fatto era gia' documentato in §9.14, righe 1267-1296).
+
+**La nuova architettura** (decisione completa in
+[`docs/13-ADR/0013-post-merge-automation.md`](13-ADR/0013-post-merge-automation.md)):
+
+```
+merge → post-merge.yml (writer unico) → commit → workflow_run → CI sullo stato finale
+```
+
+| Regola | Come e' imposta | Gate |
+|--------|------------------|------|
+| Un solo writer su `main` | un solo workflow contiene una push a `main` | `validate-workflows.mjs` → `checkSingleWriter` |
+| Il writer non ribasa i file generati | reset a `origin/main` + **rigenerazione** | `validate-workflows.mjs` → `checkPushSync` (i `git rebase` non valgono come difesa) |
+| Il writer scatta su ogni PR mergiata | trigger `pull_request: [closed]` **senza** `paths:` | `validate-workflows.mjs` → `checkWriterTrigger` |
+| La CI consuma il writer | trigger `workflow_run` su `["post-merge"]`, nome allineato al `name:` reale | `validate-workflows.mjs` → `checkWriterOrdering` |
+| La CI valida la **testa** di `main` nel passaggio `workflow_run` | `checkout` con `ref: main` (`workflow_run.head_sha` e' il commit di *partenza* del writer) | `validate-workflows.mjs` → `checkWorkflowRunCheckout` |
+| Il gate merge-state non fallisce per costruzione sul merge commit | modalita' `--defer-unapplied`: differisce **solo** l'albero che e' il merge commit della PR | `scripts/check-merge-state.mjs` (test T10..T12) |
+| I generatori producono gli stessi byte su ogni OS | UTC + `InvariantCulture` + ordinamento ordinale + guardia `pwsh >= 7` + LF | `scripts/check-generators-portable.mjs` (job `gates-portability`, matrix `ubuntu-latest` + `windows-latest`) |
+
+**Il gate di portabilita'** e' la prova empirica dell'indipendenza dal sistema
+operativo: rigenera i file aggregati e confronta i **byte** con lo stato
+committato (normalizzando i due campi mutabili: `> Data:` e
+`- Ultima aggregazione:`). Se un generatore tornasse a dipendere dalla
+locale, dal fuso orario o dai line ending, la pipeline si rossa su entrambi i
+sistemi operativi.
+
+**Gate**: `scripts/validate-workflows.mjs` (bloccante) · `scripts/check-generators-portable.mjs` (bloccante) ·
+test: `scripts/test-workflow-writer-ordering.sh` (13 assert) · `scripts/test-workflow-push-sync.sh` (9 assert) ·
+`scripts/test-generators-portable.sh` (3 assert) · `scripts/test-merge-state-gate.sh` (16 assert).
 
 ---
 

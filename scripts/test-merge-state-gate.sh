@@ -154,6 +154,23 @@ run_gate() {
   GITHUB_TOKEN=fixture-token node "$GATE" --root "$1" --repo owner/repo --api "http://127.0.0.1:$PORT" 2>&1
 }
 
+# Issue #284: la modalita' `--defer-unapplied` (passaggio `push` sul merge
+# commit, prima del writer post-merge).
+run_gate_defer() {
+  GITHUB_TOKEN=fixture-token node "$GATE" --root "$1" --repo owner/repo --api "http://127.0.0.1:$PORT" --defer-unapplied 2>&1
+}
+
+# Crea un repository git con la sessione di fixture committata: serve perche'
+# il gate, in modalita' `--defer-unapplied`, confronta l'albero sotto esame con
+# il merge commit della PR.
+make_git_fixture() {
+  local d="$1"
+  git -C "$d" init -q
+  git -C "$d" add -A
+  git -C "$d" -c user.email=fixture@test.local -c user.name=Fixture commit -qm "fixture"
+  git -C "$d" rev-parse HEAD
+}
+
 echo "=== T0: repo reale - lo stato di merge delle sessioni e' in sync con GitHub ==="
 out="$(node "$GATE" --root "$REPO_ROOT" 2>&1)"; ec=$?
 if [ $ec -eq 0 ]; then
@@ -236,6 +253,36 @@ echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f9.json"
 start_server "$WORK/f9.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
 if [ $ec -eq 2 ]; then ok "exit 2 (dato esterno incompleto: fail-closed)"; else ng "exit $ec (atteso 2): $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T10: --defer-unapplied, l'albero E' il merge commit -> differito, non fallito ==="
+D="$WORK/t10"; make_session "$D" 10 10 false "" "" "🟡"
+HEAD_SHA="$(make_git_fixture "$D")"
+echo "  [DEBUG] HEAD_SHA=[$HEAD_SHA]"
+echo "$(pr_merged 10 "$HEAD_SHA" "$DATE_A")" > "$WORK/f10.json"
+echo "  [DEBUG] fixture=[$(cat "$WORK/f10.json")]"
+start_server "$WORK/f10.json" || exit 1
+out="$(run_gate_defer "$D")"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (il caso strutturale e' differito)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
+if echo "$out" | grep -q "\[DEFERRED\]"; then ok "il messaggio dichiara il differimento"; else ng "il messaggio non dichiara il differimento: $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T11: --defer-unapplied, l'albero NON e' il merge commit -> il drift resta un fallimento ==="
+D="$WORK/t11"; make_session "$D" 10 10 false "" "" "🟡"
+make_git_fixture "$D" >/dev/null
+echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f11.json"
+start_server "$WORK/f11.json" || exit 1
+out="$(run_gate_defer "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (il drift reale non e' differibile)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T12: senza --defer-unapplied lo stesso caso T10 resta un fallimento (il gate non e' indebolito) ==="
+D="$WORK/t12"; make_session "$D" 10 10 false "" "" "🟡"
+HEAD_SHA="$(make_git_fixture "$D")"
+echo "$(pr_merged 10 "$HEAD_SHA" "$DATE_A")" > "$WORK/f12.json"
+start_server "$WORK/f12.json" || exit 1
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (modalita' autoritativa: fail-closed)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"; fi
 stop_server
 
 echo ""

@@ -83,6 +83,20 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $outputFile = "docs/BUNDLE.md"
 
+# === Indipendenza dal sistema operativo e dalla locale (issue #284) ===
+#
+# 1. PowerShell 7+ obbligatorio (baseline del repo, AGENTS.md F9): l'output
+#    dipende dal motore (issue #104). Guardia fail-closed, non solo documentale.
+# 2. Timestamp in UTC con locale invariante: l'ora locale del runner (UTC su
+#    GitHub, locale sul PC dello sviluppatore) rendeva il bundle non
+#    riproducibile.
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "[FAIL] Serve PowerShell 7+ (baseline del repo, AGENTS.md F9): trovato $($PSVersionTable.PSVersion)." -ForegroundColor Red
+    Write-Host "       L'output del generatore non e' identico su Windows PowerShell 5.1 (issue #104, #284)." -ForegroundColor Yellow
+    exit 2
+}
+$InvariantCulture = [System.Globalization.CultureInfo]::InvariantCulture
+
 # === Elenco canonico dei file da includere nel bundle ===
 # Regole di manutenzione: vedi commento .NOTES sopra + docs/12-DEVOPS.md §9 + AGENTS.md.
 # Quando modifichi questo array, rigenera il bundle e committa nella stessa PR.
@@ -324,6 +338,18 @@ $files = @(
     # dichiarato; le espressioni `${{ ... }}` sono neutralizzate (GitHub le
     # interpola prima dell'esecuzione).
     "scripts/check-workflow-syntax.mjs",
+    # Gate di PORTABILITA' dei generatori (issue #284): rigenera i file
+    # aggregati e confronta i byte con lo stato committato. Il job
+    # `gates-portability` lo esegue su due sistemi operativi reali: e' la
+    # prova empirica che l'output dei generatori non dipende dal SO.
+    "scripts/check-generators-portable.mjs",
+    # Test di regressione del gate di portabilita' (issue #284): scenario
+    # negativo in un worktree temporaneo (un generatore alterato deve essere
+    # intercettato).
+    "scripts/test-generators-portable.sh",
+    # ADR-0013: automazioni post-merge deterministiche (writer unico, CI
+    # post-writer, generatori portabili).
+    "docs/13-ADR/0013-post-merge-automation.md",
     # Gate "coerenza del protocollo" (Sessione 80 / issue #248, ADR-0012): confronta
     # i fatti normativi di AGENTS.md con la realta' del repository (6 check: versione
     # dichiarata, tabella label, tabella exit code, integrita' degli anchor,
@@ -372,14 +398,11 @@ $files = @(
     ".github/pull_request_template.md",
     ".github/CODEOWNERS",
     ".github/workflows/ci.yml",
-    # Workflow post-merge che rigenera il contenuto FILE di docs/BUNDLE.md
-    # quando $files o un file coperto da esso cambia (issue #115 follow-up
-    # di PR #113). Companion di auto-state-aggregate.yml.
-    ".github/workflows/auto-bundle.yml",
-    # Workflow post-merge che applica lo stato di merge alle sessioni
-    # (issue #239): aggiorna merged/merged_commit/merged_date/state nel
-    # frontmatter della sessione e rigenera i blocchi aggregati.
-    ".github/workflows/auto-session-merge-state.yml",
+    # IL writer unico post-merge (issue #284): applica lo stato di merge,
+    # rigenera i blocchi aggregati e il bundle, e committa UNA volta. Sostituisce
+    # i tre writer precedenti (`auto-bundle`, `auto-session-merge-state`,
+    # `auto-state-aggregate`), che concorrevano sugli stessi file generati.
+    ".github/workflows/post-merge.yml",
     "fixtures/synthetic-history/spotify-sample.json",
     "fixtures/synthetic-history/youtube-sample.json",
     "fixtures/synthetic-history/apple-music-sample.csv",
@@ -406,7 +429,7 @@ $files = @(
 # === Costruzione del bundle (in memoria) ===
 function Build-Bundle {
     param(
-        [string]$Timestamp = (Get-Date -Format 'yyyy-MM-dd HH:mm')
+        [string]$Timestamp = [DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm', $InvariantCulture)
     )
     $fileCount = $files.Count
     $missing = New-Object System.Collections.Generic.List[string]
@@ -435,6 +458,14 @@ function Build-Bundle {
             # decodifica UTF-8 con rilevamento del BOM, senza l'overhead del
             # cmdlet. Stesso contenuto, byte per byte.
             $content = [System.IO.File]::ReadAllText($file, $utf8)
+            # Issue #284: normalizzazione dei line ending del contenuto
+            # incorporato. Il repo ha `.gitattributes` con `* text=auto eol=lf`
+            # (il checkout e' LF su ogni OS), ma la normalizzazione e' qui la
+            # DIFESA DI SECONDO LIVELLO: se un file arrivasse con CRLF (un
+            # `.gitattributes` modificato, un file generato da un tool
+            # esterno, una copia manuale), il bundle riprodurrebbe byte
+            # diversi su macchine diverse.
+            if ($null -ne $content) { $content = $content.Replace("`r`n", "`n") }
             [void]$sb.Append("`n`n===== FILE: $file =====`n`n")
             if ($null -ne $content) { [void]$sb.Append($content) }
             [void]$sb.Append("`n")
@@ -524,9 +555,15 @@ if ($Check) {
         exit 0
     } else {
         # Calcola differenza
-        $existingFiles = [regex]::Matches($existing, '(?m)^===== FILE: (.+?) =====$') |
-            ForEach-Object { $_.Groups[1].Value } | Sort-Object
-        $expectedFiles = $files | Sort-Object
+        # Issue #284: ordinamento ORDINALE dei nomi dei file. `Sort-Object`
+        # usa la collazione della locale corrente: due runner con locale
+        # diverse potrebbero elencare i file in ordine diverso e il diff
+        # "da aggiungere / da rimuovere" diventerebbe rumore.
+        $existingFiles = [string[]]@([regex]::Matches($existing, '(?m)^===== FILE: (.+?) =====$') |
+            ForEach-Object { $_.Groups[1].Value })
+        $expectedFiles = [string[]]$files
+        [System.Array]::Sort($existingFiles, [System.StringComparer]::Ordinal)
+        [System.Array]::Sort($expectedFiles, [System.StringComparer]::Ordinal)
         $added   = Compare-Object -ReferenceObject $existingFiles -DifferenceObject $expectedFiles |
             Where-Object { $_.SideIndicator -eq "=>" } | ForEach-Object { $_.InputObject }
         $removed = Compare-Object -ReferenceObject $existingFiles -DifferenceObject $expectedFiles |

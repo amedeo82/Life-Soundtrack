@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.39 — Sessione 87 (2026-11-02)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.40 — Sessione 90 (2026-11-02)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -548,13 +548,13 @@ Issue chiusa come `wontdo` perché la mitigazione strutturale (worktree come def
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
 
-- `main` (solo per GH Action auto-commits: `kilo-bot[bot]` con `auto-status-done` o `auto-state-aggregate`; vietato per agenti umani)
+- `main` (solo per GH Action auto-commits: `kilo-bot[bot]` con `auto-status-done` o `post-merge`; vietato per agenti umani)
 - `docs/<desc>` (branch di documentazione)
 - `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
 
 ### Eccezione `main` chiarita
 
-Il pattern `main` e ammesso dal hook **esclusivamente** per i commit automatici delle GH Action (identity `kilo-bot[bot]`). Gli agenti umani NON devono committare direttamente su `main` per nessuna ragione (vedi §"📤 Post-merge actions" → "Regola fondamentale — NO commit su main"). Il doc-sync (rigenerazione SESSIONS/BACKLOG/INDEX/BUNDLE) e gestito automaticamente dall'auto-state-aggregate workflow, che usa il bot identity.
+Il pattern `main` e ammesso dal hook **esclusivamente** per i commit automatici delle GH Action (identity `kilo-bot[bot]`). Gli agenti umani NON devono committare direttamente su `main` per nessuna ragione (vedi §"📤 Post-merge actions" → "Regola fondamentale — NO commit su main"). Il doc-sync (rigenerazione SESSIONS/BACKLOG/INDEX/BUNDLE) e gestito automaticamente dal workflow `post-merge`, che usa il bot identity.
 
 ### Setup
 
@@ -768,7 +768,7 @@ git push
    pwsh scripts/agent-pr.ps1 -IssueNumber <N>
    ```
 
-   Il campo `pr: N` è la precondizione del workflow post-merge `auto-session-merge-state.yml`: scriverlo a mano dopo l'apertura della PR è stato il motivo di due fallimenti della catena post-merge (Sessione 80, issue #254).
+   Il campo `pr: N` è la precondizione del workflow post-merge `post-merge.yml`: scriverlo a mano dopo l'apertura della PR è stato il motivo di due fallimenti della catena post-merge (Sessione 80, issue #254).
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -857,7 +857,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 4. **Verifica statale post-merge** (sostituisce l'ex "Verifica statale post-merge" v1.7):
      ```powershell
-     # 4a. Aggregator in sync (post GH Action auto-state-aggregate)
+     # 4a. Aggregator in sync (post GH Action `post-merge`)
      pwsh scripts/aggregate-state.ps1 -Check
      # 4b. Bundle in sync
      pwsh scripts/generate-bundle.ps1 -Check
@@ -880,7 +880,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 > - il gate `quality` è l'aggregatore fall-closed: se un gate parallelo fallisce, la PR è rossa.
 ### Regola fondamentale — NO commit su `main`
 
-**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `auto-state-aggregate`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
+**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `post-merge`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
 
 Vedi `docs/18-DEV-LOG.md` §20 (Sessione 20, hardening multi-agente) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
 
@@ -900,7 +900,7 @@ Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di 
 - I file in `docs/state/sessions/<N>-<slug>.md` (se la PR documenta una sessione)
 - I file in `docs/state/stories/<id>-<slug>.md` (se la PR chiude una story)
 
-I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `auto-state-aggregate.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
+I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `post-merge.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
 
 ### Chi può scrivere cosa nei file globali *(D.38.1 — vincolante, Sessione 38)*
 
@@ -908,7 +908,7 @@ La regola sopra vieta di toccare i **file** globali. Ma questi file contengono d
 
 | Tipo di contenuto | Dove si trova | Chi lo scrive | Regola |
 |---|---|---|---|
-| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 -Check` fallisce (gate CI) e `auto-state-aggregate` sovrascrive il diff |
+| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 -Check` fallisce (gate CI) e il writer `post-merge` sovrascrive il diff |
 | **Sezioni legacy** | tutto il resto: prosa, tabelle statiche, changelog, `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" di `11-BACKLOG.md`, `18-DEV-LOG.md` | **l'agente**, nella stessa PR che cambia i fatti che dichiarano | **Allinearle è obbligatorio**, non facoltativo: se la sezione dichiara uno stato, un conteggio, una versione o un riferimento che la tua PR cambia, aggiornala in quella PR |
 
 **Non è un allargamento di ADR-0008**: i blocchi aggregati restano vietati. La regola riguarda le sezioni legacy, che non hanno alcun generatore e quindi nessuno le aggiorna al posto tuo.
@@ -959,7 +959,7 @@ bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
 | `README.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
 | `docs/INDEX.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
 
-**Vincolante (issue #136)**: la riga `git add` di `.github/workflows/auto-state-aggregate.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
+**Vincolante (issue #136)**: la riga `git add` di `.github/workflows/post-merge.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
 
 **Vincolante (issue #216)**: i `paths:` del workflow devono comprendere **tutti gli input** del blocco che generano (`docs/11-BACKLOG.md` = catalogo, `docs/state/**` = stato e analisi). Il blocco PROGRESS dipende dal backlog: senza quel path nei trigger, l'indicatore resterebbe fermo con un denominatore vecchio, e nessun gate se ne accorgerebbe (il `-Check` confronta il blocco con i file *di quel momento*, non con la data dell'ultima modifica del catalogo). Il gate è il sesto controllo di `scripts/validate-workflows.mjs`; vedi `docs/12-DEVOPS.md` §9.8h.
 
@@ -1045,15 +1045,24 @@ $N = (git ls-tree --name-only origin/main docs/state/sessions/ |
 
 **Difesa di seconda linea**: `aggregate-state.ps1` ora rileva il duplicato a run-time (vedi §"Aggregator" sopra → `Find-DuplicateSessionNumbers`). In `-Check` esce 1 con messaggio esplicito che cita entrambi i path; in apply mode emette `[WARN]` ma continua a scrivere (il drift a quel punto e' gia' su `main` e va risolto rinumerando uno dei due file). Test di regressione T9 in `test-aggregate-determinism.sh`.
 
-### GH Action auto-state-aggregate (post-merge auto-commit)
+### GH Action `post-merge` — IL writer unico di `main` (issue #284)
 
-Dopo ogni push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1`, la GH Action:
-1. Esegue `pwsh scripts/aggregate-state.ps1 -Check` (rileva drift)
-2. Esegue `pwsh scripts/aggregate-state.ps1` (applica i blocchi corretti)
-3. Rileva il diff con `git diff --name-only`
-4. Se modificato, committa e pusha con bot identity `kilo-bot[bot]`
+Dopo ogni merge su `main`, **un solo workflow** scrive: `.github/workflows/post-merge.yml`. La sua sequenza è lineare e senza alternative:
 
-Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` sul diff step + `if (git diff --cached --quiet)` syntax fix PowerShell + `-replace CRLF, LF` in tutti gli script di write.
+```
+apply-merge-state → aggregate-state → generate-bundle → verifica (-Check) → 1 commit → 1 push
+```
+
+Regole strutturali ( enforced dai gate di `scripts/validate-workflows.mjs`):
+
+- **Un solo writer su `main`**: due workflow che pushano su `main` riportano la race fra writer (misurata il 2026-11-02: push rifiutato, rebase dei file generati, conflitto, run fallito).
+- **Il writer non ribasa mai**: al tentativo successivo fa `git reset --hard origin/main` e **rigenera** da capo. Il rebase dei file generati è un conflitto strutturale, non una race.
+- **Il writer scatta su ogni PR mergiata**: nessun filtro `paths:` (il bundle dipende da molti file, non solo da `docs/state/**`).
+- **Il writer verifica prima di committare**: `aggregate-state -Check` e `generate-bundle -Check` devono essere verdi, altrimenti il commit non entra.
+
+La **CI sullo stato finale** di `main` non è un `push` (i push con `GITHUB_TOKEN` non generano eventi `push` — i writer non triggavano mai la pipeline): è il trigger **`workflow_run`** di `ci.yml`, che fa `checkout ref: main`. Nel passaggio `push` il gate `check-merge-state.mjs` gira in modalità `--defer-unapplied` (differisce **solo** l'albero che è il merge commit della PR, cioè lo stato non ancora applicato); nel passaggio `workflow_run` gira in modalità autoritativa, fail-closed.
+
+La specifica completa è in [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md); i gate sono `scripts/validate-workflows.mjs`, `scripts/check-merge-state.mjs` e `scripts/check-generators-portable.mjs`.
 
 ### Checklist PR aggiuntiva (D.24.x + D.29.x + D.30.x)
 
@@ -1121,4 +1130,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.39 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.40 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*

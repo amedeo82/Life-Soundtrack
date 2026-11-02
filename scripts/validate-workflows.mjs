@@ -58,7 +58,9 @@ const SYNC_FORMS = [
 // La push a `main` puo' comparire anche dentro un ciclo di retry
 // (`if git push origin main; then`): il pattern non e' piu' ancorato alla riga.
 // Le righe di COMMENTO sono escluse dal controllo (vedi checkPushSync).
-const PUSH_MAIN_RE = /git\s+push\s+origin\s+main\b/;
+// Issue #284: il writer unico usa la forma `git push origin HEAD:main` (il
+// checkout e' su `main`, ma il push e' esplicito sul ref di destinazione).
+const PUSH_MAIN_RE = /git\s+push\s+origin\s+(?:HEAD:)?main\b/;
 
 // === Scalari semplici con ": " — YAML non valido (Sessione 74) ===
 //
@@ -203,7 +205,9 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.yml'))) {
 // invisibile finche' il fallback generato coincideva per caso col testo in file.
 // Questo assert e' la difesa di seconda linea che mancava.
 const GIT_ADD_BINDINGS = [
-  { workflow: 'auto-state-aggregate.yml', script: 'scripts/aggregate-state.ps1' },
+  // Issue #284: il writer e' UNO (`post-merge.yml`) e sostituisce i tre writer
+  // precedenti, che concorrevano sugli stessi file generati.
+  { workflow: 'post-merge.yml', script: 'scripts/aggregate-state.ps1' },
 ];
 
 // Estrae i path dall'array `$targets = @( @{ Path = "..." ... } )` del Powershell.
@@ -414,7 +418,16 @@ function checkPushSync(lines, file) {
   }
   const before = lines.slice(0, stepStart).join('\n'); // gli step precedenti
   const wholeStep = lines.slice(stepStart, stepEnd).join('\n'); // lo step della push
-  const hasSync = (text) => SYNC_FORMS.some((re) => re.test(text));
+  // Issue #284: un COMMENTO non e' un comando. Una riga di commento che
+  // contiene `git reset --hard origin/main` non sincronizza niente: senza
+  // questo filtro il gate accettava un writer che non ha nessuna difesa
+  // (la stessa regola che esclude i commenti dalla detection della push).
+  const codeOnly = (text) =>
+    text
+      .split('\n')
+      .filter((l) => !l.trim().startsWith('#'))
+      .join('\n');
+  const hasSync = (text) => SYNC_FORMS.some((re) => re.test(codeOnly(text)));
 
   if (hasSync(before)) {
     console.log(
@@ -502,11 +515,26 @@ function checkPushSync(lines, file) {
 
 const WRITER_ORDERING = [
   {
-    consumer: 'auto-bundle.yml',
-    producer: 'auto-state-aggregate.yml',
-    producerName: 'auto-state-aggregate',
+    // Issue #284: la CI consuma lo stato finale prodotto dal writer. Il
+    // trigger e' `workflow_run` (agganciato alla CONCLUSIONE del writer, non
+    // a un push): e' l'unico trigger che sopravvive alla soppressione del
+    // `GITHUB_TOKEN`, che vale solo per gli eventi `push`/`pull_request`
+    // generati dal token stesso. Con il trigger `push` il commit del writer
+    // non avrebbe MAI attivato la pipeline (misurato: nessuna run `CI` per il
+    // commit `831b9e7` della PR #282).
+    consumer: 'ci.yml',
+    producer: 'post-merge.yml',
+    producerName: 'post-merge',
   },
 ];
+
+// Issue #284: nel passaggio `workflow_run` la CI deve validare la TESTA di
+// `main` (che contiene il commit del writer), non `workflow_run.head_sha`
+// (che e' il commit di PARTENZA del writer: il merge commit, senza lo stato
+// applicato). Senza questo contratto il passaggio post-writer validerebbe
+// l'albero sbagliato — il gate merge-state fallirebbe per costruzione.
+const WORKFLOW_RUN_CHECKOUT_RE =
+  /github\.event_name\s*==\s*['"]workflow_run['"]\s*&&\s*['"]main['"]/;
 
 // Estrae il nome logico di un workflow dal campo `name:` intestazione.
 function extractWorkflowName(text) {
@@ -636,162 +664,133 @@ function checkWriterOrdering(dir) {
 
 failures += checkWriterOrdering(dir);
 
-// === Issue #216 — i trigger del workflow devono coprire gli input dei blocchi ===
+// === Issue #284 — il writer di `main` e' UNO, e la CI lo consuma ===
 //
-// Il blocco `AGGREGATE-PROGRESS-*` (ADR-0008 V4, issue #216) calcola la percentuale
-// di implementazione su TRE sorgenti: lo stato delle story (`docs/state/stories/`),
-// il CATALOGO delle story (`docs/11-BACKLOG.md`, il denominatore) e il generatore
-// stesso (`scripts/aggregate-state.ps1`).
+// I tre writer precedenti (`auto-session-merge-state`, `auto-state-aggregate`,
+// `auto-bundle`) concorrevano sullo stesso `main` e sugli stessi file
+// generati: misurato il 2026-11-02, push rifiutato + rebase dei file
+// generati -> conflitto -> run fallito. Il writer unico (`post-merge.yml`)
+// elimina la race per costruzione.
 //
-// `auto-state-aggregate.yml` dichiarava in `paths:` solo i primi due: una story
-// nuova nel backlog (o un EPIC nuovo) non avrebbe fatto scattare il workflow, e
-// l'indicatore sarebbe rimasto fermo su una percentuale falsa. E' la stessa classe
-// di fallimento silenzioso chiusa dall'issue #136 per la riga `git add`, applicata
-// ai trigger invece che allo staging.
+// I gate che ne difendono la struttura:
 //
-// Il check richiede che ogni sorgente sia coperta da almeno un pattern di `paths:`:
-// "se questo file cambia, il workflow deve scattare".
+//   1. **Un solo writer**: due workflow che pushano su `main` riportano
+//      indietro la race, per quanto bene scritti.
+//   2. **Il writer non filtra i merge**: un `paths:` sotto `on.pull_request`
+//      lascerebbe fuori some PR mergiate (il bundle dipende da molti file,
+//      non solo dallo stato).
+//   3. **La CI consuma il writer con `workflow_run`** e fa il checkout della
+//      TESTA di `main` in quel passaggio.
 
-const AGGREGATOR_TRIGGER_INPUTS = [
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'docs/state/stories/3.1-home-timeline.md',
-    why: 'stato di una story (frontmatter `status`)',
-  },
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'docs/state/sessions/75-progress-indicator.md',
-    why: 'stato di una sessione (analisi narrativa + blocco SESSIONS)',
-  },
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'docs/11-BACKLOG.md',
-    why: 'catalogo delle story = denominatore della percentuale (issue #216, AC2)',
-  },
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'scripts/aggregate-state.ps1',
-    why: 'il generatore stesso',
-  },
-];
-
-/**
- * Converte un pattern di `paths:` (globo GitHub) in espressione regolare.
- * `**` copre zero o piu' segmenti, `*` copre un segmento, `?` un carattere.
- */
-function pathPatternToRegExp(pattern) {
-  let out = '';
-  for (let i = 0; i < pattern.length; i++) {
-    const c = pattern[i];
-    if (c === '*') {
-      if (pattern[i + 1] === '*') {
-        if (pattern[i + 2] === '/') {
-          out += '(?:[^/]+/)*';
-          i += 2;
-        } else {
-          out += '.*';
-          i += 1;
-        }
-      } else {
-        out += '[^/]*';
-      }
-      continue;
-    }
-    if (c === '?') {
-      out += '[^/]';
-      continue;
-    }
-    out += c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-  }
-  return new RegExp(`^${out}$`);
+/** Il blocco `on:` del workflow (fino a `jobs:`), come testo. */
+function extractOnBlock(text) {
+  const jobsAt = text.indexOf('\njobs:');
+  return jobsAt > 0 ? text.slice(0, jobsAt) : text;
 }
 
-/**
- * Estrae la lista `paths:` del blocco `on.push` di un file YAML.
- * Ritorna null se il blocco non esiste.
- */
-function extractPushPaths(text) {
-  const lines = text.split('\n');
-  let inOn = false;
-  let onIndent = -1;
-  let inPush = false;
-  let pushIndent = -1;
-  let inPaths = false;
-  let pathsIndent = -1;
-  const paths = [];
-  for (const raw of lines) {
-    const indent = raw.match(/^\s*/)[0].length;
-    const trimmed = raw.trim();
-    if (trimmed === '' || trimmed.startsWith('#')) continue;
-    if (!inOn) {
-      if (/^on:\s*$/.test(trimmed)) {
-        inOn = true;
-        onIndent = indent;
-      }
-      continue;
-    }
-    if (indent <= onIndent) break;          // uscita dal blocco `on:`
-    if (!inPush) {
-      if (/^push:\s*$/.test(trimmed)) {
-        inPush = true;
-        pushIndent = indent;
-      }
-      continue;
-    }
-    if (indent <= pushIndent) break;         // uscita dal blocco `push:`
-    if (!inPaths) {
-      if (/^paths:\s*$/.test(trimmed)) {
-        inPaths = true;
-        pathsIndent = indent;
-      }
-      continue;
-    }
-    if (indent <= pathsIndent) break;        // uscita dal blocco `paths:`
-    const m = trimmed.match(/^-\s*(.+?)\s*$/);
-    if (m) paths.push(m[1].replace(/^["']|["']$/g, ''));
+/** Writer che pushano su `main` (una riga di push reale, non un commento). */
+function findMainWriters(dir) {
+  const writers = [];
+  for (const file of readdirSync(dir)) {
+    if (!file.endsWith('.yml') && !file.endsWith('.yaml')) continue;
+    const text = readFileSync(join(dir, file), 'utf8');
+    const pushes = text
+      .split('\n')
+      .some((l) => PUSH_MAIN_RE.test(l) && !l.trim().startsWith('#'));
+    if (pushes) writers.push(file);
   }
-  return paths.length > 0 ? paths : null;
+  return writers;
 }
 
-function checkTriggerCoverage(dir) {
-  let bad = 0;
-  const byWorkflow = new Map();
-  for (const input of AGGREGATOR_TRIGGER_INPUTS) {
-    if (!byWorkflow.has(input.workflow)) byWorkflow.set(input.workflow, []);
-    byWorkflow.get(input.workflow).push(input);
+function checkSingleWriter(dir) {
+  // Il gate vale per la directory reale dei workflow: su una fixture che
+  // contiene un solo writer il controllo e' vacuo ma non dannoso.
+  if (!existsSync(join(dir, 'post-merge.yml'))) {
+    console.log('[SKIP] single-writer: `post-merge.yml` non e\' nella directory ispezionata');
+    return 0;
   }
-  for (const [workflow, inputs] of byWorkflow) {
-    const wfPath = join(dir, workflow);
-    if (!existsSync(wfPath)) {
-      console.log(`[SKIP] ${workflow}: assente dalla directory ispezionata, il check di copertura dei trigger non e' applicabile`);
-      continue;
-    }
-    const paths = extractPushPaths(readFileSync(wfPath, 'utf8'));
-    if (!paths) {
-      console.error(`[FAIL] ${workflow}: nessun blocco \`paths:\` trovato sotto \`on.push\`.`);
-      console.error('       Il workflow non scatterebbe mai su un cambio degli input dei blocchi aggregati: l\'indicatore resterebbe fermo mentre le sue sorgenti cambiano.');
-      bad++;
-      continue;
-    }
-    const uncovered = inputs.filter(
-      input => !paths.some(pattern => pathPatternToRegExp(pattern).test(input.path)),
+  const writers = findMainWriters(dir);
+  if (writers.length > 1) {
+    console.error(
+      `[FAIL] single-writer: ${writers.length} workflow pushano su \`main\`: ${writers.join(', ')}.`,
     );
-    if (uncovered.length > 0) {
-      console.error(`[FAIL] ${workflow}: i trigger \`paths:\` NON coprono ${uncovered.length}/${inputs.length} input dei blocchi aggregati:`);
-      for (const input of uncovered) {
-        console.error(`         NON coprono ${input.path} (${input.why})`);
-      }
-      console.error(`         Filtri dichiarati: ${paths.join(', ')}`);
-      console.error('         Senza copertura il blocco generato resta fermo mentre la sua sorgente cambia: percentuale falsa, in silenzio.');
-      bad++;
-    } else {
-      console.log(`[OK] ${workflow}: i trigger \`paths:\` coprono tutti i ${inputs.length} input dei blocchi aggregati`);
-    }
+    console.error(
+      '       Due writer sullo stesso `main` e sugli stessi file generati producono la race ' +
+        'misurata il 2026-11-02 (push rifiutato, rebase dei file generati, conflitto, run fallito).',
+    );
+    console.error('       Un solo writer: `post-merge.yml`.');
+    return 1;
+  }
+  if (writers.length === 0) {
+    console.error('[FAIL] single-writer: nessun workflow pusha su `main`: nessuno applicherebbe lo stato di merge.');
+    return 1;
+  }
+  console.log(`[OK] single-writer: un solo writer su \`main\` (${writers[0]})`);
+  return 0;
+}
+
+function checkWriterTrigger(dir) {
+  const wfPath = join(dir, 'post-merge.yml');
+  if (!existsSync(wfPath)) {
+    console.log('[SKIP] writer-trigger: `post-merge.yml` non e\' nella directory ispezionata');
+    return 0;
+  }
+  const text = readFileSync(wfPath, 'utf8');
+  let bad = 0;
+
+  if (!/^\s*pull_request:\s*$/m.test(extractOnBlock(text))) {
+    console.error('[FAIL] writer-trigger: `post-merge.yml` non ha un trigger `pull_request:`.');
+    console.error('       Senza il trigger sulla PR chiusa il writer non gira mai.');
+    bad++;
+  }
+  if (!/types:\s*\[closed\]/.test(text)) {
+    console.error('[FAIL] writer-trigger: `post-merge.yml` non scatta su `types: [closed]`.');
+    bad++;
+  }
+  if (/^\s+paths:/m.test(extractOnBlock(text))) {
+    console.error('[FAIL] writer-trigger: `post-merge.yml` filtra i merge con un blocco `paths:`.');
+    console.error(
+      '       Il bundle dipende da molti file (non solo da `docs/state/**`): un filtro lascerebbe ' +
+        'fuori delle PR mergiate, e i loro file resterebbero fuori dal bundle.',
+    );
+    bad++;
+  }
+  if (bad === 0) {
+    console.log('[OK] writer-trigger: il writer scatta su ogni PR mergiata (nessun filtro `paths:`)');
   }
   return bad;
 }
 
-failures += checkTriggerCoverage(dir);
+function checkWorkflowRunCheckout(dir) {
+  const ciPath = join(dir, 'ci.yml');
+  if (!existsSync(ciPath)) {
+    console.log('[SKIP] workflow-run-checkout: `ci.yml` non e\' nella directory ispezionata');
+    return 0;
+  }
+  const text = readFileSync(ciPath, 'utf8');
+  if (!/workflow_run:/.test(text)) {
+    console.error('[FAIL] workflow-run-checkout: `ci.yml` non ha un trigger `workflow_run:`.');
+    console.error(
+      '       Il passaggio sullo stato finale di `main` deve essere agganciato alla CONCLUSIONE ' +
+        'del writer: il trigger `push` e\' soppresso quando il push e\' fatto con il GITHUB_TOKEN.',
+    );
+    return 1;
+  }
+  if (!WORKFLOW_RUN_CHECKOUT_RE.test(text)) {
+    console.error('[FAIL] workflow-run-checkout: `ci.yml` non fa il checkout di `main` nel passaggio `workflow_run`.');
+    console.error(
+      '       `workflow_run.head_sha` e\' il commit di PARTENZA del writer (il merge commit, senza ' +
+        'lo stato applicato): validarlo equivarrebbe a far fallire il gate merge-state per costruzione.',
+    );
+    return 1;
+  }
+  console.log('[OK] workflow-run-checkout: nel passaggio `workflow_run` la CI valida la testa di `main`');
+  return 0;
+}
+
+failures += checkSingleWriter(dir);
+failures += checkWriterTrigger(dir);
+failures += checkWorkflowRunCheckout(dir);
 
 console.log(
   `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`,
