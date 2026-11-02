@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 17:13
+> Data: 2026-11-02 17:15
 > Totale file: 171
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -30187,11 +30187,21 @@ merge → post-merge.yml (writer unico) → commit → workflow_run → CI sullo
 | I generatori producono gli stessi byte su ogni OS | UTC + `InvariantCulture` + ordinamento ordinale + guardia `pwsh >= 7` + LF | `scripts/check-generators-portable.mjs` (determinismo + manifest cross-OS: job `gates-portability` su `ubuntu-latest` + `windows-latest`, confronto nel job `gates-portability-compare`) |
 
 **Il gate di portabilita'** e' la prova empirica dell'indipendenza dal sistema
-operativo: rigenera i file aggregati e confronta i **byte** con lo stato
-committato (normalizzando i due campi mutabili: `> Data:` e
-`- Ultima aggregazione:`). Se un generatore tornasse a dipendere dalla
-locale, dal fuso orario o dai line ending, la pipeline si rossa su entrambi i
-sistemi operativi.
+operativo, su tre livelli:
+
+1. **determinismo**: due rigenerazioni consecutive (in un worktree pulito)
+   producono gli stessi byte;
+2. **invarianti del repo**: il bundle e' in sync con lo stato committato;
+3. **uguaglianza cross-OS**: ogni job della matrix pubblica il manifest
+   (sha256 per file) dei file generati sul proprio sistema operativo, e il job
+   `gates-portability-compare` confronta i due manifest byte per byte.
+
+Il riferimento del confronto cross-OS **non** e' lo stato committato: quello
+cambia a ogni PR (i blocchi aggregati li aggiorna il writer post-merge, per
+contratto ADR-0008), quindi non puo' essere il riferimento di un confronto fra
+due sistemi operativi. Se un generatore tornasse a dipendere dalla locale,
+dal fuso orario o dai line ending, i due manifest divergerebbero e la
+pipeline sarebbe rossa.
 
 **Gate**: `scripts/validate-workflows.mjs` (bloccante) · `scripts/check-generators-portable.mjs` (bloccante) ·
 test: `scripts/test-workflow-writer-ordering.sh` (13 assert) · `scripts/test-workflow-push-sync.sh` (9 assert) ·
