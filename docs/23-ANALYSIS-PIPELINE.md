@@ -1,8 +1,9 @@
 # 23 — Collegamento del pipeline di analisi all'app
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner, cioè al merge della PR)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **2.5** (`docs/11-BACKLOG.md` §"Story 2.5") · Area: `analysis` · Size: L
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §7 (differenziatore 3 «retrospettiva storica» verificato 🟡)
@@ -270,7 +271,8 @@ I fixture esistenti sono riutilizzabili: `fixtures/scenarios/era-shift.json` (8+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: contratti reali del core (pipeline, persistenza, i18n, tipi), punti di innesto nell'app, runner da costruire, stato vuoto `no-features`, piano di test, D-23.1…D-23.6 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner. Fino ad allora è una proposta.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*

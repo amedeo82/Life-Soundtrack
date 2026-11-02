@@ -1,8 +1,9 @@
 # 26 — Anteprima del risultato in onboarding (modalità demo)
 
-> Status: 🟡 DRAFT (diventa **🟢 APPROVED v1.0** alla ratifica del project owner)
-> Versione: 0.1
+> Status: 🟢 APPROVED
+> Versione: 1.0
 > Ultima modifica: Sessione 86 (2026-11-02)
+> Ratificato: dal project owner al merge della PR #273 (2026-11-02, commit `89573176`)
 > Responsabile: Boss
 > Story: **3.5** (`docs/11-BACKLOG.md` §"Story 3.5") · Area: `ui` · Size: M · **Priorità P0 (piccola)**
 > Origine: `docs/22-COMPETITIVE-POSITIONING.md` §9 · Requisito di UX: `docs/06-UX-FLOWS-STATES.md` §2.14
@@ -182,7 +183,8 @@ Modifiche a `scripts/generate-fixtures.mjs` (funzione `buildDemoUser`):
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 86 (2026-11-02) | Prima stesura: stato reale del fixture e del reveal, decisione del DB separato, loader e normalizzazione, estensione del generatore (albums + features deterministiche), piano di test, D-26.1…D-26.5 |
+| 1.0 | Sessione 87 (2026-11-02) | **Ratificata** dal project owner al merge della PR #273: status 🟢 APPROVED, versione 1.0, decisioni vincolanti |
 
 ---
 
-*Questo documento diventa vincolante (🟢 APPROVED v1.0) alla ratifica del project owner.*
+*Questo documento è **vincolante** (🟢 APPROVED v1.0) dal 2026-11-02: le decisioni che contiene sono applicabili dagli agenti senza ulteriore approvazione.*

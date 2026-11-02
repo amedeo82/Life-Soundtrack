@@ -420,7 +420,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: I quattro motori di analisi sono implementati e testati in `packages/core/src/analysis/` (mood `mood/`, ere `era/`, eventi `event/`, ricordi `memory/`, con l'orchestratore `pipeline.ts`) e la persistenza degli insight esiste (`db/insights.ts`), ma **nessun codice in `apps/web` li esegue**: la Home **legge** gli insight (`apps/web/src/hooks/useHomeTimelineData.ts`) che nessuno **scrive**. Dopo un import pulito le sezioni mood, ere e ricordi restano vuote e i differenziatori narrativi del progetto — «dati storici + emozioni» — non sono visibili a nessuno. Questa story collega il core all'app: è il lavoro che trasforma «abbiamo gli algoritmi» in «l'app conosce la tua musica».
 
-**Stato**: ⬚ **TODO** — la specifica di collegamento è **scritta** (`docs/23-ANALYSIS-PIPELINE.md`, 🟡 DRAFT v0.1, Sessione 86) e diventa 🟢 APPROVED alla ratifica del project owner; dopo la ratifica l'agente apre l'issue di implementazione (`agent-ready`) e la lavora. La spec definisce i contratti reali del core (pipeline, persistenza, i18n), i punti di innesto nell'app, lo stato vuoto `no-features` e il piano di test
+**Stato**: ⬚ **TODO** — **pronta al claim**: la specifica di collegamento (`docs/23-ANALYSIS-PIPELINE.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante; l'agente prende in carico l'issue **#266** (`agent-ready`) e la lavora secondo la procedura di claim La spec definisce i contratti reali del core (pipeline, persistenza, i18n), i punti di innesto nell'app, lo stato vuoto `no-features` e il piano di test
 
 **Task**:
 - T2.5.1 — Trigger di esecuzione: dopo l'import e a richiesta, in **coda** (l'import non deve mai attendere l'analisi: `05§6.1`)
@@ -441,7 +441,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - [ ] La spec di collegamento è scritta e 🟢 APPROVED prima dell'implementazione (protocollo: `agent-ready` solo con spec approvata)
 
 **Dipendenze**: Story 2.1, 2.2, 2.3, 2.4 (tutte ✅ DONE) · la 4.1 è la sorgente delle feature
-**Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
+**Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
 **Issue**: #266 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
@@ -480,7 +480,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] L'utente può rinominare un'era rilevata automaticamente: il campo esiste già (`Insight.userNote`) ma **non** ha né UI né percorso di scrittura
 - [ ] i18n IT/EN per le nuove stringhe
 
-**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.2: feed, card canvas, ShareSheet, tagging manuale) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
+**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
 **Issue**: #241 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
@@ -497,7 +497,7 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 - [ ] Gli insight visualizzati sono **persistiti** (nessuna lettura «a caldo» che non passi dalla tabella `insights`): la story consuma l'output della Story **2.5**
 - [ ] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
 
-**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.3: Esplora, QuadrantChart, InsightCard, deep-link interno) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
+**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
 **Issue**: #240 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
@@ -528,7 +528,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Descrizione**: L'onboarding oggi termina con un **contatore** di eventi (`apps/web/src/onboarding/OnboardingRouter.tsx`, schermata ⑤ Reveal): l'utente non vede mai il prodotto prima di usarlo, e il README dichiarava un'«anteprima del risultato» che il codice non ha. Il progetto ha già i mattoni: `fixtures/demo-user.json` (1 anno, 4500 eventi, 200 track, 30 artisti, `demoMode: true`) è previsto da `06-UX-FLOWS-STATES.md` §2.14 e la CTA «Scopri come funziona» esiste nelle stringhe i18n (`empty.cta.demo`) — ma **nessun file di codice li usa**. Questa story rende l'onboarding **spettacolare**: il diario di esempio *prima* dell'import, le prime righe della timeline reale *dopo*.
 
-**Stato**: ⬚ **TODO** — la specifica è **scritta** in `docs/26-ONBOARDING-DEMO.md` (🟡 DRAFT v0.1, Sessione 86) e diventa 🟢 APPROVED alla ratifica; dopo la ratifica l'agente apre l'issue di implementazione (`agent-ready`). La spec definisce il **DB demo separato**, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche) e il reveal con ≥3 righe reali.
+**Stato**: ⬚ **TODO** — **pronta al claim**: la specifica (`docs/26-ONBOARDING-DEMO.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante; l'agente prende in carico l'issue **#270** (`agent-ready`) e la lavora secondo la procedura di claim. La spec definisce il **DB demo separato**, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche) e il reveal con ≥3 righe reali.
 
 **Task**:
 - T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding (la stringa `empty.cta.demo` esiste ma non è renderizzata)
@@ -546,7 +546,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
 
 **Dipendenze**: Story 0.4 ✅ (onboarding), Story 3.1 ✅ (Home + Timeline) · **effetto pieno dipende dalla Story 2.5** (senza, la demo non ha ere né mood)
-**Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
+**Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
 **Issue**: #270 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
 
 ---
@@ -607,7 +607,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Placeholder gradient generato coerente con Mood (vedi `15-DESIGN-SYSTEM` §3 palette mood)
 
 **Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: Spotify Web API e iTunes Search coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
-**Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare: cascata iTunes → Cover Art Archive → placeholder, D-24.1…D-24.6) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
+**Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
 **Issue**: #242 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 **Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
@@ -646,7 +646,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Bozza privacy policy GDPR-compliant
 - [ ] **Pagina in-app «Come trattiamo i tuoi dati»**: per il lancio non serve un documento legale monumentale, serve una pagina chiara e onesta che dica (a) cosa resta sul dispositivo e cosa non esce mai, (b) che l'**unica** uscita è l'invio ai hub di scrobbling e solo se l'utente ha attivato quel hub (default: nessuno), (c) cosa succede ai dati quando li esporta o li cancella, (d) che il progetto è AGPL-3.0 e offre il sorgente (§13). La pagina utente è il documento (`09`) tradotto in linguaggio semplice — vedi `22-COMPETITIVE-POSITIONING.md` §13 (decisione D-22.7)
 
-**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.1: pagina in 5 blocchi, montaggio della schermata About, 7 chiavi i18n mancanti, drift `useDbHealth`) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13 · `docs/12-DEVOPS.md` §5.3 (AGPL §13)
+**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13 · `docs/12-DEVOPS.md` §5.3 (AGPL §13)
 **Issue**: #244 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---
@@ -658,7 +658,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Export JSON completo (portabilità GDPR)
 - [ ] Cancellazione totale con doppia conferma
 
-**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.2: `exportAll` con manifest, CSV degli ascolti, `purgeInsights`, `deleteAll` transazionale, doppia conferma con parola chiave) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13, §3.4 · `docs/22-COMPETITIVE-POSITIONING.md` §12
+**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13, §3.4 · `docs/22-COMPETITIVE-POSITIONING.md` §12
 **Issue**: #246 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
 
 ---

@@ -2,8 +2,10 @@
 number: 85
 title: "Posizionamento competitivo verificato sul codice e priorità ricalcolate"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "89573176e80ef24b4f4015ab03fbd954de823b15"
+merged_date: "2026-11-02T11:42:46Z"
 branch: feat/265-docs-competitive-specs
 pr: 273
 claim: kilo-HP-ELITEBOOK-c85pos
