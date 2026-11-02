@@ -141,6 +141,7 @@
 | 86 | Il pacchetto di specifiche implementabili delle 7 story rimanenti | 🟢 | ✅ | #273 |
 | 87 | Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione | 🟢 | ✅ | #278 |
 | 88 | Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge | 🟢 | ✅ | #280 |
+| 89 | CI su main: i commit del writer dello stato di merge triggano la pipeline | 🟢 | ✅ | #282 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -180,9 +181,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **65** (merge: 64)
+- Sessioni migrate in state/sessions: **66** (merge: 65)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S88** - Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge
+- Ultima sessione migrata: **S89** - CI su main: i commit del writer dello stato di merge triggano la pipeline
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -231,39 +232,28 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S88)
+**Analisi della sessione corrente** (S89)
 
 **Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
-Lavoro di **devops**: nessuna story di prodotto e' toccata, ma la catena post-merge — quella che
-scrive i blocchi aggregati, il bundle e lo stato di merge delle sessioni — smette di essere
-rottta.
+Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
+senza spiegazione.
 
 **Cosa e' pronto.**
-- `auto-session-merge-state.yml`: `pull-requests: read` aggiunto (era la causa del 403).
-- `auto-state-aggregate.yml` e `auto-bundle.yml`: ciclo di retry riscritto in **PowerShell**
-  (`for` / `if` / `break`), con `exit 1` se il push fallisce dopo 3 tentativi.
-- `scripts/check-workflow-syntax.mjs`: gate nuovo — estrae ogni blocco `run:` con il suo `shell:`
-  effettivo e lo syntax-checka (`pwsh` -> parser di PowerShell, `bash` -> `bash -n`); neutralizza
-  `${{ ... }}`; salta i blocchi bash quando l'interprete non e' utilizzabile.
-- `scripts/test-merge-state.mjs` non serve: il fix di `apply-merge-state.mjs` (issue #275) ha gia'
-  il suo test (`scripts/test-apply-merge-state.mjs`, T1..T3).
-- Stato di merge della sessione 87 applicato (`merged: true`, commit `63588098...`, data
-  `2026-11-02T12:51:43Z`): `check-merge-state.mjs` → 63 confronti, 0 falliti.
+- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
+  che spiega la race e perche' il gate non viene indebolito.
+- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
+  il controllo esistente dell'issue #216 resta verde).
 
-**Cosa manca.** Nulla sul piano della remediation: i due difetti sono corretti, il terzo (lo stato
-di merge) e' recuperato, e il gate che li intercetta in futuro e' in CI. Il `main` torna verde
-quando questa PR viene mergiata e la catena post-merge — **ora funzionante** — ricostruisce i
-blocchi.
+**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
+il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
+deve essere verde.
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano: li rigenera
-l'aggregatore post-merge (che, con il ParserError risolto, torna a scrivere).
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Gate di testabilità.** `node scripts/check-workflow-syntax.mjs` → 11 blocchi pwsh verificati,
-0 non validi (10 blocchi bash saltati in locale: il bash di Windows e' lo stub WSL, la CI ha il
-vero) · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
-`node scripts/check-merge-state.mjs` → 63 confronti, 0 falliti ·
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
 `node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->

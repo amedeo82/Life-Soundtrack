@@ -2,8 +2,10 @@
 number: 89
 title: "CI su main: i commit del writer dello stato di merge triggano la pipeline"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "110a99a09bf3965b833f868fe8158f6eb3293e60"
+merged_date: "2026-11-02T13:51:42Z"
 branch: feat/281-ci-su-main-i-commit-del-writer-auto-sess
 pr: 282
 claim: kilo-HP-ELITEBOOK-c89ci

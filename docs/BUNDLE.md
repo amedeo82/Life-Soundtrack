@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 14:44
+> Data: 2026-11-02 13:51
 > Totale file: 169
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 168 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2465.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-02 13:34
+- Dimensione totale: 2465.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-02 13:51
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1256,39 +1256,28 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S88)
+**Analisi della sessione corrente** (S89)
 
 **Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
-Lavoro di **devops**: nessuna story di prodotto e' toccata, ma la catena post-merge — quella che
-scrive i blocchi aggregati, il bundle e lo stato di merge delle sessioni — smette di essere
-rottta.
+Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
+senza spiegazione.
 
 **Cosa e' pronto.**
-- `auto-session-merge-state.yml`: `pull-requests: read` aggiunto (era la causa del 403).
-- `auto-state-aggregate.yml` e `auto-bundle.yml`: ciclo di retry riscritto in **PowerShell**
-  (`for` / `if` / `break`), con `exit 1` se il push fallisce dopo 3 tentativi.
-- `scripts/check-workflow-syntax.mjs`: gate nuovo — estrae ogni blocco `run:` con il suo `shell:`
-  effettivo e lo syntax-checka (`pwsh` -> parser di PowerShell, `bash` -> `bash -n`); neutralizza
-  `${{ ... }}`; salta i blocchi bash quando l'interprete non e' utilizzabile.
-- `scripts/test-merge-state.mjs` non serve: il fix di `apply-merge-state.mjs` (issue #275) ha gia'
-  il suo test (`scripts/test-apply-merge-state.mjs`, T1..T3).
-- Stato di merge della sessione 87 applicato (`merged: true`, commit `63588098...`, data
-  `2026-11-02T12:51:43Z`): `check-merge-state.mjs` → 63 confronti, 0 falliti.
+- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
+  che spiega la race e perche' il gate non viene indebolito.
+- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
+  il controllo esistente dell'issue #216 resta verde).
 
-**Cosa manca.** Nulla sul piano della remediation: i due difetti sono corretti, il terzo (lo stato
-di merge) e' recuperato, e il gate che li intercetta in futuro e' in CI. Il `main` torna verde
-quando questa PR viene mergiata e la catena post-merge — **ora funzionante** — ricostruisce i
-blocchi.
+**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
+il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
+deve essere verde.
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano: li rigenera
-l'aggregatore post-merge (che, con il ParserError risolto, torna a scrivere).
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Gate di testabilità.** `node scripts/check-workflow-syntax.mjs` → 11 blocchi pwsh verificati,
-0 non validi (10 blocchi bash saltati in locale: il bash di Windows e' lo stub WSL, la CI ha il
-vero) · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
-`node scripts/check-merge-state.mjs` → 63 confronti, 0 falliti ·
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
 `node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
@@ -2168,6 +2157,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 86 | Il pacchetto di specifiche implementabili delle 7 story rimanenti | 🟢 | ✅ | #273 |
 | 87 | Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione | 🟢 | ✅ | #278 |
 | 88 | Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge | 🟢 | ✅ | #280 |
+| 89 | CI su main: i commit del writer dello stato di merge triggano la pipeline | 🟢 | ✅ | #282 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2207,9 +2197,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **65** (merge: 64)
+- Sessioni migrate in state/sessions: **66** (merge: 65)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S88** - Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge
+- Ultima sessione migrata: **S89** - CI su main: i commit del writer dello stato di merge triggano la pipeline
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2258,39 +2248,28 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S88)
+**Analisi della sessione corrente** (S89)
 
 **Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
-Lavoro di **devops**: nessuna story di prodotto e' toccata, ma la catena post-merge — quella che
-scrive i blocchi aggregati, il bundle e lo stato di merge delle sessioni — smette di essere
-rottta.
+Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
+senza spiegazione.
 
 **Cosa e' pronto.**
-- `auto-session-merge-state.yml`: `pull-requests: read` aggiunto (era la causa del 403).
-- `auto-state-aggregate.yml` e `auto-bundle.yml`: ciclo di retry riscritto in **PowerShell**
-  (`for` / `if` / `break`), con `exit 1` se il push fallisce dopo 3 tentativi.
-- `scripts/check-workflow-syntax.mjs`: gate nuovo — estrae ogni blocco `run:` con il suo `shell:`
-  effettivo e lo syntax-checka (`pwsh` -> parser di PowerShell, `bash` -> `bash -n`); neutralizza
-  `${{ ... }}`; salta i blocchi bash quando l'interprete non e' utilizzabile.
-- `scripts/test-merge-state.mjs` non serve: il fix di `apply-merge-state.mjs` (issue #275) ha gia'
-  il suo test (`scripts/test-apply-merge-state.mjs`, T1..T3).
-- Stato di merge della sessione 87 applicato (`merged: true`, commit `63588098...`, data
-  `2026-11-02T12:51:43Z`): `check-merge-state.mjs` → 63 confronti, 0 falliti.
+- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
+  che spiega la race e perche' il gate non viene indebolito.
+- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
+  il controllo esistente dell'issue #216 resta verde).
 
-**Cosa manca.** Nulla sul piano della remediation: i due difetti sono corretti, il terzo (lo stato
-di merge) e' recuperato, e il gate che li intercetta in futuro e' in CI. Il `main` torna verde
-quando questa PR viene mergiata e la catena post-merge — **ora funzionante** — ricostruisce i
-blocchi.
+**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
+il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
+deve essere verde.
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano: li rigenera
-l'aggregatore post-merge (che, con il ParserError risolto, torna a scrivere).
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Gate di testabilità.** `node scripts/check-workflow-syntax.mjs` → 11 blocchi pwsh verificati,
-0 non validi (10 blocchi bash saltati in locale: il bash di Windows e' lo stub WSL, la CI ha il
-vero) · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
-`node scripts/check-merge-state.mjs` → 63 confronti, 0 falliti ·
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
 `node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
@@ -11260,6 +11239,94 @@ vero) · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti �
 - `scripts/check-workflow-syntax.mjs` (nuovo)
 - `docs/state/sessions/87-encoding-remediation.md` (stato di merge recuperato)
 - `docs/12-DEVOPS.md` §9.10 (catalogo dei gate: nuova riga)
+- `docs/BUNDLE.md` (rigenerato)
+```
+
+### Sessione 89 - CI su main: i commit del writer dello stato di merge triggano la pipeline
+
+- **Data**: 2026-11-02
+- **Stato**: 🟢
+- **Merged**: ✅ PR #282 (110a99a09bf3965b833f868fe8158f6eb3293e60, 2026-11-02T13:51:42Z)
+- **Claim**: `kilo-HP-ELITEBOOK-c89ci`
+
+```
+
+# Sessione 89 — La race fra merge e stato di merge
+
+> **Oggetto**: dopo il merge della PR #280 (Sessione 88, issue #279) `main` e' rimasto **rosso**,
+> non per un difetto del codice ma per una **race strutturale** fra la CI e il writer che applica
+> lo stato di merge alle sessioni.
+
+## Sintesi
+
+La sequenza sul merge di una PR che tocca `docs/BUNDLE.md` (quindi quasi tutte):
+
+1. il **merge** arriva su `main` → il trigger `push` della CI scatta (`docs/BUNDLE.md` e' nei `paths:`) e la pipeline parte **subito**;
+2. in parallelo `auto-session-merge-state` applica lo stato di merge alla sessione (`merged: true`, `merged_commit`, `merged_date`);
+3. la CI, nel frattempo, trova la sessione ancora con `merged: false` → il gate `check-merge-state.mjs` (**fail-closed**) chiude `gates-docs`;
+4. il **commit del writer** (`docs/state/sessions/<N>-<slug>.md`) **non triggava la CI**: `docs/state/**` non era nei `paths:` del trigger `push` → la pipeline non ripartiva → `main` restava rosso.
+
+Il commento del trigger enunciava il principio giusto («il push su `main` scatta solo per i file che i
+**writer automatici** modificano: sono gli unici commit che arrivano su `main` senza essere mai passati
+da una PR»), ma la lista dei path non includeva `docs/state/**` — cioè proprio i file del writer che
+scrive lo stato di merge.
+
+## Cosa è emerso
+
+- Il difetto era **preesistente**: la lista dei `paths:` era stata scritta quando i writer erano solo
+  `auto-state-aggregate` (blocchi aggregati) e `auto-bundle` (bundle). Il terzo writer —
+  `auto-session-merge-state` — è stato aggiunto dopo, e nessuno ha aggiornato la lista.
+- La race è **inevitabile** nella forma attuale: la CI non può attendere il writer, e il writer non
+  può precedere la CI. La soluzione non è eliminare la race, ma **renderla non terminale**: l'ultimo
+  run su `main` deve essere quello del writer, e deve essere verde.
+- Nota: fino alla PR #280 il writer **non funzionava affatto** (403 sull'API): la race era mascherata
+  dal fatto che nessuno stato veniva applicato. Riparato il writer, la race è diventata visibile —
+  un sintomo che emerge quando si sistema una causa a valle.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-89.1 | Aggiungere `docs/state/**` ai `paths:` del trigger `push` della CI | Il principio del trigger e' gia' scritto nel file: vale per **tutti** i writer. Il writer dello stato di merge era l'unico escluso |
+| D-89.2 | **Non** si indebolisce il gate `check-merge-state.mjs` | La race si risolve facendo girare la pipeline sul commit che la chiude, non rendendo il gate tollerante: un gate che accetta «forse mergiato» non e' un gate |
+| D-89.3 | La race resta, ma non e' terminale | La sequenza finale e': merge -> CI (rossa per ~30 s) -> commit del writer -> CI verde. Il branch protection guarda l'ultimo run |
+| D-89.4 | Il principio e' scritto nel commento del trigger, non solo nel diff | Il commento del trigger e' il posto dove si cerca quando un writer nuovo viene aggiunto: deve dire quali file scrive **quel** writer |
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
+Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
+senza spiegazione.
+
+**Cosa e' pronto.**
+- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
+  che spiega la race e perche' il gate non viene indebolito.
+- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
+  il controllo esistente dell'issue #216 resta verde).
+
+**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
+il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
+deve essere verde.
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
+
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un trigger con `paths:` e' una **denuncia di authorship**: elenca i file che **solo** i writer toccano | Ogni writer nuovo va aggiunto a quella lista, con il suo contratto. Il commento del trigger (che cosa arriva su `main` senza passare da una PR) e' il posto dove la regola va scritta |
+| Riparare una causa a valle fa emergere il sintomo che essa mascherava | Il writer rotto (403) impediva l'applicazione dello stato: la race esisteva gia', ma non si vedeva. Il 403 e' stato riparato per primi, e solo dopo la race e' diventata visibile — un altro caso di «il bug che appare e' spesso il bug che hai appena sistemato» |
+| La race fra due writer non si risolve rendendo tollerante il gate | Si risolve facendo girare la pipeline **sul commit che chiude la race**. Il gate resta fail-closed, e l'ultimo run e' quello che conta per il branch protection |
+
+## Documenti aggiornati
+
+- `.github/workflows/ci.yml` (`paths:` del trigger `push`)
 - `docs/BUNDLE.md` (rigenerato)
 ```
 
