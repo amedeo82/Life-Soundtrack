@@ -1,4 +1,4 @@
-﻿---
+---
 number: 84
 title: "La race sul push risolta: retry con ri-sincronizzazione e contratto del gate aggiornato"
 date: 2026-11-01

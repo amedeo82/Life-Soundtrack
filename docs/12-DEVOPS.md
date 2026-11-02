@@ -850,6 +850,17 @@ protection può interpretare un check saltato come successo.
 | 29 | `gates-protocol` | `Blocchi aggregati intoccabili` (`check-aggregate-blocks.mjs`) | solo PR | sì | **#248** |
 | 30 | `gates-protocol` | `Gate "blocchi aggregati" fail-closed` (`test-aggregate-blocks.sh`, 6 scenari) | solo PR | sì | **#248** |
 | 31 | `quality` | `Esito dei gate paralleli` (aggregatore, fall-closed) | solo PR | sì | **#224** |
+| 32 | `gates-docs` | `Encoding dei file tracciati` (`check-encoding.mjs`) | solo PR | sì | **#277** |
+| 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
+
+> **Il gate "encoding"** (Sessione 87, issue #277) intercetta la corruzione **silenziosa** che
+> Windows PowerShell 5.1 introduce riscrivendo i file: doppia codifica (mojibake), BOM UTF-8,
+> UTF-8 non valido. Nella Sessione 85 due file di sessione sono stati riscritti in ANSI e il
+> danno è finito in `main` senza che un solo comando fallisse. Il gate è **read-only** in
+> modalità verifica (`--staged` per il pre-commit, `--fix` per la riparazione quando è
+> inequivocabile) e i file che *documentano* esempi di mojibake sono in
+> `scripts/encoding-allowlist.txt` (WARN, non errore). Istruzioni operative per gli agenti:
+> `AGENTS.md` §F9-ter.
 
 **Il job `gates-protocol`** (Sessione 80, issue #248, ADR-0012) è il primo enforcement del
 protocollo: fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di governance del repo
