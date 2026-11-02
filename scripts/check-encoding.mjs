@@ -7,13 +7,19 @@
  * BOM** quando `Set-Content -Encoding UTF8`. Un file con accenti, em-dash o
  * emoji diventa illegibile senza che nessun comando fallisca:
  *
- *     à  ->  "Ã " (U+00C3 + NBSP)      —  ->  "â€”"
- *     €  ->  "â‚¬"                  ✅ ->  "ðŸ˜€"
+ *     "a-accentata"  ->  "A-tilde" + NBSP   (U+00C3 U+00A0)
+ *     "em-dash"      ->  "a-circumflex" + "euro" + "virgoletta" (U+00E2 U+20AC U+201D)
+ *     "euro"         ->  "a-circumflex" + "virgoletta bassa" (U+00E2 U+201A)
+ *     "emoji"        ->  "eth" + U+0178 + U+0153 + U+009D
+ *
+ * (Le firme sono descritte per codice Unicode, non scritte letteralmente: questo
+ * file non deve contenere il danno che il gate cerca, altrimenti dovrebbe stare
+ * nella allowlist — e un gate che non controlla se stesso e' un gate a meta'.)
  *
  * Il danno e' silenzioso: il file si apre, il diff e' plausibile, e il
  * contenuto arriva in `main`. Nella Sessione 85 due file di sessione sono
  * stati riscritti cosi' (40+ punti corrotti ciascuno) e il rilevamento e'
- * avvenuto per caso, cercando la sequenza `Ã|â€|Â`.
+ * avvenuto per caso, cercando la sequenza `A-tilde` / `a-circumflex`.
  *
  * **Cosa controlla**:
  *   1. **BOM UTF-8** in testa al file (lo aggiunge `Set-Content -Encoding UTF8` di 5.1)
@@ -78,8 +84,8 @@ const HIGH_CLASS =
  * Il mojibake e' una coppia: un carattere-guida (quello che la doppia
  * codifica produce dal primo byte di una sequenza UTF-8) seguito da un
  * carattere di continuazione. La coppia e' il segnale: un carattere-guida
- * isolato ("Ã") puo' essere legittimo (un nome proprio), ma "Ã©" o "â€”"
- * non lo sono mai.
+  * isolato (U+00C3 da solo) puo' essere legittimo (un nome proprio), ma la coppia
+  * U+00C3 U+00A9 o U+00E2 U+20AC U+201D non lo e' mai.
  */
 const MOJIBAKE_SOURCE = '[\\u00c2-\\u00c5\\u00d0\\u00d1\\u00e2\\u00ef\\u00f0][' + HIGH_CLASS + ']';
 
@@ -154,10 +160,23 @@ function git(args, encoding) {
 }
 
 function listFiles() {
-  const args = STAGED
-    ? ['diff', '--cached', '--name-only', '--diff-filter=ACM', '-z']
-    : ['ls-files', '-z'];
-  return git(args).toString('utf8').split('\0').filter(Boolean);
+  if (STAGED) {
+    const args = ['diff', '--cached', '--name-only', '--diff-filter=ACM', '-z'];
+    return git(args).toString('utf8').split('\0').filter(Boolean);
+  }
+  // Tracciati **e non tracciati**: un file nuovo, corrotto prima ancora di essere
+  // committato, deve essere visto dal gate locale (in CI i file sono gia' tracciati).
+  const tracked = git(['ls-files', '-z']).toString('utf8').split('\0').filter(Boolean);
+  let untracked = [];
+  try {
+    untracked = git(['ls-files', '--others', '--exclude-standard', '-z'])
+      .toString('utf8')
+      .split('\0')
+      .filter(Boolean);
+  } catch {
+    // nessun repository git o untracked non disponibili: i tracciati bastano
+  }
+  return [...new Set([...tracked, ...untracked])];
 }
 
 function readContent(file) {

@@ -15,6 +15,7 @@ docs/17-DEV-NOTES.md                       # lesson 36-6 e 69-5: il danno e i su
 docs/18-DEV-LOG.md                         # cronologia del danno (sessione 36 e 72)
 docs/state/sessions/72-audit-procedure-automatiche-pwsh-encoding.md # la sessione che ha scoperto il difetto
 docs/state/sessions/86-implementation-specs.md                       # lesson learned della sessione 85
+docs/state/sessions/87-encoding-remediation.md                       # lesson learned della sessione 87: il danno con gli esempi
 scripts/test-aggregate-determinism.sh      # il test greppa il mojibake: e' un fixture, non un difetto
 # --- file generati che incorporano il contenuto dei file sopra -----------------
 docs/SESSIONS.md                          # aggregato delle sessioni (incorpora i testi sopra)
