@@ -143,6 +143,8 @@ $files = @(
     "docs/state/sessions/82-catena-post-merge.md",
     "docs/state/sessions/83-rifinitura-agents.md",
     "docs/state/sessions/84-push-race-retry.md",
+    "docs/state/sessions/85-competitive-positioning.md",
+    "docs/state/sessions/86-implementation-specs.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -192,6 +194,12 @@ $files = @(
     "docs/19-GEO-CONTEXT.md",
     "docs/20-SCROBBLING-HUB.md",
     "docs/21-AUDIO-FEATURES.md",
+    "docs/22-COMPETITIVE-POSITIONING.md",
+    "docs/23-ANALYSIS-PIPELINE.md",
+    "docs/24-ARTWORK-ENRICHMENT.md",
+    "docs/25-MEMORIES-SHARE-EXPLORE.md",
+    "docs/26-ONBOARDING-DEMO.md",
+    "docs/27-PRIVACY-DATA-SETTINGS.md",
     # Fixture (small/foundational) — i file di grandi dimensioni (medium/large/scenarios/demo-user)
     # sono generati da scripts/generate-fixtures.mjs su richiesta, e NON inclusi nel bundle
     # (vedi 10-TESTING §3.5). Lo script generator è incluso.
