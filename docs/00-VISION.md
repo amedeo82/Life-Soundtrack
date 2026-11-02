@@ -1,8 +1,8 @@
 # 00 — Visione e Missione
 
 > Status: 🟡 DRAFT
-> Versione: 0.2
-> Ultima modifica: Sessione 9 (audit 2026-10-15)
+> Versione: 0.3
+> Ultima modifica: Sessione 85 (2026-11-02)
 > Responsabile: Boss
 
 ---
@@ -49,6 +49,7 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 ## 🌍 Perimetro Iniziale (MVP)
 
 - **Piattaforme supportate (Europa)**: Spotify, YouTube Music, Apple Music, Deezer, Tidal, SoundCloud, Last.fm, ListenBrainz
+  - *Allo stato del repository (Sessione 85) sono **implementate e importabili 5** fonti: Spotify, YouTube Music, Apple Music, ListenBrainz, Last.fm. Deezer, Tidal e SoundCloud restano nel perimetro ma **fuori** finché non c'è domanda reale — vedi `docs/22-COMPETITIVE-POSITIONING.md` §8 e `docs/01-PLATFORMS.md` §3.4-3.6*
 - **Piattaforma di distribuzione**: PWA (web app installabile)
 - **Modalità operativa**: Local-first, elaborazione in-browser
 - **Lingue MVP**: Italiano, Inglese
@@ -61,6 +62,9 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 - Non è un social network musicale
 - Non è un'app di raccomandazione
 - Non è uno strumento per artisti/label (fuori scope per ora)
+- **Non è un tracker di statistiche (Last.fm)**: un tracker conta e socializza i tuoi ascolti; noi li usiamo per scrivere un diario. È la distinzione da mettere per prima nel README
+- **Non è un servizio cloud**: nessun account obbligatorio, nessun backend, nessun lock-in. L'unica uscita di rete è l'invio ai hub di scrobbling, **solo** se l'utente lo attiva hub per hub
+- **Non è un diario manuale**: l'utente non deve annotare nulla durante l'ascolto; le storie nascono da anni di dati già esistenti
 
 ## 🎁 Cosa offre di unico
 
@@ -69,6 +73,8 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 3. **Rilevamento ere musicali ed eventi**: pattern e anomalie che raccontano capitoli della vita
 4. **Ricordi tipo "Facebook Memories"**: ma basati sulla musica, non sulle foto
 5. **Privacy come valore**: i dati non escono mai dal dispositivo
+
+> **Stato reale dei cinque punti**: la verifica del 2026-11-02 (Sessione 85) ha distinto ciò che è **vero nel codice** da ciò che è **promesso**: la privacy locale e l'unificazione multi-sorgente sono reali; i motori di analisi (mood, ere, eventi, ricordi) e la pipeline audio sono **scritti e testati in core, ma non ancora collegati all'app** — quindi non ancora visibili all'utente. La tabella completa, con evidenze e gap, è in [`docs/22-COMPETITIVE-POSITIONING.md`](22-COMPETITIVE-POSITIONING.md) §4; il collegamento è la Story **2.5**.
 
 ## 📈 Metriche di Successo
 
@@ -82,7 +88,7 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 | Decisione | Esito | Rif. |
 |-----------|-------|------|
 | Modello di business | ✅ Open-source puro, nessuna monetizzazione | D.A.9 |
-| Licenza | ✅ Apache-2.0 (con patent grant) | D.A.10 |
+| Licenza | ✅ **AGPL-3.0** (con patent grant non applicabile: AGPL-3.0) — ratificata dal project owner il 2026-10-30 (issue #201), D-AF.2 in `21-AUDIO-FEATURES.md` §2.4 | D.A.10 (superata) / D-AF.2 |
 | Self-hosting supportato | ✅ Solo self-hosting con docs curata; istanza demo gratuita eventuale in Fase 2 | D.A.11 |
 | Sync cloud | ✅ Previsto come servizio self-hosted in Fase 2 (mai SaaS); ADR-0005 con E2EE + consenso granulare + opt-in per categoria | D.A.12 |
 | Cloud sync (implementazione MVP) | ✅ Placeholder in `05`, ADR-0005 da scrivere prima dell'implementazione | D.A.7 |
@@ -95,6 +101,7 @@ Non è un'app di statistica. È un'app di **narrazione autobiografica** basata s
 |----------|------|-----------|
 | 0.1 | Sessione 0 | Bozza iniziale, consolidata dal lavoro esplorativo |
 | 0.2 | Sessione 9 (2026-10-15) | Audit: chiuse tutte le decisioni strategiche aperte (D.A.9-12). Aggiornato modello di business |
+| 0.3 | Sessione 85 (2026-11-02) | Posizionamento competitivo: rimando a `22-COMPETITIVE-POSITIONING.md`; "Cosa NON è" esteso (non un tracker, non un servizio cloud, non un diario manuale); stato reale dei cinque differenziatori (quello che è **vero nel codice** vs quello che è solo promesso); **licenza allineata ad AGPL-3.0** (la riga dichiarava ancora Apache-2.0, D.A.10 superata da D-AF.2, issue #201); perimetro MVP: 5 fonti implementate su 8 dichiarate |
 
 ---
 

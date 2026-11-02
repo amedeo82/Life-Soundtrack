@@ -8,9 +8,9 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 
 - Importa la cronologia di ascolto dai servizi supportati e la normalizza in un database locale (Dexie/IndexedDB)
 - **Invia i tuoi ascolti ai hub di scrobbling** (Last.fm, ListenBrainz): coda in locale, retry con backoff, consenso per-hub esplicito
-- **Tutto resta sul tuo dispositivo**: elaborazione locale, privacy-first
-- PWA installabile, onboarding guidato con anteprima del risultato
-- Interfaccia in italiano e inglese, strumenti di manutenzione e di purga del database
+- **Tutto resta sul tuo dispositivo**: elaborazione locale, nessun backend. L'unica uscita di rete è l'invio ai hub di scrobbling, e solo se lo attivi tu (default: nessuno)
+- PWA installabile, onboarding guidato in 5 passaggi (benvenuto → privacy → import → elaborazione → riepilogo)
+- Interfaccia in italiano e inglese, funzioni di manutenzione del database nel core (rekey, pulizia degli orfani, recount)
 
 ### Piattaforme importabili
 
@@ -20,12 +20,31 @@ Life Soundtrack è un'applicazione web (PWA) che trasforma i metadati grezzi del
 - `listenbrainz` — ListenBrainz (export API: ZIP/JSONL)
 - `lastfm` — Last.fm (file CSV/JSON, oppure API via proxy CORS con credenziali locali)
 
+## 🚫 Cosa non siamo
+
+Life Soundtrack non è un altro scrobbler. Le distinzioni che contano:
+
+- **Non è Last.fm**: Last.fm è un tracker di statistiche — conta e socializza i tuoi ascolti. Qui i tuoi ascolti restano sul dispositivo e diventano un diario
+- **Non è Spotify Wrapped**: non un annuale effimero e chiuso, ma una timeline continua che cresce con gli anni
+- **Non è un servizio cloud**: nessun account obbligatorio, nessun backend, nessun lock-in — i dati sono tuoi e puoi portarli via
+- **Non è un diario manuale**: non devi annotare nulla mentre ascolti, la narrazione nasce da anni di dati già esistenti
+- **Non è un social network**, né una piattaforma di streaming, né uno strumento per artisti e label
+
+Il posizionamento completo — confronto con i competitor e **verifica dello stato reale** di ogni differenziatore — è in [`docs/22-COMPETITIVE-POSITIONING.md`](docs/22-COMPETITIVE-POSITIONING.md).
+
 ## 🗺️ Roadmap
 
-Non ancora implementato — la roadmap completa, con lo stato di ogni story, è in [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md):
+Non ancora nell'app — la roadmap completa, con lo stato di ogni story, è in [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md):
 
-- **Analisi** (EPIC 2): mood giornaliero, ere, eventi e ricordi
-- **Enrichment** (EPIC 4): audio features (valence, energy, danceability, BPM), artwork, generi
+- **Collegamento del pipeline di analisi** (EPIC 2, Story 2.5): i motori di mood, ere, eventi e ricordi sono scritti e testati in `@ls/core`, ma non sono ancora eseguiti dall'app
+- **Ricordi + Share** (EPIC 3, Story 3.2): feed dei ricordi, card 1080×1350, export statico di un capitolo, tagging manuale di ere e canzoni
+- **Esplora + Analisi** (EPIC 3, Story 3.3): ricerca sui propri dati, quadrante valence/energy, insight in prosa
+- **Anteprima in onboarding** (EPIC 3, Story 3.5): diario di esempio prima dell'import, prime righe della timeline dopo
+- **Artwork** (EPIC 4, Story 4.3): copertine degli album — il campo esiste già nello schema, la pipeline non le popola ancora
+- **Audio features** (EPIC 4, Story 4.1): la pipeline è implementata in `@ls/core` (cascata cache → Essentia.js → AcousticBrainz → euristico), ma il modulo Essentia non è ancora integrato nell'app
+- **Lookup MusicBrainz** (EPIC 4, Story 4.2): MBID e generi (priorità bassa: non serve all'artwork)
+- **Privacy spec finale** (EPIC 5, Story 5.1): pagina in-app «Come trattiamo i tuoi dati»
+- **Export e purge** (EPIC 5, Story 5.2): export JSON/CSV del diario, cancellazione totale con doppia conferma
 - **Altre piattaforme**: Deezer, Tidal, SoundCloud ([`docs/01-PLATFORMS.md`](docs/01-PLATFORMS.md) §3.4-3.6)
 - **Scrobbling continuo**: hub Maloja (Fase 2) — Last.fm e ListenBrainz sono già implementati (Story 1.5)
 

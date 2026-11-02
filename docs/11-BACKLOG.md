@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.33 · Sessione 77 (2026-10-31, issue #233) · l'**EPIC 3** (UI) ha le sue **prime due schermate**: la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.2** (Ricordi + Share) e la **3.3** (Esplora + Analisi) per chiudere il percorso end-to-end, poi la **5.1/5.2** (privacy, export e purge) e il **lookup MusicBrainz** (4.2) con l'artwork (4.3). Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.34 · Sessione 85 (2026-11-02, analisi competitiva) · l'**EPIC 3** (UI) ha le sue **prime due schermate**: la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding) per chiudere il percorso end-to-end, poi la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). La verifica del 2026-11-02 ha rilevato un buco più profondo: i **motori di analisi dell'EPIC 2 sono scritti e testati in core ma non sono mai eseguiti dall'app** → la nuova **2.5** (collegamento del pipeline di analisi all'app) è il primo passo dell'ordine di lavorazione. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -416,6 +416,35 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 ---
 
+### Story 2.5 — Collegamento del pipeline di analisi all'app `[PHASE-2]` `[AREA:analysis]` `[PRI:B]` `[SIZE:L]` `[DEP:2.1, 2.2, 2.3, 2.4]`
+
+**Descrizione**: I quattro motori di analisi sono implementati e testati in `packages/core/src/analysis/` (mood `mood/`, ere `era/`, eventi `event/`, ricordi `memory/`, con l'orchestratore `pipeline.ts`) e la persistenza degli insight esiste (`db/insights.ts`), ma **nessun codice in `apps/web` li esegue**: la Home **legge** gli insight (`apps/web/src/hooks/useHomeTimelineData.ts`) che nessuno **scrive**. Dopo un import pulito le sezioni mood, ere e ricordi restano vuote e i differenziatori narrativi del progetto — «dati storici + emozioni» — non sono visibili a nessuno. Questa story collega il core all'app: è il lavoro che trasforma «abbiamo gli algoritmi» in «l'app conosce la tua musica».
+
+**Stato**: ⬚ **TODO** — la specifica di collegamento è **scritta** (`docs/23-ANALYSIS-PIPELINE.md`, 🟡 DRAFT v0.1, Sessione 86) e diventa 🟢 APPROVED alla ratifica del project owner; dopo la ratifica l'agente apre l'issue di implementazione (`agent-ready`) e la lavora. La spec definisce i contratti reali del core (pipeline, persistenza, i18n), i punti di innesto nell'app, lo stato vuoto `no-features` e il piano di test
+
+**Task**:
+- T2.5.1 — Trigger di esecuzione: dopo l'import e a richiesta, in **coda** (l'import non deve mai attendere l'analisi: `05§6.1`)
+- T2.5.2 — Precondizione dei dati: il mood tracker usa **solo** feature misurate o manuali (D-AF.4: l'euristico non alimenta il mood); senza feature l'analisi **non produce nulla** e nessun segnale viene inventato (D-A.1)
+- T2.5.3 — Persistenza degli insight con `derivedVersion` e ricalcolo batch che rimuove gli insight `stale` (MIG-3, `04§9`)
+- T2.5.4 — Stato vuoto **esplicito** nella UI («non c'è ancora niente da raccontare: importa il tuo storico»), mai uno schermo vuoto senza spiegazione
+- T2.5.5 — Wiring dei quattro plug-in dell'orchestratore (`04§8.1`): `createMoodGenerator`, `createEraGenerator`, `createEventGenerator`, `createMemoryGenerator`
+- T2.5.6 — i18n: i testi dei ricordi sono **stringhe rese** dal resolver (D-A.4), nessuna stringa italiana nel core
+- T2.5.7 — Collegamento alla pipeline audio features (Story 4.1): la coda di arricchimento è il **precondizionamento** dell'analisi, non un doppione
+
+**Acceptance criteria**:
+- [ ] Dopo un import reale con feature disponibili, la tabella `insights` contiene righe `mood_day`, `era`, `event` e `memory` con `derivedVersion`
+- [ ] La Timeline mostra almeno un'era e la Home un ricordo del giorno, letti dal DB (non da dati in memoria)
+- [ ] **Nessun segnale inventato**: senza feature misurate o manuali non viene prodotto alcun insight basato sulla valence (D-A.1), e la UI lo dice
+- [ ] Esecuzione **idempotente**: un ricalcolo non duplica gli insight e un'interruzione non lascia righe parziali (`21§11.3`, T-AF.14)
+- [ ] L'import non attende l'analisi: il tempo di import resta indipendente dal numero di eventi analizzati
+- [ ] Test con i fixture di scenario (`fixtures/scenarios/*.json`) e copertura dei quattro generatori
+- [ ] La spec di collegamento è scritta e 🟢 APPROVED prima dell'implementazione (protocollo: `agent-ready` solo con spec approvata)
+
+**Dipendenze**: Story 2.1, 2.2, 2.3, 2.4 (tutte ✅ DONE) · la 4.1 è la sorgente delle feature
+**Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
+
+---
+
 ## EPIC 3 — UI/UX (Fase 3)
 
 ### Story 3.1 — Home + Timeline `[PHASE-3]` `[AREA:ui]` `[PRI:B]` `[SIZE:XL]`
@@ -438,19 +467,35 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 
 ### Story 3.2 — Ricordi + Share `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
 
+**Descrizione**: Il feed dei ricordi (schermata ⑪) e la **condivisione** di un capitolo della timeline. Il vincolo «tutto locale» non è un blocco: la condivisione esporta **un capitolo statico** (immagine, HTML autonomo, PDF), **mai** il database. La privacy resta il messaggio: la card dice «la mia estate 2019 su Life Soundtrack» e non contiene dati identificativi. In questa story cade anche il **tagging manuale** di ere e canzoni («viaggio a Berlino», «esame di laurea»): è il ponte fra l'analisi automatica, che dice *cosa* suonava, e l'utente, che sa *perché*. I dati del tagging sono testo libero e restano sul dispositivo: sono coperti dall'export e dalla cancellazione della Story 5.2.
+
 **Acceptance criteria**:
 - [ ] Feed ricordi mobile (schermata ⑪)
 - [ ] ShareSheet con card 1080×1350 generata via canvas
 - [ ] Condivisione nativa + download immagine
+- [ ] La card è un **capitolo statico**: copertine, periodo, canone simbolo, nome dell'era — nessun dump del database nei canali di condivisione
+- [ ] Export statico alternativo (HTML autonomo e/o PDF) per chi non usa i social
+- [ ] Tagging manuale di un'era (nome libero + parole chiave) e di una canzone, persistito localmente e cancellabile dalla Story 5.2
+- [ ] L'utente può rinominare un'era rilevata automaticamente: il campo esiste già (`Insight.userNote`) ma **non** ha né UI né percorso di scrittura
+- [ ] i18n IT/EN per le nuove stringhe
+
+**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.2: feed, card canvas, ShareSheet, tagging manuale) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
 
 ---
 
 ### Story 3.3 — Esplora + Analisi `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
 
+**Descrizione**: Le schermate di esplorazione (⑨ ricerca, ⑩ quadrante valence/energy) sono il luogo dove l'utente **interroga** il proprio diario. Il criterio di accettazione di questa story non è «un grafico in più»: è l'**insight in prosa** — la stessa analisi raccontata in linguaggio naturale («A marzo 2023 hai ascoltato 47 canzoni malinconiche in due settimane: stava succedendo qualcosa?»). Un grafico senza lettura è l'ennesimo cruscotto; l'«aha moment» è la frase che spiega un periodo.
+
 **Acceptance criteria**:
 - [ ] Schermata ⑨ con search autocomplete sui propri dati
 - [ ] Schermata ⑩ QuadrantChart valence/energy
 - [ ] Click su punto → deep-link timeline
+- [ ] **Insight in prosa**: ogni insight mostrato è accompagnato da una frase generata dai template i18n (`insight.*`), non da un solo valore numerico
+- [ ] Gli insight visualizzati sono **persistiti** (nessuna lettura «a caldo» che non passi dalla tabella `insights`): la story consuma l'output della Story **2.5**
+- [ ] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
+
+**Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟡 DRAFT v0.1, Sessione 86 — §3.3: Esplora, QuadrantChart, InsightCard, deep-link interno) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
 
 ---
 
@@ -474,8 +519,34 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [x] Il nastro **non** effettua richieste di rete
 
 **Spec**: `docs/19-GEO-CONTEXT.md` (v1.0 🟢 APPROVED, Sessione 67) §8.2-8.3 · `docs/08-COPY-I18N.md` §2.12h · `docs/06-UX-FLOWS-STATES.md` (schermata ⑦)
+---
+
+### Story 3.5 — Anteprima del risultato in onboarding (modalità demo) `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:M]` `[DEP:0.4, 3.1]`
+
+**Descrizione**: L'onboarding oggi termina con un **contatore** di eventi (`apps/web/src/onboarding/OnboardingRouter.tsx`, schermata ⑤ Reveal): l'utente non vede mai il prodotto prima di usarlo, e il README dichiarava un'«anteprima del risultato» che il codice non ha. Il progetto ha già i mattoni: `fixtures/demo-user.json` (1 anno, 4500 eventi, 200 track, 30 artisti, `demoMode: true`) è previsto da `06-UX-FLOWS-STATES.md` §2.14 e la CTA «Scopri come funziona» esiste nelle stringhe i18n (`empty.cta.demo`) — ma **nessun file di codice li usa**. Questa story rende l'onboarding **spettacolare**: il diario di esempio *prima* dell'import, le prime righe della timeline reale *dopo*.
+
+**Stato**: ⬚ **TODO** — la specifica è **scritta** in `docs/26-ONBOARDING-DEMO.md` (🟡 DRAFT v0.1, Sessione 86) e diventa 🟢 APPROVED alla ratifica; dopo la ratifica l'agente apre l'issue di implementazione (`agent-ready`). La spec definisce il **DB demo separato**, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche) e il reveal con ≥3 righe reali.
+
+**Task**:
+- T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding (la stringa `empty.cta.demo` esiste ma non è renderizzata)
+- T3.5.2 — Demo: caricamento di `fixtures/demo-user.json` in un contesto **isolato** (nessun dato scritto nel database dell'utente)
+- T3.5.3 — Anteprima resa con gli **stessi componenti** della Home e della Timeline (Story 3.1): nessun renderer parallelo da mantenere
+- T3.5.4 — Reveal post-import: le **prime tre righe** della timeline reale invece del solo contatore di eventi
+- T3.5.5 — Dichiarazione: i dati della demo sono **sintetici** e il passaggio all'import reale è esplicito
+
+**Acceptance criteria**:
+- [ ] La CTA della demo è raggiungibile dal primo passo e mostra un **diario di esempio**, non un testo descrittivo
+- [ ] La demo usa gli stessi componenti della Home/Timeline (nessun renderer separato)
+- [ ] La demo **non scrive** nel database dell'utente (test: dopo la demo il DB è vuoto)
+- [ ] Il reveal post-import mostra almeno 3 righe della timeline reale
+- [ ] i18n IT/EN per le nuove stringhe
+- [ ] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
+
+**Dipendenze**: Story 0.4 ✅ (onboarding), Story 3.1 ✅ (Home + Timeline) · **effetto pieno dipende dalla Story 2.5** (senza, la demo non ha ere né mood)
+**Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
 
 ---
+
 ## EPIC 4 — Arricchimento (Fase 2/3)
 
 ### Story 4.1 — Pipeline audio features `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:L]`
@@ -508,9 +579,11 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 ---
 
-### Story 4.3 — Artwork enrichment `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]` `[DEP:4.2]`
+### Story 4.3 — Artwork enrichment `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]`
 
 **Descrizione**: Popolamento di `Track.artworkUrl` e `Album.artworkUrl` (aggiunti in `02 v1.2` per chiusura M5 audit). Cascata di fonti: **Spotify Web API** (se utente Spotify-first e `PrivacySettings.enrichMetadata=true`) → **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`, no auth, rate limit 1 req/s) → **iTunes Search API** (`/search?term=`, no auth, fallback per utenti Apple/Last.fm-first) → **placeholder gradient** generato runtime.
+
+**Priorità 2026-11-02 (P0)**: le copertine sono l'**ancora visiva** del diario — senza, la timeline è un elenco di testo e l'app resta uno strumento tecnico invece di un oggetto emotivo. L'artwork è inoltre il **moltiplicatore** delle story vicine: il colore dominante dell'era, la card condivisibile (3.2) e la lettura visiva del mood (3.3) nascono tutti dalle copertine. La verifica del 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §4) ha confermato che **non esiste alcun artwork nel repository**: il campo esiste nello schema ma la pipeline di import scrive sempre `artworkUrl: null` (`packages/core/src/adapters/pipeline.ts`), e il componente `MemoryCard` ha solo lo slot vuoto.
 
 **Task**:
 - T4.3.1 — Modulo `enrichment/artwork.ts` con funzione `fetchArtworkUrl(track|album, deps)` che applica la cascata
@@ -529,7 +602,8 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Migrazione Dexie v2→v3 testata con dati pre-migrazione (10-TESTING §4.3)
 - [ ] Placeholder gradient generato coerente con Mood (vedi `15-DESIGN-SYSTEM` §3 palette mood)
 
-**Dipendenze**: Story 4.2 (per `mbid` arricchito da MB lookup)
+**Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: Spotify Web API e iTunes Search coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
+**Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟡 DRAFT v0.1, Sessione 86 — la spec di questa story; da ratificare: cascata iTunes → Cover Art Archive → placeholder, D-24.1…D-24.6) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
 **Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
 ---
@@ -559,21 +633,26 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 ---
 ## EPIC 5 — Privacy e legale (Fase 6)
 
-### Story 5.1 — Privacy spec finale `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
+### Story 5.1 — Privacy spec finale `[PHASE-6]` `[AREA:privacy]` `[PRI:B]` `[SIZE:M]`
 
 **Acceptance criteria**:
 - [ ] `09-PRIVACY-SECURITY.md` APPROVED
 - [ ] Data flow diagram
 - [ ] Bozza privacy policy GDPR-compliant
+- [ ] **Pagina in-app «Come trattiamo i tuoi dati»**: per il lancio non serve un documento legale monumentale, serve una pagina chiara e onesta che dica (a) cosa resta sul dispositivo e cosa non esce mai, (b) che l'**unica** uscita è l'invio ai hub di scrobbling e solo se l'utente ha attivato quel hub (default: nessuno), (c) cosa succede ai dati quando li esporta o li cancella, (d) che il progetto è AGPL-3.0 e offre il sorgente (§13). La pagina utente è il documento (`09`) tradotto in linguaggio semplice — vedi `22-COMPETITIVE-POSITIONING.md` §13 (decisione D-22.7)
+
+**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.1: pagina in 5 blocchi, montaggio della schermata About, 7 chiavi i18n mancanti, drift `useDbHealth`) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13 · `docs/12-DEVOPS.md` §5.3 (AGPL §13)
 
 ---
 
-### Story 5.2 — Export e purge `[PHASE-6]` `[AREA:privacy]` `[PRI:B]`
+### Story 5.2 — Export e purge `[PHASE-6]` `[AREA:privacy]` `[PRI:B]` `[SIZE:M]`
 
 **Acceptance criteria**:
 - [ ] `purgeIp()` cancella tutti gli IP
 - [ ] Export JSON completo (portabilità GDPR)
 - [ ] Cancellazione totale con doppia conferma
+
+**Spec**: **`docs/27-PRIVACY-DATA-SETTINGS.md`** (🟡 DRAFT v0.1, Sessione 86 — §5.2: `exportAll` con manifest, CSV degli ascolti, `purgeInsights`, `deleteAll` transazionale, doppia conferma con parola chiave) · `docs/09-PRIVACY-SECURITY.md` (🟡 DRAFT v0.7) §6.1 · `docs/06-UX-FLOWS-STATES.md` §2.13, §3.4 · `docs/22-COMPETITIVE-POSITIONING.md` §12
 
 ---
 
@@ -622,9 +701,12 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **1.6, 4.4, 3.4** geo e contesto di ascolto — **tranche chiusa** (Sessione 76, issue #231): dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201) sono state completate la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1 — Sessione 68, issue #205, PR #209, merge `68c27e5`), la **4.4** (DB MMDB on-demand + derivazione della città — issue #221) e la **3.4** (nastro contesto — Sessione 76, issue #231: il nastro e il dettaglio del periodo, con il namespace `timeline.context.*` materializzato). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città. Il blocco NEXT-STEP del README indica ora la **3.1** (Home + Timeline): con il nastro pronto, la Timeline è il pezzo che manca per montarlo e per sbloccare il test end-to-end
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
-15. **3.1, 3.2, 3.3** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233): le schermate ⑥ e ⑦ esistono, con i grafici SVG scritti a mano e il nastro contesto della 3.4 montato sotto le EraBand; l'app non è più solo onboarding (la scelta onboarding/app è legata ai dati). Restano la **3.2** (Ricordi + Share, L) e la **3.3** (Esplora + Analisi, L): sono le ultime due schermate mancanti e chiudono il percorso end-to-end
-16. **5.1, 5.2** privacy
-17. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
+15. **2.5** Collegamento del pipeline di analisi all'app — **prima di tutto il resto**: i motori di analisi (mood, ere, eventi, ricordi) sono scritti e testati in `packages/core/src/analysis/`, ma **nessun codice in `apps/web` li esegue**: la Home legge gli insight che nessuno scrive, e dopo un import pulito le sezioni restano vuote. È il differenziatore narrativo del progetto ed è più economico dell'artwork (`22-COMPETITIVE-POSITIONING.md` §7, D-22.2). **Manca la spec**: l'agente che la claima apre l'issue `needs-spec` e scrive la specifica di collegamento prima di implementare
+16. **4.3** Artwork enrichment — **P0**: l'ancora visiva del diario, e il moltiplicatore delle story vicine (colore dell'era, card condivisibile, lettura del mood). **Non dipende più dal lookup MusicBrainz** (D-22.4): Spotify Web API + iTunes Search + placeholder gradient bastano
+17. **3.2, 3.3, 3.5** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233) e la **3.4** (nastro contesto) pure (Sessione 76, issue #231). Restano la **3.2** (Ricordi + Share: un **capitolo statico**, mai un dump del database), la **3.3** (Esplora + Analisi: insight **in prosa**, non un grafico in più) e la **3.5** (anteprima/demo in onboarding): le tre chiudono il percorso end-to-end. La 3.3 consuma l'output della **2.5**
+18. **5.2, 5.1** privacy — nell'ordine **5.2 → 5.1**: export e purge sono l'atto di fiducia che rende vera la promessa della privacy (pulsanti **prominenti**, non nascosti in un menu), la pagina «Come trattiamo i tuoi dati» ne è la traduzione in linguaggio utente (D-22.7)
+19. **4.2** Lookup MusicBrainz — **P2**: utile per la precisione dei metadati, non per l'esperienza; non è più il prerequisito dell'artwork (D-22.4)
+20. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
 
 **Regola di selezione per agenti paralleli (ADR-0006)**: l'ordine sopra è l'ordine di **tentativo**, non una scelta automatica. Un agente lavora la prima story dell'ordine che sia **libera** — issue `agent-ready` senza label `in-progress` (o con claim stantio oltre le 12h). Se la prima è già claimata da un altro agente, passa alla successiva. La procedura obbligatoria — claim, riverifica, cascata, TTL — è definita in `AGENTS.md` §"🎫 Presa in carico delle story (claim)". **Nessuna selezione di story avviene senza quella procedura.**
 
@@ -638,14 +720,16 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · **2.2 e 2.3 completate** (Sessione 69 e Sessione 70): l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere) e 2.3 (eventi) — nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231) e la **3.1** (Home + Timeline, Sessione 77, issue #233): l'app ha ora le sue prime due schermate vere. Restano le **3.2** (Ricordi + Share) e la **3.3** (Esplora + Analisi) |
-| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.2** (lookup MusicBrainz), **4.3** (artwork), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere), 2.3 (eventi) e 2.4 (ricordi): i quattro motori sono **scritti e testati in core**, ma **non collegati all'app** → **2.5** (nuova, Sessione 85) è il collegamento mancante e diventa il primo passo della lista di priorità · nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231) e la **3.1** (Home + Timeline, Sessione 77, issue #233): l'app ha ora le sue prime due schermate vere. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding, nuova, Sessione 85) |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.3** (artwork, **P0** dal 2026-11-02 e **senza dipendenza** dal lookup MusicBrainz), **4.2** (lookup MusicBrainz, P2), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
 **EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 5/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment · 1.5 scrobbling hub). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
+> **Allineato al 2026-11-02** (Sessione 85, analisi competitiva verificata sul codice): il catalogo passa da 28 a **30 story** con **2.5** (collegamento del pipeline di analisi all'app) e **3.5** (anteprima/demo in onboarding); l'ordine di lavorazione diventa **2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1**; la **4.3** non dipende più dalla **4.2** e sale a **P0**; la **3.2** incorpora il **tagging manuale** e l'**export statico** del capitolo; la **3.3** richiede **insight in prosa**; la **5.1** richiede la **pagina in-app «Come trattiamo i tuoi dati»**. Motivazioni, evidenze e decisioni proposte: `docs/22-COMPETITIVE-POSITIONING.md` (D-22.1…D-22.7).
+>
 > **Allineato al 2026-10-30** (Sessione 67, follow-up post-merge): la **tranche geo sale al posto 13**, davanti alle 2.2/2.3, per allineare la lista di priorità al blocco NEXT-STEP del README. L'aggregatore ordina le story **migrate per id** (e non per la priorità di questa lista): con lo state file della 1.6 creato nella Sessione 67, il puntatore indicava «1.6» mentre questa lista e la prosa dell'INDEX indicavano «2.2/2.3» — due documenti, due risposte diverse sul prossimo lavoro. La scelta è del project owner: **geo prima**, e la lista è stata riallineata al puntatore (nessuna modifica al codice dell'aggregatore).
 >
 > **Aggiornato al 2026-10-30** (Sessione 67, issue #201: gli **atti del project owner** sono chiusi — la ratifica di `19-GEO-CONTEXT.md` (v1.0 🟢) e dell'ADR-0009 (v1.0 🟢) e l'applicazione della **licenza AGPL-3.0** (D-AF.2). Le tre story della tranche geo — **1.6** (fondazione geo), **4.4** (DB IP→città) e **3.4** (nastro contesto) — entrano nella roadmap con la specifica già ratificata; le story **2.2** e **2.3** ricevono il loro state file (la dipendenza `[DEP:2.1]` è soddisfatta dal merge della 2.1). Con i loro state file il blocco NEXT-STEP del README punta alla **prima story lavorabile** invece del fallback. Per il dettaglio cronologico vedi `docs/18-DEV-LOG.md`).
@@ -715,6 +799,7 @@ Ogni story deve avere label GitHub:
 | 1.6.28 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 implementata** (fondazione geo e contesto di ascolto): il delta su `02-DATA-SCHEMA.md` passa a **v1.7** (i tre campi derivati `city`/`citySource`/`cityConfidence` su `ListenEvent`, l'entità derivata `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS`, i toggle `retainCountry` (**default true**: il paese è derivato e non identificativo — decisione del project owner sull'issue #108), `retainCity`/`retainDeviceDetail` (default false) e `retainDeviceType`/`deriveContext` (default true), la tabella `contexts` nello **schema Dexie v6** con migrazione non distruttiva e **MIG-5**: il ricalcolo del contesto è esplicito e non azzera i campi già persistiti). Il **classificatore L1** vive in `packages/core/src/context/` (regole R1..R7 nell'ordine dichiarato, soglia 0.5, `derivedVersion` dai parametri, slot = giorno locale × dispositivo, paese di riferimento = moda su 90gg con ≥30 eventi) con la persistenza dei periodi (`recompute()`, verdetto utente con `userLabel` sopravvive al ricalcolo) e il **fixture di scenario geo** (`fixtures/scenarios/geo-context.json`, generato da `scripts/generate-fixtures.mjs geo`). **39 test** nuovi in `@ls/core`. Scelte dichiarate (`docs/state/stories/1.6-geo-foundation.md`): `away` come complemento di R1, R4 vincolata alla durata delle sessioni (25 minuti, la soglia di R6) perché uno spostamento ricorrente non venga classificato `home`, il viaggio riconosciuto sull'intero *run* di giorni esteri, il modulo in `context/` (il layer `analysis` è puro e non ha dipendenze dal DB), il fuso come dato in `settings` (`app.timezone`). Correzione di numerazione: l'AC citava «E22», la spec `19` dichiara **E19** |
 | 1.6.30 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 implementata** (Era Detector): il motore in `packages/core/src/analysis/era/` — firme settimanali (distribuzione dei generi, top artist, valence/energy medie, quota notturna, tasso di ripetizione), similarità (cosine + Jaccard + distanza normalizzata), **change point detection** (nessun clustering non supervisionato, `04§5`), costruzione delle ere e filtro `minEraDays`; il mood dominante dell’era è classificato dal **classificatore del mood tracker** (D.69.2); la persistenza sostituisce **l’insieme** delle ere (`replaceAllInsightsOfType`, D.69.8); il plug-in `createEraGenerator` dell’orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/era-shift.json` (confine dichiarato al giorno 56). **37 test** nuovi in `@ls/core`. Sezione Story 2.2: `**Stato**:` ✅ DONE e i **4 AC** spuntati; la riga roadmap «2-3» allineata (restano 2.3 e 3.x); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla **2.3**). `docs/04-ANALYSIS-ALGORITHMS.md` → **v1.2** (`§8.1`), `docs/08-COPY-I18N.md` → **v0.10** (namespace `insight.era.*`), `docs/10-TESTING.md` → **v1.2** (§3.3) |
 | 1.6.31 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 implementata** (Event Detector): il motore in `packages/core/src/analysis/event/` — metriche giornaliere (volume in ore, valence/energy medie ponderate, diversità, artisti nuovi), detector a **z-score** su griglia settimanale (baseline 60gg, finestra 14gg, soglia 2.0), detector a **quota** per `spike_artist`/`spike_genre` (dominanza + rapporto 2× sulla baseline), detector specialistici per `silence` ed `exploration`, dedupe per tipo e per soggetto; la persistenza sostituisce **l’insieme** degli eventi (`replaceAllInsightsOfType`); il plug-in `createEventGenerator` dell’orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non c’è alcun evento basato sulla valence. Sezione Story 2.3: `**Stato**:` ✅ DONE e i **3 AC** spuntati; la riga roadmap «2-3» allineata (l’EPIC 2 ha ora mood, ere, eventi e ricordi); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla tranche **geo**, 4.4 e 3.4). `docs/04-ANALYSIS-ALGORITHMS.md` → **v1.3** (`§6.8` nuova, `§8.1`, `§9`), `docs/08-COPY-I18N.md` → **v0.11** (`insight.event.spike_genre`), `docs/10-TESTING.md` → **v1.2** (§3.3) |
+| 1.6.34 | Sessione 85 (2026-11-02, analisi competitiva) | **Posizionamento competitivo verificato sul codice** e riflesso nel backlog. Le story **2.5** (collegamento del pipeline di analisi all'app) e **3.5** (anteprima/demo in onboarding) entrano nel catalogo: 28 → **30 story**. La verifica ha rilevato che i quattro motori di analisi dell'EPIC 2 **non sono mai eseguiti dall'app** (la Home legge gli insight che nessuno scrive) e che l'artwork **non esiste** nel repository (`artworkUrl` sempre `null`): da qui l'ordine ricalcolato **2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1**. La **4.3** perde il vincolo `[DEP:4.2]` e sale a **P0** (D-22.4); la **3.2** incorpora l'export statico del capitolo e il **tagging manuale** (D-22.5); la **3.3** richiede **insight in prosa**; la **5.1** richiede la **pagina in-app «Come trattiamo i tuoi dati»** (D-22.7). Le decisioni proposte e le evidenze sono in `docs/22-COMPETITIVE-POSITIONING.md` (D-22.1…D-22.7) |
 
 
 
