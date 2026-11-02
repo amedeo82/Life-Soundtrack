@@ -8466,8 +8466,8 @@ commits precedenti, quindi nella history di `main` non si distingue «commit del
 ### Sessione 85 - Posizionamento competitivo verificato sul codice e priorità ricalcolate
 
 - **Data**: 2026-11-02
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #273)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #273 (89573176e80ef24b4f4015ab03fbd954de823b15, 2026-11-02T11:42:46Z)
 - **Claim**: `kilo-HP-ELITEBOOK-c85pos`
 
 ```
@@ -8577,13 +8577,27 @@ bundle rigenerati in quest'ordine (aggregator → generator), come impone la pro
 ### Sessione 86 - Il pacchetto di specifiche implementabili delle 7 story rimanenti
 
 - **Data**: 2026-11-02
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #273)
+- **Stato**: 🟢
+- **Merged**: ✅ PR #273 (89573176e80ef24b4f4015ab03fbd954de823b15, 2026-11-02T11:42:46Z)
 - **Claim**: `kilo-HP-ELITEBOOK-c86sp`
 
 ```
 
 # Sessione 86 — Le specifiche delle 7 story rimanenti
+
+> **Nota sulle due sessioni in una PR**: la PR **#273** (merge `89573176`, 2026-11-02T11:42:46Z) ha consegnato
+> **due** file di sessione — la 85 (posizionamento competitivo) e questa (pacchetto di specifiche): erano due
+> blocchi di lavoro distinti, ma **una sola issue** (#265) e **una sola PR**, perché la ratifica delle specifiche
+> non poteva precedere la PR che le introduce. Entrambe dichiarano quindi `pr: 273` e lo stesso merge commit:
+> il fatto è vero (i due file sono stati mergiati da quella PR) e il gate `check-merge-state.mjs` lo verifica
+> senza problemi.
+> **Limite noto del tooling**: `scripts/apply-merge-state.mjs` assume **un file di sessione per PR** e aborta
+> quando ne trova due (è il motivo per cui, al merge della #273, nessuna delle due sessioni aveva ricevuto
+> `merged: true` e i blocchi aggregati le mostravano ancora «non ancora mergiato (PR #273)» — il drift che il
+> gate dell'issue #239 esiste per intercettare). Il limite e' tracciato come issue separata; la correzione
+> del tooling (applicare lo stato a **tutti** i file di sessione che dichiarano la PR) e' il fix appropriato e
+> non appartiene a una PR di documentazione.
+
 
 > **Oggetto**: la Sessione 85 ha prodotto il posizionamento competitivo e una priorità ricalcolata, ma le story
 > rimanenti **non erano lavorabili**: il protocollo richiede una specifica 🟢 APPROVED, e per 5 delle 7 story
@@ -8659,6 +8673,12 @@ verificato, contratti, task numerati, AC verificabili, piano di test e 30 decisi
 
 **Cosa manca.** La **ratifica** delle specifiche e delle decisioni (D-23.x…D-27.x): è l'atto del project
 owner, e senza di esso le story restano `⬚ TODO` e le issue non possono avere la label `agent-ready`.
+
+**Ratifica (Sessione 87, issue #274, PR #274).** Il project owner ha ratificato le 6 specifiche (`22`–`27`)
+**al merge della PR #273**: sono promosse a **🟢 APPROVED v1.0** e le loro decisioni (D-22.1…D-22.8,
+D-23.1…D-27.6) sono **vincolanti** per gli agenti. Le 7 story rimanenti hanno una sola issue canonica
+(`#266`, `#241`, `#240`, `#270`, `#242`, `#244`, `#246`) e le loro righe `**Spec**:` nel backlog puntano
+alla versione APPROVED. Le story **2.5** e **3.5** sono ora **pronte al claim**.
 
 **Issue aperte — una per story** (regola «1 issue = 1 story»): ogni story ha una sola issue canonica,
 con la spec e la checklist già dentro.
