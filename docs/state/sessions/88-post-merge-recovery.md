@@ -2,8 +2,10 @@
 number: 88
 title: "Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "591dceba97b464095d74df0b22759d47c6840e22"
+merged_date: "2026-11-02T13:34:27Z"
 branch: fix/279-recovery-post-merge-stato-di-merge-della
 pr: 280
 claim: kilo-HP-ELITEBOOK-c88rec
