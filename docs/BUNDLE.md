@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 14:13
+> Data: 2026-11-02 14:18
 > Totale file: 169
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -19697,8 +19697,8 @@ title: "Recovery post-merge: stato di merge della sessione 87 e fix dei due work
 date: 2026-11-02
 state: 🟡
 merged: false
-branch: feat/279-recovery-post-merge-stato-di-merge-della
-pr: 0
+branch: fix/279-recovery-post-merge-stato-di-merge-della
+pr: 280
 claim: kilo-HP-ELITEBOOK-c88rec
 tags: [devops, recovery, workflow, protocollo]
 ---
