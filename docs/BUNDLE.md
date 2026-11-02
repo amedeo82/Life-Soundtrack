@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 14:18
+> Data: 2026-11-02 14:31
 > Totale file: 169
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -41611,7 +41611,11 @@ function checkPushSync(lines, file) {
   // push su `main` possono incrociarsi -> il writer ri-sincronizza e riprova).
   // Una sincronizzazione "tardiva" (dopo la push, ma fuori da un ciclo)
   // NON e' una strategia: il push e' gia' fallito.
-  const loopRe = /^\s*(for|while|until)\b.*\bdo\s*$/;
+  //
+  // Issue #279: il ciclo e' riconosciuto in **due** forme — quella bash
+  // (`for ...; do` / `done`) e quella PowerShell (`for (...) {` / `}`), che e'
+  // l'unica che parse dentro uno step `shell: pwsh`.
+  const loopRe = /^\s*(for|while|until|foreach)\b.*(?:\bdo\s*|\{\s*)$/;
   let loopStart = -1;
   for (let i = pushAt; i >= stepStart; i--) {
     if (loopRe.test(lines[i])) {
@@ -41621,8 +41625,16 @@ function checkPushSync(lines, file) {
   }
   if (loopStart >= 0) {
     let loopEnd = lines.length;
+    const loopIndent = lines[loopStart].match(/^\s*/)[0].length;
     for (let i = pushAt + 1; i < stepEnd; i++) {
+      // fine del ciclo: `done` (bash) oppure la graffa di chiusura all'indentazione
+      // del `for` (PowerShell: le graffe interne sono piu' annidate).
       if (/^\s*done\s*$/.test(lines[i])) {
+        loopEnd = i;
+        break;
+      }
+      const indent = lines[i].length - lines[i].trimStart().length;
+      if (lines[i].trim() === '}' && indent === loopIndent) {
         loopEnd = i;
         break;
       }
@@ -42371,10 +42383,14 @@ echo "=== T2b: fixture senza NESSUNA strategia di ri-sincronizzazione (bug #140)
   # Sostituisce il ciclo di retry con una push secca: la fixture deve avere
   # un writer che pusha su `main` senza ALCUNA strategia di ri-sincronizzazione
   # (neppure il retry, che contiene il push al suo interno).
-  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
-  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
+  # Issue #279: il ciclo di retry e' in sintassi PowerShell (gli step dei writer
+  # dichiarano `shell: pwsh`): la mutazione deve riconoscere quella forma, non
+  # piu' il ciclo bash (`for attempt in 1 2 3; do ... done`), che non parse e
+  # causava un ParserError a runtime (i writer non committavano piu' nulla).
+  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
+  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
 
-  if grep -q "for attempt in 1 2 3" "$D/.github/workflows/auto-state-aggregate.yml"; then
+  if grep -qF 'for ($attempt = 1;' "$D/.github/workflows/auto-state-aggregate.yml"; then
     ng "mutazione non applicata: il retry e' ancora presente nella fixture"
   else
     ok "mutazione applicata (sync e retry rimossi)"

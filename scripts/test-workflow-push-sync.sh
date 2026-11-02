@@ -127,10 +127,14 @@ echo "=== T2b: fixture senza NESSUNA strategia di ri-sincronizzazione (bug #140)
   # Sostituisce il ciclo di retry con una push secca: la fixture deve avere
   # un writer che pusha su `main` senza ALCUNA strategia di ri-sincronizzazione
   # (neppure il retry, che contiene il push al suo interno).
-  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
-  perl -0777 -pi -e 's/^[ ]{10}for attempt in 1 2 3; do\n(?:(?!^[ ]{10}done$).*\n)*^[ ]{10}done\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
+  # Issue #279: il ciclo di retry e' in sintassi PowerShell (gli step dei writer
+  # dichiarano `shell: pwsh`): la mutazione deve riconoscere quella forma, non
+  # piu' il ciclo bash (`for attempt in 1 2 3; do ... done`), che non parse e
+  # causava un ParserError a runtime (i writer non committavano piu' nulla).
+  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
+  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
 
-  if grep -q "for attempt in 1 2 3" "$D/.github/workflows/auto-state-aggregate.yml"; then
+  if grep -qF 'for ($attempt = 1;' "$D/.github/workflows/auto-state-aggregate.yml"; then
     ng "mutazione non applicata: il retry e' ancora presente nella fixture"
   else
     ok "mutazione applicata (sync e retry rimossi)"
