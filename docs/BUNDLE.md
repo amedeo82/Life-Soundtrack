@@ -30184,7 +30184,7 @@ merge → post-merge.yml (writer unico) → commit → workflow_run → CI sullo
 | La CI consuma il writer | trigger `workflow_run` su `["post-merge"]`, nome allineato al `name:` reale | `validate-workflows.mjs` → `checkWriterOrdering` |
 | La CI valida la **testa** di `main` nel passaggio `workflow_run` | `checkout` con `ref: main` (`workflow_run.head_sha` e' il commit di *partenza* del writer) | `validate-workflows.mjs` → `checkWorkflowRunCheckout` |
 | Il gate merge-state non fallisce per costruzione sul merge commit | modalita' `--defer-unapplied`: differisce **solo** l'albero che e' il merge commit della PR | `scripts/check-merge-state.mjs` (test T10..T12) |
-| I generatori producono gli stessi byte su ogni OS | UTC + `InvariantCulture` + ordinamento ordinale + guardia `pwsh >= 7` + LF | `scripts/check-generators-portable.mjs` (job `gates-portability`, matrix `ubuntu-latest` + `windows-latest`) |
+| I generatori producono gli stessi byte su ogni OS | UTC + `InvariantCulture` + ordinamento ordinale + guardia `pwsh >= 7` + LF | `scripts/check-generators-portable.mjs` (determinismo + manifest cross-OS: job `gates-portability` su `ubuntu-latest` + `windows-latest`, confronto nel job `gates-portability-compare`) |
 
 **Il gate di portabilita'** e' la prova empirica dell'indipendenza dal sistema
 operativo: rigenera i file aggregati e confronta i **byte** con lo stato
@@ -44821,14 +44821,21 @@ finestra in cui il drift passerebbe inosservato.
   *ordinale* (l'ordinamento non dipende più dall'enumerazione del filesystem
   né dalla collazione della locale), guardia fail-closed su PowerShell < 7,
   normalizzazione CRLF→LF del contenuto incorporato nel bundle.
-- **Per prova**: il gate `scripts/check-generators-portable.mjs` riesegue i
-  generatori e confronta i byte con lo stato committato. Il job
-  `gates-portability` lo esegue su **due sistemi operativi reali**
-  (`ubuntu-latest` e `windows-latest`) ed è bloccante.
+- **Per prova**: il gate `scripts/check-generators-portable.mjs` misura tre
+  proprietà: il **determinismo** (due rigenerazioni consecutive producono gli
+  stessi byte), le **invarianti del repo** (bundle in sync) e l’**uguaglianza
+  cross-OS** (il manifest sha256 dei file generati). La matrix
+  `gates-portability` gira su **due sistemi operativi reali**
+  (`ubuntu-latest` e `windows-latest`), ognuno pubblica il proprio manifest e
+  il job `gates-portability-compare` li confronta byte per byte. Il confronto
+  non usa lo stato committato come riferimento: quello cambia a ogni PR (i
+  blocchi aggregati li aggiorna il writer post-merge, per contratto ADR-0008),
+  quindi non può essere il riferimento di un confronto cross-OS.
 
-Il gate di portabilità è più forte di un check di `-Check` perché confronta i
-byte, non lo stato logico: le tre dipendenze storiche si manifestano proprio
-come byte diversi a parità di fatti.
+Il gate di portabilità confronta i byte, non lo stato logico: le tre
+dipendenze storiche si manifestano proprio come byte diversi a parità di
+fatti. E il riferimento è un altro sistema operativo reale, non una
+convenzione.
 
 ### D-13.6 — Un solo gate per l'autorevolezza del bundle e dei blocchi
 
@@ -44876,7 +44883,7 @@ di portabilità (che rigenera nell'ordine corretto e confronta i byte).
 | Il writer sincronizza con `origin/main` prima del push | `validate-workflows.mjs` → `checkPushSync` | `scripts/test-workflow-push-sync.sh` (T2, T3) |
 | La riga `git add` copre i `$targets` dell'aggregator | `validate-workflows.mjs` → `checkGitAddCoverage` | `scripts/test-workflow-git-add-coverage.sh` |
 | Il gate merge-state differisce **solo** il caso strutturale | `check-merge-state.mjs --defer-unapplied` | `scripts/test-merge-state-gate.sh` (T10..T12) |
-| I generatori producono gli stessi byte su ogni OS | `check-generators-portable.mjs` | `scripts/test-generators-portable.sh` (T1, T2) |
+| I generatori producono gli stessi byte su ogni OS | `check-generators-portable.mjs` (manifest cross-OS) | `scripts/test-generators-portable.sh` (T1, T2, T3) |
 
 
 
