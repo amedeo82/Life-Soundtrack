@@ -598,8 +598,49 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
-      - name: I generatori riproducono i byte committati (issue #284)
-        run: node scripts/check-generators-portable.mjs
+      - name: I generatori sono deterministici e il bundle e' in sync (issue #284)
+        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json"
+
+      - name: Pubblica il manifest per il confronto cross-OS
+        uses: actions/upload-artifact@v4
+        with:
+          name: portability-${{ matrix.os }}
+          path: portability-${{ matrix.os }}.json
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # 5c. Confronto CROSS-OS dei manifest (issue #284).
+  #
+  #     Ogni job della matrix produce il manifest (sha256 per file) dei file
+  #     generati sul proprio sistema operativo. Qui i due manifest vengono
+  #     confrontati byte per byte: se i generatori dipendessero dalla locale,
+  #     dal fuso orario o dai line ending, i due manifest divergerebbero e la
+  #     pipeline sarebbe rossa.
+  #
+  #     Il riferimento NON e' lo stato committato: quello cambia a ogni PR
+  #     (i blocchi aggregati li aggiorna il writer POST-merge, per contratto),
+  #     quindi non puo' essere il riferimento di un confronto cross-OS.
+  # ---------------------------------------------------------------------------
+  gates-portability-compare:
+    runs-on: ubuntu-latest
+    needs: gates-portability
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: portability-*
+          merge-multiple: true
+
+      - name: I generatori producono gli stessi byte su ogni sistema operativo (issue #284)
+        run: |
+          node scripts/check-generators-portable.mjs \
+            --compare portability-ubuntu-latest.json \
+            --compare portability-windows-latest.json
 
   # ---------------------------------------------------------------------------
   # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
@@ -749,6 +790,7 @@ jobs:
       - gates-bundle
       - gates-workflows
       - gates-portability
+      - gates-portability-compare
       - gates-git
       - gates-scripts
       - gates-procedure
@@ -760,13 +802,13 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-portability-compare.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
           else
             # Issue #284: nel passaggio `workflow_run` (stato finale di `main`)
             # il gate di portabilita' e' OBBLIGATORIO: e' la prova che i
             # generatori producono gli stessi byte su ogni sistema operativo.
             # Sul `push` semplice resta obbligatorio per lo stesso motivo.
-            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }}"
+            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-portability-compare.result }}"
           fi
           echo "Evento: ${{ github.event_name }}"
           echo "Risultati: $results"

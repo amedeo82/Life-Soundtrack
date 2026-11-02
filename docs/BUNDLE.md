@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 17:08
+> Data: 2026-11-02 17:13
 > Totale file: 171
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,18 +9,18 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 170 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2483.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-02 17:08
+- Totale file: 168 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2465.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-02 13:51
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 106 |
-| scripts/ | 38 |
+| docs/ | 105 |
+| scripts/ | 36 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
-| .github/ | 4 |
+| .github/ | 5 |
 | root/ | 3 |
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
@@ -1265,48 +1265,29 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S90)
+**Analisi della sessione corrente** (S89)
 
-**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
-restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
-non il codice applicativo.
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
+Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
+senza spiegazione.
 
-**Cosa è pronto.**
-- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
-  aggregatore → bundle → verifica → un commit → un push).
-- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
-  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
-  `gates-portability` su due sistemi operativi.
-- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
-  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
-- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
-  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
-  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
-  nel bundle.
-- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
-  prodotti dai generatori con lo stato committato.
-- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
-  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
-  che non possa essere faked da un commento).
+**Cosa e' pronto.**
+- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
+  che spiega la race e perche' il gate non viene indebolito.
+- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
+  il controllo esistente dell'issue #216 resta verde).
 
-**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
-sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
-gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
-primo merge con questa architettura è la prova; le sessioni successive
-verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
-`main` rosso).
+**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
+il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
+deve essere verde.
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
-mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
-del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
-scalari YAML, 15 sulle scope `permissions`.
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
-→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
-→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
-`node scripts/check-generators-portable.mjs` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2186,7 +2167,6 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 87 | Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione | 🟢 | ✅ | #278 |
 | 88 | Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge | 🟢 | ✅ | #280 |
 | 89 | CI su main: i commit del writer dello stato di merge triggano la pipeline | 🟢 | ✅ | #282 |
-| 90 | Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2226,9 +2206,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **67** (merge: 65)
+- Sessioni migrate in state/sessions: **66** (merge: 65)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S90** - Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti
+- Ultima sessione migrata: **S89** - CI su main: i commit del writer dello stato di merge triggano la pipeline
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2277,48 +2257,29 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S90)
+**Analisi della sessione corrente** (S89)
 
-**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
-restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
-non il codice applicativo.
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
+Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
+senza spiegazione.
 
-**Cosa è pronto.**
-- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
-  aggregatore → bundle → verifica → un commit → un push).
-- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
-  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
-  `gates-portability` su due sistemi operativi.
-- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
-  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
-- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
-  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
-  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
-  nel bundle.
-- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
-  prodotti dai generatori con lo stato committato.
-- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
-  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
-  che non possa essere faked da un commento).
+**Cosa e' pronto.**
+- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
+  che spiega la race e perche' il gate non viene indebolito.
+- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
+  il controllo esistente dell'issue #216 resta verde).
 
-**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
-sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
-gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
-primo merge con questa architettura è la prova; le sessioni successive
-verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
-`main` rosso).
+**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
+il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
+deve essere verde.
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
-mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
-del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
-scalari YAML, 15 sulle scope `permissions`.
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
-→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
-→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
-`node scripts/check-generators-portable.mjs` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -11376,124 +11337,6 @@ deve essere verde.
 
 - `.github/workflows/ci.yml` (`paths:` del trigger `push`)
 - `docs/BUNDLE.md` (rigenerato)
-```
-
-### Sessione 90 - Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti
-
-- **Data**: 2026-11-02
-- **Stato**: 🟡
-- **Merged**: ❌ non ancora mergiato (PR #0)
-- **Claim**: `kilo-HP-ELITEBOOK-c90auto`
-
-```
-
-# Sessione 90 — Le automazioni post-merge, risolte alla radice
-
-> **Oggetto**: dopo il merge della PR #282 (Sessione 89, issue #281) `main` era
-> **rimasto rosso**, e il fix merged non poteva funzionare: la PR aggiungeva un
-> `path` al trigger `push` della CI, ma il commit del writer **non genera
-> l'evento `push`** (è pushato con `GITHUB_TOKEN`, che sopprime i workflow
-> innescati dal token stesso). Misurato: per `831b9e7` non esiste **nessuna**
-> run `CI` — solo un `auto-bundle` su `workflow_run`.
-
-## Sintesi
-
-Tre difetti indipendenti, un solo sintomo.
-
-1. **Il writer non triggava la CI** → nessuna run verde sullo stato finale.
-2. **Tre writer concorrevano sullo stesso `main`** → push rifiutato, rebase
-   dei file generati, conflitto, run fallito.
-3. **Il gate merge-state girava sull'albero sbagliato** → fail-closed su un
-   albero in cui lo stato non era ancora applicato (per costruzione).
-
-E una quarta, trasversale: i generatori producevano output diversi su Windows
-e Linux (fuso orario, locale, ordinamento, versione di PowerShell).
-
-## Cosa è emerso
-
-- Il fix della issue #281 era basato su una premessa **falsa**: `docs/12-DEVOPS.md`
-  §9.14 documentava già, misurato, che «i commit dei writer non hanno mai
-  attivato una run `CI` — né prima né dopo questa sessione, nemmeno quando il
-  trigger `push` era privo di filtro». Un `path` in più non può attivare un
-  evento che non viene generato.
-- Il rebase dei file generati non è una race: è un conflitto strutturale. I
-  blocchi aggregati sono il *prodotto* di un input (lo stato), non la fusione
-  di due storie: si rigenerano, non si ribasano.
-- Il gate merge-state **non** andava reso tollerante (D-89.2): andava
-  spostato sull'albero giusto. La distinzione «albero = merge commit della
-  PR» è oggettiva (uguaglianza di SHA), non temporale.
-
-## Decisioni
-
-| # | Decisione | Motivazione |
-|---|-----------|-------------|
-| D-90.1 | **Un solo writer** (`post-merge.yml`) che applica lo stato, rigenera blocchi e bundle, e committa una volta | Elimina per costruzione la race fra writer (misurata il 2026-11-02) |
-| D-90.2 | Il writer **non ribasa mai**: reset a `origin/main` + rigenerazione | Il rebase dei file generati è un conflitto strutturale; la rigenerazione è funzione dello stato |
-| D-90.3 | Il passaggio **autoritativo** della CI è `workflow_run` sul writer, con `checkout ref: main` | `workflow_run` sopravvive alla soppressione del `GITHUB_TOKEN`; `head_sha` è il commit di *partenza* del writer, non la testa di `main` |
-| D-90.4 | Il gate merge-state ha due modalità: autoritativa (fail-closed) e `--defer-unapplied` (differisce **solo** l'albero = merge commit della PR) | Il gate non è indebolito: cambia il soggetto del confronto, non la sua severità |
-| D-90.5 | I generatori diventano portabili **per costruzione** (UTC, `InvariantCulture`, ordinamento ordinale, guardia `pwsh >= 7`, LF) e **per prova** (gate di portabilità su `ubuntu-latest` + `windows-latest`) | L'indipendenza dal SO non si dichiara: si misura, su due sistemi operativi reali |
-| D-90.6 | Il writer non è più "non bloccante": se fallisce, `main` resta rosso | Il fallback silenzioso è ciò che ha prodotto il drift invisibile degli ultimi mesi |
-
-La specifica completa è in `docs/13-ADR/0013-post-merge-automation.md`.
-
-## Analisi di avanzamento
-
-**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
-restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
-non il codice applicativo.
-
-**Cosa è pronto.**
-- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
-  aggregatore → bundle → verifica → un commit → un push).
-- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
-  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
-  `gates-portability` su due sistemi operativi.
-- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
-  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
-- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
-  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
-  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
-  nel bundle.
-- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
-  prodotti dai generatori con lo stato committato.
-- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
-  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
-  che non possa essere faked da un commento).
-
-**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
-sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
-gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
-primo merge con questa architettura è la prova; le sessioni successive
-verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
-`main` rosso).
-
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
-mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
-del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
-scalari YAML, 15 sulle scope `permissions`.
-
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
-→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
-→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
-`node scripts/check-generators-portable.mjs` → exit 0.
-
-## Lesson learned
-
-| Osservazione | Conseguenza |
-|--------------|-------------|
-| Un fix che aggiunge un `path` a un trigger non verifica **che l'evento venga generato** | Le premesse dei fix vanno misurate: qui il fatto era già documentato in §9.14 e la PR lo contraddiceva |
-| Il gate giusto non è sempre quello che va reso più tollerante: a volte è quello che va eseguito **sull'oggetto giusto** | D-89.2 diceva «non indebolire il gate»: la soluzione era spostarlo, non ammorbidirlo |
-| Tre writer sullo stesso `main` non sono tre feature: sono una struttura di file in conflitto | Un solo writer, un solo commit: la semplificazione è la difesa |
-| L'indipendenza dal sistema operativo è una **proprietà verificabile**, non un'intenzione | Il gate confronta i byte su due OS reali: se un generatore torna a dipendere dalla locale, la pipeline si rossa |
-
-## Documenti aggiornati
-
-- `.github/workflows/post-merge.yml` (nuovo), `ci.yml` (trigger `workflow_run`, gate di portabilità)
-- `scripts/check-merge-state.mjs`, `scripts/check-generators-portable.mjs` (nuovo)
-- `scripts/aggregate-state.ps1`, `scripts/generate-bundle.ps1`, `scripts/validate-workflows.mjs`
-- `docs/13-ADR/0013-post-merge-automation.md` (nuovo), `docs/12-DEVOPS.md`, `AGENTS.md`
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -44568,40 +44411,56 @@ process.exit(0);
  * eseguira'. Lo stesso input (lo stato del repository) deve produrre gli
  * stessi byte su Linux, Windows e macOS.
  *
- * Come lo si verifica, senza supposizioni:
+ * Il gate misura la proprieta' su tre livelli:
  *
- *   1. il working tree deve essere PULITO per i file generati (altrimenti il
- *      confronto sarebbe ambiguo: l'input non sarebbe quello committato);
- *   2. i generatori vengono rieseguiti **in place** (aggregator, poi bundle —
- *      l'ordine e' vincolante);
- *   3. il risultato viene confrontato con lo stato COMMITTATO: se i generatori
- *      producono qualcosa di diverso, il diff e' non vuoto e il gate fallisce.
- *
- * Il gate e' bloccante e gira su due sistemi operativi reali (matrix
- * `ubuntu-latest` + `windows-latest` in `.github/workflows/ci.yml`): e' la
- * prova empirica dell'indipendenza, non un'assunzione.
+ *   1. **DETERMINISMINO** — due rigenerazioni consecutive producono gli stessi
+ *      byte (locale, su ogni OS).
+ *   2. **INVARIANTI DEL REPO** — il bundle e' in sync con lo stato committato
+ *      (`generate-bundle -Check`), e i blocchi aggregati sono coerenti con lo
+ *      stato dichiarato (`aggregate-state -Check`).
+ *   3. **CROSS-OS** — il manifest dei file generati (sha256 per file) prodotto
+ *      su Linux e' identico a quello prodotto su Windows. Ogni job della
+ *      matrix `gates-portability` scrive il proprio manifest come artefatto; il
+ *      job di confronto li confronta byte per byte. Il riferimento NON e' lo
+ *      stato committato: quello cambia a ogni PR (i blocchi aggregati vengono
+ *      aggiornati dal writer POST-merge per contratto, vedi ADR-0008), quindi
+ *      non puo' essere il riferimento di un confronto cross-OS.
  *
  * Perche' confrontare i byte e non "lo stato logico": le tre dipendenze
  * storiche (fuso orario, locale corrente, ordinamento culture-sensitive) si
- * manifestano proprio come byte diversi a parita' di fatti.
+ * manifestano come byte diversi a parita' di fatti.
  *
- * Uso: node scripts/check-generators-portable.mjs [--root <dir>]
+ * Uso:
+ *   node scripts/check-generators-portable.mjs                     # livelli 1 e 2
+ *   node scripts/check-generators-portable.mjs --manifest <file>   # + manifest
+ *   node scripts/check-generators-portable.mjs --compare <a> <b>    # confronto
  *
- * Exit code: 0 = i generatori riproducono lo stato committato, 1 = drift
- * (output diverso), 2 = errore di ambiente (fail-closed).
+ * Exit code: 0 = tutto verde, 1 = drift o divergenza, 2 = errore di ambiente.
  */
 import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const argv = process.argv.slice(2);
 
-function argValue(name, fallback) {
+function argValue(name, fallback = null) {
   const idx = argv.indexOf(name);
   if (idx >= 0 && idx + 1 < argv.length) return argv[idx + 1];
   return fallback;
 }
+function argValues(name) {
+  const out = [];
+  argv.forEach((a, i) => {
+    if (a === name && i + 1 < argv.length) out.push(argv[i + 1]);
+  });
+  return out;
+}
 
 const root = resolve(argValue('--root', '.'));
+const manifestPath = argValue('--manifest');
+const comparePaths = argValues('--compare');
 
 /** I file prodotti dai generatori (stessi target dell'aggregator). */
 const TARGETS = [
@@ -44625,83 +44484,130 @@ function environmentError(message) {
 }
 
 function git(args, options = {}) {
-  const res = spawnSync('git', args, { cwd: root, encoding: 'utf8', ...options });
-  return res;
+  return spawnSync('git', args, { cwd: root, encoding: 'utf8', ...options });
 }
 
-function run(command, args) {
-  const res = spawnSync(command, args, { cwd: root, encoding: 'utf8' });
+function run(command, args, cwd = root) {
+  const res = spawnSync(command, args, { cwd, encoding: 'utf8' });
   if (res.error) {
     environmentError(`impossibile eseguire \`${command}\`: ${res.error.message}`);
   }
   if (res.status !== 0) {
     console.error((res.stdout || '') + (res.stderr || ''));
     environmentError(
-      `\`${command} ${args.join(' ')}\` e' fallito (exit ${res.status}): i generatori devono uscire 0`,
+      `\`${command} ${args.join(' ')}\` e' fallito (exit ${res.status})`,
     );
   }
   return res.stdout || '';
 }
 
-// --- 1. precondizioni -------------------------------------------------------
-
-const rev = git(['rev-parse', '--show-toplevel']);
-if (rev.status !== 0) {
-  environmentError('la directory corrente non e' + ' un repository git');
+function sha256(file) {
+  return createHash('sha256').update(readFileSync(file)).digest('hex');
 }
 
-// Il confronto e' con lo stato **committato** (in CI: indice == HEAD; in
-// locale: indice, cioe' quello che verrà committato). Il riferimento e' quindi
-// l'indice: `git diff` confronta il working tree con l'indice.
-const dirty = git(['diff', '--quiet', '--', ...TARGETS]);
-if (dirty.status !== 0 && dirty.status !== 1) {
-  environmentError('impossibile confrontare i file generati con lo stato committato');
-}
-if (dirty.status === 1) {
-  environmentError(
-    'i file generati hanno modifiche NON committate: il gate confronta i generatori con lo stato ' +
-      "committato, quindi l'input deve essere quello committato (committa o stasha le modifiche locali)",
-  );
-}
+// === confronto fra manifest (cross-OS) ========================================
 
-// --- 2. riesecuzione dei generatori ------------------------------------------
-
-console.log('[INFO] check-generators-portable: rieseguo i generatori su questo sistema operativo');
-run('pwsh', ['-NoProfile', '-File', 'scripts/aggregate-state.ps1']);
-run('pwsh', ['-NoProfile', '-File', 'scripts/generate-bundle.ps1']);
-
-// --- 3. confronto con lo stato committato ------------------------------------
-
-const diff = git(['diff', '--stat', '--', ...TARGETS]);
-const diffFull = git(['diff', '--unified=1', '--', ...TARGETS]);
-
-if (diff.status !== 0) {
-  environmentError('impossibile confrontare i file generati con lo stato committato');
-}
-
-if (diff.stdout.trim() === '') {
+if (comparePaths.length >= 2) {
+  const manifests = comparePaths.map((p) => {
+    if (!existsSync(p)) environmentError(`manifest non trovato: ${p}`);
+    return { path: p, data: JSON.parse(readFileSync(p, 'utf8')) };
+  });
+  const [a, b] = manifests;
+  const keys = [...new Set([...Object.keys(a.data), ...Object.keys(b.data)])].sort();
+  const diffs = keys.filter((k) => a.data[k] !== b.data[k]);
+  if (diffs.length > 0) {
+    fail(
+      `i generatori producono output DIVERSI sui due sistemi operativi (${a.path} vs ${b.path}): ` +
+        `${diffs.length}/${keys.length} file divergono`,
+    );
+    for (const k of diffs) {
+      console.error(`         ${k}: ${a.data[k] ?? '(assente)'} vs ${b.data[k] ?? '(assente)'}`);
+    }
+    console.error(
+      '       Cause tipiche: locale corrente (separatore decimale), fuso orario del timestamp, ' +
+        'ordinamento culture-sensitive, line ending (CRLF), versione di PowerShell.',
+    );
+    process.exit(1);
+  }
   console.log(
-    `[OK] i generatori riproducono byte per byte lo stato committato (${TARGETS.length} file): ` +
-      "l'output e' indipendente da questo sistema operativo",
+    `[OK] i generatori producono output IDENTICI sui due sistemi operativi ` +
+      `(${keys.length} file, sha256 confrontati)`,
   );
   process.exit(0);
 }
 
-fail('i generatori producono un output DIVERSO dallo stato committato su questo sistema operativo');
-console.error(diff.stdout.trim());
-const diffLines = (diffFull.stdout || '').split('\n').slice(0, 40);
-if (diffLines.length > 0) console.error(diffLines.join('\n'));
-console.error(
-  '       Cause tipiche: locale corrente (separatore decimale), fuso orario del timestamp, ' +
-    'ordinamento culture-sensitive, line ending (CRLF), versione di PowerShell.',
-);
+// === rigenerazione in un worktree pulito =====================================
 
-// Ripristina i file generati: il gate non deve lasciare il working tree sporco.
-const restore = git(['checkout', '--', ...TARGETS]);
-if (restore.status !== 0) {
-  console.error('[WARN] impossibile ripristinare i file generati: esegui `git checkout -- .`');
+/**
+ * Rigenera i file in un worktree pulito (checkout di HEAD) e restituisce il
+ * manifest {file: sha256}.
+ *
+ * Il worktree serve per due motivi:
+ *   * lo stato di partenza e' quello COMMITTATO (l'input dei generatori non
+ *     e' inquinato dalle modifiche locali);
+ *   * i generatori scrivono li', senza toccare il working tree di chi esegue
+ *     il gate (il gate e' read-only sul repository).
+ */
+function regenerate() {
+  const dir = mkdtempSync(join(tmpdir(), 'ls-portability-'));
+  const wt = join(dir, 'wt');
+  try {
+    const add = git(['worktree', 'add', '--detach', wt, 'HEAD']);
+    if (add.status !== 0) {
+      environmentError(
+        `impossibile creare il worktree temporaneo: ${(add.stderr || '').trim()}`,
+      );
+    }
+    run('pwsh', ['-NoProfile', '-File', 'scripts/aggregate-state.ps1'], wt);
+    run('pwsh', ['-NoProfile', '-File', 'scripts/generate-bundle.ps1'], wt);
+    const manifest = {};
+    for (const target of TARGETS) {
+      const file = join(wt, target);
+      if (!existsSync(file)) environmentError(`il generatore non ha prodotto ${target}`);
+      manifest[target] = sha256(file);
+    }
+    return manifest;
+  } finally {
+    git(['worktree', 'remove', '--force', wt]);
+    git(['worktree', 'prune']);
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
-process.exit(1);
+
+// --- 1. determinismo: due rigenerazioni consecutive ---------------------------
+
+console.log('[INFO] check-generators-portable: rigenero i file in un worktree pulito');
+const first = regenerate();
+const second = regenerate();
+const drift = Object.keys(first).filter((k) => first[k] !== second[k]);
+if (drift.length > 0) {
+  fail(`i generatori non sono deterministici: ${drift.length} file cambiano fra due run consecutivi`);
+  for (const k of drift) console.error(`         ${k}: ${first[k]} -> ${second[k]}`);
+  process.exit(1);
+}
+console.log(`[OK] i generatori sono deterministici (${Object.keys(first).length} file, due run consecutive)`);
+
+if (manifestPath) {
+  mkdirSync(resolve(manifestPath).replace(/[\\/][^\\/]*$/, ''), { recursive: true });
+  writeFileSync(manifestPath, JSON.stringify(first, null, 2) + '\n', 'utf8');
+  console.log(`[OK] manifest scritto in ${manifestPath}`);
+}
+
+// --- 2. invarianti del repo sullo stato committato ---------------------------
+
+const bundleCheck = spawnSync(
+  'pwsh',
+  ['-NoProfile', '-File', 'scripts/generate-bundle.ps1', '-Check'],
+  { cwd: root, encoding: 'utf8' },
+);
+if (bundleCheck.status !== 0) {
+  console.error((bundleCheck.stdout || '') + (bundleCheck.stderr || ''));
+  fail('il bundle non e\' in sync con lo stato committato (esegui `pwsh scripts/generate-bundle.ps1`)');
+  process.exit(1);
+}
+console.log('[OK] il bundle e\' in sync con lo stato committato');
+
+process.exit(0);
 
 
 
@@ -44710,19 +44616,24 @@ process.exit(1);
 #!/usr/bin/env bash
 # Test di regressione per il gate di PORTABILITA' dei generatori (issue #284).
 #
-# Il gate `scripts/check-generators-portable.mjs` verifica che i generatori,
-# rieseguiti su un sistema operativo, riproducano i BYTE committati. E' la
-# prova empirica dell'indipendenza dal sistema operativo: se un generatore
-# dipendesse dalla locale, dal fuso orario o dai line ending, il diff sarebbe
-# non vuoto e il gate fallirebbe.
+# Il gate `scripts/check-generators-portable.mjs` verifica tre proprieta':
 #
-# Il test e' ermetico: lo scenario negativo lavora in un worktree temporaneo
-# (creato da `git worktree add --detach`), dove il generatore viene alterato
-# in modo che produca un output diverso da quello committato.
+#   1. **Determinismo**: due rigenerazioni consecutive producono gli stessi
+#      byte.
+#   2. **Invarianti del repo**: il bundle e' in sync con lo stato committato.
+#   3. **Cross-OS**: il manifest dei file generati (sha256 per file) prodotto
+#      su un sistema operativo e' identico a quello prodotto su un altro. In CI
+#      i due manifest sono prodotti dalla matrix `gates-portability` (ubuntu +
+#      windows) e confrontati dal job `gates-portability-compare`.
+#
+# Il test e' ermetico: lo scenario negativo costruisce un manifest alterato
+# (simula "l'altro sistema operativo ha prodotto byte diversi") e verifica che
+# il confronto lo intercetti.
 #
 # Scenari coperti:
-#   T1  repo reale: i generatori riproducono lo stato committato -> exit 0
-#   T2  worktree con il generatore alterato -> exit 1 (il gate intercetta)
+#   T1  repo reale: il gate passa (determinismo + invarianti) -> exit 0
+#   T2  il manifest e' scritto e il confronto di due manifest identici passa -> exit 0
+#   T3  manifest alterato: il confronto fallisce -> exit 1
 #
 set -uo pipefail
 
@@ -44744,45 +44655,49 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
-echo "=== T1: repo reale - i generatori riproducono lo stato committato ==="
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+echo "=== T1: repo reale - determinismo e invarianti del repo ==="
 out="$(node "$GATE" 2>&1)"; ec=$?
 if [ $ec -eq 0 ]; then
-  ok "exit 0 (output identico a parita' di stato)"
+  ok "exit 0 (determinismo + invarianti)"
 else
   ng "exit $ec (atteso 0): $(echo "$out" | tail -8)"
 fi
 
-echo "=== T2: generatore alterato in un worktree - il gate deve intercettare ==="
-WT="$(mktemp -d)/wt"
-cleanup() {
-  git -C "$REPO_ROOT" worktree remove --force "$WT" >/dev/null 2>&1 || true
-  git -C "$REPO_ROOT" worktree prune >/dev/null 2>&1 || true
-  rm -rf "$(dirname "$WT")" >/dev/null 2>&1 || true
-}
-trap cleanup EXIT
-
-if ! git -C "$REPO_ROOT" worktree add --detach "$WT" HEAD >/dev/null 2>&1; then
-  echo "  [SKIP] non e' stato possibile creare il worktree temporaneo"
-  echo ""
-  echo "=== Risultato: $pass pass, $fail fail ==="
-  exit 0
-fi
-
-# Il generatore produce un testo diverso: il gate deve accorgersene.
-if sed -i 's/- Totale file: /- Totale file (mutato): /' "$WT/scripts/aggregate-state.ps1"; then
-  ok "mutazione applicata (il generatore produce un output diverso)"
+echo "=== T2: manifest e confronto di due manifest identici ==="
+out="$(node "$GATE" --manifest "$WORK/a.json" 2>&1)"; ec=$?
+if [ $ec -eq 0 ] && [ -s "$WORK/a.json" ]; then
+  ok "exit 0 e manifest scritto"
 else
-  ng "mutazione non applicata"
+  ng "exit $ec (atteso 0) o manifest mancante: $(echo "$out" | tail -6)"
+fi
+cp "$WORK/a.json" "$WORK/b.json"
+out="$(node "$GATE" --compare "$WORK/a.json" --compare "$WORK/b.json" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then
+  ok "exit 0 (due manifest identici sono equivalenti)"
+else
+  ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"
 fi
 
-out="$(cd "$WT" && node "$GATE" 2>&1)"; ec=$?
+echo "=== T3: manifest alterato (l'altro OS ha prodotto byte diversi) ==="
+node -e '
+const fs=require("node:fs");
+const p=process.argv[1];
+const m=JSON.parse(fs.readFileSync(p,"utf8"));
+const k=Object.keys(m)[0];
+m[k]="0".repeat(64);
+fs.writeFileSync(p, JSON.stringify(m,null,2)+"\n");
+' "$WORK/b.json"
+out="$(node "$GATE" --compare "$WORK/a.json" --compare "$WORK/b.json" 2>&1)"; ec=$?
 if [ $ec -eq 1 ]; then
-  ok "exit 1 (il gate intercetta l'output divergente)"
+  ok "exit 1 (il confronto intercetta la divergenza cross-OS)"
 else
-  ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"
+  ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"
 fi
-if echo "$out" | grep -q "output DIVERSO"; then
-  ok "il messaggio nomina la divergenza"
+if echo "$out" | grep -q "output DIVERSI"; then
+  ok "il messaggio nomina la divergenza cross-OS"
 else
   ng "il messaggio non nomina la divergenza: $(echo "$out" | tail -4)"
 fi
@@ -44790,10 +44705,10 @@ fi
 echo ""
 echo "=== Risultato: $pass pass, $fail fail ==="
 if [ $fail -gt 0 ]; then
-  echo "[FAIL] il gate di portabilita' non intercetta un generatore divergente: non e' un gate"
+  echo "[FAIL] il gate di portabilita' non intercetta un manifest divergente: non e' un gate"
   exit 1
 fi
-echo "[OK] il gate di portabilita' intercetta l'output divergente"
+echo "[OK] il gate di portabilita' intercetta la divergenza cross-OS"
 exit 0
 
 
@@ -47945,8 +47860,49 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
-      - name: I generatori riproducono i byte committati (issue #284)
-        run: node scripts/check-generators-portable.mjs
+      - name: I generatori sono deterministici e il bundle e' in sync (issue #284)
+        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json"
+
+      - name: Pubblica il manifest per il confronto cross-OS
+        uses: actions/upload-artifact@v4
+        with:
+          name: portability-${{ matrix.os }}
+          path: portability-${{ matrix.os }}.json
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # 5c. Confronto CROSS-OS dei manifest (issue #284).
+  #
+  #     Ogni job della matrix produce il manifest (sha256 per file) dei file
+  #     generati sul proprio sistema operativo. Qui i due manifest vengono
+  #     confrontati byte per byte: se i generatori dipendessero dalla locale,
+  #     dal fuso orario o dai line ending, i due manifest divergerebbero e la
+  #     pipeline sarebbe rossa.
+  #
+  #     Il riferimento NON e' lo stato committato: quello cambia a ogni PR
+  #     (i blocchi aggregati li aggiorna il writer POST-merge, per contratto),
+  #     quindi non puo' essere il riferimento di un confronto cross-OS.
+  # ---------------------------------------------------------------------------
+  gates-portability-compare:
+    runs-on: ubuntu-latest
+    needs: gates-portability
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: portability-*
+          merge-multiple: true
+
+      - name: I generatori producono gli stessi byte su ogni sistema operativo (issue #284)
+        run: |
+          node scripts/check-generators-portable.mjs \
+            --compare portability-ubuntu-latest.json \
+            --compare portability-windows-latest.json
 
   # ---------------------------------------------------------------------------
   # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
@@ -48096,6 +48052,7 @@ jobs:
       - gates-bundle
       - gates-workflows
       - gates-portability
+      - gates-portability-compare
       - gates-git
       - gates-scripts
       - gates-procedure
@@ -48107,13 +48064,13 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-portability-compare.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
           else
             # Issue #284: nel passaggio `workflow_run` (stato finale di `main`)
             # il gate di portabilita' e' OBBLIGATORIO: e' la prova che i
             # generatori producono gli stessi byte su ogni sistema operativo.
             # Sul `push` semplice resta obbligatorio per lo stesso motivo.
-            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }}"
+            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-portability-compare.result }}"
           fi
           echo "Evento: ${{ github.event_name }}"
           echo "Risultati: $results"

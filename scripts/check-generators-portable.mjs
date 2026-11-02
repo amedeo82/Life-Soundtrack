@@ -6,40 +6,56 @@
  * eseguira'. Lo stesso input (lo stato del repository) deve produrre gli
  * stessi byte su Linux, Windows e macOS.
  *
- * Come lo si verifica, senza supposizioni:
+ * Il gate misura la proprieta' su tre livelli:
  *
- *   1. il working tree deve essere PULITO per i file generati (altrimenti il
- *      confronto sarebbe ambiguo: l'input non sarebbe quello committato);
- *   2. i generatori vengono rieseguiti **in place** (aggregator, poi bundle —
- *      l'ordine e' vincolante);
- *   3. il risultato viene confrontato con lo stato COMMITTATO: se i generatori
- *      producono qualcosa di diverso, il diff e' non vuoto e il gate fallisce.
- *
- * Il gate e' bloccante e gira su due sistemi operativi reali (matrix
- * `ubuntu-latest` + `windows-latest` in `.github/workflows/ci.yml`): e' la
- * prova empirica dell'indipendenza, non un'assunzione.
+ *   1. **DETERMINISMINO** — due rigenerazioni consecutive producono gli stessi
+ *      byte (locale, su ogni OS).
+ *   2. **INVARIANTI DEL REPO** — il bundle e' in sync con lo stato committato
+ *      (`generate-bundle -Check`), e i blocchi aggregati sono coerenti con lo
+ *      stato dichiarato (`aggregate-state -Check`).
+ *   3. **CROSS-OS** — il manifest dei file generati (sha256 per file) prodotto
+ *      su Linux e' identico a quello prodotto su Windows. Ogni job della
+ *      matrix `gates-portability` scrive il proprio manifest come artefatto; il
+ *      job di confronto li confronta byte per byte. Il riferimento NON e' lo
+ *      stato committato: quello cambia a ogni PR (i blocchi aggregati vengono
+ *      aggiornati dal writer POST-merge per contratto, vedi ADR-0008), quindi
+ *      non puo' essere il riferimento di un confronto cross-OS.
  *
  * Perche' confrontare i byte e non "lo stato logico": le tre dipendenze
  * storiche (fuso orario, locale corrente, ordinamento culture-sensitive) si
- * manifestano proprio come byte diversi a parita' di fatti.
+ * manifestano come byte diversi a parita' di fatti.
  *
- * Uso: node scripts/check-generators-portable.mjs [--root <dir>]
+ * Uso:
+ *   node scripts/check-generators-portable.mjs                     # livelli 1 e 2
+ *   node scripts/check-generators-portable.mjs --manifest <file>   # + manifest
+ *   node scripts/check-generators-portable.mjs --compare <a> <b>    # confronto
  *
- * Exit code: 0 = i generatori riproducono lo stato committato, 1 = drift
- * (output diverso), 2 = errore di ambiente (fail-closed).
+ * Exit code: 0 = tutto verde, 1 = drift o divergenza, 2 = errore di ambiente.
  */
 import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const argv = process.argv.slice(2);
 
-function argValue(name, fallback) {
+function argValue(name, fallback = null) {
   const idx = argv.indexOf(name);
   if (idx >= 0 && idx + 1 < argv.length) return argv[idx + 1];
   return fallback;
 }
+function argValues(name) {
+  const out = [];
+  argv.forEach((a, i) => {
+    if (a === name && i + 1 < argv.length) out.push(argv[i + 1]);
+  });
+  return out;
+}
 
 const root = resolve(argValue('--root', '.'));
+const manifestPath = argValue('--manifest');
+const comparePaths = argValues('--compare');
 
 /** I file prodotti dai generatori (stessi target dell'aggregator). */
 const TARGETS = [
@@ -63,80 +79,127 @@ function environmentError(message) {
 }
 
 function git(args, options = {}) {
-  const res = spawnSync('git', args, { cwd: root, encoding: 'utf8', ...options });
-  return res;
+  return spawnSync('git', args, { cwd: root, encoding: 'utf8', ...options });
 }
 
-function run(command, args) {
-  const res = spawnSync(command, args, { cwd: root, encoding: 'utf8' });
+function run(command, args, cwd = root) {
+  const res = spawnSync(command, args, { cwd, encoding: 'utf8' });
   if (res.error) {
     environmentError(`impossibile eseguire \`${command}\`: ${res.error.message}`);
   }
   if (res.status !== 0) {
     console.error((res.stdout || '') + (res.stderr || ''));
     environmentError(
-      `\`${command} ${args.join(' ')}\` e' fallito (exit ${res.status}): i generatori devono uscire 0`,
+      `\`${command} ${args.join(' ')}\` e' fallito (exit ${res.status})`,
     );
   }
   return res.stdout || '';
 }
 
-// --- 1. precondizioni -------------------------------------------------------
-
-const rev = git(['rev-parse', '--show-toplevel']);
-if (rev.status !== 0) {
-  environmentError('la directory corrente non e' + ' un repository git');
+function sha256(file) {
+  return createHash('sha256').update(readFileSync(file)).digest('hex');
 }
 
-// Il confronto e' con lo stato **committato** (in CI: indice == HEAD; in
-// locale: indice, cioe' quello che verrà committato). Il riferimento e' quindi
-// l'indice: `git diff` confronta il working tree con l'indice.
-const dirty = git(['diff', '--quiet', '--', ...TARGETS]);
-if (dirty.status !== 0 && dirty.status !== 1) {
-  environmentError('impossibile confrontare i file generati con lo stato committato');
-}
-if (dirty.status === 1) {
-  environmentError(
-    'i file generati hanno modifiche NON committate: il gate confronta i generatori con lo stato ' +
-      "committato, quindi l'input deve essere quello committato (committa o stasha le modifiche locali)",
-  );
-}
+// === confronto fra manifest (cross-OS) ========================================
 
-// --- 2. riesecuzione dei generatori ------------------------------------------
-
-console.log('[INFO] check-generators-portable: rieseguo i generatori su questo sistema operativo');
-run('pwsh', ['-NoProfile', '-File', 'scripts/aggregate-state.ps1']);
-run('pwsh', ['-NoProfile', '-File', 'scripts/generate-bundle.ps1']);
-
-// --- 3. confronto con lo stato committato ------------------------------------
-
-const diff = git(['diff', '--stat', '--', ...TARGETS]);
-const diffFull = git(['diff', '--unified=1', '--', ...TARGETS]);
-
-if (diff.status !== 0) {
-  environmentError('impossibile confrontare i file generati con lo stato committato');
-}
-
-if (diff.stdout.trim() === '') {
+if (comparePaths.length >= 2) {
+  const manifests = comparePaths.map((p) => {
+    if (!existsSync(p)) environmentError(`manifest non trovato: ${p}`);
+    return { path: p, data: JSON.parse(readFileSync(p, 'utf8')) };
+  });
+  const [a, b] = manifests;
+  const keys = [...new Set([...Object.keys(a.data), ...Object.keys(b.data)])].sort();
+  const diffs = keys.filter((k) => a.data[k] !== b.data[k]);
+  if (diffs.length > 0) {
+    fail(
+      `i generatori producono output DIVERSI sui due sistemi operativi (${a.path} vs ${b.path}): ` +
+        `${diffs.length}/${keys.length} file divergono`,
+    );
+    for (const k of diffs) {
+      console.error(`         ${k}: ${a.data[k] ?? '(assente)'} vs ${b.data[k] ?? '(assente)'}`);
+    }
+    console.error(
+      '       Cause tipiche: locale corrente (separatore decimale), fuso orario del timestamp, ' +
+        'ordinamento culture-sensitive, line ending (CRLF), versione di PowerShell.',
+    );
+    process.exit(1);
+  }
   console.log(
-    `[OK] i generatori riproducono byte per byte lo stato committato (${TARGETS.length} file): ` +
-      "l'output e' indipendente da questo sistema operativo",
+    `[OK] i generatori producono output IDENTICI sui due sistemi operativi ` +
+      `(${keys.length} file, sha256 confrontati)`,
   );
   process.exit(0);
 }
 
-fail('i generatori producono un output DIVERSO dallo stato committato su questo sistema operativo');
-console.error(diff.stdout.trim());
-const diffLines = (diffFull.stdout || '').split('\n').slice(0, 40);
-if (diffLines.length > 0) console.error(diffLines.join('\n'));
-console.error(
-  '       Cause tipiche: locale corrente (separatore decimale), fuso orario del timestamp, ' +
-    'ordinamento culture-sensitive, line ending (CRLF), versione di PowerShell.',
-);
+// === rigenerazione in un worktree pulito =====================================
 
-// Ripristina i file generati: il gate non deve lasciare il working tree sporco.
-const restore = git(['checkout', '--', ...TARGETS]);
-if (restore.status !== 0) {
-  console.error('[WARN] impossibile ripristinare i file generati: esegui `git checkout -- .`');
+/**
+ * Rigenera i file in un worktree pulito (checkout di HEAD) e restituisce il
+ * manifest {file: sha256}.
+ *
+ * Il worktree serve per due motivi:
+ *   * lo stato di partenza e' quello COMMITTATO (l'input dei generatori non
+ *     e' inquinato dalle modifiche locali);
+ *   * i generatori scrivono li', senza toccare il working tree di chi esegue
+ *     il gate (il gate e' read-only sul repository).
+ */
+function regenerate() {
+  const dir = mkdtempSync(join(tmpdir(), 'ls-portability-'));
+  const wt = join(dir, 'wt');
+  try {
+    const add = git(['worktree', 'add', '--detach', wt, 'HEAD']);
+    if (add.status !== 0) {
+      environmentError(
+        `impossibile creare il worktree temporaneo: ${(add.stderr || '').trim()}`,
+      );
+    }
+    run('pwsh', ['-NoProfile', '-File', 'scripts/aggregate-state.ps1'], wt);
+    run('pwsh', ['-NoProfile', '-File', 'scripts/generate-bundle.ps1'], wt);
+    const manifest = {};
+    for (const target of TARGETS) {
+      const file = join(wt, target);
+      if (!existsSync(file)) environmentError(`il generatore non ha prodotto ${target}`);
+      manifest[target] = sha256(file);
+    }
+    return manifest;
+  } finally {
+    git(['worktree', 'remove', '--force', wt]);
+    git(['worktree', 'prune']);
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
-process.exit(1);
+
+// --- 1. determinismo: due rigenerazioni consecutive ---------------------------
+
+console.log('[INFO] check-generators-portable: rigenero i file in un worktree pulito');
+const first = regenerate();
+const second = regenerate();
+const drift = Object.keys(first).filter((k) => first[k] !== second[k]);
+if (drift.length > 0) {
+  fail(`i generatori non sono deterministici: ${drift.length} file cambiano fra due run consecutivi`);
+  for (const k of drift) console.error(`         ${k}: ${first[k]} -> ${second[k]}`);
+  process.exit(1);
+}
+console.log(`[OK] i generatori sono deterministici (${Object.keys(first).length} file, due run consecutive)`);
+
+if (manifestPath) {
+  mkdirSync(resolve(manifestPath).replace(/[\\/][^\\/]*$/, ''), { recursive: true });
+  writeFileSync(manifestPath, JSON.stringify(first, null, 2) + '\n', 'utf8');
+  console.log(`[OK] manifest scritto in ${manifestPath}`);
+}
+
+// --- 2. invarianti del repo sullo stato committato ---------------------------
+
+const bundleCheck = spawnSync(
+  'pwsh',
+  ['-NoProfile', '-File', 'scripts/generate-bundle.ps1', '-Check'],
+  { cwd: root, encoding: 'utf8' },
+);
+if (bundleCheck.status !== 0) {
+  console.error((bundleCheck.stdout || '') + (bundleCheck.stderr || ''));
+  fail('il bundle non e\' in sync con lo stato committato (esegui `pwsh scripts/generate-bundle.ps1`)');
+  process.exit(1);
+}
+console.log('[OK] il bundle e\' in sync con lo stato committato');
+
+process.exit(0);

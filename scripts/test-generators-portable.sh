@@ -1,19 +1,24 @@
 #!/usr/bin/env bash
 # Test di regressione per il gate di PORTABILITA' dei generatori (issue #284).
 #
-# Il gate `scripts/check-generators-portable.mjs` verifica che i generatori,
-# rieseguiti su un sistema operativo, riproducano i BYTE committati. E' la
-# prova empirica dell'indipendenza dal sistema operativo: se un generatore
-# dipendesse dalla locale, dal fuso orario o dai line ending, il diff sarebbe
-# non vuoto e il gate fallirebbe.
+# Il gate `scripts/check-generators-portable.mjs` verifica tre proprieta':
 #
-# Il test e' ermetico: lo scenario negativo lavora in un worktree temporaneo
-# (creato da `git worktree add --detach`), dove il generatore viene alterato
-# in modo che produca un output diverso da quello committato.
+#   1. **Determinismo**: due rigenerazioni consecutive producono gli stessi
+#      byte.
+#   2. **Invarianti del repo**: il bundle e' in sync con lo stato committato.
+#   3. **Cross-OS**: il manifest dei file generati (sha256 per file) prodotto
+#      su un sistema operativo e' identico a quello prodotto su un altro. In CI
+#      i due manifest sono prodotti dalla matrix `gates-portability` (ubuntu +
+#      windows) e confrontati dal job `gates-portability-compare`.
+#
+# Il test e' ermetico: lo scenario negativo costruisce un manifest alterato
+# (simula "l'altro sistema operativo ha prodotto byte diversi") e verifica che
+# il confronto lo intercetti.
 #
 # Scenari coperti:
-#   T1  repo reale: i generatori riproducono lo stato committato -> exit 0
-#   T2  worktree con il generatore alterato -> exit 1 (il gate intercetta)
+#   T1  repo reale: il gate passa (determinismo + invarianti) -> exit 0
+#   T2  il manifest e' scritto e il confronto di due manifest identici passa -> exit 0
+#   T3  manifest alterato: il confronto fallisce -> exit 1
 #
 set -uo pipefail
 
@@ -35,45 +40,49 @@ fail=0
 ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
 ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
-echo "=== T1: repo reale - i generatori riproducono lo stato committato ==="
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+echo "=== T1: repo reale - determinismo e invarianti del repo ==="
 out="$(node "$GATE" 2>&1)"; ec=$?
 if [ $ec -eq 0 ]; then
-  ok "exit 0 (output identico a parita' di stato)"
+  ok "exit 0 (determinismo + invarianti)"
 else
   ng "exit $ec (atteso 0): $(echo "$out" | tail -8)"
 fi
 
-echo "=== T2: generatore alterato in un worktree - il gate deve intercettare ==="
-WT="$(mktemp -d)/wt"
-cleanup() {
-  git -C "$REPO_ROOT" worktree remove --force "$WT" >/dev/null 2>&1 || true
-  git -C "$REPO_ROOT" worktree prune >/dev/null 2>&1 || true
-  rm -rf "$(dirname "$WT")" >/dev/null 2>&1 || true
-}
-trap cleanup EXIT
-
-if ! git -C "$REPO_ROOT" worktree add --detach "$WT" HEAD >/dev/null 2>&1; then
-  echo "  [SKIP] non e' stato possibile creare il worktree temporaneo"
-  echo ""
-  echo "=== Risultato: $pass pass, $fail fail ==="
-  exit 0
-fi
-
-# Il generatore produce un testo diverso: il gate deve accorgersene.
-if sed -i 's/- Totale file: /- Totale file (mutato): /' "$WT/scripts/aggregate-state.ps1"; then
-  ok "mutazione applicata (il generatore produce un output diverso)"
+echo "=== T2: manifest e confronto di due manifest identici ==="
+out="$(node "$GATE" --manifest "$WORK/a.json" 2>&1)"; ec=$?
+if [ $ec -eq 0 ] && [ -s "$WORK/a.json" ]; then
+  ok "exit 0 e manifest scritto"
 else
-  ng "mutazione non applicata"
+  ng "exit $ec (atteso 0) o manifest mancante: $(echo "$out" | tail -6)"
+fi
+cp "$WORK/a.json" "$WORK/b.json"
+out="$(node "$GATE" --compare "$WORK/a.json" --compare "$WORK/b.json" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then
+  ok "exit 0 (due manifest identici sono equivalenti)"
+else
+  ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"
 fi
 
-out="$(cd "$WT" && node "$GATE" 2>&1)"; ec=$?
+echo "=== T3: manifest alterato (l'altro OS ha prodotto byte diversi) ==="
+node -e '
+const fs=require("node:fs");
+const p=process.argv[1];
+const m=JSON.parse(fs.readFileSync(p,"utf8"));
+const k=Object.keys(m)[0];
+m[k]="0".repeat(64);
+fs.writeFileSync(p, JSON.stringify(m,null,2)+"\n");
+' "$WORK/b.json"
+out="$(node "$GATE" --compare "$WORK/a.json" --compare "$WORK/b.json" 2>&1)"; ec=$?
 if [ $ec -eq 1 ]; then
-  ok "exit 1 (il gate intercetta l'output divergente)"
+  ok "exit 1 (il confronto intercetta la divergenza cross-OS)"
 else
-  ng "exit $ec (atteso 1): $(echo "$out" | tail -8)"
+  ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"
 fi
-if echo "$out" | grep -q "output DIVERSO"; then
-  ok "il messaggio nomina la divergenza"
+if echo "$out" | grep -q "output DIVERSI"; then
+  ok "il messaggio nomina la divergenza cross-OS"
 else
   ng "il messaggio non nomina la divergenza: $(echo "$out" | tail -4)"
 fi
@@ -81,8 +90,8 @@ fi
 echo ""
 echo "=== Risultato: $pass pass, $fail fail ==="
 if [ $fail -gt 0 ]; then
-  echo "[FAIL] il gate di portabilita' non intercetta un generatore divergente: non e' un gate"
+  echo "[FAIL] il gate di portabilita' non intercetta un manifest divergente: non e' un gate"
   exit 1
 fi
-echo "[OK] il gate di portabilita' intercetta l'output divergente"
+echo "[OK] il gate di portabilita' intercetta la divergenza cross-OS"
 exit 0
