@@ -1,4 +1,4 @@
-﻿---
+---
 number: 86
 title: "Il pacchetto di specifiche implementabili delle 7 story rimanenti"
 date: 2026-11-02

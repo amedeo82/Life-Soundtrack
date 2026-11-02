@@ -1,4 +1,4 @@
-﻿---
+---
 number: 85
 title: "Posizionamento competitivo verificato sul codice e prioritÃ  ricalcolate"
 date: 2026-11-02
