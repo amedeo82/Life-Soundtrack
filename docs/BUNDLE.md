@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 08:49
+> Data: 2026-11-03 09:03
 > Totale file: 177
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -20556,7 +20556,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: feat/283-node24-actions
-pr: 0
+pr: 289
 claim: kilo-hp-elitebook-7c3f
 tags: [devops, ci, workflow, node24, protocollo]
 ---
@@ -47629,8 +47629,12 @@ if ($state.PSObject.Properties.Name -contains "session" -and $state.session) {
     if (Test-Path $candidate) { $sessionFile = $candidate }
 }
 if (-not $sessionFile) {
-    $candidates = Get-ChildItem (Join-Path $repoRoot "docs/state/sessions") -Filter "*.md" -File |
-        Where-Object { (Get-Content $_.FullName -Raw) -match "(?m)^branch:\s*$([regex]::Escape($branch))\s*$" }
+    # `@(...)`: con un SOLO file di sessione per questa branch, la pipeline
+    # restituisce un oggetto e non un array: sotto `Set-StrictMode -Version
+    # Latest` l'accesso a `.Count` su uno scalare fallisce con "Non e' possibile
+    # trovare la proprieta' 'Count'". Il wrapping lo rende sempre un array.
+    $candidates = @(Get-ChildItem (Join-Path $repoRoot "docs/state/sessions") -Filter "*.md" -File |
+        Where-Object { (Get-Content $_.FullName -Raw) -match "(?m)^branch:\s*$([regex]::Escape($branch))\s*$" })
     if ($candidates.Count -eq 1) { $sessionFile = $candidates[0].FullName }
 }
 
