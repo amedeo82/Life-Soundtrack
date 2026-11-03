@@ -66,6 +66,8 @@ export interface EraFact {
   label: string;
   /** Mood dominante dell'era, se noto. */
   mood: string | null;
+  /** La nota libera dell'utente (nome e parole chiave), se c'è. */
+  userNote?: string | null;
 }
 
 /** I quattro numeri della Home (`06§2.6` — 4 StatCard). */
@@ -305,6 +307,8 @@ export interface EraBandModel {
   mood: string | null;
   start: number;
   end: number;
+  /** La nota libera dell'utente (Story 3.2): nome e parole chiave. */
+  userNote: string | null;
 }
 
 /** Le ere come bande, ordinate per inizio. */
@@ -317,6 +321,7 @@ export function toEraBands(eras: readonly EraFact[]): EraBandModel[] {
       mood: era.mood,
       start: era.startTime,
       end: era.endTime,
+      userNote: era.userNote ?? null,
     }));
 }
 

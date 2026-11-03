@@ -11,6 +11,16 @@
 
 import type { MoodId } from '@core/schema';
 
+/** Un'azione della card (`docs/07-UI-SPEC.md` §2.2). */
+export interface MemoryCardAction {
+  /** L'icona dell'azione (emoji o glifo). */
+  readonly icon: string;
+  /** L'etichetta, già resa (è anche l'`aria-label` del bottone). */
+  readonly label: string;
+  /** Cosa fa l'azione. */
+  readonly onClick: () => void;
+}
+
 export interface MemoryCardProps {
   /** Titolo del ricordo (testo già reso). */
   title: string;
@@ -26,6 +36,13 @@ export interface MemoryCardProps {
   artworkUrl?: string | null | undefined;
   /** Callback al click (deep link al ricordo). */
   onClick?: (() => void) | undefined;
+  /**
+   * Le azioni della card (nascondi / salva / condividi) — `07§2.2`.
+   *
+   * Sono **opzionali**: la card della Home (⑥) non ha azioni, quella del
+   * feed dei ricordi (⑪) sì.
+   */
+  actions?: readonly MemoryCardAction[] | undefined;
 }
 
 const MOOD_COLORS: Record<string, string> = {
@@ -45,6 +62,7 @@ export function MemoryCard({
   date,
   artworkUrl,
   onClick,
+  actions,
 }: MemoryCardProps) {
   const moodColor = mood ? (MOOD_COLORS[mood] ?? 'var(--ls-mood-neutral)') : null;
 
@@ -80,6 +98,26 @@ export function MemoryCard({
             </span>
           )}
         </div>
+        {actions && actions.length > 0 && (
+          <div className="memory-card__actions" data-testid="memory-card-actions">
+            {actions.map((action, index) => (
+              <button
+                key={`${action.icon}-${index}`}
+                type="button"
+                className="memory-card__action"
+                aria-label={action.label}
+                data-testid={`memory-card-action-${index}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  action.onClick();
+                }}
+              >
+                <span aria-hidden="true">{action.icon}</span>
+                <span className="memory-card__action-label">{action.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </article>
   );

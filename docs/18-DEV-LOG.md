@@ -210,8 +210,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.29
-> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge (+ follow-up: i 5 gate degli script passano a pull_request only) e correzione: i commit dei writer non attivano la CI (GITHUB_TOKEN) (Sessione 74)
+> Versione: 2.30
+> Ultima modifica: 2026-11-03 - §53 Ricordi + Share: la Story 3.2 (feed ⑪, ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale con la conservazione dei campi dell'utente al ricalcolo) (Sessione 97)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -1520,6 +1520,47 @@ fix che si può eseguire **sui dati** chiude il drift presente e futuro con lo s
 `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
+## 53. Ricordi + Share: la Story 3.2 (Sessione 97)
+
+**Branch**: `feat/241-story-3-2---ricordi-share`
+**Issue di tracking**: **#241**
+**Data**: 2026-11-03
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 97-1 | P | Il ricalcolo dell'analisi **cancella e reinserisce** gli insight: il nome che l'utente dà a un'era (e la sua conferma) spariscono al primo ricalcolo | `replaceAllInsightsOfType` (Story 2.5) scrive gli insight **nuovi**, e i generatori scrivono sempre `userNote: null` / `status: 'pending'` | I **campi dell'utente** sono riportati dagli insight esistenti a quelli nuovi (`preserveUserFields`), dentro il writer: gli id sono deterministici, quindi l'insight nuovo e quello vecchio sono lo **stesso** insight | `packages/core/src/db/insights.ts` |
+| 97-2 | P | `Insight.userNote` e `Insight.status` erano **solo letti**: nessun writer, quindi nessun percorso di scrittura per il tagging manuale | Il campo esisteva nello schema per il testo libero dell'utente, ma non era mai stato cablato | Due writer transazionali (`setInsightUserNote`, `setInsightStatus`) che restituiscono `null` se l'insight non esiste (l'utente può aver rinominato un'era che il ricalcolo ha appena rimosso: non è un errore) | `packages/core/src/db/insights.ts` |
+| 97-3 | — | La card condivisa (1080×1350) e il capitolo statico | Il requisito è «un capitolo statico, mai un dump del database» | Canvas **disegnato a mano** (nessuna libreria di grafica: sarebbe una decisione di stack, non di story) e un capitolo **HTML autonomo**: nessuno script, nessuno stile esterno, nessuna richiesta di rete | `apps/web/src/share/` |
+| 97-4 | — | Ogni azione di condivisione può fallire | Il Web Share API e il clipboard non esistono su ogni piattaforma | Ogni azione ha un **fallback**: senza Web Share API il file si scarica, senza clipboard il file si scarica. L'utente deve sempre poter portare fuori la card | `apps/web/src/share/shareActions.ts` |
+| 97-5 | P | I **test i18n** falliscono in locale (8 test: 7 del «language detector» e 1 di `i18n-react`) | `localStorage` **globale**: sotto Node 26 il jsdom non lo espone e il `beforeEach` muore su `localStorage.clear()` | Non è una regressione: gli stessi file falliscono **identici su `main`** (il CI gira su Node 24). La lezione è il metodo — il confronto con `main` distingue un difetto dall'ambiente | `apps/web/src/__tests__/i18n.test.ts` |
+| 97-6 | P | Il test di performance del core (10.000 insert in < 500 ms) fallisce quando la suite gira in parallelo con un'altra suite pesante | Il test misura il **tempo**, e il tempo dipende dal carico della macchina | Passa da solo: è un indicatore di **saturazione**, non un difetto del codice. Va letto così prima di «ottimizzare» | `packages/core/src/db/__tests__/perf.test.ts` |
+
+**Lesson learned**: la prima lezione è sul **rischio dichiarato nella spec**. `25§6` avvertiva che
+`replaceAllInsightsOfType` cancella e reinserisce gli insight, e che la rinomina dell'era sarebbe
+persa al primo ricalcolo se la persistenza non leggesse il `userNote` esistente prima di sostituire
+le righe. Il rischio era **scritto**: il lavoro non è stato indovinare il pericolo, ma implementare
+il rimedio che la spec indicava — e il rimedio sta nel **writer**, non nei generatori, perché gli id
+sono deterministici e l'insight nuovo è lo stesso insight.
+
+La seconda lezione è sul **tag del brano**. L'AC dell'issue chiede il tagging di «un'era e di una
+canzone», ma la decisione D-25.4 della spec 🟢 impone **nessuna migrazione dello schema** (il DB v7
+imporrebbe il bump di `fastCheck`): il tag del brano sta quindi sulla **nota libera del ricordo**,
+che è il testo dell'utente sul ricordo e sul suo brano simbolo. Il vincolo della spec 🟢 ha
+prevalso sulla formulazione dell'AC, ed è la cosa giusta: fra due fonti in conflitto, vince la
+decisione ratificata.
+
+La terza è sul **rumore d'ambiente**. Otto test i18n e un test di performance fallivano in locale:
+i primi per il runtime (Node 26 senza `localStorage` nel jsdom), il secondo per il carico. In
+entrambi i casi la domanda utile non era «perché fallisce?» ma «fallisce anche su `main`?» — la
+risposta distingue un difetto da un ambiente, e risparmia una sessione di debugging.
+
+**Verifica**: `@ls/core` 643 test verdi (57 file) · `@ls/web` 186 test, 178 verdi e 8 falliti per
+l'ambiente (cfr. 97-5) · `eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` ·
+`node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 

@@ -136,6 +136,9 @@ export {
   replaceAllInsightsOfType,
   replaceInsights,
   replaceInsightsOfType,
+  setInsightStatus,
+  setInsightUserNote,
+  type InsightUserNote,
 } from './db';
 
 export {

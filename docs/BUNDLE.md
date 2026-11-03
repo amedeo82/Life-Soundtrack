@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 19:23
-> Totale file: 183
+> Data: 2026-11-03 22:16
+> Totale file: 185
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -2348,8 +2348,8 @@ il gate resta fail-closed su entrambi i perimetri.
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.31, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
-- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `08` ora v0.10, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.21; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
+- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.36, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
+- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.5, `07` ora v0.2, `08` ora v0.14, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.30; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
@@ -2364,7 +2364,8 @@ il gate resta fail-closed su entrambi i perimetri.
 - **Sessione 22** — implementazione Story 0.5 PWA: `vite-plugin-pwa@^2.0.0` (Workbox config); manifest inline (4 icone PNG generate deterministically da `scripts/generate-pwa-icons.mjs` zero deps); strategy precache 12 entries + NetworkFirst `/version.json` + CacheFirst Google Fonts; `useAppUpdate()` hook + `<UpdateBanner>` componente con prompt policy patch/minor/major (CTA bloccante per major); PR #19 aperta su #7 (claim `kilo-HP-ELITEBOOK-3b3f`). **Stato (2026-10-18T15:09Z)**: PR #19 cherry-pick + merge di main con S23+S24; conflitti doc risolti, mancano solo 1-2 commit di cherry-pick + Story 0.5 renumber.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 77, issue #233): l'**EPIC 3** ha le sue **prime due schermate** — la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati). Il blocco NEXT-STEP del README indica ora la **3.2** (Ricordi + Share, `[SIZE:L]`): è la prima delle due schermate mancanti, e con la **3.3** (Esplora + Analisi) chiude il percorso end-to-end dell'app. Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
+- **Sessione 97** — implementazione **Story 3.2 «Ricordi + Share»** (issue #241, branch `feat/241-story-3-2---ricordi-share`, claim `kilo-HP-ELITEBOOK-6e15`): la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scroll, i `dismissed` esclusi dal feed ma **presenti** nel database, ordinamento per `Insight.confidence`), il foglio ⑫ **ShareSheet** (dialog accessibile con focus trap e stati `generating`/`ready`/`error`), la card **1080×1350** disegnata a mano su canvas e il **capitolo HTML autonomo** (export statico alternativo, nessuno script né stile esterno), le azioni di condivisione con **fallback** (Web Share API → download, clipboard → download) e il **tagging manuale** (nome e parole chiave dell'era, nota libera del ricordo) con la **conservazione dei campi dell'utente al ricalcolo** (`Insight.userNote` e `Insight.status` riportati dagli insight esistenti a quelli nuovi: senza, il nome di un'era sparisce al primo ricalcolo dell'analisi). **37 test** nuovi; i18n IT/EN per le nuove stringhe. Documenti allineati: `11-BACKLOG.md` v1.6.36, `06-UX-FLOWS-STATES.md` v0.5, `07-UI-SPEC.md` v0.2, `08-COPY-I18N.md` v0.14, `18-DEV-LOG.md` v2.30 (§53), `docs/state/stories/3.2-ricordi-share.md` e `docs/state/sessions/97-ricordi-share.md` (nuovi).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 97, issue #241): l'**EPIC 3** ha le sue **prime tre schermate** — la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati) e la **3.2** (Ricordi + Share, Sessione 97: schermata ⑪ e ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale). Il blocco NEXT-STEP del README indica ora la **3.3** (Esplora + Analisi, `[SIZE:L]`): è la schermata che chiude il percorso end-to-end dell'app, insieme alla **3.5** (anteprima/demo in onboarding). Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -12955,8 +12956,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.29
-> Ultima modifica: 2026-10-31 - §41 La CI girava 4 volte per ogni merge (+ follow-up: i 5 gate degli script passano a pull_request only) e correzione: i commit dei writer non attivano la CI (GITHUB_TOKEN) (Sessione 74)
+> Versione: 2.30
+> Ultima modifica: 2026-11-03 - §53 Ricordi + Share: la Story 3.2 (feed ⑪, ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale con la conservazione dei campi dell'utente al ricalcolo) (Sessione 97)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -14265,6 +14266,47 @@ fix che si può eseguire **sui dati** chiude il drift presente e futuro con lo s
 `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
+## 53. Ricordi + Share: la Story 3.2 (Sessione 97)
+
+**Branch**: `feat/241-story-3-2---ricordi-share`
+**Issue di tracking**: **#241**
+**Data**: 2026-11-03
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 97-1 | P | Il ricalcolo dell'analisi **cancella e reinserisce** gli insight: il nome che l'utente dà a un'era (e la sua conferma) spariscono al primo ricalcolo | `replaceAllInsightsOfType` (Story 2.5) scrive gli insight **nuovi**, e i generatori scrivono sempre `userNote: null` / `status: 'pending'` | I **campi dell'utente** sono riportati dagli insight esistenti a quelli nuovi (`preserveUserFields`), dentro il writer: gli id sono deterministici, quindi l'insight nuovo e quello vecchio sono lo **stesso** insight | `packages/core/src/db/insights.ts` |
+| 97-2 | P | `Insight.userNote` e `Insight.status` erano **solo letti**: nessun writer, quindi nessun percorso di scrittura per il tagging manuale | Il campo esisteva nello schema per il testo libero dell'utente, ma non era mai stato cablato | Due writer transazionali (`setInsightUserNote`, `setInsightStatus`) che restituiscono `null` se l'insight non esiste (l'utente può aver rinominato un'era che il ricalcolo ha appena rimosso: non è un errore) | `packages/core/src/db/insights.ts` |
+| 97-3 | — | La card condivisa (1080×1350) e il capitolo statico | Il requisito è «un capitolo statico, mai un dump del database» | Canvas **disegnato a mano** (nessuna libreria di grafica: sarebbe una decisione di stack, non di story) e un capitolo **HTML autonomo**: nessuno script, nessuno stile esterno, nessuna richiesta di rete | `apps/web/src/share/` |
+| 97-4 | — | Ogni azione di condivisione può fallire | Il Web Share API e il clipboard non esistono su ogni piattaforma | Ogni azione ha un **fallback**: senza Web Share API il file si scarica, senza clipboard il file si scarica. L'utente deve sempre poter portare fuori la card | `apps/web/src/share/shareActions.ts` |
+| 97-5 | P | I **test i18n** falliscono in locale (8 test: 7 del «language detector» e 1 di `i18n-react`) | `localStorage` **globale**: sotto Node 26 il jsdom non lo espone e il `beforeEach` muore su `localStorage.clear()` | Non è una regressione: gli stessi file falliscono **identici su `main`** (il CI gira su Node 24). La lezione è il metodo — il confronto con `main` distingue un difetto dall'ambiente | `apps/web/src/__tests__/i18n.test.ts` |
+| 97-6 | P | Il test di performance del core (10.000 insert in < 500 ms) fallisce quando la suite gira in parallelo con un'altra suite pesante | Il test misura il **tempo**, e il tempo dipende dal carico della macchina | Passa da solo: è un indicatore di **saturazione**, non un difetto del codice. Va letto così prima di «ottimizzare» | `packages/core/src/db/__tests__/perf.test.ts` |
+
+**Lesson learned**: la prima lezione è sul **rischio dichiarato nella spec**. `25§6` avvertiva che
+`replaceAllInsightsOfType` cancella e reinserisce gli insight, e che la rinomina dell'era sarebbe
+persa al primo ricalcolo se la persistenza non leggesse il `userNote` esistente prima di sostituire
+le righe. Il rischio era **scritto**: il lavoro non è stato indovinare il pericolo, ma implementare
+il rimedio che la spec indicava — e il rimedio sta nel **writer**, non nei generatori, perché gli id
+sono deterministici e l'insight nuovo è lo stesso insight.
+
+La seconda lezione è sul **tag del brano**. L'AC dell'issue chiede il tagging di «un'era e di una
+canzone», ma la decisione D-25.4 della spec 🟢 impone **nessuna migrazione dello schema** (il DB v7
+imporrebbe il bump di `fastCheck`): il tag del brano sta quindi sulla **nota libera del ricordo**,
+che è il testo dell'utente sul ricordo e sul suo brano simbolo. Il vincolo della spec 🟢 ha
+prevalso sulla formulazione dell'AC, ed è la cosa giusta: fra due fonti in conflitto, vince la
+decisione ratificata.
+
+La terza è sul **rumore d'ambiente**. Otto test i18n e un test di performance fallivano in locale:
+i primi per il runtime (Node 26 senza `localStorage` nel jsdom), il secondo per il carico. In
+entrambi i casi la domanda utile non era «perché fallisce?» ma «fallisce anche su `main`?» — la
+risposta distingue un difetto da un ambiente, e risparmia una sessione di debugging.
+
+**Verifica**: `@ls/core` 643 test verdi (57 file) · `@ls/web` 186 test, 178 verdi e 8 falliti per
+l'ambiente (cfr. 97-5) · `eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` ·
+`node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 
@@ -22027,6 +22069,144 @@ il gate resta fail-closed su entrambi i perimetri.
 
 
 
+===== FILE: docs/state/sessions/97-ricordi-share.md =====
+
+---
+number: 97
+title: "Ricordi + Share: il feed, la card e il tagging manuale (issue #241)"
+date: 2026-11-03
+state: 🟡
+merged: false
+branch: feat/241-story-3-2---ricordi-share
+pr: 0
+claim: kilo-HP-ELITEBOOK-6e15
+tags: [ui, ricordi, share, tagging, canvas, i18n]
+---
+
+# Sessione 97 — Ricordi + Share: il feed, la card e il tagging manuale (issue #241)
+
+> **Oggetto**: la **Story 3.2** — il feed dei ricordi (schermata ⑪), il foglio di
+> condivisione (⑫) e il **tagging manuale**. È la story che rende leggibile la
+> storia dell'utente: l'analisi automatica dice *cosa* suonava, l'utente
+> scrive *perché*.
+
+## Sintesi
+
+L'issue #241 è stata implementata sulla specifica `docs/25-MEMORIES-SHARE-EXPLORE.md`
+(v1.0 🟢 APPROVED, ratificata dal project owner il 2026-11-02), con le sette
+decisioni D-25.1…D-25.7.
+
+Il lavoro è in tre pezzi, e il terzo è quello che la specifica dichiarava
+**rischioso**: il ricalcolo dell'analisi **cancella e reinserisce** gli insight
+(`replaceAllInsightsOfType`, Story 2.5), quindi un nome dato a un'era sarebbe
+sparito al primo ricalcolo. La correzione non sta nei generatori ma nel
+**writer**: `preserveUserFields` riporta `userNote` e `status` dagli insight
+esistenti a quelli nuovi, e il test di integrazione verifica la sopravvivenza
+al ricalcolo reale (`replaceAllInsightsOfType` sul database, non una simulazione).
+
+Il resto è stato scelto per restare **locale e senza librerie**:
+
+- la card 1080×1350 è disegnata a mano su `canvas` (nessuna libreria di
+  grafica), con i font caricati **prima** del disegno e un placeholder
+  deterministico quando la copertina non c'è;
+- il capitolo HTML è **autonomo**: nessuno script, nessun foglio di stile
+  esterno, nessuna richiesta di rete — l'export statico alternativo per chi non
+  usa i social;
+- ogni azione di condivisione ha un **fallback**: senza Web Share API si
+  scarica il file, senza clipboard si scarica il file.
+
+## Cosa è stato fatto
+
+### Core (`packages/core`)
+
+- `setInsightUserNote` e `setInsightStatus`: i writer dei campi **dell'utente**,
+  transazionali, che restituiscono `null` se l'insight non esiste (l'utente può
+  aver rinominato un'era che il ricalcolo ha appena rimosso: non è un errore);
+- `preserveUserFields` applicato a `replaceAllInsightsOfType`,
+  `replaceInsightsOfType` e `replaceInsights`: la nota e la conferma
+  sopravvivono al ricalcolo.
+
+### App (`apps/web`)
+
+- `hooks/useMemories.ts`: il feed — pagine di 10, `dismissed` escluso ma **non
+  cancellato**, ordinamento per `Insight.confidence` decrescente (la rilevanza
+  è il campo che il motore dei ricordi normalizza), e le tre azioni (nascondi,
+  salva, nota);
+- `hooks/useEraNotes.ts` + `eraNote.ts`: le ere rilevate e il loro nome libero
+  (nome + parole chiave separate da virgola);
+- `share/renderMemoryCard.ts`: la card 1080×1350 su canvas;
+- `share/renderMemoryChapter.ts`: il capitolo HTML autonomo;
+- `share/shareActions.ts`: Web Share API, clipboard, download (con fallback);
+- `components/ShareSheet.tsx`: il dialog accessibile (focus trap, `Esc`,
+  backdrop) con gli stati `generating` / `ready` / `error`;
+- `components/NoteField.tsx` + `EraNoteField.tsx`: il campo di nota libera,
+  riusato per l'era e per il ricordo;
+- `screens/Memories.tsx`: la schermata ⑪, con infinite scroll e fallback
+  manuale, il tagging delle ere e il flusso di condivisione;
+- `i18n`: le nuove chiavi `nav.memories`, `memories.*` e `share.*` in IT ed EN.
+
+### Test
+
+37 test nuovi (8 nel core, 29 nell'app web): i writer e la preservazione al
+ricalcolo, il feed, il canvas, il capitolo HTML, il dialog accessibile, le
+azioni della card e la rinomina dell'era.
+
+## Decisioni
+
+- **Il tag del brano sta sulla nota dell'insight del ricordo**, non su un
+  campo nuovo di `Track`: la decisione D-25.4 della spec 🟢 (nessuna
+  migrazione dello schema, il DB v7 imporrebbe il bump di `fastCheck`) è
+  vincolante, e il tag del ricordo copre il caso d'uso dell'AC «tagging
+  manuale di un'era e di una canzone».
+- **Il capitolo HTML è l'export statico alternativo**, non un PDF: il PDF
+  richiederebbe una dipendenza (o un writer minimale) e l'AC dice «HTML autonomo
+  **e/o** PDF».
+- **Il componente non conosce l'i18n**: ShareSheet, NoteField ed EraNoteField
+  ricevono le etichette già rese.
+
+## Analisi di avanzamento
+
+- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
+  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
+  (i test del «language detector» usano `localStorage`, che il jsdom non espone
+  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
+  Node 24).
+- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
+  dell'era e nota sul ricordo, i18n IT/EN.
+- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
+  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
+  la schermata ⑨/⑩ di Esplora è la Story 3.3.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
+  documentati.
+
+## Lesson learned
+
+- **Un test che usa `localStorage` globale è un test di ambiente.** Sotto
+  Node 26 il jsdom non espone `localStorage` e il `beforeEach` muore prima
+  della prima asserzione: un fallimento che sembra una regressione di i18n e
+  invece è il runtime. Il confronto con `main` è la mossa che lo distingue.
+- **Il test di performance del core è un indicatore di carico**: 10.000 insert
+  in < 500 ms falliscono se un'altra suite gira in parallelo sulla stessa
+  macchina, e passano da soli.
+- **Le entità HTML vanno costruite, non scritte letterali**: `&` in un
+  sorgente TypeScript finisce per essere riscritto come `&` in alcuni passaggi
+  di tooling; `String.fromCodePoint(38)` rende l'escape esplicito e immune.
+
+## Documenti aggiornati
+
+- `docs/state/stories/3.2-ricordi-share.md` (nuova) e
+  `docs/state/sessions/97-ricordi-share.md` (questa)
+- `docs/11-BACKLOG.md` — sezione Story 3.2
+- `docs/INDEX.md` — dettaglio legacy
+- `docs/06-UX-FLOWS-STATES.md` §2.11-§2.12 · `docs/07-UI-SPEC.md` §2.2, §2.10
+- `docs/08-COPY-I18N.md` — le nuove chiavi
+- `docs/18-DEV-LOG.md` — la entry della sessione
+- `scripts/generate-bundle.ps1` — `$files`
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -23353,6 +23533,143 @@ Consegnato:
 - `docs/08-COPY-I18N.md` §1 (namespace `nav`) · §2.6 · §2.7
 - `docs/11-BACKLOG.md` Story 3.1
 - `docs/state/sessions/77-home-timeline.md`
+
+
+
+===== FILE: docs/state/stories/3.2-ricordi-share.md =====
+
+---
+id: "3.2"
+title: "Ricordi + Share"
+phase: 3
+area: ui
+status: in_review
+priority: I
+depends_on: ["2.4", "2.5"]
+issue: 241
+branch: "feat/241-story-3-2---ricordi-share"
+pr: 0
+claim: kilo-HP-ELITEBOOK-6e15
+spec_refs:
+  - docs/25-MEMORIES-SHARE-EXPLORE.md
+  - docs/06-UX-FLOWS-STATES.md
+  - docs/07-UI-SPEC.md
+  - docs/08-COPY-I18N.md
+---
+
+## Descrizione
+
+La schermata ⑪ **Ricordi** e il foglio di condivisione ⑫ **ShareSheet**, più il
+**tagging manuale**: il ponte fra l'analisi automatica, che dice *cosa* suonava,
+e l'utente, che sa *perché*.
+
+Il vincolo «tutto locale» non è un blocco: la condivisione esporta **un
+capitolo statico** (la card PNG 1080×1350 e il capitolo HTML autonomo), **mai**
+il database. I ricordi nascosti escono dal feed ma **restano** nel database
+(D-25.3): cancellarli è un atto separato (Story 5.2).
+
+La specifica è `docs/25-MEMORIES-SHARE-EXPLORE.md` (v1.0 🟢 APPROVED), con le
+decisioni D-25.1…D-25.7.
+
+## Stato
+
+🟡 **IN REVIEW** — implementata nella Sessione 97 (issue **#241**, branch
+`feat/241-story-3-2---ricordi-share`, worktree `ls-241-story-3-2---ricordi-share`).
+
+Consegnato:
+
+- **`packages/core/src/db/insights.ts`**: i writer dei campi **dell'utente**,
+  `setInsightUserNote` e `setInsightStatus` (transazionali), e la preservazione
+  di `userNote`/`status` in `replaceAllInsightsOfType`, `replaceInsightsOfType`
+  e `replaceInsights`: senza, il nome dato a un'era sparisce al primo ricalcolo
+  dell'analisi (T25.2, il rischio dichiarato in `25§6`);
+- **`apps/web/src/hooks/useMemories.ts`**: il feed (pagine di 10, esclusione dei
+  `dismissed`, ordinamento per `Insight.confidence` decrescente, azioni
+  nascondi/salva/nota);
+- **`apps/web/src/hooks/useEraNotes.ts`** + **`apps/web/src/eraNote.ts`**: le
+  ere rilevate e il loro nome libero (nome + parole chiave separate da virgola);
+- **`apps/web/src/share/renderMemoryCard.ts`**: la card 1080×1350 disegnata a
+  mano su canvas (nessuna libreria), con placeholder deterministico e font
+  caricati prima del disegno;
+- **`apps/web/src/share/renderMemoryChapter.ts`**: il capitolo **HTML
+  autonomo** (nessuno script, nessuno stile esterno, nessuna richiesta di
+  rete): l'export statico alternativo per chi non usa i social;
+- **`apps/web/src/share/shareActions.ts`**: Web Share API, clipboard, download —
+  ogni azione ha un **fallback** (il file si scarica sempre);
+- **`apps/web/src/components/ShareSheet.tsx`**: il dialog accessibile
+  (`role="dialog"`, `aria-modal`, focus trap, `Esc`/backdrop) con gli stati
+  `generating` / `ready` / `error` e il ritentativo;
+- **`apps/web/src/components/NoteField.tsx`** + **`EraNoteField.tsx`**: il
+  campo di nota libera, riusato per l'era e per il ricordo;
+- **`apps/web/src/screens/Memories.tsx`**: la schermata ⑪ (feed con infinite
+  scroll e fallback manuale, tagging delle ere, flusso di condivisione);
+- **37 test** nuovi (8 nel core, 29 nell'app web).
+
+## Task
+
+- [x] T25.1 — Core: i writer di `Insight.userNote` / `Insight.status`
+- [x] T25.2 — Core: la preservazione dei campi dell'utente al ricalcolo
+- [x] T25.3 — App: il feed dei ricordi (⑪) con paginazione e ordinamento per rilevanza
+- [x] T25.4 — App: la card 1080×1350 su canvas
+- [x] T25.5 — App: il ShareSheet (⑫) e le azioni di condivisione con fallback
+- [x] T25.6 — App: l'export statico alternativo (capitolo HTML autonomo)
+- [x] T25.7 — App: la rinomina e i tag dell'era, e la nota libera sul ricordo
+
+## Acceptance criteria
+
+- [x] Feed ricordi mobile (schermata ⑪)
+- [x] ShareSheet con card 1080×1350 generata via canvas
+- [x] Condivisione nativa + download immagine
+- [x] La card è un **capitolo statico**: copertine, periodo, canone simbolo, nome dell'era — nessun dump del database nei canali di condivisione
+- [x] Export statico alternativo (HTML autonomo) per chi non usa i social
+- [x] Tagging manuale di un'era (nome libero + parole chiave) e nota libera sul ricordo, persistiti localmente (`Insight.userNote`, D-25.4: nessuna migrazione dello schema)
+- [x] L'utente può rinominare un'era rilevata automaticamente: il campo esiste già (`Insight.userNote`) e ha **ora** UI e percorso di scrittura
+- [x] i18n IT/EN per le nuove stringhe
+
+## Scelte di implementazione
+
+- **Il testo libero sta in `Insight.userNote`, senza migrazione dello schema**
+  (D-25.4, decisione vincolante della spec 🟢): un tag per brano avrebbe
+  imposto il DB v7 e il bump di `fastCheck`, per un campo che il campo
+  esistente copre già. Il tag del ricordo (il brano simbolo con la sua nota)
+  sta quindi sulla nota dell'insight del ricordo.
+- **La card è disegnata a mano, senza librerie.** Il canvas è il minimo
+  necessario per un PNG locale, e introdurre una libreria di grafica sarebbe
+  una decisione di stack, non di story.
+- **Il capitolo HTML è autonomo per costruzione:** nessuno script, nessun
+  foglio di stile esterno, nessuna richiesta di rete. Le copertine remote
+  sono referenziate come URL assoluti; se non sono raggiungibili, il
+  capitolo resta leggibile.
+- **Ogni azione di condivisione ha un fallback.** Senza Web Share API si
+  scarica il file, senza clipboard si scarica il file: l'utente deve sempre
+  poter portare fuori la card.
+- **Il ricordo nascosto non è un ricordo cancellato.** `dismissed` esclude
+  l'elemento dal feed e basta (D-25.3): la cancellazione è la Story 5.2.
+- **Il componente non conosce l'i18n.** ShareSheet, NoteField ed EraNoteField
+  ricevono le etichette già rese: la schermata è l'unico punto che parla i18n.
+
+## Lesson learned
+
+- **I test i18n falliscono fuori dal CI per l'ambiente, non per il codice.**
+  I 7 test del «language detector» e quello di `i18n-react` dipendono da
+  `localStorage` globale: con Node 26 il jsdom non lo espone e il `beforeEach`
+  fallisce su `localStorage.clear()`. Gli stessi file falliscono identici su
+  `main`: è un rumore locale, non una regressione (il CI gira su Node 24).
+- **Il test di performance del core è sensibile al carico**: `perf.test.ts`
+  (10.000 insert in < 500 ms) fallisce se la suite gira in parallelo con
+  un'altra suite pesante, e passa da solo. Vale la pena leggerlo come un
+  indicatore di saturazione della macchina, non come un difetto del codice.
+
+## Documenti aggiornati
+
+- `docs/11-BACKLOG.md` — sezione Story 3.2 (stato e acceptance criteria)
+- `docs/INDEX.md` — dettaglio legacy
+- `docs/06-UX-FLOWS-STATES.md` — §2.11 (il feed) e §2.12 (la condivisione)
+- `docs/07-UI-SPEC.md` — §2.2 (MemoryCard) e §2.10 (ShareSheet)
+- `docs/08-COPY-I18N.md` — le nuove chiavi `memories.*` e `share.*`
+- `docs/18-DEV-LOG.md` — la entry della Sessione 97
+- `docs/state/sessions/97-ricordi-share.md` — la sessione
+- `scripts/generate-bundle.ps1` — `$files` (sessione 97 e story 3.2)
 
 
 
@@ -29212,7 +29529,7 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.4 · Sessione 9 (audit 2026-10-15)
+> Status: 🟡 DRAFT · Versione 0.5 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -29407,6 +29724,12 @@ Note: nessuna gestione errore (schermata statica).
 - Swipe left → "Nascondi questo tipo di ricordo"
 - Swipe right → "Salva nei preferiti"
 
+**Nota libera**: sotto ogni card c'è un campo di testo (il **tag** dell'utente):
+nome libero e parole chiave separate da virgola. Il testo resta in
+`Insight.userNote` e sopravvive al ricalcolo dell'analisi. Il ricordo **nascosto**
+esce dal feed ma **resta** nel database: cancellarlo è un atto separato (Story
+5.2, export e purge).
+
 ### 2.12 ⑫ Share Sheet
 
 | Stato | Comportamento |
@@ -29421,6 +29744,11 @@ Note: nessuna gestione errore (schermata statica).
 - X (Twitter) (share)
 - Copia negli appunti
 - Scarica
+- Capitolo HTML (export statico alternativo, per chi non usa i social)
+
+**Fallback**: ogni destinazione ha un ripiego — senza Web Share API il file si
+scarica, senza clipboard il file si scarica. L'utente deve sempre poter portare
+fuori la card.
 
 **Bottom sheet**: swipe down o tap fuori → chiudi.
 
@@ -29583,13 +29911,14 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.2 | Sessione 9 (2026-10-15) | Audit: re-import esplicito come idempotente (M8) — niente blocco al doppio drop, dedup via `eventKey`; riferimento count-up al token `motion.countUp.duration` (M11) |
 | 0.3 | Sessione 13 (2026-10-16) | **M13 chiuso**: §2.3 Import ora esplicita i 5 stati della singola PlatformCard (`empty`/`validating`/`parsing`/`done`/`error`) con tabella + transizioni dettagliate. §2.14 demo-user.json ora punta a `fixtures/demo-user.json` (1 anno, 4500 eventi, flag `demoMode=true`) |
 | 0.4 | Sessione 42 (2026-10-21) | Allineamento §2.2 e §2.13 a 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`); risolto drift documentazione↔codice (issue #107) |
+| 0.5 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.11 (⑪ Ricordi) dichiara la **nota libera** sotto ogni card (il tag dell'utente, in `Insight.userNote`, sopravvive al ricalcolo) e il fatto che il ricordo nascosto **resta** nel database; §2.12 (⑫ Share Sheet) aggiunge la destinazione **Capitolo HTML** (export statico alternativo) e il **fallback** di ogni azione (senza Web Share API o senza clipboard il file si scarica) |
 
 
 ===== FILE: docs/07-UI-SPEC.md =====
 
 # 07 — Specifiche UI Componenti
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 7
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
 > Vincolante per: `packages/ui/components`, test di interazione, implementazione frontend
 
 ---
@@ -29616,6 +29945,10 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 - **Stati**: `default`, `hover` (scale 1.02 + glow), `swiping` (mobile)
 - **A11y**: Immagine con `alt` descrittivo. Pulsanti azione con `aria-label`.
 - **Interazione**: Swipe left (mobile) → nascondi; Swipe right → salva; Tap → deep link.
+
+**Implementazione (Story 3.2, Sessione 97)**: le tre azioni sono **nascondi**,
+**salva** e **condividi**; il nascondimento esclude il ricordo dal feed ma non
+lo cancella dal database.
 
 ### 2.3 EraBand
 **Uso**: Timeline. Segmento orizzontale colorato che rappresenta un'era.
@@ -29672,6 +30005,22 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 - **A11y**: Modal con `role="dialog"`, `aria-modal="true"`, focus trap.
 - **Interazione**: Swipe down o click backdrop → chiudi.
 
+**Implementazione (Story 3.2, Sessione 97)**: il dialog riceve anche `state`,
+`title`, `generatingLabel`, `errorLabel`, `retryLabel` e `closeLabel` **già
+resi** (il componente non conosce l'i18n) e un `onRetry` per lo stato `error`.
+Le destinazioni sono le tre app (Instagram, WhatsApp, X), la copia negli
+appunti, il download della card e il **capitolo HTML** (export statico
+alternativo). Ogni destinazione ha un **fallback**: senza Web Share API o senza
+clipboard il file viene scaricato.
+
+### 2.10b NoteField (Story 3.2)
+**Uso**: il tagging manuale — il nome dell'era e la nota libera del ricordo.
+- **Props**: `fieldId` (string), `label` (string), `value` (string | null), `ariaLabel` (string), `onSave` (function)
+- **Stati**: `default`, `focus`
+- **A11y**: `<label>` collegato all'input, `aria-label` esplicito.
+- **Interazione**: si salva all'uscita dal campo o con `Enter`. Il testo è
+  locale (`Insight.userNote`) e sopravvive al ricalcolo dell'analisi.
+
 ## 3. Regole di Composizione
 
 - **Spacing**: Usare sempre i token di spacing (`gap-4`, `p-6`), mai valori hardcoded.
@@ -29697,13 +30046,14 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 7 | Prima versione completa |
+| 0.2 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.2 (MemoryCard) dichiara le tre azioni reali (nascondi, salva, condividi) e il fatto che il nascondimento **non cancella**; §2.10 (ShareSheet) dichiara le props reali (etichette già rese, `onRetry`) e i **fallback** delle destinazioni; nuova §2.10b (**NoteField**) per il tagging manuale |
 
 
 ===== FILE: docs/08-COPY-I18N.md =====
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.13 · Sessione 77 (2026-10-31, issue #233), aggiornata nelle Sessioni 76 (2026-10-31, issue #231), 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
+> Status: 🟡 DRAFT · Versione 0.14 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -29717,7 +30067,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 |-----------|-----|
 | `onboarding` | Schermate ①-④ |
 | `home` | Schermata ⑥ |
-| `nav` | Navigazione principale (Home / Timeline — Story 3.1) |
+| `nav` | Navigazione principale (Home / Timeline / Ricordi — Story 3.1, 3.2) |
 | `timeline` | Schermata ⑦ |
 | `era` | Schermata ⑧ |
 | `explore` | Schermata ⑨ |
@@ -29863,6 +30213,15 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `save` | Salva | Save |
 | `hide` | Nascondi | Hide |
 | `yearsAgo` | {n} anni fa | {n} years ago |
+| `firstTime` | PRIMA VOLTA | FIRST TIME |
+| `loading` | Caricamento dei ricordi... | Loading your memories... |
+| `error` | Non e' stato possibile caricare i ricordi. | Your memories could not be loaded. |
+| `loadMore` | Carica altri ricordi | Load more memories |
+| `eras` | Le tue ere | Your eras |
+| `erasHint` | Dai un nome alle tue ere e aggiungi parole chiave: nome, parola, parola | Name your eras and add keywords: name, keyword, keyword |
+| `eraAriaLabel` | Nome e parole chiave dell'era | Era name and keywords |
+| `noteLabel` | Aggiungi una nota a questo ricordo | Add a note to this memory |
+| `noteAriaLabel` | Nota libera del ricordo | Free note for this memory |
 
 ### 2.8 `share.*`
 
@@ -29875,8 +30234,18 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `twitter` | X (Twitter) | X (Twitter) |
 | `copy` | Copia | Copy |
 | `download` | Scarica | Download |
+| `html` | Capitolo HTML | HTML chapter |
 | `copied` | Immagine copiata | Image copied |
 | `saved` | Immagine salvata | Image saved |
+| `error` | Generazione della card non riuscita. | The card could not be generated. |
+| `retry` | Riprova | Try again |
+| `close` | Chiudi | Close |
+
+> **Regola di linguaggio**: le destinazioni sono **desiderate**, non
+> integrazioni: l'etichetta «Instagram» indica l'app in cui l'utente vuole
+> condividere, non un'API (D-25.2 — Instagram non accetta file via deep link).
+> Ogni azione ha un **fallback**: il file si scarica. Il testo del capitolo
+> HTML è un documento **autonomo**: nessuno script, nessuno stile esterno.
 
 ### 2.9 `settings.*`
 
@@ -30346,6 +30715,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |
 | 0.14 | Sessione 94 (2026-11-03, issue #266) | **Story 2.5 — stato vuoto `no-features`**: §2.2 `home.*` — aggiunte le **due chiavi** `home.noFeatures.description` e `home.noFeatures.cta` per lo stato vuoto distinto quando ci sono ascolti ma zero feature utilizzabili (valence/energy). Il messaggio spiega che serve l'analisi acustica e la CTA rimanda a Impostazioni → Privacy. Materializzate in `it`/`en`. |
 | 0.13 | Sessione 77 (2026-10-31, issue #233) | **Story 3.1 — Home (⑥) e Timeline (⑦)**: le chiavi delle due schermate **esistevano già** (`home.*`, `timeline.*`) ma mancavano le **8 nuove** che la story rende necessarie — `home.partial` (il messaggio «più dati importi, più la tua storia diventa ricca» dello stato `partial`), `timeline.granularity` (l'etichetta del toggle Anni/Mesi/Settimane/Giorni), `timeline.eras` (la riga delle bande), `timeline.eraDuration` (la durata resa nelle `aria-label` delle EraBand), `timeline.partial`, `timeline.error`, `timeline.retry` e il **nuovo namespace `nav`** (`nav.label`, `nav.home`, `nav.timeline` — la prima navigazione dell'app), dichiarato in §1. I **dati** (nomi dei paesi, titoli dei brani) restano dati e non si traducono |
+| 0.14 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 — Ricordi (⑪) e Share (⑫)**: §2.7 (`memories.*`) le **6 nuove** chiavi del feed — `firstTime`, `loading`, `error`, `loadMore`, `eras`, `erasHint` — più `eraAriaLabel`, `noteLabel` e `noteAriaLabel` (il tagging manuale: il nome dell'era e la nota libera del ricordo); §2.8 (`share.*`) le **5 nuove** chiavi del foglio di condivisione — `html` (l'export statico alternativo), `error`, `retry` e `close` — con la regola di linguaggio delle destinazioni (D-25.2: sono desiderate, non integrazioni) e il fallback delle azioni. §1: il namespace `nav` dichiara anche **Ricordi** (`nav.memories`). I **dati** (nomi delle ere, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
 
 
@@ -30896,7 +31266,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.35 · Sessione 94 (2026-11-03, doc-sync post-merge) · l'**EPIC 3** (UI) ha le sue **prime due schermate**: la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding) per chiudere il percorso end-to-end, poi la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e il blocco NEXT-STEP del README non la indica più come prossima story. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.36 · Sessione 97 (2026-11-03, Story 3.2) · l'**EPIC 3** (UI) ha le sue **prime tre schermate**: la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app) e la **3.2** (Ricordi + Share, Sessione 97 — schermata ⑪ e ShareSheet ⑫, card 1080×1350 su canvas, capitolo HTML autonomo, tagging manuale). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding) per chiudere il percorso end-to-end, poi la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e il blocco NEXT-STEP del README non la indica più come prossima story. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -31364,17 +31734,21 @@ Consegnato: la schermata ⑥ **Home** (4 StatCard con count-up, ricordo del gior
 
 ### Story 3.2 — Ricordi + Share `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
 
+**Stato**: ✅ **DONE** — implementata nella Sessione 97 (issue **#241**, branch `feat/241-story-3-2---ricordi-share`). Spec `25-MEMORIES-SHARE-EXPLORE.md` (v1.0 🟢 APPROVED), `06-UX-FLOWS-STATES.md` §2.11-§2.12, `07-UI-SPEC.md` §2.2, §2.10, `08-COPY-I18N.md`.
+
+Consegnato: la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scroll, esclusione dei `dismissed` che **restano** nel database, ordinamento per rilevanza) e il foglio ⑫ **ShareSheet** (dialog accessibile con focus trap e stati `generating`/`ready`/`error`); la card **1080×1350** disegnata a mano su canvas e il **capitolo HTML autonomo** come export statico alternativo; le azioni di condivisione con fallback (Web Share API → download, clipboard → download); il **tagging manuale** (nome e parole chiave dell'era, nota libera sul ricordo) con la **preservazione al ricalcolo** dei campi dell'utente. **37 test** nuovi.
+
 **Descrizione**: Il feed dei ricordi (schermata ⑪) e la **condivisione** di un capitolo della timeline. Il vincolo «tutto locale» non è un blocco: la condivisione esporta **un capitolo statico** (immagine, HTML autonomo, PDF), **mai** il database. La privacy resta il messaggio: la card dice «la mia estate 2019 su Life Soundtrack» e non contiene dati identificativi. In questa story cade anche il **tagging manuale** di ere e canzoni («viaggio a Berlino», «esame di laurea»): è il ponte fra l'analisi automatica, che dice *cosa* suonava, e l'utente, che sa *perché*. I dati del tagging sono testo libero e restano sul dispositivo: sono coperti dall'export e dalla cancellazione della Story 5.2.
 
 **Acceptance criteria**:
-- [ ] Feed ricordi mobile (schermata ⑪)
-- [ ] ShareSheet con card 1080×1350 generata via canvas
-- [ ] Condivisione nativa + download immagine
-- [ ] La card è un **capitolo statico**: copertine, periodo, canone simbolo, nome dell'era — nessun dump del database nei canali di condivisione
-- [ ] Export statico alternativo (HTML autonomo e/o PDF) per chi non usa i social
-- [ ] Tagging manuale di un'era (nome libero + parole chiave) e di una canzone, persistito localmente e cancellabile dalla Story 5.2
-- [ ] L'utente può rinominare un'era rilevata automaticamente: il campo esiste già (`Insight.userNote`) ma **non** ha né UI né percorso di scrittura
-- [ ] i18n IT/EN per le nuove stringhe
+- [x] Feed ricordi mobile (schermata ⑪)
+- [x] ShareSheet con card 1080×1350 generata via canvas
+- [x] Condivisione nativa + download immagine
+- [x] La card è un **capitolo statico**: copertine, periodo, canone simbolo, nome dell'era — nessun dump del database nei canali di condivisione
+- [x] Export statico alternativo (HTML autonomo) per chi non usa i social
+- [x] Tagging manuale di un'era (nome libero + parole chiave) e di una canzone (la nota libera del ricordo), persistito localmente in `Insight.userNote` (D-25.4: nessuna migrazione dello schema) e cancellabile dalla Story 5.2
+- [x] L'utente può rinominare un'era rilevata automaticamente: il campo esiste già (`Insight.userNote`) e ha **ora** UI e percorso di scrittura
+- [x] i18n IT/EN per le nuove stringhe
 
 **Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/06-UX-FLOWS-STATES.md` §2.11, §2.12, §3.3 · `docs/07-UI-SPEC.md` §2.2, §2.10 · `docs/09-PRIVACY-SECURITY.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §10, §11
 **Issue**: #241 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
@@ -31606,7 +31980,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
 15. **2.5** Collegamento del pipeline di analisi all'app — **completata** (issue #266, PR #295 merged `265fa50`, 2026-11-03): i motori di analisi (mood, ere, eventi, ricordi) erano scritti e testati in `packages/core/src/analysis/` ma **nessun codice in `apps/web` li eseguiva**: la Home leggeva gli insight che nessuno scriveva. Ora l'orchestratore `runAnalysisPipeline` gira in coda dopo l'import, persiste gli insight con `derivedVersion`, la Home e la Timeline li leggono dal DB, e l'utente senza feature acustiche vede il messaggio `no-features` invece di uno schermo vuoto. È il differenziatore narrativo del progetto ed è più economico dell'artwork (`22-COMPETITIVE-POSITIONING.md` §7, D-22.2). Dettagli: `docs/state/stories/2.5-analysis-pipeline-link.md`
 16. **4.3** Artwork enrichment — **P0**: l'ancora visiva del diario, e il moltiplicatore delle story vicine (colore dell'era, card condivisibile, lettura del mood). **Non dipende più dal lookup MusicBrainz** (D-22.4): Spotify Web API + iTunes Search + placeholder gradient bastano
-17. **3.2, 3.3, 3.5** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233) e la **3.4** (nastro contesto) pure (Sessione 76, issue #231). Restano la **3.2** (Ricordi + Share: un **capitolo statico**, mai un dump del database), la **3.3** (Esplora + Analisi: insight **in prosa**, non un grafico in più) e la **3.5** (anteprima/demo in onboarding): le tre chiudono il percorso end-to-end. La 3.3 consuma l'output della **2.5**
+17. **3.2, 3.3, 3.5** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233), la **3.4** (nastro contesto) pure (Sessione 76, issue #231) e la **3.2** (Ricordi + Share) **completata** (Sessione 97, issue #241: il feed ⑪, il ShareSheet ⑫, la card 1080×1350 su canvas e il capitolo HTML autonomo — un **capitolo statico**, mai un dump del database — e il tagging manuale). Restano la **3.3** (Esplora + Analisi: insight **in prosa**, non un grafico in più) e la **3.5** (anteprima/demo in onboarding): le due chiudono il percorso end-to-end. La 3.3 consuma l'output della **2.5**
 18. **5.2, 5.1** privacy — nell'ordine **5.2 → 5.1**: export e purge sono l'atto di fiducia che rende vera la promessa della privacy (pulsanti **prominenti**, non nascosti in un menu), la pagina «Come trattiamo i tuoi dati» ne è la traduzione in linguaggio utente (D-22.7)
 19. **4.2** Lookup MusicBrainz — **P2**: utile per la precisione dei metadati, non per l'esperienza; non è più il prerequisito dell'artwork (D-22.4)
 20. **6.1** Upgrade stack a ultime major — **solo al termine dell'implementazione** (D.10.2): non blocca le fasi 0-5
@@ -31623,7 +31997,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere), 2.3 (eventi) e 2.4 (ricordi), e la **2.5** li ha **collegati all'app** (issue #266, PR #295, merge `265fa50`): l'orchestratore gira in coda dopo l'import e la Home/Timeline leggono gli insight dal DB · nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231) e la **3.1** (Home + Timeline, Sessione 77, issue #233): l'app ha ora le sue prime due schermate vere. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding, nuova, Sessione 85) |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere), 2.3 (eventi) e 2.4 (ricordi), e la **2.5** li ha **collegati all'app** (issue #266, PR #295, merge `265fa50`): l'orchestratore gira in coda dopo l'import e la Home/Timeline leggono gli insight dal DB · nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231), la **3.1** (Home + Timeline, Sessione 77, issue #233) e la **3.2** (Ricordi + Share, Sessione 97, issue #241): l'app ha ora le sue prime tre schermate vere e il tagging manuale. Restano la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding, nuova, Sessione 85) |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.3** (artwork, **P0** dal 2026-11-02 e **senza dipendenza** dal lookup MusicBrainz), **4.2** (lookup MusicBrainz, P2), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -31631,7 +32005,9 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 **EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 5/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment · 1.5 scrobbling hub). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
-> **Allineato al 2026-11-03** (Sessione 94, doc-sync post-merge della PR #295): la **2.5** è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e le sue sezioni legacy sono allineate: `**Stato**:` da `⬚ TODO` a `✅ DONE`, i **7 acceptance criteria** spuntati, la riga della tabella «Stato di avanzamento» aggiornata e l'entry #15 della lista di priorità riscritta. Il **blocco NEXT-STEP del README** non indica più la 2.5: l'indicatore di avanzamento passa a **73%** (22 story su 30, effort 76%) e l'**EPIC 2** è **completo (5/5)**. La prossima story lavorabile è la **3.2** (Ricordi + Share), poi **3.3**, **3.5**, **4.3**, **5.2**, **5.1**, **4.2**, **6.1**.
+> **Allineato al 2026-11-03** (Sessione 97, issue #241): la **3.2** (Ricordi + Share) è **implementata** — il feed ⑪, il ShareSheet ⑫, la card 1080×1350, il capitolo HTML autonomo e il tagging manuale (nome dell'era e nota sul ricordo), con la conservazione dei campi dell'utente al ricalcolo dell'analisi. La sezione Story 3.2 passa a **✅ DONE** e i suoi acceptance criteria sono spuntati; la riga della tabella «Stato di avanzamento» è allineata. La prossima story lavorabile è la **3.3** (Esplora + Analisi), poi **3.5**, **4.3**, **5.2**, **5.1**, **4.2**, **6.1**.
+>
+> **Allineato al 2026-11-03** (Sessione 94, doc-sync post-merge della PR #295): la **2.5** è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e le sue sezioni legacy sono allineate: `**Stato**:` da `⬚ TODO` a `✅ DONE`, i **7 acceptance criteria** spuntati, la riga della tabella «Stato di avanzamento» aggiornata e l'entry #15 della lista di priorità riscritta. Il **blocco NEXT-STEP del README** non indica più la 2.5: l'indicatore di avanzamento passa a **73%** (22 story su 30, effort 76%) e l'**EPIC 2** è **completo (5/5)**. La prossima story lavorabile era la **3.2** (Ricordi + Share), poi **3.3**, **3.5**, **4.3**, **5.2**, **5.1**, **4.2**, **6.1**.
 >
 > **Allineato al 2026-11-02** (Sessione 85, analisi competitiva verificata sul codice): il catalogo passa da 28 a **30 story** con **2.5** (collegamento del pipeline di analisi all'app) e **3.5** (anteprima/demo in onboarding); l'ordine di lavorazione diventa **2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1**; la **4.3** non dipende più dalla **4.2** e sale a **P0**; la **3.2** incorpora il **tagging manuale** e l'**export statico** del capitolo; la **3.3** richiede **insight in prosa**; la **5.1** richiede la **pagina in-app «Come trattiamo i tuoi dati»**. Motivazioni, evidenze e decisioni proposte: `docs/22-COMPETITIVE-POSITIONING.md` (D-22.1…D-22.7).
 >
@@ -31706,6 +32082,9 @@ Ogni story deve avere label GitHub:
 | 1.6.31 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 implementata** (Event Detector): il motore in `packages/core/src/analysis/event/` — metriche giornaliere (volume in ore, valence/energy medie ponderate, diversità, artisti nuovi), detector a **z-score** su griglia settimanale (baseline 60gg, finestra 14gg, soglia 2.0), detector a **quota** per `spike_artist`/`spike_genre` (dominanza + rapporto 2× sulla baseline), detector specialistici per `silence` ed `exploration`, dedupe per tipo e per soggetto; la persistenza sostituisce **l’insieme** degli eventi (`replaceAllInsightsOfType`); il plug-in `createEventGenerator` dell’orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non c’è alcun evento basato sulla valence. Sezione Story 2.3: `**Stato**:` ✅ DONE e i **3 AC** spuntati; la riga roadmap «2-3» allineata (l’EPIC 2 ha ora mood, ere, eventi e ricordi); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla tranche **geo**, 4.4 e 3.4). `docs/04-ANALYSIS-ALGORITHMS.md` → **v1.3** (`§6.8` nuova, `§8.1`, `§9`), `docs/08-COPY-I18N.md` → **v0.11** (`insight.event.spike_genre`), `docs/10-TESTING.md` → **v1.2** (§3.3) |
 | 1.6.34 | Sessione 85 (2026-11-02, analisi competitiva) | **Posizionamento competitivo verificato sul codice** e riflesso nel backlog. Le story **2.5** (collegamento del pipeline di analisi all'app) e **3.5** (anteprima/demo in onboarding) entrano nel catalogo: 28 → **30 story**. La verifica ha rilevato che i quattro motori di analisi dell'EPIC 2 **non sono mai eseguiti dall'app** (la Home legge gli insight che nessuno scrive) e che l'artwork **non esiste** nel repository (`artworkUrl` sempre `null`): da qui l'ordine ricalcolato **2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1**. La **4.3** perde il vincolo `[DEP:4.2]` e sale a **P0** (D-22.4); la **3.2** incorpora l'export statico del capitolo e il **tagging manuale** (D-22.5); la **3.3** richiede **insight in prosa**; la **5.1** richiede la **pagina in-app «Come trattiamo i tuoi dati»** (D-22.7). Le decisioni proposte e le evidenze sono in `docs/22-COMPETITIVE-POSITIONING.md` (D-22.1…D-22.7) |
 
+
+
+| 1.6.36 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata** (Ricordi + Share): la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scroll, `dismissed` esclusi dal feed ma **presenti** nel database, ordinamento per `Insight.confidence`) e il foglio ⑫ **ShareSheet** (dialog accessibile con focus trap e stati `generating`/`ready`/`error`); la card **1080×1350** disegnata a mano su canvas e il **capitolo HTML autonomo** (export statico alternativo: nessuno script, nessuno stile esterno); le azioni di condivisione con **fallback** (Web Share API → download, clipboard → download); il **tagging manuale** (nome e parole chiave dell'era, nota libera del ricordo) con la **conservazione dei campi dell'utente al ricalcolo** (`Insight.userNote` e `Insight.status` riportati dagli insight esistenti a quelli nuovi). **37 test** nuovi. Sezione Story 3.2: `**Stato**:` ✅ DONE e gli **8 AC** spuntati; la riga roadmap «2-3» allineata (l'EPIC 3 ha ora tre schermate); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla **3.3**). Documenti allineati: `docs/06-UX-FLOWS-STATES.md` → **v0.5** (§2.11, §2.12), `docs/07-UI-SPEC.md` → **v0.2** (§2.2, §2.10, §2.10b), `docs/08-COPY-I18N.md` → **v0.14** (`memories.*`, `share.*`, `nav.memories`), `docs/18-DEV-LOG.md` → **v2.30** (§53); `docs/state/stories/3.2-ricordi-share.md` e `docs/state/sessions/97-ricordi-share.md` (nuovi) |
 
 
 <!-- AGGREGATE-STORIES-START -->

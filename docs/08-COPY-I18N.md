@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.13 · Sessione 77 (2026-10-31, issue #233), aggiornata nelle Sessioni 76 (2026-10-31, issue #231), 69 (2026-10-31, issue #211) e 70 (2026-10-31, issue #214)
+> Status: 🟡 DRAFT · Versione 0.14 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -14,7 +14,7 @@
 |-----------|-----|
 | `onboarding` | Schermate ①-④ |
 | `home` | Schermata ⑥ |
-| `nav` | Navigazione principale (Home / Timeline — Story 3.1) |
+| `nav` | Navigazione principale (Home / Timeline / Ricordi — Story 3.1, 3.2) |
 | `timeline` | Schermata ⑦ |
 | `era` | Schermata ⑧ |
 | `explore` | Schermata ⑨ |
@@ -160,6 +160,15 @@
 | `save` | Salva | Save |
 | `hide` | Nascondi | Hide |
 | `yearsAgo` | {n} anni fa | {n} years ago |
+| `firstTime` | PRIMA VOLTA | FIRST TIME |
+| `loading` | Caricamento dei ricordi... | Loading your memories... |
+| `error` | Non e' stato possibile caricare i ricordi. | Your memories could not be loaded. |
+| `loadMore` | Carica altri ricordi | Load more memories |
+| `eras` | Le tue ere | Your eras |
+| `erasHint` | Dai un nome alle tue ere e aggiungi parole chiave: nome, parola, parola | Name your eras and add keywords: name, keyword, keyword |
+| `eraAriaLabel` | Nome e parole chiave dell'era | Era name and keywords |
+| `noteLabel` | Aggiungi una nota a questo ricordo | Add a note to this memory |
+| `noteAriaLabel` | Nota libera del ricordo | Free note for this memory |
 
 ### 2.8 `share.*`
 
@@ -172,8 +181,18 @@
 | `twitter` | X (Twitter) | X (Twitter) |
 | `copy` | Copia | Copy |
 | `download` | Scarica | Download |
+| `html` | Capitolo HTML | HTML chapter |
 | `copied` | Immagine copiata | Image copied |
 | `saved` | Immagine salvata | Image saved |
+| `error` | Generazione della card non riuscita. | The card could not be generated. |
+| `retry` | Riprova | Try again |
+| `close` | Chiudi | Close |
+
+> **Regola di linguaggio**: le destinazioni sono **desiderate**, non
+> integrazioni: l'etichetta «Instagram» indica l'app in cui l'utente vuole
+> condividere, non un'API (D-25.2 — Instagram non accetta file via deep link).
+> Ogni azione ha un **fallback**: il file si scarica. Il testo del capitolo
+> HTML è un documento **autonomo**: nessuno script, nessuno stile esterno.
 
 ### 2.9 `settings.*`
 
@@ -643,4 +662,5 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |
 | 0.14 | Sessione 94 (2026-11-03, issue #266) | **Story 2.5 — stato vuoto `no-features`**: §2.2 `home.*` — aggiunte le **due chiavi** `home.noFeatures.description` e `home.noFeatures.cta` per lo stato vuoto distinto quando ci sono ascolti ma zero feature utilizzabili (valence/energy). Il messaggio spiega che serve l'analisi acustica e la CTA rimanda a Impostazioni → Privacy. Materializzate in `it`/`en`. |
 | 0.13 | Sessione 77 (2026-10-31, issue #233) | **Story 3.1 — Home (⑥) e Timeline (⑦)**: le chiavi delle due schermate **esistevano già** (`home.*`, `timeline.*`) ma mancavano le **8 nuove** che la story rende necessarie — `home.partial` (il messaggio «più dati importi, più la tua storia diventa ricca» dello stato `partial`), `timeline.granularity` (l'etichetta del toggle Anni/Mesi/Settimane/Giorni), `timeline.eras` (la riga delle bande), `timeline.eraDuration` (la durata resa nelle `aria-label` delle EraBand), `timeline.partial`, `timeline.error`, `timeline.retry` e il **nuovo namespace `nav`** (`nav.label`, `nav.home`, `nav.timeline` — la prima navigazione dell'app), dichiarato in §1. I **dati** (nomi dei paesi, titoli dei brani) restano dati e non si traducono |
+| 0.14 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 — Ricordi (⑪) e Share (⑫)**: §2.7 (`memories.*`) le **6 nuove** chiavi del feed — `firstTime`, `loading`, `error`, `loadMore`, `eras`, `erasHint` — più `eraAriaLabel`, `noteLabel` e `noteAriaLabel` (il tagging manuale: il nome dell'era e la nota libera del ricordo); §2.8 (`share.*`) le **5 nuove** chiavi del foglio di condivisione — `html` (l'export statico alternativo), `error`, `retry` e `close` — con la regola di linguaggio delle destinazioni (D-25.2: sono desiderate, non integrazioni) e il fallback delle azioni. §1: il namespace `nav` dichiara anche **Ricordi** (`nav.memories`). I **dati** (nomi delle ere, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |

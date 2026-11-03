@@ -60,6 +60,91 @@ export async function deleteInsightsById(db: LifeSoundtrackDB, ids: string[]): P
   await db.insights.bulkDelete(ids);
 }
 
+/**
+ * I campi **dell'utente** su un insight: la nota libera e lo stato.
+ *
+ * `Insight.userNote` esiste per il testo libero dell'utente (Story 3.2:
+ * il nome di un'era e le sue parole chiave, `docs/25-MEMORIES-SHARE-EXPLORE.md`
+ * D-25.4) e `status` dice se l'utente ha confermato, corretto o nascosto
+ * l'insight (`02-DATA-SCHEMA.md` §3.6).
+ *
+ * I due campi sono **separati** dal resto: sono scritti dai generatori
+ * sempre a `userNote: null` / `status: 'pending'`, e sono gli unici che
+ * sopravvivono al ricalcolo (vedi `preserveUserFields`).
+ */
+export interface InsightUserNote {
+  /** Il testo libero dell'utente (`null` = nessuna nota). */
+  readonly userNote: string | null;
+  /** Lo stato dell'insight dopo l'intervento dell'utente. */
+  readonly status: Insight['status'];
+}
+
+/**
+ * Scrive la nota e lo stato di un insight, in una transazione.
+ *
+ * Restituisce l'insight aggiornato, oppure `null` se l'id non esiste: la
+ * scrittura di un insight inesistente non è un errore (l'utente può aver
+ * rinominato un'era che il ricalcolo ha appena rimosso), ma non è nemmeno
+ * un'operazione riuscita.
+ */
+export async function setInsightUserNote(
+  db: LifeSoundtrackDB,
+  id: string,
+  value: InsightUserNote,
+): Promise<Insight | null> {
+  return db.transaction('rw', [db.insights], async () => {
+    const insight = await db.insights.get(id);
+    if (!insight) return null;
+    const updated: Insight = { ...insight, userNote: value.userNote, status: value.status };
+    await db.insights.put(updated);
+    return updated;
+  });
+}
+
+/**
+ * Cambia lo stato di un insight (`confirmed` / `corrected` / `dismissed`),
+ * in una transazione. Vedi `setInsightUserNote` per il contratto.
+ */
+export async function setInsightStatus(
+  db: LifeSoundtrackDB,
+  id: string,
+  status: Insight['status'],
+): Promise<Insight | null> {
+  return db.transaction('rw', [db.insights], async () => {
+    const insight = await db.insights.get(id);
+    if (!insight) return null;
+    const updated: Insight = { ...insight, status };
+    await db.insights.put(updated);
+    return updated;
+  });
+}
+
+/**
+ * Riporta i **campi dell'utente** dagli insight esistenti a quelli nuovi.
+ *
+ * Il ricalcolo cancella e reinserisce gli insight (`replaceAllInsightsOfType`),
+ * quindi un insight ricalcolato **perde** la nota e la conferma dell'utente:
+ * il nome dato a un'era sparisirebbe al primo ricalcolo dell'analisi. La
+ * correzione è qui, non nei generatori: gli id sono deterministici
+ * (`era-${periodStart}`), quindi l'insight nuovo e quello vecchio sono lo
+ * **stesso** insight e i campi dell'utente gli appartengono.
+ *
+ * Lo `status` è preservato solo se l'utente l'ha cambiato: i generatori
+ * scrivono `pending`, che è il default e non distingue "non toccato" da
+ * "toccato e riportato a pending".
+ */
+function preserveUserFields(existing: readonly Insight[], incoming: readonly Insight[]): Insight[] {
+  const byId = new Map(existing.map((insight) => [insight.id, insight]));
+  return incoming.map((insight) => {
+    const previous = byId.get(insight.id);
+    if (!previous) return insight;
+    const userNote = previous.userNote !== null ? previous.userNote : insight.userNote;
+    const status = previous.status !== 'pending' ? previous.status : insight.status;
+    if (userNote === insight.userNote && status === insight.status) return insight;
+    return { ...insight, userNote, status };
+  });
+}
+
 /** Opzioni di `replaceInsights`. */
 export interface ReplaceInsightsOptions {
   /** Tipo degli insight da sostituire. */
@@ -109,7 +194,7 @@ export async function replaceInsights(
       await db.insights.bulkDelete(removed.map((insight) => insight.id));
     }
     if (options.insights.length > 0) {
-      await db.insights.bulkPut(options.insights);
+      await db.insights.bulkPut(preserveUserFields(existing, options.insights));
     }
     return {
       inserted: options.insights.length,
@@ -158,7 +243,7 @@ export async function replaceAllInsightsOfType(
       await db.insights.bulkDelete(removed.map((insight) => insight.id));
     }
     if (options.insights.length > 0) {
-      await db.insights.bulkPut(options.insights);
+      await db.insights.bulkPut(preserveUserFields(existing, options.insights));
     }
     return {
       inserted: options.insights.length,
@@ -208,7 +293,7 @@ export async function replaceInsightsOfType(
       await db.insights.bulkDelete(removed.map((insight) => insight.id));
     }
     if (options.insights.length > 0) {
-      await db.insights.bulkPut(options.insights);
+      await db.insights.bulkPut(preserveUserFields(existing, options.insights));
     }
     return {
       inserted: options.insights.length,

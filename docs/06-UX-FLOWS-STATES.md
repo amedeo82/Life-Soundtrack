@@ -1,6 +1,6 @@
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.4 · Sessione 9 (audit 2026-10-15)
+> Status: 🟡 DRAFT · Versione 0.5 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -195,6 +195,12 @@ Note: nessuna gestione errore (schermata statica).
 - Swipe left → "Nascondi questo tipo di ricordo"
 - Swipe right → "Salva nei preferiti"
 
+**Nota libera**: sotto ogni card c'è un campo di testo (il **tag** dell'utente):
+nome libero e parole chiave separate da virgola. Il testo resta in
+`Insight.userNote` e sopravvive al ricalcolo dell'analisi. Il ricordo **nascosto**
+esce dal feed ma **resta** nel database: cancellarlo è un atto separato (Story
+5.2, export e purge).
+
 ### 2.12 ⑫ Share Sheet
 
 | Stato | Comportamento |
@@ -209,6 +215,11 @@ Note: nessuna gestione errore (schermata statica).
 - X (Twitter) (share)
 - Copia negli appunti
 - Scarica
+- Capitolo HTML (export statico alternativo, per chi non usa i social)
+
+**Fallback**: ogni destinazione ha un ripiego — senza Web Share API il file si
+scarica, senza clipboard il file si scarica. L'utente deve sempre poter portare
+fuori la card.
 
 **Bottom sheet**: swipe down o tap fuori → chiudi.
 
@@ -371,3 +382,4 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.2 | Sessione 9 (2026-10-15) | Audit: re-import esplicito come idempotente (M8) — niente blocco al doppio drop, dedup via `eventKey`; riferimento count-up al token `motion.countUp.duration` (M11) |
 | 0.3 | Sessione 13 (2026-10-16) | **M13 chiuso**: §2.3 Import ora esplicita i 5 stati della singola PlatformCard (`empty`/`validating`/`parsing`/`done`/`error`) con tabella + transizioni dettagliate. §2.14 demo-user.json ora punta a `fixtures/demo-user.json` (1 anno, 4500 eventi, flag `demoMode=true`) |
 | 0.4 | Sessione 42 (2026-10-21) | Allineamento §2.2 e §2.13 a 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`); risolto drift documentazione↔codice (issue #107) |
+| 0.5 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.11 (⑪ Ricordi) dichiara la **nota libera** sotto ogni card (il tag dell'utente, in `Insight.userNote`, sopravvive al ricalcolo) e il fatto che il ricordo nascosto **resta** nel database; §2.12 (⑫ Share Sheet) aggiunge la destinazione **Capitolo HTML** (export statico alternativo) e il **fallback** di ogni azione (senza Web Share API o senza clipboard il file si scarica) |
