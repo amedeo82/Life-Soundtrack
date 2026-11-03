@@ -195,6 +195,54 @@ run_hook_scenario "H5" "file untracked, default => advisory (no abort)" \
 run_hook_scenario "H6" "branch non conforme + SKIP_HOOKS=1 => ok" \
   "git checkout -q -B feature/no-issue-number" "LIFE_SOUNDTRACK_SKIP_HOOKS=1" "0"
 
+# ---------------------------------------------------------------------------
+# Parte 3: il PERCORSO ENCODING del pre-commit hook (issue #290)
+# ---------------------------------------------------------------------------
+# Il blocco encoding conteneva un `exit 0` che chiudeva l'hook prima dei
+# controlli successivi. Con `scripts/check-encoding.mjs` presente (cioe' nel
+# repository vero, sempre) l'hook:
+#   - usciva con 0 anche quando il check encoding FALLIVA: il gate anti-mojibake
+#     della issue #277 era morto dentro l'hook (scenario H9);
+#   - non verificava MAI l'invariante del branch (F1/F7): l'unica difesa
+#     documentata in AGENTS.md non girava (scenario H8).
+# H1..H6 girano in un repo SENZA `scripts/check-encoding.mjs`: il percorso
+# encoding (quello del repository vero) non era mai coperto. Qui lo si copre.
+# Contro-prova: con l'hook di `main` gli scenari H8 e H9 escono 0 invece di 1.
+create_encoding_stub() {
+  mkdir -p scripts
+  cat > scripts/check-encoding.mjs <<'STUB'
+const mode = process.env.ENCODING_STUB_MODE || 'ok';
+if (mode === 'fail') {
+  console.error('[FAIL] encoding non valido (stub)');
+  process.exit(1);
+}
+if (mode === 'warn') {
+  console.log('[WARN] encoding in allowlist (stub)');
+  process.exit(0);
+}
+console.log('[OK] 0 file con errori (stub)');
+STUB
+}
+
+# H7: encoding pulito + branch conforme => exit 0
+run_hook_scenario "H7" "encoding ok + branch conforme => ok" \
+  "create_encoding_stub" "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=ok" "0"
+
+# H8: encoding pulito + branch NON conforme => abort (l'invariante del branch
+# deve eseguire DOPO il blocco encoding, non essere schiacciato dal suo exit 0)
+run_hook_scenario "H8" "encoding ok + branch non conforme => abort" \
+  "create_encoding_stub && git checkout -q -B feature/no-issue-number" \
+  "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=ok" "1"
+
+# H9: encoding FAIL + branch conforme => abort (il gate anti-mojibake deve
+# poter bloccare il commit: con l'hook di main questo percorso usciva con 0)
+run_hook_scenario "H9" "encoding fail + branch conforme => abort" \
+  "create_encoding_stub" "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=fail" "1"
+
+# H10: encoding in allowlist (WARN) + branch conforme => exit 0
+run_hook_scenario "H10" "encoding warn + branch conforme => ok" \
+  "create_encoding_stub" "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=warn" "0"
+
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
 

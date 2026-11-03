@@ -770,9 +770,18 @@ jobs:
       - name: Setup worktree (issue #53)
         run: bash scripts/test-setup-worktree.sh
 
-      # Pre-commit hook: il check "clean check" del working tree (D3).
+      # Pre-commit hook: il check "clean check" del working tree (D3) e i
+      # percorsi dell'invariante (issue #290).
       - name: Pre-commit clean check (sessione 23)
         run: bash scripts/test-pre-commit-clean-check.sh
+
+      # Issue #290: gli hook del repository non giravano (core.hooksPath era
+      # puntato su .husky/_ dal lifecycle `prepare` di husky, che pnpm esegue
+      # DOPO il postinstall che imposta .githooks). Il test verifica il wiring
+      # E fa un `git commit` reale in un repo temporaneo: un branch non
+      # conforme deve essere abortito, un branch conforme deve passare.
+      - name: Wiring degli hook (issue #290)
+        run: bash scripts/test-hook-wiring.sh
 
       # safe-branch-switch.ps1 (issue #49): 3 scenari (pulito / tracked dirty /
       # untracked dirty). Il conteggio degli assert vive su un file condiviso:
