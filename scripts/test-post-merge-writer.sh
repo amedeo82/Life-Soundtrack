@@ -63,7 +63,10 @@ git remote set-url origin "$REMOTE"
 git config user.email "writer@test.local"
 git config user.name "Writer Test"
 git config commit.gpgsign false
-git checkout -q main
+# NB: `checkout -B` (non `checkout main`): in CI il checkout e' su un HEAD
+# staccato (refs/pull/N/merge) e non esiste un branch locale `main` — il
+# comando semplice fallirebbe con "pathspec 'main' did not match".
+git checkout -q -B main "$(git rev-parse HEAD)"
 git push -q origin main
 BASE_SHA="$(git rev-parse HEAD)"
 
