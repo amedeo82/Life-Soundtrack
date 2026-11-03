@@ -116,7 +116,7 @@ jobs:
     outputs:
       has_code: ${{ steps.detect.outputs.has_code }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -170,11 +170,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: pnpm
@@ -203,11 +203,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: pnpm
@@ -238,11 +238,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: pnpm
@@ -270,7 +270,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Issue #284: nel passaggio `workflow_run` l'albero da validare e' la
           # TESTA di `main` (che contiene il commit del writer), non
@@ -396,7 +396,7 @@ jobs:
       pull-requests: read
       issues: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -444,7 +444,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Issue #70: gate BLOCCANTE per il determinismo dell'agregator.
       # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
@@ -470,7 +470,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
       # In PowerShell 5.1 con `&`, `--check` veniva interpretato come
@@ -491,7 +491,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Stessa regola di `gates-docs`: nel passaggio `workflow_run` si
           # valida la testa di `main` (dopo il writer), non `head_sha`.
@@ -603,7 +603,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
@@ -616,7 +616,7 @@ jobs:
 
       - name: Pubblica il manifest per il confronto cross-OS
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: portability-${{ matrix.os }}
           path: portability-${{ matrix.os }}.json
@@ -645,11 +645,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: portability-*
           merge-multiple: true
@@ -689,7 +689,7 @@ jobs:
       contents: read
       issues: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
@@ -728,7 +728,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # T1..T9: merge commit + worktree, branch non mergato (exit 12), WIP
       # tracked (exit 10), merge squash, main divergente (exit 11), audit
@@ -752,7 +752,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # S1..S8 su setup-worktree.ps1 (issue #53): issue inesistente, slug
       # derivato, slug esplicito, path gia esistente, branch base mancante,
