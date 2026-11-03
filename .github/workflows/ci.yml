@@ -400,6 +400,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Il gate Conventional Commits ha bisogno di commitlint: il toolchain
+      # (pnpm + node) va impostato come nei job `node-*`.
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: pnpm
+
       - name: Coerenza del protocollo agenti (issue #248)
         run: node scripts/check-protocol-consistency.mjs
 

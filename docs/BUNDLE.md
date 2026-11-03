@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:36
+> Data: 2026-11-03 10:39
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -50206,6 +50206,15 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      # Il gate Conventional Commits ha bisogno di commitlint: il toolchain
+      # (pnpm + node) va impostato come nei job `node-*`.
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: pnpm
 
       - name: Coerenza del protocollo agenti (issue #248)
         run: node scripts/check-protocol-consistency.mjs
