@@ -6,7 +6,7 @@ state: 🟡
 merged: false
 branch: feat/241-story-3-2---ricordi-share
 pr: 301
-claim: kilo-HP-ELITEBOOK-6e15
+claim: kilo-hp-elitebook-bfed
 tags: [ui, ricordi, share, tagging, canvas, i18n]
 ---
 
