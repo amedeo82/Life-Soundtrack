@@ -2,8 +2,10 @@
 number: 94
 title: "Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test"
 date: 2026-11-03
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "ff72162ec21f8b34b8fc8a2462ba1cfd32654d57"
+merged_date: "2026-11-03T10:52:14Z"
 branch: feat/292-hook-numbers
 pr: 293
 claim: kilo-hp-elitebook-7c3f

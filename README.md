@@ -96,42 +96,39 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S93)
+**Analisi della sessione corrente** (S94)
 
 **Numeri.** Nessun codice applicativo toccato: la percentuale di implementazione delle story
 resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **devops**.
 
 **Cosa è pronto.**
 
-- Il percorso degli hook è `.githooks` e **non può più essere sovrascritto**: nessun lifecycle
-  script lo tocca, e `setup-hooks.js` rilegge il valore per accorgersi se qualcun altro lo fa.
-- I quattro hook del repository girano davvero: `pre-commit` (pattern del branch + encoding +
-  lint-staged), `commit-msg` (commitlint), `pre-push` (bundle + base-stale), `post-checkout`
-  (advisory).
-- Il `pre-commit` è stato riordinato: l'invariante del branch e il gate encoding sono **prima**
-  di qualunque uscita, e i due difetti latenti sono chiusi.
-- `scripts/test-hook-wiring.sh` (nuovo, 13 assert): 9 verifiche statiche sul wiring + 4
-  comportamentali su un `git commit` reale.
-- `scripts/test-pre-commit-clean-check.sh`: 4 scenari nuovi (H7..H10) che coprono il **percorso
-  encoding** — quello del repository vero, mai coperto prima perché il path non esisteva in
-  quel ramo del test.
-- `docs/12-DEVOPS.md §9.10`: le 3 righe dei gate di portabilità mancanti, la nuova riga del
-  gate sul wiring, e i conteggi allineati (15 job, 38 step).
+- `scripts/test-hook-wiring.sh`: contatori su file condiviso, **17 assert**, e un assert fallito
+  dentro una subshell non può più essere perso. La contro-prova lo dimostra (exit 1).
+- I conteggi degli assert sono coerenti in `AGENTS.md`, `docs/12-DEVOPS.md §9.10` e nel file di
+  sessione 93.
+- `scripts/setup-hooks.js`: warning accurato sul residuo `.husky/`, **errore** se `husky` torna
+  fra le dipendenze.
+- `scripts/post-merge.ps1`: la diagnostica del fallimento della rimozione dice cosa è
+  successo davvero (git ha rimosso la registrazione e parte dell'albero).
+- Le due sezioni legacy che dichiaravano il toolchain sono allineate.
+- Il gate **Conventional Commits** gira in CI (job `gates-protocol`): contro-prova locale, un
+  messaggio non conventional esce con errore, uno conventional con 0.
 
-**Cosa manca.** Niente sul piano funzionale. La protezione contro la regressione è di **indole
-strutturale**, non solo documentale: il gate verifica il comportamento, e `setup-hooks.js` si
-accorge da solo se qualcuno scrive il path.
+**Cosa manca.** Niente sul piano funzionale. Nota: i file `docs/SESSIONS.md`,
+`docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi aggregati** e **prosa
+legacy**: in questa PR ho toccato solo la prosa (che è di mia competenza); i blocchi si
+aggiornano da soli dopo il merge.
 
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring non scrive
-nulla nel repository: lavora in una directory temporanea con un `git init` di prova.
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring scrive solo
+in directory temporanee.
 
-**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 13/13 ·
-`bash scripts/test-pre-commit-clean-check.sh` → 18/18 (H7..H10 nuovi) ·
-`node scripts/check-protocol-consistency.mjs` → 0 falliti ·
-`node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
-`node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 17/17 (contro-prova: exit 1) ·
+`bash scripts/test-post-merge.sh` → 47/47 · `bash scripts/test-pre-commit-clean-check.sh` →
+18/18 · `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
+`node scripts/check-merge-state.mjs` → 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` →
+exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
