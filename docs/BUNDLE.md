@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 09:41
+> Data: 2026-11-03 09:45
 > Totale file: 178
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -45000,12 +45000,33 @@ const ALLOWLIST_FILE = join(ROOT, 'scripts', 'encoding-allowlist.txt');
  * mojibake e per invertirlo.
  */
 const CP1252_HIGH = {
-  0x80: '\u20AC', 0x82: '\u201A', 0x83: '\u0192', 0x84: '\u201E', 0x85: '\u2026',
-  0x86: '\u2020', 0x87: '\u2021', 0x88: '\u02C6', 0x89: '\u2030', 0x8A: '\u0160',
-  0x8B: '\u2039', 0x8C: '\u0152', 0x8E: '\u017D', 0x91: '\u2018', 0x92: '\u2019',
-  0x93: '\u201C', 0x94: '\u201D', 0x95: '\u2022', 0x96: '\u2013', 0x97: '\u2014',
-  0x98: '\u02DC', 0x99: '\u2122', 0x9A: '\u0161', 0x9B: '\u203A', 0x9C: '\u0153',
-  0x9E: '\u017E', 0x9F: '\u0178',
+  0x80: '\u20AC',
+  0x82: '\u201A',
+  0x83: '\u0192',
+  0x84: '\u201E',
+  0x85: '\u2026',
+  0x86: '\u2020',
+  0x87: '\u2021',
+  0x88: '\u02C6',
+  0x89: '\u2030',
+  0x8a: '\u0160',
+  0x8b: '\u2039',
+  0x8c: '\u0152',
+  0x8e: '\u017D',
+  0x91: '\u2018',
+  0x92: '\u2019',
+  0x93: '\u201C',
+  0x94: '\u201D',
+  0x95: '\u2022',
+  0x96: '\u2013',
+  0x97: '\u2014',
+  0x98: '\u02DC',
+  0x99: '\u2122',
+  0x9a: '\u0161',
+  0x9b: '\u203A',
+  0x9c: '\u0153',
+  0x9e: '\u017E',
+  0x9f: '\u0178',
 };
 const CP1252_REVERSE = new Map(
   Object.entries(CP1252_HIGH).map(([byte, char]) => [char, Number(byte)]),
@@ -45023,8 +45044,8 @@ const HIGH_CLASS =
  * Il mojibake e' una coppia: un carattere-guida (quello che la doppia
  * codifica produce dal primo byte di una sequenza UTF-8) seguito da un
  * carattere di continuazione. La coppia e' il segnale: un carattere-guida
-  * isolato (U+00C3 da solo) puo' essere legittimo (un nome proprio), ma la coppia
-  * U+00C3 U+00A9 o U+00E2 U+20AC U+201D non lo e' mai.
+ * isolato (U+00C3 da solo) puo' essere legittimo (un nome proprio), ma la coppia
+ * U+00C3 U+00A9 o U+00E2 U+20AC U+201D non lo e' mai.
  */
 const MOJIBAKE_SOURCE = '[\\u00c2-\\u00c5\\u00d0\\u00d1\\u00e2\\u00ef\\u00f0][' + HIGH_CLASS + ']';
 
@@ -45089,13 +45110,49 @@ function repair(text) {
 }
 
 const BINARY_EXTENSIONS = new Set([
-  '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.pdf', '.zip', '.gz', '.7z',
-  '.mp3', '.wav', '.ogg', '.m4a', '.woff', '.woff2', '.ttf', '.eot', '.otf',
-  '.sqlite', '.db', '.mmdb', '.exe', '.dll', '.so', '.dylib', '.wasm',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.ico',
+  '.webp',
+  '.pdf',
+  '.zip',
+  '.gz',
+  '.7z',
+  '.mp3',
+  '.wav',
+  '.ogg',
+  '.m4a',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.eot',
+  '.otf',
+  '.sqlite',
+  '.db',
+  '.mmdb',
+  '.exe',
+  '.dll',
+  '.so',
+  '.dylib',
+  '.wasm',
 ]);
 
+// `maxBuffer`: il default di Node e' 1 MB e `git show` di un file grande lo
+// supera. `docs/BUNDLE.md` e' ~3.4 MB, quindi `check-encoding --staged`
+// falliva con `ENOBUFS` su ogni commit che lo mette in staging — un errore
+// che il gate non puo' segnalare: il file non e' "illeggibile", e' il
+// gate stesso che non riusciva a leggerlo. Il difetto era invisibile
+// finche' il pre-commit hook non ha girato davvero (issue #290).
+const MAX_BUFFER = 64 * 1024 * 1024;
+
 function git(args, encoding) {
-  return execFileSync('git', args, { cwd: ROOT, encoding: encoding ?? 'buffer' });
+  return execFileSync('git', args, {
+    cwd: ROOT,
+    encoding: encoding ?? 'buffer',
+    maxBuffer: MAX_BUFFER,
+  });
 }
 
 function listFiles() {
@@ -45143,9 +45200,11 @@ function inspect(file, buffer) {
   }
   let text;
   try {
-    text = utf8Strict.decode(buffer.subarray(buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf ? 3 : 0));
+    text = utf8Strict.decode(
+      buffer.subarray(buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf ? 3 : 0),
+    );
   } catch {
-    findings.push({ kind: 'invalid-utf8', detail: 'byte non validi: il file non e\' UTF-8 valido' });
+    findings.push({ kind: 'invalid-utf8', detail: "byte non validi: il file non e' UTF-8 valido" });
     return { findings, text: null };
   }
   const matches = mojibakeMatches(text);
@@ -45206,18 +45265,24 @@ function main() {
     const repaired = repair(text);
     if (repaired === null) {
       errors++;
-      console.log(`[WARN] ${file}: non riparabile automaticamente (inversione non inequivocabile): correggi a mano`);
+      console.log(
+        `[WARN] ${file}: non riparabile automaticamente (inversione non inequivocabile): correggi a mano`,
+      );
       continue;
     }
     const stillBad = mojibakeMatches(repaired);
     if (stillBad.length > 0) {
       errors++;
-      console.log(`[WARN] ${file}: riparazione incompleta (${stillBad.length} occorrenza/e residue): correggi a mano`);
+      console.log(
+        `[WARN] ${file}: riparazione incompleta (${stillBad.length} occorrenza/e residue): correggi a mano`,
+      );
       continue;
     }
     if (STAGED) {
       errors++;
-      console.log(`[WARN] ${file}: --fix non puo' scrivere sui file staged: correggi il file nella working copy e ri-staga`);
+      console.log(
+        `[WARN] ${file}: --fix non puo' scrivere sui file staged: correggi il file nella working copy e ri-staga`,
+      );
       continue;
     }
     writeFileSync(join(ROOT, file), repaired, 'utf8');
@@ -47179,9 +47244,20 @@ function info(message) {
   console.log(`[INFO] ${message}`);
 }
 
+// `maxBuffer`: il default di Node e' 1 MB. `git show` di `docs/BUNDLE.md`
+// (~3.4 MB) lo supera e `allowFail` trasformava l'errore in "file assente":
+// il blocco aggregato di quel file non veniva confrontato, in silenzio.
+// Con il buffer largo l'errore di lettura resta un errore (issue #290).
+const MAX_BUFFER = 64 * 1024 * 1024;
+
 function git(args, allowFail = false) {
   try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: MAX_BUFFER,
+    });
   } catch (err) {
     if (allowFail) return null;
     console.error(`[FAIL] git ${args.join(' ')}: ${String(err.stderr || err.message).trim()}`);
@@ -47221,7 +47297,9 @@ function extractBlocks(text) {
   return blocks;
 }
 
-console.log(`[INFO] check-aggregate-blocks: blocchi AGGREGATE-* intoccabili nella PR (base=${base}, head=${head})`);
+console.log(
+  `[INFO] check-aggregate-blocks: blocchi AGGREGATE-* intoccabili nella PR (base=${base}, head=${head})`,
+);
 
 // il base deve esistere come oggetto git
 if (git(['cat-file', '-e', `${base}^{commit}`], true) === null) {
@@ -47258,18 +47336,24 @@ for (const path of targets) {
   for (const [name, content] of headBlocks) {
     blocksSeen++;
     if (!baseBlocks.has(name)) {
-      fail(`${path}: blocco "${name}" aggiunto nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+      fail(
+        `${path}: blocco "${name}" aggiunto nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`,
+      );
       continue;
     }
     if (EXEMPT.has(name)) continue;
     if (baseBlocks.get(name) !== content) {
-      fail(`${path}: blocco "${name}" modificato a mano nella PR (regola V1 di ADR-0008). I blocchi si cambiano solo in docs/state/<propria>/* e vengono rigenerati dall'aggregator post-merge`);
+      fail(
+        `${path}: blocco "${name}" modificato a mano nella PR (regola V1 di ADR-0008). I blocchi si cambiano solo in docs/state/<propria>/* e vengono rigenerati dall'aggregator post-merge`,
+      );
     }
   }
 
   for (const name of baseBlocks.keys()) {
     if (!headBlocks.has(name)) {
-      fail(`${path}: blocco "${name}" rimosso nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+      fail(
+        `${path}: blocco "${name}" rimosso nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`,
+      );
     }
   }
 }
@@ -47278,7 +47362,9 @@ if (compared === 0) {
   info('nessun file con blocchi aggregati da confrontare');
 }
 
-console.log(`\n[INFO] check-aggregate-blocks: ${compared} file confrontati, ${blocksSeen} blocchi, ${failures} violazioni`);
+console.log(
+  `\n[INFO] check-aggregate-blocks: ${compared} file confrontati, ${blocksSeen} blocchi, ${failures} violazioni`,
+);
 process.exit(failures === 0 ? 0 : 1);
 
 
@@ -48481,9 +48567,7 @@ try {
     encoding: 'utf8',
   }).trim();
   if (applied !== HOOKS_PATH) {
-    console.warn(
-      `[setup-hooks] WARN: core.hooksPath vale "${applied}" e non "${HOOKS_PATH}".`,
-    );
+    console.warn(`[setup-hooks] WARN: core.hooksPath vale "${applied}" e non "${HOOKS_PATH}".`);
     console.warn('  Gli hook del repository NON verranno eseguiti. Chi ha cambiato il valore?');
     console.warn(`  Ripristinalo con: git config core.hooksPath ${HOOKS_PATH}`);
   }

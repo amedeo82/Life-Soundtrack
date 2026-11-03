@@ -46,6 +46,15 @@ controlli successivi, quindi
 Misurato con la contro-prova: l'hook di `main` esce **0** dove deve uscire **1** (scenari H8/H9
 del test esteso).
 
+**Un secondo strato di difetti, svelato dal primo**: con l'hook ormai vivo, il check encoding
+è entrato nel percorso dei commit — e ha bloccato il primo commit di questa sessione con
+«`docs/BUNDLE.md`: illeggibile (spawnSync git ENOBUFS)». Il file non era illeggibile: Node ha
+un `maxBuffer` di **1 MB** per `execFileSync` e `docs/BUNDLE.md` ne occupa **3.4 MB**. Lo stesso
+difetto in `check-aggregate-blocks.mjs` era **silenzioso**: `allowFail` trasformava l'errore in
+«file assente» e i blocchi aggregati di `docs/BUNDLE.md` non venivano confrontati — il gate
+controllava **7 blocchi su 15**. Entrambi i gate ora leggono con un buffer da 64 MB, e
+`check-aggregate-blocks.mjs` confronta **5 file e 15 blocchi**.
+
 **Il drift del catalogo**: `docs/12-DEVOPS.md §9.10` si dichiara «l'elenco autorevole dei gate»
 e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gates-portability*`
 (introdotti dalla issue #284, Sessione 90) non avevano una riga. Un elenco autorevole sbagliato
@@ -60,6 +69,7 @@ e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gat
 | D-93.3 | `setup-hooks.js` **rilegge** `core.hooksPath` dopo averlo scritto e avvisa se il valore è diverso; segnala anche la cartella `.husky/` | Scrivere il valore non basta: è stato il punto cieco per anni. Il sintomo (cartella `.husky/`) viene segnalato esplicitamente |
 | D-93.4 | Il gate è un **test di comportamento**, non una grep: `test-hook-wiring.sh` esegue un `git commit` reale in un repo temporaneo | Il difetto era esattamente «i file ci sono, ma non vengono eseguiti»: un controllo sui file non lo avrebbe visto |
 | D-93.5 | Il catalogo §9.10 viene allineato a **39 righe** (38 gate + l'agregatore `quality`) e i conteggi in `AGENTS.md` a **15 job, 38 step** | Le sezioni legacy vanno allineate quando la PR cambia i fatti che dichiarano (D.38.1): un catalogo autorevole sbagliato è peggio di un catalogo assente |
+| D-93.6 | I gate che leggono da git passano a `maxBuffer: 64 MB` | `docs/BUNDLE.md` è 3.4 MB: il default di Node (1 MB) faceva fallire `check-encoding --staged` e rendeva **in silenzio** inefficace metà dei confronti di `check-aggregate-blocks` |
 
 ## Analisi di avanzamento
 
@@ -107,13 +117,16 @@ nulla nel repository: lavora in una directory temporanea con un `git init` di pr
 | L'ordine dei lifecycle script di pnpm (`postinstall` → `prepare`) è stabile e deterministico | Una regressione nata dal monorepo init è rimasta **anni** senza che nessun test la vedesse |
 | Un `exit 0` di troppo in un hook disabilita tutti i controlli successivi | Due invarianti (branch ed encoding) erano morte dentro l'hook: il test le copriva solo perché il path non esisteva in quel ramo |
 | Un catalogo che si dichiara «autorevole» e sbaglia è peggio di un catalogo assente | Il drift sui due job di portabilità è nato da un merge (#284) che non ha aggiornato §9.10: nessun gate lo collega |
+| Un errore di lettura trattato come "assente" è un gate che non gira | `allowFail` + `maxBuffer` di Node faceva saltare metà dei blocchi aggregati **senza un messaggio**: il gate diceva "0 violazioni" confrontando 7 blocchi su 15 |
+| Riattivare un controllo ne fa emergere altri: è il costo (e il beneficio) del ripristino | Il check encoding è entrato nel percorso dei commit e ha bloccato il primo commit della sessione: il bug c'era, non si vedeva. Ogni controllo riattivato va seguito da un commit che lo fa passare |
 
 ## Documenti aggiornati
 
 - `.githooks/pre-commit` (riordinato), `.githooks/commit-msg` (nuovo), `.githooks/README.md`
 - `package.json` (via `prepare`/`husky`), `pnpm-lock.yaml`
 - `scripts/setup-hooks.js` (verifica post-scrittura), `scripts/test-hook-wiring.sh` (nuovo),
-  `scripts/test-pre-commit-clean-check.sh` (H7..H10), `scripts/generate-bundle.ps1` (`$files`)
+  `scripts/test-pre-commit-clean-check.sh` (H7..H10), `scripts/generate-bundle.ps1` (`$files`),
+  `scripts/check-encoding.mjs` e `scripts/check-aggregate-blocks.mjs` (`maxBuffer`)
 - `.github/workflows/ci.yml` (step «Wiring degli hook» nel job `gates-procedure`)
 - `docs/12-DEVOPS.md` (§9.10: righe e conteggi), `docs/05-ARCHITECTURE.md`, `docs/17-DEV-NOTES.md`,
   `docs/INDEX.md` (v1.42), `AGENTS.md` (v1.42)
