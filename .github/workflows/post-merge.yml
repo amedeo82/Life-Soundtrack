@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout di `main`
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # `ref: main` esplicito: il writer lavora sulla testa corrente di
           # `main` (che contiene il merge commit), non sul `github.sha` del

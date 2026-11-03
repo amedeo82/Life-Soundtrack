@@ -167,6 +167,7 @@ $files = @(
     # Sessione 91 (issue #287): il messaggio di commit del writer senza escape
     # PowerShell rotti, e il test funzionale che lo tiene a posto.
     "docs/state/sessions/91-post-merge-messaggio-commit.md",
+    "docs/state/sessions/92-node24-actions.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -305,6 +306,12 @@ $files = @(
     # anche i file CRLF (i controlli con regex ancorate a `$` fallivano in
     # silenzio per il `\r` finale).
     "scripts/test-workflow-yaml-scalars.sh",
+    # Gate "nessuna action su node20" (Sessione 92 / issue #283): Node 20 e'
+    # stato rimosso dai runner GitHub il 2026-09-23, quindi le action che
+    # dichiarano `using: 'node20'` girano fuori supporto. Il gate vive in
+    # validate-workflows.mjs ed e' fail-closed (mappa NODE24_ACTIONS): questo
+    # test ne verifica lo scenario negativo (T1..T6, 19 assert).
+    "scripts/test-workflow-node24-actions.sh",
     # Gate "fatti del README" (Sessione 54 / issue #161): confronta la prosa del
     # README con il codice (ACTIVE_PLATFORMS + ADAPTER_FACTORIES + le classi in
     # packages/core/src/adapters), vieta le capability non implementate fuori dalla

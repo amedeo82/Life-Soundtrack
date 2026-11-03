@@ -129,12 +129,41 @@ Say "riverifico i claim..." "Cyan"
 $commentsRaw = & gh api "$repoApi/issues/$IssueNumber/comments" 2>$null
 if ($LASTEXITCODE -ne 0) { Die 2 "impossibile leggere i commenti dell'issue" }
 $allComments = @($commentsRaw | ConvertFrom-Json)
+
+# Un claim RILASCIATO non conta nella riverifica. AGENTS.md (sezione
+# "Procedura di claim", punto 4) confronta l'ID piu' basso "tra i claim NON
+# ANCORA RILASCIATI"; un claim e' rilasciato da un commento `release:` /
+# `stale-release:` SUCCESSIVO che ne cita l'agente.
+#
+# Senza questo filtro la presa in carico di una claim STANTIA (TTL 12 ore di
+# ADR-0006) sarebbe impossibile: il vecchio claim ha sempre l'ID piu' basso, e
+# l'agente che subentra farebbe `yield:` pur avendo legittimamente preso
+# l'issue. E' il caso verificato con la claim di `kilo-hp-elitebook-457a`
+# sull'issue #283 (16 ore senza attivita', TTL 12 ore).
+function Get-ClaimAgent([object]$comment) {
+    $m = [regex]::Match([string]$comment.body, '^\s*claim:\s*(\S+)')
+    if ($m.Success) { return $m.Groups[1].Value }
+    return ""
+}
+function Test-ClaimReleased([object]$claim, [object[]]$releases) {
+    $claimAgent = Get-ClaimAgent $claim
+    if ([string]::IsNullOrWhiteSpace($claimAgent)) { return $false }
+    foreach ($rel in $releases) {
+        # il rilascio deve essere SUCCESSIVO al claim che rilascia
+        if ([int64]$rel.id -le [int64]$claim.id) { continue }
+        if ([string]$rel.body -like "*$claimAgent*") { return $true }
+    }
+    return $false
+}
+$releaseComments = @($allComments | Where-Object { [string]$_.body -match '^\s*(release|stale-release)\s*:' })
+
 $claims = @($allComments | Where-Object { $_.body -like "claim:*" } | Sort-Object { [int64]$_.id })
-if ($claims.Count -eq 0) { Die 2 "nessun commento di claim trovato dopo la propria presa in carico" }
-$mine = @($claims | Where-Object { $_.body -like "*$AgentId*" })
+$activeClaims = @($claims | Where-Object { -not (Test-ClaimReleased $_ $releaseComments) })
+if ($activeClaims.Count -eq 0) { Die 2 "nessun commento di claim ATTIVO trovato dopo la propria presa in carico" }
+$mine = @($activeClaims | Where-Object { $_.body -like "*$AgentId*" })
 if ($mine.Count -eq 0) { Die 2 "il proprio commento di claim non e' stato trovato fra i commenti" }
 $mineId = [int64]$mine[0].id
-$lowestId = [int64]($claims | ForEach-Object { [int64]$_.id } | Measure-Object -Minimum).Minimum
+$lowestId = [int64]($activeClaims | ForEach-Object { [int64]$_.id } | Measure-Object -Minimum).Minimum
 
 if ($mineId -ne $lowestId) {
     Say "RIVERIFICA PERSA: un altro claim ha un ID piu' basso ($lowestId < $mineId) -> yield" "Red"

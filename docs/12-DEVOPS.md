@@ -43,10 +43,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -67,7 +67,7 @@ jobs:
         run: pnpm --filter @ls/core run test:coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
 
@@ -76,10 +76,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -91,7 +91,7 @@ jobs:
         run: pnpm run build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pwa-build
           path: apps/web/dist/
@@ -303,7 +303,7 @@ Aggiungere il job `bundle-check` al workflow `ci.yml`:
   bundle-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify BUNDLE.md is in sync
         shell: pwsh
 run: pwsh scripts/generate-bundle.ps1 -Check
@@ -914,6 +914,7 @@ protection può interpretare un check saltato come successo.
 | 32 | `gates-docs` | `Encoding dei file tracciati` (`check-encoding.mjs`) | solo PR | sì | **#277** |
 | 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
 | 34 | `gates-workflows` | `Sintassi dei blocchi `run:` dei workflow` (`check-workflow-syntax.mjs`) | solo PR | sì | **#279** |
+| 35 | `gates-workflows` | `Nessuna action su node20` (`test-workflow-node24-actions.sh`, 19 assert) | solo PR | sì | **#283** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -933,6 +934,17 @@ protection può interpretare un check saltato come successo.
 > inequivocabile) e i file che *documentano* esempi di mojibake sono in
 > `scripts/encoding-allowlist.txt` (WARN, non errore). Istruzioni operative per gli agenti:
 > `AGENTS.md` §F9-ter.
+
+> **Il gate "nessuna action su node20"** (Sessione 92, issue #283) chiude l'invariante che
+> Node 20 sia stato **rimosso dai runner** il 2026-09-23: le action che dichiarano
+> `using: 'node20'` girano fuori supporto (il runner le forza su Node 24, ma il runtime
+> dichiarato resta deprecato). Il gate vive in `scripts/validate-workflows.mjs` ed è
+> **fail-closed**: la mappa `NODE24_ACTIONS` elenca, per ogni action di terze parti usata dal
+> repository, la **prima major che dichiara node24** (`checkout@v5`, `setup-node@v5`,
+> `github-script@v8`, `pnpm/action-setup@v5`, `upload-artifact@v6`, `download-artifact@v7`); un'azione
+> assente dalla mappa non è verificabile e non è accettata. Il test di scenario negativo
+> (`test-workflow-node24-actions.sh`, 19 assert) reintroduce un runtime node20 in una fixture e
+> verifica che il gate esca 1.
 
 **Il job `gates-protocol`** (Sessione 80, issue #248, ADR-0012) è il primo enforcement del
 protocollo: fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di governance del repo
