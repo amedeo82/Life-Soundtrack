@@ -23,11 +23,38 @@ Da quel momento tutti i commit passano attraverso `pre-commit`.
   - `docs/<desc>` (branch di documentazione)
   - `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
 
-  Se il branch non matcha, il commit viene abortito con un messaggio esplicativo.
+  Se il branch non matcha, il commit viene abortito con un messaggio esplicitivo.
+  Verifica inoltre l'encoding dei file staged (gate anti-mojibake della issue #277) e
+  esegue `lint-staged` (lint + format dei file staged).
+
+- **`commit-msg`**: Conventional Commits (`pnpm exec commitlint --edit "$1"`).
 
 - **`pre-push`**: rigenera `docs/BUNDLE.md` se `docs/` è cambiato, e avvisa se il branch è >5 commit dietro `origin/main`.
 
 - **`post-checkout`**: **advisory** — avvisa se un checkout tra branch ha lasciato modifiche tracked nella working tree (mitiga E3/E4/E5, issue #45).
+
+## Un solo hooks path *(Sessione 93, issue #290)*
+
+`.githooks/` è **l'unico** percorso degli hook. La regola è fragile: `core.hooksPath` è un'impostazione di git, e **chiunque scriva in quel campo senza saperlo spegne tutti gli hook del repository**.
+
+È successo per anni. `package.json` dichiarava `postinstall` (che imposta `.githooks` via `scripts/setup-hooks.js`) **e** `prepare: husky`: husky v9 scrive `core.hooksPath = .husky/_` nel suo lifecycle `prepare`, che pnpm esegue **dopo** `postinstall`. Risultato: dopo ogni `pnpm install` il path era `.husky/_` e i tre hook di questa cartella **non hanno mai girato** — le difese F1/F7 (pattern del branch), D.4/G.4 (bundle auto-regenerato al push) e F5 (advisory sul working tree) erano documentate e mai esercitate.
+
+Con il path corretto sono emersi due difetti latenti nel `pre-commit`, entrambi invisibili finché l'hook non ha girato: il blocco encoding chiudeva l'hook con `exit 0` **prima** dei controlli successivi, quindi (a) il gate anti-mojibake non poteva bloccare un commit e (b) l'invariante del branch non veniva mai verificato.
+
+Oggi:
+
+- `package.json` **non** dichiara `prepare` e **non** dipende da husky: nessun lifecycle script può sovrascrivere il path;
+- i quattro hook sono committati con mode **755**: su Linux git **ignora** un hook non eseguibile (e lo segnala con un `hint` nel log). Il bit non esiste su Windows, quindi il difetto era visibile solo lì — l'ha scoperto il CI;
+- `scripts/setup-hooks.js` **rilegge** `core.hooksPath` dopo averlo scritto e avvisa se il valore è diverso, e segnala la cartella `.husky/` (il sintomo del difetto);
+- `scripts/test-hook-wiring.sh` (16 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
+
+Un hook che non gira non produce rumore: è un difetto che si vede solo quando manca.
+
+### Il `pre-push` aveva un secondo difetto, indipendente
+
+git invoca il `pre-push` con `<remote-name> <remote-URL>`: il secondo argomento **non** è il branch spinto. La versione precedente lo trattava come tale e costruiva `origin/<URL>` — un ref inesistente. `git diff` falliva (con l'output redirectato a `/dev/null`), la condizione restava vuota e **il bundle non sarebbe stato rigenerato comunque**, nemmeno con il percorso degli hook corretto.
+
+Ora l'hook determina il branch da `git rev-parse --abbrev-ref HEAD` (con i ref su stdin come fallback per un checkout detached) e confronta con `origin/main` — la base della PR, non il branch remoto. La rigenerazione è saltata con un WARN se il working tree ha modifiche tracked non committate: il bundle riflette il working tree, e un bundle committato che non corrisponde al commit spinto è drift garantito.
 
 ## Invariante vs igiene *(Sessione 79, issue #248, ADR-0012 D-79.6)*
 

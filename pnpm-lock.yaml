@@ -17,9 +17,6 @@ importers:
       '@ls/config':
         specifier: workspace:*
         version: link:packages/config
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
       lint-staged:
         specifier: ^15.4.3
         version: 15.5.2
@@ -2233,11 +2230,6 @@ packages:
   human-signals@5.0.0:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
-
-  husky@9.1.7:
-    resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   i18next@26.5.2:
     resolution: {integrity: sha512-6fIXt//2MZNok3tULyjnypxe3vbsy3pV1bVg8p2x3yKrzZvp7z3T+wXx/88LQsATRdhyJeAUAvUxEtxsHdJ29w==}
@@ -5910,8 +5902,6 @@ snapshots:
       - supports-color
 
   human-signals@5.0.0: {}
-
-  husky@9.1.7: {}
 
   i18next@26.5.2(typescript@5.9.3):
     optionalDependencies:

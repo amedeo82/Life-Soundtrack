@@ -12,7 +12,7 @@
 
 | Comando | Cosa fa |
 |---------|---------|
-| `pnpm install` | Installa tutto il workspace (attiva anche gli hook Husky via script `prepare`) |
+| `pnpm install` | Installa tutto il workspace (attiva anche gli hook del repository via `postinstall`: `git config core.hooksPath .githooks`) |
 | `pnpm run lint` | ESLint 9 flat config su tutti i package (via Turborepo, cacheato) |
 | `pnpm run typecheck` | `tsc --noEmit` per package |
 | `pnpm run test` | Vitest in tutti i package con test |
@@ -101,7 +101,8 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   a sua volta un binding `react` (collisione `Identifier 'react' has already been declared`).
 - Nuovo file in `docs/` ⇒ aggiornare `$files` in `scripts/generate-bundle.ps1` e rigenerare
   `docs/BUNDLE.md` nella stessa PR (vedi `AGENTS.md` §Manutenzione del bundle).
-- Commit: Conventional Commits (hook `commit-msg` con commitlint); pre-commit: lint-staged.
+- Commit: Conventional Commits (hook `.githooks/commit-msg` con commitlint); pre-commit:
+  `.githooks/pre-commit` (pattern del branch, encoding dei file staged, lint-staged).
 - I test leggono i fixture da `fixtures/synthetic-history/` (spec `10-TESTING.md` §3).
 
 ### P6 — Dexie 4: `modify()` esiste solo su `Collection` (non su `Table`)

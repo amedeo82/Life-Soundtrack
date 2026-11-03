@@ -64,9 +64,20 @@ function info(message) {
   console.log(`[INFO] ${message}`);
 }
 
+// `maxBuffer`: il default di Node e' 1 MB. `git show` di `docs/BUNDLE.md`
+// (~3.4 MB) lo supera e `allowFail` trasformava l'errore in "file assente":
+// il blocco aggregato di quel file non veniva confrontato, in silenzio.
+// Con il buffer largo l'errore di lettura resta un errore (issue #290).
+const MAX_BUFFER = 64 * 1024 * 1024;
+
 function git(args, allowFail = false) {
   try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: MAX_BUFFER,
+    });
   } catch (err) {
     if (allowFail) return null;
     console.error(`[FAIL] git ${args.join(' ')}: ${String(err.stderr || err.message).trim()}`);
@@ -106,7 +117,9 @@ function extractBlocks(text) {
   return blocks;
 }
 
-console.log(`[INFO] check-aggregate-blocks: blocchi AGGREGATE-* intoccabili nella PR (base=${base}, head=${head})`);
+console.log(
+  `[INFO] check-aggregate-blocks: blocchi AGGREGATE-* intoccabili nella PR (base=${base}, head=${head})`,
+);
 
 // il base deve esistere come oggetto git
 if (git(['cat-file', '-e', `${base}^{commit}`], true) === null) {
@@ -143,18 +156,24 @@ for (const path of targets) {
   for (const [name, content] of headBlocks) {
     blocksSeen++;
     if (!baseBlocks.has(name)) {
-      fail(`${path}: blocco "${name}" aggiunto nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+      fail(
+        `${path}: blocco "${name}" aggiunto nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`,
+      );
       continue;
     }
     if (EXEMPT.has(name)) continue;
     if (baseBlocks.get(name) !== content) {
-      fail(`${path}: blocco "${name}" modificato a mano nella PR (regola V1 di ADR-0008). I blocchi si cambiano solo in docs/state/<propria>/* e vengono rigenerati dall'aggregator post-merge`);
+      fail(
+        `${path}: blocco "${name}" modificato a mano nella PR (regola V1 di ADR-0008). I blocchi si cambiano solo in docs/state/<propria>/* e vengono rigenerati dall'aggregator post-merge`,
+      );
     }
   }
 
   for (const name of baseBlocks.keys()) {
     if (!headBlocks.has(name)) {
-      fail(`${path}: blocco "${name}" rimosso nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+      fail(
+        `${path}: blocco "${name}" rimosso nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`,
+      );
     }
   }
 }
@@ -163,5 +182,7 @@ if (compared === 0) {
   info('nessun file con blocchi aggregati da confrontare');
 }
 
-console.log(`\n[INFO] check-aggregate-blocks: ${compared} file confrontati, ${blocksSeen} blocchi, ${failures} violazioni`);
+console.log(
+  `\n[INFO] check-aggregate-blocks: ${compared} file confrontati, ${blocksSeen} blocchi, ${failures} violazioni`,
+);
 process.exit(failures === 0 ? 0 : 1);

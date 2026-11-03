@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Commit-msg hook: Conventional Commits (commitlint).
+#
+# Sessione 93 (issue #290): questo passaggio era affidato a husky
+# (`.husky/commit-msg` -> `pnpm exec commitlint --edit "$1"`). Con
+# `core.hooksPath = .husky/_` era quello il file eseguito e i hook di
+# `.githooks/` non giravano MAI. Con `.githooks` come unico hooks path il
+# controllo vive qui.
+#
+# Setup: git config core.hooksPath .githooks
+# Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
+
+set -e
+
+if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
+  exit 0
+fi
+
+# Niente configurazione commitlint nel repo: il check non ha niente da
+# verificare. Il WARN non e' cosmetico: un hook che esce in silenzio e'
+# indistinguibile da un hook che non e' collegato, e questa e' esattamente la
+# classe di difetto chiusa dalla issue #290.
+if [ ! -f commitlint.config.js ]; then
+  echo "[commit-msg] WARN: nessuna configurazione commitlint nel repo: convenzione non verificata."
+  exit 0
+fi
+
+# Se `node_modules` non e' installato il check viene saltato con un WARN: la
+# convenzione e' comunque verificata dai maintainer in review.
+if [ ! -d node_modules/.bin ] || ! command -v pnpm >/dev/null 2>&1; then
+  echo "[commit-msg] WARN: commitlint non disponibile (node_modules mancante?): convenzione non verificata."
+  exit 0
+fi
+
+if ! pnpm exec commitlint --edit "$1"; then
+  echo ""
+  echo "[commit-msg] ERRORE: il messaggio di commit non rispetta Conventional Commits."
+  echo "  Formato atteso: <type>(<scope>): <descrizione in minuscolo, senza punto finale>"
+  echo "  Tipi ammessi: feat, fix, docs, refactor, test, chore, build, ci, perf, style, revert"
+  exit 1
+fi
+
+exit 0

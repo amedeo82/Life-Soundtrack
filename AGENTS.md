@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.41 — Sessione 92 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.42 — Sessione 93 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -43,6 +43,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
+| Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (13 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -567,6 +568,19 @@ Per setup manuale (fallback):
 git config core.hooksPath .githooks
 ```
 
+### Un solo hooks path *(Sessione 93, issue #290)*
+
+`.githooks/` è **l'unico** percorso degli hook: contiene `pre-commit`, `commit-msg`, `pre-push` e `post-checkout`.
+
+La regola è fragile e va tenuta: **`core.hooksPath` è un'impostazione di git, e chiunque scriva in quel campo senza saperlo spegne tutti gli hook del repository.** È successo per anni: `package.json` dichiarava `postinstall` (che imposta `.githooks`) **e** `prepare: husky` (husky v9 scrive `.husky/_`), e pnpm esegue `prepare` dopo `postinstall` → il path era `.husky/_` e i tre hook del repository non hanno mai girato. Le difese F1/F7, D.4/G.4 e F5 erano scritte qui, ma mai esercitate.
+
+Due conseguenze operative:
+
+- **Nessun lifecycle script può puntare gli hook altrove.** `package.json` non dichiara `prepare` e non dipende da husky: il check `scripts/test-hook-wiring.sh` (13 assert, bloccante in CI) lo verifica.
+- **Il setup non si limita a scrivere il valore**: `scripts/setup-hooks.js` lo rilegge dopo averlo scritto e avvisa se qualcun altro lo ha cambiato, e segnala la cartella `.husky/` (il sintomo del difetto storico).
+
+I due passaggi che husky faceva (`lint-staged` e `commitlint`) vivono ora in `.githooks/`: `lint-staged` dentro `pre-commit`, `commitlint` in `commit-msg`.
+
 ### Bypass (emergenza)
 
 ```bash
@@ -870,9 +884,9 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
 
-### 🏎️ La CI: 12 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74)*
+### 🏎️ La CI: 15 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74 + Sessione 90)*
 
-> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (13 job, 34 step): cosa gira,
+> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 38 step): cosa gira,
 > quando, con quali permessi e con quale exit code. Qui solo l'invariante operativo:
 >
 > - le modifiche a `docs/` e agli script di validazione girano su `pull_request`;
@@ -1131,4 +1145,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.41 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.42 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*

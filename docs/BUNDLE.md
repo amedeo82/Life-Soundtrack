@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 09:14
-> Totale file: 177
+> Data: 2026-11-03 09:57
+> Totale file: 179
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.41 — Sessione 92 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.42 — Sessione 93 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -74,6 +74,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
+| Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (13 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -598,6 +599,19 @@ Per setup manuale (fallback):
 git config core.hooksPath .githooks
 ```
 
+### Un solo hooks path *(Sessione 93, issue #290)*
+
+`.githooks/` è **l'unico** percorso degli hook: contiene `pre-commit`, `commit-msg`, `pre-push` e `post-checkout`.
+
+La regola è fragile e va tenuta: **`core.hooksPath` è un'impostazione di git, e chiunque scriva in quel campo senza saperlo spegne tutti gli hook del repository.** È successo per anni: `package.json` dichiarava `postinstall` (che imposta `.githooks`) **e** `prepare: husky` (husky v9 scrive `.husky/_`), e pnpm esegue `prepare` dopo `postinstall` → il path era `.husky/_` e i tre hook del repository non hanno mai girato. Le difese F1/F7, D.4/G.4 e F5 erano scritte qui, ma mai esercitate.
+
+Due conseguenze operative:
+
+- **Nessun lifecycle script può puntare gli hook altrove.** `package.json` non dichiara `prepare` e non dipende da husky: il check `scripts/test-hook-wiring.sh` (13 assert, bloccante in CI) lo verifica.
+- **Il setup non si limita a scrivere il valore**: `scripts/setup-hooks.js` lo rilegge dopo averlo scritto e avvisa se qualcun altro lo ha cambiato, e segnala la cartella `.husky/` (il sintomo del difetto storico).
+
+I due passaggi che husky faceva (`lint-staged` e `commitlint`) vivono ora in `.githooks/`: `lint-staged` dentro `pre-commit`, `commitlint` in `commit-msg`.
+
 ### Bypass (emergenza)
 
 ```bash
@@ -901,9 +915,9 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
    - (4b) drift su BUNDLE → `pwsh scripts/generate-bundle.ps1` + commit (BUNDLE.md e autogestito, drift indica file `$files` non allineato)
    - (4c) residui post-merge → `pwsh scripts/post-merge.ps1 -Branch <branch> -IssueNumber <N>` (vedi §"♻️ Pulizia branch post-merge")
 
-### 🏎️ La CI: 12 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74)*
+### 🏎️ La CI: 15 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74 + Sessione 90)*
 
-> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (13 job, 34 step): cosa gira,
+> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 38 step): cosa gira,
 > quando, con quali permessi e con quale exit code. Qui solo l'invariante operativo:
 >
 > - le modifiche a `docs/` e agli script di validazione girano su `pull_request`;
@@ -1162,7 +1176,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.41 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.42 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2090,7 +2104,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.41 | Protocollo per agenti — **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.42 | Protocollo per agenti — **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -11935,7 +11949,7 @@ sui workflow reali e su fixture temporanee: non scrive nulla nel repository.
 
 | Comando | Cosa fa |
 |---------|---------|
-| `pnpm install` | Installa tutto il workspace (attiva anche gli hook Husky via script `prepare`) |
+| `pnpm install` | Installa tutto il workspace (attiva anche gli hook del repository via `postinstall`: `git config core.hooksPath .githooks`) |
 | `pnpm run lint` | ESLint 9 flat config su tutti i package (via Turborepo, cacheato) |
 | `pnpm run typecheck` | `tsc --noEmit` per package |
 | `pnpm run test` | Vitest in tutti i package con test |
@@ -12024,7 +12038,8 @@ Target definitivo in `05-ARCHITECTURE.md` §9. Riepilogo vivo:
   a sua volta un binding `react` (collisione `Identifier 'react' has already been declared`).
 - Nuovo file in `docs/` ⇒ aggiornare `$files` in `scripts/generate-bundle.ps1` e rigenerare
   `docs/BUNDLE.md` nella stessa PR (vedi `AGENTS.md` §Manutenzione del bundle).
-- Commit: Conventional Commits (hook `commit-msg` con commitlint); pre-commit: lint-staged.
+- Commit: Conventional Commits (hook `.githooks/commit-msg` con commitlint); pre-commit:
+  `.githooks/pre-commit` (pattern del branch, encoding dei file staged, lint-staged).
 - I test leggono i fixture da `fixtures/synthetic-history/` (spec `10-TESTING.md` §3).
 
 ### P6 — Dexie 4: `modify()` esiste solo su `Collection` (non su `Table`)
@@ -20852,6 +20867,163 @@ sui workflow reali e su fixture temporanee: non scrive nulla nel repository.
 
 
 
+===== FILE: docs/state/sessions/93-hook-wiring.md =====
+
+---
+number: 93
+title: "Gli hook del repository non giravano: `core.hooksPath` era preso da husky"
+date: 2026-11-03
+state: 🟡
+merged: false
+branch: feat/290-hooks-wiring
+pr: 291
+claim: kilo-hp-elitebook-7c3f
+tags: [devops, protocollo, hook, ci]
+---
+
+# Sessione 93 — gli hook del repository non giravano (issue #290)
+
+> **Oggetto**: durante la issue #283 (PR #289, merged) è saltato fuori che l'auto-regen del
+> bundle del `pre-push` non era mai scattato. La causa è più profonda di un singolo hook:
+> **`core.hooksPath` era puntato su `.husky/_` e i tre hook del repository non sono mai stati
+> eseguiti**. La stessa verifica ha trovato che il catalogo dei gate (`docs/12-DEVOPS.md §9.10`)
+> era indietro di due job.
+
+## Sintesi
+
+`scripts/setup-hooks.js` (script `postinstall` di `package.json`) imposta
+`core.hooksPath = .githooks` — ma `package.json` dichiarava anche `"prepare": "husky"`, e
+husky v9 scrive `core.hooksPath = .husky/_` nel suo lifecycle `prepare`, che pnpm esegue
+**dopo** `postinstall`.
+
+Dopo ogni `pnpm install` il percorso degli hook era quindi `.husky/_`: i tre hook del
+repository — `.githooks/pre-commit`, `.githooks/pre-push`, `.githooks/post-checkout` — **non
+sono mai stati eseguiti**. Le difese documentate in `AGENTS.md` (F1/F7 pattern del branch,
+D.4/G.4 bundle auto-regenerato al push, F5 advisory sul working tree) erano scritte ma mai
+esercitate.
+
+La regressione è più grave di quanto sembri: l'ordine dei lifecycle script è stabile, quindi
+esiste **dal monorepo init** (Story 0.1, commit `66cbc72`: husky). `setup-hooks.js` è arrivato
+dopo (Sessione 20) e non ha mai vinto. Nessuno se n'è accorto perché **un hook che non gira non
+produce rumore**: il difetto si vede solo quando manca.
+
+Con il path corretto sono emersi **due difetti latenti** nel `.githooks/pre-commit`, invisibili
+finché l'hook non girava: il blocco encoding chiudeva l'hook con `exit 0` **prima** dei
+controlli successivi, quindi
+
+- il gate anti-mojibake della issue #277 non poteva **bloccare** un commit (usciva con 0);
+- l'invariante del branch (F1/F7) non veniva **mai** verificato.
+
+Misurato con la contro-prova: l'hook di `main` esce **0** dove deve uscire **1** (scenari H8/H9
+del test esteso).
+
+**Un secondo strato di difetti, svelato dal primo**: con l'hook ormai vivo, il check encoding
+è entrato nel percorso dei commit — e ha bloccato il primo commit di questa sessione con
+«`docs/BUNDLE.md`: illeggibile (spawnSync git ENOBUFS)». Il file non era illeggibile: Node ha
+un `maxBuffer` di **1 MB** per `execFileSync` e `docs/BUNDLE.md` ne occupa **3.4 MB**. Lo stesso
+difetto in `check-aggregate-blocks.mjs` era **silenzioso**: `allowFail` trasformava l'errore in
+«file assente» e i blocchi aggregati di `docs/BUNDLE.md` non venivano confrontati — il gate
+controllava **7 blocchi su 15**. Entrambi i gate ora leggono con un buffer da 64 MB, e
+`check-aggregate-blocks.mjs` confronta **5 file e 15 blocchi**.
+
+**Un terzo strato, nel pre-push**: git invoca il `pre-push` con `<remote-name> <remote-URL>` —
+il secondo argomento **non** è il branch spinto. La versione precedente lo trattava come tale e
+costruiva `origin/<URL>`, un ref inesistente: `git diff` falliva, la condizione restava vuota e
+**il bundle non sarebbe stato rigenerato comunque**, nemmeno con il percorso degli hook
+corretto. L'hook ora determina il branch da `git rev-parse --abbrev-ref HEAD` (con i ref su
+stdin come fallback per un checkout detached) e confronta con `origin/main` — la base della PR,
+non il branch remoto.
+
+**Un quarto strato, scoperto dal CI**: su Linux git **ignora** un hook che non è eseguibile, e
+lo dice con un `hint` che finisce nel log. `pre-commit` e `pre-push` erano committati con mode
+**644** (solo `post-checkout` era 755): su Windows il bit non esiste e git for Windows non lo
+controlla, quindi il difetto era visibile **solo** su Linux. Il test comportamentale lo ha
+scoperto al primo run su CI (`T10`: «commit su branch non conforme: PASSATO (l'hook non ha
+girato)»).
+
+**Il drift del catalogo**: `docs/12-DEVOPS.md §9.10` si dichiara «l'elenco autorevole dei gate»
+e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gates-portability*`
+(introdotti dalla issue #284, Sessione 90) non avevano una riga. Un elenco autorevole sbagliato
+è peggio di un elenco assente.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-93.1 | `.githooks/` è **l'unico** hooks path: `husky` esce da `package.json` e la cartella `.husky/` è rimossa | Due sistemi di hook sono una fonte di verità in più: chi scrive `core.hooksPath` vince, e il vincitore era quello sbagliato |
+| D-93.2 | Le due responsabilità di husky passano in `.githooks/`: `lint-staged` dentro `pre-commit`, `commitlint` in `commit-msg` | Niente di quanto funzionava va perso: il `commit-msg` era l'unico controllo che il repository eseguiva davvero |
+| D-93.3 | `setup-hooks.js` **rilegge** `core.hooksPath` dopo averlo scritto e avvisa se il valore è diverso; segnala anche la cartella `.husky/` | Scrivere il valore non basta: è stato il punto cieco per anni. Il sintomo (cartella `.husky/`) viene segnalato esplicitamente |
+| D-93.4 | Il gate è un **test di comportamento**, non una grep: `test-hook-wiring.sh` esegue un `git commit` reale in un repo temporaneo | Il difetto era esattamente «i file ci sono, ma non vengono eseguiti»: un controllo sui file non lo avrebbe visto |
+| D-93.5 | Il catalogo §9.10 viene allineato a **39 righe** (38 gate + l'agregatore `quality`) e i conteggi in `AGENTS.md` a **15 job, 38 step** | Le sezioni legacy vanno allineate quando la PR cambia i fatti che dichiarano (D.38.1): un catalogo autorevole sbagliato è peggio di un catalogo assente |
+| D-93.6 | I gate che leggono da git passano a `maxBuffer: 64 MB` | `docs/BUNDLE.md` è 3.4 MB: il default di Node (1 MB) faceva fallire `check-encoding --staged` e rendeva **in silenzio** inefficace metà dei confronti di `check-aggregate-blocks` |
+| D-93.7 | Il `pre-push` determina il branch da `git rev-parse --abbrev-ref HEAD` (fallback: i ref su stdin) e confronta con `origin/main` | git passa `<remote-name> <remote-URL>`: il secondo argomento non è il branch. La base giusta è la base della PR (`origin/main`), non il branch remoto |
+| D-93.8 | I 4 hook sono committati con mode **755** e il gate lo verifica | Su Linux git ignora un hook non eseguibile; il bit non esiste su Windows, quindi il difetto era visibile solo lì. Il CI di questa PR l'ha scoperto al primo run |
+
+## Analisi di avanzamento
+
+**Numeri.** Nessun codice applicativo toccato: la percentuale di implementazione delle story
+resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **devops**.
+
+**Cosa è pronto.**
+
+- Il percorso degli hook è `.githooks` e **non può più essere sovrascritto**: nessun lifecycle
+  script lo tocca, e `setup-hooks.js` rilegge il valore per accorgersi se qualcun altro lo fa.
+- I quattro hook del repository girano davvero: `pre-commit` (pattern del branch + encoding +
+  lint-staged), `commit-msg` (commitlint), `pre-push` (bundle + base-stale), `post-checkout`
+  (advisory).
+- Il `pre-commit` è stato riordinato: l'invariante del branch e il gate encoding sono **prima**
+  di qualunque uscita, e i due difetti latenti sono chiusi.
+- `scripts/test-hook-wiring.sh` (nuovo, 13 assert): 9 verifiche statiche sul wiring + 4
+  comportamentali su un `git commit` reale.
+- `scripts/test-pre-commit-clean-check.sh`: 4 scenari nuovi (H7..H10) che coprono il **percorso
+  encoding** — quello del repository vero, mai coperto prima perché il path non esisteva in
+  quel ramo del test.
+- `docs/12-DEVOPS.md §9.10`: le 3 righe dei gate di portabilità mancanti, la nuova riga del
+  gate sul wiring, e i conteggi allineati (15 job, 38 step).
+
+**Cosa manca.** Niente sul piano funzionale. La protezione contro la regressione è di **indole
+strutturale**, non solo documentale: il gate verifica il comportamento, e `setup-hooks.js` si
+accorge da solo se qualcuno scrive il path.
+
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring non scrive
+nulla nel repository: lavora in una directory temporanea con un `git init` di prova.
+
+**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 13/13 ·
+`bash scripts/test-pre-commit-clean-check.sh` → 18/18 (H7..H10 nuovi) ·
+`node scripts/check-protocol-consistency.mjs` → 0 falliti ·
+`node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un hook che non gira **non produce rumore**: il difetto è invisibile finché manca | Il gate di un hook deve essere **comportamentale** (un `git commit` reale), non una verifica che i file esistano |
+| Due sistemi di hook nella stessa repository sono una fonte di verità in più | Il secondo scriveva `core.hooksPath` **dopo** il primo: vinceva il meno nobile, e vinceva in silenzio |
+| L'ordine dei lifecycle script di pnpm (`postinstall` → `prepare`) è stabile e deterministico | Una regressione nata dal monorepo init è rimasta **anni** senza che nessun test la vedesse |
+| Un `exit 0` di troppo in un hook disabilita tutti i controlli successivi | Due invarianti (branch ed encoding) erano morte dentro l'hook: il test le copriva solo perché il path non esisteva in quel ramo |
+| Un catalogo che si dichiara «autorevole» e sbaglia è peggio di un catalogo assente | Il drift sui due job di portabilità è nato da un merge (#284) che non ha aggiornato §9.10: nessun gate lo collega |
+| Un errore di lettura trattato come "assente" è un gate che non gira | `allowFail` + `maxBuffer` di Node faceva saltare metà dei blocchi aggregati **senza un messaggio**: il gate diceva "0 violazioni" confrontando 7 blocchi su 15 |
+| Riattivare un controllo ne fa emergere altri: è il costo (e il beneficio) del ripristino | Il check encoding è entrato nel percorso dei commit e ha bloccato il primo commit della sessione: il bug c'era, non si vedeva. Ogni controllo riattivato va seguito da un commit che lo fa passare |
+| Un hook che non gira può avere **due** cause indipendenti: fixarne una non basta | Il `pre-push` aveva sia il path sbagliato sia gli argomenti sbagliati (`$2` è l'URL del remote, non il branch): con il path corretto la condizione sarebbe comunque stata vuota |
+| Il bit di eseguibilità è una proprietà **del repo**, non del filesystem | Su Windows il bit non esiste: un hook committato 644 funziona in locale e **non** funziona su Linux. Il difetto è visibile solo dove non si sviluppa |
+
+## Documenti aggiornati
+
+- `.githooks/pre-commit` (riordinato), `.githooks/commit-msg` (nuovo), `.githooks/README.md`
+- `package.json` (via `prepare`/`husky`), `pnpm-lock.yaml`
+- `scripts/setup-hooks.js` (verifica post-scrittura), `scripts/test-hook-wiring.sh` (nuovo),
+  `scripts/test-pre-commit-clean-check.sh` (H7..H10), `scripts/generate-bundle.ps1` (`$files`),
+  `scripts/check-encoding.mjs` e `scripts/check-aggregate-blocks.mjs` (`maxBuffer`)
+- `.github/workflows/ci.yml` (step «Wiring degli hook» nel job `gates-procedure`)
+- `docs/12-DEVOPS.md` (§9.10: righe e conteggi), `docs/05-ARCHITECTURE.md`, `docs/17-DEV-NOTES.md`,
+  `docs/INDEX.md` (v1.42), `AGENTS.md` (v1.42)
+- `docs/state/sessions/93-hook-wiring.md` (questo file)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -27694,7 +27866,7 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 | Test | **Vitest 2+** + fake-indexeddb + **MSW** + **Playwright 1.5+** | Unit + e2e + API mock | attivo (MSW futuro) |
 | Coverage | **@vitest/coverage-v8** per package | Soglie da `10§2` | attivo |
 | Build | Vite 6 + **Turborepo** | Monorepo incrementale | attivo |
-| Tooling | **ESLint 9** + Prettier 3 + Husky + lint-staged + commitlint | Convenzioni `AGENTS.md` | attivo (Husky/lint-staged/commitlint in setup) |
+| Tooling | **ESLint 9** + Prettier 3 + lint-staged + commitlint | Convenzioni `AGENTS.md` | attivo (hook in `.githooks/`: lint-staged nel pre-commit, commitlint nel commit-msg) |
 | Bundle analyzer | rollup-plugin-visualizer | NFR budget 300KB (`§10`) | futuro (Fase 6) |
 | Desktop (Fase 2) | Tauri 2.0 | 10x più leggero di Electron | futuro (Fase 2) |
 | **Sync cloud (Fase 2+, ADR-0005)** | **Placeholder** — non implementato nel MVP (D.A.7). Servizio self-hosted opzionale con E2EE | Previsto ma non vincolante per Fase 0/1 | futuro (Fase 2+) |
@@ -27704,7 +27876,7 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 ### 8.1 Tooling dev
 
 - **Linting**: ESLint 9 (flat config) + plugin React/TS/Vitest, Prettier 3
-- **Hook pre-commit**: Husky + lint-staged (lint + format solo sui file staged)
+- **Hook pre-commit**: `.githooks/pre-commit` (pattern del branch + encoding dei file staged) + lint-staged (lint + format solo sui file staged)
 - **Commit**: commitlint enforce Conventional Commits (vedi `AGENTS.md` §Git workflow)
 - **TypeScript**: 5.6+ con `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`
 - **Path aliases**: `@core/*`, `@ui/*`, `@web/*` (vedi `§9` monorepo)
@@ -31314,13 +31486,22 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 ### 9.10 Gate reali di `ci.yml`
 
 > **Sessione 73 (issue #224) e Sessione 74: la tabella è stata riscritta due volte.**
-> `ci.yml` non è più un job unico con 18 step in sequenza: è **12 job** di cui **10 girano in
+> `ci.yml` non è più un job unico con 18 step in sequenza: è **15 job** di cui **12 girano in
 > parallelo** e due (`quality` e `detect-code`) hanno un ruolo particolare.
 > **Sessione 74**: il trigger `push` su `main` è filtrato per path e su `push` girano **solo i
 > job leggeri**; i 3 job `node-*` girano **solo su `pull_request`**, e saltano (riuscendo) se la
 > PR tocca **solo file `.md`**. Dettaglio e misure in **§9.14.10**.
 > **Sessione 80 (issue #248)**: aggiunto il job `gates-protocol` (4 step) → **13 job**, 11 in
 > parallelo. Il protocollo agenti diventa un **contratto verificato** (ADR-0012).
+> **Sessione 90 (issue #284)**: aggiunti i 2 job `gates-portability` e `gates-portability-compare`
+> → **15 job**, 12 in parallelo (`gates-portability-compare` aspetta `gates-portability`; i 3 job
+> `node-*` aspettano `detect-code`).
+> **Sessione 93 (issue #290)**: il catalogo era indietro di **due job** — i due job di portabilità
+> della Sessione 90 non avevano una riga, e il conteggio dichiarava «12 job» / «33 step». La
+> tabella si dichiara «l'elenco autorevole dei gate»: un elenco autorevole sbagliato è peggio di
+> un elenco assente. Ora le righe sono **39** (38 gate + l'agregatore `quality`).
+> **Sessione 93 (issue #290)**: aggiunto il gate «wiring degli hook» (`test-hook-wiring.sh`)
+> → **39 righe**, **38 step**.
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
@@ -31367,6 +31548,10 @@ protection può interpretare un check saltato come successo.
 | 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
 | 34 | `gates-workflows` | `Sintassi dei blocchi `run:` dei workflow` (`check-workflow-syntax.mjs`) | solo PR | sì | **#279** |
 | 35 | `gates-workflows` | `Nessuna action su node20` (`test-workflow-node24-actions.sh`, 19 assert) | solo PR | sì | **#283** |
+| 36 | `gates-portability` | `I generatori sono deterministici` (`check-generators-portable.mjs`, su ubuntu + windows) | solo PR | sì | **#284** |
+| 37 | `gates-portability` | `Il bundle è in sync con lo stato committato` (`check-generators-portable.mjs --bundle-check-only`) | solo PR | sì | **#284** |
+| 38 | `gates-portability-compare` | `I generatori producono gli stessi byte su ogni sistema operativo` (`check-generators-portable.mjs --compare`) | solo PR | sì | **#284** |
+| 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 13 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -38515,6 +38700,54 @@ run_hook_scenario "H5" "file untracked, default => advisory (no abort)" \
 run_hook_scenario "H6" "branch non conforme + SKIP_HOOKS=1 => ok" \
   "git checkout -q -B feature/no-issue-number" "LIFE_SOUNDTRACK_SKIP_HOOKS=1" "0"
 
+# ---------------------------------------------------------------------------
+# Parte 3: il PERCORSO ENCODING del pre-commit hook (issue #290)
+# ---------------------------------------------------------------------------
+# Il blocco encoding conteneva un `exit 0` che chiudeva l'hook prima dei
+# controlli successivi. Con `scripts/check-encoding.mjs` presente (cioe' nel
+# repository vero, sempre) l'hook:
+#   - usciva con 0 anche quando il check encoding FALLIVA: il gate anti-mojibake
+#     della issue #277 era morto dentro l'hook (scenario H9);
+#   - non verificava MAI l'invariante del branch (F1/F7): l'unica difesa
+#     documentata in AGENTS.md non girava (scenario H8).
+# H1..H6 girano in un repo SENZA `scripts/check-encoding.mjs`: il percorso
+# encoding (quello del repository vero) non era mai coperto. Qui lo si copre.
+# Contro-prova: con l'hook di `main` gli scenari H8 e H9 escono 0 invece di 1.
+create_encoding_stub() {
+  mkdir -p scripts
+  cat > scripts/check-encoding.mjs <<'STUB'
+const mode = process.env.ENCODING_STUB_MODE || 'ok';
+if (mode === 'fail') {
+  console.error('[FAIL] encoding non valido (stub)');
+  process.exit(1);
+}
+if (mode === 'warn') {
+  console.log('[WARN] encoding in allowlist (stub)');
+  process.exit(0);
+}
+console.log('[OK] 0 file con errori (stub)');
+STUB
+}
+
+# H7: encoding pulito + branch conforme => exit 0
+run_hook_scenario "H7" "encoding ok + branch conforme => ok" \
+  "create_encoding_stub" "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=ok" "0"
+
+# H8: encoding pulito + branch NON conforme => abort (l'invariante del branch
+# deve eseguire DOPO il blocco encoding, non essere schiacciato dal suo exit 0)
+run_hook_scenario "H8" "encoding ok + branch non conforme => abort" \
+  "create_encoding_stub && git checkout -q -B feature/no-issue-number" \
+  "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=ok" "1"
+
+# H9: encoding FAIL + branch conforme => abort (il gate anti-mojibake deve
+# poter bloccare il commit: con l'hook di main questo percorso usciva con 0)
+run_hook_scenario "H9" "encoding fail + branch conforme => abort" \
+  "create_encoding_stub" "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=fail" "1"
+
+# H10: encoding in allowlist (WARN) + branch conforme => exit 0
+run_hook_scenario "H10" "encoding warn + branch conforme => ok" \
+  "create_encoding_stub" "LIFE_SOUNDTRACK_SKIP_HOOKS=0 ENCODING_STUB_MODE=warn" "0"
+
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
 
@@ -38525,6 +38758,254 @@ else
   echo "FAILURES"
   exit 1
 fi
+
+
+
+===== FILE: scripts/test-hook-wiring.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per il WIRING degli hook del repository (issue #290).
+#
+# Difetto chiuso: `package.json` dichiarava sia `postinstall` (che imposta
+# `core.hooksPath = .githooks` via `scripts/setup-hooks.js`) sia `prepare:
+# husky` (husky v9 scrive `core.hooksPath = .husky/_`). pnpm esegue `prepare`
+# DOPO `postinstall`: il setup veniva sovrascritto a ogni `pnpm install` e i
+# tre hook di `.githooks/` (pre-commit, pre-push, post-checkout) NON sono mai
+# stati eseguiti. Le difese documentate in AGENTS.md (F1/F7, D.4/G.4, F5)
+# erano scritte ma mai esercitate.
+#
+# Un gate che passa sempre non e' un gate (lesson 43-1): qui la parte
+# comportamentale esegue un `git commit` REALE in un repository temporaneo con
+# `core.hooksPath` impostata su `.githooks/` e verifica che l'hook abortisca il
+# commit su un branch non conforme. Non basta verificare che i file esistano:
+# il difetto era esattamente "i file ci sono, ma non vengono eseguiti".
+#
+# Esegui con: bash scripts/test-hook-wiring.sh
+# Richiede: bash, git.
+
+set -u
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+GITHOOKS="$REPO_ROOT/.githooks"
+PKG="$REPO_ROOT/package.json"
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "[SKIP] git non disponibile"
+  exit 0
+fi
+
+PASS=0
+FAIL=0
+ok() { echo "  [PASS] $1"; PASS=$((PASS + 1)); }
+ng() { echo "  [FAIL] $1"; FAIL=$((FAIL + 1)); }
+
+WORK=$(mktemp -d)
+trap 'rm -rf "$WORK"' EXIT
+
+echo "=== parte 1: wiring statico ==="
+
+# T1: nessun lifecycle script puo' puntare gli hook altrove.
+if grep -q '"prepare"' "$PKG"; then
+  ng "package.json dichiara ancora uno script \"prepare\" (potrebbe sovrascrivere core.hooksPath)"
+else
+  ok "T1 package.json non ha piu' uno script \"prepare\""
+fi
+
+# T2: nessuna dipendenza che tocchi il percorso degli hook.
+if grep -q '"husky"' "$PKG"; then
+  ng "package.json dipende ancora da husky (scrive core.hooksPath = .husky/_)"
+else
+  ok "T2 package.json non dipende piu' da husky"
+fi
+
+# T3: il setup degli hook e' ancora agganciato a postinstall.
+if grep -q '"postinstall": "node scripts/setup-hooks.js"' "$PKG"; then
+  ok "T3 postinstall esegue scripts/setup-hooks.js"
+else
+  ng "T3 postinstall non esegue piu' scripts/setup-hooks.js"
+fi
+
+# T4: la cartella .husky/ non esiste piu' (il sistema di hook e' uno solo).
+if [ -d "$REPO_ROOT/.husky" ]; then
+  ng "la cartella .husky/ esiste ancora: un secondo sistema di hook puo' prendere il path"
+else
+  ok "T4 non esiste una cartella .husky/ (un solo sistema di hook)"
+fi
+
+# T5: i quattro hook del repository ci sono.
+missing=""
+for hook in pre-commit commit-msg pre-push post-checkout; do
+  [ -f "$GITHOOKS/$hook" ] || missing="$missing $hook"
+done
+if [ -z "$missing" ]; then
+  ok "T5 i 4 hook sono presenti in .githooks/"
+else
+  ng "T5 hook mancanti in .githooks/:$missing"
+fi
+
+# T5b: i file degli hook devono essere ESECUTIBILI nel repo (mode 755).
+# Su Linux git IGNORA un hook non eseguibile e lo dice con un "hint" che
+# finisce nel log: il commit passa senza che nessuno controlli niente.
+# Su Windows il bit non esiste e git for Windows non lo controlla: il difetto
+# e visibile solo su Linux (e' stato scoperto dal CI di questa PR).
+not_exec=""
+for hook in pre-commit commit-msg pre-push post-checkout; do
+  mode=$(git ls-files -s ".githooks/$hook" 2>/dev/null | awk '{print $1}')
+  [ "$mode" = "100755" ] || not_exec="$not_exec $hook($mode)"
+done
+if [ -z "$not_exec" ]; then
+  ok "T5b i 4 hook sono eseguibili nel repo (mode 755)"
+else
+  ng "T5b hook non eseguibili (git li ignora su Linux):$not_exec"
+fi
+
+# T6: commitlint vive nel commit-msg.
+if grep -q 'commitlint' "$GITHOOKS/commit-msg"; then
+  ok "T6 .githooks/commit-msg esegue commitlint"
+else
+  ng "T6 .githooks/commit-msg non esegue commitlint"
+fi
+
+# T7: lint-staged vive nel pre-commit.
+if grep -q 'lint-staged' "$GITHOOKS/pre-commit"; then
+  ok "T7 .githooks/pre-commit esegue lint-staged"
+else
+  ng "T7 .githooks/pre-commit non esegue lint-staged"
+fi
+
+# T8: setup-hooks.js imposta .githooks E rilegge il valore (non si fida della scrittura).
+if grep -q 'git config core.hooksPath' "$GITHOOKS/../scripts/setup-hooks.js" \
+   && grep -q 'git config --get core.hooksPath' "$GITHOOKS/../scripts/setup-hooks.js"; then
+  ok "T8 setup-hooks.js scrive core.hooksPath e lo rilegge per verifica"
+else
+  ng "T8 setup-hooks.js non scrive+riliegue core.hooksPath"
+fi
+
+# T9: la worktree configura lo stesso percorso (D-27.6).
+if grep -q 'core.hooksPath .githooks' "$REPO_ROOT/scripts/setup-worktree.ps1"; then
+  ok "T9 setup-worktree.ps1 configura core.hooksPath = .githooks"
+else
+  ng "T9 setup-worktree.ps1 non configura core.hooksPath = .githooks"
+fi
+
+echo "=== parte 2: comportamento reale (git commit in un repo temporaneo) ==="
+
+REPO="$WORK/repo"
+mkdir -p "$REPO"
+git init -q -b main "$REPO" >/dev/null 2>&1
+cd "$REPO" || exit 2
+git config user.email "test@example.com"
+git config user.name "Test"
+git config core.autocrlf false
+git config core.eol lf
+# Il path degli hook e' quello del repository sotto test: e' il collegamento
+# che nella realta' era rotto.
+git config core.hooksPath "$GITHOOKS"
+
+printf 'v0\n' > file.txt
+git add file.txt
+git commit -q -m "chore: initial" >/dev/null 2>&1
+
+# T10: branch NON conforme -> il commit deve essere ABORTATO dall'hook.
+git checkout -q -B feature/no-issue-number
+printf 'v1\n' > file.txt
+git add file.txt
+out=$(git commit -m "feat: violazione del pattern" 2>&1)
+ec=$?
+if [ "$ec" -ne 0 ]; then
+  ok "T10 commit su branch non conforme: abortito (exit $ec)"
+else
+  ng "T10 commit su branch non conforme: PASSATO (l'hook non ha girato)"
+fi
+if echo "$out" | grep -q "non matcha il pattern del workflow agenti"; then
+  ok "T10b il messaggio di abort e' quello del pre-commit hook"
+else
+  ng "T10b il messaggio di abort non e' quello del pre-commit hook: $out"
+fi
+
+# T11: branch conforme -> il commit deve PASSARE (l'hook non blocca tutto).
+git checkout -q -B feat/290-hooks-wiring
+printf 'v2\n' > file.txt
+git add file.txt
+out=$(git commit -m "feat: branch conforme" 2>&1)
+ec=$?
+if [ "$ec" -eq 0 ]; then
+  ok "T11 commit su branch conforme: passato"
+else
+  ng "T11 commit su branch conforme: abortito (l'hook blocca troppo): $out"
+fi
+
+# T12: il commit-msg e' collegato (Conventional Commits).
+printf 'v3\n' > file.txt
+git add file.txt
+out=$(git commit -m "questo non e' un conventional commit" 2>&1)
+ec=$?
+if [ "$ec" -ne 0 ]; then
+  ok "T12 messaggio non Conventional Commits: abortito dal commit-msg"
+else
+  # commitlint non e' installato nel repo temporaneo: il commit-msg deve
+  # saltarlo con un WARN, non fallire. In entrambi i casi il gate non e'
+  # rotto, ma il caso "passato" e' quello atteso qui.
+  if echo "$out" | grep -qE "commitlint non disponibile|nessuna configurazione commitlint"; then
+    ok "T12 commitlint non utilizzabile: saltato con WARN (il hook e' collegato)"
+  else
+    ng "T12 il commit-msg non ha né bloccato né segnalato l'assenza di commitlint: $out"
+  fi
+fi
+
+cd / >/dev/null 2>&1
+
+# T13: il pre-push NON usa il secondo argomento come branch.
+# git invoca il pre-push con <remote-name> <remote-URL>: la versione precedente
+# costruiva "origin/<URL>", un ref inesistente, e la condizione non matchava
+# MAI (il bundle non veniva rigenerato).
+if grep -q 'remote_branch="\$2"' "$GITHOOKS/pre-push"; then
+  ng "T13 il pre-push usa \$2 (l'URL del remote) come branch: la condizione non puo' matchare"
+else
+  ok "T13 il pre-push non usa \$2 come branch (l'URL del remote non e' un branch)"
+fi
+if grep -q 'git rev-parse --abbrev-ref HEAD' "$GITHOOKS/pre-push"; then
+  ok "T13b il pre-push determina il branch corrente"
+else
+  ng "T13b il pre-push non determina il branch corrente"
+fi
+
+# T14: la condizione del pre-push (branch spinto x file del catalogo) MATCHA.
+# Repo temporaneo con un `origin/main` locale e un branch che cambia docs/.
+PUSH_REPO="$WORK/pushrepo"
+mkdir -p "$PUSH_REPO"
+git init -q -b main "$PUSH_REPO" >/dev/null 2>&1
+(
+  cd "$PUSH_REPO" || exit 2
+  git config user.email "test@example.com"
+  git config user.name "Test"
+  git config core.autocrlf false
+  mkdir -p docs
+  printf 'v0\n' > docs/qualcosa.md
+  git add docs/qualcosa.md
+  git commit -q -m "chore: base"
+  BASE=$(git rev-parse HEAD)
+  git update-ref refs/remotes/origin/main "$BASE"
+  git checkout -q -B feat/290-prova
+  printf 'v1\n' > docs/qualcosa.md
+  git commit -q -am "docs: un documento"
+  # il push passa l'URL del remote come secondo argomento: non e' un branch
+  out=$(printf 'refs/heads/feat/290-prova %s refs/heads/feat/290-prova %s\n' \
+    "$(git rev-parse HEAD)" "$(git rev-parse HEAD)" \
+    | bash "$GITHOOKS/pre-push" origin https://github.com/example/repo.git 2>&1)
+  if echo "$out" | grep -q "Rigenero BUNDLE.md"; then
+    echo "  [PASS] T14 la condizione del pre-push matcha (file del catalogo cambiati)"
+    PASS=$((PASS + 1))
+  else
+    echo "  [FAIL] T14 la condizione del pre-push NON matcha: $out"
+    FAIL=$((FAIL + 1))
+  fi
+)
+
+echo "---"
+echo "Risultati: $PASS passati, $FAIL falliti"
+[ "$FAIL" -eq 0 ]
 
 
 
@@ -44739,12 +45220,33 @@ const ALLOWLIST_FILE = join(ROOT, 'scripts', 'encoding-allowlist.txt');
  * mojibake e per invertirlo.
  */
 const CP1252_HIGH = {
-  0x80: '\u20AC', 0x82: '\u201A', 0x83: '\u0192', 0x84: '\u201E', 0x85: '\u2026',
-  0x86: '\u2020', 0x87: '\u2021', 0x88: '\u02C6', 0x89: '\u2030', 0x8A: '\u0160',
-  0x8B: '\u2039', 0x8C: '\u0152', 0x8E: '\u017D', 0x91: '\u2018', 0x92: '\u2019',
-  0x93: '\u201C', 0x94: '\u201D', 0x95: '\u2022', 0x96: '\u2013', 0x97: '\u2014',
-  0x98: '\u02DC', 0x99: '\u2122', 0x9A: '\u0161', 0x9B: '\u203A', 0x9C: '\u0153',
-  0x9E: '\u017E', 0x9F: '\u0178',
+  0x80: '\u20AC',
+  0x82: '\u201A',
+  0x83: '\u0192',
+  0x84: '\u201E',
+  0x85: '\u2026',
+  0x86: '\u2020',
+  0x87: '\u2021',
+  0x88: '\u02C6',
+  0x89: '\u2030',
+  0x8a: '\u0160',
+  0x8b: '\u2039',
+  0x8c: '\u0152',
+  0x8e: '\u017D',
+  0x91: '\u2018',
+  0x92: '\u2019',
+  0x93: '\u201C',
+  0x94: '\u201D',
+  0x95: '\u2022',
+  0x96: '\u2013',
+  0x97: '\u2014',
+  0x98: '\u02DC',
+  0x99: '\u2122',
+  0x9a: '\u0161',
+  0x9b: '\u203A',
+  0x9c: '\u0153',
+  0x9e: '\u017E',
+  0x9f: '\u0178',
 };
 const CP1252_REVERSE = new Map(
   Object.entries(CP1252_HIGH).map(([byte, char]) => [char, Number(byte)]),
@@ -44762,8 +45264,8 @@ const HIGH_CLASS =
  * Il mojibake e' una coppia: un carattere-guida (quello che la doppia
  * codifica produce dal primo byte di una sequenza UTF-8) seguito da un
  * carattere di continuazione. La coppia e' il segnale: un carattere-guida
-  * isolato (U+00C3 da solo) puo' essere legittimo (un nome proprio), ma la coppia
-  * U+00C3 U+00A9 o U+00E2 U+20AC U+201D non lo e' mai.
+ * isolato (U+00C3 da solo) puo' essere legittimo (un nome proprio), ma la coppia
+ * U+00C3 U+00A9 o U+00E2 U+20AC U+201D non lo e' mai.
  */
 const MOJIBAKE_SOURCE = '[\\u00c2-\\u00c5\\u00d0\\u00d1\\u00e2\\u00ef\\u00f0][' + HIGH_CLASS + ']';
 
@@ -44828,13 +45330,49 @@ function repair(text) {
 }
 
 const BINARY_EXTENSIONS = new Set([
-  '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.pdf', '.zip', '.gz', '.7z',
-  '.mp3', '.wav', '.ogg', '.m4a', '.woff', '.woff2', '.ttf', '.eot', '.otf',
-  '.sqlite', '.db', '.mmdb', '.exe', '.dll', '.so', '.dylib', '.wasm',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.ico',
+  '.webp',
+  '.pdf',
+  '.zip',
+  '.gz',
+  '.7z',
+  '.mp3',
+  '.wav',
+  '.ogg',
+  '.m4a',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.eot',
+  '.otf',
+  '.sqlite',
+  '.db',
+  '.mmdb',
+  '.exe',
+  '.dll',
+  '.so',
+  '.dylib',
+  '.wasm',
 ]);
 
+// `maxBuffer`: il default di Node e' 1 MB e `git show` di un file grande lo
+// supera. `docs/BUNDLE.md` e' ~3.4 MB, quindi `check-encoding --staged`
+// falliva con `ENOBUFS` su ogni commit che lo mette in staging — un errore
+// che il gate non puo' segnalare: il file non e' "illeggibile", e' il
+// gate stesso che non riusciva a leggerlo. Il difetto era invisibile
+// finche' il pre-commit hook non ha girato davvero (issue #290).
+const MAX_BUFFER = 64 * 1024 * 1024;
+
 function git(args, encoding) {
-  return execFileSync('git', args, { cwd: ROOT, encoding: encoding ?? 'buffer' });
+  return execFileSync('git', args, {
+    cwd: ROOT,
+    encoding: encoding ?? 'buffer',
+    maxBuffer: MAX_BUFFER,
+  });
 }
 
 function listFiles() {
@@ -44882,9 +45420,11 @@ function inspect(file, buffer) {
   }
   let text;
   try {
-    text = utf8Strict.decode(buffer.subarray(buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf ? 3 : 0));
+    text = utf8Strict.decode(
+      buffer.subarray(buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf ? 3 : 0),
+    );
   } catch {
-    findings.push({ kind: 'invalid-utf8', detail: 'byte non validi: il file non e\' UTF-8 valido' });
+    findings.push({ kind: 'invalid-utf8', detail: "byte non validi: il file non e' UTF-8 valido" });
     return { findings, text: null };
   }
   const matches = mojibakeMatches(text);
@@ -44945,18 +45485,24 @@ function main() {
     const repaired = repair(text);
     if (repaired === null) {
       errors++;
-      console.log(`[WARN] ${file}: non riparabile automaticamente (inversione non inequivocabile): correggi a mano`);
+      console.log(
+        `[WARN] ${file}: non riparabile automaticamente (inversione non inequivocabile): correggi a mano`,
+      );
       continue;
     }
     const stillBad = mojibakeMatches(repaired);
     if (stillBad.length > 0) {
       errors++;
-      console.log(`[WARN] ${file}: riparazione incompleta (${stillBad.length} occorrenza/e residue): correggi a mano`);
+      console.log(
+        `[WARN] ${file}: riparazione incompleta (${stillBad.length} occorrenza/e residue): correggi a mano`,
+      );
       continue;
     }
     if (STAGED) {
       errors++;
-      console.log(`[WARN] ${file}: --fix non puo' scrivere sui file staged: correggi il file nella working copy e ri-staga`);
+      console.log(
+        `[WARN] ${file}: --fix non puo' scrivere sui file staged: correggi il file nella working copy e ri-staga`,
+      );
       continue;
     }
     writeFileSync(join(ROOT, file), repaired, 'utf8');
@@ -46918,9 +47464,20 @@ function info(message) {
   console.log(`[INFO] ${message}`);
 }
 
+// `maxBuffer`: il default di Node e' 1 MB. `git show` di `docs/BUNDLE.md`
+// (~3.4 MB) lo supera e `allowFail` trasformava l'errore in "file assente":
+// il blocco aggregato di quel file non veniva confrontato, in silenzio.
+// Con il buffer largo l'errore di lettura resta un errore (issue #290).
+const MAX_BUFFER = 64 * 1024 * 1024;
+
 function git(args, allowFail = false) {
   try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: MAX_BUFFER,
+    });
   } catch (err) {
     if (allowFail) return null;
     console.error(`[FAIL] git ${args.join(' ')}: ${String(err.stderr || err.message).trim()}`);
@@ -46960,7 +47517,9 @@ function extractBlocks(text) {
   return blocks;
 }
 
-console.log(`[INFO] check-aggregate-blocks: blocchi AGGREGATE-* intoccabili nella PR (base=${base}, head=${head})`);
+console.log(
+  `[INFO] check-aggregate-blocks: blocchi AGGREGATE-* intoccabili nella PR (base=${base}, head=${head})`,
+);
 
 // il base deve esistere come oggetto git
 if (git(['cat-file', '-e', `${base}^{commit}`], true) === null) {
@@ -46997,18 +47556,24 @@ for (const path of targets) {
   for (const [name, content] of headBlocks) {
     blocksSeen++;
     if (!baseBlocks.has(name)) {
-      fail(`${path}: blocco "${name}" aggiunto nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+      fail(
+        `${path}: blocco "${name}" aggiunto nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`,
+      );
       continue;
     }
     if (EXEMPT.has(name)) continue;
     if (baseBlocks.get(name) !== content) {
-      fail(`${path}: blocco "${name}" modificato a mano nella PR (regola V1 di ADR-0008). I blocchi si cambiano solo in docs/state/<propria>/* e vengono rigenerati dall'aggregator post-merge`);
+      fail(
+        `${path}: blocco "${name}" modificato a mano nella PR (regola V1 di ADR-0008). I blocchi si cambiano solo in docs/state/<propria>/* e vengono rigenerati dall'aggregator post-merge`,
+      );
     }
   }
 
   for (const name of baseBlocks.keys()) {
     if (!headBlocks.has(name)) {
-      fail(`${path}: blocco "${name}" rimosso nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`);
+      fail(
+        `${path}: blocco "${name}" rimosso nella PR — i blocchi aggregati hanno un solo scrittore (aggregate-state.ps1), post-merge`,
+      );
     }
   }
 }
@@ -47017,7 +47582,9 @@ if (compared === 0) {
   info('nessun file con blocchi aggregati da confrontare');
 }
 
-console.log(`\n[INFO] check-aggregate-blocks: ${compared} file confrontati, ${blocksSeen} blocchi, ${failures} violazioni`);
+console.log(
+  `\n[INFO] check-aggregate-blocks: ${compared} file confrontati, ${blocksSeen} blocchi, ${failures} violazioni`,
+);
 process.exit(failures === 0 ? 0 : 1);
 
 
@@ -48162,6 +48729,19 @@ fi
 #!/usr/bin/env node
 // scripts/setup-hooks.js — configura `core.hooksPath` per il workflow agenti.
 // Eseguito come `postinstall` in package.json. Idempotente e non-fatal.
+//
+// Sessione 93 (issue #290): il percorso degli hook era in realta' `.husky/_`.
+// `package.json` dichiarava anche `"prepare": "husky"` e husky v9 scrive
+// `core.hooksPath = .husky/_` nel suo lifecycle `prepare`, che pnpm esegue
+// DOPO `postinstall`: il setup di questo script veniva sovrascritto a ogni
+// `pnpm install` e i tre hook del repository (`.githooks/pre-commit`,
+// `.githooks/pre-push`, `.githooks/post-checkout`) non sono mai stati
+// eseguiti. Ora `husky` non e' piu' una dipendenza e `.githooks` e' l'unico
+// hooks path.
+//
+// Il setup non si limita a scrivere il valore: lo RILEGGE e avvisa se qualcosa
+// lo ha cambiato, e segnala i sintomi di un secondo sistema di hook (la
+// cartella `.husky/`), che e' la causa storica del difetto.
 
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -48174,6 +48754,9 @@ const repoRoot = resolve(__dirname, '..');
 
 const gitDir = resolve(repoRoot, '.git');
 const hooksDir = resolve(repoRoot, '.githooks');
+const HOOKS_PATH = '.githooks';
+// Gli hook che il repository si aspetta di trovare nel percorso configurato.
+const EXPECTED_HOOKS = ['pre-commit', 'commit-msg', 'pre-push', 'post-checkout'];
 
 if (!existsSync(gitDir)) {
   console.log('[setup-hooks] .git non trovato, skip (CI o build container?)');
@@ -48186,11 +48769,48 @@ if (!existsSync(hooksDir)) {
 }
 
 try {
-  execSync('git config core.hooksPath .githooks', { stdio: 'inherit', cwd: repoRoot });
-  console.log('[setup-hooks] OK: git config core.hooksPath .githooks');
+  execSync(`git config core.hooksPath ${HOOKS_PATH}`, { stdio: 'inherit', cwd: repoRoot });
+  console.log(`[setup-hooks] OK: git config core.hooksPath ${HOOKS_PATH}`);
 } catch (err) {
   console.warn('[setup-hooks] WARN: git non disponibile. Eseguire manualmente dopo il clone:');
-  console.warn('  git config core.hooksPath .githooks');
+  console.warn(`  git config core.hooksPath ${HOOKS_PATH}`);
+  process.exit(0);
+}
+
+// --- verifica che il valore sia quello appena scritto ------------------------
+// Scrivere il valore non basta: un altro tooling puo' scriverne uno diverso
+// subito dopo (e' esattamente quello che faceva husky). Rileggere e' l'unico
+// modo per accorgersi che il setup e' stato annullato.
+try {
+  const applied = execSync('git config --get core.hooksPath', {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  }).trim();
+  if (applied !== HOOKS_PATH) {
+    console.warn(`[setup-hooks] WARN: core.hooksPath vale "${applied}" e non "${HOOKS_PATH}".`);
+    console.warn('  Gli hook del repository NON verranno eseguiti. Chi ha cambiato il valore?');
+    console.warn(`  Ripristinalo con: git config core.hooksPath ${HOOKS_PATH}`);
+  }
+} catch (err) {
+  console.warn(`[setup-hooks] WARN: impossibile rileggere core.hooksPath: ${err.message}`);
+}
+
+// --- un solo sistema di hook -------------------------------------------------
+// La cartella `.husky/` e' il sintomo del difetto storico (issue #290): con
+// `husky` installato, il suo lifecycle `prepare` scriveva il path degli hook
+// DOPO il `postinstall` che lo configura, e i tre hook di `.githooks/` non
+// giravano. Se la cartella ricompare, il problema torna.
+if (existsSync(resolve(repoRoot, '.husky'))) {
+  console.warn('[setup-hooks] WARN: esiste ancora la cartella .husky/.');
+  console.warn('  Il lifecycle "prepare" di husky scrive core.hooksPath DOPO questo script');
+  console.warn('  e lo sovrascrive: gli hook di .githooks/ non verrebbero eseguiti (issue #290).');
+}
+
+// --- gli hook attesi ci sono? -------------------------------------------------
+const missing = EXPECTED_HOOKS.filter((hook) => !existsSync(resolve(hooksDir, hook)));
+if (missing.length > 0) {
+  console.warn(`[setup-hooks] WARN: hook mancanti in ${HOOKS_PATH}/: ${missing.join(', ')}`);
+  console.warn('  Il percorso degli hook e configurato, ma i file non ci sono.');
 }
 
 process.exit(0);
@@ -48200,9 +48820,7 @@ process.exit(0);
 ===== FILE: .githooks/pre-commit =====
 
 #!/usr/bin/env bash
-# Pre-commit hook: verifica che il branch corrente sia valido per il workflow agenti.
-# Previene commit accidentali su branch non conformi alla naming convention.
-# (D3) Aggiunto check working tree clean per mitigare F5 stash collision.
+# Pre-commit hook: invarianti del workflow agenti + igiene del working tree.
 #
 # Sessione 79 (issue #248, decisione D-79.6 di ADR-0012): il hook separa
 # INVARIANTE (bloccante) e IGIENE (advisory).
@@ -48212,8 +48830,23 @@ process.exit(0);
 # (committare un sottoinsieme di file): l'unica via d'uscita era --no-verify,
 # che disabilita ANCHE il check del branch. La funzione di quel check e'
 # mitigata strutturalmente dalla worktree (issue #53), che e' il default.
-# Per ripristinare il comportamento bloccante:
+# Per ripristurare il comportamento bloccante:
 #   LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit -m "..."
+#
+# Sessione 93 (issue #290): l'hook e' stato RIORDINATO perche' non e' mai
+# entrato in funzione. `core.hooksPath` era puntato su `.husky/_` (husky v9
+# scrive il path nel suo lifecycle `prepare`, DOPO il `postinstall` che lo
+# imposta su `.githooks`), quindi questo file non e' mai stato eseguito.
+#
+# Il difetto latente che ne emerge e' il `exit 0` che chiudeva il blocco
+# encoding: swallows TUTTO quello che viene dopo. Con `scripts/check-encoding.mjs`
+# presente (cioe' nel repository vero, sempre) l'hook:
+#   - usciva con 0 anche quando il check encoding FALLIVA (il gate anti-mojibake
+#     della issue #277 era morto dentro l'hook);
+#   - non verificava MAI l'invariante del branch (F1/F7): l'unica difesa
+#     documentata in AGENTS.md non girava.
+# Misurato (scripts/test-pre-commit-clean-check.sh, scenari H8/H9): con l'hook
+# di `main` quei due percorsi escono 0 invece di 1.
 #
 # Setup: git config core.hooksPath .githooks
 # Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
@@ -48222,31 +48855,7 @@ set -e
 
 # Skip se variabile d'ambiente disattivata
 if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
-# ---------------------------------------------------------------------------
-# INVARIANTE 3 — encoding dei file staged (bloccante)
-# Sessione 87 (issue #277): Windows PowerShell 5.1 riscrive i file in ANSI
-# (doppia codifica) e aggiunge il BOM, in silenzio. Il gate "check-encoding"
-# intercetta il danno PRIMA che entri nel commit.
-# I file che documentano esempi di mojibake sono in scripts/encoding-allowlist.txt
-# e vengono segnalati in WARN (non bloccano).
-# ---------------------------------------------------------------------------
-if [ -f scripts/check-encoding.mjs ]; then
-  if ! encoding_output=$(node scripts/check-encoding.mjs --staged 2>&1); then
-    echo "$encoding_output"
-    echo ""
-    echo "[pre-commit] ERRORE: encoding non valido nei file staged (mojibake / BOM / UTF-8 non valido)."
-    echo "  Ripara con:  node scripts/check-encoding.mjs --fix"
-    echo "  (il --fix riscrive solo quando l'inversione e' inequivocabile;"
-    echo "   negli altri casi il file va corretto a mano)."
-    echo ""
-    echo "  Dettagli: AGENTS.md sezione F9-ter."
-    exit 1
-  fi
-  echo "$encoding_output" | grep -q '^\[WARN\]' && echo "[pre-commit] WARN: encoding in allowlist (documentazione di esempi)."
   exit 0
-fi
-
-exit 0
 fi
 
 current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
@@ -48283,6 +48892,54 @@ else
   echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
   echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
   exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# IGIENE — lint-staged (lint + format dei file staged)
+# ---------------------------------------------------------------------------
+# Questo passaggio era affidato a husky (`.husky/pre-commit`): con
+# `core.hooksPath = .husky/_` era quello il file eseguito e questo hook non
+# girava MAI. Con `.githooks` come unico hooks path il passaggio va eseguito
+# qui (vedi `.githooks/commit-msg` per commitlint).
+# Se `node_modules` non e' installato il check viene saltato con un WARN: la
+# CI esegue comunque lint e format su tutti i file.
+if [ -f lint-staged.config.js ] && [ -d node_modules/.bin ] && command -v pnpm >/dev/null 2>&1; then
+  if ! pnpm exec lint-staged; then
+    echo ""
+    echo "[pre-commit] ERRORE: lint-staged ha fallito (lint o format sui file staged)."
+    exit 1
+  fi
+elif [ -f lint-staged.config.js ]; then
+  echo "[pre-commit] WARN: lint-staged non disponibile (node_modules mancante?): format non verificata."
+fi
+
+# ---------------------------------------------------------------------------
+# INVARIANTE 3 — encoding dei file staged (bloccante)
+# Sessione 87 (issue #277): Windows PowerShell 5.1 riscrive i file in ANSI
+# (doppia codifica) e aggiunge il BOM, in silenzio. Il gate "check-encoding"
+# intercetta il danno PRIMA che entri nel commit.
+# I file che documentano esempi di mojibake sono in scripts/encoding-allowlist.txt
+# e vengono segnalati in WARN (non bloccano).
+# ---------------------------------------------------------------------------
+if [ -f scripts/check-encoding.mjs ]; then
+  if ! encoding_output=$(node scripts/check-encoding.mjs --staged 2>&1); then
+    echo "$encoding_output"
+    echo ""
+    echo "[pre-commit] ERRORE: encoding non valido nei file staged (mojibake / BOM / UTF-8 non valido)."
+    echo "  Ripara con:  node scripts/check-encoding.mjs --fix"
+    echo "  (il --fix riscrive solo quando l'inversione e' inequivocabile;"
+    echo "   negli altri casi il file va corretto a mano)."
+    echo ""
+    echo "  Dettagli: AGENTS.md sezione F9-ter."
+    exit 1
+  fi
+  # Il WARN (file in allowlist) NON blocca il commit. La forma `if` e' scelta
+  # per esplicita' (con `set -e` il fallimento di `grep` dentro una `&&` list
+  # e' un'eccezione documentata di bash, fragile da leggere): qui la
+  # condizione e' dichiarata, non dedotta.
+  if echo "$encoding_output" | grep -q '^\[WARN\]'; then
+    echo "[pre-commit] WARN: encoding in allowlist (documentazione di esempi)."
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -48330,7 +48987,7 @@ exit 0
 
 #!/usr/bin/env bash
 # Pre-push hook:
-# 1. BUNDLE auto-regen se `docs/` e' cambiato (D4, G4 mitigation)
+# 1. BUNDLE auto-regen se un file del catalogo (`$files`) e' cambiato (D4, G4 mitigation)
 # 2. Base-stale warning se il branch e' > 5 commit dietro origin/main (D5, G3 mitigation)
 #
 # Sessione 79 (issue #248, decisione D-79.7 di ADR-0012): il fallback a Windows
@@ -48340,7 +48997,18 @@ exit 0
 # prevenire il drift lo causava. Se pwsh 7 non e' disponibile, il bundle NON viene
 # rigenerato: si avvisa e si prosegue.
 #
-# Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
+# Sessione 93 (issue #290): l'hook non e' mai entrato in funzione, per due ragioni
+# indipendenti:
+#   a) `core.hooksPath` era puntato su `.husky/_`, non su `.githooks`
+#      (vedi `.githooks/README.md`): questo file non veniva eseguito;
+#   b) git invoca il pre-push con <remote-name> <remote-URL>: il secondo
+#      argomento NON e' il branch spinto. La versione precedente lo trattava
+#      come tale e costruiva "origin/<URL>" — un ref inesistente: `git diff`
+#      falliva, la condizione restava vuota e il bundle non veniva MAI
+#      rigenerato. I ref spinchi arrivano su stdin, una riga per ref:
+#      "<local ref> <local sha> <remote ref> <remote sha>".
+#
+# Setup: git config core.hooksPath .githooks
 # Bypass: git push --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git push ...)
 
 set -e
@@ -48350,58 +49018,86 @@ if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
 fi
 
 remote="$1"
-remote_branch="$2"
+remote_url="$2"
 
-# Sanity check: se remote/branch non passati, skip silente
-if [ -z "$remote" ] || [ -z "$remote_branch" ]; then
+# Il branch locale spinto: `git rev-parse --abbrev-ref HEAD` e' l'autorita' in
+# un clone normale; su un checkout detached si ricava dai ref su stdin.
+push_refs="$(cat 2>/dev/null || true)"
+current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
+if [ -z "$current_branch" ] || [ "$current_branch" = "HEAD" ]; then
+  current_branch="$(echo "$push_refs" | awk 'NR==1 {print $1}' | sed 's#^refs/heads/##')"
+fi
+
+if [ -z "$current_branch" ]; then
+  echo "[pre-push] WARN: non riesco a determinare il branch spinto: salto la rigenerazione del bundle."
   exit 0
 fi
 
-# Check 1: BUNDLE auto-regen (D4) se docs/ e' cambiato
-changed_docs=$(git diff --name-only "origin/${remote_branch}...HEAD" 2>/dev/null | grep -E '^docs/' | grep -v '^docs/BUNDLE.md$' || true)
+# La base del confronto e' `origin/main` (la base della PR): il bundle deve
+# riflettere lo stato COMMITTATO del branch, non quello del branch remoto.
+base_ref="origin/main"
+if ! git rev-parse --verify --quiet "$base_ref" >/dev/null 2>&1; then
+  base_ref="origin/$current_branch"
+fi
 
-if [ -n "$changed_docs" ]; then
-  echo "[pre-push] docs/ modificato rispetto a origin/${remote_branch}. Rigenero BUNDLE.md..."
+# Check 1: BUNDLE auto-regen (D4) se un file del catalogo e' cambiato.
+# Le righe del catalogo sono quelle di `scripts/generate-bundle.ps1` ($files):
+# `docs/`, `AGENTS.md`, `README.md`, `LICENSE`, `fixtures/`, `scripts/`.
+changed_files=$(git diff --name-only "$base_ref...HEAD" 2>/dev/null \
+  | grep -E '^(docs/|AGENTS\.md$|README\.md$|LICENSE$|fixtures/|scripts/)' \
+  | grep -v '^docs/BUNDLE\.md$' || true)
 
-  regen_ok=0
-  regen_failed=0
+if [ -n "$changed_files" ]; then
+  echo "[pre-push] il branch '$current_branch' modifica dei file del catalogo rispetto a $base_ref. Rigenero BUNDLE.md..."
 
-  if command -v pwsh >/dev/null 2>&1; then
-    ps_major="$(pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major' 2>/dev/null | tr -d '\r[:space:]')"
-    if [ -n "$ps_major" ] && [ "$ps_major" -ge 7 ] 2>/dev/null; then
-      if pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
-        echo "[pre-push] BUNDLE.md rigenerato con pwsh $ps_major"
-        regen_ok=1
+  # Il bundle viene generato dal WORKING TREE: con modifiche non committate il
+  # risultato non corrisponderebbe al commit spinto (e la CI lo segnalerebbe
+  # come drift). In quel caso si salta, con un WARN: e' il commit a dover
+  # essere pulito, non l'hook a sporcarlo.
+  if ! git diff --quiet 2>/dev/null; then
+    echo "[pre-push] WARN: working tree con modifiche tracked non committate: il bundle NON viene rigenerato"
+    echo "[pre-push]   (il bundle va rigenerato e committato a mano: pwsh scripts/generate-bundle.ps1)"
+  else
+    regen_ok=0
+    regen_failed=0
+
+    if command -v pwsh >/dev/null 2>&1; then
+      ps_major="$(pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major' 2>/dev/null | tr -d '\r[:space:]')"
+      if [ -n "$ps_major" ] && [ "$ps_major" -ge 7 ] 2>/dev/null; then
+        if pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+          echo "[pre-push] BUNDLE.md rigenerato con pwsh $ps_major"
+          regen_ok=1
+        else
+          regen_failed=1
+        fi
       else
-        regen_failed=1
+        echo "[pre-push] WARN: serve PowerShell 7 (pwsh); versione trovata: ${ps_major:-assente}."
+        echo "[pre-push]   BUNDLE.md NON rigenerato: sotto Windows PowerShell 5.1 il parsing dei .ps1"
+        echo "[pre-push]   sovradecodifica e il mojibake verrebbe SCRITTO nel bundle (F9-bis)."
+        echo "[pre-push]   Rigenera a mano con pwsh 7: pwsh scripts/generate-bundle.ps1"
       fi
     else
-      echo "[pre-push] WARN: serve PowerShell 7 (pwsh); versione trovata: ${ps_major:-assente}."
-      echo "[pre-push]   BUNDLE.md NON rigenerato: sotto Windows PowerShell 5.1 il parsing dei .ps1"
-      echo "[pre-push]   sovradecodifica e il mojibake verrebbe SCRITTO nel bundle (F9-bis)."
-      echo "[pre-push]   Rigenera a mano con pwsh 7: pwsh scripts/generate-bundle.ps1"
+      echo "[pre-push] WARN: pwsh non trovato nel PATH."
+      echo "[pre-push]   BUNDLE.md NON rigenerato: 'powershell' (5.1) non e' un fallback accettabile"
+      echo "[pre-push]   perche' corrompe il bundle (F9-bis). Rigenera a mano con pwsh 7:"
+      echo "[pre-push]   pwsh scripts/generate-bundle.ps1"
     fi
-  else
-    echo "[pre-push] WARN: pwsh non trovato nel PATH."
-    echo "[pre-push]   BUNDLE.md NON rigenerato: 'powershell' (5.1) non e' un fallback accettabile"
-    echo "[pre-push]   perche' corrompe il bundle (F9-bis). Rigenera a mano con pwsh 7:"
-    echo "[pre-push]   pwsh scripts/generate-bundle.ps1"
-  fi
 
-  if [ "$regen_ok" -eq 0 ] && [ "$regen_failed" -eq 1 ]; then
-    echo "[pre-push] WARN: pwsh scripts/generate-bundle.ps1 e' fallito."
-    echo "[pre-push]   Rigenera a mano e committa docs/BUNDLE.md nella stessa PR."
-  fi
+    if [ "$regen_ok" -eq 0 ] && [ "$regen_failed" -eq 1 ]; then
+      echo "[pre-push] WARN: pwsh scripts/generate-bundle.ps1 e' fallito."
+      echo "[pre-push]   Rigenera a mano e committa docs/BUNDLE.md nella stessa PR."
+    fi
 
-  if [ "$regen_ok" -eq 1 ]; then
-    # Se BUNDLE.md e' cambiato, committalo
-    if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
-      git add docs/BUNDLE.md
-      if ! git diff --cached --quiet docs/BUNDLE.md 2>/dev/null; then
-        if git commit --no-verify -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/"; then
-          echo "[pre-push] BUNDLE.md committato"
-        else
-          echo "[pre-push] WARN: commit di BUNDLE.md fallito. Aggiungi manualmente."
+    if [ "$regen_ok" -eq 1 ]; then
+      # Se BUNDLE.md e' cambiato, committalo
+      if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
+        git add docs/BUNDLE.md
+        if ! git diff --cached --quiet docs/BUNDLE.md 2>/dev/null; then
+          if git commit --no-verify -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/"; then
+            echo "[pre-push] BUNDLE.md committato"
+          else
+            echo "[pre-push] WARN: commit di BUNDLE.md fallito. Aggiungi manualmente."
+          fi
         fi
       fi
     fi
@@ -48410,13 +49106,13 @@ fi
 
 # Check 2: base-stale warning (D5)
 if git fetch origin --quiet 2>/dev/null; then
-  behind=$(git rev-list --count "HEAD..origin/${remote_branch}" 2>/dev/null || echo 0)
+  behind=$(git rev-list --count "HEAD..$base_ref" 2>/dev/null || echo 0)
   if [ "$behind" -gt 5 ]; then
     echo ""
-    echo "[pre-push] WARN: il branch e' $behind commit dietro origin/${remote_branch}."
+    echo "[pre-push] WARN: il branch e' $behind commit dietro $base_ref."
     echo "  Considera rebase prima del merge:"
-    echo "    git fetch origin && git rebase origin/${remote_branch}"
-    echo "  (non blocca il push; solo un warning per mitigare F4 base stale)"
+    echo "    git fetch origin && git rebase $base_ref"
+    echo "    (non blocca il push; solo un warning per mitigare F4 base stale)"
     echo ""
   fi
 fi
@@ -48503,11 +49199,38 @@ Da quel momento tutti i commit passano attraverso `pre-commit`.
   - `docs/<desc>` (branch di documentazione)
   - `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
 
-  Se il branch non matcha, il commit viene abortito con un messaggio esplicativo.
+  Se il branch non matcha, il commit viene abortito con un messaggio esplicitivo.
+  Verifica inoltre l'encoding dei file staged (gate anti-mojibake della issue #277) e
+  esegue `lint-staged` (lint + format dei file staged).
+
+- **`commit-msg`**: Conventional Commits (`pnpm exec commitlint --edit "$1"`).
 
 - **`pre-push`**: rigenera `docs/BUNDLE.md` se `docs/` è cambiato, e avvisa se il branch è >5 commit dietro `origin/main`.
 
 - **`post-checkout`**: **advisory** — avvisa se un checkout tra branch ha lasciato modifiche tracked nella working tree (mitiga E3/E4/E5, issue #45).
+
+## Un solo hooks path *(Sessione 93, issue #290)*
+
+`.githooks/` è **l'unico** percorso degli hook. La regola è fragile: `core.hooksPath` è un'impostazione di git, e **chiunque scriva in quel campo senza saperlo spegne tutti gli hook del repository**.
+
+È successo per anni. `package.json` dichiarava `postinstall` (che imposta `.githooks` via `scripts/setup-hooks.js`) **e** `prepare: husky`: husky v9 scrive `core.hooksPath = .husky/_` nel suo lifecycle `prepare`, che pnpm esegue **dopo** `postinstall`. Risultato: dopo ogni `pnpm install` il path era `.husky/_` e i tre hook di questa cartella **non hanno mai girato** — le difese F1/F7 (pattern del branch), D.4/G.4 (bundle auto-regenerato al push) e F5 (advisory sul working tree) erano documentate e mai esercitate.
+
+Con il path corretto sono emersi due difetti latenti nel `pre-commit`, entrambi invisibili finché l'hook non ha girato: il blocco encoding chiudeva l'hook con `exit 0` **prima** dei controlli successivi, quindi (a) il gate anti-mojibake non poteva bloccare un commit e (b) l'invariante del branch non veniva mai verificato.
+
+Oggi:
+
+- `package.json` **non** dichiara `prepare` e **non** dipende da husky: nessun lifecycle script può sovrascrivere il path;
+- i quattro hook sono committati con mode **755**: su Linux git **ignora** un hook non eseguibile (e lo segnala con un `hint` nel log). Il bit non esiste su Windows, quindi il difetto era visibile solo lì — l'ha scoperto il CI;
+- `scripts/setup-hooks.js` **rilegge** `core.hooksPath` dopo averlo scritto e avvisa se il valore è diverso, e segnala la cartella `.husky/` (il sintomo del difetto);
+- `scripts/test-hook-wiring.sh` (16 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
+
+Un hook che non gira non produce rumore: è un difetto che si vede solo quando manca.
+
+### Il `pre-push` aveva un secondo difetto, indipendente
+
+git invoca il `pre-push` con `<remote-name> <remote-URL>`: il secondo argomento **non** è il branch spinto. La versione precedente lo trattava come tale e costruiva `origin/<URL>` — un ref inesistente. `git diff` falliva (con l'output redirectato a `/dev/null`), la condizione restava vuota e **il bundle non sarebbe stato rigenerato comunque**, nemmeno con il percorso degli hook corretto.
+
+Ora l'hook determina il branch da `git rev-parse --abbrev-ref HEAD` (con i ref su stdin come fallback per un checkout detached) e confronta con `origin/main` — la base della PR, non il branch remoto. La rigenerazione è saltata con un WARN se il working tree ha modifiche tracked non committate: il bundle riflette il working tree, e un bundle committato che non corrisponde al commit spinto è drift garantito.
 
 ## Invariante vs igiene *(Sessione 79, issue #248, ADR-0012 D-79.6)*
 
@@ -49500,9 +50223,18 @@ jobs:
       - name: Setup worktree (issue #53)
         run: bash scripts/test-setup-worktree.sh
 
-      # Pre-commit hook: il check "clean check" del working tree (D3).
+      # Pre-commit hook: il check "clean check" del working tree (D3) e i
+      # percorsi dell'invariante (issue #290).
       - name: Pre-commit clean check (sessione 23)
         run: bash scripts/test-pre-commit-clean-check.sh
+
+      # Issue #290: gli hook del repository non giravano (core.hooksPath era
+      # puntato su .husky/_ dal lifecycle `prepare` di husky, che pnpm esegue
+      # DOPO il postinstall che imposta .githooks). Il test verifica il wiring
+      # E fa un `git commit` reale in un repo temporaneo: un branch non
+      # conforme deve essere abortito, un branch conforme deve passare.
+      - name: Wiring degli hook (issue #290)
+        run: bash scripts/test-hook-wiring.sh
 
       # safe-branch-switch.ps1 (issue #49): 3 scenari (pulito / tracked dirty /
       # untracked dirty). Il conteggio degli assert vive su un file condiviso:
