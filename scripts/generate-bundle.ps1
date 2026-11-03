@@ -184,6 +184,9 @@ $files = @(
     # `docs/state/stories/` — il gap aperto dalla Sessione 95 e' chiuso, e i 6
     # drift di merge preesistenti sulle story sono allineati.
     "docs/state/sessions/96-story-merge-state-writer.md",
+    # Sessione 97 (issue #241): la Story 3.2 — il feed dei ricordi, il
+    # ShareSheet e il tagging manuale.
+    "docs/state/sessions/97-ricordi-share.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -200,6 +203,8 @@ $files = @(
     "docs/state/stories/2.5-analysis-pipeline-link.md",
     "docs/state/stories/3.4-context-ribbon.md",
     "docs/state/stories/3.1-home-timeline.md",
+    # Story 3.2 (issue #241): Ricordi + Share.
+    "docs/state/stories/3.2-ricordi-share.md",
     "docs/state/stories/4.1-audio-features.md",
     "docs/state/stories/4.4-db-ip-city.md",
     "scripts/aggregate-state.ps1",

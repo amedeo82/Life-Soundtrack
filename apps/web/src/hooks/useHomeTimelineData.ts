@@ -151,6 +151,7 @@ export function useHomeTimelineData(
           endTime: era.periodEnd,
           label: era.payload.kind === 'era' ? era.payload.label : '',
           mood: era.payload.kind === 'era' ? era.payload.moodDominant : null,
+          userNote: era.userNote,
         }));
         const moodPoints: MoodPoint[] = moods
           .filter((mood) => mood.payload.kind === 'mood')

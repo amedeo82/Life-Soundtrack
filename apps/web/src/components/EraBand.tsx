@@ -13,6 +13,7 @@
  */
 
 import type { EraBandModel } from '../screens/homeTimelineModel';
+import { eraDisplayName } from '../eraNote';
 
 export interface EraBandProps {
   era: EraBandModel;
@@ -54,9 +55,13 @@ export function EraBand({
   const color = era.mood
     ? (MOOD_COLORS[era.mood] ?? 'var(--ls-text-muted)')
     : 'var(--ls-text-muted)';
+  // Il nome dell'utente ha la precedenza su quello generato dal motore
+  // (Story 3.2, `25§5`): la nota è «nome, parole chiave» e qui si mostra
+  // il nome.
+  const displayName = eraDisplayName(era.userNote ?? null, era.label);
   const ariaLabel = moodLabel
-    ? `${era.label}, ${durationLabel}, ${moodLabel}`
-    : `${era.label}, ${durationLabel}`;
+    ? `${displayName}, ${durationLabel}, ${moodLabel}`
+    : `${displayName}, ${durationLabel}`;
 
   return (
     <button
@@ -80,7 +85,7 @@ export function EraBand({
       onBlur={() => onHover?.(null)}
       onClick={() => onSelect?.(era)}
     >
-      <span className="era-band__label">{era.label}</span>
+      <span className="era-band__label">{displayName}</span>
     </button>
   );
 }

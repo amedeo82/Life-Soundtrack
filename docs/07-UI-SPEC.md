@@ -1,6 +1,6 @@
 # 07 — Specifiche UI Componenti
 
-> Status: 🟡 DRAFT · Versione 0.1 · Sessione 7
+> Status: 🟡 DRAFT · Versione 0.2 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
 > Vincolante per: `packages/ui/components`, test di interazione, implementazione frontend
 
 ---
@@ -27,6 +27,10 @@
 - **Stati**: `default`, `hover` (scale 1.02 + glow), `swiping` (mobile)
 - **A11y**: Immagine con `alt` descrittivo. Pulsanti azione con `aria-label`.
 - **Interazione**: Swipe left (mobile) → nascondi; Swipe right → salva; Tap → deep link.
+
+**Implementazione (Story 3.2, Sessione 97)**: le tre azioni sono **nascondi**,
+**salva** e **condividi**; il nascondimento esclude il ricordo dal feed ma non
+lo cancella dal database.
 
 ### 2.3 EraBand
 **Uso**: Timeline. Segmento orizzontale colorato che rappresenta un'era.
@@ -83,6 +87,22 @@
 - **A11y**: Modal con `role="dialog"`, `aria-modal="true"`, focus trap.
 - **Interazione**: Swipe down o click backdrop → chiudi.
 
+**Implementazione (Story 3.2, Sessione 97)**: il dialog riceve anche `state`,
+`title`, `generatingLabel`, `errorLabel`, `retryLabel` e `closeLabel` **già
+resi** (il componente non conosce l'i18n) e un `onRetry` per lo stato `error`.
+Le destinazioni sono le tre app (Instagram, WhatsApp, X), la copia negli
+appunti, il download della card e il **capitolo HTML** (export statico
+alternativo). Ogni destinazione ha un **fallback**: senza Web Share API o senza
+clipboard il file viene scaricato.
+
+### 2.10b NoteField (Story 3.2)
+**Uso**: il tagging manuale — il nome dell'era e la nota libera del ricordo.
+- **Props**: `fieldId` (string), `label` (string), `value` (string | null), `ariaLabel` (string), `onSave` (function)
+- **Stati**: `default`, `focus`
+- **A11y**: `<label>` collegato all'input, `aria-label` esplicito.
+- **Interazione**: si salva all'uscita dal campo o con `Enter`. Il testo è
+  locale (`Insight.userNote`) e sopravvive al ricalcolo dell'analisi.
+
 ## 3. Regole di Composizione
 
 - **Spacing**: Usare sempre i token di spacing (`gap-4`, `p-6`), mai valori hardcoded.
@@ -108,3 +128,4 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 7 | Prima versione completa |
+| 0.2 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.2 (MemoryCard) dichiara le tre azioni reali (nascondi, salva, condividi) e il fatto che il nascondimento **non cancella**; §2.10 (ShareSheet) dichiara le props reali (etichette già rese, `onRetry`) e i **fallback** delle destinazioni; nuova §2.10b (**NoteField**) per il tagging manuale |
