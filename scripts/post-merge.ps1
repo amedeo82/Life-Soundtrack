@@ -406,7 +406,13 @@ function Remove-WorktreeSafely {
         -not $_.Main -and (Normalize-Path $_.Path) -eq (Normalize-Path $abs)
     })
     if (-not $registered -and -not (Test-WorktreeMarker -Path $abs -RepoRoot $RepoRoot)) {
-        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "la directory non e' una worktree di questo repo" }
+        # Caso concreto: `git worktree remove` fallisce con "Result too large"
+        # (path lunghi di node_modules) AFTER aver rimosso la registrazione e
+        # parte dell'albero. La directory residua non e' piu' una worktree
+        # registrata e non ha piu' il marker `.git`: per questo la guardia non
+        # la riconosce, ed e' corretto non rimuovere una directory che non si
+        # puo' dimostrare essere di questo repo.
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "la directory non e' una worktree registrata di questo repo (git potrebbe averne rimosso la registrazione prima di fallire con 'Result too large': in quel caso e' un residuo da rimuovere a mano)" }
     }
 
     if (-not (Remove-LongPathTree -Path $abs)) {
@@ -611,7 +617,16 @@ if ($wtPath) {
     $rm = Remove-WorktreeSafely -Path $wtPath -RepoRoot $repoRoot
     if (-not $rm.Success) {
         Write-Err "rimozione worktree fallita: $wtPath ($($rm.Detail))"
-        Write-Host "[post-merge]   La worktree e' INTATTA: nessuna azione distruttiva eseguita." -ForegroundColor Yellow
+        # ATTENZIONE al wording: quando `git worktree remove` fallisce con
+        # "Result too long" / "Result too large", git ha GIA' rimosso la
+        # registrazione e buona parte dell'albero prima di arrendersi: la
+        # directory residua NON e' piu' una worktree registrata e non ha piu'
+        # il marker `.git`. Dire "la worktree e' INTATTA" e' falso, ed e'
+        # proprio quella frase che impedisce di capire che la directory va
+        # rimossa a mano.
+        Write-Host "[post-merge]   Attenzione: se la rimozione e' fallita con 'Result too large'" -ForegroundColor Yellow
+        Write-Host "[post-merge]   (path lunghi di node_modules), git ha gia' rimosso la REGISTRAZIONE" -ForegroundColor Yellow
+        Write-Host "[post-merge]   della worktree e parte dell'albero: la directory residua va rimossa a mano." -ForegroundColor Yellow
         Write-Host "[post-merge]   Rimozione manuale (pwsh 7, path lunghi supportati):" -ForegroundColor Yellow
         Write-Host "[post-merge]     Remove-Item -LiteralPath '$wtPath' -Recurse -Force" -ForegroundColor Cyan
         Write-Host "[post-merge]   (Windows PowerShell 5.1: cmd /c rd /s /q `"\\?\$wtPath`")" -ForegroundColor Cyan

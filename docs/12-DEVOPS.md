@@ -927,7 +927,7 @@ protection può interpretare un check saltato come successo.
 | 36 | `gates-portability` | `I generatori sono deterministici` (`check-generators-portable.mjs`, su ubuntu + windows) | solo PR | sì | **#284** |
 | 37 | `gates-portability` | `Il bundle è in sync con lo stato committato` (`check-generators-portable.mjs --bundle-check-only`) | solo PR | sì | **#284** |
 | 38 | `gates-portability-compare` | `I generatori producono gli stessi byte su ogni sistema operativo` (`check-generators-portable.mjs --compare`) | solo PR | sì | **#284** |
-| 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 13 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
+| 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**

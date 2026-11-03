@@ -172,6 +172,10 @@ $files = @(
     # (core.hooksPath preso da husky) + i due gate che leggevano file grandi
     # da git fallivano in silenzio.
     "docs/state/sessions/93-hook-wiring.md",
+    # Sessione 94 (issue #292): numeri e diagnostiche riallineati dopo la #290,
+    # e chiuso il fail-open del gate sul wiring (i contatori degli assert
+    # vivevano in variabili di shell e non attraversavano la subshell).
+    "docs/state/sessions/94-hook-numbers.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",

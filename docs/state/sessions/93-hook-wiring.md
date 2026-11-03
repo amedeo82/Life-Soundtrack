@@ -104,8 +104,8 @@ resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **de
   (advisory).
 - Il `pre-commit` è stato riordinato: l'invariante del branch e il gate encoding sono **prima**
   di qualunque uscita, e i due difetti latenti sono chiusi.
-- `scripts/test-hook-wiring.sh` (nuovo, 13 assert): 9 verifiche statiche sul wiring + 4
-  comportamentali su un `git commit` reale.
+- `scripts/test-hook-wiring.sh` (nuovo, 17 assert): 12 verifiche statiche sul wiring + 5
+  comportamentali (un `git commit` reale, la condizione del `pre-push`, il mode 755).
 - `scripts/test-pre-commit-clean-check.sh`: 4 scenari nuovi (H7..H10) che coprono il **percorso
   encoding** — quello del repository vero, mai coperto prima perché il path non esisteva in
   quel ramo del test.
@@ -119,7 +119,7 @@ accorge da solo se qualcuno scrive il path.
 **Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring non scrive
 nulla nel repository: lavora in una directory temporanea con un `git init` di prova.
 
-**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 13/13 ·
+**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 17/17 ·
 `bash scripts/test-pre-commit-clean-check.sh` → 18/18 (H7..H10 nuovi) ·
 `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
 `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·

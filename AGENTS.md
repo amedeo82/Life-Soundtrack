@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.42 — Sessione 93 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.43 — Sessione 94 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -43,7 +43,8 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
-| Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (13 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
+| Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
+| I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -576,7 +577,7 @@ La regola è fragile e va tenuta: **`core.hooksPath` è un'impostazione di git, 
 
 Due conseguenze operative:
 
-- **Nessun lifecycle script può puntare gli hook altrove.** `package.json` non dichiara `prepare` e non dipende da husky: il check `scripts/test-hook-wiring.sh` (13 assert, bloccante in CI) lo verifica.
+- **Nessun lifecycle script può puntare gli hook altrove.** `package.json` non dichiara `prepare` e non dipende da husky: il check `scripts/test-hook-wiring.sh` (17 assert, bloccante in CI) lo verifica.
 - **Il setup non si limita a scrivere il valore**: `scripts/setup-hooks.js` lo rilegge dopo averlo scritto e avvisa se qualcun altro lo ha cambiato, e segnala la cartella `.husky/` (il sintomo del difetto storico).
 
 I due passaggi che husky faceva (`lint-staged` e `commitlint`) vivono ora in `.githooks/`: `lint-staged` dentro `pre-commit`, `commitlint` in `commit-msg`.
@@ -1145,4 +1146,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.42 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.43 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*

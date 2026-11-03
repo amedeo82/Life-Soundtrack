@@ -16,7 +16,7 @@
 // cartella `.husky/`), che e' la causa storica del difetto.
 
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -67,15 +67,29 @@ try {
   console.warn(`[setup-hooks] WARN: impossibile rileggere core.hooksPath: ${err.message}`);
 }
 
+// --- il pericolo vero: husky che torna fra le dipendenze ---------------------
+// Il suo lifecycle "prepare" scrive `core.hooksPath` DOPO questo script e lo
+// sovrascrive: e' il difetto chiuso dalla issue #290.
+const pkgPath = resolve(repoRoot, 'package.json');
+if (existsSync(pkgPath)) {
+  const pkg = readFileSync(pkgPath, 'utf8');
+  if (pkg.includes('"husky"')) {
+    console.warn('[setup-hooks] ERRORE: package.json dichiara ancora "husky".');
+    console.warn('  Il suo lifecycle "prepare" scrive core.hooksPath DOPO questo script e lo');
+    console.warn('  sovrascrive: gli hook di .githooks/ non verrebbero eseguiti (issue #290).');
+    console.warn('  Rimuovi la dipendenza e lo script "prepare" da package.json.');
+  }
+}
+
 // --- un solo sistema di hook -------------------------------------------------
-// La cartella `.husky/` e' il sintomo del difetto storico (issue #290): con
-// `husky` installato, il suo lifecycle `prepare` scriveva il path degli hook
-// DOPO il `postinstall` che lo configura, e i tre hook di `.githooks/` non
-// giravano. Se la cartella ricompare, il problema torna.
+// La cartella `.husky/` e' il SINTOMO del difetto storico (issue #290). Da sola
+// non ruba piu' il path (husky non e' una dipendenza): e' un residuo locale
+// dell'installazione vecchia, e si puo' rimuovere. Il messaggio deve dire
+// questo, e non "gli hook non verrebbero eseguiti": sarebbe falso.
 if (existsSync(resolve(repoRoot, '.husky'))) {
-  console.warn('[setup-hooks] WARN: esiste ancora la cartella .husky/.');
-  console.warn('  Il lifecycle "prepare" di husky scrive core.hooksPath DOPO questo script');
-  console.warn('  e lo sovrascrive: gli hook di .githooks/ non verrebbero eseguiti (issue #290).');
+  console.warn('[setup-hooks] WARN: esiste ancora la cartella .husky/ (residuo locale).');
+  console.warn('  Da sola non ruba il path degli hook: puoi rimuoverla a mano.');
+  console.warn('  Il pericolo torna SOLO se "husky" torna fra le dipendenze (vedi sopra).');
 }
 
 // --- gli hook attesi ci sono? -------------------------------------------------

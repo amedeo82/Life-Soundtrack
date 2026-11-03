@@ -30,13 +30,15 @@ if ! command -v git >/dev/null 2>&1; then
   exit 0
 fi
 
-PASS=0
-FAIL=0
-ok() { echo "  [PASS] $1"; PASS=$((PASS + 1)); }
-ng() { echo "  [FAIL] $1"; FAIL=$((FAIL + 1)); }
-
+# I contatori vivono su un FILE, non in variabili di shell: lo scenario T14
+# gira dentro una subshell e i contatori in memoria non arrivano al padre —
+# la suite riportava successo con un assert fallito (fail-open). E' lo stesso
+# difetto corretto in `scripts/test-safe-branch-switch.sh`.
+RESULTS="$(mktemp)"
 WORK=$(mktemp -d)
-trap 'rm -rf "$WORK"' EXIT
+trap 'rm -rf "$WORK"; rm -f "$RESULTS"' EXIT
+ok() { echo "  [PASS] $1"; echo "PASS" >> "$RESULTS"; }
+ng() { echo "  [FAIL] $1"; echo "FAIL" >> "$RESULTS"; }
 
 echo "=== parte 1: wiring statico ==="
 
@@ -230,14 +232,14 @@ git init -q -b main "$PUSH_REPO" >/dev/null 2>&1
     "$(git rev-parse HEAD)" "$(git rev-parse HEAD)" \
     | bash "$GITHOOKS/pre-push" origin https://github.com/example/repo.git 2>&1)
   if echo "$out" | grep -q "Rigenero BUNDLE.md"; then
-    echo "  [PASS] T14 la condizione del pre-push matcha (file del catalogo cambiati)"
-    PASS=$((PASS + 1))
+    ok "T14 la condizione del pre-push matcha (file del catalogo cambiati)"
   else
-    echo "  [FAIL] T14 la condizione del pre-push NON matcha: $out"
-    FAIL=$((FAIL + 1))
+    ng "T14 la condizione del pre-push NON matcha: $out"
   fi
 )
 
 echo "---"
+PASS=$(grep -c '^PASS$' "$RESULTS" || true)
+FAIL=$(grep -c '^FAIL$' "$RESULTS" || true)
 echo "Risultati: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]
