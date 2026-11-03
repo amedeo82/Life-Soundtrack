@@ -46,7 +46,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 **Task**:
 - [x] T0.1.1 — Init monorepo con pnpm workspaces + Turborepo
 - [x] T0.1.2 — Config TypeScript base + path aliases
-- [x] T0.1.3 — ESLint + Prettier + commit hook (husky + lint-staged + commitlint)
+- [x] T0.1.3 — ESLint + Prettier + commit hook (hook in `.githooks/`: lint-staged + commitlint)
 - [x] T0.1.4 — Vitest + Playwright setup
 - [x] T0.1.5 — `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
 

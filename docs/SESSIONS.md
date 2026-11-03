@@ -362,7 +362,7 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 ### Risultato concreto di Story 0.1
 
 - **Monorepo Turborepo** con workspace `apps/web` (@ls/web), `packages/core` (@ls/core), `packages/ui` (@ls/ui), `packages/config` (@ls/config)
-- **Toolchain operativa**: ESLint 9 flat config, Prettier 3, Husky + lint-staged + commitlint, Vitest 3 + Playwright 1.5+
+- **Toolchain operativa**: ESLint 9 flat config, Prettier 3, lint-staged + commitlint (hook in `.githooks/`), Vitest 3 + Playwright 1.5+
 - **TypeScript 5.6+** con `paths` aliases (`@core/*`, `@ui/*`, `@web/*`); strict mode attivo
 - **CI GitHub Actions** con Node 20, job lint + typecheck + test + build + bundle --check
 - **Scaffold minimo** in `@ls/core`: `Logger` (con sink console, schema `{level, module, msg, ctx}`), `PLATFORM_IDS`/`PlatformId`, placeholder `packages/core/src/db/index.ts` per Story 0.2

@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:04
-> Totale file: 179
+> Data: 2026-11-03 10:19
+> Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.42 — Sessione 93 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.43 — Sessione 94 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -74,7 +74,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
-| Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (13 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
+| Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -607,7 +607,7 @@ La regola è fragile e va tenuta: **`core.hooksPath` è un'impostazione di git, 
 
 Due conseguenze operative:
 
-- **Nessun lifecycle script può puntare gli hook altrove.** `package.json` non dichiara `prepare` e non dipende da husky: il check `scripts/test-hook-wiring.sh` (13 assert, bloccante in CI) lo verifica.
+- **Nessun lifecycle script può puntare gli hook altrove.** `package.json` non dichiara `prepare` e non dipende da husky: il check `scripts/test-hook-wiring.sh` (17 assert, bloccante in CI) lo verifica.
 - **Il setup non si limita a scrivere il valore**: `scripts/setup-hooks.js` lo rilegge dopo averlo scritto e avvisa se qualcun altro lo ha cambiato, e segnala la cartella `.husky/` (il sintomo del difetto storico).
 
 I due passaggi che husky faceva (`lint-staged` e `commitlint`) vivono ora in `.githooks/`: `lint-staged` dentro `pre-commit`, `commitlint` in `commit-msg`.
@@ -1176,7 +1176,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.42 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.43 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2099,7 +2099,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.42 | Protocollo per agenti — **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.43 | Protocollo per agenti — **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -2721,7 +2721,7 @@ La progettazione è **allineata**. Spina dorsale APPROVED (02 ↔ 03 ↔ **05** 
 ### Risultato concreto di Story 0.1
 
 - **Monorepo Turborepo** con workspace `apps/web` (@ls/web), `packages/core` (@ls/core), `packages/ui` (@ls/ui), `packages/config` (@ls/config)
-- **Toolchain operativa**: ESLint 9 flat config, Prettier 3, Husky + lint-staged + commitlint, Vitest 3 + Playwright 1.5+
+- **Toolchain operativa**: ESLint 9 flat config, Prettier 3, lint-staged + commitlint (hook in `.githooks/`), Vitest 3 + Playwright 1.5+
 - **TypeScript 5.6+** con `paths` aliases (`@core/*`, `@ui/*`, `@web/*`); strict mode attivo
 - **CI GitHub Actions** con Node 20, job lint + typecheck + test + build + bundle --check
 - **Scaffold minimo** in `@ls/core`: `Logger` (con sink console, schema `{level, module, msg, ctx}`), `PLATFORM_IDS`/`PlatformId`, placeholder `packages/core/src/db/index.ts` per Story 0.2
@@ -21117,8 +21117,8 @@ resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **de
   (advisory).
 - Il `pre-commit` è stato riordinato: l'invariante del branch e il gate encoding sono **prima**
   di qualunque uscita, e i due difetti latenti sono chiusi.
-- `scripts/test-hook-wiring.sh` (nuovo, 13 assert): 9 verifiche statiche sul wiring + 4
-  comportamentali su un `git commit` reale.
+- `scripts/test-hook-wiring.sh` (nuovo, 17 assert): 12 verifiche statiche sul wiring + 5
+  comportamentali (un `git commit` reale, la condizione del `pre-push`, il mode 755).
 - `scripts/test-pre-commit-clean-check.sh`: 4 scenari nuovi (H7..H10) che coprono il **percorso
   encoding** — quello del repository vero, mai coperto prima perché il path non esisteva in
   quel ramo del test.
@@ -21132,7 +21132,7 @@ accorge da solo se qualcuno scrive il path.
 **Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring non scrive
 nulla nel repository: lavora in una directory temporanea con un `git init` di prova.
 
-**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 13/13 ·
+**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 17/17 ·
 `bash scripts/test-pre-commit-clean-check.sh` → 18/18 (H7..H10 nuovi) ·
 `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
 `node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
@@ -21165,6 +21165,119 @@ nulla nel repository: lavora in una directory temporanea con un `git init` di pr
 - `docs/12-DEVOPS.md` (§9.10: righe e conteggi), `docs/05-ARCHITECTURE.md`, `docs/17-DEV-NOTES.md`,
   `docs/INDEX.md` (v1.42), `AGENTS.md` (v1.42)
 - `docs/state/sessions/93-hook-wiring.md` (questo file)
+
+
+
+===== FILE: docs/state/sessions/94-hook-numbers.md =====
+
+---
+number: 94
+title: "Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test"
+date: 2026-11-03
+state: 🟡
+merged: false
+branch: feat/292-hook-numbers
+pr: 0
+claim: kilo-hp-elitebook-7c3f
+tags: [devops, protocollo, hook, ci]
+---
+
+# Sessione 94 — numeri e diagnostiche dopo la #290 (issue #292)
+
+> **Oggetto**: la #290 (PR #291, merged) ha riattivato gli hook del repository. Il merge ha
+> lasciato tracce non allineate e ha reso visibile un difetto **fail-open** nel test di
+> regressione della stessa issue: la suite poteva riportare successo con un assert fallito.
+
+## Sintesi
+
+Il difetto più grave era **in un test che avevo scritto io**: `scripts/test-hook-wiring.sh`
+esegue lo scenario T14 dentro una **subshell**, e i contatori `PASS`/`FAIL` incrementati li
+restano dentro senza arrivare al padre. Il riepilogo riportava **16 assert** invece di 17 e —
+il punto vero — **un T14 fallito non faceva fallire la suite** (exit 0 con un assert rosso).
+
+È il difetto che il repository aveva già corretto in `scripts/test-safe-branch-switch.sh` («il
+conteggio degli assert vive su un file condiviso: dentro le subshell i contatori in memoria non
+arrivano al padre e la suite era fail-open»). La correzione è la stessa: i contatori vivono su
+un file, non in variabili di shell.
+
+**Contro-prova** (il test che non può fallire è un test che non è un test): con il
+`.githooks/pre-push` reso irraggiungibile, la suite riporta `14 passati, 3 falliti` ed esce
+**1**. Prima della correzione sarebbe uscita con 0.
+
+Il resto della issue è allineamento di fatti e di diagnostiche:
+
+- i conteggi degli assert del test erano rimasti a **13** in `AGENTS.md` (tabella «regola ⟺
+  gate» e §"Un solo hooks path"), in `docs/12-DEVOPS.md §9.10` e nel file di sessione 93: ora
+  sono **17** (12 verifiche statiche + 5 comportamentali);
+- `setup-hooks.js` avvertiva che «gli hook di `.githooks/` non verrebbero eseguiti» quando
+  trovava la cartella `.husky/`: ora che husky non è più una dipendenza, quella cartella è un
+  **residuo locale** e da sola non ruba il path. Il messaggio dice la cosa vera e separa il
+  caso innocuo dal caso pericoloso (husky che torna fra le dipendenze → **errore**, non warning);
+- `post-merge.ps1` diceva «La worktree e' INTATTA: nessuna azione distruttiva eseguita» dopo
+  un `git worktree remove` fallito con «Result too large»: è **falso** — in quel caso git ha
+  *già* rimosso la registrazione e buona parte dell'albero, e proprio quella frase impediva di
+  capire che la directory residua va rimossa a mano;
+- due sezioni legacy dichiaravano ancora un toolchain con husky (`11-BACKLOG.md` T0.1.3,
+  `SESSIONS.md` «Toolchain operativa»).
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-94.1 | I contatori del test vivono su un **file condiviso**, non in variabili di shell | Uno scenario in subshell perdeva il conteggio: la suite era fail-open. È il pattern già in uso nel repository (`test-safe-branch-switch.sh`) |
+| D-94.2 | Il gate sul wiring viene **verificato per la sua capacità di fallire** (contro-prova sullo hook reso irraggiungibile) | Un gate che non può fallire non è un gate (lesson 43-1): la prova che il fallimento propaga vale più del conteggio verde |
+| D-94.3 | `setup-hooks.js` distingue il **residuo innocuo** (cartella `.husky/`) dal **pericolo** (husky che torna fra le dipendenze → errore) | Un warning che dichiara uno stato falso fa perdere fiducia nei warning: dopo la #290 la cartella non ruba più il path |
+| D-94.4 | `post-merge.ps1` descrive lo stato **reale** del fallimento | «INTATTA» era falso: git rimuove la registrazione e parte dell'albero prima di arrendersi. La frase falsa nascondeva la necessità della rimozione manuale |
+
+## Analisi di avanzamento
+
+**Numeri.** Nessun codice applicativo toccato: la percentuale di implementazione delle story
+resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **devops**.
+
+**Cosa è pronto.**
+
+- `scripts/test-hook-wiring.sh`: contatori su file condiviso, **17 assert**, e un assert fallito
+  dentro una subshell non può più essere perso. La contro-prova lo dimostra (exit 1).
+- I conteggi degli assert sono coerenti in `AGENTS.md`, `docs/12-DEVOPS.md §9.10` e nel file di
+  sessione 93.
+- `scripts/setup-hooks.js`: warning accurato sul residuo `.husky/`, **errore** se `husky` torna
+  fra le dipendenze.
+- `scripts/post-merge.ps1`: la diagnostica del fallimento della rimozione dice cosa è
+  successo davvero (git ha rimosso la registrazione e parte dell'albero).
+- Le due sezioni legacy che dichiaravano il toolchain sono allineate.
+
+**Cosa manca.** Niente sul piano funzionale. Nota: i file `docs/SESSIONS.md`,
+`docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi aggregati** e **prosa
+legacy**: in questa PR ho toccato solo la prosa (che è di mia competenza); i blocchi si
+aggiornano da soli dopo il merge.
+
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring scrive solo
+in directory temporanee.
+
+**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 17/17 (contro-prova: exit 1) ·
+`bash scripts/test-post-merge.sh` → 47/47 · `bash scripts/test-pre-commit-clean-check.sh` →
+18/18 · `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
+`node scripts/check-merge-state.mjs` → 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` →
+exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un contatore in una variabile di shell **non attraversa una subshell** | La suite riportava verde con un assert rosso: il gate proteggeva il repository da un difetto che lui stesso aveva. I contatori vivono su un file |
+| Un test che non è mai stato visto fallire **non è testato** | La contro-prova (rendere l'hook irraggiungibile) è l'unico modo per sapere che il fallimento propaga |
+| Un messaggio di diagnostica che dichiara uno stato **falso** fa perdere fiducia ai warning | «La worktree e' INTATTA» era falso proprio nel caso in cui serviva capire cosa fare: la diagnosi deve essere uno strumento, non una decorazione |
+| Un warning che segnala un pericolo **passato** è rumore | La cartella `.husky/` è un residuo innocuo: segnalarla come pericolo insegnava a ignorare i warning |
+
+## Documenti aggiornati
+
+- `scripts/test-hook-wiring.sh` (contatori su file), `scripts/setup-hooks.js` (messaggi),
+  `scripts/post-merge.ps1` (diagnostica della rimozione)
+- `AGENTS.md` (v1.43: conteggio degli assert), `docs/12-DEVOPS.md` (§9.10), `docs/INDEX.md`
+  (v1.43), `docs/11-BACKLOG.md` (T0.1.3), `docs/SESSIONS.md` (toolchain legacy),
+  `docs/state/sessions/93-hook-wiring.md` (conteggi)
+- `docs/state/sessions/94-hook-numbers.md` (questo file)
 
 
 
@@ -29966,7 +30079,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 **Task**:
 - [x] T0.1.1 — Init monorepo con pnpm workspaces + Turborepo
 - [x] T0.1.2 — Config TypeScript base + path aliases
-- [x] T0.1.3 — ESLint + Prettier + commit hook (husky + lint-staged + commitlint)
+- [x] T0.1.3 — ESLint + Prettier + commit hook (hook in `.githooks/`: lint-staged + commitlint)
 - [x] T0.1.4 — Vitest + Playwright setup
 - [x] T0.1.5 — `pnpm run lint`, `pnpm run test`, `pnpm run build` funzionanti
 
@@ -31695,7 +31808,7 @@ protection può interpretare un check saltato come successo.
 | 36 | `gates-portability` | `I generatori sono deterministici` (`check-generators-portable.mjs`, su ubuntu + windows) | solo PR | sì | **#284** |
 | 37 | `gates-portability` | `Il bundle è in sync con lo stato committato` (`check-generators-portable.mjs --bundle-check-only`) | solo PR | sì | **#284** |
 | 38 | `gates-portability-compare` | `I generatori producono gli stessi byte su ogni sistema operativo` (`check-generators-portable.mjs --compare`) | solo PR | sì | **#284** |
-| 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 13 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
+| 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -38939,13 +39052,15 @@ if ! command -v git >/dev/null 2>&1; then
   exit 0
 fi
 
-PASS=0
-FAIL=0
-ok() { echo "  [PASS] $1"; PASS=$((PASS + 1)); }
-ng() { echo "  [FAIL] $1"; FAIL=$((FAIL + 1)); }
-
+# I contatori vivono su un FILE, non in variabili di shell: lo scenario T14
+# gira dentro una subshell e i contatori in memoria non arrivano al padre —
+# la suite riportava successo con un assert fallito (fail-open). E' lo stesso
+# difetto corretto in `scripts/test-safe-branch-switch.sh`.
+RESULTS="$(mktemp)"
 WORK=$(mktemp -d)
-trap 'rm -rf "$WORK"' EXIT
+trap 'rm -rf "$WORK"; rm -f "$RESULTS"' EXIT
+ok() { echo "  [PASS] $1"; echo "PASS" >> "$RESULTS"; }
+ng() { echo "  [FAIL] $1"; echo "FAIL" >> "$RESULTS"; }
 
 echo "=== parte 1: wiring statico ==="
 
@@ -39139,15 +39254,15 @@ git init -q -b main "$PUSH_REPO" >/dev/null 2>&1
     "$(git rev-parse HEAD)" "$(git rev-parse HEAD)" \
     | bash "$GITHOOKS/pre-push" origin https://github.com/example/repo.git 2>&1)
   if echo "$out" | grep -q "Rigenero BUNDLE.md"; then
-    echo "  [PASS] T14 la condizione del pre-push matcha (file del catalogo cambiati)"
-    PASS=$((PASS + 1))
+    ok "T14 la condizione del pre-push matcha (file del catalogo cambiati)"
   else
-    echo "  [FAIL] T14 la condizione del pre-push NON matcha: $out"
-    FAIL=$((FAIL + 1))
+    ng "T14 la condizione del pre-push NON matcha: $out"
   fi
 )
 
 echo "---"
+PASS=$(grep -c '^PASS$' "$RESULTS" || true)
+FAIL=$(grep -c '^FAIL$' "$RESULTS" || true)
 echo "Risultati: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]
 
@@ -40431,7 +40546,13 @@ function Remove-WorktreeSafely {
         -not $_.Main -and (Normalize-Path $_.Path) -eq (Normalize-Path $abs)
     })
     if (-not $registered -and -not (Test-WorktreeMarker -Path $abs -RepoRoot $RepoRoot)) {
-        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "la directory non e' una worktree di questo repo" }
+        # Caso concreto: `git worktree remove` fallisce con "Result too large"
+        # (path lunghi di node_modules) AFTER aver rimosso la registrazione e
+        # parte dell'albero. La directory residua non e' piu' una worktree
+        # registrata e non ha piu' il marker `.git`: per questo la guardia non
+        # la riconosce, ed e' corretto non rimuovere una directory che non si
+        # puo' dimostrare essere di questo repo.
+        return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "la directory non e' una worktree registrata di questo repo (git potrebbe averne rimosso la registrazione prima di fallire con 'Result too large': in quel caso e' un residuo da rimuovere a mano)" }
     }
 
     if (-not (Remove-LongPathTree -Path $abs)) {
@@ -40636,7 +40757,16 @@ if ($wtPath) {
     $rm = Remove-WorktreeSafely -Path $wtPath -RepoRoot $repoRoot
     if (-not $rm.Success) {
         Write-Err "rimozione worktree fallita: $wtPath ($($rm.Detail))"
-        Write-Host "[post-merge]   La worktree e' INTATTA: nessuna azione distruttiva eseguita." -ForegroundColor Yellow
+        # ATTENZIONE al wording: quando `git worktree remove` fallisce con
+        # "Result too long" / "Result too large", git ha GIA' rimosso la
+        # registrazione e buona parte dell'albero prima di arrendersi: la
+        # directory residua NON e' piu' una worktree registrata e non ha piu'
+        # il marker `.git`. Dire "la worktree e' INTATTA" e' falso, ed e'
+        # proprio quella frase che impedisce di capire che la directory va
+        # rimossa a mano.
+        Write-Host "[post-merge]   Attenzione: se la rimozione e' fallita con 'Result too large'" -ForegroundColor Yellow
+        Write-Host "[post-merge]   (path lunghi di node_modules), git ha gia' rimosso la REGISTRAZIONE" -ForegroundColor Yellow
+        Write-Host "[post-merge]   della worktree e parte dell'albero: la directory residua va rimossa a mano." -ForegroundColor Yellow
         Write-Host "[post-merge]   Rimozione manuale (pwsh 7, path lunghi supportati):" -ForegroundColor Yellow
         Write-Host "[post-merge]     Remove-Item -LiteralPath '$wtPath' -Recurse -Force" -ForegroundColor Cyan
         Write-Host "[post-merge]   (Windows PowerShell 5.1: cmd /c rd /s /q `"\\?\$wtPath`")" -ForegroundColor Cyan
@@ -48888,7 +49018,7 @@ fi
 // cartella `.husky/`), che e' la causa storica del difetto.
 
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48939,15 +49069,29 @@ try {
   console.warn(`[setup-hooks] WARN: impossibile rileggere core.hooksPath: ${err.message}`);
 }
 
+// --- il pericolo vero: husky che torna fra le dipendenze ---------------------
+// Il suo lifecycle "prepare" scrive `core.hooksPath` DOPO questo script e lo
+// sovrascrive: e' il difetto chiuso dalla issue #290.
+const pkgPath = resolve(repoRoot, 'package.json');
+if (existsSync(pkgPath)) {
+  const pkg = readFileSync(pkgPath, 'utf8');
+  if (pkg.includes('"husky"')) {
+    console.warn('[setup-hooks] ERRORE: package.json dichiara ancora "husky".');
+    console.warn('  Il suo lifecycle "prepare" scrive core.hooksPath DOPO questo script e lo');
+    console.warn('  sovrascrive: gli hook di .githooks/ non verrebbero eseguiti (issue #290).');
+    console.warn('  Rimuovi la dipendenza e lo script "prepare" da package.json.');
+  }
+}
+
 // --- un solo sistema di hook -------------------------------------------------
-// La cartella `.husky/` e' il sintomo del difetto storico (issue #290): con
-// `husky` installato, il suo lifecycle `prepare` scriveva il path degli hook
-// DOPO il `postinstall` che lo configura, e i tre hook di `.githooks/` non
-// giravano. Se la cartella ricompare, il problema torna.
+// La cartella `.husky/` e' il SINTOMO del difetto storico (issue #290). Da sola
+// non ruba piu' il path (husky non e' una dipendenza): e' un residuo locale
+// dell'installazione vecchia, e si puo' rimuovere. Il messaggio deve dire
+// questo, e non "gli hook non verrebbero eseguiti": sarebbe falso.
 if (existsSync(resolve(repoRoot, '.husky'))) {
-  console.warn('[setup-hooks] WARN: esiste ancora la cartella .husky/.');
-  console.warn('  Il lifecycle "prepare" di husky scrive core.hooksPath DOPO questo script');
-  console.warn('  e lo sovrascrive: gli hook di .githooks/ non verrebbero eseguiti (issue #290).');
+  console.warn('[setup-hooks] WARN: esiste ancora la cartella .husky/ (residuo locale).');
+  console.warn('  Da sola non ruba il path degli hook: puoi rimuoverla a mano.');
+  console.warn('  Il pericolo torna SOLO se "husky" torna fra le dipendenze (vedi sopra).');
 }
 
 // --- gli hook attesi ci sono? -------------------------------------------------
