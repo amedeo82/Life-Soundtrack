@@ -63,6 +63,13 @@ corretto. L'hook ora determina il branch da `git rev-parse --abbrev-ref HEAD` (c
 stdin come fallback per un checkout detached) e confronta con `origin/main` — la base della PR,
 non il branch remoto.
 
+**Un quarto strato, scoperto dal CI**: su Linux git **ignora** un hook che non è eseguibile, e
+lo dice con un `hint` che finisce nel log. `pre-commit` e `pre-push` erano committati con mode
+**644** (solo `post-checkout` era 755): su Windows il bit non esiste e git for Windows non lo
+controlla, quindi il difetto era visibile **solo** su Linux. Il test comportamentale lo ha
+scoperto al primo run su CI (`T10`: «commit su branch non conforme: PASSATO (l'hook non ha
+girato)»).
+
 **Il drift del catalogo**: `docs/12-DEVOPS.md §9.10` si dichiara «l'elenco autorevole dei gate»
 e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gates-portability*`
 (introdotti dalla issue #284, Sessione 90) non avevano una riga. Un elenco autorevole sbagliato
@@ -79,6 +86,7 @@ e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gat
 | D-93.5 | Il catalogo §9.10 viene allineato a **39 righe** (38 gate + l'agregatore `quality`) e i conteggi in `AGENTS.md` a **15 job, 38 step** | Le sezioni legacy vanno allineate quando la PR cambia i fatti che dichiarano (D.38.1): un catalogo autorevole sbagliato è peggio di un catalogo assente |
 | D-93.6 | I gate che leggono da git passano a `maxBuffer: 64 MB` | `docs/BUNDLE.md` è 3.4 MB: il default di Node (1 MB) faceva fallire `check-encoding --staged` e rendeva **in silenzio** inefficace metà dei confronti di `check-aggregate-blocks` |
 | D-93.7 | Il `pre-push` determina il branch da `git rev-parse --abbrev-ref HEAD` (fallback: i ref su stdin) e confronta con `origin/main` | git passa `<remote-name> <remote-URL>`: il secondo argomento non è il branch. La base giusta è la base della PR (`origin/main`), non il branch remoto |
+| D-93.8 | I 4 hook sono committati con mode **755** e il gate lo verifica | Su Linux git ignora un hook non eseguibile; il bit non esiste su Windows, quindi il difetto era visibile solo lì. Il CI di questa PR l'ha scoperto al primo run |
 
 ## Analisi di avanzamento
 
@@ -129,6 +137,7 @@ nulla nel repository: lavora in una directory temporanea con un `git init` di pr
 | Un errore di lettura trattato come "assente" è un gate che non gira | `allowFail` + `maxBuffer` di Node faceva saltare metà dei blocchi aggregati **senza un messaggio**: il gate diceva "0 violazioni" confrontando 7 blocchi su 15 |
 | Riattivare un controllo ne fa emergere altri: è il costo (e il beneficio) del ripristino | Il check encoding è entrato nel percorso dei commit e ha bloccato il primo commit della sessione: il bug c'era, non si vedeva. Ogni controllo riattivato va seguito da un commit che lo fa passare |
 | Un hook che non gira può avere **due** cause indipendenti: fixarne una non basta | Il `pre-push` aveva sia il path sbagliato sia gli argomenti sbagliati (`$2` è l'URL del remote, non il branch): con il path corretto la condizione sarebbe comunque stata vuota |
+| Il bit di eseguibilità è una proprietà **del repo**, non del filesystem | Su Windows il bit non esiste: un hook committato 644 funziona in locale e **non** funziona su Linux. Il difetto è visibile solo dove non si sviluppa |
 
 ## Documenti aggiornati
 

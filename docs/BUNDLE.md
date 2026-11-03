@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 09:51
+> Data: 2026-11-03 09:57
 > Totale file: 179
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -20934,6 +20934,13 @@ corretto. L'hook ora determina il branch da `git rev-parse --abbrev-ref HEAD` (c
 stdin come fallback per un checkout detached) e confronta con `origin/main` — la base della PR,
 non il branch remoto.
 
+**Un quarto strato, scoperto dal CI**: su Linux git **ignora** un hook che non è eseguibile, e
+lo dice con un `hint` che finisce nel log. `pre-commit` e `pre-push` erano committati con mode
+**644** (solo `post-checkout` era 755): su Windows il bit non esiste e git for Windows non lo
+controlla, quindi il difetto era visibile **solo** su Linux. Il test comportamentale lo ha
+scoperto al primo run su CI (`T10`: «commit su branch non conforme: PASSATO (l'hook non ha
+girato)»).
+
 **Il drift del catalogo**: `docs/12-DEVOPS.md §9.10` si dichiara «l'elenco autorevole dei gate»
 e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gates-portability*`
 (introdotti dalla issue #284, Sessione 90) non avevano una riga. Un elenco autorevole sbagliato
@@ -20950,6 +20957,7 @@ e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gat
 | D-93.5 | Il catalogo §9.10 viene allineato a **39 righe** (38 gate + l'agregatore `quality`) e i conteggi in `AGENTS.md` a **15 job, 38 step** | Le sezioni legacy vanno allineate quando la PR cambia i fatti che dichiarano (D.38.1): un catalogo autorevole sbagliato è peggio di un catalogo assente |
 | D-93.6 | I gate che leggono da git passano a `maxBuffer: 64 MB` | `docs/BUNDLE.md` è 3.4 MB: il default di Node (1 MB) faceva fallire `check-encoding --staged` e rendeva **in silenzio** inefficace metà dei confronti di `check-aggregate-blocks` |
 | D-93.7 | Il `pre-push` determina il branch da `git rev-parse --abbrev-ref HEAD` (fallback: i ref su stdin) e confronta con `origin/main` | git passa `<remote-name> <remote-URL>`: il secondo argomento non è il branch. La base giusta è la base della PR (`origin/main`), non il branch remoto |
+| D-93.8 | I 4 hook sono committati con mode **755** e il gate lo verifica | Su Linux git ignora un hook non eseguibile; il bit non esiste su Windows, quindi il difetto era visibile solo lì. Il CI di questa PR l'ha scoperto al primo run |
 
 ## Analisi di avanzamento
 
@@ -21000,6 +21008,7 @@ nulla nel repository: lavora in una directory temporanea con un `git init` di pr
 | Un errore di lettura trattato come "assente" è un gate che non gira | `allowFail` + `maxBuffer` di Node faceva saltare metà dei blocchi aggregati **senza un messaggio**: il gate diceva "0 violazioni" confrontando 7 blocchi su 15 |
 | Riattivare un controllo ne fa emergere altri: è il costo (e il beneficio) del ripristino | Il check encoding è entrato nel percorso dei commit e ha bloccato il primo commit della sessione: il bug c'era, non si vedeva. Ogni controllo riattivato va seguito da un commit che lo fa passare |
 | Un hook che non gira può avere **due** cause indipendenti: fixarne una non basta | Il `pre-push` aveva sia il path sbagliato sia gli argomenti sbagliati (`$2` è l'URL del remote, non il branch): con il path corretto la condizione sarebbe comunque stata vuota |
+| Il bit di eseguibilità è una proprietà **del repo**, non del filesystem | Su Windows il bit non esiste: un hook committato 644 funziona in locale e **non** funziona su Linux. Il difetto è visibile solo dove non si sviluppa |
 
 ## Documenti aggiornati
 
@@ -38835,6 +38844,22 @@ else
   ng "T5 hook mancanti in .githooks/:$missing"
 fi
 
+# T5b: i file degli hook devono essere ESECUTIBILI nel repo (mode 755).
+# Su Linux git IGNORA un hook non eseguibile e lo dice con un "hint" che
+# finisce nel log: il commit passa senza che nessuno controlli niente.
+# Su Windows il bit non esiste e git for Windows non lo controlla: il difetto
+# e visibile solo su Linux (e' stato scoperto dal CI di questa PR).
+not_exec=""
+for hook in pre-commit commit-msg pre-push post-checkout; do
+  mode=$(git ls-files -s ".githooks/$hook" 2>/dev/null | awk '{print $1}')
+  [ "$mode" = "100755" ] || not_exec="$not_exec $hook($mode)"
+done
+if [ -z "$not_exec" ]; then
+  ok "T5b i 4 hook sono eseguibili nel repo (mode 755)"
+else
+  ng "T5b hook non eseguibili (git li ignora su Linux):$not_exec"
+fi
+
 # T6: commitlint vive nel commit-msg.
 if grep -q 'commitlint' "$GITHOOKS/commit-msg"; then
   ok "T6 .githooks/commit-msg esegue commitlint"
@@ -49195,8 +49220,9 @@ Con il path corretto sono emersi due difetti latenti nel `pre-commit`, entrambi 
 Oggi:
 
 - `package.json` **non** dichiara `prepare` e **non** dipende da husky: nessun lifecycle script può sovrascrivere il path;
+- i quattro hook sono committati con mode **755**: su Linux git **ignora** un hook non eseguibile (e lo segnala con un `hint` nel log). Il bit non esiste su Windows, quindi il difetto era visibile solo lì — l'ha scoperto il CI;
 - `scripts/setup-hooks.js` **rilegge** `core.hooksPath` dopo averlo scritto e avvisa se il valore è diverso, e segnala la cartella `.husky/` (il sintomo del difetto);
-- `scripts/test-hook-wiring.sh` (15 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
+- `scripts/test-hook-wiring.sh` (16 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
 
 Un hook che non gira non produce rumore: è un difetto che si vede solo quando manca.
 

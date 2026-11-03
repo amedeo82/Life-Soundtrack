@@ -44,8 +44,9 @@ Con il path corretto sono emersi due difetti latenti nel `pre-commit`, entrambi 
 Oggi:
 
 - `package.json` **non** dichiara `prepare` e **non** dipende da husky: nessun lifecycle script può sovrascrivere il path;
+- i quattro hook sono committati con mode **755**: su Linux git **ignora** un hook non eseguibile (e lo segnala con un `hint` nel log). Il bit non esiste su Windows, quindi il difetto era visibile solo lì — l'ha scoperto il CI;
 - `scripts/setup-hooks.js` **rilegge** `core.hooksPath` dopo averlo scritto e avvisa se il valore è diverso, e segnala la cartella `.husky/` (il sintomo del difetto);
-- `scripts/test-hook-wiring.sh` (15 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
+- `scripts/test-hook-wiring.sh` (16 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
 
 Un hook che non gira non produce rumore: è un difetto che si vede solo quando manca.
 

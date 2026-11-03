@@ -79,6 +79,22 @@ else
   ng "T5 hook mancanti in .githooks/:$missing"
 fi
 
+# T5b: i file degli hook devono essere ESECUTIBILI nel repo (mode 755).
+# Su Linux git IGNORA un hook non eseguibile e lo dice con un "hint" che
+# finisce nel log: il commit passa senza che nessuno controlli niente.
+# Su Windows il bit non esiste e git for Windows non lo controlla: il difetto
+# e visibile solo su Linux (e' stato scoperto dal CI di questa PR).
+not_exec=""
+for hook in pre-commit commit-msg pre-push post-checkout; do
+  mode=$(git ls-files -s ".githooks/$hook" 2>/dev/null | awk '{print $1}')
+  [ "$mode" = "100755" ] || not_exec="$not_exec $hook($mode)"
+done
+if [ -z "$not_exec" ]; then
+  ok "T5b i 4 hook sono eseguibili nel repo (mode 755)"
+else
+  ng "T5b hook non eseguibili (git li ignora su Linux):$not_exec"
+fi
+
 # T6: commitlint vive nel commit-msg.
 if grep -q 'commitlint' "$GITHOOKS/commit-msg"; then
   ok "T6 .githooks/commit-msg esegue commitlint"
