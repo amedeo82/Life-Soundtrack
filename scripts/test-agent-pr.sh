@@ -67,6 +67,9 @@ make_repo() {
   mkdir -p "$repo_dir"
   cd "$repo_dir"
   git init --quiet -b main
+  # Configura identità git locale per i commit (necessario per agent-pr.ps1 step 6)
+  git config user.name "Test Agent"
+  git config user.email "test@example.com"
   GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
   GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
     git commit --quiet --allow-empty -m "initial commit" 2>/dev/null || true
