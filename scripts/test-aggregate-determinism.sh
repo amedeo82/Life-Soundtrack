@@ -877,9 +877,15 @@ echo "=== T14: idempotenza del blocco progress + copertura dei trigger ==="
 
   cd /; rm -rf "$D"
 
-  # Copertura dei trigger: i path del workflow devono comprendere gli input del
-  # blocco progress (catalogo del backlog + state). Senza `docs/11-BACKLOG.md`
-  # l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio.
+  # Copertura degli input del blocco progress (issue #216, issue #284).
+  #
+  # Il gate precedente verificava che i `paths:` del trigger del writer
+  # coprissero gli input del blocco (catalogo del backlog + state). Con il
+  # writer unico (issue #284) il trigger e' `pull_request: [closed]` SENZA
+  # filtro `paths:`: ogni PR mergiata passa dal writer, quindi la copertura
+  # e' totale per costruzione e il gate si e' spostato sulla proprieta'
+  # opposta — il writer NON PUO' filtrare i merge (un filtro lascerebbe fuori
+  # delle PR, e i loro file resterebbero fuori dal bundle).
   REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
   if command -v node >/dev/null 2>&1 && [ -d "$REPO_ROOT/.github/workflows" ]; then
     D="$(mktemp -d)"; mkdir -p "$D/.github"
@@ -892,12 +898,14 @@ echo "=== T14: idempotenza del blocco progress + copertura dei trigger ==="
       ng "validatore: segnala drift sul workflow di riferimento (falso positivo)"
     fi
 
-    sed -i.bak "/docs\/11-BACKLOG.md/d" "$D/.github/workflows/auto-state-aggregate.yml"
+    # Scenario negativo: il writer filtra i merge con `paths:`.
+    sed -i.bak 's/^    types: \[closed\]$/    types: [closed]\n    paths:\n      - "docs\/state\/**"/' \
+      "$D/.github/workflows/post-merge.yml"
     out="$(node "$REPO_ROOT/scripts/validate-workflows.mjs" "$D/.github/workflows" 2>&1)"; rc=$?
-    if [ "$rc" -ne 0 ] && echo "$out" | grep -q 'NON coprono docs/11-BACKLOG.md'; then
-      ok "validatore: segnala il path mancante nei trigger (scenario negativo)"
+    if [ "$rc" -ne 0 ] && echo "$out" | grep -q 'filtra i merge con un blocco'; then
+      ok "validatore: segnala il filtro paths sul writer (scenario negativo)"
     else
-      ng "validatore: non ha segnalato il path mancante (rc=$rc): $out"
+      ng "validatore: non ha segnalato il filtro paths sul writer (rc=$rc): $out"
     fi
 
     cd /; rm -rf "$D"

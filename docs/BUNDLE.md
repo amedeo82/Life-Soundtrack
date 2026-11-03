@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 13:51
-> Totale file: 169
+> Data: 2026-11-02 17:20
+> Totale file: 172
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.39 — Sessione 87 (2026-11-02)** · decisione di struttura: [`docs/13-ADR/0012-agent-protocol-contract.md`](docs/13-ADR/0012-agent-protocol-contract.md)
+> **Versione 1.40 — Sessione 90 (2026-11-02)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -579,13 +579,13 @@ Issue chiusa come `wontdo` perché la mitigazione strutturale (worktree come def
 
 Il repo include un **pre-commit hook** committato in `.githooks/pre-commit` che verifica che il branch corrente sia valido per il workflow agenti. Pattern ammessi:
 
-- `main` (solo per GH Action auto-commits: `kilo-bot[bot]` con `auto-status-done` o `auto-state-aggregate`; vietato per agenti umani)
+- `main` (solo per GH Action auto-commits: `kilo-bot[bot]` con `auto-status-done` o `post-merge`; vietato per agenti umani)
 - `docs/<desc>` (branch di documentazione)
 - `feat/<N>-<desc>` o `fix/<N>-<desc>` (per issue con numero)
 
 ### Eccezione `main` chiarita
 
-Il pattern `main` e ammesso dal hook **esclusivamente** per i commit automatici delle GH Action (identity `kilo-bot[bot]`). Gli agenti umani NON devono committare direttamente su `main` per nessuna ragione (vedi §"📤 Post-merge actions" → "Regola fondamentale — NO commit su main"). Il doc-sync (rigenerazione SESSIONS/BACKLOG/INDEX/BUNDLE) e gestito automaticamente dall'auto-state-aggregate workflow, che usa il bot identity.
+Il pattern `main` e ammesso dal hook **esclusivamente** per i commit automatici delle GH Action (identity `kilo-bot[bot]`). Gli agenti umani NON devono committare direttamente su `main` per nessuna ragione (vedi §"📤 Post-merge actions" → "Regola fondamentale — NO commit su main"). Il doc-sync (rigenerazione SESSIONS/BACKLOG/INDEX/BUNDLE) e gestito automaticamente dal workflow `post-merge`, che usa il bot identity.
 
 ### Setup
 
@@ -799,7 +799,7 @@ git push
    pwsh scripts/agent-pr.ps1 -IssueNumber <N>
    ```
 
-   Il campo `pr: N` è la precondizione del workflow post-merge `auto-session-merge-state.yml`: scriverlo a mano dopo l'apertura della PR è stato il motivo di due fallimenti della catena post-merge (Sessione 80, issue #254).
+   Il campo `pr: N` è la precondizione del workflow post-merge `post-merge.yml`: scriverlo a mano dopo l'apertura della PR è stato il motivo di due fallimenti della catena post-merge (Sessione 80, issue #254).
 
 Se non ci sono issue `agent-ready` libere, apri issue con label `needs-spec`. **Mai iniziare a lavorare una story senza un claim valido** (ADR-0006).
 
@@ -888,7 +888,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 4. **Verifica statale post-merge** (sostituisce l'ex "Verifica statale post-merge" v1.7):
      ```powershell
-     # 4a. Aggregator in sync (post GH Action auto-state-aggregate)
+     # 4a. Aggregator in sync (post GH Action `post-merge`)
      pwsh scripts/aggregate-state.ps1 -Check
      # 4b. Bundle in sync
      pwsh scripts/generate-bundle.ps1 -Check
@@ -911,7 +911,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 > - il gate `quality` è l'aggregatore fall-closed: se un gate parallelo fallisce, la PR è rossa.
 ### Regola fondamentale — NO commit su `main`
 
-**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `auto-state-aggregate`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
+**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `post-merge`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
 
 Vedi `docs/18-DEV-LOG.md` §20 (Sessione 20, hardening multi-agente) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
 
@@ -931,7 +931,7 @@ Da Sessione 25 (2026-10-18), adottato **ADR-0008** per eliminare i conflitti di 
 - I file in `docs/state/sessions/<N>-<slug>.md` (se la PR documenta una sessione)
 - I file in `docs/state/stories/<id>-<slug>.md` (se la PR chiude una story)
 
-I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `auto-state-aggregate.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
+I file globali vengono **rigenerati automaticamente** dopo il merge dalla GH Action `post-merge.yml`, che esegue `pwsh scripts/aggregate-state.ps1` e committa eventuali blocchi `<!-- AGGREGATE-* -->` drift.
 
 ### Chi può scrivere cosa nei file globali *(D.38.1 — vincolante, Sessione 38)*
 
@@ -939,7 +939,7 @@ La regola sopra vieta di toccare i **file** globali. Ma questi file contengono d
 
 | Tipo di contenuto | Dove si trova | Chi lo scrive | Regola |
 |---|---|---|---|
-| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 -Check` fallisce (gate CI) e `auto-state-aggregate` sovrascrive il diff |
+| **Blocchi aggregati** | dentro `<!-- AGGREGATE-*-START -->` / `-END -->` | **solo** `scripts/aggregate-state.ps1`, in automatico post-merge | **Mai** a mano. `aggregate-state.ps1 -Check` fallisce (gate CI) e il writer `post-merge` sovrascrive il diff |
 | **Sezioni legacy** | tutto il resto: prosa, tabelle statiche, changelog, `INDEX.md` §"Dettaglio (legacy)", tabella "roadmap" di `11-BACKLOG.md`, `18-DEV-LOG.md` | **l'agente**, nella stessa PR che cambia i fatti che dichiarano | **Allinearle è obbligatorio**, non facoltativo: se la sezione dichiara uno stato, un conteggio, una versione o un riferimento che la tua PR cambia, aggiornala in quella PR |
 
 **Non è un allargamento di ADR-0008**: i blocchi aggregati restano vietati. La regola riguarda le sezioni legacy, che non hanno alcun generatore e quindi nessuno le aggiorna al posto tuo.
@@ -990,7 +990,7 @@ bash scripts/test-readme-facts-gate.sh  # scenario negativo del gate (T1..T9)
 | `README.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
 | `docs/INDEX.md` | `<!-- AGGREGATE-PROGRESS-{START,END} -->` | V4 (issue #216) |
 
-**Vincolante (issue #136)**: la riga `git add` di `.github/workflows/auto-state-aggregate.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
+**Vincolante (issue #136)**: la riga `git add` di `.github/workflows/post-merge.yml` deve contenere **tutti** i file di questa tabella. Due elenchi che descrivono lo stesso insieme di file senza un gate che li confronti è la classe di drift di ADR-0008 applicata agli strumenti: #127 ha aggiunto `README.md` come target e il workflow ha continuato a generare il blocco NEXT-STEP per poi scartarlo. Il gate è in `scripts/validate-workflows.mjs` (bloccante in CI); il test di scenario negativo è `scripts/test-workflow-git-add-coverage.sh`. Vedi `docs/12-DEVOPS.md` §9.8c.
 
 **Vincolante (issue #216)**: i `paths:` del workflow devono comprendere **tutti gli input** del blocco che generano (`docs/11-BACKLOG.md` = catalogo, `docs/state/**` = stato e analisi). Il blocco PROGRESS dipende dal backlog: senza quel path nei trigger, l'indicatore resterebbe fermo con un denominatore vecchio, e nessun gate se ne accorgerebbe (il `-Check` confronta il blocco con i file *di quel momento*, non con la data dell'ultima modifica del catalogo). Il gate è il sesto controllo di `scripts/validate-workflows.mjs`; vedi `docs/12-DEVOPS.md` §9.8h.
 
@@ -1076,15 +1076,24 @@ $N = (git ls-tree --name-only origin/main docs/state/sessions/ |
 
 **Difesa di seconda linea**: `aggregate-state.ps1` ora rileva il duplicato a run-time (vedi §"Aggregator" sopra → `Find-DuplicateSessionNumbers`). In `-Check` esce 1 con messaggio esplicito che cita entrambi i path; in apply mode emette `[WARN]` ma continua a scrivere (il drift a quel punto e' gia' su `main` e va risolto rinumerando uno dei due file). Test di regressione T9 in `test-aggregate-determinism.sh`.
 
-### GH Action auto-state-aggregate (post-merge auto-commit)
+### GH Action `post-merge` — IL writer unico di `main` (issue #284)
 
-Dopo ogni push su `main` con paths `docs/state/**` o `scripts/aggregate-state.ps1`, la GH Action:
-1. Esegue `pwsh scripts/aggregate-state.ps1 -Check` (rileva drift)
-2. Esegue `pwsh scripts/aggregate-state.ps1` (applica i blocchi corretti)
-3. Rileva il diff con `git diff --name-only`
-4. Se modificato, committa e pusha con bot identity `kilo-bot[bot]`
+Dopo ogni merge su `main`, **un solo workflow** scrive: `.github/workflows/post-merge.yml`. La sua sequenza è lineare e senza alternative:
 
-Fissato in S30 (issue #58+#60): exit 0 esplicito dopo warning + `if: always()` sul diff step + `if (git diff --cached --quiet)` syntax fix PowerShell + `-replace CRLF, LF` in tutti gli script di write.
+```
+apply-merge-state → aggregate-state → generate-bundle → verifica (-Check) → 1 commit → 1 push
+```
+
+Regole strutturali ( enforced dai gate di `scripts/validate-workflows.mjs`):
+
+- **Un solo writer su `main`**: due workflow che pushano su `main` riportano la race fra writer (misurata il 2026-11-02: push rifiutato, rebase dei file generati, conflitto, run fallito).
+- **Il writer non ribasa mai**: al tentativo successivo fa `git reset --hard origin/main` e **rigenera** da capo. Il rebase dei file generati è un conflitto strutturale, non una race.
+- **Il writer scatta su ogni PR mergiata**: nessun filtro `paths:` (il bundle dipende da molti file, non solo da `docs/state/**`).
+- **Il writer verifica prima di committare**: `aggregate-state -Check` e `generate-bundle -Check` devono essere verdi, altrimenti il commit non entra.
+
+La **CI sullo stato finale** di `main` non è un `push` (i push con `GITHUB_TOKEN` non generano eventi `push` — i writer non triggavano mai la pipeline): è il trigger **`workflow_run`** di `ci.yml`, che fa `checkout ref: main`. Nel passaggio `push` il gate `check-merge-state.mjs` gira in modalità `--defer-unapplied` (differisce **solo** l'albero che è il merge commit della PR, cioè lo stato non ancora applicato); nel passaggio `workflow_run` gira in modalità autoritativa, fail-closed.
+
+La specifica completa è in [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md); i gate sono `scripts/validate-workflows.mjs`, `scripts/check-merge-state.mjs` e `scripts/check-generators-portable.mjs`.
 
 ### Checklist PR aggiuntiva (D.24.x + D.29.x + D.30.x)
 
@@ -1152,7 +1161,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.39 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.40 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2062,7 +2071,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.39 | Protocollo per agenti — **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.40 | Protocollo per agenti — **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -19975,6 +19984,130 @@ vero) · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti �
 
 
 
+===== FILE: docs/state/sessions/90-automazioni-post-merge-definitive.md =====
+
+---
+number: 90
+title: "Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti"
+date: 2026-11-02
+state: 🟡
+merged: false
+branch: feat/284-automazioni-post-merge-definitive-writer
+pr: 285
+claim: kilo-HP-ELITEBOOK-c90auto
+tags: [devops, ci, workflow, determinism]
+---
+
+# Sessione 90 — Le automazioni post-merge, risolte alla radice
+
+> **Oggetto**: dopo il merge della PR #282 (Sessione 89, issue #281) `main` era
+> **rimasto rosso**, e il fix merged non poteva funzionare: la PR aggiungeva un
+> `path` al trigger `push` della CI, ma il commit del writer **non genera
+> l'evento `push`** (è pushato con `GITHUB_TOKEN`, che sopprime i workflow
+> innescati dal token stesso). Misurato: per `831b9e7` non esiste **nessuna**
+> run `CI` — solo un `auto-bundle` su `workflow_run`.
+
+## Sintesi
+
+Tre difetti indipendenti, un solo sintomo.
+
+1. **Il writer non triggava la CI** → nessuna run verde sullo stato finale.
+2. **Tre writer concorrevano sullo stesso `main`** → push rifiutato, rebase
+   dei file generati, conflitto, run fallito.
+3. **Il gate merge-state girava sull'albero sbagliato** → fail-closed su un
+   albero in cui lo stato non era ancora applicato (per costruzione).
+
+E una quarta, trasversale: i generatori producevano output diversi su Windows
+e Linux (fuso orario, locale, ordinamento, versione di PowerShell).
+
+## Cosa è emerso
+
+- Il fix della issue #281 era basato su una premessa **falsa**: `docs/12-DEVOPS.md`
+  §9.14 documentava già, misurato, che «i commit dei writer non hanno mai
+  attivato una run `CI` — né prima né dopo questa sessione, nemmeno quando il
+  trigger `push` era privo di filtro». Un `path` in più non può attivare un
+  evento che non viene generato.
+- Il rebase dei file generati non è una race: è un conflitto strutturale. I
+  blocchi aggregati sono il *prodotto* di un input (lo stato), non la fusione
+  di due storie: si rigenerano, non si ribasano.
+- Il gate merge-state **non** andava reso tollerante (D-89.2): andava
+  spostato sull'albero giusto. La distinzione «albero = merge commit della
+  PR» è oggettiva (uguaglianza di SHA), non temporale.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-90.1 | **Un solo writer** (`post-merge.yml`) che applica lo stato, rigenera blocchi e bundle, e committa una volta | Elimina per costruzione la race fra writer (misurata il 2026-11-02) |
+| D-90.2 | Il writer **non ribasa mai**: reset a `origin/main` + rigenerazione | Il rebase dei file generati è un conflitto strutturale; la rigenerazione è funzione dello stato |
+| D-90.3 | Il passaggio **autoritativo** della CI è `workflow_run` sul writer, con `checkout ref: main` | `workflow_run` sopravvive alla soppressione del `GITHUB_TOKEN`; `head_sha` è il commit di *partenza* del writer, non la testa di `main` |
+| D-90.4 | Il gate merge-state ha due modalità: autoritativa (fail-closed) e `--defer-unapplied` (differisce **solo** l'albero = merge commit della PR) | Il gate non è indebolito: cambia il soggetto del confronto, non la sua severità |
+| D-90.5 | I generatori diventano portabili **per costruzione** (UTC, `InvariantCulture`, ordinamento ordinale, guardia `pwsh >= 7`, LF) e **per prova** (gate di portabilità su `ubuntu-latest` + `windows-latest`) | L'indipendenza dal SO non si dichiara: si misura, su due sistemi operativi reali |
+| D-90.6 | Il writer non è più "non bloccante": se fallisce, `main` resta rosso | Il fallback silenzioso è ciò che ha prodotto il drift invisibile degli ultimi mesi |
+
+La specifica completa è in `docs/13-ADR/0013-post-merge-automation.md`.
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
+restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
+non il codice applicativo.
+
+**Cosa è pronto.**
+- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
+  aggregatore → bundle → verifica → un commit → un push).
+- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
+  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
+  `gates-portability` su due sistemi operativi.
+- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
+  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
+- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
+  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
+  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
+  nel bundle.
+- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
+  prodotti dai generatori con lo stato committato.
+- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
+  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
+  che non possa essere faked da un commento).
+
+**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
+sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
+gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
+primo merge con questa architettura è la prova; le sessioni successive
+verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
+`main` rosso).
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
+mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
+del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
+scalari YAML, 15 sulle scope `permissions`.
+
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
+→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
+→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+`node scripts/check-generators-portable.mjs` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un fix che aggiunge un `path` a un trigger non verifica **che l'evento venga generato** | Le premesse dei fix vanno misurate: qui il fatto era già documentato in §9.14 e la PR lo contraddiceva |
+| Il gate giusto non è sempre quello che va reso più tollerante: a volte è quello che va eseguito **sull'oggetto giusto** | D-89.2 diceva «non indebolire il gate»: la soluzione era spostarlo, non ammorbidirlo |
+| Tre writer sullo stesso `main` non sono tre feature: sono una struttura di file in conflitto | Un solo writer, un solo commit: la semplificazione è la difesa |
+| L'indipendenza dal sistema operativo è una **proprietà verificabile**, non un'intenzione | Il gate confronta i byte su due OS reali: se un generatore torna a dipendere dalla locale, la pipeline si rossa |
+
+## Documenti aggiornati
+
+- `.github/workflows/post-merge.yml` (nuovo), `ci.yml` (trigger `workflow_run`, gate di portabilità)
+- `scripts/check-merge-state.mjs`, `scripts/check-generators-portable.mjs` (nuovo)
+- `scripts/aggregate-state.ps1`, `scripts/generate-bundle.ps1`, `scripts/validate-workflows.mjs`
+- `docs/13-ADR/0013-post-merge-automation.md` (nuovo), `docs/12-DEVOPS.md`, `AGENTS.md`
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -21575,6 +21708,32 @@ if ($Help) {
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+# === Indipendenza dal sistema operativo e dalla locale (issue #284) ===
+#
+# Il requisito e' che le automazioni producano gli stessi byte su Windows,
+# Linux e macOS. Tre dipendenze storiche lo impedivano:
+#
+#   1. **Versione del motore**: l'output dipende da PowerShell (issue #104: il
+#      binding dei parametri e `StringBuilder.AppendLine` cambiano fra 5.1 e
+#      7). Il baseline del repo e' pwsh 7 (AGENTS.md F9): qui la guardia
+#      diventa fail-closed invece che solo documentale.
+#   2. **Locale**: l'interpolazione di un numero usa la locale corrente
+#      (separatore decimale `,` su it-IT, `.` su en-US): lo stesso input
+#      produceva blocchi DIVERSI su due macchine. `InvariantCulture` rende
+#      il rendering indipendente dalla lingua del runner.
+#   3. **Fuso orario**: il timestamp usava l'ora locale del runner (UTC sui
+#      runner GitHub, locale sulla macchina dello sviluppatore).
+#
+# La prova che l'obiettivo e' raggiunto e' il gate di portabilita'
+# `scripts/check-generators-portable.mjs`, che rigenera i file su
+# `ubuntu-latest` e `windows-latest` e confronta i byte.
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "[FAIL] Serve PowerShell 7+ (baseline del repo, AGENTS.md F9): trovato $($PSVersionTable.PSVersion)." -ForegroundColor Red
+    Write-Host "       L'output dei generatori non e' identico su Windows PowerShell 5.1 (issue #104, #284)." -ForegroundColor Yellow
+    exit 2
+}
+$InvariantCulture = [System.Globalization.CultureInfo]::InvariantCulture
+
 $repoRoot = (Get-Location).Path
 $stateSessionsDir = Join-Path $repoRoot "docs/state/sessions"
 $stateStoriesDir  = Join-Path $repoRoot "docs/state/stories"
@@ -21636,6 +21795,39 @@ $script:stateStoryFileCache   = $null
 $script:stateContentCache     = @{}
 $script:stateParsedCache      = @{}
 
+# Ordinamento TOTALE, indipendente dal filesystem e dalla locale (issue #284).
+#
+# `Sort-Object` ordina le stringhe con la collazione della LOCALE corrente e
+# non e' garantito stabile: a parita' di chiave l'ordine finale dipendeva
+# dall'ordine di enumerazione di `Get-ChildItem`, che e' diverso su Windows e
+# Linux (il caso reale: `0.3, 0.5, 0.6` su Linux e `0.6, 0.5, 0.3` su
+# Windows, issue #79). Qui il confronto e' esplicito e la chiave secondaria e'
+# il nome del file, confrontato in modo ORDINALE: la coppia (chiave, nome) e'
+# univoca, quindi l'ordinamento e' totale e riproducibile su ogni OS.
+function Sort-StateFiles {
+    param(
+        [object[]]$Items,
+        [scriptblock]$KeySelector,
+        [scriptblock]$TieBreakSelector
+    )
+    $array = [object[]]$Items
+    if ($array.Length -le 1) { return $array }
+    $comparison = [System.Comparison[object]] {
+        param($a, $b)
+        $ka = & $KeySelector $a
+        $kb = & $KeySelector $b
+        if ($ka -is [version]) {
+            $c = $ka.CompareTo($kb)
+        } else {
+            $c = ([int]$ka).CompareTo([int]$kb)
+        }
+        if ($c -ne 0) { return $c }
+        return [string]::CompareOrdinal((& $TieBreakSelector $a), (& $TieBreakSelector $b))
+    }
+    [System.Array]::Sort($array, $comparison)
+    return $array
+}
+
 function Get-StateSessionFiles {
     if ($null -ne $script:stateSessionFileCache) { return $script:stateSessionFileCache }
     if (-not (Test-Path $stateSessionsDir)) { $script:stateSessionFileCache = @(); return $script:stateSessionFileCache }
@@ -21646,7 +21838,11 @@ function Get-StateSessionFiles {
             Path   = $_.FullName
             Base   = $_.BaseName
         }
-    } | Sort-Object Number)
+    })
+    # Ordinamento totale (issue #284): numero crescente, nome del file come
+    # chiave secondaria ORDINALE.
+    $script:stateSessionFileCache = @(Sort-StateFiles -Items $script:stateSessionFileCache `
+        -KeySelector { param($x) $x.Number } -TieBreakSelector { param($x) $x.Base })
     return $script:stateSessionFileCache
 }
 
@@ -21660,12 +21856,18 @@ function Get-StateStoryFiles {
             Path = $_.FullName
             Base = $_.BaseName
         }
+    })
     # NB: serve `$_.Id` esplicito, NON `$Id` shorthand. Con `[version]` come
     # primo token, la forma abbreviata non viene espansa da PowerShell 5.1:
     # tutti gli item hanno sort key `$null`, l'ordine degenera a quello di
     # `Get-ChildItem` (filesystem-dipendente). Vedi issue #79 e il gate
     # `scripts/test-aggregate-determinism.sh` (T1+T2).
-    } | Sort-Object { [version]$_.Id })
+    #
+    # Issue #284: l'ordinamento e' reso TOTALE (chiave secondaria ORDINALE sul
+    # nome del file): con `Sort-Object` una chiave di versione uguale lasciava
+    # l'ordine finale dipendente dall'enumerazione del filesystem.
+    $script:stateStoryFileCache = @(Sort-StateFiles -Items $script:stateStoryFileCache `
+        -KeySelector { param($x) [version]$x.Id } -TieBreakSelector { param($x) $x.Base })
     return $script:stateStoryFileCache
 }
 
@@ -22006,7 +22208,15 @@ function Build-Block-BundleInventory {
     }
 
     $totalKB = [math]::Round($totalSize / 1KB, 1)
-    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm'
+    # Issue #284: il rendering del numero usa la locale INVARIANTE: con la
+    # locale corrente lo stesso input produceva "716,6 KB" su it-IT e
+    # "716.6 KB" su en-US — due blocchi diversi per lo stesso stato. Il
+    # formato (`.ToString(culture)`) preserva la resa attuale ("716" per un
+    # valore intero) e cambia solo il separatore decimale.
+    $totalKBText = $totalKB.ToString($InvariantCulture)
+    # UTC + locale invariante: il timestamp non dipende ne' dal fuso orario del
+    # runner ne' dalla sua lingua.
+    $timestamp = [DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm', $InvariantCulture)
 
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.AppendLine($markerBundleInventoryStart)
@@ -22019,7 +22229,7 @@ function Build-Block-BundleInventory {
         $excludedNames = ($files | Where-Object { $aggregatorManaged -contains $_ }) -join ', '
         " (esclusi dal calcolo: $excludedNames)"
     } else { " (nessuno escluso dal calcolo: i file aggregator-managed non sono in `$files)" }
-    [void]$sb.AppendLine("- Dimensione totale: $totalKB KB$excludedNote")
+    [void]$sb.AppendLine("- Dimensione totale: $totalKBText KB$excludedNote")
     [void]$sb.AppendLine("- Ultima aggregazione: $timestamp")
     [void]$sb.AppendLine("- Generatori: `'scripts/aggregate-state.ps1`' (V2) + `'scripts/generate-bundle.ps1`' (content)")
     [void]$sb.AppendLine("")
@@ -29988,7 +30198,7 @@ bash scripts/test-workflow-git-add-coverage.sh          # scenario negativo (gat
 
 ---
 
-### 9.8d Sync con `origin/main` dei writer di `main` (issue #140)
+### 9.8d Sync con `origin/main` dei writer di `main` (issue #140) — *superata da §9.8i (issue #284)*
 
 `auto-bundle.yml` (§9.8b) e `auto-state-aggregate.yml` sono i **due workflow che pushano su `main`**. Condividono il concurrency group `post-merge-main` con `cancel-in-progress: false`, pensato per serializzarli. La serializzazione, però, **non basta**.
 
@@ -30021,7 +30231,7 @@ bash scripts/test-workflow-push-sync.sh                 # scenario negativo (gat
 
 ---
 
-### 9.8e Ordinamento fra i due writer di `main` (issue #149)
+### 9.8e Ordinamento fra i due writer di `main` (issue #149) — *superata da §9.8i (issue #284)*
 
 Il concurrency group `post-merge-main` (§9.8d) **serializza** i due writer di `main`, ma **non ne impone l'ordine**: quale workflow ottenga prima il lock non è deterministico. Finora l'ordine non importava, perché i due writer producevano contenuti indipendenti. Con `auto-bundle.yml` (issue #115) l'importa: **`auto-bundle` copia il contenuto dei file che `auto-state-aggregate` modifica**.
 
@@ -30059,6 +30269,67 @@ bash scripts/test-workflow-writer-ordering.sh           # scenario negativo (gat
 ```
 
 **Regola generale**: quando due workflow concorrono allo **stesso artefatto logico** — non solo allo stesso ref — la serializzazione non basta: serve che il secondo consumi l'output del primo *dopo* che il primo l'ha prodotto. Il concurrency group ordina i *run*, non gli *effetti*. Se il secondo workflow **legge** ciò che il primo **scrive**, il trigger corretto è `workflow_run` (agganciato alla conclusione), non `push` (agganciato all'evento, e soppresso quando l'evento nasce da un GITHUB_TOKEN).
+
+---
+
+### 9.8i Il writer unico e il passaggio post-writer (issue #284)
+
+> Questa sezione **sostituisce** §9.8d (sync fra due writer) e §9.8e
+> (ordinamento fra due writer): con il writer unico non ci sono piu' due
+> writer da sincronizzare ne' da ordinare. Le due sezioni restano come
+> cronaca dei difetti che quell'architettura aveva.
+
+L'architettura precedente aveva **tre** workflow che scrivevano su `main`
+(`auto-session-merge-state`, `auto-state-aggregate`, `auto-bundle`) e
+producevano tre failure mode indipendenti:
+
+| # | Failure mode | Misura |
+|---|--------------|--------|
+| 1 | Il commit del writer **non triggava la CI**: i writer pushano con `GITHUB_TOKEN` e GitHub sopprime i workflow `on: push` generati dal token stesso | PR #282 (2026-11-02): per `831b9e7` **non esiste alcuna run `CI`**; l'unica run su quel SHA e' `auto-bundle` (`workflow_run`) |
+| 2 | Tre writer sullo stesso `main`: push rifiutato (`! [rejected] main -> main`) e retry con `git rebase origin/main` **sui file generati** → conflitto in `docs/BUNDLE.md`, `docs/INDEX.md`, `docs/SESSIONS.md` | run `41456643986` (2026-11-02), fallito |
+| 3 | Il gate `check-merge-state.mjs` (fail-closed) girava sul merge commit, **prima** che il writer applicasse lo stato → `[FAIL]` e `main` rosso | run `41456643987` (2026-11-02), fallito |
+
+Il fix della issue #281 (PR #282) aggiungeva `docs/state/**` ai `paths:` del
+trigger `push`: **non puo' funzionare**, perche' l'evento `push` non viene
+generato (il fatto era gia' documentato in §9.14, righe 1267-1296).
+
+**La nuova architettura** (decisione completa in
+[`docs/13-ADR/0013-post-merge-automation.md`](13-ADR/0013-post-merge-automation.md)):
+
+```
+merge → post-merge.yml (writer unico) → commit → workflow_run → CI sullo stato finale
+```
+
+| Regola | Come e' imposta | Gate |
+|--------|------------------|------|
+| Un solo writer su `main` | un solo workflow contiene una push a `main` | `validate-workflows.mjs` → `checkSingleWriter` |
+| Il writer non ribasa i file generati | reset a `origin/main` + **rigenerazione** | `validate-workflows.mjs` → `checkPushSync` (i `git rebase` non valgono come difesa) |
+| Il writer scatta su ogni PR mergiata | trigger `pull_request: [closed]` **senza** `paths:` | `validate-workflows.mjs` → `checkWriterTrigger` |
+| La CI consuma il writer | trigger `workflow_run` su `["post-merge"]`, nome allineato al `name:` reale | `validate-workflows.mjs` → `checkWriterOrdering` |
+| La CI valida la **testa** di `main` nel passaggio `workflow_run` | `checkout` con `ref: main` (`workflow_run.head_sha` e' il commit di *partenza* del writer) | `validate-workflows.mjs` → `checkWorkflowRunCheckout` |
+| Il gate merge-state non fallisce per costruzione sul merge commit | modalita' `--defer-unapplied`: differisce **solo** l'albero che e' il merge commit della PR | `scripts/check-merge-state.mjs` (test T10..T12) |
+| I generatori producono gli stessi byte su ogni OS | UTC + `InvariantCulture` + ordinamento ordinale + guardia `pwsh >= 7` + LF | `scripts/check-generators-portable.mjs` (determinismo + manifest cross-OS: job `gates-portability` su `ubuntu-latest` + `windows-latest`, confronto nel job `gates-portability-compare`) |
+
+**Il gate di portabilita'** e' la prova empirica dell'indipendenza dal sistema
+operativo, su tre livelli:
+
+1. **determinismo**: due rigenerazioni consecutive (in un worktree pulito)
+   producono gli stessi byte;
+2. **invarianti del repo**: il bundle e' in sync con lo stato committato;
+3. **uguaglianza cross-OS**: ogni job della matrix pubblica il manifest
+   (sha256 per file) dei file generati sul proprio sistema operativo, e il job
+   `gates-portability-compare` confronta i due manifest byte per byte.
+
+Il riferimento del confronto cross-OS **non** e' lo stato committato: quello
+cambia a ogni PR (i blocchi aggregati li aggiorna il writer post-merge, per
+contratto ADR-0008), quindi non puo' essere il riferimento di un confronto fra
+due sistemi operativi. Se un generatore tornasse a dipendere dalla locale,
+dal fuso orario o dai line ending, i due manifest divergerebbero e la
+pipeline sarebbe rossa.
+
+**Gate**: `scripts/validate-workflows.mjs` (bloccante) · `scripts/check-generators-portable.mjs` (bloccante) ·
+test: `scripts/test-workflow-writer-ordering.sh` (13 assert) · `scripts/test-workflow-push-sync.sh` (9 assert) ·
+`scripts/test-generators-portable.sh` (3 assert) · `scripts/test-merge-state-gate.sh` (16 assert).
 
 ---
 
@@ -40906,9 +41177,15 @@ echo "=== T14: idempotenza del blocco progress + copertura dei trigger ==="
 
   cd /; rm -rf "$D"
 
-  # Copertura dei trigger: i path del workflow devono comprendere gli input del
-  # blocco progress (catalogo del backlog + state). Senza `docs/11-BACKLOG.md`
-  # l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio.
+  # Copertura degli input del blocco progress (issue #216, issue #284).
+  #
+  # Il gate precedente verificava che i `paths:` del trigger del writer
+  # coprissero gli input del blocco (catalogo del backlog + state). Con il
+  # writer unico (issue #284) il trigger e' `pull_request: [closed]` SENZA
+  # filtro `paths:`: ogni PR mergiata passa dal writer, quindi la copertura
+  # e' totale per costruzione e il gate si e' spostato sulla proprieta'
+  # opposta — il writer NON PUO' filtrare i merge (un filtro lascerebbe fuori
+  # delle PR, e i loro file resterebbero fuori dal bundle).
   REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
   if command -v node >/dev/null 2>&1 && [ -d "$REPO_ROOT/.github/workflows" ]; then
     D="$(mktemp -d)"; mkdir -p "$D/.github"
@@ -40921,12 +41198,14 @@ echo "=== T14: idempotenza del blocco progress + copertura dei trigger ==="
       ng "validatore: segnala drift sul workflow di riferimento (falso positivo)"
     fi
 
-    sed -i.bak "/docs\/11-BACKLOG.md/d" "$D/.github/workflows/auto-state-aggregate.yml"
+    # Scenario negativo: il writer filtra i merge con `paths:`.
+    sed -i.bak 's/^    types: \[closed\]$/    types: [closed]\n    paths:\n      - "docs\/state\/**"/' \
+      "$D/.github/workflows/post-merge.yml"
     out="$(node "$REPO_ROOT/scripts/validate-workflows.mjs" "$D/.github/workflows" 2>&1)"; rc=$?
-    if [ "$rc" -ne 0 ] && echo "$out" | grep -q 'NON coprono docs/11-BACKLOG.md'; then
-      ok "validatore: segnala il path mancante nei trigger (scenario negativo)"
+    if [ "$rc" -ne 0 ] && echo "$out" | grep -q 'filtra i merge con un blocco'; then
+      ok "validatore: segnala il filtro paths sul writer (scenario negativo)"
     else
-      ng "validatore: non ha segnalato il path mancante (rc=$rc): $out"
+      ng "validatore: non ha segnalato il filtro paths sul writer (rc=$rc): $out"
     fi
 
     cd /; rm -rf "$D"
@@ -41417,7 +41696,9 @@ const SYNC_FORMS = [
 // La push a `main` puo' comparire anche dentro un ciclo di retry
 // (`if git push origin main; then`): il pattern non e' piu' ancorato alla riga.
 // Le righe di COMMENTO sono escluse dal controllo (vedi checkPushSync).
-const PUSH_MAIN_RE = /git\s+push\s+origin\s+main\b/;
+// Issue #284: il writer unico usa la forma `git push origin HEAD:main` (il
+// checkout e' su `main`, ma il push e' esplicito sul ref di destinazione).
+const PUSH_MAIN_RE = /git\s+push\s+origin\s+(?:HEAD:)?main\b/;
 
 // === Scalari semplici con ": " — YAML non valido (Sessione 74) ===
 //
@@ -41562,7 +41843,9 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.yml'))) {
 // invisibile finche' il fallback generato coincideva per caso col testo in file.
 // Questo assert e' la difesa di seconda linea che mancava.
 const GIT_ADD_BINDINGS = [
-  { workflow: 'auto-state-aggregate.yml', script: 'scripts/aggregate-state.ps1' },
+  // Issue #284: il writer e' UNO (`post-merge.yml`) e sostituisce i tre writer
+  // precedenti, che concorrevano sugli stessi file generati.
+  { workflow: 'post-merge.yml', script: 'scripts/aggregate-state.ps1' },
 ];
 
 // Estrae i path dall'array `$targets = @( @{ Path = "..." ... } )` del Powershell.
@@ -41773,7 +42056,16 @@ function checkPushSync(lines, file) {
   }
   const before = lines.slice(0, stepStart).join('\n'); // gli step precedenti
   const wholeStep = lines.slice(stepStart, stepEnd).join('\n'); // lo step della push
-  const hasSync = (text) => SYNC_FORMS.some((re) => re.test(text));
+  // Issue #284: un COMMENTO non e' un comando. Una riga di commento che
+  // contiene `git reset --hard origin/main` non sincronizza niente: senza
+  // questo filtro il gate accettava un writer che non ha nessuna difesa
+  // (la stessa regola che esclude i commenti dalla detection della push).
+  const codeOnly = (text) =>
+    text
+      .split('\n')
+      .filter((l) => !l.trim().startsWith('#'))
+      .join('\n');
+  const hasSync = (text) => SYNC_FORMS.some((re) => re.test(codeOnly(text)));
 
   if (hasSync(before)) {
     console.log(
@@ -41861,11 +42153,26 @@ function checkPushSync(lines, file) {
 
 const WRITER_ORDERING = [
   {
-    consumer: 'auto-bundle.yml',
-    producer: 'auto-state-aggregate.yml',
-    producerName: 'auto-state-aggregate',
+    // Issue #284: la CI consuma lo stato finale prodotto dal writer. Il
+    // trigger e' `workflow_run` (agganciato alla CONCLUSIONE del writer, non
+    // a un push): e' l'unico trigger che sopravvive alla soppressione del
+    // `GITHUB_TOKEN`, che vale solo per gli eventi `push`/`pull_request`
+    // generati dal token stesso. Con il trigger `push` il commit del writer
+    // non avrebbe MAI attivato la pipeline (misurato: nessuna run `CI` per il
+    // commit `831b9e7` della PR #282).
+    consumer: 'ci.yml',
+    producer: 'post-merge.yml',
+    producerName: 'post-merge',
   },
 ];
+
+// Issue #284: nel passaggio `workflow_run` la CI deve validare la TESTA di
+// `main` (che contiene il commit del writer), non `workflow_run.head_sha`
+// (che e' il commit di PARTENZA del writer: il merge commit, senza lo stato
+// applicato). Senza questo contratto il passaggio post-writer validerebbe
+// l'albero sbagliato — il gate merge-state fallirebbe per costruzione.
+const WORKFLOW_RUN_CHECKOUT_RE =
+  /github\.event_name\s*==\s*['"]workflow_run['"]\s*&&\s*['"]main['"]/;
 
 // Estrae il nome logico di un workflow dal campo `name:` intestazione.
 function extractWorkflowName(text) {
@@ -41995,162 +42302,133 @@ function checkWriterOrdering(dir) {
 
 failures += checkWriterOrdering(dir);
 
-// === Issue #216 — i trigger del workflow devono coprire gli input dei blocchi ===
+// === Issue #284 — il writer di `main` e' UNO, e la CI lo consuma ===
 //
-// Il blocco `AGGREGATE-PROGRESS-*` (ADR-0008 V4, issue #216) calcola la percentuale
-// di implementazione su TRE sorgenti: lo stato delle story (`docs/state/stories/`),
-// il CATALOGO delle story (`docs/11-BACKLOG.md`, il denominatore) e il generatore
-// stesso (`scripts/aggregate-state.ps1`).
+// I tre writer precedenti (`auto-session-merge-state`, `auto-state-aggregate`,
+// `auto-bundle`) concorrevano sullo stesso `main` e sugli stessi file
+// generati: misurato il 2026-11-02, push rifiutato + rebase dei file
+// generati -> conflitto -> run fallito. Il writer unico (`post-merge.yml`)
+// elimina la race per costruzione.
 //
-// `auto-state-aggregate.yml` dichiarava in `paths:` solo i primi due: una story
-// nuova nel backlog (o un EPIC nuovo) non avrebbe fatto scattare il workflow, e
-// l'indicatore sarebbe rimasto fermo su una percentuale falsa. E' la stessa classe
-// di fallimento silenzioso chiusa dall'issue #136 per la riga `git add`, applicata
-// ai trigger invece che allo staging.
+// I gate che ne difendono la struttura:
 //
-// Il check richiede che ogni sorgente sia coperta da almeno un pattern di `paths:`:
-// "se questo file cambia, il workflow deve scattare".
+//   1. **Un solo writer**: due workflow che pushano su `main` riportano
+//      indietro la race, per quanto bene scritti.
+//   2. **Il writer non filtra i merge**: un `paths:` sotto `on.pull_request`
+//      lascerebbe fuori some PR mergiate (il bundle dipende da molti file,
+//      non solo dallo stato).
+//   3. **La CI consuma il writer con `workflow_run`** e fa il checkout della
+//      TESTA di `main` in quel passaggio.
 
-const AGGREGATOR_TRIGGER_INPUTS = [
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'docs/state/stories/3.1-home-timeline.md',
-    why: 'stato di una story (frontmatter `status`)',
-  },
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'docs/state/sessions/75-progress-indicator.md',
-    why: 'stato di una sessione (analisi narrativa + blocco SESSIONS)',
-  },
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'docs/11-BACKLOG.md',
-    why: 'catalogo delle story = denominatore della percentuale (issue #216, AC2)',
-  },
-  {
-    workflow: 'auto-state-aggregate.yml',
-    path: 'scripts/aggregate-state.ps1',
-    why: 'il generatore stesso',
-  },
-];
-
-/**
- * Converte un pattern di `paths:` (globo GitHub) in espressione regolare.
- * `**` copre zero o piu' segmenti, `*` copre un segmento, `?` un carattere.
- */
-function pathPatternToRegExp(pattern) {
-  let out = '';
-  for (let i = 0; i < pattern.length; i++) {
-    const c = pattern[i];
-    if (c === '*') {
-      if (pattern[i + 1] === '*') {
-        if (pattern[i + 2] === '/') {
-          out += '(?:[^/]+/)*';
-          i += 2;
-        } else {
-          out += '.*';
-          i += 1;
-        }
-      } else {
-        out += '[^/]*';
-      }
-      continue;
-    }
-    if (c === '?') {
-      out += '[^/]';
-      continue;
-    }
-    out += c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-  }
-  return new RegExp(`^${out}$`);
+/** Il blocco `on:` del workflow (fino a `jobs:`), come testo. */
+function extractOnBlock(text) {
+  const jobsAt = text.indexOf('\njobs:');
+  return jobsAt > 0 ? text.slice(0, jobsAt) : text;
 }
 
-/**
- * Estrae la lista `paths:` del blocco `on.push` di un file YAML.
- * Ritorna null se il blocco non esiste.
- */
-function extractPushPaths(text) {
-  const lines = text.split('\n');
-  let inOn = false;
-  let onIndent = -1;
-  let inPush = false;
-  let pushIndent = -1;
-  let inPaths = false;
-  let pathsIndent = -1;
-  const paths = [];
-  for (const raw of lines) {
-    const indent = raw.match(/^\s*/)[0].length;
-    const trimmed = raw.trim();
-    if (trimmed === '' || trimmed.startsWith('#')) continue;
-    if (!inOn) {
-      if (/^on:\s*$/.test(trimmed)) {
-        inOn = true;
-        onIndent = indent;
-      }
-      continue;
-    }
-    if (indent <= onIndent) break;          // uscita dal blocco `on:`
-    if (!inPush) {
-      if (/^push:\s*$/.test(trimmed)) {
-        inPush = true;
-        pushIndent = indent;
-      }
-      continue;
-    }
-    if (indent <= pushIndent) break;         // uscita dal blocco `push:`
-    if (!inPaths) {
-      if (/^paths:\s*$/.test(trimmed)) {
-        inPaths = true;
-        pathsIndent = indent;
-      }
-      continue;
-    }
-    if (indent <= pathsIndent) break;        // uscita dal blocco `paths:`
-    const m = trimmed.match(/^-\s*(.+?)\s*$/);
-    if (m) paths.push(m[1].replace(/^["']|["']$/g, ''));
+/** Writer che pushano su `main` (una riga di push reale, non un commento). */
+function findMainWriters(dir) {
+  const writers = [];
+  for (const file of readdirSync(dir)) {
+    if (!file.endsWith('.yml') && !file.endsWith('.yaml')) continue;
+    const text = readFileSync(join(dir, file), 'utf8');
+    const pushes = text
+      .split('\n')
+      .some((l) => PUSH_MAIN_RE.test(l) && !l.trim().startsWith('#'));
+    if (pushes) writers.push(file);
   }
-  return paths.length > 0 ? paths : null;
+  return writers;
 }
 
-function checkTriggerCoverage(dir) {
-  let bad = 0;
-  const byWorkflow = new Map();
-  for (const input of AGGREGATOR_TRIGGER_INPUTS) {
-    if (!byWorkflow.has(input.workflow)) byWorkflow.set(input.workflow, []);
-    byWorkflow.get(input.workflow).push(input);
+function checkSingleWriter(dir) {
+  // Il gate vale per la directory reale dei workflow: su una fixture che
+  // contiene un solo writer il controllo e' vacuo ma non dannoso.
+  if (!existsSync(join(dir, 'post-merge.yml'))) {
+    console.log('[SKIP] single-writer: `post-merge.yml` non e\' nella directory ispezionata');
+    return 0;
   }
-  for (const [workflow, inputs] of byWorkflow) {
-    const wfPath = join(dir, workflow);
-    if (!existsSync(wfPath)) {
-      console.log(`[SKIP] ${workflow}: assente dalla directory ispezionata, il check di copertura dei trigger non e' applicabile`);
-      continue;
-    }
-    const paths = extractPushPaths(readFileSync(wfPath, 'utf8'));
-    if (!paths) {
-      console.error(`[FAIL] ${workflow}: nessun blocco \`paths:\` trovato sotto \`on.push\`.`);
-      console.error('       Il workflow non scatterebbe mai su un cambio degli input dei blocchi aggregati: l\'indicatore resterebbe fermo mentre le sue sorgenti cambiano.');
-      bad++;
-      continue;
-    }
-    const uncovered = inputs.filter(
-      input => !paths.some(pattern => pathPatternToRegExp(pattern).test(input.path)),
+  const writers = findMainWriters(dir);
+  if (writers.length > 1) {
+    console.error(
+      `[FAIL] single-writer: ${writers.length} workflow pushano su \`main\`: ${writers.join(', ')}.`,
     );
-    if (uncovered.length > 0) {
-      console.error(`[FAIL] ${workflow}: i trigger \`paths:\` NON coprono ${uncovered.length}/${inputs.length} input dei blocchi aggregati:`);
-      for (const input of uncovered) {
-        console.error(`         NON coprono ${input.path} (${input.why})`);
-      }
-      console.error(`         Filtri dichiarati: ${paths.join(', ')}`);
-      console.error('         Senza copertura il blocco generato resta fermo mentre la sua sorgente cambia: percentuale falsa, in silenzio.');
-      bad++;
-    } else {
-      console.log(`[OK] ${workflow}: i trigger \`paths:\` coprono tutti i ${inputs.length} input dei blocchi aggregati`);
-    }
+    console.error(
+      '       Due writer sullo stesso `main` e sugli stessi file generati producono la race ' +
+        'misurata il 2026-11-02 (push rifiutato, rebase dei file generati, conflitto, run fallito).',
+    );
+    console.error('       Un solo writer: `post-merge.yml`.');
+    return 1;
+  }
+  if (writers.length === 0) {
+    console.error('[FAIL] single-writer: nessun workflow pusha su `main`: nessuno applicherebbe lo stato di merge.');
+    return 1;
+  }
+  console.log(`[OK] single-writer: un solo writer su \`main\` (${writers[0]})`);
+  return 0;
+}
+
+function checkWriterTrigger(dir) {
+  const wfPath = join(dir, 'post-merge.yml');
+  if (!existsSync(wfPath)) {
+    console.log('[SKIP] writer-trigger: `post-merge.yml` non e\' nella directory ispezionata');
+    return 0;
+  }
+  const text = readFileSync(wfPath, 'utf8');
+  let bad = 0;
+
+  if (!/^\s*pull_request:\s*$/m.test(extractOnBlock(text))) {
+    console.error('[FAIL] writer-trigger: `post-merge.yml` non ha un trigger `pull_request:`.');
+    console.error('       Senza il trigger sulla PR chiusa il writer non gira mai.');
+    bad++;
+  }
+  if (!/types:\s*\[closed\]/.test(text)) {
+    console.error('[FAIL] writer-trigger: `post-merge.yml` non scatta su `types: [closed]`.');
+    bad++;
+  }
+  if (/^\s+paths:/m.test(extractOnBlock(text))) {
+    console.error('[FAIL] writer-trigger: `post-merge.yml` filtra i merge con un blocco `paths:`.');
+    console.error(
+      '       Il bundle dipende da molti file (non solo da `docs/state/**`): un filtro lascerebbe ' +
+        'fuori delle PR mergiate, e i loro file resterebbero fuori dal bundle.',
+    );
+    bad++;
+  }
+  if (bad === 0) {
+    console.log('[OK] writer-trigger: il writer scatta su ogni PR mergiata (nessun filtro `paths:`)');
   }
   return bad;
 }
 
-failures += checkTriggerCoverage(dir);
+function checkWorkflowRunCheckout(dir) {
+  const ciPath = join(dir, 'ci.yml');
+  if (!existsSync(ciPath)) {
+    console.log('[SKIP] workflow-run-checkout: `ci.yml` non e\' nella directory ispezionata');
+    return 0;
+  }
+  const text = readFileSync(ciPath, 'utf8');
+  if (!/workflow_run:/.test(text)) {
+    console.error('[FAIL] workflow-run-checkout: `ci.yml` non ha un trigger `workflow_run:`.');
+    console.error(
+      '       Il passaggio sullo stato finale di `main` deve essere agganciato alla CONCLUSIONE ' +
+        'del writer: il trigger `push` e\' soppresso quando il push e\' fatto con il GITHUB_TOKEN.',
+    );
+    return 1;
+  }
+  if (!WORKFLOW_RUN_CHECKOUT_RE.test(text)) {
+    console.error('[FAIL] workflow-run-checkout: `ci.yml` non fa il checkout di `main` nel passaggio `workflow_run`.');
+    console.error(
+      '       `workflow_run.head_sha` e\' il commit di PARTENZA del writer (il merge commit, senza ' +
+        'lo stato applicato): validarlo equivarrebbe a far fallire il gate merge-state per costruzione.',
+    );
+    return 1;
+  }
+  console.log('[OK] workflow-run-checkout: nel passaggio `workflow_run` la CI valida la testa di `main`');
+  return 0;
+}
+
+failures += checkSingleWriter(dir);
+failures += checkWriterTrigger(dir);
+failures += checkWorkflowRunCheckout(dir);
 
 console.log(
   `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`,
@@ -42164,7 +42442,7 @@ process.exit(failures === 0 ? 0 : 1);
 #!/usr/bin/env bash
 # Test di regressione per la copertura `git add` vs `$targets` dell'aggregator (issue #136).
 #
-# Difende il bug chiuso in issue #136: `auto-state-aggregate.yml` genera il blocco
+# Difende il bug chiuso in issue #136: `post-merge.yml` genera il blocco
 # `AGGREGATE-NEXT-STEP-*` del README.md (quinto target di scripts/aggregate-state.ps1,
 # introdotto da ADR-0008 V3 / issue #127) e poi lo scarta, perche' `README.md` non era
 # nella riga `git add`. Il blocco restava congelato allo stato in cui era quando V3 ha
@@ -42189,7 +42467,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
 AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
-WORKFLOW="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+WORKFLOW="$REPO_ROOT/.github/workflows/post-merge.yml"
 
 if ! command -v node >/dev/null 2>&1; then
   echo "[SKIP] node non disponibile: impossibile eseguire validate-workflows.mjs"
@@ -42208,7 +42486,7 @@ make_fixture() {
   mkdir -p "$d/.github/workflows" "$d/scripts"
   cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
   cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
-  cp "$WORKFLOW" "$d/.github/workflows/auto-state-aggregate.yml"
+  cp "$WORKFLOW" "$d/.github/workflows/post-merge.yml"
 }
 
 run_validator() {
@@ -42228,8 +42506,8 @@ echo "=== T2: fixture senza README.md nella riga \`git add\` (reintroduzione del
   # La riga `git add` deve coprire TUTTI i $targets: la mutazione li rimuove
   # da OGNI riga `git add` del workflow (con il retry ce n'e' piu' di una:
   # quella preventiva e quella dentro il ciclo di ri-sincronizzazione).
-  sed -i.bak '/git add/ s#README\.md##g' "$D/.github/workflows/auto-state-aggregate.yml"
-  if grep -qE '^[[:space:]]*git add .*README\.md' "$D/.github/workflows/auto-state-aggregate.yml"; then
+  sed -i.bak '/git add/ s#README\.md##g' "$D/.github/workflows/post-merge.yml"
+  if grep -qE '^[[:space:]]*git add .*README\.md' "$D/.github/workflows/post-merge.yml"; then
     ng "mutazione non applicata: README.md e' ancora nella riga git add"
   else
     ok "mutazione applicata (README.md rimosso dalla riga git add)"
@@ -42245,7 +42523,7 @@ echo "=== T2: fixture senza README.md nella riga \`git add\` (reintroduzione del
 echo "=== T3: fixture senza nessuna riga \`git add\` ==="
 {
   D="$(mktemp -d)"; make_fixture "$D"
-  sed -i.bak '/^[[:space:]]*git add /d' "$D/.github/workflows/auto-state-aggregate.yml"
+  sed -i.bak '/^[[:space:]]*git add /d' "$D/.github/workflows/post-merge.yml"
 
   out="$(run_validator "$D")"; ec=$?
   if [ $ec -eq 1 ]; then ok "exit 1 (nessun target committato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -5)"; fi
@@ -42259,7 +42537,7 @@ echo "=== T4: copertura via directory staged invece di path singoli ==="
   D="$(mktemp -d)"; make_fixture "$D"
   # `git add .` copre tutti i $targets per prefisso: il gate deve accettare la
   # forma "directory" senza pretendere i path letterali.
-  sed -i.bak 's#^\(\s*git add \).*#\1.#' "$D/.github/workflows/auto-state-aggregate.yml"
+  sed -i.bak 's#^\(\s*git add \).*#\1.#' "$D/.github/workflows/post-merge.yml"
 
   out="$(run_validator "$D")"; ec=$?
   if [ $ec -eq 0 ]; then ok "exit 0 (copertura per directory accettata)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi
@@ -42311,7 +42589,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
 AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
-AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/post-merge.yml"
 CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
 
 if ! command -v node >/dev/null 2>&1; then
@@ -42326,14 +42604,14 @@ ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
 # Repo fixture minimo. La struttura conta: validate-workflows.mjs risolve repoRoot
 # come <dir>/../.., e il gate di copertura `git add` (#136) fallisce se
-# `auto-state-aggregate.yml` o l'aggregator mancano — altrimenti T2-T5 passerebbero
+# `post-merge.yml` o l'aggregator mancano — altrimenti T2-T5 passerebbero
 # per il motivo sbagliato.
 make_fixture() {
   local d="$1"
   mkdir -p "$d/.github/workflows" "$d/scripts"
   cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
   cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
-  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/auto-state-aggregate.yml"
+  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/post-merge.yml"
   cp "$CI_WF" "$d/.github/workflows/ci.yml"
 }
 
@@ -42431,368 +42709,267 @@ echo "Risultati: $pass passati, $fail falliti"
 ===== FILE: scripts/test-workflow-push-sync.sh =====
 
 #!/usr/bin/env bash
-# Test di regressione per il sync `origin/main` dei writer di `main` (issue #140).
+# Test di regressione per il sync `origin/main` del writer di `main` (issue #140, #284).
 #
-# Difende il bug chiuso in issue #140: `auto-bundle.yml` e `auto-state-aggregate.yml`
-# condividono il concurrency group `post-merge-main` (`cancel-in-progress: false`),
-# pensato per serializzare i due writer di `main`. Ma il group serializza i *run*,
-# non i *checkout*: `actions/checkout` senza `with: ref:` mette il workspace sul
-# `github.sha` del merge commit, non sulla testa corrente di `main`.
+# Difende il bug chiuso in issue #140: il checkout di default di un writer e'
+# il `github.sha` del merge commit, non la testa corrente di `main`. Se un
+# altro scrittore ha gia' pushato, `git push origin main` viene rifiutato con
+# `! [rejected] main -> main (non-fast-forward)` e i blocchi aggregati
+# restano indietro — fallimento SILENZIOSO (il merge sembra riuscito).
 #
-# Sequenza del fallimento (run 39803721229, 2026-10-22T15:19:20Z):
-#   1. merge di PR #138 -> `main` = 5e2d602
-#   2. auto-bundle parte, fa sync col tip corrente, pusha -> `main` = 6287490
-#   3. auto-state-aggregate parte, fa checkout del `github.sha` (5e2d602),
-#      rigenera i blocchi, committa e pusha
-#   4. `git push origin main` -> `! [rejected] main -> main (non-fast-forward)`
-#
-# La firma e' insidiosa perche' il merge sembra riuscito: i blocchi aggregati
-# restano indietro, nessun gate di `ci.yml` lo segnala, e lo stato dichiarato
-# diverge da quello reale. Caso concreto: il doc-sync della Story 1.2 (PR #139)
-# non e' mai arrivato su `main`.
-#
-# Il gate vive in scripts/validate-workflows.mjs (gia' bloccante in CI dal #73);
-# questo file e' il suo test di regressione: verifica che il gate **esca 1**
-# quando si reintroduce il bug. Un gate che passa sempre non e' un gate
-# (lesson 43-1).
+# Issue #284: con il writer unico (`post-merge.yml`) la difesa e' dentro il
+# writer stesso: il tentativo successivo fa `git reset --hard origin/main` e
+# RIGENERA (i file generati non si ribasano: il rebase e' un conflitto
+# strutturale). Il gate verifica che il writer abbia una strategia di
+# sincronizzazione con `origin/main` prima del push.
 #
 # Scenari coperti:
-#   T1  repo reale: entrambi i writer di `main` sono sincronizzati -> exit 0
-#   T2  fixture con lo step "Sync con origin/main" rimosso da auto-state-aggregate.yml
-#       (reintroduzione del bug #140) -> exit 1, messaggio che nomina file e riga
-#   T3  fixture con una forma di sync alternativa (`git pull --rebase origin main`)
-#       -> exit 0 (nessun falso positivo sulle forme equivalenti)
-#   T4  fixture con un workflow che pusha su un BRANCH (`git push origin feat/x`)
-#       -> exit 0 e non conteggiato fra i writer di `main`
-#   T5  fixture con il sync dichiarato DOPO il push -> exit 1: l'ordine fa parte
-#       del contratto, un sync tardivo non protegge nessuno
+#   T1  repo reale: il writer e' sincronizzato -> exit 0
+#   T2  fixture con il sync e il retry rimossi -> exit 1 (gate bloccante)
+#   T3  fixture con una forma di sync alternativa (`git pull --rebase origin main`) -> exit 0
+#
 set -uo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
 AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
-AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
-AUTO_BUNDLE_WF="$REPO_ROOT/.github/workflows/auto-bundle.yml"
+WRITER_WF="$REPO_ROOT/.github/workflows/post-merge.yml"
 CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
 
-if ! command -v node >/dev/null 2>&1; then
-  echo "[SKIP] node non disponibile: impossibile eseguire validate-workflows.mjs"
-  exit 0
-fi
+PASS=0
+FAIL=0
+ok() { PASS=$((PASS+1)); echo "  [OK] $1"; }
+ko() { FAIL=$((FAIL+1)); echo "  [KO] $1"; }
 
-pass=0
-fail=0
-ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
-ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+run_validator() {
+  local dir="$1" expected="$2" desc="$3" out ec
+  out="$(node "$VALIDATOR" "$dir" 2>&1)"; ec=$?
+  if [ "$ec" = "$expected" ]; then
+    ok "$desc (exit $ec)"
+  else
+    ko "$desc: exit $ec (atteso $expected)"
+    echo "$out" | tail -8 | sed 's/^/       /'
+  fi
+  LAST_OUT="$out"
+}
 
-# Repo fixture minimo. La struttura conta: validate-workflows.mjs risolve repoRoot
-# come <dir>/../.., e il gate di copertura `git add` (#136) fallisce se
-# `auto-state-aggregate.yml` o l'agregator mancano — altrimenti T2-T5 passerebbero
-# per il motivo sbagliato. Copiamo anche auto-bundle.yml cosi' il caso reale
-# (due writer) resta rappresentato.
+# Repo fixture minimo: il validator risolve repoRoot come <dir>/../.., e il
+# gate di copertura `git add` (#136) fallisce se il writer o l'aggregator
+# mancano — altrimenti i test passerebbero per il motivo sbagliato.
 make_fixture() {
   local d="$1"
-  mkdir -p "$d/.github/workflows" "$d/scripts"
+  mkdir -p "$d/scripts" "$d/.github/workflows"
   cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
   cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
-  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/auto-state-aggregate.yml"
-  cp "$AUTO_BUNDLE_WF" "$d/.github/workflows/auto-bundle.yml"
+  cp "$WRITER_WF" "$d/.github/workflows/post-merge.yml"
   cp "$CI_WF" "$d/.github/workflows/ci.yml"
 }
 
-run_validator() {
-  node "$1/scripts/validate-workflows.mjs" "$1/.github/workflows" 2>&1
-}
-
-echo "=== T1: repo reale - entrambi i writer di main sono sincronizzati ==="
+# --- T1: repo reale, deve passare --------------------------------------------
 out="$(node "$VALIDATOR" "$REPO_ROOT/.github/workflows" 2>&1)"; ec=$?
-if [ $ec -eq 0 ]; then ok "exit 0 (nessun writer di main senza sync)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
-if echo "$out" | grep -q "auto-state-aggregate.yml:[0-9]*: .git push origin main. preceduto da una sincronizzazione"; then
-  ok "auto-state-aggregate.yml e' riconosciuto come writer sincronizzato"
+if [ $ec -eq 0 ]; then ok "exit 0 (il writer ha una strategia di sincronizzazione)"; else ko "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
+if echo "$out" | grep -qE "post-merge\.yml:[0-9]+: .git push origin main. (preceduto da una sincronizzazione|protetto da un retry)"; then
+  ok "post-merge.yml e' riconosciuto come writer sincronizzato"
 else
-  ng "auto-state-aggregate.yml non e' riconosciuto come writer sincronizzato"
+  ko "post-merge.yml non e' riconosciuto come writer sincronizzato: $(echo "$out" | tail -4)"
 fi
-if echo "$out" | grep -q "auto-bundle.yml:[0-9]*: .git push origin main. preceduto da una sincronizzazione"; then
-  ok "auto-bundle.yml e' riconosciuto come writer sincronizzato"
+if echo "$out" | grep -q "1 writer di main verificati"; then
+  ok "il riepilogo conta 1 writer di main"
 else
-  ng "auto-bundle.yml non e' riconosciuto come writer sincronizzato"
+  ko "il riepilogo non conta 1 writer di main: $(echo "$out" | tail -3)"
 fi
-if echo "$out" | grep -q "2 writer di main verificati"; then ok "il riepilogo conta 2 writer di main"; else ng "il riepilogo non conta 2 writer di main: $(echo "$out" | tail -3)"; fi
 
-echo "=== T2: fixture con lo step Sync rimosso ma con il retry (issue #261) ==="
-{
-  D="$(mktemp -d)"; make_fixture "$D"
-  # Rimuove l'intero blocco dello step "Sync con origin/main" (dal `- name:` fino
-  # alla riga prima del `- name:` successivo).
-  perl -0777 -pi -e 's/^[ ]{6}- name: Sync con origin\/main\n(?:(?!^[ ]{6}- name: ).*\n)*//m' "$D/.github/workflows/auto-state-aggregate.yml"
+FIXTURE_DIR="$(mktemp -d)"
+trap 'rm -rf "$FIXTURE_DIR"' EXIT
 
-  # Verifica lo step, non la stringa: l'header del workflow cita il nome dello
-  # step anche nei commenti, quindi un grep grezzo darebbe un falso "non applicata".
-  if grep -qE '^[ ]{6}- name: Sync con origin/main' "$D/.github/workflows/auto-state-aggregate.yml"; then
-    ng "mutazione non applicata: lo step Sync e' ancora presente nella fixture"
-  else
-    ok "mutazione applicata (step Sync rimosso)"
-  fi
+# --- T2: il writer perde sia il sync sia il retry ---------------------------
+D="$FIXTURE_DIR/t2"; make_fixture "$D"
+# Rimuove il `git fetch origin main` + `git reset --hard origin/main` (il sync)
+# e il ciclo di retry (che rigenera e riprova): resta una push secca.
+perl -0777 -pi -e 's/^[ ]{12}git fetch origin main\n//m' "$D/.github/workflows/post-merge.yml"
+perl -0777 -pi -e 's/^[ ]{12}git reset --hard origin\/main\n//m' "$D/.github/workflows/post-merge.yml"
+perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/post-merge.yml"
 
-  # Il contratto del gate (issue #261): una strategia di ri-sincronizzazione e'
-  # sufficiente se e' PREVENTIVA (step precedente) OPPURE un RETRY dentro lo
-  # step della push. Con il retry presente il writer non puo' perdere la race:
-  # ri-sincronizza e riprova.
-  out="$(run_validator "$D")"; ec=$?
-  if [ $ec -eq 0 ]; then ok "exit 0 (il retry copre la race: strategia di ri-sincronizzazione presente)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
-  if echo "$out" | grep -q "auto-state-aggregate.yml:[0-9]*: .git push origin main. protetto da un retry con ri-sincronizzazione"; then
-    ok "il messaggio dichiara la strategia adottata (retry)"
-  else
-    ng "il messaggio non dichiara il retry: $(echo "$out" | tail -6)"
-  fi
+if grep -qF 'for ($attempt = 1;' "$D/.github/workflows/post-merge.yml"; then
+  ko "mutazione non applicata: il retry e' ancora presente nella fixture"
+else
+  ok "mutazione applicata (sync e retry rimossi)"
+fi
+if grep -qF 'git fetch origin main' "$D/.github/workflows/post-merge.yml"; then
+  ko "mutazione non applicata: il sync e' ancora presente nella fixture"
+else
+  ok "mutazione applicata (sync rimosso)"
+fi
 
-  cd /; rm -rf "$D"
-}
+run_validator "$D/.github/workflows" 1 "T2 writer senza alcuna strategia di sincronizzazione: il gate bloccante lo intercetta"
+if echo "$LAST_OUT" | grep -q "post-merge.yml:[0-9]*: .git push origin main. senza sincronizzazione preventiva"; then
+  ok "il messaggio nomina il file, la riga e l'assenza di sync"
+else
+  ko "il messaggio non nomina l'assenza di sync: $(echo "$LAST_OUT" | tail -4)"
+fi
 
-echo "=== T2b: fixture senza NESSUNA strategia di ri-sincronizzazione (bug #140) ==="
-{
-  D="$(mktemp -d)"; make_fixture "$D"
-  # Rimuove sia lo step "Sync con origin/main" sia il blocco di retry: senza
-  # nessuna strategia, il writer perde la race e i blocchi restano indietro.
-  perl -0777 -pi -e 's/^[ ]{6}- name: Sync con origin\/main\n(?:(?!^[ ]{6}- name: ).*\n)*//m' "$D/.github/workflows/auto-state-aggregate.yml"
-  # Sostituisce il ciclo di retry con una push secca: la fixture deve avere
-  # un writer che pusha su `main` senza ALCUNA strategia di ri-sincronizzazione
-  # (neppure il retry, che contiene il push al suo interno).
-  # Issue #279: il ciclo di retry e' in sintassi PowerShell (gli step dei writer
-  # dichiarano `shell: pwsh`): la mutazione deve riconoscere quella forma, non
-  # piu' il ciclo bash (`for attempt in 1 2 3; do ... done`), che non parse e
-  # causava un ParserError a runtime (i writer non committavano piu' nulla).
-  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-state-aggregate.yml"
-  perl -0777 -pi -e 's/^[ ]{10}\$pushed = \$false\n(?:^[ ]{10,}.*\n)*?^[ ]{10}\}\n/          git push origin main\n/m' "$D/.github/workflows/auto-bundle.yml"
-
-  if grep -qF 'for ($attempt = 1;' "$D/.github/workflows/auto-state-aggregate.yml"; then
-    ng "mutazione non applicata: il retry e' ancora presente nella fixture"
-  else
-    ok "mutazione applicata (sync e retry rimossi)"
-  fi
-  if grep -q "git push origin main" "$D/.github/workflows/auto-state-aggregate.yml"; then
-    ok "la fixture contiene ancora un writer che pusha su main"
-  else
-    ng "la fixture non contiene piu' nessun writer: la mutazione ha rimosso anche la push"
-  fi
-
-  out="$(run_validator "$D")"; ec=$?
-  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sul writer senza alcuna strategia)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
-  if echo "$out" | grep -q "auto-state-aggregate.yml:[0-9]*: .git push origin main. senza sincronizzazione preventiva"; then
-    ok "il messaggio nomina il file, la riga e l'assenza di sync"
-  else
-    ng "il messaggio non nomina file:riga del push: $(echo "$out" | tail -6)"
-  fi
-  if echo "$out" | grep -q "non-fast-forward"; then ok "il messaggio spiega la firma del fallimento"; else ng "il messaggio non spiega il fallimento"; fi
-
-  cd /; rm -rf "$D"
-}
-
-echo "=== T3: fixture con forma di sync alternativa (git pull --rebase origin main) ==="
-{
-  D="$(mktemp -d)"; make_fixture "$D"
-  sed -i.bak 's#git rebase origin/main#git pull --rebase origin main#' "$D/.github/workflows/auto-state-aggregate.yml"
-  if grep -q "git pull --rebase origin main" "$D/.github/workflows/auto-state-aggregate.yml"; then
-    ok "mutazione applicata (forma alternativa di sync)"
-  else
-    ng "mutazione non applicata"
-  fi
-
-  out="$(run_validator "$D")"; ec=$?
-  if [ $ec -eq 0 ]; then ok "exit 0 (forma equivalente accettata, nessun falso positivo)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
-
-  cd /; rm -rf "$D"
-}
-
-echo "=== T4: fixture con workflow che pusha su un branch, non su main ==="
-{
-  D="$(mktemp -d)"; make_fixture "$D"
-  cat > "$D/.github/workflows/zz-push-branch.yml" <<'YML'
-name: push-branch
-on:
-  workflow_dispatch:
-permissions:
-  contents: write
-jobs:
-  push:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Push
-        shell: pwsh
-        run: |
-          git push origin feat/1-example
-YML
-  ok "fixture creata (workflow che pusha su feat/1-example)"
-
-  out="$(run_validator "$D")"; ec=$?
-  if [ $ec -eq 0 ]; then ok "exit 0 (un writer di branch non e' tassato come writer di main)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
-  if echo "$out" | grep -q "2 writer di main verificati"; then ok "i writer di main contati restano 2"; else ng "il conteggio dei writer di main e' cambiato: $(echo "$out" | tail -3)"; fi
-
-  cd /; rm -rf "$D"
-}
-
-echo "=== T5: fixture con il sync dichiarato DOPO il push ==="
-{
-  D="$(mktemp -d)"; make_fixture "$D"
-  cat > "$D/.github/workflows/zz-late-sync.yml" <<'YML'
-name: late-sync
-on:
-  workflow_dispatch:
-permissions:
-  contents: write
-jobs:
-  push:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Push
-        shell: pwsh
-        run: |
-          git push origin main
-          git rebase origin/main
-YML
-  ok "fixture creata (sync dopo il push)"
-
-  out="$(run_validator "$D")"; ec=$?
-  if [ $ec -eq 1 ]; then ok "exit 1 (l'ordine sync->push e' parte del contratto)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"; fi
-
-  cd /; rm -rf "$D"
-}
+# --- T3: forma di sync alternativa -------------------------------------------
+D="$FIXTURE_DIR/t3"; make_fixture "$D"
+sed -i 's#git reset --hard origin/main#git pull --rebase origin main#' "$D/.github/workflows/post-merge.yml"
+if grep -q "git pull --rebase origin main" "$D/.github/workflows/post-merge.yml"; then
+  ok "mutazione applicata (forma alternativa di sync)"
+else
+  ko "mutazione non applicata (forma alternativa di sync)"
+fi
+run_validator "$D/.github/workflows" 0 "T3 forma alternativa di sync: il gate la riconosce come difesa valida"
 
 echo ""
-echo "Risultati: $pass passati, $fail falliti"
-[ "$fail" -eq 0 ]
+echo "test-workflow-push-sync: $PASS passati, $FAIL falliti"
+[ "$FAIL" -eq 0 ] || exit 1
+exit 0
+
 
 
 ===== FILE: scripts/test-workflow-writer-ordering.sh =====
 
 #!/usr/bin/env bash
-# Test di regressione per l'ordinamento fra i due writer di `main` (issue #149).
+# Test di regressione per il cablaggio del writer post-merge (issue #284).
 #
-# Difende il bug chiuso in issue #149: `auto-bundle.yml` e `auto-state-aggregate.yml`
-# condividono il concurrency group `post-merge-main` (`cancel-in-progress: false`),
-# pensato per serializzare i due writer di `main`. Ma il group serializza i *run*,
-# non ne impone l'*ordine*: quale workflow ottenga prima il lock non e' deterministico.
+# Difende la struttura che rende le automazioni deterministiche:
 #
-# L'ordine e' essenziale perche' `auto-bundle` copia il contenuto dei file che
-# `auto-state-aggregate` modifica. Se il bundle gira PRIMA, copia i blocchi
-# aggregati ANCORA VECCHI; il guard idempotente (`git diff --quiet`) scrive
-# "gia' in sync" e non committa nulla; l'agregate committa dopo, e la copia
-# dentro `docs/BUNDLE.md` resta stale.
-#
-# Sequenza del fallimento (merge della PR #147, 2026-10-26T12:50Z):
-#   12:50:23  auto-bundle           -> copia i blocchi VECCHI -> "gia' in sync", nessun commit
-#   12:50:55  auto-state-aggregate  -> committa i blocchi freschi
-#   => docs/BUNDLE.md stale di 6 righe (riga Story 1.3, Sessione 47, conteggio merge)
-#
-# Il drift e' SILENZIOSO: il gate CI sul bundle e' warning-only, la pipeline resta
-# verde, e lo stato dichiarato diverge da quello reale.
-#
-# Difesa: `auto-bundle.yml` dichiara un trigger `workflow_run` su
-# `auto-state-aggregate`. `workflow_run` e' agganciato alla *conclusione* del
-# workflow, non a un push: sopravvive alla soppressione del GITHUB_TOKEN (che vale
-# solo per gli eventi `push`/`pull_request` generati dal token stesso) ed e' il
-# workaround documentato per i workflow che si innescano a vicenda.
-#
-# Il gate vive in scripts/validate-workflows.mjs (gia' bloccante in CI dal #73);
-# questo file e' il suo test di regressione: verifica che il gate **esca 1**
-# quando si reintroduce il bug. Un gate che passa sempre non e' un gate
-# (lesson 43-1).
+#   * la CI consuma il writer con il trigger `workflow_run` (agganciato alla
+#     CONCLUSIONE del writer: sopravvive alla soppressione del GITHUB_TOKEN,
+#     che vale solo per gli eventi `push`/`pull_request` generati dal token
+#     stesso — misurato: nessuna run `CI` per il commit `831b9e7` della
+#     PR #282);
+#   * nel passaggio `workflow_run` la CI fa il checkout della TESTA di `main`
+#     (`workflow_run.head_sha` e' il commit di PARTENZA del writer: validarlo
+#     equivarrebbe a far fallire il gate merge-state per costruzione);
+#   * `main` ha UN solo writer;
+#   * il writer scatta su ogni PR mergiata (nessun filtro `paths:`).
 #
 # Scenari coperti:
-#   T1  repo reale: il trigger `workflow_run` c'e' ed e' allineato -> exit 0
-#   T2  fixture con il blocco `workflow_run:` rimosso da auto-bundle.yml
-#       (reintroduzione del bug #149) -> exit 1, messaggio che nomina file e causa
+#   T1  repo reale: cablaggio presente e allineato -> exit 0
+#   T2  fixture senza il blocco `workflow_run:` in ci.yml -> exit 1
 #   T3  fixture con `workflows:` che punta a un altro workflow -> exit 1
-#   T4  fixture con `workflows: ["auto-state-aggregate"]` ma il `name:` reale del
-#       producer cambiato -> exit 1 (il trigger non scatterebbe MAI, in silenzio)
-#   T5  fixture col producer assente -> exit 1
+#   T4  fixture con `workflows: ["post-merge"]` ma `name:` del producer cambiato -> exit 1
+#   T5  fixture senza il producer -> exit 1
+#   T6  fixture con un SECONDO writer che pusha su `main` -> exit 1 (single-writer)
+#   T7  fixture con un filtro `paths:` nel trigger del writer -> exit 1 (writer-trigger)
+#   T8  fixture senza il checkout di `main` nel passaggio `workflow_run` -> exit 1
+#
 set -uo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
-AUTO_BUNDLE_WF="$REPO_ROOT/.github/workflows/auto-bundle.yml"
-AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
+WRITER_WF="$REPO_ROOT/.github/workflows/post-merge.yml"
 
 PASS=0
 FAIL=0
 
 ok()   { PASS=$((PASS+1)); echo "  [OK] $1"; }
-ko()   { FAIL=$((FAIL+1)); echo "  [FAIL] $1"; }
+ko()   { FAIL=$((FAIL+1)); echo "  [KO] $1"; }
 
-# Esegue il validator su una directory di fixture.
-# $1 = directory dei workflow, $2 = exit code atteso, $3 = descrizione
 run_validator() {
-  local dir="$1" expected="$2" desc="$3"
-  local out
-  out="$(node "$VALIDATOR" "$dir" 2>&1)"
-  local code=$?
-  if [ "$code" -eq "$expected" ]; then
-    ok "$desc (exit $code come atteso)"
-    echo "$out" | grep -E '^\[FAIL\]' | sed 's/^/       /' | head -5
+  # $1 = directory dei workflow, $2 = exit code atteso, $3 = descrizione
+  local dir="$1" expected="$2" desc="$3" out ec
+  out="$(node "$VALIDATOR" "$dir" 2>&1)"; ec=$?
+  if [ "$ec" = "$expected" ]; then
+    ok "$desc (exit $ec)"
   else
-    ko "$desc (exit $code, atteso $expected)"
-    echo "$out" | tail -12 | sed 's/^/       /'
+    ko "$desc: exit $ec (atteso $expected)"
+    echo "$out" | tail -8 | sed 's/^/       /'
   fi
+  LAST_OUT="$out"
 }
 
-echo "=== Issue #149 — ordinamento fra i due writer di main ==="
-echo
-
-# --- T1: repo reale, deve passare ---
-run_validator "$REPO_ROOT/.github/workflows" 0 \
-  "T1 repo reale: trigger workflow_run presente e allineato"
-
-# --- fixture: copia dei due workflow in una dir temporanea ---
 FIXTURE_DIR="$(mktemp -d)"
 trap 'rm -rf "$FIXTURE_DIR"' EXIT
 
-# T2: rimuove il blocco `workflow_run:` da auto-bundle.yml
-mkdir -p "$FIXTURE_DIR/t2"
-cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t2/auto-bundle.yml"
-cp "$AUTO_AGGREGATE_WF" "$FIXTURE_DIR/t2/auto-state-aggregate.yml"
-# Rimuove il blocco `workflow_run:` (righe di commento di sezione incluse) e la
-# riga `types: [completed]`. Usa solo sed: python3 non e' garantito su Windows
-# (dove `bash` e' il Git Bash, non il WSL stub).
-sed -i '/^  # === Issue #149/,/^    types: \[completed\]$/d' \
-  "$FIXTURE_DIR/t2/auto-bundle.yml"
-if grep -q 'workflow_run:' "$FIXTURE_DIR/t2/auto-bundle.yml"; then
-  ko "T2 preparazione fixture: il blocco workflow_run non e' stato rimosso"
+# --- T1: repo reale, deve passare --------------------------------------------
+run_validator "$REPO_ROOT/.github/workflows" 0 "T1 repo reale: cablaggio del writer presente e allineato"
+if echo "$LAST_OUT" | grep -q 'trigger `workflow_run` su "post-merge" presente e allineato'; then
+  ok "T1 il gate riconosce il trigger workflow_run sul writer"
 else
-  ok "T2 preparazione fixture: blocco workflow_run rimosso"
+  ko "T1 il gate non riconosce il trigger workflow_run sul writer"
 fi
-run_validator "$FIXTURE_DIR/t2" 1 \
-  "T2 fixture senza workflow_run: il gate segnala l'ordinamento non garantito"
+if echo "$LAST_OUT" | grep -q "single-writer: un solo writer su"; then
+  ok "T1 il gate riconosce un solo writer su main"
+else
+  ko "T1 il gate non riconosce il single-writer"
+fi
 
-# T3: workflow_run che punta a un altro workflow
-mkdir -p "$FIXTURE_DIR/t3"
-cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t3/auto-bundle.yml"
-cp "$AUTO_AGGREGATE_WF" "$FIXTURE_DIR/t3/auto-state-aggregate.yml"
-sed -i 's/workflows: \["auto-state-aggregate"\]/workflows: ["altro-workflow"]/' \
-  "$FIXTURE_DIR/t3/auto-bundle.yml"
-run_validator "$FIXTURE_DIR/t3" 1 \
-  "T3 fixture con workflow_run su un altro workflow: il gate segnala l'assenza di auto-state-aggregate"
+# --- fixture: copia di ci.yml + post-merge.yml --------------------------------
+mkfixture() {
+  local d="$1"
+  mkdir -p "$d"
+  cp "$CI_WF" "$d/ci.yml"
+  cp "$WRITER_WF" "$d/post-merge.yml"
+}
 
-# T4: il nome dichiarato non combacia con il `name:` reale del producer
-mkdir -p "$FIXTURE_DIR/t4"
-cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t4/auto-bundle.yml"
-cp "$AUTO_AGGREGATE_WF" "$FIXTURE_DIR/t4/auto-state-aggregate.yml"
-sed -i 's/^name: auto-state-aggregate$/name: auto-state-aggregate-rinominato/' \
-  "$FIXTURE_DIR/t4/auto-state-aggregate.yml"
-run_validator "$FIXTURE_DIR/t4" 1 \
-  "T4 fixture con name: del producer disallineato: il gate segnala il trigger che non scatterebbe"
+# --- T2: ci.yml senza il blocco `workflow_run:` -------------------------------
+d="$FIXTURE_DIR/t2"; mkfixture "$d"
+sed -i '/^  workflow_run:$/,+2d' "$d/ci.yml"
+if grep -q 'workflow_run:' "$d/ci.yml"; then
+  ko "T2 preparazione: il blocco workflow_run non e' stato rimosso"
+else
+  ok "T2 preparazione: blocco workflow_run rimosso"
+fi
+run_validator "$d" 1 "T2 ci.yml senza workflow_run: il gate segnala l'assenza del passaggio post-writer"
 
-# T5: producer assente
-mkdir -p "$FIXTURE_DIR/t5"
-cp "$AUTO_BUNDLE_WF" "$FIXTURE_DIR/t5/auto-bundle.yml"
-run_validator "$FIXTURE_DIR/t5" 1 \
-  "T5 fixture senza il producer: il gate segnala l'impossibilita' di verificare"
+# --- T3: workflow_run che punta a un altro workflow ---------------------------
+d="$FIXTURE_DIR/t3"; mkfixture "$d"
+sed -i 's/workflows: \["post-merge"\]/workflows: ["altro-workflow"]/' "$d/ci.yml"
+run_validator "$d" 1 "T3 workflow_run su un altro workflow: il gate segnala il trigger errato"
 
-echo
-echo "=== $PASS ok, $FAIL fallimenti ==="
+# --- T4: il `name:` del producer non combacia --------------------------------
+d="$FIXTURE_DIR/t4"; mkfixture "$d"
+sed -i 's/^name: post-merge$/name: post-merge-rinominato/' "$d/post-merge.yml"
+run_validator "$d" 1 "T4 name: del producer disallineato: il gate segnala il trigger che non scatterebbe"
+
+# --- T5: producer assente ----------------------------------------------------
+d="$FIXTURE_DIR/t5"; mkdir -p "$d"; cp "$CI_WF" "$d/ci.yml"
+run_validator "$d" 1 "T5 producer assente: il gate segnala l'impossibilita' di verificare"
+
+# --- T6: un secondo writer che pusha su `main` -------------------------------
+d="$FIXTURE_DIR/t6"; mkfixture "$d"
+cat > "$d/second-writer.yml" <<'YAML'
+name: second-writer
+on:
+  push:
+    branches: [main]
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Push
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+          git push origin main
+YAML
+run_validator "$d" 1 "T6 secondo writer su main: il gate single-writer lo intercetta"
+
+# --- T7: il writer filtra i merge con `paths:` -------------------------------
+d="$FIXTURE_DIR/t7"; mkfixture "$d"
+sed -i 's/^    types: \[closed\]$/    types: [closed]\n    paths:\n      - "docs\/state\/**"/' "$d/post-merge.yml"
+if grep -q 'paths:' "$d/post-merge.yml"; then
+  ok "T7 preparazione: filtro paths inserito"
+else
+  ko "T7 preparazione: il filtro paths non e' stato inserito"
+fi
+run_validator "$d" 1 "T7 writer con filtro paths: il gate segnala che alcune PR mergiate resterebbero fuori"
+
+# --- T8: la CI non fa il checkout di `main` nel passaggio workflow_run --------
+d="$FIXTURE_DIR/t8"; mkfixture "$d"
+sed -i "s/ref: \${{ github.event_name == 'workflow_run' && 'main' || github.sha }}/ref: \${{ github.sha }}/g" "$d/ci.yml"
+if grep -q "workflow_run' && 'main'" "$d/ci.yml"; then
+  ko "T8 preparazione: il checkout di main e' ancora presente"
+else
+  ok "T8 preparazione: checkout di main rimosso"
+fi
+run_validator "$d" 1 "T8 CI senza checkout di main nel passaggio workflow_run: il gate lo segnala"
+
+echo ""
+echo "test-workflow-writer-ordering: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ] || exit 1
 exit 0
 
@@ -42838,7 +43015,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
 AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
-AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/post-merge.yml"
 CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
 
 if ! command -v node >/dev/null 2>&1; then
@@ -42853,14 +43030,14 @@ ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
 # Repo fixture minimo. La struttura conta: validate-workflows.mjs risolve
 # repoRoot come <dir>/../.., e il gate di copertura `git add` (#136) fallisce se
-# `auto-state-aggregate.yml` o l'aggregator mancano — altrimenti i test
+# `post-merge.yml` o l'aggregator mancano — altrimenti i test
 # passerebbero per il motivo sbagliato.
 make_fixture() {
   local d="$1"
   mkdir -p "$d/.github/workflows" "$d/scripts"
   cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
   cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
-  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/auto-state-aggregate.yml"
+  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/post-merge.yml"
   cp "$CI_WF" "$d/.github/workflows/ci.yml"
 }
 
@@ -44355,6 +44532,492 @@ if (failures > 0) {
 }
 console.log(`[OK] check-workflow-syntax: ${checked} blocchi verificati, 0 non validi${skipped > 0 ? `, ${skipped} saltati` : ''}`);
 process.exit(0);
+
+
+
+===== FILE: scripts/check-generators-portable.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate di PORTABILITA' dei generatori (issue #284).
+ *
+ * Requisito: le automazioni non devono dipendere dal sistema operativo che le
+ * eseguira'. Lo stesso input (lo stato del repository) deve produrre gli
+ * stessi byte su Linux, Windows e macOS.
+ *
+ * Il gate misura la proprieta' su tre livelli:
+ *
+ *   1. **DETERMINISMINO** — due rigenerazioni consecutive producono gli stessi
+ *      byte (locale, su ogni OS).
+ *   2. **INVARIANTI DEL REPO** — il bundle e' in sync con lo stato committato
+ *      (`generate-bundle -Check`), e i blocchi aggregati sono coerenti con lo
+ *      stato dichiarato (`aggregate-state -Check`).
+ *   3. **CROSS-OS** — il manifest dei file generati (sha256 per file) prodotto
+ *      su Linux e' identico a quello prodotto su Windows. Ogni job della
+ *      matrix `gates-portability` scrive il proprio manifest come artefatto; il
+ *      job di confronto li confronta byte per byte. Il riferimento NON e' lo
+ *      stato committato: quello cambia a ogni PR (i blocchi aggregati vengono
+ *      aggiornati dal writer POST-merge per contratto, vedi ADR-0008), quindi
+ *      non puo' essere il riferimento di un confronto cross-OS.
+ *
+ * Perche' confrontare i byte e non "lo stato logico": le tre dipendenze
+ * storiche (fuso orario, locale corrente, ordinamento culture-sensitive) si
+ * manifestano come byte diversi a parita' di fatti.
+ *
+ * Uso:
+ *   node scripts/check-generators-portable.mjs                     # livelli 1 e 2
+ *   node scripts/check-generators-portable.mjs --manifest <file>   # + manifest
+ *   node scripts/check-generators-portable.mjs --compare <a> <b>    # confronto
+ *
+ * Exit code: 0 = tutto verde, 1 = drift o divergenza, 2 = errore di ambiente.
+ */
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+
+const argv = process.argv.slice(2);
+
+function argValue(name, fallback = null) {
+  const idx = argv.indexOf(name);
+  if (idx >= 0 && idx + 1 < argv.length) return argv[idx + 1];
+  return fallback;
+}
+function argValues(name) {
+  const out = [];
+  argv.forEach((a, i) => {
+    if (a === name && i + 1 < argv.length) out.push(argv[i + 1]);
+  });
+  return out;
+}
+
+const root = resolve(argValue('--root', '.'));
+const manifestPath = argValue('--manifest');
+const comparePaths = argValues('--compare');
+
+/** I file prodotti dai generatori (stessi target dell'aggregator). */
+const TARGETS = [
+  'docs/SESSIONS.md',
+  'docs/11-BACKLOG.md',
+  'docs/INDEX.md',
+  'docs/BUNDLE.md',
+  'README.md',
+];
+
+function fail(message) {
+  console.error(`[FAIL] ${message}`);
+}
+
+function environmentError(message) {
+  console.error(`[FAIL] ${message}`);
+  console.error(
+    "       Il gate e' fail-closed: senza poter confrontare i byte non puo' dichiarare la portabilita'.",
+  );
+  process.exit(2);
+}
+
+function git(args, options = {}) {
+  return spawnSync('git', args, { cwd: root, encoding: 'utf8', ...options });
+}
+
+function run(command, args, cwd = root) {
+  const res = spawnSync(command, args, { cwd, encoding: 'utf8' });
+  if (res.error) {
+    environmentError(`impossibile eseguire \`${command}\`: ${res.error.message}`);
+  }
+  if (res.status !== 0) {
+    console.error((res.stdout || '') + (res.stderr || ''));
+    environmentError(
+      `\`${command} ${args.join(' ')}\` e' fallito (exit ${res.status})`,
+    );
+  }
+  return res.stdout || '';
+}
+
+function sha256(file) {
+  return createHash('sha256').update(readFileSync(file)).digest('hex');
+}
+
+// === confronto fra manifest (cross-OS) ========================================
+
+if (comparePaths.length >= 2) {
+  const manifests = comparePaths.map((p) => {
+    if (!existsSync(p)) environmentError(`manifest non trovato: ${p}`);
+    return { path: p, data: JSON.parse(readFileSync(p, 'utf8')) };
+  });
+  const [a, b] = manifests;
+  const keys = [...new Set([...Object.keys(a.data), ...Object.keys(b.data)])].sort();
+  const diffs = keys.filter((k) => a.data[k] !== b.data[k]);
+  if (diffs.length > 0) {
+    fail(
+      `i generatori producono output DIVERSI sui due sistemi operativi (${a.path} vs ${b.path}): ` +
+        `${diffs.length}/${keys.length} file divergono`,
+    );
+    for (const k of diffs) {
+      console.error(`         ${k}: ${a.data[k] ?? '(assente)'} vs ${b.data[k] ?? '(assente)'}`);
+    }
+    console.error(
+      '       Cause tipiche: locale corrente (separatore decimale), fuso orario del timestamp, ' +
+        'ordinamento culture-sensitive, line ending (CRLF), versione di PowerShell.',
+    );
+    process.exit(1);
+  }
+  console.log(
+    `[OK] i generatori producono output IDENTICI sui due sistemi operativi ` +
+      `(${keys.length} file, sha256 confrontati)`,
+  );
+  process.exit(0);
+}
+
+// === rigenerazione in un worktree pulito =====================================
+
+/**
+ * Rigenera i file in un worktree pulito (checkout di HEAD) e restituisce il
+ * manifest {file: sha256}.
+ *
+ * Il worktree serve per due motivi:
+ *   * lo stato di partenza e' quello COMMITTATO (l'input dei generatori non
+ *     e' inquinato dalle modifiche locali);
+ *   * i generatori scrivono li', senza toccare il working tree di chi esegue
+ *     il gate (il gate e' read-only sul repository).
+ */
+function regenerate() {
+  const dir = mkdtempSync(join(tmpdir(), 'ls-portability-'));
+  const wt = join(dir, 'wt');
+  try {
+    const add = git(['worktree', 'add', '--detach', wt, 'HEAD']);
+    if (add.status !== 0) {
+      environmentError(
+        `impossibile creare il worktree temporaneo: ${(add.stderr || '').trim()}`,
+      );
+    }
+    run('pwsh', ['-NoProfile', '-File', 'scripts/aggregate-state.ps1'], wt);
+    run('pwsh', ['-NoProfile', '-File', 'scripts/generate-bundle.ps1'], wt);
+    const manifest = {};
+    for (const target of TARGETS) {
+      const file = join(wt, target);
+      if (!existsSync(file)) environmentError(`il generatore non ha prodotto ${target}`);
+      manifest[target] = sha256(file);
+    }
+    return manifest;
+  } finally {
+    git(['worktree', 'remove', '--force', wt]);
+    git(['worktree', 'prune']);
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+// --- 1. determinismo: due rigenerazioni consecutive ---------------------------
+
+console.log('[INFO] check-generators-portable: rigenero i file in un worktree pulito');
+const first = regenerate();
+const second = regenerate();
+const drift = Object.keys(first).filter((k) => first[k] !== second[k]);
+if (drift.length > 0) {
+  fail(`i generatori non sono deterministici: ${drift.length} file cambiano fra due run consecutivi`);
+  for (const k of drift) console.error(`         ${k}: ${first[k]} -> ${second[k]}`);
+  process.exit(1);
+}
+console.log(`[OK] i generatori sono deterministici (${Object.keys(first).length} file, due run consecutive)`);
+
+if (manifestPath) {
+  mkdirSync(resolve(manifestPath).replace(/[\\/][^\\/]*$/, ''), { recursive: true });
+  writeFileSync(manifestPath, JSON.stringify(first, null, 2) + '\n', 'utf8');
+  console.log(`[OK] manifest scritto in ${manifestPath}`);
+}
+
+// --- 2. invarianti del repo sullo stato committato ---------------------------
+
+const bundleCheck = spawnSync(
+  'pwsh',
+  ['-NoProfile', '-File', 'scripts/generate-bundle.ps1', '-Check'],
+  { cwd: root, encoding: 'utf8' },
+);
+if (bundleCheck.status !== 0) {
+  console.error((bundleCheck.stdout || '') + (bundleCheck.stderr || ''));
+  fail('il bundle non e\' in sync con lo stato committato (esegui `pwsh scripts/generate-bundle.ps1`)');
+  process.exit(1);
+}
+console.log('[OK] il bundle e\' in sync con lo stato committato');
+
+process.exit(0);
+
+
+
+===== FILE: scripts/test-generators-portable.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per il gate di PORTABILITA' dei generatori (issue #284).
+#
+# Il gate `scripts/check-generators-portable.mjs` verifica tre proprieta':
+#
+#   1. **Determinismo**: due rigenerazioni consecutive producono gli stessi
+#      byte.
+#   2. **Invarianti del repo**: il bundle e' in sync con lo stato committato.
+#   3. **Cross-OS**: il manifest dei file generati (sha256 per file) prodotto
+#      su un sistema operativo e' identico a quello prodotto su un altro. In CI
+#      i due manifest sono prodotti dalla matrix `gates-portability` (ubuntu +
+#      windows) e confrontati dal job `gates-portability-compare`.
+#
+# Il test e' ermetico: lo scenario negativo costruisce un manifest alterato
+# (simula "l'altro sistema operativo ha prodotto byte diversi") e verifica che
+# il confronto lo intercetti.
+#
+# Scenari coperti:
+#   T1  repo reale: il gate passa (determinismo + invarianti) -> exit 0
+#   T2  il manifest e' scritto e il confronto di due manifest identici passa -> exit 0
+#   T3  manifest alterato: il confronto fallisce -> exit 1
+#
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+GATE="$SCRIPT_DIR/check-generators-portable.mjs"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[SKIP] node non disponibile"
+  exit 0
+fi
+if ! command -v pwsh >/dev/null 2>&1; then
+  echo "[SKIP] pwsh non disponibile: il gate richiede PowerShell 7+"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+echo "=== T1: repo reale - determinismo e invarianti del repo ==="
+out="$(node "$GATE" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then
+  ok "exit 0 (determinismo + invarianti)"
+else
+  ng "exit $ec (atteso 0): $(echo "$out" | tail -8)"
+fi
+
+echo "=== T2: manifest e confronto di due manifest identici ==="
+out="$(node "$GATE" --manifest "$WORK/a.json" 2>&1)"; ec=$?
+if [ $ec -eq 0 ] && [ -s "$WORK/a.json" ]; then
+  ok "exit 0 e manifest scritto"
+else
+  ng "exit $ec (atteso 0) o manifest mancante: $(echo "$out" | tail -6)"
+fi
+cp "$WORK/a.json" "$WORK/b.json"
+out="$(node "$GATE" --compare "$WORK/a.json" --compare "$WORK/b.json" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then
+  ok "exit 0 (due manifest identici sono equivalenti)"
+else
+  ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"
+fi
+
+echo "=== T3: manifest alterato (l'altro OS ha prodotto byte diversi) ==="
+node -e '
+const fs=require("node:fs");
+const p=process.argv[1];
+const m=JSON.parse(fs.readFileSync(p,"utf8"));
+const k=Object.keys(m)[0];
+m[k]="0".repeat(64);
+fs.writeFileSync(p, JSON.stringify(m,null,2)+"\n");
+' "$WORK/b.json"
+out="$(node "$GATE" --compare "$WORK/a.json" --compare "$WORK/b.json" 2>&1)"; ec=$?
+if [ $ec -eq 1 ]; then
+  ok "exit 1 (il confronto intercetta la divergenza cross-OS)"
+else
+  ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"
+fi
+if echo "$out" | grep -q "output DIVERSI"; then
+  ok "il messaggio nomina la divergenza cross-OS"
+else
+  ng "il messaggio non nomina la divergenza: $(echo "$out" | tail -4)"
+fi
+
+echo ""
+echo "=== Risultato: $pass pass, $fail fail ==="
+if [ $fail -gt 0 ]; then
+  echo "[FAIL] il gate di portabilita' non intercetta un manifest divergente: non e' un gate"
+  exit 1
+fi
+echo "[OK] il gate di portabilita' intercetta la divergenza cross-OS"
+exit 0
+
+
+
+===== FILE: docs/13-ADR/0013-post-merge-automation.md =====
+
+# ADR-0013 — Automazioni post-merge deterministiche: writer unico, CI post-writer, generatori portabili
+
+- **Stato**: 🟢 APPROVED (issue #284, Sessione 90, 2026-11-02)
+- **Data**: 2026-11-02
+- **Riferimenti**: issue #281 (fix incompleto), issue #239 (gate merge-state), issue #140 (sync dei writer), issue #149 (ordinamento fra writer), issue #216 (copertura dei trigger), issue #277 (encoding), ADR-0008 (lazy-state aggregation), ADR-0012 (contratto del protocollo)
+
+## Contesto
+
+Le automazioni post-merge di `main` erano strutturalmente fragili. Tre difetti
+indipendenti producevano lo stesso sintomo — `main` rosso dopo ogni merge — e
+si nascondevano a vicenda.
+
+**1. Il commit del writer non triggava la CI.** I writer pushavano con
+`GITHUB_TOKEN`, e GitHub sopprime i workflow `on: push` generati dal token
+stesso. Misurato: per il commit `831b9e7` (writer della PR #282) **non
+esiste alcuna run `CI`** — l'unica run sul quel SHA è `auto-bundle`, innescata
+da `workflow_run`. La issue #281 e la PR #282 hanno risolto il problema
+aggiungendo `docs/state/**` ai `paths:` del trigger `push`: la misura mostra
+che quel path **non può** funzionare, perché l'evento `push` non viene
+generato. Il fatto era già documentato in `docs/12-DEVOPS.md` §9.14
+("i commit dei writer non hanno mai attivato una run CI — né prima né dopo
+questa sessione, nemmeno quando il trigger `push` era privo di filtro").
+
+**2. Tre writer concorrevano sullo stesso `main`.** `auto-session-merge-state`,
+`auto-state-aggregate` e `auto-bundle` pushavano sugli stessi file generati.
+Misurato il 2026-11-02: `auto-state-aggregate` ha pushato un commit rifiutato
+(`! [rejected] main -> main`) e il suo retry ha fatto `git rebase origin/main`
+**sui file generati** → conflitto in `docs/BUNDLE.md`, `docs/INDEX.md`,
+`docs/SESSIONS.md` → run fallito. Il rebase dei file generati non è una race
+risolvibile: i blocchi aggregati sono il *prodotto* di un input (lo stato), non
+la fusione di due storie.
+
+**3. Il gate fail-closed girava sull'albero sbagliato.** `check-merge-state.mjs`
+confronta il frontmatter delle sessioni con lo stato reale delle PR letto
+dall'API GitHub. Al merge la CI parte *prima* che il writer applichi lo stato:
+il gate vede la PR `MERGED` e il frontmatter `merged: false` → `[FAIL]` →
+`main` rosso. Il gate non è da indebolire (D-89.2): è **quale albero** va
+sottoposto al gate a essere sbagliato.
+
+A tutto questo si aggiungeva una dipendenza dal sistema operativo: i generatori
+(`.ps1`) producevano output diversi su Windows e Linux (fuso orario del
+timestamp, separatore decimale della locale corrente, ordinamento
+culture-sensitive, versione di PowerShell) — la classe di difetti #63, #104,
+#142, #224, #277.
+
+## Decisione
+
+### D-13.1 — Un solo writer su `main`
+
+`.github/workflows/post-merge.yml` sostituisce i tre writer precedenti. Il
+suo ciclo è lineare e senza alternative:
+
+```
+apply-merge-state → aggregate-state → generate-bundle → verifica (-Check) → 1 commit → 1 push
+```
+
+Un solo writer significa una sola sequenza di push: la race fra writer è
+eliminata per costruzione, non per locking.
+
+### D-13.2 — Il writer non ribasa mai: reset + rigenerazione
+
+Al tentativo successivo il writer esegue `git reset --hard origin/main` e
+**rigenera** da capo. Il rebase dei file generati è un conflitto strutturale;
+la rigenerazione è una funzione dello stato, quindi è sempre possibile e
+sempre convergente. L'unica condizione di successo è `git diff --quiet`:
+se non c'è diff, non c'è commit.
+
+### D-13.3 — Il passaggio autoritativo della CI è `workflow_run`
+
+`ci.yml` dichiara `workflow_run: workflows: ["post-merge"]`. `workflow_run` è
+agganciato alla **conclusione** di un workflow, non a un push: sopravvive alla
+soppressione del `GITHUB_TOKEN` ed è il workaround già documentato in
+`docs/12-DEVOPS.md` §9.8e (usato da `auto-bundle` per l'ordinamento dei
+writer).
+
+Consequenze esplicite:
+
+- nel passaggio `workflow_run` la CI fa `checkout` con `ref: main`, perché
+  `workflow_run.head_sha` è il commit di **partenza** del writer (il merge
+  commit, senza lo stato applicato): validarlo equivarrebbe a far fallire il
+  gate merge-state per costruzione;
+- il trigger `push` su `main` resta, con il filtro per path, e serve per i
+  push diretti (canale di recovery);
+- il `concurrency group` distingue l'evento (`ci-${{ github.event_name }}-…`):
+  il passaggio post-writer non deve essere annullato da un push concorrente.
+
+### D-13.4 — Il gate merge-state ha due modalità, ed è fail-closed in entrambe
+
+- **autoritativa** (default; usata su `pull_request` e su `workflow_run`):
+  ogni drift è un fallimento. Gira sullo stato finale, dopo il writer.
+- **`--defer-unapplied`** (usata su `push`): un confronto è differito **solo**
+  se la PR ha per merge commit *esattamente* l'albero sotto esame — cioè se
+  l'albero è il merge commit e lo stato non è ancora applicabile. Ogni altro
+  drift resta un fallimento.
+
+La distinzione è oggettiva (uguaglianza di SHA), non temporale ("il writer
+potrebbe non essere passato ancora"): nessuna tolleranza temporale, nessuna
+finestra in cui il drift passerebbe inosservato.
+
+### D-13.5 — I generatori sono portabili per costruzione e per prova
+
+- **Per costruzione**: timestamp in UTC con `InvariantCulture`, numeri
+  renderizzati con la locale invariante, ordinamenti con chiave secondaria
+  *ordinale* (l'ordinamento non dipende più dall'enumerazione del filesystem
+  né dalla collazione della locale), guardia fail-closed su PowerShell < 7,
+  normalizzazione CRLF→LF del contenuto incorporato nel bundle.
+- **Per prova**: il gate `scripts/check-generators-portable.mjs` misura tre
+  proprietà: il **determinismo** (due rigenerazioni consecutive producono gli
+  stessi byte), le **invarianti del repo** (bundle in sync) e l’**uguaglianza
+  cross-OS** (il manifest sha256 dei file generati). La matrix
+  `gates-portability` gira su **due sistemi operativi reali**
+  (`ubuntu-latest` e `windows-latest`), ognuno pubblica il proprio manifest e
+  il job `gates-portability-compare` li confronta byte per byte. Il confronto
+  non usa lo stato committato come riferimento: quello cambia a ogni PR (i
+  blocchi aggregati li aggiorna il writer post-merge, per contratto ADR-0008),
+  quindi non può essere il riferimento di un confronto cross-OS.
+
+Il gate di portabilità confronta i byte, non lo stato logico: le tre
+dipendenze storiche si manifestano proprio come byte diversi a parità di
+fatti. E il riferimento è un altro sistema operativo reale, non una
+convenzione.
+
+### D-13.6 — Un solo gate per l'autorevolezza del bundle e dei blocchi
+
+Il bundle è generato **dopo** l'aggregator e dentro lo stesso writer: la
+coppia di file che il bundle copia (i blocchi aggregati) è quindi sempre
+già aggiornata quando il bundle viene scritto. L'ordinamento dei due
+generatori (aggregator → bundle) resta vincolante e viene verificato dal gate
+di portabilità (che rigenera nell'ordine corretto e confronta i byte).
+
+## Alternative scartate
+
+| Alternativa | Perché scartata |
+|---|---|
+| Aggiungere path al trigger `push` (PR #282) | Misurato insufficiente: i push con `GITHUB_TOKEN` non generano l'evento `push`. |
+| Push dei writer con un PAT | Richiede un secret; il repository non ne ha (`gh secret list` vuoto) e aggiunge una credice a lungo termine dove il trigger nativo basta. |
+| Tre writer con concurrency group | Il group serializza i *run*, non i *checkout* né i *push*: la race resta (misurato il 2026-11-02). |
+| Rendere il gate merge-state tollerante | D-89.2: un gate che accetta «forse mergiato» non è un gate. Il gate resta fail-closed; cambia l'albero a cui si applica. |
+| Container con immagine PowerShell fissata | `actions/checkout` richiede Node nel container: l'immagine PowerShell non lo ha, e l'installazione di Node nel container aggiunge un failure mode più fragile di quello che risolve. |
+| Riscrittura dei generatori in Node (issue #66) | Strada corretta e già indicata dal backlog, ma è una riscrittura di due generatori (~90 KB di sorgente): non è necessaria per l'indipendenza dal SO, che la guardia di runtime + la locale invariante + l'ordinamento ordinale + il gate di portabilità rendono verificabile **oggi**. resta il passo naturale successivo. |
+
+## Conseguenze
+
+- **Un run in meno per merge**: il writer unico sostituisce tre workflow e i
+  loro round-trip (prima: merge → 3 writer → bundle 2 volte).
+- **`main` ha un solo scrittore**: ogni scrittura su `main` è tracciabile a un
+  workflow, e i gate lo impongono.
+- **Il gate merge-state ha due soggetti**: l'albero di un PR e lo stato finale
+  di `main`. Entrambi sono verificati, in momenti diversi, senza tolleranze.
+- **La portabilità è un gate, non un'intenzione**: se un generatore torna a
+  dipendere dalla locale o dal fuso, la pipeline si rossa su entrambi i
+  sistemi operativi.
+- **Il writer non è più "non bloccante"**: se il writer fallisce, `main` resta
+  rosso e il motivo è visibile. È il comportamento corretto: il fallback
+  silenzioso (loggare un warning e andare avanti) è ciò che ha prodotto il
+  drift invisibile degli ultimi mesi.
+
+## Gate che impongono questa ADR
+
+| Regola | Gate | File |
+|---|---|---|
+| Un solo workflow pusha su `main` | `validate-workflows.mjs` → `checkSingleWriter` | `scripts/test-workflow-writer-ordering.sh` (T6) |
+| Il writer non filtra i merge con `paths:` | `validate-workflows.mjs` → `checkWriterTrigger` | `scripts/test-workflow-writer-ordering.sh` (T7) |
+| La CI consuma il writer con `workflow_run` | `validate-workflows.mjs` → `checkWriterOrdering` | `scripts/test-workflow-writer-ordering.sh` (T2..T5) |
+| Nel passaggio `workflow_run` la CI valida `main` | `validate-workflows.mjs` → `checkWorkflowRunCheckout` | `scripts/test-workflow-writer-ordering.sh` (T8) |
+| Il writer sincronizza con `origin/main` prima del push | `validate-workflows.mjs` → `checkPushSync` | `scripts/test-workflow-push-sync.sh` (T2, T3) |
+| La riga `git add` copre i `$targets` dell'aggregator | `validate-workflows.mjs` → `checkGitAddCoverage` | `scripts/test-workflow-git-add-coverage.sh` |
+| Il gate merge-state differisce **solo** il caso strutturale | `check-merge-state.mjs --defer-unapplied` | `scripts/test-merge-state-gate.sh` (T10..T12) |
+| I generatori producono gli stessi byte su ogni OS | `check-generators-portable.mjs` (manifest cross-OS) | `scripts/test-generators-portable.sh` (T1, T2, T3) |
 
 
 
@@ -46760,17 +47423,43 @@ on:
       - 'docs/11-BACKLOG.md'
       - 'docs/INDEX.md'
       - 'README.md'
-      # Issue #281: `auto-session-merge-state.yml` e' un writer di main come
-      # gli altri, e scrive in `docs/state/sessions/`: senza questo path i suoi
-      # commit non triggavano la pipeline, e la race fra merge e applicazione
-      # dello stato di merge lasciava `main` rosso (il gate `check-merge-state`
-      # e' fail-closed e chiudeva `gates-docs`). Con il path, l'ultimo run su
-      # `main` e' quello del writer, ed e' verde: nessun controllo e' indebolito,
-      # la pipeline semplicemente re-valida lo stato che il writer ha applicato.
+      # `docs/state/**` resta nel filtro per i push DIRETTI su `main` che
+      # toccano lo stato (canale di recovery manuale).
+      #
+      # Issue #281 (PR #282): questo path era stato aggiunto per far sì che il
+      # commit del writer triggasse la pipeline. La misura ha mostrato che
+      # **non funziona**: il writer pusha con `GITHUB_TOKEN` e GitHub sopprime
+      # i workflow `on: push` generati dal token stesso — il path non e' mai
+      # raggiunto, perche' l'evento `push` non viene generato. Lo stesso fatto
+      # era gia' documentato in `docs/12-DEVOPS.md` §9.14 ("i commit dei writer
+      # non hanno mai attivato una run CI"). La soluzione non e' un path in
+      # piu', e' un trigger `workflow_run` (vedi sotto).
       - 'docs/state/**'
+  # Issue #284: il passaggio AUTORITATIVO della pipeline sullo stato finale di
+  # `main`. `workflow_run` e' agganciato alla CONCLUSIONE di un workflow, non
+  # a un push: sopravvive alla soppressione del `GITHUB_TOKEN` ed e' il
+  # workaround documentato (`docs/12-DEVOPS.md` §9.8e).
+  #
+  # Perche' questo passaggio esiste: il gate `check-merge-state.mjs` confronta
+  # il frontmatter delle sessioni con lo stato REALE delle PR letto dall'API
+  # GitHub. Sul merge commit lo stato non e' ancora applicato (lo applica il
+  # writer, dopo) → il gate fallirebbe per costruzione. Invece di indebolire il
+  # gate, lo si esegue sullo stato che il writer ha prodotto: e' esattamente la
+  # decisione D-89.2 ("la race si risolve facendo girare la pipeline sul commit
+  # che chiude la race").
+  #
+  # NB: `workflow_run.head_sha` e' il commit su cui il writer e' PARTITO (il
+  # merge commit), non la testa di `main` dopo il suo commit: per questo i job
+  # che girano su questo evento fanno `checkout` con `ref: main`.
+  workflow_run:
+    workflows: ["post-merge"]
+    types: [completed]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # Il group distingue l'evento: il passaggio post-writer non deve essere
+  # annullato da un push concorrente su `main` (e viceversa). `cancel-in-progress`
+  # resta `true`: annullare il run PIU' VECCHIO dello stesso evento e' corretto.
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -46985,6 +47674,13 @@ jobs:
       pull-requests: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Issue #284: nel passaggio `workflow_run` l'albero da validare e' la
+          # TESTA di `main` (che contiene il commit del writer), non
+          # `workflow_run.head_sha` (che e' il commit di partenza del writer).
+          # Sugli altri eventi `github.sha` e' l'albero giusto (merge ref della
+          # PR, commit del push).
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
       - name: Bundle in sync
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
@@ -47053,10 +47749,27 @@ jobs:
       # Fail-closed: exit 0 = in sync, exit 1 = drift, exit 2 = errore di ambiente.
       # Read-only: non genera e non scrive nulla (come check-readme-facts.mjs).
       # Richiede GITHUB_TOKEN per accedere all'API GitHub.
+      #
+      # Issue #284 — DUE MODALITA', una sola garanzia:
+      #
+      #   * `pull_request` e `workflow_run`: modalita' AUTORITATIVA (fail-closed
+      #     su ogni drift). Il passaggio `workflow_run` e' quello che gira DOPO
+      #     il writer: verifica lo stato finale di `main`.
+      #   * `push`: modalita' `--defer-unapplied`. Sul merge commit lo stato di
+      #     merge non e' ancora applicato (lo applica il writer, dopo): il gate
+      #     differisce **solo** i confronti la cui PR ha per merge commit
+      #     ESATTAMENTE l'albero sotto esame. Ogni altro drift resta un
+      #     fallimento: il gate non e' indebolito, cambia solo *quale* albero
+      #     e' il soggetto del confronto.
       - name: Stato di merge delle sessioni in sync con GitHub (issue #239)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/check-merge-state.mjs
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node scripts/check-merge-state.mjs --defer-unapplied
+          else
+            node scripts/check-merge-state.mjs
+          fi
 
   # ---------------------------------------------------------------------------
   # 3. Gate di determinismo dell'aggregator (issue #70).
@@ -47182,6 +47895,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Stessa regola di `gates-docs`: nel passaggio `workflow_run` si
+          # valida la testa di `main` (dopo il writer), non `head_sha`.
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
       # Issue #73: nessun runner Actions locale, quindi un errore di sintassi JS
       # dentro un blocco `script:` di github-script si scoprirebbe solo dopo il push
@@ -47255,6 +47972,78 @@ jobs:
       # invalida piu' comune.
       - name: Validita' YAML dei workflow (sessione 74)
         run: bash scripts/test-workflow-yaml-scalars.sh
+
+  # ---------------------------------------------------------------------------
+  # 5b. Gate di PORTABILITA' dei generatori (issue #284).
+  #
+  #     Il requisito e' che le automazioni non dipendano dal sistema operativo
+  #     che le eseguira': lo stesso input deve produrre gli stessi byte su
+  #     Linux, Windows e macOS. Il gate rigenera i file aggregati e confronta i
+  #     byte con quelli committati, normalizzando i campi mutabili (i due
+  #     timestamp: "> Data:" e "- Ultima aggregazione:").
+  #
+  #     La matrix gira su due sistemi operativi REALI: e' la prova empirica
+  #     dell'indipendenza, non un'assunzione. Il gate e' bloccante: se un
+  #     generatore produce output diverso su un OS, la pipeline e' rossa.
+  # ---------------------------------------------------------------------------
+  gates-portability:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      # `fail-fast: false`: i due OS vengono valutati entrambi, anche se uno
+      # fallisce — il confronto fra i due e' parte del risultato.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+
+      - name: I generatori sono deterministici e il bundle e' in sync (issue #284)
+        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json"
+
+      - name: Pubblica il manifest per il confronto cross-OS
+        uses: actions/upload-artifact@v4
+        with:
+          name: portability-${{ matrix.os }}
+          path: portability-${{ matrix.os }}.json
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # 5c. Confronto CROSS-OS dei manifest (issue #284).
+  #
+  #     Ogni job della matrix produce il manifest (sha256 per file) dei file
+  #     generati sul proprio sistema operativo. Qui i due manifest vengono
+  #     confrontati byte per byte: se i generatori dipendessero dalla locale,
+  #     dal fuso orario o dai line ending, i due manifest divergerebbero e la
+  #     pipeline sarebbe rossa.
+  #
+  #     Il riferimento NON e' lo stato committato: quello cambia a ogni PR
+  #     (i blocchi aggregati li aggiorna il writer POST-merge, per contratto),
+  #     quindi non puo' essere il riferimento di un confronto cross-OS.
+  # ---------------------------------------------------------------------------
+  gates-portability-compare:
+    runs-on: ubuntu-latest
+    needs: gates-portability
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: portability-*
+          merge-multiple: true
+
+      - name: I generatori producono gli stessi byte su ogni sistema operativo (issue #284)
+        run: |
+          node scripts/check-generators-portable.mjs \
+            --compare portability-ubuntu-latest.json \
+            --compare portability-windows-latest.json
 
   # ---------------------------------------------------------------------------
   # 6. Gate sui residui post-merge e sulla sincronizzazione delle label.
@@ -47403,6 +48192,8 @@ jobs:
       - gates-aggregate
       - gates-bundle
       - gates-workflows
+      - gates-portability
+      - gates-portability-compare
       - gates-git
       - gates-scripts
       - gates-procedure
@@ -47414,9 +48205,13 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
+            results="${{ needs.node-lint-typecheck.result }} ${{ needs.node-test.result }} ${{ needs.node-build.result }} ${{ needs.gates-docs.result }} ${{ needs.gates-protocol.result }} ${{ needs.gates-aggregate.result }} ${{ needs.gates-bundle.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-portability-compare.result }} ${{ needs.gates-git.result }} ${{ needs.gates-scripts.result }} ${{ needs.gates-procedure.result }}"
           else
-            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }}"
+            # Issue #284: nel passaggio `workflow_run` (stato finale di `main`)
+            # il gate di portabilita' e' OBBLIGATORIO: e' la prova che i
+            # generatori producono gli stessi byte su ogni sistema operativo.
+            # Sul `push` semplice resta obbligatorio per lo stesso motivo.
+            results="${{ needs.gates-docs.result }} ${{ needs.gates-workflows.result }} ${{ needs.gates-portability.result }} ${{ needs.gates-portability-compare.result }}"
           fi
           echo "Evento: ${{ github.event_name }}"
           echo "Risultati: $results"
@@ -47435,387 +48230,200 @@ jobs:
 
 
 
-===== FILE: .github/workflows/auto-bundle.yml =====
+===== FILE: .github/workflows/post-merge.yml =====
 
 #
-# CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
-# condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
-# GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job
-# or workflow in the concurrency group will be cancelled"*). Con un group
-# condiviso, dei writer partendo insieme uno vinceva il lock e gli altri
-# venivano annullati senza eseguire nulla (misurato nel merge della PR #249:
-# auto-state-aggregate e auto-session-merge-state annullati in 1 s e 4 s).
-# L'ordinamento non dipende dal group ma dalla catena dei push
-# (merge -> sessione -> aggregate -> bundle): l'ultimo run arriva sullo
-# stato finale, e il guard `git diff --quiet` rende ogni writer idempotente.
+# POST-MERGE — IL SOLO WRITER DI `main` (issue #284)
 #
-name: auto-bundle
-
-# Rigenera il contenuto FILE di docs/BUNDLE.md (===== FILE: ... =====) dopo un
-# merge su `main`. Companion a auto-state-aggregate.yml, che gestisce solo i
-# blocchi <!-- AGGREGATE-* -->. Insieme mantengono BUNDLE.md in sync con tutte
-# le sue zone senza intervento manuale.
+# Questo workflow sostituisce i tre writer precedenti
+# (`auto-session-merge-state`, `auto-state-aggregate`, `auto-bundle`), che
+# concorrevano sullo stesso `main` e sui **stessi file generati**.
 #
-# Caso storico (chiusura issue #115): PR #111 (issue #104) ha aggiunto
-# scripts/test-bundle-check-idempotent.sh al $files + rigenerato BUNDLE.md
-# nella stessa PR (64 file). Il workflow auto-state-aggregate post-merge ha
-# aggiornato solo il blocco inventario, NON le sezioni FILE. Il rebase +
-# merge di PR #112 (issue #105) ha ereditato una versione di BUNDLE.md con
-# 63 markers (manca il test), e `pwsh scripts/generate-bundle.ps1 -Check`
-# su main usciva 1 rompendo il gate CI quality. Risolto da PR #113
-# (rigenerato manualmente), ma la classe di bug resta: lo stesso pattern
-# si ripresenta ogni volta che $files o un file coperto da esso cambia
-# senza un commit di rigenerazione nella stessa PR.
+# I tre difetti che la concorrenza produceva (misurati il 2026-11-02):
 #
-# Questo workflow chiude strutturalmente la classe: dopo un merge che tocca
-# i path in $files (o il bundle script stesso), BUNDLE.md viene rigenerato
-# automaticamente. Il guard `git diff --quiet docs/BUNDLE.md` rende l'azione
-# idempotente (commit solo se la rigenerazione produce un diff reale).
+#   1. `git push origin main` rifiutato (`! [rejected] main -> main`) perche'
+#      un altro writer aveva gia' pushato: il retry faceva `git rebase
+#      origin/main` **sui file generati** -> conflitto in docs/BUNDLE.md,
+#      docs/INDEX.md, docs/SESSIONS.md -> run fallito. Il rebase dei file
+#      generati non e' una race risolvibile: e' un conflitto strutturale.
+#   2. Il commit del writer non triggava la CI: i writer pushano con
+#      `GITHUB_TOKEN` e GitHub sopprime i workflow `on: push` generati dal
+#      token stesso (`docs/12-DEVOPS.md` §9.14: "i commit dei writer non
+#      hanno mai attivato una run CI").
+#   3. Il gate `check-merge-state.mjs` (fail-closed) girava sul merge commit,
+#      PRIMA che il writer applicasse lo stato -> `[FAIL]` e `main` rosso.
 #
-# Companion (non-bloccante): se auto-state-aggregate corre in parallelo sullo
-# stesso push, condividono il concurrency group `post-merge-bundle` (con
-# cancel-in-progress: false). In questo modo le due rigenerazioni sono
-# serializzate: la seconda parte solo dopo che la prima ha pushato. Senza
-# la serializzazione, le due workflow potrebbero fare commit di BUNDLE.md
-# in concorrenza e una delle due fallirebbe il push (non-fast-forward).
+# Le tre cause sono Eliminate per costruzione:
 #
-# Non-bloccante: se `pwsh scripts/generate-bundle.ps1` fallisce (per
-# esempio powershell mancante o file $files inaccessibili), il workflow
-# logga un warning ma lascia il merge andare. Lo stato puo' essere
-# riallineato manualmente con `pwsh scripts/generate-bundle.ps1`.
-
-on:
-  push:
-    branches: [main]
-    paths:
-      # === Trigger paths: tutto cio' che $files in generate-bundle.ps1 copre ===
-      # Quando il bundle script stesso cambia, il $files array potrebbe essere
-      # cambiato -> rigenerare BUNDLE.md per riflettere la nuova membership.
-      - 'scripts/generate-bundle.ps1'
-      # === Documenti root ===
-      - 'AGENTS.md'
-      - 'README.md'
-      - 'LICENSE'
-      # === Tutti i docs (comprende 00-VISION.md, SESSIONS.md, INDEX.md,
-      # 13-ADR/, state/, ecc.). Sovrappone parzialmente con auto-state-aggregate
-      # (docs/state/**) ma i due workflow sono complementari. ===
-      - 'docs/**'
-      # === Script di utility (molti sono in $files) ===
-      - 'scripts/**'
-      # === Hook Git versionati ===
-      - '.githooks/**'
-      # === Configurazione GitHub (CODEOWNERS, PR template, CI workflow stesso
-      # sono in $files) ===
-      - '.github/**'
-      # === Dataset di test ===
-      - 'fixtures/**'
-
-  # === Issue #149 — trigger `workflow_run`: il bundle rigenera DOPO l'aggregate ===
-  #
-  # Il concurrency group `post-merge-bundle` (piu' in basso) serializza i due
-  # writer di `main`, ma NON ne impone l'ordine: quale workflow ottenga prima
-  # il lock non e' deterministico. `auto-bundle` copia il contenuto dei file
-  # che `auto-state-aggregate` modifica: se il bundle gira PRIMA, copia i blocchi
-  # aggregati ANCORA VECCHI, il guard idempotente scrive "gia' in sync" e non
-  # committa nulla; l'aggregate committa dopo e la copia dentro BUNDLE.md resta
-  # stale. Caso reale: merge della PR #147 (2026-10-26T12:50Z) — `docs/BUNDLE.md`
-  # mostrava ancora `| 1.3 ... | #null |` e la Sessione 47 come "non mergiata".
-  #
-  # `workflow_run` e' agganciato alla CONCLUSIONE di un workflow, non a un push:
-  # sopravvive alla soppressione del GITHUB_TOKEN (che vale solo per gli eventi
-  # `push`/`pull_request` generati dal token stesso) ed e' il workaround
-  # documentato per i workflow che si innescano a vicenda
-  # (vedi `docs/12-DEVOPS.md` §9.8e).
-  #
-  # Con questo trigger, `auto-bundle` gira SEMPRE una seconda volta dopo che
-  # `auto-state-aggregate` ha committato i blocchi: la copia embedded e' allora
-  # allineata ai sorgente, indipendentemente dall'ordine di scheduling.
-  workflow_run:
-    workflows: ["auto-state-aggregate"]
-    types: [completed]
-
-# Serialize with auto-state-aggregate: stesso gruppo, no cancel-in-progress
-# (le nuove run restano in coda dietro a quella in corso).
-concurrency:
-  group: post-merge-bundle
-  cancel-in-progress: false
-
-jobs:
-  regen-bundle:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  # necessario per il push finale
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      # Sync con origin/main PRIMA della rigenerazione: se auto-state-aggregate
-      # ha pushato prima di noi, abbiamo bisogno del suo commit per applicare
-      # correttamente il BUNDLE. fetch-depth: 0 lo permette (history completa).
-      - name: Sync con origin/main
-        shell: pwsh
-        run: |
-          git fetch origin main
-          git rebase origin/main
-          if ($LASTEXITCODE -ne 0) {
-            # Rebase fallito (es. conflitto nel working copy): fallback a reset
-            # hard. Il bundle script non lascia dirty state, quindi safe.
-            Write-Host "::warning::Rebase fallito, fallback a git reset --hard origin/main"
-            git reset --hard origin/main
-          }
-
-      # Sessione 73 (issue #224): il bundle rigenera DUE volte per merge che
-      # tocca `docs/state/**` — una sul `push`, una sul `workflow_run`
-      # (misurato: run 41212641340 push = 20 s, run 41212688495 workflow_run =
-      # 22 s). Il secondo run serve solo se l'aggregator ha prodotto un commit:
-      # e' quello il caso in cui i blocchi aggregati sono cambiati e il bundle
-      # li deve copiare. Se l'aggregator non ha committato nulla, `origin/main`
-      # e' ancora al commit su cui ha girato, e il run sul `push` ha gia'
-      # rigenerato il bundle da quello stato: il secondo run non trova nulla
-      # da fare (il guard idempotente scrive "gia' in sync") e costa 22 s di
-      # tempo di runner per niente.
-      #
-      # Il controllo e' esatto, non prudenziale: `workflow_run.head_sha` e' il
-      # commit su cui l'aggregator ha girato. Se `origin/main` e' diverso,
-      # l'aggregator ha pushato e il bundle va rigenerato. Se e' uguale,
-      # l'aggregator non ha prodotto nulla.
-      #
-      # NB: se l'aggregator e' fallito (conclusion != success) si rigenera
-      # comunque: un fallimento puo' aver lasciato i blocchi a meta'.
-      - name: Decide se la rigenerazione e' necessaria
-        id: needed
-        shell: pwsh
-        run: |
-          if ('${{ github.event_name }}' -eq 'push') {
-            Write-Host "Trigger push: la rigenerazione e' sempre necessaria."
-            "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          } else {
-            $head = '${{ github.event.workflow_run.head_sha }}'
-            $conclusion = '${{ github.event.workflow_run.conclusion }}'
-            # `origin/main` dopo il fetch dello step precedente; FETCH_HEAD e' il
-            # fallback (il fetch lo scrive sempre, anche quando e' un no-op).
-            $current = (git rev-parse origin/main 2>$null).Trim()
-            if (-not $current) { $current = (git rev-parse FETCH_HEAD).Trim() }
-            Write-Host "aggregate: conclusion=$conclusion head_sha=$head ; origin/main=$current"
-            if ($conclusion -ne 'success') {
-              Write-Host "L'aggregator non e' andato a buon fine: rigenero comunque."
-              "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-            } elseif ($head -and $current -eq $head) {
-              Write-Host "L'aggregator non ha prodotto alcun commit: il bundle e' gia' stato rigenerato dal run su push. Salto."
-              "needed=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-            } else {
-              Write-Host "L'aggregator ha prodotto un commit: rigenero il bundle per allinearlo."
-              "needed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-            }
-          }
-
-      - name: Rigenera BUNDLE.md
-        if: steps.needed.outputs.needed == 'true'
-        shell: pwsh
-        run: |
-          Write-Host "::group::Regenerate BUNDLE.md"
-          pwsh scripts/generate-bundle.ps1
-
-      # Guard idempotente: se la rigenerazione non produce un diff reale,
-      # salta il commit. Evita commit-vuoto su push che non hanno cambiato
-      # il contenuto effettivo di BUNDLE (es. aggiornamenti di metadata).
-      - name: Verifica diff su docs/BUNDLE.md
-        if: always() && steps.needed.outputs.needed == 'true'
-        id: diff
-        shell: pwsh
-        run: |
-          if (Test-Path docs/BUNDLE.md) {
-            $diffLines = git diff --name-only docs/BUNDLE.md
-          } else {
-            $diffLines = "absent"
-          }
-          if ($diffLines) {
-            Write-Host "BUNDLE.md modificato dalla rigenerazione:"
-            git diff --stat docs/BUNDLE.md
-            "modified=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          } else {
-            Write-Host "BUNDLE.md gia' in sync: nessun commit necessario"
-            "modified=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          }
-
-      - name: Commit e push
-        if: steps.diff.outputs.modified == 'true'
-        shell: pwsh
-        run: |
-          git config user.name "kilo-bot[bot]"
-          git config user.email "kilo-bot@kilo.local"
-          git add docs/BUNDLE.md
-          if (git diff --cached --quiet) {
-            Write-Host "Nothing to commit (staged diff vuoto)"
-            exit 0
-          }
-          git commit -m "chore(bundle): auto-regen BUNDLE.md dopo merge di PR su main" `
-                       -m "Triggered by .github/workflows/auto-bundle.yml on push to main." `
-                       -m "Source: scripts/generate-bundle.ps1 (rigenera $files da docs/globale)." `
-                       -m "Target: docs/BUNDLE.md (contenuto FILE: ===== FILE: foo.md =====)." `
-                       -m "" `
-                       -m "Questo workflow chiude la classe di drift BUNDLE.md identificata da PR #113:" `
-                       -m "quando \$files o un file coperto da esso cambia, BUNDLE.md viene rigenerato" `
-                       -m "automaticamente senza richiedere rigenerazione manuale nella stessa PR." `
-                       -m "" `
-                       -m "Idempotente: salta il commit se la rigenerazione non produce un diff." `
-                       -m "Serialized con auto-state-aggregate.yml via concurrency group post-merge-bundle."
-          # Retry con ri-sincronizzazione (stessa race dei writer su `main`, issue #261).
-          # Issue #279: era **sintassi bash** dentro uno step `shell: pwsh` ->
-          # ParserError e il bundle non veniva mai committato. Riscritto in
-          # sintassi PowerShell (lo stesso fix di `auto-state-aggregate.yml`).
-          $pushed = $false
-          for ($attempt = 1; $attempt -le 3 -and -not $pushed; $attempt++) {
-            git add docs/BUNDLE.md
-            git commit -m "chore(bundle): auto-regen BUNDLE.md dopo merge di PR su main" `
-                         -m "Triggered by .github/workflows/auto-bundle.yml on push to main." `
-                         -m "Source: scripts/generate-bundle.ps1 (rigenera `$files da docs/globale)." `
-                         -m "Target: docs/BUNDLE.md (contenuto FILE: ===== FILE: foo.md =====)." `
-                         -m "" `
-                         -m "Questo workflow chiude la classe di drift BUNDLE.md identificata da PR #113:" `
-                         -m "  il bundle veniva rigenerato solo localmente e non committato su main." `
-                         -m "Rieseguito automaticamente ad ogni push su main."
-            git push origin main
-            if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
-            Write-Host "[auto-bundle] push rifiutato (tentativo $attempt): ri-sincronizzo"
-            git fetch origin main
-            git rebase origin/main
-            if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
-            pwsh scripts/generate-bundle.ps1
-          }
-          if (-not $pushed) {
-            Write-Host "[auto-bundle] push fallito dopo 3 tentativi"
-            exit 1
-          }
-      # Verifica finale dello stato: l'ultimo writer della catena garantisce
-      # che `main` sia coerente. Se i check falliscono (per es. porque' un
-      # writer precedente e' stato annullato dal concurrency group, issue #251),
-      # rigenera e committa — la catena si auto-ripara invece di lasciare lo
-      # stato stale in silenzio (issue #251).
-      - name: Verifica e auto-riparazione dello stato (issue #251)
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Continue"
-          for ($i = 1; $i -le 2; $i++) {
-            pwsh scripts/aggregate-state.ps1 -Check | Out-Host
-            $aggOk = $LASTEXITCODE -eq 0
-            pwsh scripts/generate-bundle.ps1 -Check | Out-Host
-            $bundleOk = $LASTEXITCODE -eq 0
-            if ($aggOk -and $bundleOk) {
-              Write-Host "[auto-bundle] stato in sync (tentativo $i)"
-              exit 0
-            }
-            Write-Host "[auto-bundle] stato NON in sync (aggregatore=$aggOk bundle=$bundleOk): rigenero (tentativo $i)"
-            git fetch origin main
-            git rebase origin/main 2>$null; if ($LASTEXITCODE -ne 0) { git reset --hard origin/main }
-            pwsh scripts/aggregate-state.ps1 | Out-Host
-            pwsh scripts/generate-bundle.ps1 | Out-Host
-            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md
-            if (-not (git diff --cached --quiet)) {
-              git config user.name "kilo-bot[bot]"
-              git config user.email "kilo-bot@kilo.local"
-              git commit -m "chore(state): auto-riparazione dei blocchi aggregati (issue #251)" `
-                           -m "I check post-merge (aggregate-state -Check / generate-bundle -Check) non erano in sync." `
-                           -m "Rigenerati dall'ultimo writer della catena: la catena post-merge si auto-ripara invece di lasciare lo stato stale."
-              git push origin HEAD:main
-            }
-          }
-          Write-Host "[auto-bundle] ATTENZIONE: lo stato non e' in sync neppure dopo 2 tentativi (issue #251): verifica manualmente"
-          exit 0
-
-
-
-===== FILE: .github/workflows/auto-session-merge-state.yml =====
-
+#   - **Un solo writer**: un solo commit e un solo push per merge. Nessuna
+#     race fra writer, nessun rebase di file generati.
+#   - **Il writer non ribasa MAI**: al tentativo successivo fa
+#     `git reset --hard origin/main` e **rigenera** da capo. I file generati
+#     sono il prodotto di un input (lo stato), non un merge di due storie.
+#   - **Il passaggio di CI sullo stato finale e' `workflow_run`**: e' agganciato
+#     alla CONCLUSIONE del writer, non a un push, quindi sopravvive alla
+#     soppressione del `GITHUB_TOKEN`. La CI fa `checkout ref: main` perche'
+#     `workflow_run.head_sha` e' il commit di *partenza* del writer, non la
+#     testa di `main` dopo il suo commit.
 #
-# CONCURRENCY (issue #251): questo writer ha il PROPRIO group, non un group
-# condiviso con gli altri writer di `main`. Con `cancel-in-progress: false`
-# GitHub NON accoda i run in attesa: li CANCELLA (*"any previously pending job
-# or workflow in the concurrency group will be cancelled"*). Con un group
-# condiviso, dei writer partendo insieme uno vinceva il lock e gli altri
-# venivano annullati senza eseguire nulla (misurato nel merge della PR #249:
-# auto-state-aggregate e auto-session-merge-state annullati in 1 s e 4 s).
-# L'ordinamento non dipende dal group ma dalla catena dei push
-# (merge -> sessione -> aggregate -> bundle): l'ultimo run arriva sullo
-# stato finale, e il guard `git diff --quiet` rende ogni writer idempotente.
+# Il writer termina sempre con uno stato coerente: prima di committare
+# verifica con gli stessi gate della CI (`-Check` dell'aggregator e del
+# bundle), cosi' un commit su `main` non puo' introdurre drift.
 #
-name: Auto session merge state
+# Trigger: `pull_request: [closed]` SENZA filtro `paths:` — ogni PR mergiata
+# passa dal writer, anche se non tocca `docs/state/**` (il bundle dipende da
+# molti file, non solo dallo stato).
+#
+name: post-merge
 
 on:
   pull_request:
     types: [closed]
     branches: [main]
+  # Recovery manuale: il writer e' idempotente, puo' essere rilanciato per
+  # rigenerare lo stato dopo un intervento manuale o dopo un merge fatto
+  # fuori dal flusso normale.
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Numero della PR mergiata (facoltativo: se assente si rigenera solo lo stato)'
+        required: false
+        type: string
 
+# UN solo writer su `main`: il group serializza i run (nessuna cancellazione:
+# `cancel-in-progress: false` mette in coda, non annulla) e rende esplicito
+# che `main` ha un solo scrittore.
 concurrency:
-  group: post-merge-session
+  group: main-writer
   cancel-in-progress: false
 
 permissions:
   contents: write
-  issues: read
-  # Issue #279: `apply-merge-state.mjs` chiama `GET /repos/{owner}/{repo}/pulls/{N}`
-  # per il merge commit e la data di merge. Senza `pull-requests: read` la
-  # chiamata risponde **403** e il workflow esce 2 prima di applicare lo stato:
-  # le sessioni restavano `merged: false` e il gate `check-merge-state.mjs`
-  # (fail-closed) teneva `main` rosso (misurato al merge della PR #278).
   pull-requests: read
+  issues: read
 
 jobs:
-  apply-merge-state:
-    if: github.event.pull_request.merged == true
+  write:
+    # Solo PR effettivamente mergiate; il dispatch manuale e' sempre ammesso.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout di `main`
+        uses: actions/checkout@v4
         with:
+          # `ref: main` esplicito: il writer lavora sulla testa corrente di
+          # `main` (che contiene il merge commit), non sul `github.sha` del
+          # PR chiuso.
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Sync con origin/main
+      - name: Runtime — PowerShell 7+
+        # I generatori sono PowerShell: il loro output dipende dalla versione
+        # del motore (issue #104: `AppendLine` e il binding dei parametri
+        # cambiano fra 5.1 e 7). Il baseline del repo e' pwsh 7 (AGENTS.md F9):
+        # qui la guardia e' fail-closed invece che solo documentale.
+        shell: pwsh
         run: |
-          git fetch origin main
-          git rebase origin/main || git reset --hard origin/main
+          $v = $PSVersionTable.PSVersion
+          Write-Host "PowerShell $($v.Major).$($v.Minor).$($v.Patch)"
+          if ($v.Major -lt 7) {
+            Write-Host "::error::Serve PowerShell 7+ (baseline del repo): l'output dei generatori non e' identico su 5.1"
+            exit 1
+          }
+
+      - name: Determina la PR da riapplicare
+        id: pr
+        shell: bash
+        env:
+          EVENT_PR: ${{ github.event.pull_request.number }}
+          INPUT_PR: ${{ inputs.pr }}
+        run: |
+          pr="${INPUT_PR:-${EVENT_PR:-}}"
+          echo "numero=${pr}" >> "$GITHUB_OUTPUT"
+          if [ -z "$pr" ]; then
+            echo "::notice::Nessuna PR indicata: il writer rigenera comunque i blocchi aggregati e il bundle."
+          else
+            echo "PR da riapplicare: #$pr"
+          fi
 
       - name: Applica lo stato di merge alla sessione
+        # `pull-requests: read` e' necessario: `apply-merge-state.mjs` chiama
+        # `GET /repos/{owner}/{repo}/pulls/{N}` per merge commit e data di merge
+        # (issue #279: senza la scope la chiamata risponde 403 e il workflow
+        # esce prima di applicare lo stato).
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.pr.outputs.numero }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        shell: bash
         run: |
-          pr_number="${{ github.event.pull_request.number }}"
-          head_ref="${{ github.event.pull_request.head.ref }}"
-          echo "Applica stato di merge per PR #$pr_number (branch $head_ref)"
-          # --branch permette di trovare la sessione anche quando il doc-sync
-          # in-branch non ha ancora scritto `pr: N` (la sessione dichiara il
-          # proprio branch nel frontmatter): senza, la sessione non viene
-          # trovata e la chiusura resta silenziosamente pendente (misurato:
-          # sessioni 81-83 rimaste `pr: 0` dopo il merge delle PR #257/#258/#260).
-          node scripts/apply-merge-state.mjs --pr "$pr_number" --branch "$head_ref"
+          if [ -z "$PR_NUMBER" ]; then
+            echo "::notice::Nessuna PR da riapplicare: niente da fare su docs/state/."
+            exit 0
+          fi
+          node scripts/apply-merge-state.mjs --pr "$PR_NUMBER" --branch "$HEAD_REF"
 
-      - name: Rigenera blocchi aggregati
+      - name: Rigenera i blocchi aggregati e il bundle
+        # L'ORDINE e' vincolante (AGENTS.md §"L'ordine dei due generatori"):
+        # prima l'aggregator (scrive i blocchi in docs/INDEX.md), poi il
+        # bundle (copia dentro BUNDLE.md il contenuto aggiornato di INDEX.md).
+        shell: pwsh
         run: |
           pwsh scripts/aggregate-state.ps1
-
-      - name: Rigenera bundle
-        run: |
           pwsh scripts/generate-bundle.ps1
 
-      - name: Committa e pusha se modificato
+      - name: Verifica lo stato prima del commit
+        # Gli stessi gate che la CI eseguira' sullo stato finale: un commit
+        # che non passa questi check non entra su `main`.
+        shell: pwsh
+        run: |
+          pwsh scripts/aggregate-state.ps1 -Check
+          pwsh scripts/generate-bundle.ps1 -Check
+
+      - name: Commit e push (un solo commit, un solo push)
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.numero }}
+        shell: pwsh
         run: |
           git config user.name "kilo-bot[bot]"
-          git config user.email "kilo-bot[bot]@users.noreply.github.com"
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore: sync session merge state for PR #${{ github.event.pull_request.number }}
-
-            Apply merge state to session frontmatter and regenerate aggregated blocks.
-
-            Merge commit: ${{ github.event.pull_request.merge_commit_sha }}
-            PR: #${{ github.event.pull_request.number }}"
+          git config user.email "kilo-bot@kilo.local"
+          $pushed = $false
+          for ($attempt = 1; $attempt -le 3 -and -not $pushed; $attempt++) {
+            # NB: la lista dei path e' letterale perche' il gate
+            # `scripts/validate-workflows.mjs` la confronta con i `$targets`
+            # dell'agregator (issue #136): i due elenchi non possono
+            # divergere senza che nessuno se ne accorga.
+            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md docs/state/ 2>&1 | Out-Null
+            if (git diff --cached --quiet) {
+              Write-Host "[post-merge] nessuna modifica: lo stato di `main` e' gia' in sync"
+              exit 0
+            }
+            git commit -m "chore(state): stato di merge e blocchi aggregati (PR #$env:PR_NUMBER)" `
+                         -m "Writer unico post-merge (issue #284): apply-merge-state + aggregate-state + generate-bundle." `
+                         -m "Un solo commit e un solo push: niente rebase sui file generati." `
+                         -m "II passaggio di CI sullo stato finale e' il trigger \`workflow_run\` di ci.yml." 2>&1 | Out-Null
             git push origin HEAD:main
-          else
-            echo "Nessuna modifica da committare"
-          fi
+            if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
+            # Push rifiutato: NON si ribasa (i file generati non si ribasano:
+            # il conflitto e' strutturale, issue #284). Si riallinea e si
+            # RIGENERA da capo: il risultato e' funzione dello stato, non
+            # della storia dei merge.
+            Write-Host "[post-merge] push rifiutato (tentativo $attempt): riallineo a origin/main e rigenero"
+            git fetch origin main
+            git reset --hard origin/main
+            if ($env:PR_NUMBER) {
+              node scripts/apply-merge-state.mjs --pr $env:PR_NUMBER --branch "${{ github.event.pull_request.head.ref }}"
+            }
+            pwsh scripts/aggregate-state.ps1
+            pwsh scripts/generate-bundle.ps1
+          }
+          if (-not $pushed) {
+            Write-Host "::error::[post-merge] push fallito dopo 3 tentativi: lo stato di `main` non e' stato applicato"
+            exit 1
+          }
+
 
 
 ===== FILE: fixtures/synthetic-history/spotify-sample.json =====

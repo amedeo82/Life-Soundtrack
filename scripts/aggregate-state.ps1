@@ -129,6 +129,32 @@ if ($Help) {
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+# === Indipendenza dal sistema operativo e dalla locale (issue #284) ===
+#
+# Il requisito e' che le automazioni producano gli stessi byte su Windows,
+# Linux e macOS. Tre dipendenze storiche lo impedivano:
+#
+#   1. **Versione del motore**: l'output dipende da PowerShell (issue #104: il
+#      binding dei parametri e `StringBuilder.AppendLine` cambiano fra 5.1 e
+#      7). Il baseline del repo e' pwsh 7 (AGENTS.md F9): qui la guardia
+#      diventa fail-closed invece che solo documentale.
+#   2. **Locale**: l'interpolazione di un numero usa la locale corrente
+#      (separatore decimale `,` su it-IT, `.` su en-US): lo stesso input
+#      produceva blocchi DIVERSI su due macchine. `InvariantCulture` rende
+#      il rendering indipendente dalla lingua del runner.
+#   3. **Fuso orario**: il timestamp usava l'ora locale del runner (UTC sui
+#      runner GitHub, locale sulla macchina dello sviluppatore).
+#
+# La prova che l'obiettivo e' raggiunto e' il gate di portabilita'
+# `scripts/check-generators-portable.mjs`, che rigenera i file su
+# `ubuntu-latest` e `windows-latest` e confronta i byte.
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Host "[FAIL] Serve PowerShell 7+ (baseline del repo, AGENTS.md F9): trovato $($PSVersionTable.PSVersion)." -ForegroundColor Red
+    Write-Host "       L'output dei generatori non e' identico su Windows PowerShell 5.1 (issue #104, #284)." -ForegroundColor Yellow
+    exit 2
+}
+$InvariantCulture = [System.Globalization.CultureInfo]::InvariantCulture
+
 $repoRoot = (Get-Location).Path
 $stateSessionsDir = Join-Path $repoRoot "docs/state/sessions"
 $stateStoriesDir  = Join-Path $repoRoot "docs/state/stories"
@@ -190,6 +216,39 @@ $script:stateStoryFileCache   = $null
 $script:stateContentCache     = @{}
 $script:stateParsedCache      = @{}
 
+# Ordinamento TOTALE, indipendente dal filesystem e dalla locale (issue #284).
+#
+# `Sort-Object` ordina le stringhe con la collazione della LOCALE corrente e
+# non e' garantito stabile: a parita' di chiave l'ordine finale dipendeva
+# dall'ordine di enumerazione di `Get-ChildItem`, che e' diverso su Windows e
+# Linux (il caso reale: `0.3, 0.5, 0.6` su Linux e `0.6, 0.5, 0.3` su
+# Windows, issue #79). Qui il confronto e' esplicito e la chiave secondaria e'
+# il nome del file, confrontato in modo ORDINALE: la coppia (chiave, nome) e'
+# univoca, quindi l'ordinamento e' totale e riproducibile su ogni OS.
+function Sort-StateFiles {
+    param(
+        [object[]]$Items,
+        [scriptblock]$KeySelector,
+        [scriptblock]$TieBreakSelector
+    )
+    $array = [object[]]$Items
+    if ($array.Length -le 1) { return $array }
+    $comparison = [System.Comparison[object]] {
+        param($a, $b)
+        $ka = & $KeySelector $a
+        $kb = & $KeySelector $b
+        if ($ka -is [version]) {
+            $c = $ka.CompareTo($kb)
+        } else {
+            $c = ([int]$ka).CompareTo([int]$kb)
+        }
+        if ($c -ne 0) { return $c }
+        return [string]::CompareOrdinal((& $TieBreakSelector $a), (& $TieBreakSelector $b))
+    }
+    [System.Array]::Sort($array, $comparison)
+    return $array
+}
+
 function Get-StateSessionFiles {
     if ($null -ne $script:stateSessionFileCache) { return $script:stateSessionFileCache }
     if (-not (Test-Path $stateSessionsDir)) { $script:stateSessionFileCache = @(); return $script:stateSessionFileCache }
@@ -200,7 +259,11 @@ function Get-StateSessionFiles {
             Path   = $_.FullName
             Base   = $_.BaseName
         }
-    } | Sort-Object Number)
+    })
+    # Ordinamento totale (issue #284): numero crescente, nome del file come
+    # chiave secondaria ORDINALE.
+    $script:stateSessionFileCache = @(Sort-StateFiles -Items $script:stateSessionFileCache `
+        -KeySelector { param($x) $x.Number } -TieBreakSelector { param($x) $x.Base })
     return $script:stateSessionFileCache
 }
 
@@ -214,12 +277,18 @@ function Get-StateStoryFiles {
             Path = $_.FullName
             Base = $_.BaseName
         }
+    })
     # NB: serve `$_.Id` esplicito, NON `$Id` shorthand. Con `[version]` come
     # primo token, la forma abbreviata non viene espansa da PowerShell 5.1:
     # tutti gli item hanno sort key `$null`, l'ordine degenera a quello di
     # `Get-ChildItem` (filesystem-dipendente). Vedi issue #79 e il gate
     # `scripts/test-aggregate-determinism.sh` (T1+T2).
-    } | Sort-Object { [version]$_.Id })
+    #
+    # Issue #284: l'ordinamento e' reso TOTALE (chiave secondaria ORDINALE sul
+    # nome del file): con `Sort-Object` una chiave di versione uguale lasciava
+    # l'ordine finale dipendente dall'enumerazione del filesystem.
+    $script:stateStoryFileCache = @(Sort-StateFiles -Items $script:stateStoryFileCache `
+        -KeySelector { param($x) [version]$x.Id } -TieBreakSelector { param($x) $x.Base })
     return $script:stateStoryFileCache
 }
 
@@ -560,7 +629,15 @@ function Build-Block-BundleInventory {
     }
 
     $totalKB = [math]::Round($totalSize / 1KB, 1)
-    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm'
+    # Issue #284: il rendering del numero usa la locale INVARIANTE: con la
+    # locale corrente lo stesso input produceva "716,6 KB" su it-IT e
+    # "716.6 KB" su en-US — due blocchi diversi per lo stesso stato. Il
+    # formato (`.ToString(culture)`) preserva la resa attuale ("716" per un
+    # valore intero) e cambia solo il separatore decimale.
+    $totalKBText = $totalKB.ToString($InvariantCulture)
+    # UTC + locale invariante: il timestamp non dipende ne' dal fuso orario del
+    # runner ne' dalla sua lingua.
+    $timestamp = [DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm', $InvariantCulture)
 
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.AppendLine($markerBundleInventoryStart)
@@ -573,7 +650,7 @@ function Build-Block-BundleInventory {
         $excludedNames = ($files | Where-Object { $aggregatorManaged -contains $_ }) -join ', '
         " (esclusi dal calcolo: $excludedNames)"
     } else { " (nessuno escluso dal calcolo: i file aggregator-managed non sono in `$files)" }
-    [void]$sb.AppendLine("- Dimensione totale: $totalKB KB$excludedNote")
+    [void]$sb.AppendLine("- Dimensione totale: $totalKBText KB$excludedNote")
     [void]$sb.AppendLine("- Ultima aggregazione: $timestamp")
     [void]$sb.AppendLine("- Generatori: `'scripts/aggregate-state.ps1`' (V2) + `'scripts/generate-bundle.ps1`' (content)")
     [void]$sb.AppendLine("")

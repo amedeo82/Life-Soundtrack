@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Test di regressione per la copertura `git add` vs `$targets` dell'aggregator (issue #136).
 #
-# Difende il bug chiuso in issue #136: `auto-state-aggregate.yml` genera il blocco
+# Difende il bug chiuso in issue #136: `post-merge.yml` genera il blocco
 # `AGGREGATE-NEXT-STEP-*` del README.md (quinto target di scripts/aggregate-state.ps1,
 # introdotto da ADR-0008 V3 / issue #127) e poi lo scarta, perche' `README.md` non era
 # nella riga `git add`. Il blocco restava congelato allo stato in cui era quando V3 ha
@@ -26,7 +26,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
 AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
-WORKFLOW="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+WORKFLOW="$REPO_ROOT/.github/workflows/post-merge.yml"
 
 if ! command -v node >/dev/null 2>&1; then
   echo "[SKIP] node non disponibile: impossibile eseguire validate-workflows.mjs"
@@ -45,7 +45,7 @@ make_fixture() {
   mkdir -p "$d/.github/workflows" "$d/scripts"
   cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
   cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
-  cp "$WORKFLOW" "$d/.github/workflows/auto-state-aggregate.yml"
+  cp "$WORKFLOW" "$d/.github/workflows/post-merge.yml"
 }
 
 run_validator() {
@@ -65,8 +65,8 @@ echo "=== T2: fixture senza README.md nella riga \`git add\` (reintroduzione del
   # La riga `git add` deve coprire TUTTI i $targets: la mutazione li rimuove
   # da OGNI riga `git add` del workflow (con il retry ce n'e' piu' di una:
   # quella preventiva e quella dentro il ciclo di ri-sincronizzazione).
-  sed -i.bak '/git add/ s#README\.md##g' "$D/.github/workflows/auto-state-aggregate.yml"
-  if grep -qE '^[[:space:]]*git add .*README\.md' "$D/.github/workflows/auto-state-aggregate.yml"; then
+  sed -i.bak '/git add/ s#README\.md##g' "$D/.github/workflows/post-merge.yml"
+  if grep -qE '^[[:space:]]*git add .*README\.md' "$D/.github/workflows/post-merge.yml"; then
     ng "mutazione non applicata: README.md e' ancora nella riga git add"
   else
     ok "mutazione applicata (README.md rimosso dalla riga git add)"
@@ -82,7 +82,7 @@ echo "=== T2: fixture senza README.md nella riga \`git add\` (reintroduzione del
 echo "=== T3: fixture senza nessuna riga \`git add\` ==="
 {
   D="$(mktemp -d)"; make_fixture "$D"
-  sed -i.bak '/^[[:space:]]*git add /d' "$D/.github/workflows/auto-state-aggregate.yml"
+  sed -i.bak '/^[[:space:]]*git add /d' "$D/.github/workflows/post-merge.yml"
 
   out="$(run_validator "$D")"; ec=$?
   if [ $ec -eq 1 ]; then ok "exit 1 (nessun target committato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -5)"; fi
@@ -96,7 +96,7 @@ echo "=== T4: copertura via directory staged invece di path singoli ==="
   D="$(mktemp -d)"; make_fixture "$D"
   # `git add .` copre tutti i $targets per prefisso: il gate deve accettare la
   # forma "directory" senza pretendere i path letterali.
-  sed -i.bak 's#^\(\s*git add \).*#\1.#' "$D/.github/workflows/auto-state-aggregate.yml"
+  sed -i.bak 's#^\(\s*git add \).*#\1.#' "$D/.github/workflows/post-merge.yml"
 
   out="$(run_validator "$D")"; ec=$?
   if [ $ec -eq 0 ]; then ok "exit 0 (copertura per directory accettata)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi

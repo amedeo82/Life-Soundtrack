@@ -1,0 +1,191 @@
+#
+# POST-MERGE — IL SOLO WRITER DI `main` (issue #284)
+#
+# Questo workflow sostituisce i tre writer precedenti
+# (`auto-session-merge-state`, `auto-state-aggregate`, `auto-bundle`), che
+# concorrevano sullo stesso `main` e sui **stessi file generati**.
+#
+# I tre difetti che la concorrenza produceva (misurati il 2026-11-02):
+#
+#   1. `git push origin main` rifiutato (`! [rejected] main -> main`) perche'
+#      un altro writer aveva gia' pushato: il retry faceva `git rebase
+#      origin/main` **sui file generati** -> conflitto in docs/BUNDLE.md,
+#      docs/INDEX.md, docs/SESSIONS.md -> run fallito. Il rebase dei file
+#      generati non e' una race risolvibile: e' un conflitto strutturale.
+#   2. Il commit del writer non triggava la CI: i writer pushano con
+#      `GITHUB_TOKEN` e GitHub sopprime i workflow `on: push` generati dal
+#      token stesso (`docs/12-DEVOPS.md` §9.14: "i commit dei writer non
+#      hanno mai attivato una run CI").
+#   3. Il gate `check-merge-state.mjs` (fail-closed) girava sul merge commit,
+#      PRIMA che il writer applicasse lo stato -> `[FAIL]` e `main` rosso.
+#
+# Le tre cause sono Eliminate per costruzione:
+#
+#   - **Un solo writer**: un solo commit e un solo push per merge. Nessuna
+#     race fra writer, nessun rebase di file generati.
+#   - **Il writer non ribasa MAI**: al tentativo successivo fa
+#     `git reset --hard origin/main` e **rigenera** da capo. I file generati
+#     sono il prodotto di un input (lo stato), non un merge di due storie.
+#   - **Il passaggio di CI sullo stato finale e' `workflow_run`**: e' agganciato
+#     alla CONCLUSIONE del writer, non a un push, quindi sopravvive alla
+#     soppressione del `GITHUB_TOKEN`. La CI fa `checkout ref: main` perche'
+#     `workflow_run.head_sha` e' il commit di *partenza* del writer, non la
+#     testa di `main` dopo il suo commit.
+#
+# Il writer termina sempre con uno stato coerente: prima di committare
+# verifica con gli stessi gate della CI (`-Check` dell'aggregator e del
+# bundle), cosi' un commit su `main` non puo' introdurre drift.
+#
+# Trigger: `pull_request: [closed]` SENZA filtro `paths:` — ogni PR mergiata
+# passa dal writer, anche se non tocca `docs/state/**` (il bundle dipende da
+# molti file, non solo dallo stato).
+#
+name: post-merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  # Recovery manuale: il writer e' idempotente, puo' essere rilanciato per
+  # rigenerare lo stato dopo un intervento manuale o dopo un merge fatto
+  # fuori dal flusso normale.
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Numero della PR mergiata (facoltativo: se assente si rigenera solo lo stato)'
+        required: false
+        type: string
+
+# UN solo writer su `main`: il group serializza i run (nessuna cancellazione:
+# `cancel-in-progress: false` mette in coda, non annulla) e rende esplicito
+# che `main` ha un solo scrittore.
+concurrency:
+  group: main-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: read
+
+jobs:
+  write:
+    # Solo PR effettivamente mergiate; il dispatch manuale e' sempre ammesso.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout di `main`
+        uses: actions/checkout@v4
+        with:
+          # `ref: main` esplicito: il writer lavora sulla testa corrente di
+          # `main` (che contiene il merge commit), non sul `github.sha` del
+          # PR chiuso.
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Runtime — PowerShell 7+
+        # I generatori sono PowerShell: il loro output dipende dalla versione
+        # del motore (issue #104: `AppendLine` e il binding dei parametri
+        # cambiano fra 5.1 e 7). Il baseline del repo e' pwsh 7 (AGENTS.md F9):
+        # qui la guardia e' fail-closed invece che solo documentale.
+        shell: pwsh
+        run: |
+          $v = $PSVersionTable.PSVersion
+          Write-Host "PowerShell $($v.Major).$($v.Minor).$($v.Patch)"
+          if ($v.Major -lt 7) {
+            Write-Host "::error::Serve PowerShell 7+ (baseline del repo): l'output dei generatori non e' identico su 5.1"
+            exit 1
+          }
+
+      - name: Determina la PR da riapplicare
+        id: pr
+        shell: bash
+        env:
+          EVENT_PR: ${{ github.event.pull_request.number }}
+          INPUT_PR: ${{ inputs.pr }}
+        run: |
+          pr="${INPUT_PR:-${EVENT_PR:-}}"
+          echo "numero=${pr}" >> "$GITHUB_OUTPUT"
+          if [ -z "$pr" ]; then
+            echo "::notice::Nessuna PR indicata: il writer rigenera comunque i blocchi aggregati e il bundle."
+          else
+            echo "PR da riapplicare: #$pr"
+          fi
+
+      - name: Applica lo stato di merge alla sessione
+        # `pull-requests: read` e' necessario: `apply-merge-state.mjs` chiama
+        # `GET /repos/{owner}/{repo}/pulls/{N}` per merge commit e data di merge
+        # (issue #279: senza la scope la chiamata risponde 403 e il workflow
+        # esce prima di applicare lo stato).
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.pr.outputs.numero }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        shell: bash
+        run: |
+          if [ -z "$PR_NUMBER" ]; then
+            echo "::notice::Nessuna PR da riapplicare: niente da fare su docs/state/."
+            exit 0
+          fi
+          node scripts/apply-merge-state.mjs --pr "$PR_NUMBER" --branch "$HEAD_REF"
+
+      - name: Rigenera i blocchi aggregati e il bundle
+        # L'ORDINE e' vincolante (AGENTS.md §"L'ordine dei due generatori"):
+        # prima l'aggregator (scrive i blocchi in docs/INDEX.md), poi il
+        # bundle (copia dentro BUNDLE.md il contenuto aggiornato di INDEX.md).
+        shell: pwsh
+        run: |
+          pwsh scripts/aggregate-state.ps1
+          pwsh scripts/generate-bundle.ps1
+
+      - name: Verifica lo stato prima del commit
+        # Gli stessi gate che la CI eseguira' sullo stato finale: un commit
+        # che non passa questi check non entra su `main`.
+        shell: pwsh
+        run: |
+          pwsh scripts/aggregate-state.ps1 -Check
+          pwsh scripts/generate-bundle.ps1 -Check
+
+      - name: Commit e push (un solo commit, un solo push)
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.numero }}
+        shell: pwsh
+        run: |
+          git config user.name "kilo-bot[bot]"
+          git config user.email "kilo-bot@kilo.local"
+          $pushed = $false
+          for ($attempt = 1; $attempt -le 3 -and -not $pushed; $attempt++) {
+            # NB: la lista dei path e' letterale perche' il gate
+            # `scripts/validate-workflows.mjs` la confronta con i `$targets`
+            # dell'agregator (issue #136): i due elenchi non possono
+            # divergere senza che nessuno se ne accorga.
+            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md docs/state/ 2>&1 | Out-Null
+            if (git diff --cached --quiet) {
+              Write-Host "[post-merge] nessuna modifica: lo stato di `main` e' gia' in sync"
+              exit 0
+            }
+            git commit -m "chore(state): stato di merge e blocchi aggregati (PR #$env:PR_NUMBER)" `
+                         -m "Writer unico post-merge (issue #284): apply-merge-state + aggregate-state + generate-bundle." `
+                         -m "Un solo commit e un solo push: niente rebase sui file generati." `
+                         -m "II passaggio di CI sullo stato finale e' il trigger \`workflow_run\` di ci.yml." 2>&1 | Out-Null
+            git push origin HEAD:main
+            if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
+            # Push rifiutato: NON si ribasa (i file generati non si ribasano:
+            # il conflitto e' strutturale, issue #284). Si riallinea e si
+            # RIGENERA da capo: il risultato e' funzione dello stato, non
+            # della storia dei merge.
+            Write-Host "[post-merge] push rifiutato (tentativo $attempt): riallineo a origin/main e rigenero"
+            git fetch origin main
+            git reset --hard origin/main
+            if ($env:PR_NUMBER) {
+              node scripts/apply-merge-state.mjs --pr $env:PR_NUMBER --branch "${{ github.event.pull_request.head.ref }}"
+            }
+            pwsh scripts/aggregate-state.ps1
+            pwsh scripts/generate-bundle.ps1
+          }
+          if (-not $pushed) {
+            Write-Host "::error::[post-merge] push fallito dopo 3 tentativi: lo stato di `main` non e' stato applicato"
+            exit 1
+          }

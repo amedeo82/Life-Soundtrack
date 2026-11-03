@@ -35,7 +35,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
 AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
-AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/auto-state-aggregate.yml"
+AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/post-merge.yml"
 CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
 
 if ! command -v node >/dev/null 2>&1; then
@@ -50,14 +50,14 @@ ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
 
 # Repo fixture minimo. La struttura conta: validate-workflows.mjs risolve repoRoot
 # come <dir>/../.., e il gate di copertura `git add` (#136) fallisce se
-# `auto-state-aggregate.yml` o l'aggregator mancano — altrimenti T2-T5 passerebbero
+# `post-merge.yml` o l'aggregator mancano — altrimenti T2-T5 passerebbero
 # per il motivo sbagliato.
 make_fixture() {
   local d="$1"
   mkdir -p "$d/.github/workflows" "$d/scripts"
   cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
   cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
-  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/auto-state-aggregate.yml"
+  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/post-merge.yml"
   cp "$CI_WF" "$d/.github/workflows/ci.yml"
 }
 
