@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 07:41
-> Totale file: 172
+> Data: 2026-11-03 08:16
+> Totale file: 175
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -20264,6 +20264,150 @@ scalari YAML, 15 sulle scope `permissions`.
 - `scripts/check-merge-state.mjs`, `scripts/check-generators-portable.mjs` (nuovo)
 - `scripts/aggregate-state.ps1`, `scripts/generate-bundle.ps1`, `scripts/validate-workflows.mjs`
 - `docs/13-ADR/0013-post-merge-automation.md` (nuovo), `docs/12-DEVOPS.md`, `AGENTS.md`
+
+
+
+===== FILE: docs/state/sessions/91-post-merge-messaggio-commit.md =====
+
+---
+number: 91
+title: "Il messaggio di commit del writer post-merge senza escape PowerShell rotti"
+date: 2026-11-03
+state: 🟡
+merged: false
+branch: feat/287-post-merge-yml-il-messaggio-di-commit-de
+pr: 288
+claim: kilo-HP-ELITEBOOK-c90auto
+tags: [devops, ci, workflow, qualita]
+---
+
+# Sessione 91 — Il messaggio del writer, e il test che lo tiene a posto
+
+> **Oggetto**: dopo il merge della PR #285 (Sessione 90, issue #284) la nuova
+> architettura delle automazioni funziona — zero run rossi, writer unico, CI
+> post-writer — ma il **messaggio di commit** che il writer scrive su `main` era
+> corrotto: al posto dei backtick comparivano backslash letterali
+> (`\workflow_run\`).
+
+## Sintesi
+
+Il writer `post-merge.yml` costruiva il messaggio di commit con:
+
+```powershell
+-m "II passaggio di CI sullo stato finale e' il trigger \`workflow_run\` di ci.yml."
+```
+
+In PowerShell il backtick è il carattere di escape: `\`` produce un backslash
+letterale e **consuma** il backtick. Per ottenere un backtick letterale serve
+il **doppio** backtick. Il risultato sul `main` era:
+
+```
+II passaggio di CI sullo stato finale e' il trigger \workflow_run\ di ci.yml.
+```
+
+Il difetto è stato trovato ispezionando il commit del writer dopo il merge
+della PR #285 (`5f54296`): la riga di storia era sporca a ogni merge.
+
+## Cosa e' emerso
+
+- Il difetto era **cosmetico ma cumulativo**: il writer scrive un commit per
+  merge, quindi ogni merge di `main` accumulava la stessa riga corrotta.
+- Nessun gate lo intercettava: i gate sui workflow verificano la **struttura**
+  (trigger, permessi, `git add`, un solo writer), non il **testo** del
+  messaggio.
+- La lezione che ne segue: un gate che verifica la forma del workflow non
+  verifica cosa il workflow *scrive*. Serviva un test **funzionale**.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-91.1 | Il messaggio non usa piu' i backtick | In un messaggio di git non aggiungono nulla; la classe di difetto (escape PowerShell) sparisce invece di essere gestita |
+| D-91.2 | Ogni riga del messaggio resta sotto i 100 caratteri | Regola `body-max-line-length` di commitlint: se il workflow installasse un giorno le dipendenze, il commit non deve fallire |
+| D-91.3 | Il messaggio viene **estratto dal workflow reale** dal test, non ricopiato | Un test che ricopia il messaggio non lo testa: la regressione deve fallire sul testo vero |
+| D-91.4 | Il test è **funzionale**: esegue i passi del writer in un clone con un remoto finto | Copre il comportamento (stato applicato, un solo commit, push, idempotenza), non la forma |
+
+## Analisi di avanzamento
+
+**Numeri.** Nessun codice applicativo toccato: la percentuale di
+implementazione delle story resta **70%** (21 su 30, effort 72%), **9 step**
+rimanenti. Il lavoro è di **devops**.
+
+**Cosa è pronto.**
+- `.github/workflows/post-merge.yml`: il messaggio di commit senza backtick e
+  senza backslash, con la spiegazione della causa in un commento (così non
+  viene reintrodotto).
+- `scripts/test-post-merge-writer.sh` (nuovo): **19 assert** che eseguono i
+  passi del writer in un clone locale con un remoto finto — stato di merge
+  applicato e finito sul remoto, blocchi rigenerati, bundle in sync, **un solo
+  commit**, push, idle del remoto allineato, messaggio pulito, **PR senza
+  sessione → nessun commit**, **idempotenza**.
+- `.github/workflows/ci.yml`: il test gira nel job `gates-workflows` (bloccante
+  su ogni PR).
+- `scripts/generate-bundle.ps1`: il nuovo script entra nel `$files`.
+
+**Cosa manca.** Nulla sul piano funzionale (dopo il *controllo totale* della
+Sessione 91, vedi sotto): la verifica end-to-end del
+writer è già stata fatta dal merge della PR #285 (zero run rossi) e il difetto
+di #287 è coperto da un test con **controllo negativo eseguito**: reintrodotto
+il difetto, il test fallisce con il messaggio esatto (`\workflow_run\`),
+ripristinato il fix, il test torna verde (19/19).
+
+**Salute tecnica.** PowerShell 7.6.9. Nessun blocco `AGGREGATE-*` toccato a
+mano. Il test non tocca il repository vero: clona in una directory temporanea
+e usa un remoto finto (`git remote set-url`), quindi non puo' spingere nulla
+sull'origin reale.
+
+**Gate di testabilità.** `bash scripts/test-post-merge-writer.sh` → 19/19 ·
+`bash scripts/test-generators-portable.sh` → 6/6 ·
+`node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-protocol-consistency.mjs` → 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Controllo totale di funzionamento del workflow
+
+Il *controllo totale* richiesto dal project owner (2026-11-03) ha eseguito
+l'intera catena — merge → writer → CI post-writer → gate locali — e ha
+**trovato tre difetti reali**, che il merge della PR #285 non aveva potuto
+mostrare perché riguardavano il percorso di test, non il writer:
+
+| # | Difetto | Sintomo | Causa |
+|---|---------|---------|-------|
+| 1 | **Il bundle nella PR era stale** | `gates-portability` falliva su ubuntu **e** windows: «docs/BUNDLE.md non è in sync» | Dopo l'ultima modifica a un file di `$files` il bundle non era stato rigenerato (regola D.26.3). Il gate lo ha intercettato: è esattamente il suo lavoro |
+| 2 | **Il test del writer non reggeva l'ambiente della CI** | `gates-workflows` rosso: «failed to push some refs … (shallow update not allowed)» | In CI il checkout è **shallow** e su un HEAD staccato: il `git clone` della sorgente produceva un clone shallow e senza HEAD, e il push verso il remoto finito veniva rifiutato. Il fixture ora è ricostruito dal contenuto tracciato (`git archive`): repository completo, un solo commit, stessi file della CI |
+| 3 | **Il gate di portabilità aveva un falso positivo** | `gates-portability-compare` rosso: «1/5 file divergono» (`docs/BUNDLE.md`) | L'hash del manifest includeva i **campi mutabili** (`> Data:` e `- Ultima aggregazione:`): i due job cadendo in minuti diversi producevano hash diversi **senza alcuna differenza reale di contenuto** |
+
+Il terzo difetto è il più instructive: è **il gate stesso** a essere sbagliato,
+non i generatori. Correzione: l'hash è calcolato sul contenuto normalizzato
+(modulo `scripts/portability-normalize.mjs`, senza effetti collaterali, con
+test di regressione T4 che verifica che l'hash sia **invariante** rispetto ai
+timestamp e **sensibile** al contenuto reale).
+
+In parallelo è stato corretto un difetto di progetto della matrix: il manifest
+veniva prodotto nello **stesso** step del check del bundle, quindi un bundle
+non in sync faceva saltare l'upload e il confronto cross-OS non si poteva fare
+proprio quando serviva. Ora le fasi sono separate e l'upload ha `if: always()`.
+
+**Stato finale della PR #288**: 17/17 job verdi, incluso il confronto
+cross-OS su due sistemi operativi reali.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un gate che verifica la **forma** di un workflow non verifica **cosa scrive** | Il test del writer è funzionale: esegue i passi e guarda il risultato |
+| Un test che ricopia il testo dal codice che testa non testa nulla | Il messaggio è estratto dal workflow reale nel test |
+| Un controllo negativo eseguito vale più di un test che "passa" | Il difetto è stato reintrodotto apposta: il test è fallito con il messaggio esatto |
+| In PowerShell il backtick è l'escape: il backslash non lo protegge | I messaggi delle automazioni non usano piu' i backtick; le righe restano sotto i 100 caratteri |
+
+## Documenti aggiornati
+
+- `.github/workflows/post-merge.yml` (messaggio di commit), `.github/workflows/ci.yml` (nuovo step di gate)
+- `scripts/test-post-merge-writer.sh` (nuovo), `scripts/generate-bundle.ps1` (`$files`)
+- `docs/state/sessions/91-post-merge-messaggio-commit.md` (questo file)
 
 
 
@@ -44735,6 +44879,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { normalizeMutable } from './portability-normalize.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -44754,6 +44899,13 @@ function argValues(name) {
 const root = resolve(argValue('--root', '.'));
 const manifestPath = argValue('--manifest');
 const comparePaths = argValues('--compare');
+// Le fasi sono separabili perche' nella CI il manifest cross-OS deve essere
+// pubblicato **anche** quando un'altra fase fallisce: senza il manifest il
+// confronto fra i due sistemi operativi non si puo' fare proprio quando
+// serve (misurato il 2026-11-03: il bundle non in sync faceva saltare
+// l'upload e quindi il confronto).
+const skipBundleCheck = argv.includes('--no-bundle-check');
+const bundleCheckOnly = argv.includes('--bundle-check-only');
 
 /** I file prodotti dai generatori (stessi target dell'aggregator). */
 const TARGETS = [
@@ -44795,7 +44947,7 @@ function run(command, args, cwd = root) {
 }
 
 function sha256(file) {
-  return createHash('sha256').update(readFileSync(file)).digest('hex');
+  return createHash('sha256').update(normalizeMutable(readFileSync(file, 'utf8'))).digest('hex');
 }
 
 // === confronto fra manifest (cross-OS) ========================================
@@ -44867,38 +45019,44 @@ function regenerate() {
   }
 }
 
-// --- 1. determinismo: due rigenerazioni consecutive ---------------------------
-
-console.log('[INFO] check-generators-portable: rigenero i file in un worktree pulito');
-const first = regenerate();
-const second = regenerate();
-const drift = Object.keys(first).filter((k) => first[k] !== second[k]);
-if (drift.length > 0) {
-  fail(`i generatori non sono deterministici: ${drift.length} file cambiano fra due run consecutivi`);
-  for (const k of drift) console.error(`         ${k}: ${first[k]} -> ${second[k]}`);
-  process.exit(1);
-}
-console.log(`[OK] i generatori sono deterministici (${Object.keys(first).length} file, due run consecutive)`);
-
-if (manifestPath) {
-  mkdirSync(resolve(manifestPath).replace(/[\\/][^\\/]*$/, ''), { recursive: true });
-  writeFileSync(manifestPath, JSON.stringify(first, null, 2) + '\n', 'utf8');
-  console.log(`[OK] manifest scritto in ${manifestPath}`);
-}
-
 // --- 2. invarianti del repo sullo stato committato ---------------------------
 
-const bundleCheck = spawnSync(
-  'pwsh',
-  ['-NoProfile', '-File', 'scripts/generate-bundle.ps1', '-Check'],
-  { cwd: root, encoding: 'utf8' },
-);
-if (bundleCheck.status !== 0) {
-  console.error((bundleCheck.stdout || '') + (bundleCheck.stderr || ''));
-  fail('il bundle non e\' in sync con lo stato committato (esegui `pwsh scripts/generate-bundle.ps1`)');
-  process.exit(1);
+if (!bundleCheckOnly) {
+  console.log('[INFO] check-generators-portable: rigenero i file in un worktree pulito');
+  const first = regenerate();
+  const second = regenerate();
+  const drift = Object.keys(first).filter((k) => first[k] !== second[k]);
+  if (drift.length > 0) {
+    fail(`i generatori non sono deterministici: ${drift.length} file cambiano fra due run consecutivi`);
+    for (const k of drift) console.error(`         ${k}: ${first[k]} -> ${second[k]}`);
+    process.exit(1);
+  }
+  console.log(
+    `[OK] i generatori sono deterministici (${Object.keys(first).length} file, due run consecutive)`,
+  );
+
+  if (manifestPath) {
+    mkdirSync(resolve(manifestPath).replace(/[\\/][^\\/]*$/, ''), { recursive: true });
+    writeFileSync(manifestPath, JSON.stringify(first, null, 2) + '\n', 'utf8');
+    console.log(`[OK] manifest scritto in ${manifestPath}`);
+  }
 }
-console.log('[OK] il bundle e\' in sync con lo stato committato');
+
+if (!skipBundleCheck) {
+  const bundleCheck = spawnSync(
+    'pwsh',
+    ['-NoProfile', '-File', 'scripts/generate-bundle.ps1', '-Check'],
+    { cwd: root, encoding: 'utf8' },
+  );
+  if (bundleCheck.status !== 0) {
+    console.error((bundleCheck.stdout || '') + (bundleCheck.stderr || ''));
+    fail(
+      "il bundle non e' in sync con lo stato committato (esegui `pwsh scripts/generate-bundle.ps1`)",
+    );
+    process.exit(1);
+  }
+  console.log('[OK] il bundle e\' in sync con lo stato committato');
+}
 
 process.exit(0);
 
@@ -44996,12 +45154,283 @@ else
 fi
 
 echo ""
+echo "=== T4: la normalizzazione dei campi mutabili rende l'hash invariante ==="
+# I campi mutabili (Data del bundle, Ultima aggregazione) cambiano a ogni
+# esecuzione: se l'hash li includesse, il confronto cross-OS sarebbe
+# falsamente positivo quando i due job cadono in minuti diversi (misurato il
+# 2026-11-03: docs/BUNDLE.md con hash diversi su ubuntu e windows, senza
+# differenze reali). Il confronto deve essere INVARIANTE rispetto a questi
+# campi.
+if node --input-type=module -e '
+import { normalizeMutable } from "./scripts/portability-normalize.mjs";
+const a = normalizeMutable("> Data: 2026-01-01 00:00\n- Ultima aggregazione: 2026-01-01 00:00\ncorpo\n");
+const b = normalizeMutable("> Data: 2026-12-31 23:59\n- Ultima aggregazione: 2026-12-31 23:59\ncorpo\n");
+if (a !== b) {
+  console.error("la normalizzazione NON rende invariante l hash rispetto ai campi mutabili");
+  process.exit(1);
+}
+const c = normalizeMutable("> Data: 2026-01-01 00:00\n- Ultima aggregazione: 2026-01-01 00:00\ncorpo DIVERSO\n");
+if (a === c) {
+  console.error("la normalizzazione nasconde anche le differenze REALI di contenuto");
+  process.exit(1);
+}
+' 2>/dev/null; then
+  ok "T4 l'hash e' invariante rispetto ai timestamp mutabili e sensibile al contenuto reale"
+else
+  ng "T4 la normalizzazione dei campi mutabili non e' corretta"
+fi
+
+echo ""
 echo "=== Risultato: $pass pass, $fail fail ==="
 if [ $fail -gt 0 ]; then
   echo "[FAIL] il gate di portabilita' non intercetta un manifest divergente: non e' un gate"
   exit 1
 fi
 echo "[OK] il gate di portabilita' intercetta la divergenza cross-OS"
+exit 0
+
+
+
+===== FILE: scripts/portability-normalize.mjs =====
+
+/**
+ * Normalizzazione dei campi MUTABILI dei file generati (issue #284).
+ *
+ * Due campi cambiano a ogni esecuzione e non sono contenuto:
+ *   - `> Data: ...` (l'intestazione del bundle)
+ *   - `- Ultima aggregazione: ...` (i blocchi aggregati)
+ *
+ * Senza questa normalizzazione il confronto cross-OS (manifest sha256 dei file
+ * generati su ubuntu vs windows) e' falsamente positivo quando i due job
+ * cadono in minuti diversi: misurato il 2026-11-03 (`docs/BUNDLE.md` con hash
+ * diversi su ubuntu e windows, senza alcuna differenza reale di contenuto).
+ * E' la stessa normalizzazione che il check `-Check` del bundle usa per
+ * confrontare.
+ *
+ * Vive in un modulo separato (senza effetti collaterali) perche' il test di
+ * regressione `scripts/test-generators-portable.sh` (T4) possa importarla e
+ * verificare che l'hash sia invariante rispetto ai campi mutabili e sensibile
+ * al contenuto reale.
+ */
+export function normalizeMutable(content) {
+  return content
+    .replace(/^> Data: .+$/gm, '> Data: <timestamp>')
+    .replace(/^- Ultima aggregazione: .+$/gm, '- Ultima aggregazione: <timestamp>');
+}
+
+
+
+===== FILE: scripts/test-post-merge-writer.sh =====
+
+#!/usr/bin/env bash
+# Test funzionale del WRITER post-merge (issue #284, issue #287).
+#
+# Questa suite non ispeziona il testo del workflow: **esegue** i passi del
+# writer `post-merge.yml` in un clone locale con un remoto finto, e verifica
+# il risultato. Copre:
+#
+#   T1  PR con una sessione: lo stato di merge e' applicato, i blocchi sono
+#       rigenerati, il bundle e' in sync, **un solo commit** viene prodotto e
+#       spinto sul remoto.
+#   T2  il messaggio di commit prodotto dal writer non contiene escape
+#       PowerShell rotti (backslash residui) e nessuna riga supera i 100
+#       caratteri (regola `body-max-line-length` di commitlint).
+#   T3  PR **senza** sessione: il writer non fallisce e **non** committa
+#       niente (una PR che non ha sessione non deve sporcare `main`).
+#   T4  il writer e' idempotente: rieseguendolo non produce un secondo commit.
+#
+# Il comando `git commit` e' estratto dal workflow reale (non ricopiato qui):
+# cosi' il test verifica il messaggio che il writer scrive davvero, e la
+# regressione dell'issue #287 (backslash al posto dei backtick) viene
+# intercettata per costruzione.
+#
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+WORKFLOW="$REPO_ROOT/.github/workflows/post-merge.yml"
+
+for bin in git node pwsh; do
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    echo "[SKIP] '$bin' non disponibile: il test funzionale del writer richiede git, node e pwsh 7+"
+    exit 0
+  fi
+done
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+WORK="$(mktemp -d)"
+REMOTE="$WORK/remote.git"
+CLONE="$WORK/clone"
+cleanup() { rm -rf "$WORK" >/dev/null 2>&1 || true; }
+trap cleanup EXIT
+
+# --- estraggo i comandi reali dal workflow -----------------------------------
+# `git add ...`
+GIT_ADD_LINE="$(grep -E '^[[:space:]]*git add ' "$WORKFLOW" | head -1 | sed 's/^[[:space:]]*//')"
+# `git commit -m ...` (blocco multi-riga con continuazione backtick)
+awk '/git commit -m/ {f=1} f {print} f && /Out-Null/ {f=0}' "$WORKFLOW" \
+  | sed 's/^[[:space:]]*//' > "$WORK/commit.ps1"
+if [ -z "$GIT_ADD_LINE" ] || ! grep -q 'git commit -m' "$WORK/commit.ps1"; then
+  echo "[FAIL] non sono riuscito a estrarre i comandi di commit dal workflow: il test non puo' verificare il writer"
+  exit 1
+fi
+
+# --- preparo il clone con un remoto finto ------------------------------------
+# NB: NON si clona il repository sorgente. In CI il checkout e' **shallow**
+# (fetch-depth 1) e su un HEAD staccato (refs/pull/N/merge): il clone
+# risulterebbe shallow e senza HEAD, e il push verso il remoto finito verrebbe
+# rifiutato ("shallow update not allowed"). Si ricostruisce quindi il fixture
+# dal contenuto tracciato (`git archive`): repository completo, un solo
+# commit, file identici a quelli che la CI vede.
+git init --bare -q "$REMOTE"
+mkdir -p "$CLONE"
+git init -q "$CLONE"
+git -C "$REPO_ROOT" archive --format=tar HEAD | tar -x -C "$CLONE"
+cd "$CLONE" || exit 1
+git config user.email "writer@test.local"
+git config user.name "Writer Test"
+git config commit.gpgsign false
+git checkout -q -B main
+git add -A >/dev/null 2>&1
+git commit -q -m "test: fixture iniziale (contenuto del repository)"
+git remote add origin "$REMOTE"
+git push -q origin main
+BASE_SHA="$(git rev-parse HEAD)"
+
+# --- T1: una PR con una sessione ---------------------------------------------
+mkdir -p docs/state/sessions
+cat > docs/state/sessions/99-writer-test.md <<'EOF'
+---
+number: 99
+title: "Sessione di prova del writer post-merge"
+date: 2026-11-03
+state: 🟡
+merged: false
+branch: feat/99-writer-test
+pr: 1
+tags: [test]
+---
+
+# Sessione 99 — prova
+
+## Analisi di avanzamento
+
+Numeri: test. Cosa e' pronto: test. Cosa manca: test. Salute tecnica: test.
+EOF
+git add -A >/dev/null 2>&1
+git commit -q -m "test: simulazione di merge (PR #1)"
+MERGE_SHA="$(git rev-parse HEAD)"
+
+apply_out="$(node scripts/apply-merge-state.mjs --pr 1 --sha "$MERGE_SHA" --date 2026-11-03T07:40:49Z 2>&1)"
+apply_rc=$?
+if [ "$apply_rc" -eq 0 ]; then ok "T1 apply-merge-state applica lo stato (exit 0)"; else ng "T1 apply-merge-state exit $apply_rc: $apply_out"; fi
+if echo "$apply_out" | grep -q 'stato di merge applicato'; then ok "T1 il frontmatter e' stato aggiornato"; else ng "T1 il frontmatter non e' stato aggiornato: $apply_out"; fi
+
+pwsh -NoProfile -File scripts/aggregate-state.ps1 >/dev/null 2>&1
+agg_rc=$?
+pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1
+bun_rc=$?
+pwsh -NoProfile -File scripts/aggregate-state.ps1 -Check >/dev/null 2>&1
+aggchk_rc=$?
+pwsh -NoProfile -File scripts/generate-bundle.ps1 -Check >/dev/null 2>&1
+bunchk_rc=$?
+if [ "$agg_rc" -eq 0 ] && [ "$bun_rc" -eq 0 ]; then ok "T1 i due generatori girano senza errori"; else ng "T1 generatori: aggregate=$agg_rc bundle=$bun_rc"; fi
+if [ "$aggchk_rc" -eq 0 ] && [ "$bunchk_rc" -eq 0 ]; then ok "T1 dopo la rigenerazione i check sono verdi"; else ng "T1 check dopo rigenerazione: aggregate=$aggchk_rc bundle=$bunchk_rc"; fi
+
+# Il commit usa i comandi REALI del workflow.
+export PR_NUMBER=1
+eval "$GIT_ADD_LINE" >/dev/null 2>&1
+pwsh -NoProfile -File "$WORK/commit.ps1" >/dev/null 2>&1
+commit_rc=$?
+if [ "$commit_rc" -eq 0 ]; then ok "T1 il commit del writer va a buon fine"; else ng "T1 il commit del writer e' fallito (exit $commit_rc)"; fi
+
+COMMIT_SHA="$(git rev-parse HEAD)"
+if [ "$(git rev-list --count "$MERGE_SHA".."$COMMIT_SHA")" = "1" ]; then
+  ok "T1 il writer produce UN solo commit"
+else
+  ng "T1 il writer ha prodotto $(git rev-list --count "$MERGE_SHA".."$COMMIT_SHA") commit (atteso 1)"
+fi
+
+if git push -q origin HEAD:main 2>/dev/null; then
+  ok "T1 il push del writer va a buon fine"
+else
+  ng "T1 il push del writer e' fallito"
+fi
+if [ "$(git -C "$REMOTE" rev-parse main)" = "$COMMIT_SHA" ]; then
+  ok "T1 il remoto e' allineato al commit del writer"
+else
+  ng "T1 il remoto non coincide con il commit del writer"
+fi
+
+# Lo stato applicato e' finito sul remoto?
+REMOTE_SESSION="$(git -C "$REMOTE" show main:docs/state/sessions/99-writer-test.md 2>/dev/null)"
+if echo "$REMOTE_SESSION" | grep -q 'merged: true'; then ok "T1 lo stato di merge e' finito sul remoto"; else ng "T1 lo stato di merge non e' sul remoto"; fi
+if echo "$REMOTE_SESSION" | grep -q "$MERGE_SHA"; then ok "T1 il merge commit e' finito sul remoto"; else ng "T1 il merge commit non e' sul remoto"; fi
+
+# --- T2: il messaggio di commit e' pulito ------------------------------------
+MSG="$(git log -1 --pretty=%B "$COMMIT_SHA")"
+if echo "$MSG" | grep -q '\\'; then
+  ng "T2 il messaggio contiene backslash residui (escape PowerShell rotto): $(echo "$MSG" | tr '\n' '|')"
+else
+  ok "T2 il messaggio non contiene backslash residui"
+fi
+if echo "$MSG" | grep -q '`'; then
+  ng "T2 il messaggio contiene backtick: il writer doveva produrre testo semplice"
+else
+  ok "T2 il messaggio non contiene backtick"
+fi
+long_line="$(echo "$MSG" | awk 'length($0) > 100 {print length($0); exit}')"
+if [ -z "$long_line" ]; then
+  ok "T2 nessuna riga del messaggio supera i 100 caratteri"
+else
+  ng "T2 una riga del messaggio supera i 100 caratteri ($long_line)"
+fi
+if echo "$MSG" | grep -q 'chore(state): stato di merge e blocchi aggregati (PR #1)'; then
+  ok "T2 il messaggio cita la PR"
+else
+  ng "T2 il messaggio non cita la PR: $MSG"
+fi
+
+# --- T3: una PR SENZA sessione non deve produrre nulla ------------------------
+BEFORE="$(git -C "$REMOTE" rev-parse main)"
+out="$(node scripts/apply-merge-state.mjs --pr 4242 --sha deadbeef --date 2026-11-03T00:00:00Z 2>&1)"
+rc=$?
+if [ "$rc" -eq 0 ]; then ok "T3 apply-merge-state su una PR senza sessione esce 0 (nessun fallimento)"; else ng "T3 apply-merge-state senza sessione esce $rc (atteso 0): $out"; fi
+if echo "$out" | grep -q 'nessun file di sessione'; then ok "T3 il caso e' dichiarato esplicitamente"; else ng "T3 l'output non dichiara il caso: $out"; fi
+eval "$GIT_ADD_LINE" >/dev/null 2>&1
+if git diff --cached --quiet; then
+  ok "T3 nessuna modifica da committare (il writerWould esce senza committare)"
+else
+  ng "T3 ci sono modifiche da committare per una PR senza sessione"
+fi
+if [ "$(git -C "$REMOTE" rev-parse main)" = "$BEFORE" ]; then
+  ok "T3 il remoto non e' cambiato"
+else
+  ng "T3 il remoto e' cambiato per una PR senza sessione"
+fi
+
+# --- T4: idempotenza ----------------------------------------------------------
+cp scripts/aggregate-state.ps1 /dev/null 2>/dev/null || true
+pwsh -NoProfile -File scripts/aggregate-state.ps1 >/dev/null 2>&1
+pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1
+eval "$GIT_ADD_LINE" >/dev/null 2>&1
+if git diff --cached --quiet; then
+  ok "T4 rieseguendo il writer non c'e' nessuna modifica (idempotente)"
+else
+  ng "T4 rieseguendo il writer il writer ha prodotto modifiche (non idempotente)"
+fi
+
+echo ""
+echo "=== Risultato: $pass pass, $fail fail ==="
+if [ "$fail" -gt 0 ]; then
+  echo "[FAIL] il writer post-merge non si comporta come dichiarato"
+  exit 1
+fi
+echo "[OK] il writer post-merge si comporta come dichiarato"
 exit 0
 
 
@@ -48122,6 +48551,15 @@ jobs:
       - name: Ordinamento dei writer di `main` (issue #149)
         run: bash scripts/test-workflow-writer-ordering.sh
 
+      # Issue #284 + #287: test FUNZIONALE del writer post-merge. Non
+      # ispeziona il testo del workflow: esegue i suoi passi in un clone locale
+      # con un remoto finto e verifica il risultato (stato applicato, un solo
+      # commit, push, idempotenza, messaggio di commit senza escape rotti).
+      # Il comando `git commit` e' estratto dal workflow reale: la regressione
+      # dell'issue #287 viene intercettata per costruzione.
+      - name: Il writer post-merge si comporta come dichiarato (issue #284, #287)
+        run: bash scripts/test-post-merge-writer.sh
+
       # Sessione 74: validita' YAML dei file workflow. Un file che GitHub
       # rifiuta in fase di validazione non produce un job che fallisce:
       # produce una run con `jobs: 0`, `conclusion: failure` a 0 secondi,
@@ -48160,15 +48598,24 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
-      - name: I generatori sono deterministici e il bundle e' in sync (issue #284)
-        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json"
+      - name: I generatori sono deterministici (issue #284)
+        # Il manifest viene prodotto in un passo separato dal check del bundle:
+        # se il bundle non e' in sync il manifest deve ESSERE PUBBLICATO
+        # comunque, altrimenti il confronto cross-OS non si puo' fare proprio
+        # quando servirebbe (misurato il 2026-11-03).
+        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json" --no-bundle-check
 
       - name: Pubblica il manifest per il confronto cross-OS
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: portability-${{ matrix.os }}
           path: portability-${{ matrix.os }}.json
-          if-no-files-found: error
+          if-no-files-found: warn
+
+      - name: Il bundle e' in sync con lo stato committato (issue #284)
+        if: always()
+        run: node scripts/check-generators-portable.mjs --bundle-check-only
 
   # ---------------------------------------------------------------------------
   # 5c. Confronto CROSS-OS dei manifest (issue #284).
@@ -48559,10 +49006,16 @@ jobs:
               Write-Host "[post-merge] nessuna modifica: lo stato di `main` e' gia' in sync"
               exit 0
             }
+            # NB: i messaggi sono senza backtick (issue #287). In PowerShell il
+            # backtick e' il carattere di escape: per ottenerne uno letterale
+            # serve il DOPPIO backtick, e un `\`` lascia un backslash nel testo.
+            # Il messaggio di commit e' la traccia del lavoro su `main`: non
+            # deve contenere escape rotti. Ogni riga resta sotto i 100
+            # caratteri (regola `body-max-line-length` di commitlint).
             git commit -m "chore(state): stato di merge e blocchi aggregati (PR #$env:PR_NUMBER)" `
-                         -m "Writer unico post-merge (issue #284): apply-merge-state + aggregate-state + generate-bundle." `
+                         -m "Writer unico post-merge (issue #284): apply-merge-state, aggregate-state, generate-bundle." `
                          -m "Un solo commit e un solo push: niente rebase sui file generati." `
-                         -m "II passaggio di CI sullo stato finale e' il trigger \`workflow_run\` di ci.yml." 2>&1 | Out-Null
+                         -m "Il passaggio di CI sullo stato finale e' il trigger workflow_run di ci.yml." 2>&1 | Out-Null
             git push origin HEAD:main
             if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
             # Push rifiutato: NON si ribasa (i file generati non si ribasano:

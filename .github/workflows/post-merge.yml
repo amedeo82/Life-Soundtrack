@@ -166,10 +166,16 @@ jobs:
               Write-Host "[post-merge] nessuna modifica: lo stato di `main` e' gia' in sync"
               exit 0
             }
+            # NB: i messaggi sono senza backtick (issue #287). In PowerShell il
+            # backtick e' il carattere di escape: per ottenerne uno letterale
+            # serve il DOPPIO backtick, e un `\`` lascia un backslash nel testo.
+            # Il messaggio di commit e' la traccia del lavoro su `main`: non
+            # deve contenere escape rotti. Ogni riga resta sotto i 100
+            # caratteri (regola `body-max-line-length` di commitlint).
             git commit -m "chore(state): stato di merge e blocchi aggregati (PR #$env:PR_NUMBER)" `
-                         -m "Writer unico post-merge (issue #284): apply-merge-state + aggregate-state + generate-bundle." `
+                         -m "Writer unico post-merge (issue #284): apply-merge-state, aggregate-state, generate-bundle." `
                          -m "Un solo commit e un solo push: niente rebase sui file generati." `
-                         -m "II passaggio di CI sullo stato finale e' il trigger \`workflow_run\` di ci.yml." 2>&1 | Out-Null
+                         -m "Il passaggio di CI sullo stato finale e' il trigger workflow_run di ci.yml." 2>&1 | Out-Null
             git push origin HEAD:main
             if ($LASTEXITCODE -eq 0) { $pushed = $true; break }
             # Push rifiutato: NON si ribasa (i file generati non si ribasano:
