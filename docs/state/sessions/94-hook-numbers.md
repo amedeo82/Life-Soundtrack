@@ -5,7 +5,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: feat/292-hook-numbers
-pr: 0
+pr: 293
 claim: kilo-hp-elitebook-7c3f
 tags: [devops, protocollo, hook, ci]
 ---
