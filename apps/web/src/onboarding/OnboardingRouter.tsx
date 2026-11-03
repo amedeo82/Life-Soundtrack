@@ -25,6 +25,9 @@ import { PlatformCard } from './PlatformCard';
 import { LastfmPanel } from './LastfmPanel';
 import { ScrobblePanel } from './ScrobblePanel';
 import { useT } from '../i18n';
+import { createAnalysisRunner } from '../analysis/analysisRunner';
+import { i18n } from '../i18n';
+import { createLogger } from '@core/logger';
 
 /**
  * Adapter disponibili per piattaforma (05§4): una entry solo quando
@@ -78,6 +81,7 @@ export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | u
   };
   const abortControllerRef = useRef<AbortController | null>(null);
   const dbRef = useRef<Awaited<ReturnType<typeof openDb>> | null>(null);
+  const analysisRunnerRef = useRef<ReturnType<typeof createAnalysisRunner> | null>(null);
 
   const ensureDb = useCallback(async () => {
     if (!dbRef.current) {
@@ -218,6 +222,22 @@ export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | u
 
     if (!failed && !controller.signal.aborted) {
       setScreen('reveal');
+
+      // Trigger analisi post-import (in background, non blocca l'import)
+      // 05§6.1: l'import non attende l'analisi
+      void (async () => {
+        try {
+          if (!analysisRunnerRef.current) {
+            analysisRunnerRef.current = createAnalysisRunner({
+              i18n,
+              logger: createLogger('onboarding:analysis'),
+            });
+          }
+          await analysisRunnerRef.current.run('post-import');
+        } catch {
+          // Errori già loggati dal runner, non propagare
+        }
+      })();
     }
   }, [importStates, privacy, ensureDb, t]);
 

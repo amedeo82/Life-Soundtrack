@@ -16,8 +16,8 @@ import { MemoryCard } from '../components/MemoryCard';
 import { StatCard } from '../components/StatCard';
 import type { HomeStats } from './homeTimelineModel';
 
-/** Stati della Home (`06§2.6`). */
-export type HomeState = 'empty' | 'partial' | 'ready' | 'loading';
+/** Stati della Home (`06§2.6` + Story 2.5 `no-features`). */
+export type HomeState = 'empty' | 'no-features' | 'partial' | 'ready' | 'loading';
 
 /** Il ricordo mostrato nella MemoryCard (testo già reso). */
 export interface HomeMemory {
@@ -75,6 +75,18 @@ export function Home({
         <p>{t('empty.description.home')}</p>
         <button type="button" className="btn btn-primary" onClick={onImportCta}>
           {t('empty.cta.import')}
+        </button>
+      </main>
+    );
+  }
+
+  if (state === 'no-features') {
+    return (
+      <main className="screen screen--home" data-testid="home-no-features">
+        <h1>{t('empty.title')}</h1>
+        <p>{t('home.noFeatures.description')}</p>
+        <button type="button" className="btn btn-primary" onClick={onImportCta}>
+          {t('home.noFeatures.cta')}
         </button>
       </main>
     );

@@ -13,7 +13,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import { openDb, listListensInRange, listInsightsByType, type LifeSoundtrackDB } from '@core/db';
+import {
+  openDb,
+  listListensInRange,
+  listInsightsByType,
+  getFeatures,
+  type LifeSoundtrackDB,
+} from '@core/db';
 import { listContextPeriods } from '@core/context';
 import { toRibbonPeriod, type ContextRibbonPeriod } from '../components/contextRibbonModel';
 import {
@@ -39,7 +45,7 @@ export const TIMELINE_PARTIAL_MONTHS = 6;
 /** I dati delle due schermate, già mappati sul view model. */
 export interface HomeTimelineData {
   /** Stato della schermata (inclusi gli stati vuoti). */
-  state: 'empty' | 'partial' | 'ready' | 'loading' | 'error';
+  state: 'empty' | 'no-features' | 'partial' | 'ready' | 'loading' | 'error';
   stats: HomeStats;
   /** I sette giorni della settimana. */
   barWeek: ReturnType<typeof computeBarWeek>;
@@ -55,6 +61,8 @@ export interface HomeTimelineData {
   range: { start: number; end: number } | null;
   /** Il ricordo del giorno (l'ultimo insight di tipo `memory`). */
   memory: { title: string; mood: string | null; date: string } | null;
+  /** Mood della settimana, già reso (per AppShell). */
+  weekMoodLabel: string | null;
 }
 
 /** Stato vuoto, prima che il database risponda. */
@@ -69,6 +77,7 @@ function initialData(): HomeTimelineData {
     contexts: [],
     range: null,
     memory: null,
+    weekMoodLabel: null,
   };
 }
 
@@ -111,8 +120,22 @@ export function useHomeTimelineData(
         const artistByTrack = new Map(tracks.map((track) => [track.id, track.artistId]));
         const eras = await listInsightsByType(db, 'era');
         const moods = await listInsightsByType(db, 'mood_day');
+        const moodWeeks = await listInsightsByType(db, 'mood_week');
         const memories = await listInsightsByType(db, 'memory');
         const contexts = await listContextPeriods(db);
+
+        // Verifica feature utilizzabili (valence + energy non nulli)
+        const features = await getFeatures(db);
+        const featureByTrack = new Map(features.map((f) => [f.trackId, f]));
+        let hasUsableFeatures = false;
+        for (const listen of listens) {
+          const feat = featureByTrack.get(listen.trackId);
+          if (feat && feat.valence !== null && feat.energy !== null) {
+            hasUsableFeatures = true;
+            break;
+          }
+        }
+
         if (cancelled) return;
 
         const facts = toListenFacts(listens, artistByTrack);
@@ -132,6 +155,15 @@ export function useHomeTimelineData(
             mood: mood.payload.kind === 'mood' ? mood.payload.mood : null,
           }));
 
+        // weekMoodLabel dal più recente mood_week
+        const latestMoodWeek = moodWeeks
+          .filter((m) => m.payload.kind === 'mood')
+          .sort((a, b) => b.periodStart - a.periodStart)[0];
+        const weekMoodLabel =
+          latestMoodWeek && latestMoodWeek.payload.kind === 'mood'
+            ? latestMoodWeek.payload.mood
+            : null;
+
         const timestamps = facts.map((fact) => fact.playedAt);
         const range =
           timestamps.length > 0
@@ -139,12 +171,16 @@ export function useHomeTimelineData(
             : null;
 
         const stats = computeHomeStats(facts, eraFacts.length);
-        const state =
-          facts.length === 0
-            ? 'empty'
-            : facts.length < HOME_PARTIAL_THRESHOLD
-              ? 'partial'
-              : 'ready';
+        let state: HomeTimelineData['state'];
+        if (facts.length === 0) {
+          state = 'empty';
+        } else if (!hasUsableFeatures) {
+          state = 'no-features';
+        } else if (facts.length < HOME_PARTIAL_THRESHOLD) {
+          state = 'partial';
+        } else {
+          state = 'ready';
+        }
 
         const lastMemory = memories[memories.length - 1];
         const memory =
@@ -166,6 +202,7 @@ export function useHomeTimelineData(
           contexts: contexts.map((context) => toRibbonPeriod(context)),
           range,
           memory,
+          weekMoodLabel,
         });
       } catch {
         if (!cancelled) setData({ ...initialData(), state: 'error' });

@@ -61,24 +61,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 70%** - 21 story completate su 30 - effort pesato 72% - **mancano 9 step**
+**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
 
-`█████████████████████░░░░░░░░░` 70%
+`██████████████████████░░░░░░░░` 73%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
-| EPIC 2 - Analisi | 4 | 5 | 80% | in corso |
+| EPIC 2 - Analisi | 5 | 5 | 100% | completo |
 | EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 21 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (9):
-- 2.5 Collegamento del pipeline di analisi all'app - da fare (size L)
+**Step ancora da implementare** (8):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
@@ -93,7 +92,7 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
 | Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
-| Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
+| Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
 **Analisi della sessione corrente** (S94)
