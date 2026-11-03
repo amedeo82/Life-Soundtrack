@@ -37,6 +37,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { normalizeMutable } from './portability-normalize.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -102,30 +103,6 @@ function run(command, args, cwd = root) {
   }
   return res.stdout || '';
 }
-
-/**
- * Normalizza i campi MUTABILI prima dell'hash.
- *
- * Due campi cambiano a ogni esecuzione e non sono contenuto:
- *   - `> Data: ...` (l'intestazione del bundle)
- *   - `- Ultima aggregazione: ...` (i blocchi aggregati)
- *
- * Senza questa normalizzazione il confronto cross-OS e' falsamente positivo
- * quando i due job cadono in minuti diversi: misurato il 2026-11-03
- * (`docs/BUNDLE.md` con hash diversi su ubuntu e windows, senza alcuna
- * differenza reale di contenuto). E' la stessa normalizzazione che il check
- * `-Check` del bundle usa per confrontare.
- */
-function normalizeMutable(content) {
-  return content
-    .replace(/^> Data: .+$/gm, '> Data: <timestamp>')
-    .replace(/^- Ultima aggregazione: .+$/gm, '- Ultima aggregazione: <timestamp>');
-}
-
-// Esportata per il test di regressione: la normalizzazione deve rendere
-// INVARIANTE l'hash rispetto ai campi mutabili (vedi T4 di
-// `scripts/test-generators-portable.sh`).
-export { normalizeMutable };
 
 function sha256(file) {
   return createHash('sha256').update(normalizeMutable(readFileSync(file, 'utf8'))).digest('hex');

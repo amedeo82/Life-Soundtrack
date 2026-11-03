@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 08:12
-> Totale file: 174
+> Data: 2026-11-03 08:13
+> Totale file: 175
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -44850,6 +44850,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { normalizeMutable } from './portability-normalize.mjs';
 
 const argv = process.argv.slice(2);
 
@@ -44915,30 +44916,6 @@ function run(command, args, cwd = root) {
   }
   return res.stdout || '';
 }
-
-/**
- * Normalizza i campi MUTABILI prima dell'hash.
- *
- * Due campi cambiano a ogni esecuzione e non sono contenuto:
- *   - `> Data: ...` (l'intestazione del bundle)
- *   - `- Ultima aggregazione: ...` (i blocchi aggregati)
- *
- * Senza questa normalizzazione il confronto cross-OS e' falsamente positivo
- * quando i due job cadono in minuti diversi: misurato il 2026-11-03
- * (`docs/BUNDLE.md` con hash diversi su ubuntu e windows, senza alcuna
- * differenza reale di contenuto). E' la stessa normalizzazione che il check
- * `-Check` del bundle usa per confrontare.
- */
-function normalizeMutable(content) {
-  return content
-    .replace(/^> Data: .+$/gm, '> Data: <timestamp>')
-    .replace(/^- Ultima aggregazione: .+$/gm, '- Ultima aggregazione: <timestamp>');
-}
-
-// Esportata per il test di regressione: la normalizzazione deve rendere
-// INVARIANTE l'hash rispetto ai campi mutabili (vedi T4 di
-// `scripts/test-generators-portable.sh`).
-export { normalizeMutable };
 
 function sha256(file) {
   return createHash('sha256').update(normalizeMutable(readFileSync(file, 'utf8'))).digest('hex');
@@ -45156,7 +45133,7 @@ echo "=== T4: la normalizzazione dei campi mutabili rende l'hash invariante ==="
 # differenze reali). Il confronto deve essere INVARIANTE rispetto a questi
 # campi.
 if node --input-type=module -e '
-import { normalizeMutable } from "./scripts/check-generators-portable.mjs";
+import { normalizeMutable } from "./scripts/portability-normalize.mjs";
 const a = normalizeMutable("> Data: 2026-01-01 00:00\n- Ultima aggregazione: 2026-01-01 00:00\ncorpo\n");
 const b = normalizeMutable("> Data: 2026-12-31 23:59\n- Ultima aggregazione: 2026-12-31 23:59\ncorpo\n");
 if (a !== b) {
@@ -45182,6 +45159,35 @@ if [ $fail -gt 0 ]; then
 fi
 echo "[OK] il gate di portabilita' intercetta la divergenza cross-OS"
 exit 0
+
+
+
+===== FILE: scripts/portability-normalize.mjs =====
+
+/**
+ * Normalizzazione dei campi MUTABILI dei file generati (issue #284).
+ *
+ * Due campi cambiano a ogni esecuzione e non sono contenuto:
+ *   - `> Data: ...` (l'intestazione del bundle)
+ *   - `- Ultima aggregazione: ...` (i blocchi aggregati)
+ *
+ * Senza questa normalizzazione il confronto cross-OS (manifest sha256 dei file
+ * generati su ubuntu vs windows) e' falsamente positivo quando i due job
+ * cadono in minuti diversi: misurato il 2026-11-03 (`docs/BUNDLE.md` con hash
+ * diversi su ubuntu e windows, senza alcuna differenza reale di contenuto).
+ * E' la stessa normalizzazione che il check `-Check` del bundle usa per
+ * confrontare.
+ *
+ * Vive in un modulo separato (senza effetti collaterali) perche' il test di
+ * regressione `scripts/test-generators-portable.sh` (T4) possa importarla e
+ * verificare che l'hash sia invariante rispetto ai campi mutabili e sensibile
+ * al contenuto reale.
+ */
+export function normalizeMutable(content) {
+  return content
+    .replace(/^> Data: .+$/gm, '> Data: <timestamp>')
+    .replace(/^- Ultima aggregazione: .+$/gm, '- Ultima aggregazione: <timestamp>');
+}
 
 
 

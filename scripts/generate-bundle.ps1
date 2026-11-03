@@ -353,6 +353,9 @@ $files = @(
     # negativo in un worktree temporaneo (un generatore alterato deve essere
     # intercettato).
     "scripts/test-generators-portable.sh",
+    "scripts/portability-normalize.mjs",
+    # Modulo con la normalizzazione dei campi mutabili (usato dal gate di
+    # portabilita' e dal suo test di regressione).
     # Test FUNZIONALE del writer post-merge (issue #284, #287): esegue i passi
     # del writer in un clone locale con un remoto finto e verifica il
     # risultato (stato applicato, un solo commit, push, idempotenza,

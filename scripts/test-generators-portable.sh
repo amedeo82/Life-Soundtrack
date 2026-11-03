@@ -96,7 +96,7 @@ echo "=== T4: la normalizzazione dei campi mutabili rende l'hash invariante ==="
 # differenze reali). Il confronto deve essere INVARIANTE rispetto a questi
 # campi.
 if node --input-type=module -e '
-import { normalizeMutable } from "./scripts/check-generators-portable.mjs";
+import { normalizeMutable } from "./scripts/portability-normalize.mjs";
 const a = normalizeMutable("> Data: 2026-01-01 00:00\n- Ultima aggregazione: 2026-01-01 00:00\ncorpo\n");
 const b = normalizeMutable("> Data: 2026-12-31 23:59\n- Ultima aggregazione: 2026-12-31 23:59\ncorpo\n");
 if (a !== b) {
