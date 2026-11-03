@@ -862,13 +862,22 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 ### 9.10 Gate reali di `ci.yml`
 
 > **Sessione 73 (issue #224) e Sessione 74: la tabella è stata riscritta due volte.**
-> `ci.yml` non è più un job unico con 18 step in sequenza: è **12 job** di cui **10 girano in
+> `ci.yml` non è più un job unico con 18 step in sequenza: è **15 job** di cui **12 girano in
 > parallelo** e due (`quality` e `detect-code`) hanno un ruolo particolare.
 > **Sessione 74**: il trigger `push` su `main` è filtrato per path e su `push` girano **solo i
 > job leggeri**; i 3 job `node-*` girano **solo su `pull_request`**, e saltano (riuscendo) se la
 > PR tocca **solo file `.md`**. Dettaglio e misure in **§9.14.10**.
 > **Sessione 80 (issue #248)**: aggiunto il job `gates-protocol` (4 step) → **13 job**, 11 in
 > parallelo. Il protocollo agenti diventa un **contratto verificato** (ADR-0012).
+> **Sessione 90 (issue #284)**: aggiunti i 2 job `gates-portability` e `gates-portability-compare`
+> → **15 job**, 12 in parallelo (`gates-portability-compare` aspetta `gates-portability`; i 3 job
+> `node-*` aspettano `detect-code`).
+> **Sessione 93 (issue #290)**: il catalogo era indietro di **due job** — i due job di portabilità
+> della Sessione 90 non avevano una riga, e il conteggio dichiarava «12 job» / «33 step». La
+> tabella si dichiara «l'elenco autorevole dei gate»: un elenco autorevole sbagliato è peggio di
+> un elenco assente. Ora le righe sono **39** (38 gate + l'agregatore `quality`).
+> **Sessione 93 (issue #290)**: aggiunto il gate «wiring degli hook» (`test-hook-wiring.sh`)
+> → **39 righe**, **38 step**.
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
@@ -915,6 +924,10 @@ protection può interpretare un check saltato come successo.
 | 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
 | 34 | `gates-workflows` | `Sintassi dei blocchi `run:` dei workflow` (`check-workflow-syntax.mjs`) | solo PR | sì | **#279** |
 | 35 | `gates-workflows` | `Nessuna action su node20` (`test-workflow-node24-actions.sh`, 19 assert) | solo PR | sì | **#283** |
+| 36 | `gates-portability` | `I generatori sono deterministici` (`check-generators-portable.mjs`, su ubuntu + windows) | solo PR | sì | **#284** |
+| 37 | `gates-portability` | `Il bundle è in sync con lo stato committato` (`check-generators-portable.mjs --bundle-check-only`) | solo PR | sì | **#284** |
+| 38 | `gates-portability-compare` | `I generatori producono gli stessi byte su ogni sistema operativo` (`check-generators-portable.mjs --compare`) | solo PR | sì | **#284** |
+| 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 13 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**

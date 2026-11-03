@@ -348,7 +348,7 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 | Test | **Vitest 2+** + fake-indexeddb + **MSW** + **Playwright 1.5+** | Unit + e2e + API mock | attivo (MSW futuro) |
 | Coverage | **@vitest/coverage-v8** per package | Soglie da `10§2` | attivo |
 | Build | Vite 6 + **Turborepo** | Monorepo incrementale | attivo |
-| Tooling | **ESLint 9** + Prettier 3 + Husky + lint-staged + commitlint | Convenzioni `AGENTS.md` | attivo (Husky/lint-staged/commitlint in setup) |
+| Tooling | **ESLint 9** + Prettier 3 + lint-staged + commitlint | Convenzioni `AGENTS.md` | attivo (hook in `.githooks/`: lint-staged nel pre-commit, commitlint nel commit-msg) |
 | Bundle analyzer | rollup-plugin-visualizer | NFR budget 300KB (`§10`) | futuro (Fase 6) |
 | Desktop (Fase 2) | Tauri 2.0 | 10x più leggero di Electron | futuro (Fase 2) |
 | **Sync cloud (Fase 2+, ADR-0005)** | **Placeholder** — non implementato nel MVP (D.A.7). Servizio self-hosted opzionale con E2EE | Previsto ma non vincolante per Fase 0/1 | futuro (Fase 2+) |
@@ -358,7 +358,7 @@ Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, E
 ### 8.1 Tooling dev
 
 - **Linting**: ESLint 9 (flat config) + plugin React/TS/Vitest, Prettier 3
-- **Hook pre-commit**: Husky + lint-staged (lint + format solo sui file staged)
+- **Hook pre-commit**: `.githooks/pre-commit` (pattern del branch + encoding dei file staged) + lint-staged (lint + format solo sui file staged)
 - **Commit**: commitlint enforce Conventional Commits (vedi `AGENTS.md` §Git workflow)
 - **TypeScript**: 5.6+ con `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`
 - **Path aliases**: `@core/*`, `@ui/*`, `@web/*` (vedi `§9` monorepo)

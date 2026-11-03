@@ -234,6 +234,12 @@ $files = @(
     # Bash portabile (funziona su WSL, Git Bash, Linux, macOS) — NON incluso nel pre-push hook
     # perché eseguito solo in dev/CI; il check è cross-platform.
     "scripts/test-pre-commit-clean-check.sh",
+    # Test di regressione del WIRING degli hook (Sessione 93 / issue #290):
+    # verifica (a) che `core.hooksPath` punti su `.githooks` e che nessun
+    # lifecycle script possa sovrascriverlo, (b) con un `git commit` REALE in
+    # un repo temporaneo, che l'hook abortisca un branch non conforme e
+    # lasci passare un branch conforme. 13 assert.
+    "scripts/test-hook-wiring.sh",
     # Test per fix AppendLine LF (issue #58): 5 scenari pwsh, verificano che
     # StringBuilder.AppendLine aggiunge CRLF su Windows e che il fix
     # (Append + "n" esplicito) produce LF-only.
