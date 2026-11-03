@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 /**
- * Gate "stato di merge delle sessioni" (issue #239).
+ * Gate "stato di merge delle sessioni e delle story" (issue #239, issue #297).
  *
  * Il frontmatter di `docs/state/sessions/<N>-<slug>.md` dichiara lo stato del
  * lavoro (`state`, `merged`, `merged_commit`, `merged_date`, `pr`). Fino alla
  * Sessione 78 nessun gate confrontava quei campi con lo stato REALE delle
  * pull request: 14 sessioni su ~56 riportavano `merged: false` anche dopo il
  * merge della propria PR, e 5 non avevano neppure il numero di PR.
+ *
+ * **Issue #297 — il perimetro delle story**: `docs/state/stories/<id>-<slug>.md`
+ * dichiara lo stesso fatto in un formato diverso (`status: done` invece di
+ * `state: <chiuso>` + `merged: true`). Fino alla Sessione 94 nessun writer e
+ * nessun gate coprivano quel perimetro: la Story 2.5 e' restata
+ * `status: in-review` con `pr: 267` dopo il merge della PR #295, e nulla se
+ * n'era accorto. Oggi il gate confronta anche le story.
  *
  * Il drift era invisibile perche' i gate esistenti verificano la consistenza
  * INTERNA (il blocco aggregato coincide con i file di quel momento): il flag
@@ -22,9 +29,11 @@
  *
  * Fonti di verita':
  *   1. API GitHub `/repos/{owner}/{repo}/pulls` -> stato reale delle PR
- *   2. `docs/state/sessions/*.md` -> frontmatter dichiarato
+ *   2. `docs/state/sessions/*.md` -> frontmatter dichiarato (formato sessione)
+ *   3. `docs/state/stories/*.md` -> frontmatter dichiarato (formato story)
  *
  * Uso: node scripts/check-merge-state.mjs [--root <dir>] [--sessions <dir>]
+ *                                           [--stories <dir>]
  *                                           [--repo owner/name] [--api <url>]
  *                                           [--defer-unapplied]
  *
@@ -53,6 +62,7 @@ function argValue(name, fallback) {
 
 const root = resolve(argValue('--root', '.'));
 const sessionsDir = argValue('--sessions', join(root, 'docs', 'state', 'sessions'));
+const storiesDir = argValue('--stories', join(root, 'docs', 'state', 'stories'));
 const repo = argValue('--repo', process.env.GITHUB_REPOSITORY || 'amedeo82/Life-Soundtrack');
 const apiBase = argValue('--api', process.env.GITHUB_API_URL || 'https://api.github.com').replace(
   /\/+$/,
@@ -64,6 +74,10 @@ const apiBase = argValue('--api', process.env.GITHUB_API_URL || 'https://api.git
 const deferUnapplied = argv.includes('--defer-unapplied');
 
 const CLOSED_MARKER = '\u{1F7E2}';
+const STORY_DONE = 'done';
+// Stati terminali dichiarati di una story: non sono stati di lavoro, e il
+// merge di una PR non li cancella (scope cancellato, dipendenza esterna).
+const STORY_TERMINAL = new Set(['blocked', 'wontdo']);
 
 let failures = 0;
 let checks = 0;
@@ -114,6 +128,24 @@ function readSessions() {
     .sort();
   return files.map((file) => {
     const full = join(sessionsDir, file);
+    const text = readFileSync(full, 'utf8');
+    return { file, full, text, fm: parseFrontmatter(text) };
+  });
+}
+
+/**
+ * Le story (issue #297): stesso fatto, formato diverso. Il frontmatter dichiara
+ * `status: done` invece di `state: <chiuso>` + `merged: true`.
+ */
+function readStories() {
+  if (!existsSync(storiesDir)) {
+    environmentError(`directory delle story non trovata: ${storiesDir}`);
+  }
+  const files = readdirSync(storiesDir)
+    .filter((f) => f.endsWith('.md'))
+    .sort();
+  return files.map((file) => {
+    const full = join(storiesDir, file);
     const text = readFileSync(full, 'utf8');
     return { file, full, text, fm: parseFrontmatter(text) };
   });
@@ -246,10 +278,12 @@ function dateMatches(declared, actual) {
 }
 
 const sessions = readSessions();
+const stories = readStories();
 const pulls = await fetchPulls();
 
 console.log(
-  `[INFO] check-merge-state: ${sessions.length} sessioni, ${pulls.size} PR lette da ${repo}`,
+  `[INFO] check-merge-state: ${sessions.length} sessioni, ${stories.length} story, ` +
+    `${pulls.size} PR lette da ${repo}`,
 );
 
 let compared = 0;
@@ -337,10 +371,95 @@ for (const session of sessions) {
   }
 }
 
+/**
+ * Le story (issue #297): il formato e' `status: done`, non `state` + `merged`.
+ * Il drift che questo giro intercetta e' quello della Story 2.5: una story
+ * mergiata che dichiara ancora `status: in-review`, con l'aggregatore che la
+ * conta come non-done e il blocco NEXT-STEP che la indica come «prossima
+ * story da implementare».
+ */
+for (const story of stories) {
+  const prRaw = story.fm.pr;
+  const prNumber = Number.parseInt(prRaw ?? '', 10);
+  if (!Number.isFinite(prNumber) || prNumber <= 0) {
+    skipped++;
+    continue;
+  }
+  const pr = pulls.get(prNumber);
+  if (!pr) {
+    environmentError(
+      `PR #${prNumber} (citata da ${story.file}) non trovata nella risposta dell'API: ` +
+        'il dato esterno e\' incompleto, il gate non puo\' dichiarare "in sync"',
+    );
+  }
+
+  compared++;
+  checks++;
+  const isMerged = pr.mergedAt !== null;
+  const status = story.fm.status ?? '';
+
+  if (!isMerged) {
+    if (status === STORY_DONE) {
+      fail(
+        `${story.file}: \`status: done\`, ma la PR #${prNumber} non risulta mergiata ` +
+          `(state ${pr.state})`,
+      );
+    }
+    continue;
+  }
+
+  if (status !== STORY_DONE) {
+    // Stati terminali dichiarati (scope cancellato, dipendenza esterna): il
+    // merge della PR non li cancella, non e' drift.
+    if (STORY_TERMINAL.has(status)) continue;
+
+    // Caso strutturale (issue #284): l'albero sotto esame e' il merge commit
+    // della PR, quindi lo stato non e' ancora applicabile (il writer
+    // post-merge non e' passato). Differito, non fallito.
+    if (
+      deferUnapplied &&
+      headSha &&
+      pr.mergeCommitSha &&
+      pr.mergeCommitSha.toLowerCase() === headSha.toLowerCase()
+    ) {
+      deferred++;
+      console.log(
+        `[DEFERRED] ${story.file}: la PR #${prNumber} e' MERGED e l'albero sotto esame ne' e' ` +
+          `il merge commit (${headSha.slice(0, 7)}): lo stato viene applicato dal writer ` +
+          "post-merge, il confronto e' differito al passaggio successivo.",
+      );
+      continue;
+    }
+
+    fail(
+      `${story.file}: la PR #${prNumber} e' MERGED, ma \`status\` e' "${status || '(assente)'}" ` +
+        `invece di "${STORY_DONE}" (story completata)`,
+    );
+    continue;
+  }
+
+  const declaredSha = story.fm.merged_commit ?? '';
+  if (!shaMatches(declaredSha, pr.mergeCommitSha)) {
+    fail(
+      `${story.file}: \`merged_commit\` non coincide con il merge commit della PR #${prNumber} ` +
+        `(dichiarato: "${declaredSha || '(vuoto)'}", reale: "${pr.mergeCommitSha ?? '(null)'}")`,
+    );
+    continue;
+  }
+
+  const declaredDate = story.fm.merged_date ?? '';
+  if (!dateMatches(declaredDate, pr.mergedAt)) {
+    fail(
+      `${story.file}: \`merged_date\` non coincide con la data di merge della PR #${prNumber} ` +
+        `(dichiarato: "${declaredDate || '(vuoto)'}", reale: "${pr.mergedAt}")`,
+    );
+  }
+}
+
 if (failures === 0) {
   ok(
-    `stato di merge delle sessioni in sync con GitHub: ${compared} sessioni con PR confrontate, ` +
-      `${skipped} senza PR (ignorate)` +
+    `stato di merge delle sessioni e delle story in sync con GitHub: ` +
+      `${compared} file di stato con PR confrontati, ${skipped} senza PR (ignorati)` +
       (deferred > 0 ? `, ${deferred} differiti (stato non ancora applicato dal writer)` : ''),
   );
 }

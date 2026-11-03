@@ -4,7 +4,14 @@
 > completo è qui (decisione D2 del project owner, Sessione 79: la storia del protocollo
 > ha una sede, e `AGENTS.md` resta il **contratto**).
 
-*Ultimo aggiornamento: v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
+*Ultimo aggiornamento: v1.44 — **il writer e il gate coprono anche le story** (Sessione 96, issue #297). Il perimetro `docs/state/stories/` non aveva né un writer né un gate: una story mergiata poteva restare `status: in-review` per sempre — il caso della Story 2.5, che l'aggregatore contava come non-done mentre la CI restava verde. Ora:
+- **`scripts/apply-merge-state.mjs`** scrive il fatto di merge anche sui file di **story**: il formato viene riconosciuto dal frontmatter (`state:` ⇒ sessione, `status:` ⇒ story) e su una story il merge significa `status: done`, `merged_commit`, `merged_date`. Gli stati terminali dichiarati (`blocked`, `wontdo`) non vengono sovrascritti
+- **`scripts/check-merge-state.mjs`** confronta **entrambi** i perimetri con lo stato reale delle PR, fail-closed: una story con la PR mergiata e `status` diverso da `done` è drift. Il gate passa da 70 a **92** confronti
+- **`ADR-0013` D-13.7** dichiara la regola: il perimetro del writer e del gate è la **classe** dei file di stato, non un sottoinsieme
+- **6 drift preesistenti** chiusi (Story 0.2, 0.5, 1.2, 3.1, 3.4, 4.4): i fatti di merge erano dichiarati a mano e non coincidevano con le PR — allineati dal writer stesso
+- Test: `scripts/test-apply-merge-state.mjs` 33 assert (T4..T9), `scripts/test-merge-state-gate.sh` 24 assert (T13..T18)
+
+*Precedente v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
 - **`scripts/agent-claim.ps1`**: presa in carico **atomica** — validazione dell'issue → worktree → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico REST** più basso, non il `node_id` GraphQL né `created_at`) → file di stato dell'agente (nella directory git della worktree: non è un file untracked, non confonde il `pre-commit`, sparisce con la worktree). Se la riverifica è persa rimuove la label, posta `yield:` ed esce 4. Exit 3 = issue già claimata
 - **`scripts/agent-pr.ps1`**: apertura **verificata** — gate locali bloccanti, **una sola** keyword di chiusura nuda, creazione della PR, transizione delle label (`agent-ready` → `status:in-review`) e **scrittura di `pr: N` nel file di sessione** con push: era la precondizione che ha fatto fallire il workflow post-merge due volte (Sessione 80, issue #254)
 - **`scripts/check-claim-state.mjs`** (read-only, bloccante in CI): la PR è coerente con **branch ↔ issue ↔ keyword di chiusura ↔ stato dell'issue ↔ claim** (C1-C5), e **una branch `docs/*` tocca solo file sotto `docs/`** (C4): nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa — la classe diventa impossibile, non solo sgradita. 11 scenari di test (`scripts/test-claim-state.sh`)
@@ -1479,6 +1486,40 @@ La terza e' sul **criterio di fallita**. «Nessun file di sessione corrisponde a
 **Il gap aperto**: `docs/state/stories/*.md` non ha un writer di stato di merge e non e' coperto dal gate `check-merge-state.mjs`. Ogni story chiusa dopo il merge richiede un doc-sync manuale — un costo che nessuna regola dichiara e che l'elenco delle story mergiate (`2.4`, `4.4`, `3.1`, `2.5`, …) rende visibile solo a posteriori. Il gap e' ora tracciato dall'**issue #297**, che propone le due modifiche nella stessa direzione: estendere `apply-merge-state.mjs` al formato delle story (`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro `docs/state/stories/`. Chiudono la **classe** di drift, non il caso. Non sono applicate qui perche' toccano il writer unico di `main` (`ADR-0013`) e il gate bloccante che verifica il suo perimetro: e' lavoro da issue dedicata, non da doc-sync.
 
 **Verifica**: `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni · `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` → 544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti · `pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
+## 52. Il writer e il gate coprono anche le story (Sessione 96)
+
+**Branch**: `fix/297-fix-devops-le-story-non-hanno-un-writer`
+**Issue di tracking**: **#297** (riaperta: la PR #298 l'aveva chiusa prematuramente)
+**Data**: 2026-11-03
+**Stato**: ✅ fatto
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 96-1 | P | L'issue #297 — che tracciava il **gap strutturale** (nessun writer e nessun gate sul perimetro `docs/state/stories/`) — risultava **chiusa**, con il gap aperto | La PR #298 (doc-sync del caso della 2.5) portava la keyword `Closes #297`: GitHub ha chiuso l'issue al merge, ma il corpo della PR dichiarava di chiudere **il caso**, non la **classe** | La keyword di chiusura dichiara **l'issue che la PR risolve**: una PR che risolve un caso non porta la keyword dell'issue che traccia la classe. L'issue #297 è stata riaperta, con le label corrette (`status:done` e `status:in-review` erano in contraddizione fra loro) | issue #297 |
+| 96-2 | P | `apply-merge-state.mjs` e `check-merge-state.mjs` avevano **una sola** directory di ricerca (`docs/state/sessions/`) e **un solo** formato (`state`/`merged`) | Le sessioni e le story sono la **stessa classe** di dati («lo stato di merge di un file di stato») in **due formati** diversi: il writer ne conosceva uno | `ADR-0013` D-13.7: il perimetro del writer e del gate è la **classe** dei file di stato. Il formato viene riconosciuto dal frontmatter (`state:` ⇒ sessione, `status:` ⇒ story) | `scripts/apply-merge-state.mjs` · `scripts/check-merge-state.mjs` |
+| 96-3 | P | Con il gate esteso alle story, **6 drift già presenti in `main`** sono emersi: le Story 0.2, 0.5, 1.2, 3.1, 3.4 e 4.4 dichiaravano un `merged_commit` diverso dal merge commit reale (in tre casi assente) e una data di merge sbagliata | Il perimetro stretto non era un rischio futuro: era un drift **presente** e non visto. Il `merged_commit` dichiarato era spesso l'ultimo commit del branch, non il merge commit (il criterio che `docs/state/_index.md` dichiara da sempre) | I 6 file sono stati allineati **dal writer introdotto nella stessa PR** (i fatti sono quelli dell'API GitHub, non quelli dichiarati a mano) | `docs/state/stories/*.md` |
+
+**Lesson learned**: la lezione è sul **perimetro come parte della specifica**. Un gate che copre una classe di dati con un perimetro più stretto di quello che la classe richiede è un **fail-open silenzoso**: la Story 2.5 è restata `in-review` dopo il merge, con l'aggregatore che la contava come non-done e la CI verde. Il perimetro non è un dettaglio implementativo — è metà della specifica del gate, e va dichiarato come tale (ora lo è, in `ADR-0013` D-13.7 e nella tabella «regola ⟺ gate» di `AGENTS.md`).
+
+La seconda lezione è sulla **keyword di chiusura**: `Closes #N` dichiara che la PR **risolve** l'issue
+#N. Una PR che chiude un *caso* non porta la keyword dell'issue che traccia la *classe*: la chiusura
+automatica ha trasformato l'issue del gap in un issue chiusa con il gap aperto, e la cosa è passata
+inosservata perché il gap non aveva — per definizione — un gate che lo notasse.
+
+La terza è sul **riuso del fix**: i 6 drift preesistenti sono stati corretti dal writer introdotto
+nella stessa PR. Un fix che richiede un intervento manuale parallelo lascia il drift dove sta; un
+fix che si può eseguire **sui dati** chiude il drift presente e futuro con lo stesso gesto.
+
+**Verifica**: `node scripts/check-merge-state.mjs` → 92 confronti, 0 falliti ·
+`node scripts/test-apply-merge-state.mjs` → 33 assert, 0 falliti ·
+`bash scripts/test-merge-state-gate.sh` → 24 assert, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 

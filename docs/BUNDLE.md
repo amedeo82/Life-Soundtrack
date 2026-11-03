@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 15:02
-> Totale file: 182
+> Data: 2026-11-03 19:16
+> Totale file: 183
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.43 — Sessione 94 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.44 — Sessione 96 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -76,6 +76,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 | I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
+| Il frontmatter di una **story** dichiara lo stesso fatto di merge delle sessioni (`status: done`, `merged_commit`, `merged_date`), e il writer post-merge lo applica | `check-merge-state.mjs` (perimetro `docs/state/stories/`) + `apply-merge-state.mjs` | issue #297 (Story 2.5 restata `in-review` dopo il merge) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -1102,6 +1103,8 @@ apply-merge-state → aggregate-state → generate-bundle → verifica (-Check) 
 
 Regole strutturali ( enforced dai gate di `scripts/validate-workflows.mjs`):
 
+- **Il writer copre due formati di stato** (issue #297): `apply-merge-state.mjs` scrive il fatto di merge sia sui file di **sessione** (`state: 🟢`, `merged: true`, `merged_commit`, `merged_date`) sia sui file di **story** (`status: done`, `merged_commit`, `merged_date` — lo schema delle story non ha il campo `merged`). Una story mergiata che restasse `status: in-review` non e' piu' possibile senza drift: il gate `check-merge-state.mjs` confronta **entrambi** i perimetri con lo stato reale delle PR ed e' fail-closed. Gli stati terminali dichiarati di una story (`blocked`, `wontdo`) non vengono sovrascritti dal writer e non sono drift per il gate: il merge di una PR non cancella un esito dichiarato.
+
 - **Un solo writer su `main`**: due workflow che pushano su `main` riportano la race fra writer (misurata il 2026-11-02: push rifiutato, rebase dei file generati, conflitto, run fallito).
 - **Il writer non ribasa mai**: al tentativo successivo fa `git reset --hard origin/main` e **rigenera** da capo. Il rebase dei file generati è un conflitto strutturale, non una race.
 - **Il writer scatta su ogni PR mergiata**: nessun filtro `paths:` (il bundle dipende da molti file, non solo da `docs/state/**`).
@@ -1177,7 +1180,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.43 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.44 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2108,7 +2111,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.43 | Protocollo per agenti — **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.44 | Protocollo per agenti — **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -12625,7 +12628,14 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 > completo è qui (decisione D2 del project owner, Sessione 79: la storia del protocollo
 > ha una sede, e `AGENTS.md` resta il **contratto**).
 
-*Ultimo aggiornamento: v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
+*Ultimo aggiornamento: v1.44 — **il writer e il gate coprono anche le story** (Sessione 96, issue #297). Il perimetro `docs/state/stories/` non aveva né un writer né un gate: una story mergiata poteva restare `status: in-review` per sempre — il caso della Story 2.5, che l'aggregatore contava come non-done mentre la CI restava verde. Ora:
+- **`scripts/apply-merge-state.mjs`** scrive il fatto di merge anche sui file di **story**: il formato viene riconosciuto dal frontmatter (`state:` ⇒ sessione, `status:` ⇒ story) e su una story il merge significa `status: done`, `merged_commit`, `merged_date`. Gli stati terminali dichiarati (`blocked`, `wontdo`) non vengono sovrascritti
+- **`scripts/check-merge-state.mjs`** confronta **entrambi** i perimetri con lo stato reale delle PR, fail-closed: una story con la PR mergiata e `status` diverso da `done` è drift. Il gate passa da 70 a **92** confronti
+- **`ADR-0013` D-13.7** dichiara la regola: il perimetro del writer e del gate è la **classe** dei file di stato, non un sottoinsieme
+- **6 drift preesistenti** chiusi (Story 0.2, 0.5, 1.2, 3.1, 3.4, 4.4): i fatti di merge erano dichiarati a mano e non coincidevano con le PR — allineati dal writer stesso
+- Test: `scripts/test-apply-merge-state.mjs` 33 assert (T4..T9), `scripts/test-merge-state-gate.sh` 24 assert (T13..T18)
+
+*Precedente v1.36 — **il claim diventa verificabile** (Sessione 81, issue #256). ADR-0006 ha 8 regole *vincolanti* sul claim e **zero** enforcement: due agenti potevano implementare la stessa story senza che nulla se ne accorgesse — la race che ADR-0006 dichiara di aver chiuso era chiusa solo nella prosa. La presa in carico era tre occasioni di dimenticanza (lanciare lo script, copiare due comandi `gh`, interpretare a mano la riverifica). Ora:
 - **`scripts/agent-claim.ps1`**: presa in carico **atomica** — validazione dell'issue → worktree → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico REST** più basso, non il `node_id` GraphQL né `created_at`) → file di stato dell'agente (nella directory git della worktree: non è un file untracked, non confonde il `pre-commit`, sparisce con la worktree). Se la riverifica è persa rimuove la label, posta `yield:` ed esce 4. Exit 3 = issue già claimata
 - **`scripts/agent-pr.ps1`**: apertura **verificata** — gate locali bloccanti, **una sola** keyword di chiusura nuda, creazione della PR, transizione delle label (`agent-ready` → `status:in-review`) e **scrittura di `pr: N` nel file di sessione** con push: era la precondizione che ha fatto fallire il workflow post-merge due volte (Sessione 80, issue #254)
 - **`scripts/check-claim-state.mjs`** (read-only, bloccante in CI): la PR è coerente con **branch ↔ issue ↔ keyword di chiusura ↔ stato dell'issue ↔ claim** (C1-C5), e **una branch `docs/*` tocca solo file sotto `docs/`** (C4): nel merge della PR #249 due script di un altro task erano finiti in una PR di doc-sync per un `git add -A` nella working copy condivisa — la classe diventa impossibile, non solo sgradita. 11 scenari di test (`scripts/test-claim-state.sh`)
@@ -14103,6 +14113,40 @@ La terza e' sul **criterio di fallita**. «Nessun file di sessione corrisponde a
 
 ---
 
+## 52. Il writer e il gate coprono anche le story (Sessione 96)
+
+**Branch**: `fix/297-fix-devops-le-story-non-hanno-un-writer`
+**Issue di tracking**: **#297** (riaperta: la PR #298 l'aveva chiusa prematuramente)
+**Data**: 2026-11-03
+**Stato**: ✅ fatto
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 96-1 | P | L'issue #297 — che tracciava il **gap strutturale** (nessun writer e nessun gate sul perimetro `docs/state/stories/`) — risultava **chiusa**, con il gap aperto | La PR #298 (doc-sync del caso della 2.5) portava la keyword `Closes #297`: GitHub ha chiuso l'issue al merge, ma il corpo della PR dichiarava di chiudere **il caso**, non la **classe** | La keyword di chiusura dichiara **l'issue che la PR risolve**: una PR che risolve un caso non porta la keyword dell'issue che traccia la classe. L'issue #297 è stata riaperta, con le label corrette (`status:done` e `status:in-review` erano in contraddizione fra loro) | issue #297 |
+| 96-2 | P | `apply-merge-state.mjs` e `check-merge-state.mjs` avevano **una sola** directory di ricerca (`docs/state/sessions/`) e **un solo** formato (`state`/`merged`) | Le sessioni e le story sono la **stessa classe** di dati («lo stato di merge di un file di stato») in **due formati** diversi: il writer ne conosceva uno | `ADR-0013` D-13.7: il perimetro del writer e del gate è la **classe** dei file di stato. Il formato viene riconosciuto dal frontmatter (`state:` ⇒ sessione, `status:` ⇒ story) | `scripts/apply-merge-state.mjs` · `scripts/check-merge-state.mjs` |
+| 96-3 | P | Con il gate esteso alle story, **6 drift già presenti in `main`** sono emersi: le Story 0.2, 0.5, 1.2, 3.1, 3.4 e 4.4 dichiaravano un `merged_commit` diverso dal merge commit reale (in tre casi assente) e una data di merge sbagliata | Il perimetro stretto non era un rischio futuro: era un drift **presente** e non visto. Il `merged_commit` dichiarato era spesso l'ultimo commit del branch, non il merge commit (il criterio che `docs/state/_index.md` dichiara da sempre) | I 6 file sono stati allineati **dal writer introdotto nella stessa PR** (i fatti sono quelli dell'API GitHub, non quelli dichiarati a mano) | `docs/state/stories/*.md` |
+
+**Lesson learned**: la lezione è sul **perimetro come parte della specifica**. Un gate che copre una classe di dati con un perimetro più stretto di quello che la classe richiede è un **fail-open silenzoso**: la Story 2.5 è restata `in-review` dopo il merge, con l'aggregatore che la contava come non-done e la CI verde. Il perimetro non è un dettaglio implementativo — è metà della specifica del gate, e va dichiarato come tale (ora lo è, in `ADR-0013` D-13.7 e nella tabella «regola ⟺ gate» di `AGENTS.md`).
+
+La seconda lezione è sulla **keyword di chiusura**: `Closes #N` dichiara che la PR **risolve** l'issue
+#N. Una PR che chiude un *caso* non porta la keyword dell'issue che traccia la *classe*: la chiusura
+automatica ha trasformato l'issue del gap in un issue chiusa con il gap aperto, e la cosa è passata
+inosservata perché il gap non aveva — per definizione — un gate che lo notasse.
+
+La terza è sul **riuso del fix**: i 6 drift preesistenti sono stati corretti dal writer introdotto
+nella stessa PR. Un fix che richiede un intervento manuale parallelo lascia il drift dove sta; un
+fix che si può eseguire **sui dati** chiude il drift presente e futuro con lo stesso gesto.
+
+**Verifica**: `node scripts/check-merge-state.mjs` → 92 confronti, 0 falliti ·
+`node scripts/test-apply-merge-state.mjs` → 33 assert, 0 falliti ·
+`bash scripts/test-merge-state-gate.sh` → 24 assert, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
 ## 49. AGENTS.md: il contratto senza la storia (Sessione 83)
 
 **Branch**: `feat/259-rifinitura-agents`
@@ -14436,6 +14480,25 @@ merged_date: 2026-10-18              # data merge
 ## Documenti aggiornati
 [bullet]
 ```
+
+### Invariante: una story con PR mergiata è una story `done` *(vincolante, issue #297)*
+
+Le story dichiarano lo **stesso fatto** delle sessioni — «la PR è stata mergiata in `main`» — in un **formato diverso**: `status` invece di `state` + `merged`. Fino alla Sessione 95 nessun writer e nessun gate copriva questo perimetro: la Story 2.5 è restata `status: in-review` con `pr: 267` (una PR inesistente) dopo il merge della PR #295, e nulla se n'era accorto — l'aggregatore la contava come non-done e il blocco `AGGREGATE-NEXT-STEP-*` la indicava come «prossima story da implementare».
+
+| Campo | Valore richiesto quando la PR è mergiata |
+|-------|-------------------------------------------|
+| `status` | `done` |
+| `merged_commit` | SHA del merge commit della PR (lo stesso criterio delle sessioni: il merge commit, non l'ultimo commit del branch) |
+| `merged_date` | data del merge (`YYYY-MM-DD`) |
+| `pr` | numero della PR (non `0`, non `null`) |
+
+**Chi lo applica**: `scripts/apply-merge-state.mjs`, nel writer unico post-merge (`ADR-0013`): il file di story che dichiara `pr: <N>` riceve `status: done`, `merged_commit` e `merged_date` determinati dalla stessa fonte di verità delle sessioni (l'API GitHub). Il writer è idempotente e tocca solo le righe di frontmatter.
+
+**Chi lo verifica**: `scripts/check-merge-state.mjs`, fail-closed: confronta il frontmatter di **sessioni e story** con lo stato reale delle PR. Una story con la PR mergiata e `status` diverso da `done` è drift (fallisce); lo stesso vale per un `merged_commit` o un `merged_date` che non coincidono con la PR.
+
+**Eccezione dichiarata**: gli stati **terminali** di una story (`blocked`, `wontdo`) non sono drift e il writer non li sovrascrive: il merge di una PR non cancella un esito dichiarato (scope cancellato, dipendenza esterna).
+
+**Fonte di verità**: lo stato della PR su GitHub (`gh pr view <N> --json state,mergedAt,mergeCommit`), **mai** il branch locale né la presenza del file. Una story senza PR (`pr: 0`) non ha merge commit da citare.
 
 ---
 
@@ -21707,6 +21770,140 @@ Sessione 73).
 
 
 
+===== FILE: docs/state/sessions/96-story-merge-state-writer.md =====
+
+---
+number: 96
+title: "Il writer di stato di merge copre anche le story (issue #297)"
+date: 2026-11-03
+state: 🟡
+merged: false
+branch: fix/297-fix-devops-le-story-non-hanno-un-writer
+pr: 300
+claim: kilo-hp-elitebook-6e15
+tags: [devops, stato, story, protocollo, writer]
+---
+
+# Sessione 96 — il writer e il gate coprono anche le story (issue #297)
+
+> **Oggetto**: la Sessione 94 (issue #266) ha allineato lo stato di merge della **Story 2.5** con un
+> doc-sync manuale e ha tracciato il **gap strutturale** che lo rendeva necessario: nessun writer e
+> nessun gate coprivano il perimetro `docs/state/stories/`. Questa sessione chiude **la classe** di
+> drift, non il caso.
+
+## Sintesi
+
+L'issue #297 era stata chiusa **prematuramente**: la PR #298 (doc-sync della Story 2.5) portava la
+keyword `Closes #297`, quindi GitHub l'ha chiusa al merge — ma il corpo della PR dichiarava
+esplicitamente di chiudere **il caso della 2.5**, non il gap. Il gap è stato riaprire l'issue
+(2026-11-03), correggere le label (`status:done` e `status:in-review` erano in contraddizione fra
+loro) e riprenderlo.
+
+Il gap era misurabile in tre righe di codice: `scripts/apply-merge-state.mjs` e
+`scripts/check-merge-state.mjs` avevano **una sola** directory di ricerca (`docs/state/sessions/`) e
+**un solo** formato (`state`/`merged` per le sessioni). Le story dichiarano lo stesso fatto — «la PR
+è stata mergiata in `main`» — in un formato diverso: `status: done`, e i fatti del merge in
+`merged_commit`/`merged_date`.
+
+La correzione è una sola decisione (`ADR-0013` D-13.7): **il perimetro del writer e del gate è la
+classe dei file di stato**, non un sottoinsieme. Ogni formato viene riconosciuto dal frontmatter e
+trattato con i suoi campi.
+
+## Cosa è stato fatto
+
+- **`scripts/apply-merge-state.mjs`**: il writer cerca ora nei **due** perimetri (`docs/state/sessions/`
+  e `docs/state/stories/`). Su una story il merge significa `status: done`, `merged_commit` (SHA
+  completo) e `merged_date` (`YYYY-MM-DD`, il formato dello schema delle story): il campo `merged`
+  non viene introdotto, perché lo schema delle story non lo dichiara — il fatto è dichiarato una volta
+  sola. Gli stati **terminali** dichiarati (`blocked`, `wontdo`) non vengono sovrascritti: il merge di
+  una PR non cancella un esito dichiarato.
+- **`scripts/check-merge-state.mjs`**: il gate confronta **anch'esso** i due perimetri con lo stato
+  reale delle PR ed è fail-closed. Una story con la PR mergiata e `status` diverso da `done` è drift,
+  come un `merged_commit` o un `merged_date` che non coincidono; la modalità `--defer-unapplied`
+  (D-13.4) differisce anche le story, con lo stesso criterio oggettivo (uguaglianza di SHA).
+- **Allineamento dei fatti di merge preesistenti**: il gate esteso ha intercettato **6 drift** già
+  presenti in `main` — le Story 0.2, 0.5, 1.2, 3.1, 3.4 e 4.4 dichiaravano un `merged_commit` diverso
+  dal merge commit reale (in tre casi assente) e una data di merge sbagliata. Sono stati allineati
+  **dal writer stesso**, eseguendo `apply-merge-state.mjs` sulle PR corrispondenti: i fatti sono
+  quelli dell'API GitHub, non quelli dichiarati a mano.
+- **Documentazione**: `ADR-0013` (D-13.7 e due righe nella tabella dei gate), `docs/state/_index.md`
+  (l'invariante delle story, simmetrico a quello delle sessioni), `AGENTS.md` v1.44 (la regola nella
+  tabella «regola ⟺ gate» e la nota sul writer), `docs/12-DEVOPS.md` §9.10, `docs/18-DEV-LOG.md` §52.
+- **Test**: `scripts/test-apply-merge-state.mjs` da 12 a **33 assert** (T4..T9: la story, la story
+  già `done` senza i fatti del merge, lo stato terminale, sessione + story della stessa PR, l'assenza
+  di file di stato, l'idempotenza); `scripts/test-merge-state-gate.sh` da 16 a **24 assert**
+  (T13..T18: story coerente, `status: in_review` su PR mergiata, `merged_commit` assente,
+  `merged_date` errato, story senza PR, il caso strutturale differito).
+
+## Analisi di avanzamento
+
+**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato, gate e documentazione**. La
+percentuale di implementazione delle story resta **73%** (22 su 30, effort 76%, 8 step rimanenti):
+questo lavoro non implementa una story, chiude un gap di processo. Il numero che cambia è quello dei
+**confronti del gate**: da 70 a **92** (70 sessioni + 22 story), e i confronti coprono ora **tutta**
+la classe dei file di stato.
+
+**Cosa è pronto.**
+
+- Il perimetro `docs/state/stories/` ha un **writer** e un **gate**: una story mergiata non può più
+  restare `in-review` senza che il gate fallisca e senza che il writer la corregga al merge.
+- I **6 drift preesistenti** sulle story sono chiusi: i fatti di merge dichiarati nelle Story 0.2,
+  0.5, 1.2, 3.1, 3.4 e 4.4 coincidono ora con lo stato reale delle PR.
+- La regola è **scritta e verificata**: una riga nella tabella «regola ⟺ gate» di `AGENTS.md`
+  (v1.44), l'invariante in `docs/state/_index.md`, la decisione D-13.7 in `ADR-0013` e i gate che la
+  impongono (`check-merge-state.mjs`, `apply-merge-state.mjs`).
+
+**Cosa manca.** La classe di drift è chiusa; restano due punti **fuori perimetro**, dichiarati e non
+modificati qui:
+
+- le chiavi i18n `insight.mood.angry` / `insight.mood.neutral` (sessione concorrente, in
+  `stash@{0}`): non sono usate da nessun codice e il namespace non è nella spec
+  `docs/08-COPY-I18N.md` §2.15 — vanno decise a parte (recupero in PR dedicata o abbandono);
+- il **post-merge cleanup** dei branch e delle worktree residue della Sessione 94 (procedura
+  canonica `scripts/post-merge.ps1`, eseguita dalla working copy principale).
+
+Nota: `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi
+aggregati**: i blocchi si aggiornano da soli dopo il merge (regola V1 di ADR-0008); in questa PR è
+stato toccato solo il contenuto dei file già registrati in `$files`, e il bundle rigenerato di
+conseguenza.
+
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il writer è idempotente (test T9) e
+il gate resta fail-closed su entrambi i perimetri.
+
+**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 92 confronti, 0 falliti ·
+`node scripts/test-apply-merge-state.mjs` → 33 assert, 0 falliti ·
+`bash scripts/test-merge-state-gate.sh` → 24 assert, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| # | Osservazione | Conseguenza |
+|---|--------------|-------------|
+| 96-1 | Una **keyword di chiusura** in una PR che risolve solo un *caso* chiude l'issue che descriveva la *classe* | La PR #298 chiudeva il caso della 2.5 ma portava `Closes #297`: l'issue del gap è stata chiusa con il gap aperto, e nessuno se n'era accorto perché il gate copriva solo le sessioni |
+| 96-2 | Un gate che copre una classe di dati con un **perimetro più stretto** è un fail-open silenzoso | Sessioni e story sono la stessa classe («lo stato di merge di un file di stato») con due formati: coprirne uno solo lasciava l'altro fuori, in silenzio, con la CI verde |
+| 96-3 | Il **perimetro** di un gate è parte della sua specifica, non un dettaglio implementativo | Il gate esteso ha intercettato 6 drift già in `main`: il perimetro stretto non era solo un futuro rischio, era un drift presente e non visto |
+| 96-4 | Il fix giusto è quello che si può **riusare** per chiudere il drift esistente | I 6 file allineati sono stati corretti dal writer introdotto nella stessa PR: nessun dato dichiarato a mano |
+
+## Documenti aggiornati
+
+- `scripts/apply-merge-state.mjs` — writer: perimetro `docs/state/stories/`, formato story, stati terminali rispettati
+- `scripts/check-merge-state.mjs` — gate: perimetro `docs/state/stories/`, fail-closed, differimento `--defer-unapplied`
+- `scripts/test-apply-merge-state.mjs` — T4..T9 (story, idempotenza, stato terminale)
+- `scripts/test-merge-state-gate.sh` — T13..T18 (drift delle story)
+- `docs/13-ADR/0013-post-merge-automation.md` — D-13.7 e tabella dei gate
+- `docs/state/_index.md` — invariante «una story con PR mergiata è una story `done`»
+- `AGENTS.md` — v1.44: regola ⟺ gate e nota sul writer
+- `docs/INDEX.md` — versione del protocollo allineata a v1.44
+- `docs/12-DEVOPS.md` — catalogo dei gate: il perimetro delle story
+- `docs/18-DEV-LOG.md` — §52 e changelog del protocollo
+- `docs/state/stories/{0.2,0.5,1.2,3.1,3.4,4.4}-*.md` — fatti di merge allineati al reale
+- `scripts/generate-bundle.ps1` — sessione 96 registrata in `$files`
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -22827,6 +23024,8 @@ depends_on: ["1.6", "4.4"]
 issue: 231
 branch: "feat/231-context-ribbon"
 pr: 232
+merged_commit: "bc959d3a932ab2d4210ae0f243b59f598d9cbc8d"
+merged_date: 2026-10-31
 claim: kilo-HP-ELITEBOOK-progress
 spec_refs:
   - docs/19-GEO-CONTEXT.md
@@ -22934,6 +23133,8 @@ depends_on: []
 issue: 233
 branch: "feat/233-home-timeline"
 pr: 234
+merged_commit: "815ce171f9bfd70133d0a788d6e15f717624a290"
+merged_date: 2026-10-31
 claim: kilo-HP-ELITEBOOK-progress
 spec_refs:
   - docs/06-UX-FLOWS-STATES.md
@@ -23238,7 +23439,7 @@ spec_refs:
   - docs/13-ADR/0009-local-ip-geolocation.md
   - docs/19-GEO-CONTEXT.md
 pr: 222
-merged_commit: e661e37
+merged_commit: "beaefba677f9dbaf0ec9891c3e70516015a1adcf"
 merged_date: 2026-10-31
 ---
 
@@ -32023,6 +32224,7 @@ merge → post-merge.yml (writer unico) → commit → workflow_run → CI sullo
 | La CI consuma il writer | trigger `workflow_run` su `["post-merge"]`, nome allineato al `name:` reale | `validate-workflows.mjs` → `checkWriterOrdering` |
 | La CI valida la **testa** di `main` nel passaggio `workflow_run` | `checkout` con `ref: main` (`workflow_run.head_sha` e' il commit di *partenza* del writer) | `validate-workflows.mjs` → `checkWorkflowRunCheckout` |
 | Il gate merge-state non fallisce per costruzione sul merge commit | modalita' `--defer-unapplied`: differisce **solo** l'albero che e' il merge commit della PR | `scripts/check-merge-state.mjs` (test T10..T12) |
+| Il gate merge-state confronta **anche** le story (perimetro `docs/state/stories/`, formato `status: done`) | il gate legge `docs/state/sessions/` **e** `docs/state/stories/` e confronta entrambi con lo stato reale delle PR | `scripts/check-merge-state.mjs` (test T13..T18) · issue #297 |
 | I generatori producono gli stessi byte su ogni OS | UTC + `InvariantCulture` + ordinamento ordinale + guardia `pwsh >= 7` + LF | `scripts/check-generators-portable.mjs` (determinismo + manifest cross-OS: job `gates-portability` su `ubuntu-latest` + `windows-latest`, confronto nel job `gates-portability-compare`) |
 
 **Il gate di portabilita'** e' la prova empirica dell'indipendenza dal sistema
@@ -46559,17 +46761,22 @@ docs/BUNDLE.md                             # snapshot di tutto il repository (in
 
 #!/usr/bin/env node
 /**
- * Test di `scripts/apply-merge-state.mjs` (issue #275).
+ * Test di `scripts/apply-merge-state.mjs` (issue #275, issue #297).
  *
- * Il caso che ha motivato il fix: una PR puo' consegnare **piu' file di sessione**
- * (una sola issue, piu' blocchi di lavoro distinti). La versione precedente abortava
- * e nessuna delle sessioni riceveva `merged: true`: i blocchi aggregati mostravano
- * «non ancora mergiato (PR #N)» per sempre — il drift che il gate
- * `check-merge-state.mjs` esiste per intercettare.
+ * Il caso che ha motivato il fix #275: una PR puo' consegnare **piu' file di
+ * sessione** (una sola issue, piu' blocchi di lavoro distinti). La versione
+ * precedente abortava e nessuna delle sessioni riceveva `merged: true`: i
+ * blocchi aggregati mostravano «non ancora mergiato (PR #N)» per sempre — il
+ * drift che il gate `check-merge-state.mjs` esiste per intercettare.
  *
- * Ogni scenario costruisce una directory con `docs/state/sessions/` e verifica
- * l'uscita e il contenuto dei file. Lo SHA e la data sono passati come argomenti:
- * il test non tocca la rete.
+ * Il caso che ha motivato il fix #297: le **story** hanno un frontmatter
+ * diverso (`status: done` invece di `state: <chiuso>` + `merged: true`) e non
+ * erano coperte dal writer: una story mergiata restava `status: in-review`
+ * per sempre, con la CI verde (il caso reale e' la Story 2.5, PR #295).
+ *
+ * Ogni scenario costruisce una directory con `docs/state/sessions/` e
+ * `docs/state/stories/` e verifica l'uscita e il contenuto dei file. Lo SHA e
+ * la data sono passati come argomenti: il test non tocca la rete.
  *
  * Uso: node scripts/test-apply-merge-state.mjs
  * Exit code: 0 = tutti gli scenari passano, 1 = almeno uno fallisce.
@@ -46609,10 +46816,15 @@ function cleanup() {
 }
 process.on('exit', cleanup);
 
-function makeRepo(sessionFiles) {
+function makeRepo(sessionFiles, storyFiles = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'ls-merge-state-'));
   for (const [name, content] of Object.entries(sessionFiles)) {
     const full = join(dir, 'docs', 'state', 'sessions', name);
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, content);
+  }
+  for (const [name, content] of Object.entries(storyFiles)) {
+    const full = join(dir, 'docs', 'state', 'stories', name);
     mkdirSync(dirname(full), { recursive: true });
     writeFileSync(full, content);
   }
@@ -46648,6 +46860,23 @@ const session = (number, pr) =>
     '---',
     '',
     '# Sessione di test',
+    '',
+  ].join('\n');
+
+const story = (id, pr, status = 'in_review', branch = 'feat/test-story') =>
+  [
+    '---',
+    `id: "${id}"`,
+    'title: "Story di test"',
+    'phase: 2',
+    'area: analysis',
+    `status: ${status}`,
+    'priority: B',
+    `branch: ${branch}`,
+    `pr: ${pr}`,
+    '---',
+    '',
+    '# Story di test',
     '',
   ].join('\n');
 
@@ -46691,6 +46920,91 @@ const session = (number, pr) =>
   const res = runTool(dir, 273);
   assert(res.code === 0, `T3: nessuna sessione -> exit 0 (ottenuto ${res.code})`);
   assert(res.stdout.includes('[WARN]'), 'T3: l\'assenza e\' un WARN, non un errore');
+}
+
+// --- T4: una story con pr: N -> status: done + merged_commit + merged_date --
+{
+  const dir = makeRepo({}, { '2.5-analysis-pipeline-link.md': story('2.5', 295) });
+  dirs.push(dir);
+  const res = runTool(dir, 295);
+  assert(res.code === 0, `T4: una story -> exit 0 (ottenuto ${res.code})`);
+  const content = readFileSync(
+    join(dir, 'docs', 'state', 'stories', '2.5-analysis-pipeline-link.md'),
+    'utf8',
+  );
+  assert(content.includes('status: done'), 'T4: status: done applicato');
+  assert(content.includes(`merged_commit: "${SHA}"`), 'T4: merged_commit applicato');
+  assert(content.includes('merged_date: 2026-11-02'), 'T4: merged_date applicata (YYYY-MM-DD)');
+  assert(content.includes('# Story di test'), 'T4: il corpo del file resta intatto');
+}
+
+// --- T5: la story e' gia' `done` ma mancano i fatti del merge ----------------
+{
+  const dir = makeRepo({}, { '3.1-home-timeline.md': story('3.1', 234, 'done') });
+  dirs.push(dir);
+  const res = runTool(dir, 234);
+  assert(res.code === 0, `T5: story gia' done -> exit 0 (ottenuto ${res.code})`);
+  const content = readFileSync(join(dir, 'docs', 'state', 'stories', '3.1-home-timeline.md'), 'utf8');
+  assert(content.includes(`merged_commit: "${SHA}"`), 'T5: merged_commit applicato');
+  assert(content.includes('merged_date: 2026-11-02'), 'T5: merged_date applicata');
+  assert(content.includes('status: done'), 'T5: lo status resta done');
+}
+
+// --- T6: stato terminale dichiarato (blocked) -> non sovrascritto ------------
+{
+  const dir = makeRepo({}, { '2.1-mood-tracker.md': story('2.1', 192, 'blocked') });
+  dirs.push(dir);
+  const res = runTool(dir, 192);
+  assert(res.code === 0, `T6: stato terminale -> exit 0 (ottenuto ${res.code})`);
+  const content = readFileSync(join(dir, 'docs', 'state', 'stories', '2.1-mood-tracker.md'), 'utf8');
+  assert(content.includes('status: blocked'), 'T6: lo stato terminale non e\' stato sovrascritto');
+  assert(!content.includes('status: done'), 'T6: la story non e\' diventata done');
+}
+
+// --- T7: sessione e story della stessa PR -> entrambe allineate --------------
+{
+  const dir = makeRepo(
+    { '96-sessione.md': session(96, 297) },
+    { '2.5-analysis-pipeline-link.md': story('2.5', 297) },
+  );
+  dirs.push(dir);
+  const res = runTool(dir, 297);
+  assert(res.code === 0, `T7: sessione + story -> exit 0 (ottenuto ${res.code})`);
+  const sessionContent = readFileSync(join(dir, 'docs', 'state', 'sessions', '96-sessione.md'), 'utf8');
+  assert(sessionContent.includes('merged: true'), 'T7: la sessione riceve merged: true');
+  const storyContent = readFileSync(
+    join(dir, 'docs', 'state', 'stories', '2.5-analysis-pipeline-link.md'),
+    'utf8',
+  );
+  assert(storyContent.includes('status: done'), 'T7: la story riceve status: done');
+}
+
+// --- T8: nessun file di stato per la PR (ne' sessione ne' story) -> WARN ------
+{
+  const dir = makeRepo({ '13-altra.md': session(13, 999) });
+  dirs.push(dir);
+  const res = runTool(dir, 273);
+  assert(res.code === 0, `T8: nessun file di stato -> exit 0 (ottenuto ${res.code})`);
+  assert(res.stdout.includes('[WARN]'), 'T8: l\'assenza e\' un WARN, non un errore');
+}
+
+// --- T9: il writer e' idempotente ------------------------------------------
+{
+  const dir = makeRepo({}, { '2.5-analysis-pipeline-link.md': story('2.5', 295) });
+  dirs.push(dir);
+  runTool(dir, 295);
+  const first = readFileSync(
+    join(dir, 'docs', 'state', 'stories', '2.5-analysis-pipeline-link.md'),
+    'utf8',
+  );
+  const res = runTool(dir, 295);
+  const second = readFileSync(
+    join(dir, 'docs', 'state', 'stories', '2.5-analysis-pipeline-link.md'),
+    'utf8',
+  );
+  assert(res.code === 0, `T9: seconda esecuzione -> exit 0 (ottenuto ${res.code})`);
+  assert(first === second, 'T9: la seconda esecuzione non cambia il file (idempotente)');
+  assert(res.stdout.includes('gia\' in sync'), 'T9: il log dichiara lo stato gia\' in sync');
 }
 
 console.log('');
@@ -47509,7 +47823,7 @@ exit 0
 
 - **Stato**: 🟢 APPROVED (issue #284, Sessione 90, 2026-11-02)
 - **Data**: 2026-11-02
-- **Riferimenti**: issue #281 (fix incompleto), issue #239 (gate merge-state), issue #140 (sync dei writer), issue #149 (ordinamento fra writer), issue #216 (copertura dei trigger), issue #277 (encoding), ADR-0008 (lazy-state aggregation), ADR-0012 (contratto del protocollo)
+- **Riferimenti**: issue #281 (fix incompleto), issue #239 (gate merge-state), issue #297 (perimetro delle story), issue #140 (sync dei writer), issue #149 (ordinamento fra writer), issue #216 (copertura dei trigger), issue #277 (encoding), ADR-0008 (lazy-state aggregation), ADR-0012 (contratto del protocollo)
 
 ## Contesto
 
@@ -47635,6 +47949,37 @@ già aggiornata quando il bundle viene scritto. L'ordinamento dei due
 generatori (aggregator → bundle) resta vincolante e viene verificato dal gate
 di portabilità (che rigenera nell'ordine corretto e confronta i byte).
 
+### D-13.7 — Il writer e il gate coprono anche le story *(issue #297)*
+
+Il writer unico scriveva lo stato di merge **solo** sui file di
+`docs/state/sessions/`, e il gate confrontava **solo** le sessioni: il
+perimetro `docs/state/stories/` non aveva né un writer né un gate. Il caso
+reale (Story 2.5, PR #295) mostra la conseguenza: una story mergiata è
+restata `status: in-review` con `pr: 267` — una PR inesistente — e l'aggregatore
+l'ha contata come non-done, con il blocco `AGGREGATE-NEXT-STEP-*` che la
+indicava come «prossima story da implementare». Nessun errore, nessun warning,
+CI verde.
+
+La decisione è che **il perimetro del writer e del gate è la classe dei file di
+stato**, non un sottoinsieme: i due coprono `docs/state/sessions/` e
+`docs/state/stories/`, ciascuno nel **proprio formato**.
+
+- Il writer riconosce il formato dal frontmatter: `state:`/`merged:` ⇒
+  sessione; `status:` ⇒ story. Su una story il merge significa `status: done`,
+  `merged_commit` e `merged_date` (lo schema delle story non ha il campo
+  `merged`: il fatto è dichiarato una volta sola).
+- Il gate confronta **entrambi** i perimetri con lo stato reale delle PR, e
+  resta fail-closed: una story con la PR mergiata e `status` diverso da `done`
+  è drift, come un `merged_commit` o un `merged_date` che non coincidono.
+- Gli stati **terminali** dichiarati di una story (`blocked`, `wontdo`) non
+  sono drift e il writer non li sovrascrive: il merge di una PR non cancella
+  un esito dichiarato.
+
+La regola generale che ne discende è la stessa del resto del protocollo
+(`ADR-0012`): **una regola senza gate è un consiglio**. Due gate che coprono la
+stessa classe di dati con un perimetro più stretto di quello che la classe
+richiede sono un fail-open silenzioso.
+
 ## Alternative scartate
 
 | Alternativa | Perché scartata |
@@ -47673,6 +48018,8 @@ di portabilità (che rigenera nell'ordine corretto e confronta i byte).
 | Il writer sincronizza con `origin/main` prima del push | `validate-workflows.mjs` → `checkPushSync` | `scripts/test-workflow-push-sync.sh` (T2, T3) |
 | La riga `git add` copre i `$targets` dell'aggregator | `validate-workflows.mjs` → `checkGitAddCoverage` | `scripts/test-workflow-git-add-coverage.sh` |
 | Il gate merge-state differisce **solo** il caso strutturale | `check-merge-state.mjs --defer-unapplied` | `scripts/test-merge-state-gate.sh` (T10..T12) |
+| Il gate merge-state confronta **anche** le story, nel loro formato (`status: done`) | `check-merge-state.mjs` (perimetro `docs/state/stories/`) | `scripts/test-merge-state-gate.sh` (T13..T18) · issue #297 |
+| Il writer applica lo stato di merge anche alle story | `apply-merge-state.mjs` (perimetro `docs/state/stories/`) | `scripts/test-apply-merge-state.mjs` (T4..T9) |
 | I generatori producono gli stessi byte su ogni OS | `check-generators-portable.mjs` (manifest cross-OS) | `scripts/test-generators-portable.sh` (T1, T2, T3) |
 
 

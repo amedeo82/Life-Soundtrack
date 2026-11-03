@@ -600,6 +600,7 @@ merge → post-merge.yml (writer unico) → commit → workflow_run → CI sullo
 | La CI consuma il writer | trigger `workflow_run` su `["post-merge"]`, nome allineato al `name:` reale | `validate-workflows.mjs` → `checkWriterOrdering` |
 | La CI valida la **testa** di `main` nel passaggio `workflow_run` | `checkout` con `ref: main` (`workflow_run.head_sha` e' il commit di *partenza* del writer) | `validate-workflows.mjs` → `checkWorkflowRunCheckout` |
 | Il gate merge-state non fallisce per costruzione sul merge commit | modalita' `--defer-unapplied`: differisce **solo** l'albero che e' il merge commit della PR | `scripts/check-merge-state.mjs` (test T10..T12) |
+| Il gate merge-state confronta **anche** le story (perimetro `docs/state/stories/`, formato `status: done`) | il gate legge `docs/state/sessions/` **e** `docs/state/stories/` e confronta entrambi con lo stato reale delle PR | `scripts/check-merge-state.mjs` (test T13..T18) · issue #297 |
 | I generatori producono gli stessi byte su ogni OS | UTC + `InvariantCulture` + ordinamento ordinale + guardia `pwsh >= 7` + LF | `scripts/check-generators-portable.mjs` (determinismo + manifest cross-OS: job `gates-portability` su `ubuntu-latest` + `windows-latest`, confronto nel job `gates-portability-compare`) |
 
 **Il gate di portabilita'** e' la prova empirica dell'indipendenza dal sistema

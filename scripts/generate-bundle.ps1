@@ -180,6 +180,10 @@ $files = @(
     # dopo la PR #295, e il gap scoperto (le story non hanno un writer di
     # stato di merge: apply-merge-state.mjs scrive solo sulle sessioni).
     "docs/state/sessions/95-story-2-5-merge-state.md",
+    # Sessione 96 (issue #297): il writer e il gate coprono anche il perimetro
+    # `docs/state/stories/` — il gap aperto dalla Sessione 95 e' chiuso, e i 6
+    # drift di merge preesistenti sulle story sono allineati.
+    "docs/state/sessions/96-story-merge-state-writer.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
