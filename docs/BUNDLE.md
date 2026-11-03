@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 22:27
+> Data: 2026-11-03 22:29
 > Totale file: 185
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -22079,7 +22079,7 @@ state: 🟡
 merged: false
 branch: feat/241-story-3-2---ricordi-share
 pr: 301
-claim: kilo-HP-ELITEBOOK-6e15
+claim: kilo-hp-elitebook-bfed
 tags: [ui, ricordi, share, tagging, canvas, i18n]
 ---
 
@@ -23549,7 +23549,7 @@ depends_on: ["2.4", "2.5"]
 issue: 241
 branch: "feat/241-story-3-2---ricordi-share"
 pr: 301
-claim: kilo-HP-ELITEBOOK-6e15
+claim: kilo-hp-elitebook-bfed
 spec_refs:
   - docs/25-MEMORIES-SHARE-EXPLORE.md
   - docs/06-UX-FLOWS-STATES.md
