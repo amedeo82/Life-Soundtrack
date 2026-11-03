@@ -2,8 +2,10 @@
 number: 96
 title: "Il writer di stato di merge copre anche le story (issue #297)"
 date: 2026-11-03
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "37975de11931b262379d0dad5caa2186926141aa"
+merged_date: "2026-11-03T19:22:23Z"
 branch: fix/297-fix-devops-le-story-non-hanno-un-writer
 pr: 300
 claim: kilo-hp-elitebook-6e15

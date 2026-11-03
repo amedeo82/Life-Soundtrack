@@ -94,51 +94,47 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S95)
+**Analisi della sessione corrente** (S96)
 
-**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato e documentazione**. La
-percentuale di implementazione delle story passa da **70%** (21 su 30, effort 72%, 9 step) a
-**73%** (22 su 30, effort 76%, **8 step** rimanenti): l'**EPIC 2** (Analisi) diventa **completo
-(5/5)** e il gate di testabilità «Motore di analisi completo» passa da «4/5 - in corso» a
-**«5/5 - soddisfatto»**.
+**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato, gate e documentazione**. La
+percentuale di implementazione delle story resta **73%** (22 su 30, effort 76%, 8 step rimanenti):
+questo lavoro non implementa una story, chiude un gap di processo. Il numero che cambia è quello dei
+**confronti del gate**: da 70 a **92** (70 sessioni + 22 story), e i confronti coprono ora **tutta**
+la classe dei file di stato.
 
 **Cosa è pronto.**
 
-- Lo stato di merge della Story 2.5 è allineato in tutti e quattro i documenti che lo dichiarano:
-  `docs/state/stories/2.5-*.md` (fonte), `docs/11-BACKLOG.md` (sezione legacy + blocco
-  aggregato), `docs/INDEX.md` (blocchi aggregati) e `README.md` (prosa + blocco aggregato).
-- Il blocco `AGGREGATE-NEXT-STEP-*` del README **non indica più** la 2.5: con tutte le 22 story
-  migrate in `done` il blocco mostra correttamente il fallback «Nessuna story non-done e non
-  bloccata migrata in `docs/state/stories/`» — le 8 story rimanenti (3.2, 3.3, 3.5, 4.2, 4.3,
-  5.1, 5.2, 6.1) non hanno ancora un state file e lo riceveranno al claim.
-- I **7 acceptance criteria** della Story 2.5 sono spuntati nella sezione legacy del backlog, e
-  la riga `**Stato**:` dichiara PR, merge commit e data: la sezione legacy non è più una copia
-  stantia dello stato reale.
-- Il **gap strutturale** è documentato (§51 del DEV-LOG): `docs/state/stories/*.md` non ha un
-  writer di stato di merge e non è coperto dal gate `check-merge-state.mjs`.
+- Il perimetro `docs/state/stories/` ha un **writer** e un **gate**: una story mergiata non può più
+  restare `in-review` senza che il gate fallisca e senza che il writer la corregga al merge.
+- I **6 drift preesistenti** sulle story sono chiusi: i fatti di merge dichiarati nelle Story 0.2,
+  0.5, 1.2, 3.1, 3.4 e 4.4 coincidono ora con lo stato reale delle PR.
+- La regola è **scritta e verificata**: una riga nella tabella «regola ⟺ gate» di `AGENTS.md`
+  (v1.44), l'invariante in `docs/state/_index.md`, la decisione D-13.7 in `ADR-0013` e i gate che la
+  impongono (`check-merge-state.mjs`, `apply-merge-state.mjs`).
 
-**Cosa manca.** Il gap strutturale è **aperto**: le story continuano a non avere un writer di
-stato di merge. La correzione naturale è estendere `apply-merge-state.mjs` al formato delle story
-(`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro
-`docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la **classe** di
-drift, non il caso. Non sono state applicate qui perché toccano il **writer unico di `main`**
-(ADR-0013) e il gate bloccante che ne verifica il perimetro: è lavoro da issue dedicata, non da
-doc-sync. Il gap è tracciato dall'**issue #297**, aperta in questa sessione.
+**Cosa manca.** La classe di drift è chiusa; restano due punti **fuori perimetro**, dichiarati e non
+modificati qui:
 
-Nota: i file `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno
-**blocchi aggregati** e **prosa legacy**: in questa PR ho toccato la prosa (che è di mia
-competenza); i blocchi si aggiornano da soli dopo il merge.
+- le chiavi i18n `insight.mood.angry` / `insight.mood.neutral` (sessione concorrente, in
+  `stash@{0}`): non sono usate da nessun codice e il namespace non è nella spec
+  `docs/08-COPY-I18N.md` §2.15 — vanno decise a parte (recupero in PR dedicata o abbandono);
+- il **post-merge cleanup** dei branch e delle worktree residue della Sessione 94 (procedura
+  canonica `scripts/post-merge.ps1`, eseguita dalla working copy principale).
 
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano (il gate
-`check-aggregate-blocks.mjs` → 0 violazioni). Il bundle è stato rigenerato dopo le modifiche
-documentali (`generate-bundle.ps1` dopo `aggregate-state.ps1`, l'ordine vincolante della
-Sessione 73).
+Nota: `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi
+aggregati**: i blocchi si aggiornano da soli dopo il merge (regola V1 di ADR-0008); in questa PR è
+stato toccato solo il contenuto dei file già registrati in `$files`, e il bundle rigenerato di
+conseguenza.
 
-**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti ·
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il writer è idempotente (test T9) e
+il gate resta fail-closed su entrambi i perimetri.
+
+**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 92 confronti, 0 falliti ·
+`node scripts/test-apply-merge-state.mjs` → 33 assert, 0 falliti ·
+`bash scripts/test-merge-state-gate.sh` → 24 assert, 0 falliti ·
 `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
 `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
-544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
-`pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti ·
+0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->

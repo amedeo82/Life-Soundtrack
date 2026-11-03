@@ -821,14 +821,14 @@ Ogni story deve avere label GitHub:
 | Story | Stato | PR | Merge commit | Area |
 |-------|-------|----|--------------|------|
 | 0.1 - Setup monorepo e toolchain | done | #2 | `c0fb0a4` | devops |
-| 0.2 - Schema DB e layer Dexie | done | #4 | `fa09b06` | db |
+| 0.2 - Schema DB e layer Dexie | done | #4 | `fa09b0617b273a99e303df41de9cbea2db381237` | db |
 | 0.3 - Adapter Spotify base | done | #28 | `3dc9654c8ce037035176732ca11e2f5e86f27735` | adapter |
 | 0.4 - UI import (onboarding) | done | #71 | `0a8e83f2aaf90cb61862e0737417eb7ec8b63881` | ui |
-| 0.5 - PWA e service worker | done | #19 | `3fa3c0d` | devops |
+| 0.5 - PWA e service worker | done | #19 | `0ebe8dad10e348a63a04c83d9b1484767e4a0013` | devops |
 | 0.6 - Setup i18n | done | #22 | `5235c88` | ui |
 | 0.7 - Operations runbook + manutenzione DB | done | #64 | `b44420beb9ec95ea16ec47305ac4873f41b1a15b` | devops |
 | 1.1 - Adapter YouTube Music | done | #130 | `43f75291e5184144dc9d974c5003cd6ae6a7583e` | adapter |
-| 1.2 - Adapter Apple Music | done | #139 | `7640d83` | adapter |
+| 1.2 - Adapter Apple Music | done | #139 | `2e1a4cc921ad7b5d9cd74a3d3ccb667445578c8d` | adapter |
 | 1.3 - Adapter Last.fm + ListenBrainz | done | #158 | `7afbf0337b94b5bfca2fb1eb9751320f84b0cbf4` | adapter |
 | 1.4 - Dedup promozione post-enrichment | done | #162 | `471a049a1fc5c8605ca264b0c20b1ecd201ca649` | db |
 | 1.5 - Scrobbling hub (invio scrobble, sync continua, toggle) | done | #176 | `bfb5946bd547fed46fb32be2638e1f5785f4b579` | adapter |
@@ -838,9 +838,9 @@ Ogni story deve avere label GitHub:
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 2.5 - Collegamento del pipeline di analisi all'app | done | #295 | `265fa50f279a7dbec70507388a3a7ffe405acc14` | analysis |
-| 3.1 - Home + Timeline | done | #234 | - | ui |
-| 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
+| 3.1 - Home + Timeline | done | #234 | `815ce171f9bfd70133d0a788d6e15f717624a290` | ui |
+| 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
-| 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `e661e37` | enrichment |
+| 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `beaefba677f9dbaf0ec9891c3e70516015a1adcf` | enrichment |
 
 <!-- AGGREGATE-STORIES-END -->
