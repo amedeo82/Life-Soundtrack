@@ -5,7 +5,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: feat/241-story-3-2---ricordi-share
-pr: 0
+pr: 301
 claim: kilo-HP-ELITEBOOK-6e15
 tags: [ui, ricordi, share, tagging, canvas, i18n]
 ---
