@@ -56,21 +56,24 @@ if [ -z "$GIT_ADD_LINE" ] || ! grep -q 'git commit -m' "$WORK/commit.ps1"; then
 fi
 
 # --- preparo il clone con un remoto finto ------------------------------------
+# NB: NON si clona il repository sorgente. In CI il checkout e' **shallow**
+# (fetch-depth 1) e su un HEAD staccato (refs/pull/N/merge): il clone
+# risulterebbe shallow e senza HEAD, e il push verso il remoto finito verrebbe
+# rifiutato ("shallow update not allowed"). Si ricostruisce quindi il fixture
+# dal contenuto tracciato (`git archive`): repository completo, un solo
+# commit, file identici a quelli che la CI vede.
 git init --bare -q "$REMOTE"
-git clone -q --no-hardlinks "$REPO_ROOT" "$CLONE" 2>/dev/null
+mkdir -p "$CLONE"
+git init -q "$CLONE"
+git -C "$REPO_ROOT" archive --format=tar HEAD | tar -x -C "$CLONE"
 cd "$CLONE" || exit 1
-# NB: in CI il checkout della sorgente e' su un HEAD staccato
-# (refs/pull/N/merge): il commit non e' riferito da nessun ref locale, quindi
-# `git clone` NON lo porta nel clone (e il clone resta senza HEAD, quindi
-# `git rev-parse HEAD` fallisce). Lo si porta esplicitamente con
-# `git fetch <sorgente> HEAD`.
-git fetch -q "$REPO_ROOT" HEAD
-git remote set-url origin "$REMOTE"
 git config user.email "writer@test.local"
 git config user.name "Writer Test"
 git config commit.gpgsign false
-# `checkout -B` (non `checkout main`): crea il branch se non esiste.
-git checkout -q -B main FETCH_HEAD
+git checkout -q -B main
+git add -A >/dev/null 2>&1
+git commit -q -m "test: fixture iniziale (contenuto del repository)"
+git remote add origin "$REMOTE"
 git push -q origin main
 BASE_SHA="$(git rev-parse HEAD)"
 
