@@ -5,7 +5,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: feat/283-node24-actions
-pr: 0
+pr: 289
 claim: kilo-hp-elitebook-7c3f
 tags: [devops, ci, workflow, node24, protocollo]
 ---

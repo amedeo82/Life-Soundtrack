@@ -157,8 +157,12 @@ if ($state.PSObject.Properties.Name -contains "session" -and $state.session) {
     if (Test-Path $candidate) { $sessionFile = $candidate }
 }
 if (-not $sessionFile) {
-    $candidates = Get-ChildItem (Join-Path $repoRoot "docs/state/sessions") -Filter "*.md" -File |
-        Where-Object { (Get-Content $_.FullName -Raw) -match "(?m)^branch:\s*$([regex]::Escape($branch))\s*$" }
+    # `@(...)`: con un SOLO file di sessione per questa branch, la pipeline
+    # restituisce un oggetto e non un array: sotto `Set-StrictMode -Version
+    # Latest` l'accesso a `.Count` su uno scalare fallisce con "Non e' possibile
+    # trovare la proprieta' 'Count'". Il wrapping lo rende sempre un array.
+    $candidates = @(Get-ChildItem (Join-Path $repoRoot "docs/state/sessions") -Filter "*.md" -File |
+        Where-Object { (Get-Content $_.FullName -Raw) -match "(?m)^branch:\s*$([regex]::Escape($branch))\s*$" })
     if ($candidates.Count -eq 1) { $sessionFile = $candidates[0].FullName }
 }
 
