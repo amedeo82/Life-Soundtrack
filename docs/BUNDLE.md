@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 13:24
+> Data: 2026-11-03 13:32
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -1324,9 +1324,9 @@ exit 0.
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
+**Prossima story da implementare**: **2.5** — Collegamento del pipeline di analisi all'app (priority `B`, vedi `docs/11-BACKLOG.md`).
 
-Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
+Sorgente: `docs/state/stories/2.5-analysis-pipeline-link.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2238,7 +2238,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **71** (merge: 70)
-- Stories migrate in state/stories: **21** (done: 21)
+- Stories migrate in state/stories: **22** (done: 21)
 - Ultima sessione migrata: **S94** - Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
@@ -31026,6 +31026,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
+| 2.5 - Collegamento del pipeline di analisi all'app | in-review | #267 | - | analysis |
 | 3.1 - Home + Timeline | done | #234 | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
