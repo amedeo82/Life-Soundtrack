@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 08:20
-> Totale file: 175
+> Data: 2026-11-03 08:49
+> Totale file: 177
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.40 — Sessione 90 (2026-11-02)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.41 — Sessione 92 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -73,6 +73,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
+| Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -902,7 +903,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### 🏎️ La CI: 12 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74)*
 
-> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (13 job, 33 step): cosa gira,
+> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (13 job, 34 step): cosa gira,
 > quando, con quali permessi e con quale exit code. Qui solo l'invariante operativo:
 >
 > - le modifiche a `docs/` e agli script di validazione girano su `pull_request`;
@@ -1161,7 +1162,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.40 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.41 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2087,7 +2088,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.40 | Protocollo per agenti — **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.41 | Protocollo per agenti — **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -20546,6 +20547,158 @@ cross-OS su due sistemi operativi reali.
 
 
 
+===== FILE: docs/state/sessions/92-node24-actions.md =====
+
+---
+number: 92
+title: "Node 24 per le action dei workflow: l'inventario incompleto e il gate che lo rende verificabile"
+date: 2026-11-03
+state: 🟡
+merged: false
+branch: feat/283-node24-actions
+pr: 0
+claim: kilo-hp-elitebook-7c3f
+tags: [devops, ci, workflow, node24, protocollo]
+---
+
+# Sessione 92 — Node 24 per le action dei workflow (issue #283)
+
+> **Oggetto**: l'issue #283 chiedeva di migrare le action dei workflow da Node 20 a
+> Node 24. La verifica sulla codebase attuale ha confermato la premessa, ma ha
+> trovato **due difetti nell'inventario** dell'issue stessa: due action su node20
+> non erano elencate, e la major "neutra" proposta per `setup-node` non era
+> semanticamente neutra. In più la issue è rimasta **senza implementazione** per
+> 16 ore: la claim dell'agente precedente era scaduta (TTL 12 ore di ADR-0006).
+
+## Sintesi
+
+La premessa dell'issue è **valida e più forte di quanto dichiarato**: Node 20 non è
+solo "deprecato", è stato **rimosso dai runner GitHub il 2026-09-23** (changelog
+GitHub del 2025-09-19, aggiornato il 2026-08-25). Le action che dichiarano
+`using: 'node20'` non girano più su un runtime supportato: il runner le forza su
+Node 24, ma il runtime dichiarato resta fuori supporto.
+
+L'inventario dell'issue, però, copriva **4 delle 6 action** usate dal repository.
+Le altre due — `actions/upload-artifact@v4` e `actions/download-artifact@v4` —
+dichiarano anch'esse `node20`, e senza il loro bump il criterio di accettazione
+«nessun workflow referenzia una action che dichiara `using: 'node20'`» restava
+**insoddisfacibile**: la issue elencava i mezzi, non il fine, e i mezzi erano
+incompleti.
+
+| Action | Prima major node20 | Prima major node24 | Note |
+|--------|--------------------|-------------------|------|
+| `actions/checkout` | v4 | **v5** | v6 persiste le credenziali su file separato, v7 blocca il checkout dei fork |
+| `actions/setup-node` | v4 | **v5** | v5 introduce il caching automatico da `packageManager` (vedi sotto), v6 lo limita a npm, v7 migra a ESM |
+| `actions/github-script` | v7 | **v8** | v9 inietta `getOctokit` come parametro ESM |
+| `pnpm/action-setup` | v4 | **v5** | v6 aggiunge il supporto di pnpm v11 |
+| `actions/upload-artifact` | v4, **v5** | **v6** | v5 è già "preliminary node24" ma **gira ancora su node20** |
+| `actions/download-artifact` | v4, v5, **v6** | **v7** | v8 migra a ESM e rende `digest-mismatch` un errore |
+
+La scelta della major è sempre la **prima che dichiara node24** e che non
+introduce un cambio di comportamento non correlato al runtime: le major
+successive (ESM, persistenza delle credenziali su file separato, blocco dei fork
+in `pull_request_target`/`workflow_run`, `digest-mismatch` come errore) restano
+fuori perimetro, come dice l'issue stessa.
+
+**Il caso subdolo è `upload-artifact`**: la v5 dichiara node20 nella sua
+`action.yml` ("v5 had preliminary support for Node.js 24, however this action
+was by default still running on Node.js 20"): un bump "a vista" alla major
+più recente compatibile (`v5`) avrebbe lasciato il repository su node20 senza
+che nulla lo segnalasse. Il gate introdotto in questa sessione copre anche
+questa classe.
+
+## La claim scaduta
+
+L'issue #283 era `in-progress` con la claim di `kilo-hp-elitebook-457a`
+(2026-11-02T16:21:00Z) e la worktree `ls-283-node24-actions` già creata, ma il
+branch non aveva **zero commit unici** rispetto a `origin/main`: il lavoro non
+era mai iniziato. Dopo 16 ore di inattività la claim era **scantita** (TTL 12 ore
+di ADR-0006).
+
+La presa in carico ha rivelato un **difetto dello strumento**: `agent-claim.ps1`
+confrontava l'id numerico più basso fra **tutti** i commenti `claim:`, mentre il
+protocollo (AGENTS.md §"Procedura di claim", punto 4) confronta l'id più basso
+fra i claim **non ancora rilasciati**. Un claim rilasciato ha sempre l'id più
+basso, quindi l'agente che subentra a una claim scantita avrebbe fatto `yield:`
+pur avendo legittimamente preso l'issue: il percorso documentato era **ineseguibile
+dallo strumento canonico**. Corretto nel ramo della PR: la riverifica esclude
+i claim rilasciati da un commento `release:`/`stale-release:` successivo che ne
+cita l'agente.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-92.1 | L'inventario dell'issue è corretto **esteso** alle 6 action reali, non alle 4 dichiarate | Il criterio di accettazione è sullo **stato** del repository, non sui mezzi: con 4 action il gate sarebbe rimasto rosso |
+| D-92.2 | Ogni action va sulla **prima major node24**, non sulla più recente | Le major successive portano cambi di comportamento non correlati al runtime (ESM, credenziali, fork, digest): restano fuori perimetro |
+| D-92.3 | `setup-node@v5` va bene **perché** i workflow dichiarano già `cache: pnpm` | La v5 introduce il caching automatico da `packageManager` (che il repo ha: `pnpm@9.15.9`), ma nel suo codice l'input esplicito `cache` ha la precedenza: il comportamento resta identico |
+| D-92.4 | L'invariante diventa un **gate fail-closed** in `validate-workflows.mjs` | ADR-0012: una regola senza gate è un consiglio. La mappa `NODE24_ACTIONS` elenca la prima major node24 di ogni action: un'azione assente dalla mappa non è verificabile e non è accettata |
+| D-92.5 | Il gate copre **anche i documenti**, non solo i workflow | Il bundle rigenerato contiene i workflow e gli esempi YAML di `12-DEVOPS.md`: senza allinearli, il repository si autotrasmette la deprecazione |
+| D-92.6 | La riverifica di `agent-claim.ps1` diventa **release-aware** | Il protocollo confronta i claim «non ancora rilasciati»: senza il filtro, la presa in carico di una claim scantita era impossibile |
+
+## Analisi di avanzamento
+
+**Numeri.** Nessun codice applicativo toccato: la percentuale di
+implementazione delle story resta **70%** (21 su 30, effort 72%), **9 step**
+rimanenti. Il lavoro è di **devops**.
+
+**Cosa è pronto.**
+- I 5 workflow del repository non referenziano più nessuna action node20: **26
+  reference**, tutte su major node24 (`checkout@v5`, `setup-node@v5`,
+  `github-script@v8`, `pnpm/action-setup@v5`, `upload-artifact@v6`,
+  `download-artifact@v7`).
+- `scripts/validate-workflows.mjs`: il gate **fail-closed** con la mappa
+  `NODE24_ACTIONS` (l'azione assente dalla mappa non è verificabile → non è
+  accettata; un riferimento pinnato a SHA non è verificabile → non è accettato;
+  le azioni locali e `docker://` sono escluse perché non dichiarano un runtime).
+- `scripts/test-workflow-node24-actions.sh` (nuovo): **19 assert** in 6
+  scenari, incluso il caso `upload-artifact@v5` (node20 nonostante il nome) e
+  il caso dell'azione locale (nessun falso positivo).
+- `scripts/agent-claim.ps1`: riverifica release-aware (prerequisito per la presa
+  in carico di una claim scantita).
+- `docs/12-DEVOPS.md`: esempi YAML allineati (§2 e §9.4) e §9.10 con il gate
+  nuovo; `AGENTS.md` v1.41 con la regola nella tabella «regola ⟺ gate».
+
+**Cosa manca.** Nulla sul piano funzionale. Resta un **drift preesistente**,
+non introdotto da questa sessione: la tabella §9.10 dichiara «13 job» ma
+`ci.yml` ne ha **15** (i due job `gates-portability*` sono entrati con
+l'issue #284 e non hanno una riga nella tabella). Il conteggio degli step è
+stato allineato (33 → 34) perché è la cifra che questa sessione cambia; il
+ conteggio dei job è rimasto com'era e va riallineato con i due gate di
+portabilità in una sessione dedicata.
+
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il gate gira
+sui workflow reali e su fixture temporanee: non scrive nulla nel repository.
+
+**Gate di testabilità.** `bash scripts/test-workflow-node24-actions.sh` → 19/19 ·
+`node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-protocol-consistency.mjs` → 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un issue che elenca i **mezzi** (quali action bumpare) e non il **fine** (quale stato raggiungere) può essere soddisfatto a metà | L'inventario delle action reali si verifica con un grep, non con la memoria: 4 su 6, e le 2 mancanti erano entrambe node20 |
+| Una major può essere "preliminary node24" e **continuare a girare su node20** | `upload-artifact@v5` è il caso: il nome della major non dice il runtime, lo dice `action.yml` |
+| Una regola dichiarata solo in prosa torna, perché nessuno la verifica | L'invariante è diventato un gate fail-closed con mappa esplicita: un'azione nuova deve dichiarare la sua major node24 |
+| Il confronto "id più basso" senza lo stato del claim rende il percorso di rientro impossibile | La riverifica confronta i claim **non ancora rilasciati**: il claim rilasciato è escluso, altrimenti chi subentra fa `yield:` per sempre |
+| Un tool canonico che non implementa il protocollo che documenta è un difetto del tool, non un motivo per procedere a mano | Corretto lo strumento e riusato il percorso documentato |
+
+## Documenti aggiornati
+
+- `.github/workflows/ci.yml`, `post-merge.yml`, `auto-branch-cleanup.yml`,
+  `auto-status-done.yml`, `stale-claim-sweeper.yml` (major node24)
+- `scripts/validate-workflows.mjs` (gate node24), `scripts/test-workflow-node24-actions.sh` (nuovo),
+  `scripts/agent-claim.ps1` (riverifica release-aware), `scripts/generate-bundle.ps1` (`$files`)
+- `docs/12-DEVOPS.md` (esempi YAML, §9.10), `docs/INDEX.md` (v1.41), `AGENTS.md` (v1.41)
+- `docs/state/sessions/92-node24-actions.md` (questo file)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -30189,10 +30342,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -30213,7 +30366,7 @@ jobs:
         run: pnpm --filter @ls/core run test:coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
 
@@ -30222,10 +30375,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -30237,7 +30390,7 @@ jobs:
         run: pnpm run build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pwa-build
           path: apps/web/dist/
@@ -30449,7 +30602,7 @@ Aggiungere il job `bundle-check` al workflow `ci.yml`:
   bundle-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Verify BUNDLE.md is in sync
         shell: pwsh
 run: pwsh scripts/generate-bundle.ps1 -Check
@@ -31060,6 +31213,7 @@ protection può interpretare un check saltato come successo.
 | 32 | `gates-docs` | `Encoding dei file tracciati` (`check-encoding.mjs`) | solo PR | sì | **#277** |
 | 33 | `gates-docs` | `Gate "encoding" fail-closed` (`test-encoding-gate.mjs`, 7 scenari) | solo PR | sì | **#277** |
 | 34 | `gates-workflows` | `Sintassi dei blocchi `run:` dei workflow` (`check-workflow-syntax.mjs`) | solo PR | sì | **#279** |
+| 35 | `gates-workflows` | `Nessuna action su node20` (`test-workflow-node24-actions.sh`, 19 assert) | solo PR | sì | **#283** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -31079,6 +31233,17 @@ protection può interpretare un check saltato come successo.
 > inequivocabile) e i file che *documentano* esempi di mojibake sono in
 > `scripts/encoding-allowlist.txt` (WARN, non errore). Istruzioni operative per gli agenti:
 > `AGENTS.md` §F9-ter.
+
+> **Il gate "nessuna action su node20"** (Sessione 92, issue #283) chiude l'invariante che
+> Node 20 sia stato **rimosso dai runner** il 2026-09-23: le action che dichiarano
+> `using: 'node20'` girano fuori supporto (il runner le forza su Node 24, ma il runtime
+> dichiarato resta deprecato). Il gate vive in `scripts/validate-workflows.mjs` ed è
+> **fail-closed**: la mappa `NODE24_ACTIONS` elenca, per ogni action di terze parti usata dal
+> repository, la **prima major che dichiara node24** (`checkout@v5`, `setup-node@v5`,
+> `github-script@v8`, `pnpm/action-setup@v5`, `upload-artifact@v6`, `download-artifact@v7`); un'azione
+> assente dalla mappa non è verificabile e non è accettata. Il test di scenario negativo
+> (`test-workflow-node24-actions.sh`, 19 assert) reintroduce un runtime node20 in una fixture e
+> verifica che il gate esca 1.
 
 **Il job `gates-protocol`** (Sessione 80, issue #248, ADR-0012) è il primo enforcement del
 protocollo: fino alla Sessione 79 `AGENTS.md` era l'unico artefatto di governance del repo
@@ -42092,6 +42257,96 @@ let permissionBlocks = 0;
 let permissionScopes = 0;
 let pushers = 0;
 
+// === Issue #283 - nessuna action su Node 20 nei workflow ===
+//
+// Node 20 e' stato rimosso dai runner GitHub il 2026-09-23 (changelog
+// GitHub del 2025-09-19, aggiornato il 2026-08-25): le action che dichiarano
+// `using: 'node20'` non girano piu' su un runtime supportato. Il runner le
+// forza su Node 24, ma il runtime dichiarato resta fuori supporto.
+//
+// La mappa elenca, per ogni action di terze parti usata dal repository, la
+// PRIMA major che dichiara `using: node24`. Il gate e' fail-closed: un'azione
+// assente dalla mappa non e' verificabile, e un'azione non verificabile non e'
+// un'azione accettata (la si dichiara nella mappa con la sua major node24).
+const NODE24_ACTIONS = new Map([
+  ['actions/checkout', 'v5'], // v6: creds su file separato | v7: blocco dei fork
+  ['actions/setup-node', 'v5'], // v6: caching automatico limitato a npm | v7: ESM
+  ['actions/github-script', 'v8'], // v9: getOctokit iniettato come parametro ESM
+  ['pnpm/action-setup', 'v5'], // v6: supporto pnpm v11
+  ['actions/upload-artifact', 'v6'], // v7: upload diretto, ESM
+  ['actions/download-artifact', 'v7'], // v8: ESM, digest-mismatch = error
+]);
+
+/** La major numerica di un tag `vN` (null se il riferimento non e' una major). */
+function majorOf(ref) {
+  const m = /^v(\d+)$/.exec(ref);
+  return m ? Number(m[1]) : null;
+}
+
+let node24Refs = 0;
+
+function checkNode24Actions(dir) {
+  let bad = 0;
+  const files = readdirSync(dir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
+  for (const file of files) {
+    const text = readFileSync(join(dir, file), 'utf8');
+    const lines = text.split('\n').map((l) => (l.endsWith('\r') ? l.slice(0, -1) : l));
+    let fileRefs = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // un COMMENTO non e' una reference: `uses:` in un commento non esegue nulla
+      if (line.trim().startsWith('#')) continue;
+      const m = line.match(/^\s*(?:-\s+)?uses:\s*(\S+)/);
+      if (!m) continue;
+      const ref = m[1].trim().replace(/^['"]|['"]$/g, '');
+      // azioni locali (`.github/actions/...`) e docker: nessun runtime dichiarato
+      if (ref.startsWith('./') || ref.startsWith('../') || ref.startsWith('docker://')) continue;
+      const at = ref.lastIndexOf('@');
+      if (at < 0) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`uses: ${ref}\` non dichiara una versione: il runtime non e' verificabile.`,
+        );
+        bad++;
+        continue;
+      }
+      const action = ref.slice(0, at);
+      const version = ref.slice(at + 1);
+      const min = NODE24_ACTIONS.get(action);
+      if (!min) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`${ref}\` non e' in NODE24_ACTIONS: il runtime dichiarato non e' verificabile.`,
+        );
+        console.error(
+          `       Dichiarala nella mappa con la prima major su node24 (azioni note: ${[...NODE24_ACTIONS.keys()].join(', ')}).`,
+        );
+        bad++;
+        continue;
+      }
+      const major = majorOf(version);
+      if (major === null) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`${ref}\` non e' pinnata a una major (attesa la forma \`vN\`): il runtime non e' verificabile.`,
+        );
+        bad++;
+        continue;
+      }
+      fileRefs++;
+      node24Refs++;
+      if (major < majorOf(min)) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`${ref}\` dichiara il runtime node20 (prima major su node24: ${min}).`,
+        );
+        console.error(
+          "       Node 20 e' stato rimosso dai runner il 2026-09-23: le action node20 girano fuori supporto (issue #283).",
+        );
+        bad++;
+      }
+    }
+    if (fileRefs > 0) console.log(`[OK] ${file}: ${fileRefs} reference a action, nessuna su node20`);
+  }
+  return bad;
+}
+
 // === Issue #135 — le scope di `permissions:` devono essere dichiarabili ===
 //
 // Elenco preso da "Workflow syntax for GitHub Actions" -> permissions.
@@ -42867,9 +43122,10 @@ function checkWorkflowRunCheckout(dir) {
 failures += checkSingleWriter(dir);
 failures += checkWriterTrigger(dir);
 failures += checkWorkflowRunCheckout(dir);
+failures += checkNode24Actions(dir);
 
 console.log(
-  `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`,
+  `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${node24Refs} reference a action su node24, ${failures} fallimenti.`,
 );
 process.exit(failures === 0 ? 0 : 1);
 
@@ -43565,6 +43821,168 @@ echo "=== T4: fixture CRLF - il gate deve comunque intercettare ==="
 
   out="$(run_validator "$D")"; ec=$?
   if [ $ec -eq 1 ]; then ok "exit 1 (intercettato anche su file CRLF)"; else ng "exit $ec (atteso 1): il gate NON intercetta l'errore su CRLF"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo ""
+echo "Risultati: $pass passati, $fail falliti"
+[ "$fail" -eq 0 ]
+
+
+
+===== FILE: scripts/test-workflow-node24-actions.sh =====
+
+#!/usr/bin/env bash
+# Test di regressione per il gate "nessuna action su node20" (issue #283).
+#
+# Node 20 e' stato rimosso dai runner GitHub il 2026-09-23: le action che
+# dichiarano `using: 'node20'` non girano piu' su un runtime supportato. Il
+# runner le forza su Node 24, ma il runtime dichiarato resta fuori supporto.
+#
+# Il gate vive in scripts/validate-workflows.mjs (gia' bloccante in CI); questo
+# file e' il suo test di regressione: verifica che il gate **esca 1** quando
+# il runtime node20 viene reintrodotto. Un gate che passa sempre non e' un
+# gate (lesson 43-1).
+#
+# La mappa NODE24_ACTIONS del gate elenca la PRIMA major su node24 di ogni
+# action di terze parti usata dal repository. Il gate e' fail-closed: un'azione
+# assente dalla mappa non e' verificabile, e non e' accettata.
+#
+# Scenari coperti:
+#   T1  repo reale: nessuna reference su node20 -> exit 0
+#   T2  fixture con `actions/checkout@v4` (node20) -> exit 1, messaggio che
+#       nomina il file, la riga e la major node24 attesa
+#   T3  fixture con `actions/upload-artifact@v5`: e' la major PIU' RECENTE
+#       dichiarata node20 (la v6 e' la prima su node24) -> exit 1
+#   T4  fixture con un'azione assente dalla mappa -> exit 1 (fail-closed)
+#   T5  fixture con un riferimento pinnato a SHA -> exit 1 (non verificabile)
+#   T6  fixture con un'azione locale (`./.github/actions/...`) -> exit 0
+#       (nessun falso positivo: le azioni locali non dichiarano un runtime)
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+VALIDATOR="$SCRIPT_DIR/validate-workflows.mjs"
+AGGREGATOR="$SCRIPT_DIR/aggregate-state.ps1"
+AUTO_AGGREGATE_WF="$REPO_ROOT/.github/workflows/post-merge.yml"
+CI_WF="$REPO_ROOT/.github/workflows/ci.yml"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[SKIP] node non disponibile: impossibile eseguire validate-workflows.mjs"
+  exit 0
+fi
+
+pass=0
+fail=0
+ok() { echo "  [PASS] $1"; pass=$((pass + 1)); }
+ng() { echo "  [FAIL] $1"; fail=$((fail + 1)); }
+
+# Repo fixture minimo. La struttura conta: validate-workflows.mjs risolve
+# repoRoot come <dir>/../.., e i gate di copertura `git add` (#136) e di
+# single-writer (#284) falliscono se `post-merge.yml` o l'aggregator mancano:
+# altrimenti T2-T6 passerebbero per il motivo sbagliato.
+make_fixture() {
+  local d="$1"
+  mkdir -p "$d/.github/workflows" "$d/scripts"
+  cp "$VALIDATOR" "$d/scripts/validate-workflows.mjs"
+  cp "$AGGREGATOR" "$d/scripts/aggregate-state.ps1"
+  cp "$AUTO_AGGREGATE_WF" "$d/.github/workflows/post-merge.yml"
+  cp "$CI_WF" "$d/.github/workflows/ci.yml"
+}
+
+run_validator() {
+  node "$1/scripts/validate-workflows.mjs" "$1/.github/workflows" 2>&1
+}
+
+echo "=== T1: repo reale - nessuna reference su node20 ==="
+out="$(node "$VALIDATOR" "$REPO_ROOT/.github/workflows" 2>&1)"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (nessuna action node20 in .github/workflows)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi
+if echo "$out" | grep -q "reference a action su node24"; then ok "il riepilogo riporta le reference verificate"; else ng "manca il riepilogo delle reference a action"; fi
+if echo "$out" | grep -q "dichiara il runtime node20"; then ng "il gate segnala un runtime node20 sul repo reale"; else ok "nessun runtime node20 nel repo reale"; fi
+
+echo "=== T2: fixture con actions/checkout@v4 (reintroduzione del bug #283) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  sed -i.bak '0,/actions\/checkout@v5/s//actions\/checkout@v4/' "$D/.github/workflows/ci.yml"
+  if grep -q "actions/checkout@v4" "$D/.github/workflows/ci.yml"; then
+    ok "mutazione applicata (checkout@v5 -> checkout@v4)"
+  else
+    ng "mutazione non applicata"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (gate bloccante sul runtime node20)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
+  if echo "$out" | grep -q "dichiara il runtime node20"; then ok "il messaggio nomina il runtime node20"; else ng "il messaggio non nomina il runtime: $(echo "$out" | tail -5)"; fi
+  if echo "$out" | grep -q "ci.yml:[0-9]"; then ok "il messaggio cita il file e la riga"; else ng "il messaggio non cita file:riga"; fi
+  if echo "$out" | grep -q "prima major su node24: v5"; then ok "il messaggio indica la major node24 attesa"; else ng "il messaggio non indica la major attesa"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T3: fixture con actions/upload-artifact@v5 (ancora node20) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  sed -i.bak 's#actions/upload-artifact@v6#actions/upload-artifact@v5#' "$D/.github/workflows/ci.yml"
+  if grep -q "actions/upload-artifact@v5" "$D/.github/workflows/ci.yml"; then
+    ok "mutazione applicata (upload-artifact@v6 -> upload-artifact@v5)"
+  else
+    ng "mutazione non applicata"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (v5 dichiara ancora node20)"; else ng "exit $ec (atteso 1): il gate NON intercetta il bug"; fi
+  if echo "$out" | grep -q "prima major su node24: v6"; then ok "il messaggio indica v6 come prima major su node24"; else ng "il messaggio non indica v6: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T4: fixture con un'azione assente dalla mappa (fail-closed) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  sed -i.bak '0,/^\(      - uses: actions\/checkout@v5\)$/s//\1\n      - uses: vendor\/unknown-action@v1/' "$D/.github/workflows/ci.yml"
+  if grep -q "vendor/unknown-action@v1" "$D/.github/workflows/ci.yml"; then
+    ok "mutazione applicata (azione sconosciuta inserita)"
+  else
+    ng "mutazione non applicata"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (azione non verificabile rifiutata)"; else ng "exit $ec (atteso 1): il gate accetta un'azione non verificabile"; fi
+  if echo "$out" | grep -q "non e' in NODE24_ACTIONS"; then ok "il messaggio spiega che l'azione non e' verificabile"; else ng "messaggio non esplicativo: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T5: fixture con un riferimento pinnato a SHA (non verificabile) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  sed -i.bak '0,/^\(      - uses: actions\/checkout@v5\)$/s//\1\n      - uses: actions\/checkout@8ade135a41bc03c155e62e844d188df1ea18608/' "$D/.github/workflows/ci.yml"
+  if grep -q "actions/checkout@8ade135a" "$D/.github/workflows/ci.yml"; then
+    ok "mutazione applicata (checkout pinnato a SHA)"
+  else
+    ng "mutazione non applicata"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 1 ]; then ok "exit 1 (riferimento non verificabile rifiutato)"; else ng "exit $ec (atteso 1): il gate accetta un riferimento non verificabile"; fi
+  if echo "$out" | grep -q "non e' pinnata a una major"; then ok "il messaggio spiega che il riferimento non e' una major"; else ng "messaggio non esplicativo: $(echo "$out" | tail -5)"; fi
+
+  cd /; rm -rf "$D"
+}
+
+echo "=== T6: fixture con un'azione locale (nessun runtime dichiarato) ==="
+{
+  D="$(mktemp -d)"; make_fixture "$D"
+  sed -i.bak '0,/^\(      - uses: actions\/checkout@v5\)$/s//\1\n      - uses: .\/scripts\/local-action/' "$D/.github/workflows/ci.yml"
+  if grep -q "uses: ./scripts/local-action" "$D/.github/workflows/ci.yml"; then
+    ok "mutazione applicata (azione locale inserita)"
+  else
+    ng "mutazione non applicata"
+  fi
+
+  out="$(run_validator "$D")"; ec=$?
+  if [ $ec -eq 0 ]; then ok "exit 0 (azione locale accettata, nessun falso positivo)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -5)"; fi
 
   cd /; rm -rf "$D"
 }
@@ -46976,12 +47394,41 @@ Say "riverifico i claim..." "Cyan"
 $commentsRaw = & gh api "$repoApi/issues/$IssueNumber/comments" 2>$null
 if ($LASTEXITCODE -ne 0) { Die 2 "impossibile leggere i commenti dell'issue" }
 $allComments = @($commentsRaw | ConvertFrom-Json)
+
+# Un claim RILASCIATO non conta nella riverifica. AGENTS.md (sezione
+# "Procedura di claim", punto 4) confronta l'ID piu' basso "tra i claim NON
+# ANCORA RILASCIATI"; un claim e' rilasciato da un commento `release:` /
+# `stale-release:` SUCCESSIVO che ne cita l'agente.
+#
+# Senza questo filtro la presa in carico di una claim STANTIA (TTL 12 ore di
+# ADR-0006) sarebbe impossibile: il vecchio claim ha sempre l'ID piu' basso, e
+# l'agente che subentra farebbe `yield:` pur avendo legittimamente preso
+# l'issue. E' il caso verificato con la claim di `kilo-hp-elitebook-457a`
+# sull'issue #283 (16 ore senza attivita', TTL 12 ore).
+function Get-ClaimAgent([object]$comment) {
+    $m = [regex]::Match([string]$comment.body, '^\s*claim:\s*(\S+)')
+    if ($m.Success) { return $m.Groups[1].Value }
+    return ""
+}
+function Test-ClaimReleased([object]$claim, [object[]]$releases) {
+    $claimAgent = Get-ClaimAgent $claim
+    if ([string]::IsNullOrWhiteSpace($claimAgent)) { return $false }
+    foreach ($rel in $releases) {
+        # il rilascio deve essere SUCCESSIVO al claim che rilascia
+        if ([int64]$rel.id -le [int64]$claim.id) { continue }
+        if ([string]$rel.body -like "*$claimAgent*") { return $true }
+    }
+    return $false
+}
+$releaseComments = @($allComments | Where-Object { [string]$_.body -match '^\s*(release|stale-release)\s*:' })
+
 $claims = @($allComments | Where-Object { $_.body -like "claim:*" } | Sort-Object { [int64]$_.id })
-if ($claims.Count -eq 0) { Die 2 "nessun commento di claim trovato dopo la propria presa in carico" }
-$mine = @($claims | Where-Object { $_.body -like "*$AgentId*" })
+$activeClaims = @($claims | Where-Object { -not (Test-ClaimReleased $_ $releaseComments) })
+if ($activeClaims.Count -eq 0) { Die 2 "nessun commento di claim ATTIVO trovato dopo la propria presa in carico" }
+$mine = @($activeClaims | Where-Object { $_.body -like "*$AgentId*" })
 if ($mine.Count -eq 0) { Die 2 "il proprio commento di claim non e' stato trovato fra i commenti" }
 $mineId = [int64]$mine[0].id
-$lowestId = [int64]($claims | ForEach-Object { [int64]$_.id } | Measure-Object -Minimum).Minimum
+$lowestId = [int64]($activeClaims | ForEach-Object { [int64]$_.id } | Measure-Object -Minimum).Minimum
 
 if ($mineId -ne $lowestId) {
     Say "RIVERIFICA PERSA: un altro claim ha un ID piu' basso ($lowestId < $mineId) -> yield" "Red"
@@ -48242,7 +48689,7 @@ jobs:
     outputs:
       has_code: ${{ steps.detect.outputs.has_code }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -48296,11 +48743,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: pnpm
@@ -48329,11 +48776,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: pnpm
@@ -48364,11 +48811,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: pnpm
@@ -48396,7 +48843,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Issue #284: nel passaggio `workflow_run` l'albero da validare e' la
           # TESTA di `main` (che contiene il commit del writer), non
@@ -48522,7 +48969,7 @@ jobs:
       pull-requests: read
       issues: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -48570,7 +49017,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Issue #70: gate BLOCCANTE per il determinismo dell'agregator.
       # Verifica l'output DENTRO la stessa piattaforma (idempotenza byte-identica +
@@ -48596,7 +49043,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Issue #104: gate BLOCCANTE per il fail-closed sui flag di generate-bundle.ps1.
       # In PowerShell 5.1 con `&`, `--check` veniva interpretato come
@@ -48617,7 +49064,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Stessa regola di `gates-docs`: nel passaggio `workflow_run` si
           # valida la testa di `main` (dopo il writer), non `head_sha`.
@@ -48705,6 +49152,16 @@ jobs:
       - name: Validita' YAML dei workflow (sessione 74)
         run: bash scripts/test-workflow-yaml-scalars.sh
 
+      # Issue #283: Node 20 e' stato rimosso dai runner GitHub il 2026-09-23.
+      # Le action che dichiarano `using: 'node20'` girano fuori supporto: il
+      # runner le forza su Node 24, ma il runtime dichiarato resta deprecato.
+      # Il gate vive in validate-workflows.mjs (run precedente); questo test ne
+      # verifica lo scenario negativo — reintroduce un runtime node20 in una
+      # fixture e verifica che il gate esca 1 (un gate che passa sempre non e'
+      # un gate, lesson 43-1).
+      - name: Nessuna action su node20 (issue #283)
+        run: bash scripts/test-workflow-node24-actions.sh
+
   # ---------------------------------------------------------------------------
   # 5b. Gate di PORTABILITA' dei generatori (issue #284).
   #
@@ -48729,7 +49186,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
@@ -48742,7 +49199,7 @@ jobs:
 
       - name: Pubblica il manifest per il confronto cross-OS
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: portability-${{ matrix.os }}
           path: portability-${{ matrix.os }}.json
@@ -48771,11 +49228,11 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: portability-*
           merge-multiple: true
@@ -48815,7 +49272,7 @@ jobs:
       contents: read
       issues: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Issue #76: il rilevamento dei branch LOCALI orfani e' la difesa contro
       # l'eliminazione di lavoro non mergato. Il test copre sia il caso positivo
@@ -48854,7 +49311,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # T1..T9: merge commit + worktree, branch non mergato (exit 12), WIP
       # tracked (exit 10), merge squash, main divergente (exit 11), audit
@@ -48878,7 +49335,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # S1..S8 su setup-worktree.ps1 (issue #53): issue inesistente, slug
       # derivato, slug esplicito, path gia esistente, branch base mancante,
@@ -49050,7 +49507,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout di `main`
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # `ref: main` esplicito: il writer lavora sulla testa corrente di
           # `main` (che contiene il merge commit), non sul `github.sha` del
