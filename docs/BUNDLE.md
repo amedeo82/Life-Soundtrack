@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 22:26
+> Data: 2026-11-03 22:27
 > Totale file: 185
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -23548,7 +23548,7 @@ priority: I
 depends_on: ["2.4", "2.5"]
 issue: 241
 branch: "feat/241-story-3-2---ricordi-share"
-pr: 0
+pr: 301
 claim: kilo-HP-ELITEBOOK-6e15
 spec_refs:
   - docs/25-MEMORIES-SHARE-EXPLORE.md
