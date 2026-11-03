@@ -145,6 +145,7 @@
 | 90 | Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti | 🟢 | ✅ | #285 |
 | 91 | Il messaggio di commit del writer post-merge senza escape PowerShell rotti | 🟢 | ✅ | #288 |
 | 92 | Node 24 per le action dei workflow: l'inventario incompleto e il gate che lo rende verificabile | 🟢 | ✅ | #289 |
+| 93 | Gli hook del repository non giravano: `core.hooksPath` era preso da husky | 🟢 | ✅ | #291 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -184,9 +185,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **69** (merge: 68)
+- Sessioni migrate in state/sessions: **70** (merge: 69)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S92** - Node 24 per le action dei workflow: l'inventario incompleto e il gate che lo rende verificabile
+- Ultima sessione migrata: **S93** - Gli hook del repository non giravano: `core.hooksPath` era preso da husky
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -235,46 +236,41 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S92)
+**Analisi della sessione corrente** (S93)
 
-**Numeri.** Nessun codice applicativo toccato: la percentuale di
-implementazione delle story resta **70%** (21 su 30, effort 72%), **9 step**
-rimanenti. Il lavoro è di **devops**.
+**Numeri.** Nessun codice applicativo toccato: la percentuale di implementazione delle story
+resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **devops**.
 
 **Cosa è pronto.**
-- I 5 workflow del repository non referenziano più nessuna action node20: **26
-  reference**, tutte su major node24 (`checkout@v5`, `setup-node@v5`,
-  `github-script@v8`, `pnpm/action-setup@v5`, `upload-artifact@v6`,
-  `download-artifact@v7`).
-- `scripts/validate-workflows.mjs`: il gate **fail-closed** con la mappa
-  `NODE24_ACTIONS` (l'azione assente dalla mappa non è verificabile → non è
-  accettata; un riferimento pinnato a SHA non è verificabile → non è accettato;
-  le azioni locali e `docker://` sono escluse perché non dichiarano un runtime).
-- `scripts/test-workflow-node24-actions.sh` (nuovo): **19 assert** in 6
-  scenari, incluso il caso `upload-artifact@v5` (node20 nonostante il nome) e
-  il caso dell'azione locale (nessun falso positivo).
-- `scripts/agent-claim.ps1`: riverifica release-aware (prerequisito per la presa
-  in carico di una claim scantita).
-- `docs/12-DEVOPS.md`: esempi YAML allineati (§2 e §9.4) e §9.10 con il gate
-  nuovo; `AGENTS.md` v1.41 con la regola nella tabella «regola ⟺ gate».
 
-**Cosa manca.** Nulla sul piano funzionale. Resta un **drift preesistente**,
-non introdotto da questa sessione: la tabella §9.10 dichiara «13 job» ma
-`ci.yml` ne ha **15** (i due job `gates-portability*` sono entrati con
-l'issue #284 e non hanno una riga nella tabella). Il conteggio degli step è
-stato allineato (33 → 34) perché è la cifra che questa sessione cambia; il
- conteggio dei job è rimasto com'era e va riallineato con i due gate di
-portabilità in una sessione dedicata.
+- Il percorso degli hook è `.githooks` e **non può più essere sovrascritto**: nessun lifecycle
+  script lo tocca, e `setup-hooks.js` rilegge il valore per accorgersi se qualcun altro lo fa.
+- I quattro hook del repository girano davvero: `pre-commit` (pattern del branch + encoding +
+  lint-staged), `commit-msg` (commitlint), `pre-push` (bundle + base-stale), `post-checkout`
+  (advisory).
+- Il `pre-commit` è stato riordinato: l'invariante del branch e il gate encoding sono **prima**
+  di qualunque uscita, e i due difetti latenti sono chiusi.
+- `scripts/test-hook-wiring.sh` (nuovo, 13 assert): 9 verifiche statiche sul wiring + 4
+  comportamentali su un `git commit` reale.
+- `scripts/test-pre-commit-clean-check.sh`: 4 scenari nuovi (H7..H10) che coprono il **percorso
+  encoding** — quello del repository vero, mai coperto prima perché il path non esisteva in
+  quel ramo del test.
+- `docs/12-DEVOPS.md §9.10`: le 3 righe dei gate di portabilità mancanti, la nuova riga del
+  gate sul wiring, e i conteggi allineati (15 job, 38 step).
 
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il gate gira
-sui workflow reali e su fixture temporanee: non scrive nulla nel repository.
+**Cosa manca.** Niente sul piano funzionale. La protezione contro la regressione è di **indole
+strutturale**, non solo documentale: il gate verifica il comportamento, e `setup-hooks.js` si
+accorge da solo se qualcuno scrive il path.
 
-**Gate di testabilità.** `bash scripts/test-workflow-node24-actions.sh` → 19/19 ·
-`node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
-`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori ·
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring non scrive
+nulla nel repository: lavora in una directory temporanea con un `git init` di prova.
+
+**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 13/13 ·
+`bash scripts/test-pre-commit-clean-check.sh` → 18/18 (H7..H10 nuovi) ·
 `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->

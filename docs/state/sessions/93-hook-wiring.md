@@ -2,8 +2,10 @@
 number: 93
 title: "Gli hook del repository non giravano: `core.hooksPath` era preso da husky"
 date: 2026-11-03
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "aa3f001e683f65b8ca38b982a8b21a208ab45aa9"
+merged_date: "2026-11-03T10:04:34Z"
 branch: feat/290-hooks-wiring
 pr: 291
 claim: kilo-hp-elitebook-7c3f
