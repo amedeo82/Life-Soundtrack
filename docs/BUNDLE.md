@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:34
+> Data: 2026-11-03 10:36
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -21229,6 +21229,16 @@ constatato su me stesso: i miei commit in questa worktree nuova sono passati con
 gate gira nel job `gates-protocol` (che ha già `fetch-depth: 0`) sul range `base.sha..head.sha`
 — il range esclude il merge commit di GitHub, il cui messaggio non è conventional.
 
+**E un difetto nel `pre-push` appena riattivato**: il commit con il bundle rigenerato, creato
+**durante** il push, non faceva parte di quel push (git calcola i ref da inviare **prima** di
+eseguire l'hook). Il branch remoto restava con il bundle stale → CI rossa. Verificato in
+laboratorio con un remoto locale: il bundle rigenerato non arrivava al remoto. Pushare da
+dentro l'hook non è la soluzione: il push interno sposta il ref e fa fallire quello esterno con
+«incorrect old value provided» (lease obsoleto), cioè con exit 1 su un push andato a buon fine.
+L'hook ora **rigenera, committa e blocca** con l'azione esatta da fare — il comportamento che
+`AGENTS.md` descriveva già («blocca il push se drift») — e `agent-pr.ps1` rigenera il bundle
+prima di committare `pr: N`, così l'automazione non incappa mai nel blocco.
+
 ## Decisioni
 
 | # | Decisione | Motivazione |
@@ -21238,6 +21248,7 @@ gate gira nel job `gates-protocol` (che ha già `fetch-depth: 0`) sul range `bas
 | D-94.3 | `setup-hooks.js` distingue il **residuo innocuo** (cartella `.husky/`) dal **pericolo** (husky che torna fra le dipendenze → errore) | Un warning che dichiara uno stato falso fa perdere fiducia nei warning: dopo la #290 la cartella non ruba più il path |
 | D-94.4 | `post-merge.ps1` descrive lo stato **reale** del fallimento | «INTATTA» era falso: git rimuove la registrazione e parte dell'albero prima di arrendersi. La frase falsa nascondeva la necessità della rimozione manuale |
 | D-94.5 | La convenzione Conventional Commits ha un **gate in CI** (job `gates-protocol`), non solo l'hook locale | L'hook `commit-msg` salta senza `node_modules`: la regola era verificata solo dove la dipendenza era installata. Una regola che si verifica solo da qualche parte non è una regola |
+| D-94.6 | Il `pre-push` **rigenera, committa e blocca** con l'azione esatta; `agent-pr.ps1` rigenera prima di committare | Il commit del bundle non entra nel push in corso (git calcola i ref prima dell'hook): il remoto restava stale. Pushare dall'hook rompe il lease del push esterno. Il blocco esplicito è il comportamento documentato in `AGENTS.md` |
 
 ## Analisi di avanzamento
 
@@ -21282,6 +21293,7 @@ exit 0.
 | Un messaggio di diagnostica che dichiara uno stato **falso** fa perdere fiducia ai warning | «La worktree e' INTATTA» era falso proprio nel caso in cui serviva capire cosa fare: la diagnosi deve essere uno strumento, non una decorazione |
 | Un warning che segnala un pericolo **passato** è rumore | La cartella `.husky/` è un residuo innocuo: segnalarla come pericolo insegnava a ignorare i warning |
 | Una regola verificata **solo dove la dipendenza è installata** non è verificata | La convenzione Conventional Commits dipendeva dal `commit-msg` hook, che salta senza `node_modules`: in una worktree nuova la regola non esisteva |
+| Un hook che modifica il repository **durante** il push produce una scrittura che il push non contiene | Git calcola i ref da inviare prima di eseguire il pre-push: il commit del bundle restava locale e il remoto stale. E pushare dall'hook non è la via: rompe il lease del push esterno |
 
 ## Documenti aggiornati
 
