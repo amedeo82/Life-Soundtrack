@@ -403,6 +403,21 @@ jobs:
       - name: Coerenza del protocollo agenti (issue #248)
         run: node scripts/check-protocol-consistency.mjs
 
+      # La convenzione "Conventional Commits" e' normativa (AGENTS.md sezione
+      # "Git workflow") ma fino ad ora era verificata SOLO dal commit-msg hook
+      # locale — che salta quando `node_modules` non e' installato (worktree
+      # nuova, o un agente che non ha ancora lanciato `pnpm install`). Il
+      # checkout e' con fetch-depth 0 perche' servono i due ref.
+      # Il range e' base.sha..head.sha: esclude il merge commit di GitHub, il
+      # cui messaggio ("Merge pull request #N from ...") non e' conventional.
+      - name: Conventional Commits nei messaggi di commit (issue #292)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA"
+
       - name: Gate "coerenza del protocollo" fail-closed (issue #248)
         run: bash scripts/test-protocol-consistency.sh
 

@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:19
+> Data: 2026-11-03 10:24
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -75,6 +75,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
+| I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -21220,6 +21221,14 @@ Il resto della issue è allineamento di fatti e di diagnostiche:
 - due sezioni legacy dichiaravano ancora un toolchain con husky (`11-BACKLOG.md` T0.1.3,
   `SESSIONS.md` «Toolchain operativa»).
 
+**Un buco emerso lavorando in questa sessione**: la convenzione «Conventional Commits» è
+normativa (`AGENTS.md` §"Git workflow") ma **non aveva alcun gate in CI** — era verificata solo
+dal `commit-msg` hook locale, che **salta quando `node_modules` non è installato**. L'ho
+constatato su me stesso: i miei commit in questa worktree nuova sono passati con il WARN
+«commitlint non disponibile (node_modules mancante?)», e nessuno li avrebbe bloccati. Ora il
+gate gira nel job `gates-protocol` (che ha già `fetch-depth: 0`) sul range `base.sha..head.sha`
+— il range esclude il merge commit di GitHub, il cui messaggio non è conventional.
+
 ## Decisioni
 
 | # | Decisione | Motivazione |
@@ -21228,6 +21237,7 @@ Il resto della issue è allineamento di fatti e di diagnostiche:
 | D-94.2 | Il gate sul wiring viene **verificato per la sua capacità di fallire** (contro-prova sullo hook reso irraggiungibile) | Un gate che non può fallire non è un gate (lesson 43-1): la prova che il fallimento propaga vale più del conteggio verde |
 | D-94.3 | `setup-hooks.js` distingue il **residuo innocuo** (cartella `.husky/`) dal **pericolo** (husky che torna fra le dipendenze → errore) | Un warning che dichiara uno stato falso fa perdere fiducia nei warning: dopo la #290 la cartella non ruba più il path |
 | D-94.4 | `post-merge.ps1` descrive lo stato **reale** del fallimento | «INTATTA» era falso: git rimuove la registrazione e parte dell'albero prima di arrendersi. La frase falsa nascondeva la necessità della rimozione manuale |
+| D-94.5 | La convenzione Conventional Commits ha un **gate in CI** (job `gates-protocol`), non solo l'hook locale | L'hook `commit-msg` salta senza `node_modules`: la regola era verificata solo dove la dipendenza era installata. Una regola che si verifica solo da qualche parte non è una regola |
 
 ## Analisi di avanzamento
 
@@ -21245,6 +21255,8 @@ resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **de
 - `scripts/post-merge.ps1`: la diagnostica del fallimento della rimozione dice cosa è
   successo davvero (git ha rimosso la registrazione e parte dell'albero).
 - Le due sezioni legacy che dichiaravano il toolchain sono allineate.
+- Il gate **Conventional Commits** gira in CI (job `gates-protocol`): contro-prova locale, un
+  messaggio non conventional esce con errore, uno conventional con 0.
 
 **Cosa manca.** Niente sul piano funzionale. Nota: i file `docs/SESSIONS.md`,
 `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi aggregati** e **prosa
@@ -21269,11 +21281,13 @@ exit 0.
 | Un test che non è mai stato visto fallire **non è testato** | La contro-prova (rendere l'hook irraggiungibile) è l'unico modo per sapere che il fallimento propaga |
 | Un messaggio di diagnostica che dichiara uno stato **falso** fa perdere fiducia ai warning | «La worktree e' INTATTA» era falso proprio nel caso in cui serviva capire cosa fare: la diagnosi deve essere uno strumento, non una decorazione |
 | Un warning che segnala un pericolo **passato** è rumore | La cartella `.husky/` è un residuo innocuo: segnalarla come pericolo insegnava a ignorare i warning |
+| Una regola verificata **solo dove la dipendenza è installata** non è verificata | La convenzione Conventional Commits dipendeva dal `commit-msg` hook, che salta senza `node_modules`: in una worktree nuova la regola non esisteva |
 
 ## Documenti aggiornati
 
 - `scripts/test-hook-wiring.sh` (contatori su file), `scripts/setup-hooks.js` (messaggi),
   `scripts/post-merge.ps1` (diagnostica della rimozione)
+- `.github/workflows/ci.yml` (gate Conventional Commits nel job `gates-protocol`)
 - `AGENTS.md` (v1.43: conteggio degli assert), `docs/12-DEVOPS.md` (§9.10), `docs/INDEX.md`
   (v1.43), `docs/11-BACKLOG.md` (T0.1.3), `docs/SESSIONS.md` (toolchain legacy),
   `docs/state/sessions/93-hook-wiring.md` (conteggi)
@@ -50143,6 +50157,21 @@ jobs:
 
       - name: Coerenza del protocollo agenti (issue #248)
         run: node scripts/check-protocol-consistency.mjs
+
+      # La convenzione "Conventional Commits" e' normativa (AGENTS.md sezione
+      # "Git workflow") ma fino ad ora era verificata SOLO dal commit-msg hook
+      # locale — che salta quando `node_modules` non e' installato (worktree
+      # nuova, o un agente che non ha ancora lanciato `pnpm install`). Il
+      # checkout e' con fetch-depth 0 perche' servono i due ref.
+      # Il range e' base.sha..head.sha: esclude il merge commit di GitHub, il
+      # cui messaggio ("Merge pull request #N from ...") non e' conventional.
+      - name: Conventional Commits nei messaggi di commit (issue #292)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA"
 
       - name: Gate "coerenza del protocollo" fail-closed (issue #248)
         run: bash scripts/test-protocol-consistency.sh
