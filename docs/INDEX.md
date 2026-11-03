@@ -143,6 +143,7 @@
 | 88 | Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge | 🟢 | ✅ | #280 |
 | 89 | CI su main: i commit del writer dello stato di merge triggano la pipeline | 🟢 | ✅ | #282 |
 | 90 | Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti | 🟢 | ✅ | #285 |
+| 91 | Il messaggio di commit del writer post-merge senza escape PowerShell rotti | 🟢 | ✅ | #288 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -182,9 +183,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **67** (merge: 66)
+- Sessioni migrate in state/sessions: **68** (merge: 67)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S90** - Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti
+- Ultima sessione migrata: **S91** - Il messaggio di commit del writer post-merge senza escape PowerShell rotti
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -233,48 +234,45 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S90)
+**Analisi della sessione corrente** (S91)
 
-**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
-restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
-non il codice applicativo.
+**Numeri.** Nessun codice applicativo toccato: la percentuale di
+implementazione delle story resta **70%** (21 su 30, effort 72%), **9 step**
+rimanenti. Il lavoro è di **devops**.
 
 **Cosa è pronto.**
-- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
-  aggregatore → bundle → verifica → un commit → un push).
-- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
-  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
-  `gates-portability` su due sistemi operativi.
-- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
-  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
-- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
-  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
-  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
-  nel bundle.
-- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
-  prodotti dai generatori con lo stato committato.
-- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
-  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
-  che non possa essere faked da un commento).
+- `.github/workflows/post-merge.yml`: il messaggio di commit senza backtick e
+  senza backslash, con la spiegazione della causa in un commento (così non
+  viene reintrodotto).
+- `scripts/test-post-merge-writer.sh` (nuovo): **19 assert** che eseguono i
+  passi del writer in un clone locale con un remoto finto — stato di merge
+  applicato e finito sul remoto, blocchi rigenerati, bundle in sync, **un solo
+  commit**, push, idle del remoto allineato, messaggio pulito, **PR senza
+  sessione → nessun commit**, **idempotenza**.
+- `.github/workflows/ci.yml`: il test gira nel job `gates-workflows` (bloccante
+  su ogni PR).
+- `scripts/generate-bundle.ps1`: il nuovo script entra nel `$files`.
 
-**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
-sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
-gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
-primo merge con questa architettura è la prova; le sessioni successive
-verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
-`main` rosso).
+**Cosa manca.** Nulla sul piano funzionale (dopo il *controllo totale* della
+Sessione 91, vedi sotto): la verifica end-to-end del
+writer è già stata fatta dal merge della PR #285 (zero run rossi) e il difetto
+di #287 è coperto da un test con **controllo negativo eseguito**: reintrodotto
+il difetto, il test fallisce con il messaggio esatto (`\workflow_run\`),
+ripristinato il fix, il test torna verde (19/19).
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
-mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
-del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
-scalari YAML, 15 sulle scope `permissions`.
+**Salute tecnica.** PowerShell 7.6.9. Nessun blocco `AGGREGATE-*` toccato a
+mano. Il test non tocca il repository vero: clona in una directory temporanea
+e usa un remoto finto (`git remote set-url`), quindi non puo' spingere nulla
+sull'origin reale.
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
-→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
-→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
-`node scripts/check-generators-portable.mjs` → exit 0.
+**Gate di testabilità.** `bash scripts/test-post-merge-writer.sh` → 19/19 ·
+`bash scripts/test-generators-portable.sh` → 6/6 ·
+`node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-protocol-consistency.mjs` → 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

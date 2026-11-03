@@ -2,8 +2,10 @@
 number: 91
 title: "Il messaggio di commit del writer post-merge senza escape PowerShell rotti"
 date: 2026-11-03
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "5af570d9cdee53a2104535577d0c973b141ddd26"
+merged_date: "2026-11-03T08:20:02Z"
 branch: feat/287-post-merge-yml-il-messaggio-di-commit-de
 pr: 288
 claim: kilo-HP-ELITEBOOK-c90auto
