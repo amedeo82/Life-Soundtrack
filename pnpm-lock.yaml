@@ -84,6 +84,9 @@ importers:
       eslint:
         specifier: ^9.17.0
         version: 9.39.5(jiti@2.6.1)
+      fake-indexeddb:
+        specifier: ^6.0.0
+        version: 6.2.5
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1

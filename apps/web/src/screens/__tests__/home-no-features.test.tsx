@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
+import { I18nextProvider } from 'react-i18next';
+import { i18n } from '../../i18n';
 import { Home } from '../Home';
 import { vi } from 'vitest';
 
@@ -26,8 +27,18 @@ describe('Home no-features state (Story 2.5)', () => {
     onImportCta: mockOnImportCta,
   };
 
-  it("mostra il messaggio no-features e la CTA per attivare l'analisi acustica", () => {
-    render(<Home {...defaultProps} />);
+  /** Renderizza la Home nella lingua indicata (default: italiano). */
+  async function renderHome(language: 'it' | 'en' = 'it') {
+    await i18n.changeLanguage(language);
+    return render(
+      <I18nextProvider i18n={i18n}>
+        <Home {...defaultProps} />
+      </I18nextProvider>,
+    );
+  }
+
+  it("mostra il messaggio no-features e la CTA per attivare l'analisi acustica", async () => {
+    await renderHome();
 
     // Titolo uguale a empty
     expect(screen.getByText('La tua storia inizia qui')).toBeInTheDocument();
@@ -45,7 +56,7 @@ describe('Home no-features state (Story 2.5)', () => {
   });
 
   it('click su CTA chiama onImportCta', async () => {
-    render(<Home {...defaultProps} />);
+    await renderHome();
 
     const ctaButton = screen.getByRole('button', { name: 'Attiva analisi acustica' });
     await userEvent.click(ctaButton);
@@ -53,9 +64,20 @@ describe('Home no-features state (Story 2.5)', () => {
     expect(mockOnImportCta).toHaveBeenCalledTimes(1);
   });
 
-  it('ha data-testid home-no-features', () => {
-    render(<Home {...defaultProps} />);
+  it('ha data-testid home-no-features', async () => {
+    await renderHome();
 
     expect(screen.getByTestId('home-no-features')).toBeInTheDocument();
+  });
+
+  it('traduce il messaggio anche in inglese', async () => {
+    await renderHome('en');
+
+    expect(
+      screen.getByText(
+        'Your data is here, but to tell its mood we need acoustic analysis: enable it in Settings → Privacy',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enable acoustic analysis' })).toBeInTheDocument();
   });
 });

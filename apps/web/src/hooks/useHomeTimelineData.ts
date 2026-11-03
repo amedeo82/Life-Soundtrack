@@ -13,7 +13,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import { openDb, listListensInRange, listInsightsByType, type LifeSoundtrackDB } from '@core/db';
+import {
+  openDb,
+  listListensInRange,
+  listInsightsByType,
+  DB_NAME,
+  type LifeSoundtrackDB,
+} from '@core/db';
 import { listContextPeriods } from '@core/context';
 import { toRibbonPeriod, type ContextRibbonPeriod } from '../components/contextRibbonModel';
 import {
@@ -97,9 +103,15 @@ function toListenFacts(
  *
  * `granularity` determina il bucket delle serie: cambiarla **ricalcola** le
  * serie, ed è il chiamante (la Timeline) a decidere quando.
+ *
+ * `dbName` è il nome del database IndexedDB da leggere: di default `DB_NAME`
+ * (il database unico dell'app, ADR-0002 local-first). È iniettabile **solo
+ * per i test**, che devono leggere un database isolato invece di quello
+ * dell'app.
  */
 export function useHomeTimelineData(
   granularity: 'years' | 'months' | 'weeks' | 'days',
+  dbName: string = DB_NAME,
 ): HomeTimelineData {
   const [data, setData] = useState<HomeTimelineData>(initialData);
 
@@ -108,7 +120,7 @@ export function useHomeTimelineData(
 
     const load = async () => {
       try {
-        const db: LifeSoundtrackDB = await openDb();
+        const db: LifeSoundtrackDB = await openDb(dbName);
         const listens = await listListensInRange(db, 0, Date.now() + 86_400_000);
         const tracks = await db.tracks.toArray();
         const artistByTrack = new Map(tracks.map((track) => [track.id, track.artistId]));
@@ -207,7 +219,7 @@ export function useHomeTimelineData(
     return () => {
       cancelled = true;
     };
-  }, [granularity]);
+  }, [granularity, dbName]);
 
   return data;
 }

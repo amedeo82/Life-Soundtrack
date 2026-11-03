@@ -93,7 +93,7 @@ describe('useHomeTimelineData (Story 2.5)', () => {
       },
     ]);
 
-    const { result } = renderHook(() => useHomeTimelineData('months'));
+    const { result } = renderHook(() => useHomeTimelineData('months', dbName));
 
     await waitFor(() => {
       expect(result.current.state).not.toBe('loading');
@@ -138,7 +138,7 @@ describe('useHomeTimelineData (Story 2.5)', () => {
 
     // NESSUNA feature inserita
 
-    const { result } = renderHook(() => useHomeTimelineData('months'));
+    const { result } = renderHook(() => useHomeTimelineData('months', dbName));
 
     await waitFor(() => {
       expect(result.current.state).not.toBe('loading');
@@ -153,7 +153,7 @@ describe('useHomeTimelineData (Story 2.5)', () => {
     await db.open();
     // DB vuoto
 
-    const { result } = renderHook(() => useHomeTimelineData('months'));
+    const { result } = renderHook(() => useHomeTimelineData('months', dbName));
 
     await waitFor(() => {
       expect(result.current.state).not.toBe('loading');
