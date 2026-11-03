@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:25
+> Data: 2026-11-03 10:34
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -48658,6 +48658,26 @@ if ($sessionFile) {
     }
     $content | Set-Content -Path $sessionFile -Encoding utf8 -NoNewline
     & git add $relative | Out-Null
+
+    # La sessione e' un file del catalogo del bundle ($files): scrivendo `pr: N`
+    # il bundle va rigenerato PRIMA del commit, altrimenti il branch remoto
+    # resta con un bundle stale e la CI lo segnala ("docs/BUNDLE.md non e' in
+    # sync"). Il `pre-push` hook rigenera e committa da solo quando il bundle
+    # e' da rifare, ma BLOCCA il push (git calcola i ref da inviare prima di
+    # eseguire l'hook): qui lo facciamo prima, quindi il push passa pulito.
+    $bundleChanged = $false
+    & pwsh -NoProfile -File (Join-Path $repoRoot "scripts/generate-bundle.ps1") | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        & git diff --quiet -- docs/BUNDLE.md
+        if ($LASTEXITCODE -ne 0) { $bundleChanged = $true }
+    }
+    if ($bundleChanged) {
+        & git add docs/BUNDLE.md | Out-Null
+        & git commit -q -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/" | Out-Null
+        if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare il bundle rigenerato" }
+        Say "bundle rigenerato e committato" "Cyan"
+    }
+
     & git commit -q -m "docs(state): scrive 'pr: $prNumber' nella sessione ($relative)" | Out-Null
     if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare l'aggiornamento della sessione" }
     & git push | Out-Null
@@ -49326,6 +49346,12 @@ remote_url="$2"
 # un clone normale; su un checkout detached si ricava dai ref su stdin.
 push_refs="$(cat 2>/dev/null || true)"
 current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
+# Il ref REMOTO spinto (es. refs/heads/feat/42-x): serve al push interno del
+# commit con il bundle rigenerato.
+push_ref="$(echo "$push_refs" | awk 'NR==1 {print $3}')"
+if [ -z "$push_ref" ]; then
+  push_ref="refs/heads/$current_branch"
+fi
 if [ -z "$current_branch" ] || [ "$current_branch" = "HEAD" ]; then
   current_branch="$(echo "$push_refs" | awk 'NR==1 {print $1}' | sed 's#^refs/heads/##')"
 fi
@@ -49396,7 +49422,21 @@ if [ -n "$changed_files" ]; then
         git add docs/BUNDLE.md
         if ! git diff --cached --quiet docs/BUNDLE.md 2>/dev/null; then
           if git commit --no-verify -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/"; then
-            echo "[pre-push] BUNDLE.md committato"
+            # Il commit appena creato NON fa parte del push in corso: git calcola
+            # i ref da inviare PRIMA di eseguire questo hook. Lasciarlo fuori
+            # lascerebbe il BRANCH REMOTO con un bundle stale e la CI lo
+            # segnalerebbe ("docs/BUNDLE.md non e' in sync").
+            #
+            # Non lo si pusha da qui: il push interno sposta il ref remoto e
+            # fa fallire il push esterno con "incorrect old value provided"
+            # (lease obsoleto) — cioe' con un exit code 1 su un push che in
+            # realta' e' andato a buon fine. Meglio bloccare qui, con
+            # l'azione esatta da fare: il bundle e' gia' committato, basta
+            # riprovare il push.
+            echo "[pre-push] BUNDLE.md rigenerato e committato: questo push non lo include"
+            echo "[pre-push]   (git calcola i ref da inviare PRIMA di eseguire l'hook)."
+            echo "[pre-push]   Riprova:  git push"
+            exit 1
           else
             echo "[pre-push] WARN: commit di BUNDLE.md fallito. Aggiungi manualmente."
           fi

@@ -178,6 +178,26 @@ if ($sessionFile) {
     }
     $content | Set-Content -Path $sessionFile -Encoding utf8 -NoNewline
     & git add $relative | Out-Null
+
+    # La sessione e' un file del catalogo del bundle ($files): scrivendo `pr: N`
+    # il bundle va rigenerato PRIMA del commit, altrimenti il branch remoto
+    # resta con un bundle stale e la CI lo segnala ("docs/BUNDLE.md non e' in
+    # sync"). Il `pre-push` hook rigenera e committa da solo quando il bundle
+    # e' da rifare, ma BLOCCA il push (git calcola i ref da inviare prima di
+    # eseguire l'hook): qui lo facciamo prima, quindi il push passa pulito.
+    $bundleChanged = $false
+    & pwsh -NoProfile -File (Join-Path $repoRoot "scripts/generate-bundle.ps1") | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        & git diff --quiet -- docs/BUNDLE.md
+        if ($LASTEXITCODE -ne 0) { $bundleChanged = $true }
+    }
+    if ($bundleChanged) {
+        & git add docs/BUNDLE.md | Out-Null
+        & git commit -q -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/" | Out-Null
+        if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare il bundle rigenerato" }
+        Say "bundle rigenerato e committato" "Cyan"
+    }
+
     & git commit -q -m "docs(state): scrive 'pr: $prNumber' nella sessione ($relative)" | Out-Null
     if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare l'aggiornamento della sessione" }
     & git push | Out-Null
