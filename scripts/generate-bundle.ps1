@@ -164,6 +164,9 @@ $files = @(
     # Sessione 90 (issue #284): automazioni post-merge deterministiche
     # (writer unico, CI post-writer, generatori portabili).
     "docs/state/sessions/90-automazioni-post-merge-definitive.md",
+    # Sessione 91 (issue #287): il messaggio di commit del writer senza escape
+    # PowerShell rotti, e il test funzionale che lo tiene a posto.
+    "docs/state/sessions/91-post-merge-messaggio-commit.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -350,6 +353,11 @@ $files = @(
     # negativo in un worktree temporaneo (un generatore alterato deve essere
     # intercettato).
     "scripts/test-generators-portable.sh",
+    # Test FUNZIONALE del writer post-merge (issue #284, #287): esegue i passi
+    # del writer in un clone locale con un remoto finto e verifica il
+    # risultato (stato applicato, un solo commit, push, idempotenza,
+    # messaggio di commit senza escape PowerShell rotti).
+    "scripts/test-post-merge-writer.sh",
     # ADR-0013: automazioni post-merge deterministiche (writer unico, CI
     # post-writer, generatori portabili).
     "docs/13-ADR/0013-post-merge-automation.md",

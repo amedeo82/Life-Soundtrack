@@ -560,6 +560,15 @@ jobs:
       - name: Ordinamento dei writer di `main` (issue #149)
         run: bash scripts/test-workflow-writer-ordering.sh
 
+      # Issue #284 + #287: test FUNZIONALE del writer post-merge. Non
+      # ispeziona il testo del workflow: esegue i suoi passi in un clone locale
+      # con un remoto finto e verifica il risultato (stato applicato, un solo
+      # commit, push, idempotenza, messaggio di commit senza escape rotti).
+      # Il comando `git commit` e' estratto dal workflow reale: la regressione
+      # dell'issue #287 viene intercettata per costruzione.
+      - name: Il writer post-merge si comporta come dichiarato (issue #284, #287)
+        run: bash scripts/test-post-merge-writer.sh
+
       # Sessione 74: validita' YAML dei file workflow. Un file che GitHub
       # rifiuta in fase di validazione non produce un job che fallisce:
       # produce una run con `jobs: 0`, `conclusion: failure` a 0 secondi,
