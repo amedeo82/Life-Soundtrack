@@ -75,7 +75,8 @@ rimanenti. Il lavoro è di **devops**.
   su ogni PR).
 - `scripts/generate-bundle.ps1`: il nuovo script entra nel `$files`.
 
-**Cosa manca.** Nulla sul piano funzionale: la verifica end-to-end del
+**Cosa manca.** Nulla sul piano funzionale (dopo il *controllo totale* della
+Sessione 91, vedi sotto): la verifica end-to-end del
 writer è già stata fatta dal merge della PR #285 (zero run rossi) e il difetto
 di #287 è coperto da un test con **controllo negativo eseguito**: reintrodotto
 il difetto, il test fallisce con il messaggio esatto (`\workflow_run\`),
@@ -87,12 +88,40 @@ e usa un remoto finto (`git remote set-url`), quindi non puo' spingere nulla
 sull'origin reale.
 
 **Gate di testabilità.** `bash scripts/test-post-merge-writer.sh` → 19/19 ·
+`bash scripts/test-generators-portable.sh` → 6/6 ·
 `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
 `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
 `node scripts/check-encoding.mjs` → 0 errori ·
 `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
 `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
 `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Controllo totale di funzionamento del workflow
+
+Il *controllo totale* richiesto dal project owner (2026-11-03) ha eseguito
+l'intera catena — merge → writer → CI post-writer → gate locali — e ha
+**trovato tre difetti reali**, che il merge della PR #285 non aveva potuto
+mostrare perché riguardavano il percorso di test, non il writer:
+
+| # | Difetto | Sintomo | Causa |
+|---|---------|---------|-------|
+| 1 | **Il bundle nella PR era stale** | `gates-portability` falliva su ubuntu **e** windows: «docs/BUNDLE.md non è in sync» | Dopo l'ultima modifica a un file di `$files` il bundle non era stato rigenerato (regola D.26.3). Il gate lo ha intercettato: è esattamente il suo lavoro |
+| 2 | **Il test del writer non reggeva l'ambiente della CI** | `gates-workflows` rosso: «failed to push some refs … (shallow update not allowed)» | In CI il checkout è **shallow** e su un HEAD staccato: il `git clone` della sorgente produceva un clone shallow e senza HEAD, e il push verso il remoto finito veniva rifiutato. Il fixture ora è ricostruito dal contenuto tracciato (`git archive`): repository completo, un solo commit, stessi file della CI |
+| 3 | **Il gate di portabilità aveva un falso positivo** | `gates-portability-compare` rosso: «1/5 file divergono» (`docs/BUNDLE.md`) | L'hash del manifest includeva i **campi mutabili** (`> Data:` e `- Ultima aggregazione:`): i due job cadendo in minuti diversi producevano hash diversi **senza alcuna differenza reale di contenuto** |
+
+Il terzo difetto è il più instructive: è **il gate stesso** a essere sbagliato,
+non i generatori. Correzione: l'hash è calcolato sul contenuto normalizzato
+(modulo `scripts/portability-normalize.mjs`, senza effetti collaterali, con
+test di regressione T4 che verifica che l'hash sia **invariante** rispetto ai
+timestamp e **sensibile** al contenuto reale).
+
+In parallelo è stato corretto un difetto di progetto della matrix: il manifest
+veniva prodotto nello **stesso** step del check del bundle, quindi un bundle
+non in sync faceva saltare l'upload e il confronto cross-OS non si poteva fare
+proprio quando serviva. Ora le fasi sono separate e l'upload ha `if: always()`.
+
+**Stato finale della PR #288**: 17/17 job verdi, incluso il confronto
+cross-OS su due sistemi operativi reali.
 
 ## Lesson learned
 
