@@ -55,6 +55,14 @@ difetto in `check-aggregate-blocks.mjs` era **silenzioso**: `allowFail` trasform
 controllava **7 blocchi su 15**. Entrambi i gate ora leggono con un buffer da 64 MB, e
 `check-aggregate-blocks.mjs` confronta **5 file e 15 blocchi**.
 
+**Un terzo strato, nel pre-push**: git invoca il `pre-push` con `<remote-name> <remote-URL>` —
+il secondo argomento **non** è il branch spinto. La versione precedente lo trattava come tale e
+costruiva `origin/<URL>`, un ref inesistente: `git diff` falliva, la condizione restava vuota e
+**il bundle non sarebbe stato rigenerato comunque**, nemmeno con il percorso degli hook
+corretto. L'hook ora determina il branch da `git rev-parse --abbrev-ref HEAD` (con i ref su
+stdin come fallback per un checkout detached) e confronta con `origin/main` — la base della PR,
+non il branch remoto.
+
 **Il drift del catalogo**: `docs/12-DEVOPS.md §9.10` si dichiara «l'elenco autorevole dei gate»
 e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gates-portability*`
 (introdotti dalla issue #284, Sessione 90) non avevano una riga. Un elenco autorevole sbagliato
@@ -70,6 +78,7 @@ e dichiarava «12 job» / «33 step», mentre `ci.yml` ha **15 job**: i due `gat
 | D-93.4 | Il gate è un **test di comportamento**, non una grep: `test-hook-wiring.sh` esegue un `git commit` reale in un repo temporaneo | Il difetto era esattamente «i file ci sono, ma non vengono eseguiti»: un controllo sui file non lo avrebbe visto |
 | D-93.5 | Il catalogo §9.10 viene allineato a **39 righe** (38 gate + l'agregatore `quality`) e i conteggi in `AGENTS.md` a **15 job, 38 step** | Le sezioni legacy vanno allineate quando la PR cambia i fatti che dichiarano (D.38.1): un catalogo autorevole sbagliato è peggio di un catalogo assente |
 | D-93.6 | I gate che leggono da git passano a `maxBuffer: 64 MB` | `docs/BUNDLE.md` è 3.4 MB: il default di Node (1 MB) faceva fallire `check-encoding --staged` e rendeva **in silenzio** inefficace metà dei confronti di `check-aggregate-blocks` |
+| D-93.7 | Il `pre-push` determina il branch da `git rev-parse --abbrev-ref HEAD` (fallback: i ref su stdin) e confronta con `origin/main` | git passa `<remote-name> <remote-URL>`: il secondo argomento non è il branch. La base giusta è la base della PR (`origin/main`), non il branch remoto |
 
 ## Analisi di avanzamento
 
@@ -119,6 +128,7 @@ nulla nel repository: lavora in una directory temporanea con un `git init` di pr
 | Un catalogo che si dichiara «autorevole» e sbaglia è peggio di un catalogo assente | Il drift sui due job di portabilità è nato da un merge (#284) che non ha aggiornato §9.10: nessun gate lo collega |
 | Un errore di lettura trattato come "assente" è un gate che non gira | `allowFail` + `maxBuffer` di Node faceva saltare metà dei blocchi aggregati **senza un messaggio**: il gate diceva "0 violazioni" confrontando 7 blocchi su 15 |
 | Riattivare un controllo ne fa emergere altri: è il costo (e il beneficio) del ripristino | Il check encoding è entrato nel percorso dei commit e ha bloccato il primo commit della sessione: il bug c'era, non si vedeva. Ogni controllo riattivato va seguito da un commit che lo fa passare |
+| Un hook che non gira può avere **due** cause indipendenti: fixarne una non basta | Il `pre-push` aveva sia il path sbagliato sia gli argomenti sbagliati (`$2` è l'URL del remote, non il branch): con il path corretto la condizione sarebbe comunque stata vuota |
 
 ## Documenti aggiornati
 

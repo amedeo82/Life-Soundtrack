@@ -175,6 +175,53 @@ fi
 
 cd / >/dev/null 2>&1
 
+# T13: il pre-push NON usa il secondo argomento come branch.
+# git invoca il pre-push con <remote-name> <remote-URL>: la versione precedente
+# costruiva "origin/<URL>", un ref inesistente, e la condizione non matchava
+# MAI (il bundle non veniva rigenerato).
+if grep -q 'remote_branch="\$2"' "$GITHOOKS/pre-push"; then
+  ng "T13 il pre-push usa \$2 (l'URL del remote) come branch: la condizione non puo' matchare"
+else
+  ok "T13 il pre-push non usa \$2 come branch (l'URL del remote non e' un branch)"
+fi
+if grep -q 'git rev-parse --abbrev-ref HEAD' "$GITHOOKS/pre-push"; then
+  ok "T13b il pre-push determina il branch corrente"
+else
+  ng "T13b il pre-push non determina il branch corrente"
+fi
+
+# T14: la condizione del pre-push (branch spinto x file del catalogo) MATCHA.
+# Repo temporaneo con un `origin/main` locale e un branch che cambia docs/.
+PUSH_REPO="$WORK/pushrepo"
+mkdir -p "$PUSH_REPO"
+git init -q -b main "$PUSH_REPO" >/dev/null 2>&1
+(
+  cd "$PUSH_REPO" || exit 2
+  git config user.email "test@example.com"
+  git config user.name "Test"
+  git config core.autocrlf false
+  mkdir -p docs
+  printf 'v0\n' > docs/qualcosa.md
+  git add docs/qualcosa.md
+  git commit -q -m "chore: base"
+  BASE=$(git rev-parse HEAD)
+  git update-ref refs/remotes/origin/main "$BASE"
+  git checkout -q -B feat/290-prova
+  printf 'v1\n' > docs/qualcosa.md
+  git commit -q -am "docs: un documento"
+  # il push passa l'URL del remote come secondo argomento: non e' un branch
+  out=$(printf 'refs/heads/feat/290-prova %s refs/heads/feat/290-prova %s\n' \
+    "$(git rev-parse HEAD)" "$(git rev-parse HEAD)" \
+    | bash "$GITHOOKS/pre-push" origin https://github.com/example/repo.git 2>&1)
+  if echo "$out" | grep -q "Rigenero BUNDLE.md"; then
+    echo "  [PASS] T14 la condizione del pre-push matcha (file del catalogo cambiati)"
+    PASS=$((PASS + 1))
+  else
+    echo "  [FAIL] T14 la condizione del pre-push NON matcha: $out"
+    FAIL=$((FAIL + 1))
+  fi
+)
+
 echo "---"
 echo "Risultati: $PASS passati, $FAIL falliti"
 [ "$FAIL" -eq 0 ]

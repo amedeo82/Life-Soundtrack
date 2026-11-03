@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pre-push hook:
-# 1. BUNDLE auto-regen se `docs/` e' cambiato (D4, G4 mitigation)
+# 1. BUNDLE auto-regen se un file del catalogo (`$files`) e' cambiato (D4, G4 mitigation)
 # 2. Base-stale warning se il branch e' > 5 commit dietro origin/main (D5, G3 mitigation)
 #
 # Sessione 79 (issue #248, decisione D-79.7 di ADR-0012): il fallback a Windows
@@ -10,7 +10,18 @@
 # prevenire il drift lo causava. Se pwsh 7 non e' disponibile, il bundle NON viene
 # rigenerato: si avvisa e si prosegue.
 #
-# Setup: git config core.hooksPath .githooks (via scripts/setup-hooks.js postinstall)
+# Sessione 93 (issue #290): l'hook non e' mai entrato in funzione, per due ragioni
+# indipendenti:
+#   a) `core.hooksPath` era puntato su `.husky/_`, non su `.githooks`
+#      (vedi `.githooks/README.md`): questo file non veniva eseguito;
+#   b) git invoca il pre-push con <remote-name> <remote-URL>: il secondo
+#      argomento NON e' il branch spinto. La versione precedente lo trattava
+#      come tale e costruiva "origin/<URL>" — un ref inesistente: `git diff`
+#      falliva, la condizione restava vuota e il bundle non veniva MAI
+#      rigenerato. I ref spinchi arrivano su stdin, una riga per ref:
+#      "<local ref> <local sha> <remote ref> <remote sha>".
+#
+# Setup: git config core.hooksPath .githooks
 # Bypass: git push --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git push ...)
 
 set -e
@@ -20,58 +31,86 @@ if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
 fi
 
 remote="$1"
-remote_branch="$2"
+remote_url="$2"
 
-# Sanity check: se remote/branch non passati, skip silente
-if [ -z "$remote" ] || [ -z "$remote_branch" ]; then
+# Il branch locale spinto: `git rev-parse --abbrev-ref HEAD` e' l'autorita' in
+# un clone normale; su un checkout detached si ricava dai ref su stdin.
+push_refs="$(cat 2>/dev/null || true)"
+current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
+if [ -z "$current_branch" ] || [ "$current_branch" = "HEAD" ]; then
+  current_branch="$(echo "$push_refs" | awk 'NR==1 {print $1}' | sed 's#^refs/heads/##')"
+fi
+
+if [ -z "$current_branch" ]; then
+  echo "[pre-push] WARN: non riesco a determinare il branch spinto: salto la rigenerazione del bundle."
   exit 0
 fi
 
-# Check 1: BUNDLE auto-regen (D4) se docs/ e' cambiato
-changed_docs=$(git diff --name-only "origin/${remote_branch}...HEAD" 2>/dev/null | grep -E '^docs/' | grep -v '^docs/BUNDLE.md$' || true)
+# La base del confronto e' `origin/main` (la base della PR): il bundle deve
+# riflettere lo stato COMMITTATO del branch, non quello del branch remoto.
+base_ref="origin/main"
+if ! git rev-parse --verify --quiet "$base_ref" >/dev/null 2>&1; then
+  base_ref="origin/$current_branch"
+fi
 
-if [ -n "$changed_docs" ]; then
-  echo "[pre-push] docs/ modificato rispetto a origin/${remote_branch}. Rigenero BUNDLE.md..."
+# Check 1: BUNDLE auto-regen (D4) se un file del catalogo e' cambiato.
+# Le righe del catalogo sono quelle di `scripts/generate-bundle.ps1` ($files):
+# `docs/`, `AGENTS.md`, `README.md`, `LICENSE`, `fixtures/`, `scripts/`.
+changed_files=$(git diff --name-only "$base_ref...HEAD" 2>/dev/null \
+  | grep -E '^(docs/|AGENTS\.md$|README\.md$|LICENSE$|fixtures/|scripts/)' \
+  | grep -v '^docs/BUNDLE\.md$' || true)
 
-  regen_ok=0
-  regen_failed=0
+if [ -n "$changed_files" ]; then
+  echo "[pre-push] il branch '$current_branch' modifica dei file del catalogo rispetto a $base_ref. Rigenero BUNDLE.md..."
 
-  if command -v pwsh >/dev/null 2>&1; then
-    ps_major="$(pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major' 2>/dev/null | tr -d '\r[:space:]')"
-    if [ -n "$ps_major" ] && [ "$ps_major" -ge 7 ] 2>/dev/null; then
-      if pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
-        echo "[pre-push] BUNDLE.md rigenerato con pwsh $ps_major"
-        regen_ok=1
+  # Il bundle viene generato dal WORKING TREE: con modifiche non committate il
+  # risultato non corrisponderebbe al commit spinto (e la CI lo segnalerebbe
+  # come drift). In quel caso si salta, con un WARN: e' il commit a dover
+  # essere pulito, non l'hook a sporcarlo.
+  if ! git diff --quiet 2>/dev/null; then
+    echo "[pre-push] WARN: working tree con modifiche tracked non committate: il bundle NON viene rigenerato"
+    echo "[pre-push]   (il bundle va rigenerato e committato a mano: pwsh scripts/generate-bundle.ps1)"
+  else
+    regen_ok=0
+    regen_failed=0
+
+    if command -v pwsh >/dev/null 2>&1; then
+      ps_major="$(pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major' 2>/dev/null | tr -d '\r[:space:]')"
+      if [ -n "$ps_major" ] && [ "$ps_major" -ge 7 ] 2>/dev/null; then
+        if pwsh -NoProfile -File scripts/generate-bundle.ps1 >/dev/null 2>&1; then
+          echo "[pre-push] BUNDLE.md rigenerato con pwsh $ps_major"
+          regen_ok=1
+        else
+          regen_failed=1
+        fi
       else
-        regen_failed=1
+        echo "[pre-push] WARN: serve PowerShell 7 (pwsh); versione trovata: ${ps_major:-assente}."
+        echo "[pre-push]   BUNDLE.md NON rigenerato: sotto Windows PowerShell 5.1 il parsing dei .ps1"
+        echo "[pre-push]   sovradecodifica e il mojibake verrebbe SCRITTO nel bundle (F9-bis)."
+        echo "[pre-push]   Rigenera a mano con pwsh 7: pwsh scripts/generate-bundle.ps1"
       fi
     else
-      echo "[pre-push] WARN: serve PowerShell 7 (pwsh); versione trovata: ${ps_major:-assente}."
-      echo "[pre-push]   BUNDLE.md NON rigenerato: sotto Windows PowerShell 5.1 il parsing dei .ps1"
-      echo "[pre-push]   sovradecodifica e il mojibake verrebbe SCRITTO nel bundle (F9-bis)."
-      echo "[pre-push]   Rigenera a mano con pwsh 7: pwsh scripts/generate-bundle.ps1"
+      echo "[pre-push] WARN: pwsh non trovato nel PATH."
+      echo "[pre-push]   BUNDLE.md NON rigenerato: 'powershell' (5.1) non e' un fallback accettabile"
+      echo "[pre-push]   perche' corrompe il bundle (F9-bis). Rigenera a mano con pwsh 7:"
+      echo "[pre-push]   pwsh scripts/generate-bundle.ps1"
     fi
-  else
-    echo "[pre-push] WARN: pwsh non trovato nel PATH."
-    echo "[pre-push]   BUNDLE.md NON rigenerato: 'powershell' (5.1) non e' un fallback accettabile"
-    echo "[pre-push]   perche' corrompe il bundle (F9-bis). Rigenera a mano con pwsh 7:"
-    echo "[pre-push]   pwsh scripts/generate-bundle.ps1"
-  fi
 
-  if [ "$regen_ok" -eq 0 ] && [ "$regen_failed" -eq 1 ]; then
-    echo "[pre-push] WARN: pwsh scripts/generate-bundle.ps1 e' fallito."
-    echo "[pre-push]   Rigenera a mano e committa docs/BUNDLE.md nella stessa PR."
-  fi
+    if [ "$regen_ok" -eq 0 ] && [ "$regen_failed" -eq 1 ]; then
+      echo "[pre-push] WARN: pwsh scripts/generate-bundle.ps1 e' fallito."
+      echo "[pre-push]   Rigenera a mano e committa docs/BUNDLE.md nella stessa PR."
+    fi
 
-  if [ "$regen_ok" -eq 1 ]; then
-    # Se BUNDLE.md e' cambiato, committalo
-    if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
-      git add docs/BUNDLE.md
-      if ! git diff --cached --quiet docs/BUNDLE.md 2>/dev/null; then
-        if git commit --no-verify -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/"; then
-          echo "[pre-push] BUNDLE.md committato"
-        else
-          echo "[pre-push] WARN: commit di BUNDLE.md fallito. Aggiungi manualmente."
+    if [ "$regen_ok" -eq 1 ]; then
+      # Se BUNDLE.md e' cambiato, committalo
+      if ! git diff --quiet docs/BUNDLE.md 2>/dev/null; then
+        git add docs/BUNDLE.md
+        if ! git diff --cached --quiet docs/BUNDLE.md 2>/dev/null; then
+          if git commit --no-verify -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/"; then
+            echo "[pre-push] BUNDLE.md committato"
+          else
+            echo "[pre-push] WARN: commit di BUNDLE.md fallito. Aggiungi manualmente."
+          fi
         fi
       fi
     fi
@@ -80,13 +119,13 @@ fi
 
 # Check 2: base-stale warning (D5)
 if git fetch origin --quiet 2>/dev/null; then
-  behind=$(git rev-list --count "HEAD..origin/${remote_branch}" 2>/dev/null || echo 0)
+  behind=$(git rev-list --count "HEAD..$base_ref" 2>/dev/null || echo 0)
   if [ "$behind" -gt 5 ]; then
     echo ""
-    echo "[pre-push] WARN: il branch e' $behind commit dietro origin/${remote_branch}."
+    echo "[pre-push] WARN: il branch e' $behind commit dietro $base_ref."
     echo "  Considera rebase prima del merge:"
-    echo "    git fetch origin && git rebase origin/${remote_branch}"
-    echo "  (non blocca il push; solo un warning per mitigare F4 base stale)"
+    echo "    git fetch origin && git rebase $base_ref"
+    echo "    (non blocca il push; solo un warning per mitigare F4 base stale)"
     echo ""
   fi
 fi

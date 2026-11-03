@@ -45,9 +45,15 @@ Oggi:
 
 - `package.json` **non** dichiara `prepare` e **non** dipende da husky: nessun lifecycle script può sovrascrivere il path;
 - `scripts/setup-hooks.js` **rilegge** `core.hooksPath` dopo averlo scritto e avvisa se il valore è diverso, e segnala la cartella `.husky/` (il sintomo del difetto);
-- `scripts/test-hook-wiring.sh` (13 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
+- `scripts/test-hook-wiring.sh` (15 assert) verifica il wiring statico **ed esegue un `git commit` reale** in un repository temporaneo con `core.hooksPath = .githooks`: un branch non conforme deve essere abortito, un branch conforme deve passare.
 
 Un hook che non gira non produce rumore: è un difetto che si vede solo quando manca.
+
+### Il `pre-push` aveva un secondo difetto, indipendente
+
+git invoca il `pre-push` con `<remote-name> <remote-URL>`: il secondo argomento **non** è il branch spinto. La versione precedente lo trattava come tale e costruiva `origin/<URL>` — un ref inesistente. `git diff` falliva (con l'output redirectato a `/dev/null`), la condizione restava vuota e **il bundle non sarebbe stato rigenerato comunque**, nemmeno con il percorso degli hook corretto.
+
+Ora l'hook determina il branch da `git rev-parse --abbrev-ref HEAD` (con i ref su stdin come fallback per un checkout detached) e confronta con `origin/main` — la base della PR, non il branch remoto. La rigenerazione è saltata con un WARN se il working tree ha modifiche tracked non committate: il bundle riflette il working tree, e un bundle committato che non corrisponde al commit spinto è drift garantito.
 
 ## Invariante vs igiene *(Sessione 79, issue #248, ADR-0012 D-79.6)*
 
