@@ -607,15 +607,24 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
-      - name: I generatori sono deterministici e il bundle e' in sync (issue #284)
-        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json"
+      - name: I generatori sono deterministici (issue #284)
+        # Il manifest viene prodotto in un passo separato dal check del bundle:
+        # se il bundle non e' in sync il manifest deve ESSERE PUBBLICATO
+        # comunque, altrimenti il confronto cross-OS non si puo' fare proprio
+        # quando servirebbe (misurato il 2026-11-03).
+        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json" --no-bundle-check
 
       - name: Pubblica il manifest per il confronto cross-OS
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: portability-${{ matrix.os }}
           path: portability-${{ matrix.os }}.json
-          if-no-files-found: error
+          if-no-files-found: warn
+
+      - name: Il bundle e' in sync con lo stato committato (issue #284)
+        if: always()
+        run: node scripts/check-generators-portable.mjs --bundle-check-only
 
   # ---------------------------------------------------------------------------
   # 5c. Confronto CROSS-OS dei manifest (issue #284).

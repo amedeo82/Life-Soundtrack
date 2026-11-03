@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 07:54
+> Data: 2026-11-03 08:02
 > Totale file: 174
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -44869,6 +44869,13 @@ function argValues(name) {
 const root = resolve(argValue('--root', '.'));
 const manifestPath = argValue('--manifest');
 const comparePaths = argValues('--compare');
+// Le fasi sono separabili perche' nella CI il manifest cross-OS deve essere
+// pubblicato **anche** quando un'altra fase fallisce: senza il manifest il
+// confronto fra i due sistemi operativi non si puo' fare proprio quando
+// serve (misurato il 2026-11-03: il bundle non in sync faceva saltare
+// l'upload e quindi il confronto).
+const skipBundleCheck = argv.includes('--no-bundle-check');
+const bundleCheckOnly = argv.includes('--bundle-check-only');
 
 /** I file prodotti dai generatori (stessi target dell'aggregator). */
 const TARGETS = [
@@ -44982,38 +44989,44 @@ function regenerate() {
   }
 }
 
-// --- 1. determinismo: due rigenerazioni consecutive ---------------------------
-
-console.log('[INFO] check-generators-portable: rigenero i file in un worktree pulito');
-const first = regenerate();
-const second = regenerate();
-const drift = Object.keys(first).filter((k) => first[k] !== second[k]);
-if (drift.length > 0) {
-  fail(`i generatori non sono deterministici: ${drift.length} file cambiano fra due run consecutivi`);
-  for (const k of drift) console.error(`         ${k}: ${first[k]} -> ${second[k]}`);
-  process.exit(1);
-}
-console.log(`[OK] i generatori sono deterministici (${Object.keys(first).length} file, due run consecutive)`);
-
-if (manifestPath) {
-  mkdirSync(resolve(manifestPath).replace(/[\\/][^\\/]*$/, ''), { recursive: true });
-  writeFileSync(manifestPath, JSON.stringify(first, null, 2) + '\n', 'utf8');
-  console.log(`[OK] manifest scritto in ${manifestPath}`);
-}
-
 // --- 2. invarianti del repo sullo stato committato ---------------------------
 
-const bundleCheck = spawnSync(
-  'pwsh',
-  ['-NoProfile', '-File', 'scripts/generate-bundle.ps1', '-Check'],
-  { cwd: root, encoding: 'utf8' },
-);
-if (bundleCheck.status !== 0) {
-  console.error((bundleCheck.stdout || '') + (bundleCheck.stderr || ''));
-  fail('il bundle non e\' in sync con lo stato committato (esegui `pwsh scripts/generate-bundle.ps1`)');
-  process.exit(1);
+if (!bundleCheckOnly) {
+  console.log('[INFO] check-generators-portable: rigenero i file in un worktree pulito');
+  const first = regenerate();
+  const second = regenerate();
+  const drift = Object.keys(first).filter((k) => first[k] !== second[k]);
+  if (drift.length > 0) {
+    fail(`i generatori non sono deterministici: ${drift.length} file cambiano fra due run consecutivi`);
+    for (const k of drift) console.error(`         ${k}: ${first[k]} -> ${second[k]}`);
+    process.exit(1);
+  }
+  console.log(
+    `[OK] i generatori sono deterministici (${Object.keys(first).length} file, due run consecutive)`,
+  );
+
+  if (manifestPath) {
+    mkdirSync(resolve(manifestPath).replace(/[\\/][^\\/]*$/, ''), { recursive: true });
+    writeFileSync(manifestPath, JSON.stringify(first, null, 2) + '\n', 'utf8');
+    console.log(`[OK] manifest scritto in ${manifestPath}`);
+  }
 }
-console.log('[OK] il bundle e\' in sync con lo stato committato');
+
+if (!skipBundleCheck) {
+  const bundleCheck = spawnSync(
+    'pwsh',
+    ['-NoProfile', '-File', 'scripts/generate-bundle.ps1', '-Check'],
+    { cwd: root, encoding: 'utf8' },
+  );
+  if (bundleCheck.status !== 0) {
+    console.error((bundleCheck.stdout || '') + (bundleCheck.stderr || ''));
+    fail(
+      "il bundle non e' in sync con lo stato committato (esegui `pwsh scripts/generate-bundle.ps1`)",
+    );
+    process.exit(1);
+  }
+  console.log('[OK] il bundle e\' in sync con lo stato committato');
+}
 
 process.exit(0);
 
@@ -45184,11 +45197,18 @@ fi
 git init --bare -q "$REMOTE"
 git clone -q --no-hardlinks "$REPO_ROOT" "$CLONE" 2>/dev/null
 cd "$CLONE" || exit 1
+# NB: in CI il checkout della sorgente e' su un HEAD staccato
+# (refs/pull/N/merge): il commit non e' riferito da nessun ref locale, quindi
+# `git clone` NON lo porta nel clone (e il clone resta senza HEAD, quindi
+# `git rev-parse HEAD` fallisce). Lo si porta esplicitamente con
+# `git fetch <sorgente> HEAD`.
+git fetch -q "$REPO_ROOT" HEAD
 git remote set-url origin "$REMOTE"
 git config user.email "writer@test.local"
 git config user.name "Writer Test"
 git config commit.gpgsign false
-git checkout -q main
+# `checkout -B` (non `checkout main`): crea il branch se non esiste.
+git checkout -q -B main FETCH_HEAD
 git push -q origin main
 BASE_SHA="$(git rev-parse HEAD)"
 
@@ -48489,15 +48509,24 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
 
-      - name: I generatori sono deterministici e il bundle e' in sync (issue #284)
-        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json"
+      - name: I generatori sono deterministici (issue #284)
+        # Il manifest viene prodotto in un passo separato dal check del bundle:
+        # se il bundle non e' in sync il manifest deve ESSERE PUBBLICATO
+        # comunque, altrimenti il confronto cross-OS non si puo' fare proprio
+        # quando servirebbe (misurato il 2026-11-03).
+        run: node scripts/check-generators-portable.mjs --manifest "portability-${{ matrix.os }}.json" --no-bundle-check
 
       - name: Pubblica il manifest per il confronto cross-OS
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: portability-${{ matrix.os }}
           path: portability-${{ matrix.os }}.json
-          if-no-files-found: error
+          if-no-files-found: warn
+
+      - name: Il bundle e' in sync con lo stato committato (issue #284)
+        if: always()
+        run: node scripts/check-generators-portable.mjs --bundle-check-only
 
   # ---------------------------------------------------------------------------
   # 5c. Confronto CROSS-OS dei manifest (issue #284).

@@ -59,14 +59,18 @@ fi
 git init --bare -q "$REMOTE"
 git clone -q --no-hardlinks "$REPO_ROOT" "$CLONE" 2>/dev/null
 cd "$CLONE" || exit 1
+# NB: in CI il checkout della sorgente e' su un HEAD staccato
+# (refs/pull/N/merge): il commit non e' riferito da nessun ref locale, quindi
+# `git clone` NON lo porta nel clone (e il clone resta senza HEAD, quindi
+# `git rev-parse HEAD` fallisce). Lo si porta esplicitamente con
+# `git fetch <sorgente> HEAD`.
+git fetch -q "$REPO_ROOT" HEAD
 git remote set-url origin "$REMOTE"
 git config user.email "writer@test.local"
 git config user.name "Writer Test"
 git config commit.gpgsign false
-# NB: `checkout -B` (non `checkout main`): in CI il checkout e' su un HEAD
-# staccato (refs/pull/N/merge) e non esiste un branch locale `main` — il
-# comando semplice fallirebbe con "pathspec 'main' did not match".
-git checkout -q -B main "$(git rev-parse HEAD)"
+# `checkout -B` (non `checkout main`): crea il branch se non esiste.
+git checkout -q -B main FETCH_HEAD
 git push -q origin main
 BASE_SHA="$(git rev-parse HEAD)"
 
