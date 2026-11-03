@@ -2,10 +2,10 @@
 number: 95
 title: "Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto"
 date: 2026-11-03
-state: 🟡
-merged: false
-merged_commit: ""
-merged_date: ""
+state: 🟢
+merged: true
+merged_commit: "571fd512e2ab5dea7260c6ace341f681d4e297fb"
+merged_date: "2026-11-03T15:01:41Z"
 branch: fix/297-story-merge-state-writer
 pr: 0
 claim: kilo-HP-ELITEBOOK-2x9k
