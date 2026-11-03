@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Pre-commit hook: verifica che il branch corrente sia valido per il workflow agenti.
-# Previene commit accidentali su branch non conformi alla naming convention.
-# (D3) Aggiunto check working tree clean per mitigare F5 stash collision.
+# Pre-commit hook: invarianti del workflow agenti + igiene del working tree.
 #
 # Sessione 79 (issue #248, decisione D-79.6 di ADR-0012): il hook separa
 # INVARIANTE (bloccante) e IGIENE (advisory).
@@ -11,8 +9,23 @@
 # (committare un sottoinsieme di file): l'unica via d'uscita era --no-verify,
 # che disabilita ANCHE il check del branch. La funzione di quel check e'
 # mitigata strutturalmente dalla worktree (issue #53), che e' il default.
-# Per ripristinare il comportamento bloccante:
+# Per ripristurare il comportamento bloccante:
 #   LIFE_SOUNDTRACK_STRICT_CLEAN=1 git commit -m "..."
+#
+# Sessione 93 (issue #290): l'hook e' stato RIORDINATO perche' non e' mai
+# entrato in funzione. `core.hooksPath` era puntato su `.husky/_` (husky v9
+# scrive il path nel suo lifecycle `prepare`, DOPO il `postinstall` che lo
+# imposta su `.githooks`), quindi questo file non e' mai stato eseguito.
+#
+# Il difetto latente che ne emerge e' il `exit 0` che chiudeva il blocco
+# encoding: swallows TUTTO quello che viene dopo. Con `scripts/check-encoding.mjs`
+# presente (cioe' nel repository vero, sempre) l'hook:
+#   - usciva con 0 anche quando il check encoding FALLIVA (il gate anti-mojibake
+#     della issue #277 era morto dentro l'hook);
+#   - non verificava MAI l'invariante del branch (F1/F7): l'unica difesa
+#     documentata in AGENTS.md non girava.
+# Misurato (scripts/test-pre-commit-clean-check.sh, scenari H8/H9): con l'hook
+# di `main` quei due percorsi escono 0 invece di 1.
 #
 # Setup: git config core.hooksPath .githooks
 # Bypass: git commit --no-verify (oppure LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)
@@ -21,31 +34,7 @@ set -e
 
 # Skip se variabile d'ambiente disattivata
 if [ "${LIFE_SOUNDTRACK_SKIP_HOOKS:-0}" = "1" ]; then
-# ---------------------------------------------------------------------------
-# INVARIANTE 3 — encoding dei file staged (bloccante)
-# Sessione 87 (issue #277): Windows PowerShell 5.1 riscrive i file in ANSI
-# (doppia codifica) e aggiunge il BOM, in silenzio. Il gate "check-encoding"
-# intercetta il danno PRIMA che entri nel commit.
-# I file che documentano esempi di mojibake sono in scripts/encoding-allowlist.txt
-# e vengono segnalati in WARN (non bloccano).
-# ---------------------------------------------------------------------------
-if [ -f scripts/check-encoding.mjs ]; then
-  if ! encoding_output=$(node scripts/check-encoding.mjs --staged 2>&1); then
-    echo "$encoding_output"
-    echo ""
-    echo "[pre-commit] ERRORE: encoding non valido nei file staged (mojibake / BOM / UTF-8 non valido)."
-    echo "  Ripara con:  node scripts/check-encoding.mjs --fix"
-    echo "  (il --fix riscrive solo quando l'inversione e' inequivocabile;"
-    echo "   negli altri casi il file va corretto a mano)."
-    echo ""
-    echo "  Dettagli: AGENTS.md sezione F9-ter."
-    exit 1
-  fi
-  echo "$encoding_output" | grep -q '^\[WARN\]' && echo "[pre-commit] WARN: encoding in allowlist (documentazione di esempi)."
   exit 0
-fi
-
-exit 0
 fi
 
 current_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
@@ -82,6 +71,54 @@ else
   echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
   echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
   exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# IGIENE — lint-staged (lint + format dei file staged)
+# ---------------------------------------------------------------------------
+# Questo passaggio era affidato a husky (`.husky/pre-commit`): con
+# `core.hooksPath = .husky/_` era quello il file eseguito e questo hook non
+# girava MAI. Con `.githooks` come unico hooks path il passaggio va eseguito
+# qui (vedi `.githooks/commit-msg` per commitlint).
+# Se `node_modules` non e' installato il check viene saltato con un WARN: la
+# CI esegue comunque lint e format su tutti i file.
+if [ -f lint-staged.config.js ] && [ -d node_modules/.bin ] && command -v pnpm >/dev/null 2>&1; then
+  if ! pnpm exec lint-staged; then
+    echo ""
+    echo "[pre-commit] ERRORE: lint-staged ha fallito (lint o format sui file staged)."
+    exit 1
+  fi
+elif [ -f lint-staged.config.js ]; then
+  echo "[pre-commit] WARN: lint-staged non disponibile (node_modules mancante?): format non verificata."
+fi
+
+# ---------------------------------------------------------------------------
+# INVARIANTE 3 — encoding dei file staged (bloccante)
+# Sessione 87 (issue #277): Windows PowerShell 5.1 riscrive i file in ANSI
+# (doppia codifica) e aggiunge il BOM, in silenzio. Il gate "check-encoding"
+# intercetta il danno PRIMA che entri nel commit.
+# I file che documentano esempi di mojibake sono in scripts/encoding-allowlist.txt
+# e vengono segnalati in WARN (non bloccano).
+# ---------------------------------------------------------------------------
+if [ -f scripts/check-encoding.mjs ]; then
+  if ! encoding_output=$(node scripts/check-encoding.mjs --staged 2>&1); then
+    echo "$encoding_output"
+    echo ""
+    echo "[pre-commit] ERRORE: encoding non valido nei file staged (mojibake / BOM / UTF-8 non valido)."
+    echo "  Ripara con:  node scripts/check-encoding.mjs --fix"
+    echo "  (il --fix riscrive solo quando l'inversione e' inequivocabile;"
+    echo "   negli altri casi il file va corretto a mano)."
+    echo ""
+    echo "  Dettagli: AGENTS.md sezione F9-ter."
+    exit 1
+  fi
+  # Il WARN (file in allowlist) NON blocca il commit. La forma `if` e' scelta
+  # per esplicita' (con `set -e` il fallimento di `grep` dentro una `&&` list
+  # e' un'eccezione documentata di bash, fragile da leggere): qui la
+  # condizione e' dichiarata, non dedotta.
+  if echo "$encoding_output" | grep -q '^\[WARN\]'; then
+    echo "[pre-commit] WARN: encoding in allowlist (documentazione di esempi)."
+  fi
 fi
 
 # ---------------------------------------------------------------------------

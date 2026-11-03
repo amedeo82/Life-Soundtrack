@@ -19,7 +19,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "progress": "pwsh scripts/aggregate-state.ps1 -Progress",
-    "prepare": "husky",
     "postinstall": "node scripts/setup-hooks.js",
     "setup-hooks": "node scripts/setup-hooks.js"
   },
@@ -27,7 +26,6 @@
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@ls/config": "workspace:*",
-    "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
     "prettier": "^3.4.2",
     "turbo": "^2.3.3"
