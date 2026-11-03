@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 18:46
+> Data: 2026-11-03 19:16
 > Totale file: 183
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -21779,7 +21779,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: fix/297-fix-devops-le-story-non-hanno-un-writer
-pr: 0
+pr: 300
 claim: kilo-hp-elitebook-6e15
 tags: [devops, stato, story, protocollo, writer]
 ---

@@ -5,7 +5,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: fix/297-fix-devops-le-story-non-hanno-un-writer
-pr: 0
+pr: 300
 claim: kilo-hp-elitebook-6e15
 tags: [devops, stato, story, protocollo, writer]
 ---
