@@ -2,8 +2,10 @@
 number: 92
 title: "Node 24 per le action dei workflow: l'inventario incompleto e il gate che lo rende verificabile"
 date: 2026-11-03
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "bf3e5041a900da9256be6bdce737019fe1df78e9"
+merged_date: "2026-11-03T09:14:05Z"
 branch: feat/283-node24-actions
 pr: 289
 claim: kilo-hp-elitebook-7c3f

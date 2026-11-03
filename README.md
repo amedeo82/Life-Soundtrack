@@ -96,40 +96,42 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S91)
+**Analisi della sessione corrente** (S92)
 
 **Numeri.** Nessun codice applicativo toccato: la percentuale di
 implementazione delle story resta **70%** (21 su 30, effort 72%), **9 step**
 rimanenti. Il lavoro è di **devops**.
 
 **Cosa è pronto.**
-- `.github/workflows/post-merge.yml`: il messaggio di commit senza backtick e
-  senza backslash, con la spiegazione della causa in un commento (così non
-  viene reintrodotto).
-- `scripts/test-post-merge-writer.sh` (nuovo): **19 assert** che eseguono i
-  passi del writer in un clone locale con un remoto finto — stato di merge
-  applicato e finito sul remoto, blocchi rigenerati, bundle in sync, **un solo
-  commit**, push, idle del remoto allineato, messaggio pulito, **PR senza
-  sessione → nessun commit**, **idempotenza**.
-- `.github/workflows/ci.yml`: il test gira nel job `gates-workflows` (bloccante
-  su ogni PR).
-- `scripts/generate-bundle.ps1`: il nuovo script entra nel `$files`.
+- I 5 workflow del repository non referenziano più nessuna action node20: **26
+  reference**, tutte su major node24 (`checkout@v5`, `setup-node@v5`,
+  `github-script@v8`, `pnpm/action-setup@v5`, `upload-artifact@v6`,
+  `download-artifact@v7`).
+- `scripts/validate-workflows.mjs`: il gate **fail-closed** con la mappa
+  `NODE24_ACTIONS` (l'azione assente dalla mappa non è verificabile → non è
+  accettata; un riferimento pinnato a SHA non è verificabile → non è accettato;
+  le azioni locali e `docker://` sono escluse perché non dichiarano un runtime).
+- `scripts/test-workflow-node24-actions.sh` (nuovo): **19 assert** in 6
+  scenari, incluso il caso `upload-artifact@v5` (node20 nonostante il nome) e
+  il caso dell'azione locale (nessun falso positivo).
+- `scripts/agent-claim.ps1`: riverifica release-aware (prerequisito per la presa
+  in carico di una claim scantita).
+- `docs/12-DEVOPS.md`: esempi YAML allineati (§2 e §9.4) e §9.10 con il gate
+  nuovo; `AGENTS.md` v1.41 con la regola nella tabella «regola ⟺ gate».
 
-**Cosa manca.** Nulla sul piano funzionale (dopo il *controllo totale* della
-Sessione 91, vedi sotto): la verifica end-to-end del
-writer è già stata fatta dal merge della PR #285 (zero run rossi) e il difetto
-di #287 è coperto da un test con **controllo negativo eseguito**: reintrodotto
-il difetto, il test fallisce con il messaggio esatto (`\workflow_run\`),
-ripristinato il fix, il test torna verde (19/19).
+**Cosa manca.** Nulla sul piano funzionale. Resta un **drift preesistente**,
+non introdotto da questa sessione: la tabella §9.10 dichiara «13 job» ma
+`ci.yml` ne ha **15** (i due job `gates-portability*` sono entrati con
+l'issue #284 e non hanno una riga nella tabella). Il conteggio degli step è
+stato allineato (33 → 34) perché è la cifra che questa sessione cambia; il
+ conteggio dei job è rimasto com'era e va riallineato con i due gate di
+portabilità in una sessione dedicata.
 
-**Salute tecnica.** PowerShell 7.6.9. Nessun blocco `AGGREGATE-*` toccato a
-mano. Il test non tocca il repository vero: clona in una directory temporanea
-e usa un remoto finto (`git remote set-url`), quindi non puo' spingere nulla
-sull'origin reale.
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il gate gira
+sui workflow reali e su fixture temporanee: non scrive nulla nel repository.
 
-**Gate di testabilità.** `bash scripts/test-post-merge-writer.sh` → 19/19 ·
-`bash scripts/test-generators-portable.sh` → 6/6 ·
-`node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
+**Gate di testabilità.** `bash scripts/test-workflow-node24-actions.sh` → 19/19 ·
+`node scripts/validate-workflows.mjs .github/workflows` → 0 fallimenti ·
 `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
 `node scripts/check-encoding.mjs` → 0 errori ·
 `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
