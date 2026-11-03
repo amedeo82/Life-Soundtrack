@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:39
+> Data: 2026-11-03 10:46
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -48678,10 +48678,13 @@ if ($sessionFile) {
     # e' da rifare, ma BLOCCA il push (git calcola i ref da inviare prima di
     # eseguire l'hook): qui lo facciamo prima, quindi il push passa pulito.
     $bundleChanged = $false
-    & pwsh -NoProfile -File (Join-Path $repoRoot "scripts/generate-bundle.ps1") | Out-Null
-    if ($LASTEXITCODE -eq 0) {
-        & git diff --quiet -- docs/BUNDLE.md
-        if ($LASTEXITCODE -ne 0) { $bundleChanged = $true }
+    $bundleScript = Join-Path $repoRoot "scripts/generate-bundle.ps1"
+    if (Test-Path $bundleScript) {
+        & pwsh -NoProfile -File $bundleScript | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            & git diff --quiet -- docs/BUNDLE.md
+            if ($LASTEXITCODE -ne 0) { $bundleChanged = $true }
+        }
     }
     if ($bundleChanged) {
         & git add docs/BUNDLE.md | Out-Null
