@@ -122,6 +122,11 @@ function normalizeMutable(content) {
     .replace(/^- Ultima aggregazione: .+$/gm, '- Ultima aggregazione: <timestamp>');
 }
 
+// Esportata per il test di regressione: la normalizzazione deve rendere
+// INVARIANTE l'hash rispetto ai campi mutabili (vedi T4 di
+// `scripts/test-generators-portable.sh`).
+export { normalizeMutable };
+
 function sha256(file) {
   return createHash('sha256').update(normalizeMutable(readFileSync(file, 'utf8'))).digest('hex');
 }

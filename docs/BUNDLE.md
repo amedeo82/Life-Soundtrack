@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 08:11
+> Data: 2026-11-03 08:12
 > Totale file: 174
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -44935,6 +44935,11 @@ function normalizeMutable(content) {
     .replace(/^- Ultima aggregazione: .+$/gm, '- Ultima aggregazione: <timestamp>');
 }
 
+// Esportata per il test di regressione: la normalizzazione deve rendere
+// INVARIANTE l'hash rispetto ai campi mutabili (vedi T4 di
+// `scripts/test-generators-portable.sh`).
+export { normalizeMutable };
+
 function sha256(file) {
   return createHash('sha256').update(normalizeMutable(readFileSync(file, 'utf8'))).digest('hex');
 }
@@ -45140,6 +45145,33 @@ if echo "$out" | grep -q "output DIVERSI"; then
   ok "il messaggio nomina la divergenza cross-OS"
 else
   ng "il messaggio non nomina la divergenza: $(echo "$out" | tail -4)"
+fi
+
+echo ""
+echo "=== T4: la normalizzazione dei campi mutabili rende l'hash invariante ==="
+# I campi mutabili (Data del bundle, Ultima aggregazione) cambiano a ogni
+# esecuzione: se l'hash li includesse, il confronto cross-OS sarebbe
+# falsamente positivo quando i due job cadono in minuti diversi (misurato il
+# 2026-11-03: docs/BUNDLE.md con hash diversi su ubuntu e windows, senza
+# differenze reali). Il confronto deve essere INVARIANTE rispetto a questi
+# campi.
+if node --input-type=module -e '
+import { normalizeMutable } from "./scripts/check-generators-portable.mjs";
+const a = normalizeMutable("> Data: 2026-01-01 00:00\n- Ultima aggregazione: 2026-01-01 00:00\ncorpo\n");
+const b = normalizeMutable("> Data: 2026-12-31 23:59\n- Ultima aggregazione: 2026-12-31 23:59\ncorpo\n");
+if (a !== b) {
+  console.error("la normalizzazione NON rende invariante l hash rispetto ai campi mutabili");
+  process.exit(1);
+}
+const c = normalizeMutable("> Data: 2026-01-01 00:00\n- Ultima aggregazione: 2026-01-01 00:00\ncorpo DIVERSO\n");
+if (a === c) {
+  console.error("la normalizzazione nasconde anche le differenze REALI di contenuto");
+  process.exit(1);
+}
+' 2>/dev/null; then
+  ok "T4 l'hash e' invariante rispetto ai timestamp mutabili e sensibile al contenuto reale"
+else
+  ng "T4 la normalizzazione dei campi mutabili non e' corretta"
 fi
 
 echo ""
