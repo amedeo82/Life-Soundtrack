@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 22:29
+> Data: 2026-11-03 22:32
 > Totale file: 185
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,14 +9,14 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 182 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2639.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-03 19:23
+- Totale file: 184 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2661.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-03 22:32
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 114 |
+| docs/ | 116 |
 | scripts/ | 42 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1248,24 +1248,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
+**Implementazione: 77%** - 23 story completate su 30 - effort pesato 80% - **mancano 7 step**
 
-`██████████████████████░░░░░░░░` 73%
+`███████████████████████░░░░░░░` 77%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
+| EPIC 3 - UI/UX | 3 | 5 | 60% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 23 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
-- 3.2 Ricordi + Share - da fare (size L)
+**Step ancora da implementare** (7):
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
@@ -1278,52 +1277,26 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 3/5 - in corso |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S96)
+**Analisi della sessione corrente** (S97)
 
-**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato, gate e documentazione**. La
-percentuale di implementazione delle story resta **73%** (22 su 30, effort 76%, 8 step rimanenti):
-questo lavoro non implementa una story, chiude un gap di processo. Il numero che cambia è quello dei
-**confronti del gate**: da 70 a **92** (70 sessioni + 22 story), e i confronti coprono ora **tutta**
-la classe dei file di stato.
-
-**Cosa è pronto.**
-
-- Il perimetro `docs/state/stories/` ha un **writer** e un **gate**: una story mergiata non può più
-  restare `in-review` senza che il gate fallisca e senza che il writer la corregga al merge.
-- I **6 drift preesistenti** sulle story sono chiusi: i fatti di merge dichiarati nelle Story 0.2,
-  0.5, 1.2, 3.1, 3.4 e 4.4 coincidono ora con lo stato reale delle PR.
-- La regola è **scritta e verificata**: una riga nella tabella «regola ⟺ gate» di `AGENTS.md`
-  (v1.44), l'invariante in `docs/state/_index.md`, la decisione D-13.7 in `ADR-0013` e i gate che la
-  impongono (`check-merge-state.mjs`, `apply-merge-state.mjs`).
-
-**Cosa manca.** La classe di drift è chiusa; restano due punti **fuori perimetro**, dichiarati e non
-modificati qui:
-
-- le chiavi i18n `insight.mood.angry` / `insight.mood.neutral` (sessione concorrente, in
-  `stash@{0}`): non sono usate da nessun codice e il namespace non è nella spec
-  `docs/08-COPY-I18N.md` §2.15 — vanno decise a parte (recupero in PR dedicata o abbandono);
-- il **post-merge cleanup** dei branch e delle worktree residue della Sessione 94 (procedura
-  canonica `scripts/post-merge.ps1`, eseguita dalla working copy principale).
-
-Nota: `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi
-aggregati**: i blocchi si aggiornano da soli dopo il merge (regola V1 di ADR-0008); in questa PR è
-stato toccato solo il contenuto dei file già registrati in `$files`, e il bundle rigenerato di
-conseguenza.
-
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il writer è idempotente (test T9) e
-il gate resta fail-closed su entrambi i perimetri.
-
-**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 92 confronti, 0 falliti ·
-`node scripts/test-apply-merge-state.mjs` → 33 assert, 0 falliti ·
-`bash scripts/test-merge-state-gate.sh` → 24 assert, 0 falliti ·
-`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
-`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
-0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
+  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
+  (i test del «language detector» usano `localStorage`, che il jsdom non espone
+  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
+  Node 24).
+- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
+  dell'era e nota sul ricordo, i18n IT/EN.
+- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
+  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
+  la schermata ⑨/⑩ di Esplora è la Story 3.3.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
+  documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2210,6 +2183,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 94 | Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test | 🟢 | ✅ | #293 |
 | 95 | Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto | 🟢 | ✅ | - |
 | 96 | Il writer di stato di merge copre anche le story (issue #297) | 🟢 | ✅ | #300 |
+| 97 | Ricordi + Share: il feed, la card e il tagging manuale (issue #241) | 🟢 | ✅ | #301 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2249,10 +2223,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **73** (merge: 72)
-- Stories migrate in state/stories: **22** (done: 22)
-- Ultima sessione migrata: **S96** - Il writer di stato di merge copre anche le story (issue #297)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **74** (merge: 73)
+- Stories migrate in state/stories: **23** (done: 23)
+- Ultima sessione migrata: **S97** - Ricordi + Share: il feed, la card e il tagging manuale (issue #241)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2265,24 +2239,23 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
+**Implementazione: 77%** - 23 story completate su 30 - effort pesato 80% - **mancano 7 step**
 
-`██████████████████████░░░░░░░░` 73%
+`███████████████████████░░░░░░░` 77%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
+| EPIC 3 - UI/UX | 3 | 5 | 60% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 23 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
-- 3.2 Ricordi + Share - da fare (size L)
+**Step ancora da implementare** (7):
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
@@ -2295,52 +2268,26 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 3/5 - in corso |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S96)
+**Analisi della sessione corrente** (S97)
 
-**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato, gate e documentazione**. La
-percentuale di implementazione delle story resta **73%** (22 su 30, effort 76%, 8 step rimanenti):
-questo lavoro non implementa una story, chiude un gap di processo. Il numero che cambia è quello dei
-**confronti del gate**: da 70 a **92** (70 sessioni + 22 story), e i confronti coprono ora **tutta**
-la classe dei file di stato.
-
-**Cosa è pronto.**
-
-- Il perimetro `docs/state/stories/` ha un **writer** e un **gate**: una story mergiata non può più
-  restare `in-review` senza che il gate fallisca e senza che il writer la corregga al merge.
-- I **6 drift preesistenti** sulle story sono chiusi: i fatti di merge dichiarati nelle Story 0.2,
-  0.5, 1.2, 3.1, 3.4 e 4.4 coincidono ora con lo stato reale delle PR.
-- La regola è **scritta e verificata**: una riga nella tabella «regola ⟺ gate» di `AGENTS.md`
-  (v1.44), l'invariante in `docs/state/_index.md`, la decisione D-13.7 in `ADR-0013` e i gate che la
-  impongono (`check-merge-state.mjs`, `apply-merge-state.mjs`).
-
-**Cosa manca.** La classe di drift è chiusa; restano due punti **fuori perimetro**, dichiarati e non
-modificati qui:
-
-- le chiavi i18n `insight.mood.angry` / `insight.mood.neutral` (sessione concorrente, in
-  `stash@{0}`): non sono usate da nessun codice e il namespace non è nella spec
-  `docs/08-COPY-I18N.md` §2.15 — vanno decise a parte (recupero in PR dedicata o abbandono);
-- il **post-merge cleanup** dei branch e delle worktree residue della Sessione 94 (procedura
-  canonica `scripts/post-merge.ps1`, eseguita dalla working copy principale).
-
-Nota: `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi
-aggregati**: i blocchi si aggiornano da soli dopo il merge (regola V1 di ADR-0008); in questa PR è
-stato toccato solo il contenuto dei file già registrati in `$files`, e il bundle rigenerato di
-conseguenza.
-
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il writer è idempotente (test T9) e
-il gate resta fail-closed su entrambi i perimetri.
-
-**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 92 confronti, 0 falliti ·
-`node scripts/test-apply-merge-state.mjs` → 33 assert, 0 falliti ·
-`bash scripts/test-merge-state-gate.sh` → 24 assert, 0 falliti ·
-`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
-`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
-0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
+  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
+  (i test del «language detector» usano `localStorage`, che il jsdom non espone
+  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
+  Node 24).
+- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
+  dell'era e nota sul ricordo, i18n IT/EN.
+- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
+  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
+  la schermata ⑨/⑩ di Esplora è la Story 3.3.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
+  documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -12321,6 +12268,138 @@ il gate resta fail-closed su entrambi i perimetri.
 - `scripts/generate-bundle.ps1` — sessione 96 registrata in `$files`
 ```
 
+### Sessione 97 - Ricordi + Share: il feed, la card e il tagging manuale (issue #241)
+
+- **Data**: 2026-11-03
+- **Stato**: 🟢
+- **Merged**: ✅ PR #301 (22cf5916140c5869ea296bc778e6cb094ed71037, 2026-11-03T22:32:23Z)
+- **Claim**: `kilo-hp-elitebook-bfed`
+
+```
+
+# Sessione 97 — Ricordi + Share: il feed, la card e il tagging manuale (issue #241)
+
+> **Oggetto**: la **Story 3.2** — il feed dei ricordi (schermata ⑪), il foglio di
+> condivisione (⑫) e il **tagging manuale**. È la story che rende leggibile la
+> storia dell'utente: l'analisi automatica dice *cosa* suonava, l'utente
+> scrive *perché*.
+
+## Sintesi
+
+L'issue #241 è stata implementata sulla specifica `docs/25-MEMORIES-SHARE-EXPLORE.md`
+(v1.0 🟢 APPROVED, ratificata dal project owner il 2026-11-02), con le sette
+decisioni D-25.1…D-25.7.
+
+Il lavoro è in tre pezzi, e il terzo è quello che la specifica dichiarava
+**rischioso**: il ricalcolo dell'analisi **cancella e reinserisce** gli insight
+(`replaceAllInsightsOfType`, Story 2.5), quindi un nome dato a un'era sarebbe
+sparito al primo ricalcolo. La correzione non sta nei generatori ma nel
+**writer**: `preserveUserFields` riporta `userNote` e `status` dagli insight
+esistenti a quelli nuovi, e il test di integrazione verifica la sopravvivenza
+al ricalcolo reale (`replaceAllInsightsOfType` sul database, non una simulazione).
+
+Il resto è stato scelto per restare **locale e senza librerie**:
+
+- la card 1080×1350 è disegnata a mano su `canvas` (nessuna libreria di
+  grafica), con i font caricati **prima** del disegno e un placeholder
+  deterministico quando la copertina non c'è;
+- il capitolo HTML è **autonomo**: nessuno script, nessun foglio di stile
+  esterno, nessuna richiesta di rete — l'export statico alternativo per chi non
+  usa i social;
+- ogni azione di condivisione ha un **fallback**: senza Web Share API si
+  scarica il file, senza clipboard si scarica il file.
+
+## Cosa è stato fatto
+
+### Core (`packages/core`)
+
+- `setInsightUserNote` e `setInsightStatus`: i writer dei campi **dell'utente**,
+  transazionali, che restituiscono `null` se l'insight non esiste (l'utente può
+  aver rinominato un'era che il ricalcolo ha appena rimosso: non è un errore);
+- `preserveUserFields` applicato a `replaceAllInsightsOfType`,
+  `replaceInsightsOfType` e `replaceInsights`: la nota e la conferma
+  sopravvivono al ricalcolo.
+
+### App (`apps/web`)
+
+- `hooks/useMemories.ts`: il feed — pagine di 10, `dismissed` escluso ma **non
+  cancellato**, ordinamento per `Insight.confidence` decrescente (la rilevanza
+  è il campo che il motore dei ricordi normalizza), e le tre azioni (nascondi,
+  salva, nota);
+- `hooks/useEraNotes.ts` + `eraNote.ts`: le ere rilevate e il loro nome libero
+  (nome + parole chiave separate da virgola);
+- `share/renderMemoryCard.ts`: la card 1080×1350 su canvas;
+- `share/renderMemoryChapter.ts`: il capitolo HTML autonomo;
+- `share/shareActions.ts`: Web Share API, clipboard, download (con fallback);
+- `components/ShareSheet.tsx`: il dialog accessibile (focus trap, `Esc`,
+  backdrop) con gli stati `generating` / `ready` / `error`;
+- `components/NoteField.tsx` + `EraNoteField.tsx`: il campo di nota libera,
+  riusato per l'era e per il ricordo;
+- `screens/Memories.tsx`: la schermata ⑪, con infinite scroll e fallback
+  manuale, il tagging delle ere e il flusso di condivisione;
+- `i18n`: le nuove chiavi `nav.memories`, `memories.*` e `share.*` in IT ed EN.
+
+### Test
+
+37 test nuovi (8 nel core, 29 nell'app web): i writer e la preservazione al
+ricalcolo, il feed, il canvas, il capitolo HTML, il dialog accessibile, le
+azioni della card e la rinomina dell'era.
+
+## Decisioni
+
+- **Il tag del brano sta sulla nota dell'insight del ricordo**, non su un
+  campo nuovo di `Track`: la decisione D-25.4 della spec 🟢 (nessuna
+  migrazione dello schema, il DB v7 imporrebbe il bump di `fastCheck`) è
+  vincolante, e il tag del ricordo copre il caso d'uso dell'AC «tagging
+  manuale di un'era e di una canzone».
+- **Il capitolo HTML è l'export statico alternativo**, non un PDF: il PDF
+  richiederebbe una dipendenza (o un writer minimale) e l'AC dice «HTML autonomo
+  **e/o** PDF».
+- **Il componente non conosce l'i18n**: ShareSheet, NoteField ed EraNoteField
+  ricevono le etichette già rese.
+
+## Analisi di avanzamento
+
+- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
+  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
+  (i test del «language detector» usano `localStorage`, che il jsdom non espone
+  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
+  Node 24).
+- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
+  dell'era e nota sul ricordo, i18n IT/EN.
+- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
+  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
+  la schermata ⑨/⑩ di Esplora è la Story 3.3.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
+  documentati.
+
+## Lesson learned
+
+- **Un test che usa `localStorage` globale è un test di ambiente.** Sotto
+  Node 26 il jsdom non espone `localStorage` e il `beforeEach` muore prima
+  della prima asserzione: un fallimento che sembra una regressione di i18n e
+  invece è il runtime. Il confronto con `main` è la mossa che lo distingue.
+- **Il test di performance del core è un indicatore di carico**: 10.000 insert
+  in < 500 ms falliscono se un'altra suite gira in parallelo sulla stessa
+  macchina, e passano da soli.
+- **Le entità HTML vanno costruite, non scritte letterali**: `&` in un
+  sorgente TypeScript finisce per essere riscritto come `&` in alcuni passaggi
+  di tooling; `String.fromCodePoint(38)` rende l'escape esplicito e immune.
+
+## Documenti aggiornati
+
+- `docs/state/stories/3.2-ricordi-share.md` (nuova) e
+  `docs/state/sessions/97-ricordi-share.md` (questa)
+- `docs/11-BACKLOG.md` — sezione Story 3.2
+- `docs/INDEX.md` — dettaglio legacy
+- `docs/06-UX-FLOWS-STATES.md` §2.11-§2.12 · `docs/07-UI-SPEC.md` §2.2, §2.10
+- `docs/08-COPY-I18N.md` — le nuove chiavi
+- `docs/18-DEV-LOG.md` — la entry della sessione
+- `scripts/generate-bundle.ps1` — `$files`
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -22075,8 +22154,10 @@ il gate resta fail-closed su entrambi i perimetri.
 number: 97
 title: "Ricordi + Share: il feed, la card e il tagging manuale (issue #241)"
 date: 2026-11-03
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "22cf5916140c5869ea296bc778e6cb094ed71037"
+merged_date: "2026-11-03T22:32:23Z"
 branch: feat/241-story-3-2---ricordi-share
 pr: 301
 claim: kilo-hp-elitebook-bfed
@@ -23543,12 +23624,14 @@ id: "3.2"
 title: "Ricordi + Share"
 phase: 3
 area: ui
-status: in_review
+status: done
 priority: I
 depends_on: ["2.4", "2.5"]
 issue: 241
 branch: "feat/241-story-3-2---ricordi-share"
 pr: 301
+merged_commit: "22cf5916140c5869ea296bc778e6cb094ed71037"
+merged_date: 2026-11-03
 claim: kilo-hp-elitebook-bfed
 spec_refs:
   - docs/25-MEMORIES-SHARE-EXPLORE.md
@@ -32114,6 +32197,7 @@ Ogni story deve avere label GitHub:
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 2.5 - Collegamento del pipeline di analisi all'app | done | #295 | `265fa50f279a7dbec70507388a3a7ffe405acc14` | analysis |
 | 3.1 - Home + Timeline | done | #234 | `815ce171f9bfd70133d0a788d6e15f717624a290` | ui |
+| 3.2 - Ricordi + Share | done | #301 | `22cf5916140c5869ea296bc778e6cb094ed71037` | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `beaefba677f9dbaf0ec9891c3e70516015a1adcf` | enrichment |

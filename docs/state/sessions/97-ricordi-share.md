@@ -2,8 +2,10 @@
 number: 97
 title: "Ricordi + Share: il feed, la card e il tagging manuale (issue #241)"
 date: 2026-11-03
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "22cf5916140c5869ea296bc778e6cb094ed71037"
+merged_date: "2026-11-03T22:32:23Z"
 branch: feat/241-story-3-2---ricordi-share
 pr: 301
 claim: kilo-hp-elitebook-bfed

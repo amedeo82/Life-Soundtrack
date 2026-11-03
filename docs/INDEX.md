@@ -149,6 +149,7 @@
 | 94 | Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test | 🟢 | ✅ | #293 |
 | 95 | Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto | 🟢 | ✅ | - |
 | 96 | Il writer di stato di merge copre anche le story (issue #297) | 🟢 | ✅ | #300 |
+| 97 | Ricordi + Share: il feed, la card e il tagging manuale (issue #241) | 🟢 | ✅ | #301 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -188,10 +189,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **73** (merge: 72)
-- Stories migrate in state/stories: **22** (done: 22)
-- Ultima sessione migrata: **S96** - Il writer di stato di merge copre anche le story (issue #297)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **74** (merge: 73)
+- Stories migrate in state/stories: **23** (done: 23)
+- Ultima sessione migrata: **S97** - Ricordi + Share: il feed, la card e il tagging manuale (issue #241)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -204,24 +205,23 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
+**Implementazione: 77%** - 23 story completate su 30 - effort pesato 80% - **mancano 7 step**
 
-`██████████████████████░░░░░░░░` 73%
+`███████████████████████░░░░░░░` 77%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
+| EPIC 3 - UI/UX | 3 | 5 | 60% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 23 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
-- 3.2 Ricordi + Share - da fare (size L)
+**Step ancora da implementare** (7):
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
@@ -234,52 +234,26 @@
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 3/5 - in corso |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S96)
+**Analisi della sessione corrente** (S97)
 
-**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato, gate e documentazione**. La
-percentuale di implementazione delle story resta **73%** (22 su 30, effort 76%, 8 step rimanenti):
-questo lavoro non implementa una story, chiude un gap di processo. Il numero che cambia è quello dei
-**confronti del gate**: da 70 a **92** (70 sessioni + 22 story), e i confronti coprono ora **tutta**
-la classe dei file di stato.
-
-**Cosa è pronto.**
-
-- Il perimetro `docs/state/stories/` ha un **writer** e un **gate**: una story mergiata non può più
-  restare `in-review` senza che il gate fallisca e senza che il writer la corregga al merge.
-- I **6 drift preesistenti** sulle story sono chiusi: i fatti di merge dichiarati nelle Story 0.2,
-  0.5, 1.2, 3.1, 3.4 e 4.4 coincidono ora con lo stato reale delle PR.
-- La regola è **scritta e verificata**: una riga nella tabella «regola ⟺ gate» di `AGENTS.md`
-  (v1.44), l'invariante in `docs/state/_index.md`, la decisione D-13.7 in `ADR-0013` e i gate che la
-  impongono (`check-merge-state.mjs`, `apply-merge-state.mjs`).
-
-**Cosa manca.** La classe di drift è chiusa; restano due punti **fuori perimetro**, dichiarati e non
-modificati qui:
-
-- le chiavi i18n `insight.mood.angry` / `insight.mood.neutral` (sessione concorrente, in
-  `stash@{0}`): non sono usate da nessun codice e il namespace non è nella spec
-  `docs/08-COPY-I18N.md` §2.15 — vanno decise a parte (recupero in PR dedicata o abbandono);
-- il **post-merge cleanup** dei branch e delle worktree residue della Sessione 94 (procedura
-  canonica `scripts/post-merge.ps1`, eseguita dalla working copy principale).
-
-Nota: `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi
-aggregati**: i blocchi si aggiornano da soli dopo il merge (regola V1 di ADR-0008); in questa PR è
-stato toccato solo il contenuto dei file già registrati in `$files`, e il bundle rigenerato di
-conseguenza.
-
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il writer è idempotente (test T9) e
-il gate resta fail-closed su entrambi i perimetri.
-
-**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 92 confronti, 0 falliti ·
-`node scripts/test-apply-merge-state.mjs` → 33 assert, 0 falliti ·
-`bash scripts/test-merge-state-gate.sh` → 24 assert, 0 falliti ·
-`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
-`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
-0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
+  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
+  (i test del «language detector» usano `localStorage`, che il jsdom non espone
+  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
+  Node 24).
+- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
+  dell'era e nota sul ricordo, i18n IT/EN.
+- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
+  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
+  la schermata ⑨/⑩ di Esplora è la Story 3.3.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
+  documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

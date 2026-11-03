@@ -848,6 +848,7 @@ Ogni story deve avere label GitHub:
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
 | 2.5 - Collegamento del pipeline di analisi all'app | done | #295 | `265fa50f279a7dbec70507388a3a7ffe405acc14` | analysis |
 | 3.1 - Home + Timeline | done | #234 | `815ce171f9bfd70133d0a788d6e15f717624a290` | ui |
+| 3.2 - Ricordi + Share | done | #301 | `22cf5916140c5869ea296bc778e6cb094ed71037` | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `beaefba677f9dbaf0ec9891c3e70516015a1adcf` | enrichment |
