@@ -2,8 +2,10 @@
 number: 90
 title: "Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "25d26d90c35ff5c0023aa50b7944d267d09972c4"
+merged_date: "2026-11-03T07:40:49Z"
 branch: feat/284-automazioni-post-merge-definitive-writer
 pr: 285
 claim: kilo-HP-ELITEBOOK-c90auto

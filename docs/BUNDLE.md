@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-02 17:20
+> Data: 2026-11-03 07:41
 > Totale file: 172
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,18 +9,18 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 168 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2465.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-02 13:51
+- Totale file: 171 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2496.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-03 07:41
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 105 |
-| scripts/ | 36 |
+| docs/ | 107 |
+| scripts/ | 38 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
-| .github/ | 5 |
+| .github/ | 4 |
 | root/ | 3 |
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
@@ -1265,29 +1265,48 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S89)
+**Analisi della sessione corrente** (S90)
 
-**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
-Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
-senza spiegazione.
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
+restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
+non il codice applicativo.
 
-**Cosa e' pronto.**
-- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
-  che spiega la race e perche' il gate non viene indebolito.
-- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
-  il controllo esistente dell'issue #216 resta verde).
+**Cosa è pronto.**
+- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
+  aggregatore → bundle → verifica → un commit → un push).
+- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
+  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
+  `gates-portability` su due sistemi operativi.
+- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
+  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
+- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
+  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
+  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
+  nel bundle.
+- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
+  prodotti dai generatori con lo stato committato.
+- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
+  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
+  che non possa essere faked da un commento).
 
-**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
-il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
-deve essere verde.
+**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
+sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
+gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
+primo merge con questa architettura è la prova; le sessioni successive
+verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
+`main` rosso).
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
+mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
+del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
+scalari YAML, 15 sulle scope `permissions`.
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
-`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
+→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
+→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+`node scripts/check-generators-portable.mjs` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2167,6 +2186,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 87 | Remediation dell'encoding UTF-8 (mojibake/BOM) e del tooling multi-sessione | 🟢 | ✅ | #278 |
 | 88 | Recovery post-merge: stato di merge della sessione 87 e fix dei due workflow post-merge | 🟢 | ✅ | #280 |
 | 89 | CI su main: i commit del writer dello stato di merge triggano la pipeline | 🟢 | ✅ | #282 |
+| 90 | Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti | 🟢 | ✅ | #285 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2206,9 +2226,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **66** (merge: 65)
+- Sessioni migrate in state/sessions: **67** (merge: 66)
 - Stories migrate in state/stories: **21** (done: 21)
-- Ultima sessione migrata: **S89** - CI su main: i commit del writer dello stato di merge triggano la pipeline
+- Ultima sessione migrata: **S90** - Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2257,29 +2277,48 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S89)
+**Analisi della sessione corrente** (S90)
 
-**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%), restano **9 step**.
-Lavoro di **devops**: una riga di trigger, ma la riga che chiude l'ultima classe di "main rosso"
-senza spiegazione.
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
+restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
+non il codice applicativo.
 
-**Cosa e' pronto.**
-- `.github/workflows/ci.yml`: `docs/state/**` aggiunto ai `paths:` del trigger `push`, con il commento
-  che spiega la race e perche' il gate non viene indebolito.
-- `scripts/validate-workflows.mjs`: 0 falliti (i `paths:` coprono gli input dei blocchi aggregati —
-  il controllo esistente dell'issue #216 resta verde).
+**Cosa è pronto.**
+- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
+  aggregatore → bundle → verifica → un commit → un push).
+- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
+  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
+  `gates-portability` su due sistemi operativi.
+- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
+  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
+- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
+  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
+  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
+  nel bundle.
+- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
+  prodotti dai generatori con lo stato committato.
+- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
+  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
+  che non possa essere faked da un commento).
 
-**Cosa manca.** Nulla: la riga è l'intero fix. La verifica che **chiude** la race è empirica e la dà
-il merge stesso: dopo il merge, il commit del writer deve triggare la CI e l'ultimo run su `main`
-deve essere verde.
+**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
+sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
+gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
+primo merge con questa architettura è la prova; le sessioni successive
+verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
+`main` rosso).
 
-**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a mano.
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
+mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
+del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
+scalari YAML, 15 sulle scope `permissions`.
 
-**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti ·
-`node scripts/check-workflow-syntax.mjs` → 0 non validi ·
-`node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-merge-state.mjs` → 64 confronti, 0 falliti ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
+→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
+→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+`node scripts/check-generators-portable.mjs` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -11339,6 +11378,124 @@ deve essere verde.
 - `docs/BUNDLE.md` (rigenerato)
 ```
 
+### Sessione 90 - Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti
+
+- **Data**: 2026-11-02
+- **Stato**: 🟢
+- **Merged**: ✅ PR #285 (25d26d90c35ff5c0023aa50b7944d267d09972c4, 2026-11-03T07:40:49Z)
+- **Claim**: `kilo-HP-ELITEBOOK-c90auto`
+
+```
+
+# Sessione 90 — Le automazioni post-merge, risolte alla radice
+
+> **Oggetto**: dopo il merge della PR #282 (Sessione 89, issue #281) `main` era
+> **rimasto rosso**, e il fix merged non poteva funzionare: la PR aggiungeva un
+> `path` al trigger `push` della CI, ma il commit del writer **non genera
+> l'evento `push`** (è pushato con `GITHUB_TOKEN`, che sopprime i workflow
+> innescati dal token stesso). Misurato: per `831b9e7` non esiste **nessuna**
+> run `CI` — solo un `auto-bundle` su `workflow_run`.
+
+## Sintesi
+
+Tre difetti indipendenti, un solo sintomo.
+
+1. **Il writer non triggava la CI** → nessuna run verde sullo stato finale.
+2. **Tre writer concorrevano sullo stesso `main`** → push rifiutato, rebase
+   dei file generati, conflitto, run fallito.
+3. **Il gate merge-state girava sull'albero sbagliato** → fail-closed su un
+   albero in cui lo stato non era ancora applicato (per costruzione).
+
+E una quarta, trasversale: i generatori producevano output diversi su Windows
+e Linux (fuso orario, locale, ordinamento, versione di PowerShell).
+
+## Cosa è emerso
+
+- Il fix della issue #281 era basato su una premessa **falsa**: `docs/12-DEVOPS.md`
+  §9.14 documentava già, misurato, che «i commit dei writer non hanno mai
+  attivato una run `CI` — né prima né dopo questa sessione, nemmeno quando il
+  trigger `push` era privo di filtro». Un `path` in più non può attivare un
+  evento che non viene generato.
+- Il rebase dei file generati non è una race: è un conflitto strutturale. I
+  blocchi aggregati sono il *prodotto* di un input (lo stato), non la fusione
+  di due storie: si rigenerano, non si ribasano.
+- Il gate merge-state **non** andava reso tollerante (D-89.2): andava
+  spostato sull'albero giusto. La distinzione «albero = merge commit della
+  PR» è oggettiva (uguaglianza di SHA), non temporale.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-90.1 | **Un solo writer** (`post-merge.yml`) che applica lo stato, rigenera blocchi e bundle, e committa una volta | Elimina per costruzione la race fra writer (misurata il 2026-11-02) |
+| D-90.2 | Il writer **non ribasa mai**: reset a `origin/main` + rigenerazione | Il rebase dei file generati è un conflitto strutturale; la rigenerazione è funzione dello stato |
+| D-90.3 | Il passaggio **autoritativo** della CI è `workflow_run` sul writer, con `checkout ref: main` | `workflow_run` sopravvive alla soppressione del `GITHUB_TOKEN`; `head_sha` è il commit di *partenza* del writer, non la testa di `main` |
+| D-90.4 | Il gate merge-state ha due modalità: autoritativa (fail-closed) e `--defer-unapplied` (differisce **solo** l'albero = merge commit della PR) | Il gate non è indebolito: cambia il soggetto del confronto, non la sua severità |
+| D-90.5 | I generatori diventano portabili **per costruzione** (UTC, `InvariantCulture`, ordinamento ordinale, guardia `pwsh >= 7`, LF) e **per prova** (gate di portabilità su `ubuntu-latest` + `windows-latest`) | L'indipendenza dal SO non si dichiara: si misura, su due sistemi operativi reali |
+| D-90.6 | Il writer non è più "non bloccante": se fallisce, `main` resta rosso | Il fallback silenzioso è ciò che ha prodotto il drift invisibile degli ultimi mesi |
+
+La specifica completa è in `docs/13-ADR/0013-post-merge-automation.md`.
+
+## Analisi di avanzamento
+
+**Numeri.** L'implementazione non cambia: **70%** (21 story su 30, effort 72%),
+restano **9 step**. Il lavoro è di **devops**: l'architettura delle automazioni,
+non il codice applicativo.
+
+**Cosa è pronto.**
+- `.github/workflows/post-merge.yml`: il writer unico (stato di merge →
+  aggregatore → bundle → verifica → un commit → un push).
+- `.github/workflows/ci.yml`: trigger `workflow_run` sul writer, checkout della
+  testa di `main` in quel passaggio, gate merge-state nelle due modalità, job
+  `gates-portability` su due sistemi operativi.
+- `scripts/check-merge-state.mjs`: modalità `--defer-unapplied` con
+  distinzione oggettiva (SHA del merge commit vs albero sotto esame).
+- `scripts/aggregate-state.ps1` e `scripts/generate-bundle.ps1`: guardia
+  `pwsh >= 7`, timestamp UTC con locale invariante, numeri con locale
+  invariante, ordinamenti con chiave secondaria ordinale, CRLF normalizzati
+  nel bundle.
+- `scripts/check-generators-portable.mjs`: il gate che confronta i **byte**
+  prodotti dai generatori con lo stato committato.
+- `scripts/validate-workflows.mjs`: quattro gate nuovi (writer unico, trigger
+  del writer, checkout del passaggio `workflow_run`, sync con `origin/main`
+  che non possa essere faked da un commento).
+
+**Cosa manca.** La verifica finale è **empirica e la dà il merge**: la
+sequenza merge → writer → CI post-writer deve produrre zero run rossi, e il
+gate di portabilità deve essere verde su entrambi i sistemi operativi. Il
+primo merge con questa architettura è la prova; le sessioni successive
+verificheranno la stabilità (l'obiettivo è che *nessun* merge futuro lasci
+`main` rosso).
+
+**Salute tecnica.** `pwsh` 7.6.9. Nessun blocco `AGGREGATE-*` modificato a
+mano. Suite: 16 assert sul gate merge-state (T10..T12 nuovi), 13 sul cablaggio
+del writer (T6..T8 nuovi), 9 sul sync, 8 sulla copertura `git add`, 8 sui
+scalari YAML, 15 sulle scope `permissions`.
+
+**Gate di testabilità.** `node scripts/validate-workflows.mjs .github/workflows`
+→ 0 falliti · `node scripts/check-workflow-syntax.mjs` → 0 non validi ·
+`node scripts/check-encoding.mjs` → 0 errori · `node scripts/check-merge-state.mjs`
+→ 0 falliti · `pwsh scripts/aggregate-state.ps1 -Check` → exit 0 ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 ·
+`node scripts/check-generators-portable.mjs` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Un fix che aggiunge un `path` a un trigger non verifica **che l'evento venga generato** | Le premesse dei fix vanno misurate: qui il fatto era già documentato in §9.14 e la PR lo contraddiceva |
+| Il gate giusto non è sempre quello che va reso più tollerante: a volte è quello che va eseguito **sull'oggetto giusto** | D-89.2 diceva «non indebolire il gate»: la soluzione era spostarlo, non ammorbidirlo |
+| Tre writer sullo stesso `main` non sono tre feature: sono una struttura di file in conflitto | Un solo writer, un solo commit: la semplificazione è la difesa |
+| L'indipendenza dal sistema operativo è una **proprietà verificabile**, non un'intenzione | Il gate confronta i byte su due OS reali: se un generatore torna a dipendere dalla locale, la pipeline si rossa |
+
+## Documenti aggiornati
+
+- `.github/workflows/post-merge.yml` (nuovo), `ci.yml` (trigger `workflow_run`, gate di portabilità)
+- `scripts/check-merge-state.mjs`, `scripts/check-generators-portable.mjs` (nuovo)
+- `scripts/aggregate-state.ps1`, `scripts/generate-bundle.ps1`, `scripts/validate-workflows.mjs`
+- `docs/13-ADR/0013-post-merge-automation.md` (nuovo), `docs/12-DEVOPS.md`, `AGENTS.md`
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -19990,8 +20147,10 @@ vero) · `node scripts/validate-workflows.mjs .github/workflows` → 0 falliti �
 number: 90
 title: "Automazioni post-merge definitive: writer unico, CI post-writer, generatori OS-indipendenti"
 date: 2026-11-02
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "25d26d90c35ff5c0023aa50b7944d267d09972c4"
+merged_date: "2026-11-03T07:40:49Z"
 branch: feat/284-automazioni-post-merge-definitive-writer
 pr: 285
 claim: kilo-HP-ELITEBOOK-c90auto
