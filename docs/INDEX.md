@@ -147,6 +147,7 @@
 | 92 | Node 24 per le action dei workflow: l'inventario incompleto e il gate che lo rende verificabile | 🟢 | ✅ | #289 |
 | 93 | Gli hook del repository non giravano: `core.hooksPath` era preso da husky | 🟢 | ✅ | #291 |
 | 94 | Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test | 🟢 | ✅ | #293 |
+| 95 | Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -186,10 +187,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **71** (merge: 70)
-- Stories migrate in state/stories: **22** (done: 21)
-- Ultima sessione migrata: **S94** - Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **72** (merge: 70)
+- Stories migrate in state/stories: **22** (done: 22)
+- Ultima sessione migrata: **S95** - Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -202,24 +203,23 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 70%** - 21 story completate su 30 - effort pesato 72% - **mancano 9 step**
+**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
 
-`█████████████████████░░░░░░░░░` 70%
+`██████████████████████░░░░░░░░` 73%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
-| EPIC 2 - Analisi | 4 | 5 | 80% | in corso |
+| EPIC 2 - Analisi | 5 | 5 | 100% | completo |
 | EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 21 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (9):
-- 2.5 Collegamento del pipeline di analisi all'app - da fare (size L)
+**Step ancora da implementare** (8):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
@@ -234,42 +234,55 @@
 | Gate | Requisito | Stato |
 |------|-----------|-------|
 | Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
-| Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
+| Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S94)
+**Analisi della sessione corrente** (S95)
 
-**Numeri.** Nessun codice applicativo toccato: la percentuale di implementazione delle story
-resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **devops**.
+**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato e documentazione**. La
+percentuale di implementazione delle story passa da **70%** (21 su 30, effort 72%, 9 step) a
+**73%** (22 su 30, effort 76%, **8 step** rimanenti): l'**EPIC 2** (Analisi) diventa **completo
+(5/5)** e il gate di testabilità «Motore di analisi completo» passa da «4/5 - in corso» a
+**«5/5 - soddisfatto»**.
 
 **Cosa è pronto.**
 
-- `scripts/test-hook-wiring.sh`: contatori su file condiviso, **17 assert**, e un assert fallito
-  dentro una subshell non può più essere perso. La contro-prova lo dimostra (exit 1).
-- I conteggi degli assert sono coerenti in `AGENTS.md`, `docs/12-DEVOPS.md §9.10` e nel file di
-  sessione 93.
-- `scripts/setup-hooks.js`: warning accurato sul residuo `.husky/`, **errore** se `husky` torna
-  fra le dipendenze.
-- `scripts/post-merge.ps1`: la diagnostica del fallimento della rimozione dice cosa è
-  successo davvero (git ha rimosso la registrazione e parte dell'albero).
-- Le due sezioni legacy che dichiaravano il toolchain sono allineate.
-- Il gate **Conventional Commits** gira in CI (job `gates-protocol`): contro-prova locale, un
-  messaggio non conventional esce con errore, uno conventional con 0.
+- Lo stato di merge della Story 2.5 è allineato in tutti e quattro i documenti che lo dichiarano:
+  `docs/state/stories/2.5-*.md` (fonte), `docs/11-BACKLOG.md` (sezione legacy + blocco
+  aggregato), `docs/INDEX.md` (blocchi aggregati) e `README.md` (prosa + blocco aggregato).
+- Il blocco `AGGREGATE-NEXT-STEP-*` del README **non indica più** la 2.5: con tutte le 22 story
+  migrate in `done` il blocco mostra correttamente il fallback «Nessuna story non-done e non
+  bloccata migrata in `docs/state/stories/`» — le 8 story rimanenti (3.2, 3.3, 3.5, 4.2, 4.3,
+  5.1, 5.2, 6.1) non hanno ancora un state file e lo riceveranno al claim.
+- I **7 acceptance criteria** della Story 2.5 sono spuntati nella sezione legacy del backlog, e
+  la riga `**Stato**:` dichiara PR, merge commit e data: la sezione legacy non è più una copia
+  stantia dello stato reale.
+- Il **gap strutturale** è documentato (§51 del DEV-LOG): `docs/state/stories/*.md` non ha un
+  writer di stato di merge e non è coperto dal gate `check-merge-state.mjs`.
 
-**Cosa manca.** Niente sul piano funzionale. Nota: i file `docs/SESSIONS.md`,
-`docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi aggregati** e **prosa
-legacy**: in questa PR ho toccato solo la prosa (che è di mia competenza); i blocchi si
-aggiornano da soli dopo il merge.
+**Cosa manca.** Il gap strutturale è **aperto**: le story continuano a non avere un writer di
+stato di merge. La correzione naturale è estendere `apply-merge-state.mjs` al formato delle story
+(`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro
+`docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la **classe** di
+drift, non il caso. Non sono state applicate qui perché toccano il **writer unico di `main`**
+(ADR-0013) e il gate bloccante che ne verifica il perimetro: è lavoro da issue dedicata, non da
+doc-sync.
 
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring scrive solo
-in directory temporanee.
+Nota: i file `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno
+**blocchi aggregati** e **prosa legacy**: in questa PR ho toccato la prosa (che è di mia
+competenza); i blocchi si aggiornano da soli dopo il merge.
 
-**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 17/17 (contro-prova: exit 1) ·
-`bash scripts/test-post-merge.sh` → 47/47 · `bash scripts/test-pre-commit-clean-check.sh` →
-18/18 · `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
-`node scripts/check-merge-state.mjs` → 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` →
-exit 0.
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano (il gate
+`check-aggregate-blocks.mjs` → 0 violazioni). Il bundle è stato rigenerato dopo le modifiche
+documentali (`generate-bundle.ps1` dopo `aggregate-state.ps1`, l'ordine vincolante della
+Sessione 73).
+
+**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

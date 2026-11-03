@@ -1457,6 +1457,31 @@ La seconda lezione e' sulle **fixture**: T2 si aspettava che il gate fallisse qu
 
 ---
 
+## 51. Le story non hanno un writer di stato di merge (Sessione 94)
+
+**Branch**: `docs/story-2-5-merge-state`
+**Issue di tracking**: nessuna (doc-sync di uno stato già chiuso; la issue #266 è chiusa con `status:done`)
+**Data**: 2026-11-03
+**Stato**: ✅ fatto
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 94-1 | P | Dopo il merge della PR #295 (Story 2.5), il blocco `AGGREGATE-NEXT-STEP-*` del README continuava a indicare la **2.5** come «prossima story da implementare», e il frontmatter di `docs/state/stories/2.5-analysis-pipeline-link.md` diceva ancora `status: in-review` con `pr: 267` (una PR **inesistente**) e `merged_commit: ""` | `scripts/apply-merge-state.mjs` (issue #239) scrive lo stato di merge **solo** sui file di `docs/state/sessions/`: la sua directory di ricerca è `sessionsDir` e i campi che aggiorna sono `state`/`merged`/`merged_commit`/`merged_date` — il **formato delle sessioni**, non quello delle story (`status`). Il gate `scripts/check-merge-state.mjs` ha lo stesso perimetro. La PR #295 non aveva un file di sessione: `apply-merge-state.mjs` ha stampato «niente da applicare» e uscito 0 — legittimo per il suo contratto | Il doc-sync della story in una PR `docs:` (il pattern consolidato: `2f5c1c2 docs: post-merge sync story 4.4 (pr 222)`) | `docs/state/stories/2.5-analysis-pipeline-link.md` |
+| 94-2 | P | La sezione legacy della Story 2.5 in `docs/11-BACKLOG.md` dichiarava ancora `**Stato**: ⬚ TODO — pronta al claim`, con i 7 acceptance criteria non spuntati | Le sezioni legacy non hanno un generatore: se un agente le ignora, invecchiano senza che nessun gate se ne accorga (è la classe di drift chiusa nella Sessione 38, issue #90). La PR #295 le aveva dichiarate allineate nella checklist ma non le aveva modificate | Allineamento nella stessa PR che cambia i fatti che dichiarano (regola D.38.1): `**Stato**:` da `⬚ TODO` a `✅ DONE`, i 7 AC spuntati, la riga della tabella «Stato di avanzamento», l'entry #15 della lista di priorità, l'header di versione e la nota di allineamento | `docs/11-BACKLOG.md` |
+| 94-3 | L | Il campo `pr:` dichiarava la **267**, una PR che non è mai esistita: un numero di PR sbagliato che nessun gate ha segnalato | Il doc-sync in-branch scrive `pr: N` a mano; nessun gate confronta quel numero con l'esistenza della PR, e `check-merge-state.mjs` non legge le story | Il campo è stato corretto a `295` (la PR reale). Il gate che manca è tracciato sotto | `docs/state/stories/2.5-analysis-pipeline-link.md` |
+
+**Lesson learned**: la lezione è sulla **copertura perimetrale dei gate**. Due gate che coprono la stessa classe di dati ma con un perimetro piu' stretto di quello che la classe richiede sono un **fail-open**: `apply-merge-state.mjs` e `check-merge-state.mjs` coprono entrambi i **file di sessione**, nessuno dei due copre i **file di story**. Il risultato è che lo stato di merge delle story non e' verificato da nessuno, e una story mergiata puo' restare `in-review` per sempre — senza un errore, senza un warning, con la CI verde.
+
+La seconda lezione e' sul **formato dei dati**. Le sessioni e le story hanno frontmatter diversi (`state`/`merged` vs `status`, `merged`/`merged_commit` vs gli stessi campi): due formati nella stessa directory `docs/state/` e un solo writer che ne conosce uno. Il modello giusto sarebbe stato un writer che conosce entrambi i formati (o un formato unico), non un secondo writer parallelo.
+
+La terza e' sul **criterio di fallita**. «Nessun file di sessione corrisponde alla PR #N» e' un **fatto**, non un errore: `apply-merge-state.mjs` esce 0 ed e' corretto farlo (il fail-closed selettivo della Sessione 82). Ma lo stesso fatto, applicato a una **story**, lascia un drift silenzioso: l'assenza del file non e' un errore, la **non-applicazione** dello stato merge a un file che esiste e dichiara la PR e' un errore. Il caso della story e' quello che nessuno guardava.
+
+**Il gap aperto**: `docs/state/stories/*.md` non ha un writer di stato di merge e non e' coperto dal gate `check-merge-state.mjs`. Ogni story chiusa dopo il merge richiede un doc-sync manuale in una PR `docs:` — un costo che nessuna regola dichiara e che l'elenco delle story mergiate (`2.4`, `4.4`, `3.1`, `2.5`, …) rende visibile solo a posteriori. Il percorso naturale e' estendere `apply-merge-state.mjs` al formato delle story (`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro `docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la classe di drift, non il caso. Non sono state applicate qui perche' toccano il writer unico di `main` (`ADR-0013`) e il gate bloccante che verifica il suo perimetro: e' lavoro da issue dedicata, non da doc-sync.
+
+**Verifica**: `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni · `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` → 544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti · `pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
 ## 49. AGENTS.md: il contratto senza la storia (Sessione 83)
 
 **Branch**: `feat/259-rifinitura-agents`

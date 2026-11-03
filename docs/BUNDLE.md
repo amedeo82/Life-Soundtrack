@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 13:32
-> Totale file: 180
+> Data: 2026-11-03 14:29
+> Totale file: 182
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 179 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2595.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-03 12:56
+- Totale file: 181 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2615.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-03 14:29
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 111 |
+| docs/ | 113 |
 | scripts/ | 42 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1221,7 +1221,6 @@ Il posizionamento completo — confronto con i competitor e **verifica dello sta
 
 Non ancora nell'app — la roadmap completa, con lo stato di ogni story, è in [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md):
 
-- **Collegamento del pipeline di analisi** (EPIC 2, Story 2.5): i motori di mood, ere, eventi e ricordi sono scritti e testati in `@ls/core`, ma non sono ancora eseguiti dall'app
 - **Ricordi + Share** (EPIC 3, Story 3.2): feed dei ricordi, card 1080×1350, export statico di un capitolo, tagging manuale di ere e canzoni
 - **Esplora + Analisi** (EPIC 3, Story 3.3): ricerca sui propri dati, quadrante valence/energy, insight in prosa
 - **Anteprima in onboarding** (EPIC 3, Story 3.5): diario di esempio prima dell'import, prime righe della timeline dopo
@@ -1246,24 +1245,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 70%** - 21 story completate su 30 - effort pesato 72% - **mancano 9 step**
+**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
 
-`█████████████████████░░░░░░░░░` 70%
+`██████████████████████░░░░░░░░` 73%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
-| EPIC 2 - Analisi | 4 | 5 | 80% | in corso |
+| EPIC 2 - Analisi | 5 | 5 | 100% | completo |
 | EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 21 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (9):
-- 2.5 Collegamento del pipeline di analisi all'app - da fare (size L)
+**Step ancora da implementare** (8):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
@@ -1278,42 +1276,55 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
 | Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
-| Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
+| Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S94)
+**Analisi della sessione corrente** (S95)
 
-**Numeri.** Nessun codice applicativo toccato: la percentuale di implementazione delle story
-resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **devops**.
+**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato e documentazione**. La
+percentuale di implementazione delle story passa da **70%** (21 su 30, effort 72%, 9 step) a
+**73%** (22 su 30, effort 76%, **8 step** rimanenti): l'**EPIC 2** (Analisi) diventa **completo
+(5/5)** e il gate di testabilità «Motore di analisi completo» passa da «4/5 - in corso» a
+**«5/5 - soddisfatto»**.
 
 **Cosa è pronto.**
 
-- `scripts/test-hook-wiring.sh`: contatori su file condiviso, **17 assert**, e un assert fallito
-  dentro una subshell non può più essere perso. La contro-prova lo dimostra (exit 1).
-- I conteggi degli assert sono coerenti in `AGENTS.md`, `docs/12-DEVOPS.md §9.10` e nel file di
-  sessione 93.
-- `scripts/setup-hooks.js`: warning accurato sul residuo `.husky/`, **errore** se `husky` torna
-  fra le dipendenze.
-- `scripts/post-merge.ps1`: la diagnostica del fallimento della rimozione dice cosa è
-  successo davvero (git ha rimosso la registrazione e parte dell'albero).
-- Le due sezioni legacy che dichiaravano il toolchain sono allineate.
-- Il gate **Conventional Commits** gira in CI (job `gates-protocol`): contro-prova locale, un
-  messaggio non conventional esce con errore, uno conventional con 0.
+- Lo stato di merge della Story 2.5 è allineato in tutti e quattro i documenti che lo dichiarano:
+  `docs/state/stories/2.5-*.md` (fonte), `docs/11-BACKLOG.md` (sezione legacy + blocco
+  aggregato), `docs/INDEX.md` (blocchi aggregati) e `README.md` (prosa + blocco aggregato).
+- Il blocco `AGGREGATE-NEXT-STEP-*` del README **non indica più** la 2.5: con tutte le 22 story
+  migrate in `done` il blocco mostra correttamente il fallback «Nessuna story non-done e non
+  bloccata migrata in `docs/state/stories/`» — le 8 story rimanenti (3.2, 3.3, 3.5, 4.2, 4.3,
+  5.1, 5.2, 6.1) non hanno ancora un state file e lo riceveranno al claim.
+- I **7 acceptance criteria** della Story 2.5 sono spuntati nella sezione legacy del backlog, e
+  la riga `**Stato**:` dichiara PR, merge commit e data: la sezione legacy non è più una copia
+  stantia dello stato reale.
+- Il **gap strutturale** è documentato (§51 del DEV-LOG): `docs/state/stories/*.md` non ha un
+  writer di stato di merge e non è coperto dal gate `check-merge-state.mjs`.
 
-**Cosa manca.** Niente sul piano funzionale. Nota: i file `docs/SESSIONS.md`,
-`docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi aggregati** e **prosa
-legacy**: in questa PR ho toccato solo la prosa (che è di mia competenza); i blocchi si
-aggiornano da soli dopo il merge.
+**Cosa manca.** Il gap strutturale è **aperto**: le story continuano a non avere un writer di
+stato di merge. La correzione naturale è estendere `apply-merge-state.mjs` al formato delle story
+(`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro
+`docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la **classe** di
+drift, non il caso. Non sono state applicate qui perché toccano il **writer unico di `main`**
+(ADR-0013) e il gate bloccante che ne verifica il perimetro: è lavoro da issue dedicata, non da
+doc-sync.
 
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring scrive solo
-in directory temporanee.
+Nota: i file `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno
+**blocchi aggregati** e **prosa legacy**: in questa PR ho toccato la prosa (che è di mia
+competenza); i blocchi si aggiornano da soli dopo il merge.
 
-**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 17/17 (contro-prova: exit 1) ·
-`bash scripts/test-post-merge.sh` → 47/47 · `bash scripts/test-pre-commit-clean-check.sh` →
-18/18 · `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
-`node scripts/check-merge-state.mjs` → 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` →
-exit 0.
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano (il gate
+`check-aggregate-blocks.mjs` → 0 violazioni). Il bundle è stato rigenerato dopo le modifiche
+documentali (`generate-bundle.ps1` dopo `aggregate-state.ps1`, l'ordine vincolante della
+Sessione 73).
+
+**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -1324,9 +1335,9 @@ exit 0.
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **2.5** — Collegamento del pipeline di analisi all'app (priority `B`, vedi `docs/11-BACKLOG.md`).
+_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
 
-Sorgente: `docs/state/stories/2.5-analysis-pipeline-link.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2198,6 +2209,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 92 | Node 24 per le action dei workflow: l'inventario incompleto e il gate che lo rende verificabile | 🟢 | ✅ | #289 |
 | 93 | Gli hook del repository non giravano: `core.hooksPath` era preso da husky | 🟢 | ✅ | #291 |
 | 94 | Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test | 🟢 | ✅ | #293 |
+| 95 | Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2237,10 +2249,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **71** (merge: 70)
-- Stories migrate in state/stories: **22** (done: 21)
-- Ultima sessione migrata: **S94** - Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **72** (merge: 70)
+- Stories migrate in state/stories: **22** (done: 22)
+- Ultima sessione migrata: **S95** - Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2253,24 +2265,23 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 70%** - 21 story completate su 30 - effort pesato 72% - **mancano 9 step**
+**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
 
-`█████████████████████░░░░░░░░░` 70%
+`██████████████████████░░░░░░░░` 73%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
-| EPIC 2 - Analisi | 4 | 5 | 80% | in corso |
+| EPIC 2 - Analisi | 5 | 5 | 100% | completo |
 | EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 21 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (9):
-- 2.5 Collegamento del pipeline di analisi all'app - da fare (size L)
+**Step ancora da implementare** (8):
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
@@ -2285,42 +2296,55 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Gate | Requisito | Stato |
 |------|-----------|-------|
 | Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
-| Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
+| Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S94)
+**Analisi della sessione corrente** (S95)
 
-**Numeri.** Nessun codice applicativo toccato: la percentuale di implementazione delle story
-resta **70%** (21 su 30, effort 72%), **9 step** rimanenti. Il lavoro è di **devops**.
+**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato e documentazione**. La
+percentuale di implementazione delle story passa da **70%** (21 su 30, effort 72%, 9 step) a
+**73%** (22 su 30, effort 76%, **8 step** rimanenti): l'**EPIC 2** (Analisi) diventa **completo
+(5/5)** e il gate di testabilità «Motore di analisi completo» passa da «4/5 - in corso» a
+**«5/5 - soddisfatto»**.
 
 **Cosa è pronto.**
 
-- `scripts/test-hook-wiring.sh`: contatori su file condiviso, **17 assert**, e un assert fallito
-  dentro una subshell non può più essere perso. La contro-prova lo dimostra (exit 1).
-- I conteggi degli assert sono coerenti in `AGENTS.md`, `docs/12-DEVOPS.md §9.10` e nel file di
-  sessione 93.
-- `scripts/setup-hooks.js`: warning accurato sul residuo `.husky/`, **errore** se `husky` torna
-  fra le dipendenze.
-- `scripts/post-merge.ps1`: la diagnostica del fallimento della rimozione dice cosa è
-  successo davvero (git ha rimosso la registrazione e parte dell'albero).
-- Le due sezioni legacy che dichiaravano il toolchain sono allineate.
-- Il gate **Conventional Commits** gira in CI (job `gates-protocol`): contro-prova locale, un
-  messaggio non conventional esce con errore, uno conventional con 0.
+- Lo stato di merge della Story 2.5 è allineato in tutti e quattro i documenti che lo dichiarano:
+  `docs/state/stories/2.5-*.md` (fonte), `docs/11-BACKLOG.md` (sezione legacy + blocco
+  aggregato), `docs/INDEX.md` (blocchi aggregati) e `README.md` (prosa + blocco aggregato).
+- Il blocco `AGGREGATE-NEXT-STEP-*` del README **non indica più** la 2.5: con tutte le 22 story
+  migrate in `done` il blocco mostra correttamente il fallback «Nessuna story non-done e non
+  bloccata migrata in `docs/state/stories/`» — le 8 story rimanenti (3.2, 3.3, 3.5, 4.2, 4.3,
+  5.1, 5.2, 6.1) non hanno ancora un state file e lo riceveranno al claim.
+- I **7 acceptance criteria** della Story 2.5 sono spuntati nella sezione legacy del backlog, e
+  la riga `**Stato**:` dichiara PR, merge commit e data: la sezione legacy non è più una copia
+  stantia dello stato reale.
+- Il **gap strutturale** è documentato (§51 del DEV-LOG): `docs/state/stories/*.md` non ha un
+  writer di stato di merge e non è coperto dal gate `check-merge-state.mjs`.
 
-**Cosa manca.** Niente sul piano funzionale. Nota: i file `docs/SESSIONS.md`,
-`docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno **blocchi aggregati** e **prosa
-legacy**: in questa PR ho toccato solo la prosa (che è di mia competenza); i blocchi si
-aggiornano da soli dopo il merge.
+**Cosa manca.** Il gap strutturale è **aperto**: le story continuano a non avere un writer di
+stato di merge. La correzione naturale è estendere `apply-merge-state.mjs` al formato delle story
+(`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro
+`docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la **classe** di
+drift, non il caso. Non sono state applicate qui perché toccano il **writer unico di `main`**
+(ADR-0013) e il gate bloccante che ne verifica il perimetro: è lavoro da issue dedicata, non da
+doc-sync.
 
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano. Il test del wiring scrive solo
-in directory temporanee.
+Nota: i file `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno
+**blocchi aggregati** e **prosa legacy**: in questa PR ho toccato la prosa (che è di mia
+competenza); i blocchi si aggiornano da soli dopo il merge.
 
-**Gate di testabilità.** `bash scripts/test-hook-wiring.sh` → 17/17 (contro-prova: exit 1) ·
-`bash scripts/test-post-merge.sh` → 47/47 · `bash scripts/test-pre-commit-clean-check.sh` →
-18/18 · `node scripts/check-protocol-consistency.mjs` → 0 falliti ·
-`node scripts/check-merge-state.mjs` → 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
-`pwsh scripts/aggregate-state.ps1 -Check` → exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` →
-exit 0.
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano (il gate
+`check-aggregate-blocks.mjs` → 0 violazioni). Il bundle è stato rigenerato dopo le modifiche
+documentali (`generate-bundle.ps1` dopo `aggregate-state.ps1`, l'ordine vincolante della
+Sessione 73).
+
+**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -12065,6 +12089,113 @@ exit 0.
 - `docs/state/sessions/94-hook-numbers.md` (questo file)
 ```
 
+### Sessione 95 - Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto
+
+- **Data**: 2026-11-03
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-HP-ELITEBOOK`
+
+```
+
+# Sessione 95 — lo stato di merge della Story 2.5 (issue #266)
+
+> **Oggetto**: la Story 2.5 (collegamento del pipeline di analisi all'app) è **mergata in `main`**
+> (PR #295, merge commit `265fa50`), ma il suo file di stato ne dichiarava ancora `status: in-review`
+> con un numero di PR **inesistente** (`267`). Il blocco `AGGREGATE-NEXT-STEP-*` del README
+> continuava quindi a indicare la 2.5 come «prossima story da implementare», e le sezioni legacy
+> del backlog la dichiaravano `⬚ TODO — pronta al claim`.
+
+## Sintesi
+
+Il sintomo — «la prossima story è ancora quella che ho appena finito» — è un **drift di stato**, e
+la causa non è la PR #295 ma un **gap di copertura** fra i writer e i gate.
+
+`scripts/apply-merge-state.mjs` (issue #239) scrive lo stato di merge **solo** sui file di
+`docs/state/sessions/`: la sua directory di ricerca è `sessionsDir` e i campi che aggiorna sono
+`state`, `merged`, `merged_commit`, `merged_date` — il **formato delle sessioni**. Il formato delle
+story è diverso (`status`, e `merged`/`merged_commit` non ci sono). Lo stesso vale per il gate
+bloccante `scripts/check-merge-state.mjs`, che confronta **solo** le sessioni con lo stato reale
+delle PR.
+
+La PR #295 non aveva un file di sessione in `docs/state/sessions/`: `apply-merge-state.mjs` ha
+quindi stampato «nessun file di sessione corrisponde alla PR #295: niente da applicare» ed è uscito
+**0**. È il comportamento corretto per il suo contratto — l'assenza di una sessione è un *fatto*,
+non un errore (fail-closed selettivo, Sessione 82) — ma lascia un buco: **una story mergiata non
+ha nessun writer che aggiorni il suo stato di merge, e nessun gate che se ne accorga.**
+
+La conseguenza è che lo stato delle story mergiate dipende da un **doc-sync manuale** in una PR
+`docs:` dedicata. È il pattern consolidato del repository (`2f5c1c2 docs: post-merge sync story
+4.4 (pr 222)`), ma è un costo che nessuna regola dichiara e che solo l'elenco delle story
+mergiate rende visibile a posteriori.
+
+## Cosa è stato fatto
+
+- **`docs/state/stories/2.5-analysis-pipeline-link.md`**: `status: in-review` → `done`, `pr: 267`
+  → `295` (la PR reale), `merged_commit` e `merged_date` compilati; la sezione `## Stato` e la
+  sezione `## Esito post-merge` riscritte (la seconda riporta la causa strutturale, non solo
+  l'esito).
+- **`docs/11-BACKLOG.md`**: `**Stato**:` da `⬚ TODO — pronta al claim` a `✅ DONE — mergiata in
+  main`; i **7 acceptance criteria** spuntati; la riga della tabella «Stato di avanzamento»
+  aggiornata; l'entry #15 della lista di priorità riscritta; l'header di versione (1.6.34 →
+  1.6.35) e una nota di allineamento che dichiara il nuovo ordine di lavorazione.
+- **`README.md`**: la riga di roadmap «Collegamento del pipeline di analisi (EPIC 2, Story 2.5) …
+  non sono ancora eseguiti dall'app» rimossa: la capability è **implementata**, e la regola del
+  README vuole le capability non ancora implementate **solo** nella sezione roadmap.
+- **`docs/18-DEV-LOG.md`**: nuova §51 con i tre sintomi, la causa e la lezione.
+
+I blocchi `AGGREGATE-*` sono stati rigenerati dall'aggregator (non a mano): l'indicatore di
+avanzamento passa a **73%** (22 story su 30, effort 76%, 8 step rimanenti) e l'**EPIC 2** diventa
+**completo (5/5)**.
+
+## Analisi di avanzamento
+
+**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato e documentazione**. La
+percentuale di implementazione delle story passa da **70%** (21 su 30, effort 72%, 9 step) a
+**73%** (22 su 30, effort 76%, **8 step** rimanenti): l'**EPIC 2** (Analisi) diventa **completo
+(5/5)** e il gate di testabilità «Motore di analisi completo» passa da «4/5 - in corso» a
+**«5/5 - soddisfatto»**.
+
+**Cosa è pronto.**
+
+- Lo stato di merge della Story 2.5 è allineato in tutti e quattro i documenti che lo dichiarano:
+  `docs/state/stories/2.5-*.md` (fonte), `docs/11-BACKLOG.md` (sezione legacy + blocco
+  aggregato), `docs/INDEX.md` (blocchi aggregati) e `README.md` (prosa + blocco aggregato).
+- Il blocco `AGGREGATE-NEXT-STEP-*` del README **non indica più** la 2.5: con tutte le 22 story
+  migrate in `done` il blocco mostra correttamente il fallback «Nessuna story non-done e non
+  bloccata migrata in `docs/state/stories/`» — le 8 story rimanenti (3.2, 3.3, 3.5, 4.2, 4.3,
+  5.1, 5.2, 6.1) non hanno ancora un state file e lo riceveranno al claim.
+- I **7 acceptance criteria** della Story 2.5 sono spuntati nella sezione legacy del backlog, e
+  la riga `**Stato**:` dichiara PR, merge commit e data: la sezione legacy non è più una copia
+  stantia dello stato reale.
+- Il **gap strutturale** è documentato (§51 del DEV-LOG): `docs/state/stories/*.md` non ha un
+  writer di stato di merge e non è coperto dal gate `check-merge-state.mjs`.
+
+**Cosa manca.** Il gap strutturale è **aperto**: le story continuano a non avere un writer di
+stato di merge. La correzione naturale è estendere `apply-merge-state.mjs` al formato delle story
+(`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro
+`docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la **classe** di
+drift, non il caso. Non sono state applicate qui perché toccano il **writer unico di `main`**
+(ADR-0013) e il gate bloccante che ne verifica il perimetro: è lavoro da issue dedicata, non da
+doc-sync.
+
+Nota: i file `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno
+**blocchi aggregati** e **prosa legacy**: in questa PR ho toccato la prosa (che è di mia
+competenza); i blocchi si aggiornano da soli dopo il merge.
+
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano (il gate
+`check-aggregate-blocks.mjs` → 0 violazioni). Il bundle è stato rigenerato dopo le modifiche
+documentali (`generate-bundle.ps1` dopo `aggregate-state.ps1`, l'ordine vincolante della
+Sessione 73).
+
+**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -13944,6 +14075,31 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 La seconda lezione e' sulle **fixture**: T2 si aspettava che il gate fallisse quando il sync preventivo mancava, e cosi' ha **bloccato** la soluzione corretta. Un test che fissa una forma invece di un comportamento diventa, col tempo, un ostacolo alla correzione: e' successo anche con il test della checklist PR (22 voci per parte, 2 identiche) e con quello del bundle. Quando il contratto cambia, la fixture deve cambiare con lui — ed e' il contratto a dover essere scritto per primo.
 
 **Verifica**: `node scripts/validate-workflows.mjs .github/workflows` → 2 writer verificati, 0 fallimenti · `bash scripts/test-workflow-push-sync.sh` → 19 assert, 0 falliti · `bash scripts/test-workflow-git-add-coverage.sh` → 8 assert, 0 falliti · `bash scripts/test-workflow-writer-ordering.sh` → 6 assert, 0 falliti · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti · `node scripts/check-readme-facts.mjs` → 0 falliti.
+
+---
+
+## 51. Le story non hanno un writer di stato di merge (Sessione 94)
+
+**Branch**: `docs/story-2-5-merge-state`
+**Issue di tracking**: nessuna (doc-sync di uno stato già chiuso; la issue #266 è chiusa con `status:done`)
+**Data**: 2026-11-03
+**Stato**: ✅ fatto
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 94-1 | P | Dopo il merge della PR #295 (Story 2.5), il blocco `AGGREGATE-NEXT-STEP-*` del README continuava a indicare la **2.5** come «prossima story da implementare», e il frontmatter di `docs/state/stories/2.5-analysis-pipeline-link.md` diceva ancora `status: in-review` con `pr: 267` (una PR **inesistente**) e `merged_commit: ""` | `scripts/apply-merge-state.mjs` (issue #239) scrive lo stato di merge **solo** sui file di `docs/state/sessions/`: la sua directory di ricerca è `sessionsDir` e i campi che aggiorna sono `state`/`merged`/`merged_commit`/`merged_date` — il **formato delle sessioni**, non quello delle story (`status`). Il gate `scripts/check-merge-state.mjs` ha lo stesso perimetro. La PR #295 non aveva un file di sessione: `apply-merge-state.mjs` ha stampato «niente da applicare» e uscito 0 — legittimo per il suo contratto | Il doc-sync della story in una PR `docs:` (il pattern consolidato: `2f5c1c2 docs: post-merge sync story 4.4 (pr 222)`) | `docs/state/stories/2.5-analysis-pipeline-link.md` |
+| 94-2 | P | La sezione legacy della Story 2.5 in `docs/11-BACKLOG.md` dichiarava ancora `**Stato**: ⬚ TODO — pronta al claim`, con i 7 acceptance criteria non spuntati | Le sezioni legacy non hanno un generatore: se un agente le ignora, invecchiano senza che nessun gate se ne accorga (è la classe di drift chiusa nella Sessione 38, issue #90). La PR #295 le aveva dichiarate allineate nella checklist ma non le aveva modificate | Allineamento nella stessa PR che cambia i fatti che dichiarano (regola D.38.1): `**Stato**:` da `⬚ TODO` a `✅ DONE`, i 7 AC spuntati, la riga della tabella «Stato di avanzamento», l'entry #15 della lista di priorità, l'header di versione e la nota di allineamento | `docs/11-BACKLOG.md` |
+| 94-3 | L | Il campo `pr:` dichiarava la **267**, una PR che non è mai esistita: un numero di PR sbagliato che nessun gate ha segnalato | Il doc-sync in-branch scrive `pr: N` a mano; nessun gate confronta quel numero con l'esistenza della PR, e `check-merge-state.mjs` non legge le story | Il campo è stato corretto a `295` (la PR reale). Il gate che manca è tracciato sotto | `docs/state/stories/2.5-analysis-pipeline-link.md` |
+
+**Lesson learned**: la lezione è sulla **copertura perimetrale dei gate**. Due gate che coprono la stessa classe di dati ma con un perimetro piu' stretto di quello che la classe richiede sono un **fail-open**: `apply-merge-state.mjs` e `check-merge-state.mjs` coprono entrambi i **file di sessione**, nessuno dei due copre i **file di story**. Il risultato è che lo stato di merge delle story non e' verificato da nessuno, e una story mergiata puo' restare `in-review` per sempre — senza un errore, senza un warning, con la CI verde.
+
+La seconda lezione e' sul **formato dei dati**. Le sessioni e le story hanno frontmatter diversi (`state`/`merged` vs `status`, `merged`/`merged_commit` vs gli stessi campi): due formati nella stessa directory `docs/state/` e un solo writer che ne conosce uno. Il modello giusto sarebbe stato un writer che conosce entrambi i formati (o un formato unico), non un secondo writer parallelo.
+
+La terza e' sul **criterio di fallita**. «Nessun file di sessione corrisponde alla PR #N» e' un **fatto**, non un errore: `apply-merge-state.mjs` esce 0 ed e' corretto farlo (il fail-closed selettivo della Sessione 82). Ma lo stesso fatto, applicato a una **story**, lascia un drift silenzioso: l'assenza del file non e' un errore, la **non-applicazione** dello stato merge a un file che esiste e dichiara la PR e' un errore. Il caso della story e' quello che nessuno guardava.
+
+**Il gap aperto**: `docs/state/stories/*.md` non ha un writer di stato di merge e non e' coperto dal gate `check-merge-state.mjs`. Ogni story chiusa dopo il merge richiede un doc-sync manuale in una PR `docs:` — un costo che nessuna regola dichiara e che l'elenco delle story mergiate (`2.4`, `4.4`, `3.1`, `2.5`, …) rende visibile solo a posteriori. Il percorso naturale e' estendere `apply-merge-state.mjs` al formato delle story (`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro `docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la classe di drift, non il caso. Non sono state applicate qui perche' toccano il writer unico di `main` (`ADR-0013`) e il gate bloccante che verifica il suo perimetro: e' lavoro da issue dedicata, non da doc-sync.
+
+**Verifica**: `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni · `node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` → 544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti · `pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 
@@ -21436,6 +21592,121 @@ exit 0.
 
 
 
+===== FILE: docs/state/sessions/95-story-2-5-merge-state.md =====
+
+---
+number: 95
+title: "Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto"
+date: 2026-11-03
+state: 🟡
+merged: false
+merged_commit: ""
+merged_date: ""
+branch: docs/story-2-5-merge-state
+pr: 0
+claim: kilo-HP-ELITEBOOK
+tags: [docs, stato, story, protocollo, devops]
+---
+
+# Sessione 95 — lo stato di merge della Story 2.5 (issue #266)
+
+> **Oggetto**: la Story 2.5 (collegamento del pipeline di analisi all'app) è **mergata in `main`**
+> (PR #295, merge commit `265fa50`), ma il suo file di stato ne dichiarava ancora `status: in-review`
+> con un numero di PR **inesistente** (`267`). Il blocco `AGGREGATE-NEXT-STEP-*` del README
+> continuava quindi a indicare la 2.5 come «prossima story da implementare», e le sezioni legacy
+> del backlog la dichiaravano `⬚ TODO — pronta al claim`.
+
+## Sintesi
+
+Il sintomo — «la prossima story è ancora quella che ho appena finito» — è un **drift di stato**, e
+la causa non è la PR #295 ma un **gap di copertura** fra i writer e i gate.
+
+`scripts/apply-merge-state.mjs` (issue #239) scrive lo stato di merge **solo** sui file di
+`docs/state/sessions/`: la sua directory di ricerca è `sessionsDir` e i campi che aggiorna sono
+`state`, `merged`, `merged_commit`, `merged_date` — il **formato delle sessioni**. Il formato delle
+story è diverso (`status`, e `merged`/`merged_commit` non ci sono). Lo stesso vale per il gate
+bloccante `scripts/check-merge-state.mjs`, che confronta **solo** le sessioni con lo stato reale
+delle PR.
+
+La PR #295 non aveva un file di sessione in `docs/state/sessions/`: `apply-merge-state.mjs` ha
+quindi stampato «nessun file di sessione corrisponde alla PR #295: niente da applicare» ed è uscito
+**0**. È il comportamento corretto per il suo contratto — l'assenza di una sessione è un *fatto*,
+non un errore (fail-closed selettivo, Sessione 82) — ma lascia un buco: **una story mergiata non
+ha nessun writer che aggiorni il suo stato di merge, e nessun gate che se ne accorga.**
+
+La conseguenza è che lo stato delle story mergiate dipende da un **doc-sync manuale** in una PR
+`docs:` dedicata. È il pattern consolidato del repository (`2f5c1c2 docs: post-merge sync story
+4.4 (pr 222)`), ma è un costo che nessuna regola dichiara e che solo l'elenco delle story
+mergiate rende visibile a posteriori.
+
+## Cosa è stato fatto
+
+- **`docs/state/stories/2.5-analysis-pipeline-link.md`**: `status: in-review` → `done`, `pr: 267`
+  → `295` (la PR reale), `merged_commit` e `merged_date` compilati; la sezione `## Stato` e la
+  sezione `## Esito post-merge` riscritte (la seconda riporta la causa strutturale, non solo
+  l'esito).
+- **`docs/11-BACKLOG.md`**: `**Stato**:` da `⬚ TODO — pronta al claim` a `✅ DONE — mergiata in
+  main`; i **7 acceptance criteria** spuntati; la riga della tabella «Stato di avanzamento»
+  aggiornata; l'entry #15 della lista di priorità riscritta; l'header di versione (1.6.34 →
+  1.6.35) e una nota di allineamento che dichiara il nuovo ordine di lavorazione.
+- **`README.md`**: la riga di roadmap «Collegamento del pipeline di analisi (EPIC 2, Story 2.5) …
+  non sono ancora eseguiti dall'app» rimossa: la capability è **implementata**, e la regola del
+  README vuole le capability non ancora implementate **solo** nella sezione roadmap.
+- **`docs/18-DEV-LOG.md`**: nuova §51 con i tre sintomi, la causa e la lezione.
+
+I blocchi `AGGREGATE-*` sono stati rigenerati dall'aggregator (non a mano): l'indicatore di
+avanzamento passa a **73%** (22 story su 30, effort 76%, 8 step rimanenti) e l'**EPIC 2** diventa
+**completo (5/5)**.
+
+## Analisi di avanzamento
+
+**Numeri.** Nessun codice applicativo toccato: il lavoro è di **stato e documentazione**. La
+percentuale di implementazione delle story passa da **70%** (21 su 30, effort 72%, 9 step) a
+**73%** (22 su 30, effort 76%, **8 step** rimanenti): l'**EPIC 2** (Analisi) diventa **completo
+(5/5)** e il gate di testabilità «Motore di analisi completo» passa da «4/5 - in corso» a
+**«5/5 - soddisfatto»**.
+
+**Cosa è pronto.**
+
+- Lo stato di merge della Story 2.5 è allineato in tutti e quattro i documenti che lo dichiarano:
+  `docs/state/stories/2.5-*.md` (fonte), `docs/11-BACKLOG.md` (sezione legacy + blocco
+  aggregato), `docs/INDEX.md` (blocchi aggregati) e `README.md` (prosa + blocco aggregato).
+- Il blocco `AGGREGATE-NEXT-STEP-*` del README **non indica più** la 2.5: con tutte le 22 story
+  migrate in `done` il blocco mostra correttamente il fallback «Nessuna story non-done e non
+  bloccata migrata in `docs/state/stories/`» — le 8 story rimanenti (3.2, 3.3, 3.5, 4.2, 4.3,
+  5.1, 5.2, 6.1) non hanno ancora un state file e lo riceveranno al claim.
+- I **7 acceptance criteria** della Story 2.5 sono spuntati nella sezione legacy del backlog, e
+  la riga `**Stato**:` dichiara PR, merge commit e data: la sezione legacy non è più una copia
+  stantia dello stato reale.
+- Il **gap strutturale** è documentato (§51 del DEV-LOG): `docs/state/stories/*.md` non ha un
+  writer di stato di merge e non è coperto dal gate `check-merge-state.mjs`.
+
+**Cosa manca.** Il gap strutturale è **aperto**: le story continuano a non avere un writer di
+stato di merge. La correzione naturale è estendere `apply-merge-state.mjs` al formato delle story
+(`status: done` invece di `state: <chiuso>`) e estendere `check-merge-state.mjs` al perimetro
+`docs/state/stories/`: le due modifiche sono nella stessa direzione e chiudono la **classe** di
+drift, non il caso. Non sono state applicate qui perché toccano il **writer unico di `main`**
+(ADR-0013) e il gate bloccante che ne verifica il perimetro: è lavoro da issue dedicata, non da
+doc-sync.
+
+Nota: i file `docs/SESSIONS.md`, `docs/INDEX.md`, `docs/11-BACKLOG.md` e `docs/BUNDLE.md` hanno
+**blocchi aggregati** e **prosa legacy**: in questa PR ho toccato la prosa (che è di mia
+competenza); i blocchi si aggiornano da soli dopo il merge.
+
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano (il gate
+`check-aggregate-blocks.mjs` → 0 violazioni). Il bundle è stato rigenerato dopo le modifiche
+documentali (`generate-bundle.ps1` dopo `aggregate-state.ps1`, l'ordine vincolante della
+Sessione 73).
+
+**Gate di testabilità.** `node scripts/check-merge-state.mjs` → 70 confronti, 0 falliti ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0 violazioni ·
+`node scripts/check-readme-facts.mjs` → 15 check, 0 falliti · `node scripts/check-encoding.mjs` →
+544 file, 0 errori · `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti ·
+`pwsh scripts/aggregate-state.ps1 -Progress` → 73%, 22 story su 30, 8 step rimanenti ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -22431,6 +22702,116 @@ fallback "nessuna story non-done e non bloccata migrata" — che è la risposta
 corretta: il prossimo lavoro è la **spec dell'EPIC 4.1** (issue #180), non
 un'implementazione.
 
+
+
+===== FILE: docs/state/stories/2.5-analysis-pipeline-link.md =====
+
+---
+id: "2.5"
+title: "Collegamento del pipeline di analisi all'app"
+phase: 2
+area: analysis
+status: done
+priority: B
+depends_on: ["0.2", "1.5", "2.1", "2.4"]
+issue: 266
+branch: feat/266-story-2-5---collegamento-del-pipeline-di
+pr: 295
+merged_commit: 265fa50f279a7dbec70507388a3a7ffe405acc14
+merged_date: 2026-11-03
+claim: kilo-HP-ELITEBOOK-xxxx
+spec_refs:
+  - docs/23-ANALYSIS-PIPELINE.md
+  - docs/04-ANALYSIS-ALGORITHMS.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/08-COPY-I18N.md
+---
+
+## Descrizione
+
+Collegare i quattro motori di analisi (mood, ere, eventi, ricordi) — già scritti e testati in `packages/core/src/analysis/` — all'app, in modo che dopo un import l'app **generi e persista** gli insight, la Home e la Timeline li mostrino senza codice nuovo, e l'utente senza dati acustici veda un **messaggio esplicito** (`no-features`), non uno schermo vuoto ambiguo.
+
+## Stato
+
+✅ **DONE — mergiata in `main`** (issue #266, PR #295, merge commit `265fa50`, 2026-11-03). La spec `docs/23-ANALYSIS-PIPELINE.md` è **v1.0 🟢 APPROVED** (ratificata dal project owner al merge della PR #273).
+
+Cosa è stato consegnato:
+
+- **`packages/core/src/analysis/runner.ts`**: `runAnalysisPipeline` che orchestra i 4 generator (mood, era, event, memory), legge i dati dal DB, persiste con le `replace*` corrette per tipo (mood → `replaceInsightsOfType`, ere/memory → `replaceAllInsightsOfType`, eventi → `replaceInsightsOfType`), scarta `pattern`, ritorna `AnalysisRunReport`.
+- **`apps/web/src/analysis/analysisRunner.ts`**: adapter app che apre il DB, costruisce il `Translator` da i18next, chiama `runAnalysisPipeline`, logga il report e **non propaga errori** (un fallimento dell'analisi non deve far fallire l'import).
+- **Trigger `post-import`** in `OnboardingRouter.handleImportAll`: avvia l'analisi in background dopo il reveal (`void runner.run('post-import')`), non blocca l'import (05§6.1).
+- **Stato vuoto `no-features`** in `Home.tsx`: distingue tre casi (`empty` / `no-features` / `ready`) con messaggi e CTA dedicati (chiavi i18n `home.noFeatures.*`).
+- **`mood_week` letta e `weekMoodLabel` popolato** in `AppShell`: `useHomeTimelineData` legge ora `mood_week` e `AppShell` passa l'etichetta alla Home.
+- **Test**: runner core (idempotenza, no-feature, persistenza), runner app (errori non propagati), Home no-features, useHomeTimelineData (mood_week, stato no-features).
+
+## Task
+
+- [x] `packages/core/src/analysis/runner.ts`: `runAnalysisPipeline` + report + persistenza transazionale per tipo
+- [x] Test del runner in `@core/analysis` (idempotenza, senza feature, sostituzione ere)
+- [x] `apps/web/src/analysis/analysisRunner.ts`: adapter con DB, translator, logging, errori non fatali
+- [x] Trigger `post-import` in `OnboardingRouter.handleImportAll` (in background, dopo il reveal)
+- [x] Stato vuoto `no-features` in `Home.tsx` (+ chiavi i18n `home.*` in it/en)
+- [x] `useHomeTimelineData`: lettura di `mood_week`; `AppShell`: `weekMoodLabel` popolato
+- [x] Test app: runner, stato vuoto `no-features`, `mood_week`
+- [x] Allineamento documentale: `docs/INDEX.md`, `docs/11-BACKLOG.md` (§2.5), `docs/state/stories/2.5-*.md`, `docs/08-COPY-I18N.md` (chiavi nuove)
+
+## Acceptance criteria
+
+- [x] `runAnalysisPipeline` esiste in `@core/analysis` ed è coperto da test (idempotenza, assenza di feature, sostituzione delle ere)
+- [x] Dopo un import, il trigger `post-import` avvia l'analisi **senza bloccare l'import** (il tempo di import non dipende dal numero di eventi)
+- [x] La tabella `insights` contiene righe `mood_day`, `era`, `event`, `memory` con `derivedVersion` quando le feature ci sono
+- [x] La Timeline mostra almeno un'era e la Home un ricordo del giorno, **letti dal DB**
+- [x] **Nessun segnale inventato**: senza feature misurate o manuali non viene prodotto alcun insight basato sulla valence, e la UI lo dice (`no-features`)
+- [x] `mood_week` viene letto e `weekMoodLabel` è popolato in `AppShell`
+- [x] Il testo degli insight è **reso** dal resolver i18n: nessuna chiave mancante in it/en
+- [x] Due esecuzioni consecutive non duplicano righe e lasciano le stesse `id`
+- [x] Un errore dell'analisi **non** fa fallire l'import e viene loggato
+- [x] Nessuna richiesta di rete introdotta dalla story
+
+## Scelte di implementazione
+
+| # | Scelta | Motivazione |
+|---|--------|-------------|
+| D-23.1 | Il runner vive nel **core** (`analysis/runner.ts`), non nell'app | Il core resta senza React (D-AF.5) e il runner è testabile senza browser; l'app resta un adapter |
+| D-23.2 | L'analisi gira **in background** dopo l'import e non blocca | `05§6.1`: l'import non attende la rete né l'analisi; l'utente vede il reveal subito |
+| D-23.3 | Persistenza con `replaceAllInsightsOfType` per **ere** e **ricordi**, `replaceInsightsOfType` per **mood** ed **eventi** | Le ere hanno confini mobili (D.69.8): senza sostituzione totale resterebbero ere fantasma; mood ed eventi sono per-periodo |
+| D-23.4 | `mood_week` viene letto e popolato `weekMoodLabel` | Oggi `AppShell` passa `null` hard-coded: una feature già pronta che non viene mostrata |
+| D-23.5 | Stato vuoto **`no-features`** distinto da `empty` | «Mai schermate bianche» (`06§1`): senza feature l'utente deve capire che il problema è l'arricchimento, non l'import |
+| D-23.6 | Il tipo `pattern` resta fuori (non prodotto, `04§4` fuori perimetro) | Non produrre insight di un tipo che il core non emette |
+
+## Vincoli
+
+- Nessuna uscita di rete: questa story **non** fa rete, legge e scrive solo sul DB locale
+- Toggle `enrichMetadata`: non pertinente (nessun arricchimento qui); se un domani l'enrichment, il toggle resta il primo check
+- Dati derivati: gli insight derivano dagli ascolti, sono dati personali, restano locali, e sono inclusi nell'export della Story 5.2
+- Nessun segnale inventato: senza feature non si produce nulla — **mai** un mood dedotto dal genere (D-A.6, issue #193 — il fallback mood-by-genre **non esiste**)
+
+## Documenti collegati
+
+- `docs/23-ANALYSIS-PIPELINE.md` (spec completa, v1.0 🟢)
+- `docs/04-ANALYSIS-ALGORITHMS.md` §8.1 (pipeline), §8 (generatori)
+- `docs/02-DATA-SCHEMA.md` §6 (`insights`), §7 MIG-3 (`derivedVersion`)
+- `docs/08-COPY-I18N.md` §2.12h (`home.noFeatures.*`), §2.15 (`insight.*`)
+- `fixtures/scenarios/` — scenari per i test
+- `docs/11-BACKLOG.md` Story 2.5
+
+## Esito post-merge
+
+✅ **Mergiata** (PR #295, merge commit `265fa50`, 2026-11-03). La catena post-merge ha girato: `auto-status-done` (issue #266 chiusa con `status:done`), `auto-branch-cleanup` (branch remoto e locale eliminati), `auto-state-aggregate` (blocchi `AGGREGATE-*` rigenerati), `auto-bundle`.
+
+### Nota — perché il doc-sync è avvenuto in una PR separata
+
+Il frontmatter di questa story diceva ancora `status: in-review` con `pr: 267` (una PR **inesistente**) dopo il merge, e il blocco `AGGREGATE-NEXT-STEP-*` del README continuava a indicare la 2.5 come «prossima story da implementare».
+
+La causa è strutturale, non un errore di questa PR:
+
+- `scripts/apply-merge-state.mjs` (issue #239) scrive lo stato di merge **solo** sui file di `docs/state/sessions/`: la sua directory di ricerca è `sessionsDir` e i campi che aggiorna sono `state`, `merged`, `merged_commit`, `merged_date` — il **formato delle sessioni**, non quello delle story (`status`).
+- Il gate `scripts/check-merge-state.mjs` (bloccante in CI) ha lo stesso perimetro: confronta **solo** le sessioni con lo stato reale delle PR. Una story rimasta `in-review` dopo il merge **non** è un drift che nessun gate intercetta.
+- La PR #295 non aveva un file di sessione in `docs/state/sessions/`: `apply-merge-state.mjs` ha quindi stampato «nessun file di sessione corrisponde alla PR #295: niente da applicare» e uscito 0 — legittimo per il suo contratto, che riguarda le sessioni.
+
+Il gap è quindi che **le story non hanno un writer di stato di merge**. Le story chiuse a mano dopo il merge (`2.4`, `4.4`, `3.1`, …) sono state allineate da un doc-sync manuale in una PR `docs:` dedicata, che è il pattern consolidato del repository (`2f5c1c2 docs: post-merge sync story 4.4 (pr 222)`).
+
+Questa PR segue lo stesso pattern e chiude il drift residuo per la 2.5. Il gap strutturale è tracciato in `docs/18-DEV-LOG.md`.
 
 
 ===== FILE: docs/state/stories/3.4-context-ribbon.md =====
@@ -30191,7 +30572,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.34 · Sessione 85 (2026-11-02, analisi competitiva) · l'**EPIC 3** (UI) ha le sue **prime due schermate**: la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding) per chiudere il percorso end-to-end, poi la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). La verifica del 2026-11-02 ha rilevato un buco più profondo: i **motori di analisi dell'EPIC 2 sono scritti e testati in core ma non sono mai eseguiti dall'app** → la nuova **2.5** (collegamento del pipeline di analisi all'app) è il primo passo dell'ordine di lavorazione. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.35 · Sessione 94 (2026-11-03, doc-sync post-merge) · l'**EPIC 3** (UI) ha le sue **prime due schermate**: la **3.4** (nastro contesto, Sessione 76) e la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding) per chiudere il percorso end-to-end, poi la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e il blocco NEXT-STEP del README non la indica più come prossima story. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -30611,7 +30992,7 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 
 **Descrizione**: I quattro motori di analisi sono implementati e testati in `packages/core/src/analysis/` (mood `mood/`, ere `era/`, eventi `event/`, ricordi `memory/`, con l'orchestratore `pipeline.ts`) e la persistenza degli insight esiste (`db/insights.ts`), ma **nessun codice in `apps/web` li esegue**: la Home **legge** gli insight (`apps/web/src/hooks/useHomeTimelineData.ts`) che nessuno **scrive**. Dopo un import pulito le sezioni mood, ere e ricordi restano vuote e i differenziatori narrativi del progetto — «dati storici + emozioni» — non sono visibili a nessuno. Questa story collega il core all'app: è il lavoro che trasforma «abbiamo gli algoritmi» in «l'app conosce la tua musica».
 
-**Stato**: ⬚ **TODO** — **pronta al claim**: la specifica di collegamento (`docs/23-ANALYSIS-PIPELINE.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante; l'agente prende in carico l'issue **#266** (`agent-ready`) e la lavora secondo la procedura di claim La spec definisce i contratti reali del core (pipeline, persistenza, i18n), i punti di innesto nell'app, lo stato vuoto `no-features` e il piano di test
+**Stato**: ✅ **DONE — mergiata in `main`** (issue #266, PR #295 merged il 2026-11-03, merge commit `265fa50`, branch `feat/266-story-2-5---collegamento-del-pipeline-di`). La spec di collegamento (`docs/23-ANALYSIS-PIPELINE.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante e l'implementazione la rispetta. Consegnato: l'orchestratore `runAnalysisPipeline` in `packages/core/src/analysis/runner.ts` (i 4 generator nell'ordine di `04§8.1`, la persistenza con le `replace*` corrette per tipo, il report `AnalysisRunReport`), l'adapter app `apps/web/src/analysis/analysisRunner.ts` (DB, translator i18n, logging, **errori non fatali**), il trigger `post-import` in coda che **non blocca l'import** (`05§6.1`), lo stato vuoto **`no-features`** nella Home (`home.noFeatures.*` in it/en) e la lettura di `mood_week` con `weekMoodLabel` popolato in `AppShell`. **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non viene prodotto alcun insight basato sulla valence, e la UI lo dice. Dettagli e scelte dichiarate (D-23.1…D-23.6): `docs/state/stories/2.5-analysis-pipeline-link.md`.
 
 **Task**:
 - T2.5.1 — Trigger di esecuzione: dopo l'import e a richiesta, in **coda** (l'import non deve mai attendere l'analisi: `05§6.1`)
@@ -30623,17 +31004,17 @@ Obiettivo: monorepo funzionante, schema DB live, primo adapter end-to-end.
 - T2.5.7 — Collegamento alla pipeline audio features (Story 4.1): la coda di arricchimento è il **precondizionamento** dell'analisi, non un doppione
 
 **Acceptance criteria**:
-- [ ] Dopo un import reale con feature disponibili, la tabella `insights` contiene righe `mood_day`, `era`, `event` e `memory` con `derivedVersion`
-- [ ] La Timeline mostra almeno un'era e la Home un ricordo del giorno, letti dal DB (non da dati in memoria)
-- [ ] **Nessun segnale inventato**: senza feature misurate o manuali non viene prodotto alcun insight basato sulla valence (D-A.1), e la UI lo dice
-- [ ] Esecuzione **idempotente**: un ricalcolo non duplica gli insight e un'interruzione non lascia righe parziali (`21§11.3`, T-AF.14)
-- [ ] L'import non attende l'analisi: il tempo di import resta indipendente dal numero di eventi analizzati
-- [ ] Test con i fixture di scenario (`fixtures/scenarios/*.json`) e copertura dei quattro generatori
-- [ ] La spec di collegamento è scritta e 🟢 APPROVED prima dell'implementazione (protocollo: `agent-ready` solo con spec approvata)
+- [x] Dopo un import reale con feature disponibili, la tabella `insights` contiene righe `mood_day`, `era`, `event` e `memory` con `derivedVersion`
+- [x] La Timeline mostra almeno un'era e la Home un ricordo del giorno, letti dal DB (non da dati in memoria)
+- [x] **Nessun segnale inventato**: senza feature misurate o manuali non viene prodotto alcun insight basato sulla valence (D-A.1), e la UI lo dice
+- [x] Esecuzione **idempotente**: un ricalcolo non duplica gli insight e un'interruzione non lascia righe parziali (`21§11.3`, T-AF.14)
+- [x] L'import non attende l'analisi: il tempo di import resta indipendente dal numero di eventi analizzati
+- [x] Test con i fixture di scenario (`fixtures/scenarios/*.json`) e copertura dei quattro generatori
+- [x] La spec di collegamento è scritta e 🟢 APPROVED prima dell'implementazione (protocollo: `agent-ready` solo con spec approvata)
 
 **Dipendenze**: Story 2.1, 2.2, 2.3, 2.4 (tutte ✅ DONE) · la 4.1 è la sorgente delle feature
 **Spec**: **`docs/23-ANALYSIS-PIPELINE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `04-ANALYSIS-ALGORITHMS.md` (v1.2 🟢 APPROVED) §8.1, §9 · `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) §12 · `05-ARCHITECTURE.md` §6.1 · `docs/22-COMPETITIVE-POSITIONING.md` §7
-**Issue**: #266 (nuova, Sessione 86 — `needs-spec` fino alla ratifica della spec)
+**Issue**: #266 (chiusa con `status:done` al merge della PR #295)
 
 ---
 
@@ -30899,7 +31280,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 12. **2.1** mood tracker — **completata** (Sessione 63, issue #180, PR #192 merged `d018a26`): il motore è consegnato e consuma le feature già persistite. Il **percorso dati** è arrivato con la 4.1: la catena **4.1 (dati) → 2.1 (letture)** è completa
 13. **1.6, 4.4, 3.4** geo e contesto di ascolto — **tranche chiusa** (Sessione 76, issue #231): dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201) sono state completate la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1 — Sessione 68, issue #205, PR #209, merge `68c27e5`), la **4.4** (DB MMDB on-demand + derivazione della città — issue #221) e la **3.4** (nastro contesto — Sessione 76, issue #231: il nastro e il dettaglio del periodo, con il namespace `timeline.context.*` materializzato). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città. Il blocco NEXT-STEP del README indica ora la **3.1** (Home + Timeline): con il nastro pronto, la Timeline è il pezzo che manca per montarlo e per sbloccare il test end-to-end
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
-15. **2.5** Collegamento del pipeline di analisi all'app — **prima di tutto il resto**: i motori di analisi (mood, ere, eventi, ricordi) sono scritti e testati in `packages/core/src/analysis/`, ma **nessun codice in `apps/web` li esegue**: la Home legge gli insight che nessuno scrive, e dopo un import pulito le sezioni restano vuote. È il differenziatore narrativo del progetto ed è più economico dell'artwork (`22-COMPETITIVE-POSITIONING.md` §7, D-22.2). **Manca la spec**: l'agente che la claima apre l'issue `needs-spec` e scrive la specifica di collegamento prima di implementare
+15. **2.5** Collegamento del pipeline di analisi all'app — **completata** (issue #266, PR #295 merged `265fa50`, 2026-11-03): i motori di analisi (mood, ere, eventi, ricordi) erano scritti e testati in `packages/core/src/analysis/` ma **nessun codice in `apps/web` li eseguiva**: la Home leggeva gli insight che nessuno scriveva. Ora l'orchestratore `runAnalysisPipeline` gira in coda dopo l'import, persiste gli insight con `derivedVersion`, la Home e la Timeline li leggono dal DB, e l'utente senza feature acustiche vede il messaggio `no-features` invece di uno schermo vuoto. È il differenziatore narrativo del progetto ed è più economico dell'artwork (`22-COMPETITIVE-POSITIONING.md` §7, D-22.2). Dettagli: `docs/state/stories/2.5-analysis-pipeline-link.md`
 16. **4.3** Artwork enrichment — **P0**: l'ancora visiva del diario, e il moltiplicatore delle story vicine (colore dell'era, card condivisibile, lettura del mood). **Non dipende più dal lookup MusicBrainz** (D-22.4): Spotify Web API + iTunes Search + placeholder gradient bastano
 17. **3.2, 3.3, 3.5** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233) e la **3.4** (nastro contesto) pure (Sessione 76, issue #231). Restano la **3.2** (Ricordi + Share: un **capitolo statico**, mai un dump del database), la **3.3** (Esplora + Analisi: insight **in prosa**, non un grafico in più) e la **3.5** (anteprima/demo in onboarding): le tre chiudono il percorso end-to-end. La 3.3 consuma l'output della **2.5**
 18. **5.2, 5.1** privacy — nell'ordine **5.2 → 5.1**: export e purge sono l'atto di fiducia che rende vera la promessa della privacy (pulsanti **prominenti**, non nascosti in un menu), la pagina «Come trattiamo i tuoi dati» ne è la traduzione in linguaggio utente (D-22.7)
@@ -30918,7 +31299,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
-| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere), 2.3 (eventi) e 2.4 (ricordi): i quattro motori sono **scritti e testati in core**, ma **non collegati all'app** → **2.5** (nuova, Sessione 85) è il collegamento mancante e diventa il primo passo della lista di priorità · nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231) e la **3.1** (Home + Timeline, Sessione 77, issue #233): l'app ha ora le sue prime due schermate vere. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding, nuova, Sessione 85) |
+| 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere), 2.3 (eventi) e 2.4 (ricordi), e la **2.5** li ha **collegati all'app** (issue #266, PR #295, merge `265fa50`): l'orchestratore gira in coda dopo l'import e la Home/Timeline leggono gli insight dal DB · nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231) e la **3.1** (Home + Timeline, Sessione 77, issue #233): l'app ha ora le sue prime due schermate vere. Restano la **3.2** (Ricordi + Share), la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding, nuova, Sessione 85) |
 | 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.3** (artwork, **P0** dal 2026-11-02 e **senza dipendenza** dal lookup MusicBrainz), **4.2** (lookup MusicBrainz, P2), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
@@ -30926,6 +31307,8 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 
 **EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 5/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment · 1.5 scrobbling hub). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
+> **Allineato al 2026-11-03** (Sessione 94, doc-sync post-merge della PR #295): la **2.5** è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e le sue sezioni legacy sono allineate: `**Stato**:` da `⬚ TODO` a `✅ DONE`, i **7 acceptance criteria** spuntati, la riga della tabella «Stato di avanzamento» aggiornata e l'entry #15 della lista di priorità riscritta. Il **blocco NEXT-STEP del README** non indica più la 2.5: l'indicatore di avanzamento passa a **73%** (22 story su 30, effort 76%) e l'**EPIC 2** è **completo (5/5)**. La prossima story lavorabile è la **3.2** (Ricordi + Share), poi **3.3**, **3.5**, **4.3**, **5.2**, **5.1**, **4.2**, **6.1**.
+>
 > **Allineato al 2026-11-02** (Sessione 85, analisi competitiva verificata sul codice): il catalogo passa da 28 a **30 story** con **2.5** (collegamento del pipeline di analisi all'app) e **3.5** (anteprima/demo in onboarding); l'ordine di lavorazione diventa **2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1**; la **4.3** non dipende più dalla **4.2** e sale a **P0**; la **3.2** incorpora il **tagging manuale** e l'**export statico** del capitolo; la **3.3** richiede **insight in prosa**; la **5.1** richiede la **pagina in-app «Come trattiamo i tuoi dati»**. Motivazioni, evidenze e decisioni proposte: `docs/22-COMPETITIVE-POSITIONING.md` (D-22.1…D-22.7).
 >
 > **Allineato al 2026-10-30** (Sessione 67, follow-up post-merge): la **tranche geo sale al posto 13**, davanti alle 2.2/2.3, per allineare la lista di priorità al blocco NEXT-STEP del README. L'aggregatore ordina le story **migrate per id** (e non per la priorità di questa lista): con lo state file della 1.6 creato nella Sessione 67, il puntatore indicava «1.6» mentre questa lista e la prosa dell'INDEX indicavano «2.2/2.3» — due documenti, due risposte diverse sul prossimo lavoro. La scelta è del project owner: **geo prima**, e la lista è stata riallineata al puntatore (nessuna modifica al codice dell'aggregatore).
@@ -31026,7 +31409,7 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 2.5 - Collegamento del pipeline di analisi all'app | in-review | #267 | - | analysis |
+| 2.5 - Collegamento del pipeline di analisi all'app | done | #295 | `265fa50f279a7dbec70507388a3a7ffe405acc14` | analysis |
 | 3.1 - Home + Timeline | done | #234 | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
