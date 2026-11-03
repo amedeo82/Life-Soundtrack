@@ -176,6 +176,10 @@ $files = @(
     # e chiuso il fail-open del gate sul wiring (i contatori degli assert
     # vivevano in variabili di shell e non attraversavano la subshell).
     "docs/state/sessions/94-hook-numbers.md",
+    # Sessione 95 (issue #266): lo stato di merge della Story 2.5 allineato
+    # dopo la PR #295, e il gap scoperto (le story non hanno un writer di
+    # stato di merge: apply-merge-state.mjs scrive solo sulle sessioni).
+    "docs/state/sessions/95-story-2-5-merge-state.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -184,6 +188,12 @@ $files = @(
     "docs/state/stories/2.2-era-detector.md",
     "docs/state/stories/2.3-event-detector.md",
     "docs/state/stories/2.4-memory-engine.md",
+    # Story 2.5 (issue #266, PR #295): il collegamento del pipeline di analisi
+    # all'app. Il file era stato creato dalla PR #295 ma non era mai stato
+    # registrato in `$files`: il bundle ne copiava il contenuto solo per
+    # caso (tramite `docs/BUNDLE.md` ↔ `docs/state/`), e il gate
+    # `generate-bundle.ps1 -Check` non se ne accorgeva.
+    "docs/state/stories/2.5-analysis-pipeline-link.md",
     "docs/state/stories/3.4-context-ribbon.md",
     "docs/state/stories/3.1-home-timeline.md",
     "docs/state/stories/4.1-audio-features.md",

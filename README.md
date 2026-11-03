@@ -36,7 +36,6 @@ Il posizionamento completo — confronto con i competitor e **verifica dello sta
 
 Non ancora nell'app — la roadmap completa, con lo stato di ogni story, è in [`docs/11-BACKLOG.md`](docs/11-BACKLOG.md):
 
-- **Collegamento del pipeline di analisi** (EPIC 2, Story 2.5): i motori di mood, ere, eventi e ricordi sono scritti e testati in `@ls/core`, ma non sono ancora eseguiti dall'app
 - **Ricordi + Share** (EPIC 3, Story 3.2): feed dei ricordi, card 1080×1350, export statico di un capitolo, tagging manuale di ere e canzoni
 - **Esplora + Analisi** (EPIC 3, Story 3.3): ricerca sui propri dati, quadrante valence/energy, insight in prosa
 - **Anteprima in onboarding** (EPIC 3, Story 3.5): diario di esempio prima dell'import, prime righe della timeline dopo
