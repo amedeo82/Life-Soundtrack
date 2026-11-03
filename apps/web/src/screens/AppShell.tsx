@@ -63,7 +63,7 @@ export function AppShell() {
           stats={data.stats}
           barWeek={data.barWeek}
           memory={data.memory}
-          weekMoodLabel={null}
+          weekMoodLabel={data.weekMoodLabel}
         />
       ) : (
         <Timeline

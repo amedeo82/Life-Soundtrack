@@ -502,5 +502,9 @@ describe('integrazione fixture db-seed/medium.json', () => {
     await putListens(db, seed.listens.slice(0, 50));
     expect(await countListens(db)).toBe(5000);
     expect(new Set(seed.listens.map((l) => l.eventKey)).size).toBe(5000);
-  });
+    // Timeout esplicito: 5.000 inserti in bulk su fake-indexeddb superano il
+    // default di Vitest (5s) su macchina lenta o sotto carico parallelo. La
+    // soglia è generosa (30s) e non copre l'asserzione: l'invariante è
+    // l'idempotenza, non la durata (stesso criterio di `perf.test.ts`).
+  }, 30000);
 });

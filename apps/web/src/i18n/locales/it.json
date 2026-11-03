@@ -37,6 +37,8 @@
   "home.partial": "Più dati importi, più la tua storia diventa ricca",
   "home.weekTitle": "La tua settimana",
   "home.moodWeek": "Mood della settimana",
+  "home.noFeatures.description": "I tuoi dati ci sono, ma per raccontare il loro umore serve l'analisi acustica: attivala in Impostazioni → Privacy",
+  "home.noFeatures.cta": "Attiva analisi acustica",
   "home.days.mon": "Lun",
   "home.days.tue": "Mar",
   "home.days.wed": "Mer",

@@ -21,6 +21,8 @@ export {
 
 export { createTranslator, type TranslateFn, type TranslateParams, type Translator } from './i18n';
 
+export { runAnalysisPipeline, type AnalysisRunOptions, type AnalysisRunReport } from './runner';
+
 export {
   buildEras,
   computeEraDerivedVersion,

@@ -37,6 +37,8 @@
   "home.partial": "The more you import, the richer your story becomes",
   "home.weekTitle": "Your week",
   "home.moodWeek": "Week mood",
+  "home.noFeatures.description": "Your data is here, but to tell its mood we need acoustic analysis: enable it in Settings → Privacy",
+  "home.noFeatures.cta": "Enable acoustic analysis",
   "home.days.mon": "Mon",
   "home.days.tue": "Tue",
   "home.days.wed": "Wed",
