@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:24
+> Data: 2026-11-03 10:25
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -21178,7 +21178,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: feat/292-hook-numbers
-pr: 0
+pr: 293
 claim: kilo-hp-elitebook-7c3f
 tags: [devops, protocollo, hook, ci]
 ---
