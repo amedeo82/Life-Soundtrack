@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 10:52
+> Data: 2026-11-03 11:04
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -50758,6 +50758,13 @@ jobs:
       - name: Encoding LF dei generatori (issue #58)
         shell: pwsh
         run: pwsh scripts/test-appendline-lf-fix.ps1
+
+      # issue #286: agent-pr.ps1 step 6 scrive pr: N nel file di sessione.
+      # Verifica che con una sessione singola (caso buggato pre-fix) lo script
+      # scriva il numero PR ed esca 0, e che senza sessione matching esca 0
+      # con warning "NESSUN file di sessione".
+      - name: Agent PR step 6 regression (issue #286)
+        run: bash scripts/test-agent-pr.sh
 
   # ---------------------------------------------------------------------------
   # 10. Check aggregatore (nome invariato: "CI / quality").
