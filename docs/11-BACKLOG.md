@@ -835,7 +835,6 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 2.5 - Collegamento del pipeline di analisi all'app | done | #267 | - | analysis |
 | 3.1 - Home + Timeline | done | #234 | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |

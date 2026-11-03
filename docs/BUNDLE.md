@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 12:11
+> Data: 2026-11-03 11:04
 > Totale file: 180
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 179 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2595.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-03 12:11
+- Dimensione totale: 2595 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-03 11:07
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1246,23 +1246,24 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
+**Implementazione: 70%** - 21 story completate su 30 - effort pesato 72% - **mancano 9 step**
 
-`██████████████████████░░░░░░░░` 73%
+`█████████████████████░░░░░░░░░` 70%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
-| EPIC 2 - Analisi | 5 | 5 | 100% | completo |
+| EPIC 2 - Analisi | 4 | 5 | 80% | in corso |
 | EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 21 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
+**Step ancora da implementare** (9):
+- 2.5 Collegamento del pipeline di analisi all'app - da fare (size L)
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
@@ -1277,7 +1278,7 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
 | Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
-| Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
+| Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
 **Analisi della sessione corrente** (S94)
@@ -2237,9 +2238,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **71** (merge: 70)
-- Stories migrate in state/stories: **22** (done: 22)
+- Stories migrate in state/stories: **21** (done: 21)
 - Ultima sessione migrata: **S94** - Dopo la #290: numeri e diagnostiche riallineati, e un fail-open chiuso nel test
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.4, 4.1, 4.4
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 3.1, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2252,23 +2253,24 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 73%** - 22 story completate su 30 - effort pesato 76% - **mancano 8 step**
+**Implementazione: 70%** - 21 story completate su 30 - effort pesato 72% - **mancano 9 step**
 
-`██████████████████████░░░░░░░░` 73%
+`█████████████████████░░░░░░░░░` 70%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
-| EPIC 2 - Analisi | 5 | 5 | 100% | completo |
+| EPIC 2 - Analisi | 4 | 5 | 80% | in corso |
 | EPIC 3 - UI/UX | 2 | 5 | 40% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 22 done - 0 in corso - 8 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 21 done - 0 in corso - 9 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (8):
+**Step ancora da implementare** (9):
+- 2.5 Collegamento del pipeline di analisi all'app - da fare (size L)
 - 3.2 Ricordi + Share - da fare (size L)
 - 3.3 Esplora + Analisi - da fare (size L)
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
@@ -2283,7 +2285,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Gate | Requisito | Stato |
 |------|-----------|-------|
 | Test end-to-end dell'app | EPIC 3 (5 story) | 2/5 - in corso |
-| Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
+| Motore di analisi completo | EPIC 2 (5 story) | 4/5 - in corso |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
 **Analisi della sessione corrente** (S94)
@@ -29069,8 +29071,6 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `todayInHistory` | Oggi nella tua storia | Today in your history |
 | `weekTitle` | La tua settimana | Your week |
 | `moodWeek` | Mood della settimana | Week mood |
-| `noFeatures.description` | I tuoi dati ci sono, ma per raccontare il loro umore serve l'analisi acustica: attivala in Impostazioni → Privacy | Your data is here, but to tell its mood we need acoustic analysis: enable it in Settings → Privacy |
-| `noFeatures.cta` | Attiva analisi acustica | Enable acoustic analysis |
 | `days.mon` | Lun | Mon |
 | `days.tue` | Mar | Tue |
 | `days.wed` | Mer | Wed |
@@ -29637,7 +29637,6 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.9 | Sessione 67 (2026-10-30, issue #201) | **Story 1.6 ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): §2.9 — aggiunte le chiavi dei toggle `retainCountry`, `retainCity`, `retainDeviceType`, `retainDeviceDetail`, `deriveContext` (namespace `settings.privacy.*`, già previsto da `19§8.3`); nuova sezione §2.12h `timeline.context.*` (nastro contesto e dettaglio del periodo, `19§8.2-8.3`), con la regola di linguaggio vincolante: **la città è sempre introdotta da un indicatore di incertezza, il paese mai**. |
 | 0.10 | Sessione 69 (2026-10-31, issue #211) | **Story 2.2 — l'etichetta dell'era**: §2.15 — aggiunte le **otto chiavi** `insight.era.*` (il template `label` e i **sei** nomi dei mood, `sad`/`angry`/`neutral`/`calm`/`happy`/`excited`), materializzate nei locale `it`/`en` dell'app. `EraPayload.label` (`02§4`) è una **stringa resa**, come il `text` del ricordo (D-A.4): il core non contiene stringhe italiane, l'app inietta il resolver. §2.4 — `era.title` diventa un **pass-through** (`{label}`): l'etichetta contiene già il prefisso «Era» (`02§4`, `04§5.2`), e anteporlo produrrebbe «Era Era Malinconia Indie». Il **genere** non viene tradotto: è dato, non copia |
 | 0.11 | Sessione 70 (2026-10-31, issue #214) | **Story 2.3 — la descrizione dell'evento**: §2.15 — la `description` di `EventPayload` (`02§4`) è una **stringa resa**, come il ricordo e l'etichetta dell'era: il core non contiene stringhe italiane, l'app inietta il resolver. Aggiunta la chiave **`insight.event.spike_genre`** (l'unica dei otto tipi che mancava: `{{genre}}`), materializzata nei locale `it`/`en`. I template di `event.*` accettano due segnaposto, `{{artist}}` (il nome dell'artista che domina) e `{{genre}}` (il genere che domina — **dato**, non copia, e non tradotto). La descrizione è seguita dal **suffisso numerico** del detector: `(z-score: 4.00)` per il detector a z-score, `(×2.40)` per quello a quota — neutro, è il dato che rende l'evento verificabile |
-| 0.14 | Sessione 94 (2026-11-03, issue #266) | **Story 2.5 — stato vuoto `no-features`**: §2.2 `home.*` — aggiunte le **due chiavi** `home.noFeatures.description` e `home.noFeatures.cta` per lo stato vuoto distinto quando ci sono ascolti ma zero feature utilizzabili (valence/energy). Il messaggio spiega che serve l'analisi acustica e la CTA rimanda a Impostazioni → Privacy. Materializzate in `it`/`en`. |
 | 0.13 | Sessione 77 (2026-10-31, issue #233) | **Story 3.1 — Home (⑥) e Timeline (⑦)**: le chiavi delle due schermate **esistevano già** (`home.*`, `timeline.*`) ma mancavano le **8 nuove** che la story rende necessarie — `home.partial` (il messaggio «più dati importi, più la tua storia diventa ricca» dello stato `partial`), `timeline.granularity` (l'etichetta del toggle Anni/Mesi/Settimane/Giorni), `timeline.eras` (la riga delle bande), `timeline.eraDuration` (la durata resa nelle `aria-label` delle EraBand), `timeline.partial`, `timeline.error`, `timeline.retry` e il **nuovo namespace `nav`** (`nav.label`, `nav.home`, `nav.timeline` — la prima navigazione dell'app), dichiarato in §1. I **dati** (nomi dei paesi, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
 
@@ -31024,7 +31023,6 @@ Ogni story deve avere label GitHub:
 | 2.2 - Era Detector | done | #212 | `3294aa4` | analysis |
 | 2.3 - Event Detector | done | #215 | `5149b2c` | analysis |
 | 2.4 - Memory Engine | done | #185 | `40ad0b75be5efb70af17cce82531b523970059ea` | analysis |
-| 2.5 - Collegamento del pipeline di analisi all'app | done | #267 | - | analysis |
 | 3.1 - Home + Timeline | done | #234 | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
