@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 07:52
+> Data: 2026-11-03 07:54
 > Totale file: 174
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -20276,7 +20276,7 @@ date: 2026-11-03
 state: 🟡
 merged: false
 branch: feat/287-post-merge-yml-il-messaggio-di-commit-de
-pr: 0
+pr: 288
 claim: kilo-HP-ELITEBOOK-c90auto
 tags: [devops, ci, workflow, qualita]
 ---
