@@ -241,6 +241,8 @@
   "insight.mood.sad": "Your music was mostly melancholic",
   "insight.mood.excited": "High-energy period",
   "insight.mood.calm": "Relaxed period",
+  "insight.mood.angry": "Tense period",
+  "insight.mood.neutral": "Neutral period",
   "insight.event.spike_artist": "You discovered {{artist}} who dominated your listening",
   "insight.event.spike_genre": "The {{genre}} genre dominated your listening",
   "insight.event.valence_drop": "Your music became more melancholic",
