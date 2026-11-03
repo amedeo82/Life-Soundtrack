@@ -29,6 +29,15 @@
 #   T7  fixture: API GitHub in errore (HTTP 500) -> exit 2 (fail-closed)
 #   T8  fixture: sessione senza PR (`pr: 0`) -> exit 0 (ignorata, nessun falso positivo)
 #   T9  fixture: la sessione cita una PR assente dalla risposta -> exit 2 (dato incompleto)
+#   T10..T12  modalita' `--defer-unapplied` (issue #284): il caso strutturale e' differito,
+#              il drift reale resta un fallimento, la modalita' autoritativa non e' indebolita
+#   T13 fixture: story coerente (`status: done` + fatti del merge allineati) -> exit 0
+#   T14 fixture: PR mergiata ma la story dichiara `status: in_review` -> exit 1 (issue #297)
+#   T15 fixture: story `done` ma `merged_commit` assente -> exit 1
+#   T16 fixture: story `done` ma `merged_date` non coincide -> exit 1
+#   T17 fixture: story senza PR (`pr: 0`) -> exit 0 (ignorata)
+#   T18 fixture: `--defer-unapplied` con l'albero = merge commit e story non ancora
+#              `done` -> differito, non fallito
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -121,6 +130,9 @@ stop_server() {
 make_session() {
   local d="$1" num="$2" pr="$3" merged="$4" sha="$5" date="$6" state="$7"
   mkdir -p "$d/docs/state/sessions"
+  # Il gate confronta anche le story (issue #297): la directory deve esistere,
+  # altrimenti il gate esce 2 (fail-closed sul perimetro mancante).
+  mkdir -p "$d/docs/state/stories"
   {
     echo "---"
     echo "number: $num"
@@ -138,6 +150,29 @@ make_session() {
   } > "$d/docs/state/sessions/$num-fixture.md"
 }
 
+# Crea una story di fixture (formato `status:` invece di `state:`/`merged:`).
+# I parametri sono: dir, id file, pr, status, merged_commit, merged_date.
+make_story() {
+  local d="$1" id="$2" pr="$3" status="$4" sha="$5" date="$6"
+  mkdir -p "$d/docs/state/stories"
+  {
+    echo "---"
+    echo "id: \"$id\""
+    echo "title: \"Fixture $id\""
+    echo "phase: 2"
+    echo "area: analysis"
+    echo "status: $status"
+    echo "priority: B"
+    echo "branch: feat/$id-fixture"
+    echo "pr: $pr"
+    if [ -n "$sha" ]; then echo "merged_commit: \"$sha\""; fi
+    if [ -n "$date" ]; then echo "merged_date: $date"; fi
+    echo "---"
+    echo ""
+    echo "# Fixture $id"
+  } > "$d/docs/state/stories/$id-fixture.md"
+}
+
 SHA_A="aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbccccccc"
 SHA_B="ddddddddddddddddeeeeeeeeeeeeeeeeeefffffff"
 DATE_A="2026-11-01T09:58:20Z"
@@ -148,6 +183,11 @@ pr_merged() {
 }
 pr_open() {
   echo "[{\"number\":$1,\"state\":\"open\",\"merged_at\":null,\"merge_commit_sha\":null}]"
+}
+
+# Due PR mergiate nella stessa fixture: sessione (PR 10) e story (PR 11).
+pr_merged_pair() {
+  echo "[{\"number\":$1,\"state\":\"closed\",\"merged_at\":\"$3\",\"merge_commit_sha\":\"$2\"},{\"number\":$4,\"state\":\"closed\",\"merged_at\":\"$6\",\"merge_commit_sha\":\"$5\"}]"
 }
 
 run_gate() {
@@ -283,6 +323,57 @@ echo "$(pr_merged 10 "$HEAD_SHA" "$DATE_A")" > "$WORK/f12.json"
 start_server "$WORK/f12.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
 if [ $ec -eq 1 ]; then ok "exit 1 (modalita' autoritativa: fail-closed)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T13: story coerente (PR mergiata, status: done, fatti del merge allineati) ==="
+D="$WORK/t13"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "$SHA_A" "2026-11-01"
+echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f13.json"
+start_server "$WORK/f13.json" || exit 1
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (nessun drift)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T14: la PR e' mergiata ma la story dichiara status: in_review (il caso Story 2.5) ==="
+D="$WORK/t14"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 in_review "" ""
+echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f14.json"
+start_server "$WORK/f14.json" || exit 1
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"; fi
+if echo "$out" | grep -q "2.5-fixture.md"; then ok "il messaggio nomina il file della story"; else ng "il messaggio non cita il file: $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T15: la story e' done ma merged_commit manca ==="
+D="$WORK/t15"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "" ""
+echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f15.json"
+start_server "$WORK/f15.json" || exit 1
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T16: la story e' done ma merged_date non coincide ==="
+D="$WORK/t16"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "$SHA_A" "2026-10-31"
+echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f16.json"
+start_server "$WORK/f16.json" || exit 1
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atteso 1): $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T17: story senza PR (pr: 0) -> ignorata, nessun falso positivo ==="
+D="$WORK/t17"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 0 todo "" ""
+echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f17.json"
+start_server "$WORK/f17.json" || exit 1
+out="$(run_gate "$D")"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (story senza PR ignorata)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
+stop_server
+
+echo "=== T18: --defer-unapplied con l'albero = merge commit e story non ancora done -> differito ==="
+D="$WORK/t18"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 in_review "" ""
+HEAD_SHA="$(make_git_fixture "$D")"
+echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$HEAD_SHA" "$DATE_A")" > "$WORK/f18.json"
+start_server "$WORK/f18.json" || exit 1
+out="$(run_gate_defer "$D")"; ec=$?
+if [ $ec -eq 0 ]; then ok "exit 0 (il caso strutturale e' differito)"; else ng "exit $ec (atteso 0): $(echo "$out" | tail -6)"; fi
+if echo "$out" | grep -q "2.5-fixture.md"; then ok "il messaggio di differimento nomina la story"; else ng "il messaggio non cita la story: $(echo "$out" | tail -6)"; fi
 stop_server
 
 echo ""

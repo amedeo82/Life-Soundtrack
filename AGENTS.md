@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.43 — Sessione 94 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.44 — Sessione 96 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -45,6 +45,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 | I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
+| Il frontmatter di una **story** dichiara lo stesso fatto di merge delle sessioni (`status: done`, `merged_commit`, `merged_date`), e il writer post-merge lo applica | `check-merge-state.mjs` (perimetro `docs/state/stories/`) + `apply-merge-state.mjs` | issue #297 (Story 2.5 restata `in-review` dopo il merge) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -1071,6 +1072,8 @@ apply-merge-state → aggregate-state → generate-bundle → verifica (-Check) 
 
 Regole strutturali ( enforced dai gate di `scripts/validate-workflows.mjs`):
 
+- **Il writer copre due formati di stato** (issue #297): `apply-merge-state.mjs` scrive il fatto di merge sia sui file di **sessione** (`state: 🟢`, `merged: true`, `merged_commit`, `merged_date`) sia sui file di **story** (`status: done`, `merged_commit`, `merged_date` — lo schema delle story non ha il campo `merged`). Una story mergiata che restasse `status: in-review` non e' piu' possibile senza drift: il gate `check-merge-state.mjs` confronta **entrambi** i perimetri con lo stato reale delle PR ed e' fail-closed. Gli stati terminali dichiarati di una story (`blocked`, `wontdo`) non vengono sovrascritti dal writer e non sono drift per il gate: il merge di una PR non cancella un esito dichiarato.
+
 - **Un solo writer su `main`**: due workflow che pushano su `main` riportano la race fra writer (misurata il 2026-11-02: push rifiutato, rebase dei file generati, conflitto, run fallito).
 - **Il writer non ribasa mai**: al tentativo successivo fa `git reset --hard origin/main` e **rigenera** da capo. Il rebase dei file generati è un conflitto strutturale, non una race.
 - **Il writer scatta su ogni PR mergiata**: nessun filtro `paths:` (il bundle dipende da molti file, non solo da `docs/state/**`).
@@ -1146,4 +1149,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.43 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.44 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*

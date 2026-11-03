@@ -181,6 +181,25 @@ merged_date: 2026-10-18              # data merge
 [bullet]
 ```
 
+### Invariante: una story con PR mergiata è una story `done` *(vincolante, issue #297)*
+
+Le story dichiarano lo **stesso fatto** delle sessioni — «la PR è stata mergiata in `main`» — in un **formato diverso**: `status` invece di `state` + `merged`. Fino alla Sessione 95 nessun writer e nessun gate copriva questo perimetro: la Story 2.5 è restata `status: in-review` con `pr: 267` (una PR inesistente) dopo il merge della PR #295, e nulla se n'era accorto — l'aggregatore la contava come non-done e il blocco `AGGREGATE-NEXT-STEP-*` la indicava come «prossima story da implementare».
+
+| Campo | Valore richiesto quando la PR è mergiata |
+|-------|-------------------------------------------|
+| `status` | `done` |
+| `merged_commit` | SHA del merge commit della PR (lo stesso criterio delle sessioni: il merge commit, non l'ultimo commit del branch) |
+| `merged_date` | data del merge (`YYYY-MM-DD`) |
+| `pr` | numero della PR (non `0`, non `null`) |
+
+**Chi lo applica**: `scripts/apply-merge-state.mjs`, nel writer unico post-merge (`ADR-0013`): il file di story che dichiara `pr: <N>` riceve `status: done`, `merged_commit` e `merged_date` determinati dalla stessa fonte di verità delle sessioni (l'API GitHub). Il writer è idempotente e tocca solo le righe di frontmatter.
+
+**Chi lo verifica**: `scripts/check-merge-state.mjs`, fail-closed: confronta il frontmatter di **sessioni e story** con lo stato reale delle PR. Una story con la PR mergiata e `status` diverso da `done` è drift (fallisce); lo stesso vale per un `merged_commit` o un `merged_date` che non coincidono con la PR.
+
+**Eccezione dichiarata**: gli stati **terminali** di una story (`blocked`, `wontdo`) non sono drift e il writer non li sovrascrive: il merge di una PR non cancella un esito dichiarato (scope cancellato, dipendenza esterna).
+
+**Fonte di verità**: lo stato della PR su GitHub (`gh pr view <N> --json state,mergedAt,mergeCommit`), **mai** il branch locale né la presenza del file. Una story senza PR (`pr: 0`) non ha merge commit da citare.
+
 ---
 
 ## Aggregazione

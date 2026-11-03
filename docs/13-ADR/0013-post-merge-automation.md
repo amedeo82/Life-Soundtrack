@@ -2,7 +2,7 @@
 
 - **Stato**: 🟢 APPROVED (issue #284, Sessione 90, 2026-11-02)
 - **Data**: 2026-11-02
-- **Riferimenti**: issue #281 (fix incompleto), issue #239 (gate merge-state), issue #140 (sync dei writer), issue #149 (ordinamento fra writer), issue #216 (copertura dei trigger), issue #277 (encoding), ADR-0008 (lazy-state aggregation), ADR-0012 (contratto del protocollo)
+- **Riferimenti**: issue #281 (fix incompleto), issue #239 (gate merge-state), issue #297 (perimetro delle story), issue #140 (sync dei writer), issue #149 (ordinamento fra writer), issue #216 (copertura dei trigger), issue #277 (encoding), ADR-0008 (lazy-state aggregation), ADR-0012 (contratto del protocollo)
 
 ## Contesto
 
@@ -128,6 +128,37 @@ già aggiornata quando il bundle viene scritto. L'ordinamento dei due
 generatori (aggregator → bundle) resta vincolante e viene verificato dal gate
 di portabilità (che rigenera nell'ordine corretto e confronta i byte).
 
+### D-13.7 — Il writer e il gate coprono anche le story *(issue #297)*
+
+Il writer unico scriveva lo stato di merge **solo** sui file di
+`docs/state/sessions/`, e il gate confrontava **solo** le sessioni: il
+perimetro `docs/state/stories/` non aveva né un writer né un gate. Il caso
+reale (Story 2.5, PR #295) mostra la conseguenza: una story mergiata è
+restata `status: in-review` con `pr: 267` — una PR inesistente — e l'aggregatore
+l'ha contata come non-done, con il blocco `AGGREGATE-NEXT-STEP-*` che la
+indicava come «prossima story da implementare». Nessun errore, nessun warning,
+CI verde.
+
+La decisione è che **il perimetro del writer e del gate è la classe dei file di
+stato**, non un sottoinsieme: i due coprono `docs/state/sessions/` e
+`docs/state/stories/`, ciascuno nel **proprio formato**.
+
+- Il writer riconosce il formato dal frontmatter: `state:`/`merged:` ⇒
+  sessione; `status:` ⇒ story. Su una story il merge significa `status: done`,
+  `merged_commit` e `merged_date` (lo schema delle story non ha il campo
+  `merged`: il fatto è dichiarato una volta sola).
+- Il gate confronta **entrambi** i perimetri con lo stato reale delle PR, e
+  resta fail-closed: una story con la PR mergiata e `status` diverso da `done`
+  è drift, come un `merged_commit` o un `merged_date` che non coincidono.
+- Gli stati **terminali** dichiarati di una story (`blocked`, `wontdo`) non
+  sono drift e il writer non li sovrascrive: il merge di una PR non cancella
+  un esito dichiarato.
+
+La regola generale che ne discende è la stessa del resto del protocollo
+(`ADR-0012`): **una regola senza gate è un consiglio**. Due gate che coprono la
+stessa classe di dati con un perimetro più stretto di quello che la classe
+richiede sono un fail-open silenzioso.
+
 ## Alternative scartate
 
 | Alternativa | Perché scartata |
@@ -166,4 +197,6 @@ di portabilità (che rigenera nell'ordine corretto e confronta i byte).
 | Il writer sincronizza con `origin/main` prima del push | `validate-workflows.mjs` → `checkPushSync` | `scripts/test-workflow-push-sync.sh` (T2, T3) |
 | La riga `git add` copre i `$targets` dell'aggregator | `validate-workflows.mjs` → `checkGitAddCoverage` | `scripts/test-workflow-git-add-coverage.sh` |
 | Il gate merge-state differisce **solo** il caso strutturale | `check-merge-state.mjs --defer-unapplied` | `scripts/test-merge-state-gate.sh` (T10..T12) |
+| Il gate merge-state confronta **anche** le story, nel loro formato (`status: done`) | `check-merge-state.mjs` (perimetro `docs/state/stories/`) | `scripts/test-merge-state-gate.sh` (T13..T18) · issue #297 |
+| Il writer applica lo stato di merge anche alle story | `apply-merge-state.mjs` (perimetro `docs/state/stories/`) | `scripts/test-apply-merge-state.mjs` (T4..T9) |
 | I generatori producono gli stessi byte su ogni OS | `check-generators-portable.mjs` (manifest cross-OS) | `scripts/test-generators-portable.sh` (T1, T2, T3) |
