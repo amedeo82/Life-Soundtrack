@@ -17,7 +17,7 @@ import { StatCard } from '../components/StatCard';
 import type { HomeStats } from './homeTimelineModel';
 
 /** Stati della Home (`06§2.6` + Story 2.5 `no-features`). */
-export type HomeState = 'empty' | 'no-features' | 'partial' | 'ready' | 'loading';
+export type HomeState = 'empty' | 'no-features' | 'partial' | 'ready' | 'loading' | 'error';
 
 /** Il ricordo mostrato nella MemoryCard (testo già reso). */
 export interface HomeMemory {

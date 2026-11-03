@@ -13,13 +13,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  openDb,
-  listListensInRange,
-  listInsightsByType,
-  getFeatures,
-  type LifeSoundtrackDB,
-} from '@core/db';
+import { openDb, listListensInRange, listInsightsByType, type LifeSoundtrackDB } from '@core/db';
 import { listContextPeriods } from '@core/context';
 import { toRibbonPeriod, type ContextRibbonPeriod } from '../components/contextRibbonModel';
 import {
@@ -125,7 +119,7 @@ export function useHomeTimelineData(
         const contexts = await listContextPeriods(db);
 
         // Verifica feature utilizzabili (valence + energy non nulli)
-        const features = await getFeatures(db);
+        const features = await db.features.toArray();
         const featureByTrack = new Map(features.map((f) => [f.trackId, f]));
         let hasUsableFeatures = false;
         for (const listen of listens) {

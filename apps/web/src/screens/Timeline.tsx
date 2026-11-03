@@ -30,7 +30,7 @@ import {
 } from './homeTimelineModel';
 
 /** Stati della Timeline (`06§2.7`). */
-export type TimelineState = 'empty' | 'partial' | 'loading' | 'ready' | 'error';
+export type TimelineState = 'empty' | 'no-features' | 'partial' | 'loading' | 'ready' | 'error';
 
 export interface TimelineProps {
   state: TimelineState;

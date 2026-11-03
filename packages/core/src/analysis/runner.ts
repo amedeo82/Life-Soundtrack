@@ -7,7 +7,9 @@
  */
 
 import type { LifeSoundtrackDB } from '../db';
-import type { InsightType } from '../schema';
+import type { Insight, InsightType } from '../schema';
+import type { Logger } from '../logger';
+import type { Translator } from './i18n';
 import {
   createEraGenerator,
   createEventGenerator,
@@ -16,8 +18,6 @@ import {
   AnalysisPipeline,
   type AnalysisInput,
   type AnalysisGenerator,
-  type Logger,
-  type Translator,
 } from './pipeline';
 
 /** Opzioni di esecuzione dell'analisi. */
@@ -148,7 +148,7 @@ export async function runAnalysisPipeline(options: AnalysisRunOptions): Promise<
   const derivedVersionByType = new Map<InsightType, string>();
   for (const [type, arr] of byType) {
     if (arr.length > 0) {
-      derivedVersionByType.set(type, arr[0].derivedVersion);
+      derivedVersionByType.set(type, arr[0]!.derivedVersion);
     }
   }
 

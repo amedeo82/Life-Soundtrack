@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createAnalysisRunner } from '../analysisRunner';
 import { openDb } from '@core/db';
-import { i18n } from '../i18n';
+import { i18n } from '../../i18n';
 import { createLogger } from '@core/logger';
 
 /**
