@@ -16,6 +16,96 @@ let permissionBlocks = 0;
 let permissionScopes = 0;
 let pushers = 0;
 
+// === Issue #283 - nessuna action su Node 20 nei workflow ===
+//
+// Node 20 e' stato rimosso dai runner GitHub il 2026-09-23 (changelog
+// GitHub del 2025-09-19, aggiornato il 2026-08-25): le action che dichiarano
+// `using: 'node20'` non girano piu' su un runtime supportato. Il runner le
+// forza su Node 24, ma il runtime dichiarato resta fuori supporto.
+//
+// La mappa elenca, per ogni action di terze parti usata dal repository, la
+// PRIMA major che dichiara `using: node24`. Il gate e' fail-closed: un'azione
+// assente dalla mappa non e' verificabile, e un'azione non verificabile non e'
+// un'azione accettata (la si dichiara nella mappa con la sua major node24).
+const NODE24_ACTIONS = new Map([
+  ['actions/checkout', 'v5'], // v6: creds su file separato | v7: blocco dei fork
+  ['actions/setup-node', 'v5'], // v6: caching automatico limitato a npm | v7: ESM
+  ['actions/github-script', 'v8'], // v9: getOctokit iniettato come parametro ESM
+  ['pnpm/action-setup', 'v5'], // v6: supporto pnpm v11
+  ['actions/upload-artifact', 'v6'], // v7: upload diretto, ESM
+  ['actions/download-artifact', 'v7'], // v8: ESM, digest-mismatch = error
+]);
+
+/** La major numerica di un tag `vN` (null se il riferimento non e' una major). */
+function majorOf(ref) {
+  const m = /^v(\d+)$/.exec(ref);
+  return m ? Number(m[1]) : null;
+}
+
+let node24Refs = 0;
+
+function checkNode24Actions(dir) {
+  let bad = 0;
+  const files = readdirSync(dir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
+  for (const file of files) {
+    const text = readFileSync(join(dir, file), 'utf8');
+    const lines = text.split('\n').map((l) => (l.endsWith('\r') ? l.slice(0, -1) : l));
+    let fileRefs = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // un COMMENTO non e' una reference: `uses:` in un commento non esegue nulla
+      if (line.trim().startsWith('#')) continue;
+      const m = line.match(/^\s*(?:-\s+)?uses:\s*(\S+)/);
+      if (!m) continue;
+      const ref = m[1].trim().replace(/^['"]|['"]$/g, '');
+      // azioni locali (`.github/actions/...`) e docker: nessun runtime dichiarato
+      if (ref.startsWith('./') || ref.startsWith('../') || ref.startsWith('docker://')) continue;
+      const at = ref.lastIndexOf('@');
+      if (at < 0) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`uses: ${ref}\` non dichiara una versione: il runtime non e' verificabile.`,
+        );
+        bad++;
+        continue;
+      }
+      const action = ref.slice(0, at);
+      const version = ref.slice(at + 1);
+      const min = NODE24_ACTIONS.get(action);
+      if (!min) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`${ref}\` non e' in NODE24_ACTIONS: il runtime dichiarato non e' verificabile.`,
+        );
+        console.error(
+          `       Dichiarala nella mappa con la prima major su node24 (azioni note: ${[...NODE24_ACTIONS.keys()].join(', ')}).`,
+        );
+        bad++;
+        continue;
+      }
+      const major = majorOf(version);
+      if (major === null) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`${ref}\` non e' pinnata a una major (attesa la forma \`vN\`): il runtime non e' verificabile.`,
+        );
+        bad++;
+        continue;
+      }
+      fileRefs++;
+      node24Refs++;
+      if (major < majorOf(min)) {
+        console.error(
+          `[FAIL] ${file}:${i + 1}: \`${ref}\` dichiara il runtime node20 (prima major su node24: ${min}).`,
+        );
+        console.error(
+          "       Node 20 e' stato rimosso dai runner il 2026-09-23: le action node20 girano fuori supporto (issue #283).",
+        );
+        bad++;
+      }
+    }
+    if (fileRefs > 0) console.log(`[OK] ${file}: ${fileRefs} reference a action, nessuna su node20`);
+  }
+  return bad;
+}
+
 // === Issue #135 — le scope di `permissions:` devono essere dichiarabili ===
 //
 // Elenco preso da "Workflow syntax for GitHub Actions" -> permissions.
@@ -791,8 +881,9 @@ function checkWorkflowRunCheckout(dir) {
 failures += checkSingleWriter(dir);
 failures += checkWriterTrigger(dir);
 failures += checkWorkflowRunCheckout(dir);
+failures += checkNode24Actions(dir);
 
 console.log(
-  `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${failures} fallimenti.`,
+  `\nWorkflow: ${checked} blocchi script verificati, ${permissionScopes} scope permissions verificate in ${permissionBlocks} blocchi, ${pushers} writer di main verificati, ${node24Refs} reference a action su node24, ${failures} fallimenti.`,
 );
 process.exit(failures === 0 ? 0 : 1);

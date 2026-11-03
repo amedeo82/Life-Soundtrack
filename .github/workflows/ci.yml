@@ -579,6 +579,16 @@ jobs:
       - name: Validita' YAML dei workflow (sessione 74)
         run: bash scripts/test-workflow-yaml-scalars.sh
 
+      # Issue #283: Node 20 e' stato rimosso dai runner GitHub il 2026-09-23.
+      # Le action che dichiarano `using: 'node20'` girano fuori supporto: il
+      # runner le forza su Node 24, ma il runtime dichiarato resta deprecato.
+      # Il gate vive in validate-workflows.mjs (run precedente); questo test ne
+      # verifica lo scenario negativo — reintroduce un runtime node20 in una
+      # fixture e verifica che il gate esca 1 (un gate che passa sempre non e'
+      # un gate, lesson 43-1).
+      - name: Nessuna action su node20 (issue #283)
+        run: bash scripts/test-workflow-node24-actions.sh
+
   # ---------------------------------------------------------------------------
   # 5b. Gate di PORTABILITA' dei generatori (issue #284).
   #
