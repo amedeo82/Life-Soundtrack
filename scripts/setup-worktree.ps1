@@ -43,6 +43,10 @@
 .PARAMETER NoPush
     Non eseguire il push early (D.20.2). Default: false (push early abilitato).
 
+.PARAMETER SkipInstall
+    Non eseguire `pnpm install --frozen-lockfile` nella worktree nuova (issue #306).
+    Default: false.
+
 .PARAMETER Help
     Mostra questo help.
 
@@ -83,6 +87,8 @@ param(
     [switch]$SkipGhCheck,
 
     [switch]$NoPush,
+
+    [switch]$SkipInstall,
 
     [switch]$Help
 )
@@ -274,7 +280,49 @@ try {
     Pop-Location
 }
 
-# === 9. Push early (D.20.2) ===
+# === 9. Install delle dipendenze nella worktree (issue #306) ===
+#
+# L'hook `commit-msg` esegue `commitlint` e **salta silenziosamente** (WARN,
+# exit 0) quando `node_modules/.bin` non esiste. In una worktree appena
+# creata `node_modules` non esiste: la convenzione Conventional Commits non
+# veniva quindi verificata AL MOMENTO DEL COMMIT, e il primo controllo era
+# quello in CI. E' successo con la PR #305: due body di commit violavano
+# `body-max-line-length` (100 caratteri per riga) e il difetto e' stato
+# scoperto dai gate, non dall'hook.
+#
+# `pnpm install --frozen-lockfile` popola `node_modules` (lo store di pnpm e'
+# gia' locale: il costo e' di qualche secondo) e rende l'hook EFFETTIVO.
+#
+# L'installazione NON e' fatale: senza `pnpm` o senza rete la worktree resta
+# comunque utilizzabile, e l'agente puo' installare le dipendenze quando
+# servono. Il fallimento e' annunciato, non silenzioso.
+if ($SkipInstall) {
+    Write-Step "Install delle dipendenze SKIPPATO (SkipInstall attivo)." -ForegroundColor Yellow
+} else {
+    Write-Step "Install delle dipendenze nella worktree (issue #306)..."
+    Push-Location $WorktreePath
+    try {
+        if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+            Write-Warn "pnpm non trovato nel PATH: l'hook `commit-msg` saltera' commitlint."
+            Write-Host "[setup-worktree]   Installa pnpm, poi: cd $WorktreePath ; pnpm install --frozen-lockfile" -ForegroundColor Cyan
+        } else {
+            $global:LASTEXITCODE = 0
+            $installOut = & pnpm install --frozen-lockfile 2>&1
+            $installCode = $LASTEXITCODE
+            $installOut | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkGray }
+            if ($installCode -eq 0) {
+                Write-Step "Dipendenze installate: l'hook `commit-msg` verifica davvero Conventional Commits." -ForegroundColor Green
+            } else {
+                Write-Warn "pnpm install fallito (exit $installCode): l'hook `commit-msg` saltera' commitlint."
+                Write-Host "[setup-worktree]   Installa le dipendenze a mano: cd $WorktreePath ; pnpm install --frozen-lockfile" -ForegroundColor Cyan
+            }
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
+# === 10. Push early (D.20.2) ===
 if (-not $NoPush) {
     Write-Step "Push early (D.20.2)..."
     git push -u origin $BranchName | Out-Null
@@ -290,7 +338,7 @@ if (-not $NoPush) {
     Write-Step "Push early SKIPPATO (NoPush attivo)." -ForegroundColor Yellow
 }
 
-# === 10. Output finale ===
+# === 11. Output finale ===
 Write-Step ""
 Write-Step "==============================================" -ForegroundColor Green
 Write-Step "Worktree pronta. Prossimi passi:" -ForegroundColor Green

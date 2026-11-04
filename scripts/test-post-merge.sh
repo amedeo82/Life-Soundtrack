@@ -20,6 +20,10 @@
 #   T13 catena completa su Windows PowerShell 5.1: L1 (git) e L2 (Remove-Item)
 #      falliscono, interviene L3 (`rd /s /q "\\?\"`)
 #   T14 rete di sicurezza L3 forzata (LIFE_SOUNDTRACK_WT_REMOVAL=rd)
+#   T15 residuo post-"Result too large": git rimuove la REGISTRAZIONE e si
+#      arrende (fallback L4: il path veniva da `git worktree list`)
+#   T16 node_modules nella worktree: rimosso PRIMA di `git worktree remove`
+#      (L0: e' la causa dei path > MAX_PATH)
 #
 # Richiede: git, bash e pwsh (o Windows PowerShell come fallback).
 set -uo pipefail
@@ -89,6 +93,55 @@ done
 exec "$REAL_GIT" "\$@"
 EOF
     chmod +x "$SHIM_DIR/git"
+  fi
+}
+
+# Installa uno shim di `git` che simula il caso REALE "Result too large":
+# git rimuove la REGISTRAZIONE della worktree (e il marker `.git`) e POI si
+# arrende, lasciando sul disco una directory residua che non e' piu' una
+# worktree registrata. E' il caso in cui la guardia di sicurezza non trova
+# ne' la registrazione ne' il marker: senza il fallback L4 la procedura
+# si fermerebbe con exit 16 e la rimozione manuale diventerebbe la norma.
+install_git_shim_deregistering() {
+  SHIM_DIR="$(mktemp -d)"
+  REAL_GIT="$(command -v git)"
+  cat > "$SHIM_DIR/git-shim.sh" <<EOF
+#!/usr/bin/env bash
+# Shim: su \`worktree remove\` rimuove la registrazione della worktree e il
+# marker \`.git\`, poi fallisce con "Result too large".
+REAL_GIT="$REAL_GIT"
+prev=""
+is_remove=0
+target=""
+for a in "\$@"; do
+  if [ "\$prev" = "worktree" ] && [ "\$a" = "remove" ]; then is_remove=1; fi
+  if [ -d "\$a" ]; then target="\$a"; fi
+  prev="\$a"
+done
+if [ "\$is_remove" = "1" ]; then
+  if [ -n "\$target" ]; then
+    gitdir="\$("\$REAL_GIT" rev-parse --absolute-git-dir 2>/dev/null)"
+    name="\$(\$(basename "\$target"))"
+    rm -f "\$target/.git" 2>/dev/null || true
+    rm -rf "\$gitdir/worktrees/\$name" 2>/dev/null || true
+  fi
+  echo "error: failed to delete '\$target': Result too large" >&2
+  exit 255
+fi
+exec "\$REAL_GIT" "\$@"
+EOF
+  chmod +x "$SHIM_DIR/git-shim.sh"
+  if is_windows; then
+    # Il pwsh nativo risolve `git` via PATHEXT: il wrapper `.cmd` chiama
+    # bash per ABSOLUTO, cosi' non dipende da `bash` nel PATH di cmd.exe.
+    local bash_win
+    bash_win="$(cygpath -w "$(command -v bash)")"
+    cat > "$SHIM_DIR/git.cmd" <<EOF
+@echo off
+"$bash_win" "%~dp0git-shim.sh" %*
+EOF
+  else
+    cp "$SHIM_DIR/git-shim.sh" "$SHIM_DIR/git"
   fi
 }
 
@@ -441,6 +494,51 @@ echo "=== T14: rete di sicurezza L3 (rd /s /q \"\\\\?\\\") forzata ==="
 
     cd /; rm -rf "$D" "$SHIM_DIR"
   fi
+}
+
+echo "=== T15: residuo post-'Result too large' (git deregistra e si arrende) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+
+  # `node_modules` (non tracciato) nella worktree: e' la causa dei path >
+  # MAX_PATH che fanno fallire `git worktree remove` su Windows.
+  mkdir -p "$D/wt/node_modules/.pnpm/pkg"
+  echo "x" > "$D/wt/node_modules/.pnpm/pkg/index.js"
+
+  install_git_shim_deregistering
+  OLD_PATH="$PATH"
+  export PATH="$SHIM_DIR:$PATH"
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  export PATH="$OLD_PATH"
+
+  if [ $rc -eq 0 ]; then ok "exit 0 con il residuo (fallback L4)"; else ng "exit $rc invece di 0"; echo "$out" | tail -25; fi
+  if [ ! -d "$D/wt" ]; then ok "residuo rimosso dal filesystem"; else ng "residuo ancora presente"; fi
+  if git worktree list | grep -q "$D/wt"; then ng "worktree ancora registrata"; else ok "worktree deregistrata"; fi
+  if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+  if branch_exists_remotely feat/x; then ng "branch remoto ancora presente"; else ok "branch remoto eliminato"; fi
+
+  cd /; rm -rf "$D" "$SHIM_DIR"
+}
+
+echo "=== T16: node_modules rimosso PRIMA di git worktree remove (L0) ==="
+{
+  D="$(mktemp -d)"; make_repo "$D" 1; cd "$D/work" || exit 1
+  do_merge_commit
+
+  mkdir -p "$D/wt/node_modules/.pnpm/pkg"
+  echo "x" > "$D/wt/node_modules/.pnpm/pkg/index.js"
+
+  out="$(run_ps -Branch feat/x)"; rc=$?
+  # L0 e' osservabile: la procedura dichiara la rimozione di node_modules
+  # PRIMA di chiedere a git di rimuovere la worktree. E' la rimozione che
+  # evita i path > MAX_PATH (la causa del fallimento "Result too large").
+  if echo "$out" | grep -q "rimuovo node_modules dalla worktree"; then ok "L0 dichiarato (node_modules rimosso prima di git)"; else ng "L0 non dichiarato"; echo "$out" | tail -20; fi
+  if [ $rc -eq 0 ]; then ok "exit 0 con node_modules nella worktree"; else ng "exit $rc invece di 0"; echo "$out" | tail -20; fi
+  if [ ! -d "$D/wt" ]; then ok "worktree rimossa"; else ng "worktree ancora presente"; fi
+  if branch_exists_locally feat/x; then ng "branch locale ancora presente"; else ok "branch locale eliminato"; fi
+
+  cd /; rm -rf "$D"
 }
 
 echo ""

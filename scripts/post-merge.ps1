@@ -234,7 +234,11 @@ function Normalize-Path {
 # con "Filename too long" / "Result too large" quando la worktree contiene
 # `node_modules` con path > MAX_PATH (260 caratteri).
 #
-# La rimozione e' difesa su tre livelli:
+# La rimozione e' difesa su cinque livelli:
+#   L0  rimozione preventive di `node_modules` dalla worktree: non e' mai
+#       tracciato da git, ma i suoi path superano MAX_PATH. E' la CAUSA del
+#       fallimento di L1 ("Result too large"), non una sua conseguenza:
+#       eliminatinga a priori, L1 diventa superfluo nel caso normale.
 #   L1  `git -c core.longpaths=true worktree remove --force` -> git usa il
 #       prefisso `\\?\` internamente e rimuove l'albero correttamente.
 #   L2  fallback nativo: `Remove-Item -Recurse -Force`. PowerShell 7 e'
@@ -243,6 +247,12 @@ function Normalize-Path {
 #       Non segue le junction: il contenuto collegato resta intatto.
 #   L3  rete di sicurezza per Windows PowerShell 5.1 (non long-path-aware):
 #       `rd /s /q "\\?\<path>"` via cmd.exe, che non segue le junction.
+#   L4  residuo post-"Result too large": quando L1 fallisce DOPO aver gia'
+#       rimosso la registrazione della worktree, la guardia di sicurezza non
+#       ritrova piu' né la registrazione né il marker `.git`. Il path e'
+#       pero' stato letto da `git worktree list` di QUESTO repo PRIMA del
+#       tentativo: e' la prova che la directory residua e' una worktree di
+#       questo repo, e ne autorizza la rimozione.
 #
 # Il fallback manuale e' consentito SOLO su una directory che e' davvero
 # una worktree di questo repo (registrata da `git worktree list`, o con il
@@ -390,6 +400,28 @@ function Remove-WorktreeSafely {
         return [pscustomobject]@{ Success = $true; Method = "gia' assente"; Detail = "" }
     }
 
+    # La worktree e' registrata in QUESTO momento? La domanda va posta
+    # PRIMA di L1: se git fallisce con "Result too large" ha gia' rimosso la
+    # registrazione (e parte dell'albero), e la guardia di sicurezza di
+    # sotto non la ritroverebbe piu'. Il path letto da `git worktree list` di
+    # QUESTO repo PRIMA del tentativo e' la prova che la directory residua
+    # appartiene a questo repo: e' cio' che autorizza il fallback L4.
+    $wasRegistered = @((Get-Worktrees) | Where-Object {
+        -not $_.Main -and (Normalize-Path $_.Path) -eq (Normalize-Path $abs)
+    }).Count -gt 0
+
+    # L0: `node_modules` non e' mai tracciato da git (e' in .gitignore), quindi
+    # non puo' contenere lavoro da perdere, ma i suoi path superano MAX_PATH:
+    # e' la causa del fallimento "Result too large" di L1. Rimuoverlo PRIMA
+    # rende L1 (che di per se' fallisce) superfluo nel caso normale. Con
+    # l'installazione delle dipendenze nella worktree (issue #306) questo e'
+    # il percorso normale, non l'eccezione.
+    $nodeModules = Join-Path $abs "node_modules"
+    if (Test-Path -LiteralPath $nodeModules) {
+        Write-Host "[post-merge]       rimuovo node_modules dalla worktree (non tracciato da git: evita i path > MAX_PATH)" -ForegroundColor DarkGray
+        $null = Remove-LongPathTree -Path $nodeModules
+    }
+
     # L1: git con core.longpaths=true (risolve "Filename too long" / "Result too large")
     $res = Invoke-Git -GitArgs @("-c", "core.longpaths=true", "worktree", "remove", "--force", $abs) -AllowFail
     if ($res.ExitCode -eq 0) {
@@ -410,8 +442,22 @@ function Remove-WorktreeSafely {
         # (path lunghi di node_modules) AFTER aver rimosso la registrazione e
         # parte dell'albero. La directory residua non e' piu' una worktree
         # registrata e non ha piu' il marker `.git`: per questo la guardia non
-        # la riconosce, ed e' corretto non rimuovere una directory che non si
-        # puo' dimostrare essere di questo repo.
+        # la riconosce.
+        #
+        # L4: se il path proveniva da `git worktree list` di QUESTO repo
+        # PRIMA del tentativo (registrazione catturata in `$wasRegistered`),
+        # allora la directory residua e' dimostrabilmente una worktree di
+        # questo repo e la si puo' rimuovere. La working copy principale e i
+        # suoi antenati restano esclusi dalla guardia sopra.
+        if ($wasRegistered) {
+            Write-Host "[post-merge]       git aveva gia' rimosso la registrazione: rimuovo il residuo (long-path-safe)" -ForegroundColor DarkGray
+            if (-not (Remove-LongPathTree -Path $abs)) {
+                return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "rimozione manuale del residuo fallita" }
+            }
+            Invoke-Git -GitArgs @("worktree", "prune") -Quiet -AllowFail | Out-Null
+            return [pscustomobject]@{ Success = $true; Method = "fallback long-path-safe (residuo)"; Detail = "" }
+        }
+        # Nessuna prova che la directory sia di questo repo: non si rimuove.
         return [pscustomobject]@{ Success = $false; Method = "nessuno"; Detail = "la directory non e' una worktree registrata di questo repo (git potrebbe averne rimosso la registrazione prima di fallire con 'Result too large': in quel caso e' un residuo da rimuovere a mano)" }
     }
 

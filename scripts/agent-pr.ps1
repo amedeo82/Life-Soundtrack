@@ -15,7 +15,9 @@
 
     Sequenza:
       1. legge il file di stato dell'agente e verifica la branch
-      2. esegue i gate locali bloccanti
+      2. esegue i gate locali bloccanti (issue #306: la batteria copre i gate
+         che la CI esegue — Conventional Commits sul range della PR e gate dei
+         workflow — perche' l'agente veda il verdetto PRIMA di aprire la PR)
       3. verifica che il body contenga UNA sola keyword di chiusura, nuda
       4. crea la PR
       5. transiziona le label (`agent-ready` -> `status:in-review`)
@@ -77,9 +79,25 @@ if ($branch -notmatch "^(feat|fix)/$IssueNumber-") {
 Say "issue #$IssueNumber, branch $branch, agent $($state.agent_id)" "DarkGray"
 
 # --- 2. gate locali bloccanti ----------------------------------------------
+#
+# La batteria locale deve coprire i gate che la CI esegue: e' l'unico punto
+# in cui l'agente vede il verdetto PRIMA di aprire la PR. Con 4 controlli
+# (precedenti) la PR #305 e' passata "gate locali verdi" e la CI l'ha poi
+# resa rossa su due job (`gates-protocol` e `gates-workflows`): due round-
+# trip sprecati, e un difetto che l'agente non aveva modo di vedere.
+#
+# I gate locali hanno tre esiti, distinti perche' i tre hanno effetti diversi:
+#   fallito  -> BLOCCA l'apertura della PR (il gate era eseguibile e ha
+#               trovato un difetto: e' esattamente il caso da intercettare)
+#   saltato  -> NON blocca, ma viene DICHIARATO nel riepilogo: il gate non era
+#               eseguibile in questo ambiente (es. `bash` assente), e la CI
+#               lo eseguira' comunque. Un salto silenzioso sarebbe un gate
+#               che "passa sempre" (lesson 43-1)
+#   eseguito -> verde
 if (-not $SkipChecks) {
     Say "eseguo i gate locali..." "Cyan"
     $failures = @()
+    $skipped = @()
     $node = "node"
 
     & $node (Join-Path $repoRoot "scripts/check-protocol-consistency.mjs") | Out-Host
@@ -95,6 +113,71 @@ if (-not $SkipChecks) {
     & pwsh -NoProfile -File (Join-Path $repoRoot "scripts/generate-bundle.ps1") -Check | Out-Host
     if ($LASTEXITCODE -ne 0) { $failures += "generate-bundle.ps1 -Check" }
 
+    # --- Conventional Commits sul range della PR (job `gates-protocol`) ---
+    # Stesso comando del gate bloccante della CI: `commitlint --from <base>
+    # --to <head>`. La convenzione e' normativa (AGENTS.md, "Git workflow").
+    #
+    # Il range va letto contro `origin/$Base` ACCURATO: senza un fetch il
+    # ref puo' essere stale e il controllo girerebbe su un range sbagliato.
+    $global:LASTEXITCODE = 0
+    & git fetch origin --quiet 2>$null
+    $baseRef = "origin/$Base"
+    & git rev-parse --verify --quiet $baseRef | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[agent-pr] ERRORE: il ref $baseRef non esiste: il range dei commit non e' verificabile." -ForegroundColor Red
+        Write-Host "[agent-pr]   Risolvilo con: git fetch origin" -ForegroundColor Yellow
+        $failures += "commitlint (ref $baseRef non trovato)"
+    }
+    elseif (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+        Say "commitlint: saltato (pnpm non nel PATH): la CI lo eseguira'" "Yellow"
+        $skipped += "commitlint (pnpm assente)"
+    }
+    elseif (-not (Test-Path (Join-Path $repoRoot "node_modules/.bin"))) {
+        # L'hook `commit-msg` salta commitlint quando `node_modules` non
+        # esiste, e la worktree appena creata NON lo aveva (issue #306): la
+        # convenzione non veniva verificata al momento del commit. Qui il
+        # controllo non e' "non eseguibile per assenza di tool": e' eseguibile
+        # e va eseguito, quindi BLOCCA finche' l'agente non installa.
+        Write-Host "[agent-pr] ERRORE: node_modules assente: commitlint non puo' girare." -ForegroundColor Red
+        Write-Host "[agent-pr]   Risolvilo con: pnpm install --frozen-lockfile" -ForegroundColor Yellow
+        $failures += "commitlint (node_modules assente)"
+    }
+    else {
+        & pnpm exec commitlint --from $baseRef --to HEAD | Out-Host
+        if ($LASTEXITCODE -ne 0) { $failures += "commitlint (Conventional Commits)" }
+    }
+
+    # --- Gate dei workflow (job `gates-workflows`) ---
+    # Validatore dei workflow e sintassi dei blocchi `run:`: moduli built-in di
+    # node, sempre eseguibili.
+    & $node (Join-Path $repoRoot "scripts/validate-workflows.mjs") ".github/workflows" | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "validate-workflows.mjs" }
+
+    & $node (Join-Path $repoRoot "scripts/check-workflow-syntax.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "check-workflow-syntax.mjs" }
+
+    # Test FUNZIONALE del writer post-merge: e' il gate che ha reso rossa la
+    # PR #305 (un numero di sessione duplicato nel fixture faceva fallire
+    # `aggregate-state.ps1 -Check` dentro il clone temporaneo del test).
+    $writerTest = Join-Path $repoRoot "scripts/test-post-merge-writer.sh"
+    if (Test-Path $writerTest) {
+        # `bash` puo' essere uno stub non funzionante (WindowsApps): la
+        # disponibilita' si verifica PROBANDOLO, non guardando il PATH.
+        $global:LASTEXITCODE = 0
+        & bash -c "exit 0" 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Say "test-post-merge-writer.sh: saltato (bash non utilizzabile): la CI lo eseguira'" "Yellow"
+            $skipped += "test-post-merge-writer.sh (bash non utilizzabile)"
+        }
+        else {
+            & bash $writerTest | Out-Host
+            if ($LASTEXITCODE -ne 0) { $failures += "test-post-merge-writer.sh" }
+        }
+    }
+
+    if ($skipped.Count -gt 0) {
+        Say "gate saltati (non eseguibili in questo ambiente, li eseguira' la CI): $($skipped -join ', ')" "Yellow"
+    }
     if ($failures.Count -gt 0) {
         Write-Host "[agent-pr] ERRORE: gate locali falliti: $($failures -join ', ')" -ForegroundColor Red
         exit 1
@@ -214,7 +297,7 @@ else {
 # --- 7. prossimi passi ------------------------------------------------------
 Write-Host ""
 Write-Host "[agent-pr] prossimi passi:" -ForegroundColor Cyan
-Write-Host "  1. attendi la review (CI: 13 check)"
+Write-Host "  1. attendi la review (CI: 17 check)"
 Write-Host "  2. al merge: pwsh scripts/post-merge.ps1 -Branch $branch -IssueNumber $IssueNumber"
 Write-Host ""
 exit 0

@@ -8,6 +8,8 @@
 # Scenari:
 #   T1 - Sessione singola matching -> step 6 scrive pr: N, exit 0
 #   T2 - Nessuna sessione matching -> warning "NESSUN file di sessione", exit 0
+#   T3 - Gate locale: Conventional Commits non conforme -> PR NON aperta
+#   T4 - Gate locale: test del writer post-merge rosso -> PR NON aperta
 #
 # Uso: bash scripts/test-agent-pr.sh
 # Richiede: bash, git, pwsh.
@@ -113,6 +115,15 @@ EOF
   mkdir -p scripts
   cp "$SCRIPT_DIR/agent-pr.ps1" scripts/agent-pr.ps1
 
+  # Il gate del writer post-merge (job `gates-workflows`) gira solo se lo
+  # script esiste: nel repo mock ne basta la presenza.
+  cp "$SCRIPT_DIR/test-post-merge-writer.sh" scripts/test-post-merge-writer.sh 2>/dev/null \
+    || echo "# stub" > scripts/test-post-merge-writer.sh
+
+  # `node_modules/.bin` e' il segnale che agent-pr.ps1 usa per decidere se
+  # commitlint e' eseguibile (issue #306).
+  mkdir -p node_modules/.bin
+
   echo "$repo_dir"
 }
 
@@ -133,6 +144,7 @@ if ($args[0] -eq "issue" -and $args[1] -eq "view") {
   exit 0
 }
 if ($args[0] -eq "pr" -and $args[1] -eq "create") {
+  if ($env:MOCK_GH_LOG) { Add-Content -Path $env:MOCK_GH_LOG -Value "pr create" }
   "https://github.com/test/test/pull/77"
   exit 0
 }
@@ -149,6 +161,57 @@ EOF
   export PATH="$mock_bin:$PATH"
 }
 
+# Mock pnpm: `pnpm exec commitlint` fallisce (simula un body di commit che
+# viola `body-max-line-length`).
+make_mock_pnpm() {
+  local tmpdir="$1"
+  local mock_bin="$tmpdir/mock-bin"
+  mkdir -p "$mock_bin"
+  cat > "$mock_bin/pnpm" <<'EOF'
+#!/usr/bin/env bash
+if [ "$1" = "exec" ] && [ "$2" = "commitlint" ]; then
+  echo "mock commitlint: body's lines must not be longer than 100 characters [body-max-line-length]" >&2
+  exit 1
+fi
+exit 0
+EOF
+  chmod +x "$mock_bin/pnpm"
+  if uname -s 2>/dev/null | grep -qi 'mingw\|msys\|cygwin\|windows'; then
+    cat > "$mock_bin/pnpm.cmd" <<'EOF'
+@echo off
+if "%1"=="exec" if "%2"=="commitlint" (
+  echo mock commitlint: body's lines must not be longer than 100 characters 1>&2
+  exit /b 1
+)
+exit /b 0
+EOF
+  fi
+}
+
+# Mock bash: il probe di disponibilita' (`bash -c "exit 0"`) passa, ma
+# l'esecuzione di uno script fallisce: simula il gate del writer post-merge
+# che non passa.
+make_mock_bash() {
+  local tmpdir="$1"
+  local mock_bin="$tmpdir/mock-bin"
+  mkdir -p "$mock_bin"
+  cat > "$mock_bin/bash" <<'EOF'
+#!/usr/bin/env bash
+if [ "$1" = "-c" ]; then exit 0; fi
+echo "mock bash: script fallito" >&2
+exit 1
+EOF
+  chmod +x "$mock_bin/bash"
+  if uname -s 2>/dev/null | grep -qi 'mingw\|msys\|cygwin\|windows'; then
+    local bash_win
+    bash_win="$(cygpath -w "$(command -v bash)")"
+    cat > "$mock_bin/bash.cmd" <<EOF
+@echo off
+"$bash_win" "%~dp0bash" %*
+EOF
+  fi
+}
+
 # File body con keyword di chiusura nuda per issue 286.
 make_body_file() {
   local tmpdir="$1"
@@ -163,11 +226,27 @@ EOF
 }
 
 cleanup() {
-  if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then
-    rm -rf "$TMPDIR"
+  # Rimuove SOLO la directory creata dal test (`TEST_TMPDIR`).
+  #
+  # `TMPDIR` puo' essere la directory temporanea DI SISTEMA (Windows: %TEMP%,
+  # cioe' C:\Users\<utente>\AppData\Local\Temp): rimuoverla a quel punto
+  # cancellerebbe i file temporanei di altri programmi. Il bug era gia' nel
+  # test (la `trap cleanup EXIT` rimuoveva `$TMPDIR`, che a quel punto era
+  # gia' stato ripristinato sul valore ORIGINALE) e si e' manifestato su
+  # Windows, dove `TMPDIR` e' impostata: `rm -rf /tmp` ha cancellato la
+  # `%TEMP%` dell'utente. Da qui la separazione esplicita.
+  if [ -n "${TEST_TMPDIR:-}" ] && [ -d "$TEST_TMPDIR" ]; then
+    rm -rf "$TEST_TMPDIR"
   fi
+  TEST_TMPDIR=""
   if [ -n "$ORIG_TMPDIR" ]; then export TMPDIR="$ORIG_TMPDIR"; else unset TMPDIR; fi
   export PATH="$ORIG_PATH"
+}
+
+# Crea la directory di lavoro del test e la registra per la pulizia.
+new_tmpdir() {
+  TEST_TMPDIR="$(mktemp -d)"
+  export TMPDIR="$TEST_TMPDIR"
 }
 
 trap cleanup EXIT
@@ -175,7 +254,7 @@ trap cleanup EXIT
 # === T1: Sessione singola matching -> step 6 scrive pr: 77, exit 0 ===
 echo ""
 echo "Scenario T1: sessione singola matching (caso buggato pre-fix)"
-TMPDIR="$(mktemp -d)"
+new_tmpdir
 REPO_DIR="$(make_repo "$TMPDIR")"
 make_mock_gh "$TMPDIR"
 BODY_FILE="$(make_body_file "$TMPDIR")"
@@ -197,7 +276,7 @@ cleanup
 # === T2: Nessuna sessione matching -> warning "NESSUN file di sessione", exit 0 ===
 echo ""
 echo "Scenario T2: nessuna sessione matching"
-TMPDIR="$(mktemp -d)"
+new_tmpdir
 # session_branch diverso da branch lavoro -> nessun match
 REPO_DIR="$(make_repo "$TMPDIR" "feat/286-test" "feat/99-other")"
 make_mock_gh "$TMPDIR"
@@ -212,6 +291,60 @@ if [ "$EC" -eq 0 ] && echo "$OUTPUT" | grep -q "NESSUN file di sessione"; then
   pass "T2 nessuna sessione matching -> warning + exit 0"
 else
   fail "T2" "ec=$EC; output=$OUTPUT"
+fi
+cleanup
+
+# === T3: gate locale Conventional Commits rosso -> la PR NON viene aperta ===
+echo ""
+echo "Scenario T3: commitlint non conforme -> PR non aperta"
+new_tmpdir
+REPO_DIR="$(make_repo "$TMPDIR")"
+make_mock_gh "$TMPDIR"
+make_mock_pnpm "$TMPDIR"
+BODY_FILE="$(make_body_file "$TMPDIR")"
+BODY_FILE_PS="$(ps_path "$BODY_FILE")"
+export MOCK_GH_LOG="$TMPDIR/gh.log"
+
+cd "$REPO_DIR"
+LOCAL_SCRIPT_PS="$(ps_path "$REPO_DIR/scripts/agent-pr.ps1")"
+OUTPUT="$(pwsh "$LOCAL_SCRIPT_PS" -IssueNumber 286 -BodyFile "$BODY_FILE_PS" 2>&1)" && EC=0 || EC=$?
+
+if [ "$EC" -ne 0 ] && echo "$OUTPUT" | grep -q "commitlint"; then
+  pass "T3 commitlint non conforme -> uscita non zero (gate locale bloccante)"
+else
+  fail "T3" "ec=$EC; output=$OUTPUT"
+fi
+if [ -f "$MOCK_GH_LOG" ] && grep -q "pr create" "$MOCK_GH_LOG"; then
+  fail "T3" "la PR e' stata creata nonostante il gate rosso"
+else
+  pass "T3 nessuna PR creata (il gate ha bloccato prima di gh pr create)"
+fi
+cleanup
+
+# === T4: gate locale del writer post-merge rosso -> la PR NON viene aperta ===
+echo ""
+echo "Scenario T4: test del writer post-merge rosso -> PR non aperta"
+new_tmpdir
+REPO_DIR="$(make_repo "$TMPDIR")"
+make_mock_gh "$TMPDIR"
+make_mock_bash "$TMPDIR"
+BODY_FILE="$(make_body_file "$TMPDIR")"
+BODY_FILE_PS="$(ps_path "$BODY_FILE")"
+export MOCK_GH_LOG="$TMPDIR/gh.log"
+
+cd "$REPO_DIR"
+LOCAL_SCRIPT_PS="$(ps_path "$REPO_DIR/scripts/agent-pr.ps1")"
+OUTPUT="$(pwsh "$LOCAL_SCRIPT_PS" -IssueNumber 286 -BodyFile "$BODY_FILE_PS" 2>&1)" && EC=0 || EC=$?
+
+if [ "$EC" -ne 0 ] && echo "$OUTPUT" | grep -q "test-post-merge-writer.sh"; then
+  pass "T4 gate del writer rosso -> uscita non zero (gate locale bloccante)"
+else
+  fail "T4" "ec=$EC; output=$OUTPUT"
+fi
+if [ -f "$MOCK_GH_LOG" ] && grep -q "pr create" "$MOCK_GH_LOG"; then
+  fail "T4" "la PR e' stata creata nonostante il gate rosso"
+else
+  pass "T4 nessuna PR creata (il gate ha bloccato prima di gh pr create)"
 fi
 cleanup
 

@@ -194,6 +194,10 @@ $files = @(
     # Sessione 99 (issue #304): la spec della suite di test offline degli
     # script di protocollo (ADR-0014).
     "docs/state/sessions/99-test-suite-protocol-scripts.md",
+    # Sessione 100 (issue #306): la parita' fra i gate locali e i gate della CI
+    # (worktree con le dipendenze installate, batteria di `agent-pr.ps1`
+    # allineata alla CI, rimozione worktree long-path-safe con `node_modules`).
+    "docs/state/sessions/100-gate-locali-parita-ci.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
