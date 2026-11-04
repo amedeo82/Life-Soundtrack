@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 17:28
+> Data: 2026-11-04 17:53
 > Totale file: 194
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -22844,6 +22844,7 @@ sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). 
 | Un riferimento `#NNN` nel **body** di un messaggio di commit fa sì che `conventional-commits-parser` tratti tutto ciò che segue come **footer**, e commitlint segnala «footer must have leading blank line» su un messaggio corretto | nel body scrivere «la PR 305», non «la PR #305»; il titolo accetta il riferimento (`(issue #306)`). La regola è ora in AGENTS.md §"Git workflow" |
 | Un `git commit` senza elenco di path committa **tutto** l'index, e in un flusso a due commit il primo si mangia il secondo | ogni commit che deve portare **un solo** file lo dichiara esplicitamente (`git commit -- <path>`): il flusso "rigenera il bundle, poi committa la sessione" produceva una PR con `pr: 0` e un exit 1 **dopo** la PR aperta |
 | `pnpm exec` in un repository **senza dipendenze** non fallisce subito: tenta un'installazione dal registry | in CI ha bloccato il job `gates-procedure` per **20 minuti** (poi timeout). Il guard di `agent-pr.ps1` ora controlla il **binario** (`node_modules/.bin/commitlint`), non la cartella; i test mockano `pnpm` per non toccare la rete |
+| Un mock con shebang `#!/usr/bin/env bash`, **nel PATH**, chiama se stesso: ricorsione infinita (fork bomb) | i mock usano il percorso **assoluto** del bash reale (`REAL_BASH`, risolto dal `PATH` originale). Su Windows il wrapper `.cmd` lo faceva già: il difetto era invisibile in locale e si è manifestato **solo in CI** (Linux), bloccando il job per 20 minuti |
 | Il difetto più costoso non è quello che un gate intercetta, ma quello che **nessun gate guarda** | il numero di sessione hardcodato in un test era una mina armata: nessun gate lo poteva vedere, perché il difetto si manifestava solo dentro una directory temporanea |
 
 ## Documenti aggiornati
@@ -34584,6 +34585,26 @@ ripristinato sul valore **originale** — la directory temporanea di sistema (`%
 `C:\Users\<utente>\AppData\Local\Temp`). Il `rm -rf` ha quindi cancellato la `%TEMP%`
 dell'utente (il fallimento è rumoroso ma non fatale: i file in uso non si cancellano). La
 suite ora rimuove **solo** la directory che ha creato (`TEST_TMPDIR`).
+
+#### I mock dei test non devono potersi richiamare da soli
+
+Regola emersa dalla stessa sessione: un mock eseguibile con shebang
+`#!/usr/bin/env bash`, **messo nel `PATH`**, chiama se stesso e la ricorsione diventa
+infinita (fork bomb). Il blocco è invisibile in locale su Windows — dove il wrapper
+`.cmd` chiama il bash reale per percorso assoluto — e si manifesta **solo in CI su
+Linux**: il job `gates-procedure` è rimasto bloccato per 20 minuti (poi timeout) per
+due volte di fila, prima sul `pnpm exec` di rete e poi sul fork bomb.
+
+I mock di `scripts/test-agent-pr.sh` usano quindi il percorso **assoluto** del bash
+reale, risolto dal `PATH` **originale** (quello senza i mock):
+
+```bash
+ORIG_PATH="$PATH"
+REAL_BASH="$(PATH="$ORIG_PATH" command -v bash)"
+```
+
+Lo scenario **T4** verifica anche che il mock di `bash` non abbia uno shebang
+`env bash`: il controllo è nel test, non nella fiducia.
 
 #### I riferimenti `#NNN` nel body dei messaggi di commit
 

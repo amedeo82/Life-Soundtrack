@@ -55,6 +55,21 @@ TARGET_SCRIPT_PS="$(ps_path "$TARGET_SCRIPT")"
 ORIG_TMPDIR="${TMPDIR:-}"
 ORIG_PATH="$PATH"
 
+# Percorso ASSOLUTO del bash REALE.
+#
+# I mock (`pnpm`, `bash`) hanno uno shebang che richiama `bash`: se il mock
+# di `bash` finisce nel PATH (ed è il caso: i mock vivono nella stessa
+# directory), `#!/usr/bin/env bash` ritrova il MOCK STESSO e la ricorsione
+# diventa infinita — un fork bomb che in CI ha bloccato il job
+# `gates-procedure` per 20 minuti (poi timeout). Su Windows il wrapper
+# `.cmd` chiamava il bash reale per percorso assoluto, e il difetto non
+# compariva: è la differenza di piattaforma che lo nascondeva.
+#
+# `ORIG_PATH` è il PATH senza i mock: `command -v bash` li cerca lì e
+# restituisce il binario di sistema.
+REAL_BASH="$(PATH="$ORIG_PATH" command -v bash)"
+[ -n "$REAL_BASH" ] || REAL_BASH="/bin/sh"
+
 # Crea repo mock con branch feat/286-test, agent-state.json, file sessione.
 # $1 = tmpdir base
 # $2 = branch name (default feat/286-test)
@@ -200,7 +215,7 @@ make_mock_pnpm() {
   local mock_bin="$tmpdir/mock-bin"
   mkdir -p "$mock_bin"
   cat > "$mock_bin/pnpm" <<EOF
-#!/usr/bin/env bash
+#!$REAL_BASH
 if [ "\$1" = "exec" ] && [ "\$2" = "commitlint" ]; then
   if [ "$mode" = "fail" ]; then
     echo "mock commitlint: body's lines must not be longer than 100 characters [body-max-line-length]" >&2
@@ -237,9 +252,9 @@ make_mock_bash() {
   local tmpdir="$1"
   local mock_bin="$tmpdir/mock-bin"
   mkdir -p "$mock_bin"
-  cat > "$mock_bin/bash" <<'EOF'
-#!/usr/bin/env bash
-if [ "$1" = "-c" ]; then exit 0; fi
+  cat > "$mock_bin/bash" <<EOF
+#!$REAL_BASH
+if [ "\$1" = "-c" ]; then exit 0; fi
 echo "mock bash: script fallito" >&2
 exit 1
 EOF
@@ -394,6 +409,14 @@ if [ "$EC" -ne 0 ] && echo "$OUTPUT" | grep -q "test-post-merge-writer.sh"; then
   pass "T4 gate del writer rosso -> uscita non zero (gate locale bloccante)"
 else
   fail "T4" "ec=$EC; output=$OUTPUT"
+fi
+# Il mock di `bash` non puo' avere uno shebang `env bash`: il mock e' nel
+# PATH, `env` lo ritroverebbe e la ricorsione sarebbe infinita (fork bomb:
+# in CI il job `gates-procedure` e' rimasto bloccato 20 minuti).
+if head -1 "$TMPDIR/mock-bin/bash" | grep -q 'env bash'; then
+  fail "T4" "il mock di bash ha uno shebang 'env bash': rischio di ricorsione infinita"
+else
+  pass "T4 il mock di bash non puo' richiamare se stesso"
 fi
 if [ -f "$MOCK_GH_LOG" ] && grep -q "pr create" "$MOCK_GH_LOG"; then
   fail "T4" "la PR e' stata creata nonostante il gate rosso"

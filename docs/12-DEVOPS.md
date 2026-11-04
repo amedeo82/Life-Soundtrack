@@ -1507,6 +1507,26 @@ ripristinato sul valore **originale** — la directory temporanea di sistema (`%
 dell'utente (il fallimento è rumoroso ma non fatale: i file in uso non si cancellano). La
 suite ora rimuove **solo** la directory che ha creato (`TEST_TMPDIR`).
 
+#### I mock dei test non devono potersi richiamare da soli
+
+Regola emersa dalla stessa sessione: un mock eseguibile con shebang
+`#!/usr/bin/env bash`, **messo nel `PATH`**, chiama se stesso e la ricorsione diventa
+infinita (fork bomb). Il blocco è invisibile in locale su Windows — dove il wrapper
+`.cmd` chiama il bash reale per percorso assoluto — e si manifesta **solo in CI su
+Linux**: il job `gates-procedure` è rimasto bloccato per 20 minuti (poi timeout) per
+due volte di fila, prima sul `pnpm exec` di rete e poi sul fork bomb.
+
+I mock di `scripts/test-agent-pr.sh` usano quindi il percorso **assoluto** del bash
+reale, risolto dal `PATH` **originale** (quello senza i mock):
+
+```bash
+ORIG_PATH="$PATH"
+REAL_BASH="$(PATH="$ORIG_PATH" command -v bash)"
+```
+
+Lo scenario **T4** verifica anche che il mock di `bash` non abbia uno shebang
+`env bash`: il controllo è nel test, non nella fiducia.
+
 #### I riferimenti `#NNN` nel body dei messaggi di commit
 
 Regola scoperta nella stessa sessione e documentata in `AGENTS.md` §"Git workflow": un
