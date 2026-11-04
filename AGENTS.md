@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.45 — Sessione 98 (2026-11-04)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.46 — Sessione 100 (2026-11-04)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -259,6 +259,7 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 
 - Branch: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
 - Commit: **Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
+- **Nessun riferimento `#NNN` nel _body_ del messaggio** (il titolo lo accetta: `feat(x): … (issue #306)`). `conventional-commits-parser` considera **footer** tutto ciò che segue la prima riga che contiene un riferimento `#NNN`, e la regola `footer-leading-blank` di commitlint segnala allora un falso positivo («footer must have leading blank line») su un messaggio che è corretto. Nel body scrivi «la PR 305», non «la PR #305». *(issue #306, Sessione 100)*
 - Branch `main` protetto: richiede PR e review
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
