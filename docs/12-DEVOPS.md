@@ -1152,6 +1152,25 @@ Il dettaglio dei fix e delle misure è in **§9.14**; qui il solo stato di chius
 `TMPDIR` puntava a una directory già cancellata — la suite falliva su **qualsiasi** piattaforma.
 Il difetto era il *cleanup*, non la piattaforma.
 
+#### Copertura degli script di protocollo (`agent-claim.ps1`, `agent-pr.ps1`) *(issue #304, Sessione 99)*
+
+Il perimetro dell'audit precedente è quello delle **suite di test locali**. Restano fuori dal suo
+elenco gli **script di protocollo** che non hanno una suite: `scripts/agent-claim.ps1` (claim
+atomico, riverifica, `-Stale` con TTL 12 ore) e `scripts/agent-pr.ps1` (apertura della PR,
+transizione delle label, keyword di chiusura, `pr: N` nella sessione). Sono gli unici strumenti
+del protocollo che **parlano con GitHub**, e la loro copertura è:
+
+| Script | Copertura attuale | Difetto |
+|---|---|---|
+| `scripts/agent-claim.ps1` | **nessuna** | ogni regressione è intercettabile solo dal vivo: la regressione **#302** (il ramo di riverifica persa rimuoveva la label `in-progress`, contro ADR-0006 regola 4) è passata in `main` con la CI verde |
+| `scripts/agent-pr.ps1` | `scripts/test-agent-pr.sh`, **2 scenari** (issue #286) | copre solo lo step 6 (`pr: N` nel file di sessione): non copre la transizione delle label né il controllo della keyword di chiusura |
+
+La **spec** della copertura (strategia del mock, contratto delle invocazioni intercettate,
+inventario dei casi) è in **[`13-ADR/0014-test-suite-protocol-scripts.md`](13-ADR/0014-test-suite-protocol-scripts.md)**
+(🟡 DRAFT, in attesa di ratifica del project owner): mock di `gh` **su PATH, offline e stateful**,
+suite in `scripts/test-agent-claim.sh` e `scripts/test-agent-pr.sh`, esecuzione nel job
+`gates-procedure` di `ci.yml`. L'implementazione è successiva alla ratifica.
+
 ---
 
 ### 9.14 Prestazioni delle procedure automatiche (issue #224)

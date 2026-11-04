@@ -191,6 +191,9 @@ $files = @(
     # label, fallback del blocco NEXT-STEP, prosa README, takeover dei claim
     # scaduti).
     "docs/state/sessions/98-fix-drift-concorrenza.md",
+    # Sessione 99 (issue #304): la spec della suite di test offline degli
+    # script di protocollo (ADR-0014).
+    "docs/state/sessions/99-test-suite-protocol-scripts.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -416,6 +419,10 @@ $files = @(
     # ADR-0013: automazioni post-merge deterministiche (writer unico, CI
     # post-writer, generatori portabili).
     "docs/13-ADR/0013-post-merge-automation.md",
+    # ADR-0014: copertura di test offline degli script di protocollo
+    # (issue #304, Sessione 99) — mock di `gh` su PATH, suite per
+    # `agent-claim.ps1` e `agent-pr.ps1`.
+    "docs/13-ADR/0014-test-suite-protocol-scripts.md",
     # Gate "coerenza del protocollo" (Sessione 80 / issue #248, ADR-0012): confronta
     # i fatti normativi di AGENTS.md con la realta' del repository (6 check: versione
     # dichiarata, tabella label, tabella exit code, integrita' degli anchor,
