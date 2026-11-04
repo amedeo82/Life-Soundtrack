@@ -125,9 +125,9 @@ Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per l
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
-Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md".
+Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md`.
 
-Il blocco **non conosce le dipendenze** fra story: la story indicata può dipenderne da un'altra non ancora fatta. Prima di claimarla, guarda `depends_on` nel suo file in `docs/state/stories/`. Oggi la **3.4** (nastro contesto) dichiara `[DEP:4.4]`: la tranche geo si fa nella **4.4** (il DB IP→città, la specifica già ratificata) e **poi** nella 3.4, che la consuma.
+Il blocco **non conosce né le dipendenze né i claim**: la story indicata può dipenderne da un'altra non ancora fatta, o essere già presa in carico da un altro agente. Prima di claimarla, guarda `depends_on` nel suo file in `docs/state/stories/` e verifica le label sulle issue con `gh issue list --label agent-ready --state open` (senza `in-progress` né `status:*`, ADR-0006): **la selezione del lavoro non avviene mai da questo blocco** — è la query live sulle issue, non il README, a dire cosa è libero. Esempio passato: la 3.4 dichiarava `[DEP:4.4]` — tranche geo chiusa in Sessione 76 (issue #231).
 
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)
