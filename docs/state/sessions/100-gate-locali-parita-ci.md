@@ -69,7 +69,7 @@ nasce con `node_modules` (l'hook `commit-msg` smette di saltare commitlint), e
 `agent-pr.ps1` verifica Conventional Commits e i gate dei workflow **prima** di aprire la
 PR. Il cleanup post-merge è robusto con `node_modules` presente (L0 + L4). I test di
 regressione coprono i tre script: `test-setup-worktree.sh` (11 scenari, S9..S11 nuovi),
-`test-post-merge.sh` (16 scenari, T15 e T16 nuovi), `test-agent-pr.sh` (6 scenari, T3 e T4
+`test-post-merge.sh` (16 scenari, T15 e T16 nuovi), `test-agent-pr.sh` (11 scenari, T3, T4 e T5 nuovi)
 nuovi).
 
 **Cosa manca.** La suite offline degli script di protocollo (`agent-claim.ps1`,
@@ -86,7 +86,7 @@ sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). 
 -Check` → exit 0 · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
 → 0 violazioni · `bash scripts/test-setup-worktree.sh` → 11/11 ·
 `bash scripts/test-post-merge.sh` → 56 assert, 0 falliti ·
-`bash scripts/test-agent-pr.sh` → 6/6.
+`bash scripts/test-agent-pr.sh` → 11/11.
 
 ## Lesson learned
 
