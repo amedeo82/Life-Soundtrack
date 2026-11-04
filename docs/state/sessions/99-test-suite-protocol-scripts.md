@@ -2,8 +2,10 @@
 number: 99
 title: "Spec delle suite di test offline per gli script di protocollo (ADR-0014)"
 date: 2026-11-04
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "98ac03ad279212a70460a7e8fda51f4a9efc93dc"
+merged_date: "2026-11-04T15:31:06Z"
 branch: feat/304-test-suite-protocol-scripts
 pr: 305
 claim: kilo-amedeovecchiemilcoms-304a

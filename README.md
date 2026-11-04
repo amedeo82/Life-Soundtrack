@@ -93,38 +93,40 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S98)
+**Analisi della sessione corrente** (S99)
 
-**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
-percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
-rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
-cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e test**. La
+percentuale di avanzamento resta **77%** (23 story completate su 30, effort
+pesato 80%, 7 step rimanenti): nessuna state file di story è stata creata o
+modificata in questa sessione.
 
-**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
-front-to-back**: selezione (query live su GitHub) → claim atomico con
-riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
-takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
-post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
-NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
-anche dopo i merge delle prossime story.
+**Cosa è pronto.** La specifica della copertura mancante è scritta e verificabile:
+il mock (cosa intercetta, come muta lo stato, come fallisce su una chiamata
+non prevista), i casi per entrambi gli script (con l'expected e l'exit code),
+il wiring in CI e il mapping con gli AC dell'issue. La issue #304 è passata da
+`needs-spec` a `agent-ready` (la strategia è stata ratificata dal project
+owner) ed è claimata.
 
-**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
-perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
-post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
-`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
-regressioni come quella dello yield sono oggi intercettabili solo dalla
-riverifica stessa.
+**Cosa manca.** La ratifica dell'ADR-0014 (🟡 → 🟢) e quindi l'implementazione:
+`scripts/mock/gh.ps1`, `scripts/test-agent-claim.sh`, l'estensione di
+`scripts/test-agent-pr.sh`, i due step in `gates-procedure`, la riga nella
+tabella regola ⟺ gate di `AGENTS.md` (che richiede il bump di versione in
+`AGENTS.md` e `docs/INDEX.md`, gate C1) e l'aggiornamento di §9.10 e §9.13 di
+`docs/12-DEVOPS.md`.
 
-**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
-verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
-state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
-aggregator → bundle).
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+il file di sessione e la prosa legacy (`docs/INDEX.md`, `docs/12-DEVOPS.md`).
+Il bundle è stato rigenerato dopo l'aggregator (ordine aggregator → bundle).
 
 **Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
-→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
-→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
-→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+→ 6 check, 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (192 file) ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0
+violazioni (i blocchi `AGGREGATE-*` **non** sono stati toccati a mano: li
+riscrive il writer post-merge, ADR-0008 V1) · `pwsh scripts/aggregate-state.ps1
+-Check` → **exit 1 atteso**: il nuovo file di sessione cambia i blocchi
+aggregati, che per contratto vengono applicati dal writer post-merge (gate
+warning-only in CI, come per la Sessione 98).
 
 <!-- AGGREGATE-PROGRESS-END -->
 

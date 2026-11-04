@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 13:59
+> Data: 2026-11-04 15:31
 > Totale file: 193
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,14 +9,14 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 190 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2685.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-04 10:51
+- Totale file: 192 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2709.4 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-04 15:31
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 122 |
+| docs/ | 124 |
 | scripts/ | 42 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1281,38 +1281,40 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S98)
+**Analisi della sessione corrente** (S99)
 
-**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
-percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
-rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
-cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e test**. La
+percentuale di avanzamento resta **77%** (23 story completate su 30, effort
+pesato 80%, 7 step rimanenti): nessuna state file di story è stata creata o
+modificata in questa sessione.
 
-**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
-front-to-back**: selezione (query live su GitHub) → claim atomico con
-riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
-takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
-post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
-NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
-anche dopo i merge delle prossime story.
+**Cosa è pronto.** La specifica della copertura mancante è scritta e verificabile:
+il mock (cosa intercetta, come muta lo stato, come fallisce su una chiamata
+non prevista), i casi per entrambi gli script (con l'expected e l'exit code),
+il wiring in CI e il mapping con gli AC dell'issue. La issue #304 è passata da
+`needs-spec` a `agent-ready` (la strategia è stata ratificata dal project
+owner) ed è claimata.
 
-**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
-perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
-post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
-`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
-regressioni come quella dello yield sono oggi intercettabili solo dalla
-riverifica stessa.
+**Cosa manca.** La ratifica dell'ADR-0014 (🟡 → 🟢) e quindi l'implementazione:
+`scripts/mock/gh.ps1`, `scripts/test-agent-claim.sh`, l'estensione di
+`scripts/test-agent-pr.sh`, i due step in `gates-procedure`, la riga nella
+tabella regola ⟺ gate di `AGENTS.md` (che richiede il bump di versione in
+`AGENTS.md` e `docs/INDEX.md`, gate C1) e l'aggiornamento di §9.10 e §9.13 di
+`docs/12-DEVOPS.md`.
 
-**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
-verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
-state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
-aggregator → bundle).
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+il file di sessione e la prosa legacy (`docs/INDEX.md`, `docs/12-DEVOPS.md`).
+Il bundle è stato rigenerato dopo l'aggregator (ordine aggregator → bundle).
 
 **Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
-→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
-→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
-→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+→ 6 check, 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (192 file) ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0
+violazioni (i blocchi `AGGREGATE-*` **non** sono stati toccati a mano: li
+riscrive il writer post-merge, ADR-0008 V1) · `pwsh scripts/aggregate-state.ps1
+-Check` → **exit 1 atteso**: il nuovo file di sessione cambia i blocchi
+aggregati, che per contratto vengono applicati dal writer post-merge (gate
+warning-only in CI, come per la Sessione 98).
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2203,6 +2205,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 96 | Il writer di stato di merge copre anche le story (issue #297) | 🟢 | ✅ | #300 |
 | 97 | Ricordi + Share: il feed, la card e il tagging manuale (issue #241) | 🟢 | ✅ | #301 |
 | 98 | Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README) | 🟢 | ✅ | #303 |
+| 99 | Spec delle suite di test offline per gli script di protocollo (ADR-0014) | 🟢 | ✅ | #305 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2242,9 +2245,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **75** (merge: 74)
+- Sessioni migrate in state/sessions: **76** (merge: 75)
 - Stories migrate in state/stories: **28** (done: 23)
-- Ultima sessione migrata: **S98** - Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README)
+- Ultima sessione migrata: **S99** - Spec delle suite di test offline per gli script di protocollo (ADR-0014)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2291,38 +2294,40 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S98)
+**Analisi della sessione corrente** (S99)
 
-**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
-percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
-rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
-cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e test**. La
+percentuale di avanzamento resta **77%** (23 story completate su 30, effort
+pesato 80%, 7 step rimanenti): nessuna state file di story è stata creata o
+modificata in questa sessione.
 
-**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
-front-to-back**: selezione (query live su GitHub) → claim atomico con
-riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
-takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
-post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
-NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
-anche dopo i merge delle prossime story.
+**Cosa è pronto.** La specifica della copertura mancante è scritta e verificabile:
+il mock (cosa intercetta, come muta lo stato, come fallisce su una chiamata
+non prevista), i casi per entrambi gli script (con l'expected e l'exit code),
+il wiring in CI e il mapping con gli AC dell'issue. La issue #304 è passata da
+`needs-spec` a `agent-ready` (la strategia è stata ratificata dal project
+owner) ed è claimata.
 
-**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
-perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
-post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
-`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
-regressioni come quella dello yield sono oggi intercettabili solo dalla
-riverifica stessa.
+**Cosa manca.** La ratifica dell'ADR-0014 (🟡 → 🟢) e quindi l'implementazione:
+`scripts/mock/gh.ps1`, `scripts/test-agent-claim.sh`, l'estensione di
+`scripts/test-agent-pr.sh`, i due step in `gates-procedure`, la riga nella
+tabella regola ⟺ gate di `AGENTS.md` (che richiede il bump di versione in
+`AGENTS.md` e `docs/INDEX.md`, gate C1) e l'aggiornamento di §9.10 e §9.13 di
+`docs/12-DEVOPS.md`.
 
-**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
-verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
-state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
-aggregator → bundle).
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+il file di sessione e la prosa legacy (`docs/INDEX.md`, `docs/12-DEVOPS.md`).
+Il bundle è stato rigenerato dopo l'aggregator (ordine aggregator → bundle).
 
 **Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
-→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
-→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
-`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
-→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+→ 6 check, 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (192 file) ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0
+violazioni (i blocchi `AGGREGATE-*` **non** sono stati toccati a mano: li
+riscrive il writer post-merge, ADR-0008 V1) · `pwsh scripts/aggregate-state.ps1
+-Check` → **exit 1 atteso**: il nuovo file di sessione cambia i blocchi
+aggregati, che per contratto vengono applicati dal writer post-merge (gate
+warning-only in CI, come per la Sessione 98).
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -12528,6 +12533,107 @@ aggregator → bundle).
 - `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`: blocchi aggregati **non** toccati (regola V1 di ADR-0008): li riscrive il writer post-merge
 ```
 
+### Sessione 99 - Spec delle suite di test offline per gli script di protocollo (ADR-0014)
+
+- **Data**: 2026-11-04
+- **Stato**: 🟢
+- **Merged**: ✅ PR #305 (98ac03ad279212a70460a7e8fda51f4a9efc93dc, 2026-11-04T15:31:06Z)
+- **Claim**: `kilo-amedeovecchiemilcoms-304a`
+
+```
+
+## Sintesi
+
+L'issue **#304** chiedeva due suite di test per gli script di protocollo che
+parlano con GitHub (`scripts/agent-claim.ps1`, `scripts/agent-pr.ps1`) e non
+ne avevano alcuna: la regressione **#302** — il ramo di riverifica persa che
+rimuoveva la label `in-progress`, contro ADR-0006 regola 4 — era passata in
+`main` con la CI verde, perché la regola era scritta due volte (ADR-0006 e
+`AGENTS.md`) e **nessuna delle due copie veniva eseguita**.
+
+L'issue era bloccata (`needs-spec`) su due punti: la strategia di mock e
+l'inventario delle funzioni da coprire. Il project owner ha ratificato in
+questa sessione la strategia (**mock di `gh` a livello di PATH, offline**) e ha
+chiesto che la spec scritta fosse approvata **prima** dell'implementazione.
+
+Questa sessione scrive dunque la **spec**, non il codice:
+[`docs/13-ADR/0014-test-suite-protocol-scripts.md`](../13-ADR/0014-test-suite-protocol-scripts.md)
+(🟡 DRAFT) fissa il contratto del mock (le 9 invocazioni intercettate, lo
+stato iniettato, l'orologio deterministico), l'inventario dei casi per i due
+script (T1..T7 per il claim, T1..T7 per la PR) e il piano di implementazione.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-99.1 | Il mock di `gh` è **un eseguibile sul PATH, offline e stateful** | è l'unica strategia compatibile con l'AC «senza rete e senza dipendenze native di `gh`»; è il pattern già in uso e collaudato in `test-setup-worktree.sh` e `test-agent-pr.sh` |
+| D-99.2 | Il mock è **stateful** (stato su JSON) e registra ogni invocazione | la riverifica deve vedere il commento appena postato; le asserzioni devono poter verificare *quali* comandi sono stati eseguiti (es. «nessuna `--remove-label`»), non solo lo stato finale |
+| D-99.3 | L'orologio del mock è **iniettato** (`created_at` derivato da un `now` nello stato) | i casi di TTL diventano deterministici: nessun test dipende dall'orologio della macchina (la classe di difetto reso flaky dal test `T3` dell'agregator, issue #142) |
+| D-99.4 | Il mock **fallisce su ogni invocazione non prevista** (exit 1 con messaggio) | un mock che risponde `exit 0` a tutto può mascherare una chiamata non prevista: lo stesso principio del gate «un gate che passa sempre non è un gate» (lesson 43-1) |
+| D-99.5 | Un **file solo** per il mock (`scripts/mock/gh.ps1`), con i launcher generati dal driver | due copie divergono: è la classe di drift che il repository ha già imparato a costo |
+| D-99.6 | La copertura è per **comportamento osservabile** (exit code, chiamate a `gh`, file prodotti), non per riga | un refactor interno degli script non deve rompere la suite; un cambio di comportamento sì |
+| D-99.7 | Le suite girano nel job `gates-procedure` di `ci.yml` | il job è già nell'elenco `needs:` dell'aggregatore `quality`, che è fail-closed: una suite che fallisce rende la PR rossa |
+| D-99.8 | L'ADR-0014 resta **🟡 DRAFT** finché il project owner non lo ratifica | il protocollo riserva al project owner le decisioni sulla strategia di test; l'ADR-0012 (contratto del protocollo) impone che la regola e il gate nascano nello stesso commit |
+
+## Analisi di avanzamento
+
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e test**. La
+percentuale di avanzamento resta **77%** (23 story completate su 30, effort
+pesato 80%, 7 step rimanenti): nessuna state file di story è stata creata o
+modificata in questa sessione.
+
+**Cosa è pronto.** La specifica della copertura mancante è scritta e verificabile:
+il mock (cosa intercetta, come muta lo stato, come fallisce su una chiamata
+non prevista), i casi per entrambi gli script (con l'expected e l'exit code),
+il wiring in CI e il mapping con gli AC dell'issue. La issue #304 è passata da
+`needs-spec` a `agent-ready` (la strategia è stata ratificata dal project
+owner) ed è claimata.
+
+**Cosa manca.** La ratifica dell'ADR-0014 (🟡 → 🟢) e quindi l'implementazione:
+`scripts/mock/gh.ps1`, `scripts/test-agent-claim.sh`, l'estensione di
+`scripts/test-agent-pr.sh`, i due step in `gates-procedure`, la riga nella
+tabella regola ⟺ gate di `AGENTS.md` (che richiede il bump di versione in
+`AGENTS.md` e `docs/INDEX.md`, gate C1) e l'aggiornamento di §9.10 e §9.13 di
+`docs/12-DEVOPS.md`.
+
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+il file di sessione e la prosa legacy (`docs/INDEX.md`, `docs/12-DEVOPS.md`).
+Il bundle è stato rigenerato dopo l'aggregator (ordine aggregator → bundle).
+
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
+→ 6 check, 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
+`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (192 file) ·
+`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0
+violazioni (i blocchi `AGGREGATE-*` **non** sono stati toccati a mano: li
+riscrive il writer post-merge, ADR-0008 V1) · `pwsh scripts/aggregate-state.ps1
+-Check` → **exit 1 atteso**: il nuovo file di sessione cambia i blocchi
+aggregati, che per contratto vengono applicati dal writer post-merge (gate
+warning-only in CI, come per la Sessione 98).
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Una issue `needs-spec` può essere sbloccata da una **decisione del project owner presa in sessione**, non solo da un documento già scritto | la spec si scrive *dopo* la decisione strategica e ne formalizza i contenuti: il rischio è invertire l'ordine e scrivere una spec che il project owner non voleva |
+| «Lo script implementa una regola» non basta: senza un test, lo script può **contraddirla** in silenzio | la regola del claim (label `in-progress` conservata) era in ADR-0006 e in `AGENTS.md`; nessuna delle due copie era eseguita (#302) |
+| Un mock che risponde `exit 0` a tutto è un **mock che può mascare** una chiamata non prevista | il mock fallisce su ogni invocazione fuori contratto: l'errore è visibile nel momento in cui gli script crescono |
+| I casi di TTL sono deterministici solo se l'orologio è iniettato | un test che usa `Get-Date` è flaky per costruzione (lezione dell'aggregator, issue #142): il `now` sta nello stato del mock |
+| Verificare *quali* comandi sono stati eseguiti è più forte che verificare lo stato finale | «la label `in-progress` c'è» non distingue «conservata» da «rimossa e riapplicata»: il log delle invocazioni lo distingue |
+
+## Documenti aggiornati
+
+- `docs/13-ADR/0014-test-suite-protocol-scripts.md` (nuovo, 🟡 DRAFT): la spec
+  della copertura di test offline degli script di protocollo
+- `docs/INDEX.md`: riga `13-ADR/` (ADR-0013 e 0014) e conteggio degli ADR nella
+  sezione legacy «Dettaglio»
+- `docs/12-DEVOPS.md`: §9.13 — nuova sottosezione «Copertura degli script di
+  protocollo (`agent-claim.ps1`, `agent-pr.ps1`)» con il rimando all'ADR-0014
+- `scripts/generate-bundle.ps1`: `docs/13-ADR/0014-test-suite-protocol-scripts.md`
+  registrato in `$files`
+- `docs/BUNDLE.md`: rigenerato dopo l'aggregator (ordine aggregator → bundle)
+- `docs/state/sessions/99-test-suite-protocol-scripts.md` (questo file)
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -22530,8 +22636,10 @@ aggregator → bundle).
 number: 99
 title: "Spec delle suite di test offline per gli script di protocollo (ADR-0014)"
 date: 2026-11-04
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "98ac03ad279212a70460a7e8fda51f4a9efc93dc"
+merged_date: "2026-11-04T15:31:06Z"
 branch: feat/304-test-suite-protocol-scripts
 pr: 305
 claim: kilo-amedeovecchiemilcoms-304a
