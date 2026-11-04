@@ -11,6 +11,10 @@
 #   S6 - Idempotenza: 2 chiamate identiche consecutive -> la 2a fallisce (path esistente)
 #   S7 - -NoPush salta il push
 #   S8 - -SkipGhCheck funziona senza gh nel PATH
+#   S9 - le dipendenze vengono installate nella worktree (issue #306): e' la
+#        condizione perche' l'hook `commit-msg` smetta di saltare commitlint
+#   S10 - -SkipInstall salta l'installazione
+#   S11 - l'installazione fallita NON e' fatale: la worktree resta pronta
 #
 # Uso:
 #   bash scripts/test-setup-worktree.sh
@@ -149,6 +153,47 @@ fi
 exit 0
 EOF
   chmod +x "$mock_bin/gh"
+
+  # Mock pnpm (issue #306): `setup-worktree.ps1` esegue
+  # `pnpm install --frozen-lockfile` nella worktree nuova, cosi' l'hook
+  # `commit-msg` smette di saltare commitlint (prima saltava perche'
+  # `node_modules` non esisteva). Il mock crea `node_modules/.bin`, che e'
+  # il segnale che l'hook usa per decidere se eseguire commitlint.
+  cat > "$mock_bin/pnpm" <<'EOF'
+#!/usr/bin/env bash
+# Mock pnpm per test-setup-worktree.ps1
+#   MOCK_PNPM_FAIL=1 -> fallisce (scenario S11)
+if [ "${MOCK_PNPM_FAIL:-0}" = "1" ]; then
+  echo "mock pnpm: ERRORE simulato" >&2
+  exit 1
+fi
+if [ "$1" = "install" ]; then
+  mkdir -p node_modules/.bin
+  echo "mock" > node_modules/.bin/commitlint
+  echo "mock pnpm: install eseguito in $(pwd)"
+  exit 0
+fi
+exit 0
+EOF
+  chmod +x "$mock_bin/pnpm"
+  # Su Windows il pwsh NATIVO risolve `pnpm` via PATHEXT: serve un wrapper
+  # `pnpm.cmd` che NON dipenda da `bash` nel PATH di cmd.exe.
+  if uname -s 2>/dev/null | grep -qi 'mingw\|msys\|cygwin\|windows'; then
+    cat > "$mock_bin/pnpm.cmd" <<'EOF'
+@echo off
+if "%MOCK_PNPM_FAIL%"=="1" (
+  echo mock pnpm: ERRORE simulato 1>&2
+  exit /b 1
+)
+if "%1"=="install" (
+  mkdir node_modules\.bin 2>nul
+  echo mock> node_modules\.bin\commitlint
+  echo mock pnpm: install eseguito
+  exit /b 0
+)
+exit /b 0
+EOF
+  fi
 
   # Sessione 73 (issue #224): su Windows il pwsh NATIVO risolve `gh` tramite
   # PATHEXT, quindi uno script bash senza estensione non e' eseguibile e il
@@ -334,6 +379,69 @@ test_s8_skip_gh_check() {
   cleanup_mock_env
 }
 
+# === S9: le dipendenze vengono installate nella worktree (issue #306) ===
+test_s9_install_deps() {
+  echo ""
+  echo "Scenario S9: install delle dipendenze nella worktree"
+  make_mock_env "s9"
+  local output exitcode wt
+  wt="$WORKTREE_PARENT/ls-42-test-issue"
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  if [ "$exitcode" -ne 0 ]; then
+    fail "S9" "doveva riuscire ma exit=$exitcode. Output: $output"
+  elif ! echo "$output" | grep -q "Install delle dipendenze nella worktree"; then
+    fail "S9" "lo step di install non e' stato annunciato. Output: $output"
+  elif [ ! -d "$wt/node_modules/.bin" ]; then
+    # `node_modules/.bin` e' il segnale che l'hook `commit-msg` usa per
+    # decidere se eseguire commitlint: senza, la convenzione Conventional
+    # Commits non veniva verificata al momento del commit.
+    fail "S9" "node_modules/.bin assente nella worktree: l'hook commit-msg continuerebbe a saltare commitlint"
+  else
+    pass "S9 dipendenze installate nella worktree (node_modules/.bin presente)"
+  fi
+  cleanup_mock_env
+}
+
+# === S10: -SkipInstall salta l'installazione ===
+test_s10_skip_install() {
+  echo ""
+  echo "Scenario S10: -SkipInstall salta l'installazione"
+  make_mock_env "s10"
+  local output wt
+  wt="$WORKTREE_PARENT/ls-42-test-issue"
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -SkipInstall -NoPush 2>&1)" || true
+  if ! echo "$output" | grep -q "Install delle dipendenze SKIPPATO"; then
+    fail "S10" "doveva mostrare 'Install delle dipendenze SKIPPATO'. Output: $output"
+  elif [ -d "$wt/node_modules" ]; then
+    fail "S10" "node_modules presente nonostante -SkipInstall"
+  else
+    pass "S10 install saltato con -SkipInstall"
+  fi
+  cleanup_mock_env
+}
+
+# === S11: l'installazione fallita NON e' fatale ===
+test_s11_install_failure_not_fatal() {
+  echo ""
+  echo "Scenario S11: install fallito -> la worktree resta pronta"
+  make_mock_env "s11"
+  MOCK_PNPM_FAIL=1
+  export MOCK_PNPM_FAIL
+  local output exitcode wt
+  wt="$WORKTREE_PARENT/ls-42-test-issue"
+  output="$(cd "$REPO_DIR" && pwsh "$TARGET_SCRIPT_PS" 42 -NoPush 2>&1)" && exitcode=0 || exitcode=$?
+  if [ "$exitcode" -ne 0 ]; then
+    fail "S11" "un install fallito non deve rendere fallente la creazione della worktree (exit=$exitcode). Output: $output"
+  elif ! echo "$output" | grep -q "pnpm install fallito"; then
+    fail "S11" "il fallimento dell'install non e' stato dichiarato. Output: $output"
+  elif [ ! -d "$wt" ]; then
+    fail "S11" "la worktree non e' stata creata"
+  else
+    pass "S11 install fallito dichiarato e non fatale (worktree pronta)"
+  fi
+  cleanup_mock_env
+}
+
 # === Esegui tutti ===
 test_s1_issue_missing
 test_s2_slug_derived
@@ -343,6 +451,9 @@ test_s5_base_branch_missing
 test_s6_idempotent_fails
 test_s7_no_push
 test_s8_skip_gh_check
+test_s9_install_deps
+test_s10_skip_install
+test_s11_install_failure_not_fatal
 
 echo ""
 echo "=============================================="

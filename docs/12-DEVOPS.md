@@ -1442,6 +1442,115 @@ fallivano **in silenzio** su un file CRLF. Ora le righe vengono normalizzate una
 
 ---
 
+### 9.15 Parità fra i gate locali e i gate della CI (issue #306)
+
+`scripts/agent-pr.ps1` è il **comando unico** con cui un agente apre una PR, e il suo
+passo 2 («gate locali bloccanti») è l'**unico punto** in cui l'agente vede il verdetto
+**prima** che la PR esista. Con 4 controlli la batteria locale era **più stretta** dei gate
+che la CI esegue: nella PR #305 l'agente ha visto «gate locali verdi» e la CI ha poi resa
+rossa la PR su due job (`gates-protocol` e `gates-workflows`) — due round-trip sprecati e
+un difetto che l'agente non aveva modo di vedere.
+
+| Gate locale (prima del #306) | Gate CI che non aveva riscontro locale |
+|---|---|
+| `check-protocol-consistency.mjs` | `gates-protocol`: **Conventional Commits sul range della PR** (`commitlint --from origin/<base> --to HEAD`) |
+| `check-merge-state.mjs` | `gates-workflows`: validatore dei workflow, sintassi dei blocchi `run:` |
+| `check-aggregate-blocks.mjs` | `gates-workflows`: **test funzionale del writer post-merge** (`scripts/test-post-merge-writer.sh`) |
+| `generate-bundle.ps1 -Check` | — |
+
+La batteria locale esegue ora gli stessi controlli dei job `gates-protocol` e
+`gates-workflows`. I tre esiti sono **distinti**, perché hanno effetti diversi:
+
+| Esito | Significato | Effetto |
+|---|---|---|
+| **fallito** | il gate era eseguibile e ha trovato un difetto | **blocca** l'apertura della PR |
+| **saltato** | il gate non era eseguibile in questo ambiente (es. `bash` assente) | non blocca, ma viene **dichiarato** nel riepilogo: la CI lo eseguirà comunque |
+| **verde** | eseguito e superato | — |
+
+Un salto *silenzioso* sarebbe un gate che «passa sempre» (lesson 43-1): la disponibilità
+di `bash` si verifica **probandolo** (`bash -c "exit 0"`), non guardando il `PATH`, perché
+su Windows `bash` può essere uno stub non funzionante.
+
+Il caso speciale è **commitlint**: se `pnpm` non è nel `PATH` il gate viene *saltato*, ma
+se `pnpm` c'è e il **binario** `node_modules/.bin/commitlint` manca il gate **blocca** — il
+problema è risolvibile dall'agente (`pnpm install --frozen-lockfile`) ed è esattamente il
+difetto che la worktree senza dipendenze produce (vedi sotto).
+
+> Il controllo è sul **binario**, non sulla cartella `node_modules/.bin`: con la cartella
+> vuota `pnpm exec` non fallisce subito, ma **tenta un'installazione dal registry** — in CI
+> questo ha bloccato il job `gates-procedure` per 20 minuti (poi timeout del job).
+
+#### La worktree nasce con le dipendenze installate
+
+La ragione per cui commitlint non girava mai al momento del commit è che **la worktree
+non aveva `node_modules`**: `.githooks/commit-msg` esegue il controllo solo se
+`node_modules/.bin` esiste, e in quel caso **salta in silenzio** (stampa un `WARN` ed esce
+0). Su una working copy con le dipendenze installate il gate funziona; su una worktree
+appena creata no.
+
+`scripts/setup-worktree.ps1` esegue ora `pnpm install --frozen-lockfile` nella worktree
+nuova (passo 9). L'installazione **non è fatale**: senza `pnpm` o senza rete la worktree
+resta utilizzabile e il fallimento è annunciato. `-SkipInstall` la disattiva.
+
+> **Effetto collaterale deliberato**: con `node_modules` nella worktree i suoi path
+> superano `MAX_PATH` e `git worktree remove --force` fallisce con «Result too large»
+> (§9.8i). Per questo `post-merge.ps1` rimuove `node_modules` **prima** di rimuovere la
+> worktree (livello **L0** della rete di rimozione): `node_modules` non è mai tracciato da
+> git, quindi non può contenere lavoro da perdere.
+
+#### Il `cleanup` distruttivo di `test-agent-pr.sh`
+
+Eseguendo la suite su Windows è emerso un difetto **preesistente** nella pulizia della
+suite: la `trap cleanup EXIT` rimuoveva `$TMPDIR`, che a quel punto era già stato
+ripristinato sul valore **originale** — la directory temporanea di sistema (`%TEMP%`, cioè
+`C:\Users\<utente>\AppData\Local\Temp`). Il `rm -rf` ha quindi cancellato la `%TEMP%`
+dell'utente (il fallimento è rumoroso ma non fatale: i file in uso non si cancellano). La
+suite ora rimuove **solo** la directory che ha creato (`TEST_TMPDIR`).
+
+#### I mock dei test non devono potersi richiamare da soli
+
+Regola emersa dalla stessa sessione: un mock eseguibile con shebang
+`#!/usr/bin/env bash`, **messo nel `PATH`**, chiama se stesso e la ricorsione diventa
+infinita (fork bomb). Il blocco è invisibile in locale su Windows — dove il wrapper
+`.cmd` chiama il bash reale per percorso assoluto — e si manifesta **solo in CI su
+Linux**: il job `gates-procedure` è rimasto bloccato per 20 minuti (poi timeout) per
+due volte di fila, prima sul `pnpm exec` di rete e poi sul fork bomb.
+
+I mock di `scripts/test-agent-pr.sh` usano quindi il percorso **assoluto** del bash
+reale, risolto dal `PATH` **originale** (quello senza i mock):
+
+```bash
+ORIG_PATH="$PATH"
+REAL_BASH="$(PATH="$ORIG_PATH" command -v bash)"
+```
+
+Lo scenario **T4** verifica anche che il mock di `bash` non abbia uno shebang
+`env bash`: il controllo è nel test, non nella fiducia.
+
+#### I riferimenti `#NNN` nel body dei messaggi di commit
+
+Regola scoperta nella stessa sessione e documentata in `AGENTS.md` §"Git workflow": un
+riferimento `#NNN` nel **body** di un messaggio di commit fa sì che
+`conventional-commits-parser` consideri **footer** tutto ciò che segue la riga che lo
+contiene, e la regola `footer-leading-blank` di commitlint segnali allora un falso
+positivo («footer must have leading blank line») su un messaggio che è corretto. Il
+**titolo** non è soggetto al problema: la convenzione `(issue #NNN)` va lì.
+
+#### Il commit del bundle non deve inghiottare il commit della sessione
+
+`agent-pr.ps1` (step 6) scrive `pr: N` nel file di sessione e poi rigenera il bundle
+(la sessione è nel catalogo `$files`): due commit in sequenza. Il primo, `git commit`
+senza elenco di path, committa **tutto** l'index — quindi anche il file di sessione, che
+a quel punto ha già `pr: N`. Il commit successivo non trova nulla da committare, esce
+1, e **il comando fallisce dopo aver creato la PR**: la PR resta con `pr: 0` e il
+workflow post-merge non trova il file di sessione.
+
+La correzione è dichiarare i path: `git commit -m "…" -- docs/BUNDLE.md`. Il test di
+regressione è lo scenario **T5** di `scripts/test-agent-pr.sh` (verifica che i due
+commit siano separati e che il commit del bundle contenga solo il bundle).
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
 | 0.1 | Sessione 8 | Prima versione completa |
@@ -1461,3 +1570,4 @@ fallivano **in silenzio** su un file CRLF. Ora le righe vengono normalizzate una
 | 1.5 | Sessione 73 (2026-10-31, issue #224) | **§9.10 Gate reali di `ci.yml`** (riscritta): `ci.yml` passa da **1 job sequenziale con 18 step** a **11 job** di cui 10 in parallelo (`node-lint-typecheck`, `node-test`, `node-build`, `gates-docs`, `gates-aggregate`, `gates-bundle`, `gates-workflows`, `gates-git`, `gates-scripts`, `gates-procedure`) + `quality` aggregatore. Il check `CI / quality` **conserva il nome** ed è fail-closed (fallisce se un job parallelo è fallito/annullato/saltato: senza il controllo esplicito, `needs:` produrrebbe un check *skipped*, che la branch protection può accettare come successo). I 5 job di gate **non richiedono `pnpm install`** (`validate-*.mjs` e `check-readme-facts.mjs` usano solo i moduli built-in di node). **`pnpm run verify`** (nuovo script = `turbo run lint && turbo run typecheck && turbo run test && turbo run build`): i 4 gate del CI in una sola invocazione locale. Le 4 invocazioni turbo **restano sequenziali** nella CI: la forma parallela (`turbo run lint typecheck test build`, 32,8 s misurati) **rompeva il gate** — sul runner a 2 vCPU `build` in concorrenza con `test` faceva scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion e non si tocca). Inoltre `git init` nelle suite che creano repository temporanei dichiara **esplicitamente** `-b main`: `init.defaultBranch` è una configurazione **di macchina** (la dev machine ha `main`, il runner GitHub `master`) e senza il fix `test-post-merge.sh` falliva sul runner con «src refspec main does not match any». **§9.13** (nuova sezione *Chiusura dell'audit*): le 5 suite che la CI non eseguiva sono ora **in CI**, con i difetti corretti — `test-safe-branch-switch.sh` **fail-open** (contatori fuori dalle subshell, ora 11 assert), `test-appendline-lf-fix.ps1` S3 **stale** (l'invariante reale è «normalizza CRLF→LF», non «0 AppendLine») e S5 che **mutava il working tree** (ora gira su fixture temporaneo), `test-setup-worktree.sh` che falliva **su ogni piattaforma** (`TMPDIR` non ripristinato nel cleanup, path POSIX non convertito, mock `gh` non eseguibile dal `pwsh` nativo su Windows). **`§9.14 Prestazioni delle procedure automatiche`** (nuova): il profilo (dove andava il tempo), il costo nascosto dei **processi figli** (`seed_repo_files` = 256 spawn per repo = 9,5 s per repo → ~50 ms), la tabella dei risultati (`test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s; **tempo pareggio della pipeline 172 s → 73 s**), l'equivalenza dimostrata di ogni modifica, il **costo del parallelismo** (§9.14.7), il `git init` con branch implicito (§9.14.8) e ciò che **non** è stato fatto (typecheck duplicato, doppio startup di vitest, CI sui push del bot, parallelizzazione interna delle suite) |
 | 1.6 | Sessione 75 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74): la numerazione delle sessioni è univoca (issue #105). |
 | 1.7 | Sessione 78 (2026-10-31) | **§9.8i rimozione worktree long-path-safe nella procedura post-merge** (nuova): `git worktree remove --force` cancellava la worktree senza il prefisso `\\?\`, quindi falliva con «Filename too long» / «Result too large» quando la worktree conteneva `node_modules` con path > MAX_PATH — e il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive. Fix su tre livelli: **L1** `git -c core.longpaths=true worktree remove --force` (la causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale è consentito solo su una directory che è davvero una worktree di questo repo (working copy principale e antenati mai toccati → exit 16) e `git status` fallito = WIP sconosciuto = stop (exit 10). Test: `test-post-merge.sh` **T10..T14** (47 assert in tutto), con lo **shim di `git`** che rende deterministico il caso del fallback. **§9.10**: il gate `gates-scripts` passa da 29 a 47 assert. |
+| 1.8 | Sessione 100 (2026-11-04, issue #306) | **§9.15 parita' fra i gate locali e i gate della CI** (nuova): `agent-pr.ps1` esegue i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) prima di aprire la PR; `setup-worktree.ps1` installa le dipendenze nella worktree (senza `node_modules` l'hook `commit-msg` saltava commitlint in silenzio); `post-merge.ps1` rimuove `node_modules` prima della worktree (L0) e gestisce il residuo post-«Result too large» (L4) |
