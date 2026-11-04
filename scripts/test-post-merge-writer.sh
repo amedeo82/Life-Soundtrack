@@ -78,20 +78,42 @@ git push -q origin main
 BASE_SHA="$(git rev-parse HEAD)"
 
 # --- T1: una PR con una sessione ---------------------------------------------
+# Il numero della sessione di test va ALLOCATO, non scritto a mano.
+#
+# Il guard fail-closed sui numeri di sessione duplicati (issue #105) fa uscire
+# 1 da `aggregate-state.ps1 -Check` quando due file in `docs/state/sessions/`
+# hanno lo stesso numero. Un numero FISSO (era 99) colliderebbe con la sessione
+# reale omonima appena creata nel repository: il test si romperebbe da solo,
+# senza che nessuno avesse toccato il test (e' successo con la sessione 99,
+# che ha reso rosso il job `gates-workflows` della PR #305).
+#
+# Qui si applica la stessa regola di allocazione del protocollo (`max + 1`,
+# vedi AGENTS.md "Allocazione numero di sessione"): il numero si ricava dai
+# file gia' presenti nel clone, quindi non puo' collidere con nessuno.
+session_max=0
+for f in docs/state/sessions/[0-9]*.md; do
+  [ -e "$f" ] || continue
+  n="$(basename "$f" | sed 's/-.*//')"
+  case "$n" in ''|*[!0-9]*) continue ;; esac
+  if [ "$n" -gt "$session_max" ]; then session_max="$n"; fi
+done
+session_no=$((session_max + 1))
+session_file="docs/state/sessions/${session_no}-writer-test.md"
+
 mkdir -p docs/state/sessions
-cat > docs/state/sessions/99-writer-test.md <<'EOF'
+cat > "$session_file" <<EOF
 ---
-number: 99
+number: $session_no
 title: "Sessione di prova del writer post-merge"
 date: 2026-11-03
 state: 🟡
 merged: false
-branch: feat/99-writer-test
+branch: feat/$session_no-writer-test
 pr: 1
 tags: [test]
 ---
 
-# Sessione 99 — prova
+# Sessione $session_no — prova
 
 ## Analisi di avanzamento
 
@@ -143,7 +165,7 @@ else
 fi
 
 # Lo stato applicato e' finito sul remoto?
-REMOTE_SESSION="$(git -C "$REMOTE" show main:docs/state/sessions/99-writer-test.md 2>/dev/null)"
+REMOTE_SESSION="$(git -C "$REMOTE" show "main:$session_file" 2>/dev/null)"
 if echo "$REMOTE_SESSION" | grep -q 'merged: true'; then ok "T1 lo stato di merge e' finito sul remoto"; else ng "T1 lo stato di merge non e' sul remoto"; fi
 if echo "$REMOTE_SESSION" | grep -q "$MERGE_SHA"; then ok "T1 il merge commit e' finito sul remoto"; else ng "T1 il merge commit non e' sul remoto"; fi
 
