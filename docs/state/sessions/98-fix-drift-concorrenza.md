@@ -2,8 +2,10 @@
 number: 98
 title: "Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README)"
 date: 2026-11-04
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "82c57cf33929bc471a85e17dade5675765dda54a"
+merged_date: "2026-11-04T10:51:33Z"
 branch: fix/302-fix-protocol-il-claim-perdente-ruba-la-l
 pr: 303
 claim: kilo-hp-elitebook-a7c7

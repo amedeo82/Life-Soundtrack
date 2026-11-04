@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 10:46
+> Data: 2026-11-04 10:51
 > Totale file: 191
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 190 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2680.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-04 10:12
+- Dimensione totale: 2685.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-04 10:51
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1281,22 +1281,38 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S97)
+**Analisi della sessione corrente** (S98)
 
-- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
-  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
-  (i test del «language detector» usano `localStorage`, che il jsdom non espone
-  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
-  Node 24).
-- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
-  dell'era e nota sul ricordo, i18n IT/EN.
-- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
-  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
-  la schermata ⑨/⑩ di Esplora è la Story 3.3.
-- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
-- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
-  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
-  documentati.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
+percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
+rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
+cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+
+**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
+front-to-back**: selezione (query live su GitHub) → claim atomico con
+riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
+takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
+post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
+NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
+anche dopo i merge delle prossime story.
+
+**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
+perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
+post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
+`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
+regressioni come quella dello yield sono oggi intercettabili solo dalla
+riverifica stessa.
+
+**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
+verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
+aggregator → bundle).
+
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
+→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
+→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
+→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -1307,9 +1323,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
+**Prossima story da implementare**: **3.3** — Esplora + Analisi (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
+Sorgente: `docs/state/stories/3.3-esplora-analisi.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+
+Altre non-done e non bloccate in ordine di priorita backlog (id): 3.5, 4.3, 5.1, 5.2.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2184,6 +2202,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 95 | Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto | 🟢 | ✅ | - |
 | 96 | Il writer di stato di merge copre anche le story (issue #297) | 🟢 | ✅ | #300 |
 | 97 | Ricordi + Share: il feed, la card e il tagging manuale (issue #241) | 🟢 | ✅ | #301 |
+| 98 | Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README) | 🟢 | ✅ | #303 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2223,9 +2242,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **74** (merge: 73)
-- Stories migrate in state/stories: **23** (done: 23)
-- Ultima sessione migrata: **S97** - Ricordi + Share: il feed, la card e il tagging manuale (issue #241)
+- Sessioni migrate in state/sessions: **75** (merge: 74)
+- Stories migrate in state/stories: **28** (done: 23)
+- Ultima sessione migrata: **S98** - Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2272,22 +2291,38 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S97)
+**Analisi della sessione corrente** (S98)
 
-- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
-  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
-  (i test del «language detector» usano `localStorage`, che il jsdom non espone
-  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
-  Node 24).
-- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
-  dell'era e nota sul ricordo, i18n IT/EN.
-- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
-  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
-  la schermata ⑨/⑩ di Esplora è la Story 3.3.
-- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
-- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
-  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
-  documentati.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
+percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
+rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
+cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+
+**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
+front-to-back**: selezione (query live su GitHub) → claim atomico con
+riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
+takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
+post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
+NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
+anche dopo i merge delle prossime story.
+
+**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
+perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
+post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
+`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
+regressioni come quella dello yield sono oggi intercettabili solo dalla
+riverifica stessa.
+
+**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
+verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
+aggregator → bundle).
+
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
+→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
+→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
+→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -12400,6 +12435,99 @@ azioni della card e la rinomina dell'era.
 - `scripts/generate-bundle.ps1` — `$files`
 ```
 
+### Sessione 98 - Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README)
+
+- **Data**: 2026-11-04
+- **Stato**: 🟢
+- **Merged**: ✅ PR #303 (82c57cf33929bc471a85e17dade5675765dda54a, 2026-11-04T10:51:33Z)
+- **Claim**: `kilo-hp-elitebook-a7c7`
+
+```
+
+## Sintesi
+
+Audit del protocollo di workflow richiesto dal project owner: «controlla se la
+concorrenza è gestita in modo corretto, senza che agenti paralleli lavorino
+alle stesse issue perché il README riporta il blocco next story non aggiornato
+fino al merge». L'audit ha **confermato la correttezza strutturale** della
+coordinazione (la selezione passa dalle label live su GitHub e dal claim
+atomico ADR-0006, non dal README) e ha trovato **4 drift**, tutti corretti in
+questa sessione:
+
+| # | Drift | Correzione |
+|---|-------|------------|
+| A | `scripts/agent-claim.ps1` rimuoveva la label `in-progress` nel ramo di riverifica persa, contro §"Procedura di claim" punto 4 («Non rimuovere la label: serve al vincitore») | lo script posta `yield:` ed esce 4 **senza** rimuovere la label; `AGENTS.md` §"Primo task" (che descriveva il comportamento errato) corretto |
+| B | Il blocco `AGGREGATE-NEXT-STEP-*` del README era sul fallback «nessuna story migrata» da Sessione 87: nessuna delle 8 story rimanenti aveva un state file, e l'eccezione documentata «state file alla ratifica della spec» non era mai stata applicata al lotto della Sessione 86 | creati i file di stato di **3.3, 3.5, 4.3, 5.1, 5.2** (`todo`); il blocco indicherà la **3.3** e resterà significativo anche ai merge successivi. **4.2 e 6.1 restano senza file**: nessuna spec ratificata (P2 e post-impl, D.10.2). La **3.2** non ha bisogno di file locale: è stata mergiata (PR #301) mentre la sessione era aperta, e il suo file è già su `main` con `status: done` |
+| C | La prosa del README sotto il blocco citava la coppia 3.4/4.4 come esempio vivo di dipendenza, ma la tranche geo è chiusa (Sessione 76, issue #231) | prosa riscritta: regola valida + esempio dichiarato passato + esplicitazione che il blocco **non conosce né dipendenze né claim** e che la selezione non avviene mai da lì |
+| D | Il takeover di un claim scaduto (TTL 12 ore) era impossibile via script (la validazione rifiutava l'issue `in-progress`), costringendo a comandi `gh` manuali | `agent-claim.ps1 -Stale`: verifica dell'ultima attività (>12 ore: commenti che citano l'agente, PR aperta per l'issue), `stale-release:` atomico citando l'agente del claim scaduto, poi claim + riverifica; exit 5 se il claim non è ancora scaduto |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-98.1 | Il perdente della riverifica **non tocca** la label `in-progress` | La regola esisteva in `AGENTS.md` (ADR-0006, regola 4) ma lo script la violava: l'issue ricompariva "libera" e ogni contendente ripeteva validate+worktree+claim+yield a vuoto. La riverifica reggeva comunque (niente doppio lavoro), ma il rumore e il costo erano evitabili |
+| D-98.2 | Il takeover dei claim stantii diventa un flag atomico (`-Stale`) | Un takeover fattibile solo con comandi `gh` manuali è la stessa occasione di dimenticanza del protocollo che la Sessione 81 ha chiuso con `agent-claim.ps1`. La verifica dell'età (>12 ore su commenti + PR aperta) rende il TTL applicabile senza giudizio a mano |
+| D-98.3 | State file **solo** per le story con specifica ratificata (3.3, 3.5, 4.3, 5.1, 5.2) | L'eccezione documentata in `docs/state/_index.md` («crea il file alla ratifica della spec») serve a mantenere il blocco NEXT-STEP significativo. 4.2 (P2) e 6.1 (post-impl, D.10.2) non hanno spec: un file per loro sarebbe una promessa non lavorabile nel blocco |
+| D-98.4 | La prosa del README dichiara esplicitamente che il blocco non è la fonte di selezione | La domanda del project owner («agenti che lavorano la stessa story per il blocco non aggiornato») aveva una risposta strutturale già presente (query live + claim) ma non scritta nel posto dove un lettore cerca la risposta: il README. Scrivere la regola lì chiude la classe di fraintendimento |
+| D-98.5 | La sessione è la **98**, non la 97 | La Sessione 97 è stata assegnata alla Story 3.2 (PR #301) ed è finita su `main` mentre questa sessione era aperta: il numero è stato ricalcolato con la procedura di `docs/state/_index.md` §"Allocazione del numero di sessione" (massimo su `origin/main` + 1) e il file rinominato di conseguenza |
+| D-98.6 | Nessun blocco `AGGREGATE-*` viene toccato nella PR | Regola V1 di ADR-0008: i blocchi si aggiornano da soli post-merge (writer unico, ADR-0013). La PR porta solo le **fonti** (file di stato, prosa legacy, protocollo) e il bundle rigenerato |
+
+## Analisi di avanzamento
+
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
+percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
+rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
+cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+
+**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
+front-to-back**: selezione (query live su GitHub) → claim atomico con
+riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
+takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
+post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
+NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
+anche dopo i merge delle prossime story.
+
+**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
+perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
+post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
+`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
+regressioni come quella dello yield sono oggi intercettabili solo dalla
+riverifica stessa.
+
+**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
+verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
+aggregator → bundle).
+
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
+→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
+→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
+→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Uno script che implementa una regola può **contraddirla** se nessun test lo esercita | Lo yield di `agent-claim.ps1` rimuoveva la label che §"Procedura di claim" ordina di preservare: la regola era scritta due volte (ADR-0006 + AGENTS.md) e nessuna delle due copie veniva eseguita |
+| Il fallback del blocco NEXT-STEP non è una anomalia: è il **sintomo** di state file mancanti | Il fallback era «corretto» (lo dichiarava anche il backlog), ma persistente dal 2026-11-02: l'eccezione «file alla ratifica della spec» andava applicata al lotto S86 e non lo fu |
+| La prosa che spiega un blocco auto-generato **invecchia più veloce del blocco** | L'esempio 3.4/4.4 era vero alla Sessione 73 ed è morto alla 76: gli esempi vivi nella prosa vanno marcati come tali o sostituiti da regole |
+| Il **numero di sessione** va ricalcolato al rebase, non fissato all'inizio | La 97 è stata presa dalla Story 3.2 durante la sessione: il file rinominato (98) e i riferimenti corretti sono l'unica forma di difesa — `aggregate-state.ps1` segnalerebbe il duplicato solo dopo il merge |
+| Un `main` locale stale fa scrivere **prosa di stato sbagliata** | Il blocco PROGRESS locale contava la 3.2 come «in corso» mentre su `main` era già `done`: la working copy principale va allineata con `origin/main` prima di qualunque lavoro di stato |
+
+## Documenti aggiornati
+
+- `scripts/agent-claim.ps1`: yield senza rimozione label + modalità `-Stale` (TTL takeover) + exit code 5 documentato
+- `AGENTS.md` **v1.45**: §"Primo task" (yield corretto + `-Stale`), §"Mantenere il claim" (invocazione `-Stale`), versione
+- `docs/INDEX.md`: riga `../AGENTS.md` a v1.45 (gate C1)
+- `docs/18-DEV-LOG.md`: changelog del protocollo v1.45
+- `README.md`: prosa sotto il blocco NEXT-STEP (dipendenze + claim, selezione mai dal blocco)
+- `docs/state/stories/`: nuovi `3.3-esplora-analisi.md`, `3.5-anteprima-onboarding-demo.md`, `4.3-artwork-enrichment.md`, `5.1-privacy-spec-finale.md`, `5.2-export-purge.md` (`todo`)
+- `scripts/generate-bundle.ps1`: i 6 nuovi file di stato registrati in `$files` (stato del bundle = contenuto dei file in elenco)
+- `docs/BUNDLE.md`: rigenerato dopo l'aggregator (ordine aggregator → bundle)
+- `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`: blocchi aggregati **non** toccati (regola V1 di ADR-0008): li riscrive il writer post-merge
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -22301,8 +22429,10 @@ azioni della card e la rinomina dell'era.
 number: 98
 title: "Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README)"
 date: 2026-11-04
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "82c57cf33929bc471a85e17dade5675765dda54a"
+merged_date: "2026-11-04T10:51:33Z"
 branch: fix/302-fix-protocol-il-claim-perdente-ruba-la-l
 pr: 303
 claim: kilo-hp-elitebook-a7c7
@@ -32586,9 +32716,14 @@ Ogni story deve avere label GitHub:
 | 2.5 - Collegamento del pipeline di analisi all'app | done | #295 | `265fa50f279a7dbec70507388a3a7ffe405acc14` | analysis |
 | 3.1 - Home + Timeline | done | #234 | `815ce171f9bfd70133d0a788d6e15f717624a290` | ui |
 | 3.2 - Ricordi + Share | done | #301 | `22cf5916140c5869ea296bc778e6cb094ed71037` | ui |
+| 3.3 - Esplora + Analisi | todo | - | - | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
+| 3.5 - Anteprima del risultato in onboarding (modalità demo) | todo | - | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
+| 4.3 - Artwork enrichment | todo | - | - | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `beaefba677f9dbaf0ec9891c3e70516015a1adcf` | enrichment |
+| 5.1 - Privacy spec finale | todo | - | - | privacy |
+| 5.2 - Export e purge | todo | - | - | privacy |
 
 <!-- AGGREGATE-STORIES-END -->
 

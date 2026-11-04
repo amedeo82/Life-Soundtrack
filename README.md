@@ -93,22 +93,38 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S97)
+**Analisi della sessione corrente** (S98)
 
-- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
-  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
-  (i test del «language detector» usano `localStorage`, che il jsdom non espone
-  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
-  Node 24).
-- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
-  dell'era e nota sul ricordo, i18n IT/EN.
-- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
-  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
-  la schermata ⑨/⑩ di Esplora è la Story 3.3.
-- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
-- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
-  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
-  documentati.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
+percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
+rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
+cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+
+**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
+front-to-back**: selezione (query live su GitHub) → claim atomico con
+riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
+takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
+post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
+NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
+anche dopo i merge delle prossime story.
+
+**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
+perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
+post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
+`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
+regressioni come quella dello yield sono oggi intercettabili solo dalla
+riverifica stessa.
+
+**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
+verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
+aggregator → bundle).
+
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
+→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
+→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
+→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -119,9 +135,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-_Nessuna story non-done e non bloccata migrata in `docs/state/stories/`._
+**Prossima story da implementare**: **3.3** — Esplora + Analisi (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per la procedura di migration.
+Sorgente: `docs/state/stories/3.3-esplora-analisi.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+
+Altre non-done e non bloccate in ordine di priorita backlog (id): 3.5, 4.3, 5.1, 5.2.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 

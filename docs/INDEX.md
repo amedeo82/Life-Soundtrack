@@ -150,6 +150,7 @@
 | 95 | Dopo la #295: lo stato di merge della Story 2.5 allineato, e il gap dei writer scoperto | 🟢 | ✅ | - |
 | 96 | Il writer di stato di merge copre anche le story (issue #297) | 🟢 | ✅ | #300 |
 | 97 | Ricordi + Share: il feed, la card e il tagging manuale (issue #241) | 🟢 | ✅ | #301 |
+| 98 | Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README) | 🟢 | ✅ | #303 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -189,9 +190,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **74** (merge: 73)
-- Stories migrate in state/stories: **23** (done: 23)
-- Ultima sessione migrata: **S97** - Ricordi + Share: il feed, la card e il tagging manuale (issue #241)
+- Sessioni migrate in state/sessions: **75** (merge: 74)
+- Stories migrate in state/stories: **28** (done: 23)
+- Ultima sessione migrata: **S98** - Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README)
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -238,22 +239,38 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S97)
+**Analisi della sessione corrente** (S98)
 
-- **Numeri**: 37 test nuovi; suite `@ls/core` 643 test verdi (57 file),
-  `@ls/web` 186 test di cui 178 verdi e 8 falliti **per l'ambiente locale**
-  (i test del «language detector» usano `localStorage`, che il jsdom non espone
-  sotto Node 26: gli stessi file falliscono identici su `main`, il CI gira su
-  Node 24).
-- **Cosa è pronto**: feed ⑪, ShareSheet ⑫, card PNG, capitolo HTML, tagging
-  dell'era e nota sul ricordo, i18n IT/EN.
-- **Cosa manca**: l'export del database e la cancellazione definitiva (Story
-  5.2), il nastro contesto nella Timeline è un'altra story (3.4, già merged),
-  la schermata ⑨/⑩ di Esplora è la Story 3.3.
-- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`.
-- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
-  verde **in CI** (Node 24); in locale i 8 fallimenti i18n sono attesi e
-  documentati.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
+percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
+rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
+cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+
+**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
+front-to-back**: selezione (query live su GitHub) → claim atomico con
+riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
+takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
+post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
+NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
+anche dopo i merge delle prossime story.
+
+**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
+perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
+post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
+`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
+regressioni come quella dello yield sono oggi intercettabili solo dalla
+riverifica stessa.
+
+**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
+verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
+aggregator → bundle).
+
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
+→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
+→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
+→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
