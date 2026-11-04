@@ -5,7 +5,7 @@ date: 2026-11-04
 state: 🟡
 merged: false
 branch: feat/304-test-suite-protocol-scripts
-pr: 0
+pr: 305
 claim: kilo-amedeovecchiemilcoms-304a
 tags: [protocol, testing, ci, devops]
 ---
