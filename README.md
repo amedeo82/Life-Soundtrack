@@ -93,40 +93,35 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S99)
+**Analisi della sessione corrente** (S100)
 
-**Numeri.** Nessuna story implementata: è lavoro di **protocollo e test**. La
-percentuale di avanzamento resta **77%** (23 story completate su 30, effort
-pesato 80%, 7 step rimanenti): nessuna state file di story è stata creata o
-modificata in questa sessione.
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e CI**. La percentuale di
+avanzamento resta **77%** (23 story completate su 30, effort pesato 80%, 7 step rimanenti):
+nessuna state file di story è stata creata o modificata in questa sessione.
 
-**Cosa è pronto.** La specifica della copertura mancante è scritta e verificabile:
-il mock (cosa intercetta, come muta lo stato, come fallisce su una chiamata
-non prevista), i casi per entrambi gli script (con l'expected e l'exit code),
-il wiring in CI e il mapping con gli AC dell'issue. La issue #304 è passata da
-`needs-spec` a `agent-ready` (la strategia è stata ratificata dal project
-owner) ed è claimata.
+**Cosa è pronto.** Il divario fra i gate locali e i gate della CI è chiuso: la worktree
+nasce con `node_modules` (l'hook `commit-msg` smette di saltare commitlint), e
+`agent-pr.ps1` verifica Conventional Commits e i gate dei workflow **prima** di aprire la
+PR. Il cleanup post-merge è robusto con `node_modules` presente (L0 + L4). I test di
+regressione coprono i tre script: `test-setup-worktree.sh` (11 scenari, S9..S11 nuovi),
+`test-post-merge.sh` (16 scenari, T15 e T16 nuovi), `test-agent-pr.sh` (11 scenari, T3, T4 e T5 nuovi)
+nuovi).
 
-**Cosa manca.** La ratifica dell'ADR-0014 (🟡 → 🟢) e quindi l'implementazione:
-`scripts/mock/gh.ps1`, `scripts/test-agent-claim.sh`, l'estensione di
-`scripts/test-agent-pr.sh`, i due step in `gates-procedure`, la riga nella
-tabella regola ⟺ gate di `AGENTS.md` (che richiede il bump di versione in
-`AGENTS.md` e `docs/INDEX.md`, gate C1) e l'aggiornamento di §9.10 e §9.13 di
-`docs/12-DEVOPS.md`.
+**Cosa manca.** La suite offline degli script di protocollo (`agent-claim.ps1`,
+`agent-pr.ps1`) è ancora quella dell'ADR-0014 (🟡 DRAFT, issue #304): i gate aggiunti qui
+sono **verificati da test con mock**, non dalla suite offline col mock di `gh` su PATH. La
+ratifica dell'ADR-0014 resta al project owner.
 
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
-il file di sessione e la prosa legacy (`docs/INDEX.md`, `docs/12-DEVOPS.md`).
-Il bundle è stato rigenerato dopo l'aggregator (ordine aggregator → bundle).
+**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono il file di
+sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). Il bundle
+è stato rigenerato dopo l'agregator (ordine aggregator → bundle).
 
-**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
-→ 6 check, 0 falliti · `node scripts/check-encoding.mjs` → 0 errori ·
-`pwsh scripts/generate-bundle.ps1 -Check` → exit 0 (192 file) ·
-`node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD` → 0
-violazioni (i blocchi `AGGREGATE-*` **non** sono stati toccati a mano: li
-riscrive il writer post-merge, ADR-0008 V1) · `pwsh scripts/aggregate-state.ps1
--Check` → **exit 1 atteso**: il nuovo file di sessione cambia i blocchi
-aggregati, che per contratto vengono applicati dal writer post-merge (gate
-warning-only in CI, come per la Sessione 98).
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs` → 6 check,
+0 falliti · `node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1
+-Check` → exit 0 · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
+→ 0 violazioni · `bash scripts/test-setup-worktree.sh` → 11/11 ·
+`bash scripts/test-post-merge.sh` → 56 assert, 0 falliti ·
+`bash scripts/test-agent-pr.sh` → 11/11.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

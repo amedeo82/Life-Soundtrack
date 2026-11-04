@@ -2,8 +2,10 @@
 number: 100
 title: "I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306)"
 date: 2026-11-04
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "98f126fab8b26ac75ca03f4f98afb11f543d1fd2"
+merged_date: "2026-11-04T18:09:15Z"
 branch: feat/306-gate-locali-parita-ci
 pr: 307
 claim: kilo-hp-elitebook-93a9
