@@ -132,13 +132,19 @@ if (-not $SkipChecks) {
         Say "commitlint: saltato (pnpm non nel PATH): la CI lo eseguira'" "Yellow"
         $skipped += "commitlint (pnpm assente)"
     }
-    elseif (-not (Test-Path (Join-Path $repoRoot "node_modules/.bin"))) {
+    elseif (-not (Test-Path (Join-Path $repoRoot "node_modules/.bin/commitlint")) -and
+            -not (Test-Path (Join-Path $repoRoot "node_modules/.bin/commitlint.cmd"))) {
         # L'hook `commit-msg` salta commitlint quando `node_modules` non
         # esiste, e la worktree appena creata NON lo aveva (issue #306): la
         # convenzione non veniva verificata al momento del commit. Qui il
         # controllo non e' "non eseguibile per assenza di tool": e' eseguibile
         # e va eseguito, quindi BLOCCA finche' l'agente non installa.
-        Write-Host "[agent-pr] ERRORE: node_modules assente: commitlint non puo' girare." -ForegroundColor Red
+        #
+        # Il controllo e' sul BINARIO (`commitlint`), non sulla cartella: con
+        # `node_modules/.bin` vuota `pnpm exec` tenta un'installazione dal
+        # registry (rete, e potenzialmente minuti di attesa) invece di fallire
+        # subito.
+        Write-Host "[agent-pr] ERRORE: commitlint non e' installato (node_modules assente o incompleto)." -ForegroundColor Red
         Write-Host "[agent-pr]   Risolvilo con: pnpm install --frozen-lockfile" -ForegroundColor Yellow
         $failures += "commitlint (node_modules assente)"
     }

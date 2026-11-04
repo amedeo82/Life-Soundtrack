@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 17:02
+> Data: 2026-11-04 17:28
 > Totale file: 194
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -22843,6 +22843,7 @@ sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). 
 | Un `cleanup` che rimuove `$TMPDIR` invece della directory creata dal test è un `rm -rf` sulla directory temporanea **di sistema** | i test che creano directory temporanei devono ricordare **quella** che hanno creato; la `trap` di uscita è il posto peggiore in cui fidarsi di una variabile d'ambiente |
 | Un riferimento `#NNN` nel **body** di un messaggio di commit fa sì che `conventional-commits-parser` tratti tutto ciò che segue come **footer**, e commitlint segnala «footer must have leading blank line» su un messaggio corretto | nel body scrivere «la PR 305», non «la PR #305»; il titolo accetta il riferimento (`(issue #306)`). La regola è ora in AGENTS.md §"Git workflow" |
 | Un `git commit` senza elenco di path committa **tutto** l'index, e in un flusso a due commit il primo si mangia il secondo | ogni commit che deve portare **un solo** file lo dichiara esplicitamente (`git commit -- <path>`): il flusso "rigenera il bundle, poi committa la sessione" produceva una PR con `pr: 0` e un exit 1 **dopo** la PR aperta |
+| `pnpm exec` in un repository **senza dipendenze** non fallisce subito: tenta un'installazione dal registry | in CI ha bloccato il job `gates-procedure` per **20 minuti** (poi timeout). Il guard di `agent-pr.ps1` ora controlla il **binario** (`node_modules/.bin/commitlint`), non la cartella; i test mockano `pnpm` per non toccare la rete |
 | Il difetto più costoso non è quello che un gate intercetta, ma quello che **nessun gate guarda** | il numero di sessione hardcodato in un test era una mina armata: nessun gate lo poteva vedere, perché il difetto si manifestava solo dentro una directory temporanea |
 
 ## Documenti aggiornati
@@ -34549,9 +34550,13 @@ di `bash` si verifica **probandolo** (`bash -c "exit 0"`), non guardando il `PAT
 su Windows `bash` può essere uno stub non funzionante.
 
 Il caso speciale è **commitlint**: se `pnpm` non è nel `PATH` il gate viene *saltato*, ma
-se `pnpm` c'è e `node_modules` manca il gate **blocca** — il problema è risolvibile
-dall'agente (`pnpm install --frozen-lockfile`) ed è esattamente il difetto che la worktree
-senza dipendenze produce (vedi sotto).
+se `pnpm` c'è e il **binario** `node_modules/.bin/commitlint` manca il gate **blocca** — il
+problema è risolvibile dall'agente (`pnpm install --frozen-lockfile`) ed è esattamente il
+difetto che la worktree senza dipendenze produce (vedi sotto).
+
+> Il controllo è sul **binario**, non sulla cartella `node_modules/.bin`: con la cartella
+> vuota `pnpm exec` non fallisce subito, ma **tenta un'installazione dal registry** — in CI
+> questo ha bloccato il job `gates-procedure` per 20 minuti (poi timeout del job).
 
 #### La worktree nasce con le dipendenze installate
 
@@ -51677,13 +51682,19 @@ if (-not $SkipChecks) {
         Say "commitlint: saltato (pnpm non nel PATH): la CI lo eseguira'" "Yellow"
         $skipped += "commitlint (pnpm assente)"
     }
-    elseif (-not (Test-Path (Join-Path $repoRoot "node_modules/.bin"))) {
+    elseif (-not (Test-Path (Join-Path $repoRoot "node_modules/.bin/commitlint")) -and
+            -not (Test-Path (Join-Path $repoRoot "node_modules/.bin/commitlint.cmd"))) {
         # L'hook `commit-msg` salta commitlint quando `node_modules` non
         # esiste, e la worktree appena creata NON lo aveva (issue #306): la
         # convenzione non veniva verificata al momento del commit. Qui il
         # controllo non e' "non eseguibile per assenza di tool": e' eseguibile
         # e va eseguito, quindi BLOCCA finche' l'agente non installa.
-        Write-Host "[agent-pr] ERRORE: node_modules assente: commitlint non puo' girare." -ForegroundColor Red
+        #
+        # Il controllo e' sul BINARIO (`commitlint`), non sulla cartella: con
+        # `node_modules/.bin` vuota `pnpm exec` tenta un'installazione dal
+        # registry (rete, e potenzialmente minuti di attesa) invece di fallire
+        # subito.
+        Write-Host "[agent-pr] ERRORE: commitlint non e' installato (node_modules assente o incompleto)." -ForegroundColor Red
         Write-Host "[agent-pr]   Risolvilo con: pnpm install --frozen-lockfile" -ForegroundColor Yellow
         $failures += "commitlint (node_modules assente)"
     }

@@ -120,9 +120,13 @@ EOF
   cp "$SCRIPT_DIR/test-post-merge-writer.sh" scripts/test-post-merge-writer.sh 2>/dev/null \
     || echo "# stub" > scripts/test-post-merge-writer.sh
 
-  # `node_modules/.bin` e' il segnale che agent-pr.ps1 usa per decidere se
-  # commitlint e' eseguibile (issue #306).
+  # `node_modules/.bin/commitlint` e' il segnale che agent-pr.ps1 usa per
+  # decidere se commitlint e' eseguibile (issue #306). Il controllo e' sul
+  # BINARIO, non sulla cartella: con `node_modules/.bin` vuota `pnpm exec`
+  # tenta un'installazione dal registry invece di fallire subito.
   mkdir -p node_modules/.bin
+  echo "mock" > node_modules/.bin/commitlint
+  echo "mock" > node_modules/.bin/commitlint.cmd
 
   # Bundle TRACCIATO + generatore MOCK: `agent-pr.ps1` rigenera il bundle
   # prima di committare il file di sessione (la sessione e' nel catalogo
@@ -132,8 +136,11 @@ EOF
   echo "bundle iniziale" > docs/BUNDLE.md
   cat > scripts/generate-bundle.ps1 <<'EOF'
 # Mock del generatore del bundle: modifica docs/BUNDLE.md.
+# Il percorso e' costruito con Split-Path (non con "..\") per funzionare
+# anche su Linux, dove il backslash non e' un separatore.
 $ErrorActionPreference = "Stop"
-$p = Join-Path $PSScriptRoot "..\docs\BUNDLE.md"
+$root = Split-Path -Parent $PSScriptRoot
+$p = Join-Path $root "docs/BUNDLE.md"
 Set-Content -LiteralPath $p -Value "bundle rigenerato" -Encoding utf8
 exit 0
 EOF
@@ -181,21 +188,32 @@ EOF
 
 # Mock pnpm: `pnpm exec commitlint` fallisce (simula un body di commit che
 # viola `body-max-line-length`).
+#
+# $2 = "fail" (default) -> commitlint fallisce; "ok" -> commitlint passa.
+#
+# Il mock serve anche a ISOLARE il test dalla rete: senza, `pnpm exec` in un
+# repo senza package.json tenta un'installazione dal registry (in CI: 20
+# minuti di attesa, poi timeout del job).
 make_mock_pnpm() {
   local tmpdir="$1"
+  local mode="${2:-fail}"
   local mock_bin="$tmpdir/mock-bin"
   mkdir -p "$mock_bin"
-  cat > "$mock_bin/pnpm" <<'EOF'
+  cat > "$mock_bin/pnpm" <<EOF
 #!/usr/bin/env bash
-if [ "$1" = "exec" ] && [ "$2" = "commitlint" ]; then
-  echo "mock commitlint: body's lines must not be longer than 100 characters [body-max-line-length]" >&2
-  exit 1
+if [ "\$1" = "exec" ] && [ "\$2" = "commitlint" ]; then
+  if [ "$mode" = "fail" ]; then
+    echo "mock commitlint: body's lines must not be longer than 100 characters [body-max-line-length]" >&2
+    exit 1
+  fi
+  exit 0
 fi
 exit 0
 EOF
   chmod +x "$mock_bin/pnpm"
   if uname -s 2>/dev/null | grep -qi 'mingw\|msys\|cygwin\|windows'; then
-    cat > "$mock_bin/pnpm.cmd" <<'EOF'
+    if [ "$mode" = "fail" ]; then
+      cat > "$mock_bin/pnpm.cmd" <<'EOF'
 @echo off
 if "%1"=="exec" if "%2"=="commitlint" (
   echo mock commitlint: body's lines must not be longer than 100 characters 1>&2
@@ -203,6 +221,12 @@ if "%1"=="exec" if "%2"=="commitlint" (
 )
 exit /b 0
 EOF
+    else
+      cat > "$mock_bin/pnpm.cmd" <<'EOF'
+@echo off
+exit /b 0
+EOF
+    fi
   fi
 }
 
@@ -354,6 +378,10 @@ new_tmpdir
 REPO_DIR="$(make_repo "$TMPDIR")"
 make_mock_gh "$TMPDIR"
 make_mock_bash "$TMPDIR"
+# commitlint deve PASSARE: e' il gate successivo (quello del writer
+# post-merge) che deve fallire. Senza il mock, `pnpm exec` in questo repo
+# mock tenta un'installazione dal registry (in CI: 20 minuti, poi timeout).
+make_mock_pnpm "$TMPDIR" ok
 BODY_FILE="$(make_body_file "$TMPDIR")"
 BODY_FILE_PS="$(ps_path "$BODY_FILE")"
 export MOCK_GH_LOG="$TMPDIR/gh.log"

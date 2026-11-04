@@ -1472,9 +1472,13 @@ di `bash` si verifica **probandolo** (`bash -c "exit 0"`), non guardando il `PAT
 su Windows `bash` può essere uno stub non funzionante.
 
 Il caso speciale è **commitlint**: se `pnpm` non è nel `PATH` il gate viene *saltato*, ma
-se `pnpm` c'è e `node_modules` manca il gate **blocca** — il problema è risolvibile
-dall'agente (`pnpm install --frozen-lockfile`) ed è esattamente il difetto che la worktree
-senza dipendenze produce (vedi sotto).
+se `pnpm` c'è e il **binario** `node_modules/.bin/commitlint` manca il gate **blocca** — il
+problema è risolvibile dall'agente (`pnpm install --frozen-lockfile`) ed è esattamente il
+difetto che la worktree senza dipendenze produce (vedi sotto).
+
+> Il controllo è sul **binario**, non sulla cartella `node_modules/.bin`: con la cartella
+> vuota `pnpm exec` non fallisce subito, ma **tenta un'installazione dal registry** — in CI
+> questo ha bloccato il job `gates-procedure` per 20 minuti (poi timeout del job).
 
 #### La worktree nasce con le dipendenze installate
 
