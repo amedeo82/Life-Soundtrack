@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 10:51
-> Totale file: 191
+> Data: 2026-11-04 13:23
+> Totale file: 192
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -2078,7 +2078,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
-| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 79 (0001-0012) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; 0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0; **0012 protocollo agenti come contratto verificato APPROVED v1.0**, Sessione 79, issue #248) |
+| 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 99 (0001-0014) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; 0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0; **0012 protocollo agenti come contratto verificato APPROVED v1.0**, Sessione 79, issue #248; **0013 automazioni post-merge deterministiche APPROVED v1.0**, Sessione 90, issue #284; **0014 copertura di test offline degli script di protocollo 🟡 DRAFT**, Sessione 99, issue #304 — in attesa di ratifica del project owner) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
 | 16 | [`16-OPERATIONS.md`](16-OPERATIONS.md) | 🟢 APPROVED | Sessione 53 (Story 1.4) | Runbook operativo: update management (`05§11`) + manutenzione DB (`05§12`); §2.3 API `@ls/core/db` con il report esteso di `rekey()` |
@@ -2330,7 +2330,7 @@ aggregator → bundle).
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.36, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 10 ADR in `13-ADR/` (0001-0003, 0005-0009, 0010, 0011)
+- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.36, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 13 ADR in `13-ADR/` (0001-0003, 0005-0013; **0014** 🟡 DRAFT, Sessione 99, issue #304 — in attesa di ratifica)
 - **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.5, `07` ora v0.2, `08` ora v0.14, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.30; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
@@ -33885,6 +33885,25 @@ Il dettaglio dei fix e delle misure è in **§9.14**; qui il solo stato di chius
 `TMPDIR` puntava a una directory già cancellata — la suite falliva su **qualsiasi** piattaforma.
 Il difetto era il *cleanup*, non la piattaforma.
 
+#### Copertura degli script di protocollo (`agent-claim.ps1`, `agent-pr.ps1`) *(issue #304, Sessione 99)*
+
+Il perimetro dell'audit precedente è quello delle **suite di test locali**. Restano fuori dal suo
+elenco gli **script di protocollo** che non hanno una suite: `scripts/agent-claim.ps1` (claim
+atomico, riverifica, `-Stale` con TTL 12 ore) e `scripts/agent-pr.ps1` (apertura della PR,
+transizione delle label, keyword di chiusura, `pr: N` nella sessione). Sono gli unici strumenti
+del protocollo che **parlano con GitHub**, e la loro copertura è:
+
+| Script | Copertura attuale | Difetto |
+|---|---|---|
+| `scripts/agent-claim.ps1` | **nessuna** | ogni regressione è intercettabile solo dal vivo: la regressione **#302** (il ramo di riverifica persa rimuoveva la label `in-progress`, contro ADR-0006 regola 4) è passata in `main` con la CI verde |
+| `scripts/agent-pr.ps1` | `scripts/test-agent-pr.sh`, **2 scenari** (issue #286) | copre solo lo step 6 (`pr: N` nel file di sessione): non copre la transizione delle label né il controllo della keyword di chiusura |
+
+La **spec** della copertura (strategia del mock, contratto delle invocazioni intercettate,
+inventario dei casi) è in **[`13-ADR/0014-test-suite-protocol-scripts.md`](13-ADR/0014-test-suite-protocol-scripts.md)**
+(🟡 DRAFT, in attesa di ratifica del project owner): mock di `gh` **su PATH, offline e stateful**,
+suite in `scripts/test-agent-claim.sh` e `scripts/test-agent-pr.sh`, esecuzione nel job
+`gates-procedure` di `ci.yml`. L'implementazione è successiva alla ratifica.
+
 ---
 
 ### 9.14 Prestazioni delle procedure automatiche (issue #224)
@@ -49130,6 +49149,217 @@ richiede sono un fail-open silenzioso.
 | Il gate merge-state confronta **anche** le story, nel loro formato (`status: done`) | `check-merge-state.mjs` (perimetro `docs/state/stories/`) | `scripts/test-merge-state-gate.sh` (T13..T18) · issue #297 |
 | Il writer applica lo stato di merge anche alle story | `apply-merge-state.mjs` (perimetro `docs/state/stories/`) | `scripts/test-apply-merge-state.mjs` (T4..T9) |
 | I generatori producono gli stessi byte su ogni OS | `check-generators-portable.mjs` (manifest cross-OS) | `scripts/test-generators-portable.sh` (T1, T2, T3) |
+
+
+
+===== FILE: docs/13-ADR/0014-test-suite-protocol-scripts.md =====
+
+# ADR-0014 — Copertura di test offline degli script di protocollo (`agent-claim.ps1`, `agent-pr.ps1`)
+
+- **Stato**: 🟡 DRAFT (issue #304, Sessione 99, 2026-11-04) — in attesa di ratifica del project owner
+- **Data**: 2026-11-04
+- **Riferimenti**: issue #304 (suite di test mancanti), issue #302 (regressione dello yield), issue #256 (claim atomico, ADR-0006), issue #286 (test di regressione di `agent-pr.ps1`), issue #53 (worktree), ADR-0006, ADR-0012, `docs/12-DEVOPS.md` §9.13
+
+## Contesto
+
+`scripts/agent-claim.ps1` e `scripts/agent-pr.ps1` sono gli unici strumenti del
+protocollo che **parlano con GitHub** (label, commenti `claim:`/`release:`,
+creazione PR, push) e **non hanno alcuna suite di test**. Ogni regressione è
+quindi intercettabile solo dal vivo, e la verifica «manuale» non è un gate.
+
+Il caso reale è la regressione **#302**: nel ramo di riverifica persa,
+`agent-claim.ps1` rimuoveva la label `in-progress`, in contraddizione con
+ADR-0006 regola 4 («non rimuovere la label: serve al vincitore»). La regola
+era scritta due volte (ADR-0006 e `AGENTS.md`) e **nessuna delle due copie
+veniva eseguita**: il protocollo diceva una cosa, lo script ne faceva un'altra,
+e la pipeline restava verde. La lezione è la stessa che chiude ADR-0012: *uno
+script che implementa una regola può contraddirla se nessun test lo esercita*.
+
+L'unica copertura esistente è `scripts/test-agent-pr.sh` (issue #286): **due**
+scenari, sul solo step 6 (scrivere `pr: N` nel file di sessione). La claim
+atomica, la riverifica, il `-Stale` con TTL di 12 ore, la transizione delle
+label e il controllo della keyword di chiusura non sono coperti da nulla.
+
+La issue **#304** chiede tre cose verificabili: una suite per `agent-claim.ps1`
+che eserciti i rami `claim concesso`, `claim perso`, `-Stale` con TTL scaduto e
+`-Stale` con TTL **non** scaduto; una suite autonoma per `agent-pr.ps1` che
+verifichi transizione delle label, keyword di chiusura e scrittura di `pr: N`;
+l'esecuzione in CI **senza accesso alla rete e senza dipendenze native di `gh`**,
+con exit code non zero al fallimento.
+
+I due punti che bloccavano la issue (label `needs-spec`) erano la scelta della
+strategia di mock e l'inventario delle funzioni da coprire. La strategia è
+ratificata dal project owner in questa sessione (**mock di `gh` a livello di
+PATH, offline**); l'inventario è la sezione «Decisione» di questo ADR.
+
+## Decisione
+
+### D-14.1 — Il mock di `gh` è un eseguibile sul PATH, offline e *stateful*
+
+La rete e il `gh` nativo sono esclusi per contratto (AC della issue #304): il
+mock è uno script PowerShell (`scripts/mock/gh.ps1`) con due launcher —
+`gh` (POSIX, con shebang) e `gh.cmd` (Windows) — che il driver mette **in
+testa** al `PATH` della suite. Nessun token, nessuna env var di
+autenticazione, nessuna chiamata che esca dalla macchina.
+
+Il mock è **stateful**: lo stato (issue, label, commenti, PR, elenco delle
+chiamate) vive in un JSON nella directory temporanea della suite, indicata
+dalla env var `LS_GH_MOCK_STATE`. La statefulness non è un dettaglio: la
+riverifica di `agent-claim.ps1` deve vedere **il commento di claim che lo
+script ha appena postato**, e il `-Stale` deve poter dichiarare scaduto un
+claim che il mock ha creato 20 ore fa.
+
+Il mock registra inoltre **ogni invocazione** ricevuta (argomenti grezzi) in
+`calls[]`. Le asserzioni verificano quindi *quali comandi sono stati eseguiti*
+— per esempio «nessuna `--remove-label` dopo una riverifica persa» — e non
+solo lo stato finale: è l'unico modo di distinguere «label conservata» da
+«label rimossa e riapplicata».
+
+Il tempo è **iniettato**: lo stato contiene un orologio base (`now`) e il mock
+deriva `created_at` da quel valore. I casi di TTL sono così deterministici e
+non dipendono dall'orologio della macchina (la classe di difetto che ha reso
+flaky il test `T3` dell'aggregator, issue #142).
+
+### D-14.2 — Il contratto del mock: le invocazioni intercettate
+
+| # | Invocazione | Risposta del mock | Usata da |
+|---|-------------|-------------------|----------|
+| 1 | `gh repo view --json nameWithOwner --jq .nameWithOwner` | `test/test` | `agent-claim.ps1:85`, `agent-pr.ps1:58` |
+| 2 | `gh issue view <N> --json number,title,state,labels` | JSON dell'issue con `labels[]` | `agent-claim.ps1:172` |
+| 3 | `gh issue view <N> --json title --jq .title` | titolo dell'issue | `agent-pr.ps1:127` |
+| 4 | `gh issue edit <N> --add-label <L>` / `--remove-label <L>` | exit 0, muta le label | `agent-claim.ps1:226`, `agent-pr.ps1:147` |
+| 5 | `gh issue comment <N> --body <B>` | exit 0, appende `{id, body, created_at}` | `agent-claim.ps1:238`, `:243`, `:267` |
+| 6 | `gh api repos/<slug>/issues/<N>/comments` | array JSON dei commenti | `agent-claim.ps1:128`, `:248` |
+| 7 | `gh pr list --state open --limit 100 --json number,headRefName,updatedAt` | array JSON delle PR aperte | `agent-claim.ps1:147` (TTL) |
+| 8 | `gh pr create --base <B> --head <H> --title <T> --body-file <F>` | `https://github.com/test/test/pull/<N>` | `agent-pr.ps1:139` |
+| 9 | qualunque altra invocazione | exit 1 con messaggio esplicito | — |
+
+La riga 9 è una **scelta deliberata**: un mock che risponde `exit 0` a tutto
+è un mock che può mascare una chiamata non prevista (lo stesso principio del
+gate «un gate che passa sempre non è un gate», lesson 43-1). Se gli script
+cresceranno e useranno una nuova invocazione, la suite fallisce e dice
+quale.
+
+### D-14.3 — Inventario dei casi di `agent-claim.ps1`
+
+| ID | Scenario | Atteso | Exit |
+|----|----------|--------|------|
+| T1 | claim concesso (issue `agent-ready`, nessun claim attivo) | label `in-progress` aggiunta; commento `claim:` postato; `agent-state.json` scritto con `issue`, `agent_id`, `branch`, `claim_id` = id del commento | 0 |
+| T2 | **claim perso** (un altro claim attivo con id più basso) | commento `yield:` postato; **label `in-progress` conservata** (nessuna `--remove-label` in `calls[]`); nessun `agent-state.json` | 4 |
+| T3 | `-Stale` con **TTL scaduto** (claim attivo di 20 ore) | commento `stale-release:` che **cita l'agente stantio**; poi `claim:` nuovo; riverifica vinta; label `in-progress` presente | 0 |
+| T4 | `-Stale` con **TTL non scaduto** (claim attivo di 2 ore) | **zero modifiche**: nessun commento postato, nessuna label cambiata, nessun file di stato | 5 |
+| T5 | issue senza label `agent-ready` | zero modifiche | 3 |
+| T6 | issue già `in-progress`, senza `-Stale` | zero modifiche | 3 |
+| T7 | `-DryRun` | zero modifiche su GitHub (nessuna label, nessun commento) | 0 |
+
+T2 è la regressione **#302** (la regola che nessun test esercitava). T3 e T4
+coprono il takeover TTL introdotto da `agent-claim.ps1 -Stale` (D-98.2) nelle
+**due** direzioni: il takeover ammesso e il takeover rifiutato.
+
+T5 e T6 non sono richiesti dagli AC, ma sono la validazione minima della
+precondizione: senza di essi, un mock che restituisce sempre `agent-ready`
+passerebbe T1..T4 senza mai verificare la validazione dell'issue.
+
+### D-14.4 — Inventario dei casi di `agent-pr.ps1`
+
+| ID | Scenario | Atteso | Exit |
+|----|----------|--------|------|
+| T1 | sessione singola con `branch:` corrispondente | `pr: 77` scritto nel file di sessione | 0 |
+| T2 | nessuna sessione corrispondente | warning `NESSUN file di sessione`, nessuna scrittura | 0 |
+| T3 | transizione delle label | in `calls[]`: `gh issue edit <N> --remove-label agent-ready --add-label status:in-review` | 0 |
+| T4 | keyword di chiusura **assente** | **nessuna PR creata** (nessuna `gh pr create` in `calls[]`) | 1 |
+| T5 | keyword di chiusura **dentro backtick** | nessuna PR creata | 1 |
+| T6 | keyword di chiusura su **un'altra issue** | nessuna PR creata | 1 |
+| T7 | file di stato dell'agente assente | nessuna PR creata | 3 |
+
+T1 e T2 sono i due scenari esistenti (`test-agent-pr.sh`, issue #286): la
+suite li conserva e li estende, così l'AC «suite autonoma, non solo il test di
+regressione puntuale» è soddisfatto senza perdere la copertura già acquisita.
+
+### D-14.5 — Le suite girano in CI, bloccanti, senza rete
+
+Le due suite entrano in `.github/workflows/ci.yml` nel job **`gates-procedure`**
+(già nell'elenco `needs:` del job aggregatore `quality`): un passo per
+`bash scripts/test-agent-claim.sh` e uno per `bash scripts/test-agent-pr.sh`.
+Il job `quality` è l'aggregatore **fail-closed**: se uno dei due fallisce, la
+PR è rossa.
+
+Vincoli di CI: il `PATH` della suite contiene il mock e **non** il `gh` vero;
+nessuna env var di autenticazione è necessaria; le suite girano su repository
+git temporanei (con un remoto finto) e non toccano il repository reale.
+
+### D-14.6 — Una regola, un gate (ADR-0012)
+
+Quando le suite esistono, `AGENTS.md` §"Il contratto del protocollo: regola ⟺
+gate" guadagna la riga che dichiara la regola «gli script di protocollo hanno
+una suite offline che ne verifica il comportamento». La riga è verificata da
+due gate: `check-protocol-consistency.mjs` (C5: gli script citati esistono
+davvero) e l'esecuzione della suite in CI (la regola è **enforzata**, non
+dichiarata). Nessuna regola senza gate: la riga di `AGENTS.md` e la suite
+nascono **nello stesso commit**.
+
+## Alternative scartate
+
+| Alternativa | Perché scartata |
+|---|---|
+| Repository GitHub di test + token reale | viola l'AC «senza accesso alla rete e senza dipendenze native di `gh`»; non riproducibile in CI; i test scrivono su GitHub durante l'esecuzione |
+| Pester (framework di test PowerShell) | il repository non ha Pester e non vuole aggiungere un toolchain; le suite esistenti sono bash + `pwsh`, ed è il pattern che il repo ha già scelto e collaudato |
+| Suite in Node.js | gli script sotto test sono PowerShell: il test deve comunque invocare `pwsh`; il driver bash + mock PowerShell è il pattern già in uso (`test-setup-worktree.sh`, `test-agent-pr.sh`) |
+| Estrarre la logica degli script in un modulo testabile | refactor di due strumenti di protocollo già in uso: il rischio è maggiore del difetto che si vuole coprire |
+| Un mock duplicato in ciascuna suite | due copie divergono (la classe di drift che il repo ha già imparato a costo); il mock è **un file solo**, con i launcher generati dal driver |
+| Test E2E «live» manuali contro il repository vero | non riproducibili, non bloccanti, e l'errore umano nel claim è proprio il difetto da coprire |
+| Copertura per riga (strumenti di coverage) | la copertura per riga non dice nulla del **comportamento osservabile** (exit code, chiamate a `gh`, file prodotti) e rende i test fragili rispetto a ogni refactor interno degli script |
+
+## Conseguenze
+
+- **La regressione #302 diventa intercettabile in CI**: il ramo di riverifica
+  persa ha un test che verifica che la label `in-progress` resta al vincitore.
+- **Il takeover TTL è verificato nelle due direzioni**: `-Stale` ammesso (T3) e
+  `-Stale` rifiutato senza toccare nulla (T4). Il secondo è il caso più
+  pericoloso: uno script che «prende» un claim ancora valido.
+- **Le suite sono deterministiche**: l'orologio è iniettato dal mock, i
+  repository sono temporanei, nessuna dipendenza dalla rete o da `gh`.
+- **Il costo è basso e bounded**: tre file (`scripts/mock/gh.ps1` e le due
+  suite), nessuna dipendenza nuova, ~3-8 s di esecuzione per suite.
+- **La copertura è per comportamento osservabile**: un refactor interno degli
+  script non rompe la suite; un cambio di comportamento sì.
+- **La copertura è per casi, non esaustiva**: i casi elencati coprono i rami
+  dichiarati dagli AC e le precondizioni minime; non è una copertura
+  esaustiva delle righe.
+
+## Criteri di accettazione (mapping con l'issue #304)
+
+| AC dell'issue #304 | Casi che lo soddisfano |
+|---|---|
+| Suite per `agent-claim.ps1` con `gh` mock offline: claim concesso, claim perso (yield, label `in-progress` conservata), `-Stale` con TTL scaduto, `-Stale` con TTL non scaduto (exit 5, nessuna modifica) | `test-agent-claim.sh` T1, T2, T3, T4 |
+| Suite autonoma per `agent-pr.ps1`: transizione label, keyword di chiusura, scrittura `pr: N` | `test-agent-pr.sh` T1, T3, T4, T5, T6 |
+| I test girano in CI, senza rete e senza dipendenze native di `gh`; exit code non zero al fallimento | job `gates-procedure` in `ci.yml` (D-14.5) |
+
+## Piano di implementazione
+
+1. `scripts/mock/gh.ps1` — il mock stateful (D-14.1, D-14.2).
+2. `scripts/test-agent-claim.sh` — driver + casi T1..T7 (D-14.3).
+3. `scripts/test-agent-pr.sh` — suite estesa con T3..T7 (D-14.4); i casi T1 e
+   T2 esistenti vengono conservati.
+4. `.github/workflows/ci.yml` — due step nel job `gates-procedure` (D-14.5).
+5. `AGENTS.md` — riga nella tabella regola ⟺ gate + versione; `docs/INDEX.md` —
+   versione di `AGENTS.md` (gate C1) e riga `13-ADR/`.
+6. `docs/12-DEVOPS.md` — §9.10 (catalogo dei gate) e §9.13 (audit della
+   copertura CI: i due script non sono più privi di suite).
+7. `scripts/generate-bundle.ps1` — i nuovi file in `$files`; rigenerazione di
+   `docs/BUNDLE.md` (aggregator **prima**, bundle **poi**).
+8. `docs/state/sessions/99-*.md` — il file di sessione.
+
+## Gate che impongono questa ADR
+
+| Regola | Gate | File |
+|---|---|---|
+| `agent-claim.ps1`: claim concesso, claim perso, `-Stale` scaduto, `-Stale` non scaduto | suite offline (mock `gh` su PATH) | `scripts/test-agent-claim.sh` (T1..T4) |
+| `agent-claim.ps1`: la validazione dell'issue precede il claim | suite offline | `scripts/test-agent-claim.sh` (T5, T6) |
+| `agent-pr.ps1`: transizione label, keyword di chiusura, `pr: N` nella sessione | suite offline | `scripts/test-agent-pr.sh` (T1, T3, T4, T5, T6) |
+| Le suite girano in CI, offline, e falliscono la PR | job `gates-procedure` → `quality` (fail-closed) | `.github/workflows/ci.yml` |
+| Il mock è offline e non usa il `gh` nativo | il `PATH` della suite è costruito dal driver (mock in testa, `gh` nativo escluso) | `scripts/test-agent-claim.sh`, `scripts/test-agent-pr.sh` |
+| La regola «gli script di protocollo hanno una suite» è dichiarata | `check-protocol-consistency.mjs` (C5: gli script citati esistono) | `AGENTS.md` §"Il contratto del protocollo" |
 
 
 
