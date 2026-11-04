@@ -5,7 +5,7 @@ date: 2026-11-04
 state: 🟡
 merged: false
 branch: feat/306-gate-locali-parita-ci
-pr: 0
+pr: 307
 claim: kilo-hp-elitebook-93a9
 tags: [protocol, ci, devops, testing]
 ---
