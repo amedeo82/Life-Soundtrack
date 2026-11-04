@@ -191,6 +191,9 @@ $files = @(
     # label, fallback del blocco NEXT-STEP, prosa README, takeover dei claim
     # scaduti).
     "docs/state/sessions/98-fix-drift-concorrenza.md",
+    # Sessione 99 (issue #304): la spec della suite di test offline degli
+    # script di protocollo (ADR-0014).
+    "docs/state/sessions/99-test-suite-protocol-scripts.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
