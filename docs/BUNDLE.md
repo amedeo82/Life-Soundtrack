@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 16:57
+> Data: 2026-11-04 17:02
 > Totale file: 194
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -22800,6 +22800,7 @@ resto no). La suite ora rimuove **solo** la directory che ha creato.
 | D-100.7 | Il cleanup di `test-agent-pr.sh` rimuove **solo** `TEST_TMPDIR` | la `trap` di uscita agiva su `$TMPDIR` **originale** (= `%TEMP%` su Windows): il `rm -rf` ha cancellato la directory temporanea di sistema dell'utente |
 | D-100.8 | Nessun gate **statico** dedicato ai numeri di sessione hardcodati nei test | la protezione **dinamica** è più forte: `test-post-merge-writer.sh` gira sul contenuto **reale** del repository a ogni PR e, con il numero allocato dinamicamente, non può più collidere. Un gate statico sui numeri letterali avrebbe falsi positivi sui test che costruiscono repository temporanei |
 | D-100.9 | La versione del protocollo sale a **v1.46** (gate C1) | due regole nuove nella tabella regola ⟺ gate di `AGENTS.md`: la worktree con le dipendenze installate e i gate locali allineati alla CI |
+| D-100.10 | Il commit del bundle in `agent-pr.ps1` porta con sé **solo** `docs/BUNDLE.md` (elenco esplicito dei path) | senza l'elenco, `git commit` committa **tutto** l'index: il file di sessione (appena modificato con `pr: N`) veniva inghiottato dal commit del bundle, il commit successivo non aveva nulla da committare e il comando usciva **1 dopo aver creato la PR** — la PR restava con `pr: 0` e il workflow post-merge non trovava il file di sessione |
 
 ## Analisi di avanzamento
 
@@ -22841,6 +22842,7 @@ sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). 
 | Installare le dipendenze in una worktree **cambia il terreno** della rimozione: `node_modules` introduce i path > `MAX_PATH` che facevano fallire `git worktree remove` | ogni misura ha un effetto collaterale: la prevenzione ne ha generato uno, e la correzione va progettata **insieme** alla prevenzione, non dopo |
 | Un `cleanup` che rimuove `$TMPDIR` invece della directory creata dal test è un `rm -rf` sulla directory temporanea **di sistema** | i test che creano directory temporanei devono ricordare **quella** che hanno creato; la `trap` di uscita è il posto peggiore in cui fidarsi di una variabile d'ambiente |
 | Un riferimento `#NNN` nel **body** di un messaggio di commit fa sì che `conventional-commits-parser` tratti tutto ciò che segue come **footer**, e commitlint segnala «footer must have leading blank line» su un messaggio corretto | nel body scrivere «la PR 305», non «la PR #305»; il titolo accetta il riferimento (`(issue #306)`). La regola è ora in AGENTS.md §"Git workflow" |
+| Un `git commit` senza elenco di path committa **tutto** l'index, e in un flusso a due commit il primo si mangia il secondo | ogni commit che deve portare **un solo** file lo dichiara esplicitamente (`git commit -- <path>`): il flusso "rigenera il bundle, poi committa la sessione" produceva una PR con `pr: 0` e un exit 1 **dopo** la PR aperta |
 | Il difetto più costoso non è quello che un gate intercetta, ma quello che **nessun gate guarda** | il numero di sessione hardcodato in un test era una mina armata: nessun gate lo poteva vedere, perché il difetto si manifestava solo dentro una directory temporanea |
 
 ## Documenti aggiornati
@@ -22854,12 +22856,13 @@ sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). 
   riga 1.8 del changelog del documento
 - `scripts/setup-worktree.ps1`: passo 9 (install delle dipendenze) e flag `-SkipInstall`
 - `scripts/agent-pr.ps1`: batteria locale allineata alla CI (commitlint + gate dei
-  workflow) con i tre esiti distinti
+  workflow) con i tre esiti distinti, e il commit del bundle limitato a `docs/BUNDLE.md`
+  (D-100.10)
 - `scripts/post-merge.ps1`: livelli **L0** (rimozione preventiva di `node_modules`) e
   **L4** (residuo post-«Result too large»)
 - `scripts/test-setup-worktree.sh`: scenari S9..S11 + mock `pnpm`
 - `scripts/test-post-merge.sh`: scenari T15 e T16 + shim di `git` che deregistra
-- `scripts/test-agent-pr.sh`: scenari T3 e T4 + mock `pnpm`/`bash` + **correzione del
+- `scripts/test-agent-pr.sh`: scenari T3, T4 e T5 + mock `pnpm`/`bash` + **correzione del
   `cleanup` distruttivo**
 - `docs/state/sessions/100-gate-locali-parita-ci.md` (questo file)
 
@@ -34585,6 +34588,19 @@ riferimento `#NNN` nel **body** di un messaggio di commit fa sì che
 contiene, e la regola `footer-leading-blank` di commitlint segnali allora un falso
 positivo («footer must have leading blank line») su un messaggio che è corretto. Il
 **titolo** non è soggetto al problema: la convenzione `(issue #NNN)` va lì.
+
+#### Il commit del bundle non deve inghiottare il commit della sessione
+
+`agent-pr.ps1` (step 6) scrive `pr: N` nel file di sessione e poi rigenera il bundle
+(la sessione è nel catalogo `$files`): due commit in sequenza. Il primo, `git commit`
+senza elenco di path, committa **tutto** l'index — quindi anche il file di sessione, che
+a quel punto ha già `pr: N`. Il commit successivo non trova nulla da committare, esce
+1, e **il comando fallisce dopo aver creato la PR**: la PR resta con `pr: 0` e il
+workflow post-merge non trova il file di sessione.
+
+La correzione è dichiarare i path: `git commit -m "…" -- docs/BUNDLE.md`. Il test di
+regressione è lo scenario **T5** di `scripts/test-agent-pr.sh` (verifica che i due
+commit siano separati e che il commit del bundle contenga solo il bundle).
 
 ---
 
@@ -51808,7 +51824,14 @@ if ($sessionFile) {
     }
     if ($bundleChanged) {
         & git add docs/BUNDLE.md | Out-Null
-        & git commit -q -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/" | Out-Null
+        # Il commit del bundle porta con sé **solo** il bundle: senza l'elenco
+        # esplicito dei path, `git commit` committa TUTTO l'index — quindi
+        # anche il file di sessione appena modificato, che ha ancora `pr: 0`.
+        # Il commit successivo (quello della sessione) resterebbe senza nulla
+        # da committare e il comando uscirebbe 1, **dopo** aver creato la PR:
+        # la PR restava con `pr: 0` e il workflow post-merge non trovava il
+        # file di sessione (issue #306, Sessione 100).
+        & git commit -q -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/" -- docs/BUNDLE.md | Out-Null
         if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare il bundle rigenerato" }
         Say "bundle rigenerato e committato" "Cyan"
     }

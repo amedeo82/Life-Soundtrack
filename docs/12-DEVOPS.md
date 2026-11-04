@@ -1512,6 +1512,19 @@ contiene, e la regola `footer-leading-blank` di commitlint segnali allora un fal
 positivo («footer must have leading blank line») su un messaggio che è corretto. Il
 **titolo** non è soggetto al problema: la convenzione `(issue #NNN)` va lì.
 
+#### Il commit del bundle non deve inghiottare il commit della sessione
+
+`agent-pr.ps1` (step 6) scrive `pr: N` nel file di sessione e poi rigenera il bundle
+(la sessione è nel catalogo `$files`): due commit in sequenza. Il primo, `git commit`
+senza elenco di path, committa **tutto** l'index — quindi anche il file di sessione, che
+a quel punto ha già `pr: N`. Il commit successivo non trova nulla da committare, esce
+1, e **il comando fallisce dopo aver creato la PR**: la PR resta con `pr: 0` e il
+workflow post-merge non trova il file di sessione.
+
+La correzione è dichiarare i path: `git commit -m "…" -- docs/BUNDLE.md`. Il test di
+regressione è lo scenario **T5** di `scripts/test-agent-pr.sh` (verifica che i due
+commit siano separati e che il commit del bundle contenga solo il bundle).
+
 ---
 
 | Versione | Data | Modifiche |

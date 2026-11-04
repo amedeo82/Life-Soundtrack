@@ -279,7 +279,14 @@ if ($sessionFile) {
     }
     if ($bundleChanged) {
         & git add docs/BUNDLE.md | Out-Null
-        & git commit -q -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/" | Out-Null
+        # Il commit del bundle porta con sé **solo** il bundle: senza l'elenco
+        # esplicito dei path, `git commit` committa TUTTO l'index — quindi
+        # anche il file di sessione appena modificato, che ha ancora `pr: 0`.
+        # Il commit successivo (quello della sessione) resterebbe senza nulla
+        # da committare e il comando uscirebbe 1, **dopo** aver creato la PR:
+        # la PR restava con `pr: 0` e il workflow post-merge non trovava il
+        # file di sessione (issue #306, Sessione 100).
+        & git commit -q -m "chore(bundle): regen BUNDLE.md dopo modifica a docs/" -- docs/BUNDLE.md | Out-Null
         if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare il bundle rigenerato" }
         Say "bundle rigenerato e committato" "Cyan"
     }

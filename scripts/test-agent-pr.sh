@@ -124,6 +124,24 @@ EOF
   # commitlint e' eseguibile (issue #306).
   mkdir -p node_modules/.bin
 
+  # Bundle TRACCIATO + generatore MOCK: `agent-pr.ps1` rigenera il bundle
+  # prima di committare il file di sessione (la sessione e' nel catalogo
+  # `$files`). Il mock lo modifica davvero, cosi' il percorso "bundle
+  # cambiato" e' esercitato: e' il caso in cui il commit del bundle puo'
+  # "inghiottare" il file di sessione (scenario T5).
+  echo "bundle iniziale" > docs/BUNDLE.md
+  cat > scripts/generate-bundle.ps1 <<'EOF'
+# Mock del generatore del bundle: modifica docs/BUNDLE.md.
+$ErrorActionPreference = "Stop"
+$p = Join-Path $PSScriptRoot "..\docs\BUNDLE.md"
+Set-Content -LiteralPath $p -Value "bundle rigenerato" -Encoding utf8
+exit 0
+EOF
+  git add -A
+  GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
+  GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
+    git commit --quiet -m "setup bundle"
+
   echo "$repo_dir"
 }
 
@@ -236,11 +254,19 @@ cleanup() {
   # Windows, dove `TMPDIR` e' impostata: `rm -rf /tmp` ha cancellato la
   # `%TEMP%` dell'utente. Da qui la separazione esplicita.
   if [ -n "${TEST_TMPDIR:-}" ] && [ -d "$TEST_TMPDIR" ]; then
-    rm -rf "$TEST_TMPDIR"
+    if [ -n "${KEEP_TEST_TMP:-}" ]; then
+      echo "[test-agent-pr] KEEP_TEST_TMP: directory mantenuta: $TEST_TMPDIR"
+    else
+      rm -rf "$TEST_TMPDIR"
+    fi
   fi
   TEST_TMPDIR=""
   if [ -n "$ORIG_TMPDIR" ]; then export TMPDIR="$ORIG_TMPDIR"; else unset TMPDIR; fi
   export PATH="$ORIG_PATH"
+  # `MOCK_GH_LOG` deve morire con la directory che lo ospita: se resta
+  # esportato, il mock `gh` scrive in un percorso gia' cancellato e fallisce
+  # (scenario T5).
+  unset MOCK_GH_LOG
 }
 
 # Crea la directory di lavoro del test e la registra per la pulizia.
@@ -345,6 +371,47 @@ if [ -f "$MOCK_GH_LOG" ] && grep -q "pr create" "$MOCK_GH_LOG"; then
   fail "T4" "la PR e' stata creata nonostante il gate rosso"
 else
   pass "T4 nessuna PR creata (il gate ha bloccato prima di gh pr create)"
+fi
+cleanup
+
+# === T5: il commit del bundle NON inghiotte il commit della sessione ===
+echo ""
+echo "Scenario T5: bundle rigenerato -> due commit separati"
+new_tmpdir
+REPO_DIR="$(make_repo "$TMPDIR")"
+make_mock_gh "$TMPDIR"
+BODY_FILE="$(make_body_file "$TMPDIR")"
+BODY_FILE_PS="$(ps_path "$BODY_FILE")"
+
+cd "$REPO_DIR"
+LOCAL_SCRIPT_PS="$(ps_path "$REPO_DIR/scripts/agent-pr.ps1")"
+export MOCK_GH_LOG="$TMPDIR/gh.log"
+OUTPUT="$(pwsh "$LOCAL_SCRIPT_PS" -IssueNumber 286 -SkipChecks -BodyFile "$BODY_FILE_PS" 2>&1)" && EC=0 || EC=$?
+
+SESSION_FILE="$REPO_DIR/docs/state/sessions/286-test.md"
+if [ "$EC" -eq 0 ]; then
+  pass "T5 exit 0: il bundle non inghiotte il commit della sessione"
+else
+  fail "T5" "ec=$EC; output=$OUTPUT"
+fi
+if grep -q "^pr: 77$" "$SESSION_FILE" 2>/dev/null; then
+  pass "T5 la sessione dichiara pr: 77"
+else
+  fail "T5" "la sessione non dichiara pr: 77: $(cat "$SESSION_FILE" 2>/dev/null)"
+fi
+BUNDLE_COMMIT="$(git log --format='%H %s' | grep 'chore(bundle)' | head -1 | cut -d' ' -f1)"
+SESSION_COMMIT="$(git log --format='%H %s' | grep 'docs(state):' | head -1 | cut -d' ' -f1)"
+if [ -z "$BUNDLE_COMMIT" ]; then
+  fail "T5" "nessun commit 'chore(bundle)' trovato: il bundle non e' stato rigenerato"
+elif git show --name-only --format= "$BUNDLE_COMMIT" | grep -q "docs/state/sessions/286-test.md"; then
+  fail "T5" "il commit del bundle contiene anche il file di sessione: lo inghiotte"
+else
+  pass "T5 il commit del bundle contiene solo docs/BUNDLE.md"
+fi
+if [ -n "$SESSION_COMMIT" ]; then
+  pass "T5 esiste un commit dedicato alla sessione"
+else
+  fail "T5" "nessun commit 'docs(state):' trovato"
 fi
 cleanup
 
