@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.44 — Sessione 96 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.45 — Sessione 98 (2026-11-04)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -186,7 +186,7 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 
 - **Un agente = una story alla volta.** Nessun claim multiplo simultaneo.
 - **Attività obbligatoria**: qualsiasi attività (commit pushato, PR aperta, commento di progresso `progress: <AGENT-ID> — <update>`) resetta il TTL di 12 ore.
-- **Claim stantio (TTL 12 ore)**: un claim senza attività per 12 ore è considerato abbandonato. Qualsiasi agente può prenderlo: prima commenta `stale-release: <AGENT-ID> — claim scaduto, ultima attività >12h`, poi esegue la procedura di claim normale (punti 3-4). Un agente che torna dopo uno stale-release verifica lo storico dei commenti: se esiste un claim più recente attivo, si arrende con `yield:`.
+- **Claim stantio (TTL 12 ore)**: un claim senza attività per 12 ore è considerato abbandonato. Qualsiasi agente può prenderlo: prima commenta `stale-release: <AGENT-ID> — claim scaduto, ultima attività >12h`, poi esegue la procedura di claim normale (punti 3-4). Un agente che torna dopo uno stale-release verifica lo storico dei commenti: se esiste un claim più recente attivo, si arrende con `yield:`. L'equivalente atomico è `pwsh scripts/agent-claim.ps1 <N> -Stale`: lo script verifica che l'ultima attività del claim attivo (commenti `progress:`, PR aperta per l'issue) risalga a più di 12 ore fa, posta lo `stale-release:` citando l'agente del claim scaduto e procede con claim + riverifica; se il claim non è ancora scaduto esce con codice 5 senza toccare nulla.
 
 ### Rilascio del claim
 
@@ -776,7 +776,7 @@ git push
    pwsh scripts/agent-claim.ps1 <N>
    ```
 
-   Lo script esegue in sequenza atomica: validazione dell'issue → worktree (`setup-worktree.ps1`) → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico** del commento più basso, letto dall'API REST) → file di stato dell'agente. Se la riverifica è persa, rimuove la label, posta `yield:` ed esce con codice 4. **Non** copiare a mano i comandi `gh`: la procedura manuale era la principale occasione di dimenticanza del protocollo (vedi §"🎫 Presa in carico delle story").
+   Lo script esegue in sequenza atomica: validazione dell'issue → worktree (`setup-worktree.ps1`) → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico** del commento più basso, letto dall'API REST) → file di stato dell'agente. Se la riverifica è persa, posta `yield:` ed esce con codice 4 **senza rimuovere la label `in-progress`**: serve al vincitore (ADR-0006, regola 4). Con `-Stale` esegue anche la presa in carico atomica di un claim scaduto (TTL 12 ore, vedi §"🎫 Presa in carico delle story"). **Non** copiare a mano i comandi `gh`: la procedura manuale era la principale occasione di dimenticanza del protocollo (vedi §"🎫 Presa in carico delle story").
 
 4. Leggi la specifica del task e implementa con test (nella worktree)
 5. **Apri la PR** con **un solo comando** che verifica i gate locali, controlla la keyword di chiusura, crea la PR, transiziona le label e scrive `pr: N` nel file di sessione:
@@ -1149,4 +1149,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.44 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.45 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
