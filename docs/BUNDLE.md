@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-03 22:32
-> Totale file: 185
+> Data: 2026-11-04 10:43
+> Totale file: 191
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 184 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2661.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-03 22:32
+- Totale file: 190 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2680.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-04 10:12
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 116 |
+| docs/ | 122 |
 | scripts/ | 42 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.44 — Sessione 96 (2026-11-03)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.45 — Sessione 98 (2026-11-04)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -217,7 +217,7 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 
 - **Un agente = una story alla volta.** Nessun claim multiplo simultaneo.
 - **Attività obbligatoria**: qualsiasi attività (commit pushato, PR aperta, commento di progresso `progress: <AGENT-ID> — <update>`) resetta il TTL di 12 ore.
-- **Claim stantio (TTL 12 ore)**: un claim senza attività per 12 ore è considerato abbandonato. Qualsiasi agente può prenderlo: prima commenta `stale-release: <AGENT-ID> — claim scaduto, ultima attività >12h`, poi esegue la procedura di claim normale (punti 3-4). Un agente che torna dopo uno stale-release verifica lo storico dei commenti: se esiste un claim più recente attivo, si arrende con `yield:`.
+- **Claim stantio (TTL 12 ore)**: un claim senza attività per 12 ore è considerato abbandonato. Qualsiasi agente può prenderlo: prima commenta `stale-release: <AGENT-ID> — claim scaduto, ultima attività >12h`, poi esegue la procedura di claim normale (punti 3-4). Un agente che torna dopo uno stale-release verifica lo storico dei commenti: se esiste un claim più recente attivo, si arrende con `yield:`. L'equivalente atomico è `pwsh scripts/agent-claim.ps1 <N> -Stale`: lo script verifica che l'ultima attività del claim attivo (commenti `progress:`, PR aperta per l'issue) risalga a più di 12 ore fa, posta lo `stale-release:` citando l'agente del claim scaduto e procede con claim + riverifica; se il claim non è ancora scaduto esce con codice 5 senza toccare nulla.
 
 ### Rilascio del claim
 
@@ -807,7 +807,7 @@ git push
    pwsh scripts/agent-claim.ps1 <N>
    ```
 
-   Lo script esegue in sequenza atomica: validazione dell'issue → worktree (`setup-worktree.ps1`) → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico** del commento più basso, letto dall'API REST) → file di stato dell'agente. Se la riverifica è persa, rimuove la label, posta `yield:` ed esce con codice 4. **Non** copiare a mano i comandi `gh`: la procedura manuale era la principale occasione di dimenticanza del protocollo (vedi §"🎫 Presa in carico delle story").
+   Lo script esegue in sequenza atomica: validazione dell'issue → worktree (`setup-worktree.ps1`) → label `in-progress` → commento `claim:` → **riverifica deterministica** (vince l'**ID numerico** del commento più basso, letto dall'API REST) → file di stato dell'agente. Se la riverifica è persa, posta `yield:` ed esce con codice 4 **senza rimuovere la label `in-progress`**: serve al vincitore (ADR-0006, regola 4). Con `-Stale` esegue anche la presa in carico atomica di un claim scaduto (TTL 12 ore, vedi §"🎫 Presa in carico delle story"). **Non** copiare a mano i comandi `gh`: la procedura manuale era la principale occasione di dimenticanza del protocollo (vedi §"🎫 Presa in carico delle story").
 
 4. Leggi la specifica del task e implementa con test (nella worktree)
 5. **Apri la PR** con **un solo comando** che verifica i gate locali, controlla la keyword di chiusura, crea la PR, transiziona le label e scrive `pr: N` nel file di sessione:
@@ -1180,7 +1180,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.44 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.45 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -1313,9 +1313,9 @@ Vedi `docs/11-BACKLOG.md` per la roadmap completa e `docs/state/_index.md` per l
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
-Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md".
+Il blocco sopra elenca la prima story non completata fra quelle **già migrate** in `docs/state/stories/`; le story ancora da implementare sono elencate nella tabella §"Stato di avanzamento" di `docs/11-BACKLOG.md`.
 
-Il blocco **non conosce le dipendenze** fra story: la story indicata può dipenderne da un'altra non ancora fatta. Prima di claimarla, guarda `depends_on` nel suo file in `docs/state/stories/`. Oggi la **3.4** (nastro contesto) dichiara `[DEP:4.4]`: la tranche geo si fa nella **4.4** (il DB IP→città, la specifica già ratificata) e **poi** nella 3.4, che la consuma.
+Il blocco **non conosce né le dipendenze né i claim**: la story indicata può dipenderne da un'altra non ancora fatta, o essere già presa in carico da un altro agente. Prima di claimarla, guarda `depends_on` nel suo file in `docs/state/stories/` e verifica le label sulle issue con `gh issue list --label agent-ready --state open` (senza `in-progress` né `status:*`, ADR-0006): **la selezione del lavoro non avviene mai da questo blocco** — è la query live sulle issue, non il README, a dire cosa è libero. Esempio passato: la 3.4 dichiarava `[DEP:4.4]` — tranche geo chiusa in Sessione 76 (issue #231).
 
 - Documentazione: [`docs/INDEX.md`](docs/INDEX.md)
 - Protocollo agenti: [`AGENTS.md`](AGENTS.md)
@@ -2080,7 +2080,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.44 | Protocollo per agenti — **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.45 | Protocollo per agenti — **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -12829,7 +12829,14 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 > completo è qui (decisione D2 del project owner, Sessione 79: la storia del protocollo
 > ha una sede, e `AGENTS.md` resta il **contratto**).
 
-*Ultimo aggiornamento: v1.44 — **il writer e il gate coprono anche le story** (Sessione 96, issue #297). Il perimetro `docs/state/stories/` non aveva né un writer né un gate: una story mergiata poteva restare `status: in-review` per sempre — il caso della Story 2.5, che l'aggregatore contava come non-done mentre la CI restava verde. Ora:
+*Ultimo aggiornamento: v1.45 — **il claim perduto non ruba più la label al vincitore** (Sessione 98, verifica di concorrenza richiesta dal project owner). L'audit del protocollo di workflow ha trovato che `scripts/agent-claim.ps1`, nel ramo di riverifica persa, **rimuoveva la label `in-progress`** — esattamente ciò che §"Procedura di claim" punto 4 vieta al perdente («Non rimuovere la label: serve al vincitore»): l'issue ricompariva "libera" nelle query dei contendenti, che ripetevano validate+worktree+claim+yield a vuoto. In più, il takeover di un claim scaduto (TTL 12 ore) era **impossibile via script** (la validazione rifiutava l'issue `in-progress`), costringendo a comandi `gh` manuali — la stessa occasione di dimenticanza del protocollo che la Sessione 81 aveva chiuso. Ora:
+- **`agent-claim.ps1` yield**: posta `yield:` ed esce 4 **senza rimuovere la label `in-progress`** (ADR-0006, regola 4); il corpo del commento torna al formato canonico `yield: <AGENT-ID>`
+- **`agent-claim.ps1 -Stale`**: takeover **atomico** di un claim scaduto — verifica che l'ultima attività del claim attivo (commenti che citano l'agente, PR aperta per l'issue) risalga a oltre 12 ore, posta `stale-release:` citando l'agente del claim scaduto (il marker che la riverifica cerca per escluderlo) e prosegue con claim + riverifica; exit 5 se il claim non è ancora scaduto
+- **`AGENTS.md` §"Primo task"** corretto (descriveva il vecchio comportamento "rimuove la label") e §"Mantenere il claim" con l'invocazione `-Stale`
+- **Prosa README**: il paragrafo sotto il blocco NEXT-STEP non cita più la coppia 3.4/4.4 (tranche geo chiusa in Sessione 76) come esempio vivo e dichiara esplicitamente che il blocco non conosce né le dipendenze né i claim: la selezione non avviene mai da lì
+- **State file delle story residue**: create le entry di **3.3, 3.5, 4.3, 5.1, 5.2** (`todo` — specifiche ratificate in Sessione 87): il blocco NEXT-STEP ricadeva sul fallback "nessuna story migrata" perché nessuna delle 7 story rimanenti aveva un file — l'eccezione documentata "state file alla ratifica della spec" (`docs/state/_index.md`) non era mai stata applicata al lotto della Sessione 86
+
+*Precedente v1.44 — **il writer e il gate coprono anche le story** (Sessione 96, issue #297). Il perimetro `docs/state/stories/` non aveva né un writer né un gate: una story mergiata poteva restare `status: in-review` per sempre — il caso della Story 2.5, che l'aggregatore contava come non-done mentre la CI restava verde. Ora:
 - **`scripts/apply-merge-state.mjs`** scrive il fatto di merge anche sui file di **story**: il formato viene riconosciuto dal frontmatter (`state:` ⇒ sessione, `status:` ⇒ story) e su una story il merge significa `status: done`, `merged_commit`, `merged_date`. Gli stati terminali dichiarati (`blocked`, `wontdo`) non vengono sovrascritti
 - **`scripts/check-merge-state.mjs`** confronta **entrambi** i perimetri con lo stato reale delle PR, fail-closed: una story con la PR mergiata e `status` diverso da `done` è drift. Il gate passa da 70 a **92** confronti
 - **`ADR-0013` D-13.7** dichiara la regola: il perimetro del writer e del gate è la **classe** dei file di stato, non un sottoinsieme
@@ -22288,6 +22295,105 @@ azioni della card e la rinomina dell'era.
 
 
 
+===== FILE: docs/state/sessions/98-fix-drift-concorrenza.md =====
+
+---
+number: 98
+title: "Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README)"
+date: 2026-11-04
+state: 🟡
+merged: false
+branch: fix/302-fix-protocol-il-claim-perdente-ruba-la-l
+pr: 0
+claim: kilo-hp-elitebook-a7c7
+tags: [docs, protocol, concurrency, claim]
+---
+
+## Sintesi
+
+Audit del protocollo di workflow richiesto dal project owner: «controlla se la
+concorrenza è gestita in modo corretto, senza che agenti paralleli lavorino
+alle stesse issue perché il README riporta il blocco next story non aggiornato
+fino al merge». L'audit ha **confermato la correttezza strutturale** della
+coordinazione (la selezione passa dalle label live su GitHub e dal claim
+atomico ADR-0006, non dal README) e ha trovato **4 drift**, tutti corretti in
+questa sessione:
+
+| # | Drift | Correzione |
+|---|-------|------------|
+| A | `scripts/agent-claim.ps1` rimuoveva la label `in-progress` nel ramo di riverifica persa, contro §"Procedura di claim" punto 4 («Non rimuovere la label: serve al vincitore») | lo script posta `yield:` ed esce 4 **senza** rimuovere la label; `AGENTS.md` §"Primo task" (che descriveva il comportamento errato) corretto |
+| B | Il blocco `AGGREGATE-NEXT-STEP-*` del README era sul fallback «nessuna story migrata» da Sessione 87: nessuna delle 8 story rimanenti aveva un state file, e l'eccezione documentata «state file alla ratifica della spec» non era mai stata applicata al lotto della Sessione 86 | creati i file di stato di **3.3, 3.5, 4.3, 5.1, 5.2** (`todo`); il blocco indicherà la **3.3** e resterà significativo anche ai merge successivi. **4.2 e 6.1 restano senza file**: nessuna spec ratificata (P2 e post-impl, D.10.2). La **3.2** non ha bisogno di file locale: è stata mergiata (PR #301) mentre la sessione era aperta, e il suo file è già su `main` con `status: done` |
+| C | La prosa del README sotto il blocco citava la coppia 3.4/4.4 come esempio vivo di dipendenza, ma la tranche geo è chiusa (Sessione 76, issue #231) | prosa riscritta: regola valida + esempio dichiarato passato + esplicitazione che il blocco **non conosce né dipendenze né claim** e che la selezione non avviene mai da lì |
+| D | Il takeover di un claim scaduto (TTL 12 ore) era impossibile via script (la validazione rifiutava l'issue `in-progress`), costringendo a comandi `gh` manuali | `agent-claim.ps1 -Stale`: verifica dell'ultima attività (>12 ore: commenti che citano l'agente, PR aperta per l'issue), `stale-release:` atomico citando l'agente del claim scaduto, poi claim + riverifica; exit 5 se il claim non è ancora scaduto |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-98.1 | Il perdente della riverifica **non tocca** la label `in-progress` | La regola esisteva in `AGENTS.md` (ADR-0006, regola 4) ma lo script la violava: l'issue ricompariva "libera" e ogni contendente ripeteva validate+worktree+claim+yield a vuoto. La riverifica reggeva comunque (niente doppio lavoro), ma il rumore e il costo erano evitabili |
+| D-98.2 | Il takeover dei claim stantii diventa un flag atomico (`-Stale`) | Un takeover fattibile solo con comandi `gh` manuali è la stessa occasione di dimenticanza del protocollo che la Sessione 81 ha chiuso con `agent-claim.ps1`. La verifica dell'età (>12 ore su commenti + PR aperta) rende il TTL applicabile senza giudizio a mano |
+| D-98.3 | State file **solo** per le story con specifica ratificata (3.3, 3.5, 4.3, 5.1, 5.2) | L'eccezione documentata in `docs/state/_index.md` («crea il file alla ratifica della spec») serve a mantenere il blocco NEXT-STEP significativo. 4.2 (P2) e 6.1 (post-impl, D.10.2) non hanno spec: un file per loro sarebbe una promessa non lavorabile nel blocco |
+| D-98.4 | La prosa del README dichiara esplicitamente che il blocco non è la fonte di selezione | La domanda del project owner («agenti che lavorano la stessa story per il blocco non aggiornato») aveva una risposta strutturale già presente (query live + claim) ma non scritta nel posto dove un lettore cerca la risposta: il README. Scrivere la regola lì chiude la classe di fraintendimento |
+| D-98.5 | La sessione è la **98**, non la 97 | La Sessione 97 è stata assegnata alla Story 3.2 (PR #301) ed è finita su `main` mentre questa sessione era aperta: il numero è stato ricalcolato con la procedura di `docs/state/_index.md` §"Allocazione del numero di sessione" (massimo su `origin/main` + 1) e il file rinominato di conseguenza |
+| D-98.6 | Nessun blocco `AGGREGATE-*` viene toccato nella PR | Regola V1 di ADR-0008: i blocchi si aggiornano da soli post-merge (writer unico, ADR-0013). La PR porta solo le **fonti** (file di stato, prosa legacy, protocollo) e il bundle rigenerato |
+
+## Analisi di avanzamento
+
+**Numeri.** Nessuna story implementata: è lavoro di **protocollo e stato**. La
+percentuale resta **77%** (23 story completate su 30, effort pesato 80%, 7 step
+rimanenti): la Story 3.2 è stata mergiata durante la sessione (PR #301), e le
+cinque story con state file nuovo (3.3, 3.5, 4.3, 5.1, 5.2) sono tutte `todo`.
+
+**Cosa è pronto.** La catena di coordinamento del parallelismo è **coerente
+front-to-back**: selezione (query live su GitHub) → claim atomico con
+riverifica deterministica (`agent-claim.ps1`, yield senza rubare la label) →
+takeover dei claim stantii atomico (`-Stale`, TTL 12 ore) → macchina a stati
+post-claim (ADR-0007) → writer unico post-merge (ADR-0013). Il blocco
+NEXT-STEP tornerà a indicare una story reale (la 3.3) e resterà significativo
+anche dopo i merge delle prossime story.
+
+**Cosa manca.** Il merge di questa sessione (PR da aprire), e i due punti fuori
+perimetro dichiarati in Sessione 96 (chiavi i18n `insight.mood.*` in stash;
+post-merge cleanup dei residui della Sessione 94). Inoltre `agent-claim.ps1` e
+`agent-pr.ps1` restano **senza suite di test** (sono network-bound): le
+regressioni come quella dello yield sono oggi intercettabili solo dalla
+riverifica stessa.
+
+**Salute tecnica.** `scripts/agent-claim.ps1` ASCII-only (F9-bis), parsing
+verificato (0 errori). Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono
+state file e prosa legacy; bundle rigenerato dopo l'aggregator (ordine
+aggregator → bundle).
+
+**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs`
+→ 6 check · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
+→ 0 violazioni · `node scripts/check-encoding.mjs` → 0 errori ·
+`node scripts/check-readme-facts.mjs` → 15 check · `node scripts/check-merge-state.mjs`
+→ confronti · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+## Lesson learned
+
+| Osservazione | Conseguenza |
+|--------------|-------------|
+| Uno script che implementa una regola può **contraddirla** se nessun test lo esercita | Lo yield di `agent-claim.ps1` rimuoveva la label che §"Procedura di claim" ordina di preservare: la regola era scritta due volte (ADR-0006 + AGENTS.md) e nessuna delle due copie veniva eseguita |
+| Il fallback del blocco NEXT-STEP non è una anomalia: è il **sintomo** di state file mancanti | Il fallback era «corretto» (lo dichiarava anche il backlog), ma persistente dal 2026-11-02: l'eccezione «file alla ratifica della spec» andava applicata al lotto S86 e non lo fu |
+| La prosa che spiega un blocco auto-generato **invecchia più veloce del blocco** | L'esempio 3.4/4.4 era vero alla Sessione 73 ed è morto alla 76: gli esempi vivi nella prosa vanno marcati come tali o sostituiti da regole |
+| Il **numero di sessione** va ricalcolato al rebase, non fissato all'inizio | La 97 è stata presa dalla Story 3.2 durante la sessione: il file rinominato (98) e i riferimenti corretti sono l'unica forma di difesa — `aggregate-state.ps1` segnalerebbe il duplicato solo dopo il merge |
+| Un `main` locale stale fa scrivere **prosa di stato sbagliata** | Il blocco PROGRESS locale contava la 3.2 come «in corso» mentre su `main` era già `done`: la working copy principale va allineata con `origin/main` prima di qualunque lavoro di stato |
+
+## Documenti aggiornati
+
+- `scripts/agent-claim.ps1`: yield senza rimozione label + modalità `-Stale` (TTL takeover) + exit code 5 documentato
+- `AGENTS.md` **v1.45**: §"Primo task" (yield corretto + `-Stale`), §"Mantenere il claim" (invocazione `-Stale`), versione
+- `docs/INDEX.md`: riga `../AGENTS.md` a v1.45 (gate C1)
+- `docs/18-DEV-LOG.md`: changelog del protocollo v1.45
+- `README.md`: prosa sotto il blocco NEXT-STEP (dipendenze + claim, selezione mai dal blocco)
+- `docs/state/stories/`: nuovi `3.3-esplora-analisi.md`, `3.5-anteprima-onboarding-demo.md`, `4.3-artwork-enrichment.md`, `5.1-privacy-spec-finale.md`, `5.2-export-purge.md` (`todo`)
+- `scripts/generate-bundle.ps1`: i 6 nuovi file di stato registrati in `$files` (stato del bundle = contenuto dei file in elenco)
+- `docs/BUNDLE.md`: rigenerato dopo l'aggregator (ordine aggregator → bundle)
+- `docs/SESSIONS.md`, `docs/11-BACKLOG.md`, `docs/INDEX.md`, `README.md`: blocchi aggregati **non** toccati (regola V1 di ADR-0008): li riscrive il writer post-merge
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -23753,6 +23859,288 @@ Consegnato:
 - `docs/18-DEV-LOG.md` — la entry della Sessione 97
 - `docs/state/sessions/97-ricordi-share.md` — la sessione
 - `scripts/generate-bundle.ps1` — `$files` (sessione 97 e story 3.2)
+
+
+
+===== FILE: docs/state/stories/3.3-esplora-analisi.md =====
+
+---
+id: "3.3"
+title: "Esplora + Analisi"
+phase: 3
+area: ui
+status: todo
+priority: I
+depends_on: []
+issue: 240
+spec_refs:
+  - docs/25-MEMORIES-SHARE-EXPLORE.md
+  - docs/06-UX-FLOWS-STATES.md
+  - docs/07-UI-SPEC.md
+  - docs/22-COMPETITIVE-POSITIONING.md
+---
+
+## Descrizione
+
+Le schermate di esplorazione (⑨ ricerca, ⑩ quadrante valence/energy) sono il
+luogo dove l'utente **interroga** il proprio diario. Il criterio di accettazione
+non è «un grafico in più»: è l'**insight in prosa** — la stessa analisi raccontata
+in linguaggio naturale. Un grafico senza lettura è l'ennesimo cruscotto;
+l'«aha moment» è la frase che spiega un periodo.
+
+La story consuma l'output della **2.5** (collegamento del pipeline di analisi,
+merged con PR #295): gli insight sono già persistiti e letti dalla Home/Timeline.
+
+Spec: `docs/25-MEMORIES-SHARE-EXPLORE.md` **v1.0 🟢 APPROVED** (ratificata dal
+project owner il 2026-11-02, Sessione 87).
+
+## Stato
+
+⬚ **TODO** — spec ratificata, issue canonica #240 aperta: **in attesa di claim**
+(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
+`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
+
+## Task
+
+- [ ] Da definire al claim, dalla spec `docs/25-MEMORIES-SHARE-EXPLORE.md`
+
+## Acceptance criteria
+
+- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 3.3" (compilare al claim)
+
+## Lesson learned
+
+_(al termine dell'implementazione)_
+
+## Documenti aggiornati
+
+_(alla chiusura della PR)_
+
+
+
+===== FILE: docs/state/stories/3.5-anteprima-onboarding-demo.md =====
+
+---
+id: "3.5"
+title: "Anteprima del risultato in onboarding (modalità demo)"
+phase: 3
+area: ui
+status: todo
+priority: I
+depends_on: ["0.4", "3.1"]
+issue: 270
+spec_refs:
+  - docs/26-ONBOARDING-DEMO.md
+  - docs/06-UX-FLOWS-STATES.md
+  - docs/07-UI-SPEC.md
+  - docs/22-COMPETITIVE-POSITIONING.md
+---
+
+## Descrizione
+
+Il diario di esempio **prima** dell'import (modalità demo, con il fixture
+esteso ad album e features deterministiche — D-26.2) e le prime righe della
+timeline **dopo**: l'utente vede la magia del prodotto prima di consegnare i
+propri dati. Dipendenze `0.4` (UI import) e `3.1` (Home + Timeline) entrambe
+soddisfatte; l'effetto pieno dipende dalla 2.5 (merged, PR #295).
+
+Spec: `docs/26-ONBOARDING-DEMO.md` **v1.0 🟢 APPROVED** (ratificata dal
+project owner il 2026-11-02, Sessione 87).
+
+## Stato
+
+⬚ **TODO** — spec ratificata, issue canonica #270 aperta: **in attesa di claim**
+(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
+`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
+
+## Task
+
+- [ ] Da definire al claim, dalla spec `docs/26-ONBOARDING-DEMO.md`
+
+## Acceptance criteria
+
+- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 3.5" (compilare al claim)
+
+## Lesson learned
+
+_(al termine dell'implementazione)_
+
+## Documenti aggiornati
+
+_(alla chiusura della PR)_
+
+
+
+===== FILE: docs/state/stories/4.3-artwork-enrichment.md =====
+
+---
+id: "4.3"
+title: "Artwork enrichment"
+phase: 2
+area: enrichment
+status: todo
+priority: I
+depends_on: []
+issue: 242
+spec_refs:
+  - docs/24-ARTWORK-ENRICHMENT.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/05-ARCHITECTURE.md
+  - docs/07-UI-SPEC.md
+---
+
+## Descrizione
+
+Le copertine degli album: il campo `artworkUrl` esiste già nello schema, la
+pipeline non le popola ancora. È l'**ancora visiva** del diario (P0 dal
+2026-11-02, `22-COMPETITIVE-POSITIONING.md` §7) e il moltiplicatore delle story
+vicine (colore dell'era, card condivisibile della 3.2, lettura del mood).
+
+La cascata reale è **iTunes → Cover Art Archive → placeholder gradient**
+(D-24.2: il branch Spotify è codice morto, il progetto non ha OAuth e gli
+export non contengono copertine), con l'obbligo CSP di `coverartarchive.org`.
+**Non dipende** dal lookup MusicBrainz (D-22.4: il vincolo `[DEP:4.2]` è stato
+rimosso).
+
+Spec: `docs/24-ARTWORK-ENRICHMENT.md` **v1.0 🟢 APPROVED** (ratificata dal
+project owner il 2026-11-02, Sessione 87).
+
+## Stato
+
+⬚ **TODO** — spec ratificata, issue canonica #242 aperta: **in attesa di claim**
+(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
+`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
+
+## Task
+
+- [ ] Da definire al claim, dalla spec `docs/24-ARTWORK-ENRICHMENT.md`
+
+## Acceptance criteria
+
+- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 4.3" (compilare al claim)
+
+## Lesson learned
+
+_(al termine dell'implementazione)_
+
+## Documenti aggiornati
+
+_(alla chiusura della PR)_
+
+
+
+===== FILE: docs/state/stories/5.1-privacy-spec-finale.md =====
+
+---
+id: "5.1"
+title: "Privacy spec finale"
+phase: 6
+area: privacy
+status: todo
+priority: B
+depends_on: []
+issue: 244
+spec_refs:
+  - docs/27-PRIVACY-DATA-SETTINGS.md
+  - docs/09-PRIVACY-SECURITY.md
+  - docs/06-UX-FLOWS-STATES.md
+  - docs/12-DEVOPS.md
+---
+
+## Descrizione
+
+La pagina in-app **«Come trattiamo i tuoi dati»**: la traduzione in linguaggio
+utente della promessa privacy del progetto (local-first, nessun backend,
+L2 opt-in). Comprende la **AGPL §13 — offerta del sorgente** (`12§5.3`): la
+schermata About esiste ma è oggi dead code, l'offerta non è raggiungibile
+dall'utente in rete.
+
+Sette chiavi i18n dichiarate in `08-COPY-I18N.md` non sono nei locale
+(`settings.privacy.retain*`, `.deriveContext`): la pagina non può essere
+completa senza di esse (Sessione 86, punto 6).
+
+Spec: `docs/27-PRIVACY-DATA-SETTINGS.md` **v1.0 🟢 APPROVED** (ratificata dal
+project owner il 2026-11-02, Sessione 87). Ordine fra le due story privacy:
+**5.2 → 5.1** (D-22.7) — priorità, non dipendenza.
+
+## Stato
+
+⬚ **TODO** — spec ratificata, issue canonica #244 aperta: **in attesa di claim**
+(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
+`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
+
+## Task
+
+- [ ] Da definire al claim, dalla spec `docs/27-PRIVACY-DATA-SETTINGS.md`
+
+## Acceptance criteria
+
+- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 5.1" (compilare al claim)
+
+## Lesson learned
+
+_(al termine dell'implementazione)_
+
+## Documenti aggiornati
+
+_(alla chiusura della PR)_
+
+
+
+===== FILE: docs/state/stories/5.2-export-purge.md =====
+
+---
+id: "5.2"
+title: "Export e purge"
+phase: 6
+area: privacy
+status: todo
+priority: B
+depends_on: []
+issue: 246
+spec_refs:
+  - docs/27-PRIVACY-DATA-SETTINGS.md
+  - docs/09-PRIVACY-SECURITY.md
+  - docs/06-UX-FLOWS-STATES.md
+  - docs/22-COMPETITIVE-POSITIONING.md
+---
+
+## Descrizione
+
+Export JSON/CSV del diario e **cancellazione totale con doppia conferma**:
+l'atto di fiducia che rende vera la promessa della privacy. I pulsanti devono
+essere **prominenti**, non nascosti in un menu (D-22.7); il tagging manuale
+della 3.2 (testo libero) è coperto dall'export e dalla cancellazione.
+
+Tre delle quattro funzioni obbligatorie di `09§6.1` non esistono:
+`exportAll`, `deleteAll`, `purgeInsights` (esiste solo `purgeIp`) — Sessione 86,
+punto 5.
+
+Spec: `docs/27-PRIVACY-DATA-SETTINGS.md` **v1.0 🟢 APPROVED** (ratificata dal
+project owner il 2026-11-02, Sessione 87). Ordine fra le due story privacy:
+**5.2 → 5.1** (D-22.7).
+
+## Stato
+
+⬚ **TODO** — spec ratificata, issue canonica #246 aperta: **in attesa di claim**
+(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
+`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
+
+## Task
+
+- [ ] Da definire al claim, dalla spec `docs/27-PRIVACY-DATA-SETTINGS.md`
+
+## Acceptance criteria
+
+- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 5.2" (compilare al claim)
+
+## Lesson learned
+
+_(al termine dell'implementazione)_
+
+## Documenti aggiornati
+
+_(alla chiusura della PR)_
 
 
 
@@ -49743,20 +50131,38 @@ fi
 
     Questo script esegue la presa in carico come sequenza atomica:
 
-      1. valida l'issue (esiste, aperta, `agent-ready`, NON `in-progress`)
+      1. valida l'issue (esiste, aperta, `agent-ready`, NON `in-progress`
+         -- salvo modalita' -Stale, vedi sotto)
       2. crea la worktree isolata (delega a scripts/setup-worktree.ps1)
-      3. aggiunge la label `in-progress`
+      3. aggiunge la label `in-progress` (se non gia' presente)
       4. posta il commento `claim: <agent-id> (UTC <ts>) -- worktree: <path>`
       5. RIVERIFICA: scarica i commenti di claim e verifica che il proprio
          abbia l'ID NUMERICO (API REST) piu' basso: vince chi ha commentato
          per primo. Il discriminatore e' l'id numerico, non il node_id GraphQL
          e non created_at (vedi AGENTS.md §"Presa in carico delle story").
       6. scrive il file di stato dell'agente (usato da hook e script)
-      7. in caso di perdita: rimuove la label, posta `yield:` ed esce
+      7. in caso di perdita: posta `yield:` ed esce SENZA rimuovere la label
+         `in-progress`: serve al vincitore (ADR-0006, regola 4; AGENTS.md
+         sezione "Procedura di claim", punto 4). Rimuoverla faceva ricomparire
+         l'issue come "libera" nelle query degli altri agenti.
+
+    TAKEOVER DI CLAIM SCADUTO (-Stale, ADR-0006 regola 5, TTL 12 ore):
+    un claim senza attivita' per oltre 12 ore e' abbandonato. Con -Stale lo
+    script accetta un'issue gia' `in-progress` a UNA condizione verificata:
+    l'ultima attivita' del claim attivo (claim, commenti `progress:`,
+    PR aperta per l'issue) risale a piu' di 12 ore fa. Allora posta
+    `stale-release: <agente-del-claim> -- claim scaduto, ultima attivita'
+    >12h` e prosegue con claim + riverifica (il filtro dei claim rilasciati
+    esclude il claim stantio). Se il claim NON e' ancora scaduto, esce 5
+    senza toccare nulla.
 
     Il file di stato vive FUORI dal working tree (nella directory git della
     worktree): non e' un file untracked, quindi non confonde l'hook
     pre-commit, e sparisce con la worktree.
+
+    Exit code: 0 ok - 1 errore git/worktree - 2 errore ambiente/API - 3
+    validazione issue - 4 riverifica persa (yield) - 5 claim non ancora
+    scaduto (-Stale).
 
 .PARAMETER IssueNumber
     Numero dell'issue da prendere in carico.
@@ -49770,12 +50176,18 @@ fi
 .PARAMETER SkipWorktree
     Non creare la worktree (l'agente lavora gia' in una worktree).
 
+.PARAMETER Stale
+    Consente la presa in carico di un claim SCADUTO (TTL 12 ore, ADR-0006
+    regola 5): verifica l'eta' dell'ultima attivita' del claim attivo e, se
+    supera le 12 ore, posta `stale-release:` e prosegue con claim + riverifica.
+
 .PARAMETER DryRun
     Stampa cosa farebbe, senza toccare GitHub ne il filesystem.
 
 .EXAMPLE
     pwsh scripts/agent-claim.ps1 256
     pwsh scripts/agent-claim.ps1 256 -DryRun
+    pwsh scripts/agent-claim.ps1 283 -Stale   # claim senza attivita' da >12h
 #>
 [CmdletBinding()]
 param(
@@ -49784,6 +50196,7 @@ param(
     [string]$Slug = "",
     [string]$AgentId = "",
     [switch]$SkipWorktree,
+    [switch]$Stale,
     [switch]$DryRun
 )
 
@@ -49796,6 +50209,79 @@ $repoApi = "repos/$repoSlug"
 
 function Say([string]$msg, [string]$color = "Gray") { Write-Host "[agent-claim] $msg" -ForegroundColor $color }
 function Die([int]$code, [string]$msg) { Write-Host "[agent-claim] ERRORE: $msg" -ForegroundColor Red; exit $code }
+
+# Agente di un commento di claim: il primo token dopo il marker `claim:`.
+function Get-ClaimAgent([object]$comment) {
+    $m = [regex]::Match([string]$comment.body, '^\s*claim:\s*(\S+)')
+    if ($m.Success) { return $m.Groups[1].Value }
+    return ""
+}
+
+# Un claim RILASCIATO non conta nella riverifica ne' nella verifica di stantia'.
+# AGENTS.md (sezione "Procedura di claim", punto 4) confronta l'ID piu' basso
+# "tra i claim NON ANCORA RILASCIATI"; un claim e' rilasciato da un commento
+# `release:` / `stale-release:` SUCCESSIVO che ne cita l'agente.
+#
+# Senza questo filtro la presa in carico di una claim STANTIA (TTL 12 ore di
+# ADR-0006) sarebbe impossibile: il vecchio claim ha sempre l'ID piu' basso, e
+# l'agente che subentra farebbe `yield:` pur avendo legittimamente preso
+# l'issue. E' il caso verificato con la claim di `kilo-hp-elitebook-457a`
+# sull'issue #283 (16 ore senza attivita', TTL 12 ore).
+function Test-ClaimReleased([object]$claim, [object[]]$releases) {
+    $claimAgent = Get-ClaimAgent $claim
+    if ([string]::IsNullOrWhiteSpace($claimAgent)) { return $false }
+    foreach ($rel in $releases) {
+        # il rilascio deve essere SUCCESSIVO al claim che rilascia
+        if ([int64]$rel.id -le [int64]$claim.id) { continue }
+        if ([string]$rel.body -like "*$claimAgent*") { return $true }
+    }
+    return $false
+}
+
+# Takeover di claim scaduto (ADR-0006, regola 5: TTL 12 ore; AGENTS.md
+# sezione "Mantenere il claim"). Verifica che l'ultima attivita' del claim attivo
+# risalga a oltre 12 ore fa e restituisce l'agente del claim stantio.
+# Attivita' che resetta il TTL: commit pushato, PR aperta, commento di
+# progresso. Rilevabile qui: l'ultimo commento pertinente sull'issue (claim,
+# `progress:`) e una PR APERTA il cui branch cita il numero dell'issue.
+function Assert-ClaimStale {
+    param([int]$IssueNumber)
+    $ttlHours = 12
+    $commentsRaw = & gh api "$repoApi/issues/$IssueNumber/comments" 2>$null
+    if ($LASTEXITCODE -ne 0) { Die 2 "impossibile leggere i commenti dell'issue" }
+    $allComments = @($commentsRaw | ConvertFrom-Json)
+    $releaseComments = @($allComments | Where-Object { [string]$_.body -match '^\s*(release|stale-release)\s*:' })
+    $active = @(@($allComments | Where-Object { $_.body -like "claim:*" } | Sort-Object { [int64]$_.id }) |
+        Where-Object { -not (Test-ClaimReleased $_ $releaseComments) })
+    if ($active.Count -eq 0) { Die 2 "nessun claim attivo trovato: la label 'in-progress' e' orfana, rilancia senza -Stale" }
+    $claim = $active[0]   # la riverifica assegna l'issue all'ID piu' basso: vale anche qui
+    $agent = Get-ClaimAgent $claim
+    $lastActivity = [datetimeoffset]::Parse([string]$claim.created_at).UtcDateTime
+    foreach ($c in $allComments) {
+        if ([int64]$c.id -le [int64]$claim.id) { continue }
+        $body = [string]$c.body
+        $isRelease = $body -match '^\s*(release|stale-release)\s*:'
+        if ((-not $isRelease) -and ($body -like "*$agent*")) {
+            $t = [datetimeoffset]::Parse([string]$c.created_at).UtcDateTime
+            if ($t -gt $lastActivity) { $lastActivity = $t }
+        }
+    }
+    $prJson = & gh pr list --state open --limit 100 --json number,headRefName,updatedAt 2>$null
+    if ($LASTEXITCODE -eq 0 -and $prJson) {
+        foreach ($pr in @($prJson | ConvertFrom-Json)) {
+            if ("$($pr.headRefName)" -match "^(feat|fix)/$IssueNumber-") {
+                $t = [datetimeoffset]::Parse([string]$pr.updatedAt).UtcDateTime
+                if ($t -gt $lastActivity) { $lastActivity = $t }
+            }
+        }
+    }
+    $ageHours = ((Get-Date).ToUniversalTime() - $lastActivity).TotalHours
+    if ($ageHours -le $ttlHours) {
+        Die 5 ("claim di {0} non ancora scaduto: ultima attivita' {1:N1} ore fa (TTL {2} ore)" -f $agent, $ageHours, $ttlHours)
+    }
+    Say ("claim di {0} inattivo da {1:N1} ore (> TTL {2}h): takeover ammesso" -f $agent, $ageHours, $ttlHours) "Yellow"
+    return $agent
+}
 
 # --- agent id ---------------------------------------------------------------
 if ([string]::IsNullOrWhiteSpace($AgentId)) {
@@ -49811,8 +50297,17 @@ $issue = $issueRaw | ConvertFrom-Json
 if ($issue.state -ne "OPEN") { Die 3 "issue #$IssueNumber non e' aperta (stato: $($issue.state))" }
 $labels = @($issue.labels | ForEach-Object { $_.name })
 if ($labels -notcontains "agent-ready") { Die 3 "issue #$IssueNumber non ha la label 'agent-ready' (labels: $($labels -join ', '))" }
-if ($labels -contains "in-progress") { Die 3 "issue #$IssueNumber ha gia' la label 'in-progress': qualcun altro l'ha presa in carico" }
 if ($labels -match '^status:') { Die 3 "issue #$IssueNumber ha gia' una label status:* ($($labels -join ', '))" }
+
+# Claim gia' attivo: ammesso solo in modalita' -Stale (takeover di claim
+# scaduto, ADR-0006 regola 5 -- AGENTS.md sezione "Mantenere il claim").
+$staleAgent = ""
+if ($labels -contains "in-progress") {
+    if (-not $Stale) {
+        Die 3 "issue #$IssueNumber ha gia' la label 'in-progress': qualcun altro l'ha presa in carico (per un claim senza attivita' da oltre 12 ore, rilancia con -Stale)"
+    }
+    $staleAgent = Assert-ClaimStale $IssueNumber
+}
 
 $title = $issue.title
 Say "titolo: $title" "DarkGray"
@@ -49848,13 +50343,25 @@ if ($DryRun) {
     exit 0
 }
 
-Say "aggiungo la label 'in-progress' ..." "Cyan"
-& gh issue edit $IssueNumber --add-label "in-progress" | Out-Null
-if ($LASTEXITCODE -ne 0) { Die 1 "impossibile aggiungere la label 'in-progress'" }
+if ($labels -notcontains "in-progress") {
+    Say "aggiungo la label 'in-progress' ..." "Cyan"
+    & gh issue edit $IssueNumber --add-label "in-progress" | Out-Null
+    if ($LASTEXITCODE -ne 0) { Die 1 "impossibile aggiungere la label 'in-progress'" }
+}
+else {
+    Say "label 'in-progress' gia' presente (takeover -Stale): resta all'issue" "DarkGray"
+}
 
 $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+if ($staleAgent) {
+    # ADR-0006, regola 5: il commento `stale-release:` DEVE citare l'agente del
+    # claim scaduto (e' il marker che la riverifica cerca per escluderlo).
+    Say "posto il commento 'stale-release:' per il claim di $staleAgent ..." "Cyan"
+    & gh issue comment $IssueNumber --body "stale-release: $staleAgent -- claim scaduto, ultima attivita' >12h (presa in carico: $AgentId)" | Out-Null
+    if ($LASTEXITCODE -ne 0) { Die 1 "impossibile postare il commento stale-release" }
+}
 $claimBody = "claim: $AgentId (UTC $timestamp) -- worktree: $worktreePath"
-Say "posterei il commento di claim" "Cyan"
+Say "posto il commento di claim" "Cyan"
 & gh issue comment $IssueNumber --body $claimBody | Out-Null
 if ($LASTEXITCODE -ne 0) { Die 1 "impossibile postare il commento di claim" }
 
@@ -49864,31 +50371,6 @@ $commentsRaw = & gh api "$repoApi/issues/$IssueNumber/comments" 2>$null
 if ($LASTEXITCODE -ne 0) { Die 2 "impossibile leggere i commenti dell'issue" }
 $allComments = @($commentsRaw | ConvertFrom-Json)
 
-# Un claim RILASCIATO non conta nella riverifica. AGENTS.md (sezione
-# "Procedura di claim", punto 4) confronta l'ID piu' basso "tra i claim NON
-# ANCORA RILASCIATI"; un claim e' rilasciato da un commento `release:` /
-# `stale-release:` SUCCESSIVO che ne cita l'agente.
-#
-# Senza questo filtro la presa in carico di una claim STANTIA (TTL 12 ore di
-# ADR-0006) sarebbe impossibile: il vecchio claim ha sempre l'ID piu' basso, e
-# l'agente che subentra farebbe `yield:` pur avendo legittimamente preso
-# l'issue. E' il caso verificato con la claim di `kilo-hp-elitebook-457a`
-# sull'issue #283 (16 ore senza attivita', TTL 12 ore).
-function Get-ClaimAgent([object]$comment) {
-    $m = [regex]::Match([string]$comment.body, '^\s*claim:\s*(\S+)')
-    if ($m.Success) { return $m.Groups[1].Value }
-    return ""
-}
-function Test-ClaimReleased([object]$claim, [object[]]$releases) {
-    $claimAgent = Get-ClaimAgent $claim
-    if ([string]::IsNullOrWhiteSpace($claimAgent)) { return $false }
-    foreach ($rel in $releases) {
-        # il rilascio deve essere SUCCESSIVO al claim che rilascia
-        if ([int64]$rel.id -le [int64]$claim.id) { continue }
-        if ([string]$rel.body -like "*$claimAgent*") { return $true }
-    }
-    return $false
-}
 $releaseComments = @($allComments | Where-Object { [string]$_.body -match '^\s*(release|stale-release)\s*:' })
 
 $claims = @($allComments | Where-Object { $_.body -like "claim:*" } | Sort-Object { [int64]$_.id })
@@ -49901,8 +50383,10 @@ $lowestId = [int64]($activeClaims | ForEach-Object { [int64]$_.id } | Measure-Ob
 
 if ($mineId -ne $lowestId) {
     Say "RIVERIFICA PERSA: un altro claim ha un ID piu' basso ($lowestId < $mineId) -> yield" "Red"
-    & gh issue edit $IssueNumber --remove-label "in-progress" | Out-Null
-    & gh issue comment $IssueNumber --body "yield: l'agente $AgentId ha rinunciato (claim $mineId, ID piu' basso in carico: $lowestId)" | Out-Null
+    # ADR-0006, regola 4 (AGENTS.md sezione "Procedura di claim", punto 4): il perdente
+    # NON rimuove la label `in-progress` -- serve al vincitore. Rimuoverla faceva
+    # ricomparire l'issue come "libera" nelle query degli altri contendenti.
+    & gh issue comment $IssueNumber --body "yield: $AgentId -- riverifica persa (claim $mineId; ID piu' basso in carico: $lowestId)" | Out-Null
     exit 4
 }
 Say "riverifica OK: il claim $mineId e' il piu' basso" "Green"

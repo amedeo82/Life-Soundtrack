@@ -187,6 +187,10 @@ $files = @(
     # Sessione 97 (issue #241): la Story 3.2 — il feed dei ricordi, il
     # ShareSheet e il tagging manuale.
     "docs/state/sessions/97-ricordi-share.md",
+    # Sessione 98: i drift di concorrenza del protocollo (yield che rubava la
+    # label, fallback del blocco NEXT-STEP, prosa README, takeover dei claim
+    # scaduti).
+    "docs/state/sessions/98-fix-drift-concorrenza.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -205,6 +209,14 @@ $files = @(
     "docs/state/stories/3.1-home-timeline.md",
     # Story 3.2 (issue #241): Ricordi + Share.
     "docs/state/stories/3.2-ricordi-share.md",
+    # Story 3.3, 3.5, 4.3, 5.1, 5.2: i file di stato creati alla ratifica delle
+    # specifiche (Sessione 98) — senza questi il blocco NEXT-STEP cadeva sul
+    # fallback «nessuna story migrata».
+    "docs/state/stories/3.3-esplora-analisi.md",
+    "docs/state/stories/3.5-anteprima-onboarding-demo.md",
+    "docs/state/stories/4.3-artwork-enrichment.md",
+    "docs/state/stories/5.1-privacy-spec-finale.md",
+    "docs/state/stories/5.2-export-purge.md",
     "docs/state/stories/4.1-audio-features.md",
     "docs/state/stories/4.4-db-ip-city.md",
     "scripts/aggregate-state.ps1",
