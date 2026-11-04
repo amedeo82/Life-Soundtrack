@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 10:43
+> Data: 2026-11-04 10:46
 > Totale file: 191
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -22304,7 +22304,7 @@ date: 2026-11-04
 state: 🟡
 merged: false
 branch: fix/302-fix-protocol-il-claim-perdente-ruba-la-l
-pr: 0
+pr: 303
 claim: kilo-hp-elitebook-a7c7
 tags: [docs, protocol, concurrency, claim]
 ---
