@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 19:42
+> Data: 2026-11-05 19:43
 > Totale file: 198
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -25260,7 +25260,7 @@ priority: I
 depends_on: ["2.5"]
 issue: 240
 branch: "feat/240-story-3-3---esplora-analisi-schermate-9"
-pr: 0
+pr: 320
 claim: kilo-hp-elitebook-d957
 spec_refs:
   - docs/25-MEMORIES-SHARE-EXPLORE.md
