@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 19:41
+> Data: 2026-11-05 19:42
 > Totale file: 198
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -23635,7 +23635,7 @@ date: 2026-11-05
 state: 🟡
 merged: false
 branch: feat/240-story-3-3---esplora-analisi-schermate-9
-pr: 0
+pr: 320
 claim: kilo-hp-elitebook-d957
 tags: [ui, esplora, analisi, ricerca, quadrante, deep-link, i18n]
 ---
