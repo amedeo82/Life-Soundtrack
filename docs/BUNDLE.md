@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 22:07
+> Data: 2026-11-05 22:16
 > Totale file: 201
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -24050,7 +24050,7 @@ date: 2026-11-05
 state: 🟡
 merged: false
 branch: fix/319-arbitraggio-claim-lock-worktree
-pr: 0
+pr: 321
 claim: kilo-hp-elitebook-85df
 tags: [devops, protocol, ci, testing]
 ---
