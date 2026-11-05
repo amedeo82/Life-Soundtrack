@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.47 — Sessione 101 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.48 — Sessione 102 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -47,6 +47,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 | I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
 | Il frontmatter di una **story** dichiara lo stesso fatto di merge delle sessioni (`status: done`, `merged_commit`, `merged_date`), e il writer post-merge lo applica | `check-merge-state.mjs` (perimetro `docs/state/stories/`) + `apply-merge-state.mjs` | issue #297 (Story 2.5 restata `in-review` dopo il merge) |
+| `main` è protetta: nessun merge senza PR con il check `quality` verde, nessun force push, nessuna cancellazione, history lineare; l'unico scrittore diretto è il writer post-merge | ruleset GitHub `main-protection` (bypass: la sola deploy key `post-merge-writer`) | issue #311 (repository pubblico: il protocollo diventa *enforceable*) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -262,7 +263,7 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 - Branch: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
 - Commit: **Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
 - **Nessun riferimento `#NNN` nel _body_ del messaggio** (il titolo lo accetta: `feat(x): … (issue #306)`). `conventional-commits-parser` considera **footer** tutto ciò che segue la prima riga che contiene un riferimento `#NNN`, e la regola `footer-leading-blank` di commitlint segnala allora un falso positivo («footer must have leading blank line») su un messaggio che è corretto. Nel body scrivi «la PR 305», non «la PR #305». *(issue #306, Sessione 100)*
-- Branch `main` protetto: richiede PR e review
+- Branch `main` protetto dalla ruleset GitHub `main-protection`: nessun merge senza PR + check `quality` verde + branch aggiornato, nessun force push, nessuna cancellazione, history lineare (merge commit vietati: si usa **squash**). L'unico attore che puo spingere direttamente su `main` e' il writer post-merge (deploy key `post-merge-writer`). Vedi §"📤 Post-merge actions" e `docs/CHECKLIST-PUBBLICAZIONE.md`
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
@@ -623,7 +624,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 
 > **La checklist operativa della PR è in [`.github/pull_request_template.md`](.github/pull_request_template.md)** — è l'**unico** artifact: GitHub la rende interattiva e le caselle non spuntate sono blocker per il merge. **Non copiarla qui**: due copie divergono in silenzio (misurato: 22 voci per parte, solo 2 identiche al testo — decisione D3 di [`ADR-0012`](docs/13-ADR/0012-agent-protocol-contract.md)).
 >
-> **Branch protection**: il Boss applichera (post-merge #51) `branch protection` su `main` che richiede review Boss + CI verde. Vedi §"📤 Post-merge actions" → "Branch protection Boss-only".
+> **Branch protection**: `main` e' protetta dalla ruleset GitHub `main-protection` (attiva dal 2026-11-05, issue #311): merge solo via PR, con il check `quality` verde (aggregatore fail-closed; nella UI: `CI / quality`), branch aggiornato, history lineare (squash), niente force push e niente cancellazione. L'unico scrittore diretto di `main` e' il workflow `post-merge` (deploy key `post-merge-writer`). Vedi `docs/CHECKLIST-PUBBLICAZIONE.md` §"Passo 2".
 >
 > **Cosa contiene la checklist** (per sapere se un requisito è coperto senza aprire il template): documentazione letta · codice e test (schema dati, fixture, JSDoc, PII, lint/typecheck/test/build) · documentazione di stato (blocchi `AGGREGATE-*`, sezioni legacy, `docs/state/`, `$files` + bundle, aggregatore, `check-readme-facts.mjs`, `check-merge-state.mjs`, determinismo) · issue tracking (keyword `Closes #N`, transizione label) · git workflow (branch, worktree, working tree, push early, Conventional Commits).
 
@@ -900,7 +901,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 > - il gate `quality` è l'aggregatore fall-closed: se un gate parallelo fallisce, la PR è rossa.
 ### Regola fondamentale — NO commit su `main`
 
-**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `post-merge`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
+**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `post-merge`, che committano automaticamente (con bot identity `kilo-bot[bot]`); `post-merge` spinge su `main` con la deploy key `post-merge-writer`, l'unico bypass actor della ruleset `main-protection` (il `GITHUB_TOKEN` non può spingere su un branch protetto: GH013). Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
 
 Vedi `docs/18-DEV-LOG.md` §20 (Sessione 20, hardening multi-agente) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
 
@@ -1152,4 +1153,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.45 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.48 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*

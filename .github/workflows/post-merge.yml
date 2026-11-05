@@ -103,7 +103,16 @@ jobs:
           # `main` (che contiene il merge commit), non sul `github.sha` del
           # PR chiuso.
           ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # La branch protection di `main` (ruleset `main-protection`, attiva
+          # dal 2026-11-05) vieta i push diretti: il `GITHUB_TOKEN` NON puo'
+          # bypassarla (l'integration `github-actions` non e' un bypass actor
+          # ammesso) e il suo push verrebbe respinto con GH013. Il writer e'
+          # l'UNICO scrittore di `main` (ADR-0013), quindi autentica con la
+          # deploy key `post-merge-writer`, l'unico bypass actor della
+          # ruleset. Le chiamate API (apply-merge-state) continuano a usare
+          # il `GITHUB_TOKEN`, che serve `pull-requests: read`.
+          ssh-key: ${{ secrets.WRITER_SSH_KEY }}
+          ssh-known-hosts: ${{ secrets.WRITER_SSH_KNOWN_HOSTS }}
           fetch-depth: 0
 
       - name: Runtime — PowerShell 7+

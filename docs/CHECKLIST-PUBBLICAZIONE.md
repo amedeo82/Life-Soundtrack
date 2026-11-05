@@ -53,6 +53,13 @@ gh api -X PATCH repos/amedeo82/Life-Soundtrack -f private=false
 
 ## Passo 2 — attivare la branch protection (subito dopo il flip)
 
+> **Stato: applicato il 2026-11-05 (issue #311).** La sezione originale della checklist
+> conteneva tre cose che, misurate sul repository reale, **non** erano applicabili così
+> come scritte. Il blocco sotto è conservato per referenza e **non è più eseguibile**:
+> cosa è stato applicato davvero è nella sottosezione «Cosa è stato applicato davvero».
+
+### La versione originale della sezione (superata — non eseguire)
+
 Ora disponibile. Da GitHub: **Settings → Branches → Add rule**, oppure:
 
 ```bash
@@ -88,6 +95,31 @@ Impostazioni e perché:
 
 > Con `enforce_admins: true` nessuno — nemmeno il titolare del repository —
 > può mergiare una PR senza review e senza `CI / quality` verde.
+
+### Cosa è stato applicato davvero (2026-11-05, issue #311)
+
+| Impostazione | Valore applicato | Perché |
+|--------------|------------------|--------|
+| Endpoint | **ruleset** `main-protection` (id `26614787`), non la classic branch protection | il token OAuth della CLI (`gho_`, scope `repo`) riceve **404** su `POST /branches/main/protection`: l'endpoint chiede il permesso *Administration*, che un token OAuth non ottiene. La ruleset è creabile con lo stesso token e applica le stesse garanzie |
+| `required_status_checks` | contesto **`quality`**, `strict: true`, `integration_id: 15368` | il contesto richiesto è il **nome del check run** (il `job.name`), non la coppia `workflow / job` che si vede nella UI. Il check run del job aggregatore si chiama `quality` (`GET /commits/<sha>/check-runs`). Con `CI / quality` la regola sarebbe **soddisfacibile da nessuna run** → ogni merge resterebbe bloccato per sempre |
+| `required_approving_review_count` | **0** | con `1` il repository è **congelato**: l'unico account GitHub è anche l'autore di ogni PR (gli agenti usano l'account del project owner) e GitHub vieta l'auto-approvazione. Restano enforced: PR + check `quality` verde + branch aggiornato |
+| Nessun bypass per gli admin | `bypass_actors` = **solo** la deploy key | l'owner resta vincolato come tutti gli altri; l'unica eccezione è il writer post-merge |
+| `required_linear_history` | attivo | i merge commit non sono più ammessi: **le PR si mergiano con squash** |
+| `non_fast_forward` / `deletion` | attivi | niente force push, niente cancellazione di `main` |
+| Bypass actor | deploy key `post-merge-writer` (id `168877742`, write) | il writer post-merge è l'unico scrittore di `main` (ADR-0013) e il `GITHUB_TOKEN` **non può** bypassare una ruleset (GitHub: *"Actor GitHub Actions integration must be part of the ruleset source or owner organization"*) |
+
+### Il writer post-merge dopo la protezione
+
+`post-merge.yml` autentica il checkout con la deploy key `post-merge-writer`
+(`secrets.WRITER_SSH_KEY` + `secrets.WRITER_SSH_KNOWN_HOSTS`) invece che con il
+`GITHUB_TOKEN`: le chiamate API continuano a usare il `GITHUB_TOKEN` (serve
+`pull-requests: read`), ma il **push** su `main` passa dalla chiave, che è l'unico
+bypass actor. Con il `GITHUB_TOKEN` il push verrebbe respinto con `GH013`.
+
+**Verifica eseguita** (branch sonda `protection-probe`, con una ruleset identica, poi
+rimosso): push diretto come owner/admin → **respinto** (`GH013`: *"Changes must be made
+through a pull request"* + *"Required status check \"quality\" is expected"*); push diretto
+come deploy key → **accettato** (*"Bypassed rule violations"*).
 
 ## Passo 3 — creare il primo tag di release
 
@@ -141,7 +173,7 @@ repository discoveribile.
 | **Non riscrivere la history** per rimuovere l'email | cambierebbe tutti gli SHA: i 38 riferimenti `merged_commit` in `docs/state/` punterebbero a commit inesistenti e il gate fail-closed `check-merge-state.mjs` renderebbe `main` rosso. Richiederebbe un force-push su `main`, vietato dal protocollo. Decisione già assunta (issue #309) |
 | **Non disattivare `pull_request` in favore di `pull_request_target`** | `pull_request_target` gira con i permessi del branch BASE ma con il codice del fork: è la classica *pwn request*. I guard di fork aggiunti in #310 rendono `pull_request` sicuro |
 | **Non rimuovere i guard di fork dai workflow** | con il repository pubblico chiunque può aprire una PR da un fork: `post-merge.yml` (`contents: write`) scriverebbe su `main`, `auto-status-done.yml` (`issues: write`) transizionerebbe issue arbitrarie |
-| **Non rimuovere `CI / quality` dalla branch protection** | è l'aggregatore fail-closed: richiedere i singoli job lascerebbe passare una PR con un job saltato |
+| **Non rimuovere il check `quality` (aggregatore) dalla ruleset `main-protection`** | è l'aggregatore fail-closed: richiedere i singoli job lascerebbe passare una PR con un job saltato. Il contesto richiesto è il **nome del check run** (`quality`), non la coppia `CI / quality` mostrata nella UI |
 | **Non impostare un budget $0** su Actions | blocca le run a quota esaurita = sviluppo bloccato. Su repository pubblico i minuti sono gratuiti: il budget non serve più |
 
 ## Verifica finale (dopo il flip)
@@ -150,9 +182,9 @@ repository discoveribile.
 # il repository è pubblico?
 gh repo view amedeo82/Life-Soundtrack --json isPrivate --jq .isPrivate   # atteso: false
 
-# la branch protection è attiva?
-gh api repos/amedeo82/Life-Soundtrack/branches/main/protection \
-  --jq '{checks:.required_status_checks.contexts, reviews:.required_pull_request_reviews.required_approving_review_count, force_push:.allow_force_pushes.enabled}'
+# la protezione di main è attiva? (ruleset, non endpoint classic)
+gh api repos/amedeo82/Life-Soundtrack/rulesets/main-protection \
+  --jq '{enforcement, target, checks: [.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context], reviews: [.rules[] | select(.type=="pull_request") | .parameters.required_approving_review_count], bypass: [.rules[] | select(.type=="pull_request") | .parameters.bypass_actors[].actor_id]}'
 
 # il tag di release esiste?
 gh release list --repo amedeo82/Life-Soundtrack
@@ -161,13 +193,24 @@ gh release list --repo amedeo82/Life-Soundtrack
 curl -sI https://github.com/amedeo82/Life-Soundtrack | head -1   # atteso: HTTP/2 200
 ```
 
+> `gh api repos/.../branches/main/protection` **non** è il comando di verifica: con un
+> token OAuth l'endpoint classic non è amministrabile (404) e la protezione applicata è
+> una **ruleset**. Il comando sopra è quello che riflette lo stato reale.
+
 ## Rollback
 
 Il flip è reversibile: Settings → Change visibility → Private. Ma **non è
 senza prezzo**:
 
 - la branch protection **non è disponibile** sui repository privati con piano
-  Free → si perde (reconfigurabile a mano al prossimo flip)
+  Free → si perde (reconfigurabile a mano al prossimo flip). Con il public
+  flip la protezione è stata applicata come **ruleset** `main-protection`
+  (l'endpoint classic non è amministrabile con il token OAuth della CLI)
+- la **deploy key** `post-merge-writer` e i secret `WRITER_SSH_KEY` /
+  `WRITER_SSH_KNOWN_HOSTS` restano configurati: sono l'unico bypass actor
+  della ruleset e servono al writer post-merge. Se la ruleset viene rimossa,
+  il writer torna a poter spingere con il `GITHUB_TOKEN` (e a riprovare i
+  secret, che **non** andrebbero mai committati)
 - i minuti Actions tornano a essere contati sul pool da 2.000/account
 - la history resta comunque esposta: chi ha già clonato o scaricato i file
   durante il periodo pubblico li ha ancora
