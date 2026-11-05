@@ -200,6 +200,15 @@ $files = @(
     # (worktree con le dipendenze installate, batteria di `agent-pr.ps1`
     # allineata alla CI, rimozione worktree long-path-safe con `node_modules`).
     "docs/state/sessions/100-gate-locali-parita-ci.md",
+    # Sessione 101 (issue #309): il repository reso pubblico e l'hardening di
+    # sicurezza e privacy (fixture solo sintetiche, encoding).
+    "docs/state/sessions/101-repo-pubblico-hardening.md",
+    # Sessione 102 (issue #311): la branch protection di `main` con la deploy key
+    # del writer post-merge.
+    "docs/state/sessions/102-branch-protection-deploy-key.md",
+    # Sessione 103 (issue #240): la Story 3.3 — Esplora (ricerca sul catalogo)
+    # e Analisi (la mappa emotiva con l'insight in prosa).
+    "docs/state/sessions/103-story-3-3-esplora-analisi.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",

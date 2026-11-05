@@ -491,15 +491,19 @@ Consegnato: la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scrol
 
 ### Story 3.3 — Esplora + Analisi `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
 
+**Stato**: 🟡 **IN REVIEW** — implementata nella Sessione 103 (issue **#240**, branch `feat/240-story-3-3---esplora-analisi-schermate-9`). Spec `25-MEMORIES-SHARE-EXPLORE.md` (v1.0 🟢 APPROVED), `06-UX-FLOWS-STATES.md` §2.9-§2.10, `07-UI-SPEC.md` §2.8-§2.9.
+
+Consegnato: la schermata ⑨ **Esplora** (ricerca sul **proprio** catalogo con debounce di 300 ms, cinque tab — Artisti · Brani · Album · Generi · Mood — e i risultati ordinati per `listenCount`) e la schermata ⑩ **Analisi** (il `QuadrantChart` valence/energy con un punto per mese, la **frase in prosa** che accompagna il grafico e gli insight persistiti con le tre azioni dell'utente); il **deep-link interno** dal punto del quadrante alla Timeline (`AppSection` + `AppFocus`, senza router); il mood della settimana letto da `mood_week` e **tradotto** nella shell. **20 test** nuovi.
+
 **Descrizione**: Le schermate di esplorazione (⑨ ricerca, ⑩ quadrante valence/energy) sono il luogo dove l'utente **interroga** il proprio diario. Il criterio di accettazione di questa story non è «un grafico in più»: è l'**insight in prosa** — la stessa analisi raccontata in linguaggio naturale («A marzo 2023 hai ascoltato 47 canzoni malinconiche in due settimane: stava succedendo qualcosa?»). Un grafico senza lettura è l'ennesimo cruscotto; l'«aha moment» è la frase che spiega un periodo.
 
 **Acceptance criteria**:
-- [ ] Schermata ⑨ con search autocomplete sui propri dati
-- [ ] Schermata ⑩ QuadrantChart valence/energy
-- [ ] Click su punto → deep-link timeline
-- [ ] **Insight in prosa**: ogni insight mostrato è accompagnato da una frase generata dai template i18n (`insight.*`), non da un solo valore numerico
-- [ ] Gli insight visualizzati sono **persistiti** (nessuna lettura «a caldo» che non passi dalla tabella `insights`): la story consuma l'output della Story **2.5**
-- [ ] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
+- [x] Schermata ⑨ con search autocomplete sui propri dati
+- [x] Schermata ⑩ QuadrantChart valence/energy
+- [x] Click su punto → deep-link timeline
+- [x] **Insight in prosa**: ogni insight mostrato è accompagnato da una frase generata dai template i18n (`insight.*`), non da un solo valore numerico
+- [x] Gli insight visualizzati sono **persistiti** (nessuna lettura «a caldo» che non passi dalla tabella `insights`): la story consuma l'output della Story **2.5**
+- [x] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
 
 **Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
 **Issue**: #240 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)

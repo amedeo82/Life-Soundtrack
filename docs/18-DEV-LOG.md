@@ -217,8 +217,8 @@
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.30
-> Ultima modifica: 2026-11-03 - §53 Ricordi + Share: la Story 3.2 (feed ⑪, ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale con la conservazione dei campi dell'utente al ricalcolo) (Sessione 97)
+> Versione: 2.31
+> Ultima modifica: 2026-11-05 - §54 Esplora + Analisi: la Story 3.3 (ricerca ⑨ sul catalogo con debounce 300 ms, mappa emotiva ⑩ con l'insight in prosa, deep-link interno alla Timeline) (Sessione 103)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -1568,6 +1568,48 @@ risposta distingue un difetto da un ambiente, e risparmia una sessione di debugg
 **Verifica**: `@ls/core` 643 test verdi (57 file) · `@ls/web` 186 test, 178 verdi e 8 falliti per
 l'ambiente (cfr. 97-5) · `eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` ·
 `node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
+## 54. Esplora + Analisi: la Story 3.3 (Sessione 103)
+
+**Branch**: `feat/240-story-3-3---esplora-analisi-schermate-9`
+**Issue di tracking**: **#240**
+**Data**: 2026-11-05
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 103-1 | P | Il tab **Mood** della ricerca dipendeva dalla **lingua dell'interfaccia**: filtrare per il testo tradotto cambiava i risultati fra `it` ed `en` | Il filtro operava sul testo mostrato, non sull'identità del mood | Il filtro opera sul **MoodId** (`exploreModel.ts`): l'id è stabile fra le lingue, il testo è solo la resa | `apps/web/src/screens/exploreModel.ts` |
+| 103-2 | P | Il mood della settimana sulla Home mostrava «happy» invece di «Felice» | `useHomeTimelineData` restituiva il **MoodId** in un campo chiamato `weekMoodLabel`, e nessuno lo traduceva | Il campo è stato rinominato `weekMood` (il **MoodId**) e la **shell** lo traduce con `analysis.moods.*`: il difetto diventa visibile invece di implicito | `apps/web/src/hooks/useHomeTimelineData.ts` · `apps/web/src/screens/AppShell.tsx` |
+| 103-3 | P | Le nuove chiavi i18n scritte con uno script ad hoc hanno prodotto chiavi «spazzatura» (una lettera sola: `n`, `A`, `e`, `{`) | Una destructuring sbagliata in uno script di inserimento: le chiavi venivano splittate carattere per carattere | Il test «ogni chiave appartiene a un namespace di 08§1» le ha **smascherate subito**: è la ragione per cui quel test esiste. Una chiave i18n si scrive in **un solo posto** | `apps/web/src/__tests__/i18n.test.ts` |
+| 103-4 | — | La ricerca su tutto il catalogo | Il criterio della story è «il **proprio** catalogo», non un indice globale | Modello **puro** sopra il catalogo caricato dal database locale: nessuna richiesta di rete (lo verifica un test che spia `fetch`), nessuna dipendenza dal DB nel modello | `apps/web/src/screens/exploreModel.ts` |
+| 103-5 | — | I punti del quadrante devono essere **cliccabili** e **leggibili** | Un cerchio di SVG non è un controllo della tastiera | I punti sono **`<button>` HTML** sopra l'SVG della cornice, con un `aria-label` che **dichiara i due valori** («2026-01: valence 0.80, energy 0.70»): il grafico si può consultare con lo screen reader | `apps/web/src/components/QuadrantChart.tsx` |
+| 103-6 | — | Il deep-link fra le schermate | Il progetto non ha un router e non ne ha bisogno | `AppSection` + `AppFocus`: il click su un punto porta alla Timeline con l'era del periodo in evidenza. Il tipo del focus sta in un modulo separato (`appNavigation.ts`) per non creare un import circolare | `apps/web/src/screens/appNavigation.ts` · `apps/web/src/screens/Timeline.tsx` |
+
+**Lesson learned**: la lezione principale è sul **criterio di accettazione**. Il backlog non chiede «un
+grafico in più»: chiede l'**insight in prosa** — la frase che spiega un periodo (`22§8`). Il rischio
+del lavoro è quindi che il quadrante diventasse un cruscotto muto: la difesa è che ogni grafico
+**deve** avere una frase accanto (`insight.mood.*`), e il test lo verifica per contratto e non per
+caso.
+
+La seconda lezione è sulla **lingua**. Due difetti della stessa famiglia — il tab Mood e il mood della
+settimana — erano nati dalla stessa confusione: **dato** e **copia**. Il mood è un dato (un
+identificatore), la sua etichetta è una copia (il testo mostrato). Filtrare o mostrare il dato
+richiede di tradurre il dato, non di tradurre il filtro: una ricerca che dipende dalla lingua
+dell'interfaccia è un bug che si presenta solo a un utente.
+
+La terza è sul **gate**. Le chiavi i18n «spazzatura» sono nate da uno script di inserimento scritto
+di fretta, e sono state intercettate da un test che era stato scritto per un altro motivo (la parità
+fra `it` ed `en` e l'appartenenza a un namespace). Un gate che copre un fatto **non pensato** per lui
+vale quanto un gate pensato: il suo valore è nel difetto che chiude, non nell'intenzione.
+
+**Verifica**: `@ls/web` 206 test, 198 verdi e 8 falliti per l'ambiente (i test i18n che usano
+`localStorage`, che **falliscono identici su `main`** sotto Node 26; il CI gira su Node 24) ·
+`@ls/core` 642 test in 56 file (il test di performance passa da solo: è l'indicatore di
+saturazione di 97-6) · `eslint` e `tsc --noEmit` verdi su `@ls/web` ·
+`node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/aggregate-state.ps1 -Check` →
+exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 

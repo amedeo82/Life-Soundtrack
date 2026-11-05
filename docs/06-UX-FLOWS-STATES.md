@@ -1,6 +1,6 @@
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.5 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
+> Status: 🟡 DRAFT · Versione 0.6 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -166,6 +166,16 @@ Note: nessuna gestione errore (schermata statica).
 
 **Mood pills**: riga in basso con 6 emoji. Click = filtro. Pill attivo ha glow.
 
+**Implementazione (Story 3.3, Sessione 103)**: la schermata ⑨ ha i cinque tab
+(Artisti · Brani · Album · Generi · Mood), il campo di ricerca con
+`role="searchbox"` e `aria-label`, il **debounce di 300 ms** e i risultati
+ordinati per `listenCount` decrescente (il nome è lo spareggio **stabile**).
+Il tab Mood filtra sui **periodi** (`mood_day`) per mood: il filtro opera sul
+**MoodId**, non sul testo tradotto, altrimenti i risultati dipenderebbero
+dalla lingua dell'interfaccia. Lo stato vuoto è `empty.description.explore` e
+il «nessun risultato» è `explore.noResults`. Il percorso è **interamente
+locale**: nessuna richiesta di rete.
+
 ### 2.10 ⑩ Analisi — Mappa Emotiva
 
 | Stato | Comportamento |
@@ -179,6 +189,17 @@ Note: nessuna gestione errore (schermata statica).
 - Click su punto mese → highlight nelle line chart sotto
 - Hover su punto → tooltip con "Marzo 2024 — valence 0.31, energy 0.42, mood sad"
 - Selettore periodo (anno) in alto
+
+**Implementazione (Story 3.3, Sessione 103)**: la schermata ⑩ mostra il
+`QuadrantChart` (valence × energy) con **un punto per mese**, aggregato dagli
+insight `mood_day` con media **pesata** sugli ascolti; la dimensione del punto
+è proporzionale agli ascolti e il colore è il mood dominante. Ogni punto è un
+**`<button>`** con un `aria-label` che dichiara i due valori, e il click è il
+**deep-link** alla Timeline (D-25.1: `AppSection` + `AppFocus`, senza router).
+Sotto il grafico c'è la **frase in prosa** (`insight.mood.*`) e gli insight
+**persistiti** (eventi e ricordi) nelle `InsightCard`, con le tre azioni
+dell'utente. I line chart e il selettore di periodo restano **fuori perimetro
+di questa story**: il grafico secondario è la Timeline, che li disegna già.
 
 ### 2.11 ⑪ Ricordi (mobile)
 
@@ -383,3 +404,4 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.3 | Sessione 13 (2026-10-16) | **M13 chiuso**: §2.3 Import ora esplicita i 5 stati della singola PlatformCard (`empty`/`validating`/`parsing`/`done`/`error`) con tabella + transizioni dettagliate. §2.14 demo-user.json ora punta a `fixtures/demo-user.json` (1 anno, 4500 eventi, flag `demoMode=true`) |
 | 0.4 | Sessione 42 (2026-10-21) | Allineamento §2.2 e §2.13 a 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`); risolto drift documentazione↔codice (issue #107) |
 | 0.5 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.11 (⑪ Ricordi) dichiara la **nota libera** sotto ogni card (il tag dell'utente, in `Insight.userNote`, sopravvive al ricalcolo) e il fatto che il ricordo nascosto **resta** nel database; §2.12 (⑫ Share Sheet) aggiunge la destinazione **Capitolo HTML** (export statico alternativo) e il **fallback** di ogni azione (senza Web Share API o senza clipboard il file si scarica) |
+| 0.6 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.9 (⑨ Esplora) dichiara il campo di ricerca accessibile (`role="searchbox"`), il **debounce di 300 ms** e l'ordinamento per `listenCount` con spareggio stabile, e il fatto che il tab Mood filtri sul **MoodId** (non sul testo tradotto); §2.10 (⑩ Analisi) dichiara il `QuadrantChart` con **un punto per mese** (media pesata sugli ascolti), i punti come **`<button>`** accessibili, il **deep-link** alla Timeline (D-25.1) e la **frase in prosa** che accompagna il grafico; i line chart e il selettore di periodo restano **fuori perimetro** (il grafico secondario è la Timeline) |

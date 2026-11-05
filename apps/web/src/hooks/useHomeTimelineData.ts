@@ -21,6 +21,7 @@ import {
   type LifeSoundtrackDB,
 } from '@core/db';
 import { listContextPeriods } from '@core/context';
+import type { MoodId } from '@core/schema';
 import { toRibbonPeriod, type ContextRibbonPeriod } from '../components/contextRibbonModel';
 import {
   bucketizeListens,
@@ -61,8 +62,14 @@ export interface HomeTimelineData {
   range: { start: number; end: number } | null;
   /** Il ricordo del giorno (l'ultimo insight di tipo `memory`). */
   memory: { title: string; mood: string | null; date: string } | null;
-  /** Mood della settimana, già reso (per AppShell). */
-  weekMoodLabel: string | null;
+  /**
+   * Il mood della settimana, letto dagli insight `mood_week`.
+   *
+   * È il **MoodId**, non un'etichetta: il testo tradotto lo rende la
+   * schermata (l'hook non conosce l'i18n). `analysis.moods.*` è il
+   * namespace dei sei mood.
+   */
+  weekMood: MoodId | null;
 }
 
 /** Stato vuoto, prima che il database risponda. */
@@ -77,7 +84,7 @@ function initialData(): HomeTimelineData {
     contexts: [],
     range: null,
     memory: null,
-    weekMoodLabel: null,
+    weekMood: null,
   };
 }
 
@@ -162,11 +169,11 @@ export function useHomeTimelineData(
             mood: mood.payload.kind === 'mood' ? mood.payload.mood : null,
           }));
 
-        // weekMoodLabel dal più recente mood_week
+        // Il mood della settimana, dal più recente mood_week
         const latestMoodWeek = moodWeeks
           .filter((m) => m.payload.kind === 'mood')
           .sort((a, b) => b.periodStart - a.periodStart)[0];
-        const weekMoodLabel =
+        const weekMood =
           latestMoodWeek && latestMoodWeek.payload.kind === 'mood'
             ? latestMoodWeek.payload.mood
             : null;
@@ -209,7 +216,7 @@ export function useHomeTimelineData(
           contexts: contexts.map((context) => toRibbonPeriod(context)),
           range,
           memory,
-          weekMoodLabel,
+          weekMood,
         });
       } catch {
         if (!cancelled) setData({ ...initialData(), state: 'error' });

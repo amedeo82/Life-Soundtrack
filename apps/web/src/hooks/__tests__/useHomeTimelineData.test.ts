@@ -7,7 +7,7 @@ import { makeListen, makeTrack, makeArtist, makeFeatures } from '@core/db/__test
 /**
  * Test di useHomeTimelineData — Story 2.5, 23-ANALYSIS-PIPELINE.md v1.0 🟢.
  *
- * Copre: lettura di mood_week; weekMoodLabel popolato quando esiste.
+ * Copre: lettura di mood_week; `weekMood` popolato quando esiste.
  */
 
 let dbName = 'ls-use-home-timeline-test';
@@ -99,8 +99,9 @@ describe('useHomeTimelineData (Story 2.5)', () => {
       expect(result.current.state).not.toBe('loading');
     });
 
-    // weekMoodLabel dovrebbe essere popolato dal mood_week
-    expect(result.current.weekMoodLabel).toBe('happy');
+    // weekMood dovrebbe essere popolato dal mood_week: e' il MoodId, non
+    // un'etichetta (la traduzione la fa la schermata, Story 3.3).
+    expect(result.current.weekMood).toBe('happy');
   });
 
   it('stato no-features quando ci sono listen ma zero feature utilizzabili', async () => {

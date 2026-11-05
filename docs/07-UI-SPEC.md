@@ -1,6 +1,6 @@
 # 07 — Specifiche UI Componenti
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
+> Status: 🟡 DRAFT · Versione 0.3 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
 > Vincolante per: `packages/ui/components`, test di interazione, implementazione frontend
 
 ---
@@ -73,12 +73,27 @@ lo cancella dal database.
 - **A11y**: Ogni punto è un `<button>` o `<a>` con `aria-label` descrittivo.
 - **Interazione**: Click su punto → aggiorna grafici secondari sotto.
 
+**Implementazione (Story 3.3, Sessione 103)**: i punti sono **`<button>` HTML**
+posizionati sopra l'SVG della cornice, non cerchi di SVG: un punto cliccabile
+deve essere un controllo della tastiera. Ogni punto ha un `aria-label` che
+**dice i due valori** (`analysis.pointAria`: «2026-01: valence 0.80, energy
+0.70»), non un nome generico. La **dimensione** del punto è proporzionale agli
+ascolti del periodo; il **colore** è il mood dominante. Il click consegna il
+periodo al chiamante: è il deep-link alla Timeline (D-25.1).
+
 ### 2.9 InsightCard
 **Uso**: Analisi, spiegazione algoritmi.
 - **Props**: `icon` (Lucide), `title` (string), `description` (string), `confidence` (0-1, opzionale)
 - **Stati**: `pending` (bordo giallo), `confirmed` (bordo verde), `dismissed` (opacità 0.5)
 - **A11y**: `role="article"`, `aria-labelledby`.
 - **Interazione**: Pulsanti nascosti per confermare/correggere/ignorare l'insight.
+
+**Implementazione (Story 3.3, Sessione 103)**: la `description` è la **frase
+in prosa** dell'insight, **già resa** dal core (`EventPayload.description`,
+`MemoryPayload.text` — D-A.4): la UI non re-renderizza i template. Le tre
+azioni (confermare / correggere / ignorare) scrivono `Insight.status` e sono
+esposte con `aria-label`; ignorare **esclude** l'insight dalla lista ma **non
+lo cancella** dal database (D-25.3).
 
 ### 2.10 ShareSheet
 **Uso**: Mobile, condivisione ricordi.
@@ -129,3 +144,4 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 |----------|------|-----------|
 | 0.1 | Sessione 7 | Prima versione completa |
 | 0.2 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.2 (MemoryCard) dichiara le tre azioni reali (nascondi, salva, condividi) e il fatto che il nascondimento **non cancella**; §2.10 (ShareSheet) dichiara le props reali (etichette già rese, `onRetry`) e i **fallback** delle destinazioni; nuova §2.10b (**NoteField**) per il tagging manuale |
+| 0.3 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.8 (QuadrantChart) dichiara i punti come **`<button>` HTML** sopra l'SVG (controllo della tastiera, non cerchio), l'`aria-label` che **dichiara i due valori** e il deep-link alla Timeline; §2.9 (InsightCard) dichiara la `description` come **frase già resa** dal core (D-A.4) e le tre azioni che scrivono `Insight.status` (ignorare esclude, non cancella) |
