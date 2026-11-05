@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 11:40
-> Totale file: 194
+> Data: 2026-11-05 11:46
+> Totale file: 195
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -2103,6 +2103,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
 | [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.3 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, branch protection con `CI / quality`, primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -14894,6 +14895,184 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
 tra conversazioni AI e durante l'audit di Sessione (vedi `AGENTS.md` §"Fine di un'implementazione").*
 
+
+
+
+===== FILE: docs/CHECKLIST-PUBBLICAZIONE.md =====
+
+# Checklist: rendere pubblico il repository
+
+> Documento operativo. Va eseguito **dopo** il merge della PR di hardening (#310).
+> L'ordine è vincolante: la branch protection si abilita **dopo** il flip (su
+> repository privato con piano Free non è disponibile), e il tag di release
+> serve **dopo** che il repository è pubblico, perché l'offerta AGPL §13
+> («il sorgente corrispondente è identificato dal tag git nella pagina
+> Releases») è soddisfatta dal tag solo se il repository è leggibile da chiunque.
+
+## Stato al momento della consegna
+
+| Verifica | Esito |
+|----------|-------|
+| Segreti in 689 commit | **0** |
+| PII reale nei file tracciati | **0** |
+| IP routable reali nei fixture | **11 → 0** (range RFC 5737) |
+| Gate nuovi (bloccanti, fail-closed, con scenario negativo) | **2** |
+| Workflow con guard di fork | **3 su 3** |
+| CI | **17/17 check verdi** sulla PR #310 |
+| Struttura CI | **invariata**: 15 job, 38 → 40 step |
+| Gate locali | **tutti verdi** |
+
+---
+
+## Passo 1 — rendere pubblico il repository
+
+Da GitHub: **Settings → General → Danger Zone → Change visibility → Public**.
+
+Oppure via API:
+
+```bash
+gh api -X PATCH repos/amedeo82/Life-Soundtrack -f private=false
+```
+
+**Cosa succede subito dopo:**
+
+- ✅ **I minuti Actions diventano illimitati e gratuiti.** Il pool da 2.000
+  minuti/account non si applica ai repository pubblici. Il problema economico
+  che aveva bloccato lo sviluppo (1.802/2.000 minuti, reset il 1° dicembre)
+  **scompare**: niente più blocco a fine quota, niente più overage.
+- ✅ **La branch protection diventa disponibile** su piano Free per i repository
+  pubblici. È il vero motivo per cui il flip conviene: fino ad ora i 16 job
+  della CI **non bloccavano alcuna merge** (403 su
+  `branches/main/protection`), perché erano un *report*, non un gate.
+- ✅ **L'offerta AGPL §13 diventa fruibile.** L'app dichiara già
+  `github.com/amedeo82/Life-Soundtrack` nella schermata About
+  (`apps/web/src/components/About.tsx:74`): da privato quel link non portava
+  nessuno al sorgente.
+- ⚠️ **Da questo momento chiunque può leggere tutto**: 689 commit, 141
+  documentazione, 194 file di bundle. L'email personale nei 252 commit
+  iniziali diventa visibile (decisione assunta: l'identità è già pubblica
+  nel profilo e nel contenuto; `.mailmap` normalizza l'attribuzione).
+
+## Passo 2 — attivare la branch protection (subito dopo il flip)
+
+Ora disponibile. Da GitHub: **Settings → Branches → Add rule**, oppure:
+
+```bash
+gh api -X POST repos/amedeo82/Life-Soundtrack/branches/main/protection \
+  --input - <<'JSON'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["CI / quality"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true
+  },
+  "restrictions": null,
+  "required_linear_history": true,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+JSON
+```
+
+Impostazioni e perché:
+
+| Impostazione | Valore | Motivo |
+|--------------|--------|--------|
+| `required_status_checks.contexts` | `CI / quality` | il check aggregatore fail-closed: fallisce se **qualsiasi** job parallelo è fallito, annullato o saltato (`docs/12-DEVOPS.md` §9.10). È il check giusto da richiedere, non i singoli job |
+| `strict` | `true` | il branch deve essere aggiornato con `main` prima del merge: senza, una PR verde su un base vecchio si mergea su un base diverso |
+| `required_approving_review_count` | `1` | l'unico revisore è il project owner: con `enforce_admins: true` la regola vale anche per lui |
+| `required_linear_history` | `true` | i merge commit non servono e confondono la ricostruzione della history |
+| `allow_force_pushes` / `allow_deletions` | `false` | il protocollo vieta il force-push su `main`; qui diventa **impossibile**, non solo vietato |
+
+> Con `enforce_admins: true` nessuno — nemmeno il titolare del repository —
+> può mergiare una PR senza review e senza `CI / quality` verde.
+
+## Passo 3 — creare il primo tag di release
+
+L'offerta AGPL §13 nel NOTICE dice: «il sorgente corrispondente a una release
+è identificato dal tag git nella pagina Releases». Nel repository non esiste
+ancora **nessun tag e nessuna release** (verificato: `gh api .../releases`
+→ `0`). Finché la pagina Releases è vuota, l'offerta è formale.
+
+```bash
+git tag -a v0.1.0 -m "v0.1.0 — prima release pubblica (AGPL-3.0)"
+git push origin v0.1.0
+gh release create v0.1.0 --title "v0.1.0" --notes "Prima release pubblica. Sorgente completo: AGPL-3.0."
+```
+
+> Il tag va creato **dopo** il flip: fino a quel momento il sorgente non è
+> scaricabile da chiunque, quindi il tag non renderebbe l'offerta soddisfacibile.
+
+## Passo 4 — metadata del repository (opzionale ma raccomandato)
+
+```bash
+gh repo edit amedeo82/Life-Soundtrack \
+  --description "Life Soundtrack — la colonna sonora della tua vita, finalmente leggibile. PWA local-first, privacy-first (AGPL-3.0)." \
+  --homepage "https://github.com/amedeo82/Life-Soundtrack#readme" \
+  --add-topic pwa --add-topic local-first --add-topic privacy \
+  --add-topic music --add-topic monorepo --add-topic react \
+  --add-topic typescript --add-topic pnpm --add-topic agpl
+```
+
+Ora c'è solo il topic `typescript`. I topic sono il modo in cui GitHub rende il
+repository discoveribile.
+
+## Passo 5 — opzionale: sicurezza e automazioni
+
+- **Dependabot alerts**: si attivano automaticamente sui repository pubblici
+  (Settings → Code security → Dependabot). Segnalerà vulnerabilità delle
+  dipendenze npm.
+- **Code scanning**: Settings → Code security → Code scanning → Enable. Su
+  repository pubblico è gratuito (CodeQL).
+- **Secret scanning**: su repository pubblico è disponibile e segnala
+  credenziali committate per errore. Il gate `check-fixtures-privacy.mjs`
+  copre i **fixture**, non tutti i file: la secret scanning copre il resto.
+- **Discussions**: disattivate per ora. Attivarle solo se servono (il
+  protocollo del repository non le usa).
+
+---
+
+## Cosa NON fare
+
+| Azione | Perché no |
+|--------|-----------|
+| **Non riscrivere la history** per rimuovere l'email | cambierebbe tutti gli SHA: i 38 riferimenti `merged_commit` in `docs/state/` punterebbero a commit inesistenti e il gate fail-closed `check-merge-state.mjs` renderebbe `main` rosso. Richiederebbe un force-push su `main`, vietato dal protocollo. Decisione già assunta (issue #309) |
+| **Non disattivare `pull_request` in favore di `pull_request_target`** | `pull_request_target` gira con i permessi del branch BASE ma con il codice del fork: è la classica *pwn request*. I guard di fork aggiunti in #310 rendono `pull_request` sicuro |
+| **Non rimuovere i guard di fork dai workflow** | con il repository pubblico chiunque può aprire una PR da un fork: `post-merge.yml` (`contents: write`) scriverebbe su `main`, `auto-status-done.yml` (`issues: write`) transizionerebbe issue arbitrarie |
+| **Non rimuovere `CI / quality` dalla branch protection** | è l'aggregatore fail-closed: richiedere i singoli job lascerebbe passare una PR con un job saltato |
+| **Non impostare un budget $0** su Actions | blocca le run a quota esaurita = sviluppo bloccato. Su repository pubblico i minuti sono gratuiti: il budget non serve più |
+
+## Verifica finale (dopo il flip)
+
+```bash
+# il repository è pubblico?
+gh repo view amedeo82/Life-Soundtrack --json isPrivate --jq .isPrivate   # atteso: false
+
+# la branch protection è attiva?
+gh api repos/amedeo82/Life-Soundtrack/branches/main/protection \
+  --jq '{checks:.required_status_checks.contexts, reviews:.required_pull_request_reviews.required_approving_review_count, force_push:.allow_force_pushes.enabled}'
+
+# il tag di release esiste?
+gh release list --repo amedeo82/Life-Soundtrack
+
+# il link AGPL §13 dell'app risolve?
+curl -sI https://github.com/amedeo82/Life-Soundtrack | head -1   # atteso: HTTP/2 200
+```
+
+## Rollback
+
+Il flip è reversibile: Settings → Change visibility → Private. Ma **non è
+senza prezzo**:
+
+- la branch protection **non è disponibile** sui repository privati con piano
+  Free → si perde (reconfigurabile a mano al prossimo flip)
+- i minuti Actions tornano a essere contati sul pool da 2.000/account
+- la history resta comunque esposta: chi ha già clonato o scaricato i file
+  durante il periodo pubblico li ha ancora
 
 
 
