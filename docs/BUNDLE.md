@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 19:43
+> Data: 2026-11-05 19:52
 > Totale file: 198
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 197 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2804.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-05 19:38
+- Dimensione totale: 2804.9 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-05 19:52
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1252,24 +1252,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 77%** - 23 story completate su 30 - effort pesato 80% - **mancano 7 step**
+**Implementazione: 80%** - 24 story completate su 30 - effort pesato 84% - **mancano 6 step**
 
-`███████████████████████░░░░░░░` 77%
+`████████████████████████░░░░░░` 80%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 3 | 5 | 60% | in corso |
+| EPIC 3 - UI/UX | 4 | 5 | 80% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 23 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 24 done - 0 in corso - 6 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (7):
-- 3.3 Esplora + Analisi - da fare (size L)
+**Step ancora da implementare** (6):
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
@@ -1281,29 +1280,30 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 3/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 4/5 - in corso |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S102)
+**Analisi della sessione corrente** (S103)
 
-| # | Metrica | Valore |
-|---|---------|--------|
-| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
-| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
-| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
-| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
-| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
-| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
-| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
-| 8 | Versione protocollo | v1.47 → **v1.48** |
-
-**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
-l'attestazione necessaria per spingere.
-
-**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
-su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
-davvero e che il writer è l'unico scrittore ammesso.
+- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
+  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
+  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
+  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
+  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
+  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
+  file falliscono identici su `main`**, il CI gira su Node 24).
+- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
+  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
+  dell'utente sugli insight.
+- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
+  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
+  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
+- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
+  al layer `@ls/core` (la story è di sola UI e lettura del database).
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
+  documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -1314,11 +1314,11 @@ davvero e che il writer è l'unico scrittore ammesso.
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **3.3** — Esplora + Analisi (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **3.5** — Anteprima del risultato in onboarding (modalità demo) (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/3.3-esplora-analisi.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/3.5-anteprima-onboarding-demo.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 3.5, 4.3, 5.1, 5.2.
+Altre non-done e non bloccate in ordine di priorita backlog (id): 4.3, 5.1, 5.2.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2199,6 +2199,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 100 | I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306) | 🟢 | ✅ | #307 |
 | 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟢 | ✅ | #310 |
 | 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟢 | ✅ | #312 |
+| 103 | Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240) | 🟢 | ✅ | #320 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2238,10 +2239,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **79** (merge: 78)
-- Stories migrate in state/stories: **28** (done: 23)
-- Ultima sessione migrata: **S102** - Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **80** (merge: 79)
+- Stories migrate in state/stories: **28** (done: 24)
+- Ultima sessione migrata: **S103** - Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2254,24 +2255,23 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 77%** - 23 story completate su 30 - effort pesato 80% - **mancano 7 step**
+**Implementazione: 80%** - 24 story completate su 30 - effort pesato 84% - **mancano 6 step**
 
-`███████████████████████░░░░░░░` 77%
+`████████████████████████░░░░░░` 80%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 3 | 5 | 60% | in corso |
+| EPIC 3 - UI/UX | 4 | 5 | 80% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 23 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 24 done - 0 in corso - 6 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (7):
-- 3.3 Esplora + Analisi - da fare (size L)
+**Step ancora da implementare** (6):
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
@@ -2283,29 +2283,30 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 3/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 4/5 - in corso |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S102)
+**Analisi della sessione corrente** (S103)
 
-| # | Metrica | Valore |
-|---|---------|--------|
-| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
-| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
-| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
-| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
-| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
-| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
-| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
-| 8 | Versione protocollo | v1.47 → **v1.48** |
-
-**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
-l'attestazione necessaria per spingere.
-
-**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
-su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
-davvero e che il writer è l'unico scrittore ammesso.
+- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
+  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
+  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
+  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
+  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
+  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
+  file falliscono identici su `main`**, il CI gira su Node 24).
+- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
+  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
+  dell'utente sugli insight.
+- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
+  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
+  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
+- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
+  al layer `@ls/core` (la story è di sola UI e lettura del database).
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
+  documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -12920,6 +12921,154 @@ davvero e che il writer è l'unico scrittore ammesso.
   Il branch sonda ha risolto in un'ora ciò che la lettura della documentazione
   non poteva stabilire, e ha prodotto la prova (GH013 + bypass) che oggi
   documenta il Passo 2.
+```
+
+### Sessione 103 - Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)
+
+- **Data**: 2026-11-05
+- **Stato**: 🟢
+- **Merged**: ✅ PR #320 (d082c0046fe4e30fe99436990ce96530f9ee8ef2, 2026-11-05T19:52:23Z)
+- **Claim**: `kilo-hp-elitebook-d957`
+
+```
+
+# Sessione 103 — Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)
+
+> **Oggetto**: la **Story 3.3** — le due schermate che chiudono il percorso
+> end-to-end: la ricerca nel proprio catalogo (⑨) e la mappa emotiva (⑩),
+> con l'**insight in prosa** come criterio di accettazione.
+
+## Sintesi
+
+L'issue #240 è stata implementata sulla specifica `docs/25-MEMORIES-SHARE-EXPLORE.md`
+(v1.0 🟢 APPROVED, ratificata dal project owner il 2026-11-02).
+
+La story ha una regola che la distingue da tutte le altre: **il criterio di
+accettazione non è «un grafico in più»**, è la **frase** che spiega un periodo
+(`docs/22-COMPETITIVE-POSITIONING.md` §8). Il quadrante valence/energy da solo
+è l'ennesimo cruscotto; quello che vale è «a marzo 2023 la tua musica era
+più triste del solito».
+
+Il lavoro è stato **interamente locale** e **senza librerie**:
+
+- la ricerca è un **modello puro** (`exploreModel.ts`) sopra il catalogo
+  caricato dal database locale: nessuna richiesta di rete, nessun indice
+  globale, e il filtro è testabile senza database;
+- il debounce è di **300 ms** (`06§2.9`) e vive in un hook dedicato, testato
+  con i timer falsi;
+- il quadrante è **SVG scritto a mano** come gli altri grafici della casa
+  (`MoodLine`, `StreamChart`), con i punti come **`<button>` HTML** sopra la
+  cornice: un punto cliccabile deve essere un controllo della tastiera, e il
+  suo `aria-label` dichiara i due valori («2026-01: valence 0.80, energy 0.70»)
+  invece di un nome generico;
+- gli insight mostrati sono **persistiti**: la schermata legge la tabella
+  `insights` (Story 2.5), non ricalcola nulla «a caldo».
+
+Il deep-link fra le schermate è a **stato** (D-25.1): nessun router, nessun
+URL — un `AppFocus` che la Timeline usa per evidenziare l'era del periodo
+cliccato.
+
+## Cosa è stato fatto
+
+### App (`apps/web`)
+
+- `screens/exploreModel.ts`: il modello puro — filtro per sottostringa,
+  ordinamento per `listenCount` decrescente (nome come spareggio **stabile**),
+  indice dei generi (il genere sta in `Track.genres`, non in una tabella) e
+  tab Mood;
+- `hooks/useExploreData.ts`: il catalogo dell'utente e i periodi con mood
+  (gli insight `mood_day`);
+- `hooks/useDebouncedValue.ts`: il debounce di 300 ms;
+- `components/SearchField.tsx`: il campo con `role="searchbox"` e `aria-label`;
+- `screens/ExploreScreen.tsx`: la schermata ⑨ — cinque tab, mood pill,
+  deep-link dal periodo;
+- `screens/analysisModel.ts`: l'aggregazione **per mese** degli insight
+  `mood_day` (media **pesata** sugli ascolti) e i punti del quadrante;
+- `components/QuadrantChart.tsx` e `components/InsightCard.tsx`;
+- `hooks/useAnalysisData.ts` e `screens/AnalysisScreen.tsx`: la schermata ⑩ —
+  il quadrante, la **frase** che lo accompagna e gli insight persistiti con
+  le tre azioni dell'utente;
+- `screens/appNavigation.ts` (nuovo), `screens/AppShell.tsx`,
+  `screens/Timeline.tsx`: la navigazione estesa e il deep-link interno;
+- `hooks/useHomeTimelineData.ts`: il mood della settimana è adesso il
+  **MoodId** (`weekMood`) e la shell lo **traduce** — la Home mostrava
+  «happy» invece di «Felice».
+
+### i18n
+
+Le nuove chiavi in it ed en: `nav.explore`, `nav.analysis`,
+`explore.listens` (con i plurali), le **otto** di `analysis.*` e le **due**
+frasi che mancavano in `insight.*` (`mood.neutral`, `mood.angry`). Le chiavi
+che **esistevano già** (`explore.*`, `analysis.quadrant.*`, `analysis.moods.*`,
+`insight.mood.*`) sono state **usate**, non duplicate.
+
+### Test
+
+20 test nuovi: il modello della ricerca (ordine e filtro), il debounce (con
+i timer falsi), la schermata ⑨ (filtro, tab, mood, nessuna richiesta di
+rete), la schermata ⑩ (punti accessibili, la frase accanto al grafico, gli
+insight in prosa, il deep-link), i due componenti e il focus della Timeline.
+
+## Decisioni
+
+- **La ricerca filtra in memoria, non con un indice**: il catalogo dell'utente
+  è locale e piccolo rispetto a una raccolta indicizzata; il vantaggio del
+  modello puro (testabile, nessuna dipendenza dal DB) supera il vantaggio
+  dell'indice.
+- **Il tab Mood filtra sul MoodId**: il testo tradotto cambierebbe i
+  risultati a seconda della lingua dell'interfaccia.
+- **I punti del quadrante sono aggregati per mese**: la serie `mood_day` esiste
+  già (la `MoodLine` della Timeline la disegna) e non va duplicata; la media
+  mensile è **pesata** sugli ascolti.
+- **Il README non è stato toccato**: il gate `check-readme-facts.mjs` vieta di
+  dichiarare come presenti le capability degli EPIC 2 e 4 fuori dalla sezione
+  roadmap, e l'EPIC 4 (audio features) non è ancora merged. La prosa
+  dichiara quindi esattamente la stessa cosa di prima.
+
+## Analisi di avanzamento
+
+- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
+  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
+  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
+  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
+  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
+  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
+  file falliscono identici su `main`**, il CI gira su Node 24).
+- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
+  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
+  dell'utente sugli insight.
+- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
+  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
+  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
+- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
+  al layer `@ls/core` (la story è di sola UI e lettura del database).
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
+  documentati.
+
+## Lesson learned
+
+- **Una chiave i18n si scrive in un solo posto.** I primi tentativi di
+  inserire le chiavi con uno script ad hoc hanno prodotto chiavi «spazzatura»
+  (i resti di una destructuring sbagliata: una lettera sola). Il test «ogni
+  chiave appartiene a un namespace di 08§1» le ha smascherate subito: è la
+  ragione per cui quel test esiste.
+- **Il campo `weekMoodLabel` era un MoodId travestito da etichetta**: la Home
+  mostrava «happy» al posto di «Felice». Rinominare il campo in `weekMood` e
+  tradurre nella shell ha reso il difetto **visibile** invece di implicito.
+- **Un modulo per i tipi condivisi evita l'import circolare**: `AppFocus` sta
+  in `appNavigation.ts` e non in `AppShell.tsx`, perché le schermate ricevono
+  il tipo del focus e la shell riceve le schermate.
+
+## Documenti aggiornati
+
+- `docs/state/stories/3.3-esplora-analisi.md` e
+  `docs/state/sessions/103-story-3-3-esplora-analisi.md` (questa)
+- `docs/11-BACKLOG.md` — sezione Story 3.3
+- `docs/07-UI-SPEC.md` — §2.8, §2.9
+- `docs/08-COPY-I18N.md` — §2.5, §2.6, §2.15, changelog 0.15
+- `docs/18-DEV-LOG.md` — la entry della sessione
+- `scripts/generate-bundle.ps1` — `$files`
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -23632,8 +23781,10 @@ davvero e che il writer è l'unico scrittore ammesso.
 number: 103
 title: "Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)"
 date: 2026-11-05
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "d082c0046fe4e30fe99436990ce96530f9ee8ef2"
+merged_date: "2026-11-05T19:52:23Z"
 branch: feat/240-story-3-3---esplora-analisi-schermate-9
 pr: 320
 claim: kilo-hp-elitebook-d957
@@ -25255,12 +25406,14 @@ id: "3.3"
 title: "Esplora + Analisi"
 phase: 3
 area: ui
-status: in_progress
+status: done
 priority: I
 depends_on: ["2.5"]
 issue: 240
 branch: "feat/240-story-3-3---esplora-analisi-schermate-9"
 pr: 320
+merged_commit: "d082c0046fe4e30fe99436990ce96530f9ee8ef2"
+merged_date: 2026-11-05
 claim: kilo-hp-elitebook-d957
 spec_refs:
   - docs/25-MEMORIES-SHARE-EXPLORE.md
@@ -34144,7 +34297,7 @@ Ogni story deve avere label GitHub:
 | 2.5 - Collegamento del pipeline di analisi all'app | done | #295 | `265fa50f279a7dbec70507388a3a7ffe405acc14` | analysis |
 | 3.1 - Home + Timeline | done | #234 | `815ce171f9bfd70133d0a788d6e15f717624a290` | ui |
 | 3.2 - Ricordi + Share | done | #301 | `22cf5916140c5869ea296bc778e6cb094ed71037` | ui |
-| 3.3 - Esplora + Analisi | todo | - | - | ui |
+| 3.3 - Esplora + Analisi | done | #320 | `d082c0046fe4e30fe99436990ce96530f9ee8ef2` | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
 | 3.5 - Anteprima del risultato in onboarding (modalità demo) | todo | - | - | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |

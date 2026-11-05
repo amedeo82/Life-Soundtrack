@@ -2,8 +2,10 @@
 number: 103
 title: "Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)"
 date: 2026-11-05
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "d082c0046fe4e30fe99436990ce96530f9ee8ef2"
+merged_date: "2026-11-05T19:52:23Z"
 branch: feat/240-story-3-3---esplora-analisi-schermate-9
 pr: 320
 claim: kilo-hp-elitebook-d957

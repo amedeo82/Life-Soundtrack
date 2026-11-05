@@ -156,6 +156,7 @@
 | 100 | I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306) | 🟢 | ✅ | #307 |
 | 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟢 | ✅ | #310 |
 | 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟢 | ✅ | #312 |
+| 103 | Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240) | 🟢 | ✅ | #320 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -195,10 +196,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **79** (merge: 78)
-- Stories migrate in state/stories: **28** (done: 23)
-- Ultima sessione migrata: **S102** - Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **80** (merge: 79)
+- Stories migrate in state/stories: **28** (done: 24)
+- Ultima sessione migrata: **S103** - Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -211,24 +212,23 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 77%** - 23 story completate su 30 - effort pesato 80% - **mancano 7 step**
+**Implementazione: 80%** - 24 story completate su 30 - effort pesato 84% - **mancano 6 step**
 
-`███████████████████████░░░░░░░` 77%
+`████████████████████████░░░░░░` 80%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 3 | 5 | 60% | in corso |
+| EPIC 3 - UI/UX | 4 | 5 | 80% | in corso |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 23 done - 0 in corso - 7 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 24 done - 0 in corso - 6 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (7):
-- 3.3 Esplora + Analisi - da fare (size L)
+**Step ancora da implementare** (6):
 - 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
@@ -240,29 +240,30 @@
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 3/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 4/5 - in corso |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S102)
+**Analisi della sessione corrente** (S103)
 
-| # | Metrica | Valore |
-|---|---------|--------|
-| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
-| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
-| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
-| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
-| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
-| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
-| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
-| 8 | Versione protocollo | v1.47 → **v1.48** |
-
-**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
-l'attestazione necessaria per spingere.
-
-**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
-su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
-davvero e che il writer è l'unico scrittore ammesso.
+- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
+  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
+  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
+  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
+  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
+  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
+  file falliscono identici su `main`**, il CI gira su Node 24).
+- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
+  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
+  dell'utente sugli insight.
+- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
+  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
+  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
+- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
+  al layer `@ls/core` (la story è di sola UI e lettura del database).
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
+  documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
