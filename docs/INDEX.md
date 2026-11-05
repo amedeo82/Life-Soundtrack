@@ -46,12 +46,12 @@
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.47 | Protocollo per agenti — **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.48 | Protocollo per agenti — **v1.48 (Sessione 102, issue #311)**: `main` è protetta dalla ruleset GitHub `main-protection` (merge solo via PR, check `quality` verde e strict, history lineare → merge **squash**, niente force push né cancellazione) e il writer post-merge spinge con una **deploy key SSH** (`post-merge-writer`) perché il `GITHUB_TOKEN` non può bypassare una ruleset (GH013); `required_approving_review_count: 0` perché l'unico account GitHub è anche l'autore delle PR (l'auto-approvazione è vietata: con 1 il repository resterebbe congelato); **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
 | [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.3 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
-| [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, branch protection con `CI / quality`, primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
+| [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, protezione di `main` (ruleset `main-protection`: check `quality`, squash, deploy key per il writer post-merge), primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -155,6 +155,7 @@
 | 99 | Spec delle suite di test offline per gli script di protocollo (ADR-0014) | 🟢 | ✅ | #305 |
 | 100 | I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306) | 🟢 | ✅ | #307 |
 | 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟢 | ✅ | #310 |
+| 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -194,9 +195,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **78** (merge: 77)
+- Sessioni migrate in state/sessions: **79** (merge: 77)
 - Stories migrate in state/stories: **28** (done: 23)
-- Ultima sessione migrata: **S101** - Rendere il repository pubblico: hardening sicurezza e privacy
+- Ultima sessione migrata: **S102** - Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -243,26 +244,25 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S101)
+**Analisi della sessione corrente** (S102)
 
 | # | Metrica | Valore |
 |---|---------|--------|
-| 1 | Segreti trovati in 689 commit | **0** |
-| 2 | File con PII reale | **0** |
-| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
-| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
-| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
-| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
-| 7 | Step CI | 38 → **40** |
-| 8 | Righe del catalogo §9.10 | 39 → **41** |
+| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
+| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
+| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
+| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
+| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
+| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
+| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
+| 8 | Versione protocollo | v1.47 → **v1.48** |
 
-**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
-stessa PR.
+**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
+l'attestazione necessaria per spingere.
 
-**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
-repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
-flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
-gia' puntare al repository pubblico — cosa che già fa.
+**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
+su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
+davvero e che il writer è l'unico scrittore ammesso.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

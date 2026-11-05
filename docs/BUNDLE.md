@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 11:55
+> Data: 2026-11-05 14:22
 > Totale file: 195
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 194 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2761.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-05 11:55
+- Dimensione totale: 2767.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-05 14:22
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.47 — Sessione 101 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.48 — Sessione 102 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -78,6 +78,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 | I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
 | Il frontmatter di una **story** dichiara lo stesso fatto di merge delle sessioni (`status: done`, `merged_commit`, `merged_date`), e il writer post-merge lo applica | `check-merge-state.mjs` (perimetro `docs/state/stories/`) + `apply-merge-state.mjs` | issue #297 (Story 2.5 restata `in-review` dopo il merge) |
+| `main` è protetta: nessun merge senza PR con il check `quality` verde, nessun force push, nessuna cancellazione, history lineare; l'unico scrittore diretto è il writer post-merge | ruleset GitHub `main-protection` (bypass: la sola deploy key `post-merge-writer`) | issue #311 (repository pubblico: il protocollo diventa *enforceable*) |
 
 ```bash
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
@@ -293,7 +294,7 @@ Se incontri un'issue `agent-ready` con una PR `merged` associata (esattamente il
 - Branch: `feat/<issue-number>-<descrizione>` o `fix/<issue-number>-<descrizione>`
 - Commit: **Conventional Commits** (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
 - **Nessun riferimento `#NNN` nel _body_ del messaggio** (il titolo lo accetta: `feat(x): … (issue #306)`). `conventional-commits-parser` considera **footer** tutto ciò che segue la prima riga che contiene un riferimento `#NNN`, e la regola `footer-leading-blank` di commitlint segnala allora un falso positivo («footer must have leading blank line») su un messaggio che è corretto. Nel body scrivi «la PR 305», non «la PR #305». *(issue #306, Sessione 100)*
-- Branch `main` protetto: richiede PR e review
+- Branch `main` protetto dalla ruleset GitHub `main-protection`: nessun merge senza PR + check `quality` verde + branch aggiornato, nessun force push, nessuna cancellazione, history lineare (merge commit vietati: si usa **squash**). L'unico attore che puo spingere direttamente su `main` e' il writer post-merge (deploy key `post-merge-writer`). Vedi §"📤 Post-merge actions" e `docs/CHECKLIST-PUBBLICAZIONE.md`
 - Nessun force push su `main`
 - Una PR = una issue (salvo eccezioni)
 - **Branch stale vanno eliminati** dopo il merge — vedi §"♻️ Pulizia branch post-merge"
@@ -654,7 +655,7 @@ Vedi `.githooks/README.md` per il dettaglio dei failure mode non coperti (F3, F5
 
 > **La checklist operativa della PR è in [`.github/pull_request_template.md`](.github/pull_request_template.md)** — è l'**unico** artifact: GitHub la rende interattiva e le caselle non spuntate sono blocker per il merge. **Non copiarla qui**: due copie divergono in silenzio (misurato: 22 voci per parte, solo 2 identiche al testo — decisione D3 di [`ADR-0012`](docs/13-ADR/0012-agent-protocol-contract.md)).
 >
-> **Branch protection**: il Boss applichera (post-merge #51) `branch protection` su `main` che richiede review Boss + CI verde. Vedi §"📤 Post-merge actions" → "Branch protection Boss-only".
+> **Branch protection**: `main` e' protetta dalla ruleset GitHub `main-protection` (attiva dal 2026-11-05, issue #311): merge solo via PR, con il check `quality` verde (aggregatore fail-closed; nella UI: `CI / quality`), branch aggiornato, history lineare (squash), niente force push e niente cancellazione. L'unico scrittore diretto di `main` e' il workflow `post-merge` (deploy key `post-merge-writer`). Vedi `docs/CHECKLIST-PUBBLICAZIONE.md` §"Passo 2".
 >
 > **Cosa contiene la checklist** (per sapere se un requisito è coperto senza aprire il template): documentazione letta · codice e test (schema dati, fixture, JSDoc, PII, lint/typecheck/test/build) · documentazione di stato (blocchi `AGGREGATE-*`, sezioni legacy, `docs/state/`, `$files` + bundle, aggregatore, `check-readme-facts.mjs`, `check-merge-state.mjs`, determinismo) · issue tracking (keyword `Closes #N`, transizione label) · git workflow (branch, worktree, working tree, push early, Conventional Commits).
 
@@ -931,7 +932,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 > - il gate `quality` è l'aggregatore fall-closed: se un gate parallelo fallisce, la PR è rossa.
 ### Regola fondamentale — NO commit su `main`
 
-**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `post-merge`, che committano automaticamente (con bot identity `kilo-bot[bot]`) e sono autorizzate dal PAT. Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
+**Niente commit su `main` da parte degli agenti**. Il doc-sync finale è gia nel branch PR (vedi §"📝 Checklist di auto-revisione PR"). L'unica eccezione sono le GH Action `auto-status-done` e `post-merge`, che committano automaticamente (con bot identity `kilo-bot[bot]`); `post-merge` spinge su `main` con la deploy key `post-merge-writer`, l'unico bypass actor della ruleset `main-protection` (il `GITHUB_TOKEN` non può spingere su un branch protetto: GH013). Per situazioni di recovery (es. fix drift che GH Action non ha committato), apri una PR `docs:` separata invece di committare su `main`.
 
 Vedi `docs/18-DEV-LOG.md` §20 (Sessione 20, hardening multi-agente) per il contesto sul perché questa separazione (commit nel branch vs. label sull'issue vs. auto-commit GH Action) elimina le race condition.
 
@@ -1183,7 +1184,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.45 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.48 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -1284,26 +1285,25 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S101)
+**Analisi della sessione corrente** (S102)
 
 | # | Metrica | Valore |
 |---|---------|--------|
-| 1 | Segreti trovati in 689 commit | **0** |
-| 2 | File con PII reale | **0** |
-| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
-| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
-| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
-| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
-| 7 | Step CI | 38 → **40** |
-| 8 | Righe del catalogo §9.10 | 39 → **41** |
+| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
+| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
+| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
+| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
+| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
+| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
+| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
+| 8 | Versione protocollo | v1.47 → **v1.48** |
 
-**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
-stessa PR.
+**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
+l'attestazione necessaria per spingere.
 
-**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
-repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
-flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
-gia' puntare al repository pubblico — cosa che già fa.
+**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
+su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
+davvero e che il writer è l'unico scrittore ammesso.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2089,12 +2089,12 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.47 | Protocollo per agenti — **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.48 | Protocollo per agenti — **v1.48 (Sessione 102, issue #311)**: `main` è protetta dalla ruleset GitHub `main-protection` (merge solo via PR, check `quality` verde e strict, history lineare → merge **squash**, niente force push né cancellazione) e il writer post-merge spinge con una **deploy key SSH** (`post-merge-writer`) perché il `GITHUB_TOKEN` non può bypassare una ruleset (GH013); `required_approving_review_count: 0` perché l'unico account GitHub è anche l'autore delle PR (l'auto-approvazione è vietata: con 1 il repository resterebbe congelato); **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
 | [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.3 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
-| [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, branch protection con `CI / quality`, primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
+| [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, protezione di `main` (ruleset `main-protection`: check `quality`, squash, deploy key per il writer post-merge), primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -2198,6 +2198,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 99 | Spec delle suite di test offline per gli script di protocollo (ADR-0014) | 🟢 | ✅ | #305 |
 | 100 | I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306) | 🟢 | ✅ | #307 |
 | 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟢 | ✅ | #310 |
+| 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2237,9 +2238,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **78** (merge: 77)
+- Sessioni migrate in state/sessions: **79** (merge: 77)
 - Stories migrate in state/stories: **28** (done: 23)
-- Ultima sessione migrata: **S101** - Rendere il repository pubblico: hardening sicurezza e privacy
+- Ultima sessione migrata: **S102** - Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2286,26 +2287,25 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S101)
+**Analisi della sessione corrente** (S102)
 
 | # | Metrica | Valore |
 |---|---------|--------|
-| 1 | Segreti trovati in 689 commit | **0** |
-| 2 | File con PII reale | **0** |
-| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
-| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
-| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
-| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
-| 7 | Step CI | 38 → **40** |
-| 8 | Righe del catalogo §9.10 | 39 → **41** |
+| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
+| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
+| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
+| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
+| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
+| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
+| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
+| 8 | Versione protocollo | v1.47 → **v1.48** |
 
-**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
-stessa PR.
+**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
+l'attestazione necessaria per spingere.
 
-**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
-repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
-flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
-gia' puntare al repository pubblico — cosa che già fa.
+**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
+su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
+davvero e che il writer è l'unico scrittore ammesso.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -12819,6 +12819,108 @@ flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
 gia' puntare al repository pubblico — cosa che già fa.
 ```
 
+### Sessione 102 - Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN
+
+- **Data**: 2026-11-05
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `kilo-hp-elitebook-2097`
+
+```
+
+## Sintesi
+
+Con il repository ormai **pubblico** (Sessione 101), la protezione di `main` è
+diventata disponibile ed è stata applicata. Il passaggio non è stato una
+formalità: la checklist di pubblicazione (`docs/CHECKLIST-PUBBLICAZIONE.md`,
+Passo 2) conteneva **tre presupposti che sul repository reale non valevano**,
+e applicarli alla lettera avrebbe prodotto una protezione *finta* (o un
+repository congelato).
+
+La correzione è una **ruleset** GitHub (`main-protection`), non la classic
+branch protection, e l'unico atore che può spingere direttamente su `main`
+è il workflow `post-merge` — via una **deploy key SSH**, perché il
+`GITHUB_TOKEN` non può bypassare una ruleset.
+
+## I tre presupposti falsi della checklist originale
+
+| # | Presuposto | Realtà misurata | Conseguenza se applicato alla lettera |
+|---|-----------|-----------------|----------------------------------------|
+| 1 | `POST /branches/main/protection` è il modo per proteggere `main` | il token OAuth della CLI (`gho_`, scope `repo`) riceve **404**: l'endpoint classic chiede il permesso *Administration*, che un token OAuth non ottiene | nessuna protezione, nessun errore visibile (il 404 sembra un path sbagliato) |
+| 2 | il check richiesto è `CI / quality` | il **nome del check run** del job aggregatore è `quality` (`GET /commits/<sha>/check-runs`); `CI / quality` è la coppia *workflow / job* mostrata nella UI | regola **soddisfacibile da nessuna run**: ogni merge resterebbe bloccato per sempre, repository congelato |
+| 3 | `required_approving_review_count: 1` | l'unico account GitHub (`amedeo82`) è **anche l'autore di ogni PR** (gli agenti usano l'account del project owner) e GitHub vieta l'auto-approvazione | nessuna PR potrebbe mai essere mergiata: repository congelato |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-102.1 | La protezione è una **ruleset** (`main-protection`, id `26614787`), non la classic branch protection | l'endpoint classic non è amministrabile con il token a disposizione; la ruleset è creabile con lo stesso token e applica le stesse garanzie a `refs/heads/main` |
+| D-102.2 | Il check richiesto è il contesto **`quality`** (nome del check run), `strict: true`, `integration_id: 15368` | il contesto richiesto è il nome del check run, non la coppia `CI / quality` della UI. `strict` obbliga ad aggiornare il branch con `main` prima del merge |
+| D-102.3 | `required_approving_review_count: 0` | con `1` il repository sarebbe congelato (auto-approvazione vietata). Restano enforced: **PR + check `quality` verde + branch aggiornato** |
+| D-102.4 | **Nessun bypass per gli admin**: l'owner è vincolato come tutti | un bypass per l'admin renderebbe la protezione una formalità per chiunque abbia il ruolo, cioè per l'unico account del repository |
+| D-102.5 | L'unico bypass actor è la **deploy key `post-merge-writer`** (id `168877742`, write) | il `GITHUB_TOKEN` / `github-actions[bot]` non può bypassare una ruleset (422: *"Actor GitHub Actions integration must be part of the ruleset source or owner organization"*). Il writer post-merge è per definizione l'unico scrittore di `main` (ADR-0013): la deploy key è il suo strumento di autenticazione |
+| D-102.6 | `required_linear_history` attivo → i merge devono essere **squash** | i merge commit non servono e confondono la ricostruzione della history. È un cambio operativo che va dichiarato nel protocollo |
+| D-102.7 | La verifica è stata fatta su un **branch sonda** (`protection-probe`), non sulla documentazione | la prova ha simulato i due attori: push diretto come owner/admin → **respinto** (GH013: *"Changes must be made through a pull request"* + *"Required status check \"quality\" is expected"*); push diretto come deploy key → **accettato** (*"Bypassed rule violations"*). Il branch sonda e la sua ruleset sono stati rimossi |
+
+## Cosa cambia nel protocollo
+
+1. `.github/workflows/post-merge.yml` autentica il **checkout** con
+   `secrets.WRITER_SSH_KEY` + `secrets.WRITER_SSH_KNOWN_HOSTS` invece che con
+   `secrets.GITHUB_TOKEN`. Le chiamate API continuano a usare il `GITHUB_TOKEN`
+   (serve `pull-requests: read`): è solo il **push** che passa dalla chiave.
+2. `AGENTS.md` v1.48: la regola «`main` è protetta» scende da L2 (prosa) a
+   **L3 (applicata)**, con la ruleset come gate e la deploy key come unico
+   bypass. Aggiornati i punti che dichiaravano «PAT autorizzato dal PAT».
+3. `docs/CHECKLIST-PUBBLICAZIONE.md`: il Passo 2 dichiara **cosa è stato
+   applicato davvero**; il testo originale è conservato ma marcato come
+   superato e non eseguibile. La verifica finale e il rollback usano
+   l'API delle ruleset, non l'endpoint classic.
+4. I merge da ora sono **squash** (linear history).
+
+## Analisi di avanzamento
+
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
+| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
+| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
+| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
+| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
+| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
+| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
+| 8 | Versione protocollo | v1.47 → **v1.48** |
+
+**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
+l'attestazione necessaria per spingere.
+
+**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
+su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
+davvero e che il writer è l'unico scrittore ammesso.
+
+## Lesson learned
+
+- **La documentazione di una procedura operativa va verificata contro
+  l'endpoint reale, non copiata.** Tre parametri della checklist (endpoint,
+  nome del contesto, numero di approvazioni) erano tutti sbagliati e
+  nessuno dei tre avrebbe prodotto un errore evidente: il 404 sembra un
+  path sbagliato, un contesto sbagliato blocca silenziosamente ogni merge,
+  un'approvazione richiesta in più blocca silenziosamente ogni merge. Due
+  dei tre errori hanno la **stessa** classe di difetto: una restrizione che
+  non può mai essere soddisfatta.
+- **Il nome del check run non è il nome mostrato nella UI.** `CI / quality` è
+  la coppia *workflow / job*; il check run si chiama `quality`. La regola
+  confronta il **check run**, quindi il contesto richiesto va letto da
+  `GET /commits/<sha>/check-runs`, non copiato dalla UI.
+- **Un bypass per gli admin annulla la protezione per l'unico account del
+  repository.** Se l'unico utente è anche l'amministratore e l'autore delle
+  PR, il vincolo deve valere anche per lui: altrimenti "protezione attiva"
+  significa "chiunque può schierare l'eccezione".
+- **Le regole si verificano con un esperimento, non con un ragionamento.**
+  Il branch sonda ha risolto in un'ora ciò che la lettura della documentazione
+  non poteva stabilire, e ha prodotto la prova (GH013 + bypass) che oggi
+  documenta il Passo 2.
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -15021,6 +15123,13 @@ gh api -X PATCH repos/amedeo82/Life-Soundtrack -f private=false
 
 ## Passo 2 — attivare la branch protection (subito dopo il flip)
 
+> **Stato: applicato il 2026-11-05 (issue #311).** La sezione originale della checklist
+> conteneva tre cose che, misurate sul repository reale, **non** erano applicabili così
+> come scritte. Il blocco sotto è conservato per referenza e **non è più eseguibile**:
+> cosa è stato applicato davvero è nella sottosezione «Cosa è stato applicato davvero».
+
+### La versione originale della sezione (superata — non eseguire)
+
 Ora disponibile. Da GitHub: **Settings → Branches → Add rule**, oppure:
 
 ```bash
@@ -15056,6 +15165,31 @@ Impostazioni e perché:
 
 > Con `enforce_admins: true` nessuno — nemmeno il titolare del repository —
 > può mergiare una PR senza review e senza `CI / quality` verde.
+
+### Cosa è stato applicato davvero (2026-11-05, issue #311)
+
+| Impostazione | Valore applicato | Perché |
+|--------------|------------------|--------|
+| Endpoint | **ruleset** `main-protection` (id `26614787`), non la classic branch protection | il token OAuth della CLI (`gho_`, scope `repo`) riceve **404** su `POST /branches/main/protection`: l'endpoint chiede il permesso *Administration*, che un token OAuth non ottiene. La ruleset è creabile con lo stesso token e applica le stesse garanzie |
+| `required_status_checks` | contesto **`quality`**, `strict: true`, `integration_id: 15368` | il contesto richiesto è il **nome del check run** (il `job.name`), non la coppia `workflow / job` che si vede nella UI. Il check run del job aggregatore si chiama `quality` (`GET /commits/<sha>/check-runs`). Con `CI / quality` la regola sarebbe **soddisfacibile da nessuna run** → ogni merge resterebbe bloccato per sempre |
+| `required_approving_review_count` | **0** | con `1` il repository è **congelato**: l'unico account GitHub è anche l'autore di ogni PR (gli agenti usano l'account del project owner) e GitHub vieta l'auto-approvazione. Restano enforced: PR + check `quality` verde + branch aggiornato |
+| Nessun bypass per gli admin | `bypass_actors` = **solo** la deploy key | l'owner resta vincolato come tutti gli altri; l'unica eccezione è il writer post-merge |
+| `required_linear_history` | attivo | i merge commit non sono più ammessi: **le PR si mergiano con squash** |
+| `non_fast_forward` / `deletion` | attivi | niente force push, niente cancellazione di `main` |
+| Bypass actor | deploy key `post-merge-writer` (id `168877742`, write) | il writer post-merge è l'unico scrittore di `main` (ADR-0013) e il `GITHUB_TOKEN` **non può** bypassare una ruleset (GitHub: *"Actor GitHub Actions integration must be part of the ruleset source or owner organization"*) |
+
+### Il writer post-merge dopo la protezione
+
+`post-merge.yml` autentica il checkout con la deploy key `post-merge-writer`
+(`secrets.WRITER_SSH_KEY` + `secrets.WRITER_SSH_KNOWN_HOSTS`) invece che con il
+`GITHUB_TOKEN`: le chiamate API continuano a usare il `GITHUB_TOKEN` (serve
+`pull-requests: read`), ma il **push** su `main` passa dalla chiave, che è l'unico
+bypass actor. Con il `GITHUB_TOKEN` il push verrebbe respinto con `GH013`.
+
+**Verifica eseguita** (branch sonda `protection-probe`, con una ruleset identica, poi
+rimosso): push diretto come owner/admin → **respinto** (`GH013`: *"Changes must be made
+through a pull request"* + *"Required status check \"quality\" is expected"*); push diretto
+come deploy key → **accettato** (*"Bypassed rule violations"*).
 
 ## Passo 3 — creare il primo tag di release
 
@@ -15109,7 +15243,7 @@ repository discoveribile.
 | **Non riscrivere la history** per rimuovere l'email | cambierebbe tutti gli SHA: i 38 riferimenti `merged_commit` in `docs/state/` punterebbero a commit inesistenti e il gate fail-closed `check-merge-state.mjs` renderebbe `main` rosso. Richiederebbe un force-push su `main`, vietato dal protocollo. Decisione già assunta (issue #309) |
 | **Non disattivare `pull_request` in favore di `pull_request_target`** | `pull_request_target` gira con i permessi del branch BASE ma con il codice del fork: è la classica *pwn request*. I guard di fork aggiunti in #310 rendono `pull_request` sicuro |
 | **Non rimuovere i guard di fork dai workflow** | con il repository pubblico chiunque può aprire una PR da un fork: `post-merge.yml` (`contents: write`) scriverebbe su `main`, `auto-status-done.yml` (`issues: write`) transizionerebbe issue arbitrarie |
-| **Non rimuovere `CI / quality` dalla branch protection** | è l'aggregatore fail-closed: richiedere i singoli job lascerebbe passare una PR con un job saltato |
+| **Non rimuovere il check `quality` (aggregatore) dalla ruleset `main-protection`** | è l'aggregatore fail-closed: richiedere i singoli job lascerebbe passare una PR con un job saltato. Il contesto richiesto è il **nome del check run** (`quality`), non la coppia `CI / quality` mostrata nella UI |
 | **Non impostare un budget $0** su Actions | blocca le run a quota esaurita = sviluppo bloccato. Su repository pubblico i minuti sono gratuiti: il budget non serve più |
 
 ## Verifica finale (dopo il flip)
@@ -15118,9 +15252,9 @@ repository discoveribile.
 # il repository è pubblico?
 gh repo view amedeo82/Life-Soundtrack --json isPrivate --jq .isPrivate   # atteso: false
 
-# la branch protection è attiva?
-gh api repos/amedeo82/Life-Soundtrack/branches/main/protection \
-  --jq '{checks:.required_status_checks.contexts, reviews:.required_pull_request_reviews.required_approving_review_count, force_push:.allow_force_pushes.enabled}'
+# la protezione di main è attiva? (ruleset, non endpoint classic)
+gh api repos/amedeo82/Life-Soundtrack/rulesets/main-protection \
+  --jq '{enforcement, target, checks: [.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context], reviews: [.rules[] | select(.type=="pull_request") | .parameters.required_approving_review_count], bypass: [.rules[] | select(.type=="pull_request") | .parameters.bypass_actors[].actor_id]}'
 
 # il tag di release esiste?
 gh release list --repo amedeo82/Life-Soundtrack
@@ -15129,13 +15263,24 @@ gh release list --repo amedeo82/Life-Soundtrack
 curl -sI https://github.com/amedeo82/Life-Soundtrack | head -1   # atteso: HTTP/2 200
 ```
 
+> `gh api repos/.../branches/main/protection` **non** è il comando di verifica: con un
+> token OAuth l'endpoint classic non è amministrabile (404) e la protezione applicata è
+> una **ruleset**. Il comando sopra è quello che riflette lo stato reale.
+
 ## Rollback
 
 Il flip è reversibile: Settings → Change visibility → Private. Ma **non è
 senza prezzo**:
 
 - la branch protection **non è disponibile** sui repository privati con piano
-  Free → si perde (reconfigurabile a mano al prossimo flip)
+  Free → si perde (reconfigurabile a mano al prossimo flip). Con il public
+  flip la protezione è stata applicata come **ruleset** `main-protection`
+  (l'endpoint classic non è amministrabile con il token OAuth della CLI)
+- la **deploy key** `post-merge-writer` e i secret `WRITER_SSH_KEY` /
+  `WRITER_SSH_KNOWN_HOSTS` restano configurati: sono l'unico bypass actor
+  della ruleset e servono al writer post-merge. Se la ruleset viene rimossa,
+  il writer torna a poter spingere con il `GITHUB_TOKEN` (e a riprovare i
+  secret, che **non** andrebbero mai committati)
 - i minuti Actions tornano a essere contati sul pool da 2.000/account
 - la history resta comunque esposta: chi ha già clonato o scaricato i file
   durante il periodo pubblico li ha ancora
@@ -54411,7 +54556,16 @@ jobs:
           # `main` (che contiene il merge commit), non sul `github.sha` del
           # PR chiuso.
           ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # La branch protection di `main` (ruleset `main-protection`, attiva
+          # dal 2026-11-05) vieta i push diretti: il `GITHUB_TOKEN` NON puo'
+          # bypassarla (l'integration `github-actions` non e' un bypass actor
+          # ammesso) e il suo push verrebbe respinto con GH013. Il writer e'
+          # l'UNICO scrittore di `main` (ADR-0013), quindi autentica con la
+          # deploy key `post-merge-writer`, l'unico bypass actor della
+          # ruleset. Le chiamate API (apply-merge-state) continuano a usare
+          # il `GITHUB_TOKEN`, che serve `pull-requests: read`.
+          ssh-key: ${{ secrets.WRITER_SSH_KEY }}
+          ssh-known-hosts: ${{ secrets.WRITER_SSH_KNOWN_HOSTS }}
           fetch-depth: 0
 
       - name: Runtime — PowerShell 7+
