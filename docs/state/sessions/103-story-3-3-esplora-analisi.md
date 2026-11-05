@@ -5,7 +5,7 @@ date: 2026-11-05
 state: 🟡
 merged: false
 branch: feat/240-story-3-3---esplora-analisi-schermate-9
-pr: 0
+pr: 320
 claim: kilo-hp-elitebook-d957
 tags: [ui, esplora, analisi, ricerca, quadrante, deep-link, i18n]
 ---
