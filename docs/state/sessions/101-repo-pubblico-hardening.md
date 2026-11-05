@@ -4,6 +4,7 @@ title: "Rendere il repository pubblico: hardening sicurezza e privacy"
 date: 2026-11-05
 state: 🟡
 merged: false
+pr: 310
 branch: feat/309-rendere-il-repository-pubblico-hardening
 claim: kilo-amedeovecchiemilcoms-309
 tags: [devops, privacy, security, ci, repository]
