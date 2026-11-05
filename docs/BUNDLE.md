@@ -1,22 +1,22 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 17:06
-> Totale file: 195
+> Data: 2026-11-05 19:41
+> Totale file: 198
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 194 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2767.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-05 17:11
+- Totale file: 197 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2804.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-05 19:38
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 126 |
+| docs/ | 129 |
 | scripts/ | 42 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -2314,7 +2314,7 @@ davvero e che il writer è l'unico scrittore ammesso.
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
 - **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.36, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 13 ADR in `13-ADR/` (0001-0003, 0005-0013; **0014** 🟡 DRAFT, Sessione 99, issue #304 — in attesa di ratifica)
-- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.5, `07` ora v0.2, `08` ora v0.14, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.30; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
+- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.6, `07` ora v0.3, `08` ora v0.15, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.31; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
@@ -2330,7 +2330,8 @@ davvero e che il writer è l'unico scrittore ammesso.
 - **Sessione 23** — fix bug pre-commit hook (issue #20, claim `kilo-HP-ELITEBOOK-hc0f`): il check D3 introdotto in S21 verificava `git diff HEAD` (working tree + staged) invece di `git diff` (unstaged-only), bloccando ogni commit normale; fix in `.githooks/pre-commit` con check unstaged (`git diff --quiet`) + untracked (`git ls-files --others --exclude-standard`); test `scripts/test-pre-commit-clean-check.sh` con 8 scenari tutti passati. **Esito post-merge**: PR #21 mergata `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40` (2026-10-18T09:54:10Z, squash da `c81a1c2`), branch eliminata, claim rilasciato, GH Action `auto-status-done` applicato `status:done` a #20. Smoke-test reale: `git commit` con sole staged changes passa senza `--no-verify`.
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
 - **Sessione 97** — implementazione **Story 3.2 «Ricordi + Share»** (issue #241, branch `feat/241-story-3-2---ricordi-share`, claim `kilo-HP-ELITEBOOK-6e15`): la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scroll, i `dismissed` esclusi dal feed ma **presenti** nel database, ordinamento per `Insight.confidence`), il foglio ⑫ **ShareSheet** (dialog accessibile con focus trap e stati `generating`/`ready`/`error`), la card **1080×1350** disegnata a mano su canvas e il **capitolo HTML autonomo** (export statico alternativo, nessuno script né stile esterno), le azioni di condivisione con **fallback** (Web Share API → download, clipboard → download) e il **tagging manuale** (nome e parole chiave dell'era, nota libera del ricordo) con la **conservazione dei campi dell'utente al ricalcolo** (`Insight.userNote` e `Insight.status` riportati dagli insight esistenti a quelli nuovi: senza, il nome di un'era sparisce al primo ricalcolo dell'analisi). **37 test** nuovi; i18n IT/EN per le nuove stringhe. Documenti allineati: `11-BACKLOG.md` v1.6.36, `06-UX-FLOWS-STATES.md` v0.5, `07-UI-SPEC.md` v0.2, `08-COPY-I18N.md` v0.14, `18-DEV-LOG.md` v2.30 (§53), `docs/state/stories/3.2-ricordi-share.md` e `docs/state/sessions/97-ricordi-share.md` (nuovi).
-- **Prossimo passo tecnico** (aggiornato alla Sessione 97, issue #241): l'**EPIC 3** ha le sue **prime tre schermate** — la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati) e la **3.2** (Ricordi + Share, Sessione 97: schermata ⑪ e ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale). Il blocco NEXT-STEP del README indica ora la **3.3** (Esplora + Analisi, `[SIZE:L]`): è la schermata che chiude il percorso end-to-end dell'app, insieme alla **3.5** (anteprima/demo in onboarding). Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
+- **Sessione 103** — implementazione **Story 3.3 «Esplora + Analisi»** (issue #240, branch `feat/240-story-3-3---esplora-analisi-schermate-9`, claim `kilo-hp-elitebook-d957`): la schermata ⑨ **Esplora** (ricerca sul **proprio** catalogo — artisti, brani, album, generi, mood — con **debounce di 300 ms**, risultati ordinati per `listenCount`, nessuna richiesta di rete) e la schermata ⑩ **Analisi** (il `QuadrantChart` valence/energy con un punto per mese, la **frase in prosa** che accompagna il grafico e gli **insight persistiti** — eventi e ricordi — con le tre azioni dell'utente). Il **deep-link interno** porta dal punto del quadrante alla Timeline (`AppSection` + `AppFocus`, senza router: D-25.1); il mood della settimana letto da `mood_week` è adesso **tradotto** nella shell. **20 test** nuovi; i18n IT/EN per le nuove stringhe (le chiavi già esistenti sono state usate, non duplicate). Documenti allineati: `11-BACKLOG.md` (sezione Story 3.3), `07-UI-SPEC.md` v0.3 (§2.8, §2.9), `08-COPY-I18N.md` v0.15 (§2.5, §2.6, §2.15), `18-DEV-LOG.md` v2.31 (§54), `docs/state/stories/3.3-esplora-analisi.md` e `docs/state/sessions/103-story-3-3-esplora-analisi.md`.
+- **Prossimo passo tecnico** (aggiornato alla Sessione 103, issue #240): l'**EPIC 3** ha le sue **prime quattro schermate** — la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati), la **3.2** (Ricordi + Share, Sessione 97: schermata ⑪ e ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale) e la **3.3** (Esplora + Analisi, Sessione 103: schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa). Il blocco NEXT-STEP del README indica ora la **3.5** (anteprima/demo in onboarding): è l'ultima schermata che chiude il percorso end-to-end dell'app. Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -13563,8 +13564,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.30
-> Ultima modifica: 2026-11-03 - §53 Ricordi + Share: la Story 3.2 (feed ⑪, ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale con la conservazione dei campi dell'utente al ricalcolo) (Sessione 97)
+> Versione: 2.31
+> Ultima modifica: 2026-11-05 - §54 Esplora + Analisi: la Story 3.3 (ricerca ⑨ sul catalogo con debounce 300 ms, mappa emotiva ⑩ con l'insight in prosa, deep-link interno alla Timeline) (Sessione 103)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -14914,6 +14915,48 @@ risposta distingue un difetto da un ambiente, e risparmia una sessione di debugg
 **Verifica**: `@ls/core` 643 test verdi (57 file) · `@ls/web` 186 test, 178 verdi e 8 falliti per
 l'ambiente (cfr. 97-5) · `eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` ·
 `node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
+## 54. Esplora + Analisi: la Story 3.3 (Sessione 103)
+
+**Branch**: `feat/240-story-3-3---esplora-analisi-schermate-9`
+**Issue di tracking**: **#240**
+**Data**: 2026-11-05
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 103-1 | P | Il tab **Mood** della ricerca dipendeva dalla **lingua dell'interfaccia**: filtrare per il testo tradotto cambiava i risultati fra `it` ed `en` | Il filtro operava sul testo mostrato, non sull'identità del mood | Il filtro opera sul **MoodId** (`exploreModel.ts`): l'id è stabile fra le lingue, il testo è solo la resa | `apps/web/src/screens/exploreModel.ts` |
+| 103-2 | P | Il mood della settimana sulla Home mostrava «happy» invece di «Felice» | `useHomeTimelineData` restituiva il **MoodId** in un campo chiamato `weekMoodLabel`, e nessuno lo traduceva | Il campo è stato rinominato `weekMood` (il **MoodId**) e la **shell** lo traduce con `analysis.moods.*`: il difetto diventa visibile invece di implicito | `apps/web/src/hooks/useHomeTimelineData.ts` · `apps/web/src/screens/AppShell.tsx` |
+| 103-3 | P | Le nuove chiavi i18n scritte con uno script ad hoc hanno prodotto chiavi «spazzatura» (una lettera sola: `n`, `A`, `e`, `{`) | Una destructuring sbagliata in uno script di inserimento: le chiavi venivano splittate carattere per carattere | Il test «ogni chiave appartiene a un namespace di 08§1» le ha **smascherate subito**: è la ragione per cui quel test esiste. Una chiave i18n si scrive in **un solo posto** | `apps/web/src/__tests__/i18n.test.ts` |
+| 103-4 | — | La ricerca su tutto il catalogo | Il criterio della story è «il **proprio** catalogo», non un indice globale | Modello **puro** sopra il catalogo caricato dal database locale: nessuna richiesta di rete (lo verifica un test che spia `fetch`), nessuna dipendenza dal DB nel modello | `apps/web/src/screens/exploreModel.ts` |
+| 103-5 | — | I punti del quadrante devono essere **cliccabili** e **leggibili** | Un cerchio di SVG non è un controllo della tastiera | I punti sono **`<button>` HTML** sopra l'SVG della cornice, con un `aria-label` che **dichiara i due valori** («2026-01: valence 0.80, energy 0.70»): il grafico si può consultare con lo screen reader | `apps/web/src/components/QuadrantChart.tsx` |
+| 103-6 | — | Il deep-link fra le schermate | Il progetto non ha un router e non ne ha bisogno | `AppSection` + `AppFocus`: il click su un punto porta alla Timeline con l'era del periodo in evidenza. Il tipo del focus sta in un modulo separato (`appNavigation.ts`) per non creare un import circolare | `apps/web/src/screens/appNavigation.ts` · `apps/web/src/screens/Timeline.tsx` |
+
+**Lesson learned**: la lezione principale è sul **criterio di accettazione**. Il backlog non chiede «un
+grafico in più»: chiede l'**insight in prosa** — la frase che spiega un periodo (`22§8`). Il rischio
+del lavoro è quindi che il quadrante diventasse un cruscotto muto: la difesa è che ogni grafico
+**deve** avere una frase accanto (`insight.mood.*`), e il test lo verifica per contratto e non per
+caso.
+
+La seconda lezione è sulla **lingua**. Due difetti della stessa famiglia — il tab Mood e il mood della
+settimana — erano nati dalla stessa confusione: **dato** e **copia**. Il mood è un dato (un
+identificatore), la sua etichetta è una copia (il testo mostrato). Filtrare o mostrare il dato
+richiede di tradurre il dato, non di tradurre il filtro: una ricerca che dipende dalla lingua
+dell'interfaccia è un bug che si presenta solo a un utente.
+
+La terza è sul **gate**. Le chiavi i18n «spazzatura» sono nate da uno script di inserimento scritto
+di fretta, e sono state intercettate da un test che era stato scritto per un altro motivo (la parità
+fra `it` ed `en` e l'appartenenza a un namespace). Un gate che copre un fatto **non pensato** per lui
+vale quanto un gate pensato: il suo valore è nel difetto che chiude, non nell'intenzione.
+
+**Verifica**: `@ls/web` 206 test, 198 verdi e 8 falliti per l'ambiente (i test i18n che usano
+`localStorage`, che **falliscono identici su `main`** sotto Node 26; il CI gira su Node 24) ·
+`@ls/core` 642 test in 56 file (il test di performance passa da solo: è l'indicatore di
+saturazione di 97-6) · `eslint` e `tsc --noEmit` verdi su `@ls/web` ·
+`node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/aggregate-state.ps1 -Check` →
+exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 
@@ -23382,6 +23425,361 @@ sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). 
 
 
 
+===== FILE: docs/state/sessions/101-repo-pubblico-hardening.md =====
+
+---
+number: 101
+title: "Rendere il repository pubblico: hardening sicurezza e privacy"
+date: 2026-11-05
+state: 🟢
+merged: true
+merged_commit: "d07a26482dbeda9039e7b1b7f419ffefa2a0885d"
+merged_date: "2026-11-05T11:55:31Z"
+pr: 310
+branch: feat/309-rendere-il-repository-pubblico-hardening
+claim: kilo-amedeovecchiemilcoms-309
+tags: [devops, privacy, security, ci, repository]
+---
+
+## Sintesi
+
+Il project owner ha deciso di rendere **pubblico** il repository. La ragione
+non è solo economica: su un repository **privato** con piano Free la branch
+protection e i rulesets **non sono disponibili** (`branches/main/protection`
+risponde 403: *"Upgrade to GitHub Pro or make this repository public to enable
+this feature"*). Quindi i 16 job della CI, per quanto ben costruiti, **non
+bloccavano alcuna merge**: erano un report, non un gate. Su un repository
+pubblico con piano Free la branch protection è inclusa e il protocollo
+dichiarato in `AGENTS.md` diventa finalmente **enforceable**.
+
+Prima del flip questa sessione ha eseguito un audit **read-only** dell'intero
+repository (689 commit, tutti i file tracciati, tutti i file mai cancellati
+nella history) e chiuso i buchi che il flip avrebbe esposto.
+
+### Audit: esito
+
+| Classe | Esito |
+|--------|-------|
+| Segreti / credential | **nessuno** — in 689 commit, in tutti i file tracciati, in tutti i file cancellati (`IDEA.md`, `.husky/commit-msg`, `.husky/pre-commit` ispezionati) |
+| PII reale | **nessuna** — solo `test@example.com`, `dp3@last.fm` (email di supporto **pubblica** di Last.fm), ID di run, nomi di pacchetti npm |
+| Fixture | 100% sintetici, generati da `scripts/generate-fixtures.mjs` |
+| Encoding | 0 errori al gate `check-encoding.mjs` (11 file in allowlist, esempi documentati) |
+| Licenze | nessuna incompatibilità con AGPL-3.0 |
+| Link AGPL §13 | l'app dichiara già `github.com/amedeo82/Life-Soundtrack` (`apps/web/src/components/About.tsx:74`) — da privato il link non era fruibile: **il flip chiude un gap di conformità**, non lo crea |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-101.1 | L'email personale (`AMEDEO.VECCHI82@GMAIL.COM`, in 252 commit) **si accetta**, con `.mailmap` | decisione del project owner (2026-11-05). Il rewrite della history cambierebbe **tutti** gli SHA: i 38 riferimenti `merged_commit` in `docs/state/` punterebbero a commit inesistenti e il gate fail-closed `check-merge-state.mjs` (che li confronta con lo stato reale delle PR letto dall'API) renderebbe `main` rosso. Richiederebbe inoltre un force-push su `main`, vietato dal protocollo. L'identità è già pubblica nel profilo e nel contenuto del repo: non è un segreto, è il contatto del progetto open-source |
+| D-101.2 | La regola «mai committare dati reali di ascolto» scende a L3 con un gate | `09-PRIVACY-SECURITY.md` §10.1 era **solo prosa**: nessun gate la verificava. Con il repo pubblico ogni file tracciato è scaricabile da chiunque, quindi la finestra per committare per errore un export reale non è più chiusa dal perimetro del repo privato. Contra il principio ADR-0012: *una regola senza gate è un consiglio* |
+| D-101.3 | Il gate dei fixture è **bloccante** e **fail-closed** | un gate che dichiarasse «pulito» senza aver guardato sarebbe peggio di nessun gate: exit 2 su errore di ambiente, mai 0. E ha il suo scenario negativo (`test-fixtures-privacy-gate.mjs`, 6 scenari): *un gate che passa sempre non è un gate* (lesson 43-1) |
+| D-101.4 | Gli IP routable reali nei fixture sono sostituiti con range RFC 5737 | `92.40.100.50`, `85.20.40.10`, `78.195.10.20` sono IP **assegnati a ISP reali**: potrebbero identificare una persona. I range documentazione (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) sono gli unici ammessi. La semantica dei test è invariata: l'IP resta pubblico e non-documentato |
+| D-101.5 | I workflow che scrivono su `main` o sulle issue **saltano le PR da fork** | con il repo pubblico chiunque può aprire una PR da un fork. `post-merge.yml` (`contents: write`) scriverebbe su `main` usando l'`head.ref` di un branch esterno; `auto-status-done.yml` (`issues: write`) transizionerebbe issue **arbitrarie** perché il body di una PR è input non fidabile quando la PR viene da fuori. Stesso guard di `auto-branch-cleanup.yml`: `head.repo.full_name == base.repo.full_name` |
+| D-101.6 | `pull_request`, **non** `pull_request_target` | `pull_request_target` gira con i permessi del branch BASE ma con il codice del fork: è la classica *pwn request*. `pull_request` gira con i permessi del fork, read-only: nessuna escalation. La scelta è deliberata, non un caso |
+| D-101.7 | Il NOTICE dichiara la **realtà** su essentia.js | dichiarava un bundle che nel repository non è presente (non è in `package.json`, nel lockfile né in `node_modules`). In un repository pubblico un NOTICE falso è un problema di conformità, non un dettaglio di stile. Ora lo stato è `NOT yet distributed`, come l'entry DB-IP che era già onesta |
+| D-101.8 | `.gitignore` chiude `.env*`, chiavi e certificati | con il repo pubblico un `.env` committato per errore è un segreto pubblico. Il perimetro non deve dipendere dalla memoria di chi committa |
+| D-101.9 | Il ridisegno della CI a 3 corsie **non** è in scope | con il repo pubblico i minuti Actions sono **illimitati e gratuiti**: il vincolo economico che lo rendeva urgente è scomparso. Resta un'ottimizzazione di wall-clock, non un blocco. La struttura a 16 job resta **invariata**: nessun workflow è stato rimosso, nessun gate è stato perso |
+
+## Cosa cambia per il protocollo
+
+Nessuna regola è stata rimossa e nessun gate è stato perso. Sono state **aggiunte**
+tre cose:
+
+1. `check-fixtures-privacy.mjs` + il suo scenario negativo — nuovi, bloccanti
+2. i guard di fork in `post-merge.yml` e `auto-status-done.yml`
+3. `.mailmap`, `.gitignore` e la correzione del NOTICE
+
+La parità locale ↔ CI (issue #306) è mantenuta: i due nuovi gate girano sia nel
+job `gates-docs` della CI sia nella batteria locale di `scripts/agent-pr.ps1`.
+
+## Analisi di avanzamento
+
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Segreti trovati in 689 commit | **0** |
+| 2 | File con PII reale | **0** |
+| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
+| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
+| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
+| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
+| 7 | Step CI | 38 → **40** |
+| 8 | Righe del catalogo §9.10 | 39 → **41** |
+
+**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
+stessa PR.
+
+**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
+repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
+flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
+gia' puntare al repository pubblico — cosa che già fa.
+
+
+
+===== FILE: docs/state/sessions/102-branch-protection-deploy-key.md =====
+
+---
+number: 102
+title: "Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN"
+date: 2026-11-05
+state: 🟢
+merged: true
+merged_commit: "007b31ba5271bc6d1e4158dcca1392576f33f81f"
+merged_date: "2026-11-05T15:35:42Z"
+pr: 312
+branch: feat/311-branch-protection-attiva-il-writer-post
+claim: kilo-hp-elitebook-2097
+tags: [devops, security, ci, branch-protection]
+---
+
+## Sintesi
+
+Con il repository ormai **pubblico** (Sessione 101), la protezione di `main` è
+diventata disponibile ed è stata applicata. Il passaggio non è stato una
+formalità: la checklist di pubblicazione (`docs/CHECKLIST-PUBBLICAZIONE.md`,
+Passo 2) conteneva **tre presupposti che sul repository reale non valevano**,
+e applicarli alla lettera avrebbe prodotto una protezione *finta* (o un
+repository congelato).
+
+La correzione è una **ruleset** GitHub (`main-protection`), non la classic
+branch protection, e l'unico atore che può spingere direttamente su `main`
+è il workflow `post-merge` — via una **deploy key SSH**, perché il
+`GITHUB_TOKEN` non può bypassare una ruleset.
+
+## I tre presupposti falsi della checklist originale
+
+| # | Presuposto | Realtà misurata | Conseguenza se applicato alla lettera |
+|---|-----------|-----------------|----------------------------------------|
+| 1 | `POST /branches/main/protection` è il modo per proteggere `main` | il token OAuth della CLI (`gho_`, scope `repo`) riceve **404**: l'endpoint classic chiede il permesso *Administration*, che un token OAuth non ottiene | nessuna protezione, nessun errore visibile (il 404 sembra un path sbagliato) |
+| 2 | il check richiesto è `CI / quality` | il **nome del check run** del job aggregatore è `quality` (`GET /commits/<sha>/check-runs`); `CI / quality` è la coppia *workflow / job* mostrata nella UI | regola **soddisfacibile da nessuna run**: ogni merge resterebbe bloccato per sempre, repository congelato |
+| 3 | `required_approving_review_count: 1` | l'unico account GitHub (`amedeo82`) è **anche l'autore di ogni PR** (gli agenti usano l'account del project owner) e GitHub vieta l'auto-approvazione | nessuna PR potrebbe mai essere mergiata: repository congelato |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-102.1 | La protezione è una **ruleset** (`main-protection`, id `26614787`), non la classic branch protection | l'endpoint classic non è amministrabile con il token a disposizione; la ruleset è creabile con lo stesso token e applica le stesse garanzie a `refs/heads/main` |
+| D-102.2 | Il check richiesto è il contesto **`quality`** (nome del check run), `strict: true`, `integration_id: 15368` | il contesto richiesto è il nome del check run, non la coppia `CI / quality` della UI. `strict` obbliga ad aggiornare il branch con `main` prima del merge |
+| D-102.3 | `required_approving_review_count: 0` | con `1` il repository sarebbe congelato (auto-approvazione vietata). Restano enforced: **PR + check `quality` verde + branch aggiornato** |
+| D-102.4 | **Nessun bypass per gli admin**: l'owner è vincolato come tutti | un bypass per l'admin renderebbe la protezione una formalità per chiunque abbia il ruolo, cioè per l'unico account del repository |
+| D-102.5 | L'unico bypass actor è la **deploy key `post-merge-writer`** (id `168877742`, write) | il `GITHUB_TOKEN` / `github-actions[bot]` non può bypassare una ruleset (422: *"Actor GitHub Actions integration must be part of the ruleset source or owner organization"*). Il writer post-merge è per definizione l'unico scrittore di `main` (ADR-0013): la deploy key è il suo strumento di autenticazione |
+| D-102.6 | `required_linear_history` attivo → i merge devono essere **squash** | i merge commit non servono e confondono la ricostruzione della history. È un cambio operativo che va dichiarato nel protocollo |
+| D-102.7 | La verifica è stata fatta su un **branch sonda** (`protection-probe`), non sulla documentazione | la prova ha simulato i due attori: push diretto come owner/admin → **respinto** (GH013: *"Changes must be made through a pull request"* + *"Required status check \"quality\" is expected"*); push diretto come deploy key → **accettato** (*"Bypassed rule violations"*). Il branch sonda e la sua ruleset sono stati rimossi |
+
+## Cosa cambia nel protocollo
+
+1. `.github/workflows/post-merge.yml` autentica il **checkout** con
+   `secrets.WRITER_SSH_KEY` + `secrets.WRITER_SSH_KNOWN_HOSTS` invece che con
+   `secrets.GITHUB_TOKEN`. Le chiamate API continuano a usare il `GITHUB_TOKEN`
+   (serve `pull-requests: read`): è solo il **push** che passa dalla chiave.
+2. `AGENTS.md` v1.48: la regola «`main` è protetta» scende da L2 (prosa) a
+   **L3 (applicata)**, con la ruleset come gate e la deploy key come unico
+   bypass. Aggiornati i punti che dichiaravano «PAT autorizzato dal PAT».
+3. `docs/CHECKLIST-PUBBLICAZIONE.md`: il Passo 2 dichiara **cosa è stato
+   applicato davvero**; il testo originale è conservato ma marcato come
+   superato e non eseguibile. La verifica finale e il rollback usano
+   l'API delle ruleset, non l'endpoint classic.
+4. I merge da ora sono **squash** (linear history).
+
+## Analisi di avanzamento
+
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
+| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
+| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
+| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
+| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
+| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
+| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
+| 8 | Versione protocollo | v1.47 → **v1.48** |
+
+**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
+l'attestazione necessaria per spingere.
+
+**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
+su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
+davvero e che il writer è l'unico scrittore ammesso.
+
+## Lesson learned
+
+- **La documentazione di una procedura operativa va verificata contro
+  l'endpoint reale, non copiata.** Tre parametri della checklist (endpoint,
+  nome del contesto, numero di approvazioni) erano tutti sbagliati e
+  nessuno dei tre avrebbe prodotto un errore evidente: il 404 sembra un
+  path sbagliato, un contesto sbagliato blocca silenziosamente ogni merge,
+  un'approvazione richiesta in più blocca silenziosamente ogni merge. Due
+  dei tre errori hanno la **stessa** classe di difetto: una restrizione che
+  non può mai essere soddisfatta.
+- **Il nome del check run non è il nome mostrato nella UI.** `CI / quality` è
+  la coppia *workflow / job*; il check run si chiama `quality`. La regola
+  confronta il **check run**, quindi il contesto richiesto va letto da
+  `GET /commits/<sha>/check-runs`, non copiato dalla UI.
+- **Un bypass per gli admin annulla la protezione per l'unico account del
+  repository.** Se l'unico utente è anche l'amministratore e l'autore delle
+  PR, il vincolo deve valere anche per lui: altrimenti "protezione attiva"
+  significa "chiunque può schierare l'eccezione".
+- **Le regole si verificano con un esperimento, non con un ragionamento.**
+  Il branch sonda ha risolto in un'ora ciò che la lettura della documentazione
+  non poteva stabilire, e ha prodotto la prova (GH013 + bypass) che oggi
+  documenta il Passo 2.
+
+
+
+===== FILE: docs/state/sessions/103-story-3-3-esplora-analisi.md =====
+
+---
+number: 103
+title: "Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)"
+date: 2026-11-05
+state: 🟡
+merged: false
+branch: feat/240-story-3-3---esplora-analisi-schermate-9
+pr: 0
+claim: kilo-hp-elitebook-d957
+tags: [ui, esplora, analisi, ricerca, quadrante, deep-link, i18n]
+---
+
+# Sessione 103 — Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)
+
+> **Oggetto**: la **Story 3.3** — le due schermate che chiudono il percorso
+> end-to-end: la ricerca nel proprio catalogo (⑨) e la mappa emotiva (⑩),
+> con l'**insight in prosa** come criterio di accettazione.
+
+## Sintesi
+
+L'issue #240 è stata implementata sulla specifica `docs/25-MEMORIES-SHARE-EXPLORE.md`
+(v1.0 🟢 APPROVED, ratificata dal project owner il 2026-11-02).
+
+La story ha una regola che la distingue da tutte le altre: **il criterio di
+accettazione non è «un grafico in più»**, è la **frase** che spiega un periodo
+(`docs/22-COMPETITIVE-POSITIONING.md` §8). Il quadrante valence/energy da solo
+è l'ennesimo cruscotto; quello che vale è «a marzo 2023 la tua musica era
+più triste del solito».
+
+Il lavoro è stato **interamente locale** e **senza librerie**:
+
+- la ricerca è un **modello puro** (`exploreModel.ts`) sopra il catalogo
+  caricato dal database locale: nessuna richiesta di rete, nessun indice
+  globale, e il filtro è testabile senza database;
+- il debounce è di **300 ms** (`06§2.9`) e vive in un hook dedicato, testato
+  con i timer falsi;
+- il quadrante è **SVG scritto a mano** come gli altri grafici della casa
+  (`MoodLine`, `StreamChart`), con i punti come **`<button>` HTML** sopra la
+  cornice: un punto cliccabile deve essere un controllo della tastiera, e il
+  suo `aria-label` dichiara i due valori («2026-01: valence 0.80, energy 0.70»)
+  invece di un nome generico;
+- gli insight mostrati sono **persistiti**: la schermata legge la tabella
+  `insights` (Story 2.5), non ricalcola nulla «a caldo».
+
+Il deep-link fra le schermate è a **stato** (D-25.1): nessun router, nessun
+URL — un `AppFocus` che la Timeline usa per evidenziare l'era del periodo
+cliccato.
+
+## Cosa è stato fatto
+
+### App (`apps/web`)
+
+- `screens/exploreModel.ts`: il modello puro — filtro per sottostringa,
+  ordinamento per `listenCount` decrescente (nome come spareggio **stabile**),
+  indice dei generi (il genere sta in `Track.genres`, non in una tabella) e
+  tab Mood;
+- `hooks/useExploreData.ts`: il catalogo dell'utente e i periodi con mood
+  (gli insight `mood_day`);
+- `hooks/useDebouncedValue.ts`: il debounce di 300 ms;
+- `components/SearchField.tsx`: il campo con `role="searchbox"` e `aria-label`;
+- `screens/ExploreScreen.tsx`: la schermata ⑨ — cinque tab, mood pill,
+  deep-link dal periodo;
+- `screens/analysisModel.ts`: l'aggregazione **per mese** degli insight
+  `mood_day` (media **pesata** sugli ascolti) e i punti del quadrante;
+- `components/QuadrantChart.tsx` e `components/InsightCard.tsx`;
+- `hooks/useAnalysisData.ts` e `screens/AnalysisScreen.tsx`: la schermata ⑩ —
+  il quadrante, la **frase** che lo accompagna e gli insight persistiti con
+  le tre azioni dell'utente;
+- `screens/appNavigation.ts` (nuovo), `screens/AppShell.tsx`,
+  `screens/Timeline.tsx`: la navigazione estesa e il deep-link interno;
+- `hooks/useHomeTimelineData.ts`: il mood della settimana è adesso il
+  **MoodId** (`weekMood`) e la shell lo **traduce** — la Home mostrava
+  «happy» invece di «Felice».
+
+### i18n
+
+Le nuove chiavi in it ed en: `nav.explore`, `nav.analysis`,
+`explore.listens` (con i plurali), le **otto** di `analysis.*` e le **due**
+frasi che mancavano in `insight.*` (`mood.neutral`, `mood.angry`). Le chiavi
+che **esistevano già** (`explore.*`, `analysis.quadrant.*`, `analysis.moods.*`,
+`insight.mood.*`) sono state **usate**, non duplicate.
+
+### Test
+
+20 test nuovi: il modello della ricerca (ordine e filtro), il debounce (con
+i timer falsi), la schermata ⑨ (filtro, tab, mood, nessuna richiesta di
+rete), la schermata ⑩ (punti accessibili, la frase accanto al grafico, gli
+insight in prosa, il deep-link), i due componenti e il focus della Timeline.
+
+## Decisioni
+
+- **La ricerca filtra in memoria, non con un indice**: il catalogo dell'utente
+  è locale e piccolo rispetto a una raccolta indicizzata; il vantaggio del
+  modello puro (testabile, nessuna dipendenza dal DB) supera il vantaggio
+  dell'indice.
+- **Il tab Mood filtra sul MoodId**: il testo tradotto cambierebbe i
+  risultati a seconda della lingua dell'interfaccia.
+- **I punti del quadrante sono aggregati per mese**: la serie `mood_day` esiste
+  già (la `MoodLine` della Timeline la disegna) e non va duplicata; la media
+  mensile è **pesata** sugli ascolti.
+- **Il README non è stato toccato**: il gate `check-readme-facts.mjs` vieta di
+  dichiarare come presenti le capability degli EPIC 2 e 4 fuori dalla sezione
+  roadmap, e l'EPIC 4 (audio features) non è ancora merged. La prosa
+  dichiara quindi esattamente la stessa cosa di prima.
+
+## Analisi di avanzamento
+
+- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
+  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
+  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
+  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
+  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
+  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
+  file falliscono identici su `main`**, il CI gira su Node 24).
+- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
+  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
+  dell'utente sugli insight.
+- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
+  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
+  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
+- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
+  al layer `@ls/core` (la story è di sola UI e lettura del database).
+- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
+  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
+  documentati.
+
+## Lesson learned
+
+- **Una chiave i18n si scrive in un solo posto.** I primi tentativi di
+  inserire le chiavi con uno script ad hoc hanno prodotto chiavi «spazzatura»
+  (i resti di una destructuring sbagliata: una lettera sola). Il test «ogni
+  chiave appartiene a un namespace di 08§1» le ha smascherate subito: è la
+  ragione per cui quel test esiste.
+- **Il campo `weekMoodLabel` era un MoodId travestito da etichetta**: la Home
+  mostrava «happy» al posto di «Felice». Rinominare il campo in `weekMood` e
+  tradurre nella shell ha reso il difetto **visibile** invece di implicito.
+- **Un modulo per i tipi condivisi evita l'import circolare**: `AppFocus` sta
+  in `appNavigation.ts` e non in `AppShell.tsx`, perché le schermate ricevono
+  il tipo del focus e la shell riceve le schermate.
+
+## Documenti aggiornati
+
+- `docs/state/stories/3.3-esplora-analisi.md` e
+  `docs/state/sessions/103-story-3-3-esplora-analisi.md` (questa)
+- `docs/11-BACKLOG.md` — sezione Story 3.3
+- `docs/07-UI-SPEC.md` — §2.8, §2.9
+- `docs/08-COPY-I18N.md` — §2.5, §2.6, §2.15, changelog 0.15
+- `docs/18-DEV-LOG.md` — la entry della sessione
+- `scripts/generate-bundle.ps1` — `$files`
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -24857,10 +25255,13 @@ id: "3.3"
 title: "Esplora + Analisi"
 phase: 3
 area: ui
-status: todo
+status: in_progress
 priority: I
-depends_on: []
+depends_on: ["2.5"]
 issue: 240
+branch: "feat/240-story-3-3---esplora-analisi-schermate-9"
+pr: 0
+claim: kilo-hp-elitebook-d957
 spec_refs:
   - docs/25-MEMORIES-SHARE-EXPLORE.md
   - docs/06-UX-FLOWS-STATES.md
@@ -24877,32 +25278,114 @@ in linguaggio naturale. Un grafico senza lettura è l'ennesimo cruscotto;
 l'«aha moment» è la frase che spiega un periodo.
 
 La story consuma l'output della **2.5** (collegamento del pipeline di analisi,
-merged con PR #295): gli insight sono già persistiti e letti dalla Home/Timeline.
+merged con PR #295): gli insight sono **già persistiti** e letti dal database,
+non calcolati «a caldo» dalla schermata.
 
 Spec: `docs/25-MEMORIES-SHARE-EXPLORE.md` **v1.0 🟢 APPROVED** (ratificata dal
 project owner il 2026-11-02, Sessione 87).
 
 ## Stato
 
-⬚ **TODO** — spec ratificata, issue canonica #240 aperta: **in attesa di claim**
-(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
-`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
+🟡 **IN REVIEW** — implementata nella Sessione 103 (issue **#240**, branch
+`feat/240-story-3-3---esplora-analisi-schermate-9`, worktree
+`ls-240-story-3-3---esplora-analisi-schermate-9`).
+
+Consegnato:
+
+- **`apps/web/src/screens/exploreModel.ts`**: il modello **puro** della ricerca —
+  il filtro per sottostringa, l'ordinamento per `listenCount` decrescente (con
+  il nome come spareggio **stabile**), l'indice dei generi (il genere non è una
+  tabella: sta in `Track.genres`) e il tab Mood;
+- **`apps/web/src/hooks/useExploreData.ts`**: il caricamento del **catalogo
+  dell'utente** (artisti, brani, album) e dei periodi con mood (gli insight
+  `mood_day` persistiti);
+- **`apps/web/src/hooks/useDebouncedValue.ts`**: il **debounce di 300 ms** della
+  ricerca (`06§2.9`), testato con i timer falsi;
+- **`apps/web/src/components/SearchField.tsx`**: il campo di ricerca con
+  `role="searchbox"` e `aria-label` esplicito;
+- **`apps/web/src/screens/ExploreScreen.tsx`**: la schermata ⑨ — i cinque tab
+  (Artisti · Brani · Album · Generi · Mood), le mood pill e il deep-link dal
+  periodo alla Timeline;
+- **`apps/web/src/screens/analysisModel.ts`**: l'aggregazione **per mese** degli
+  insight `mood_day` (media **pesata** sugli ascolti) e i punti del quadrante
+  (dimensione proporzionale agli ascolti, colore del mood dominante);
+- **`apps/web/src/components/QuadrantChart.tsx`**: la mappa emotiva — i punti
+  sono **`<button>`** con `aria-label` che dichiara i due valori;
+- **`apps/web/src/components/InsightCard.tsx`**: la card dell'insight **in
+  prosa** (la descrizione è **già resa** dal core, D-A.4) con le tre azioni
+  dell'utente (confermare / correggere / ignorare);
+- **`apps/web/src/hooks/useAnalysisData.ts`** +
+  **`apps/web/src/screens/AnalysisScreen.tsx`**: la schermata ⑩ — il quadrante,
+  la **frase** che lo accompagna (`insight.mood.*`) e gli insight persistiti
+  (eventi e ricordi);
+- **`apps/web/src/screens/appNavigation.ts`** (nuovo) + `AppShell.tsx` +
+  `Timeline.tsx`: la navigazione estesa a `explore` / `analysis` e il
+  **deep-link interno** (`AppFocus`): il click su un punto porta alla Timeline
+  con l'era del periodo in evidenza (D-25.1);
+- **`apps/web/src/hooks/useHomeTimelineData.ts`**: il mood della settimana è
+  adesso il **MoodId** (`weekMood`), e la shell lo **traduce**: la Home
+  mostrava «happy» invece di «Felice»;
+- **i18n**: le nuove chiavi `nav.explore`, `nav.analysis`, `explore.listens`,
+  `analysis.*` (8) e `insight.mood.neutral` / `insight.mood.angry` in it ed en;
+- **20 test** nuovi nell'app web.
 
 ## Task
 
-- [ ] Da definire al claim, dalla spec `docs/25-MEMORIES-SHARE-EXPLORE.md`
+- [x] T25.8 — App: `ExploreScreen` + ricerca con debounce + tab + mood pills + test
+- [x] T25.9 — App: `QuadrantChart`, `InsightCard`, `AnalysisScreen` + test
+- [x] T25.10 — App: navigazione estesa (`AppSection`, `AppFocus`) + deep-link alla Timeline
+- [x] T25.11 — i18n: le chiavi nuove in it/en (`08-COPY-I18N.md` §2.5, §2.6, §2.15)
+- [x] T25.12 — Allineamento documentale (`07-UI-SPEC.md`, `08-COPY-I18N.md`, `11-BACKLOG.md`, `docs/state/`)
 
 ## Acceptance criteria
 
-- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 3.3" (compilare al claim)
+- [x] Schermata ⑨ con search autocomplete sui propri dati (debounce 300 ms, ordinamento per `listenCount`)
+- [x] Schermata ⑩ QuadrantChart valence/energy (i punti sono `<button>` accessibili)
+- [x] Click su punto → deep-link timeline (senza router: `AppSection` + `AppFocus`)
+- [x] **Insight in prosa**: ogni grafico è accompagnato da almeno una frase (`insight.*`)
+- [x] Gli insight visualizzati sono **persistiti** (arrivano dalla tabella `insights`, Story 2.5)
+- [x] Il percorso è **interamente locale**: nessuna richiesta di rete
+
+## Scelte di implementazione
+
+- **La ricerca è un modello puro sopra il catalogo caricato**: `db.tracks`
+  ha un indice sul nome esatto (`listTracksByName`), ma un'autocomplete per
+  sottostringa su tutto il catalogo locale non ha bisogno di un indice: sono
+  dati dell'utente, e il filtro vive in un **modello** testabile senza
+  database.
+- **Il tab Mood filtra sul MoodId, non sul testo tradotto**: altrimenti i
+  risultati dipenderebbero dalla lingua dell'interfaccia.
+- **I punti del quadrante sono aggregati per mese** (`25§7`): la media è
+  **pesata** sugli ascolti, altrimenti un mese con 3 ascolti peserebbe come
+  un mese con 300.
+- **Il quadrante legge i `mood_day`**, gli insight che il mood tracker
+  scrive: la serie esiste già (`MoodLine` la disegna nella Timeline) e non va
+  duplicata.
+- **Il deep-link è a stato** (D-25.1): nessuna libreria di routing, nessun
+  URL. Il modulo `appNavigation.ts` esiste per non creare un import circolare
+  fra la shell e le schermate.
+- **Il README non è stato toccato**: il gate `check-readme-facts.mjs` vieta di
+  dichiarare come presenti le capability degli EPIC 2 e 4 (`mood`, `valence`,
+  `ricordi`) fuori dalla sezione roadmap, e l'EPIC 4 (audio features) non è
+  ancora merged. La prosa dichiara quindi la stessa cosa di prima.
 
 ## Lesson learned
 
-_(al termine dell'implementazione)_
+- **Una chiave i18n si scrive in un solo posto**: i primi tentativi di
+  inserire le chiavi con uno script ad hoc hanno prodotto chiavi «spazzatura»
+  (resti di una destructuring sbagliata: una lettera sola). Il gate
+  «ogni chiave appartiene a un namespace» le ha smascherate subito — ed è la
+  ragione per cui quel test esiste.
 
 ## Documenti aggiornati
 
-_(alla chiusura della PR)_
+- `docs/07-UI-SPEC.md` — §2.8 (QuadrantChart) e §2.9 (InsightCard)
+- `docs/08-COPY-I18N.md` — §2.5, §2.6, §2.15 e il changelog 0.15
+- `docs/11-BACKLOG.md` — sezione Story 3.3
+- `docs/state/stories/3.3-esplora-analisi.md` (questo file) e
+  `docs/state/sessions/103-story-3-3-esplora-analisi.md` (la sessione)
+- `scripts/generate-bundle.ps1` — `$files` (sessione 103; sessioni 101 e 102,
+  mai registrate)
 
 
 
@@ -30988,7 +31471,7 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.5 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
+> Status: 🟡 DRAFT · Versione 0.6 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -31154,6 +31637,16 @@ Note: nessuna gestione errore (schermata statica).
 
 **Mood pills**: riga in basso con 6 emoji. Click = filtro. Pill attivo ha glow.
 
+**Implementazione (Story 3.3, Sessione 103)**: la schermata ⑨ ha i cinque tab
+(Artisti · Brani · Album · Generi · Mood), il campo di ricerca con
+`role="searchbox"` e `aria-label`, il **debounce di 300 ms** e i risultati
+ordinati per `listenCount` decrescente (il nome è lo spareggio **stabile**).
+Il tab Mood filtra sui **periodi** (`mood_day`) per mood: il filtro opera sul
+**MoodId**, non sul testo tradotto, altrimenti i risultati dipenderebbero
+dalla lingua dell'interfaccia. Lo stato vuoto è `empty.description.explore` e
+il «nessun risultato» è `explore.noResults`. Il percorso è **interamente
+locale**: nessuna richiesta di rete.
+
 ### 2.10 ⑩ Analisi — Mappa Emotiva
 
 | Stato | Comportamento |
@@ -31167,6 +31660,17 @@ Note: nessuna gestione errore (schermata statica).
 - Click su punto mese → highlight nelle line chart sotto
 - Hover su punto → tooltip con "Marzo 2024 — valence 0.31, energy 0.42, mood sad"
 - Selettore periodo (anno) in alto
+
+**Implementazione (Story 3.3, Sessione 103)**: la schermata ⑩ mostra il
+`QuadrantChart` (valence × energy) con **un punto per mese**, aggregato dagli
+insight `mood_day` con media **pesata** sugli ascolti; la dimensione del punto
+è proporzionale agli ascolti e il colore è il mood dominante. Ogni punto è un
+**`<button>`** con un `aria-label` che dichiara i due valori, e il click è il
+**deep-link** alla Timeline (D-25.1: `AppSection` + `AppFocus`, senza router).
+Sotto il grafico c'è la **frase in prosa** (`insight.mood.*`) e gli insight
+**persistiti** (eventi e ricordi) nelle `InsightCard`, con le tre azioni
+dell'utente. I line chart e il selettore di periodo restano **fuori perimetro
+di questa story**: il grafico secondario è la Timeline, che li disegna già.
 
 ### 2.11 ⑪ Ricordi (mobile)
 
@@ -31371,13 +31875,14 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.3 | Sessione 13 (2026-10-16) | **M13 chiuso**: §2.3 Import ora esplicita i 5 stati della singola PlatformCard (`empty`/`validating`/`parsing`/`done`/`error`) con tabella + transizioni dettagliate. §2.14 demo-user.json ora punta a `fixtures/demo-user.json` (1 anno, 4500 eventi, flag `demoMode=true`) |
 | 0.4 | Sessione 42 (2026-10-21) | Allineamento §2.2 e §2.13 a 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`); risolto drift documentazione↔codice (issue #107) |
 | 0.5 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.11 (⑪ Ricordi) dichiara la **nota libera** sotto ogni card (il tag dell'utente, in `Insight.userNote`, sopravvive al ricalcolo) e il fatto che il ricordo nascosto **resta** nel database; §2.12 (⑫ Share Sheet) aggiunge la destinazione **Capitolo HTML** (export statico alternativo) e il **fallback** di ogni azione (senza Web Share API o senza clipboard il file si scarica) |
+| 0.6 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.9 (⑨ Esplora) dichiara il campo di ricerca accessibile (`role="searchbox"`), il **debounce di 300 ms** e l'ordinamento per `listenCount` con spareggio stabile, e il fatto che il tab Mood filtri sul **MoodId** (non sul testo tradotto); §2.10 (⑩ Analisi) dichiara il `QuadrantChart` con **un punto per mese** (media pesata sugli ascolti), i punti come **`<button>`** accessibili, il **deep-link** alla Timeline (D-25.1) e la **frase in prosa** che accompagna il grafico; i line chart e il selettore di periodo restano **fuori perimetro** (il grafico secondario è la Timeline) |
 
 
 ===== FILE: docs/07-UI-SPEC.md =====
 
 # 07 — Specifiche UI Componenti
 
-> Status: 🟡 DRAFT · Versione 0.2 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
+> Status: 🟡 DRAFT · Versione 0.3 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
 > Vincolante per: `packages/ui/components`, test di interazione, implementazione frontend
 
 ---
@@ -31450,12 +31955,27 @@ lo cancella dal database.
 - **A11y**: Ogni punto è un `<button>` o `<a>` con `aria-label` descrittivo.
 - **Interazione**: Click su punto → aggiorna grafici secondari sotto.
 
+**Implementazione (Story 3.3, Sessione 103)**: i punti sono **`<button>` HTML**
+posizionati sopra l'SVG della cornice, non cerchi di SVG: un punto cliccabile
+deve essere un controllo della tastiera. Ogni punto ha un `aria-label` che
+**dice i due valori** (`analysis.pointAria`: «2026-01: valence 0.80, energy
+0.70»), non un nome generico. La **dimensione** del punto è proporzionale agli
+ascolti del periodo; il **colore** è il mood dominante. Il click consegna il
+periodo al chiamante: è il deep-link alla Timeline (D-25.1).
+
 ### 2.9 InsightCard
 **Uso**: Analisi, spiegazione algoritmi.
 - **Props**: `icon` (Lucide), `title` (string), `description` (string), `confidence` (0-1, opzionale)
 - **Stati**: `pending` (bordo giallo), `confirmed` (bordo verde), `dismissed` (opacità 0.5)
 - **A11y**: `role="article"`, `aria-labelledby`.
 - **Interazione**: Pulsanti nascosti per confermare/correggere/ignorare l'insight.
+
+**Implementazione (Story 3.3, Sessione 103)**: la `description` è la **frase
+in prosa** dell'insight, **già resa** dal core (`EventPayload.description`,
+`MemoryPayload.text` — D-A.4): la UI non re-renderizza i template. Le tre
+azioni (confermare / correggere / ignorare) scrivono `Insight.status` e sono
+esposte con `aria-label`; ignorare **esclude** l'insight dalla lista ma **non
+lo cancella** dal database (D-25.3).
 
 ### 2.10 ShareSheet
 **Uso**: Mobile, condivisione ricordi.
@@ -31506,13 +32026,14 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 |----------|------|-----------|
 | 0.1 | Sessione 7 | Prima versione completa |
 | 0.2 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.2 (MemoryCard) dichiara le tre azioni reali (nascondi, salva, condividi) e il fatto che il nascondimento **non cancella**; §2.10 (ShareSheet) dichiara le props reali (etichette già rese, `onRetry`) e i **fallback** delle destinazioni; nuova §2.10b (**NoteField**) per il tagging manuale |
+| 0.3 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.8 (QuadrantChart) dichiara i punti come **`<button>` HTML** sopra l'SVG (controllo della tastiera, non cerchio), l'`aria-label` che **dichiara i due valori** e il deep-link alla Timeline; §2.9 (InsightCard) dichiara la `description` come **frase già resa** dal core (D-A.4) e le tre azioni che scrivono `Insight.status` (ignorare esclude, non cancella) |
 
 
 ===== FILE: docs/08-COPY-I18N.md =====
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.14 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
+> Status: 🟡 DRAFT · Versione 0.15 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -31526,7 +32047,7 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 |-----------|-----|
 | `onboarding` | Schermate ①-④ |
 | `home` | Schermata ⑥ |
-| `nav` | Navigazione principale (Home / Timeline / Ricordi — Story 3.1, 3.2) |
+| `nav` | Navigazione principale (Home / Timeline / Ricordi / Esplora / Analisi — Story 3.1, 3.2, 3.3) |
 | `timeline` | Schermata ⑦ |
 | `era` | Schermata ⑧ |
 | `explore` | Schermata ⑨ |
@@ -31640,6 +32161,12 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `tab.genres` | Generi | Genres |
 | `tab.mood` | Mood | Mood |
 | `noResults` | Nessun risultato per "{query}" | No results for "{query}" |
+| `listens` (plurale) | {count} ascolto / {count} ascolti | {count} play / {count} plays |
+
+> **Story 3.3**: le chiavi di `explore.*` **esistevano già** e sono state
+> **usate**, non duplicate. L'unica chiave nuova è `listens` (con i suoi
+> plurali `_one` / `_other`, `08§3`): il numero di ascolti che accompanies
+> ogni risultato.
 
 ### 2.6 `analysis.*`
 
@@ -31649,6 +32176,8 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `quadrant.high` | ALTA ENERGIA | HIGH ENERGY |
 | `quadrant.low` | BASSA ENERGIA | LOW ENERGY |
 | `quadrant.valence` | VALENCE → | VALENCE → |
+| `quadrant.highValence` | VALENCE ALTA | HIGH VALENCE |
+| `quadrant.lowValence` | VALENCE BASSA | LOW VALENCE |
 | `moods.sad` | Triste | Sad |
 | `moods.angry` | Arrabbiato | Angry |
 | `moods.neutral` | Neutro | Neutral |
@@ -31657,6 +32186,23 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `moods.excited` | Eccitato | Excited |
 | `valenceOverTime` | Valence nel tempo | Valence over time |
 | `energyOverTime` | Energy nel tempo | Energy over time |
+| `chart` | La mappa valence/energia | The valence/energy map |
+| `event` | Evento | Event |
+| `insights` | Gli insight | The insights |
+| `correct` | Correggi | Fix |
+| `dismiss` | Ignora | Dismiss |
+| `confidence` | Affidabilità: {value} | Reliability: {value} |
+| `pointAria` | {label}: valence {valence}, energy {energy} | {label}: valence {valence}, energy {energy} |
+
+> **Story 3.3**: `quadrant.high` / `quadrant.low` / `quadrant.valence` e
+> `moods.*` **esistevano già** e sono state usate. Le nuove sono le **8**
+> che la schermata ⑩ rende necessarie: `chart` (il titolo accessibile del
+> grafico), `event` (l'etichetta breve di un evento: la **frase** sta nella
+> descrizione, già resa dal core), `insights` (il titolo della sezione),
+> `correct` / `dismiss` (le due azioni dell'utente accanto a «Conferma»,
+> che è `common.confirm`), `confidence` (l'affidabilità dell'insight),
+> `pointAria` (l'`aria-label` di ogni punto del quadrante) e le due etichette
+> dell'asse della valence.
 
 ### 2.7 `memories.*`
 
@@ -31909,6 +32455,8 @@ statistica e un numero): è il dato che rende l'evento verificabile.
 | `mood.sad` | La tua musica è stata prevalentemente malinconica | Your music was mostly melancholic |
 | `mood.excited` | Periodo ad alta energia | High-energy period |
 | `mood.calm` | Periodo rilassato | Relaxed period |
+| `mood.neutral` | La tua musica è stata prevalentemente neutrale | Your music was mostly neutral |
+| `mood.angry` | La tua musica è stata prevalentemente arrabbiata | Your music was mostly angry |
 | `event.spike_artist` | Hai scoperto {artist} che ha dominato il tuo ascolto | You discovered {artist} who dominated your listening |
 | `event.spike_genre` | Il genere {genre} ha dominato il tuo ascolto | The {genre} genre dominated your listening |
 | `event.valence_drop` | La tua musica è diventata più malinconica | Your music became more melancholic |
@@ -32176,6 +32724,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.13 | Sessione 77 (2026-10-31, issue #233) | **Story 3.1 — Home (⑥) e Timeline (⑦)**: le chiavi delle due schermate **esistevano già** (`home.*`, `timeline.*`) ma mancavano le **8 nuove** che la story rende necessarie — `home.partial` (il messaggio «più dati importi, più la tua storia diventa ricca» dello stato `partial`), `timeline.granularity` (l'etichetta del toggle Anni/Mesi/Settimane/Giorni), `timeline.eras` (la riga delle bande), `timeline.eraDuration` (la durata resa nelle `aria-label` delle EraBand), `timeline.partial`, `timeline.error`, `timeline.retry` e il **nuovo namespace `nav`** (`nav.label`, `nav.home`, `nav.timeline` — la prima navigazione dell'app), dichiarato in §1. I **dati** (nomi dei paesi, titoli dei brani) restano dati e non si traducono |
 | 0.14 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 — Ricordi (⑪) e Share (⑫)**: §2.7 (`memories.*`) le **6 nuove** chiavi del feed — `firstTime`, `loading`, `error`, `loadMore`, `eras`, `erasHint` — più `eraAriaLabel`, `noteLabel` e `noteAriaLabel` (il tagging manuale: il nome dell'era e la nota libera del ricordo); §2.8 (`share.*`) le **5 nuove** chiavi del foglio di condivisione — `html` (l'export statico alternativo), `error`, `retry` e `close` — con la regola di linguaggio delle destinazioni (D-25.2: sono desiderate, non integrazioni) e il fallback delle azioni. §1: il namespace `nav` dichiara anche **Ricordi** (`nav.memories`). I **dati** (nomi delle ere, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
+| 0.15 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 — Esplora (⑨) e Analisi (⑩)**: §2.5 (`explore.*`) le chiavi **esistevano già** e sono state **usate**: l'unica nuova è `listens` (con i plurali `_one`/`_other`, §3), il numero di ascolti che accompanies ogni risultato. §2.6 (`analysis.*`) le chiavi dei quadranti e dei sei mood **esistevano già**; le **otto nuove** sono quelle che la mappa emotiva rende necessarie — `chart`, `event`, `insights`, `correct`, `dismiss`, `confidence`, `pointAria` e le due etichette dell'asse della valence (`quadrant.highValence`, `quadrant.lowValence`). §2.15 (`insight.*`): le **due** frasi che mancavano per i mood senza template — `mood.neutral` e `mood.angry` — perché l'insight in prosa del grafico (`25§7`) non può avere un buco. §1: il namespace `nav` dichiara anche **Esplora** e **Analisi** (`nav.explore`, `nav.analysis`). La **descrizione** degli insight resta una **stringa resa** dal core (D-A.4): `analysis.event` è solo l'etichetta breve della card |
 
 
 
@@ -33233,15 +33782,19 @@ Consegnato: la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scrol
 
 ### Story 3.3 — Esplora + Analisi `[PHASE-3]` `[AREA:ui]` `[PRI:I]` `[SIZE:L]`
 
+**Stato**: 🟡 **IN REVIEW** — implementata nella Sessione 103 (issue **#240**, branch `feat/240-story-3-3---esplora-analisi-schermate-9`). Spec `25-MEMORIES-SHARE-EXPLORE.md` (v1.0 🟢 APPROVED), `06-UX-FLOWS-STATES.md` §2.9-§2.10, `07-UI-SPEC.md` §2.8-§2.9.
+
+Consegnato: la schermata ⑨ **Esplora** (ricerca sul **proprio** catalogo con debounce di 300 ms, cinque tab — Artisti · Brani · Album · Generi · Mood — e i risultati ordinati per `listenCount`) e la schermata ⑩ **Analisi** (il `QuadrantChart` valence/energy con un punto per mese, la **frase in prosa** che accompagna il grafico e gli insight persistiti con le tre azioni dell'utente); il **deep-link interno** dal punto del quadrante alla Timeline (`AppSection` + `AppFocus`, senza router); il mood della settimana letto da `mood_week` e **tradotto** nella shell. **20 test** nuovi.
+
 **Descrizione**: Le schermate di esplorazione (⑨ ricerca, ⑩ quadrante valence/energy) sono il luogo dove l'utente **interroga** il proprio diario. Il criterio di accettazione di questa story non è «un grafico in più»: è l'**insight in prosa** — la stessa analisi raccontata in linguaggio naturale («A marzo 2023 hai ascoltato 47 canzoni malinconiche in due settimane: stava succedendo qualcosa?»). Un grafico senza lettura è l'ennesimo cruscotto; l'«aha moment» è la frase che spiega un periodo.
 
 **Acceptance criteria**:
-- [ ] Schermata ⑨ con search autocomplete sui propri dati
-- [ ] Schermata ⑩ QuadrantChart valence/energy
-- [ ] Click su punto → deep-link timeline
-- [ ] **Insight in prosa**: ogni insight mostrato è accompagnato da una frase generata dai template i18n (`insight.*`), non da un solo valore numerico
-- [ ] Gli insight visualizzati sono **persistiti** (nessuna lettura «a caldo» che non passi dalla tabella `insights`): la story consuma l'output della Story **2.5**
-- [ ] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
+- [x] Schermata ⑨ con search autocomplete sui propri dati
+- [x] Schermata ⑩ QuadrantChart valence/energy
+- [x] Click su punto → deep-link timeline
+- [x] **Insight in prosa**: ogni insight mostrato è accompagnato da una frase generata dai template i18n (`insight.*`), non da un solo valore numerico
+- [x] Gli insight visualizzati sono **persistiti** (nessuna lettura «a caldo» che non passi dalla tabella `insights`): la story consuma l'output della Story **2.5**
+- [x] Il percorso è interamente locale: nessuna richiesta di rete per cercare o spiegare
 
 **Spec**: **`docs/25-MEMORIES-SHARE-EXPLORE.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `docs/06-UX-FLOWS-STATES.md` §2.9, §2.10 · `docs/07-UI-SPEC.md` §2.8, §2.9 · `docs/22-COMPETITIVE-POSITIONING.md` §8
 **Issue**: #240 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)

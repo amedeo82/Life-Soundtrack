@@ -1,13 +1,19 @@
 /**
- * Shell dell'app — Story 3.1.
+ * Shell dell'app — Story 3.1 (Home, Timeline, Ricordi) e Story 3.3
+ * (Esplora, Analisi).
  *
- * La prima navigazione dell'app: Home (⑥) e Timeline (⑦), con una
- * **NavBar** su desktop e una **TabBar** su mobile (`15-DESIGN-SYSTEM.md` §5,
- * `15§10`). Le altre schermate (⑧ dettaglio era, ⑨ esplora, ⑩ analisi,
- * ⑪ ricordi) sono delle Story 3.2 e 3.3: qui ci sono solo le due che esistono.
+ * La prima navigazione dell'app: Home (⑥), Timeline (⑦) e Ricordi (⑪), con
+ * una **NavBar** su desktop e una **TabBar** su mobile (`15-DESIGN-SYSTEM.md`
+ * §5, `15§10`). Dalla Story 3.3 ci sono anche Esplora (⑨) e Analisi (⑩).
  *
  * I dati arrivano da `useHomeTimelineData`, l'unico punto che conosce il
- * database: la shell non sa nulla di Dexie.
+ * database: la shell non sa nulla di Dexie. Esplora e Analisi hanno i loro
+ * hook (`useExploreData`, `useAnalysisData`), che leggono lo stesso
+ * database locale.
+ *
+ * La navigazione è a **stato**, senza librerie di routing (D-25.1): il
+ * progetto non ha un router e non ne ha bisogno. Il deep-link fra le
+ * schermate è un contratto interno (`AppFocus`).
  */
 
 import { useState } from 'react';
@@ -15,36 +21,23 @@ import { useT } from '../i18n';
 import { Home } from './Home';
 import { Timeline } from './Timeline';
 import { Memories } from './Memories';
+import { ExploreScreen } from './ExploreScreen';
+import { AnalysisScreen } from './AnalysisScreen';
 import { useHomeTimelineData } from '../hooks/useHomeTimelineData';
 import { granularityForSpan, type Granularity } from './homeTimelineModel';
+import type { AppFocus, AppSection } from './appNavigation';
 
-/**
- * Le schermate raggiungibili dalla shell.
- *
- * La navigazione è a **stato**, senza librerie di routing (D-25.1): il
- * progetto non ha un router e non ne ha bisogno. Le schermate della Story
- * 3.3 (Esplora, Analisi) arriveranno con la loro.
- */
-export type AppSection = 'home' | 'timeline' | 'memories';
-
-/**
- * Il contesto da passare a un'altra schermata (D-25.1).
- *
- * È il deep-link **interno**: l'utente clicca un punto e la Timeline mette
- * in evidenza l'era o il periodo. Non c'è un URL: c'è uno stato.
- */
-export interface AppFocus {
-  /** Che cosa è evidenziato. */
-  readonly kind: 'era' | 'track' | 'period';
-  /** L'id dell'oggetto (l'id dell'era, per esempio). */
-  readonly id: string;
-  /** Il timestamp UTC del periodo. */
-  readonly at: number;
-}
+export type { AppFocus, AppSection } from './appNavigation';
 
 export function AppShell() {
   const t = useT();
   const [section, setSection] = useState<AppSection>('home');
+  /**
+   * Il contesto evidenziato nella Timeline: è il **deep-link interno**
+   * (D-25.1). Un click su un punto dell'Analisi porta alla Timeline con il
+   * periodo in evidenza.
+   */
+  const [focus, setFocus] = useState<AppFocus | null>(null);
   // `null` = l'utente non ha ancora scelto: la granularità segue la durata
   // della storia (una vita lunga si legge per anni, poche settimane per giorni).
   const [chosen, setChosen] = useState<Granularity | null>(null);
@@ -55,6 +48,12 @@ export function AppShell() {
   const visibleRange = data.range
     ? { start: data.range.start, end: data.range.end }
     : { start: Date.now() - 86_400_000, end: Date.now() };
+
+  /** Il deep-link: si cambia sezione e si tiene il contesto. */
+  const goToFocus = (next: AppFocus) => {
+    setFocus(next);
+    setSection('timeline');
+  };
 
   return (
     <div className="app-shell" data-testid="app-shell">
@@ -86,6 +85,24 @@ export function AppShell() {
         >
           {t('nav.memories')}
         </button>
+        <button
+          type="button"
+          className="app-shell__nav-item"
+          aria-current={section === 'explore' ? 'page' : undefined}
+          data-testid="nav-explore"
+          onClick={() => setSection('explore')}
+        >
+          {t('nav.explore')}
+        </button>
+        <button
+          type="button"
+          className="app-shell__nav-item"
+          aria-current={section === 'analysis' ? 'page' : undefined}
+          data-testid="nav-analysis"
+          onClick={() => setSection('analysis')}
+        >
+          {t('nav.analysis')}
+        </button>
       </nav>
 
       {section === 'home' ? (
@@ -94,7 +111,7 @@ export function AppShell() {
           stats={data.stats}
           barWeek={data.barWeek}
           memory={data.memory}
-          weekMoodLabel={data.weekMoodLabel}
+          weekMoodLabel={data.weekMood ? t(`analysis.moods.${data.weekMood}`) : null}
         />
       ) : section === 'timeline' ? (
         <Timeline
@@ -105,10 +122,15 @@ export function AppShell() {
           eras={data.eras}
           contexts={data.contexts}
           visibleRange={visibleRange}
+          focus={focus}
           onGranularityChange={setChosen}
         />
-      ) : (
+      ) : section === 'memories' ? (
         <Memories />
+      ) : section === 'explore' ? (
+        <ExploreScreen onFocus={goToFocus} />
+      ) : (
+        <AnalysisScreen onFocus={goToFocus} />
       )}
     </div>
   );

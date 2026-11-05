@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.14 · Sessione 97 (2026-11-03, issue #241 — Story 3.2)
+> Status: 🟡 DRAFT · Versione 0.15 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -14,7 +14,7 @@
 |-----------|-----|
 | `onboarding` | Schermate ①-④ |
 | `home` | Schermata ⑥ |
-| `nav` | Navigazione principale (Home / Timeline / Ricordi — Story 3.1, 3.2) |
+| `nav` | Navigazione principale (Home / Timeline / Ricordi / Esplora / Analisi — Story 3.1, 3.2, 3.3) |
 | `timeline` | Schermata ⑦ |
 | `era` | Schermata ⑧ |
 | `explore` | Schermata ⑨ |
@@ -128,6 +128,12 @@
 | `tab.genres` | Generi | Genres |
 | `tab.mood` | Mood | Mood |
 | `noResults` | Nessun risultato per "{query}" | No results for "{query}" |
+| `listens` (plurale) | {count} ascolto / {count} ascolti | {count} play / {count} plays |
+
+> **Story 3.3**: le chiavi di `explore.*` **esistevano già** e sono state
+> **usate**, non duplicate. L'unica chiave nuova è `listens` (con i suoi
+> plurali `_one` / `_other`, `08§3`): il numero di ascolti che accompanies
+> ogni risultato.
 
 ### 2.6 `analysis.*`
 
@@ -137,6 +143,8 @@
 | `quadrant.high` | ALTA ENERGIA | HIGH ENERGY |
 | `quadrant.low` | BASSA ENERGIA | LOW ENERGY |
 | `quadrant.valence` | VALENCE → | VALENCE → |
+| `quadrant.highValence` | VALENCE ALTA | HIGH VALENCE |
+| `quadrant.lowValence` | VALENCE BASSA | LOW VALENCE |
 | `moods.sad` | Triste | Sad |
 | `moods.angry` | Arrabbiato | Angry |
 | `moods.neutral` | Neutro | Neutral |
@@ -145,6 +153,23 @@
 | `moods.excited` | Eccitato | Excited |
 | `valenceOverTime` | Valence nel tempo | Valence over time |
 | `energyOverTime` | Energy nel tempo | Energy over time |
+| `chart` | La mappa valence/energia | The valence/energy map |
+| `event` | Evento | Event |
+| `insights` | Gli insight | The insights |
+| `correct` | Correggi | Fix |
+| `dismiss` | Ignora | Dismiss |
+| `confidence` | Affidabilità: {value} | Reliability: {value} |
+| `pointAria` | {label}: valence {valence}, energy {energy} | {label}: valence {valence}, energy {energy} |
+
+> **Story 3.3**: `quadrant.high` / `quadrant.low` / `quadrant.valence` e
+> `moods.*` **esistevano già** e sono state usate. Le nuove sono le **8**
+> che la schermata ⑩ rende necessarie: `chart` (il titolo accessibile del
+> grafico), `event` (l'etichetta breve di un evento: la **frase** sta nella
+> descrizione, già resa dal core), `insights` (il titolo della sezione),
+> `correct` / `dismiss` (le due azioni dell'utente accanto a «Conferma»,
+> che è `common.confirm`), `confidence` (l'affidabilità dell'insight),
+> `pointAria` (l'`aria-label` di ogni punto del quadrante) e le due etichette
+> dell'asse della valence.
 
 ### 2.7 `memories.*`
 
@@ -397,6 +422,8 @@ statistica e un numero): è il dato che rende l'evento verificabile.
 | `mood.sad` | La tua musica è stata prevalentemente malinconica | Your music was mostly melancholic |
 | `mood.excited` | Periodo ad alta energia | High-energy period |
 | `mood.calm` | Periodo rilassato | Relaxed period |
+| `mood.neutral` | La tua musica è stata prevalentemente neutrale | Your music was mostly neutral |
+| `mood.angry` | La tua musica è stata prevalentemente arrabbiata | Your music was mostly angry |
 | `event.spike_artist` | Hai scoperto {artist} che ha dominato il tuo ascolto | You discovered {artist} who dominated your listening |
 | `event.spike_genre` | Il genere {genre} ha dominato il tuo ascolto | The {genre} genre dominated your listening |
 | `event.valence_drop` | La tua musica è diventata più malinconica | Your music became more melancholic |
@@ -664,3 +691,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.13 | Sessione 77 (2026-10-31, issue #233) | **Story 3.1 — Home (⑥) e Timeline (⑦)**: le chiavi delle due schermate **esistevano già** (`home.*`, `timeline.*`) ma mancavano le **8 nuove** che la story rende necessarie — `home.partial` (il messaggio «più dati importi, più la tua storia diventa ricca» dello stato `partial`), `timeline.granularity` (l'etichetta del toggle Anni/Mesi/Settimane/Giorni), `timeline.eras` (la riga delle bande), `timeline.eraDuration` (la durata resa nelle `aria-label` delle EraBand), `timeline.partial`, `timeline.error`, `timeline.retry` e il **nuovo namespace `nav`** (`nav.label`, `nav.home`, `nav.timeline` — la prima navigazione dell'app), dichiarato in §1. I **dati** (nomi dei paesi, titoli dei brani) restano dati e non si traducono |
 | 0.14 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 — Ricordi (⑪) e Share (⑫)**: §2.7 (`memories.*`) le **6 nuove** chiavi del feed — `firstTime`, `loading`, `error`, `loadMore`, `eras`, `erasHint` — più `eraAriaLabel`, `noteLabel` e `noteAriaLabel` (il tagging manuale: il nome dell'era e la nota libera del ricordo); §2.8 (`share.*`) le **5 nuove** chiavi del foglio di condivisione — `html` (l'export statico alternativo), `error`, `retry` e `close` — con la regola di linguaggio delle destinazioni (D-25.2: sono desiderate, non integrazioni) e il fallback delle azioni. §1: il namespace `nav` dichiara anche **Ricordi** (`nav.memories`). I **dati** (nomi delle ere, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
+| 0.15 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 — Esplora (⑨) e Analisi (⑩)**: §2.5 (`explore.*`) le chiavi **esistevano già** e sono state **usate**: l'unica nuova è `listens` (con i plurali `_one`/`_other`, §3), il numero di ascolti che accompanies ogni risultato. §2.6 (`analysis.*`) le chiavi dei quadranti e dei sei mood **esistevano già**; le **otto nuove** sono quelle che la mappa emotiva rende necessarie — `chart`, `event`, `insights`, `correct`, `dismiss`, `confidence`, `pointAria` e le due etichette dell'asse della valence (`quadrant.highValence`, `quadrant.lowValence`). §2.15 (`insight.*`): le **due** frasi che mancavano per i mood senza template — `mood.neutral` e `mood.angry` — perché l'insight in prosa del grafico (`25§7`) non può avere un buco. §1: il namespace `nav` dichiara anche **Esplora** e **Analisi** (`nav.explore`, `nav.analysis`). La **descrizione** degli insight resta una **stringa resa** dal core (D-A.4): `analysis.event` è solo l'etichetta breve della card |

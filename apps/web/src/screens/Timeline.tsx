@@ -28,6 +28,7 @@ import {
   type SeriesPoint,
   type VisibleRange,
 } from './homeTimelineModel';
+import type { AppFocus } from './appNavigation';
 
 /** Stati della Timeline (`06§2.7`). */
 export type TimelineState = 'empty' | 'no-features' | 'partial' | 'loading' | 'ready' | 'error';
@@ -46,6 +47,13 @@ export interface TimelineProps {
   contexts?: readonly ContextRibbonPeriod[];
   /** Intervallo visibile (zoom) dei dati. */
   visibleRange: VisibleRange;
+  /**
+   * Il contesto evidenziato (deep-link interno, D-25.1).
+   *
+   * Arriva dal click su un punto dell'Analisi (⑩): la Timeline mette in
+   * evidenza l'era che contiene il periodo.
+   */
+  focus?: AppFocus | null | undefined;
   /** Callback del cambio di granularità. */
   onGranularityChange?: (granularity: Granularity) => void;
   /** Callback alla selezione di un'era (schermata ⑧). */
@@ -64,6 +72,7 @@ export function Timeline({
   eras,
   contexts = [],
   visibleRange,
+  focus,
   onGranularityChange,
   onEraSelect,
   onContextSelect,
@@ -75,27 +84,36 @@ export function Timeline({
 
   const span = Math.max(1, visibleRange.end - visibleRange.start);
 
-  /** La banda evidenziata: per hover diretto, o per il bucket sotto il puntatore. */
+  /** La banda evidenziata: per hover diretto, per il bucket sotto il puntatore, o per il deep-link. */
   const activeEraId = useMemo(() => {
     if (hoveredEraId) return hoveredEraId;
-    if (hoveredIndex === null) return null;
+    if (hoveredIndex === null) {
+      // Il deep-link (D-25.1): l'era che contiene il periodo evidenziato.
+      if (!focus) return null;
+      const era = eras.find((candidate) => focus.at >= candidate.start && focus.at < candidate.end);
+      return era?.id ?? null;
+    }
     const point = volume[hoveredIndex];
     if (!point) return null;
     const era = eras.find(
       (candidate) => point.start >= candidate.start && point.start < candidate.end,
     );
     return era?.id ?? null;
-  }, [hoveredEraId, hoveredIndex, volume, eras]);
+  }, [hoveredEraId, hoveredIndex, volume, eras, focus]);
 
-  /** Il bucket evidenziato: per hover diretto, o per l'era sotto il puntatore. */
+  /** Il bucket evidenziato: per hover diretto, per l'era sotto il puntatore, o per il deep-link. */
   const activeIndex = useMemo(() => {
     if (hoveredIndex !== null) return hoveredIndex;
-    if (!activeEraId) return null;
+    if (!activeEraId) {
+      if (!focus) return null;
+      const index = volume.findIndex((point) => point.start <= focus.at && focus.at < point.end);
+      return index >= 0 ? index : null;
+    }
     const era = eras.find((candidate) => candidate.id === activeEraId);
     if (!era) return null;
     const index = volume.findIndex((point) => point.start >= era.start && point.start < era.end);
     return index >= 0 ? index : null;
-  }, [hoveredIndex, activeEraId, eras, volume]);
+  }, [hoveredIndex, activeEraId, eras, volume, focus]);
 
   if (state === 'loading') {
     return (
