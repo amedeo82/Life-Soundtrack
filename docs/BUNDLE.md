@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 18:09
+> Data: 2026-11-05 11:36
 > Totale file: 194
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 193 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2747.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-04 18:09
+- Dimensione totale: 2753.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-05 11:36
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.46 — Sessione 100 (2026-11-04)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.47 — Sessione 101 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -73,6 +73,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
+| I fixture contengono **solo dati sintetici**: mai un IP pubblico routable (fuori dai range documentazione RFC 5737), mai una email reale, mai un path che rivela il nome utente | `check-fixtures-privacy.mjs` (+ scenario negativo `test-fixtures-privacy-gate.mjs`) | issue #309 (repository pubblico: ogni file tracciato è scaricabile da chiunque) |
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 | I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
@@ -82,6 +83,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
 node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
 node scripts/check-encoding.mjs                # encoding dei file tracciati, exit 0 = nessun mojibake/BOM
+node scripts/check-fixtures-privacy.mjs        # fixture solo sintetici, exit 0 = nessun dato reale
 ```
 
 **Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
@@ -920,7 +922,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### 🏎️ La CI: 15 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74 + Sessione 90)*
 
-> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 38 step): cosa gira,
+> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 40 step): cosa gira,
 > quando, con quali permessi e con quale exit code. Qui solo l'invariante operativo:
 >
 > - le modifiche a `docs/` e agli script di validazione girano su `pull_request`;
@@ -1282,35 +1284,26 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S100)
+**Analisi della sessione corrente** (S101)
 
-**Numeri.** Nessuna story implementata: è lavoro di **protocollo e CI**. La percentuale di
-avanzamento resta **77%** (23 story completate su 30, effort pesato 80%, 7 step rimanenti):
-nessuna state file di story è stata creata o modificata in questa sessione.
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Segreti trovati in 689 commit | **0** |
+| 2 | File con PII reale | **0** |
+| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
+| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
+| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
+| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
+| 7 | Step CI | 38 → **40** |
+| 8 | Righe del catalogo §9.10 | 39 → **41** |
 
-**Cosa è pronto.** Il divario fra i gate locali e i gate della CI è chiuso: la worktree
-nasce con `node_modules` (l'hook `commit-msg` smette di saltare commitlint), e
-`agent-pr.ps1` verifica Conventional Commits e i gate dei workflow **prima** di aprire la
-PR. Il cleanup post-merge è robusto con `node_modules` presente (L0 + L4). I test di
-regressione coprono i tre script: `test-setup-worktree.sh` (11 scenari, S9..S11 nuovi),
-`test-post-merge.sh` (16 scenari, T15 e T16 nuovi), `test-agent-pr.sh` (11 scenari, T3, T4 e T5 nuovi)
-nuovi).
+**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
+stessa PR.
 
-**Cosa manca.** La suite offline degli script di protocollo (`agent-claim.ps1`,
-`agent-pr.ps1`) è ancora quella dell'ADR-0014 (🟡 DRAFT, issue #304): i gate aggiunti qui
-sono **verificati da test con mock**, non dalla suite offline col mock di `gh` su PATH. La
-ratifica dell'ADR-0014 resta al project owner.
-
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono il file di
-sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). Il bundle
-è stato rigenerato dopo l'agregator (ordine aggregator → bundle).
-
-**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs` → 6 check,
-0 falliti · `node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1
--Check` → exit 0 · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
-→ 0 violazioni · `bash scripts/test-setup-worktree.sh` → 11/11 ·
-`bash scripts/test-post-merge.sh` → 56 assert, 0 falliti ·
-`bash scripts/test-agent-pr.sh` → 11/11.
+**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
+repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
+flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
+gia' puntare al repository pubblico — cosa che già fa.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2096,7 +2089,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.46 | Protocollo per agenti — **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.47 | Protocollo per agenti — **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -2203,6 +2196,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 98 | Correzione dei drift di concorrenza (claim, NEXT-STEP, prosa README) | 🟢 | ✅ | #303 |
 | 99 | Spec delle suite di test offline per gli script di protocollo (ADR-0014) | 🟢 | ✅ | #305 |
 | 100 | I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306) | 🟢 | ✅ | #307 |
+| 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2242,9 +2236,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **77** (merge: 76)
+- Sessioni migrate in state/sessions: **78** (merge: 76)
 - Stories migrate in state/stories: **28** (done: 23)
-- Ultima sessione migrata: **S100** - I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306)
+- Ultima sessione migrata: **S101** - Rendere il repository pubblico: hardening sicurezza e privacy
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2291,35 +2285,26 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S100)
+**Analisi della sessione corrente** (S101)
 
-**Numeri.** Nessuna story implementata: è lavoro di **protocollo e CI**. La percentuale di
-avanzamento resta **77%** (23 story completate su 30, effort pesato 80%, 7 step rimanenti):
-nessuna state file di story è stata creata o modificata in questa sessione.
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Segreti trovati in 689 commit | **0** |
+| 2 | File con PII reale | **0** |
+| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
+| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
+| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
+| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
+| 7 | Step CI | 38 → **40** |
+| 8 | Righe del catalogo §9.10 | 39 → **41** |
 
-**Cosa è pronto.** Il divario fra i gate locali e i gate della CI è chiuso: la worktree
-nasce con `node_modules` (l'hook `commit-msg` smette di saltare commitlint), e
-`agent-pr.ps1` verifica Conventional Commits e i gate dei workflow **prima** di aprire la
-PR. Il cleanup post-merge è robusto con `node_modules` presente (L0 + L4). I test di
-regressione coprono i tre script: `test-setup-worktree.sh` (11 scenari, S9..S11 nuovi),
-`test-post-merge.sh` (16 scenari, T15 e T16 nuovi), `test-agent-pr.sh` (11 scenari, T3, T4 e T5 nuovi)
-nuovi).
+**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
+stessa PR.
 
-**Cosa manca.** La suite offline degli script di protocollo (`agent-claim.ps1`,
-`agent-pr.ps1`) è ancora quella dell'ADR-0014 (🟡 DRAFT, issue #304): i gate aggiunti qui
-sono **verificati da test con mock**, non dalla suite offline col mock di `gh` su PATH. La
-ratifica dell'ADR-0014 resta al project owner.
-
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono il file di
-sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). Il bundle
-è stato rigenerato dopo l'agregator (ordine aggregator → bundle).
-
-**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs` → 6 check,
-0 falliti · `node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1
--Check` → exit 0 · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
-→ 0 violazioni · `bash scripts/test-setup-worktree.sh` → 11/11 ·
-`bash scripts/test-post-merge.sh` → 56 assert, 0 falliti ·
-`bash scripts/test-agent-pr.sh` → 11/11.
+**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
+repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
+flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
+gia' puntare al repository pubblico — cosa che già fa.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -12748,6 +12733,89 @@ sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). 
 - `scripts/test-agent-pr.sh`: scenari T3, T4 e T5 + mock `pnpm`/`bash` + **correzione del
   `cleanup` distruttivo**
 - `docs/state/sessions/100-gate-locali-parita-ci.md` (questo file)
+```
+
+### Sessione 101 - Rendere il repository pubblico: hardening sicurezza e privacy
+
+- **Data**: 2026-11-05
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #-)
+- **Claim**: `kilo-amedeovecchiemilcoms-309`
+
+```
+
+## Sintesi
+
+Il project owner ha deciso di rendere **pubblico** il repository. La ragione
+non è solo economica: su un repository **privato** con piano Free la branch
+protection e i rulesets **non sono disponibili** (`branches/main/protection`
+risponde 403: *"Upgrade to GitHub Pro or make this repository public to enable
+this feature"*). Quindi i 16 job della CI, per quanto ben costruiti, **non
+bloccavano alcuna merge**: erano un report, non un gate. Su un repository
+pubblico con piano Free la branch protection è inclusa e il protocollo
+dichiarato in `AGENTS.md` diventa finalmente **enforceable**.
+
+Prima del flip questa sessione ha eseguito un audit **read-only** dell'intero
+repository (689 commit, tutti i file tracciati, tutti i file mai cancellati
+nella history) e chiuso i buchi che il flip avrebbe esposto.
+
+### Audit: esito
+
+| Classe | Esito |
+|--------|-------|
+| Segreti / credential | **nessuno** — in 689 commit, in tutti i file tracciati, in tutti i file cancellati (`IDEA.md`, `.husky/commit-msg`, `.husky/pre-commit` ispezionati) |
+| PII reale | **nessuna** — solo `test@example.com`, `dp3@last.fm` (email di supporto **pubblica** di Last.fm), ID di run, nomi di pacchetti npm |
+| Fixture | 100% sintetici, generati da `scripts/generate-fixtures.mjs` |
+| Encoding | 0 errori al gate `check-encoding.mjs` (11 file in allowlist, esempi documentati) |
+| Licenze | nessuna incompatibilità con AGPL-3.0 |
+| Link AGPL §13 | l'app dichiara già `github.com/amedeo82/Life-Soundtrack` (`apps/web/src/components/About.tsx:74`) — da privato il link non era fruibile: **il flip chiude un gap di conformità**, non lo crea |
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-101.1 | L'email personale (`AMEDEO.VECCHI82@GMAIL.COM`, in 252 commit) **si accetta**, con `.mailmap` | decisione del project owner (2026-11-05). Il rewrite della history cambierebbe **tutti** gli SHA: i 38 riferimenti `merged_commit` in `docs/state/` punterebbero a commit inesistenti e il gate fail-closed `check-merge-state.mjs` (che li confronta con lo stato reale delle PR letto dall'API) renderebbe `main` rosso. Richiederebbe inoltre un force-push su `main`, vietato dal protocollo. L'identità è già pubblica nel profilo e nel contenuto del repo: non è un segreto, è il contatto del progetto open-source |
+| D-101.2 | La regola «mai committare dati reali di ascolto» scende a L3 con un gate | `09-PRIVACY-SECURITY.md` §10.1 era **solo prosa**: nessun gate la verificava. Con il repo pubblico ogni file tracciato è scaricabile da chiunque, quindi la finestra per committare per errore un export reale non è più chiusa dal perimetro del repo privato. Contra il principio ADR-0012: *una regola senza gate è un consiglio* |
+| D-101.3 | Il gate dei fixture è **bloccante** e **fail-closed** | un gate che dichiarasse «pulito» senza aver guardato sarebbe peggio di nessun gate: exit 2 su errore di ambiente, mai 0. E ha il suo scenario negativo (`test-fixtures-privacy-gate.mjs`, 6 scenari): *un gate che passa sempre non è un gate* (lesson 43-1) |
+| D-101.4 | Gli IP routable reali nei fixture sono sostituiti con range RFC 5737 | `92.40.100.50`, `85.20.40.10`, `78.195.10.20` sono IP **assegnati a ISP reali**: potrebbero identificare una persona. I range documentazione (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) sono gli unici ammessi. La semantica dei test è invariata: l'IP resta pubblico e non-documentato |
+| D-101.5 | I workflow che scrivono su `main` o sulle issue **saltano le PR da fork** | con il repo pubblico chiunque può aprire una PR da un fork. `post-merge.yml` (`contents: write`) scriverebbe su `main` usando l'`head.ref` di un branch esterno; `auto-status-done.yml` (`issues: write`) transizionerebbe issue **arbitrarie** perché il body di una PR è input non fidabile quando la PR viene da fuori. Stesso guard di `auto-branch-cleanup.yml`: `head.repo.full_name == base.repo.full_name` |
+| D-101.6 | `pull_request`, **non** `pull_request_target` | `pull_request_target` gira con i permessi del branch BASE ma con il codice del fork: è la classica *pwn request*. `pull_request` gira con i permessi del fork, read-only: nessuna escalation. La scelta è deliberata, non un caso |
+| D-101.7 | Il NOTICE dichiara la **realtà** su essentia.js | dichiarava un bundle che nel repository non è presente (non è in `package.json`, nel lockfile né in `node_modules`). In un repository pubblico un NOTICE falso è un problema di conformità, non un dettaglio di stile. Ora lo stato è `NOT yet distributed`, come l'entry DB-IP che era già onesta |
+| D-101.8 | `.gitignore` chiude `.env*`, chiavi e certificati | con il repo pubblico un `.env` committato per errore è un segreto pubblico. Il perimetro non deve dipendere dalla memoria di chi committa |
+| D-101.9 | Il ridisegno della CI a 3 corsie **non** è in scope | con il repo pubblico i minuti Actions sono **illimitati e gratuiti**: il vincolo economico che lo rendeva urgente è scomparso. Resta un'ottimizzazione di wall-clock, non un blocco. La struttura a 16 job resta **invariata**: nessun workflow è stato rimosso, nessun gate è stato perso |
+
+## Cosa cambia per il protocollo
+
+Nessuna regola è stata rimossa e nessun gate è stato perso. Sono state **aggiunte**
+tre cose:
+
+1. `check-fixtures-privacy.mjs` + il suo scenario negativo — nuovi, bloccanti
+2. i guard di fork in `post-merge.yml` e `auto-status-done.yml`
+3. `.mailmap`, `.gitignore` e la correzione del NOTICE
+
+La parità locale ↔ CI (issue #306) è mantenuta: i due nuovi gate girano sia nel
+job `gates-docs` della CI sia nella batteria locale di `scripts/agent-pr.ps1`.
+
+## Analisi di avanzamento
+
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Segreti trovati in 689 commit | **0** |
+| 2 | File con PII reale | **0** |
+| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
+| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
+| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
+| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
+| 7 | Step CI | 38 → **40** |
+| 8 | Righe del catalogo §9.10 | 39 → **41** |
+
+**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
+stessa PR.
+
+**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
+repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
+flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
+gia' puntare al repository pubblico — cosa che già fa.
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
@@ -32095,7 +32163,7 @@ Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
 | T2 | XSS che legge IndexedDB | Bassa | Alto | CSP strict, nessun innerHTML con dati utente, sanitize input |
 | T3 | Estensione browser malevola che legge IndexedDB | Media | Alto | Documentare il rischio; consigliare profile browser dedicato |
 | T4 | Leak via chiamate enrichment | Bassa | Medio | Inviare solo titolo+artista; nessun dato utente; log pubblico delle chiamate |
-| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali |
+| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali, **con gate bloccante** `check-fixtures-privacy.mjs` (issue #309) |
 | T6 | Sync cloud compromesso (Fase 2) | Bassa | Alto | E2E encryption, chiavi solo sul dispositivo |
 | T7 | Inferenze usate contro l'utente (es. assicurazioni) | Bassa | Alto | Dati mai inviati; disclaimer; export escluso insight su richiesta |
 
@@ -32103,8 +32171,25 @@ Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
 
 **Mai committare dati reali di ascolto nel repository.** I fixture in
 `fixtures/` sono sintetici. Ogni PR che aggiunga dati reali va rifiutata.
-Aggiungere check CI che scansioni i fixture per pattern sospetti (IP reali,
-email).
+
+*Gate (issue #309, Sessione 101):* la regola è verificata automaticamente da
+`scripts/check-fixtures-privacy.mjs` — bloccante nel job `gates-docs` della CI e
+nella batteria locale di `scripts/agent-pr.ps1`. Il gate scansiona i fixture
+alla ricerca di marker di dati reali: **IPv4 routable non-documentazione**
+(gli unici ammessi sono i range RFC 5737 `192.0.2.0/24`, `198.51.100.0/24`,
+`203.0.113.0/24` e i range privati/riservati), **email non-placeholder**
+(domini ammessi: `example.com`/`.org`/`.net`/`.edu`, `.invalid`, `.test`,
+`.localhost`, `*.noreply.github.com`) e **path che rivelano il nome utente**
+(`C:\Users\<utente>\…`, `/home/<utente>/…`). È read-only e **fail-closed**:
+exit 1 = dati reali rilevati, exit 2 = errore di ambiente (mai 0 senza aver
+guardato). Il suo scenario negativo `scripts/test-fixtures-privacy-gate.mjs`
+(6 scenari) dimostra che il gate fallisce quando deve — un gate che passa
+sempre non è un gate.
+
+La regola è diventata bloccante con il repository **pubblico**: fino ad allora
+ogni file tracciato era scaricabile solo da chi avesse accesso al repository,
+mentre da quel momento chiunque può leggerlo. Per questo la regola scende da
+L2 (protocollo) a L3 (applicazione).
 
 ## 11. Checklist compliance pre-lancio
 
@@ -34075,6 +34160,13 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > un elenco assente. Ora le righe sono **39** (38 gate + l'agregatore `quality`).
 > **Sessione 93 (issue #290)**: aggiunto il gate «wiring degli hook» (`test-hook-wiring.sh`)
 > → **39 righe**, **38 step**.
+> **Sessione 101 (issue #309)**: aggiunti i 2 step del gate «privacy dei fixture»
+> (`check-fixtures-privacy.mjs` + il suo scenario negativo `test-fixtures-privacy-gate.mjs`) nel
+> job `gates-docs` → **41 righe**, **40 step**. Il **numero di job non cambia** (15): i due step
+> sono dentro `gates-docs`, che già gira su `pull_request`. La regola che verifica è «mai
+> committare dati reali di ascolto» (`09-PRIVACY-SECURITY.md` §10.1), che fino a questa Sessione
+> era **solo prosa**: con il repository pubblico ogni file tracciato è scaricabile da chiunque,
+> quindi la regola scende a L3 e deve avere un gate che la faccia rispettare.
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
@@ -34125,6 +34217,8 @@ protection può interpretare un check saltato come successo.
 | 37 | `gates-portability` | `Il bundle è in sync con lo stato committato` (`check-generators-portable.mjs --bundle-check-only`) | solo PR | sì | **#284** |
 | 38 | `gates-portability-compare` | `I generatori producono gli stessi byte su ogni sistema operativo` (`check-generators-portable.mjs --compare`) | solo PR | sì | **#284** |
 | 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
+| 40 | `gates-docs` | `Privacy dei fixture` (`check-fixtures-privacy.mjs`) | solo PR | sì | **#309** |
+| 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -51850,6 +51944,21 @@ if (-not $SkipChecks) {
     & $node (Join-Path $repoRoot "scripts/check-workflow-syntax.mjs") | Out-Host
     if ($LASTEXITCODE -ne 0) { $failures += "check-workflow-syntax.mjs" }
 
+    # --- Gate "privacy dei fixture" (job `gates-docs`, issue #309) ---
+    # La regola "mai committare dati reali di ascolto" era solo prosa: con il
+    # repository pubblico ogni file tracciato e' scaricabile da chiunque, quindi
+    # la regola scende a L3 e deve avere un gate. Il gate e' un modulo built-in
+    # di node: sempre eseguibile, read-only, fail-closed.
+    #
+    # Si esegue anche il suo scenario NEGATIVO (lesson 43-1: un gate che passa
+    # sempre non e' un gate): i due moduli coprono i gate locali che la CI
+    # esegue, come richiesto dalla parita' locale <-> CI (issue #306).
+    & $node (Join-Path $repoRoot "scripts/check-fixtures-privacy.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "check-fixtures-privacy.mjs" }
+
+    & $node (Join-Path $repoRoot "scripts/test-fixtures-privacy-gate.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "test-fixtures-privacy-gate.mjs" }
+
     # Test FUNZIONALE del writer post-merge: e' il gate che ha reso rossa la
     # PR #305 (un numero di sessione duplicato nel fixture faceva fallire
     # `aggregate-state.ps1 -Check` dentro il clone temporaneo del test).
@@ -53385,6 +53494,25 @@ jobs:
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 -Check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
+      # Issue #309 (repository pubblico): la regola "mai committare dati reali
+      # di ascolto" (docs/09-PRIVACY-SECURITY.md §10.1) era SOLO prosa: nessun
+      # gate la verificava. Con il repo pubblico ogni file tracciato e'
+      # scaricabile da chiunque, quindi la regola scende a L3.
+      #
+      # Il gate scansiona i fixture alla ricerca di marker di dati reali:
+      # IPv4 routable non-documentazione (RFC 5737), email non-placeholder,
+      # path che rivelano il nome utente della macchina. Fail-closed:
+      # exit 1 = dati reali, exit 2 = errore di ambiente (mai 0 per non aver
+      # guardato). Bloccante: un fixture con un IP reale non deve passare.
+      - name: Privacy dei fixture (issue #309)
+        run: node scripts/check-fixtures-privacy.mjs
+
+      # Lo scenario NEGATIVO del gate: dimostra che il gate fallisce quando
+      # deve (lesson 43-1: un gate che passa sempre non e' un gate). Copre i
+      # 6 scenari T1..T6 con directory temporanee.
+      - name: Gate "privacy dei fixture" - scenario negativo (issue #309)
+        run: node scripts/test-fixtures-privacy-gate.mjs
+
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
       # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
@@ -54064,6 +54192,23 @@ concurrency:
   group: main-writer
   cancel-in-progress: false
 
+# GUARD DI FORK (issue #309 — il repository diventa pubblico).
+#
+# Con il repository pubblico chiunque puo' aprire una PR da un fork. Il
+# trigger `pull_request: closed` scatta ANCHE per una PR da fork mergiata, e
+# questo workflow ha `contents: write`: il writer scriverebbe su `main` usando
+# il `head.ref` di un branch che non e' del repository.
+#
+# Il guard e' lo stesso di `auto-branch-cleanup.yml`: si opera solo quando
+# `head.repo.full_name == base.repo.full_name`. Una PR da fork non produce
+# una story del progetto, quindi non ha nulla daApplicare allo stato: skip e'
+# il comportamento corretto, non un caso limite.
+#
+# Nota: `pull_request` (NON `pull_request_target`) e' la scelta deliberata:
+# `pull_request_target` gira con i permessi del branch BASE ma con il codice
+# del fork, che e' la classica "pwn request". Qui il codice gira con i
+# permessi del fork e i permessi sono read-only: nessuna escalation.
+
 permissions:
   contents: write
   pull-requests: read
@@ -54072,7 +54217,12 @@ permissions:
 jobs:
   write:
     # Solo PR effettivamente mergiate; il dispatch manuale e' sempre ammesso.
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    # Il guard di fork e' una condizione AND: una PR da fork non viene toccata
+    # dal writer, anche se il dispatch manuale viene invocato su una PR esterna.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout di `main`
@@ -54220,7 +54370,7 @@ jobs:
       "platform": "Android OS 13 (samsung, SM-S911B)",
       "ms_played": 245000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "A Night at the Opera",
@@ -54239,7 +54389,7 @@ jobs:
       "platform": "Windows 10 (10.0.19045; x64)",
       "ms_played": 12000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Radio Gaga",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "The Works",
@@ -54258,7 +54408,7 @@ jobs:
       "platform": "web_player windows 10; chrome 119",
       "ms_played": 25000,
       "conn_country": "DE",
-      "ip_addr": "85.20.40.10",
+      "ip_addr": "198.51.100.10",
       "master_metadata_track_name": "We Will Rock You",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "News of the World",
@@ -54277,7 +54427,7 @@ jobs:
       "platform": "Android OS 7.0 API 24 (motorola, Moto G4)",
       "ms_played": 312800,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Don't Stop Me Now",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Jazz",
@@ -54297,7 +54447,7 @@ jobs:
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 354000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Greatest Hits",
@@ -54317,7 +54467,7 @@ jobs:
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 354000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Greatest Hits (Remaster)",
@@ -54337,7 +54487,7 @@ jobs:
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 412000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Live at Wembley",
@@ -54356,7 +54506,7 @@ jobs:
       "platform": "android",
       "ms_played": 180000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Under Pressure",
       "master_metadata_album_artist_name": "Queen & David Bowie",
       "master_metadata_album_album_name": "Hot Space",
@@ -54375,7 +54525,7 @@ jobs:
       "platform": "Android OS 12 API 31 (google, Pixel 6)",
       "ms_played": 240000,
       "conn_country": "FR",
-      "ip_addr": "78.195.10.20",
+      "ip_addr": "203.0.113.20",
       "master_metadata_track_name": "Another One Bites the Dust",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "The Game",
@@ -54395,7 +54545,7 @@ jobs:
       "platform": "android",
       "ms_played": 1800000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": null,
       "master_metadata_album_artist_name": null,
       "master_metadata_album_album_name": null,
@@ -54417,7 +54567,7 @@ jobs:
       "platform": "windows",
       "ms_played": 200000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Guilty Pleasure Song",
       "master_metadata_album_artist_name": "Some Pop Artist",
       "master_metadata_album_album_name": "Guilty Pleasures",

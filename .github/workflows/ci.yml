@@ -283,6 +283,25 @@ jobs:
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 -Check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
+      # Issue #309 (repository pubblico): la regola "mai committare dati reali
+      # di ascolto" (docs/09-PRIVACY-SECURITY.md §10.1) era SOLO prosa: nessun
+      # gate la verificava. Con il repo pubblico ogni file tracciato e'
+      # scaricabile da chiunque, quindi la regola scende a L3.
+      #
+      # Il gate scansiona i fixture alla ricerca di marker di dati reali:
+      # IPv4 routable non-documentazione (RFC 5737), email non-placeholder,
+      # path che rivelano il nome utente della macchina. Fail-closed:
+      # exit 1 = dati reali, exit 2 = errore di ambiente (mai 0 per non aver
+      # guardato). Bloccante: un fixture con un IP reale non deve passare.
+      - name: Privacy dei fixture (issue #309)
+        run: node scripts/check-fixtures-privacy.mjs
+
+      # Lo scenario NEGATIVO del gate: dimostra che il gate fallisce quando
+      # deve (lesson 43-1: un gate che passa sempre non e' un gate). Copre i
+      # 6 scenari T1..T6 con directory temporanee.
+      - name: Gate "privacy dei fixture" - scenario negativo (issue #309)
+        run: node scripts/test-fixtures-privacy-gate.mjs
+
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
       # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per

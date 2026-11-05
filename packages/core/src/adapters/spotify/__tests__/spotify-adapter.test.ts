@@ -170,7 +170,7 @@ describe('SpotifyAdapter — import fixture (§8: casi 1-10)', () => {
       const kept = await dbKeep.listens.toArray();
       expect(kept.every((l) => l.ip !== null)).toBe(true);
       expect(new Set(kept.map((l) => l.ip))).toEqual(
-        new Set(['92.40.100.50', '85.20.40.10', '78.195.10.20']),
+        new Set(['192.0.2.50', '198.51.100.10', '203.0.113.20']),
       );
     } finally {
       await dbKeep.delete();

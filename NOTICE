@@ -10,10 +10,17 @@ licensed under the GNU Affero General Public License v3.0 (see LICENSE).
    - Version: essentia.js@0.1.3 (npm)
    - License: GNU Affero General Public License v3.0 (AGPL-3.0)
    - Copyright: Music Technology Group, Universitat Pompeu Fabra
-   - Bundled parts: WASM module (essentia-wasm.web.wasm), glue JS, MusicNN
-     backbone models and classification heads (deam-msd-musicnn-2).
    - Source: https://github.com/MTG/essentia.js
      https://www.npmjs.com/package/essentia.js/v/0.1.3
+   - Status: NOT yet distributed. The analysis stack (essentia.js, WASM module,
+     MusicNN backbone models and classification heads) is declared as the
+     target of the audio-analysis capability, but it is not currently
+     installed as a dependency and no part of it is bundled in the
+     distributed PWA. This entry records the intended attribution and will be
+     completed with the exact versions, the bundled parts and the attribution
+     text at the moment the dependency is actually shipped (see
+     docs/21-AUDIO-FEATURES.md §2.4, decision D-AF.2, and
+     docs/12-DEVOPS.md §5.3).
 
    essentia.js is AGPL-3.0; bundling it in the distributed PWA is the reason
    the Life Soundtrack repository is licensed under AGPL-3.0 (see

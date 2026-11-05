@@ -25,12 +25,16 @@ describe('deriveSkipped (E1, §3.3)', () => {
   });
 
   it('endplay sotto la soglia fissa ⇒ skip (fixture caso 4: 25000 < 30000)', () => {
-    expect(deriveSkipped({ ...base, ms_played: 25_000, skipped: false, reason_end: 'endplay' })).toBe(true);
+    expect(
+      deriveSkipped({ ...base, ms_played: 25_000, skipped: false, reason_end: 'endplay' }),
+    ).toBe(true);
     expect(E1_NO_CATALOG_THRESHOLD_MS).toBe(30_000);
   });
 
   it('endplay sopra la soglia ⇒ nessuno skip', () => {
-    expect(deriveSkipped({ ...base, ms_played: 200_000, skipped: false, reason_end: 'endplay' })).toBe(false);
+    expect(
+      deriveSkipped({ ...base, ms_played: 200_000, skipped: false, reason_end: 'endplay' }),
+    ).toBe(false);
   });
 
   it('trackdone e reason normali ⇒ nessuno skip', () => {
@@ -42,12 +46,22 @@ describe('deriveSkipped (E1, §3.3)', () => {
 
 describe('deriveCompleted', () => {
   it('reason_end trackdone ⇒ completato (derivazione GDPR di §3.1)', () => {
-    expect(deriveCompleted({ ts: '2024-01-01T00:00:00Z', platform: 'x', ms_played: 1, reason_end: 'trackdone' })).toBe(
-      true,
-    );
-    expect(deriveCompleted({ ts: '2024-01-01T00:00:00Z', platform: 'x', ms_played: 1, reason_end: 'fwdbtn' })).toBe(
-      false,
-    );
+    expect(
+      deriveCompleted({
+        ts: '2024-01-01T00:00:00Z',
+        platform: 'x',
+        ms_played: 1,
+        reason_end: 'trackdone',
+      }),
+    ).toBe(true);
+    expect(
+      deriveCompleted({
+        ts: '2024-01-01T00:00:00Z',
+        platform: 'x',
+        ms_played: 1,
+        reason_end: 'fwdbtn',
+      }),
+    ).toBe(false);
   });
 });
 
@@ -108,7 +122,7 @@ describe('mapSpotifyEvent (§3.1)', () => {
     platform: 'Android OS 13 (samsung, SM-S911B)',
     ms_played: 245_000,
     conn_country: 'IT',
-    ip_addr: '92.40.100.50',
+    ip_addr: '192.0.2.50',
     master_metadata_track_name: 'Bohemian Rhapsody',
     master_metadata_album_artist_name: 'Queen',
     master_metadata_album_album_name: 'A Night at the Opera',
@@ -137,7 +151,7 @@ describe('mapSpotifyEvent (§3.1)', () => {
     expect(raw?.skipped).toBe(false);
     expect(raw?.deviceType).toBe('mobile');
     expect(raw?.deviceDetail).toBe(record.platform);
-    expect(raw?.ip).toBe('92.40.100.50');
+    expect(raw?.ip).toBe('192.0.2.50');
     expect(raw?.country).toBe('IT');
     expect(raw?.isrc).toBeNull();
     expect(raw?.mbid).toBeNull();

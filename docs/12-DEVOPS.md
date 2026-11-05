@@ -879,6 +879,13 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > un elenco assente. Ora le righe sono **39** (38 gate + l'agregatore `quality`).
 > **Sessione 93 (issue #290)**: aggiunto il gate «wiring degli hook» (`test-hook-wiring.sh`)
 > → **39 righe**, **38 step**.
+> **Sessione 101 (issue #309)**: aggiunti i 2 step del gate «privacy dei fixture»
+> (`check-fixtures-privacy.mjs` + il suo scenario negativo `test-fixtures-privacy-gate.mjs`) nel
+> job `gates-docs` → **41 righe**, **40 step**. Il **numero di job non cambia** (15): i due step
+> sono dentro `gates-docs`, che già gira su `pull_request`. La regola che verifica è «mai
+> committare dati reali di ascolto» (`09-PRIVACY-SECURITY.md` §10.1), che fino a questa Sessione
+> era **solo prosa**: con il repository pubblico ogni file tracciato è scaricabile da chiunque,
+> quindi la regola scende a L3 e deve avere un gate che la faccia rispettare.
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
@@ -929,6 +936,8 @@ protection può interpretare un check saltato come successo.
 | 37 | `gates-portability` | `Il bundle è in sync con lo stato committato` (`check-generators-portable.mjs --bundle-check-only`) | solo PR | sì | **#284** |
 | 38 | `gates-portability-compare` | `I generatori producono gli stessi byte su ogni sistema operativo` (`check-generators-portable.mjs --compare`) | solo PR | sì | **#284** |
 | 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
+| 40 | `gates-docs` | `Privacy dei fixture` (`check-fixtures-privacy.mjs`) | solo PR | sì | **#309** |
+| 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**

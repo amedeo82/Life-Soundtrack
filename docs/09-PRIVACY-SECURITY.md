@@ -307,7 +307,7 @@ Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
 | T2 | XSS che legge IndexedDB | Bassa | Alto | CSP strict, nessun innerHTML con dati utente, sanitize input |
 | T3 | Estensione browser malevola che legge IndexedDB | Media | Alto | Documentare il rischio; consigliare profile browser dedicato |
 | T4 | Leak via chiamate enrichment | Bassa | Medio | Inviare solo titolo+artista; nessun dato utente; log pubblico delle chiamate |
-| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali |
+| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali, **con gate bloccante** `check-fixtures-privacy.mjs` (issue #309) |
 | T6 | Sync cloud compromesso (Fase 2) | Bassa | Alto | E2E encryption, chiavi solo sul dispositivo |
 | T7 | Inferenze usate contro l'utente (es. assicurazioni) | Bassa | Alto | Dati mai inviati; disclaimer; export escluso insight su richiesta |
 
@@ -315,8 +315,25 @@ Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
 
 **Mai committare dati reali di ascolto nel repository.** I fixture in
 `fixtures/` sono sintetici. Ogni PR che aggiunga dati reali va rifiutata.
-Aggiungere check CI che scansioni i fixture per pattern sospetti (IP reali,
-email).
+
+*Gate (issue #309, Sessione 101):* la regola è verificata automaticamente da
+`scripts/check-fixtures-privacy.mjs` — bloccante nel job `gates-docs` della CI e
+nella batteria locale di `scripts/agent-pr.ps1`. Il gate scansiona i fixture
+alla ricerca di marker di dati reali: **IPv4 routable non-documentazione**
+(gli unici ammessi sono i range RFC 5737 `192.0.2.0/24`, `198.51.100.0/24`,
+`203.0.113.0/24` e i range privati/riservati), **email non-placeholder**
+(domini ammessi: `example.com`/`.org`/`.net`/`.edu`, `.invalid`, `.test`,
+`.localhost`, `*.noreply.github.com`) e **path che rivelano il nome utente**
+(`C:\Users\<utente>\…`, `/home/<utente>/…`). È read-only e **fail-closed**:
+exit 1 = dati reali rilevati, exit 2 = errore di ambiente (mai 0 senza aver
+guardato). Il suo scenario negativo `scripts/test-fixtures-privacy-gate.mjs`
+(6 scenari) dimostra che il gate fallisce quando deve — un gate che passa
+sempre non è un gate.
+
+La regola è diventata bloccante con il repository **pubblico**: fino ad allora
+ogni file tracciato era scaricabile solo da chi avesse accesso al repository,
+mentre da quel momento chiunque può leggerlo. Per questo la regola scende da
+L2 (protocollo) a L3 (applicazione).
 
 ## 11. Checklist compliance pre-lancio
 
