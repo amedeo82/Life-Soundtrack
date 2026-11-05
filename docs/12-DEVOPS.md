@@ -888,6 +888,15 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > quindi la regola scende a L3 e deve avere un gate che la faccia rispettare.
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
+>
+> **Sessione 104 (issue #319)**: il catalogo era indietro di **2 step** — i due step del gate
+> «coerenza del claim» (`check-claim-state.mjs` + `test-claim-state.sh`, Sessione 81) non
+> avevano una riga, e il nuovo step del gate «proprietà della worktree»
+> (`test-worktree-ownership.sh`, issue #319) si aggiunge a quelli. Ora le righe sono **44**
+> (43 gate + l'agregatore `quality`). Il **numero di job non cambia** (15): i tre step sono
+> dentro `gates-protocol`, che già gira su `pull_request`. Il gate di proprietà della worktree
+> è **locale** (pre-commit hook + `agent-pr.ps1`): in CI si esegue il suo **scenario negativo**,
+> che dimostra che fallisce quando deve (lesson 43-1: un gate che passa sempre non è un gate).
 
 Il job `quality` è il **check aggregatore**: fallisce in modo esplicito se uno
 qualunque dei job paralleli è fallito, annullato o saltato. È il check che la branch
@@ -938,6 +947,9 @@ protection può interpretare un check saltato come successo.
 | 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
 | 40 | `gates-docs` | `Privacy dei fixture` (`check-fixtures-privacy.mjs`) | solo PR | sì | **#309** |
 | 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
+| 42 | `gates-protocol` | `Coerenza claim/issue/branch/PR` (`check-claim-state.mjs`) | solo PR | sì | **#256** |
+| 43 | `gates-protocol` | `Gate "coerenza del claim" fail-closed` (`test-claim-state.sh`, 14 scenari) | solo PR | sì | **#256** |
+| 44 | `gates-protocol` | `Gate "proprieta' della worktree" fail-closed` (`test-worktree-ownership.sh`, 9 scenari) | solo PR | sì | **#319** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**

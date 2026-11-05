@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 19:52
-> Totale file: 198
+> Data: 2026-11-05 22:07
+> Totale file: 201
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.48 — Sessione 102 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.49 — Sessione 104 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -71,6 +71,8 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
+| La **worktree** è proprietà del claimante: l'owner locale (`agent-state.json`) coincide con l'agente del claim **vincente** | `check-worktree-ownership.mjs` (hook `pre-commit` + `agent-pr.ps1`) | issue #319 (doppio lavoro silenzioso nella stessa directory) |
+| La PR dichiara l'`agent-id` del **claimante**, che coincide con l'agente del claim vincente | C6 di `check-claim-state.mjs` | issue #319 (PR attribuita a un agente diverso dal claimante) |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 | I fixture contengono **solo dati sintetici**: mai un IP pubblico routable (fuori dai range documentazione RFC 5737), mai una email reale, mai un path che rivela il nome utente | `check-fixtures-privacy.mjs` (+ scenario negativo `test-fixtures-privacy-gate.mjs`) | issue #309 (repository pubblico: ogni file tracciato è scaricabile da chiunque) |
@@ -85,6 +87,7 @@ node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
 node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
 node scripts/check-encoding.mjs                # encoding dei file tracciati, exit 0 = nessun mojibake/BOM
 node scripts/check-fixtures-privacy.mjs        # fixture solo sintetici, exit 0 = nessun dato reale
+node scripts/check-worktree-ownership.mjs      # owner locale = claim vincente, exit 1 = doppio lavoro
 ```
 
 **Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
@@ -215,6 +218,50 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 
    - **Vinci**: procedi — branch `feat/<N>-<descrizione>` e resto del protocollo.
    - **Perdi**: lascia un commento `yield: <AGENT-ID>` e passa alla prossima issue candidabile (torna al punto 2). **Non rimuovere la label `in-progress`**: serve al vincitore.
+
+### La procedura atomica: `scripts/agent-claim.ps1`
+
+La procedura manuale dei punti 1-4 è fragile (TOCTOU: tra la riverifica e il primo commit un altro agente può prendere la stessa story). Lo script esegue claim + riverifica in un'unica operazione, e **è il modo raccomandato**:
+
+```powershell
+pwsh scripts/agent-claim.ps1 <N> -AgentId <AGENT-ID>     # claim atomico di <N>
+pwsh scripts/agent-claim.ps1 <N> -AgentId <AGENT-ID> -DryRun  # sola anteprima, nessuna scrittura
+pwsh scripts/agent-claim.ps1 -Auto -AgentId <AGENT-ID>   # arbitraggio: sceglie la prima story libera
+pwsh scripts/agent-claim.ps1 <N> -AgentId <AGENT-ID> -Stale  # takeover di un claim scaduto (TTL 12h)
+```
+
+**I codici di uscita dello script** (verificati dai test, non dalla documentazione):
+
+| Exit | Significato | Cosa fa l'agente |
+|:----:|-------------|------------------|
+| 0 | claim riuscito (o issue già tua) | procedi con la worktree |
+| 2 | parametri o ambiente non valido | correggi e rilancia |
+| 3 | l'issue è **già in carico** di un altro agente | **non scrivere niente**: passa alla prossima candidabile |
+| 4 | hai **perso la riverifica** (un altro claim ha id più basso) | lascia `yield:` e **abbandona la worktree** |
+| 5 | il claim è ancora fresco (non scaduto) | non fare takeover: attendi o cambia story |
+| 6 | la **worktree è di un altro agente** | **ABANDONA la worktree**: nessuna scrittura, nessun commit |
+
+Il codice 3 è il caso che, prima della Sessione 104, non aveva una procedura codificata: un agent che riceveva "issue già `in-progress`" non aveva un comportamento definito, e il rischio reale è **continuare a lavorarci** (la worktree esiste già, il path è deterministico). Ora la procedura è: `3` → `-Auto` sceglie la prossima story libera; `6` → si abbandona la directory.
+
+### L'arbitraggio automatico (`-Auto`)
+
+Scegliere la story a mano è la fase in cui due agenti finiscono sulla stessa issue (la selezione non è atomica: leggere i candidati, poi reclamare, lascia una finestra). `-Auto` chiude la finestra: lo script **ricalcola i candidati e verifica il claim winner subito prima di procedere**, nell'ordine di priorità di `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti".
+
+```powershell
+pwsh scripts/agent-claim.ps1 -Auto -DryRun        # stampa i candidati, non scrive nulla
+pwsh scripts/agent-claim.ps1 -Auto -AgentId <ID>  # prende il primo candidato libero
+```
+
+Se il claim perde la riverifica, `-Auto` **non si ferma**: va al candidato successivo. L'arbitraggio è deterministico (stesso backlog → stesso ordine), ma la **verifica finale resta atomica**: due agenti possono arrivare allo stesso candidato, e in quel caso vince il claim con l'id più basso e l'altro va avanti.
+
+### Il lock di proprietà della worktree *(Sessione 104, issue #319)*
+
+Il claim di ADR-0006 blocca **l'issue**, ma il path della worktree è deterministico (`ls-<N>-<slug>`): due agenti sulla stessa story condividono la **stessa directory**, e il codice del secondo finisce nel commit del primo. Il protocollo ha quindi **due lock distinti**, e vanno entrambi rispettati:
+
+1. **Lock dell'issue** (ADR-0006): il claim, verificato dall'`id` più basso del commento.
+2. **Lock della worktree** (Sessione 104): l'owner locale dichiarato in `agent-state.json`, confrontato con l'agente del claim vincente da `node scripts/check-worktree-ownership.mjs`.
+
+**Regola operativa**: se il check di proprietà segnala mismatch, l'agente **abbandona** la worktree — non "prende possesso" della directory, non corregge il file di stato, non committa. L'unica correzione legittima è **uscire dalla directory** (`cd` altrove) e lavorare nella worktree del proprio claim, ricreata se necessario.
 
 ### Mantenere il claim
 
@@ -799,12 +846,25 @@ git push
         ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
         ├── check-readme-facts.mjs  ← gate read-only: confronta la prosa del README con il codice (issue #161)
         ├── test-post-merge.sh      ← 14 scenari (T1..T14) su repo temporanei che coprono E3/E4/E5/F7 + squash + rimozione long-path
+        ├── agent-claim.ps1         ← claim atomico + arbitraggio (-Auto) + lock di proprietà della worktree (issue #319)
+        ├── agent-pr.ps1            ← gate locali + apertura PR (dichiara l'agent-id del claimante) + `pr: N`
+        ├── check-worktree-ownership.mjs ← gate read-only: owner locale della worktree = claim vincente (issue #319)
+        ├── test-worktree-ownership.sh ← 9 scenari (T1..T9) sul gate di proprietà della worktree (issue #319)
         └── test-readme-facts-gate.sh ← 9 scenari (T1..T9) sul gate "fatti del README" (issue #161)
 
 ## 🚀 Primo task di un agente
 
+0. **Fase 0 — arbitraggio (Sessione 104, issue #319 — vincolante)**: prima di scegliere una story, verifica **due cose** nella worktree in cui ti trovi:
+
+   ```bash
+   pwd                                  # sei nella worktree di qualcun altro?
+   node scripts/check-worktree-ownership.mjs   # l'owner locale e' il claim vincente?
+   ```
+
+   Se il gate esce con **1**, la directory è di un altro agente: **esci** e non scrivere niente. Se esce con **2**, non puoi verificare: procedi solo se hai un claim valido tuo. Il percorso della worktree è deterministico (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finiscono nella stessa directory: questo check è la difesa contro il **doppio lavoro silenzioso** (issue #319).
+
 1. Leggi questo file
-2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
+2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)"). In alternativa, lascia che lo script arbitri: `pwsh scripts/agent-claim.ps1 -Auto -DryRun` stampa i candidati in quell'ordine, `-Auto` prende il primo libero (verifica atomica inclusa).
 3. **Crea la worktree isolata e prendi in carico l'issue** con **un solo comando** (Sessione 81, issue #256):
 
    ```bash
@@ -836,25 +896,32 @@ Da Sessione 27 (issue #53, PR #54), ogni agente lavora in una **worktree isolata
 
 ### Flusso operativo
 
+> **⚠️ DEPRECATO (Sessione 104, issue #319): il flusso manuale qui sotto è il primo autore del doppio lavoro.** `setup-worktree.ps1` + `gh issue edit` + `gh issue comment` **a mano** non fanno la riverifica e non verificano la proprietà della worktree: l'agente che segue i passi manuali crede di avere la story, ma non lo sa. **Il flusso canonico è `scripts/agent-claim.ps1`** (vedi §"🚀 Primo task di un agente" e §"🎫 Presa in carico delle story"), che esegue claim + riverifica + lock di proprietà in un'unica operazione.
+
 ```powershell
-# PRIMA di lavorare sulla issue, crea la worktree:
-pwsh scripts/setup-worktree.ps1 53
-# Output: cd ../ls-53-worktree-default + gh claim command
-
-cd ../ls-53-worktree-default
-# claim (ADR-0006):
-gh issue edit 53 --add-label in-progress
-gh issue comment 53 --body "claim: kilo-HP-ELITEBOOK-xxxx (UTC ...) — worktree: C:\..\ls-53-..."
-
-# lavora nel branch feat/53-worktree-default (pushato automaticamente da setup-worktree.ps1)
+# flusso canonico (un solo comando: claim atomico + riverifica + lock worktree):
+pwsh scripts/agent-claim.ps1 <N>
+cd ../ls-<N>-<slug>
 # ... scrivi codice, test, AGENTS.md updates ...
 git add -A
 git commit -m "feat: ..."
 git push  # hook pre-push: BUNDLE auto-regen se docs/ hai cambiato
-
-# apri PR (Closes #N nel body)
-gh pr create --base main --head feat/53-worktree-default --title "..." --body "Closes #53 ..."
+pwsh scripts/agent-pr.ps1 -IssueNumber <N>   # gate locali + PR + keyword di chiusura + `pr: N`
 ```
+
+```powershell
+# flusso MANUALE — deprecato, non usare (resta solo per il troubleshooting):
+pwsh scripts/setup-worktree.ps1 53
+cd ../ls-53-worktree-default
+gh issue edit 53 --add-label in-progress
+gh issue comment 53 --body "claim: kilo-HP-ELITEBOOK-xxxx (UTC ...) — worktree: C:\..\ls-53-..."
+```
+
+Le ragioni della deprecazione sono tre, e tutte hanno un costo reale:
+
+1. **Nessuna riverifica**: il claim manuale non verifica che l'id del proprio commento sia il più basso → due agenti credono di avere la stessa story.
+2. **Nessun lock di proprietà**: la worktree viene creata prima di sapere chi ha vinto → il secondo agente scrive nella directory del primo (path deterministico `ls-<N>-<slug>`).
+3. **Nessuna verifica al commit**: il flusso manuale non ha il gate di proprietà, che nel flusso canonico gira nel pre-commit hook e nei gate locali di `agent-pr.ps1`.
 
 ### Parametri di `setup-worktree.ps1`
 
@@ -923,7 +990,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### 🏎️ La CI: 15 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74 + Sessione 90)*
 
-> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 40 step): cosa gira,
+> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 43 step): cosa gira,
 > quando, con quali permessi e con quale exit code. Qui solo l'invariante operativo:
 >
 > - le modifiche a `docs/` e agli script di validazione girano su `pull_request`;
@@ -1124,7 +1191,7 @@ La specifica completa è in [`docs/13-ADR/0013-post-merge-automation.md`](docs/1
 
 ## 🛡️ Session start checklist
 
-Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti **6 check** per catturare precocemente i failure mode del parallelismo:
+Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti **7 check** per catturare precocemente i failure mode del parallelismo:
 
 ```powershell
 git status                          # working tree clean? (F3, F5)
@@ -1132,10 +1199,19 @@ git branch --show-current           # sul branch giusto? (F1)
 git fetch origin && git status -uno # main stale? (F4)
 gh issue view <N> --jq .state       # issue ancora nostra e aperta? (F7)
 git worktree list                   # non in worktree di un altro agente? (F8, post-#54)
+node scripts/check-worktree-ownership.mjs  # owner locale = claim vincente? (F10, issue #319)
 pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'  # PowerShell 7? (F9, Sessione 71)
 ```
 
-Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+Tutti e 7 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+
+**F10 — la worktree è proprietà del claimante** *(Sessione 104, issue #319 — vincolante)*: il path della worktree è **deterministico** (`ls-<N>-<slug>`), quindi due agenti che scelgono la stessa story finiscono nella **stessa directory**: il secondo scrive sopra il primo, e il codice del primo finisce nel commit del secondo (doppio lavoro silenzioso, nessun errore). Il claim di ADR-0006 è un lock **sull'issue**, non sul filesystem: da solo non basta. Il check è `node scripts/check-worktree-ownership.mjs`, che confronta l'owner locale (`agent-state.json`) con l'agente del claim **vincente**:
+
+- exit **0** — la worktree è tua: procedi.
+- exit **1** — la worktree è di **un altro agente**: **abbandonala subito** (nessuna scrittura, nessun commit, nessun `git add`). Se il tuo claim è valido ma l'owner locale è sbagliato, non "correggi" il file di stato: ricrea la worktree.
+- exit **2** — errore di ambiente (`gh` assente, API irraggiungibile, file di stato mancante): **non è** un doppio lavoro, ma non è nemmeno una verifica: il gate locale in `agent-pr.ps1` lo tratta come WARN e non blocca.
+
+Il gate gira anche nel **pre-commit hook** (INVARIANTE 4: mismatch → abort) e nei gate locali di `scripts/agent-pr.ps1` (mismatch → blocco). Non è un controllo da fare una volta: è un controllo da fare a ogni commit.
 
 **F9 — PowerShell 7 (`pwsh`) è il baseline del repo** *(Sessione 71, rafforzato dalla Sessione 72)*: gli script in `scripts/*.ps1` si invocano con `pwsh`. Sotto Windows PowerShell 5.1 il doppio trattino non viene normalizzato e i gate con `--check` ricadono silenziosamente in modalità WRITING (fail-open, issue #104): verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output. La forma canonica dei flag resta a **singolo trattino** (`-Check`, `-List`, `-DryRun`). Vedi `docs/12-DEVOPS.md §9.1`.
 
@@ -1184,7 +1260,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.48 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.49 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2089,7 +2165,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.48 | Protocollo per agenti — **v1.48 (Sessione 102, issue #311)**: `main` è protetta dalla ruleset GitHub `main-protection` (merge solo via PR, check `quality` verde e strict, history lineare → merge **squash**, niente force push né cancellazione) e il writer post-merge spinge con una **deploy key SSH** (`post-merge-writer`) perché il `GITHUB_TOKEN` non può bypassare una ruleset (GH013); `required_approving_review_count: 0` perché l'unico account GitHub è anche l'autore delle PR (l'auto-approvazione è vietata: con 1 il repository resterebbe congelato); **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.49 | Protocollo per agenti — **v1.49 (Sessione 104, issue #319)**: il claim di ADR-0006 è un lock **sull'issue**, non sul filesystem — il path della worktree è deterministico (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finivano nella **stessa directory** e il codice del secondo finiva nel commit del primo (doppio lavoro silenzioso): ora il protocollo ha **due lock** (issue + worktree), con il gate `check-worktree-ownership.mjs` che confronta l'owner locale (`agent-state.json`) con l'agente del claim vincente (mismatch → exit 1 → abort nel pre-commit, blocco nei gate locali di `agent-pr.ps1`), l'arbitraggio `-Auto` di `agent-claim.ps1` (selezione atomica dei candidati, con procedura codificata per l'exit 3 «issue già in carico»), la dichiarazione dell'`agent-id` nel body della PR (C6 di `check-claim-state.mjs`: la PR deve essere del claimante) e il **7° check** della session-start checklist (F10); **v1.48 (Sessione 102, issue #311)**: `main` è protetta dalla ruleset GitHub `main-protection` (merge solo via PR, check `quality` verde e strict, history lineare → merge **squash**, niente force push né cancellazione) e il writer post-merge spinge con una **deploy key SSH** (`post-merge-writer`) perché il `GITHUB_TOKEN` non può bypassare una ruleset (GH013); `required_approving_review_count: 0` perché l'unico account GitHub è anche l'autore delle PR (l'auto-approvazione è vietata: con 1 il repository resterebbe congelato); **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
@@ -13500,7 +13576,17 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 > completo è qui (decisione D2 del project owner, Sessione 79: la storia del protocollo
 > ha una sede, e `AGENTS.md` resta il **contratto**).
 
-*Ultimo aggiornamento: v1.45 — **il claim perduto non ruba più la label al vincitore** (Sessione 98, verifica di concorrenza richiesta dal project owner). L'audit del protocollo di workflow ha trovato che `scripts/agent-claim.ps1`, nel ramo di riverifica persa, **rimuoveva la label `in-progress`** — esattamente ciò che §"Procedura di claim" punto 4 vieta al perdente («Non rimuovere la label: serve al vincitore»): l'issue ricompariva "libera" nelle query dei contendenti, che ripetevano validate+worktree+claim+yield a vuoto. In più, il takeover di un claim scaduto (TTL 12 ore) era **impossibile via script** (la validazione rifiutava l'issue `in-progress`), costringendo a comandi `gh` manuali — la stessa occasione di dimenticanza del protocollo che la Sessione 81 aveva chiuso. Ora:
+*Ultimo aggiornamento: v1.49 — **il protocollo ha due lock: l'issue e la worktree** (Sessione 104, issue #319). Due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree**: doppio lavoro silenzioso, nessun errore. La diagnosi ha mostrato due cause indipendenti, e la seconda è la più interessante. La prima è la **selezione non atomica**: l'agente legge i candidati, sceglie, poi reclama — in quella finestra un altro agente fa lo stesso, e il claim risolve il conflitto *dopo* (vince l'id più basso), quando il secondo ha già la worktree. La seconda è che **il lock di ADR-0006 è sull'issue, non sul filesystem**: il path della worktree è **deterministico** (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finiscono nella **stessa directory**; il secondo scrive sopra il primo e il codice del primo finisce nel commit del secondo. `agent-claim.ps1` proseguiva sulla worktree «già presente» (non verificava **di chi** fosse) e nessun gate leggeva `agent-state.json`. Ora:
+- **Secondo lock: la proprietà della worktree.** `scripts/check-worktree-ownership.mjs` confronta l'owner locale (`agent-state.json`) con l'agente del claim **vincente**: mismatch → **exit 1** (blocco), errore d'ambiente (`gh` assente, API irraggiungibile) → **exit 2** (WARN). Un gate che blocca per una disconnessione non è un gate, e un gate che non blocca sul mismatch non è un gate
+- **Il gate gira in tre punti**: `pre-commit` (INVARIANTE 4 → abort sul mismatch), gate locali di `agent-pr.ps1` (mismatch → blocco) e **CI** (lo scenario negativo, 9 assert: un gate che passa sempre non è un gate)
+- **`agent-claim.ps1 -Auto`**: ricalcola i candidati e verifica il claim winner **subito prima** di procedere (la finestra TOCTOU della selezione si chiude); l'ordine è deterministico (`docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti"), la verifica finale resta atomica
+- **Exit code 6 = «la worktree è di un altro agente»**: procedura codificata (abbandonare la directory, nessuna scrittura). L'exit **3** («issue già in carico») ha ora una procedura esplicita: non si scrive niente, si passa alla prossima candidabile. Prima non esisteva un comportamento definito per il caso più frequente in caso di conflitto
+- **La PR dichiara l'`agent-id`** del claimante (`agent-pr.ps1`) e la CI lo verifica (**C6** di `check-claim-state.mjs`): la PR deve essere del claimante. Dichiarazione assente → WARN (non si rompono le PR aperte da altri agenti prima della regola)
+- **`agent-state.json` scritto in modo atomico** (UTF-8 senza BOM + `Move-Item -Force`): un file di stato scritto a metà è un lock corrotto, peggio di un lock assente
+- **Il flusso manuale è deprecato** (`setup-worktree.ps1` + `gh issue edit`/`comment`): è il primo autore del difetto — non fa riverifica e non verifica la proprietà
+- `AGENTS.md` v1.49: tabella regola ⟺ gate (2 righe nuove), **Fase 0** di arbitraggio in §"Primo task", codici di uscita di `agent-claim.ps1`, `-Auto`, lock di proprietà, session-start checklist a **7** check (F10), conteggio dei gate di CI. La storia dettagliata delle v1.46–v1.48 è in `docs/INDEX.md`
+
+*Precedente v1.45 — **il claim perduto non ruba più la label al vincitore** (Sessione 98, verifica di concorrenza richiesta dal project owner). L'audit del protocollo di workflow ha trovato che `scripts/agent-claim.ps1`, nel ramo di riverifica persa, **rimuoveva la label `in-progress`** — esattamente ciò che §"Procedura di claim" punto 4 vieta al perdente («Non rimuovere la label: serve al vincitore»): l'issue ricompariva "libera" nelle query dei contendenti, che ripetevano validate+worktree+claim+yield a vuoto. In più, il takeover di un claim scaduto (TTL 12 ore) era **impossibile via script** (la validazione rifiutava l'issue `in-progress`), costringendo a comandi `gh` manuali — la stessa occasione di dimenticanza del protocollo che la Sessione 81 aveva chiuso. Ora:
 - **`agent-claim.ps1` yield**: posta `yield:` ed esce 4 **senza rimuovere la label `in-progress`** (ADR-0006, regola 4); il corpo del commento torna al formato canonico `yield: <AGENT-ID>`
 - **`agent-claim.ps1 -Stale`**: takeover **atomico** di un claim scaduto — verifica che l'ultima attività del claim attivo (commenti che citano l'agente, PR aperta per l'issue) risalga a oltre 12 ore, posta `stale-release:` citando l'agente del claim scaduto (il marker che la riverifica cerca per escluderlo) e prosegue con claim + riverifica; exit 5 se il claim non è ancora scaduto
 - **`AGENTS.md` §"Primo task"** corretto (descriveva il vecchio comportamento "rimuove la label") e §"Mantenere il claim" con l'invocazione `-Stale`
@@ -15241,8 +15327,32 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 
 ---
 
+## 55. Issue #319 — arbitraggio atomico e lock di proprietà della worktree (Sessione 104)
+
+**Branch**: `fix/319-arbitraggio-claim-lock-worktree`
+**Issue di tracking**: **#319**
+**Data**: 2026-11-05
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 104-1 | P | Due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree**: il codice del primo è finito nel commit del secondo, senza alcun errore | Il path della worktree è **deterministico** (`ls-<N>-<slug>`): il lock di ADR-0006 è **sull'issue**, non sul filesystem, quindi due agenti sulla stessa story condividono la directory | **Secondo lock**: `scripts/check-worktree-ownership.mjs` confronta l'owner locale (`agent-state.json`) con l'agente del claim **vincente**. Mismatch → exit 1 (blocco), errore d'ambiente → exit 2 (WARN). Gate nel `pre-commit` (INVARIANTE 4), nei gate locali di `agent-pr.ps1` e in CI (scenario negativo) | `scripts/check-worktree-ownership.mjs` · `.githooks/pre-commit` |
+| 104-2 | P | La **selezione** della story non è atomica: l'agente legge i candidati, sceglie, poi reclama — nella finestra un altro agent fa lo stesso | Il blocco di scelta e il claim sono due operazioni **non atomiche** fra loro; il claim risolve il conflitto *dopo* che è avvenuto | `agent-claim.ps1 -Auto`: ricalcola i candidati nell'ordine del backlog e verifica il claim winner **subito prima** di procedere; se perde, va al candidato successivo | `scripts/agent-claim.ps1` · `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti" |
+| 104-3 | P | L'exit **3** («issue già in carico») non aveva **nessuna procedura codificata**: l'agente che lo riceveva poteva continuare a lavorarci (la worktree esiste già) | Il caso più frequente in caso di conflitto non era descritto da nessuna parte; il flusso manuale restava l'unica guida | Codici di uscita dell'agente-claim **documentati in `AGENTS.md`** (0, 2, 3, 4, 5, 6) con l'azione richiesta per ciascuno: 3 → `-Auto` sulla prossima story; 4 → `yield:` + abbandono della worktree; 6 → abbandono della directory | `AGENTS.md` §"🎫 Presa in carico delle story (claim)" |
+| 104-4 | P | Il doppio lavoro non era **rilevabile in CI**: nessun gate confrontava la PR con il claimante | Il body della PR non dichiarava **chi** l'aveva aperta; il gate `check-claim-state.mjs` poteva verificare branch/issue/keyword/stato, ma non l'attribuzione | `agent-pr.ps1` dichiara l'`agent-id` nel body; **C6** di `check-claim-state.mjs` verifica che coincida con il claim vincente (mismatch → FAIL, assente → WARN) | `scripts/agent-pr.ps1` · `scripts/check-claim-state.mjs` |
+| 104-5 | L | `agent-state.json` era scritto in modo non atomico: un'interruzione a metà scrittura lasciava un file **corrotto** | Scrittura diretta sul file di stato | Write UTF-8 senza BOM + `Move-Item -Force` (scrittura atomica): un file di stato corrotto è un lock corrotto, peggio di un lock assente | `scripts/agent-claim.ps1` |
+
+**Lesson learned**: un lock è tale solo se copre **il punto in cui i due agenti si incontrano**. ADR-0006 bloccava l'*issue*, mentre il rischio reale (due agenti nella stessa directory) è sul *filesystem*: il lock esisteva e non proteggeva nulla. La domanda che ha smontato il caso non è «la worktree esiste già?» (era la domanda implicita di `agent-claim.ps1`, che proseguiva) ma **«di chi è?»**. E la convenienza è spesso la causa: `ls-<N>-<slug>` è comodo da leggere ed è *esattamente* ciò che fa collidere le directory.
+
+La seconda lezione è sul confine del fail-closed: mismatch ed errore d'ambiente sono fatti diversi, e un gate che li tratta allo stesso modo è un gate che o blocca per motivi sbagliati (rete, `gh` assente — e i team imparano a usare `--no-verify`) o non blocca mai. Il mismatch blocca; l'errore d'ambiente avvisa.
+
+**Verifica**: `bash scripts/test-worktree-ownership.sh` → **9 scenari, 0 falliti** (fra cui T2: owner diverso dal claim vincente → exit 1); `bash scripts/test-claim-state.sh` → **14 scenari, 0 falliti** (T12/T13/T14 sulla nuova regola C6); `node scripts/check-protocol-consistency.mjs` → **6 check, 0 falliti**; `node scripts/check-aggregate-blocks.mjs` → exit 0.
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
+| 2.39 | 2026-11-05 (issue #319) | **§55 Sessione 104 — il protocollo ha due lock: l'issue e la worktree**: due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree** (doppio lavoro silenzioso, nessun errore). Causa: il path della worktree è **deterministico** (`ls-<N>-<slug>`) e il lock di ADR-0006 è **sull'issue**, non sul filesystem; `agent-claim.ps1` proseguiva sulla worktree «già presente» senza verificare **di chi** fosse, e nessun gate leggeva `agent-state.json`. Aggiunti: **secondo lock** (`scripts/check-worktree-ownership.mjs`: owner locale = claim vincente, mismatch → exit 1, errore d'ambiente → exit 2) con gate in `pre-commit` (INVARIANTE 4), nei gate locali di `agent-pr.ps1` e in CI (9 scenari); **arbitraggio `-Auto`** in `agent-claim.ps1` (ricalcolo dei candidati + verifica atomica del claim winner, nell'ordine del backlog) e **exit 6** (worktree di un altro agente) con procedura codificata per l'exit 3 (issue già in carico); **C6** di `check-claim-state.mjs` (l'`agent-id` dichiarato nel body della PR deve coincidere con il claimante); scrittura **atomica** di `agent-state.json`; deprecazione del flusso manuale `setup-worktree.ps1` + `gh issue edit`/`comment`. `AGENTS.md` v1.49 (2 righe nella tabella regola ⟺ gate, Fase 0 di arbitraggio, codici di uscita, session-start checklist a 7 check) |
 | 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
 | 2.34 | 2026-11-01 (issue #252) | **§46 Sessione 80 — il protocollo agenti come contratto verificato (I2-b)**: `AGENTS.md` era l'unico artefatto di governance **senza gate** ⇒ 2 gate read-only nuovi, `check-protocol-consistency.mjs` (6 check: versione, tabella label, tabella exit code, **integrità degli anchor**, esistenza di script e flag citati, checklist unica) e `check-aggregate-blocks.mjs` (**bloccante**: la regola V1 di ADR-0008 verificata in modo **testuale**, immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore), con le suite di scenario negativo (8 + 6) e il job CI `gates-protocol` (4 step, `fetch-depth: 0`). Il primo giro ha trovato **3 riferimenti rotti in `AGENTS.md`** (typo «Macchina **di** stati», sezione «⚠️ Deprecazione» inesistente, rimando a «🛡️ Hardening multi-agente» rinominata) e **1 riferimento stale** in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`). Prova di non-vacuità: il gate dei blocchi applicato alla **PR #249 reale** rileva **5 violazioni** (la PR aveva committato i blocchi rigenerati in locale) ⇒ la regola V1 era violabile in silenzio; la **PR #250** aveva la stessa violazione ed è stata corretta. `AGENTS.md` v1.35 (nuova sezione §"✅ Il contratto del protocollo: regola ⟺ gate"), `docs/12-DEVOPS.md §9.10` a 13 job / 31 step |
 | 2.38 | 2026-11-01 (issue #261) | **§50 Sessione 84 — la race sul push**: con i concurrency group separati i tre writer di `main` corrono in parallelo e il push dell'aggregator è stato **rifiutato** (non-fast-forward, misurato il 2026-11-01T16:17:07Z) ⇒ i blocchi aggregati restavano indietro. Fix: **retry con ri-sincronizzazione** in ogni writer (3 tentativi: fetch → rebase → rigenera → riprova) e **contratto del gate `checkPushSync` aggiornato**: una strategia di ri-sincronizzazione basta, se è **preventiva** (step precedente) **oppure** un **retry** (sync dentro il ciclo che contiene la push); una sync tardiva non è una strategia (la push è già fallita) e una push citata in un commento non è una push. Fixture aggiornate al contratto: T2 ora si aspetta che il gate **passi** (il retry copre la race), **T2b** (nessuna strategia) si aspetta che **fallisca**; la copertura `git add` rimuove il target da tutte le righe `git add` |
@@ -23928,6 +24038,131 @@ insight in prosa, il deep-link), i due componenti e il focus della Timeline.
 - `docs/08-COPY-I18N.md` — §2.5, §2.6, §2.15, changelog 0.15
 - `docs/18-DEV-LOG.md` — la entry della sessione
 - `scripts/generate-bundle.ps1` — `$files`
+
+
+
+===== FILE: docs/state/sessions/104-arbitraggio-claim-lock-worktree.md =====
+
+---
+number: 104
+title: "Arbitraggio atomico della selezione e lock di proprietà della worktree"
+date: 2026-11-05
+state: 🟡
+merged: false
+branch: fix/319-arbitraggio-claim-lock-worktree
+pr: 0
+claim: kilo-hp-elitebook-85df
+tags: [devops, protocol, ci, testing]
+---
+
+## Sintesi
+
+Due agenti hanno iniziato a lavorare **la stessa issue (#240)** nella **stessa
+worktree**. Non è un errore di una persona: è un difetto del protocollo, e la
+diagnosi ha mostrato due cause indipendenti.
+
+La prima è la **selezione non è atomica**: l'agente legge i candidati, sceglie,
+poi reclama — e in quella finestra un altro agente fa lo stesso. Il blocco
+`AGGREGATE-NEXT-STEP` (la procedura di scelta) e il claim (la procedura di
+prenotazione) sono due operazioni **non atomiche** tra loro, quindi due agenti
+possono arrivare allo stesso candidato. Il claim, per sua natura, risolve il
+conflitto *dopo* che è avvenuto (vince l'id più basso), ma a quel punto il
+secondo agente ha già la worktree.
+
+La seconda, più grave, è che **il lock di ADR-0006 è sull'issue, non sul
+filesystem**: il path della worktree è **deterministico** (`ls-<N>-<slug>`),
+quindi due agenti sulla stessa story finiscono nella **stessa directory**. Il
+secondo agente scrive sopra il primo, e il codice del primo finisce nel commit
+del secondo: **doppio lavoro silenzioso**, nessun errore, nessun gate che lo
+noti. `scripts/agent-claim.ps1` proseguiva sulla worktree "già presente"
+(`scripts/agent-claim.ps1:205-207` prima della modifica) e nessun gate leggeva
+`agent-state.json`.
+
+La correzione è **un secondo lock**: oltre al lock dell'issue (il claim), il
+protocolto ha ora il **lock della worktree**, verificato da un gate che confronta
+l'owner locale (`agent-state.json`) con l'agente del claim **vincente**.
+
+## Decisioni
+
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-103.1 | Il protocollo ha **due lock distinti**: il claim (issue) e la proprietà della worktree | il path della worktree è deterministico: il claim da solo non protegge la directory |
+| D-103.2 | Il gate di proprietà è **fail-closed sul mismatch** (exit 1 = blocco) e **aperto sull'errore d'ambiente** (exit 2 = WARN) | un gate che blocca perché `gh` è assente o la rete è down non è un gate, è un ostacolo; un gate che non blocca sul mismatch non è un gate |
+| D-103.3 | Il gate gira nel **pre-commit hook** (INVARIANTE 4), nei **gate locali** di `agent-pr.ps1` e nei **test** in CI | il controllo va ripetuto a ogni commit: verificarlo una volta all'avvio non copre il caso in cui due agenti si incontrano a metà sessione |
+| D-103.4 | `agent-claim.ps1` acquisisce **`-Auto`**: ricalcola i candidati e verifica il claim winner subito prima di procedere | chiude la finestra TOCTOU della selezione; l'ordine è deterministico (backlog), la **verifica finale** resta atomica |
+| D-103.5 | L'exit **3** («issue già in carico») ha una **procedura codificata**: non si scrive niente, si passa alla prossima candidabile (`-Auto`) | prima non esisteva un comportamento definito per il caso più frequente in caso di conflitto |
+| D-103.6 | Il corpo della PR **dichiara l'`agent-id`** del claimante; la CI (C6 di `check-claim-state.mjs`) verifica che coincida con il claim vincente (assente → WARN, mismatch → FAIL) | rende il doppio lavoro **rilevabile in CI**, non solo localmente |
+| D-103.7 | Il flusso **manuale** (`setup-worktree.ps1` + `gh issue edit`/`comment`) è **deprecato** in `AGENTS.md` | è il primo autore del difetto: non fa riverifica e non verifica la proprietà |
+| D-103.8 | `agent-state.json` viene scritto in modo **atomico** (write UTF-8 senza BOM + `Move-Item -Force`) | un file di stato scritto a metà è un lock corrotto: peggio di un lock assente |
+
+## Il difetto, in due righe
+
+| | prima | dopo |
+|---|---|---|
+| Selezione della story | l'agente sceglie, poi reclama (finestra TOCTOU) | `-Auto`: ricalcolo + verifica atomica |
+| Conflitto sulla stessa story | due agenti nella **stessa directory**, nessuno lo nota | `check-worktree-ownership.mjs`: exit 1 → blocco |
+| Lavoro duplicato in CI | invisibile | C6: l'`agent-id` della PR deve essere quello del claimante |
+
+## Analisi di avanzamento
+
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Gate di proprietà della worktree | **1** (`check-worktree-ownership.mjs`, read-only) |
+| 2 | Scenari coperti dal gate | **9** (T1..T9, con scenario negativo dimostrato) |
+| 3 | Exit code di `agent-claim.ps1` documentati | **6** (0, 2, 3, 4, 5, 6) |
+| 4 | Check della session-start checklist | **7** (era 6: aggiunto F10) |
+| 5 | Step di CI aggiati | **1** (`test-worktree-ownership.sh` nel job `gates-protocol`) |
+| 6 | Righe del catalogo dei gate | **44** (43 gate + aggregatore `quality`) |
+| 7 | Versione protocollo | v1.48 → **v1.49** |
+
+**Pronto**: il lock di proprietà è implementato, testato (9/9) e collegato a tre
+punti (hook, gate locali, CI). La dichiarazione dell'agent-id nel body della PR
+chiude il ciclo in CI.
+
+**Dopo il merge**: i due agenti che erano in collisione sulla #240 restano da
+chiudere a mano (la #240 **non** è stata toccata: è di quell'agente). La
+Sessione 104 verifica che il protocollo nuovo, applicato da un agente fresco,
+chiuda il ciclo claim → worktree → commit senza collisioni.
+
+## Lesson learned
+
+- **Un lock è tale solo se copre il rischio che protegge.** ADR-0006 bloccava
+  l'*issue*; il rischio reale (due agenti nella stessa directory) è sul
+  *filesystem*. Un lock che non copre il punto in cui i due agenti si incontrano
+  non previene nulla: previene solo il caso in cui i due agenti si incontrano
+  **fuori** da lì.
+- **Il path deterministico è la causa, non il sintomo.** `ls-<N>-<slug>` è
+  comodo da leggere ed è *esattamente* ciò che fa collidere le directory: la
+  convenientia e la collisione hanno la stessa causa.
+- **"La worktree è già presente" non è idempotenza, è una scusa.** Lo script
+  proseguiva perché la directory esisteva: l'esistenza della directory non
+  dice **di chi** è. La domanda giusta non è "esiste già?" ma "di chi è?".
+- **Un gate che passa sempre non è un gate.** Per questo il gate ha uno
+  **scenario negativo** in CI (T2: owner diverso dal claim vincente → exit 1):
+  se il gate non può fallire, non è un gate.
+- **L'errore d'ambiente e il mismatch sono cose diverse.** Un gate fail-closed
+  su entrambi blocca per motivi sbagliati (rete, `gh` assente) e i team
+  imparano a usare `--no-verify`. Il mismatch blocca; l'errore d'ambiente
+  avvisa.
+
+## Documenti aggiornati
+
+- `AGENTS.md` (v1.49): tabella regola ⟺ gate, Fase 0 di arbitraggio, codici di
+  uscita di `agent-claim.ps1`, `-Auto`, lock di proprietà della worktree,
+  session-start checklist a 7 check, flusso manuale deprecato, conteggio CI.
+- `docs/INDEX.md`: versione del protocollo in sync (C1).
+- `docs/12-DEVOPS.md §9.10`: tre righe nuove nel catalogo autorevole dei gate.
+- `docs/18-DEV-LOG.md §4`: entry della sessione.
+- `docs/state/sessions/104-arbitraggio-claim-lock-worktree.md`: questo file.
+- `scripts/check-worktree-ownership.mjs`, `scripts/test-worktree-ownership.sh`:
+  nuovi.
+- `scripts/agent-claim.ps1`: `-Auto`, exit 6, lock di proprietà, scrittura
+  atomica dello stato.
+- `scripts/agent-pr.ps1`: gate di proprietà + dichiarazione dell'`agent-id`.
+- `scripts/check-claim-state.mjs`: regola C6.
+- `scripts/test-claim-state.sh`: scenari T12..T14.
+- `.githooks/pre-commit`: INVARIANTE 4.
+- `.github/workflows/ci.yml`: step del gate di proprietà.
 
 
 
@@ -35202,6 +35437,15 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > quindi la regola scende a L3 e deve avere un gate che la faccia rispettare.
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
+>
+> **Sessione 104 (issue #319)**: il catalogo era indietro di **2 step** — i due step del gate
+> «coerenza del claim» (`check-claim-state.mjs` + `test-claim-state.sh`, Sessione 81) non
+> avevano una riga, e il nuovo step del gate «proprietà della worktree»
+> (`test-worktree-ownership.sh`, issue #319) si aggiunge a quelli. Ora le righe sono **44**
+> (43 gate + l'agregatore `quality`). Il **numero di job non cambia** (15): i tre step sono
+> dentro `gates-protocol`, che già gira su `pull_request`. Il gate di proprietà della worktree
+> è **locale** (pre-commit hook + `agent-pr.ps1`): in CI si esegue il suo **scenario negativo**,
+> che dimostra che fallisce quando deve (lesson 43-1: un gate che passa sempre non è un gate).
 
 Il job `quality` è il **check aggregatore**: fallisce in modo esplicito se uno
 qualunque dei job paralleli è fallito, annullato o saltato. È il check che la branch
@@ -35252,6 +35496,9 @@ protection può interpretare un check saltato come successo.
 | 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
 | 40 | `gates-docs` | `Privacy dei fixture` (`check-fixtures-privacy.mjs`) | solo PR | sì | **#309** |
 | 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
+| 42 | `gates-protocol` | `Coerenza claim/issue/branch/PR` (`check-claim-state.mjs`) | solo PR | sì | **#256** |
+| 43 | `gates-protocol` | `Gate "coerenza del claim" fail-closed` (`test-claim-state.sh`, 14 scenari) | solo PR | sì | **#256** |
+| 44 | `gates-protocol` | `Gate "proprieta' della worktree" fail-closed` (`test-worktree-ownership.sh`, 9 scenari) | solo PR | sì | **#319** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -52552,7 +52799,7 @@ fi
 
     Exit code: 0 ok - 1 errore git/worktree - 2 errore ambiente/API - 3
     validazione issue - 4 riverifica persa (yield) - 5 claim non ancora
-    scaduto (-Stale).
+    scaduto (-Stale) - 6 worktree posseduta da un altro agente (issue #319).
 
 .PARAMETER IssueNumber
     Numero dell'issue da prendere in carico.
@@ -52571,6 +52818,16 @@ fi
     regola 5): verifica l'eta' dell'ultima attivita' del claim attivo e, se
     supera le 12 ore, posta `stale-release:` e prosegue con claim + riverifica.
 
+.PARAMETER Auto
+    Procedura di ARBITRAGGIO (issue #319): invece di prendere in carico
+    l'issue indicata, prende la prima issue CANDIDABILE **libera** secondo
+    l'ordine di `docs/11-BACKLOG.md` (sezione "Priorita' di lavorazione per
+    agenti"). La selezione smette di essere una scelta dell'agente: con lo
+    stesso prompt, due agenti convergevano sulla stessa story; con `-Auto` il
+    tentativo e' in ordine e la riverifica decide. Se l'issue candidata non e'
+    piu' libera (exit 3), se il claim viene perso (exit 4) o se la worktree
+    appartiene a un altro agente (exit 6), si passa alla successiva.
+
 .PARAMETER DryRun
     Stampa cosa farebbe, senza toccare GitHub ne il filesystem.
 
@@ -52578,16 +52835,18 @@ fi
     pwsh scripts/agent-claim.ps1 256
     pwsh scripts/agent-claim.ps1 256 -DryRun
     pwsh scripts/agent-claim.ps1 283 -Stale   # claim senza attivita' da >12h
+    pwsh scripts/agent-claim.ps1 -Auto       # prima issue libera in ordine di backlog
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true, Position = 0)]
-    [int]$IssueNumber,
+    [Parameter(Position = 0)]
+    [int]$IssueNumber = 0,
     [string]$Slug = "",
     [string]$AgentId = "",
     [switch]$SkipWorktree,
     [switch]$Stale,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Auto
 )
 
 Set-StrictMode -Version Latest
@@ -52673,10 +52932,163 @@ function Assert-ClaimStale {
     return $agent
 }
 
+# --- claim attivo sull'issue (issue #319) --------------------------------------
+# Il claim vincente e' quello con l'id NUMERICO piu' basso fra i claim non
+# ancora rilasciati. Serve al lock di proprieta' della worktree: l'owner
+# locale (`agent-state.json`) deve coincidere con il vincitore.
+function Get-ActiveClaimWinner([int]$issue) {
+    $raw = & gh api "$repoApi/issues/$issue/comments" 2>$null
+    if ($LASTEXITCODE -ne 0) { return $null }
+    $all = @($raw | ConvertFrom-Json)
+    $releases = @($all | Where-Object { [string]$_.body -match '^\s*(release|stale-release)\s*:' })
+    $active = @(@($all | Where-Object { $_.body -like "claim:*" } | Sort-Object { [int64]$_.id }) |
+        Where-Object { -not (Test-ClaimReleased $_ $releases) })
+    if ($active.Count -eq 0) { return $null }
+    $c = $active[0]
+    return [pscustomobject]@{ id = [int64]$c.id; agent = (Get-ClaimAgent $c) }
+}
+
+# --- lock di proprieta' della worktree (issue #319) ---------------------------
+# ADR-0006 blocca l'ISSUE, non la directory: il path della worktree e'
+# deterministico (`ls-<N>-<slug>`), quindi due agenti che puntano alla stessa
+# story finiscono nella stessa cartella. Qui la worktree esistente viene
+# confrontata con il claim attivo:
+#   - owner diverso dal claim vincente -> exit 6 (nessuna scrittura su GitHub)
+#   - owner uguale al claim vincente   -> la worktree e' gia' nostra
+#   - nessun owner (orfana)             -> adottabile dal vincitore
+function Assert-WorktreeOwnership([string]$path) {
+    $wtState = $null
+    $gitDir = (& git -C $path rev-parse --absolute-git-dir 2>$null)
+    if ($LASTEXITCODE -eq 0 -and $gitDir) {
+        $statePath = Join-Path $gitDir.Trim() "agent-state.json"
+        if (Test-Path $statePath) {
+            try { $wtState = (Get-Content $statePath -Raw | ConvertFrom-Json) } catch { $wtState = $null }
+        }
+    }
+    if (-not $wtState) {
+        Say "worktree senza stato (orfana): nessun owner dichiarato" "Yellow"
+        $dirty = (& git -C $path status --porcelain 2>$null)
+        if ($dirty) {
+            Say "ATTENZIONE: la worktree orfana ha modifiche non committate: verifica prima di adottarla" "Yellow"
+        }
+        return
+    }
+    $owner = [string]$wtState.agent_id
+    if ([string]::IsNullOrWhiteSpace($owner)) { return }
+    $winner = Get-ActiveClaimWinner $IssueNumber
+    if ($winner -and $winner.agent -ne $owner) {
+        Die 6 ("la worktree '$path' appartiene all'agente $($winner.agent) (claim $($winner.id) attivo sull'issue #$IssueNumber): non puoi lavorarci. Scegli un'altra issue.")
+    }
+    if ($winner) {
+        Say "la worktree e' gia' di questo agente ($owner, claim $($winner.id))" "Green"
+        return
+    }
+    Say "worktree orfana (nessun claim attivo): adottabile" "Yellow"
+}
+
+# --- ordine di backlog (issue #319) -------------------------------------------
+# L'ordine di tentativo delle story e' quello di `docs/11-BACKLOG.md`, sezione
+# "Priorita' di lavorazione per agenti": la lista numerata delle story.
+function Get-BacklogStoryOrder {
+    $backlog = Join-Path $repoRoot "docs/11-BACKLOG.md"
+    if (-not (Test-Path $backlog)) { return @() }
+    $text = [System.IO.File]::ReadAllText($backlog)
+    $ids = @()
+    foreach ($m in [regex]::Matches($text, '(?m)^\s*\d+\.\s+\*\*([^*]+)\*\*')) {
+        foreach ($idm in [regex]::Matches($m.Groups[1].Value, '\d+\.\d+')) {
+            $ids += $idm.Value
+        }
+    }
+    return $ids
+}
+
+# Mappa story id -> numero issue, dai file di stato delle story.
+function Get-StoryIssueMap {
+    $map = @{}
+    $dir = Join-Path $repoRoot "docs/state/stories"
+    if (-not (Test-Path $dir)) { return $map }
+    foreach ($f in Get-ChildItem $dir -Filter "*.md" -File) {
+        $t = [System.IO.File]::ReadAllText($f.FullName)
+        $idm = [regex]::Match($t, '(?m)^id:\s*"?([0-9.]+)"?\s*$')
+        $issm = [regex]::Match($t, '(?m)^issue:\s*([0-9]+)\s*$')
+        if ($idm.Success -and $issm.Success) {
+            $map[$idm.Groups[1].Value] = [int]$issm.Groups[1].Value
+        }
+    }
+    return $map
+}
+
+# Issue candidabili LIBERE, ordinate per priorita' di backlog.
+function Get-CandidateIssues {
+    $json = & gh issue list --state open --label agent-ready --limit 50 --json number,title,labels
+    if ($LASTEXITCODE -ne 0) { Die 2 "impossibile leggere le issue candidabili" }
+    $free = @(@($json | ConvertFrom-Json) | Where-Object {
+        $names = @($_.labels | ForEach-Object { $_.name })
+        -not ($names -contains 'in-progress') -and -not ($names -match '^status:')
+    })
+    if ($free.Count -eq 0) { return @() }
+    $order = @(Get-BacklogStoryOrder)
+    $map = Get-StoryIssueMap
+    $rank = @{}
+    for ($i = 0; $i -lt $order.Count; $i++) {
+        $sid = $order[$i]
+        if ($map.ContainsKey($sid)) {
+            $issueNum = [int]$map[$sid]
+            if (-not $rank.ContainsKey($issueNum)) { $rank[$issueNum] = $i }
+        }
+    }
+    $tail = $order.Count + 1
+    return @($free | Sort-Object `
+        @{ Expression = { if ($rank.ContainsKey([int]$_.number)) { $rank[[int]$_.number] } else { $tail } } }, `
+        @{ Expression = { [int]$_.number } })
+}
+
 # --- agent id ---------------------------------------------------------------
 if ([string]::IsNullOrWhiteSpace($AgentId)) {
     $hostName = $env:COMPUTERNAME.ToLowerInvariant()
     $AgentId = "kilo-$hostName-$([guid]::NewGuid().ToString('N').Substring(0,4))"
+}
+
+# --- arbitraggio automatico (-Auto, issue #319) -------------------------------
+# Con lo stesso prompt, due agenti avviati a pochi secondi di distanza
+# convergevano sulla stessa story (il blocco NEXT-STEP e la query live delle
+# issue libere indicano la stessa prima story). `-Auto` toglie la scelta
+# all'agente: il tentativo e' in ordine di backlog, e la riverifica decide.
+if ($Auto) {
+    Say "modalita' -Auto: prendo in carico la prima issue libera in ordine di backlog" "Cyan"
+    $candidates = @(Get-CandidateIssues)
+    if ($candidates.Count -eq 0) {
+        Die 3 "nessuna issue agent-ready libera: apri una issue needs-spec e termina la sessione"
+    }
+    $names = @($candidates | ForEach-Object { "#$($_.number)" })
+    Say "candidati liberi, in ordine di tentativo: $($names -join ', ')" "DarkGray"
+    if ($DryRun) {
+        Say "[DRY-RUN] prenderei in carico $($names[0])" "Yellow"
+        exit 0
+    }
+    foreach ($cand in $candidates) {
+        $n = [int]$cand.number
+        Say "provo #$n ($($cand.title))" "DarkGray"
+        $childArgs = @("-NoProfile", "-File", $PSCommandPath, "$n", "-AgentId", $AgentId)
+        if ($SkipWorktree) { $childArgs += "-SkipWorktree" }
+        if ($Stale) { $childArgs += "-Stale" }
+        & pwsh @childArgs | Out-Host
+        $childExit = $LASTEXITCODE
+        if ($childExit -eq 0) {
+            Say "claim acquisito su #$n" "Green"
+            exit 0
+        }
+        if ($childExit -in @(3, 4, 5, 6)) {
+            Say "#$n non ottenibile (exit $childExit): passo alla successiva" "Yellow"
+            continue
+        }
+        Die $childExit "il tentativo su #$n e' fallito (exit $childExit)"
+    }
+    Die 3 "nessuna issue ottenibile: apri una issue needs-spec e termina la sessione"
+}
+
+if ($IssueNumber -le 0) {
+    Die 2 "manca il numero dell'issue (oppure usa -Auto per l'arbitraggio automatico)"
 }
 
 # --- 1. validazione dell'issue --------------------------------------------
@@ -52716,6 +53128,11 @@ if (-not $SkipWorktree) {
     $worktreePath = Join-Path $worktreeParent $wtName
     if (Test-Path $worktreePath) {
         Say "worktree gia' presente: $worktreePath" "Yellow"
+        # Lock di proprieta' (issue #319): la worktree ha un path deterministico,
+        # quindi due agenti sulla stessa story finiscono nella stessa cartella.
+        # Qui la proprieta' viene confrontata con il claim attivo: se e' di un
+        # altro agente, si esce con 6 **senza** toccare GitHub.
+        Assert-WorktreeOwnership $worktreePath
     }
     else {
         Say "creo la worktree: $worktreePath" "Cyan"
@@ -52777,6 +53194,8 @@ if ($mineId -ne $lowestId) {
     # NON rimuove la label `in-progress` -- serve al vincitore. Rimuoverla faceva
     # ricomparire l'issue come "libera" nelle query degli altri contendenti.
     & gh issue comment $IssueNumber --body "yield: $AgentId -- riverifica persa (claim $mineId; ID piu' basso in carico: $lowestId)" | Out-Null
+    Say "ABANDONA la worktree ${worktreePath}: il suo owner e' il vincitore della riverifica" "Red"
+    Say "Non scrivere in quella directory e non rimuovere la label 'in-progress': passi alla prossima issue candidabile." "Red"
     exit 4
 }
 Say "riverifica OK: il claim $mineId e' il piu' basso" "Green"
@@ -52796,7 +53215,13 @@ $state = [ordered]@{
     pr          = $null
     session     = $null
 }
-$state | ConvertTo-Json | Set-Content -Path $stateFile -Encoding utf8
+# Scrittura ATOMICA del file di stato (issue #319): il file e' il lock della
+# worktree, e due agenti che lo scrivono nello stesso momento non possono
+# produrre un JSON troncato. Si scrive su un file temporaneo e si rinomina:
+# la rinomina e' atomica sullo stesso volume.
+$tmpState = "$stateFile.tmp"
+[System.IO.File]::WriteAllText($tmpState, ($state | ConvertTo-Json), (New-Object System.Text.UTF8Encoding($false)))
+Move-Item -LiteralPath $tmpState -Destination $stateFile -Force
 Say "file di stato: $stateFile" "DarkGray"
 
 # --- 7. prossimi passi ------------------------------------------------------
@@ -52992,6 +53417,18 @@ if (-not $SkipChecks) {
     & $node (Join-Path $repoRoot "scripts/test-fixtures-privacy-gate.mjs") | Out-Host
     if ($LASTEXITCODE -ne 0) { $failures += "test-fixtures-privacy-gate.mjs" }
 
+    # --- Gate "proprieta' della worktree" (issue #319) ---
+    # L'owner locale della worktree (`agent-state.json`) deve coincidere con
+    # l'agente del claim VINCENTE. Il codice 1 (mismatch) BLOCCA: e' doppio
+    # lavoro. Il codice 2 (errore di ambiente: `gh` assente, API irraggiungibile)
+    # NON blocca: un gate che blocca per una disconnessione non e' un gate.
+    $ownershipGate = Join-Path $repoRoot "scripts/check-worktree-ownership.mjs"
+    if (Test-Path $ownershipGate) {
+        & $node $ownershipGate | Out-Host
+        if ($LASTEXITCODE -eq 1) { $failures += "check-worktree-ownership.mjs (mismatch)" }
+        elseif ($LASTEXITCODE -ne 0) { $skipped += "check-worktree-ownership.mjs (errore di ambiente)" }
+    }
+
     # Test FUNZIONALE del writer post-merge: e' il gate che ha reso rossa la
     # PR #305 (un numero di sessione duplicato nel fixture faceva fallire
     # `aggregate-state.ps1 -Check` dentro il clone temporaneo del test).
@@ -53028,6 +53465,17 @@ if ([string]::IsNullOrWhiteSpace($BodyFile)) {
 if (-not (Test-Path $BodyFile)) { Die 2 "file del body non trovato: $BodyFile" }
 $body = Get-Content $BodyFile -Raw
 
+# --- dichiarazione dell'agente (issue #319) ----------------------------------
+# Il body dichiara l'agent-id del claimante: e' il fatto che permette a
+# `scripts/check-claim-state.mjs` (CI) di verificare che la PR sia stata
+# aperta dall'agente che ha vinto la riverifica. Una PR aperta da un agente
+# diverso dal claimante e' doppio lavoro, e in CI deve fallire.
+$agentId = [string]$state.agent_id
+if ([string]::IsNullOrWhiteSpace($agentId)) {
+    Die 3 "il file di stato non dichiara l'agent_id: la PR non puo' essere attribuita al claimante"
+}
+$body = $body.TrimEnd() + "`n`n## Agente`n`nagent-id: ``$agentId```n"
+
 $naked = @([regex]::Matches($body, "(?m)^\s*(Closes|Fixes|Resolves)\s+#(\d+)\s*$"))
 $allKeywords = @([regex]::Matches($body, "(?i)\b(Closes|Fixes|Resolves)\s+#(\d+)"))
 if ($naked.Count -ne 1) {
@@ -53055,8 +53503,17 @@ if ($DryRun) {
 
 # --- 4. creazione della PR --------------------------------------------------
 Say "creo la PR..." "Cyan"
-$prUrl = (& gh pr create --base $Base --head $branch --title $Title --body-file $BodyFile | Select-Object -Last 1).Trim()
-if ($LASTEXITCODE -ne 0) { Die 1 "gh pr create e' fallito" }
+# Il body effettivo include la dichiarazione dell'agente: si scrive su un file
+# temporaneo (UTF-8 senza BOM) e si usa quello per `gh pr create`. Il template
+# del repository resta L'UNICO artifact della checklist (regola C6): qui non
+# viene duplicato, viene arricchito di una riga machine-readable.
+$bodyFile = [System.IO.Path]::GetTempFileName()
+[System.IO.File]::WriteAllText($bodyFile, $body, (New-Object System.Text.UTF8Encoding($false)))
+$prOut = & gh pr create --base $Base --head $branch --title $Title --body-file $bodyFile | Select-Object -Last 1
+$prExit = $LASTEXITCODE
+Remove-Item -LiteralPath $bodyFile -Force -ErrorAction SilentlyContinue
+if ($prExit -ne 0) { Die 1 "gh pr create e' fallito" }
+$prUrl = ([string]$prOut).Trim()
 if ($prUrl -notmatch "/pull/(\d+)") { Die 1 "impossibile ricavare il numero della PR dall'output: $prUrl" }
 $prNumber = [int]$Matches[1]
 Say "PR #$prNumber aperta: $prUrl" "Green"
@@ -53175,6 +53632,10 @@ exit 0
  *       nella working copy condivisa)
  *   C5  nessuna keyword di chiusura extra (niente occorrenze dentro backtick
  *       o caselle di checklist: GitHub chiude solo le keyword nude)
+ *   C6  l'agent-id dichiarato nel body della PR coincide con l'agente del
+ *       claim VINCENTE (issue #319): una PR aperta da un agente diverso dal
+ *       claimante e' doppio lavoro. Dichiarazione ASSENTE -> WARN, per non
+ *       rendere rosse le PR aperte da altri agenti prima di questa regola.
  *
  * Uso: node scripts/check-claim-state.mjs [--pr <N>] [--repo <owner/name>]
  *
@@ -53190,9 +53651,13 @@ function arg(name, fallback) {
 }
 
 let failures = 0;
-const fail = (m) => { console.error(`[FAIL] ${m}`); failures++; };
+const fail = (m) => {
+  console.error(`[FAIL] ${m}`);
+  failures++;
+};
 const ok = (m) => console.log(`[OK] ${m}`);
 const info = (m) => console.log(`[INFO] ${m}`);
+const warn = (m) => console.log(`[WARN] ${m}`);
 
 function gh(args) {
   try {
@@ -53253,7 +53718,9 @@ const prFile = arg('--pr-json', '');
 const issueFile = arg('--issue-json', '');
 const commentsFile = arg('--comments-json', '');
 
-const pr = prFile ? readJsonFile(prFile, 'PR') : ghJson(['pr', 'view', String(prNumber), '--json', 'headRefName,body,files,state,number']);
+const pr = prFile
+  ? readJsonFile(prFile, 'PR')
+  : ghJson(['pr', 'view', String(prNumber), '--json', 'headRefName,body,files,state,number']);
 const branch = pr.headRefName || '';
 const body = pr.body || '';
 const files = (pr.files || []).map((f) => f.path);
@@ -53263,7 +53730,9 @@ info(`branch: ${branch} — ${files.length} file`);
 // su una PR chiusa o mergiata lo stato dell'issue e' gia' cambiato
 // (status:done): il gate vale per le PR aperte
 if (pr.state !== 'OPEN') {
-  console.log(`[INFO] check-claim-state: PR #${prNumber} e' ${pr.state} — il gate vale per le PR aperte`);
+  console.log(
+    `[INFO] check-claim-state: PR #${prNumber} e' ${pr.state} — il gate vale per le PR aperte`,
+  );
   console.log('\n[INFO] check-claim-state: 0 violazioni');
   process.exit(0);
 }
@@ -53278,14 +53747,20 @@ const branchMatch = branch.match(/^(?:feat|fix)\/(\d+)-/);
 if (branchMatch) {
   issueNumber = Number(branchMatch[1]);
 } else if (!branch.startsWith('docs/')) {
-  fail(`C1: la branch "${branch}" non e' nel formato richiesto (feat/<N>-... | fix/<N>-... | docs/<slug>)`);
+  fail(
+    `C1: la branch "${branch}" non e' nel formato richiesto (feat/<N>-... | fix/<N>-... | docs/<slug>)`,
+  );
 }
 
 if (issueNumber !== null) {
   if (naked.length !== 1) {
-    fail(`C1: la keyword di chiusura deve comparire UNA volta come riga nuda nella branch ${branch} (trovate ${naked.length})`);
+    fail(
+      `C1: la keyword di chiusura deve comparire UNA volta come riga nuda nella branch ${branch} (trovate ${naked.length})`,
+    );
   } else if (Number(naked[0][2]) !== issueNumber) {
-    fail(`C1: la keyword di chiusura punta a #${naked[0][2]} ma la branch dichiara l'issue #${issueNumber}`);
+    fail(
+      `C1: la keyword di chiusura punta a #${naked[0][2]} ma la branch dichiara l'issue #${issueNumber}`,
+    );
   } else {
     ok(`C1: branch ${branch} e keyword di chiusura #${issueNumber} coerenti`);
   }
@@ -53294,7 +53769,9 @@ if (issueNumber !== null) {
 }
 
 if (all.length !== naked.length) {
-  fail(`C5: la keyword di chiusura compare ${all.length} volte ma solo ${naked.length} sono nude: le occorrenze dentro backtick o checklist non chiudono l'issue`);
+  fail(
+    `C5: la keyword di chiusura compare ${all.length} volte ma solo ${naked.length} sono nude: le occorrenze dentro backtick o checklist non chiudono l'issue`,
+  );
 } else {
   ok('C5: nessuna keyword di chiusura extra (naked = totale)');
 }
@@ -53303,7 +53780,9 @@ if (all.length !== naked.length) {
 if (branch.startsWith('docs/')) {
   const fuori = files.filter((f) => !f.startsWith('docs/'));
   if (fuori.length) {
-    fail(`C4: la branch "${branch}" e' un doc-sync ma tocca ${fuori.length} file fuori da docs/: ${fuori.slice(0, 8).join(', ')}${fuori.length > 8 ? ' …' : ''}`);
+    fail(
+      `C4: la branch "${branch}" e' un doc-sync ma tocca ${fuori.length} file fuori da docs/: ${fuori.slice(0, 8).join(', ')}${fuori.length > 8 ? ' …' : ''}`,
+    );
   } else {
     ok(`C4: branch docs/ — tutti i ${files.length} file sono sotto docs/`);
   }
@@ -53311,25 +53790,35 @@ if (branch.startsWith('docs/')) {
 
 // --- C2/C3: stato dell'issue e claim -----------------------------------------
 if (issueNumber !== null) {
-  const issue = issueFile ? readJsonFile(issueFile, 'issue') : ghJson(['issue', 'view', String(issueNumber), '--json', 'state,labels']);
+  const issue = issueFile
+    ? readJsonFile(issueFile, 'issue')
+    : ghJson(['issue', 'view', String(issueNumber), '--json', 'state,labels']);
   const labels = (issue.labels || []).map((l) => l.name);
   const inReview = labels.includes('status:in-review');
   const inProgress = labels.includes('in-progress');
   if (issue.state !== 'OPEN') {
     fail(`C2: l'issue #${issueNumber} non e' aperta (stato: ${issue.state})`);
   } else if (!inReview && !inProgress) {
-    fail(`C2: l'issue #${issueNumber} non e' in 'status:in-review' ne' in 'in-progress' (labels: ${labels.join(', ')})`);
+    fail(
+      `C2: l'issue #${issueNumber} non e' in 'status:in-review' ne' in 'in-progress' (labels: ${labels.join(', ')})`,
+    );
   } else {
-    ok(`C2: issue #${issueNumber} in stato coerente (${inReview ? 'status:in-review' : 'in-progress'})`);
+    ok(
+      `C2: issue #${issueNumber} in stato coerente (${inReview ? 'status:in-review' : 'in-progress'})`,
+    );
   }
 
   // i commenti di claim (API REST: l'id numerico e' il discriminante)
-  const comments = commentsFile ? readJsonFile(commentsFile, 'comments') : ghJson(['api', `repos/{owner}/{repo}/issues/${issueNumber}/comments`]);
+  const comments = commentsFile
+    ? readJsonFile(commentsFile, 'comments')
+    : ghJson(['api', `repos/{owner}/{repo}/issues/${issueNumber}/comments`]);
   const claimComments = comments.filter((c) => c.body && c.body.startsWith('claim:'));
   const yieldComments = comments.filter((c) => c.body && c.body.startsWith('yield:'));
 
   if (claimComments.length === 0) {
-    fail(`C3: l'issue #${issueNumber} non ha nessun commento di claim: — la regola di ADR-0006 ("nessun lavoro senza claim valido") non e' verificabile`);
+    fail(
+      `C3: l'issue #${issueNumber} non ha nessun commento di claim: — la regola di ADR-0006 ("nessun lavoro senza claim valido") non e' verificabile`,
+    );
   } else {
     const winner = claimComments.sort((a, b) => Number(a.id) - Number(b.id))[0];
     const yielded = yieldComments.some((y) => {
@@ -53337,9 +53826,31 @@ if (issueNumber !== null) {
       return m && winner.body.includes(m[1]);
     });
     if (yielded) {
-      fail(`C3: l'agente del claim vincente (commento ${winner.id}) ha postato un yield: — la story non e' stata presa in carico`);
+      fail(
+        `C3: l'agente del claim vincente (commento ${winner.id}) ha postato un yield: — la story non e' stata presa in carico`,
+      );
     } else {
       ok(`C3: claim valido (commento ${winner.id}, ${claimComments.length} claim in totale)`);
+    }
+
+    // --- C6: l'agent-id dichiarato nel body coincide con il claim vincente ---
+    // Il body della PR dichiara l'agente che l'ha aperta (`agent-pr.ps1` lo
+    // aggiunge). Se non coincide con il claim vincente, la PR porta lavoro
+    // attribuito a un agente diverso: e' doppio lavoro (issue #319).
+    const declared = body.match(/agent-id:\s*`?([A-Za-z0-9._-]+)`?/);
+    const winnerAgent = (winner.body.match(/^\s*claim:\s*(\S+)/) || [])[1] || '';
+    if (!declared) {
+      warn(
+        `C6: il body della PR non dichiara l'agent-id: non e' verificabile che la PR sia del claim vincente (${winnerAgent || '?'})`,
+      );
+    } else if (winnerAgent && declared[1] !== winnerAgent) {
+      fail(
+        `C6: il body dichiara l'agente "${declared[1]}" ma il claim vincente dell'issue #${issueNumber} e' di "${winnerAgent}" (commento ${winner.id}) — doppio lavoro`,
+      );
+    } else {
+      ok(
+        `C6: l'agent-id dichiarato (${declared[1]}) coincide con il claim vincente (commento ${winner.id})`,
+      );
     }
   }
 }
@@ -53469,6 +53980,353 @@ scenario "T11" "PR mergiata (gate non applicabile)" "0" \
   '{"number":1,"state":"MERGED","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
   "$ISSUE_OK" "$COMMENTS_OK"
 
+# T12: l'agent-id dichiarato nel body coincide con il claim vincente (issue #319)
+PR_BODY_AGENT_OK='## Sintesi\n\nCloses #7\n\n## Agente\n\nagent-id: `kilo-hp-abc`'
+scenario "T12" "agent-id del body = agente del claim vincente" "0" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_AGENT_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T13: l'agent-id dichiarato nel body NON coincide con il claim vincente:
+# doppio lavoro (issue #319)
+PR_BODY_AGENT_WRONG='## Sintesi\n\nCloses #7\n\n## Agente\n\nagent-id: `kilo-hp-altro`'
+scenario "T13" "agent-id del body != agente del claim vincente" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_AGENT_WRONG"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T14: nessun agent-id nel body -> WARN, non fallimento (non si rompono le PR
+# aperte da altri agenti prima che la regola esistesse)
+scenario "T14" "nessun agent-id nel body (warn, non fail)" "0" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+echo "---"
+echo "Pass: $PASS   Fail: $FAIL"
+
+if [ "$FAIL" -eq 0 ]; then
+  echo "ALL PASS"
+  exit 0
+else
+  echo "FAILURES"
+  exit 1
+fi
+
+
+
+===== FILE: scripts/check-worktree-ownership.mjs =====
+
+#!/usr/bin/env node
+/**
+ * Gate "proprieta' della worktree" (issue #319, ADR-0012 regola 5).
+ *
+ * ADR-0006 mette il lock sull'*issue* GitHub, non sulla risorsa fisica: la
+ * worktree `ls-<N>-<slug>` ha un path DETERMINISTICO, quindi due agenti che
+ * puntano alla stessa story finiscono nella stessa cartella. Il claim
+ * (riverificato sull'id numerico del commento) arbitra chi *dovrebbe* lavorarci,
+ * ma nessun gate verificava chi sta *davvero* scrivendo li'.
+ *
+ * Consequenza misurata (issue #319): il codice del secondo agente finiva nel
+ * commit e nella PR del primo, indistinguibile per la CI — il doppio lavoro
+ * era silenzioso e la perdita di attribuzione era irreversibile.
+ *
+ * Questo gate confronta i due fatti:
+ *   - chi possiede la worktree LOCALE (`agent-state.json`, scritto da
+ *     `scripts/agent-claim.ps1` al momento del claim);
+ *   - chi ha vinto il claim sull'issue (commento `claim:` con l'id numerico
+ *     piu' basso fra quelli non ancora rilasciati).
+ *
+ * Se i due agenti differiscono, il lavoro locale non e' del claimante: e'
+ * doppio lavoro.
+ *
+ * Semantica dell'uscita (fail-closed sul difetto, fail-open sull'ambiente):
+ *   0 = coerente (o niente da verificare)
+ *   1 = MISMATCH: la worktree non appartiene al claim vincente
+ *   2 = errore di ambiente (stato illeggibile, `gh` assente, API irraggiungibile)
+ *
+ * Il codice 2 NON blocca: un gate che blocca per una disconnessione di rete
+ * non e' un gate, e' un ostacolo. Il codice 1 blocca.
+ *
+ * Uso:
+ *   node scripts/check-worktree-ownership.mjs
+ *   node scripts/check-worktree-ownership.mjs --state-json s.json --comments-json c.json
+ */
+import { execFileSync } from 'node:child_process';
+import { readFileSync, existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+
+const argv = process.argv.slice(2);
+function arg(name, fallback) {
+  const i = argv.indexOf(name);
+  return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : fallback;
+}
+
+let failures = 0;
+const fail = (m) => {
+  console.error(`[FAIL] ${m}`);
+  failures++;
+};
+const ok = (m) => console.log(`[OK] ${m}`);
+const info = (m) => console.log(`[INFO] ${m}`);
+const warn = (m) => console.log(`[WARN] ${m}`);
+
+/** Uscita 2: errore di ambiente (non un difetto del protocollo). */
+function envError(message) {
+  console.error(`[FAIL] ${message}`);
+  process.exit(2);
+}
+
+function readJsonFile(path, label) {
+  if (!existsSync(path)) envError(`${label}: file non trovato: ${path}`);
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    envError(`${label}: JSON non valido in ${path}`);
+  }
+}
+
+function ghJson(args) {
+  let out;
+  try {
+    out = execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  } catch (err) {
+    envError(`gh ${args.join(' ')}: ${String(err.stderr || err.message).trim()}`);
+  }
+  try {
+    return JSON.parse(out);
+  } catch {
+    envError('output JSON non valido da gh');
+  }
+}
+
+/**
+ * Agente di un commento di claim: il primo token dopo il marker `claim:`.
+ * Il formato e' quello di `scripts/agent-claim.ps1`:
+ *   claim: <AGENT-ID> (UTC <timestamp>) -- worktree: <path>
+ */
+function claimAgent(comment) {
+  const m = String(comment.body || '').match(/^\s*claim:\s*(\S+)/);
+  return m ? m[1] : '';
+}
+
+/**
+ * Un claim RILASCIATO non conta: `release:` / `stale-release:` successivi al
+ * claim e che ne citano l'agente lo annullano. Stessa semantica di
+ * `Test-ClaimReleased` in `scripts/agent-claim.ps1`.
+ */
+function isReleased(claim, comments) {
+  const agent = claimAgent(claim);
+  if (!agent) return false;
+  return comments.some(
+    (c) =>
+      /^\s*(release|stale-release)\s*:/.test(String(c.body || '')) &&
+      Number(c.id) > Number(claim.id) &&
+      String(c.body).includes(agent),
+  );
+}
+
+/**
+ * Claim vincente: quello con l'id numerico piu' basso fra i claim non
+ * rilasciati. Il discriminatore e' l'id NUMERICO dell'API REST, non il
+ * `node_id` GraphQL e non `created_at` (vedi AGENTS.md, procedura di claim).
+ */
+function winningClaim(comments) {
+  const claims = comments
+    .filter((c) => /^\s*claim:/.test(String(c.body || '')))
+    .filter((c) => !isReleased(c, comments))
+    .sort((a, b) => Number(a.id) - Number(b.id));
+  return claims[0] || null;
+}
+
+console.log("[INFO] check-worktree-ownership: proprieta' della worktree vs claim vincente");
+
+// --- 1. stato locale della worktree -------------------------------------------
+const root = resolve(arg('--root', '.'));
+const stateFile = arg('--state-json', '');
+let state = null;
+
+if (stateFile) {
+  state = readJsonFile(stateFile, 'stato della worktree');
+} else {
+  let gitDir = '';
+  try {
+    gitDir = execFileSync('git', ['rev-parse', '--absolute-git-dir'], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
+  } catch (err) {
+    envError(`git rev-parse --absolute-git-dir: ${String(err.stderr || err.message).trim()}`);
+  }
+  const candidate = join(gitDir, 'agent-state.json');
+  if (!existsSync(candidate)) {
+    // La working copy principale (e le worktree create a mano) non hanno
+    // stato: non c'e' nessun claim da confrontare.
+    info(`nessun agent-state.json in ${gitDir}: niente da verificare`);
+    console.log('\n[INFO] check-worktree-ownership: 0 violazioni');
+    process.exit(0);
+  }
+  state = readJsonFile(candidate, 'stato della worktree');
+}
+
+const owner = String(state.agent_id || '');
+const stateIssue = Number(state.issue || 0);
+const stateClaimId = Number(state.claim_id || 0);
+
+if (!owner) envError('agent-state.json senza agent_id: stato illeggibile');
+if (!stateIssue) envError('agent-state.json senza issue: stato illeggibile');
+
+info(`worktree: owner ${owner} (issue #${stateIssue}, claim ${stateClaimId || '?'})`);
+
+// --- 2. claim attivo sull'issue ------------------------------------------------
+const issueNumber = Number(arg('--issue', String(stateIssue))) || stateIssue;
+const commentsFile = arg('--comments-json', '');
+const comments = commentsFile
+  ? readJsonFile(commentsFile, 'commenti')
+  : ghJson(['api', `repos/{owner}/{repo}/issues/${issueNumber}/comments`]);
+
+const winner = winningClaim(comments);
+if (!winner) {
+  // Nessun claim attivo: la worktree e' orfana (il claimante ha rilasciato).
+  // Non e' un difetto: la worktree viene rimossa dalla procedura post-merge.
+  warn(`nessun claim attivo sull'issue #${issueNumber}: la worktree e' orfana`);
+  console.log('\n[INFO] check-worktree-ownership: 0 violazioni');
+  process.exit(0);
+}
+
+const winnerAgent = claimAgent(winner);
+info(`claim vincente: commento ${winner.id} — agente ${winnerAgent}`);
+
+if (winnerAgent !== owner) {
+  fail(
+    `la worktree e' di ${owner} ma il claim vincente sull'issue #${issueNumber} e' di ${winnerAgent} (commento ${winner.id}): ` +
+      'lavoro locale non attribuito al claimante — doppio lavoro',
+  );
+} else if (stateClaimId && Number(winner.id) !== stateClaimId) {
+  // Stesso agente, claim diverso: il file di stato e' precedente (per esempio
+  // un re-claim dopo un rilascio). Non e' un doppio lavoro.
+  warn(
+    `stesso agente (${owner}) ma il file di stato cita il claim ${stateClaimId} e il vincente e' ${winner.id}: ` +
+      'stato precedente, nessun doppio lavoro',
+  );
+  ok(`worktree di ${owner}: l'agente coincide con il claim vincente`);
+} else {
+  ok(`worktree di ${owner}: l'agente coincide con il claim vincente (commento ${winner.id})`);
+}
+
+console.log(`\n[INFO] check-worktree-ownership: ${failures} violazioni`);
+process.exit(failures === 0 ? 0 : 1);
+
+
+
+===== FILE: scripts/test-worktree-ownership.sh =====
+
+#!/usr/bin/env bash
+# Test di scenario per scripts/check-worktree-ownership.mjs (issue #319).
+#
+# Il gate confronta chi possiede la worktree LOCALE (`agent-state.json`) con
+# chi ha vinto il claim sull'issue (commento `claim:` con id numerico piu'
+# basso fra quelli non rilasciati). Il gate che passa sempre non e' un gate
+# (lesson 43-1): qui si verificano sia il caso positivo sia i casi negativi.
+#
+# I dati arrivano da file JSON (--state-json/--comments-json): il test non
+# tocca GitHub e funziona identico su Windows e Linux (un mock `gh` bash non
+# e' eseguibile su Windows senza estensione, e il PATH finirebbe per chiamare
+# il gh vero).
+#
+# Esegui con: bash scripts/test-worktree-ownership.sh
+# Richiede: bash, node.
+
+set -u
+
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+GATE="$SCRIPT_DIR/check-worktree-ownership.mjs"
+
+if [ ! -f "$GATE" ]; then
+  echo "[FAIL] gate non trovato: $GATE"
+  exit 2
+fi
+
+WORK=$(mktemp -d)
+trap "rm -rf '$WORK'" EXIT
+
+PASS=0
+FAIL=0
+
+# scenario <id> <descrizione> <expected exit> <state json> <comments json>
+scenario() {
+  local id="$1" desc="$2" expected_exit="$3"
+  printf '%s' "$4" > "$WORK/state.json"
+  printf '%s' "$5" > "$WORK/comments.json"
+
+  node "$GATE" --state-json "$WORK/state.json" --comments-json "$WORK/comments.json" \
+    > "$WORK/out.txt" 2>&1
+  local actual_exit=$?
+
+  local status="OK"
+  if [ "$actual_exit" != "$expected_exit" ]; then
+    status="FAIL"
+  fi
+
+  printf "%-3s %-56s | expected=%-3s | actual=%-3s (%s)\n" \
+    "$id" "$desc" "$expected_exit" "$actual_exit" "$status"
+
+  if [ "$status" = "OK" ]; then
+    PASS=$((PASS+1))
+  else
+    FAIL=$((FAIL+1))
+    sed 's/^/       | /' "$WORK/out.txt" | head -6
+  fi
+}
+
+# il claim attivo: formato di scripts/agent-claim.ps1
+STATE_OWNER='{"issue":240,"agent_id":"kilo-hp-abc","claim_id":100,"branch":"feat/240-x"}'
+STATE_OTHER='{"issue":240,"agent_id":"kilo-hp-xyz","claim_id":101,"branch":"feat/240-x"}'
+
+COMMENTS_OWNER='[{"id":100,"body":"claim: kilo-hp-abc (UTC 2026-11-05T19:22:34Z) -- worktree: C:/tmp/ls-240"}]'
+COMMENTS_TWO='[{"id":100,"body":"claim: kilo-hp-abc (UTC 2026-11-05T19:22:34Z)"},{"id":101,"body":"claim: kilo-hp-xyz (UTC 2026-11-05T19:22:40Z)"}]'
+COMMENTS_RELEASED='[{"id":100,"body":"claim: kilo-hp-abc (UTC 2026-11-05T19:22:34Z)"},{"id":102,"body":"release: kilo-hp-abc — PR merged"}]'
+COMMENTS_RELEASED_THEN_NEW='[{"id":100,"body":"claim: kilo-hp-abc (UTC 2026-11-05T19:22:34Z)"},{"id":102,"body":"release: kilo-hp-abc — abbandono"},{"id":103,"body":"claim: kilo-hp-xyz (UTC 2026-11-05T20:00:00Z)"}]'
+
+# T1: l'owner locale coincide con il claim vincente
+scenario "T1" "owner locale = claim vincente" "0" "$STATE_OWNER" "$COMMENTS_OWNER"
+
+# T2: l'owner locale NON coincide con il claim vincente (doppo lavoro)
+scenario "T2" "owner locale != claim vincente (doppio lavoro)" "1" "$STATE_OTHER" "$COMMENTS_OWNER"
+
+# T3: due claim, l'id piu' basso vince (l'owner deve essere il primo)
+scenario "T3" "con due claim vince quello con id piu' basso" "1" "$STATE_OTHER" "$COMMENTS_TWO"
+
+# T4: il claim vincente e' stato rilasciato: la worktree e' orfana, non un difetto
+scenario "T4" "claim vincente rilasciato (worktree orfana)" "0" "$STATE_OWNER" "$COMMENTS_RELEASED"
+
+# T5: claim rilasciato e poi un nuovo claim: vince il nuovo
+scenario "T5" "claim rilasciato seguito da nuovo claim" "1" "$STATE_OWNER" "$COMMENTS_RELEASED_THEN_NEW"
+
+# T6: stesso agente, claim id diverso nello stato: stato precedente, non un difetto
+scenario "T6" "stesso agente con claim id diverso nello stato" "0" \
+  '{"issue":240,"agent_id":"kilo-hp-abc","claim_id":99,"branch":"feat/240-x"}' "$COMMENTS_OWNER"
+
+# T7: stato illeggibile (nessun agent_id) -> errore di ambiente, non un difetto
+scenario "T7" "agent-state.json senza agent_id (errore di ambiente)" "2" \
+  '{"issue":240,"claim_id":100}' "$COMMENTS_OWNER"
+
+# T8: nessun claim attivo e nessun stato: niente da verificare
+scenario "T8" "nessun claim attivo" "0" "$STATE_OWNER" '[]'
+
+# T9: file di stato inesistente -> errore di ambiente (exit 2, fail-open)
+node "$GATE" --state-json "$WORK/does-not-exist.json" --comments-json "$WORK/comments.json" \
+  > "$WORK/out.txt" 2>&1
+actual_exit=$?
+status="OK"
+if [ "$actual_exit" != "2" ]; then status="FAIL"; fi
+printf "%-3s %-56s | expected=%-3s | actual=%-3s (%s)\n" \
+  "T9" "file di stato inesistente (errore di ambiente)" "2" "$actual_exit" "$status"
+if [ "$status" = "OK" ]; then
+  PASS=$((PASS+1))
+else
+  FAIL=$((FAIL+1))
+  sed 's/^/       | /' "$WORK/out.txt" | head -6
+fi
+
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
 
@@ -53597,6 +54455,7 @@ process.exit(0);
 # Sessione 79 (issue #248, decisione D-79.6 di ADR-0012): il hook separa
 # INVARIANTE (bloccante) e IGIENE (advisory).
 #   - INVARIANTE: pattern del branch (F1, F7)            -> abort
+#   - INVARIANTE: proprieta' della worktree (issue #319) -> abort sul mismatch
 #   - IGIENE:     working tree pulito (F5, stash collision) -> warning
 # Il check "clean tree" era bloccante e impediva anche i commit parziali
 # (committare un sottoinsieme di file): l'unica via d'uscita era --no-verify,
@@ -53664,6 +54523,48 @@ else
   echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
   echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
   exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# INVARIANTE 4 — proprieta' della worktree (bloccante sul mismatch)
+# Issue #319: ADR-0006 blocca l'ISSUE, non la directory. Il path della worktree
+# e' deterministico (`ls-<N>-<slug>`), quindi due agenti sulla stessa story
+# finiscono nella stessa cartella: il codice del secondo finiva nel commit e
+# nella PR del primo, indistinguibile per la CI.
+#
+# Il gate confronta l'owner locale della worktree (`agent-state.json`) con
+# l'agente del claim VINCENTE (commento `claim:` con id numerico piu' basso).
+# Mismatch -> abort (codice 1). Errore di ambiente (gh assente, API
+# irraggiungibile, stato illeggibile) -> WARN: un gate che blocca per una
+# disconnessione non e' un gate, e' un ostacolo.
+# ---------------------------------------------------------------------------
+if [ -f scripts/check-worktree-ownership.mjs ]; then
+  if command -v node >/dev/null 2>&1 && command -v gh >/dev/null 2>&1; then
+    set +e
+    ownership_output=$(node scripts/check-worktree-ownership.mjs 2>&1)
+    ownership_exit=$?
+    set -e
+    case "$ownership_exit" in
+      0)
+        echo "$ownership_output" | grep -q '^\[OK\]' && echo "$ownership_output" | grep '^\[OK\]'
+        ;;
+      1)
+        echo "$ownership_output"
+        echo ""
+        echo "[pre-commit] ERRORE: la worktree non appartiene all'agente del claim vincente."
+        echo "  Questo e' doppio lavoro: un altro agente e' il claimante di questa issue."
+        echo "  Non committare qui: spostati sulla worktree del tuo claim."
+        echo "  Dettagli: AGENTS.md sezione 'Presa in carico delle story (claim)'."
+        exit 1
+        ;;
+      *)
+        echo "[pre-commit] WARN: gate di proprieta' della worktree non eseguibile (exit $ownership_exit):"
+        echo "$ownership_output" | sed 's/^/  /'
+        ;;
+    esac
+  else
+    echo "[pre-commit] WARN: node o gh non disponibili: proprieta' della worktree non verificata."
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -54720,6 +55621,17 @@ jobs:
 
       - name: Gate "coerenza del claim" fail-closed (issue #256)
         run: bash scripts/test-claim-state.sh
+
+      # Issue #319: il lock di ADR-0006 e' sull'issue, non sulla directory di
+      # lavoro: il path della worktree e' deterministico (`ls-<N>-<slug>`), quindi
+      # due agenti sulla stessa story finiscono nella stessa cartella e il
+      # codice del secondo finiva nel commit del primo. Il gate confronta l'owner
+      # locale della worktree (`agent-state.json`) con l'agente del claim
+      # VINCENTE. Il gate stesso gira in locale (pre-commit hook + agent-pr.ps1):
+      # in CI si esegue il suo scenario NEGATIVO, che dimostra che fallisce
+      # quando deve (lesson 43-1: un gate che passa sempre non e' un gate).
+      - name: Gate "proprieta' della worktree" fail-closed (issue #319)
+        run: bash scripts/test-worktree-ownership.sh
 
   gates-aggregate:
     # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
