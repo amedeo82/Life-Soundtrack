@@ -5,7 +5,7 @@ date: 2026-11-05
 state: 🟡
 merged: false
 branch: fix/319-arbitraggio-claim-lock-worktree
-pr: 0
+pr: 321
 claim: kilo-hp-elitebook-85df
 tags: [devops, protocol, ci, testing]
 ---
