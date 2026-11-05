@@ -63,6 +63,23 @@ concurrency:
   group: main-writer
   cancel-in-progress: false
 
+# GUARD DI FORK (issue #309 — il repository diventa pubblico).
+#
+# Con il repository pubblico chiunque puo' aprire una PR da un fork. Il
+# trigger `pull_request: closed` scatta ANCHE per una PR da fork mergiata, e
+# questo workflow ha `contents: write`: il writer scriverebbe su `main` usando
+# il `head.ref` di un branch che non e' del repository.
+#
+# Il guard e' lo stesso di `auto-branch-cleanup.yml`: si opera solo quando
+# `head.repo.full_name == base.repo.full_name`. Una PR da fork non produce
+# una story del progetto, quindi non ha nulla daApplicare allo stato: skip e'
+# il comportamento corretto, non un caso limite.
+#
+# Nota: `pull_request` (NON `pull_request_target`) e' la scelta deliberata:
+# `pull_request_target` gira con i permessi del branch BASE ma con il codice
+# del fork, che e' la classica "pwn request". Qui il codice gira con i
+# permessi del fork e i permessi sono read-only: nessuna escalation.
+
 permissions:
   contents: write
   pull-requests: read
@@ -71,7 +88,12 @@ permissions:
 jobs:
   write:
     # Solo PR effettivamente mergiate; il dispatch manuale e' sempre ammesso.
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    # Il guard di fork e' una condizione AND: una PR da fork non viene toccata
+    # dal writer, anche se il dispatch manuale viene invocato su una PR esterna.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout di `main`

@@ -18,6 +18,18 @@ name: auto-status-done
 # cosi' il rilascio del claim non dipende da un passo manuale.
 #
 # Idempotente: un rerun non duplica label ne' commenti.
+#
+# GUARD DI FORK (issue #309 — il repository diventa pubblico).
+#
+# Questo workflow ha `issues: write` e transiziona lo stato delle issue
+# indicizzando il body della PR con la regex `Closes/Fixes/Resolves #N`.
+# Con il repository pubblico, una PR da fork puo' citare `Closes #123` nel
+# body e far transitare un'issue che non ha nulla a che fare con il progetto:
+# il body di una PR e' input non fidabile quando la PR viene da fuori.
+#
+# Il guard e' lo stesso di `auto-branch-cleanup.yml` e `post-merge.yml`:
+# si opera solo quando `head.repo.full_name == base.repo.full_name`. Solo le
+# PR del repository possono transizionare lo stato delle sue issue.
 
 on:
   pull_request:
@@ -25,8 +37,11 @@ on:
 
 jobs:
   apply-status-done:
-    # Esegui solo se la PR e' stata mergiata (non solo chiusa)
-    if: github.event.pull_request.merged == true
+    # Esegui solo se la PR e' stata mergiata (non solo chiusa) E non viene da
+    # un fork: il body di una PR esterna non autorizza transizioni di stato.
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       issues: write

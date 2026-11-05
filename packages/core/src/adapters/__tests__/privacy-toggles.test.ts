@@ -38,7 +38,7 @@ const record: SpotifyStreamingRecord = {
   spotify_track_uri: 'spotify:track:1t2yc2ShL54GfGKWclFzWZ',
   reason_end: 'trackdone',
   conn_country: 'IT',
-  ip_addr: '92.40.100.50',
+  ip_addr: '192.0.2.50',
 };
 
 /** Importa un record con le impostazioni indicate e restituisce l'evento. */

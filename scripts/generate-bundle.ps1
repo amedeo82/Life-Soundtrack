@@ -113,6 +113,8 @@ $files = @(
     "docs/17-DEV-NOTES.md",
     # Diario di sviluppo cronologico (problemi/fix/lesson per implementazione)
     "docs/18-DEV-LOG.md",
+    # Checklist operativa per la pubblicazione del repository (issue #309)
+    "docs/CHECKLIST-PUBBLICAZIONE.md",
     # Lazy-state aggregation (ADR-0008, S25): sorgenti atomiche per doc-sync fuori PR
     "docs/state/_index.md",
     "docs/state/stories/0.7-operations-runbook.md",

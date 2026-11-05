@@ -10,6 +10,30 @@ build/
 .env.local
 .env.*.local
 
+# Segreti e configurazioni locali (issue #309 — repository pubblico).
+#
+# Con il repository pubblico ogni file tracciato e' scaricabile da chiunque:
+# un `.env` committato per errore diventa un segreto pubblico. Queste righe
+# sono il perimetro minimo perche' il danno non dipenda dalla memoria di
+# chi committa.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+secrets.json
+credentials.json
+.stash-snapshot.txt
+stash-snapshot.txt
+
+# Body di PR in lavorazione: file di lavoro, non artefatto del repository.
+# (`pr-body.md` era finito nel tracking con un riferimento a un'issue chiusa.)
+pr-body.md
+
 # IDE
 .vscode/
 .idea/

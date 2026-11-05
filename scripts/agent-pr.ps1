@@ -162,6 +162,21 @@ if (-not $SkipChecks) {
     & $node (Join-Path $repoRoot "scripts/check-workflow-syntax.mjs") | Out-Host
     if ($LASTEXITCODE -ne 0) { $failures += "check-workflow-syntax.mjs" }
 
+    # --- Gate "privacy dei fixture" (job `gates-docs`, issue #309) ---
+    # La regola "mai committare dati reali di ascolto" era solo prosa: con il
+    # repository pubblico ogni file tracciato e' scaricabile da chiunque, quindi
+    # la regola scende a L3 e deve avere un gate. Il gate e' un modulo built-in
+    # di node: sempre eseguibile, read-only, fail-closed.
+    #
+    # Si esegue anche il suo scenario NEGATIVO (lesson 43-1: un gate che passa
+    # sempre non e' un gate): i due moduli coprono i gate locali che la CI
+    # esegue, come richiesto dalla parita' locale <-> CI (issue #306).
+    & $node (Join-Path $repoRoot "scripts/check-fixtures-privacy.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "check-fixtures-privacy.mjs" }
+
+    & $node (Join-Path $repoRoot "scripts/test-fixtures-privacy-gate.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "test-fixtures-privacy-gate.mjs" }
+
     # Test FUNZIONALE del writer post-merge: e' il gate che ha reso rossa la
     # PR #305 (un numero di sessione duplicato nel fixture faceva fallire
     # `aggregate-state.ps1 -Check` dentro il clone temporaneo del test).

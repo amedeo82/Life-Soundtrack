@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-04 18:09
-> Totale file: 194
+> Data: 2026-11-05 11:46
+> Totale file: 195
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 193 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2747.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-04 18:09
+- Dimensione totale: 2753.2 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-05 11:36
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.46 — Sessione 100 (2026-11-04)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.47 — Sessione 101 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -73,6 +73,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
+| I fixture contengono **solo dati sintetici**: mai un IP pubblico routable (fuori dai range documentazione RFC 5737), mai una email reale, mai un path che rivela il nome utente | `check-fixtures-privacy.mjs` (+ scenario negativo `test-fixtures-privacy-gate.mjs`) | issue #309 (repository pubblico: ogni file tracciato è scaricabile da chiunque) |
 | Nessun workflow referenzia una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23) | `validate-workflows.mjs` (mappa `NODE24_ACTIONS`) | issue #283 (action fuori supporto) |
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 | I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
@@ -82,6 +83,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
 node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
 node scripts/check-encoding.mjs                # encoding dei file tracciati, exit 0 = nessun mojibake/BOM
+node scripts/check-fixtures-privacy.mjs        # fixture solo sintetici, exit 0 = nessun dato reale
 ```
 
 **Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
@@ -920,7 +922,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### 🏎️ La CI: 15 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74 + Sessione 90)*
 
-> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 38 step): cosa gira,
+> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 40 step): cosa gira,
 > quando, con quali permessi e con quale exit code. Qui solo l'invariante operativo:
 >
 > - le modifiche a `docs/` e agli script di validazione girano su `pull_request`;
@@ -2096,11 +2098,12 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.46 | Protocollo per agenti — **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.47 | Protocollo per agenti — **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
 | [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.3 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, branch protection con `CI / quality`, primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
 
 ## Design & mockup
 | Cartella | Contenuto |
@@ -14892,6 +14895,184 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 *Questo file viene aggiornato ad ogni implementazione chiusa. È letto durante l'handoff
 tra conversazioni AI e durante l'audit di Sessione (vedi `AGENTS.md` §"Fine di un'implementazione").*
 
+
+
+
+===== FILE: docs/CHECKLIST-PUBBLICAZIONE.md =====
+
+# Checklist: rendere pubblico il repository
+
+> Documento operativo. Va eseguito **dopo** il merge della PR di hardening (#310).
+> L'ordine è vincolante: la branch protection si abilita **dopo** il flip (su
+> repository privato con piano Free non è disponibile), e il tag di release
+> serve **dopo** che il repository è pubblico, perché l'offerta AGPL §13
+> («il sorgente corrispondente è identificato dal tag git nella pagina
+> Releases») è soddisfatta dal tag solo se il repository è leggibile da chiunque.
+
+## Stato al momento della consegna
+
+| Verifica | Esito |
+|----------|-------|
+| Segreti in 689 commit | **0** |
+| PII reale nei file tracciati | **0** |
+| IP routable reali nei fixture | **11 → 0** (range RFC 5737) |
+| Gate nuovi (bloccanti, fail-closed, con scenario negativo) | **2** |
+| Workflow con guard di fork | **3 su 3** |
+| CI | **17/17 check verdi** sulla PR #310 |
+| Struttura CI | **invariata**: 15 job, 38 → 40 step |
+| Gate locali | **tutti verdi** |
+
+---
+
+## Passo 1 — rendere pubblico il repository
+
+Da GitHub: **Settings → General → Danger Zone → Change visibility → Public**.
+
+Oppure via API:
+
+```bash
+gh api -X PATCH repos/amedeo82/Life-Soundtrack -f private=false
+```
+
+**Cosa succede subito dopo:**
+
+- ✅ **I minuti Actions diventano illimitati e gratuiti.** Il pool da 2.000
+  minuti/account non si applica ai repository pubblici. Il problema economico
+  che aveva bloccato lo sviluppo (1.802/2.000 minuti, reset il 1° dicembre)
+  **scompare**: niente più blocco a fine quota, niente più overage.
+- ✅ **La branch protection diventa disponibile** su piano Free per i repository
+  pubblici. È il vero motivo per cui il flip conviene: fino ad ora i 16 job
+  della CI **non bloccavano alcuna merge** (403 su
+  `branches/main/protection`), perché erano un *report*, non un gate.
+- ✅ **L'offerta AGPL §13 diventa fruibile.** L'app dichiara già
+  `github.com/amedeo82/Life-Soundtrack` nella schermata About
+  (`apps/web/src/components/About.tsx:74`): da privato quel link non portava
+  nessuno al sorgente.
+- ⚠️ **Da questo momento chiunque può leggere tutto**: 689 commit, 141
+  documentazione, 194 file di bundle. L'email personale nei 252 commit
+  iniziali diventa visibile (decisione assunta: l'identità è già pubblica
+  nel profilo e nel contenuto; `.mailmap` normalizza l'attribuzione).
+
+## Passo 2 — attivare la branch protection (subito dopo il flip)
+
+Ora disponibile. Da GitHub: **Settings → Branches → Add rule**, oppure:
+
+```bash
+gh api -X POST repos/amedeo82/Life-Soundtrack/branches/main/protection \
+  --input - <<'JSON'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["CI / quality"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true
+  },
+  "restrictions": null,
+  "required_linear_history": true,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+JSON
+```
+
+Impostazioni e perché:
+
+| Impostazione | Valore | Motivo |
+|--------------|--------|--------|
+| `required_status_checks.contexts` | `CI / quality` | il check aggregatore fail-closed: fallisce se **qualsiasi** job parallelo è fallito, annullato o saltato (`docs/12-DEVOPS.md` §9.10). È il check giusto da richiedere, non i singoli job |
+| `strict` | `true` | il branch deve essere aggiornato con `main` prima del merge: senza, una PR verde su un base vecchio si mergea su un base diverso |
+| `required_approving_review_count` | `1` | l'unico revisore è il project owner: con `enforce_admins: true` la regola vale anche per lui |
+| `required_linear_history` | `true` | i merge commit non servono e confondono la ricostruzione della history |
+| `allow_force_pushes` / `allow_deletions` | `false` | il protocollo vieta il force-push su `main`; qui diventa **impossibile**, non solo vietato |
+
+> Con `enforce_admins: true` nessuno — nemmeno il titolare del repository —
+> può mergiare una PR senza review e senza `CI / quality` verde.
+
+## Passo 3 — creare il primo tag di release
+
+L'offerta AGPL §13 nel NOTICE dice: «il sorgente corrispondente a una release
+è identificato dal tag git nella pagina Releases». Nel repository non esiste
+ancora **nessun tag e nessuna release** (verificato: `gh api .../releases`
+→ `0`). Finché la pagina Releases è vuota, l'offerta è formale.
+
+```bash
+git tag -a v0.1.0 -m "v0.1.0 — prima release pubblica (AGPL-3.0)"
+git push origin v0.1.0
+gh release create v0.1.0 --title "v0.1.0" --notes "Prima release pubblica. Sorgente completo: AGPL-3.0."
+```
+
+> Il tag va creato **dopo** il flip: fino a quel momento il sorgente non è
+> scaricabile da chiunque, quindi il tag non renderebbe l'offerta soddisfacibile.
+
+## Passo 4 — metadata del repository (opzionale ma raccomandato)
+
+```bash
+gh repo edit amedeo82/Life-Soundtrack \
+  --description "Life Soundtrack — la colonna sonora della tua vita, finalmente leggibile. PWA local-first, privacy-first (AGPL-3.0)." \
+  --homepage "https://github.com/amedeo82/Life-Soundtrack#readme" \
+  --add-topic pwa --add-topic local-first --add-topic privacy \
+  --add-topic music --add-topic monorepo --add-topic react \
+  --add-topic typescript --add-topic pnpm --add-topic agpl
+```
+
+Ora c'è solo il topic `typescript`. I topic sono il modo in cui GitHub rende il
+repository discoveribile.
+
+## Passo 5 — opzionale: sicurezza e automazioni
+
+- **Dependabot alerts**: si attivano automaticamente sui repository pubblici
+  (Settings → Code security → Dependabot). Segnalerà vulnerabilità delle
+  dipendenze npm.
+- **Code scanning**: Settings → Code security → Code scanning → Enable. Su
+  repository pubblico è gratuito (CodeQL).
+- **Secret scanning**: su repository pubblico è disponibile e segnala
+  credenziali committate per errore. Il gate `check-fixtures-privacy.mjs`
+  copre i **fixture**, non tutti i file: la secret scanning copre il resto.
+- **Discussions**: disattivate per ora. Attivarle solo se servono (il
+  protocollo del repository non le usa).
+
+---
+
+## Cosa NON fare
+
+| Azione | Perché no |
+|--------|-----------|
+| **Non riscrivere la history** per rimuovere l'email | cambierebbe tutti gli SHA: i 38 riferimenti `merged_commit` in `docs/state/` punterebbero a commit inesistenti e il gate fail-closed `check-merge-state.mjs` renderebbe `main` rosso. Richiederebbe un force-push su `main`, vietato dal protocollo. Decisione già assunta (issue #309) |
+| **Non disattivare `pull_request` in favore di `pull_request_target`** | `pull_request_target` gira con i permessi del branch BASE ma con il codice del fork: è la classica *pwn request*. I guard di fork aggiunti in #310 rendono `pull_request` sicuro |
+| **Non rimuovere i guard di fork dai workflow** | con il repository pubblico chiunque può aprire una PR da un fork: `post-merge.yml` (`contents: write`) scriverebbe su `main`, `auto-status-done.yml` (`issues: write`) transizionerebbe issue arbitrarie |
+| **Non rimuovere `CI / quality` dalla branch protection** | è l'aggregatore fail-closed: richiedere i singoli job lascerebbe passare una PR con un job saltato |
+| **Non impostare un budget $0** su Actions | blocca le run a quota esaurita = sviluppo bloccato. Su repository pubblico i minuti sono gratuiti: il budget non serve più |
+
+## Verifica finale (dopo il flip)
+
+```bash
+# il repository è pubblico?
+gh repo view amedeo82/Life-Soundtrack --json isPrivate --jq .isPrivate   # atteso: false
+
+# la branch protection è attiva?
+gh api repos/amedeo82/Life-Soundtrack/branches/main/protection \
+  --jq '{checks:.required_status_checks.contexts, reviews:.required_pull_request_reviews.required_approving_review_count, force_push:.allow_force_pushes.enabled}'
+
+# il tag di release esiste?
+gh release list --repo amedeo82/Life-Soundtrack
+
+# il link AGPL §13 dell'app risolve?
+curl -sI https://github.com/amedeo82/Life-Soundtrack | head -1   # atteso: HTTP/2 200
+```
+
+## Rollback
+
+Il flip è reversibile: Settings → Change visibility → Private. Ma **non è
+senza prezzo**:
+
+- la branch protection **non è disponibile** sui repository privati con piano
+  Free → si perde (reconfigurabile a mano al prossimo flip)
+- i minuti Actions tornano a essere contati sul pool da 2.000/account
+- la history resta comunque esposta: chi ha già clonato o scaricato i file
+  durante il periodo pubblico li ha ancora
 
 
 
@@ -32095,7 +32276,7 @@ Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
 | T2 | XSS che legge IndexedDB | Bassa | Alto | CSP strict, nessun innerHTML con dati utente, sanitize input |
 | T3 | Estensione browser malevola che legge IndexedDB | Media | Alto | Documentare il rischio; consigliare profile browser dedicato |
 | T4 | Leak via chiamate enrichment | Bassa | Medio | Inviare solo titolo+artista; nessun dato utente; log pubblico delle chiamate |
-| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali |
+| T5 | Repo pubblico espone dati reali | Bassa | Alto | Fixture SOLO sintetici; policy: mai commit di dati reali, **con gate bloccante** `check-fixtures-privacy.mjs` (issue #309) |
 | T6 | Sync cloud compromesso (Fase 2) | Bassa | Alto | E2E encryption, chiavi solo sul dispositivo |
 | T7 | Inferenze usate contro l'utente (es. assicurazioni) | Bassa | Alto | Dati mai inviati; disclaimer; export escluso insight su richiesta |
 
@@ -32103,8 +32284,25 @@ Life Soundtrack NON è affiliata, sponsorizzata o approvata da essi.
 
 **Mai committare dati reali di ascolto nel repository.** I fixture in
 `fixtures/` sono sintetici. Ogni PR che aggiunga dati reali va rifiutata.
-Aggiungere check CI che scansioni i fixture per pattern sospetti (IP reali,
-email).
+
+*Gate (issue #309, Sessione 101):* la regola è verificata automaticamente da
+`scripts/check-fixtures-privacy.mjs` — bloccante nel job `gates-docs` della CI e
+nella batteria locale di `scripts/agent-pr.ps1`. Il gate scansiona i fixture
+alla ricerca di marker di dati reali: **IPv4 routable non-documentazione**
+(gli unici ammessi sono i range RFC 5737 `192.0.2.0/24`, `198.51.100.0/24`,
+`203.0.113.0/24` e i range privati/riservati), **email non-placeholder**
+(domini ammessi: `example.com`/`.org`/`.net`/`.edu`, `.invalid`, `.test`,
+`.localhost`, `*.noreply.github.com`) e **path che rivelano il nome utente**
+(`C:\Users\<utente>\…`, `/home/<utente>/…`). È read-only e **fail-closed**:
+exit 1 = dati reali rilevati, exit 2 = errore di ambiente (mai 0 senza aver
+guardato). Il suo scenario negativo `scripts/test-fixtures-privacy-gate.mjs`
+(6 scenari) dimostra che il gate fallisce quando deve — un gate che passa
+sempre non è un gate.
+
+La regola è diventata bloccante con il repository **pubblico**: fino ad allora
+ogni file tracciato era scaricabile solo da chi avesse accesso al repository,
+mentre da quel momento chiunque può leggerlo. Per questo la regola scende da
+L2 (protocollo) a L3 (applicazione).
 
 ## 11. Checklist compliance pre-lancio
 
@@ -34075,6 +34273,13 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > un elenco assente. Ora le righe sono **39** (38 gate + l'agregatore `quality`).
 > **Sessione 93 (issue #290)**: aggiunto il gate «wiring degli hook» (`test-hook-wiring.sh`)
 > → **39 righe**, **38 step**.
+> **Sessione 101 (issue #309)**: aggiunti i 2 step del gate «privacy dei fixture»
+> (`check-fixtures-privacy.mjs` + il suo scenario negativo `test-fixtures-privacy-gate.mjs`) nel
+> job `gates-docs` → **41 righe**, **40 step**. Il **numero di job non cambia** (15): i due step
+> sono dentro `gates-docs`, che già gira su `pull_request`. La regola che verifica è «mai
+> committare dati reali di ascolto» (`09-PRIVACY-SECURITY.md` §10.1), che fino a questa Sessione
+> era **solo prosa**: con il repository pubblico ogni file tracciato è scaricabile da chiunque,
+> quindi la regola scende a L3 e deve avere un gate che la faccia rispettare.
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 
@@ -34125,6 +34330,8 @@ protection può interpretare un check saltato come successo.
 | 37 | `gates-portability` | `Il bundle è in sync con lo stato committato` (`check-generators-portable.mjs --bundle-check-only`) | solo PR | sì | **#284** |
 | 38 | `gates-portability-compare` | `I generatori producono gli stessi byte su ogni sistema operativo` (`check-generators-portable.mjs --compare`) | solo PR | sì | **#284** |
 | 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
+| 40 | `gates-docs` | `Privacy dei fixture` (`check-fixtures-privacy.mjs`) | solo PR | sì | **#309** |
+| 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -51850,6 +52057,21 @@ if (-not $SkipChecks) {
     & $node (Join-Path $repoRoot "scripts/check-workflow-syntax.mjs") | Out-Host
     if ($LASTEXITCODE -ne 0) { $failures += "check-workflow-syntax.mjs" }
 
+    # --- Gate "privacy dei fixture" (job `gates-docs`, issue #309) ---
+    # La regola "mai committare dati reali di ascolto" era solo prosa: con il
+    # repository pubblico ogni file tracciato e' scaricabile da chiunque, quindi
+    # la regola scende a L3 e deve avere un gate. Il gate e' un modulo built-in
+    # di node: sempre eseguibile, read-only, fail-closed.
+    #
+    # Si esegue anche il suo scenario NEGATIVO (lesson 43-1: un gate che passa
+    # sempre non e' un gate): i due moduli coprono i gate locali che la CI
+    # esegue, come richiesto dalla parita' locale <-> CI (issue #306).
+    & $node (Join-Path $repoRoot "scripts/check-fixtures-privacy.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "check-fixtures-privacy.mjs" }
+
+    & $node (Join-Path $repoRoot "scripts/test-fixtures-privacy-gate.mjs") | Out-Host
+    if ($LASTEXITCODE -ne 0) { $failures += "test-fixtures-privacy-gate.mjs" }
+
     # Test FUNZIONALE del writer post-merge: e' il gate che ha reso rossa la
     # PR #305 (un numero di sessione duplicato nel fixture faceva fallire
     # `aggregate-state.ps1 -Check` dentro il clone temporaneo del test).
@@ -53385,6 +53607,25 @@ jobs:
         # Stesso problema di cross-platform PowerShell 5.1 vs 7. Warning non-bloccante.
         run: pwsh scripts/generate-bundle.ps1 -Check || echo "::warning::generate-bundle check fallito, verra rigenerato post-merge"
 
+      # Issue #309 (repository pubblico): la regola "mai committare dati reali
+      # di ascolto" (docs/09-PRIVACY-SECURITY.md §10.1) era SOLO prosa: nessun
+      # gate la verificava. Con il repo pubblico ogni file tracciato e'
+      # scaricabile da chiunque, quindi la regola scende a L3.
+      #
+      # Il gate scansiona i fixture alla ricerca di marker di dati reali:
+      # IPv4 routable non-documentazione (RFC 5737), email non-placeholder,
+      # path che rivelano il nome utente della macchina. Fail-closed:
+      # exit 1 = dati reali, exit 2 = errore di ambiente (mai 0 per non aver
+      # guardato). Bloccante: un fixture con un IP reale non deve passare.
+      - name: Privacy dei fixture (issue #309)
+        run: node scripts/check-fixtures-privacy.mjs
+
+      # Lo scenario NEGATIVO del gate: dimostra che il gate fallisce quando
+      # deve (lesson 43-1: un gate che passa sempre non e' un gate). Copre i
+      # 6 scenari T1..T6 con directory temporanee.
+      - name: Gate "privacy dei fixture" - scenario negativo (issue #309)
+        run: node scripts/test-fixtures-privacy-gate.mjs
+
       # Issue #51 (P2 PR template + branch protection): enforce ADR-0008 V1.
       # Fallisce se la PR ha modificato docs/INDEX.md, docs/SESSIONS.md,
       # docs/11-BACKLOG.md o docs/BUNDLE.md direttamente invece di passare per
@@ -54064,6 +54305,23 @@ concurrency:
   group: main-writer
   cancel-in-progress: false
 
+# GUARD DI FORK (issue #309 — il repository diventa pubblico).
+#
+# Con il repository pubblico chiunque puo' aprire una PR da un fork. Il
+# trigger `pull_request: closed` scatta ANCHE per una PR da fork mergiata, e
+# questo workflow ha `contents: write`: il writer scriverebbe su `main` usando
+# il `head.ref` di un branch che non e' del repository.
+#
+# Il guard e' lo stesso di `auto-branch-cleanup.yml`: si opera solo quando
+# `head.repo.full_name == base.repo.full_name`. Una PR da fork non produce
+# una story del progetto, quindi non ha nulla daApplicare allo stato: skip e'
+# il comportamento corretto, non un caso limite.
+#
+# Nota: `pull_request` (NON `pull_request_target`) e' la scelta deliberata:
+# `pull_request_target` gira con i permessi del branch BASE ma con il codice
+# del fork, che e' la classica "pwn request". Qui il codice gira con i
+# permessi del fork e i permessi sono read-only: nessuna escalation.
+
 permissions:
   contents: write
   pull-requests: read
@@ -54072,7 +54330,12 @@ permissions:
 jobs:
   write:
     # Solo PR effettivamente mergiate; il dispatch manuale e' sempre ammesso.
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    # Il guard di fork e' una condizione AND: una PR da fork non viene toccata
+    # dal writer, anche se il dispatch manuale viene invocato su una PR esterna.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout di `main`
@@ -54220,7 +54483,7 @@ jobs:
       "platform": "Android OS 13 (samsung, SM-S911B)",
       "ms_played": 245000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "A Night at the Opera",
@@ -54239,7 +54502,7 @@ jobs:
       "platform": "Windows 10 (10.0.19045; x64)",
       "ms_played": 12000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Radio Gaga",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "The Works",
@@ -54258,7 +54521,7 @@ jobs:
       "platform": "web_player windows 10; chrome 119",
       "ms_played": 25000,
       "conn_country": "DE",
-      "ip_addr": "85.20.40.10",
+      "ip_addr": "198.51.100.10",
       "master_metadata_track_name": "We Will Rock You",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "News of the World",
@@ -54277,7 +54540,7 @@ jobs:
       "platform": "Android OS 7.0 API 24 (motorola, Moto G4)",
       "ms_played": 312800,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Don't Stop Me Now",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Jazz",
@@ -54297,7 +54560,7 @@ jobs:
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 354000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Greatest Hits",
@@ -54317,7 +54580,7 @@ jobs:
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 354000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Greatest Hits (Remaster)",
@@ -54337,7 +54600,7 @@ jobs:
       "platform": "iOS 16.4 (iPhone 13)",
       "ms_played": 412000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Bohemian Rhapsody",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "Live at Wembley",
@@ -54356,7 +54619,7 @@ jobs:
       "platform": "android",
       "ms_played": 180000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Under Pressure",
       "master_metadata_album_artist_name": "Queen & David Bowie",
       "master_metadata_album_album_name": "Hot Space",
@@ -54375,7 +54638,7 @@ jobs:
       "platform": "Android OS 12 API 31 (google, Pixel 6)",
       "ms_played": 240000,
       "conn_country": "FR",
-      "ip_addr": "78.195.10.20",
+      "ip_addr": "203.0.113.20",
       "master_metadata_track_name": "Another One Bites the Dust",
       "master_metadata_album_artist_name": "Queen",
       "master_metadata_album_album_name": "The Game",
@@ -54395,7 +54658,7 @@ jobs:
       "platform": "android",
       "ms_played": 1800000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": null,
       "master_metadata_album_artist_name": null,
       "master_metadata_album_album_name": null,
@@ -54417,7 +54680,7 @@ jobs:
       "platform": "windows",
       "ms_played": 200000,
       "conn_country": "IT",
-      "ip_addr": "92.40.100.50",
+      "ip_addr": "192.0.2.50",
       "master_metadata_track_name": "Guilty Pleasure Song",
       "master_metadata_album_artist_name": "Some Pop Artist",
       "master_metadata_album_album_name": "Guilty Pleasures",

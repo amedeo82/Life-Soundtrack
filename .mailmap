@@ -1,0 +1,46 @@
+# .mailmap — attribuzione canonica degli autori (issue #309)
+#
+# Con il repository PUBLICO l'attribuzione dei commit diventa un dato
+# pubblico e permanente. Git usa questo file per normalizzare nome ed email
+# dell'autore: i commit esistenti non cambiano (nessuno SHA viene
+# riscritto), ma ogni strumento che onora .mailmap — git log, GitHub,
+# `git shortlog`, le statistiche dei contributori — mostra l'identita'
+# canonica invece della variante grezza.
+#
+# PERCHE' NON SI RISCRIVE LA HISTORY
+#
+# L'email `AMEDEO.VECCHI82@GMAIL.COM` compare nei metadati di 252 commit
+# (dal 2026-10-14 al 2026-11-04). Un rewrite della history la eliminerebbe,
+# ma con un costo sproporzionato e un rischio reale:
+#
+#   1. Cambia TUTTI gli SHA dei 689 commit. I 38 riferimenti `merged_commit`
+#      in `docs/state/sessions/` e `docs/state/stories/`punterebbero a commit
+#      inesistenti, e il gate fail-closed `check-merge-state.mjs` — che li
+#      confronta con lo stato REALE delle PR letto dall'API GitHub —
+#      fallirebbe su ogni sessione, rendendo la CI rossa su `main`.
+#   2. Richiede un force-push su `main`, che il protocollo vieta esplicitamente
+#      (AGENTS.md, §"Git workflow": "Nessun force push su `main`").
+#   3. Rende invalidi i riferimenti a commit in issue, PR e documentazione.
+#
+# La scelta del project owner (2026-11-05) e' ACCETTARE l'email e usare
+# .mailmap per l'attribuzione. L'identita' del project owner e' gia' pubblica
+# nel profilo GitHub ("Amedeo Vecchi") e nel contenuto del repository: non e'
+# un segreto, e il suo indirizzo e' quello di contatto del progetto open-source.
+#
+# Le righe seguenti normalizzano le varianti degli autori degli agenti: i
+# workflow usano oggi nomi ed email locali (`kilo-bot`, `Kilo`, `T`) che non
+# identificano nessuno e non sono utilizzabili come contatto.
+
+# Project owner: unica identita' canonica, email di contatto del progetto.
+Amedeo Vecchi <AMEDEO.VECCHI82@GMAIL.COM> <AMEDEO.VECCHI82@GMAIL.COM>
+Amedeo Vecchi <AMEDEO.VECCHI82@GMAIL.COM> <Amedeo.Vecchi82@gmail.com>
+
+# Bot dei workflow: identita' unica, email noreply GitHub.
+kilo-bot[bot] <kilo-bot[bot]@users.noreply.github.com> <kilo-bot@kilo.local>
+kilo-bot[bot] <kilo-bot[bot]@users.noreply.github.com> <kilo-bot[bot]@kilo.local>
+kilo-bot[bot] <kilo-bot[bot]@users.noreply.github.com> <kilo-bot[bot]@users.noreply.github.com>
+
+# Agenti locali: identita' canonica condivisa, senza email personale.
+Kilo <kilo@kilo.local> <kilo@kilo.local>
+Kilo <kilo@kilo.local> <kilo@bot.local>
+T <t@t.local> <t@t.local>
