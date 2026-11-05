@@ -2,8 +2,10 @@
 number: 101
 title: "Rendere il repository pubblico: hardening sicurezza e privacy"
 date: 2026-11-05
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "d07a26482dbeda9039e7b1b7f419ffefa2a0885d"
+merged_date: "2026-11-05T11:55:31Z"
 pr: 310
 branch: feat/309-rendere-il-repository-pubblico-hardening
 claim: kilo-amedeovecchiemilcoms-309

@@ -93,35 +93,26 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S100)
+**Analisi della sessione corrente** (S101)
 
-**Numeri.** Nessuna story implementata: è lavoro di **protocollo e CI**. La percentuale di
-avanzamento resta **77%** (23 story completate su 30, effort pesato 80%, 7 step rimanenti):
-nessuna state file di story è stata creata o modificata in questa sessione.
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Segreti trovati in 689 commit | **0** |
+| 2 | File con PII reale | **0** |
+| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
+| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
+| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
+| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
+| 7 | Step CI | 38 → **40** |
+| 8 | Righe del catalogo §9.10 | 39 → **41** |
 
-**Cosa è pronto.** Il divario fra i gate locali e i gate della CI è chiuso: la worktree
-nasce con `node_modules` (l'hook `commit-msg` smette di saltare commitlint), e
-`agent-pr.ps1` verifica Conventional Commits e i gate dei workflow **prima** di aprire la
-PR. Il cleanup post-merge è robusto con `node_modules` presente (L0 + L4). I test di
-regressione coprono i tre script: `test-setup-worktree.sh` (11 scenari, S9..S11 nuovi),
-`test-post-merge.sh` (16 scenari, T15 e T16 nuovi), `test-agent-pr.sh` (11 scenari, T3, T4 e T5 nuovi)
-nuovi).
+**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
+stessa PR.
 
-**Cosa manca.** La suite offline degli script di protocollo (`agent-claim.ps1`,
-`agent-pr.ps1`) è ancora quella dell'ADR-0014 (🟡 DRAFT, issue #304): i gate aggiunti qui
-sono **verificati da test con mock**, non dalla suite offline col mock di `gh` su PATH. La
-ratifica dell'ADR-0014 resta al project owner.
-
-**Salute tecnica.** Nessun blocco `AGGREGATE-*` toccato a mano: le fonti sono il file di
-sessione e la prosa legacy (`AGENTS.md`, `docs/INDEX.md`, `docs/12-DEVOPS.md`). Il bundle
-è stato rigenerato dopo l'agregator (ordine aggregator → bundle).
-
-**Gate di testabilità (comandi).** `node scripts/check-protocol-consistency.mjs` → 6 check,
-0 falliti · `node scripts/check-encoding.mjs` → 0 errori · `pwsh scripts/generate-bundle.ps1
--Check` → exit 0 · `node scripts/check-aggregate-blocks.mjs --base origin/main --head HEAD`
-→ 0 violazioni · `bash scripts/test-setup-worktree.sh` → 11/11 ·
-`bash scripts/test-post-merge.sh` → 56 assert, 0 falliti ·
-`bash scripts/test-agent-pr.sh` → 11/11.
+**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
+repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
+flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
+gia' puntare al repository pubblico — cosa che già fa.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
