@@ -312,7 +312,8 @@ if ($sessionFile) {
         Say "bundle rigenerato e committato" "Cyan"
     }
 
-    & git commit -q -m "docs(state): scrive 'pr: $prNumber' nella sessione ($relative)" | Out-Null
+    $fileName = Split-Path $relative -Leaf
+    & git commit -q -m "docs(state): scrive 'pr: $prNumber' nella sessione ($fileName)" | Out-Null
     if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare l'aggiornamento della sessione" }
     & git push | Out-Null
     if ($LASTEXITCODE -ne 0) { Die 1 "impossibile pushare l'aggiornamento della sessione" }

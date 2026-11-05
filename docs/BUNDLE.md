@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 16:26
+> Data: 2026-11-05 17:06
 > Totale file: 195
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -15253,7 +15253,10 @@ repository discoveribile.
 gh repo view amedeo82/Life-Soundtrack --json isPrivate --jq .isPrivate   # atteso: false
 
 # la protezione di main è attiva? (ruleset, non endpoint classic)
-gh api repos/amedeo82/Life-Soundtrack/rulesets/main-protection \
+# L'endpoint GET /rulesets/{ruleset_id} accetta solo l'id numerico; il nome non risolve.
+# Prima risolviamo l'id per nome, poi interroghiamo la ruleset.
+RULESET_ID=$(gh api repos/amedeo82/Life-Soundtrack/rulesets --jq '.[] | select(.name=="main-protection") | .id')
+gh api "repos/amedeo82/Life-Soundtrack/rulesets/$RULESET_ID" \
   --jq '{enforcement, target, checks: [.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context], reviews: [.rules[] | select(.type=="pull_request") | .parameters.required_approving_review_count], bypass: [.rules[] | select(.type=="pull_request") | .parameters.bypass_actors[].actor_id]}'
 
 # il tag di release esiste?
@@ -52418,7 +52421,8 @@ if ($sessionFile) {
         Say "bundle rigenerato e committato" "Cyan"
     }
 
-    & git commit -q -m "docs(state): scrive 'pr: $prNumber' nella sessione ($relative)" | Out-Null
+    $fileName = Split-Path $relative -Leaf
+    & git commit -q -m "docs(state): scrive 'pr: $prNumber' nella sessione ($fileName)" | Out-Null
     if ($LASTEXITCODE -ne 0) { Die 1 "impossibile committare l'aggiornamento della sessione" }
     & git push | Out-Null
     if ($LASTEXITCODE -ne 0) { Die 1 "impossibile pushare l'aggiornamento della sessione" }

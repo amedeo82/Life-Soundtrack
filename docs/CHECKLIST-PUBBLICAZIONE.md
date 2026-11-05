@@ -183,7 +183,10 @@ repository discoveribile.
 gh repo view amedeo82/Life-Soundtrack --json isPrivate --jq .isPrivate   # atteso: false
 
 # la protezione di main è attiva? (ruleset, non endpoint classic)
-gh api repos/amedeo82/Life-Soundtrack/rulesets/main-protection \
+# L'endpoint GET /rulesets/{ruleset_id} accetta solo l'id numerico; il nome non risolve.
+# Prima risolviamo l'id per nome, poi interroghiamo la ruleset.
+RULESET_ID=$(gh api repos/amedeo82/Life-Soundtrack/rulesets --jq '.[] | select(.name=="main-protection") | .id')
+gh api "repos/amedeo82/Life-Soundtrack/rulesets/$RULESET_ID" \
   --jq '{enforcement, target, checks: [.rules[] | select(.type=="required_status_checks") | .parameters.required_status_checks[].context], reviews: [.rules[] | select(.type=="pull_request") | .parameters.required_approving_review_count], bypass: [.rules[] | select(.type=="pull_request") | .parameters.bypass_actors[].actor_id]}'
 
 # il tag di release esiste?

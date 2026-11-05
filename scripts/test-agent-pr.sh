@@ -10,6 +10,8 @@
 #   T2 - Nessuna sessione matching -> warning "NESSUN file di sessione", exit 0
 #   T3 - Gate locale: Conventional Commits non conforme -> PR NON aperta
 #   T4 - Gate locale: test del writer post-merge rosso -> PR NON aperta
+#   T5 - Il commit del bundle NON inghiotte il commit della sessione
+#   T6 - Sessione con slug lungo (40 char) -> step 6 scrive pr: N ed esce 0 (non rompe commitlint header-max-length)
 #
 # Uso: bash scripts/test-agent-pr.sh
 # Richiede: bash, git, pwsh.
@@ -463,6 +465,76 @@ if [ -n "$SESSION_COMMIT" ]; then
   pass "T5 esiste un commit dedicato alla sessione"
 else
   fail "T5" "nessun commit 'docs(state):' trovato"
+fi
+cleanup
+
+# === T6: Sessione con slug lungo (40 char) -> step 6 scrive pr: N ed esce 0 ===
+echo ""
+echo "Scenario T6: sessione con slug lungo (40 caratteri) -> non rompe commitlint header-max-length"
+new_tmpdir
+# Usa uno slug di esattamente 40 caratteri: "this-is-a-very-long-session-slug-here"
+LONG_SLUG="this-is-a-very-long-session-slug-here"
+LONG_BRANCH="feat/313-${LONG_SLUG}"
+REPO_DIR="$(make_repo "$TMPDIR" "$LONG_BRANCH" "$LONG_BRANCH")"
+
+# Aggiorna agent-state.json con la branch lunga
+cat > "$REPO_DIR/.git/agent-state.json" <<EOF
+{"issue":313,"branch":"$LONG_BRANCH","agent_id":"kilo-test-313"}
+EOF
+
+# Aggiorna il file di sessione con lo slug lungo (40 char)
+cat > "$REPO_DIR/docs/state/sessions/313-${LONG_SLUG}.md" <<EOF
+---
+branch: $LONG_BRANCH
+pr: 0
+---
+EOF
+cd "$REPO_DIR"
+git add -A
+GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
+GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
+  git commit --quiet -m "setup sessione slug lungo"
+
+# Re-push per aggiornare il remote
+git push --quiet -u origin "$LONG_BRANCH"
+
+# Rimuovi il file di sessione creato da make_repo (286-test.md) per evitare match multipli
+rm -f "$REPO_DIR/docs/state/sessions/286-test.md"
+git add -A
+GIT_AUTHOR_NAME="Test" GIT_AUTHOR_EMAIL="test@example.com" \
+GIT_COMMITTER_NAME="Test" GIT_COMMITTER_EMAIL="test@example.com" \
+  git commit --quiet -m "rimuovi sessione 286"
+
+make_mock_gh "$TMPDIR"
+# Body file per issue 313 (non 286)
+cat > "$TMPDIR/pr-body-313.md" <<'EOF'
+## Issue
+
+Closes #313
+
+- Tipo: bug fix
+EOF
+BODY_FILE="$(ps_path "$TMPDIR/pr-body-313.md")"
+
+cd "$REPO_DIR"
+LOCAL_SCRIPT_PS="$(ps_path "$REPO_DIR/scripts/agent-pr.ps1")"
+OUTPUT="$(pwsh "$LOCAL_SCRIPT_PS" -IssueNumber 313 -SkipChecks -BodyFile "$BODY_FILE" 2>&1)" && EC=0 || EC=$?
+
+SESSION_FILE="$REPO_DIR/docs/state/sessions/313-${LONG_SLUG}.md"
+
+if [ "$EC" -eq 0 ] && grep -q "^pr: 77$" "$SESSION_FILE"; then
+  pass "T6 step 6 scrive pr: 77 ed esce 0 con slug 40 char"
+else
+  fail "T6" "ec=$EC; session=$(cat "$SESSION_FILE" 2>/dev/null || echo 'missing'); output=$OUTPUT"
+fi
+
+# Verifica che il commit header sia <= 100 caratteri
+LAST_COMMIT_MSG="$(git log -1 --format='%s')"
+HEADER_LEN=${#LAST_COMMIT_MSG}
+if [ "$HEADER_LEN" -le 100 ]; then
+  pass "T6 commit header length $HEADER_LEN <= 100 (commitlint header-max-length)"
+else
+  fail "T6" "commit header length $HEADER_LEN > 100: '$LAST_COMMIT_MSG'"
 fi
 cleanup
 
