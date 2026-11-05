@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 15:36
+> Data: 2026-11-05 16:26
 > Totale file: 195
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -43168,13 +43168,13 @@ exit 0
     scripts/post-merge.ps1 esegue l'unica procedura di cleanup post-merge ammessa dal repo
     (AGENTS.md sezione "Pulizia branch post-merge"), in modo idempotente e difensivo.
 
-    Ordine obbligatorio dei passi (ognuno e' una difesa contro una classe di errore nota):
+Ordine obbligatorio dei passi (ognuno e' una difesa contro una classe di errore nota):
 
       0. Zero-WIP guard        -> evita E3/E4/E5 (transizioni distruttive con working tree sporco)
-      1. Worktree PRIMA       -> `git branch -d` fallisce se il branch e' checked-out in una worktree
-                                (rimozione long-path-safe: `core.longpaths=true` + fallback nativo pwsh 7)
-      2. fetch --prune        -> `origin/main` deve contenere il merge commit, altrimenti i check mentono
-      3. allineamento `main`   -> `git checkout main` + `git merge --ff-only origin/main`
+      1. fetch --prune        -> `origin/main` deve contenere il merge commit, altrimenti i check mentono
+      2. allineamento `main`   -> `git checkout main` + `git merge --ff-only origin/main`
+      3. Worktree             -> `git branch -d` fallisce se il branch e' checked-out in una worktree
+                                 (rimozione long-path-safe: `core.longpaths=true` + fallback nativo pwsh 7)
       4. verifica merge       -> contro `origin/main` e/o via `gh` (robusta al merge squash)
       5. delete remoto        -> `git push origin --delete <branch>`
       6. delete locale        -> `git branch -d` con fallback `git cherry` per merge squash
@@ -43778,8 +43778,45 @@ if ($dirty.Count -gt 0) {
     Write-Ok "working tree pulito (nessun tracked dirty)"
 }
 
-# --- PASSO 1: worktree PRIMA (git branch -d fallisce se il branch e' checked-out li) ---
-Write-Step "1/7 Worktree"
+# --- PASSO 1: fetch (origin/main deve contenere il merge commit) ---
+Write-Step "1/7 Fetch"
+Invoke-Git -GitArgs @("fetch", $Remote, "--prune") | Out-Null
+Write-Ok "refs aggiornate da $Remote (prune incluso)"
+
+# --- PASSO 2: allineamento main (checkout + merge --ff-only, mai pull) ---
+Write-Step "2/7 Allineamento $BaseBranch"
+
+Invoke-Git -GitArgs @("rev-parse", "--verify", "refs/heads/$BaseBranch") -Quiet -AllowFail | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Warn "$BaseBranch locale non esiste: lo creo da $Remote/$BaseBranch"
+    Invoke-Git -GitArgs @("checkout", "-b", $BaseBranch, "$Remote/$BaseBranch") | Out-Null
+}
+
+if ($currentBranch -ne $BaseBranch) {
+    Write-Step "checkout $BaseBranch (da '$currentBranch')"
+    Invoke-Git -GitArgs @("checkout", $BaseBranch) | Out-Null
+}
+
+$ff = Invoke-Git -GitArgs @("merge", "--ff-only", "$Remote/$BaseBranch") -AllowFail -Quiet
+if ($ff.ExitCode -ne 0) {
+    $counts = (Invoke-Git -GitArgs @("rev-list", "--left-right", "--count", "$BaseBranch...$Remote/$BaseBranch") -Quiet -AllowFail).Output
+    Write-Err "$BaseBranch locale non e' fast-forwardable verso $Remote/$BaseBranch (divergente o locale avanti)."
+    Write-Host "[post-merge]         ahead/behind: $counts" -ForegroundColor DarkGray
+    Write-Host "[post-merge]   Nessuna azione distruttiva eseguita. Risolvi manualmente:" -ForegroundColor Yellow
+    Write-Host "[post-merge]     git log --oneline --left-right $BaseBranch...$Remote/$BaseBranch" -ForegroundColor Cyan
+    exit 11
+}
+$head = (Invoke-Git -GitArgs @("rev-parse", "--short", "HEAD") -Quiet).Output
+Write-Ok "$BaseBranch allineato a $Remote/$BaseBranch (HEAD=$head)"
+
+$aheadCount = (Invoke-Git -GitArgs @("rev-list", "--count", "$Remote/$BaseBranch..$BaseBranch") -Quiet -AllowFail).Output
+if ($aheadCount -and $aheadCount -ne "0") {
+    Write-Warn "$BaseBranch locale ha $aheadCount commit non presenti in $Remote/$BaseBranch (commit locale non pushato)."
+    Write-Host "[post-merge]         Se non e' intenzionale, il prossimo lavoro partira' da una base sbagliata." -ForegroundColor DarkGray
+}
+
+# --- PASSO 3: worktree (git branch -d fallisce se il branch e' checked-out li) ---
+Write-Step "3/7 Worktree"
 $targetWt = $worktrees | Where-Object { $_.Branch -eq $Branch -and -not $_.Main } | Select-Object -First 1
 
 $wtPath = $null
@@ -43837,50 +43874,13 @@ if ($wtPath) {
         Write-Host "[post-merge]   della worktree e parte dell'albero: la directory residua va rimossa a mano." -ForegroundColor Yellow
         Write-Host "[post-merge]   Rimozione manuale (pwsh 7, path lunghi supportati):" -ForegroundColor Yellow
         Write-Host "[post-merge]     Remove-Item -LiteralPath '$wtPath' -Recurse -Force" -ForegroundColor Cyan
-        Write-Host "[post-merge]   (Windows PowerShell 5.1: cmd /c rd /s /q `"\\?\$wtPath`")" -ForegroundColor Cyan
+        Write-Host "[post-merge]   (Windows PowerShell 5.1: cmd /c rd /s /q `\"\\?\$wtPath`\")" -ForegroundColor Cyan
         Write-Host "[post-merge]   poi: git worktree prune" -ForegroundColor Cyan
         exit 16
     }
     Write-Ok "worktree rimossa: $wtPath (metodo: $($rm.Method))"
 } else {
     Write-Ok "nessuna worktree associata a '$Branch'"
-}
-
-# --- PASSO 2: fetch (origin/main deve contenere il merge commit) ---
-Write-Step "2/7 Fetch"
-Invoke-Git -GitArgs @("fetch", $Remote, "--prune") | Out-Null
-Write-Ok "refs aggiornate da $Remote (prune incluso)"
-
-# --- PASSO 3: allineamento main (checkout + merge --ff-only, mai pull) ---
-Write-Step "3/7 Allineamento $BaseBranch"
-
-Invoke-Git -GitArgs @("rev-parse", "--verify", "refs/heads/$BaseBranch") -Quiet -AllowFail | Out-Null
-if ($LASTEXITCODE -ne 0) {
-    Write-Warn "$BaseBranch locale non esiste: lo creo da $Remote/$BaseBranch"
-    Invoke-Git -GitArgs @("checkout", "-b", $BaseBranch, "$Remote/$BaseBranch") | Out-Null
-}
-
-if ($currentBranch -ne $BaseBranch) {
-    Write-Step "checkout $BaseBranch (da '$currentBranch')"
-    Invoke-Git -GitArgs @("checkout", $BaseBranch) | Out-Null
-}
-
-$ff = Invoke-Git -GitArgs @("merge", "--ff-only", "$Remote/$BaseBranch") -AllowFail -Quiet
-if ($ff.ExitCode -ne 0) {
-    $counts = (Invoke-Git -GitArgs @("rev-list", "--left-right", "--count", "$BaseBranch...$Remote/$BaseBranch") -Quiet -AllowFail).Output
-    Write-Err "$BaseBranch locale non e' fast-forwardable verso $Remote/$BaseBranch (divergente o locale avanti)."
-    Write-Host "[post-merge]         ahead/behind: $counts" -ForegroundColor DarkGray
-    Write-Host "[post-merge]   Nessuna azione distruttiva eseguita. Risolvi manualmente:" -ForegroundColor Yellow
-    Write-Host "[post-merge]     git log --oneline --left-right $BaseBranch...$Remote/$BaseBranch" -ForegroundColor Cyan
-    exit 11
-}
-$head = (Invoke-Git -GitArgs @("rev-parse", "--short", "HEAD") -Quiet).Output
-Write-Ok "$BaseBranch allineato a $Remote/$BaseBranch (HEAD=$head)"
-
-$aheadCount = (Invoke-Git -GitArgs @("rev-list", "--count", "$Remote/$BaseBranch..$BaseBranch") -Quiet -AllowFail).Output
-if ($aheadCount -and $aheadCount -ne "0") {
-    Write-Warn "$BaseBranch locale ha $aheadCount commit non presenti in $Remote/$BaseBranch (commit locale non pushato)."
-    Write-Host "[post-merge]         Se non e' intenzionale, il prossimo lavoro partira' da una base sbagliata." -ForegroundColor DarkGray
 }
 
 # --- PASSO 4: verifica merge ---
