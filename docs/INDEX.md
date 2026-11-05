@@ -155,6 +155,7 @@
 | 99 | Spec delle suite di test offline per gli script di protocollo (ADR-0014) | 🟢 | ✅ | #305 |
 | 100 | I gate locali coprono i gate della CI: la worktree ha le dipendenze, agent-pr.ps1 verifica prima di aprire la PR (issue #306) | 🟢 | ✅ | #307 |
 | 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟢 | ✅ | #310 |
+| 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟢 | ✅ | #312 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -194,9 +195,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **78** (merge: 77)
+- Sessioni migrate in state/sessions: **79** (merge: 78)
 - Stories migrate in state/stories: **28** (done: 23)
-- Ultima sessione migrata: **S101** - Rendere il repository pubblico: hardening sicurezza e privacy
+- Ultima sessione migrata: **S102** - Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.4, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -243,26 +244,25 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S101)
+**Analisi della sessione corrente** (S102)
 
 | # | Metrica | Valore |
 |---|---------|--------|
-| 1 | Segreti trovati in 689 commit | **0** |
-| 2 | File con PII reale | **0** |
-| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
-| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
-| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
-| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
-| 7 | Step CI | 38 → **40** |
-| 8 | Righe del catalogo §9.10 | 39 → **41** |
+| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
+| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
+| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
+| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
+| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
+| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
+| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
+| 8 | Versione protocollo | v1.47 → **v1.48** |
 
-**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
-stessa PR.
+**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
+l'attestazione necessaria per spingere.
 
-**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
-repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
-flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
-gia' puntare al repository pubblico — cosa che già fa.
+**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
+su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
+davvero e che il writer è l'unico scrittore ammesso.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

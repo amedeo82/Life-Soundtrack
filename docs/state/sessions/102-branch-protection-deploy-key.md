@@ -2,8 +2,10 @@
 number: 102
 title: "Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN"
 date: 2026-11-05
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "007b31ba5271bc6d1e4158dcca1392576f33f81f"
+merged_date: "2026-11-05T15:35:42Z"
 pr: 312
 branch: feat/311-branch-protection-attiva-il-writer-post
 claim: kilo-hp-elitebook-2097

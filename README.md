@@ -93,26 +93,25 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S101)
+**Analisi della sessione corrente** (S102)
 
 | # | Metrica | Valore |
 |---|---------|--------|
-| 1 | Segreti trovati in 689 commit | **0** |
-| 2 | File con PII reale | **0** |
-| 3 | IP routable reali nei fixture | **11 occorrenze** → **0** (range RFC 5737) |
-| 4 | Gate nuovi | **2** (bloccanti, fail-closed, con scenario negativo) |
-| 5 | Workflow protetti da guard di fork | **2** su 3 (il terzo, `auto-branch-cleanup.yml`, era già protetto) |
-| 6 | Job CI | **15** (invariati — i 2 step nuovi sono dentro `gates-docs`) |
-| 7 | Step CI | 38 → **40** |
-| 8 | Righe del catalogo §9.10 | 39 → **41** |
+| 1 | Endpoint classic `POST /branches/main/protection` | **404** (token OAuth, permesso *Administration* mancante) |
+| 2 | Ruleset applicata | **1** (`main-protection`, id `26614787`, `refs/heads/main`) |
+| 3 | Check run aggregatore | `quality` (non `CI / quality`) |
+| 4 | Approvazioni richieste | **0** (con 1 il repository sarebbe congelato) |
+| 5 | Deploy key di scrittura | **1** (`post-merge-writer`, id `168877742`) |
+| 6 | Secret impostati | **2** (`WRITER_SSH_KEY`, `WRITER_SSH_KNOWN_HOSTS`) |
+| 7 | Push di prova | 1 **respinto** (GH013, owner/admin), 1 **accettato** (deploy key) |
+| 8 | Versione protocollo | v1.47 → **v1.48** |
 
-**Pronto per il merge**: i gate locali sono verdi e il bundle è rigenerato nella
-stessa PR.
+**Pronto**: la protezione è attiva e verificata, e il writer post-merge ha
+l'attestazione necessaria per spingere.
 
-**Dopo il merge, e solo dopo**, il project owner può rendere pubblico il
-repository. L'ordine è vincolante: la branch protection si abilita **dopo** il
-flip (su privato Free non è disponibile), e il `README`/`About` dell'app deve
-gia' puntare al repository pubblico — cosa che già fa.
+**Dopo il merge**: il workflow `post-merge` deve produrre il commit di doc-sync
+su `main` **senza** GH013 — è la prova end-to-end che la deploy key è usata
+davvero e che il writer è l'unico scrittore ammesso.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
