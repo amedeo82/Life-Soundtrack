@@ -4,7 +4,7 @@ title: "Branch protection attiva: il writer post-merge deve spingere con una dep
 date: 2026-11-05
 state: 🟡
 merged: false
-pr: 0
+pr: 312
 branch: feat/311-branch-protection-attiva-il-writer-post
 claim: kilo-hp-elitebook-2097
 tags: [devops, security, ci, branch-protection]
