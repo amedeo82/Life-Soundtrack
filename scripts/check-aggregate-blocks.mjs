@@ -146,6 +146,18 @@ for (const path of targets) {
 
   const baseBlocks = extractBlocks(baseText);
   const headBlocks = extractBlocks(headText);
+  console.log('[DEBUG] baseBlocks:', Array.from(baseBlocks.keys()));
+  console.log('[DEBUG] headBlocks:', Array.from(headBlocks.keys()));
+  for (const [name, content] of headBlocks) {
+    console.log('[DEBUG] head block:', name, 'len:', content.length);
+    if (!baseBlocks.has(name)) {
+      console.log('[DEBUG] MISSING IN BASE:', name);
+    } else if (baseBlocks.get(name) !== content) {
+      console.log('[DEBUG] CONTENT DIFFERS:', name);
+    } else {
+      console.log('[DEBUG] OK:', name);
+    }
+  }
 
   if (baseBlocks.size === 0) {
     info(`${path}: nessun blocco aggregato nella base (caso di introduzione ADR-0008)`);

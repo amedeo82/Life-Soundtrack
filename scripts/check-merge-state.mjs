@@ -31,9 +31,11 @@
  *   1. API GitHub `/repos/{owner}/{repo}/pulls` -> stato reale delle PR
  *   2. `docs/state/sessions/*.md` -> frontmatter dichiarato (formato sessione)
  *   3. `docs/state/stories/*.md` -> frontmatter dichiarato (formato story)
+ *   4. `docs/18-DEV-LOG.md` -> entry `**Stato**:` (issue #324)
  *
  * Uso: node scripts/check-merge-state.mjs [--root <dir>] [--sessions <dir>]
  *                                           [--stories <dir>]
+ *                                           [--devlog <file>]
  *                                           [--repo owner/name] [--api <url>]
  *                                           [--defer-unapplied]
  *
@@ -63,6 +65,7 @@ function argValue(name, fallback) {
 const root = resolve(argValue('--root', '.'));
 const sessionsDir = argValue('--sessions', join(root, 'docs', 'state', 'sessions'));
 const storiesDir = argValue('--stories', join(root, 'docs', 'state', 'stories'));
+const devlogPath = argValue('--devlog', join(root, 'docs', '18-DEV-LOG.md'));
 const repo = argValue('--repo', process.env.GITHUB_REPOSITORY || 'amedeo82/Life-Soundtrack');
 const apiBase = argValue('--api', process.env.GITHUB_API_URL || 'https://api.github.com').replace(
   /\/+$/,
@@ -149,6 +152,112 @@ function readStories() {
     const text = readFileSync(full, 'utf8');
     return { file, full, text, fm: parseFrontmatter(text) };
   });
+}
+
+/**
+ * Legge e analizza le entry del DEV-LOG che hanno una riga `**Stato**:`.
+ * Ogni entry e' delimitata da heading `## ` o `### `.
+ * Restituisce un array di oggetti: { line, heading, stato, prLine, sessionRefs }.
+ */
+function readDevlogEntries() {
+  if (!existsSync(devlogPath)) {
+    environmentError(`file DEV-LOG non trovato: ${devlogPath}`);
+  }
+  const text = readFileSync(devlogPath, 'utf8');
+  const lines = text.split(/\r?\n/);
+  const sections = [];
+  let cur = null;
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^(#{2,3})\s+(.*)$/.exec(lines[i]);
+    if (m) {
+      cur = { level: m[1].length, heading: m[2], line: i + 1, body: [] };
+      sections.push(cur);
+      continue;
+    }
+    if (cur) cur.body.push(lines[i]);
+  }
+  const entries = [];
+  for (const s of sections) {
+    const body = s.body.join('\n');
+    const statoM = /^\*\*Stato\*\*:\s*(.*)$/m.exec(body);
+    if (!statoM) continue;
+    const prM = /^\*\*PR\*\*:\s*(.*)$/m.exec(body);
+    // Sessioni referenziate nel heading: "(Sessione N)" o "(Sessioni N-M)"
+    const sessionRefs = [];
+    const single = s.heading.match(/\(Sessione\s+(\d+)\)/);
+    if (single) sessionRefs.push(Number.parseInt(single[1], 10));
+    const multi = s.heading.match(/\(Sessioni\s+([\d,\s-]+)\)/);
+    if (multi) {
+      const parts = multi[1].split(/[,\s-]+/);
+      if (parts.length === 2) {
+        const a = Number.parseInt(parts[0], 10);
+        const b = Number.parseInt(parts[1], 10);
+        if (Number.isFinite(a) && Number.isFinite(b) && a <= b) {
+          for (let n = a; n <= b; n++) sessionRefs.push(n);
+        }
+      } else {
+        for (const p of parts) {
+          const n = Number.parseInt(p.trim(), 10);
+          if (Number.isFinite(n)) sessionRefs.push(n);
+        }
+      }
+    }
+    entries.push({
+      line: s.line,
+      heading: s.heading,
+      stato: statoM[1].trim(),
+      prLine: prM ? prM[1].trim() : null,
+      sessionRefs,
+    });
+  }
+  return entries;
+}
+
+/** Mappa sessione -> file di stato (per lookup rapido). */
+function buildSessionMap(sessions) {
+  const map = new Map();
+  for (const s of sessions) {
+    const m = /^(\d+)-/.exec(s.file);
+    if (m) map.set(Number.parseInt(m[1], 10), s);
+  }
+  return map;
+}
+
+/** Estrae il primo numero di PR da una riga `**PR**:`. */
+function extractPrFromLine(prLine) {
+  if (!prLine) return null;
+  // Formati: **#236**, #21, **#190**, **#236** (aperta ...), etc.
+  const m = prLine.match(/#(\d+)/);
+  return m ? Number.parseInt(m[1], 10) : null;
+}
+
+/** Classifica il marker dello stato. */
+function classifyMarker(stato) {
+  // MERGED claim: contiene "MERGED" o "merged" come parola intera o in **MERGED**
+  if (/\bmerged\b/i.test(stato) || /MERGED/.test(stato)) return 'MERGED';
+  // WIP claim: emoji 🟡 / 👀, o parole chiave
+  if (/^🟡|^👀/.test(stato)) return 'WIP';
+  if (/\bin corso\b/i.test(stato)) return 'WIP';
+  if (/\bin progress\b/i.test(stato)) return 'WIP';
+  if (/\bin review\b/i.test(stato)) return 'WIP';
+  if (/\bPR aperta\b/i.test(stato)) return 'WIP';
+  if (/\bin attesa di merge\b/i.test(stato)) return 'WIP';
+  // DONE claim: altri checkmark verdi
+  if (/^✅/.test(stato)) return 'DONE';
+  if (/\bcompletata\b/i.test(stato)) return 'DONE';
+  if (/\bfatto\b/i.test(stato)) return 'DONE';
+  if (/\bimplementazione completa\b/i.test(stato)) return 'DONE';
+  if (/\bspec .* scritta e approvata\b/i.test(stato)) return 'DONE';
+  return 'UNKNOWN';
+}
+
+/** Verifica se la riga Stato cita PR #N e merge commit sha (7+ hex). */
+function checkCitation(stato, prNumber, mergeSha) {
+  const prPattern = new RegExp(`PR\\s*#${prNumber}\\b`, 'i');
+  const shaPattern = new RegExp('`[0-9a-f]{7,}`', 'i');
+  const hasPr = prPattern.test(stato);
+  const hasSha = shaPattern.test(stato);
+  return { hasPr, hasSha };
 }
 
 /** Token: env per prima, poi la CLI `gh` (dev machine e runner), poi anonimo. */
@@ -312,14 +421,25 @@ for (const session of sessions) {
   const declaredMerged = session.fm.merged === 'true';
 
   if (isMerged !== declaredMerged) {
-    console.error('[DEBUG] isMerged='+isMerged+' declared='+declaredMerged+' mergeCommitSha='+pr.mergeCommitSha);
+    console.error(
+      '[DEBUG] isMerged=' +
+        isMerged +
+        ' declared=' +
+        declaredMerged +
+        ' mergeCommitSha=' +
+        pr.mergeCommitSha,
+    );
     // Issue #284: il caso strutturale (la PR e' stata mergiata, ma l'albero
     // sotto esame e' il suo merge commit, quindi lo stato non e' ancora
     // applicabile perche' il writer post-merge non e' ancora passato) viene
     // DIFFERITO, non fallito. Il gate autoritativo gira sullo stato finale,
     // dopo il writer: li' nessun confronto e' differito.
-    console.error('[DBG] isMerged=' + isMerged + ' declared=' + declaredMerged + ' prSha=' + pr.mergeCommitSha);
-    console.error('[DBG] isMerged=' + isMerged + ' declared=' + declaredMerged + ' prSha=' + pr.mergeCommitSha);
+    console.error(
+      '[DBG] isMerged=' + isMerged + ' declared=' + declaredMerged + ' prSha=' + pr.mergeCommitSha,
+    );
+    console.error(
+      '[DBG] isMerged=' + isMerged + ' declared=' + declaredMerged + ' prSha=' + pr.mergeCommitSha,
+    );
     if (
       deferUnapplied &&
       isMerged &&
@@ -456,17 +576,135 @@ for (const story of stories) {
   }
 }
 
+/**
+ * DEV-LOG perimeter (issue #324): verifica che le entry del DEV-LOG dichiarino
+ * lo stato di merge corretto per le sessioni/PR che referenziano.
+ */
+const devlogEntries = readDevlogEntries();
+const sessionMap = buildSessionMap(sessions);
+
+let devlogCompared = 0;
+let devlogSkipped = 0;
+let devlogDeferred = 0;
+
+for (const entry of devlogEntries) {
+  // Risolvi il numero di PR: prima la riga **PR**:, poi la sessione referenziata
+  let prNumber = extractPrFromLine(entry.prLine);
+  let matchedBy = 'prLine';
+  if (!prNumber && entry.sessionRefs.length > 0) {
+    // Usa la prima sessione con un PR valido
+    for (const sn of entry.sessionRefs) {
+      const s = sessionMap.get(sn);
+      if (s && s.fm.pr) {
+        const p = Number.parseInt(s.fm.pr, 10);
+        if (Number.isFinite(p) && p > 0) {
+          prNumber = p;
+          matchedBy = `sessione ${sn}`;
+          break;
+        }
+      }
+    }
+  }
+  if (!prNumber) {
+    devlogSkipped++;
+    continue;
+  }
+
+  const pr = pulls.get(prNumber);
+  if (!pr) {
+    environmentError(
+      `PR #${prNumber} (citata da DEV-LOG entry L${entry.line} via ${matchedBy}) non trovata nell'API: ` +
+        'dato esterno incompleto, gate fail-closed',
+    );
+  }
+
+  devlogCompared++;
+  checks++;
+  const isMerged = pr.mergedAt !== null;
+  const markerClass = classifyMarker(entry.stato);
+
+  // R1: MERGED claim -> PR deve essere mergiata + citazione PR+sha
+  if (markerClass === 'MERGED') {
+    if (!isMerged) {
+      fail(
+        `DEV-LOG L${entry.line} (${entry.heading}): marker dichiara MERGED ma la PR #${prNumber} non e' mergiata (state: ${pr.state})`,
+      );
+      continue;
+    }
+    // Richiesta citazione PR e sha per entry moderne (con sessionRefs)
+    if (entry.sessionRefs.length > 0) {
+      const { hasPr, hasSha } = checkCitation(entry.stato, prNumber, pr.mergeCommitSha);
+      if (!hasPr || !hasSha) {
+        fail(
+          `DEV-LOG L${entry.line} (${entry.heading}): marker MERGED deve citare \`PR #${prNumber}\` e il merge commit (sha) - trovati: PR=${hasPr}, sha=${hasSha}`,
+        );
+      }
+    }
+    // Differimento (issue #284): se l'albero e' il merge commit, lo stato non e' ancora applicabile
+    if (
+      deferUnapplied &&
+      headSha &&
+      pr.mergeCommitSha &&
+      pr.mergeCommitSha.toLowerCase() === headSha.toLowerCase()
+    ) {
+      devlogDeferred++;
+      console.log(
+        `[DEFERRED] DEV-LOG L${entry.line} (${entry.heading}): la PR #${prNumber} e' MERGED e l'albero e' ` +
+          `il suo merge commit (${headSha.slice(0, 7)}): confronto differito.`,
+      );
+      continue;
+    }
+    continue;
+  }
+
+  // R2: WIP claim -> PR NON deve essere mergiata
+  if (markerClass === 'WIP') {
+    if (isMerged) {
+      // Differimento per caso strutturale (stato non ancora applicato dal writer)
+      if (
+        deferUnapplied &&
+        headSha &&
+        pr.mergeCommitSha &&
+        pr.mergeCommitSha.toLowerCase() === headSha.toLowerCase()
+      ) {
+        devlogDeferred++;
+        console.log(
+          `[DEFERRED] DEV-LOG L${entry.line} (${entry.heading}): la PR #${prNumber} e' MERGED e l'albero e' ` +
+            `il suo merge commit (${headSha.slice(0, 7)}): confronto differito.`,
+        );
+      } else {
+        fail(
+          `DEV-LOG L${entry.line} (${entry.heading}): marker dichiara WIP (${entry.stato}) ma la PR #${prNumber} e' MERGED (merge commit ${pr.mergeCommitSha?.slice(0, 7)})`,
+        );
+      }
+    }
+    continue;
+  }
+
+  // R3: DONE claim per entry moderne con sessione -> se PR mergiata, deve essere canonico MERGED
+  if (markerClass === 'DONE' && entry.sessionRefs.length > 0 && isMerged) {
+    fail(
+      `DEV-LOG L${entry.line} (${entry.heading}): marker DONE (${entry.stato}) per PR mergiata #${prNumber} - deve essere MERGED canonico con citazione PR e sha`,
+    );
+    continue;
+  }
+
+  // UNKNOWN o DONE per entry legacy / PR non mergiata -> nessun controllo stretto
+}
+
 if (failures === 0) {
   ok(
-    `stato di merge delle sessioni e delle story in sync con GitHub: ` +
-      `${compared} file di stato con PR confrontati, ${skipped} senza PR (ignorati)` +
-      (deferred > 0 ? `, ${deferred} differiti (stato non ancora applicato dal writer)` : ''),
+    `stato di merge delle sessioni, story e DEV-LOG in sync con GitHub: ` +
+      `${compared} file di stato (sessions+stories) con PR confrontati, ${skipped} senza PR (ignorati)` +
+      (deferred > 0 ? `, ${deferred} differiti (stato non ancora applicato dal writer)` : '') +
+      `; DEV-LOG: ${devlogCompared} entry confrontate, ${devlogSkipped} senza PR verificabile` +
+      (devlogDeferred > 0 ? `, ${devlogDeferred} differite` : ''),
   );
 }
 
 console.log('');
 console.log(
   `[INFO] check-merge-state: ${checks} confronti, ${failures} falliti` +
-    (deferred > 0 ? `, ${deferred} differiti` : ''),
+    (deferred + devlogDeferred > 0 ? `, ${deferred + devlogDeferred} differiti` : ''),
 );
 process.exit(failures > 0 ? 1 : 0);
