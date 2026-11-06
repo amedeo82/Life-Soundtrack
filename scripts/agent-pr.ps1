@@ -177,6 +177,18 @@ if (-not $SkipChecks) {
     & $node (Join-Path $repoRoot "scripts/test-fixtures-privacy-gate.mjs") | Out-Host
     if ($LASTEXITCODE -ne 0) { $failures += "test-fixtures-privacy-gate.mjs" }
 
+    # --- Gate "proprieta' della worktree" (issue #319) ---
+    # L'owner locale della worktree (`agent-state.json`) deve coincidere con
+    # l'agente del claim VINCENTE. Il codice 1 (mismatch) BLOCCA: e' doppio
+    # lavoro. Il codice 2 (errore di ambiente: `gh` assente, API irraggiungibile)
+    # NON blocca: un gate che blocca per una disconnessione non e' un gate.
+    $ownershipGate = Join-Path $repoRoot "scripts/check-worktree-ownership.mjs"
+    if (Test-Path $ownershipGate) {
+        & $node $ownershipGate | Out-Host
+        if ($LASTEXITCODE -eq 1) { $failures += "check-worktree-ownership.mjs (mismatch)" }
+        elseif ($LASTEXITCODE -ne 0) { $skipped += "check-worktree-ownership.mjs (errore di ambiente)" }
+    }
+
     # Test FUNZIONALE del writer post-merge: e' il gate che ha reso rossa la
     # PR #305 (un numero di sessione duplicato nel fixture faceva fallire
     # `aggregate-state.ps1 -Check` dentro il clone temporaneo del test).
@@ -213,6 +225,17 @@ if ([string]::IsNullOrWhiteSpace($BodyFile)) {
 if (-not (Test-Path $BodyFile)) { Die 2 "file del body non trovato: $BodyFile" }
 $body = Get-Content $BodyFile -Raw
 
+# --- dichiarazione dell'agente (issue #319) ----------------------------------
+# Il body dichiara l'agent-id del claimante: e' il fatto che permette a
+# `scripts/check-claim-state.mjs` (CI) di verificare che la PR sia stata
+# aperta dall'agente che ha vinto la riverifica. Una PR aperta da un agente
+# diverso dal claimante e' doppio lavoro, e in CI deve fallire.
+$agentId = [string]$state.agent_id
+if ([string]::IsNullOrWhiteSpace($agentId)) {
+    Die 3 "il file di stato non dichiara l'agent_id: la PR non puo' essere attribuita al claimante"
+}
+$body = $body.TrimEnd() + "`n`n## Agente`n`nagent-id: ``$agentId```n"
+
 $naked = @([regex]::Matches($body, "(?m)^\s*(Closes|Fixes|Resolves)\s+#(\d+)\s*$"))
 $allKeywords = @([regex]::Matches($body, "(?i)\b(Closes|Fixes|Resolves)\s+#(\d+)"))
 if ($naked.Count -ne 1) {
@@ -240,8 +263,17 @@ if ($DryRun) {
 
 # --- 4. creazione della PR --------------------------------------------------
 Say "creo la PR..." "Cyan"
-$prUrl = (& gh pr create --base $Base --head $branch --title $Title --body-file $BodyFile | Select-Object -Last 1).Trim()
-if ($LASTEXITCODE -ne 0) { Die 1 "gh pr create e' fallito" }
+# Il body effettivo include la dichiarazione dell'agente: si scrive su un file
+# temporaneo (UTF-8 senza BOM) e si usa quello per `gh pr create`. Il template
+# del repository resta L'UNICO artifact della checklist (regola C6): qui non
+# viene duplicato, viene arricchito di una riga machine-readable.
+$bodyFile = [System.IO.Path]::GetTempFileName()
+[System.IO.File]::WriteAllText($bodyFile, $body, (New-Object System.Text.UTF8Encoding($false)))
+$prOut = & gh pr create --base $Base --head $branch --title $Title --body-file $bodyFile | Select-Object -Last 1
+$prExit = $LASTEXITCODE
+Remove-Item -LiteralPath $bodyFile -Force -ErrorAction SilentlyContinue
+if ($prExit -ne 0) { Die 1 "gh pr create e' fallito" }
+$prUrl = ([string]$prOut).Trim()
 if ($prUrl -notmatch "/pull/(\d+)") { Die 1 "impossibile ricavare il numero della PR dall'output: $prUrl" }
 $prNumber = [int]$Matches[1]
 Say "PR #$prNumber aperta: $prUrl" "Green"

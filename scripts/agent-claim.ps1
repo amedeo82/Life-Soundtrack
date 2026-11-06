@@ -40,7 +40,7 @@
 
     Exit code: 0 ok - 1 errore git/worktree - 2 errore ambiente/API - 3
     validazione issue - 4 riverifica persa (yield) - 5 claim non ancora
-    scaduto (-Stale).
+    scaduto (-Stale) - 6 worktree posseduta da un altro agente (issue #319).
 
 .PARAMETER IssueNumber
     Numero dell'issue da prendere in carico.
@@ -59,6 +59,16 @@
     regola 5): verifica l'eta' dell'ultima attivita' del claim attivo e, se
     supera le 12 ore, posta `stale-release:` e prosegue con claim + riverifica.
 
+.PARAMETER Auto
+    Procedura di ARBITRAGGIO (issue #319): invece di prendere in carico
+    l'issue indicata, prende la prima issue CANDIDABILE **libera** secondo
+    l'ordine di `docs/11-BACKLOG.md` (sezione "Priorita' di lavorazione per
+    agenti"). La selezione smette di essere una scelta dell'agente: con lo
+    stesso prompt, due agenti convergevano sulla stessa story; con `-Auto` il
+    tentativo e' in ordine e la riverifica decide. Se l'issue candidata non e'
+    piu' libera (exit 3), se il claim viene perso (exit 4) o se la worktree
+    appartiene a un altro agente (exit 6), si passa alla successiva.
+
 .PARAMETER DryRun
     Stampa cosa farebbe, senza toccare GitHub ne il filesystem.
 
@@ -66,16 +76,18 @@
     pwsh scripts/agent-claim.ps1 256
     pwsh scripts/agent-claim.ps1 256 -DryRun
     pwsh scripts/agent-claim.ps1 283 -Stale   # claim senza attivita' da >12h
+    pwsh scripts/agent-claim.ps1 -Auto       # prima issue libera in ordine di backlog
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true, Position = 0)]
-    [int]$IssueNumber,
+    [Parameter(Position = 0)]
+    [int]$IssueNumber = 0,
     [string]$Slug = "",
     [string]$AgentId = "",
     [switch]$SkipWorktree,
     [switch]$Stale,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Auto
 )
 
 Set-StrictMode -Version Latest
@@ -161,10 +173,163 @@ function Assert-ClaimStale {
     return $agent
 }
 
+# --- claim attivo sull'issue (issue #319) --------------------------------------
+# Il claim vincente e' quello con l'id NUMERICO piu' basso fra i claim non
+# ancora rilasciati. Serve al lock di proprieta' della worktree: l'owner
+# locale (`agent-state.json`) deve coincidere con il vincitore.
+function Get-ActiveClaimWinner([int]$issue) {
+    $raw = & gh api "$repoApi/issues/$issue/comments" 2>$null
+    if ($LASTEXITCODE -ne 0) { return $null }
+    $all = @($raw | ConvertFrom-Json)
+    $releases = @($all | Where-Object { [string]$_.body -match '^\s*(release|stale-release)\s*:' })
+    $active = @(@($all | Where-Object { $_.body -like "claim:*" } | Sort-Object { [int64]$_.id }) |
+        Where-Object { -not (Test-ClaimReleased $_ $releases) })
+    if ($active.Count -eq 0) { return $null }
+    $c = $active[0]
+    return [pscustomobject]@{ id = [int64]$c.id; agent = (Get-ClaimAgent $c) }
+}
+
+# --- lock di proprieta' della worktree (issue #319) ---------------------------
+# ADR-0006 blocca l'ISSUE, non la directory: il path della worktree e'
+# deterministico (`ls-<N>-<slug>`), quindi due agenti che puntano alla stessa
+# story finiscono nella stessa cartella. Qui la worktree esistente viene
+# confrontata con il claim attivo:
+#   - owner diverso dal claim vincente -> exit 6 (nessuna scrittura su GitHub)
+#   - owner uguale al claim vincente   -> la worktree e' gia' nostra
+#   - nessun owner (orfana)             -> adottabile dal vincitore
+function Assert-WorktreeOwnership([string]$path) {
+    $wtState = $null
+    $gitDir = (& git -C $path rev-parse --absolute-git-dir 2>$null)
+    if ($LASTEXITCODE -eq 0 -and $gitDir) {
+        $statePath = Join-Path $gitDir.Trim() "agent-state.json"
+        if (Test-Path $statePath) {
+            try { $wtState = (Get-Content $statePath -Raw | ConvertFrom-Json) } catch { $wtState = $null }
+        }
+    }
+    if (-not $wtState) {
+        Say "worktree senza stato (orfana): nessun owner dichiarato" "Yellow"
+        $dirty = (& git -C $path status --porcelain 2>$null)
+        if ($dirty) {
+            Say "ATTENZIONE: la worktree orfana ha modifiche non committate: verifica prima di adottarla" "Yellow"
+        }
+        return
+    }
+    $owner = [string]$wtState.agent_id
+    if ([string]::IsNullOrWhiteSpace($owner)) { return }
+    $winner = Get-ActiveClaimWinner $IssueNumber
+    if ($winner -and $winner.agent -ne $owner) {
+        Die 6 ("la worktree '$path' appartiene all'agente $($winner.agent) (claim $($winner.id) attivo sull'issue #$IssueNumber): non puoi lavorarci. Scegli un'altra issue.")
+    }
+    if ($winner) {
+        Say "la worktree e' gia' di questo agente ($owner, claim $($winner.id))" "Green"
+        return
+    }
+    Say "worktree orfana (nessun claim attivo): adottabile" "Yellow"
+}
+
+# --- ordine di backlog (issue #319) -------------------------------------------
+# L'ordine di tentativo delle story e' quello di `docs/11-BACKLOG.md`, sezione
+# "Priorita' di lavorazione per agenti": la lista numerata delle story.
+function Get-BacklogStoryOrder {
+    $backlog = Join-Path $repoRoot "docs/11-BACKLOG.md"
+    if (-not (Test-Path $backlog)) { return @() }
+    $text = [System.IO.File]::ReadAllText($backlog)
+    $ids = @()
+    foreach ($m in [regex]::Matches($text, '(?m)^\s*\d+\.\s+\*\*([^*]+)\*\*')) {
+        foreach ($idm in [regex]::Matches($m.Groups[1].Value, '\d+\.\d+')) {
+            $ids += $idm.Value
+        }
+    }
+    return $ids
+}
+
+# Mappa story id -> numero issue, dai file di stato delle story.
+function Get-StoryIssueMap {
+    $map = @{}
+    $dir = Join-Path $repoRoot "docs/state/stories"
+    if (-not (Test-Path $dir)) { return $map }
+    foreach ($f in Get-ChildItem $dir -Filter "*.md" -File) {
+        $t = [System.IO.File]::ReadAllText($f.FullName)
+        $idm = [regex]::Match($t, '(?m)^id:\s*"?([0-9.]+)"?\s*$')
+        $issm = [regex]::Match($t, '(?m)^issue:\s*([0-9]+)\s*$')
+        if ($idm.Success -and $issm.Success) {
+            $map[$idm.Groups[1].Value] = [int]$issm.Groups[1].Value
+        }
+    }
+    return $map
+}
+
+# Issue candidabili LIBERE, ordinate per priorita' di backlog.
+function Get-CandidateIssues {
+    $json = & gh issue list --state open --label agent-ready --limit 50 --json number,title,labels
+    if ($LASTEXITCODE -ne 0) { Die 2 "impossibile leggere le issue candidabili" }
+    $free = @(@($json | ConvertFrom-Json) | Where-Object {
+        $names = @($_.labels | ForEach-Object { $_.name })
+        -not ($names -contains 'in-progress') -and -not ($names -match '^status:')
+    })
+    if ($free.Count -eq 0) { return @() }
+    $order = @(Get-BacklogStoryOrder)
+    $map = Get-StoryIssueMap
+    $rank = @{}
+    for ($i = 0; $i -lt $order.Count; $i++) {
+        $sid = $order[$i]
+        if ($map.ContainsKey($sid)) {
+            $issueNum = [int]$map[$sid]
+            if (-not $rank.ContainsKey($issueNum)) { $rank[$issueNum] = $i }
+        }
+    }
+    $tail = $order.Count + 1
+    return @($free | Sort-Object `
+        @{ Expression = { if ($rank.ContainsKey([int]$_.number)) { $rank[[int]$_.number] } else { $tail } } }, `
+        @{ Expression = { [int]$_.number } })
+}
+
 # --- agent id ---------------------------------------------------------------
 if ([string]::IsNullOrWhiteSpace($AgentId)) {
     $hostName = $env:COMPUTERNAME.ToLowerInvariant()
     $AgentId = "kilo-$hostName-$([guid]::NewGuid().ToString('N').Substring(0,4))"
+}
+
+# --- arbitraggio automatico (-Auto, issue #319) -------------------------------
+# Con lo stesso prompt, due agenti avviati a pochi secondi di distanza
+# convergevano sulla stessa story (il blocco NEXT-STEP e la query live delle
+# issue libere indicano la stessa prima story). `-Auto` toglie la scelta
+# all'agente: il tentativo e' in ordine di backlog, e la riverifica decide.
+if ($Auto) {
+    Say "modalita' -Auto: prendo in carico la prima issue libera in ordine di backlog" "Cyan"
+    $candidates = @(Get-CandidateIssues)
+    if ($candidates.Count -eq 0) {
+        Die 3 "nessuna issue agent-ready libera: apri una issue needs-spec e termina la sessione"
+    }
+    $names = @($candidates | ForEach-Object { "#$($_.number)" })
+    Say "candidati liberi, in ordine di tentativo: $($names -join ', ')" "DarkGray"
+    if ($DryRun) {
+        Say "[DRY-RUN] prenderei in carico $($names[0])" "Yellow"
+        exit 0
+    }
+    foreach ($cand in $candidates) {
+        $n = [int]$cand.number
+        Say "provo #$n ($($cand.title))" "DarkGray"
+        $childArgs = @("-NoProfile", "-File", $PSCommandPath, "$n", "-AgentId", $AgentId)
+        if ($SkipWorktree) { $childArgs += "-SkipWorktree" }
+        if ($Stale) { $childArgs += "-Stale" }
+        & pwsh @childArgs | Out-Host
+        $childExit = $LASTEXITCODE
+        if ($childExit -eq 0) {
+            Say "claim acquisito su #$n" "Green"
+            exit 0
+        }
+        if ($childExit -in @(3, 4, 5, 6)) {
+            Say "#$n non ottenibile (exit $childExit): passo alla successiva" "Yellow"
+            continue
+        }
+        Die $childExit "il tentativo su #$n e' fallito (exit $childExit)"
+    }
+    Die 3 "nessuna issue ottenibile: apri una issue needs-spec e termina la sessione"
+}
+
+if ($IssueNumber -le 0) {
+    Die 2 "manca il numero dell'issue (oppure usa -Auto per l'arbitraggio automatico)"
 }
 
 # --- 1. validazione dell'issue --------------------------------------------
@@ -204,6 +369,11 @@ if (-not $SkipWorktree) {
     $worktreePath = Join-Path $worktreeParent $wtName
     if (Test-Path $worktreePath) {
         Say "worktree gia' presente: $worktreePath" "Yellow"
+        # Lock di proprieta' (issue #319): la worktree ha un path deterministico,
+        # quindi due agenti sulla stessa story finiscono nella stessa cartella.
+        # Qui la proprieta' viene confrontata con il claim attivo: se e' di un
+        # altro agente, si esce con 6 **senza** toccare GitHub.
+        Assert-WorktreeOwnership $worktreePath
     }
     else {
         Say "creo la worktree: $worktreePath" "Cyan"
@@ -265,6 +435,8 @@ if ($mineId -ne $lowestId) {
     # NON rimuove la label `in-progress` -- serve al vincitore. Rimuoverla faceva
     # ricomparire l'issue come "libera" nelle query degli altri contendenti.
     & gh issue comment $IssueNumber --body "yield: $AgentId -- riverifica persa (claim $mineId; ID piu' basso in carico: $lowestId)" | Out-Null
+    Say "ABANDONA la worktree ${worktreePath}: il suo owner e' il vincitore della riverifica" "Red"
+    Say "Non scrivere in quella directory e non rimuovere la label 'in-progress': passi alla prossima issue candidabile." "Red"
     exit 4
 }
 Say "riverifica OK: il claim $mineId e' il piu' basso" "Green"
@@ -284,7 +456,13 @@ $state = [ordered]@{
     pr          = $null
     session     = $null
 }
-$state | ConvertTo-Json | Set-Content -Path $stateFile -Encoding utf8
+# Scrittura ATOMICA del file di stato (issue #319): il file e' il lock della
+# worktree, e due agenti che lo scrivono nello stesso momento non possono
+# produrre un JSON troncato. Si scrive su un file temporaneo e si rinomina:
+# la rinomina e' atomica sullo stesso volume.
+$tmpState = "$stateFile.tmp"
+[System.IO.File]::WriteAllText($tmpState, ($state | ConvertTo-Json), (New-Object System.Text.UTF8Encoding($false)))
+Move-Item -LiteralPath $tmpState -Destination $stateFile -Force
 Say "file di stato: $stateFile" "DarkGray"
 
 # --- 7. prossimi passi ------------------------------------------------------

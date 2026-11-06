@@ -476,6 +476,17 @@ jobs:
       - name: Gate "coerenza del claim" fail-closed (issue #256)
         run: bash scripts/test-claim-state.sh
 
+      # Issue #319: il lock di ADR-0006 e' sull'issue, non sulla directory di
+      # lavoro: il path della worktree e' deterministico (`ls-<N>-<slug>`), quindi
+      # due agenti sulla stessa story finiscono nella stessa cartella e il
+      # codice del secondo finiva nel commit del primo. Il gate confronta l'owner
+      # locale della worktree (`agent-state.json`) con l'agente del claim
+      # VINCENTE. Il gate stesso gira in locale (pre-commit hook + agent-pr.ps1):
+      # in CI si esegue il suo scenario NEGATIVO, che dimostra che fallisce
+      # quando deve (lesson 43-1: un gate che passa sempre non e' un gate).
+      - name: Gate "proprieta' della worktree" fail-closed (issue #319)
+        run: bash scripts/test-worktree-ownership.sh
+
   gates-aggregate:
     # Sessione 74 (follow-up): su `push` su `main` girano solo i gate "leggeri"
     # (`gates-docs` + `gates-workflows`). Questo gate verifica gli SCRIPT, che su

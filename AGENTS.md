@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.48 — Sessione 102 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.49 — Sessione 105 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -40,6 +40,8 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
+| La **worktree** è proprietà del claimante: l'owner locale (`agent-state.json`) coincide con l'agente del claim **vincente** | `check-worktree-ownership.mjs` (hook `pre-commit` + `agent-pr.ps1`) | issue #319 (doppio lavoro silenzioso nella stessa directory) |
+| La PR dichiara l'`agent-id` del **claimante**, che coincide con l'agente del claim vincente | C6 di `check-claim-state.mjs` | issue #319 (PR attribuita a un agente diverso dal claimante) |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
 | I file di testo del repository sono **UTF-8 senza BOM** e senza doppia codifica (mojibake) | `check-encoding.mjs` | issue #277 (corruzione silenziosa da PowerShell 5.1) |
 | I fixture contengono **solo dati sintetici**: mai un IP pubblico routable (fuori dai range documentazione RFC 5737), mai una email reale, mai un path che rivela il nome utente | `check-fixtures-privacy.mjs` (+ scenario negativo `test-fixtures-privacy-gate.mjs`) | issue #309 (repository pubblico: ogni file tracciato è scaricabile da chiunque) |
@@ -54,6 +56,7 @@ node scripts/check-protocol-consistency.mjs   # 6 check, exit 0 = in sync
 node scripts/check-aggregate-blocks.mjs        # blocchi intoccabili, exit 0 = nessuna violazione
 node scripts/check-encoding.mjs                # encoding dei file tracciati, exit 0 = nessun mojibake/BOM
 node scripts/check-fixtures-privacy.mjs        # fixture solo sintetici, exit 0 = nessun dato reale
+node scripts/check-worktree-ownership.mjs      # owner locale = claim vincente, exit 1 = doppio lavoro
 ```
 
 **Se un gate segnala un drift, il drift si corregge nel file che il gate indica** — non nel gate.
@@ -184,6 +187,50 @@ All'avvio l'agente genera il proprio identificativo univoco, in formato `<tool>-
 
    - **Vinci**: procedi — branch `feat/<N>-<descrizione>` e resto del protocollo.
    - **Perdi**: lascia un commento `yield: <AGENT-ID>` e passa alla prossima issue candidabile (torna al punto 2). **Non rimuovere la label `in-progress`**: serve al vincitore.
+
+### La procedura atomica: `scripts/agent-claim.ps1`
+
+La procedura manuale dei punti 1-4 è fragile (TOCTOU: tra la riverifica e il primo commit un altro agente può prendere la stessa story). Lo script esegue claim + riverifica in un'unica operazione, e **è il modo raccomandato**:
+
+```powershell
+pwsh scripts/agent-claim.ps1 <N> -AgentId <AGENT-ID>     # claim atomico di <N>
+pwsh scripts/agent-claim.ps1 <N> -AgentId <AGENT-ID> -DryRun  # sola anteprima, nessuna scrittura
+pwsh scripts/agent-claim.ps1 -Auto -AgentId <AGENT-ID>   # arbitraggio: sceglie la prima story libera
+pwsh scripts/agent-claim.ps1 <N> -AgentId <AGENT-ID> -Stale  # takeover di un claim scaduto (TTL 12h)
+```
+
+**I codici di uscita dello script** (verificati dai test, non dalla documentazione):
+
+| Exit | Significato | Cosa fa l'agente |
+|:----:|-------------|------------------|
+| 0 | claim riuscito (o issue già tua) | procedi con la worktree |
+| 2 | parametri o ambiente non valido | correggi e rilancia |
+| 3 | l'issue è **già in carico** di un altro agente | **non scrivere niente**: passa alla prossima candidabile |
+| 4 | hai **perso la riverifica** (un altro claim ha id più basso) | lascia `yield:` e **abbandona la worktree** |
+| 5 | il claim è ancora fresco (non scaduto) | non fare takeover: attendi o cambia story |
+| 6 | la **worktree è di un altro agente** | **ABANDONA la worktree**: nessuna scrittura, nessun commit |
+
+Il codice 3 è il caso che, prima della Sessione 105, non aveva una procedura codificata: un agent che riceveva "issue già `in-progress`" non aveva un comportamento definito, e il rischio reale è **continuare a lavorarci** (la worktree esiste già, il path è deterministico). Ora la procedura è: `3` → `-Auto` sceglie la prossima story libera; `6` → si abbandona la directory.
+
+### L'arbitraggio automatico (`-Auto`)
+
+Scegliere la story a mano è la fase in cui due agenti finiscono sulla stessa issue (la selezione non è atomica: leggere i candidati, poi reclamare, lascia una finestra). `-Auto` chiude la finestra: lo script **ricalcola i candidati e verifica il claim winner subito prima di procedere**, nell'ordine di priorità di `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti".
+
+```powershell
+pwsh scripts/agent-claim.ps1 -Auto -DryRun        # stampa i candidati, non scrive nulla
+pwsh scripts/agent-claim.ps1 -Auto -AgentId <ID>  # prende il primo candidato libero
+```
+
+Se il claim perde la riverifica, `-Auto` **non si ferma**: va al candidato successivo. L'arbitraggio è deterministico (stesso backlog → stesso ordine), ma la **verifica finale resta atomica**: due agenti possono arrivare allo stesso candidato, e in quel caso vince il claim con l'id più basso e l'altro va avanti.
+
+### Il lock di proprietà della worktree *(Sessione 105, issue #319)*
+
+Il claim di ADR-0006 blocca **l'issue**, ma il path della worktree è deterministico (`ls-<N>-<slug>`): due agenti sulla stessa story condividono la **stessa directory**, e il codice del secondo finisce nel commit del primo. Il protocollo ha quindi **due lock distinti**, e vanno entrambi rispettati:
+
+1. **Lock dell'issue** (ADR-0006): il claim, verificato dall'`id` più basso del commento.
+2. **Lock della worktree** (Sessione 105): l'owner locale dichiarato in `agent-state.json`, confrontato con l'agente del claim vincente da `node scripts/check-worktree-ownership.mjs`.
+
+**Regola operativa**: se il check di proprietà segnala mismatch, l'agente **abbandona** la worktree — non "prende possesso" della directory, non corregge il file di stato, non committa. L'unica correzione legittima è **uscire dalla directory** (`cd` altrove) e lavorare nella worktree del proprio claim, ricreata se necessario.
 
 ### Mantenere il claim
 
@@ -768,12 +815,25 @@ git push
         ├── post-merge.ps1          ← procedura canonica post-merge (allinea main, rimuove worktree e branch)
         ├── check-readme-facts.mjs  ← gate read-only: confronta la prosa del README con il codice (issue #161)
         ├── test-post-merge.sh      ← 14 scenari (T1..T14) su repo temporanei che coprono E3/E4/E5/F7 + squash + rimozione long-path
+        ├── agent-claim.ps1         ← claim atomico + arbitraggio (-Auto) + lock di proprietà della worktree (issue #319)
+        ├── agent-pr.ps1            ← gate locali + apertura PR (dichiara l'agent-id del claimante) + `pr: N`
+        ├── check-worktree-ownership.mjs ← gate read-only: owner locale della worktree = claim vincente (issue #319)
+        ├── test-worktree-ownership.sh ← 9 scenari (T1..T9) sul gate di proprietà della worktree (issue #319)
         └── test-readme-facts-gate.sh ← 9 scenari (T1..T9) sul gate "fatti del README" (issue #161)
 
 ## 🚀 Primo task di un agente
 
+0. **Fase 0 — arbitraggio (Sessione 105, issue #319 — vincolante)**: prima di scegliere una story, verifica **due cose** nella worktree in cui ti trovi:
+
+   ```bash
+   pwd                                  # sei nella worktree di qualcun altro?
+   node scripts/check-worktree-ownership.mjs   # l'owner locale e' il claim vincente?
+   ```
+
+   Se il gate esce con **1**, la directory è di un altro agente: **esci** e non scrivere niente. Se esce con **2**, non puoi verificare: procedi solo se hai un claim valido tuo. Il percorso della worktree è deterministico (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finiscono nella stessa directory: questo check è la difesa contro il **doppio lavoro silenzioso** (issue #319).
+
 1. Leggi questo file
-2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)")
+2. Scegli la prima issue `agent-ready` **libera** secondo l'ordine di `docs/11-BACKLOG.md` §"Priorità di lavorazione" — libera = senza label `in-progress` né `status:*` (vedi §"📦 Macchina a stati delle issue (status:*)"). In alternativa, lascia che lo script arbitri: `pwsh scripts/agent-claim.ps1 -Auto -DryRun` stampa i candidati in quell'ordine, `-Auto` prende il primo libero (verifica atomica inclusa).
 3. **Crea la worktree isolata e prendi in carico l'issue** con **un solo comando** (Sessione 81, issue #256):
 
    ```bash
@@ -805,25 +865,32 @@ Da Sessione 27 (issue #53, PR #54), ogni agente lavora in una **worktree isolata
 
 ### Flusso operativo
 
+> **⚠️ DEPRECATO (Sessione 105, issue #319): il flusso manuale qui sotto è il primo autore del doppio lavoro.** `setup-worktree.ps1` + `gh issue edit` + `gh issue comment` **a mano** non fanno la riverifica e non verificano la proprietà della worktree: l'agente che segue i passi manuali crede di avere la story, ma non lo sa. **Il flusso canonico è `scripts/agent-claim.ps1`** (vedi §"🚀 Primo task di un agente" e §"🎫 Presa in carico delle story"), che esegue claim + riverifica + lock di proprietà in un'unica operazione.
+
 ```powershell
-# PRIMA di lavorare sulla issue, crea la worktree:
-pwsh scripts/setup-worktree.ps1 53
-# Output: cd ../ls-53-worktree-default + gh claim command
-
-cd ../ls-53-worktree-default
-# claim (ADR-0006):
-gh issue edit 53 --add-label in-progress
-gh issue comment 53 --body "claim: kilo-HP-ELITEBOOK-xxxx (UTC ...) — worktree: C:\..\ls-53-..."
-
-# lavora nel branch feat/53-worktree-default (pushato automaticamente da setup-worktree.ps1)
+# flusso canonico (un solo comando: claim atomico + riverifica + lock worktree):
+pwsh scripts/agent-claim.ps1 <N>
+cd ../ls-<N>-<slug>
 # ... scrivi codice, test, AGENTS.md updates ...
 git add -A
 git commit -m "feat: ..."
 git push  # hook pre-push: BUNDLE auto-regen se docs/ hai cambiato
-
-# apri PR (Closes #N nel body)
-gh pr create --base main --head feat/53-worktree-default --title "..." --body "Closes #53 ..."
+pwsh scripts/agent-pr.ps1 -IssueNumber <N>   # gate locali + PR + keyword di chiusura + `pr: N`
 ```
+
+```powershell
+# flusso MANUALE — deprecato, non usare (resta solo per il troubleshooting):
+pwsh scripts/setup-worktree.ps1 53
+cd ../ls-53-worktree-default
+gh issue edit 53 --add-label in-progress
+gh issue comment 53 --body "claim: kilo-HP-ELITEBOOK-xxxx (UTC ...) — worktree: C:\..\ls-53-..."
+```
+
+Le ragioni della deprecazione sono tre, e tutte hanno un costo reale:
+
+1. **Nessuna riverifica**: il claim manuale non verifica che l'id del proprio commento sia il più basso → due agenti credono di avere la stessa story.
+2. **Nessun lock di proprietà**: la worktree viene creata prima di sapere chi ha vinto → il secondo agente scrive nella directory del primo (path deterministico `ls-<N>-<slug>`).
+3. **Nessuna verifica al commit**: il flusso manuale non ha il gate di proprietà, che nel flusso canonico gira nel pre-commit hook e nei gate locali di `agent-pr.ps1`.
 
 ### Parametri di `setup-worktree.ps1`
 
@@ -892,7 +959,7 @@ Dopo che il Boss mergia la PR, le azioni post-merge sono **a 3 livelli**:
 
 ### 🏎️ La CI: 15 job, e non gira 4 volte per ogni merge *(Sessione 73 + Sessione 74 + Sessione 90)*
 
-> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 40 step): cosa gira,
+> Il **catalogo autorevole** dei gate è `docs/12-DEVOPS.md §9.10` (15 job, 43 step): cosa gira,
 > quando, con quali permessi e con quale exit code. Qui solo l'invariante operativo:
 >
 > - le modifiche a `docs/` e agli script di validazione girano su `pull_request`;
@@ -1093,7 +1160,7 @@ La specifica completa è in [`docs/13-ADR/0013-post-merge-automation.md`](docs/1
 
 ## 🛡️ Session start checklist
 
-Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti **6 check** per catturare precocemente i failure mode del parallelismo:
+Prima di iniziare a lavorare su un'issue claimata, esegui i seguenti **7 check** per catturare precocemente i failure mode del parallelismo:
 
 ```powershell
 git status                          # working tree clean? (F3, F5)
@@ -1101,10 +1168,19 @@ git branch --show-current           # sul branch giusto? (F1)
 git fetch origin && git status -uno # main stale? (F4)
 gh issue view <N> --jq .state       # issue ancora nostra e aperta? (F7)
 git worktree list                   # non in worktree di un altro agente? (F8, post-#54)
+node scripts/check-worktree-ownership.mjs  # owner locale = claim vincente? (F10, issue #319)
 pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'  # PowerShell 7? (F9, Sessione 71)
 ```
 
-Tutti e 6 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+Tutti e 7 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
+
+**F10 — la worktree è proprietà del claimante** *(Sessione 105, issue #319 — vincolante)*: il path della worktree è **deterministico** (`ls-<N>-<slug>`), quindi due agenti che scelgono la stessa story finiscono nella **stessa directory**: il secondo scrive sopra il primo, e il codice del primo finisce nel commit del secondo (doppio lavoro silenzioso, nessun errore). Il claim di ADR-0006 è un lock **sull'issue**, non sul filesystem: da solo non basta. Il check è `node scripts/check-worktree-ownership.mjs`, che confronta l'owner locale (`agent-state.json`) con l'agente del claim **vincente**:
+
+- exit **0** — la worktree è tua: procedi.
+- exit **1** — la worktree è di **un altro agente**: **abbandonala subito** (nessuna scrittura, nessun commit, nessun `git add`). Se il tuo claim è valido ma l'owner locale è sbagliato, non "correggi" il file di stato: ricrea la worktree.
+- exit **2** — errore di ambiente (`gh` assente, API irraggiungibile, file di stato mancante): **non è** un doppio lavoro, ma non è nemmeno una verifica: il gate locale in `agent-pr.ps1` lo tratta come WARN e non blocca.
+
+Il gate gira anche nel **pre-commit hook** (INVARIANTE 4: mismatch → abort) e nei gate locali di `scripts/agent-pr.ps1` (mismatch → blocco). Non è un controllo da fare una volta: è un controllo da fare a ogni commit.
 
 **F9 — PowerShell 7 (`pwsh`) è il baseline del repo** *(Sessione 71, rafforzato dalla Sessione 72)*: gli script in `scripts/*.ps1` si invocano con `pwsh`. Sotto Windows PowerShell 5.1 il doppio trattino non viene normalizzato e i gate con `--check` ricadono silenziosamente in modalità WRITING (fail-open, issue #104): verificare sempre l'`exit code` **e** la riga `[OK] … in sync` nell'output. La forma canonica dei flag resta a **singolo trattino** (`-Check`, `-List`, `-DryRun`). Vedi `docs/12-DEVOPS.md §9.1`.
 
@@ -1153,4 +1229,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.48 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.49 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*

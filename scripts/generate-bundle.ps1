@@ -212,6 +212,9 @@ $files = @(
     # Sessione 104 (issue #270): la Story 3.5 — l'anteprima in onboarding e
     # la modalita' demo (il diario di esempio in un database separato).
     "docs/state/sessions/104-story-3-5-anteprima-demo.md",
+    # Sessione 105 (issue #319): arbitraggio atomico della selezione e lock
+    # di proprieta' della worktree (il protocollo ha due lock: issue + worktree).
+    "docs/state/sessions/105-arbitraggio-claim-lock-worktree.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -472,9 +475,22 @@ $files = @(
     # verificabili le 8 regole vincolanti di ADR-0006 (che erano solo prosa) e
     # vieta che una branch `docs/*` porti con se' il codice di un altro task.
     "scripts/check-claim-state.mjs",
-    # Test di regressione del gate "coerenza del claim" (T1..T11): ogni
-    # controllo ha il suo scenario negativo.
+    # Test di regressione del gate "coerenza del claim" (T1..T14): ogni
+    # controllo ha il suo scenario negativo. T12..T14 coprono la regola C6
+    # (l'agent-id dichiarato nel body della PR deve coincidere con il claim
+    # vincente — issue #319).
     "scripts/test-claim-state.sh",
+    # Gate "proprieta' della worktree" (Sessione 105 / issue #319): confronta
+    # l'owner locale della worktree (`agent-state.json`) con l'agente del claim
+    # VINCENTE. Il lock di ADR-0006 e' sull'issue, non sul filesystem: il path
+    # della worktree e' deterministico (`ls-<N>-<slug>`), quindi due agenti sulla
+    # stessa story finivano nella stessa directory (doppio lavoro silenzioso).
+    # READ-ONLY: mismatch -> exit 1 (blocco), errore d'ambiente -> exit 2 (warn).
+    "scripts/check-worktree-ownership.mjs",
+    # Test di regressione del gate "proprieta' della worktree" (T1..T9): owner
+    # allineato, mismatch, due claim, claim rilasciato, claim stale + nuovo
+    # claim, stato senza agent_id, nessun claim, file di stato mancante.
+    "scripts/test-worktree-ownership.sh",
     # Setup hooks (postinstall idempotente che imposta core.hooksPath = .githooks).
     # Vedi .githooks/README.md + D.20.2 push early.
     "scripts/setup-hooks.js",

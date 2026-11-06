@@ -116,6 +116,25 @@ scenario "T11" "PR mergiata (gate non applicabile)" "0" \
   '{"number":1,"state":"MERGED","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
   "$ISSUE_OK" "$COMMENTS_OK"
 
+# T12: l'agent-id dichiarato nel body coincide con il claim vincente (issue #319)
+PR_BODY_AGENT_OK='## Sintesi\n\nCloses #7\n\n## Agente\n\nagent-id: `kilo-hp-abc`'
+scenario "T12" "agent-id del body = agente del claim vincente" "0" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_AGENT_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T13: l'agent-id dichiarato nel body NON coincide con il claim vincente:
+# doppio lavoro (issue #319)
+PR_BODY_AGENT_WRONG='## Sintesi\n\nCloses #7\n\n## Agente\n\nagent-id: `kilo-hp-altro`'
+scenario "T13" "agent-id del body != agente del claim vincente" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_AGENT_WRONG"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
+# T14: nessun agent-id nel body -> WARN, non fallimento (non si rompono le PR
+# aperte da altri agenti prima che la regola esistesse)
+scenario "T14" "nessun agent-id nel body (warn, non fail)" "0" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK"
+
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
 

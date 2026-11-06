@@ -4,6 +4,7 @@
 # Sessione 79 (issue #248, decisione D-79.6 di ADR-0012): il hook separa
 # INVARIANTE (bloccante) e IGIENE (advisory).
 #   - INVARIANTE: pattern del branch (F1, F7)            -> abort
+#   - INVARIANTE: proprieta' della worktree (issue #319) -> abort sul mismatch
 #   - IGIENE:     working tree pulito (F5, stash collision) -> warning
 # Il check "clean tree" era bloccante e impediva anche i commit parziali
 # (committare un sottoinsieme di file): l'unica via d'uscita era --no-verify,
@@ -71,6 +72,48 @@ else
   echo "  Per uscire da questo check in caso di emergenza: git commit --no-verify"
   echo "  (oppure: LIFE_SOUNDTRACK_SKIP_HOOKS=1 git commit ...)"
   exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# INVARIANTE 4 — proprieta' della worktree (bloccante sul mismatch)
+# Issue #319: ADR-0006 blocca l'ISSUE, non la directory. Il path della worktree
+# e' deterministico (`ls-<N>-<slug>`), quindi due agenti sulla stessa story
+# finiscono nella stessa cartella: il codice del secondo finiva nel commit e
+# nella PR del primo, indistinguibile per la CI.
+#
+# Il gate confronta l'owner locale della worktree (`agent-state.json`) con
+# l'agente del claim VINCENTE (commento `claim:` con id numerico piu' basso).
+# Mismatch -> abort (codice 1). Errore di ambiente (gh assente, API
+# irraggiungibile, stato illeggibile) -> WARN: un gate che blocca per una
+# disconnessione non e' un gate, e' un ostacolo.
+# ---------------------------------------------------------------------------
+if [ -f scripts/check-worktree-ownership.mjs ]; then
+  if command -v node >/dev/null 2>&1 && command -v gh >/dev/null 2>&1; then
+    set +e
+    ownership_output=$(node scripts/check-worktree-ownership.mjs 2>&1)
+    ownership_exit=$?
+    set -e
+    case "$ownership_exit" in
+      0)
+        echo "$ownership_output" | grep -q '^\[OK\]' && echo "$ownership_output" | grep '^\[OK\]'
+        ;;
+      1)
+        echo "$ownership_output"
+        echo ""
+        echo "[pre-commit] ERRORE: la worktree non appartiene all'agente del claim vincente."
+        echo "  Questo e' doppio lavoro: un altro agente e' il claimante di questa issue."
+        echo "  Non committare qui: spostati sulla worktree del tuo claim."
+        echo "  Dettagli: AGENTS.md sezione 'Presa in carico delle story (claim)'."
+        exit 1
+        ;;
+      *)
+        echo "[pre-commit] WARN: gate di proprieta' della worktree non eseguibile (exit $ownership_exit):"
+        echo "$ownership_output" | sed 's/^/  /'
+        ;;
+    esac
+  else
+    echo "[pre-commit] WARN: node o gh non disponibili: proprieta' della worktree non verificata."
+  fi
 fi
 
 # ---------------------------------------------------------------------------
