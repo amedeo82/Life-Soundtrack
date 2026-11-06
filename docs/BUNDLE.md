@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-06 01:22
+> Data: 2026-11-06 01:28
 > Totale file: 199
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -23957,7 +23957,7 @@ date: 2026-11-06
 state: 🟡
 merged: false
 branch: feat/270-story-3-5---anteprima-e-modalita-demo-in
-pr: 0
+pr: 322
 claim: kilo-hp-elitebook-a320
 tags: [ui, onboarding, demo, fixture, i18n, timeline]
 ---
