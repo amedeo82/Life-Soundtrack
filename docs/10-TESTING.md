@@ -1,6 +1,6 @@
 # 10 — Strategia di Testing
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 62 (2026-10-28, issue #187), aggiornata nella Sessione 70 (2026-10-31, issue #214)
+> Status: 🟢 APPROVED · Versione 1.3 · Sessione 62 (2026-10-28, issue #187), aggiornata nella Sessione 104 (2026-11-06, issue #270)
 
 ---
 
@@ -67,7 +67,24 @@ Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi do
 
 ### 3.4 Fixture demo mode
 
-`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti) per la modalità "Scopri come funziona" di `06-UX-FLOWS-STATES §2.14`. Il flag `_metadata.demoMode = true` segnala all'app che i dati vanno cancellati con un click.
+`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, **75
+album** e **200 feature** deterministiche) per la modalità "Scopri come
+funziona" di `06-UX-FLOWS-STATES §2.14`. Il flag `_metadata.demoMode = true`
+segnala all'app che i dati vanno cancellati con un click; il caricamento
+avviene in un **database separato** (`life-soundtrack-demo`), mai in quello
+dell'utente.
+
+Il fixture è **composto**, non casuale: tre fasi musicali disgiunte (indie/folk
+→ pop/electronic → jazz/ambient) su 366 giorni. Serve perché i test della
+demo **dichiarano un risultato**: un generatore casuale non produrrebbe
+frontiere di era, e la pipeline non produrrebbe né le **tre** ere né i mood
+`mood_day`/`mood_week` che l'anteprima mostra. Il `generatedAt` è derivato dal
+seed (non da `new Date()`): due run producono lo stesso file.
+
+Test associati: `packages/core/src/db/__tests__/demo-seed.test.ts` (il loader:
+album derivati, `listenCount`, cancellazione, database dell'utente intatto) e
+`packages/core/src/db/__tests__/demo-fixture.test.ts` (conteggi, determinismo,
+pipeline → ≥1 era e i mood).
 
 ### 3.5 Generazione fixture
 
@@ -171,3 +188,4 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | 2026-10-28 (issue #187) | **§8 allineata alla spec `21-AUDIO-FEATURES.md`** (v1.0 🟢 APPROVED): la riga "FreqBlog / Musicae" — due placeholder mai esistiti come provider, già rimossi da `02§3.4` e dalla CSP di `12§2.1` — è sostituita dai **due mock reali** della pipeline audio features (**iTunes Search API** per l'anteprima audio di 30 s che alimenta Essentia.js, **AcousticBrainz** per il bonus sui MBID), con i fixture in `fixtures/api-mocks/itunes/` e `fixtures/api-mocks/acousticbrainz/` (`21§15.2`). Il resto della strategia di testing non cambia: `§2` (coverage ≥ 75% per `packages/core/enrichment/*`) e `§7` (invarianti `valence ∈ [0,1]`) sono già quelli richiesti dalla spec. Header allineato (era fermo a v1.0 dalla Sessione 3) |
 | 1.2 | 2026-10-31 (issue #214) | **§3.3 — il fixture di scenario dell'event detector**: `fixtures/scenarios/listening-spike.json` (709 eventi, 95 giorni) è una cronologia **composta**: 81 giorni di baseline (4-7 ascolti al giorno, 6 artisti noti, **3 giorni di silenzio** ai giorni 40-42) e 14 giorni di **picco** (20 ascolti al giorno, un artista che domina il 60% e 4 artisti nuovi ogni giorno). Serve perché l'event detector cerca **anomalie**: su un fixture casuale non ci sarebbe nessun salto dichiarato, e il test non potrebbe dichiarare un risultato (la lezione della Sessione 69). Il **profilo delle audio features** è **per artista** (dichiarato nel test): la baseline deve avere una varianza giornaliera della valence, altrimenti la deviazione standard sarebbe zero e lo z-score sulla valence non sarebbe definito. Aggiunto il fixture alla lista dei **composti** in §3.3 |
+| 1.3 | 2026-11-06 (issue #270) | **§3.4 — il fixture demo mode**: `fixtures/demo-user.json` è stato **rigenerato** con `albums` (75) e `features` (200) deterministiche e con una cronologia **composta** a tre fasi musicali disgiunte (indie/folk → pop/electronic → jazz/ambient) su 366 giorni: i test della demo **dichiarano un risultato** (tre ere, i mood `mood_day`/`mood_week`), cosa che un fixture casuale non garantirebbe. Il `generatedAt` è derivato dal seed, quindi due run producono lo stesso file. Il caricamento avviene in un **database separato** (`life-soundtrack-demo`) |

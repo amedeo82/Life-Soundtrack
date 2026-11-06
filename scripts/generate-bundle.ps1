@@ -209,6 +209,9 @@ $files = @(
     # Sessione 103 (issue #240): la Story 3.3 — Esplora (ricerca sul catalogo)
     # e Analisi (la mappa emotiva con l'insight in prosa).
     "docs/state/sessions/103-story-3-3-esplora-analisi.md",
+    # Sessione 104 (issue #270): la Story 3.5 — l'anteprima in onboarding e
+    # la modalita' demo (il diario di esempio in un database separato).
+    "docs/state/sessions/104-story-3-5-anteprima-demo.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
