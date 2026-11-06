@@ -1,5 +1,5 @@
 ---
-number: 104
+number: 105
 title: "Arbitraggio atomico della selezione e lock di proprietà della worktree"
 date: 2026-11-05
 state: 🟡
@@ -76,7 +76,7 @@ chiude il ciclo in CI.
 
 **Dopo il merge**: i due agenti che erano in collisione sulla #240 restano da
 chiudere a mano (la #240 **non** è stata toccata: è di quell'agente). La
-Sessione 104 verifica che il protocollo nuovo, applicato da un agente fresco,
+Sessione 105 verifica che il protocollo nuovo, applicato da un agente fresco,
 chiuda il ciclo claim → worktree → commit senza collisioni.
 
 ## Lesson learned
@@ -108,7 +108,7 @@ chiuda il ciclo claim → worktree → commit senza collisioni.
 - `docs/INDEX.md`: versione del protocollo in sync (C1).
 - `docs/12-DEVOPS.md §9.10`: tre righe nuove nel catalogo autorevole dei gate.
 - `docs/18-DEV-LOG.md §4`: entry della sessione.
-- `docs/state/sessions/104-arbitraggio-claim-lock-worktree.md`: questo file.
+- `docs/state/sessions/105-arbitraggio-claim-lock-worktree.md`: questo file.
 - `scripts/check-worktree-ownership.mjs`, `scripts/test-worktree-ownership.sh`:
   nuovi.
 - `scripts/agent-claim.ps1`: `-Auto`, exit 6, lock di proprietà, scrittura

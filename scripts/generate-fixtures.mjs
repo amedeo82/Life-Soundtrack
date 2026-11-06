@@ -1063,38 +1063,302 @@ function buildListeningSpikeScenario() {
   };
 }
 
+/**
+ * Le **fasi musicali** del fixture demo — Story 3.5, `docs/26-ONBOARDING-DEMO.md`
+ * v1.0 (D-26.2).
+ *
+ * Ogni fase ha generi, artisti, ore di ascolto e feature proprie: il
+ * rilevatore delle ere (04§5, change point detection) trova i confini fra le
+ * fasi e la demo mostra **ere e mood reali** invece di un contatore vuoto.
+ *
+ * I valori `valence`/`energy` sono scelti sulle fasce del classificatore
+ * (04§3.4: `valenceThreshold` 0.5, `energyThreshold` 0.5, `neutralBand` 0.1,
+ * `excitedEnergyThreshold` 0.75):
+ *
+ * | fase | generi            | valence | energy | mood atteso |
+ * |------|-------------------|---------|--------|-------------|
+ * | a    | indie, folk       | 0.30    | 0.30   | `sad`       |
+ * | b    | pop, electronic   | 0.80    | 0.85   | `excited`   |
+ * | c    | jazz, ambient     | 0.55    | 0.28   | `calm`      |
+ */
+const DEMO_PHASES = [
+  {
+    key: 'a',
+    genres: ['indie', 'folk'],
+    hours: [22, 23, 0, 1, 2],
+    valence: 0.3,
+    energy: 0.3,
+    tempo: 95,
+    danceability: 0.35,
+    acousticness: 0.6,
+    instrumentalness: 0.3,
+  },
+  {
+    key: 'b',
+    genres: ['pop', 'electronic'],
+    hours: [18, 19, 20, 21, 22],
+    valence: 0.8,
+    energy: 0.85,
+    tempo: 122,
+    danceability: 0.8,
+    acousticness: 0.15,
+    instrumentalness: 0.25,
+  },
+  {
+    key: 'c',
+    genres: ['jazz', 'ambient'],
+    hours: [21, 22, 23, 0, 1],
+    valence: 0.55,
+    energy: 0.28,
+    tempo: 78,
+    danceability: 0.3,
+    acousticness: 0.45,
+    instrumentalness: 0.55,
+  },
+];
+
+/** Clampa un valore in [0, 1]. */
+function clamp01(value) {
+  return Math.min(1, Math.max(0, value));
+}
+
+/** Arrotonda a 3 decimali: i numeri del fixture restano leggibili. */
+function round3(value) {
+  return Math.round(value * 1000) / 1000;
+}
+
+/**
+ * Il fixture **demo** — Story 3.5, `docs/26-ONBOARDING-DEMO.md` v1.0.
+ *
+ * Un anno di storia sintetica (2024, 4 500 eventi, 200 brani, 30 artisti)
+ * diviso in **tre fasi musicali**, con `albums` e `features` deterministiche
+ * (D-26.2): senza feature i motori di analisi non produrrebbero né ere né mood
+ * (D-A.1) e la demo mostrerebbe il prodotto più povero, non «la magia».
+ *
+ * **`generatedAt` è deterministico** (D-26.4): deriva dal seed, non da
+ * `new Date()`. Due run consecutivi producono lo stesso file.
+ */
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
   const periodEnd = Date.UTC(2025, 0, 1);
+  const dayMs = 86400000;
+  const totalDays = Math.round((periodEnd - periodStart) / dayMs);
   const rand = makeRng(seed);
   const importId = uuidLike(rand);
-  const artists = makeArtists(rand, 30);
-  const tracks = makeTracks(rand, artists, 200);
-  const listens = makeListens(rand, {
-    count: 4500,
-    tracks,
-    artists,
-    periodStart,
-    periodEnd,
-    importId,
-  });
+  // D-26.4: `generatedAt` deriva dal seed → il fixture è riproducibile.
+  const generatedAtMs = periodStart + (seed % dayMs);
+
+  const artistNames = [...new Set(ARTIST_POOL)];
+  const artists = [];
+  const albums = [];
+  const tracks = [];
+  const features = [];
+  const phaseTracks = [[], [], []];
+
+  const artistsPerPhase = 10;
+  const tracksPerPhase = [67, 67, 66];
+  const durations = [180000, 210000, 240000, 270000, 300000, 330000, 360000];
+
+  for (let p = 0; p < DEMO_PHASES.length; p += 1) {
+    const phase = DEMO_PHASES[p];
+    const phaseArtists = [];
+
+    // I brani della fase sono distribuiti equamente fra i suoi artisti
+    // (6 o 7 ciascuno): il resto passa al primo artista.
+    const tracksPerArtist = [];
+    let remainingTracks = tracksPerPhase[p];
+    for (let a = 0; a < artistsPerPhase; a += 1) {
+      const share = Math.floor(remainingTracks / (artistsPerPhase - a));
+      tracksPerArtist.push(share);
+      remainingTracks -= share;
+    }
+
+    for (let a = 0; a < artistsPerPhase; a += 1) {
+      const artist = {
+        id: uuidLike(rand),
+        name: artistNames[(p * artistsPerPhase + a) % artistNames.length],
+        mbid: null,
+        genres: [...phase.genres],
+        platformIds: { spotify: `spotify:artist:${uuidLike(rand).slice(0, 22)}` },
+        listenCount: 0,
+      };
+      artists.push(artist);
+      phaseArtists.push(artist);
+
+      // 2 o 3 album per artista: i brani del branoartist puntano a uno di essi.
+      const albumCount = 2 + (a % 2);
+      const artistAlbums = [];
+      for (let al = 0; al < albumCount; al += 1) {
+        const album = {
+          id: uuidLike(rand),
+          name: `${artist.name} — ${ALBUM_NAME_PATTERNS[(al + p) % ALBUM_NAME_PATTERNS.length]}`,
+          artistId: artist.id,
+          mbid: null,
+          upc: null,
+          releaseDate: String(2019 + p),
+          artworkUrl: null,
+          platformIds: { spotify: `spotify:album:${uuidLike(rand).slice(0, 22)}` },
+        };
+        albums.push(album);
+        artistAlbums.push(album);
+      }
+
+      // I brani dell'artista: `k` è l'indice del brano **fra quelli di questo
+      // artista**, e seleziona nome e durata con coprimi 9 e 7 → le coppie
+      // (nome, durata) sono univoche e il `canonicalKey` non collide.
+      for (let k = 0; k < tracksPerArtist[a]; k += 1) {
+        const name = TRACK_NAME_PATTERNS[k % TRACK_NAME_PATTERNS.length](artist.name);
+        const durationMs = durations[k % durations.length];
+        const track = {
+          id: uuidLike(rand),
+          canonicalKey: canonicalKeyFor({ name, artist: artist.name, durationMs }),
+          name,
+          artistId: artist.id,
+          albumId: artistAlbums[k % artistAlbums.length].id,
+          durationMs,
+          isrc: null,
+          mbid: null,
+          explicit: null,
+          genres: [...phase.genres],
+          artworkUrl: null,
+          platformIds: { spotify: `spotify:track:${uuidLike(rand).slice(0, 22)}` },
+          firstSeenAt: 0,
+          lastSeenAt: 0,
+          listenCount: 0,
+        };
+        tracks.push(track);
+        phaseTracks[p].push(track);
+
+        // D-26.2: le feature sono sintetiche ma **dichiarate** (`source:
+        // 'manual'`): la demo non deve mentire (D-26.3).
+        features.push({
+          trackId: track.id,
+          valence: round3(clamp01(phase.valence + (rand() - 0.5) * 0.08)),
+          energy: round3(clamp01(phase.energy + (rand() - 0.5) * 0.08)),
+          danceability: round3(clamp01(phase.danceability + (rand() - 0.5) * 0.1)),
+          acousticness: round3(clamp01(phase.acousticness + (rand() - 0.5) * 0.1)),
+          instrumentalness: round3(clamp01(phase.instrumentalness + (rand() - 0.5) * 0.1)),
+          speechiness: round3(clamp01(0.04 + rand() * 0.08)),
+          liveness: round3(clamp01(rand() * 0.2)),
+          tempo: Math.round(phase.tempo + (rand() - 0.5) * 8),
+          key: Math.floor(rand() * 12),
+          mode: rand() < 0.7 ? 1 : 0,
+          loudness: Math.round((-8 - rand() * 12) * 10) / 10,
+          timeSignature: 4,
+          source: 'manual',
+          fetchedAt: generatedAtMs,
+          schemaVersion: 1,
+        });
+      }
+    }
+  }
+
+  // Gli ascolti: 12-13 al giorno, distribuiti sulle tre fasi. Ogni giorno
+  // supera `minEventsPerPeriod` (3, 04§3.4) → il mood tracker ha dati.
+  const listens = [];
+  const eventKeys = new Set();
+  const perDay = Math.floor(4500 / totalDays);
+  const remainder = 4500 - perDay * totalDays;
+
+  for (let day = 0; day < totalDays; day += 1) {
+    const phaseIndex = day < 122 ? 0 : day < 244 ? 1 : 2;
+    const phase = DEMO_PHASES[phaseIndex];
+    const pool = phaseTracks[phaseIndex];
+    const count = perDay + (day < remainder ? 1 : 0);
+
+    for (let i = 0; i < count; i += 1) {
+      const track = pool[Math.floor(rand() * pool.length)];
+      const platform = pickWeighted(rand, [
+        ['spotify', 0.6],
+        ['youtube_music', 0.15],
+        ['apple_music', 0.1],
+        ['lastfm', 0.1],
+        ['listenbrainz', 0.05],
+      ]);
+      const hour = phase.hours[Math.floor(rand() * phase.hours.length)];
+      const minute = Math.floor(rand() * 60);
+      const second = Math.floor(rand() * 60);
+      const startedAt = periodStart + day * dayMs + hour * 3600000 + minute * 60000 + second * 1000;
+      const durationMs = track.durationMs;
+      const msPlayed = Math.min(
+        durationMs,
+        Math.floor(durationMs * (0.6 + rand() * 0.4)), // 60%-100% della traccia
+      );
+
+      // L'`eventKey` è la PK degli ascolti: se collidesse, l'evento
+      // andrebbe perso in seeding. Si sposta il timestamp finché non è
+      // univoco.
+      let timestamp = Math.min(startedAt + msPlayed, periodEnd - 1);
+      let eventKey = eventKeyFor({ platform, trackId: track.id, timestamp, durationMs });
+      while (eventKeys.has(eventKey)) {
+        timestamp = Math.min(timestamp + 1000, periodEnd - 1);
+        eventKey = eventKeyFor({ platform, trackId: track.id, timestamp, durationMs });
+      }
+      eventKeys.add(eventKey);
+
+      listens.push({
+        id: uuidLike(rand),
+        eventKey,
+        platform,
+        importId,
+        timestamp,
+        startedAt: timestamp - msPlayed,
+        durationMs: msPlayed,
+        trackId: track.id,
+        completed: msPlayed >= durationMs - 5000,
+        skipped: false,
+        shuffle: rand() < 0.4,
+        offline: rand() < 0.05,
+        incognito: rand() < 0.03,
+        reasonStart: pick(rand, ['playbtn', 'clickrow', 'trackdone', 'appload']),
+        reasonEnd: pick(rand, ['trackdone', 'endplay', 'fwdbtn', 'backbtn']),
+        deviceType: pick(rand, DEVICES),
+        deviceDetail: null,
+        ip: null, // privacy-by-design: mai persistito
+        country: pick(rand, ['IT', 'DE', 'FR', 'ES', 'NL', 'GB']),
+        // Campi v6 (Story 1.6): assenti nel fixture → il loader li normalizza.
+        city: null,
+        citySource: null,
+        cityConfidence: null,
+        day: dayString(timestamp),
+      });
+
+      track.listenCount += 1;
+      track.firstSeenAt =
+        track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
+      track.lastSeenAt = Math.max(track.lastSeenAt, timestamp);
+      const artist = artists.find((a) => a.id === track.artistId);
+      if (artist) artist.listenCount += 1;
+    }
+  }
+
+  listens.sort((a, b) => a.timestamp - b.timestamp);
+
   return {
     _metadata: {
       name: 'demo-user',
-      version: '1.0',
-      session: 13,
-      generatedAt: new Date().toISOString(),
+      version: '2.0',
+      session: 104,
+      generatedAt: isoDate(generatedAtMs),
       seed,
       description:
-        'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti.',
-      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+        'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti, tre fasi musicali con album e feature deterministiche (26-ONBOARDING-DEMO v1.0).',
+      counts: {
+        listens: listens.length,
+        tracks: tracks.length,
+        artists: artists.length,
+        albums: albums.length,
+        features: features.length,
+      },
       demoMode: true, // flag per cancellazione con un click
-      spec: '02-DATA-SCHEMA.md v1.2 + 06-UX-FLOWS-STATES §2.14',
+      spec: '02-DATA-SCHEMA.md v1.7 + 06-UX-FLOWS-STATES §2.14 + 26-ONBOARDING-DEMO §2',
     },
     listens,
     tracks,
     artists,
+    albums,
+    features,
   };
 }
 

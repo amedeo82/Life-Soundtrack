@@ -29,7 +29,22 @@ import type { AppFocus, AppSection } from './appNavigation';
 
 export type { AppFocus, AppSection } from './appNavigation';
 
-export function AppShell() {
+export interface AppShellProps {
+  /**
+   * Il database da leggere (default: quello dell'utente).
+   *
+   * La **demo** (Story 3.5) passa il nome del database demo: è un secondo
+   * database Dexie, quindi il diario di esempio e la storia dell'utente non
+   * possono mescolarsi (`26-ONBOARDING-DEMO.md` D-26.1).
+   */
+  readonly dbName?: string | undefined;
+  /** La shell mostra il banner della demo? */
+  readonly demo?: boolean | undefined;
+  /** Chiusura della demo: il click che cancella il database demo. */
+  readonly onExitDemo?: (() => void) | undefined;
+}
+
+export function AppShell({ dbName, demo, onExitDemo }: AppShellProps) {
   const t = useT();
   const [section, setSection] = useState<AppSection>('home');
   /**
@@ -41,7 +56,7 @@ export function AppShell() {
   // `null` = l'utente non ha ancora scelto: la granularità segue la durata
   // della storia (una vita lunga si legge per anni, poche settimane per giorni).
   const [chosen, setChosen] = useState<Granularity | null>(null);
-  const data = useHomeTimelineData(chosen ?? 'months');
+  const data = useHomeTimelineData(chosen ?? 'months', dbName);
 
   const granularity: Granularity =
     chosen ?? (data.range ? granularityForSpan(data.range.end - data.range.start) : 'months');
@@ -57,6 +72,22 @@ export function AppShell() {
 
   return (
     <div className="app-shell" data-testid="app-shell">
+      {demo && (
+        <div className="app-shell__demo" role="status" data-testid="demo-banner">
+          <span className="app-shell__demo-text">{t('onboarding.demo.banner')}</span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              onExitDemo?.();
+            }}
+            data-testid="demo-exit"
+          >
+            {t('onboarding.demo.exit')}
+          </button>
+        </div>
+      )}
+
       <nav className="app-shell__nav" aria-label={t('nav.label')}>
         <button
           type="button"
@@ -126,11 +157,11 @@ export function AppShell() {
           onGranularityChange={setChosen}
         />
       ) : section === 'memories' ? (
-        <Memories />
+        <Memories dbName={dbName} />
       ) : section === 'explore' ? (
-        <ExploreScreen onFocus={goToFocus} />
+        <ExploreScreen dbName={dbName} onFocus={goToFocus} />
       ) : (
-        <AnalysisScreen onFocus={goToFocus} />
+        <AnalysisScreen dbName={dbName} onFocus={goToFocus} />
       )}
     </div>
   );

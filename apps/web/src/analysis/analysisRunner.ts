@@ -26,6 +26,14 @@ export interface AnalysisRunnerDeps {
   readonly i18n: I18nInstance;
   /** Logger opzionale (default: console logger). */
   readonly logger?: ReturnType<typeof createLogger>;
+  /**
+   * Il database da analizzare (default: quello dell'utente).
+   *
+   * La **demo** (Story 3.5) analizza il proprio database separato: senza
+   * questa iniezione il runner aprirebbe sempre il database dell'utente e
+   * la demo resterebbe senza ere né mood.
+   */
+  readonly db?: LifeSoundtrackDB | undefined;
 }
 
 /**
@@ -43,7 +51,7 @@ export function createAnalysisRunner(deps: AnalysisRunnerDeps): AnalysisRunner {
   /** Ottiene (o crea) la connessione DB. */
   const getDb = (): Promise<LifeSoundtrackDB> => {
     if (!dbPromise) {
-      dbPromise = openDb();
+      dbPromise = deps.db ? Promise.resolve(deps.db) : openDb();
     }
     return dbPromise;
   };

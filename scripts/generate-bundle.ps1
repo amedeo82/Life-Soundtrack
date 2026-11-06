@@ -209,9 +209,12 @@ $files = @(
     # Sessione 103 (issue #240): la Story 3.3 — Esplora (ricerca sul catalogo)
     # e Analisi (la mappa emotiva con l'insight in prosa).
     "docs/state/sessions/103-story-3-3-esplora-analisi.md",
-    # Sessione 104 (issue #319): arbitraggio atomico della selezione e lock
+    # Sessione 104 (issue #270): la Story 3.5 — l'anteprima in onboarding e
+    # la modalita' demo (il diario di esempio in un database separato).
+    "docs/state/sessions/104-story-3-5-anteprima-demo.md",
+    # Sessione 105 (issue #319): arbitraggio atomico della selezione e lock
     # di proprieta' della worktree (il protocollo ha due lock: issue + worktree).
-    "docs/state/sessions/104-arbitraggio-claim-lock-worktree.md",
+    "docs/state/sessions/105-arbitraggio-claim-lock-worktree.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -477,7 +480,7 @@ $files = @(
     # (l'agent-id dichiarato nel body della PR deve coincidere con il claim
     # vincente — issue #319).
     "scripts/test-claim-state.sh",
-    # Gate "proprieta' della worktree" (Sessione 104 / issue #319): confronta
+    # Gate "proprieta' della worktree" (Sessione 105 / issue #319): confronta
     # l'owner locale della worktree (`agent-state.json`) con l'agente del claim
     # VINCENTE. Il lock di ADR-0006 e' sull'issue, non sul filesystem: il path
     # della worktree e' deterministico (`ls-<N>-<slug>`), quindi due agenti sulla

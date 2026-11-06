@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.49 — Sessione 104 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.49 — Sessione 105 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -210,7 +210,7 @@ pwsh scripts/agent-claim.ps1 <N> -AgentId <AGENT-ID> -Stale  # takeover di un cl
 | 5 | il claim è ancora fresco (non scaduto) | non fare takeover: attendi o cambia story |
 | 6 | la **worktree è di un altro agente** | **ABANDONA la worktree**: nessuna scrittura, nessun commit |
 
-Il codice 3 è il caso che, prima della Sessione 104, non aveva una procedura codificata: un agent che riceveva "issue già `in-progress`" non aveva un comportamento definito, e il rischio reale è **continuare a lavorarci** (la worktree esiste già, il path è deterministico). Ora la procedura è: `3` → `-Auto` sceglie la prossima story libera; `6` → si abbandona la directory.
+Il codice 3 è il caso che, prima della Sessione 105, non aveva una procedura codificata: un agent che riceveva "issue già `in-progress`" non aveva un comportamento definito, e il rischio reale è **continuare a lavorarci** (la worktree esiste già, il path è deterministico). Ora la procedura è: `3` → `-Auto` sceglie la prossima story libera; `6` → si abbandona la directory.
 
 ### L'arbitraggio automatico (`-Auto`)
 
@@ -223,12 +223,12 @@ pwsh scripts/agent-claim.ps1 -Auto -AgentId <ID>  # prende il primo candidato li
 
 Se il claim perde la riverifica, `-Auto` **non si ferma**: va al candidato successivo. L'arbitraggio è deterministico (stesso backlog → stesso ordine), ma la **verifica finale resta atomica**: due agenti possono arrivare allo stesso candidato, e in quel caso vince il claim con l'id più basso e l'altro va avanti.
 
-### Il lock di proprietà della worktree *(Sessione 104, issue #319)*
+### Il lock di proprietà della worktree *(Sessione 105, issue #319)*
 
 Il claim di ADR-0006 blocca **l'issue**, ma il path della worktree è deterministico (`ls-<N>-<slug>`): due agenti sulla stessa story condividono la **stessa directory**, e il codice del secondo finisce nel commit del primo. Il protocollo ha quindi **due lock distinti**, e vanno entrambi rispettati:
 
 1. **Lock dell'issue** (ADR-0006): il claim, verificato dall'`id` più basso del commento.
-2. **Lock della worktree** (Sessione 104): l'owner locale dichiarato in `agent-state.json`, confrontato con l'agente del claim vincente da `node scripts/check-worktree-ownership.mjs`.
+2. **Lock della worktree** (Sessione 105): l'owner locale dichiarato in `agent-state.json`, confrontato con l'agente del claim vincente da `node scripts/check-worktree-ownership.mjs`.
 
 **Regola operativa**: se il check di proprietà segnala mismatch, l'agente **abbandona** la worktree — non "prende possesso" della directory, non corregge il file di stato, non committa. L'unica correzione legittima è **uscire dalla directory** (`cd` altrove) e lavorare nella worktree del proprio claim, ricreata se necessario.
 
@@ -823,7 +823,7 @@ git push
 
 ## 🚀 Primo task di un agente
 
-0. **Fase 0 — arbitraggio (Sessione 104, issue #319 — vincolante)**: prima di scegliere una story, verifica **due cose** nella worktree in cui ti trovi:
+0. **Fase 0 — arbitraggio (Sessione 105, issue #319 — vincolante)**: prima di scegliere una story, verifica **due cose** nella worktree in cui ti trovi:
 
    ```bash
    pwd                                  # sei nella worktree di qualcun altro?
@@ -865,7 +865,7 @@ Da Sessione 27 (issue #53, PR #54), ogni agente lavora in una **worktree isolata
 
 ### Flusso operativo
 
-> **⚠️ DEPRECATO (Sessione 104, issue #319): il flusso manuale qui sotto è il primo autore del doppio lavoro.** `setup-worktree.ps1` + `gh issue edit` + `gh issue comment` **a mano** non fanno la riverifica e non verificano la proprietà della worktree: l'agente che segue i passi manuali crede di avere la story, ma non lo sa. **Il flusso canonico è `scripts/agent-claim.ps1`** (vedi §"🚀 Primo task di un agente" e §"🎫 Presa in carico delle story"), che esegue claim + riverifica + lock di proprietà in un'unica operazione.
+> **⚠️ DEPRECATO (Sessione 105, issue #319): il flusso manuale qui sotto è il primo autore del doppio lavoro.** `setup-worktree.ps1` + `gh issue edit` + `gh issue comment` **a mano** non fanno la riverifica e non verificano la proprietà della worktree: l'agente che segue i passi manuali crede di avere la story, ma non lo sa. **Il flusso canonico è `scripts/agent-claim.ps1`** (vedi §"🚀 Primo task di un agente" e §"🎫 Presa in carico delle story"), che esegue claim + riverifica + lock di proprietà in un'unica operazione.
 
 ```powershell
 # flusso canonico (un solo comando: claim atomico + riverifica + lock worktree):
@@ -1174,7 +1174,7 @@ pwsh -NoProfile -c '$PSVersionTable.PSVersion.Major'  # PowerShell 7? (F9, Sessi
 
 Tutti e 7 i check devono tornare positivi. Se qualcosa non torna, risolvere **prima** di modificare file.
 
-**F10 — la worktree è proprietà del claimante** *(Sessione 104, issue #319 — vincolante)*: il path della worktree è **deterministico** (`ls-<N>-<slug>`), quindi due agenti che scelgono la stessa story finiscono nella **stessa directory**: il secondo scrive sopra il primo, e il codice del primo finisce nel commit del secondo (doppio lavoro silenzioso, nessun errore). Il claim di ADR-0006 è un lock **sull'issue**, non sul filesystem: da solo non basta. Il check è `node scripts/check-worktree-ownership.mjs`, che confronta l'owner locale (`agent-state.json`) con l'agente del claim **vincente**:
+**F10 — la worktree è proprietà del claimante** *(Sessione 105, issue #319 — vincolante)*: il path della worktree è **deterministico** (`ls-<N>-<slug>`), quindi due agenti che scelgono la stessa story finiscono nella **stessa directory**: il secondo scrive sopra il primo, e il codice del primo finisce nel commit del secondo (doppio lavoro silenzioso, nessun errore). Il claim di ADR-0006 è un lock **sull'issue**, non sul filesystem: da solo non basta. Il check è `node scripts/check-worktree-ownership.mjs`, che confronta l'owner locale (`agent-state.json`) con l'agente del claim **vincente**:
 
 - exit **0** — la worktree è tua: procedi.
 - exit **1** — la worktree è di **un altro agente**: **abbandonala subito** (nessuna scrittura, nessun commit, nessun `git add`). Se il tuo claim è valido ma l'owner locale è sbagliato, non "correggi" il file di stato: ricrea la worktree.

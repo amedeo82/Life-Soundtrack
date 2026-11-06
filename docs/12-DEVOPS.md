@@ -889,7 +889,7 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 >
-> **Sessione 104 (issue #319)**: il catalogo era indietro di **2 step** — i due step del gate
+> **Sessione 105 (issue #319)**: il catalogo era indietro di **2 step** — i due step del gate
 > «coerenza del claim» (`check-claim-state.mjs` + `test-claim-state.sh`, Sessione 81) non
 > avevano una riga, e il nuovo step del gate «proprietà della worktree»
 > (`test-worktree-ownership.sh`, issue #319) si aggiunge a quelli. Ora le righe sono **44**
