@@ -604,7 +604,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 **PR**: #21 mergata (squash `c81a1c2` su `8a48e24`)
 **Issue**: #20 (claim `kilo-HP-ELITEBOOK-hc0f`)
 **Data**: 2026-10-18
-**Stato**: ✅ Completata (post-merge S23, `8a48e24e8c9d03c7272d1daa0e6d914b0a610f40`)
+✅ **MERGED** (PR #21, merge commit `8a48e24`
 
 ### Sintesi
 
@@ -645,7 +645,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 **PR**: #22 mergata (squash `06812d4` su `5235c88`)
 **Issue**: #5 (claim `kilo-HP-ELITEBOOK-7051`, UTC 2026-10-18T09:10:33Z; riverifica OK, claim unico)
 **Data**: 2026-10-18
-**Stato**: ✅ Completata (post-merge S24)
+✅ **MERGED** (PR #22, merge commit `5235c88`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -696,7 +696,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 **Branch**: `feat/145-listenbrainz-adapter-spec` (da `main` @ `21c2c68`; lavoro eseguito in worktree dedicata) — **merged in `main`** (PR #146, merge `6d66233`, 2026-10-26) → branch eliminata dopo merge
 **PR**: #146 (issue #145, claim `kilo-HP-ELITEBOOK-lb47`)
 **Data**: 2026-10-26
-**Stato**: ✅ spec ListenBrainz scritta e approvata; issue #145 chiusa con `status:done`. Spec Last.fm (#144) ancora da scrivere, preceduta dall'ADR-0010
+✅ **MERGED** (PR #146, merge commit `6d66233`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -722,7 +722,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 **Branch**: `fix/149-bundle-writer-ordering` (da `main` @ `8b793c2`; lavoro in worktree dedicata)
 **PR**: #151 (issue #149, claim `kilo-HP-ELITEBOOK-lb47`)
 **Data**: 2026-10-26
-**Stato**: 🟡 PR aperta — opzione A (`workflow_run`)
+✅ **MERGED** (PR #151, merge commit `d155799` — opzione A (`workflow_run`)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -748,7 +748,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 **Branch**: `feat/144-lastfm-adapter-spec` (PR #154, merge `b3130a9`) e `docs/144-lastfm-spec-approval` (PR #156, merge `6ec71bb`) — entrambe merged in `main`, branch eliminati dopo merge
 **PR**: #154 (spec scritta, issue #144) · #156 (promozione a APPROVED v1.0 + apertura issue #155)
 **Data**: 2026-10-26
-**Stato**: ✅ spec Last.fm scritta e approvata; issue #144 chiusa con `status:done`; issue di implementazione #155 aperta (`agent-ready`, size L)
+✅ **MERGED** (PR #154, merge commit `b3130a9`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -776,7 +776,7 @@ Se due agenti claimano la stessa issue entro la finestra di race, vince chi ha s
 **Branch**: `feat/155-lastfm-listenbrainz-adapter` (worktree `ls-155-lastfm-listenbrainz-adapter`)
 **PR**: #158 (aperta su `main` dalla worktree)
 **Data**: 2026-10-26
-**Stato**: ✅ implementazione completa — 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi; `lint`, `typecheck`, `build` verdi
+✅ **MERGED** (PR #158, merge commit `7afbf03` — 198 test core (47 nuovi) + 81 test web (3 nuovi) verdi; `lint`, `typecheck`, `build` verdi
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -813,7 +813,7 @@ poi, si manifesta come duplicato silenzioso.
 **Branch**: `feat/160-rekey-dedup-promotion` (worktree `ls-160-rekey-dedup-promotion`)
 **PR**: #162 (aperta su `main` dalla worktree)
 **Data**: 2026-10-26
-**Stato**: ✅ completata — 208 test core (9 nuovi) + 81 test web verdi; `lint`, `typecheck`, `build` verdi
+✅ **MERGED** (PR #162, merge commit `471a049` — 208 test core (9 nuovi) + 81 test web verdi; `lint`, `typecheck`, `build` verdi
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -847,7 +847,7 @@ mezzo del lavoro.
 **Branch**: `feat/161-readme-maintenance` (worktree `ls-161-readme-maintenance`)
 **PR**: #165 (aperta su `main` dalla worktree)
 **Data**: 2026-10-27
-**Stato**: ✅ completata — gate read-only (15 check, 0 falliti), test di regressione T1..T9 (12 assert), 2 step bloccanti in `ci.yml`
+✅ **MERGED** (PR #165, merge commit `c24866f` — gate read-only (15 check, 0 falliti), test di regressione T1..T9 (12 assert), 2 step bloccanti in `ci.yml`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -876,7 +876,7 @@ mezzo del lavoro.
 **Branch**: `feat/164-scrobbling-hub-spec` (worktree `ls-164-scrobbling-hub-spec`)
 **PR**: #167 (aperta su `main` dalla worktree, **merged** `eb718d5` — 2026-10-27T16:02:57Z)
 **Data**: 2026-10-27
-**Stato**: ✅ completata — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 (issue #168) sono il passo successivo
+✅ **MERGED** (PR #167, merge commit `eb718d5` — spec `docs/20-SCROBBLING-HUB.md` v0.1 (🟡 DRAFT); la ratifica (v1.0 🟢) e l'ADR-0011 (issue #168) sono il passo successivo
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -903,7 +903,7 @@ mezzo del lavoro.
 **Branch**: `feat/168-adr-0011-scrobble-sink` (worktree `ls-168-adr-0011-scrobble-sink`, rimossa post-merge)
 **PR**: #170 (aperta su `main` dalla worktree, **merged** `8900c3b` — 2026-10-27T16:31:39Z)
 **Data**: 2026-10-27
-**Stato**: ✅ completata e **ratificata** — ADR `docs/13-ADR/0011-scrobble-sink.md` **v1.0 🟢 APPROVED** (ratifica del Boss al merge della PR #170, nessuna modifica di contenuto); `05§4.2` è la sede del contratto
+✅ **MERGED** (PR #170, merge commit `8900c3b` — ADR `docs/13-ADR/0011-scrobble-sink.md` **v1.0 🟢 APPROVED** (ratifica del Boss al merge della PR #170, nessuna modifica di contenuto); `05§4.2` è la sede del contratto
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -932,7 +932,7 @@ mezzo del lavoro.
 **Branch**: `feat/172-scrobbling-hub-spec-approval` (worktree `ls-172-scrobbling-hub-spec-approval`)
 **PR**: #174 (aperta su `main` dalla worktree, **merged** `4abb73e` — 2026-10-27T16:59:24Z)
 **Data**: 2026-10-27
-**Stato**: ✅ completata e **ratificata** — `docs/20-SCROBBLING-HUB.md` **v1.0 🟢 APPROVED** (le quattro decisioni aperte chiuse come **D-SH.11…D-SH.14**); issue di implementazione **#173** aperta (`agent-ready`, `size:L`)
+✅ **MERGED** (PR #174, merge commit `4abb73e` — `docs/20-SCROBBLING-HUB.md` **v1.0 🟢 APPROVED** (le quattro decisioni aperte chiuse come **D-SH.11…D-SH.14**); issue di implementazione **#173** aperta (`agent-ready`, `size:L`)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -962,7 +962,7 @@ mezzo del lavoro.
 **Branch**: `feat/173-story-1-5-scrobbling-hub` (worktree `ls-173-story-1-5-scrobbling-hub`)
 **PR**: #176 (aperta su `main` dalla worktree, **merged** `bfb5946` — 2026-10-28T13:56:09Z)
 **Data**: 2026-10-28
-**Stato**: ✅ completata — il percorso di **scrittura** degli scrobble è implementato sulla spec `20-SCROBBLING-HUB.md` v1.0 🟢 e sul contratto `ADR-0011` v1.0 🟢
+✅ **MERGED** (PR #176, merge commit `bfb5946` — il percorso di **scrittura** degli scrobble è implementato sulla spec `20-SCROBBLING-HUB.md` v1.0 🟢 e sul contratto `ADR-0011` v1.0 🟢
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -989,7 +989,7 @@ mezzo del lavoro.
 **Branch**: `feat/178-epic2-analysis-ratification` (worktree `ls-178-epic2-analysis-ratification`)
 **PR**: #181 (aperta su `main` dalla worktree, **merged** `5f725e3` — 2026-10-28T14:28:05Z)
 **Data**: 2026-10-28
-**Stato**: ✅ completata — `docs/04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED** (le cinque decisioni chiuse come **D-A.1…D-A.5**); aperte le issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, bloccata)
+✅ **MERGED** (PR #181, merge commit `5f725e3` — `docs/04-ANALYSIS-ALGORITHMS.md` **v1.0 🟢 APPROVED** (le cinque decisioni chiuse come **D-A.1…D-A.5**); aperte le issue **#179** (Story 2.4, `agent-ready`) e **#180** (Story 2.1, bloccata)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1014,7 +1014,7 @@ mezzo del lavoro.
 **Branch**: `feat/182-next-step-skip-blocked` (worktree `ls-182-next-step-skip-blocked`)
 **PR**: #183 (aperta su `main` dalla worktree, **merged** `a350386` — 2026-10-28T15:26:17Z)
 **Data**: 2026-10-28
-**Stato**: ✅ completata — il blocco NEXT-STEP del README indica la **2.4** (Memory Engine) invece della **2.1**, bloccata dalle audio features dell'EPIC 4.1
+✅ **MERGED** (PR #183, merge commit `a350386` — il blocco NEXT-STEP del README indica la **2.4** (Memory Engine) invece della **2.1**, bloccata dalle audio features dell'EPIC 4.1
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1037,7 +1037,7 @@ mezzo del lavoro.
 **Branch**: `feat/179-memory-engine` (worktree `ls-179-memory-engine`)
 **PR**: #185 (aperta su `main` dalla worktree)
 **Data**: 2026-10-28
-**Stato**: 🟡 in review — i 5 tipi di ricordo, il feed per rilevanza, la persistenza con `derivedVersion` e l'orchestratore minimale della tranche
+✅ **MERGED** (PR #185, merge commit `40ad0b7` — i 5 tipi di ricordo, il feed per rilevanza, la persistenza con `derivedVersion` e l'orchestratore minimale della tranche
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1068,7 +1068,7 @@ mezzo del lavoro.
 **Branch**: `docs/187-session-62-ratifica` (worktree `ls-187-doc-sync`)
 **PR**: **#190** (doc-sync di ratifica, branch `docs/187-session-62-ratifica`, dalla worktree `ls-187-doc-sync`) — merged il 2026-10-29T16:09:16Z, merge commit `b1dd83e` (la **v0.1 🟡 DRAFT** era stata merged dalla PR #189, `87d4d7d` — 2026-10-28T17:02:41Z)
 **Data**: 2026-10-28
-**Stato**: ✅ completata e **merged** — la PR #190 è stata merged in `main` il 2026-10-29T16:09:16Z (merge commit `b1dd83e`): `docs/21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (le nove decisioni chiuse come **D-AF.1…D-AF.9**); aperta l'issue **#188** (Story 4.1, `agent-ready`)
+✅ **MERGED** (PR #190, merge commit `b1dd83e` — la PR #190 è stata merged in `main` il 2026-10-29T16:09:16Z (merge commit `b1dd83e`): `docs/21-AUDIO-FEATURES.md` è **v1.0 🟢 APPROVED** (le nove decisioni chiuse come **D-AF.1…D-AF.9**); aperta l'issue **#188** (Story 4.1, `agent-ready`)
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1098,7 +1098,7 @@ mezzo del lavoro.
 **Branch**: `feat/180-mood-tracker` (worktree `ls-180-mood-tracker`)
 **PR**: #192 (aperta su `main` dalla worktree)
 **Data**: 2026-10-29
-**Stato**: 🟡 in review — il motore del mood (giorno, settimana, mese), il filtro per sorgente delle feature, la persistenza con `derivedVersion` e il plug-in dell'orchestratore
+✅ **MERGED** (PR #192, merge commit `d018a26` — il motore del mood (giorno, settimana, mese), il filtro per sorgente delle feature, la persistenza con `derivedVersion` e il plug-in dell'orchestratore
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1129,7 +1129,7 @@ mezzo del lavoro.
 **Branch**: `feat/188-feat-enrichment-pipeline-audio-features` (worktree `ls-188-feat-enrichment-pipeline-audio-features`)
 **PR**: #197 (aperta su `main` dalla worktree)
 **Data**: 2026-10-30
-**Stato**: ✅ **completata e merged** — la PR #197 è merged in `main` il 2026-10-30T11:24:49Z (merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (contratto, cascata, normalizzazione, tre provider, limiter, coda, stoccaggio), la CSP dichiarata applicata al bundle, le 8 chiavi `enrichment.*` nei locale e i fixture delle API esterne
+✅ **MERGED** (PR #197, merge commit `7458220` — la PR #197 è merged in `main` il 2026-10-30T11:24:49Z (merge commit `7458220`): il pacchetto `packages/core/src/enrichment/` (contratto, cascata, normalizzazione, tre provider, limiter, coda, stoccaggio), la CSP dichiarata applicata al bundle, le 8 chiavi `enrichment.*` nei locale e i fixture delle API esterne
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1163,7 +1163,7 @@ mezzo del lavoro.
 **Branch**: `feat/196-csp-itunes-search-host` (worktree `ls-196-csp-itunes-search-host`)
 **PR**: #0 (aperta su `main` dalla worktree — il numero è noto solo dopo l'apertura)
 **Data**: 2026-10-30
-**Stato**: 🟡 **ratificata, in attesa di merge** — il project owner ha scelto l'opzione **A** (confermare il terzo host); D-AF.9 è emendata nella v1.1 della spec
+✅ **MERGED** (PR #200, merge commit `66c3962` — il project owner ha scelto l'opzione **A** (confermare il terzo host); D-AF.9 è emendata nella v1.1 della spec
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1189,7 +1189,7 @@ mezzo del lavoro.
 **Branch**: `feat/201-ratifica-geo-licenza-agpl` (**in lavorazione**)
 **PR**: **#204** (aperta il 2026-10-30)
 **Data**: 2026-10-30
-**Stato**: 👀 **IN REVIEW** — le quattro decisioni del project owner sono prese e i documenti sono ratificati; la PR attende la review del Boss (il merge **è** la ratifica).
+✅ **MERGED** (PR #204, merge commit `b02a80d` — le quattro decisioni del project owner sono prese e i documenti sono ratificati; la PR attende la review del Boss (il merge **è** la ratifica).
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
 | 32-1 | P+L | Gli edge case geo di `19§10` erano numerati **E11..E15**, ma in `01-PLATFORMS.md` §5 quegli identificatori sono **già presi** (ListenBrainz E11..E13, Last.fm E14..E18) | `19` è stata scritta nella Sessione 41; gli identificatori E11..E18 sono stati presi **dopo**, dagli adapter della Sessione 47 | Rinumerati in **E19..E24** in entrambi i documenti, con la nota esplicita del perché. Il controllo resta manuale: **non esiste un gate** che confronti i cataloghi degli edge case fra documenti | `docs/19-GEO-CONTEXT.md` §10, `docs/01-PLATFORMS.md` §5 |
@@ -1215,7 +1215,7 @@ mezzo del lavoro.
 **Branch**: `docs/201-allineamento-prossimo-step`
 **PR**: **#206** (aperta il 2026-10-30)
 **Data**: 2026-10-30
-**Stato**: 👀 **IN REVIEW** — drift chiuso, in attesa di merge
+**Stato**: ✅ **MERGED** (PR #206, merge commit `e134dcd` — drift chiuso, in attesa di merge
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1227,7 +1227,7 @@ mezzo del lavoro.
 **Branch**: `docs/201-bundle-inventory-sync`
 **PR**: **#207** (aperta il 2026-10-30)
 **Data**: 2026-10-30
-**Stato**: 👀 **IN REVIEW** — drift chiuso, in attesa di merge
+**Stato**: ✅ **MERGED** (PR #207, merge commit `418d3fa` — drift chiuso, in attesa di merge
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1240,7 +1240,7 @@ mezzo del lavoro.
 **Branch**: `feat/205-geo-context-foundation`
 **PR**: **#209** (aperta il 2026-10-31) — **merged** il 2026-10-31T08:40:45Z (merge commit `68c27e5`)
 **Data**: 2026-10-31
-**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
+✅ **MERGED** (PR #209, merge commit `68c27e5` — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1265,7 +1265,7 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 **Branch**: `feat/211-era-detector`
 **PR**: **#212** (aperta il 2026-10-31) — **merged** il 2026-10-31T09:49:44Z (merge commit `3294aa4`)
 **Data**: 2026-10-31
-**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
+✅ **MERGED** (PR #212, merge commit `3294aa4` — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1291,7 +1291,7 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 **Branch**: `feat/214-event-detector`
 **PR**: **#215** (aperta il 2026-10-31) — **merged** il 2026-10-31T11:18:48Z (merge commit `5149b2c`)
 **Data**: 2026-10-31
-**Stato**: ✅ **MERGED** — implementazione completa e validata in `main`
+✅ **MERGED** (PR #215, merge commit `5149b2c` — implementazione completa e validata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1322,7 +1322,7 @@ La **pulizia git locale** è passata da `scripts/post-merge.ps1`: `git worktree 
 **Branch**: `docs/218-powershell-7-baseline`
 **PR**: **#219** (aperta il 2026-10-31) — **merged** il 2026-10-31T12:51:45Z (merge commit `92f0d8e`)
 **Data**: 2026-10-31
-**Stato**: ✅ **MERGED** — documentazione allineata al baseline PowerShell 7
+✅ **MERGED** (PR #219, merge commit `92f0d8e` — documentazione allineata al baseline PowerShell 7
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1341,12 +1341,12 @@ La terza è sui **comandi pubblicati**: `--strict` non esisteva, e la checklist 
 
 ---
 
-## 38. Issue #216 — L'indicatore di avanzamento automatico (Sessione 71)
+## 38. Issue #216 — L'indicatore di avanzamento automatico (Sessione 75)
 
 **Branch**: `feat/216-progress-indicator`
-**PR**: **#217** (aperta il 2026-10-31)
+**PR**: **#230** (aperta il 2026-10-31)
 **Data**: 2026-10-31
-**Stato**: 🟡 **IN REVIEW** — implementazione completa e validata in locale
+✅ **MERGED** (PR #230, merge commit `4e8cd4b` — implementazione completa e validata in locale
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1370,7 +1370,7 @@ La seconda lezione è sulla **forma dell'errore**: `return , $array` sembrava in
 **Branch**: `fix/235-post-merge-long-paths`
 **PR**: **#236** (aperta il 2026-11-01) — **merged** il 2026-11-01T09:58:20Z (merge commit `08a0b4da74ee3639d061ac714d07267e75d2eac8`) — issue di tracking: **#235** (`status:done`)
 **Data**: 2026-10-31 (sessione) · 2026-11-01 (merge)
-**Stato**: ✅ **MERGED** — implementazione completa, validata in locale (47 assert, 0 falliti) e mergiata in `main`
+✅ **MERGED** (PR #236, merge commit `08a0b4d` — implementazione completa, validata in locale (47 assert, 0 falliti) e mergiata in `main`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1446,10 +1446,10 @@ ecompute(), verdetto utente con userLabel), il **fixture di scenario geo** (ixt
 | 2.23 | 2026-10-30 (issue #201) | **§34 L'inventario del bundle resta stale su una PR solo-docs** (follow-up post-merge della Sessione 67): dopo il merge della PR #206 il blocco inventory di `docs/BUNDLE.md` dichiarava 1626.2 KB mentre i file in catalogo pesavano 1628.8 KB. Causa: `auto-state-aggregate.yml` scatta su `docs/state/**/*.md` e `scripts/aggregate-state.ps1`, quindi una PR che tocca solo `docs/` — i file **di cui l'inventario misura la dimensione** — non lo attiva, e il check dell'aggregator in CI è warning-only. Drift chiuso con una PR `docs:` separata (aggregator eseguito in locale); **la causa strutturale resta aperta** e va sottoposta al project owner: il trigger dovrebbe coprire i path che cambiano la dimensione dei file in catalogo. Lezione: un dato derivato dalle **dimensioni** non si aggiorna da solo quando i **contenuti** cambiano |
 | 2.24 | 2026-10-31 (issue #214) | **§37 Story 2.3 implementata** (Event Detector): il motore in `packages/core/src/analysis/event/` — metriche giornaliere (volume in ore, valence/energy medie ponderate, diversità, artisti nuovi), detector a **z-score** su griglia settimanale (baseline 60gg, finestra 14gg, soglia 2.0), detector a **quota** per `spike_artist`/`spike_genre` (dominanza + rapporto 2× sulla baseline), detector specialistici per `silence` ed `exploration`, dedupe per tipo e soggetto; la persistenza sostituisce **l'insieme** degli eventi (`replaceAllInsightsOfType`); il plug-in `createEventGenerator` dell'orchestratore (`04§8.1`) e il **fixture di scenario** `fixtures/scenarios/listening-spike.json` (81 giorni di baseline + 14 di picco, il picco dichiarato al giorno 81). **Nessun segnale inventato** (D-A.1): senza feature misurate o manuali non c'è alcun evento basato sulla valence. **43 test** nuovi in `@ls/core`. 7 problemi/fix/lesson (37-1…37-7): l'issue `agent-ready` mancante, il **trigger** di `04§6.2` che rende ogni variazione un picco, la **finestra troncata** che produce un `volume_drop` garantito, il giorno **senza ascolti** che non è uno zero, il **rapporto infinito** di un artista nuovo, il **dedupe** per tipo e per soggetto, la baseline di due giorni |
 | 2.25 | 2026-10-31 (issue #211) | **§36 Issue #211 — Story 2.2 implementata** (Era Detector, Sessione 69, claim `kilo-HP-ELITEBOOK-4f2k`): 6 entry (36-1 il blocco NEXT-STEP non è un claim: senza issue `agent-ready` la story indicata non è lavorabile, e il repository non aveva nessuna issue aperta; 36-2 un fixture **casuale** non verifica un algoritmo che cerca un salto — il `lockdown-2020` non ha un cambio di gusto e il suo atteso era una congettura, perciò la verifica è stata spostata sul fixture composto `era-shift.json` (96 eventi, confine dichiarato al giorno 56); 36-3 il titolo della schermata avrebbe prodotto «Era Era Malinconia Indie»: la label contiene già il prefisso, `era.title` è diventato un pass-through; 36-4 senza feature misurate l’era non viene prodotta (`avgValence`/`avgEnergy` non sono nullable in `02§4`): niente segnali inventati (D-A.1); 36-5 il ricalcolo per periodo avrebbe lasciato ere orfane quando i confini si spostano → `replaceAllInsightsOfType`; 36-6 **la shell non è un editor**: `Get-Content -Raw` + `Set-Content -Encoding UTF8` in PowerShell 5.1 ha raddoppiato la codifica di un documento (mojibake + BOM), ripristinato con `git checkout --`). Consegnato: il motore in `packages/core/src/analysis/era/` (firme settimanali, similarità con cosine + Jaccard + distanza normalizzata, **change point detection**, filtro `minEraDays`), il mood dominante classificato dal **classificatore del mood tracker** (D.69.2), la label resa dal resolver i18n (`insight.era.*`, D-A.4), il plug-in `createEraGenerator` (`04§8.1`) e **37 test** nuovi in `@ls/core`. Allineati `04` v1.2 (`§8.1`), `08` v0.10 (`insight.era.*`, `era.title`), `10` §3.3, `11` (Story 2.2 ✅, roadmap, priorità), `INDEX.md` (stato documenti e prossimo passo) |
-| 2.26 | 2026-10-31 (issue #216) | **§38 Issue #216 — l'indicatore di avanzamento automatico** (Sessione 71, claim `kilo-HPELITEBOOK-w0pl`): 6 entry (38-1 il **denominatore** della percentuale: sui soli state file si leggeva ~90% con 8 story mai scritte — il denominatore è il **catalogo** del backlog (28 story) e lo stato resta nei state file; 38-2 la percentuale è calcolata anche **pesata per effort** (S=1, M=2, L=3, XL=4) perché una story `XL` non vale una `S`; 38-3 **fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 **prima** di scrivere (niente scritture a metà); 38-4 i `paths:` del workflow non coprivano `docs/11-BACKLOG.md`: l'indicatore sarebbe restato fermo con un denominatore vecchio, in silenzio — risolto con il path + il **sesto** controllo di `validate-workflows.mjs`; 38-5 `return , $items.ToArray()` falsava il denominatore a 1 (il wrapper serve quando il chiamante **non** avvolge in `@(...)`); 38-6 il sorgente PowerShell resta ASCII (accenti e barra costruiti a runtime) per l'issue #63). Consegnati: il blocco `AGGREGATE-PROGRESS-*` in `README.md` e `docs/INDEX.md` (percentuale, `X/Y`, **Z step rimanenti**, tabella EPIC, **gate di testabilità**, analisi della sessione), la sezione `## Analisi di avanzamento` nei file di sessione, la modalità read-only `-Progress` (`pnpm run progress`), i test **T12/T12b/T13/T14** (53 assert) e la documentazione (`12-DEVOPS` §9.8h, `state/_index.md`, `AGENTS.md` v1.29) |
+| 2.26 | 2026-10-31 (issue #216) | **§38 Issue #216 — l'indicatore di avanzamento automatico** (Sessione 75, claim `kilo-HPELITEBOOK-w0pl`): 6 entry (38-1 il **denominatore** della percentuale: sui soli state file si leggeva ~90% con 8 story mai scritte — il denominatore è il **catalogo** del backlog (28 story) e lo stato resta nei state file; 38-2 la percentuale è calcolata anche **pesata per effort** (S=1, M=2, L=3, XL=4) perché una story `XL` non vale una `S`; 38-3 **fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 **prima** di scrivere (niente scritture a metà); 38-4 i `paths:` del workflow non coprivano `docs/11-BACKLOG.md`: l'indicatore sarebbe restato fermo con un denominatore vecchio, in silenzio — risolto con il path + il **sesto** controllo di `validate-workflows.mjs`; 38-5 `return , $items.ToArray()` falsava il denominatore a 1 (il wrapper serve quando il chiamante **non** avvolge in `@(...)`); 38-6 il sorgente PowerShell resta ASCII (accenti e barra costruiti a runtime) per l'issue #63). Consegnati: il blocco `AGGREGATE-PROGRESS-*` in `README.md` e `docs/INDEX.md` (percentuale, `X/Y`, **Z step rimanenti**, tabella EPIC, **gate di testabilità**, analisi della sessione), la sezione `## Analisi di avanzamento` nei file di sessione, la modalità read-only `-Progress` (`pnpm run progress`), i test **T12/T12b/T13/T14** (53 assert) e la documentazione (`12-DEVOPS` §9.8h, `state/_index.md`, `AGENTS.md` v1.29) |
 
 | 2.27 | 2026-10-31 (issue #221) | **§39 Story 4.4 — DB IP→città** (Sessione 72, claim `kilo-HP-EliteBook-ydy5o2`, PR #222 merged `e661e37`): 6 entry (39-1 il database MMDB (DB-IP Lite City, CC BY 4.0) è scaricato on-demand in Cache Storage al primo uso, non embedded nel bundle né nel precache (D-B.2); 39-2 l'host di download `https://download.db-ip.com` è dichiarato in `connect-src` della CSP applicata e in `12-DEVOPS.md` §2.1 (lezione issue #196: CSP applicata e spec devono coincidere); 39-3 la derivazione L2 avviene in `NormalizationPipeline` prima dello scarto dell'IP, usando `raw.ip` mai inviato in rete; 39-4 `cityConfidence` con soglia 0.6 (D-B.3): sotto, la città viene scartata (E16); 39-5 il toggle `retainCity` è opt-in (default false): senza, città null (E21); 39-6 il reader MMDB legge solo `city.names.en` per IPv4, con guard bounds per evitare `RangeError` su buffer corti/malformati). Consegnati: `packages/core/src/geo/` (tipi, lookup MMDB, policy retainCity, deriveCity, isDbStale + 17 test), `packages/core/src/adapters/pipeline.ts` (geoLookup/geoPolicy opzionali), `apps/web/src/security/` (DBIP_HOST, connect-src, meta CSP index.html), `docs/12-DEVOPS.md` (§2.1 CSP include download.db-ip.com). 10 test CSP + 17 test geo verdi in CI. |
-| 2.26 | 2026-10-31 (issue #218) | **§38 Issue #218 — baseline PowerShell 7 (pwsh) per gli script del repo** (Sessione 71, claim `kilo-hp-elitebook-lrm6`, PR #219): 4 entry (38-1 la documentazione prescriveva ancora il toolchain di **Windows PowerShell 5.1** — il README avvertiva che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `AGENTS.md` usava `--check` in una dozzina di punti — mentre `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usava `shell: pwsh` da sempre: **nessun gate confronta la documentazione con l'ambiente reale**; 38-2 il footer v1.20 di `AGENTS.md` dichiarava «tutti i `pwsh scripts/* --check` convertiti a `-Check`» ma il corpo del file non l'aveva mai ricevuto: la normalizzazione è un problema di **copertura**, non di spot-check; 38-3 `aggregate-state.ps1 --strict` era indicato come comando da eseguire ma il parametro **non è dichiarato** (il guard lo rifiuta con exit 2): un flag documentato che non esiste è peggio di un flag assente, e nessun gate lo segnala; 38-4 la motivazione dei due gate `-Check` warning-only era attribuita alla differenza **PS 5.1 vs 7**, che non esiste più: la residua è **di piattaforma**). Consegnati: il baseline `pwsh` dichiarato in `README.md` (requisiti), `17-DEV-NOTES.md` v0.4 (nuovo **P11**), `12-DEVOPS.md` v1.3 (§9.1, §9.7b, §9.8, §9.10), `13-ADR/0008` (vincoli implementativi), `13-ADR/0006`, `docs/state/_index.md`, `11-BACKLOG.md`, `AGENTS.md` v1.29 (session start checklist a 6 check con F9) e il nuovo state file `docs/state/sessions/71-powershell-7-baseline.md`. **Fuori perimetro, dichiarato**: nessuna modifica al codice degli script e nessun cambio alla semantica dei gate in CI — promuoverli a bloccanti è una decisione sul test strategy e spetta al project owner. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding) |
+| 2.27 | 2026-10-31 (issue #218) | **§38 Issue #218 — baseline PowerShell 7 (pwsh) per gli script del repo** (Sessione 71, claim `kilo-hp-elitebook-lrm6`, PR #219): 4 entry (38-1 la documentazione prescriveva ancora il toolchain di **Windows PowerShell 5.1** — il README avvertiva che «senza `pwsh`» i gate richiedevano il singolo trattino, `12-DEVOPS.md §9.1` prescriveva «MAI `--check`» e `AGENTS.md` usava `--check` in una dozzina di punti — mentre `pwsh` era disponibile dal 2026-10-21 (lesson 42-1) e la CI usava `shell: pwsh` da sempre: **nessun gate confronta la documentazione con l'ambiente reale**; 38-2 il footer v1.20 di `AGENTS.md` dichiarava «tutti i `pwsh scripts/* --check` convertiti a `-Check`» ma il corpo del file non l'aveva mai ricevuto: la normalizzazione è un problema di **copertura**, non di spot-check; 38-3 `aggregate-state.ps1 --strict` era indicato come comando da eseguire ma il parametro **non è dichiarato** (il guard lo rifiuta con exit 2): un flag documentato che non esiste è peggio di un flag assente, e nessun gate lo segnala; 38-4 la motivazione dei due gate `-Check` warning-only era attribuita alla differenza **PS 5.1 vs 7**, che non esiste più: la residua è **di piattaforma**). Consegnati: il baseline `pwsh` dichiarato in `README.md` (requisiti), `17-DEV-NOTES.md` v0.4 (nuovo **P11**), `12-DEVOPS.md` v1.3 (§9.1, §9.7b, §9.8, §9.10), `13-ADR/0008` (vincoli implementativi), `13-ADR/0006`, `docs/state/_index.md`, `11-BACKLOG.md`, `AGENTS.md` v1.29 (session start checklist a 6 check con F9) e il nuovo state file `docs/state/sessions/71-powershell-7-baseline.md`. **Fuori perimetro, dichiarato**: nessuna modifica al codice degli script e nessun cambio alla semantica dei gate in CI — promuoverli a bloccanti è una decisione sul test strategy e spetta al project owner. Verificato su pwsh 7.6.9: `--check` e `-Check` danno lo stesso risultato e lo stesso exit code (in `pwsh` il doppio trattino viene normalizzato sul singolo prima del binding) |
 
 | 2.28 | 2026-10-31 (issue #224) | **§40 Procedure automatiche: profilo, parallelizzazione dei gate e correzione dei difetti di copertura** (Sessione 73, claim `kilo-HP-ELITEBOOK-perf73`): 7 entry (73-1 il **tempo pareggio è la somma, non il massimo**: 18 gate indipendenti in un solo job costavano **172 s** (run `41212641314`) anche se il lavoro utile era ~89 s ⇒ `ci.yml` passa a **11 job** (10 in parallelo + `quality` aggregatore fail-closed con il **nome invariato**, perché `needs:` renderebbe `quality` *skipped* — non *failed* — e la branch protection può accettare un check saltato come successo; 73-2 il costo più alto era nel **numero di processi**, non nell'algoritmo: `seed_repo_files` = 256 spawn per repo = **9,5 s per repo** ⇒ le builtin del shell (`${f%/*}`, `: > "$f"`, `mkdir` per directory) e le env var git al posto di `git config` (`GIT_CONFIG_COUNT/KEY_n/VALUE_n`); 73-3 una suite che **non può fallire** costa anche quando non fallisce: `test-safe-branch-switch.sh` consumava 6,7 s riportando «0 passati, 0 falliti» e uscendo 0 **sempre** (i contatori vivevano dentro subshell) ⇒ contatori su file di risultati condiviso, ora 11 assert e in CI; 73-4 l'audit precedente aveva diagnosticato la **piattaforma** invece del difetto: «su `ubuntu-latest` `test-setup-worktree.sh` passerebbe» era **falso** — `mktemp` onora `TMPDIR` anche su Linux e `cleanup_mock_env` cancellava `TMPDIR` senza ripristinarlo ⇒ la suite falliva su **ogni** OS (ora 8 assert, con `cygpath -w` per il path POSIX e un wrapper `gh.cmd` per il mock su Windows); 73-5 il bundle rigenerava **due volte** per merge (push + `workflow_run`, 20 s + 22 s) ⇒ il secondo run viene **saltato** se `workflow_run.head_sha` == `origin/main` (l'aggregator non ha pushato); se l'aggregator è **fallito** si rigenera comunque; 73-6 la concatenazione con `+=` in PowerShell è **O(n²)**: costruire ~2,4 MB con `$bundle += $content` ricopia l'intera stringa a ogni iterazione ⇒ `StringBuilder` + `ReadAllText` + `.Replace()` per il CRLF, con output **byte-identico** (SHA-256 verificato sullo stesso albero); 73-7 le misure vanno fatte sull'ambiente giusto: il `bash` di default su questa macchina è lo **stub WSL**, non Git Bash ⇒ i benchmark vanno eseguiti con `C:\Program Files\Git\bin\bash.exe`). Risultati: tempo pareggio della pipeline **172 s → 73 s** (misurato sul runner: 112 s con 9 job, **73 s** con i 3 job `node` separati); `test-bundle-check-idempotent.sh` 53,0 → 11,9 s; `test-aggregate-determinism.sh` 48,2 → 39,7 s; `test-issue-76-residue.sh` 16,1 → 11,5 s; `test-post-merge.sh` 52,4 → 39,3 s; `aggregate-state.ps1 -Check` 1,23 → 0,91 s; `generate-bundle.ps1 -Check` 1,37 → 1,05 s. Le **5 suite** che la CI non eseguiva sono ora **in CI** (la procedura più distruttiva del repo, `post-merge.ps1`, non aveva copertura). **Due correzioni nate dalla prima CI della PR** (che vale come test): 73-8 **parallelizzare i job e parallelizzare i task interni sono due cose diverse** — i 4 task turbo in un'unica invocazione (52,7 → 32,8 s) facevano scadere per timeout i 2 test di integrazione del fixture `db-seed/medium.json` sul runner a 2 vCPU (classe del lesson 30-1: la soglia di un test time-sensitive è un acceptance criterion) ⇒ i 4 task restano sequenziali; 73-9 **`init.defaultBranch` è una configurazione di macchina, non del progetto**: la dev machine aveva `main`, il runner `master`, e `test-post-merge.sh` era verde solo in locale (`git clone` del bare repo senza branch esistente non fa il checkout di nessun branch ⇒ «src refspec main does not match any») ⇒ `git init -b main` esplicito in tutte e 3 le suite che creano repository temporanei, con riproduzione locale del difetto. Consegnati: `ci.yml` (11 job), `package.json` (`verify`), `auto-bundle.yml` (skip del 2° run), `scripts/generate-bundle.ps1` e `scripts/aggregate-state.ps1` (ottimizzati, output byte-identico), 5 suite di test corrette, `12-DEVOPS.md` v1.5 (§9.10 riscritta, §9.13 chiusura dell'audit, **§9.14** nuova), `17-DEV-NOTES.md` v0.6 (**P13**), `AGENTS.md` v1.31, sessione 73 |
 | 2.29 | 2026-10-31 (issue #224) | **§41 La CI girava 4 volte per ogni merge** (Sessione 74, claim `kilo-HP-ELITEBOOK-perf74`): 5 entry — 74-1 **un trigger senza filtro è una validazione ripetuta**: `push: branches: [main]` rieseguiva l'intera pipeline su alberi già validati dalla PR (4 run di CI + 3 run `auto-*` per ogni cambiamento logico, di cui ~219 s di ripetizioni su 292 s totali) ⇒ il trigger `push` è ora **filtrato per path** sui 5 file che i writer automatici modificano (gli unici commit che arrivano su `main` senza passare da una PR) e su `push` girano **solo i job leggeri** (~21 s invece di ~73 s); 74-2 **la pipeline non deve girare su ciò che non è cambiato**: il doc-sync PR (che porta `pr:` e `merged_commit:`, noti solo dopo il merge) tocca **solo `.md`** e faceva girare lint/typecheck/test/build ⇒ il job `detect-code` verifica se almeno un file cambiato non è `.md`; se sono tutti `.md` i 3 job `node-*` non installano le dipendenze e non eseguono i task; 74-3 **fail-safe significa fallire verso il lato costoso**: se il detector non sa, i gate girano (condizione `!= 'false'`, mai `== 'true'`), e i 3 job **riuscono** invece di essere saltati, così `quality` resta fail-closed senza casi speciali; 74-4 **un gate che non fa il parsing non valida la sintassi**: `validate-workflows.mjs` lavorava sul testo con regex, quindi un YAML rotto passava il gate e GitHub lo **rifiutava in fase di validazione** (run con `jobs: 0`, `failure` a 0 s, nessun log: la firma dell'issue #135) ⇒ nuovo controllo `checkYamlScalars()` (scalare semplice con `: `, che salta block scalar, valori quotati, raccolte flow e commenti) + `scripts/test-workflow-yaml-scalars.sh` (8 assert); 74-5 **il `\r` finale non è un terminatore di riga per il regex JavaScript**: `.` non lo matcha, e i pattern ancorati con `$` — incluso il gate sui push su `main` (#140) — **smettevano di matchiare sui file CRLF**, fallendo in silenzio ⇒ il validatore normalizza il fine-riga una volta sola. Consegnati: `ci.yml` (trigger filtrato + `detect-code`), `validate-workflows.mjs` (validità YAML + fine-riga), `test-workflow-yaml-scalars.sh` (nuovo), `12-DEVOPS.md` (§9.14.10-11), `AGENTS.md` v1.31, sessione 74 |
@@ -1486,7 +1486,7 @@ La seconda lezione e' sulle **fixture**: T2 si aspettava che il gate fallisse qu
 **Branch**: `fix/297-story-merge-state-writer`
 **Issue di tracking**: **#297** (aperta in questa sessione: il gap strutturale scoperto dalla 2.5)
 **Data**: 2026-11-03
-**Stato**: ✅ fatto
+✅ **MERGED** (PR #293, merge commit `ff72162`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1511,7 +1511,7 @@ La terza e' sul **criterio di fallita**. «Nessun file di sessione corrisponde a
 **Branch**: `fix/297-fix-devops-le-story-non-hanno-un-writer`
 **Issue di tracking**: **#297** (riaperta: la PR #298 l'aveva chiusa prematuramente)
 **Data**: 2026-11-03
-**Stato**: ✅ fatto
+✅ **MERGED** (PR #300, merge commit `37975de`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1545,7 +1545,7 @@ fix che si può eseguire **sui dati** chiude il drift presente e futuro con lo s
 **Branch**: `feat/241-story-3-2---ricordi-share`
 **Issue di tracking**: **#241**
 **Data**: 2026-11-03
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #301, merge commit `22cf591`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1586,7 +1586,7 @@ l'ambiente (cfr. 97-5) · `eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/w
 **Branch**: `feat/240-story-3-3---esplora-analisi-schermate-9`
 **Issue di tracking**: **#240**
 **Data**: 2026-11-05
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #320, merge commit `d082c00`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1628,7 +1628,7 @@ exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 **Branch**: `feat/270-story-3-5---anteprima-e-modalita-demo-in`
 **Issue di tracking**: **#270**
 **Data**: 2026-11-06
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #322, merge commit `4ceacc1`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1664,7 +1664,7 @@ che usano `localStorage`, **identici su `main`** sotto Node 26; il CI gira su No
 **Branch**: `feat/259-rifinitura-agents`
 **Issue di tracking**: **#259** (lotto I3 dell'epic #248)
 **Data**: 2026-11-01
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #260, merge commit `5d49fe9`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1686,7 +1686,7 @@ La seconda lezione è sulla **priorità della riduzione**. Le due sezioni più l
 **Branch**: `feat/251-catena-post-merge`
 **Issue di tracking**: **#251**
 **Data**: 2026-11-01
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #258, merge commit `a07c7b0`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1710,7 +1710,7 @@ La terza è sul **fail-closed selettivo**. Il fallimento del workflow post-merge
 **Branch**: `feat/256-claim-atomico`
 **Issue di tracking**: **#256** (lotto I2-c dell'epic #248)
 **Data**: 2026-11-01
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #257, merge commit `f6fb8c0`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1737,7 +1737,7 @@ La terza è sul **leak**. Il file di un altro task finito in una PR di doc-sync 
 **Issue di tracking**: **#252** (lotto I2-b dell'epic #248)
 **PR**: **#253** — **merged** il 2026-11-01T15:33:04Z (merge commit `1cef40b24f67c3ecde3728c9de63d60aa5ffb3ca`)
 **Data**: 2026-11-01
-**Stato**: ✅ **MERGED**
+✅ **MERGED** (PR #253, merge commit `1cef40b`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1767,7 +1767,7 @@ La terza è sulla **non vacuità**: un gate che non è mai stato eseguito su un 
 **Branch**: `feat/248-protocollo-contratto-verificato`
 **PR**: **#249** — **merged** il 2026-11-01T14:55:25Z (merge commit `2478a9a5cf122c350bf26034f502dbab6e8f134f`) — issue di tracking: **#248** (`status:done`)
 **Data**: 2026-11-01
-**Stato**: ✅ **MERGED** — lotto I1 + I2-a dell'epic #248; i lotti I2-b, I2-c e I3 sono descritti in ADR-0012 §"Stato dell'implementazione"
+✅ **MERGED** (PR #249, merge commit `2478a9a` — lotto I1 + I2-a dell'epic #248; i lotti I2-b, I2-c e I3 sono descritti in ADR-0012 §"Stato dell'implementazione"
 
 > **Nota (doc-sync di chiusura)**: il frontmatter di questa sessione è stato allineato al merge **dopo** il merge, con `node scripts/apply-merge-state.mjs --pr 249` — perché il workflow `auto-session-merge-state.yml` che fa questo passo **non ha mai girato con successo**: la sua prima esecuzione (#243) è fallita sulla precondizione (nessun file di sessione dichiarava `pr: 243`) e la seconda (#249) è stata **annullata** dal concurrency group `post-merge-main`. I tre writer di `main` non si accodano: se ne partono insieme, **uno vince e gli altri due vengono annullati** (`cancel-in-progress: false` *cancella* i run pending precedenti dello stesso group). Difetto tracciato e aperto come issue dedicata; misura e semantica in §45.
 
@@ -1796,7 +1796,7 @@ La terza è sull'**escape hatch**: accoppiando due controlli in un solo abort, s
 **Branch**: `fix/319-arbitraggio-claim-lock-worktree`
 **Issue di tracking**: **#319**
 **Data**: 2026-11-05
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #321, merge commit `46cbc00`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -1814,8 +1814,28 @@ La seconda lezione è sul confine del fail-closed: mismatch ed errore d'ambiente
 
 ---
 
+## 57. Issue #324 — DEV-LOG stato merge: una regola, un gate, un writer (Sessione 106)
+
+**Branch**: `fix/324-devlog-stato-merge`
+**Issue di tracking**: **#324**
+**Data**: 2026-11-06
+✅ **MERGED** (PR #324, merge commit `...`)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 106-1 | P | Il DEV-LOG aveva **due fonti di verità** sullo stato di merge: il frontmatter di `docs/state/sessions/` (writer post-merge, gate `check-merge-state.mjs`) e la riga `**Stato**:` di ogni entry (scritta a mano, nessun gate). 34 entry dichiaravano `🟡 in corso` / `✅ fatto` per PR già mergiate. | La checklist di merge chiedeva di aggiornare `docs/18-DEV-LOG.md` manualmente, ma **senza gate** (ADR-0012: regola senza gate = consiglio). Il gate `check-merge-state.mjs` copriva solo `docs/state/sessions/` e `docs/state/stories/`. | **Un solo writer**: `apply-merge-state.mjs` normalizza la riga `**Stato**:` in forma canonica `✅ **MERGED** (PR #N, merge commit \`sha7\`)` per la sessione mergiata. **Un solo gate**: `check-merge-state.mjs` guadagna il perimetro `docs/18-DEV-LOG.md` e verifica marker ⇔ stato reale + citazione PR+sha. **Riparazione storica**: `--repair-devlog` allinea 37 entry mergiate. Correzione §38 (Issue #216): sessione 75 / PR #230 / sha `4e8cd4b`. | `scripts/apply-merge-state.mjs` · `scripts/check-merge-state.mjs` · `docs/18-DEV-LOG.md` |
+| 106-2 | L | I test del gate fallivano perché le fixture non avevano `docs/18-DEV-LOG.md` (fail-closed sul perimetro mancante). | Il gate richiede il file DEV-LOG (come per `docs/state/stories/`). | Aggiunta `make_devlog()` in `test-merge-state-gate.sh` che crea un DEV-LOG minimo (sezioni 1-3, nessuna entry). Tutti i 18 scenari (T1..T18) passano. | `scripts/test-merge-state-gate.sh` |
+| 106-3 | P | L'entry §38 (Issue #216) citava **Sessione 71** e **PR #217**, ma la sessione reale era **75** e la PR reale **#230** (merge commit `4e8cd4b`). | Errore di copia: la PR #217 era per l'issue #214 (Story 2.3), mentre l'indicatore di avanzamento era la Sessione 75. | Heading corretto a `(Sessione 75)`, riga `**PR**:` a `#230`, riga `**Stato**:` canonica con PR #230 e sha `4e8cd4b`. Riga changelog 2.26 corretta da "Sessione 71" a "Sessione 75". Duplicato "2.26" per Issue #218 rinumerato a "2.27". | `docs/18-DEV-LOG.md` |
+
+**Lesson learned**: la doppia fonte di verità non è un problema teorico — 34 entry mentevano sullo stato reale, e il drift si accumulava ad ogni merge senza che nessun gate se ne accorgesse. La soluzione non è «aggiornare a mano» (la checklist lo chiedeva già) ma **codificare la regola nel writer e nel gate** (ADR-0012). La riparazione storica (`--repair-devlog`) chiude il passato; il gate + writer chiudono il futuro. La correzione dell'entry §38 insegna che i riferimenti incrociati vanno verificati: una PR citata nel DEV-LOG può appartenere a un'altra sessione/storia.
+
+**Verifica**: `node scripts/check-merge-state.mjs` → 115 confronti, 0 falliti; `bash scripts/test-merge-state-gate.sh` → 24 pass, 0 fail; `pwsh scripts/aggregate-state.ps1 -Check` → exit 0; `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
+| 2.40 | 2026-11-06 (issue #324) | **§57 Sessione 106 — DEV-LOG stato merge: una regola, un gate, un writer**: il DEV-LOG aveva **due fonti di verità** sullo stato di merge (frontmatter sessioni + riga `**Stato**:` entry); 34 entry dichiaravano `🟡 in corso` / `✅ fatto` per PR già mergiate. Fix: `apply-merge-state.mjs` normalizza la riga `**Stato**:` in forma canonica `✅ **MERGED** (PR #N, merge commit \`sha7\`)` per la sessione mergiata; `check-merge-state.mjs` guadagna il perimetro `docs/18-DEV-LOG.md` e verifica marker ⇔ stato reale + citazione PR+sha; `--repair-devlog` allinea 37 entry storiche. Correzione §38 (Issue #216): sessione 75 / PR #230 / sha `4e8cd4b`; riga changelog 2.26 corretta a "Sessione 75"; duplicato "2.26" per Issue #218 rinumerato a "2.27". `AGENTS.md` v1.50 (tabella regola ⟺ gate + DEV-LOG, checklist merge aggiornata); `docs/INDEX.md` v1.50; `docs/12-DEVOPS.md` gate catalog + riga 42; `docs/state/sessions/106-devlog-merge-state.md` nuovo. Test: 24/24 pass. |
 | 2.39 | 2026-11-05 (issue #319) | **§56 Sessione 105 — il protocollo ha due lock: l'issue e la worktree**: due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree** (doppio lavoro silenzioso, nessun errore). Causa: il path della worktree è **deterministico** (`ls-<N>-<slug>`) e il lock di ADR-0006 è **sull'issue**, non sul filesystem; `agent-claim.ps1` proseguiva sulla worktree «già presente» senza verificare **di chi** fosse, e nessun gate leggeva `agent-state.json`. Aggiunti: **secondo lock** (`scripts/check-worktree-ownership.mjs`: owner locale = claim vincente, mismatch → exit 1, errore d'ambiente → exit 2) con gate in `pre-commit` (INVARIANTE 4), nei gate locali di `agent-pr.ps1` e in CI (9 scenari); **arbitraggio `-Auto`** in `agent-claim.ps1` (ricalcolo dei candidati + verifica atomica del claim winner, nell'ordine del backlog) e **exit 6** (worktree di un altro agente) con procedura codificata per l'exit 3 (issue già in carico); **C6** di `check-claim-state.mjs` (l'`agent-id` dichiarato nel body della PR deve coincidere con il claimante); scrittura **atomica** di `agent-state.json`; deprecazione del flusso manuale `setup-worktree.ps1` + `gh issue edit`/`comment`. `AGENTS.md` v1.49 (2 righe nella tabella regola ⟺ gate, Fase 0 di arbitraggio, codici di uscita, session-start checklist a 7 check) |
 | 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
 | 2.34 | 2026-11-01 (issue #252) | **§46 Sessione 80 — il protocollo agenti come contratto verificato (I2-b)**: `AGENTS.md` era l'unico artefatto di governance **senza gate** ⇒ 2 gate read-only nuovi, `check-protocol-consistency.mjs` (6 check: versione, tabella label, tabella exit code, **integrità degli anchor**, esistenza di script e flag citati, checklist unica) e `check-aggregate-blocks.mjs` (**bloccante**: la regola V1 di ADR-0008 verificata in modo **testuale**, immune all'incompatibilità PS 5.1/PS 7 che tiene warning-only il check aggregatore), con le suite di scenario negativo (8 + 6) e il job CI `gates-protocol` (4 step, `fetch-depth: 0`). Il primo giro ha trovato **3 riferimenti rotti in `AGENTS.md`** (typo «Macchina **di** stati», sezione «⚠️ Deprecazione» inesistente, rimando a «🛡️ Hardening multi-agente» rinominata) e **1 riferimento stale** in `scripts/generate-fixtures.mjs` (`AGENTS.md §V1`). Prova di non-vacuità: il gate dei blocchi applicato alla **PR #249 reale** rileva **5 violazioni** (la PR aveva committato i blocchi rigenerati in locale) ⇒ la regola V1 era violabile in silenzio; la **PR #250** aveva la stessa violazione ed è stata corretta. `AGENTS.md` v1.35 (nuova sezione §"✅ Il contratto del protocollo: regola ⟺ gate"), `docs/12-DEVOPS.md §9.10` a 13 job / 31 step |
