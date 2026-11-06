@@ -1,6 +1,6 @@
 # 07 — Specifiche UI Componenti
 
-> Status: 🟡 DRAFT · Versione 0.3 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
+> Status: 🟡 DRAFT · Versione 0.4 · Sessione 104 (2026-11-06, issue #270 — Story 3.5)
 > Vincolante per: `packages/ui/components`, test di interazione, implementazione frontend
 
 ---
@@ -118,6 +118,33 @@ clipboard il file viene scaricato.
 - **Interazione**: si salva all'uscita dal campo o con `Enter`. Il testo è
   locale (`Insight.userNote`) e sopravvive al ricalcolo dell'analisi.
 
+### 2.10c DemoBanner e RevealPreview (Story 3.5)
+**Uso**: la **modalità demo** (il diario di esempio) e l'**anteprima** del
+risultato nel reveal post-import.
+
+**DemoBanner**
+- **Dove**: in cima alla `AppShell`, sopra la navigazione.
+- **Contenuto**: il testo dichiarativo (i dati sono sintetici e il database
+  dell'utente non è stato toccato) e il bottone **«Esci dalla demo»**.
+- **A11y**: `role="status"` — è un annuncio, non un errore; il bottone è un
+  `<button>` normale con etichetta tradotta.
+- **Stato**: compare solo in modalità demo (`demo`): la shell dell'utente non
+  lo mostra mai.
+
+**RevealPreview**
+- **Dove**: schermata ⑤ Prima Rivelazione, sotto il contatore degli eventi.
+- **Contenuto**: titolo + **almeno tre righe** reali della timeline (periodo,
+  numero di ascolti, mood dominante quando esiste).
+- **Dati**: le righe vengono dal **database reale** dell'utente (non da una
+  simulazione) e l'anno è **calcolato** dallo span dei dati.
+- **Stato**: con dati utilizzabili → le righe; senza → nessuna anteprima (il
+  reveal resta sul solo contatore), mai un segnaposto vuoto.
+
+**Implementazione (Story 3.5, Sessione 104)**: il banner è dentro la
+`AppShell` (che riceve `dbName`, `demo` e `onExitDemo`), l'anteprima è
+costruita da `buildRevealPreview` (`apps/web/src/onboarding/revealPreview.ts`)
+— un **modello puro** sopra i dati, testabile senza database.
+
 ## 3. Regole di Composizione
 
 - **Spacing**: Usare sempre i token di spacing (`gap-4`, `p-6`), mai valori hardcoded.
@@ -145,3 +172,4 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | 0.1 | Sessione 7 | Prima versione completa |
 | 0.2 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.2 (MemoryCard) dichiara le tre azioni reali (nascondi, salva, condividi) e il fatto che il nascondimento **non cancella**; §2.10 (ShareSheet) dichiara le props reali (etichette già rese, `onRetry`) e i **fallback** delle destinazioni; nuova §2.10b (**NoteField**) per il tagging manuale |
 | 0.3 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.8 (QuadrantChart) dichiara i punti come **`<button>` HTML** sopra l'SVG (controllo della tastiera, non cerchio), l'`aria-label` che **dichiara i due valori** e il deep-link alla Timeline; §2.9 (InsightCard) dichiara la `description` come **frase già resa** dal core (D-A.4) e le tre azioni che scrivono `Insight.status` (ignorare esclude, non cancella) |
+| 0.4 | Sessione 104 (2026-11-06, issue #270) | **Story 3.5 implementata**: nuova §2.10c — il **DemoBanner** (il banner dichiarativo della modalità demo, con `role="status"` e il bottone d'uscita che cancella il database demo) e il **RevealPreview** (le prime righe della timeline reale e l'anno calcolato, costruite da un modello puro) |

@@ -1,28 +1,11 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-05 19:52
-> Totale file: 198
+> Data: 2026-11-06 01:53
+> Totale file: 199
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
-
-> Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
-> Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
-
-- Totale file: 197 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2804.9 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-05 19:52
-- Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
-
-| Categoria | File |
-|-----------|------|
-| docs/ | 129 |
-| scripts/ | 42 |
-| fixtures/ | 15 |
-| .githooks/ | 4 |
-| .github/ | 4 |
-| root/ | 3 |
-
+inventario: 1 file
 <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
 
 
@@ -2062,12 +2045,12 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 57 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.2, S47/S57: token in scrittura, percorso incrementale) + Last.fm (🟢 v1.2, S50/S51/S57: percorso di scrittura, md5 D-SH.11, proxy D-SH.14) — **adapter implementati** in Sessione 52 (issue #155) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟢 APPROVED | Sessione 59 (v1.0) | Algoritmi di analisi (mood, ere, eventi, ricordi) — **ratificata** (Sessione 59, issue #178): i trigger dei 5 tipi di ricordo sono specificati, il perimetro della tranche è dichiarato; la Story 2.4 è implementata (Sessione 61) e la **2.1 è implementata** (Sessione 63, issue #180) |
 | 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 62 (v1.4) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢) |
-| 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 9 | Flussi UX e stati per schermata |
-| 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 7 | Specifiche UI componenti |
-| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 76 (v0.12) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`); v0.12: §2.12h **materializzata** con le 36 chiavi `timeline.context.*` della Story 3.4 (la sezione era dichiarata dal changelog 0.9 ma non scritta) |
+| 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 104 (v0.7) | Flussi UX e stati per schermata — v0.7: §2.5 l'anteprima del reveal (righe reali + anno calcolato), §2.14 la demo mode (database separato, banner, uscita) |
+| 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 104 (v0.4) | Specifiche UI componenti — v0.4: §2.10c il DemoBanner e il RevealPreview (Story 3.5) |
+| 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 104 (v0.16) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`); v0.12: §2.12h **materializzata** con le 36 chiavi `timeline.context.*` della Story 3.4 (la sezione era dichiarata dal changelog 0.9 ma non scritta); v0.16: le **12 chiavi** della Story 3.5 (`onboarding.demo.*`, `onboarding.reveal.preview.*`, `reveal.subtitle_one`/`_other`) |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
-| 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 66 (v1.6.27) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`) |
+| 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 104 (v1.3) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti; v1.3: §3.4 il fixture demo mode rigenerato (album e feature deterministiche, tre fasi musicali) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 104 (v1.6.37) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`); v1.6.37: **Story 3.5 implementata** (issue #270: anteprima e modalità demo in onboarding) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 99 (0001-0014) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; 0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0; **0012 protocollo agenti come contratto verificato APPROVED v1.0**, Sessione 79, issue #248; **0013 automazioni post-merge deterministiche APPROVED v1.0**, Sessione 90, issue #284; **0014 copertura di test offline degli script di protocollo 🟡 DRAFT**, Sessione 99, issue #304 — in attesa di ratifica del project owner) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
@@ -2314,8 +2297,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.2, `11` v1.6.36, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 13 ADR in `13-ADR/` (0001-0003, 0005-0013; **0014** 🟡 DRAFT, Sessione 99, issue #304 — in attesa di ratifica)
-- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.6, `07` ora v0.3, `08` ora v0.15, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.31; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
+- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.3, `11` v1.6.37, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 13 ADR in `13-ADR/` (0001-0003, 0005-0013; **0014** 🟡 DRAFT, Sessione 99, issue #304 — in attesa di ratifica)
+- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.7, `07` ora v0.4, `08` ora v0.16, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.32; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
@@ -2332,7 +2315,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 24** — implementazione Story 0.6 i18n (issue #5, PR #22 merged `5235c88` 2026-10-18T17:02Z +0200, claim `kilo-HP-ELITEBOOK-7051`): `i18next@^26.5.2` + `react-i18next@^17.1.0` (`apps/web/package.json`); componente `<T>` + hook `useT()` in `apps/web/src/i18n/` + `formatter.ts` (ICU pluralizzazione) + `detector.ts` (localStorage→browser); IT/EN locales con 185+185 voci in `apps/web/src/i18n/locales/{it,en}.json`; test 8/8 in `apps/web/src/__tests__/{formatter,i18n-react,i18n}.test.{ts,tsx}`; wire-up in `apps/web/src/main.tsx`. Branch `feat/5-i18n-setup` eliminata, GH Action `auto-status-done` applicata `status:done` a #5.
 - **Sessione 97** — implementazione **Story 3.2 «Ricordi + Share»** (issue #241, branch `feat/241-story-3-2---ricordi-share`, claim `kilo-HP-ELITEBOOK-6e15`): la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scroll, i `dismissed` esclusi dal feed ma **presenti** nel database, ordinamento per `Insight.confidence`), il foglio ⑫ **ShareSheet** (dialog accessibile con focus trap e stati `generating`/`ready`/`error`), la card **1080×1350** disegnata a mano su canvas e il **capitolo HTML autonomo** (export statico alternativo, nessuno script né stile esterno), le azioni di condivisione con **fallback** (Web Share API → download, clipboard → download) e il **tagging manuale** (nome e parole chiave dell'era, nota libera del ricordo) con la **conservazione dei campi dell'utente al ricalcolo** (`Insight.userNote` e `Insight.status` riportati dagli insight esistenti a quelli nuovi: senza, il nome di un'era sparisce al primo ricalcolo dell'analisi). **37 test** nuovi; i18n IT/EN per le nuove stringhe. Documenti allineati: `11-BACKLOG.md` v1.6.36, `06-UX-FLOWS-STATES.md` v0.5, `07-UI-SPEC.md` v0.2, `08-COPY-I18N.md` v0.14, `18-DEV-LOG.md` v2.30 (§53), `docs/state/stories/3.2-ricordi-share.md` e `docs/state/sessions/97-ricordi-share.md` (nuovi).
 - **Sessione 103** — implementazione **Story 3.3 «Esplora + Analisi»** (issue #240, branch `feat/240-story-3-3---esplora-analisi-schermate-9`, claim `kilo-hp-elitebook-d957`): la schermata ⑨ **Esplora** (ricerca sul **proprio** catalogo — artisti, brani, album, generi, mood — con **debounce di 300 ms**, risultati ordinati per `listenCount`, nessuna richiesta di rete) e la schermata ⑩ **Analisi** (il `QuadrantChart` valence/energy con un punto per mese, la **frase in prosa** che accompagna il grafico e gli **insight persistiti** — eventi e ricordi — con le tre azioni dell'utente). Il **deep-link interno** porta dal punto del quadrante alla Timeline (`AppSection` + `AppFocus`, senza router: D-25.1); il mood della settimana letto da `mood_week` è adesso **tradotto** nella shell. **20 test** nuovi; i18n IT/EN per le nuove stringhe (le chiavi già esistenti sono state usate, non duplicate). Documenti allineati: `11-BACKLOG.md` (sezione Story 3.3), `07-UI-SPEC.md` v0.3 (§2.8, §2.9), `08-COPY-I18N.md` v0.15 (§2.5, §2.6, §2.15), `18-DEV-LOG.md` v2.31 (§54), `docs/state/stories/3.3-esplora-analisi.md` e `docs/state/sessions/103-story-3-3-esplora-analisi.md`.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 103, issue #240): l'**EPIC 3** ha le sue **prime quattro schermate** — la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati), la **3.2** (Ricordi + Share, Sessione 97: schermata ⑪ e ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale) e la **3.3** (Esplora + Analisi, Sessione 103: schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa). Il blocco NEXT-STEP del README indica ora la **3.5** (anteprima/demo in onboarding): è l'ultima schermata che chiude il percorso end-to-end dell'app. Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
+- **Sessione 104** — implementazione **Story 3.5 «Anteprima e modalità demo in onboarding»** (issue #270, branch `feat/270-story-3-5---anteprima-e-modalita-demo-in`, claim `kilo-hp-elitebook-a320`): la CTA **«Scopri come funziona»** sul **primo passo** dell'onboarding apre il **diario di esempio** — il fixture `fixtures/demo-user.json` (rigenerato con **75 album** e **200 feature** deterministiche, tre fasi musicali su 366 giorni, `generatedAt` derivato dal seed) caricato in un **database separato** (`life-soundtrack-demo`): nessuna scrittura nel database dell'utente, e l'uscita lo cancella con un click. Lo schermo è la **stessa Home** degli altri utenti (nessun renderer parallelo), con un banner dichiarativo. Il **reveal** post-import mostra le prime righe della timeline **reale** (≥3) e l'anno **calcolato** dallo span dei dati. **19 test** nuovi (10 in `@ls/core`, 9 in `@ls/web`); i18n IT/EN per le 12 chiavi nuove. Documenti allineati: `11-BACKLOG.md` v1.6.37 (sezione Story 3.5), `06-UX-FLOWS-STATES.md` v0.7 (§2.5, §2.14), `07-UI-SPEC.md` v0.4 (§2.10c), `08-COPY-I18N.md` v0.16 (§2.1), `10-TESTING.md` v1.3 (§3.4), `18-DEV-LOG.md` v2.32 (§55), `docs/state/stories/3.5-anteprima-onboarding-demo.md` e `docs/state/sessions/104-story-3-5-anteprima-demo.md`.
+- **Prossimo passo tecnico** (aggiornato alla Sessione 104, issue #270): l'**EPIC 3** ha **chiuso il percorso end-to-end dell'app** — la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati), la **3.2** (Ricordi + Share, Sessione 97: schermata ⑪ e ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale), la **3.3** (Esplora + Analisi, Sessione 103: schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa) e la **3.5** (anteprima e modalità demo in onboarding, Sessione 104: il diario di esempio in un database separato e le prime righe della timeline reale nel reveal). Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3, ora **P0**); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -15109,6 +15093,42 @@ exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 
+## 55. Anteprima e modalità demo: la Story 3.5 (Sessione 104)
+
+**Branch**: `feat/270-story-3-5---anteprima-e-modalita-demo-in`
+**Issue di tracking**: **#270**
+**Data**: 2026-11-06
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 104-1 | P | La CTA «Scopri come funziona» e il fixture `demo-user.json` **esistevano da anni** e **nessun file di codice li usava**: la promessa «anteprima del risultato» del README non aveva un'implementazione | La doc del progetto anticipava la story (il fixture, la stringa i18n, la §2.14) ma il codice no | La CTA è sul **primo passo** dell'onboarding e apre la **stessa `AppShell`** della Home, con il database demo propagato ai componenti: nessun renderer parallelo | `apps/web/src/onboarding/OnboardingRouter.tsx` · `apps/web/src/screens/AppShell.tsx` |
+| 104-2 | P | La demo avrebbe scritto nel **database dell'utente** | Il runner dell'analisi apriva sempre il database predefinito | Il database demo è **separato** (`life-soundtrack-demo`) e il runner accetta il database da analizzare (`db?`): i due diari non possono mescolarsi | `packages/core/src/db/demoSeed.ts` · `apps/web/src/analysis/analysisRunner.ts` |
+| 104-3 | — | Il fixture non poteva importare `albums` e `features` **deterministiche** | Il generatore produceva solo eventi e artisti, e il `generatedAt` dipendeva da `new Date()` | `buildDemoUser` riscritta: tre fasi musicali disgiunte, album derivati, feature `source: 'manual'`, `generatedAt` derivato dal seed — due run producono lo stesso SHA | `scripts/generate-fixtures.mjs` · `fixtures/demo-user.json` |
+| 104-4 | — | Il reveal mostrava solo il **contatore** degli eventi | Il reveal non leggeva il database | `buildRevealPreview`: le prime righe della timeline **reale** (≥3) e l'anno **calcolato** dallo span dei dati (non cablato a 1, con la coppia `_one`/`_other`) | `apps/web/src/onboarding/revealPreview.ts` |
+| 104-5 | — | Un fixture da 3,6 MB dentro `@ls/core` | La spec prevedeva l'import di default del fixture | **Deviazione dichiarata**: il fixture entra come **parametro** (`seedDemoDatabase(db, fixture)`) — il `tsc` di `@ls/core` ha `rootDir` su `src` e non può importare `fixtures/`. Lato app il file è un chunk lazy (`?raw`) | `packages/core/src/db/demoSeed.ts` · `apps/web/src/demo/demoMode.ts` |
+| 104-6 | P | La **build** dell'app falliva: `Assets exceeding the limit: assets/demo-user-*.js is 3.7 MB` (Workbox, limite di precache 2 MiB) | Il fixture è un chunk lazy da 3,7 MB e il `globPatterns` del precache include **tutti** i `.js` | Il chunk del fixture è **escluso dal precache** (`globIgnores`) e passa alla runtime cache `ls-demo-fixture`: nessun utente scarica 3,7 MB che non usa, la demo resta offline dopo il primo uso, e la build torna verde | `apps/web/vite.config.ts` |
+
+**Lesson learned**: la lezione principale è sul **cablaggio**. Il sintomo (la demo vuota, senza
+ere né mood) e la causa (il `dbName` mai propagato dalla shell ai componenti, che lo accettavano
+già da solo per i test) erano lontani: il bundle dei dati è una **catena**, e ogni anello va
+ispezionato da capo a fondo. Il secondo anello che si è rotto è il **database**: il runner
+dell'analisi apriva sempre il database predefinito, quindi la demo — anche caricata — sarebbe
+rimasta muta. Il terzo è sul **fixture**: un generatore casuale non produce **frontiere**, e un
+test che deve *dichiarare* un risultato (tre ere, i mood) ha bisogno di una cronologia composta a
+mano, come già vale per gli scenari di `10§3.3`.
+
+**Verifica**: `@ls/core` 651 test in 58 file (il test di performance passa da solo: è l'indicatore
+di saturazione di 97-6) · `@ls/web` 207 test verdi di 215 (8 falliti per l'ambiente: i test i18n
+che usano `localStorage`, **identici su `main`** sotto Node 26; il CI gira su Node 24) ·
+`eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` · `pnpm -F @ls/web build` verde
+(precache: 13 entry, 653 KiB — il chunk del fixture demo è escluso) ·
+`node scripts/check-encoding.mjs` →
+0 errori · `node scripts/check-fixtures-privacy.mjs` → 0 dati reali ·
+`node scripts/check-aggregate-blocks.mjs` → 0 violazioni.
+
+---
+
 ## 49. AGENTS.md: il contratto senza la storia (Sessione 83)
 
 **Branch**: `feat/259-rifinitura-agents`
@@ -23931,6 +23951,160 @@ insight in prosa, il deep-link), i due componenti e il focus della Timeline.
 
 
 
+===== FILE: docs/state/sessions/104-story-3-5-anteprima-demo.md =====
+
+---
+number: 104
+title: "Anteprima del risultato in onboarding: il diario di esempio (issue #270)"
+date: 2026-11-06
+state: 🟡
+merged: false
+branch: feat/270-story-3-5---anteprima-e-modalita-demo-in
+pr: 322
+claim: kilo-hp-elitebook-a320
+tags: [ui, onboarding, demo, fixture, i18n, timeline]
+---
+
+# Sessione 104 — Anteprima del risultato in onboarding: il diario di esempio (issue #270)
+
+> **Oggetto**: la **Story 3.5** — la modalità demo: il diario di esempio
+> *prima* dell'import e le prime righe della timeline reale *dopo*.
+
+## Sintesi
+
+L'issue #270 è stata implementata sulla specifica `docs/26-ONBOARDING-DEMO.md`
+(v1.0 🟢 APPROVED, ratificata dal project owner il 2026-11-02).
+
+La story chiude il buco più rumoroso del progetto: il README e la
+documentazione promettevano un'«anteprima del risultato» e una CTA «Scopri
+come funziona», ma **nessun file di codice le usava**. Il fixture
+`fixtures/demo-user.json` esisteva da anni (1 anno, 4.500 eventi) e nessuna
+riga di codice lo leggeva.
+
+Il lavoro è stato **interamente locale** e senza librerie:
+
+- il **database demo è separato** (`life-soundtrack-demo`): è un secondo
+  database Dexie, quindi il diario di esempio e la storia dell'utente non
+  possono mescolarsi, e la cancellazione è un `db.delete()`;
+- il fixture è stato **rigenerato**: ora dichiara **album** (75) e **feature**
+  (200) deterministiche, tre fasi musicali su 366 giorni e un `generatedAt`
+  derivato dal seed (non da `new Date()`): due run producono lo stesso SHA;
+- la **demo non ha una schermata propria**: la CTA apre la stessa `AppShell`
+  della Home, con il `dbName` demo propagato a Timeline, Ricordi, Esplora e
+  Analisi — nessun renderer parallelo da mantenere;
+- il **reveal** post-import mostra le prime righe della timeline **reale** e
+  l'anno **calcolato** dallo span dei dati, non cablato a 1.
+
+## Cosa è stato fatto
+
+### Core (`packages/core`)
+
+- `db/demoSeed.ts` (nuovo): `DEMO_DB_NAME`, `seedDemoDatabase(db, fixture)` —
+  normalizzazione v6 degli eventi, album derivati, `bulkPut` in transazione,
+  `recount` dei `listenCount` — `clearDemoDatabase`, `hasDemoData` e il
+  tipo `DemoFixture`;
+- `db/index.ts`: gli export pubblici.
+
+### Fixture (`scripts/generate-fixtures.mjs`)
+
+- `buildDemoUser` riscritta: tre fasi (indie/folk → pop/electronic →
+  jazz/ambient) con generi e artisti disgiunti, 10 artisti per fase e
+  67/67/66 brani, 4.500 ascolti su 366 giorni, 75 album, 200 feature
+  `source: 'manual'`, chiavi `eventKey`/`canonicalKey` univoche e
+  `generatedAt` deterministico.
+
+### App (`apps/web`)
+
+- `demo/demoMode.ts` (nuovo): `loadDemoFixture` (`import('…?raw')` + parse),
+  `startDemo` (open + seed + pipeline sul database demo), `stopDemo`;
+- `analysis/analysisRunner.ts`: la dipendenza `db?` — senza, il runner
+  aprirebbe sempre il database dell'utente e la demo resterebbe senza ere;
+- `screens/AppShell.tsx`: props `dbName` / `demo` / `onExitDemo`, il banner
+  dichiarativo e il bottone d'uscita;
+- `onboarding/OnboardingRouter.tsx`: la CTA sul primo passo, gli stati
+  `demo-loading` / `demo` / `demo-error` e il reveal con anteprima;
+- `onboarding/revealPreview.ts` (nuovo): `buildRevealPreview` — le prime
+  righe e l'anno calcolato.
+
+### i18n
+
+Le **12 chiavi** nuove in it ed en: `onboarding.demo.*` (banner, uscita,
+caricamento, errore), `onboarding.reveal.preview.*` e la coppia pluralizzata
+`onboarding.reveal.subtitle_one` / `_other` (che sostituisce la chiave
+`subtitle` cablata su un anno).
+
+### Test
+
+**19 test** nuovi: 10 in `@ls/core` (7 sul loader — troncamento, album,
+`listenCount`, cancellazione, database dell'utente intatto — e 3 sul fixture:
+conteggi, determinismo, pipeline che produce **3 ere** e i mood
+`mood_day`/`mood_week`), 9 in `@ls/web` (CTA, stati della demo, anteprima del
+reveal, propagazione del `dbName`).
+
+## Decisioni
+
+- **Il fixture entra come parametro, non come import**: `@ls/core` non può
+  importare `fixtures/` (build `tsc` con `rootDir` su `src`). La specifica
+  prevedeva l'import di default: la deviazione è dichiarata e il contratto
+  del core resta identico.
+- **Il database si inietta per `dbName`**: la via già usata dalla Story 3.3
+  per i test; un secondo database Dexie non può mescolarsi con quello
+  dell'utente (D-26.1).
+- **Il fixture è un chunk lazy (`?raw`)**: 3,6 MB non entrano nel bundle
+  iniziale, e l'import di un JSON così grande farebbe inferire a TypeScript
+  un tipo enorme. Il chunk è **fuori dal precache** del service worker
+  (`globIgnores`): 3,7 MB nel precache li scaricherebbero tutti gli utenti,
+  anche quelli che non aprono la demo, e superano il limite di Workbox
+  (2 MiB) — la build fallirebbe. La runtime cache `ls-demo-fixture` lo
+  conserva dopo il primo uso, quindi la demo resta disponibile offline.
+- **Tre fasi disgiunte** nel fixture: è ciò che fa produrre all'era detector
+  **tre** ere — un fixture a genera casuale non avrebbe frontiere.
+
+## Analisi di avanzamento
+
+- **Numeri**: 19 test nuovi (10 in `@ls/core`, 9 in `@ls/web`); suite
+  `@ls/core` 651 test verdi in 58 file; suite `@ls/web` 207 test verdi di 215
+  (gli **8 fallimenti i18n** sono quelli noti del `localStorage` assente sotto
+  Node 26 — **identici su `main`**; il CI gira su Node 24); il test di
+  **performance** del core passa da solo (è l'indicatore di saturazione già
+  documentato, cfr. 97-6: 1.040 ms contro la soglia locale di 500 ms, in un
+  run parallelo).
+- **Cosa è pronto**: la CTA, il diario di esempio con album e feature, il
+  banner dichiarativo, l'uscita con un click, l'anteprima del reveal con
+  l'anno calcolato.
+- **Cosa manca**: l'export e la cancellazione definitiva dei dati reali
+  (Story 5.2); la pipeline delle **audio features** vere (EPIC 4, Story 4.1);
+  le piattaforme di import.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`; i gate
+  `check-aggregate-blocks`, `check-encoding` e `check-fixtures-privacy` verdi.
+- **Gate per il test**: `pnpm run verify` deve essere verde in CI (Node 24);
+  in locale gli 8 fallimenti i18n sono attesi e documentati.
+
+## Lesson learned
+
+- **Un fixture da 3,6 MB non si importa in un pacchetto**: il vincolo non è
+  il peso, è il `rootDir` del `tsc`. Il parametro è più semplice del `?raw`
+  lato core.
+- **Il cablaggio mancante era invisibile**: il `dbName` esisteva già sui
+  componenti (per i test), ma nessuno lo propagava dalla shell. Il sintomo
+  (la demo vuota) era lontano dalla causa (il parametro mai passato): il
+  bundle dei dati è una catena, e ogni anello va ispezionato da capo a
+  fondo.
+
+## Documenti aggiornati
+
+- `docs/state/stories/3.5-anteprima-onboarding-demo.md` e
+  `docs/state/sessions/104-story-3-5-anteprima-demo.md` (questa)
+- `docs/06-UX-FLOWS-STATES.md` — §2.14 e changelog
+- `docs/07-UI-SPEC.md` — §2.10c e changelog
+- `docs/08-COPY-I18N.md` — §2.1 e changelog
+- `docs/10-TESTING.md` — §3.4 e changelog
+- `docs/11-BACKLOG.md` — sezione Story 3.5
+- `docs/18-DEV-LOG.md` — la entry della sessione
+- `scripts/generate-bundle.ps1` — `$files`
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -25549,10 +25723,13 @@ id: "3.5"
 title: "Anteprima del risultato in onboarding (modalità demo)"
 phase: 3
 area: ui
-status: todo
+status: in-review
 priority: I
 depends_on: ["0.4", "3.1"]
 issue: 270
+branch: "feat/270-story-3-5---anteprima-e-modalita-demo-in"
+pr: 322
+claim: kilo-hp-elitebook-a320
 spec_refs:
   - docs/26-ONBOARDING-DEMO.md
   - docs/06-UX-FLOWS-STATES.md
@@ -25573,25 +25750,109 @@ project owner il 2026-11-02, Sessione 87).
 
 ## Stato
 
-⬚ **TODO** — spec ratificata, issue canonica #270 aperta: **in attesa di claim**
-(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
-`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
+🟡 **IN REVIEW** — implementata nella Sessione 104 (issue **#270**, branch
+`feat/270-story-3-5---anteprima-e-modalita-demo-in`, worktree
+`ls-270-story-3-5---anteprima-e-modalita-demo-in`).
+
+Consegnato:
+
+- **`packages/core/src/db/demoSeed.ts`** (nuovo): il loader del fixture in un
+  **database separato** (`DEMO_DB_NAME = 'life-soundtrack-demo'`), la
+  normalizzazione v6 degli eventi, gli album derivati, il `recount` dei
+  `listenCount` e `clearDemoDatabase` (la cancellazione con un click);
+- **`scripts/generate-fixtures.mjs`**: `buildDemoUser` riscritta — il fixture
+  dichiara **album** (75) e **features** (200) deterministiche, tre fasi
+  musicali su 366 giorni, `generatedAt` derivato dal seed (non da `new Date()`);
+- **`apps/web/src/demo/demoMode.ts`** (nuovo): `loadDemoFixture` (import
+  `?raw` + `JSON.parse`, lazy chunk), `startDemo` (open + seed + pipeline sul
+  database demo) e `stopDemo` (cancellazione);
+- **`apps/web/src/analysis/analysisRunner.ts`**: il runner accetta il
+  database da analizzare (`db?`), altrimenti la demo resterebbe senza ere né
+  mood;
+- **`apps/web/src/screens/AppShell.tsx`**: props `dbName` / `demo` /
+  `onExitDemo`, banner dichiarativo (`data-testid="demo-banner"`) e bottone
+  d'uscita — il `dbName` è propagato a Home, Ricordi, Esplora e Analisi;
+- **`apps/web/src/onboarding/OnboardingRouter.tsx`**: la CTA «Scopri come
+  funziona» sul **primo passo** (welcome), gli stati `demo-loading` /
+  `demo` / `demo-error` e il **reveal con anteprima** (≥3 righe reali + anno
+  calcolato);
+- **`apps/web/src/onboarding/revealPreview.ts`** (nuovo): `buildRevealPreview`
+  — le prime righe della timeline e l'anno **calcolato** dallo span dei dati;
+- **i18n**: le **12 chiavi** nuove in it ed en (`onboarding.demo.*`,
+  `onboarding.reveal.preview.*`, `onboarding.reveal.subtitle_one/_other`);
+- **19 test** nuovi (10 in `@ls/core`, 9 in `@ls/web`).
 
 ## Task
 
-- [ ] Da definire al claim, dalla spec `docs/26-ONBOARDING-DEMO.md`
+- [x] T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding
+- [x] T3.5.2 — Demo: caricamento di `fixtures/demo-user.json` in un contesto **isolato** (nessun dato scritto nel database dell'utente)
+- [x] T3.5.3 — Anteprima resa con gli **stessi componenti** della Home e della Timeline (Story 3.1): nessun renderer parallelo da mantenere
+- [x] T3.5.4 — Reveal post-import: le **prime tre righe** della timeline reale invece del solo contatore di eventi
+- [x] T3.5.5 — Dichiarazione: i dati della demo sono **sintetici** e il passaggio all'import reale è esplicito
 
 ## Acceptance criteria
 
-- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 3.5" (compilare al claim)
+- [x] La CTA della demo è raggiungibile dal primo passo e mostra un **diario di esempio**, non un testo descrittivo
+- [x] La demo usa gli stessi componenti della Home/Timeline (nessun renderer separato)
+- [x] La demo **non scrive** nel database dell'utente (test: dopo la demo il DB è vuoto)
+- [x] Il reveal post-import mostra almeno 3 righe della timeline reale
+- [x] i18n IT/EN per le nuove stringhe
+- [x] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
+
+## Scelte di implementazione
+
+- **Il fixture entra come parametro, non come import**: `seedDemoDatabase(db,
+  fixture)` riceve il fixture già parsato. Il `@ls/core` non può importare
+  `fixtures/` (build `tsc` con `rootDir` su `src`): un import statico
+  romperebbe il build del pacchetto. La specifica prevedeva l'import di
+  default — la **deviazione** è dichiarata qui e il contratto è lo stesso
+  (il core resta agnostico rispetto al formato del fixture).
+- **Il database si inietta per `dbName`, non per istanza**: `AppShell` riceve
+  il nome del database e lo propaga ai hook che lo aprono. È la via già
+  usata dalla Story 3.3 per i test: un secondo database Dexie non può
+  mescolarsi con quello dell'utente (D-26.1).
+- **Il fixture è caricato come `?raw`**: il file è 3,6 MB e diventa un chunk
+  lazy (non nel bundle iniziale); l'import di un JSON da 3,6 MB farebbe
+  inferire a TypeScript un tipo enorme. Il PWA lo precarica come ogni altro
+  asset statico.
+- **Il chunk del fixture è **fuori** dal precache del service worker**: 3,7 MB
+  nel precache sarebbero un peso che scarica **tutti** gli utenti, anche
+  quelli che non aprono mai la demo, e superano il limite di Workbox (2 MiB)
+  — la build fallirebbe. Il chunk è escluso con `globIgnores` e finisce
+  nella runtime cache `ls-demo-fixture` al primo click sulla CTA: la demo
+  resta disponibile offline dopo il primo uso.
+- **Tre fasi musicali** nel fixture (indie/folk → pop/electronic → jazz/ambient)
+  con generi e artisti disgiunti: è ciò che fa produrre all'era detector
+  **tre** ere (i test verificano ≥1 era e i mood `mood_day`/`mood_week`).
+- **L'anno del reveal è calcolato**, non cablato a 1: `buildRevealPreview`
+  deriva lo span dai dati reali e la chiave i18n è pluralizzata
+  (`subtitle_one` / `subtitle_other`).
+- **La demo non ha una schermata propria**: la CTA apre la `AppShell` con il
+  database demo — gli stessi componenti della Home, della Timeline, di
+  Esplora e di Analisi.
 
 ## Lesson learned
 
-_(al termine dell'implementazione)_
+- **Un fixture da 3,6 MB non si importa in un pacchetto**: il vincolo non è
+  il peso, è il `rootDir` del `tsc` di `@ls/core`. Il parametro è più
+  semplice del `?raw` lato core e mantiene il pacchetto indipendente dai
+  fixture di test.
+- **Il bundle è una catena**: il `dbName` esisteva già sui componenti (per i
+  test), ma nessuno lo propagava dalla shell. La demo ha reso visibile un
+  cablaggio mancante — il sintomo (la demo vuota) era lontano dalla causa
+  (il parametro mai passato).
 
 ## Documenti aggiornati
 
-_(alla chiusura della PR)_
+- `docs/06-UX-FLOWS-STATES.md` — §2.14 (demo mode) e changelog
+- `docs/07-UI-SPEC.md` — §2.10c (DemoBanner e RevealPreview) e changelog
+- `docs/08-COPY-I18N.md` — §2.1 (chiavi `onboarding.*`) e changelog
+- `docs/10-TESTING.md` — §3.4 (fixture demo mode) e changelog
+- `docs/11-BACKLOG.md` — sezione Story 3.5
+- `docs/18-DEV-LOG.md` — la entry della sessione
+- `docs/state/stories/3.5-anteprima-onboarding-demo.md` (questo file) e
+  `docs/state/sessions/104-story-3-5-anteprima-demo.md` (la sessione)
+- `scripts/generate-bundle.ps1` — `$files` (sessione 104)
 
 
 
@@ -31624,7 +31885,7 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.6 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
+> Status: 🟡 DRAFT · Versione 0.7 · Sessione 104 (2026-11-06, issue #270 — Story 3.5)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -31719,6 +31980,12 @@ Note: nessuna gestione errore (schermata statica).
 - Pulsante "Salta" visibile ma discreto in basso a destra
 - Click su un'era durante l'animazione → interrupt e navigazione a ⑧
 - Dopo completamento → pulsante "Esplora la tua timeline" → ⑦
+
+**Anteprima del risultato** *(Story 3.5, Sessione 104)*: accanto al contatore
+degli eventi, il reveal mostra le **prime righe della timeline reale** — non
+un testo descrittivo: almeno **tre** righe (periodo, numero di ascolti, mood
+dominante quando esiste) e l'**anno calcolato** dallo span dei dati (non
+cablato a 1). Senza dati utilizzabili il reveal resta sul solo contatore.
 
 ### 2.6 ⑥ Home
 
@@ -31896,7 +32163,17 @@ fuori la card.
 - Analisi: "Importa per vedere le tue analisi"
 - Ricordi: "Importa per generare ricordi"
 
-**Demo mode**: click su "Scopri come funziona" → carica fixture `fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, generato da `scripts/generate-fixtures.mjs`); flag `_metadata.demoMode = true` (tutti i dati cancellabili con un click).
+**Demo mode** *(Story 3.5, Sessione 104)*: click su "Scopri come funziona"
+(CTA del **primo passo** dell'onboarding, ① Welcome) → il fixture
+`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, 75
+album e 200 feature deterministiche, generato da `scripts/generate-fixtures.mjs`)
+viene caricato in un **database separato** (`life-soundtrack-demo`): nessun
+dato viene scritto nel database dell'utente. Lo schermo è la **stessa Home**
+(⑥) degli altri utenti — la demo non ha un renderer parallelo — con un
+banner dichiarativo («Diario di esempio: i dati sono sintetici e il tuo
+database non è stato toccato») e il bottone **«Esci dalla demo»**, che
+cancella il database demo con un click. Gli stati intermedi sono `loading`
+(la preparazione) ed `error` (con «Torna al benvenuto»).
 
 ## 3. Flussi utente principali
 
@@ -32029,13 +32306,14 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.4 | Sessione 42 (2026-10-21) | Allineamento §2.2 e §2.13 a 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`); risolto drift documentazione↔codice (issue #107) |
 | 0.5 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.11 (⑪ Ricordi) dichiara la **nota libera** sotto ogni card (il tag dell'utente, in `Insight.userNote`, sopravvive al ricalcolo) e il fatto che il ricordo nascosto **resta** nel database; §2.12 (⑫ Share Sheet) aggiunge la destinazione **Capitolo HTML** (export statico alternativo) e il **fallback** di ogni azione (senza Web Share API o senza clipboard il file si scarica) |
 | 0.6 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.9 (⑨ Esplora) dichiara il campo di ricerca accessibile (`role="searchbox"`), il **debounce di 300 ms** e l'ordinamento per `listenCount` con spareggio stabile, e il fatto che il tab Mood filtri sul **MoodId** (non sul testo tradotto); §2.10 (⑩ Analisi) dichiara il `QuadrantChart` con **un punto per mese** (media pesata sugli ascolti), i punti come **`<button>`** accessibili, il **deep-link** alla Timeline (D-25.1) e la **frase in prosa** che accompagna il grafico; i line chart e il selettore di periodo restano **fuori perimetro** (il grafico secondario è la Timeline) |
+| 0.7 | Sessione 104 (2026-11-06, issue #270) | **Story 3.5 implementata**: §2.5 (⑤ Prima Rivelazione) dichiara l'**anteprima del risultato** — le prime righe della timeline **reale** (≥3) e l'anno **calcolato** dallo span dei dati; §2.14 (⑭ Empty State) riscrive la **demo mode**: la CTA vive sul **primo passo** dell'onboarding, il fixture viene caricato in un **database separato** (`life-soundtrack-demo`), lo schermo è la **stessa Home** (nessun renderer parallelo) con banner dichiarativo e uscita che cancella il database demo con un click |
 
 
 ===== FILE: docs/07-UI-SPEC.md =====
 
 # 07 — Specifiche UI Componenti
 
-> Status: 🟡 DRAFT · Versione 0.3 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
+> Status: 🟡 DRAFT · Versione 0.4 · Sessione 104 (2026-11-06, issue #270 — Story 3.5)
 > Vincolante per: `packages/ui/components`, test di interazione, implementazione frontend
 
 ---
@@ -32153,6 +32431,33 @@ clipboard il file viene scaricato.
 - **Interazione**: si salva all'uscita dal campo o con `Enter`. Il testo è
   locale (`Insight.userNote`) e sopravvive al ricalcolo dell'analisi.
 
+### 2.10c DemoBanner e RevealPreview (Story 3.5)
+**Uso**: la **modalità demo** (il diario di esempio) e l'**anteprima** del
+risultato nel reveal post-import.
+
+**DemoBanner**
+- **Dove**: in cima alla `AppShell`, sopra la navigazione.
+- **Contenuto**: il testo dichiarativo (i dati sono sintetici e il database
+  dell'utente non è stato toccato) e il bottone **«Esci dalla demo»**.
+- **A11y**: `role="status"` — è un annuncio, non un errore; il bottone è un
+  `<button>` normale con etichetta tradotta.
+- **Stato**: compare solo in modalità demo (`demo`): la shell dell'utente non
+  lo mostra mai.
+
+**RevealPreview**
+- **Dove**: schermata ⑤ Prima Rivelazione, sotto il contatore degli eventi.
+- **Contenuto**: titolo + **almeno tre righe** reali della timeline (periodo,
+  numero di ascolti, mood dominante quando esiste).
+- **Dati**: le righe vengono dal **database reale** dell'utente (non da una
+  simulazione) e l'anno è **calcolato** dallo span dei dati.
+- **Stato**: con dati utilizzabili → le righe; senza → nessuna anteprima (il
+  reveal resta sul solo contatore), mai un segnaposto vuoto.
+
+**Implementazione (Story 3.5, Sessione 104)**: il banner è dentro la
+`AppShell` (che riceve `dbName`, `demo` e `onExitDemo`), l'anteprima è
+costruita da `buildRevealPreview` (`apps/web/src/onboarding/revealPreview.ts`)
+— un **modello puro** sopra i dati, testabile senza database.
+
 ## 3. Regole di Composizione
 
 - **Spacing**: Usare sempre i token di spacing (`gap-4`, `p-6`), mai valori hardcoded.
@@ -32180,13 +32485,14 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | 0.1 | Sessione 7 | Prima versione completa |
 | 0.2 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.2 (MemoryCard) dichiara le tre azioni reali (nascondi, salva, condividi) e il fatto che il nascondimento **non cancella**; §2.10 (ShareSheet) dichiara le props reali (etichette già rese, `onRetry`) e i **fallback** delle destinazioni; nuova §2.10b (**NoteField**) per il tagging manuale |
 | 0.3 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.8 (QuadrantChart) dichiara i punti come **`<button>` HTML** sopra l'SVG (controllo della tastiera, non cerchio), l'`aria-label` che **dichiara i due valori** e il deep-link alla Timeline; §2.9 (InsightCard) dichiara la `description` come **frase già resa** dal core (D-A.4) e le tre azioni che scrivono `Insight.status` (ignorare esclude, non cancella) |
+| 0.4 | Sessione 104 (2026-11-06, issue #270) | **Story 3.5 implementata**: nuova §2.10c — il **DemoBanner** (il banner dichiarativo della modalità demo, con `role="status"` e il bottone d'uscita che cancella il database demo) e il **RevealPreview** (le prime righe della timeline reale e l'anno calcolato, costruite da un modello puro) |
 
 
 ===== FILE: docs/08-COPY-I18N.md =====
 
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.15 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
+> Status: 🟡 DRAFT · Versione 0.16 · Sessione 104 (2026-11-06, issue #270 — Story 3.5)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -32243,9 +32549,20 @@ Rispettare sempre `@media (prefers-reduced-motion: reduce)`: disabilitare animaz
 | `processing.eras` | {count} ere musicali in formazione | {count} musical eras forming |
 | `processing.cancel` | Annulla | Cancel |
 | `reveal.title` | La tua vita in musica | Your life in music |
-| `reveal.subtitle` | {years} anni, {events} momenti, un solo racconto | {years} years, {events} moments, one story |
+| `reveal.subtitle_one` | {years} anno, {events} momenti, un solo racconto | {years} year, {events} moments, one story |
+| `reveal.subtitle_other` | {years} anni, {events} momenti, un solo racconto | {years} years, {events} moments, one story |
+| `reveal.preview.title` | Le prime righe della tua timeline | The first rows of your timeline |
+| `reveal.preview.listens_one` | {count} ascolto | {count} listen |
+| `reveal.preview.listens_other` | {count} ascolti | {count} listens |
 | `reveal.cta` | Esplora la tua timeline | Explore your timeline |
 | `reveal.skip` | Salta | Skip |
+| `demo.banner` | Diario di esempio: i dati sono sintetici e il tuo database non è stato toccato | Sample diary: the data is synthetic and your database was not touched |
+| `demo.exit` | Esci dalla demo | Leave the demo |
+| `demo.loading.title` | Sto preparando un diario di esempio | Preparing a sample diary |
+| `demo.loading.subtitle` | Un anno di ascolti sintetici, tutto in locale | A year of synthetic listens, all local |
+| `demo.error.title` | Non sono riuscito a preparare la demo | Could not prepare the demo |
+| `demo.error.subtitle` | Riprova: i tuoi dati non sono stati toccati | Try again: your data was not touched |
+| `demo.error.back` | Torna al benvenuto | Back to the welcome |
 
 ### 2.2 `home.*`
 
@@ -32878,6 +33195,7 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.14 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 — Ricordi (⑪) e Share (⑫)**: §2.7 (`memories.*`) le **6 nuove** chiavi del feed — `firstTime`, `loading`, `error`, `loadMore`, `eras`, `erasHint` — più `eraAriaLabel`, `noteLabel` e `noteAriaLabel` (il tagging manuale: il nome dell'era e la nota libera del ricordo); §2.8 (`share.*`) le **5 nuove** chiavi del foglio di condivisione — `html` (l'export statico alternativo), `error`, `retry` e `close` — con la regola di linguaggio delle destinazioni (D-25.2: sono desiderate, non integrazioni) e il fallback delle azioni. §1: il namespace `nav` dichiara anche **Ricordi** (`nav.memories`). I **dati** (nomi delle ere, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
 | 0.15 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 — Esplora (⑨) e Analisi (⑩)**: §2.5 (`explore.*`) le chiavi **esistevano già** e sono state **usate**: l'unica nuova è `listens` (con i plurali `_one`/`_other`, §3), il numero di ascolti che accompanies ogni risultato. §2.6 (`analysis.*`) le chiavi dei quadranti e dei sei mood **esistevano già**; le **otto nuove** sono quelle che la mappa emotiva rende necessarie — `chart`, `event`, `insights`, `correct`, `dismiss`, `confidence`, `pointAria` e le due etichette dell'asse della valence (`quadrant.highValence`, `quadrant.lowValence`). §2.15 (`insight.*`): le **due** frasi che mancavano per i mood senza template — `mood.neutral` e `mood.angry` — perché l'insight in prosa del grafico (`25§7`) non può avere un buco. §1: il namespace `nav` dichiara anche **Esplora** e **Analisi** (`nav.explore`, `nav.analysis`). La **descrizione** degli insight resta una **stringa resa** dal core (D-A.4): `analysis.event` è solo l'etichetta breve della card |
+| 0.16 | Sessione 104 (2026-11-06, issue #270) | **Story 3.5 — Anteprima e modalità demo**: §2.1 (`onboarding.*`) le **12 chiavi** nuove — il **namespace `demo`** (banner dichiarativo, uscita dalla demo, preparazione, errore e ritorno al benvenuto: 7 chiavi) e l'**anteprima del reveal** (`reveal.preview.title`, `reveal.preview.listens_one`/`_other`); `reveal.subtitle` è stata **sostituita** dalla coppia pluralizzata `reveal.subtitle_one`/`_other` (l'anno è **calcolato** dallo span dei dati, non cablato a 1). La CTA «Scopri come funziona» **esisteva già** (`empty.cta.demo`, §2.10): è stata **usata**, non duplicata. Materializzate in `it`/`en` |
 
 
 
@@ -33267,7 +33585,7 @@ L2 (protocollo) a L3 (applicazione).
 
 # 10 — Strategia di Testing
 
-> Status: 🟢 APPROVED · Versione 1.2 · Sessione 62 (2026-10-28, issue #187), aggiornata nella Sessione 70 (2026-10-31, issue #214)
+> Status: 🟢 APPROVED · Versione 1.3 · Sessione 62 (2026-10-28, issue #187), aggiornata nella Sessione 104 (2026-11-06, issue #270)
 
 ---
 
@@ -33334,7 +33652,24 @@ Ogni scenario ha `_expectedInsights` (nel `_metadata`) con gli insight attesi do
 
 ### 3.4 Fixture demo mode
 
-`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti) per la modalità "Scopri come funziona" di `06-UX-FLOWS-STATES §2.14`. Il flag `_metadata.demoMode = true` segnala all'app che i dati vanno cancellati con un click.
+`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, **75
+album** e **200 feature** deterministiche) per la modalità "Scopri come
+funziona" di `06-UX-FLOWS-STATES §2.14`. Il flag `_metadata.demoMode = true`
+segnala all'app che i dati vanno cancellati con un click; il caricamento
+avviene in un **database separato** (`life-soundtrack-demo`), mai in quello
+dell'utente.
+
+Il fixture è **composto**, non casuale: tre fasi musicali disgiunte (indie/folk
+→ pop/electronic → jazz/ambient) su 366 giorni. Serve perché i test della
+demo **dichiarano un risultato**: un generatore casuale non produrrebbe
+frontiere di era, e la pipeline non produrrebbe né le **tre** ere né i mood
+`mood_day`/`mood_week` che l'anteprima mostra. Il `generatedAt` è derivato dal
+seed (non da `new Date()`): due run producono lo stesso file.
+
+Test associati: `packages/core/src/db/__tests__/demo-seed.test.ts` (il loader:
+album derivati, `listenCount`, cancellazione, database dell'utente intatto) e
+`packages/core/src/db/__tests__/demo-fixture.test.ts` (conteggi, determinismo,
+pipeline → ≥1 era e i mood).
 
 ### 3.5 Generazione fixture
 
@@ -33438,13 +33773,14 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 | 1.0 | Sessione 3 | 🟢 APPROVED · Versione 1.0 · Sessione 3 |
 | 1.1 | 2026-10-28 (issue #187) | **§8 allineata alla spec `21-AUDIO-FEATURES.md`** (v1.0 🟢 APPROVED): la riga "FreqBlog / Musicae" — due placeholder mai esistiti come provider, già rimossi da `02§3.4` e dalla CSP di `12§2.1` — è sostituita dai **due mock reali** della pipeline audio features (**iTunes Search API** per l'anteprima audio di 30 s che alimenta Essentia.js, **AcousticBrainz** per il bonus sui MBID), con i fixture in `fixtures/api-mocks/itunes/` e `fixtures/api-mocks/acousticbrainz/` (`21§15.2`). Il resto della strategia di testing non cambia: `§2` (coverage ≥ 75% per `packages/core/enrichment/*`) e `§7` (invarianti `valence ∈ [0,1]`) sono già quelli richiesti dalla spec. Header allineato (era fermo a v1.0 dalla Sessione 3) |
 | 1.2 | 2026-10-31 (issue #214) | **§3.3 — il fixture di scenario dell'event detector**: `fixtures/scenarios/listening-spike.json` (709 eventi, 95 giorni) è una cronologia **composta**: 81 giorni di baseline (4-7 ascolti al giorno, 6 artisti noti, **3 giorni di silenzio** ai giorni 40-42) e 14 giorni di **picco** (20 ascolti al giorno, un artista che domina il 60% e 4 artisti nuovi ogni giorno). Serve perché l'event detector cerca **anomalie**: su un fixture casuale non ci sarebbe nessun salto dichiarato, e il test non potrebbe dichiarare un risultato (la lezione della Sessione 69). Il **profilo delle audio features** è **per artista** (dichiarato nel test): la baseline deve avere una varianza giornaliera della valence, altrimenti la deviazione standard sarebbe zero e lo z-score sulla valence non sarebbe definito. Aggiunto il fixture alla lista dei **composti** in §3.3 |
+| 1.3 | 2026-11-06 (issue #270) | **§3.4 — il fixture demo mode**: `fixtures/demo-user.json` è stato **rigenerato** con `albums` (75) e `features` (200) deterministiche e con una cronologia **composta** a tre fasi musicali disgiunte (indie/folk → pop/electronic → jazz/ambient) su 366 giorni: i test della demo **dichiarano un risultato** (tre ere, i mood `mood_day`/`mood_week`), cosa che un fixture casuale non garantirebbe. Il `generatedAt` è derivato dal seed, quindi due run producono lo stesso file. Il caricamento avviene in un **database separato** (`life-soundtrack-demo`) |
 
 
 ===== FILE: docs/11-BACKLOG.md =====
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.36 · Sessione 97 (2026-11-03, Story 3.2) · l'**EPIC 3** (UI) ha le sue **prime tre schermate**: la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app) e la **3.2** (Ricordi + Share, Sessione 97 — schermata ⑪ e ShareSheet ⑫, card 1080×1350 su canvas, capitolo HTML autonomo, tagging manuale). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding) per chiudere il percorso end-to-end, poi la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e il blocco NEXT-STEP del README non la indica più come prossima story. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.37 · Sessione 104 (2026-11-06, Story 3.5) · l'**EPIC 3** (UI) ha **chiuso il percorso end-to-end**: la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app), la **3.2** (Ricordi + Share, Sessione 97 — schermata ⑪ e ShareSheet ⑫, card 1080×1350 su canvas, capitolo HTML autonomo, tagging manuale), la **3.3** (Esplora + Analisi, Sessione 103 — schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa) e la **3.5** (anteprima e modalità demo in onboarding, Sessione 104 — il diario di esempio in un database separato e le prime righe della timeline reale nel reveal). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`). Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -33980,22 +34316,22 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Descrizione**: L'onboarding oggi termina con un **contatore** di eventi (`apps/web/src/onboarding/OnboardingRouter.tsx`, schermata ⑤ Reveal): l'utente non vede mai il prodotto prima di usarlo, e il README dichiarava un'«anteprima del risultato» che il codice non ha. Il progetto ha già i mattoni: `fixtures/demo-user.json` (1 anno, 4500 eventi, 200 track, 30 artisti, `demoMode: true`) è previsto da `06-UX-FLOWS-STATES.md` §2.14 e la CTA «Scopri come funziona» esiste nelle stringhe i18n (`empty.cta.demo`) — ma **nessun file di codice li usa**. Questa story rende l'onboarding **spettacolare**: il diario di esempio *prima* dell'import, le prime righe della timeline reale *dopo*.
 
-**Stato**: ⬚ **TODO** — **pronta al claim**: la specifica (`docs/26-ONBOARDING-DEMO.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante; l'agente prende in carico l'issue **#270** (`agent-ready`) e la lavora secondo la procedura di claim. La spec definisce il **DB demo separato**, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche) e il reveal con ≥3 righe reali.
+**Stato**: 🟡 **IN REVIEW** — implementata nella Sessione 104 (issue **#270**, branch `feat/270-story-3-5---anteprima-e-modalita-demo-in`). Consegnato: il **database demo separato** (`life-soundtrack-demo`) con il loader del fixture (`packages/core/src/db/demoSeed.ts`), il fixture **rigenerato** con `albums` e `features` deterministiche (75 album, 200 feature, tre fasi musicali, `generatedAt` deterministico), la CTA «Scopri come funziona» sul **primo passo** dell'onboarding, il banner dichiarativo e l'uscita con un click, e il **reveal con anteprima** (le prime righe della timeline reale e l'anno **calcolato**). Dettagli: `docs/state/stories/3.5-anteprima-onboarding-demo.md`.
 
 **Task**:
-- T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding (la stringa `empty.cta.demo` esiste ma non è renderizzata)
-- T3.5.2 — Demo: caricamento di `fixtures/demo-user.json` in un contesto **isolato** (nessun dato scritto nel database dell'utente)
-- T3.5.3 — Anteprima resa con gli **stessi componenti** della Home e della Timeline (Story 3.1): nessun renderer parallelo da mantenere
-- T3.5.4 — Reveal post-import: le **prime tre righe** della timeline reale invece del solo contatore di eventi
-- T3.5.5 — Dichiarazione: i dati della demo sono **sintetici** e il passaggio all'import reale è esplicito
+- [x] T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding (la stringa `empty.cta.demo` esiste ma non è renderizzata)
+- [x] T3.5.2 — Demo: caricamento di `fixtures/demo-user.json` in un contesto **isolato** (nessun dato scritto nel database dell'utente)
+- [x] T3.5.3 — Anteprima resa con gli **stessi componenti** della Home e della Timeline (Story 3.1): nessun renderer parallelo da mantenere
+- [x] T3.5.4 — Reveal post-import: le **prime tre righe** della timeline reale invece del solo contatore di eventi
+- [x] T3.5.5 — Dichiarazione: i dati della demo sono **sintetici** e il passaggio all'import reale è esplicito
 
 **Acceptance criteria**:
-- [ ] La CTA della demo è raggiungibile dal primo passo e mostra un **diario di esempio**, non un testo descrittivo
-- [ ] La demo usa gli stessi componenti della Home/Timeline (nessun renderer separato)
-- [ ] La demo **non scrive** nel database dell'utente (test: dopo la demo il DB è vuoto)
-- [ ] Il reveal post-import mostra almeno 3 righe della timeline reale
-- [ ] i18n IT/EN per le nuove stringhe
-- [ ] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
+- [x] La CTA della demo è raggiungibile dal primo passo e mostra un **diario di esempio**, non un testo descrittivo
+- [x] La demo usa gli stessi componenti della Home/Timeline (nessun renderer separato)
+- [x] La demo **non scrive** nel database dell'utente (test: dopo la demo il DB è vuoto)
+- [x] Il reveal post-import mostra almeno 3 righe della timeline reale
+- [x] i18n IT/EN per le nuove stringhe
+- [x] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
 
 **Dipendenze**: Story 0.4 ✅ (onboarding), Story 3.1 ✅ (Home + Timeline) · **effetto pieno dipende dalla Story 2.5** (senza, la demo non ha ere né mood)
 **Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9
@@ -41956,38 +42292,302 @@ function buildListeningSpikeScenario() {
   };
 }
 
+/**
+ * Le **fasi musicali** del fixture demo — Story 3.5, `docs/26-ONBOARDING-DEMO.md`
+ * v1.0 (D-26.2).
+ *
+ * Ogni fase ha generi, artisti, ore di ascolto e feature proprie: il
+ * rilevatore delle ere (04§5, change point detection) trova i confini fra le
+ * fasi e la demo mostra **ere e mood reali** invece di un contatore vuoto.
+ *
+ * I valori `valence`/`energy` sono scelti sulle fasce del classificatore
+ * (04§3.4: `valenceThreshold` 0.5, `energyThreshold` 0.5, `neutralBand` 0.1,
+ * `excitedEnergyThreshold` 0.75):
+ *
+ * | fase | generi            | valence | energy | mood atteso |
+ * |------|-------------------|---------|--------|-------------|
+ * | a    | indie, folk       | 0.30    | 0.30   | `sad`       |
+ * | b    | pop, electronic   | 0.80    | 0.85   | `excited`   |
+ * | c    | jazz, ambient     | 0.55    | 0.28   | `calm`      |
+ */
+const DEMO_PHASES = [
+  {
+    key: 'a',
+    genres: ['indie', 'folk'],
+    hours: [22, 23, 0, 1, 2],
+    valence: 0.3,
+    energy: 0.3,
+    tempo: 95,
+    danceability: 0.35,
+    acousticness: 0.6,
+    instrumentalness: 0.3,
+  },
+  {
+    key: 'b',
+    genres: ['pop', 'electronic'],
+    hours: [18, 19, 20, 21, 22],
+    valence: 0.8,
+    energy: 0.85,
+    tempo: 122,
+    danceability: 0.8,
+    acousticness: 0.15,
+    instrumentalness: 0.25,
+  },
+  {
+    key: 'c',
+    genres: ['jazz', 'ambient'],
+    hours: [21, 22, 23, 0, 1],
+    valence: 0.55,
+    energy: 0.28,
+    tempo: 78,
+    danceability: 0.3,
+    acousticness: 0.45,
+    instrumentalness: 0.55,
+  },
+];
+
+/** Clampa un valore in [0, 1]. */
+function clamp01(value) {
+  return Math.min(1, Math.max(0, value));
+}
+
+/** Arrotonda a 3 decimali: i numeri del fixture restano leggibili. */
+function round3(value) {
+  return Math.round(value * 1000) / 1000;
+}
+
+/**
+ * Il fixture **demo** — Story 3.5, `docs/26-ONBOARDING-DEMO.md` v1.0.
+ *
+ * Un anno di storia sintetica (2024, 4 500 eventi, 200 brani, 30 artisti)
+ * diviso in **tre fasi musicali**, con `albums` e `features` deterministiche
+ * (D-26.2): senza feature i motori di analisi non produrrebbero né ere né mood
+ * (D-A.1) e la demo mostrerebbe il prodotto più povero, non «la magia».
+ *
+ * **`generatedAt` è deterministico** (D-26.4): deriva dal seed, non da
+ * `new Date()`. Due run consecutivi producono lo stesso file.
+ */
 function buildDemoUser({ seed }) {
   // 1 anno di storia: 2024-01-01 → 2024-12-31 (demo mode §06 §2.14)
   const periodStart = Date.UTC(2024, 0, 1);
   const periodEnd = Date.UTC(2025, 0, 1);
+  const dayMs = 86400000;
+  const totalDays = Math.round((periodEnd - periodStart) / dayMs);
   const rand = makeRng(seed);
   const importId = uuidLike(rand);
-  const artists = makeArtists(rand, 30);
-  const tracks = makeTracks(rand, artists, 200);
-  const listens = makeListens(rand, {
-    count: 4500,
-    tracks,
-    artists,
-    periodStart,
-    periodEnd,
-    importId,
-  });
+  // D-26.4: `generatedAt` deriva dal seed → il fixture è riproducibile.
+  const generatedAtMs = periodStart + (seed % dayMs);
+
+  const artistNames = [...new Set(ARTIST_POOL)];
+  const artists = [];
+  const albums = [];
+  const tracks = [];
+  const features = [];
+  const phaseTracks = [[], [], []];
+
+  const artistsPerPhase = 10;
+  const tracksPerPhase = [67, 67, 66];
+  const durations = [180000, 210000, 240000, 270000, 300000, 330000, 360000];
+
+  for (let p = 0; p < DEMO_PHASES.length; p += 1) {
+    const phase = DEMO_PHASES[p];
+    const phaseArtists = [];
+
+    // I brani della fase sono distribuiti equamente fra i suoi artisti
+    // (6 o 7 ciascuno): il resto passa al primo artista.
+    const tracksPerArtist = [];
+    let remainingTracks = tracksPerPhase[p];
+    for (let a = 0; a < artistsPerPhase; a += 1) {
+      const share = Math.floor(remainingTracks / (artistsPerPhase - a));
+      tracksPerArtist.push(share);
+      remainingTracks -= share;
+    }
+
+    for (let a = 0; a < artistsPerPhase; a += 1) {
+      const artist = {
+        id: uuidLike(rand),
+        name: artistNames[(p * artistsPerPhase + a) % artistNames.length],
+        mbid: null,
+        genres: [...phase.genres],
+        platformIds: { spotify: `spotify:artist:${uuidLike(rand).slice(0, 22)}` },
+        listenCount: 0,
+      };
+      artists.push(artist);
+      phaseArtists.push(artist);
+
+      // 2 o 3 album per artista: i brani del branoartist puntano a uno di essi.
+      const albumCount = 2 + (a % 2);
+      const artistAlbums = [];
+      for (let al = 0; al < albumCount; al += 1) {
+        const album = {
+          id: uuidLike(rand),
+          name: `${artist.name} — ${ALBUM_NAME_PATTERNS[(al + p) % ALBUM_NAME_PATTERNS.length]}`,
+          artistId: artist.id,
+          mbid: null,
+          upc: null,
+          releaseDate: String(2019 + p),
+          artworkUrl: null,
+          platformIds: { spotify: `spotify:album:${uuidLike(rand).slice(0, 22)}` },
+        };
+        albums.push(album);
+        artistAlbums.push(album);
+      }
+
+      // I brani dell'artista: `k` è l'indice del brano **fra quelli di questo
+      // artista**, e seleziona nome e durata con coprimi 9 e 7 → le coppie
+      // (nome, durata) sono univoche e il `canonicalKey` non collide.
+      for (let k = 0; k < tracksPerArtist[a]; k += 1) {
+        const name = TRACK_NAME_PATTERNS[k % TRACK_NAME_PATTERNS.length](artist.name);
+        const durationMs = durations[k % durations.length];
+        const track = {
+          id: uuidLike(rand),
+          canonicalKey: canonicalKeyFor({ name, artist: artist.name, durationMs }),
+          name,
+          artistId: artist.id,
+          albumId: artistAlbums[k % artistAlbums.length].id,
+          durationMs,
+          isrc: null,
+          mbid: null,
+          explicit: null,
+          genres: [...phase.genres],
+          artworkUrl: null,
+          platformIds: { spotify: `spotify:track:${uuidLike(rand).slice(0, 22)}` },
+          firstSeenAt: 0,
+          lastSeenAt: 0,
+          listenCount: 0,
+        };
+        tracks.push(track);
+        phaseTracks[p].push(track);
+
+        // D-26.2: le feature sono sintetiche ma **dichiarate** (`source:
+        // 'manual'`): la demo non deve mentire (D-26.3).
+        features.push({
+          trackId: track.id,
+          valence: round3(clamp01(phase.valence + (rand() - 0.5) * 0.08)),
+          energy: round3(clamp01(phase.energy + (rand() - 0.5) * 0.08)),
+          danceability: round3(clamp01(phase.danceability + (rand() - 0.5) * 0.1)),
+          acousticness: round3(clamp01(phase.acousticness + (rand() - 0.5) * 0.1)),
+          instrumentalness: round3(clamp01(phase.instrumentalness + (rand() - 0.5) * 0.1)),
+          speechiness: round3(clamp01(0.04 + rand() * 0.08)),
+          liveness: round3(clamp01(rand() * 0.2)),
+          tempo: Math.round(phase.tempo + (rand() - 0.5) * 8),
+          key: Math.floor(rand() * 12),
+          mode: rand() < 0.7 ? 1 : 0,
+          loudness: Math.round((-8 - rand() * 12) * 10) / 10,
+          timeSignature: 4,
+          source: 'manual',
+          fetchedAt: generatedAtMs,
+          schemaVersion: 1,
+        });
+      }
+    }
+  }
+
+  // Gli ascolti: 12-13 al giorno, distribuiti sulle tre fasi. Ogni giorno
+  // supera `minEventsPerPeriod` (3, 04§3.4) → il mood tracker ha dati.
+  const listens = [];
+  const eventKeys = new Set();
+  const perDay = Math.floor(4500 / totalDays);
+  const remainder = 4500 - perDay * totalDays;
+
+  for (let day = 0; day < totalDays; day += 1) {
+    const phaseIndex = day < 122 ? 0 : day < 244 ? 1 : 2;
+    const phase = DEMO_PHASES[phaseIndex];
+    const pool = phaseTracks[phaseIndex];
+    const count = perDay + (day < remainder ? 1 : 0);
+
+    for (let i = 0; i < count; i += 1) {
+      const track = pool[Math.floor(rand() * pool.length)];
+      const platform = pickWeighted(rand, [
+        ['spotify', 0.6],
+        ['youtube_music', 0.15],
+        ['apple_music', 0.1],
+        ['lastfm', 0.1],
+        ['listenbrainz', 0.05],
+      ]);
+      const hour = phase.hours[Math.floor(rand() * phase.hours.length)];
+      const minute = Math.floor(rand() * 60);
+      const second = Math.floor(rand() * 60);
+      const startedAt = periodStart + day * dayMs + hour * 3600000 + minute * 60000 + second * 1000;
+      const durationMs = track.durationMs;
+      const msPlayed = Math.min(
+        durationMs,
+        Math.floor(durationMs * (0.6 + rand() * 0.4)), // 60%-100% della traccia
+      );
+
+      // L'`eventKey` è la PK degli ascolti: se collidesse, l'evento
+      // andrebbe perso in seeding. Si sposta il timestamp finché non è
+      // univoco.
+      let timestamp = Math.min(startedAt + msPlayed, periodEnd - 1);
+      let eventKey = eventKeyFor({ platform, trackId: track.id, timestamp, durationMs });
+      while (eventKeys.has(eventKey)) {
+        timestamp = Math.min(timestamp + 1000, periodEnd - 1);
+        eventKey = eventKeyFor({ platform, trackId: track.id, timestamp, durationMs });
+      }
+      eventKeys.add(eventKey);
+
+      listens.push({
+        id: uuidLike(rand),
+        eventKey,
+        platform,
+        importId,
+        timestamp,
+        startedAt: timestamp - msPlayed,
+        durationMs: msPlayed,
+        trackId: track.id,
+        completed: msPlayed >= durationMs - 5000,
+        skipped: false,
+        shuffle: rand() < 0.4,
+        offline: rand() < 0.05,
+        incognito: rand() < 0.03,
+        reasonStart: pick(rand, ['playbtn', 'clickrow', 'trackdone', 'appload']),
+        reasonEnd: pick(rand, ['trackdone', 'endplay', 'fwdbtn', 'backbtn']),
+        deviceType: pick(rand, DEVICES),
+        deviceDetail: null,
+        ip: null, // privacy-by-design: mai persistito
+        country: pick(rand, ['IT', 'DE', 'FR', 'ES', 'NL', 'GB']),
+        // Campi v6 (Story 1.6): assenti nel fixture → il loader li normalizza.
+        city: null,
+        citySource: null,
+        cityConfidence: null,
+        day: dayString(timestamp),
+      });
+
+      track.listenCount += 1;
+      track.firstSeenAt =
+        track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
+      track.lastSeenAt = Math.max(track.lastSeenAt, timestamp);
+      const artist = artists.find((a) => a.id === track.artistId);
+      if (artist) artist.listenCount += 1;
+    }
+  }
+
+  listens.sort((a, b) => a.timestamp - b.timestamp);
+
   return {
     _metadata: {
       name: 'demo-user',
-      version: '1.0',
-      session: 13,
-      generatedAt: new Date().toISOString(),
+      version: '2.0',
+      session: 104,
+      generatedAt: isoDate(generatedAtMs),
       seed,
       description:
-        'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti.',
-      counts: { listens: listens.length, tracks: tracks.length, artists: artists.length },
+        'Demo user per modalità "Scopri come funziona" (06-UX §2.14). 1 anno, 4500 eventi, 200 brani, 30 artisti, tre fasi musicali con album e feature deterministiche (26-ONBOARDING-DEMO v1.0).',
+      counts: {
+        listens: listens.length,
+        tracks: tracks.length,
+        artists: artists.length,
+        albums: albums.length,
+        features: features.length,
+      },
       demoMode: true, // flag per cancellazione con un click
-      spec: '02-DATA-SCHEMA.md v1.2 + 06-UX-FLOWS-STATES §2.14',
+      spec: '02-DATA-SCHEMA.md v1.7 + 06-UX-FLOWS-STATES §2.14 + 26-ONBOARDING-DEMO §2',
     },
     listens,
     tracks,
     artists,
+    albums,
+    features,
   };
 }
 

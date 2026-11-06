@@ -1,6 +1,6 @@
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.36 · Sessione 97 (2026-11-03, Story 3.2) · l'**EPIC 3** (UI) ha le sue **prime tre schermate**: la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app) e la **3.2** (Ricordi + Share, Sessione 97 — schermata ⑪ e ShareSheet ⑫, card 1080×1350 su canvas, capitolo HTML autonomo, tagging manuale). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding) per chiudere il percorso end-to-end, poi la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e il blocco NEXT-STEP del README non la indica più come prossima story. Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.37 · Sessione 104 (2026-11-06, Story 3.5) · l'**EPIC 3** (UI) ha **chiuso il percorso end-to-end**: la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app), la **3.2** (Ricordi + Share, Sessione 97 — schermata ⑪ e ShareSheet ⑫, card 1080×1350 su canvas, capitolo HTML autonomo, tagging manuale), la **3.3** (Esplora + Analisi, Sessione 103 — schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa) e la **3.5** (anteprima e modalità demo in onboarding, Sessione 104 — il diario di esempio in un database separato e le prime righe della timeline reale nel reveal). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`). Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -536,22 +536,22 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 **Descrizione**: L'onboarding oggi termina con un **contatore** di eventi (`apps/web/src/onboarding/OnboardingRouter.tsx`, schermata ⑤ Reveal): l'utente non vede mai il prodotto prima di usarlo, e il README dichiarava un'«anteprima del risultato» che il codice non ha. Il progetto ha già i mattoni: `fixtures/demo-user.json` (1 anno, 4500 eventi, 200 track, 30 artisti, `demoMode: true`) è previsto da `06-UX-FLOWS-STATES.md` §2.14 e la CTA «Scopri come funziona» esiste nelle stringhe i18n (`empty.cta.demo`) — ma **nessun file di codice li usa**. Questa story rende l'onboarding **spettacolare**: il diario di esempio *prima* dell'import, le prime righe della timeline reale *dopo*.
 
-**Stato**: ⬚ **TODO** — **pronta al claim**: la specifica (`docs/26-ONBOARDING-DEMO.md`, 🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) è vincolante; l'agente prende in carico l'issue **#270** (`agent-ready`) e la lavora secondo la procedura di claim. La spec definisce il **DB demo separato**, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche) e il reveal con ≥3 righe reali.
+**Stato**: 🟡 **IN REVIEW** — implementata nella Sessione 104 (issue **#270**, branch `feat/270-story-3-5---anteprima-e-modalita-demo-in`). Consegnato: il **database demo separato** (`life-soundtrack-demo`) con il loader del fixture (`packages/core/src/db/demoSeed.ts`), il fixture **rigenerato** con `albums` e `features` deterministiche (75 album, 200 feature, tre fasi musicali, `generatedAt` deterministico), la CTA «Scopri come funziona» sul **primo passo** dell'onboarding, il banner dichiarativo e l'uscita con un click, e il **reveal con anteprima** (le prime righe della timeline reale e l'anno **calcolato**). Dettagli: `docs/state/stories/3.5-anteprima-onboarding-demo.md`.
 
 **Task**:
-- T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding (la stringa `empty.cta.demo` esiste ma non è renderizzata)
-- T3.5.2 — Demo: caricamento di `fixtures/demo-user.json` in un contesto **isolato** (nessun dato scritto nel database dell'utente)
-- T3.5.3 — Anteprima resa con gli **stessi componenti** della Home e della Timeline (Story 3.1): nessun renderer parallelo da mantenere
-- T3.5.4 — Reveal post-import: le **prime tre righe** della timeline reale invece del solo contatore di eventi
-- T3.5.5 — Dichiarazione: i dati della demo sono **sintetici** e il passaggio all'import reale è esplicito
+- [x] T3.5.1 — CTA «Scopri come funziona» sul primo passo dell'onboarding (la stringa `empty.cta.demo` esiste ma non è renderizzata)
+- [x] T3.5.2 — Demo: caricamento di `fixtures/demo-user.json` in un contesto **isolato** (nessun dato scritto nel database dell'utente)
+- [x] T3.5.3 — Anteprima resa con gli **stessi componenti** della Home e della Timeline (Story 3.1): nessun renderer parallelo da mantenere
+- [x] T3.5.4 — Reveal post-import: le **prime tre righe** della timeline reale invece del solo contatore di eventi
+- [x] T3.5.5 — Dichiarazione: i dati della demo sono **sintetici** e il passaggio all'import reale è esplicito
 
 **Acceptance criteria**:
-- [ ] La CTA della demo è raggiungibile dal primo passo e mostra un **diario di esempio**, non un testo descrittivo
-- [ ] La demo usa gli stessi componenti della Home/Timeline (nessun renderer separato)
-- [ ] La demo **non scrive** nel database dell'utente (test: dopo la demo il DB è vuoto)
-- [ ] Il reveal post-import mostra almeno 3 righe della timeline reale
-- [ ] i18n IT/EN per le nuove stringhe
-- [ ] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
+- [x] La CTA della demo è raggiungibile dal primo passo e mostra un **diario di esempio**, non un testo descrittivo
+- [x] La demo usa gli stessi componenti della Home/Timeline (nessun renderer separato)
+- [x] La demo **non scrive** nel database dell'utente (test: dopo la demo il DB è vuoto)
+- [x] Il reveal post-import mostra almeno 3 righe della timeline reale
+- [x] i18n IT/EN per le nuove stringhe
+- [x] Test: rendering della demo, assenza di scritture nel DB, reveal post-import
 
 **Dipendenze**: Story 0.4 ✅ (onboarding), Story 3.1 ✅ (Home + Timeline) · **effetto pieno dipende dalla Story 2.5** (senza, la demo non ha ere né mood)
 **Spec**: **`docs/26-ONBOARDING-DEMO.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `06-UX-FLOWS-STATES.md` §2.14 (demo mode) · `07-UI-SPEC.md` · `docs/22-COMPETITIVE-POSITIONING.md` §9

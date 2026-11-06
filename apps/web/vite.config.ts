@@ -79,9 +79,26 @@ export default mergeConfig(
         //   quella del server per decidere se mostrare il banner.
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
+          // Story 3.5: il chunk del fixture demo (`demo-user-<hash>.js`, ~3,7 MB)
+          // **non** entra nel precache: è un peso che nessun utente che non
+          // apre la demo deve scaricare all'install, e supera il limite di
+          // Workbox (2 MiB) che farebbe fallire la build. Il chunk viene
+          // scaricato al primo click sulla CTA e messo in cache dalla regola
+          // runtime `ls-demo-fixture` (così la demo resta disponibile offline).
+          globIgnores: ['**/demo-user-*.js'],
           navigateFallback: '/index.html',
           navigateFallbackDenylist: [/^\/api\//, /^\/version\.json$/],
           runtimeCaching: [
+            {
+              // Il fixture demo, su richiesta (Story 3.5).
+              urlPattern: ({ url }: { url: URL }) => url.pathname.includes('/demo-user-'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'ls-demo-fixture',
+                expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
             {
               urlPattern: ({ url }) => url.pathname === '/version.json',
               handler: 'NetworkFirst',

@@ -1,6 +1,6 @@
 # 08 — Copy e Internationalization
 
-> Status: 🟡 DRAFT · Versione 0.15 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
+> Status: 🟡 DRAFT · Versione 0.16 · Sessione 104 (2026-11-06, issue #270 — Story 3.5)
 > Lingue MVP: Italiano (it), English (en)
 > Formato chiavi: `namespace.scope.key`
 
@@ -57,9 +57,20 @@
 | `processing.eras` | {count} ere musicali in formazione | {count} musical eras forming |
 | `processing.cancel` | Annulla | Cancel |
 | `reveal.title` | La tua vita in musica | Your life in music |
-| `reveal.subtitle` | {years} anni, {events} momenti, un solo racconto | {years} years, {events} moments, one story |
+| `reveal.subtitle_one` | {years} anno, {events} momenti, un solo racconto | {years} year, {events} moments, one story |
+| `reveal.subtitle_other` | {years} anni, {events} momenti, un solo racconto | {years} years, {events} moments, one story |
+| `reveal.preview.title` | Le prime righe della tua timeline | The first rows of your timeline |
+| `reveal.preview.listens_one` | {count} ascolto | {count} listen |
+| `reveal.preview.listens_other` | {count} ascolti | {count} listens |
 | `reveal.cta` | Esplora la tua timeline | Explore your timeline |
 | `reveal.skip` | Salta | Skip |
+| `demo.banner` | Diario di esempio: i dati sono sintetici e il tuo database non è stato toccato | Sample diary: the data is synthetic and your database was not touched |
+| `demo.exit` | Esci dalla demo | Leave the demo |
+| `demo.loading.title` | Sto preparando un diario di esempio | Preparing a sample diary |
+| `demo.loading.subtitle` | Un anno di ascolti sintetici, tutto in locale | A year of synthetic listens, all local |
+| `demo.error.title` | Non sono riuscito a preparare la demo | Could not prepare the demo |
+| `demo.error.subtitle` | Riprova: i tuoi dati non sono stati toccati | Try again: your data was not touched |
+| `demo.error.back` | Torna al benvenuto | Back to the welcome |
 
 ### 2.2 `home.*`
 
@@ -692,3 +703,4 @@ Libreria consigliata: `i18next` + `react-i18next`.
 | 0.14 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 — Ricordi (⑪) e Share (⑫)**: §2.7 (`memories.*`) le **6 nuove** chiavi del feed — `firstTime`, `loading`, `error`, `loadMore`, `eras`, `erasHint` — più `eraAriaLabel`, `noteLabel` e `noteAriaLabel` (il tagging manuale: il nome dell'era e la nota libera del ricordo); §2.8 (`share.*`) le **5 nuove** chiavi del foglio di condivisione — `html` (l'export statico alternativo), `error`, `retry` e `close` — con la regola di linguaggio delle destinazioni (D-25.2: sono desiderate, non integrazioni) e il fallback delle azioni. §1: il namespace `nav` dichiara anche **Ricordi** (`nav.memories`). I **dati** (nomi delle ere, titoli dei brani) restano dati e non si traducono |
 | 0.12 | Sessione 76 (2026-10-31, issue #231) | **Story 3.4 — il nastro contesto**: §2.12h — la sezione era **dichiarata** dal changelog 0.9 (Sessione 67) ma **non esisteva**: il namespace `timeline.context.*` è stato materializzato adesso, nelle **36 chiavi** che il nastro e il dettaglio del periodo usano (i sette `kind`, i filtri, gli otto `deviceType`, il dettaglio, le tre azioni utente e i quattro stati del verdetto). La regola di linguaggio vincolante (`19§8.3`) è applicata **in un solo punto** del codice (`describePeriodCity` in `apps/web/src/components/contextRibbonModel.ts`): la città stimata entra sempre con «circa {{city}}», il paese mai; una città corretta a mano (`citySource = 'manual'`) smette di essere una stima e l'indicatore scompare. `timeline.context.detail.events` segue §3 (`_one`/`_other`). I nomi dei paesi e i titoli dei brani restano **dati**: non si traducono |
 | 0.15 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 — Esplora (⑨) e Analisi (⑩)**: §2.5 (`explore.*`) le chiavi **esistevano già** e sono state **usate**: l'unica nuova è `listens` (con i plurali `_one`/`_other`, §3), il numero di ascolti che accompanies ogni risultato. §2.6 (`analysis.*`) le chiavi dei quadranti e dei sei mood **esistevano già**; le **otto nuove** sono quelle che la mappa emotiva rende necessarie — `chart`, `event`, `insights`, `correct`, `dismiss`, `confidence`, `pointAria` e le due etichette dell'asse della valence (`quadrant.highValence`, `quadrant.lowValence`). §2.15 (`insight.*`): le **due** frasi che mancavano per i mood senza template — `mood.neutral` e `mood.angry` — perché l'insight in prosa del grafico (`25§7`) non può avere un buco. §1: il namespace `nav` dichiara anche **Esplora** e **Analisi** (`nav.explore`, `nav.analysis`). La **descrizione** degli insight resta una **stringa resa** dal core (D-A.4): `analysis.event` è solo l'etichetta breve della card |
+| 0.16 | Sessione 104 (2026-11-06, issue #270) | **Story 3.5 — Anteprima e modalità demo**: §2.1 (`onboarding.*`) le **12 chiavi** nuove — il **namespace `demo`** (banner dichiarativo, uscita dalla demo, preparazione, errore e ritorno al benvenuto: 7 chiavi) e l'**anteprima del reveal** (`reveal.preview.title`, `reveal.preview.listens_one`/`_other`); `reveal.subtitle` è stata **sostituita** dalla coppia pluralizzata `reveal.subtitle_one`/`_other` (l'anno è **calcolato** dallo span dei dati, non cablato a 1). La CTA «Scopri come funziona» **esisteva già** (`empty.cta.demo`, §2.10): è stata **usata**, non duplicata. Materializzate in `it`/`en` |

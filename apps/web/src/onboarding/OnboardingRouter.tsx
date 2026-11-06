@@ -16,7 +16,7 @@ import { AppleMusicAdapter } from '@core/adapters/apple';
 import { ListenBrainzAdapter } from '@core/adapters/listenbrainz';
 import { LastfmAdapter } from '@core/adapters/lastfm';
 import type { PlatformAdapter } from '@core/adapters';
-import { openDb } from '@core/db';
+import { DEMO_DB_NAME, openDb } from '@core/db';
 import type { PlatformId } from '@core/schema';
 import { runImport, AdapterError } from '@core/adapters';
 import type { ImportPlatformState, PlatformCardStatus } from './types';
@@ -28,6 +28,9 @@ import { useT } from '../i18n';
 import { createAnalysisRunner } from '../analysis/analysisRunner';
 import { i18n } from '../i18n';
 import { createLogger } from '@core/logger';
+import { AppShell } from '../screens/AppShell';
+import { startDemo, stopDemo } from '../demo/demoMode';
+import { buildRevealPreview, type RevealPreview } from './revealPreview';
 
 /**
  * Adapter disponibili per piattaforma (05§4): una entry solo quando
@@ -64,13 +67,22 @@ const initialState: ImportPlatformState = {
 
 export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | undefined }) {
   const t = useT();
-  const [screen, setScreen] = useState<'welcome' | 'privacy' | 'import' | 'processing' | 'reveal'>(
-    'welcome',
-  );
+  const [screen, setScreen] = useState<
+    | 'welcome'
+    | 'privacy'
+    | 'import'
+    | 'processing'
+    | 'reveal'
+    | 'demo'
+    | 'demo-loading'
+    | 'demo-error'
+  >('welcome');
   const [privacy, setPrivacy] = useState<PrivacySettings>(loadPrivacy());
   const [importStates, setImportStates] = useState<Record<string, ImportPlatformState>>(
     Object.fromEntries(ACTIVE_PLATFORMS.map((p) => [p, { ...initialState }])),
   );
+  /** L'anteprima del reveal: le prime righe e l'anno calcolato. */
+  const [reveal, setReveal] = useState<RevealPreview | null>(null);
 
   /** Aggiorna lo stato di una singola piattaforma preservando gli altri campi. */
   const setPlatformState = (platform: PlatformId, patch: Partial<ImportPlatformState>) => {
@@ -221,6 +233,14 @@ export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | u
     }
 
     if (!failed && !controller.signal.aborted) {
+      // L'anteprima: le prime righe della timeline **reale** e l'anno
+      // calcolato dallo span dei dati (Story 3.5, 26§4).
+      try {
+        const db = await ensureDb();
+        setReveal(await buildRevealPreview(db));
+      } catch {
+        setReveal(null);
+      }
       setScreen('reveal');
 
       // Trigger analisi post-import (in background, non blocca l'import)
@@ -240,6 +260,26 @@ export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | u
       })();
     }
   }, [importStates, privacy, ensureDb, t]);
+
+  /* ─── Demo — il diario di esempio (Story 3.5) ─── */
+  const handleStartDemo = useCallback(async () => {
+    setScreen('demo-loading');
+    try {
+      await startDemo();
+      setScreen('demo');
+    } catch {
+      setScreen('demo-error');
+    }
+  }, []);
+
+  const handleExitDemo = useCallback(() => {
+    // Si torna all'onboarding **prima** di cancellare: la shell smonta i suoi
+    // hook, poi il database demo sparisce con un click (06§2.14).
+    setScreen('welcome');
+    void stopDemo().catch(() => {
+      /* la cancellazione non deve bloccare il ritorno all'onboarding */
+    });
+  }, []);
 
   const handleCancel = useCallback(() => {
     abortControllerRef.current?.abort();
@@ -266,7 +306,14 @@ export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | u
 
   /* ─── Render schermata attiva ─── */
   if (screen === 'welcome') {
-    return <WelcomeScreen onStart={() => setScreen('privacy')} />;
+    return (
+      <WelcomeScreen
+        onStart={() => setScreen('privacy')}
+        onStartDemo={() => {
+          void handleStartDemo();
+        }}
+      />
+    );
   }
   if (screen === 'privacy') {
     return (
@@ -289,9 +336,44 @@ export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | u
   if (screen === 'processing') {
     return <ProcessingScreen total={totalEvents} onCancel={handleCancel} />;
   }
+  if (screen === 'demo-loading') {
+    return (
+      <main className="onboarding-shell">
+        <div className="onboarding-card" role="status" data-testid="demo-loading">
+          <div className="processing-ring" aria-hidden="true" />
+          <h2>{t('onboarding.demo.loading.title')}</h2>
+          <p>{t('onboarding.demo.loading.subtitle')}</p>
+        </div>
+      </main>
+    );
+  }
+  if (screen === 'demo-error') {
+    return (
+      <main className="onboarding-shell">
+        <div className="onboarding-card" role="alert" data-testid="demo-error">
+          <h2>{t('onboarding.demo.error.title')}</h2>
+          <p>{t('onboarding.demo.error.subtitle')}</p>
+          <div className="onboarding-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setScreen('welcome')}
+              data-testid="demo-error-back"
+            >
+              {t('onboarding.demo.error.back')}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+  if (screen === 'demo') {
+    return <AppShell dbName={DEMO_DB_NAME} demo onExitDemo={handleExitDemo} />;
+  }
   return (
     <RevealScreen
       events={totalEvents}
+      preview={reveal}
       onComplete={() => {
         onComplete?.();
         setScreen('welcome');
@@ -300,7 +382,13 @@ export function OnboardingRouter({ onComplete }: { onComplete?: (() => void) | u
   );
 }
 
-export function WelcomeScreen({ onStart }: { onStart: () => void }) {
+export function WelcomeScreen({
+  onStart,
+  onStartDemo,
+}: {
+  onStart: () => void;
+  onStartDemo?: () => void;
+}) {
   const t = useT();
   return (
     <main className="onboarding-shell">
@@ -325,6 +413,16 @@ export function WelcomeScreen({ onStart }: { onStart: () => void }) {
           >
             {t('onboarding.welcome.cta')}
           </button>
+          {onStartDemo && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={onStartDemo}
+              data-testid="demo-cta"
+            >
+              {t('empty.cta.demo')}
+            </button>
+          )}
         </div>
       </div>
     </main>
@@ -534,8 +632,21 @@ export function ProcessingScreen({ total, onCancel }: { total: number; onCancel:
   );
 }
 
-export function RevealScreen({ events, onComplete }: { events: number; onComplete: () => void }) {
+export function RevealScreen({
+  events,
+  preview,
+  onComplete,
+}: {
+  events: number;
+  preview?: RevealPreview | null | undefined;
+  onComplete: () => void;
+}) {
   const t = useT();
+  // L'anno è **calcolato** dallo span reale, non cablato a 1 (26§4).
+  const years = preview?.years ?? 1;
+  const rows = preview?.rows ?? [];
+  const subtitleKey =
+    years === 1 ? 'onboarding.reveal.subtitle_one' : 'onboarding.reveal.subtitle_other';
   return (
     <main className="onboarding-shell">
       <div className="onboarding-card">
@@ -550,7 +661,38 @@ export function RevealScreen({ events, onComplete }: { events: number; onComplet
         </div>
         <div className="reveal-number">{events}</div>
         <h2>{t('onboarding.reveal.title')}</h2>
-        <p>{t('onboarding.reveal.subtitle', { years: 1, events })}</p>
+        <p>{t(subtitleKey, { years, events })}</p>
+        {rows.length > 0 ? (
+          <>
+            <h3 className="reveal-preview__title">{t('onboarding.reveal.preview.title')}</h3>
+            <ul className="reveal-preview" data-testid="reveal-preview">
+              {rows.map((row) => (
+                <li
+                  key={row.start}
+                  className="reveal-preview__row"
+                  data-testid="reveal-preview-row"
+                >
+                  <span className="reveal-preview__label">{row.label}</span>
+                  <span className="reveal-preview__value">
+                    {t(
+                      row.listens === 1
+                        ? 'onboarding.reveal.preview.listens_one'
+                        : 'onboarding.reveal.preview.listens_other',
+                      { count: row.listens },
+                    )}
+                  </span>
+                  {row.mood && (
+                    <span className="reveal-preview__mood">{t(`analysis.moods.${row.mood}`)}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p className="reveal-preview__empty" data-testid="reveal-no-preview">
+            {t('onboarding.reveal.skip')}
+          </p>
+        )}
         <div className="onboarding-actions">
           <button
             type="button"

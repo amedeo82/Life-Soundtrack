@@ -1,6 +1,6 @@
 # 06 — UX Flows e Stati per Schermata
 
-> Status: 🟡 DRAFT · Versione 0.6 · Sessione 103 (2026-11-05, issue #240 — Story 3.3)
+> Status: 🟡 DRAFT · Versione 0.7 · Sessione 104 (2026-11-06, issue #270 — Story 3.5)
 > Vincolante per: UI implementation, test E2E, copy
 
 ---
@@ -95,6 +95,12 @@ Note: nessuna gestione errore (schermata statica).
 - Pulsante "Salta" visibile ma discreto in basso a destra
 - Click su un'era durante l'animazione → interrupt e navigazione a ⑧
 - Dopo completamento → pulsante "Esplora la tua timeline" → ⑦
+
+**Anteprima del risultato** *(Story 3.5, Sessione 104)*: accanto al contatore
+degli eventi, il reveal mostra le **prime righe della timeline reale** — non
+un testo descrittivo: almeno **tre** righe (periodo, numero di ascolti, mood
+dominante quando esiste) e l'**anno calcolato** dallo span dei dati (non
+cablato a 1). Senza dati utilizzabili il reveal resta sul solo contatore.
 
 ### 2.6 ⑥ Home
 
@@ -272,7 +278,17 @@ fuori la card.
 - Analisi: "Importa per vedere le tue analisi"
 - Ricordi: "Importa per generare ricordi"
 
-**Demo mode**: click su "Scopri come funziona" → carica fixture `fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, generato da `scripts/generate-fixtures.mjs`); flag `_metadata.demoMode = true` (tutti i dati cancellabili con un click).
+**Demo mode** *(Story 3.5, Sessione 104)*: click su "Scopri come funziona"
+(CTA del **primo passo** dell'onboarding, ① Welcome) → il fixture
+`fixtures/demo-user.json` (1 anno, 4.500 eventi, 200 brani, 30 artisti, 75
+album e 200 feature deterministiche, generato da `scripts/generate-fixtures.mjs`)
+viene caricato in un **database separato** (`life-soundtrack-demo`): nessun
+dato viene scritto nel database dell'utente. Lo schermo è la **stessa Home**
+(⑥) degli altri utenti — la demo non ha un renderer parallelo — con un
+banner dichiarativo («Diario di esempio: i dati sono sintetici e il tuo
+database non è stato toccato») e il bottone **«Esci dalla demo»**, che
+cancella il database demo con un click. Gli stati intermedi sono `loading`
+(la preparazione) ed `error` (con «Torna al benvenuto»).
 
 ## 3. Flussi utente principali
 
@@ -405,3 +421,4 @@ Ogni visualizzazione ha un'alternativa testuale nascosta:
 | 0.4 | Sessione 42 (2026-10-21) | Allineamento §2.2 e §2.13 a 4 toggle privacy (`retainIp`, `enrichMetadata`, `carDetectionConsent`, `syncCloud`); risolto drift documentazione↔codice (issue #107) |
 | 0.5 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata**: §2.11 (⑪ Ricordi) dichiara la **nota libera** sotto ogni card (il tag dell'utente, in `Insight.userNote`, sopravvive al ricalcolo) e il fatto che il ricordo nascosto **resta** nel database; §2.12 (⑫ Share Sheet) aggiunge la destinazione **Capitolo HTML** (export statico alternativo) e il **fallback** di ogni azione (senza Web Share API o senza clipboard il file si scarica) |
 | 0.6 | Sessione 103 (2026-11-05, issue #240) | **Story 3.3 implementata**: §2.9 (⑨ Esplora) dichiara il campo di ricerca accessibile (`role="searchbox"`), il **debounce di 300 ms** e l'ordinamento per `listenCount` con spareggio stabile, e il fatto che il tab Mood filtri sul **MoodId** (non sul testo tradotto); §2.10 (⑩ Analisi) dichiara il `QuadrantChart` con **un punto per mese** (media pesata sugli ascolti), i punti come **`<button>`** accessibili, il **deep-link** alla Timeline (D-25.1) e la **frase in prosa** che accompagna il grafico; i line chart e il selettore di periodo restano **fuori perimetro** (il grafico secondario è la Timeline) |
+| 0.7 | Sessione 104 (2026-11-06, issue #270) | **Story 3.5 implementata**: §2.5 (⑤ Prima Rivelazione) dichiara l'**anteprima del risultato** — le prime righe della timeline **reale** (≥3) e l'anno **calcolato** dallo span dei dati; §2.14 (⑭ Empty State) riscrive la **demo mode**: la CTA vive sul **primo passo** dell'onboarding, il fixture viene caricato in un **database separato** (`life-soundtrack-demo`), lo schermo è la **stessa Home** (nessun renderer parallelo) con banner dichiarativo e uscita che cancella il database demo con un click |

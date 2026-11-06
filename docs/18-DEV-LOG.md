@@ -1613,6 +1613,42 @@ exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 
 ---
 
+## 55. Anteprima e modalità demo: la Story 3.5 (Sessione 104)
+
+**Branch**: `feat/270-story-3-5---anteprima-e-modalita-demo-in`
+**Issue di tracking**: **#270**
+**Data**: 2026-11-06
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 104-1 | P | La CTA «Scopri come funziona» e il fixture `demo-user.json` **esistevano da anni** e **nessun file di codice li usava**: la promessa «anteprima del risultato» del README non aveva un'implementazione | La doc del progetto anticipava la story (il fixture, la stringa i18n, la §2.14) ma il codice no | La CTA è sul **primo passo** dell'onboarding e apre la **stessa `AppShell`** della Home, con il database demo propagato ai componenti: nessun renderer parallelo | `apps/web/src/onboarding/OnboardingRouter.tsx` · `apps/web/src/screens/AppShell.tsx` |
+| 104-2 | P | La demo avrebbe scritto nel **database dell'utente** | Il runner dell'analisi apriva sempre il database predefinito | Il database demo è **separato** (`life-soundtrack-demo`) e il runner accetta il database da analizzare (`db?`): i due diari non possono mescolarsi | `packages/core/src/db/demoSeed.ts` · `apps/web/src/analysis/analysisRunner.ts` |
+| 104-3 | — | Il fixture non poteva importare `albums` e `features` **deterministiche** | Il generatore produceva solo eventi e artisti, e il `generatedAt` dipendeva da `new Date()` | `buildDemoUser` riscritta: tre fasi musicali disgiunte, album derivati, feature `source: 'manual'`, `generatedAt` derivato dal seed — due run producono lo stesso SHA | `scripts/generate-fixtures.mjs` · `fixtures/demo-user.json` |
+| 104-4 | — | Il reveal mostrava solo il **contatore** degli eventi | Il reveal non leggeva il database | `buildRevealPreview`: le prime righe della timeline **reale** (≥3) e l'anno **calcolato** dallo span dei dati (non cablato a 1, con la coppia `_one`/`_other`) | `apps/web/src/onboarding/revealPreview.ts` |
+| 104-5 | — | Un fixture da 3,6 MB dentro `@ls/core` | La spec prevedeva l'import di default del fixture | **Deviazione dichiarata**: il fixture entra come **parametro** (`seedDemoDatabase(db, fixture)`) — il `tsc` di `@ls/core` ha `rootDir` su `src` e non può importare `fixtures/`. Lato app il file è un chunk lazy (`?raw`) | `packages/core/src/db/demoSeed.ts` · `apps/web/src/demo/demoMode.ts` |
+| 104-6 | P | La **build** dell'app falliva: `Assets exceeding the limit: assets/demo-user-*.js is 3.7 MB` (Workbox, limite di precache 2 MiB) | Il fixture è un chunk lazy da 3,7 MB e il `globPatterns` del precache include **tutti** i `.js` | Il chunk del fixture è **escluso dal precache** (`globIgnores`) e passa alla runtime cache `ls-demo-fixture`: nessun utente scarica 3,7 MB che non usa, la demo resta offline dopo il primo uso, e la build torna verde | `apps/web/vite.config.ts` |
+
+**Lesson learned**: la lezione principale è sul **cablaggio**. Il sintomo (la demo vuota, senza
+ere né mood) e la causa (il `dbName` mai propagato dalla shell ai componenti, che lo accettavano
+già da solo per i test) erano lontani: il bundle dei dati è una **catena**, e ogni anello va
+ispezionato da capo a fondo. Il secondo anello che si è rotto è il **database**: il runner
+dell'analisi apriva sempre il database predefinito, quindi la demo — anche caricata — sarebbe
+rimasta muta. Il terzo è sul **fixture**: un generatore casuale non produce **frontiere**, e un
+test che deve *dichiarare* un risultato (tre ere, i mood) ha bisogno di una cronologia composta a
+mano, come già vale per gli scenari di `10§3.3`.
+
+**Verifica**: `@ls/core` 651 test in 58 file (il test di performance passa da solo: è l'indicatore
+di saturazione di 97-6) · `@ls/web` 207 test verdi di 215 (8 falliti per l'ambiente: i test i18n
+che usano `localStorage`, **identici su `main`** sotto Node 26; il CI gira su Node 24) ·
+`eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` · `pnpm -F @ls/web build` verde
+(precache: 13 entry, 653 KiB — il chunk del fixture demo è escluso) ·
+`node scripts/check-encoding.mjs` →
+0 errori · `node scripts/check-fixtures-privacy.mjs` → 0 dati reali ·
+`node scripts/check-aggregate-blocks.mjs` → 0 violazioni.
+
+---
+
 ## 49. AGENTS.md: il contratto senza la storia (Sessione 83)
 
 **Branch**: `feat/259-rifinitura-agents`
