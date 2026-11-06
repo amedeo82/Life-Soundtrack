@@ -132,6 +132,21 @@ export {
 export { recount } from './recount';
 
 /**
+ * Loader del fixture **demo** (Story 3.5, `docs/26-ONBOARDING-DEMO.md` v1.0):
+ * il database demo è separato da quello dell'utente e si cancella con un
+ * click.
+ */
+export {
+  DEMO_DB_NAME,
+  clearDemoDatabase,
+  hasDemoData,
+  seedDemoDatabase,
+  type DemoFixture,
+  type DemoSeedOptions,
+  type DemoSeedReport,
+} from './demoSeed';
+
+/**
  * Promozione `canonicalKey` da `fuzzy:` a `isrc:`/`mbid:` e unione duplicati
  * (11-BACKLOG T0.7.3, Story 1.4 Dedup promozione).
  */
