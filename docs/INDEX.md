@@ -158,6 +158,7 @@
 | 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟢 | ✅ | #312 |
 | 103 | Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240) | 🟢 | ✅ | #320 |
 | 104 | Anteprima del risultato in onboarding: il diario di esempio (issue #270) | 🟢 | ✅ | #322 |
+| 105 | Arbitraggio atomico della selezione e lock di proprietà della worktree | 🟢 | ✅ | #321 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -197,9 +198,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **81** (merge: 80)
+- Sessioni migrate in state/sessions: **82** (merge: 81)
 - Stories migrate in state/stories: **28** (done: 25)
-- Ultima sessione migrata: **S104** - Anteprima del risultato in onboarding: il diario di esempio (issue #270)
+- Ultima sessione migrata: **S105** - Arbitraggio atomico della selezione e lock di proprietà della worktree
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -244,25 +245,26 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S104)
+**Analisi della sessione corrente** (S105)
 
-- **Numeri**: 19 test nuovi (10 in `@ls/core`, 9 in `@ls/web`); suite
-  `@ls/core` 651 test verdi in 58 file; suite `@ls/web` 207 test verdi di 215
-  (gli **8 fallimenti i18n** sono quelli noti del `localStorage` assente sotto
-  Node 26 — **identici su `main`**; il CI gira su Node 24); il test di
-  **performance** del core passa da solo (è l'indicatore di saturazione già
-  documentato, cfr. 97-6: 1.040 ms contro la soglia locale di 500 ms, in un
-  run parallelo).
-- **Cosa è pronto**: la CTA, il diario di esempio con album e feature, il
-  banner dichiarativo, l'uscita con un click, l'anteprima del reveal con
-  l'anno calcolato.
-- **Cosa manca**: l'export e la cancellazione definitiva dei dati reali
-  (Story 5.2); la pipeline delle **audio features** vere (EPIC 4, Story 4.1);
-  le piattaforme di import.
-- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`; i gate
-  `check-aggregate-blocks`, `check-encoding` e `check-fixtures-privacy` verdi.
-- **Gate per il test**: `pnpm run verify` deve essere verde in CI (Node 24);
-  in locale gli 8 fallimenti i18n sono attesi e documentati.
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Gate di proprietà della worktree | **1** (`check-worktree-ownership.mjs`, read-only) |
+| 2 | Scenari coperti dal gate | **9** (T1..T9, con scenario negativo dimostrato) |
+| 3 | Exit code di `agent-claim.ps1` documentati | **6** (0, 2, 3, 4, 5, 6) |
+| 4 | Check della session-start checklist | **7** (era 6: aggiunto F10) |
+| 5 | Step di CI aggiati | **1** (`test-worktree-ownership.sh` nel job `gates-protocol`) |
+| 6 | Righe del catalogo dei gate | **44** (43 gate + aggregatore `quality`) |
+| 7 | Versione protocollo | v1.48 → **v1.49** |
+
+**Pronto**: il lock di proprietà è implementato, testato (9/9) e collegato a tre
+punti (hook, gate locali, CI). La dichiarazione dell'agent-id nel body della PR
+chiude il ciclo in CI.
+
+**Dopo il merge**: i due agenti che erano in collisione sulla #240 restano da
+chiudere a mano (la #240 **non** è stata toccata: è di quell'agente). La
+Sessione 105 verifica che il protocollo nuovo, applicato da un agente fresco,
+chiuda il ciclo claim → worktree → commit senza collisioni.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

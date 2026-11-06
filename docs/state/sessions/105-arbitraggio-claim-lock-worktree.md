@@ -2,8 +2,10 @@
 number: 105
 title: "Arbitraggio atomico della selezione e lock di proprietà della worktree"
 date: 2026-11-05
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "46cbc0075076b0aa7e1a89ed01f22406ee186f9c"
+merged_date: "2026-11-06T11:59:20Z"
 branch: fix/319-arbitraggio-claim-lock-worktree
 pr: 321
 claim: kilo-hp-elitebook-85df
