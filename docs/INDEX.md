@@ -157,6 +157,7 @@
 | 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟢 | ✅ | #310 |
 | 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟢 | ✅ | #312 |
 | 103 | Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240) | 🟢 | ✅ | #320 |
+| 104 | Anteprima del risultato in onboarding: il diario di esempio (issue #270) | 🟢 | ✅ | #322 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -196,10 +197,10 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **80** (merge: 79)
-- Stories migrate in state/stories: **28** (done: 24)
-- Ultima sessione migrata: **S103** - Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **81** (merge: 80)
+- Stories migrate in state/stories: **28** (done: 25)
+- Ultima sessione migrata: **S104** - Anteprima del risultato in onboarding: il diario di esempio (issue #270)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -212,24 +213,23 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 80%** - 24 story completate su 30 - effort pesato 84% - **mancano 6 step**
+**Implementazione: 83%** - 25 story completate su 30 - effort pesato 86% - **mancano 5 step**
 
-`████████████████████████░░░░░░` 80%
+`█████████████████████████░░░░░` 83%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 4 | 5 | 80% | in corso |
+| EPIC 3 - UI/UX | 5 | 5 | 100% | completo |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 24 done - 0 in corso - 6 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 25 done - 0 in corso - 5 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (6):
-- 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
+**Step ancora da implementare** (5):
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
@@ -240,30 +240,29 @@
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 4/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 5/5 - soddisfatto |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S103)
+**Analisi della sessione corrente** (S104)
 
-- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
-  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
-  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
-  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
-  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
-  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
-  file falliscono identici su `main`**, il CI gira su Node 24).
-- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
-  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
-  dell'utente sugli insight.
-- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
-  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
-  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
-- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
-  al layer `@ls/core` (la story è di sola UI e lettura del database).
-- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
-  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
-  documentati.
+- **Numeri**: 19 test nuovi (10 in `@ls/core`, 9 in `@ls/web`); suite
+  `@ls/core` 651 test verdi in 58 file; suite `@ls/web` 207 test verdi di 215
+  (gli **8 fallimenti i18n** sono quelli noti del `localStorage` assente sotto
+  Node 26 — **identici su `main`**; il CI gira su Node 24); il test di
+  **performance** del core passa da solo (è l'indicatore di saturazione già
+  documentato, cfr. 97-6: 1.040 ms contro la soglia locale di 500 ms, in un
+  run parallelo).
+- **Cosa è pronto**: la CTA, il diario di esempio con album e feature, il
+  banner dichiarativo, l'uscita con un click, l'anteprima del reveal con
+  l'anno calcolato.
+- **Cosa manca**: l'export e la cancellazione definitiva dei dati reali
+  (Story 5.2); la pipeline delle **audio features** vere (EPIC 4, Story 4.1);
+  le piattaforme di import.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`; i gate
+  `check-aggregate-blocks`, `check-encoding` e `check-fixtures-privacy` verdi.
+- **Gate per il test**: `pnpm run verify` deve essere verde in CI (Node 24);
+  in locale gli 8 fallimenti i18n sono attesi e documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

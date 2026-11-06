@@ -1,11 +1,28 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-06 01:53
+> Data: 2026-11-06 05:59
 > Totale file: 199
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
-inventario: 1 file
+
+> Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
+> Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
+
+- Totale file: 198 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2837.5 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-06 05:59
+- Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
+
+| Categoria | File |
+|-----------|------|
+| docs/ | 130 |
+| scripts/ | 42 |
+| fixtures/ | 15 |
+| .githooks/ | 4 |
+| .github/ | 4 |
+| root/ | 3 |
+
 <!-- AGGREGATE-BUNDLE-INVENTORY-END -->
 
 
@@ -1235,24 +1252,23 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 80%** - 24 story completate su 30 - effort pesato 84% - **mancano 6 step**
+**Implementazione: 83%** - 25 story completate su 30 - effort pesato 86% - **mancano 5 step**
 
-`████████████████████████░░░░░░` 80%
+`█████████████████████████░░░░░` 83%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 4 | 5 | 80% | in corso |
+| EPIC 3 - UI/UX | 5 | 5 | 100% | completo |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 24 done - 0 in corso - 6 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 25 done - 0 in corso - 5 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (6):
-- 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
+**Step ancora da implementare** (5):
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
@@ -1263,30 +1279,29 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 4/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 5/5 - soddisfatto |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S103)
+**Analisi della sessione corrente** (S104)
 
-- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
-  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
-  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
-  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
-  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
-  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
-  file falliscono identici su `main`**, il CI gira su Node 24).
-- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
-  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
-  dell'utente sugli insight.
-- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
-  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
-  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
-- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
-  al layer `@ls/core` (la story è di sola UI e lettura del database).
-- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
-  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
-  documentati.
+- **Numeri**: 19 test nuovi (10 in `@ls/core`, 9 in `@ls/web`); suite
+  `@ls/core` 651 test verdi in 58 file; suite `@ls/web` 207 test verdi di 215
+  (gli **8 fallimenti i18n** sono quelli noti del `localStorage` assente sotto
+  Node 26 — **identici su `main`**; il CI gira su Node 24); il test di
+  **performance** del core passa da solo (è l'indicatore di saturazione già
+  documentato, cfr. 97-6: 1.040 ms contro la soglia locale di 500 ms, in un
+  run parallelo).
+- **Cosa è pronto**: la CTA, il diario di esempio con album e feature, il
+  banner dichiarativo, l'uscita con un click, l'anteprima del reveal con
+  l'anno calcolato.
+- **Cosa manca**: l'export e la cancellazione definitiva dei dati reali
+  (Story 5.2); la pipeline delle **audio features** vere (EPIC 4, Story 4.1);
+  le piattaforme di import.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`; i gate
+  `check-aggregate-blocks`, `check-encoding` e `check-fixtures-privacy` verdi.
+- **Gate per il test**: `pnpm run verify` deve essere verde in CI (Node 24);
+  in locale gli 8 fallimenti i18n sono attesi e documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -1297,11 +1312,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **3.5** — Anteprima del risultato in onboarding (modalità demo) (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **4.3** — Artwork enrichment (priority `I`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/3.5-anteprima-onboarding-demo.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/4.3-artwork-enrichment.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 4.3, 5.1, 5.2.
+Altre non-done e non bloccate in ordine di priorita backlog (id): 5.1, 5.2.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2183,6 +2198,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 101 | Rendere il repository pubblico: hardening sicurezza e privacy | 🟢 | ✅ | #310 |
 | 102 | Branch protection attiva: il writer post-merge deve spingere con una deploy key (SSH), non con GITHUB_TOKEN | 🟢 | ✅ | #312 |
 | 103 | Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240) | 🟢 | ✅ | #320 |
+| 104 | Anteprima del risultato in onboarding: il diario di esempio (issue #270) | 🟢 | ✅ | #322 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2222,10 +2238,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **80** (merge: 79)
-- Stories migrate in state/stories: **28** (done: 24)
-- Ultima sessione migrata: **S103** - Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240)
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 4.1, 4.4
+- Sessioni migrate in state/sessions: **81** (merge: 80)
+- Stories migrate in state/stories: **28** (done: 25)
+- Ultima sessione migrata: **S104** - Anteprima del risultato in onboarding: il diario di esempio (issue #270)
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2238,24 +2254,23 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 80%** - 24 story completate su 30 - effort pesato 84% - **mancano 6 step**
+**Implementazione: 83%** - 25 story completate su 30 - effort pesato 86% - **mancano 5 step**
 
-`████████████████████████░░░░░░` 80%
+`█████████████████████████░░░░░` 83%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
 | EPIC 0 - Fondamenta | 7 | 7 | 100% | completo |
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
-| EPIC 3 - UI/UX | 4 | 5 | 80% | in corso |
+| EPIC 3 - UI/UX | 5 | 5 | 100% | completo |
 | EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 24 done - 0 in corso - 6 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 25 done - 0 in corso - 5 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (6):
-- 3.5 Anteprima del risultato in onboarding (modalità demo) - da fare (size M)
+**Step ancora da implementare** (5):
 - 4.2 MusicBrainz lookup - da fare (size M)
 - 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
@@ -2266,30 +2281,29 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 | Gate | Requisito | Stato |
 |------|-----------|-------|
-| Test end-to-end dell'app | EPIC 3 (5 story) | 4/5 - in corso |
+| Test end-to-end dell'app | EPIC 3 (5 story) | 5/5 - soddisfatto |
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S103)
+**Analisi della sessione corrente** (S104)
 
-- **Numeri**: 20 test nuovi; suite `@ls/core` 642 test in 56 file (il test di
-  **performance** fallisce solo quando le suite girano in parallelo — 598 ms
-  contro la soglia locale di 500 ms — e **passa da solo**: è l'indicatore di
-  saturazione già documentato, cfr. 97-6); suite `@ls/web` 206 test di cui 198
-  verdi e 8 falliti **per l'ambiente locale** (i test del «language detector»
-  usano `localStorage`, che il jsdom non espone sotto Node 26: **gli stessi
-  file falliscono identici su `main`**, il CI gira su Node 24).
-- **Cosa è pronto**: la ricerca sul catalogo con debounce e tab, la mappa
-  emotiva con l'insight in prosa, il deep-link alla Timeline, le azioni
-  dell'utente sugli insight.
-- **Cosa manca**: la pipeline delle **audio features** (EPIC 4, Story 4.1) —
-  senza valence ed energy reali la mappa emotiva resta vuota; l'export e la
-  cancellazione definitiva (Story 5.2); l'anteprima in onboarding (Story 3.5).
-- **Salute tecnica**: lint e typecheck verdi su `@ls/web`; nessuna modifica
-  al layer `@ls/core` (la story è di sola UI e lettura del database).
-- **Gate per il test**: `pnpm --filter @ls/web exec vitest run` deve essere
-  verde **in CI** (Node 24); in locale gli 8 fallimenti i18n sono attesi e
-  documentati.
+- **Numeri**: 19 test nuovi (10 in `@ls/core`, 9 in `@ls/web`); suite
+  `@ls/core` 651 test verdi in 58 file; suite `@ls/web` 207 test verdi di 215
+  (gli **8 fallimenti i18n** sono quelli noti del `localStorage` assente sotto
+  Node 26 — **identici su `main`**; il CI gira su Node 24); il test di
+  **performance** del core passa da solo (è l'indicatore di saturazione già
+  documentato, cfr. 97-6: 1.040 ms contro la soglia locale di 500 ms, in un
+  run parallelo).
+- **Cosa è pronto**: la CTA, il diario di esempio con album e feature, il
+  banner dichiarativo, l'uscita con un click, l'anteprima del reveal con
+  l'anno calcolato.
+- **Cosa manca**: l'export e la cancellazione definitiva dei dati reali
+  (Story 5.2); la pipeline delle **audio features** vere (EPIC 4, Story 4.1);
+  le piattaforme di import.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`; i gate
+  `check-aggregate-blocks`, `check-encoding` e `check-fixtures-privacy` verdi.
+- **Gate per il test**: `pnpm run verify` deve essere verde in CI (Node 24);
+  in locale gli 8 fallimenti i18n sono attesi e documentati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -13051,6 +13065,154 @@ insight in prosa, il deep-link), i due componenti e il focus della Timeline.
 - `docs/11-BACKLOG.md` — sezione Story 3.3
 - `docs/07-UI-SPEC.md` — §2.8, §2.9
 - `docs/08-COPY-I18N.md` — §2.5, §2.6, §2.15, changelog 0.15
+- `docs/18-DEV-LOG.md` — la entry della sessione
+- `scripts/generate-bundle.ps1` — `$files`
+```
+
+### Sessione 104 - Anteprima del risultato in onboarding: il diario di esempio (issue #270)
+
+- **Data**: 2026-11-06
+- **Stato**: 🟢
+- **Merged**: ✅ PR #322 (4ceacc1f30df485ef1894d59059e39eeea32e2e2, 2026-11-06T05:59:15Z)
+- **Claim**: `kilo-hp-elitebook-a320`
+
+```
+
+# Sessione 104 — Anteprima del risultato in onboarding: il diario di esempio (issue #270)
+
+> **Oggetto**: la **Story 3.5** — la modalità demo: il diario di esempio
+> *prima* dell'import e le prime righe della timeline reale *dopo*.
+
+## Sintesi
+
+L'issue #270 è stata implementata sulla specifica `docs/26-ONBOARDING-DEMO.md`
+(v1.0 🟢 APPROVED, ratificata dal project owner il 2026-11-02).
+
+La story chiude il buco più rumoroso del progetto: il README e la
+documentazione promettevano un'«anteprima del risultato» e una CTA «Scopri
+come funziona», ma **nessun file di codice le usava**. Il fixture
+`fixtures/demo-user.json` esisteva da anni (1 anno, 4.500 eventi) e nessuna
+riga di codice lo leggeva.
+
+Il lavoro è stato **interamente locale** e senza librerie:
+
+- il **database demo è separato** (`life-soundtrack-demo`): è un secondo
+  database Dexie, quindi il diario di esempio e la storia dell'utente non
+  possono mescolarsi, e la cancellazione è un `db.delete()`;
+- il fixture è stato **rigenerato**: ora dichiara **album** (75) e **feature**
+  (200) deterministiche, tre fasi musicali su 366 giorni e un `generatedAt`
+  derivato dal seed (non da `new Date()`): due run producono lo stesso SHA;
+- la **demo non ha una schermata propria**: la CTA apre la stessa `AppShell`
+  della Home, con il `dbName` demo propagato a Timeline, Ricordi, Esplora e
+  Analisi — nessun renderer parallelo da mantenere;
+- il **reveal** post-import mostra le prime righe della timeline **reale** e
+  l'anno **calcolato** dallo span dei dati, non cablato a 1.
+
+## Cosa è stato fatto
+
+### Core (`packages/core`)
+
+- `db/demoSeed.ts` (nuovo): `DEMO_DB_NAME`, `seedDemoDatabase(db, fixture)` —
+  normalizzazione v6 degli eventi, album derivati, `bulkPut` in transazione,
+  `recount` dei `listenCount` — `clearDemoDatabase`, `hasDemoData` e il
+  tipo `DemoFixture`;
+- `db/index.ts`: gli export pubblici.
+
+### Fixture (`scripts/generate-fixtures.mjs`)
+
+- `buildDemoUser` riscritta: tre fasi (indie/folk → pop/electronic →
+  jazz/ambient) con generi e artisti disgiunti, 10 artisti per fase e
+  67/67/66 brani, 4.500 ascolti su 366 giorni, 75 album, 200 feature
+  `source: 'manual'`, chiavi `eventKey`/`canonicalKey` univoche e
+  `generatedAt` deterministico.
+
+### App (`apps/web`)
+
+- `demo/demoMode.ts` (nuovo): `loadDemoFixture` (`import('…?raw')` + parse),
+  `startDemo` (open + seed + pipeline sul database demo), `stopDemo`;
+- `analysis/analysisRunner.ts`: la dipendenza `db?` — senza, il runner
+  aprirebbe sempre il database dell'utente e la demo resterebbe senza ere;
+- `screens/AppShell.tsx`: props `dbName` / `demo` / `onExitDemo`, il banner
+  dichiarativo e il bottone d'uscita;
+- `onboarding/OnboardingRouter.tsx`: la CTA sul primo passo, gli stati
+  `demo-loading` / `demo` / `demo-error` e il reveal con anteprima;
+- `onboarding/revealPreview.ts` (nuovo): `buildRevealPreview` — le prime
+  righe e l'anno calcolato.
+
+### i18n
+
+Le **12 chiavi** nuove in it ed en: `onboarding.demo.*` (banner, uscita,
+caricamento, errore), `onboarding.reveal.preview.*` e la coppia pluralizzata
+`onboarding.reveal.subtitle_one` / `_other` (che sostituisce la chiave
+`subtitle` cablata su un anno).
+
+### Test
+
+**19 test** nuovi: 10 in `@ls/core` (7 sul loader — troncamento, album,
+`listenCount`, cancellazione, database dell'utente intatto — e 3 sul fixture:
+conteggi, determinismo, pipeline che produce **3 ere** e i mood
+`mood_day`/`mood_week`), 9 in `@ls/web` (CTA, stati della demo, anteprima del
+reveal, propagazione del `dbName`).
+
+## Decisioni
+
+- **Il fixture entra come parametro, non come import**: `@ls/core` non può
+  importare `fixtures/` (build `tsc` con `rootDir` su `src`). La specifica
+  prevedeva l'import di default: la deviazione è dichiarata e il contratto
+  del core resta identico.
+- **Il database si inietta per `dbName`**: la via già usata dalla Story 3.3
+  per i test; un secondo database Dexie non può mescolarsi con quello
+  dell'utente (D-26.1).
+- **Il fixture è un chunk lazy (`?raw`)**: 3,6 MB non entrano nel bundle
+  iniziale, e l'import di un JSON così grande farebbe inferire a TypeScript
+  un tipo enorme. Il chunk è **fuori dal precache** del service worker
+  (`globIgnores`): 3,7 MB nel precache li scaricherebbero tutti gli utenti,
+  anche quelli che non aprono la demo, e superano il limite di Workbox
+  (2 MiB) — la build fallirebbe. La runtime cache `ls-demo-fixture` lo
+  conserva dopo il primo uso, quindi la demo resta disponibile offline.
+- **Tre fasi disgiunte** nel fixture: è ciò che fa produrre all'era detector
+  **tre** ere — un fixture a genera casuale non avrebbe frontiere.
+
+## Analisi di avanzamento
+
+- **Numeri**: 19 test nuovi (10 in `@ls/core`, 9 in `@ls/web`); suite
+  `@ls/core` 651 test verdi in 58 file; suite `@ls/web` 207 test verdi di 215
+  (gli **8 fallimenti i18n** sono quelli noti del `localStorage` assente sotto
+  Node 26 — **identici su `main`**; il CI gira su Node 24); il test di
+  **performance** del core passa da solo (è l'indicatore di saturazione già
+  documentato, cfr. 97-6: 1.040 ms contro la soglia locale di 500 ms, in un
+  run parallelo).
+- **Cosa è pronto**: la CTA, il diario di esempio con album e feature, il
+  banner dichiarativo, l'uscita con un click, l'anteprima del reveal con
+  l'anno calcolato.
+- **Cosa manca**: l'export e la cancellazione definitiva dei dati reali
+  (Story 5.2); la pipeline delle **audio features** vere (EPIC 4, Story 4.1);
+  le piattaforme di import.
+- **Salute tecnica**: lint e typecheck verdi su `@ls/core` e `@ls/web`; i gate
+  `check-aggregate-blocks`, `check-encoding` e `check-fixtures-privacy` verdi.
+- **Gate per il test**: `pnpm run verify` deve essere verde in CI (Node 24);
+  in locale gli 8 fallimenti i18n sono attesi e documentati.
+
+## Lesson learned
+
+- **Un fixture da 3,6 MB non si importa in un pacchetto**: il vincolo non è
+  il peso, è il `rootDir` del `tsc`. Il parametro è più semplice del `?raw`
+  lato core.
+- **Il cablaggio mancante era invisibile**: il `dbName` esisteva già sui
+  componenti (per i test), ma nessuno lo propagava dalla shell. Il sintomo
+  (la demo vuota) era lontano dalla causa (il parametro mai passato): il
+  bundle dei dati è una catena, e ogni anello va ispezionato da capo a
+  fondo.
+
+## Documenti aggiornati
+
+- `docs/state/stories/3.5-anteprima-onboarding-demo.md` e
+  `docs/state/sessions/104-story-3-5-anteprima-demo.md` (questa)
+- `docs/06-UX-FLOWS-STATES.md` — §2.14 e changelog
+- `docs/07-UI-SPEC.md` — §2.10c e changelog
+- `docs/08-COPY-I18N.md` — §2.1 e changelog
+- `docs/10-TESTING.md` — §3.4 e changelog
+- `docs/11-BACKLOG.md` — sezione Story 3.5
 - `docs/18-DEV-LOG.md` — la entry della sessione
 - `scripts/generate-bundle.ps1` — `$files`
 ```
@@ -23957,8 +24119,10 @@ insight in prosa, il deep-link), i due componenti e il focus della Timeline.
 number: 104
 title: "Anteprima del risultato in onboarding: il diario di esempio (issue #270)"
 date: 2026-11-06
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "4ceacc1f30df485ef1894d59059e39eeea32e2e2"
+merged_date: "2026-11-06T05:59:15Z"
 branch: feat/270-story-3-5---anteprima-e-modalita-demo-in
 pr: 322
 claim: kilo-hp-elitebook-a320
@@ -25723,12 +25887,14 @@ id: "3.5"
 title: "Anteprima del risultato in onboarding (modalità demo)"
 phase: 3
 area: ui
-status: in-review
+status: done
 priority: I
 depends_on: ["0.4", "3.1"]
 issue: 270
 branch: "feat/270-story-3-5---anteprima-e-modalita-demo-in"
 pr: 322
+merged_commit: "4ceacc1f30df485ef1894d59059e39eeea32e2e2"
+merged_date: 2026-11-06
 claim: kilo-hp-elitebook-a320
 spec_refs:
   - docs/26-ONBOARDING-DEMO.md
@@ -34635,7 +34801,7 @@ Ogni story deve avere label GitHub:
 | 3.2 - Ricordi + Share | done | #301 | `22cf5916140c5869ea296bc778e6cb094ed71037` | ui |
 | 3.3 - Esplora + Analisi | done | #320 | `d082c0046fe4e30fe99436990ce96530f9ee8ef2` | ui |
 | 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
-| 3.5 - Anteprima del risultato in onboarding (modalità demo) | todo | - | - | ui |
+| 3.5 - Anteprima del risultato in onboarding (modalità demo) | done | #322 | `4ceacc1f30df485ef1894d59059e39eeea32e2e2` | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
 | 4.3 - Artwork enrichment | todo | - | - | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `beaefba677f9dbaf0ec9891c3e70516015a1adcf` | enrichment |

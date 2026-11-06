@@ -2,8 +2,10 @@
 number: 104
 title: "Anteprima del risultato in onboarding: il diario di esempio (issue #270)"
 date: 2026-11-06
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "4ceacc1f30df485ef1894d59059e39eeea32e2e2"
+merged_date: "2026-11-06T05:59:15Z"
 branch: feat/270-story-3-5---anteprima-e-modalita-demo-in
 pr: 322
 claim: kilo-hp-elitebook-a320
