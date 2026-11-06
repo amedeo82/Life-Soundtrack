@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-06 01:16
+> Data: 2026-11-06 01:22
 > Totale file: 199
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -42540,7 +42540,8 @@ function buildDemoUser({ seed }) {
       });
 
       track.listenCount += 1;
-      track.firstSeenAt = track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
+      track.firstSeenAt =
+        track.firstSeenAt === 0 ? timestamp : Math.min(track.firstSeenAt, timestamp);
       track.lastSeenAt = Math.max(track.lastSeenAt, timestamp);
       const artist = artists.find((a) => a.id === track.artistId);
       if (artist) artist.listenCount += 1;
