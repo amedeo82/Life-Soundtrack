@@ -1627,6 +1627,7 @@ exit 0 · `pwsh scripts/generate-bundle.ps1 -Check` → exit 0.
 | 104-3 | — | Il fixture non poteva importare `albums` e `features` **deterministiche** | Il generatore produceva solo eventi e artisti, e il `generatedAt` dipendeva da `new Date()` | `buildDemoUser` riscritta: tre fasi musicali disgiunte, album derivati, feature `source: 'manual'`, `generatedAt` derivato dal seed — due run producono lo stesso SHA | `scripts/generate-fixtures.mjs` · `fixtures/demo-user.json` |
 | 104-4 | — | Il reveal mostrava solo il **contatore** degli eventi | Il reveal non leggeva il database | `buildRevealPreview`: le prime righe della timeline **reale** (≥3) e l'anno **calcolato** dallo span dei dati (non cablato a 1, con la coppia `_one`/`_other`) | `apps/web/src/onboarding/revealPreview.ts` |
 | 104-5 | — | Un fixture da 3,6 MB dentro `@ls/core` | La spec prevedeva l'import di default del fixture | **Deviazione dichiarata**: il fixture entra come **parametro** (`seedDemoDatabase(db, fixture)`) — il `tsc` di `@ls/core` ha `rootDir` su `src` e non può importare `fixtures/`. Lato app il file è un chunk lazy (`?raw`) | `packages/core/src/db/demoSeed.ts` · `apps/web/src/demo/demoMode.ts` |
+| 104-6 | P | La **build** dell'app falliva: `Assets exceeding the limit: assets/demo-user-*.js is 3.7 MB` (Workbox, limite di precache 2 MiB) | Il fixture è un chunk lazy da 3,7 MB e il `globPatterns` del precache include **tutti** i `.js` | Il chunk del fixture è **escluso dal precache** (`globIgnores`) e passa alla runtime cache `ls-demo-fixture`: nessun utente scarica 3,7 MB che non usa, la demo resta offline dopo il primo uso, e la build torna verde | `apps/web/vite.config.ts` |
 
 **Lesson learned**: la lezione principale è sul **cablaggio**. Il sintomo (la demo vuota, senza
 ere né mood) e la causa (il `dbName` mai propagato dalla shell ai componenti, che lo accettavano
@@ -1640,7 +1641,9 @@ mano, come già vale per gli scenari di `10§3.3`.
 **Verifica**: `@ls/core` 651 test in 58 file (il test di performance passa da solo: è l'indicatore
 di saturazione di 97-6) · `@ls/web` 207 test verdi di 215 (8 falliti per l'ambiente: i test i18n
 che usano `localStorage`, **identici su `main`** sotto Node 26; il CI gira su Node 24) ·
-`eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` · `node scripts/check-encoding.mjs` →
+`eslint` e `tsc --noEmit` verdi su `@ls/core` e `@ls/web` · `pnpm -F @ls/web build` verde
+(precache: 13 entry, 653 KiB — il chunk del fixture demo è escluso) ·
+`node scripts/check-encoding.mjs` →
 0 errori · `node scripts/check-fixtures-privacy.mjs` → 0 dati reali ·
 `node scripts/check-aggregate-blocks.mjs` → 0 violazioni.
 

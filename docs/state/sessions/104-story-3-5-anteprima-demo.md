@@ -97,7 +97,11 @@ reveal, propagazione del `dbName`).
   dell'utente (D-26.1).
 - **Il fixture è un chunk lazy (`?raw`)**: 3,6 MB non entrano nel bundle
   iniziale, e l'import di un JSON così grande farebbe inferire a TypeScript
-  un tipo enorme.
+  un tipo enorme. Il chunk è **fuori dal precache** del service worker
+  (`globIgnores`): 3,7 MB nel precache li scaricherebbero tutti gli utenti,
+  anche quelli che non aprono la demo, e superano il limite di Workbox
+  (2 MiB) — la build fallirebbe. La runtime cache `ls-demo-fixture` lo
+  conserva dopo il primo uso, quindi la demo resta disponibile offline.
 - **Tre fasi disgiunte** nel fixture: è ciò che fa produrre all'era detector
   **tre** ere — un fixture a genera casuale non avrebbe frontiere.
 
