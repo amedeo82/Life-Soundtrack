@@ -159,7 +159,6 @@
 | 103 | Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240) | 🟢 | ✅ | #320 |
 | 104 | Anteprima del risultato in onboarding: il diario di esempio (issue #270) | 🟢 | ✅ | #322 |
 | 105 | Arbitraggio atomico della selezione e lock di proprietà della worktree | 🟢 | ✅ | #321 |
-| 106 | DEV-LOG stato merge: una regola, un gate, un writer | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -199,9 +198,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **83** (merge: 81)
+- Sessioni migrate in state/sessions: **82** (merge: 81)
 - Stories migrate in state/stories: **28** (done: 25)
-- Ultima sessione migrata: **S106** - DEV-LOG stato merge: una regola, un gate, un writer
+- Ultima sessione migrata: **S105** - Arbitraggio atomico della selezione e lock di proprietà della worktree
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -246,7 +245,26 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente**: non ancora registrata (sezione `## Analisi di avanzamento` nel file di sessione).
+**Analisi della sessione corrente** (S105)
+
+| # | Metrica | Valore |
+|---|---------|--------|
+| 1 | Gate di proprietà della worktree | **1** (`check-worktree-ownership.mjs`, read-only) |
+| 2 | Scenari coperti dal gate | **9** (T1..T9, con scenario negativo dimostrato) |
+| 3 | Exit code di `agent-claim.ps1` documentati | **6** (0, 2, 3, 4, 5, 6) |
+| 4 | Check della session-start checklist | **7** (era 6: aggiunto F10) |
+| 5 | Step di CI aggiati | **1** (`test-worktree-ownership.sh` nel job `gates-protocol`) |
+| 6 | Righe del catalogo dei gate | **44** (43 gate + aggregatore `quality`) |
+| 7 | Versione protocollo | v1.49 → **v1.50** |
+
+**Pronto**: il lock di proprietà è implementato, testato (9/9) e collegato a tre
+punti (hook, gate locali, CI). La dichiarazione dell'agent-id nel body della PR
+chiude il ciclo in CI.
+
+**Dopo il merge**: i due agenti che erano in collisione sulla #240 restano da
+chiudere a mano (la #240 **non** è stata toccata: è di quell'agente). La
+Sessione 105 verifica che il protocollo nuovo, applicato da un agente fresco,
+chiuda il ciclo claim → worktree → commit senza collisioni.
 
 <!-- AGGREGATE-PROGRESS-END -->
 
