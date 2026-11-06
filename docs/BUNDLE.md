@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-06 17:27
+> Data: 2026-11-06 17:29
 > Totale file: 203
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -24699,12 +24699,10 @@ chiuda il ciclo claim → worktree → commit senza collisioni.
 number: 106
 title: "DEV-LOG stato merge: una regola, un gate, un writer"
 date: 2026-11-06
-state: 🟢
-merged: true
-merged_commit: "..."
-merged_date: "..."
+state: 🟡
+merged: false
 branch: fix/324-devlog-stato-merge
-pr: 324
+pr: 0
 ---
 
 # Sessione 106 — DEV-LOG stato merge: una regola, un gate, un writer
@@ -24712,7 +24710,7 @@ pr: 324
 **Issue di tracking**: **#324** (`agent-ready`, `area:devops`, `size:M`, `priority:important`, `phase-post`)
 
 **Branch**: `fix/324-devlog-stato-merge`
-**PR**: **#324**
+**PR**: (da aprire)
 **Data**: 2026-11-06
 
 ## Sintesi
