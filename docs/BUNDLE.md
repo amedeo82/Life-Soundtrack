@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-06 01:45
+> Data: 2026-11-06 01:53
 > Totale file: 199
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -25728,6 +25728,7 @@ priority: I
 depends_on: ["0.4", "3.1"]
 issue: 270
 branch: "feat/270-story-3-5---anteprima-e-modalita-demo-in"
+pr: 322
 claim: kilo-hp-elitebook-a320
 spec_refs:
   - docs/26-ONBOARDING-DEMO.md
