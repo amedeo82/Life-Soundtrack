@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-06 18:29
+> Data: 2026-11-07 17:25
 > Totale file: 203
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,14 +9,14 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 201 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2890.3 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-06 11:59
+- Totale file: 202 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2899.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-07 17:24
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 131 |
+| docs/ | 132 |
 | scripts/ | 44 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
@@ -1360,26 +1360,7 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S105)
-
-| # | Metrica | Valore |
-|---|---------|--------|
-| 1 | Gate di proprietà della worktree | **1** (`check-worktree-ownership.mjs`, read-only) |
-| 2 | Scenari coperti dal gate | **9** (T1..T9, con scenario negativo dimostrato) |
-| 3 | Exit code di `agent-claim.ps1` documentati | **6** (0, 2, 3, 4, 5, 6) |
-| 4 | Check della session-start checklist | **7** (era 6: aggiunto F10) |
-| 5 | Step di CI aggiati | **1** (`test-worktree-ownership.sh` nel job `gates-protocol`) |
-| 6 | Righe del catalogo dei gate | **44** (43 gate + aggregatore `quality`) |
-| 7 | Versione protocollo | v1.48 → **v1.49** |
-
-**Pronto**: il lock di proprietà è implementato, testato (9/9) e collegato a tre
-punti (hook, gate locali, CI). La dichiarazione dell'agent-id nel body della PR
-chiude il ciclo in CI.
-
-**Dopo il merge**: i due agenti che erano in collisione sulla #240 restano da
-chiudere a mano (la #240 **non** è stata toccata: è di quell'agente). La
-Sessione 105 verifica che il protocollo nuovo, applicato da un agente fresco,
-chiuda il ciclo claim → worktree → commit senza collisioni.
+**Analisi della sessione corrente**: non ancora registrata (sezione `## Analisi di avanzamento` nel file di sessione).
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2278,6 +2259,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 103 | Esplora + Analisi: la ricerca nel catalogo e la mappa emotiva (issue #240) | 🟢 | ✅ | #320 |
 | 104 | Anteprima del risultato in onboarding: il diario di esempio (issue #270) | 🟢 | ✅ | #322 |
 | 105 | Arbitraggio atomico della selezione e lock di proprietà della worktree | 🟢 | ✅ | #321 |
+| 106 | DEV-LOG stato merge: una regola, un gate, un writer | 🟡 | ❌ | - |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2317,9 +2299,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **82** (merge: 81)
+- Sessioni migrate in state/sessions: **83** (merge: 81)
 - Stories migrate in state/stories: **28** (done: 25)
-- Ultima sessione migrata: **S105** - Arbitraggio atomico della selezione e lock di proprietà della worktree
+- Ultima sessione migrata: **S106** - DEV-LOG stato merge: una regola, un gate, un writer
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2364,26 +2346,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S105)
-
-| # | Metrica | Valore |
-|---|---------|--------|
-| 1 | Gate di proprietà della worktree | **1** (`check-worktree-ownership.mjs`, read-only) |
-| 2 | Scenari coperti dal gate | **9** (T1..T9, con scenario negativo dimostrato) |
-| 3 | Exit code di `agent-claim.ps1` documentati | **6** (0, 2, 3, 4, 5, 6) |
-| 4 | Check della session-start checklist | **7** (era 6: aggiunto F10) |
-| 5 | Step di CI aggiati | **1** (`test-worktree-ownership.sh` nel job `gates-protocol`) |
-| 6 | Righe del catalogo dei gate | **44** (43 gate + aggregatore `quality`) |
-| 7 | Versione protocollo | v1.49 → **v1.50** |
-
-**Pronto**: il lock di proprietà è implementato, testato (9/9) e collegato a tre
-punti (hook, gate locali, CI). La dichiarazione dell'agent-id nel body della PR
-chiude il ciclo in CI.
-
-**Dopo il merge**: i due agenti che erano in collisione sulla #240 restano da
-chiudere a mano (la #240 **non** è stata toccata: è di quell'agente). La
-Sessione 105 verifica che il protocollo nuovo, applicato da un agente fresco,
-chiuda il ciclo claim → worktree → commit senza collisioni.
+**Analisi della sessione corrente**: non ancora registrata (sezione `## Analisi di avanzamento` nel file di sessione).
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -13415,6 +13378,87 @@ chiuda il ciclo claim → worktree → commit senza collisioni.
 - `scripts/test-claim-state.sh`: scenari T12..T14.
 - `.githooks/pre-commit`: INVARIANTE 4.
 - `.github/workflows/ci.yml`: step del gate di proprietà.
+```
+
+### Sessione 106 - DEV-LOG stato merge: una regola, un gate, un writer
+
+- **Data**: 2026-11-06
+- **Stato**: 🟡
+- **Merged**: ❌ non ancora mergiato (PR #0)
+- **Claim**: `-`
+
+```
+
+# Sessione 106 — DEV-LOG stato merge: una regola, un gate, un writer
+
+**Issue di tracking**: **#324** (`agent-ready`, `area:devops`, `size:M`, `priority:important`, `phase-post`)
+
+**Branch**: `fix/324-devlog-stato-merge`
+**PR**: (da aprire)
+**Data**: 2026-11-06
+
+## Sintesi
+
+Il DEV-LOG (`docs/18-DEV-LOG.md`) aveva **due fonti di verità** sullo stato di merge delle sessioni:
+1. Il frontmatter di `docs/state/sessions/` (scritto dal writer post-merge, verificato dal gate `check-merge-state.mjs`)
+2. La riga `**Stato**:` di ogni entry (scritta a mano, **senza gate**)
+
+Risultato: **34 entry** dichiaravano `🟡 in corso` / `✅ fatto` / `🟡 in review` per PR già mergiate (tutte le PR citate sono merged). L'entry §38 (Issue #216) citava Sessione 71 / PR #217, ma la sessione reale era 75 con PR #230 (merge commit `4e8cd4b`).
+
+## Fix implementati
+
+### 1. Writer post-merge (`scripts/apply-merge-state.mjs`)
+- Nuova modalità `--repair-devlog`: scorre tutte le sessioni mergiate e normalizza le entry DEV-LOG corrispondenti alla forma canonica `✅ **MERGED** (PR #N, merge commit \`sha7\`) — <prose>`
+- In modalità post-merge standard (dopo merge di una PR): aggiorna la riga `**Stato**:` delle entry che referenziano la PR (via `**PR**:` line o session refs nel heading)
+- Idempotente: se la riga è già canonica non scrive nulla
+
+### 2. Gate (`scripts/check-merge-state.mjs`)
+- Nuovo perimetro `docs/18-DEV-LOG.md` (fail-closed: file mancante = exit 2)
+- Per ogni entry con `**Stato**:`:
+  - Risolve la PR: prima la riga `**PR**:`, poi la sessione referenziata
+  - Classifica il marker: `MERGED` / `WIP` / `DONE` / `UNKNOWN`
+  - **R1**: marker `MERGED` → PR deve essere mergiata + citazione `PR #N` e sha (per entry moderne con session refs)
+  - **R2**: marker `WIP` → PR NON deve essere mergiata (diffonde il caso strutturale con `--defer-unapplied`)
+  - **R3**: marker `DONE` per entry moderne con PR mergiata → FAIL (deve essere canonico MERGED)
+- Supporta `--defer-unapplied` per il passaggio `push` sul merge commit (issue #284)
+
+### 3. Riparazione storica
+- `--repair-devlog` ha allineato **37 entry** mergiate alla forma canonica
+- Correzione entry §38 (Issue #216): heading `(Sessione 71)` → `(Sessione 75)`, `**PR**: #217` → `#230`, `**Stato**:` canonica con PR #230 / sha `4e8cd4b`
+- Changelog riga 2.26: "Sessione 71" → "Sessione 75"
+- Changelog duplicato "2.26" per Issue #218 rinumerato a "2.27"
+
+### 4. Test
+- `make_devlog()` in `test-merge-state-gate.sh`: crea DEV-LOG minimo (sezioni 1-3, nessuna entry) per ogni fixture
+- Tutti i **24 scenari** (T1..T18) passano
+- Gate sul repo reale: **115 confronti, 0 falliti**
+
+## File modificati
+
+- `scripts/check-merge-state.mjs` — perimetro DEV-LOG
+- `scripts/apply-merge-state.mjs` — normalizzazione `--repair-devlog` + post-merge
+- `.github/workflows/post-merge.yml` — `git add docs/18-DEV-LOG.md`
+- `scripts/test-merge-state-gate.sh` — fixture DEV-LOG + scenari T19..T22 (da aggiungere)
+- `AGENTS.md` v1.50 — tabella regola ⟺ gate + DEV-LOG, checklist merge aggiornata
+- `docs/INDEX.md` — versione protocollo v1.50
+- `docs/12-DEVOPS.md` — catalogo gate riga 42
+- `docs/18-DEV-LOG.md` — §57 + changelog 2.40 + correzioni §38/2.26/2.27
+- `docs/state/sessions/106-devlog-merge-state.md` — nuovo
+
+## Verifiche
+
+- `node scripts/check-merge-state.mjs` → 115 confronti, 0 falliti
+- `bash scripts/test-merge-state-gate.sh` → 24 pass, 0 fail
+- `pwsh scripts/aggregate-state.ps1 -Check` → exit 0
+- `pwsh scripts/generate-bundle.ps1 -Check` → exit 0
+- `node scripts/check-protocol-consistency.mjs` → 6 check, 0 falliti
+- `node scripts/check-encoding.mjs` → 0 errori
+- `node scripts/check-readme-facts.mjs` → 0 falliti
+
+---
+
+**Claim**: `kilo-hp-elitebook-85df` (UTC 2026-11-06T15:...)
+**Worktree**: `ls-324-devlog-stato-merge`
 ```
 
 <!-- AGGREGATE-SESSIONS-END -->
