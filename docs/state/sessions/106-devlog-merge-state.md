@@ -2,8 +2,10 @@
 number: 106
 title: "DEV-LOG stato merge: una regola, un gate, un writer"
 date: 2026-11-06
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "970e45b6328edb53bffc3db1bb385aa6be29173b"
+merged_date: "2026-11-07T17:39:12Z"
 branch: fix/324-devlog-stato-merge
 pr: 0
 ---
