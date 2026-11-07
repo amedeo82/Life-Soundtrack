@@ -173,6 +173,19 @@ make_story() {
   } > "$d/docs/state/stories/$id-fixture.md"
 }
 
+# Crea un DEV-LOG minimo per i test (sezioni 1-3, nessuna entry con **Stato**:).
+# Il gate richiede il file (fail-closed), ma senza entry non c'e' nulla da confrontare.
+make_devlog() {
+  local d="$1"
+  mkdir -p "$d/docs"
+  cat > "$d/docs/18-DEV-LOG.md" <<'EOF'
+## 1. Regole di compilazione
+## 2. Indice rapido (per sintomo)
+## 3. Template entry (da copiare)
+## 4. Entries cronologiche
+EOF
+}
+
 SHA_A="aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbccccccc"
 SHA_B="ddddddddddddddddeeeeeeeeeeeeeeeeeefffffff"
 DATE_A="2026-11-01T09:58:20Z"
@@ -222,7 +235,7 @@ else
 fi
 
 echo "=== T1: fixture coerente (PR mergiata, frontmatter allineato) ==="
-D="$WORK/t1"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"
+D="$WORK/t1"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f1.json"
 start_server "$WORK/f1.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -230,7 +243,7 @@ if [ $ec -eq 0 ]; then ok "exit 0 (nessun drift)"; else ng "exit $ec (atteso 0):
 stop_server
 
 echo "=== T2: la PR e' mergiata ma la sessione dichiara merged: false ==="
-D="$WORK/t2"; make_session "$D" 10 10 false "" "" "🟡"
+D="$WORK/t2"; make_session "$D" 10 10 false "" "" "🟡"; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f2.json"
 start_server "$WORK/f2.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -239,7 +252,7 @@ if echo "$out" | grep -q "10-fixture.md"; then ok "il messaggio nomina il file d
 stop_server
 
 echo "=== T3: la PR e' ancora aperta ma la sessione dichiara merged: true ==="
-D="$WORK/t3"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"
+D="$WORK/t3"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_devlog "$D"
 echo "$(pr_open 10)" > "$WORK/f3.json"
 start_server "$WORK/f3.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -247,7 +260,7 @@ if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atte
 stop_server
 
 echo "=== T4: merged_commit diverso dal merge commit reale ==="
-D="$WORK/t4"; make_session "$D" 10 10 true "$SHA_B" "$DATE_A" "🟢"
+D="$WORK/t4"; make_session "$D" 10 10 true "$SHA_B" "$DATE_A" "🟢"; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f4.json"
 start_server "$WORK/f4.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -256,7 +269,7 @@ if echo "$out" | grep -q "merged_commit"; then ok "il messaggio cita il campo me
 stop_server
 
 echo "=== T5: merged_date assente ==="
-D="$WORK/t5"; make_session "$D" 10 10 true "$SHA_A" "" "🟢"
+D="$WORK/t5"; make_session "$D" 10 10 true "$SHA_A" "" "🟢"; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f5.json"
 start_server "$WORK/f5.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -264,7 +277,7 @@ if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atte
 stop_server
 
 echo "=== T6: la sessione e' mergiata ma lo stato del lavoro non e' chiuso ==="
-D="$WORK/t6"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟡"
+D="$WORK/t6"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟡"; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f6.json"
 start_server "$WORK/f6.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -272,7 +285,7 @@ if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atte
 stop_server
 
 echo "=== T7: API GitHub in errore -> fail-closed (exit 2) ==="
-D="$WORK/t7"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"
+D="$WORK/t7"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_devlog "$D"
 echo '{"__error":true}' > "$WORK/f7.json"
 start_server "$WORK/f7.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -280,7 +293,7 @@ if [ $ec -eq 2 ]; then ok "exit 2 (errore di ambiente, distinto dal drift)"; els
 stop_server
 
 echo "=== T8: sessione senza PR (pr: 0) -> ignorata, nessun falso positivo ==="
-D="$WORK/t8"; make_session "$D" 10 0 false "" "" "🟡"
+D="$WORK/t8"; make_session "$D" 10 0 false "" "" "🟡"; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f8.json"
 start_server "$WORK/f8.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -288,7 +301,7 @@ if [ $ec -eq 0 ]; then ok "exit 0 (sessione senza PR ignorata)"; else ng "exit $
 stop_server
 
 echo "=== T9: la sessione cita una PR assente dalla risposta -> exit 2 ==="
-D="$WORK/t9"; make_session "$D" 10 99 true "$SHA_A" "$DATE_A" "🟢"
+D="$WORK/t9"; make_session "$D" 10 99 true "$SHA_A" "$DATE_A" "🟢"; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f9.json"
 start_server "$WORK/f9.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -296,7 +309,7 @@ if [ $ec -eq 2 ]; then ok "exit 2 (dato esterno incompleto: fail-closed)"; else 
 stop_server
 
 echo "=== T10: --defer-unapplied, l'albero E' il merge commit -> differito, non fallito ==="
-D="$WORK/t10"; make_session "$D" 10 10 false "" "" "🟡"
+D="$WORK/t10"; make_session "$D" 10 10 false "" "" "🟡"; make_devlog "$D"
 HEAD_SHA="$(make_git_fixture "$D")"
 echo "  [DEBUG] HEAD_SHA=[$HEAD_SHA]"
 echo "$(pr_merged 10 "$HEAD_SHA" "$DATE_A")" > "$WORK/f10.json"
@@ -308,7 +321,7 @@ if echo "$out" | grep -q "\[DEFERRED\]"; then ok "il messaggio dichiara il diffe
 stop_server
 
 echo "=== T11: --defer-unapplied, l'albero NON e' il merge commit -> il drift resta un fallimento ==="
-D="$WORK/t11"; make_session "$D" 10 10 false "" "" "🟡"
+D="$WORK/t11"; make_session "$D" 10 10 false "" "" "🟡"; make_devlog "$D"
 make_git_fixture "$D" >/dev/null
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f11.json"
 start_server "$WORK/f11.json" || exit 1
@@ -317,7 +330,7 @@ if [ $ec -eq 1 ]; then ok "exit 1 (il drift reale non e' differibile)"; else ng 
 stop_server
 
 echo "=== T12: senza --defer-unapplied lo stesso caso T10 resta un fallimento (il gate non e' indebolito) ==="
-D="$WORK/t12"; make_session "$D" 10 10 false "" "" "🟡"
+D="$WORK/t12"; make_session "$D" 10 10 false "" "" "🟡"; make_devlog "$D"
 HEAD_SHA="$(make_git_fixture "$D")"
 echo "$(pr_merged 10 "$HEAD_SHA" "$DATE_A")" > "$WORK/f12.json"
 start_server "$WORK/f12.json" || exit 1
@@ -326,7 +339,7 @@ if [ $ec -eq 1 ]; then ok "exit 1 (modalita' autoritativa: fail-closed)"; else n
 stop_server
 
 echo "=== T13: story coerente (PR mergiata, status: done, fatti del merge allineati) ==="
-D="$WORK/t13"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "$SHA_A" "2026-11-01"
+D="$WORK/t13"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "$SHA_A" "2026-11-01"; make_devlog "$D"
 echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f13.json"
 start_server "$WORK/f13.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -334,7 +347,7 @@ if [ $ec -eq 0 ]; then ok "exit 0 (nessun drift)"; else ng "exit $ec (atteso 0):
 stop_server
 
 echo "=== T14: la PR e' mergiata ma la story dichiara status: in_review (il caso Story 2.5) ==="
-D="$WORK/t14"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 in_review "" ""
+D="$WORK/t14"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 in_review "" ""; make_devlog "$D"
 echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f14.json"
 start_server "$WORK/f14.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -343,7 +356,7 @@ if echo "$out" | grep -q "2.5-fixture.md"; then ok "il messaggio nomina il file 
 stop_server
 
 echo "=== T15: la story e' done ma merged_commit manca ==="
-D="$WORK/t15"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "" ""
+D="$WORK/t15"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "" ""; make_devlog "$D"
 echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f15.json"
 start_server "$WORK/f15.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -351,7 +364,7 @@ if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atte
 stop_server
 
 echo "=== T16: la story e' done ma merged_date non coincide ==="
-D="$WORK/t16"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "$SHA_A" "2026-10-31"
+D="$WORK/t16"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 done "$SHA_A" "2026-10-31"; make_devlog "$D"
 echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$SHA_A" "$DATE_A")" > "$WORK/f16.json"
 start_server "$WORK/f16.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -359,7 +372,7 @@ if [ $ec -eq 1 ]; then ok "exit 1 (drift intercettato)"; else ng "exit $ec (atte
 stop_server
 
 echo "=== T17: story senza PR (pr: 0) -> ignorata, nessun falso positivo ==="
-D="$WORK/t17"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 0 todo "" ""
+D="$WORK/t17"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 0 todo "" ""; make_devlog "$D"
 echo "$(pr_merged 10 "$SHA_A" "$DATE_A")" > "$WORK/f17.json"
 start_server "$WORK/f17.json" || exit 1
 out="$(run_gate "$D")"; ec=$?
@@ -367,7 +380,7 @@ if [ $ec -eq 0 ]; then ok "exit 0 (story senza PR ignorata)"; else ng "exit $ec 
 stop_server
 
 echo "=== T18: --defer-unapplied con l'albero = merge commit e story non ancora done -> differito ==="
-D="$WORK/t18"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 in_review "" ""
+D="$WORK/t18"; make_session "$D" 10 10 true "$SHA_A" "$DATE_A" "🟢"; make_story "$D" 2.5 11 in_review "" ""; make_devlog "$D"
 HEAD_SHA="$(make_git_fixture "$D")"
 echo "$(pr_merged_pair 10 "$SHA_A" "$DATE_A" 11 "$HEAD_SHA" "$DATE_A")" > "$WORK/f18.json"
 start_server "$WORK/f18.json" || exit 1

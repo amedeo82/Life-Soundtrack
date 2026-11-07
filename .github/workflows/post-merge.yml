@@ -192,7 +192,7 @@ jobs:
             # `scripts/validate-workflows.mjs` la confronta con i `$targets`
             # dell'agregator (issue #136): i due elenchi non possono
             # divergere senza che nessuno se ne accorga.
-            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md README.md docs/state/ 2>&1 | Out-Null
+            git add docs/SESSIONS.md docs/11-BACKLOG.md docs/INDEX.md docs/BUNDLE.md docs/18-DEV-LOG.md README.md docs/state/ 2>&1 | Out-Null
             if (git diff --cached --quiet) {
               Write-Host "[post-merge] nessuna modifica: lo stato di `main` e' gia' in sync"
               exit 0

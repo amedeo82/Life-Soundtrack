@@ -947,6 +947,7 @@ protection può interpretare un check saltato come successo.
 | 39 | `gates-procedure` | `Wiring degli hook` (`test-hook-wiring.sh`, 17 assert: wiring statico + `git commit` reale) | solo PR | sì | **#290** |
 | 40 | `gates-docs` | `Privacy dei fixture` (`check-fixtures-privacy.mjs`) | solo PR | sì | **#309** |
 | 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
+| 42 | `gates-protocol` | `DEV-LOG stato merge` (`check-merge-state.mjs` perimetro `docs/18-DEV-LOG.md`) | solo PR | sì | **#324** |
 | 42 | `gates-protocol` | `Coerenza claim/issue/branch/PR` (`check-claim-state.mjs`) | solo PR | sì | **#256** |
 | 43 | `gates-protocol` | `Gate "coerenza del claim" fail-closed` (`test-claim-state.sh`, 14 scenari) | solo PR | sì | **#256** |
 | 44 | `gates-protocol` | `Gate "proprieta' della worktree" fail-closed` (`test-worktree-ownership.sh`, 9 scenari) | solo PR | sì | **#319** |

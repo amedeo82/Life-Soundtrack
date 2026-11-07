@@ -215,6 +215,8 @@ $files = @(
     # Sessione 105 (issue #319): arbitraggio atomico della selezione e lock
     # di proprieta' della worktree (il protocollo ha due lock: issue + worktree).
     "docs/state/sessions/105-arbitraggio-claim-lock-worktree.md",
+    # Sessione 106 (issue #324): DEV-LOG stato merge — una regola, un gate, un writer.
+    "docs/state/sessions/106-devlog-merge-state.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",

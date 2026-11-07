@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.49 — Sessione 105 (2026-11-05)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.50 — Sessione 106 (2026-11-06)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -49,6 +49,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | Il percorso degli hook è `.githooks` e gli hook **girano davvero** (nessun lifecycle script può sovrascriverlo) | `test-hook-wiring.sh` (17 assert: wiring statico + `git commit` reale) | issue #290 (hook mai eseguiti) |
 | I messaggi di commit rispettano Conventional Commits | `commitlint --from/--to` (job `gates-protocol`) | convenzione Conventional Commits (verificata solo in locale prima della #292) |
 | Il frontmatter di una **story** dichiara lo stesso fatto di merge delle sessioni (`status: done`, `merged_commit`, `merged_date`), e il writer post-merge lo applica | `check-merge-state.mjs` (perimetro `docs/state/stories/`) + `apply-merge-state.mjs` | issue #297 (Story 2.5 restata `in-review` dopo il merge) |
+| L'entry `**Stato**:` del DEV-LOG per una sessione mergiata cita `PR #N` e `merge commit \`sha7\``, e il writer post-merge la normalizza | `check-merge-state.mjs` (perimetro `docs/18-DEV-LOG.md`) + `apply-merge-state.mjs` | issue #324 (DEV-LOG con due fonti di verità sullo stato di merge) |
 | `main` è protetta: nessun merge senza PR con il check `quality` verde, nessun force push, nessuna cancellazione, history lineare; l'unico scrittore diretto è il writer post-merge | ruleset GitHub `main-protection` (bypass: la sola deploy key `post-merge-writer`) | issue #311 (repository pubblico: il protocollo diventa *enforceable*) |
 
 ```bash
@@ -688,7 +689,7 @@ Chi esegue il merge (o chi chiude la PR) è responsabile di aggiornare **nella s
 | Chiusura di una sessione | `docs/state/sessions/<N>-<slug>.md` (fonte) + `docs/SESSIONS.md` (blocco aggregato, automatico) |
 | Aggiunta/rimozione di un documento in `docs/` | `docs/INDEX.md` §"Documenti fondamentali" / "Documenti di supporto" + `scripts/generate-bundle.ps1` (`$files`) |
 | Aggiunta/rimozione di una **piattaforma importabile** o di una capability | `README.md` §"Cosa c'è oggi" / §"Roadmap" — la **prosa**, mai il blocco `AGGREGATE-NEXT-STEP-*` (vedi §"Ownership del `README.md`") |
-| Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: branch → "merged", PR → numero, aggiungere commit) + **eliminare il branch remoto** (vedi §"♻️ Pulizia branch post-merge") |
+| Branch mergato o PR chiusa | `docs/18-DEV-LOG.md` (§4 entry: `**Stato**:` → `✅ **MERGED** (PR #N, merge commit \`sha7\`)`) + **eliminare il branch remoto** (vedi §"♻️ Pulizia branch post-merge") |
 | Qualsiasi modifica al **contenuto** di `docs/`, `AGENTS.md`, `README.md`, `fixtures/`, `LICENSE` | `docs/BUNDLE.md` (rigenerare con `pwsh scripts/generate-bundle.ps1`) |
 | Modifica alla struttura (aggiunta/rimozione file in `docs/`, `fixtures/`, root) | Anche `scripts/generate-bundle.ps1` (`$files`) — vedi sotto |
 | Modifica al toolchain o alla policy di versionamento | `docs/17-DEV-NOTES.md` + nuova entry in `SESSIONS.md` |
