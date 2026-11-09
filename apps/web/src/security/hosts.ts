@@ -40,6 +40,19 @@ export const ITUNES_AUDIO_HOST = 'https://audio-ssl.itunes.apple.com';
 export const ITUNES_SEARCH_HOST = 'https://itunes.apple.com';
 
 /**
+ * L'host del Cover Art Archive (MusicBrainz) —
+ * `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 (Story 4.3).
+ *
+ * L'endpoint per l'artwork è `https://coverartarchive.org/release/{mbid}`.
+ * Nessun auth, rate limit 1 req/s (stessa disciplina di MusicBrainz).
+ *
+ * Dichiarato nella CSP applicata al bundle nella Story 4.3, con la stessa
+ * disciplina con cui D-AF.9 è stata emendata (issue #196): la spec e la CSP
+ * applicata devono dire la stessa cosa.
+ */
+export const COVER_ART_HOST = 'https://coverartarchive.org';
+
+/**
  * L'host di download del database DB-IP Lite City (MMDB, CC BY 4.0) —
  * `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 (Story 4.4).
  *

@@ -1,0 +1,14 @@
+{
+  "_comment": "Mock della risposta del Cover Art Archive per una release con immagini. La prima immagine ha front=true.",
+  "release": "a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7n8",
+  "images": [
+    {
+      "url": "https://coverartarchive.org/release/a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7n8/1234567890-front-500.jpg",
+      "front": true
+    },
+    {
+      "url": "https://coverartarchive.org/release/a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7n8/1234567891-back-500.jpg",
+      "front": false
+    }
+  ]
+}

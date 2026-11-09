@@ -75,9 +75,19 @@ export function MemoryCard({
       style={{ animationDelay: '200ms' }}
     >
       {artworkUrl ? (
-        <img className="memory-card__artwork" src={artworkUrl} alt={title} />
+        <img
+          className="memory-card__artwork"
+          src={artworkUrl}
+          alt={title}
+          loading="lazy"
+          data-testid="memory-card-artwork"
+        />
       ) : (
-        <span className="memory-card__artwork memory-card__artwork--empty" aria-hidden="true" />
+        <span
+          className="memory-card__artwork memory-card__artwork--empty"
+          aria-hidden="true"
+          data-testid="memory-card-artwork"
+        />
       )}
       <div className="memory-card__body">
         <h3 className="memory-card__title">{title}</h3>

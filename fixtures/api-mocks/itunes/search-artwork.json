@@ -1,0 +1,22 @@
+{
+  "_comment": "Mock della risposta dell'iTunes Search API per artwork (entity=album). Il primo risultato è il match esatto (titolo + artista normalizzati) con artworkUrl100 e artworkUrl600; il secondo è una variante che il resolver NON deve accettare (match non esatto).",
+  "resultCount": 2,
+  "results": [
+    {
+      "trackId": 1234567890,
+      "trackName": "Northern Sky",
+      "artistName": "The Midnight Echo",
+      "collectionName": "Long Nights",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1a2b3c4d/100x100bb.jpg",
+      "artworkUrl600": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1a2b3c4d/600x600bb.jpg"
+    },
+    {
+      "trackId": 987654321,
+      "trackName": "Northern Sky (Live)",
+      "artistName": "The Midnight Echo",
+      "collectionName": "Long Nights (Deluxe Edition)",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/9z8y7x6w/100x100bb.jpg",
+      "artworkUrl600": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/9z8y7x6w/600x600bb.jpg"
+    }
+  ]
+}

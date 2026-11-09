@@ -1,0 +1,5 @@
+{
+  "_comment": "Mock della risposta del Cover Art Archive per una release non trovata (404).",
+  "release": "nonexistent-mbid",
+  "images": []
+}

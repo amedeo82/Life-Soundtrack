@@ -593,7 +593,9 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 ### Story 4.3 — Artwork enrichment `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]`
 
-**Descrizione**: Popolamento di `Track.artworkUrl` e `Album.artworkUrl` (aggiunti in `02 v1.2` per chiusura M5 audit). Cascata di fonti: **Spotify Web API** (se utente Spotify-first e `PrivacySettings.enrichMetadata=true`) → **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`, no auth, rate limit 1 req/s) → **iTunes Search API** (`/search?term=`, no auth, fallback per utenti Apple/Last.fm-first) → **placeholder gradient** generato runtime.
+**Stato**: 👀 **IN REVIEW** — PR #326 aperta, in attesa di review
+
+**Descrizione**: Popolamento di `Track.artworkUrl` e `Album.artworkUrl` (aggiunti in `02 v1.2` per chiusura M5 audit). Cascata di fonti: **iTunes Search API** (`/search?entity=album`, no auth, 20 req/min) → **MusicBrainz Cover Art Archive** (`/release/{mbid}`, no auth, rate limit 1 req/s) → **placeholder gradient** generato runtime deterministico. Il ramo Spotify Web API è **escluso** (D-24.2): il progetto non ha infrastruttura OAuth per Spotify e gli export non contengono URL di copertina.
 
 **Priorità 2026-11-02 (P0)**: le copertine sono l'**ancora visiva** del diario — senza, la timeline è un elenco di testo e l'app resta uno strumento tecnico invece di un oggetto emotivo. L'artwork è inoltre il **moltiplicatore** delle story vicine: il colore dominante dell'era, la card condivisibile (3.2) e la lettura visiva del mood (3.3) nascono tutti dalle copertine. La verifica del 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §4) ha confermato che **non esiste alcun artwork nel repository**: il campo esiste nello schema ma la pipeline di import scrive sempre `artworkUrl: null` (`packages/core/src/adapters/pipeline.ts`), e il componente `MemoryCard` ha solo lo slot vuoto.
 
@@ -601,7 +603,7 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - T4.3.1 — Modulo `enrichment/artwork.ts` con funzione `fetchArtworkUrl(track|album, deps)` che applica la cascata
 - T4.3.2 — Integrazione con `recount()` o job `enrichOnImport()` di Story 0.7 per popolamento batch post-import
 - T4.3.3 — Trigger on-demand: schermata che richiede artwork (`Home MemoryCard`, `Timeline EraBand`, `Esplora`) → fetch lazy se `artworkUrl === null`
-- T4.3.4 — Rispettare `PrivacySettings.enrichMetadata`: se `false`, salta Spotify API (no rete); mantieni solo MB Cover Art (no PII esposta, è solo fetch pubblico) e iTunes Search; placeholder come fallback finale
+- T4.3.4 — Rispettare `PrivacySettings.enrichMetadata`: se `false`, **zero** richieste di rete, **zero** scritture, **zero** letture cache (come `21§10.4`)
 - T4.3.5 — Gestione errori: 404 (no artwork disponibile), 429 (rate limit MB), timeout → fallback a fonte successiva
 - T4.3.6 — Migrazione Dexie v2→v3 (`02 §10`): aggiunta campo nullable, non distruttiva
 
@@ -609,15 +611,14 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 - [ ] Dato un Track con `spotify:track:<id>`, `fetchArtworkUrl()` ritorna URL Spotify valido (mock test)
 - [ ] Dato un Track con solo `mbid`, fallback a MB Cover Art Archive (mock test)
 - [ ] Dato un Track senza ID, fallback a iTunes Search (mock test)
-- [ ] Dato un Track senza match, ritorna `null` (UI mostra placeholder gradient)
+- [ ] Dato un Track senza match, ritorna placeholder gradient deterministico
 - [ ] Toggle `enrichMetadata=false` → Spotify API saltata; altre fonti tentate
 - [ ] Migrazione Dexie v2→v3 testata con dati pre-migrazione (10-TESTING §4.3)
 - [ ] Placeholder gradient generato coerente con Mood (vedi `15-DESIGN-SYSTEM` §3 palette mood)
 
-**Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: Spotify Web API e iTunes Search coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
+**Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: iTunes Search e placeholder gradient coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
 **Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
 **Issue**: #242 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
-**Spec**: `02-DATA-SCHEMA §11`, `05-ARCHITECTURE §6 §6.1 §6.2`, `07-UI-SPEC §2.2 §2.10`
 
 ---
 
