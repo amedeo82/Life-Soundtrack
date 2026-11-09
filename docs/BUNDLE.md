@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-09 17:47
+> Data: 2026-11-09 17:51
 > Totale file: 203
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -26535,7 +26535,7 @@ Consegnato:
 ===== FILE: docs/state/stories/4.3-artwork-enrichment.md =====
 
 ---
-story: 4.3
+id: "4.3"
 slug: artwork-enrichment
 title: Artwork enrichment
 status: done
