@@ -39,8 +39,8 @@ Non ancora nell'app — la roadmap completa, con lo stato di ogni story, è in [
 - **Ricordi + Share** (EPIC 3, Story 3.2): feed dei ricordi, card 1080×1350, export statico di un capitolo, tagging manuale di ere e canzoni
 - **Esplora + Analisi** (EPIC 3, Story 3.3): ricerca sui propri dati, quadrante valence/energy, insight in prosa
 - **Anteprima in onboarding** (EPIC 3, Story 3.5): diario di esempio prima dell'import, prime righe della timeline dopo
-- **Artwork** (EPIC 4, Story 4.3): copertine degli album — il campo esiste già nello schema, la pipeline non le popola ancora
-- **Audio features** (EPIC 4, Story 4.1): la pipeline è implementata in `@ls/core` (cascata cache → Essentia.js → AcousticBrainz → euristico), ma il modulo Essentia non è ancora integrato nell'app
+- **Artwork** (EPIC 4, Story 4.3): ✅ **completato** — cascata iTunes → Cover Art Archive → placeholder deterministico, cursore tentativi, rate limit, toggle enrichMetadata
+- **Audio features** (EPIC 4, Story 4.1): ✅ **completato** — la pipeline è implementata in `@ls/core` (cascata cache → Essentia.js → AcousticBrainz → euristico)
 - **Lookup MusicBrainz** (EPIC 4, Story 4.2): MBID e generi (priorità bassa: non serve all'artwork)
 - **Privacy spec finale** (EPIC 5, Story 5.1): pagina in-app «Come trattiamo i tuoi dati»
 - **Export e purge** (EPIC 5, Story 5.2): export JSON/CSV del diario, cancellazione totale con doppia conferma
