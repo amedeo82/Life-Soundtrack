@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-09 17:51
+> Data: 2026-11-09 17:53
 > Totale file: 203
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -10,8 +10,8 @@
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
 - Totale file: 202 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2899.8 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-07 17:39
+- Dimensione totale: 2903.6 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-09 17:53
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
@@ -1329,9 +1329,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 83%** - 25 story completate su 30 - effort pesato 86% - **mancano 5 step**
+**Implementazione: 87%** - 26 story completate su 30 - effort pesato 89% - **mancano 4 step**
 
-`█████████████████████████░░░░░` 83%
+`██████████████████████████░░░░` 87%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
@@ -1339,15 +1339,14 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
 | EPIC 3 - UI/UX | 5 | 5 | 100% | completo |
-| EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
+| EPIC 4 - Arricchimento | 3 | 4 | 75% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 25 done - 0 in corso - 5 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 26 done - 0 in corso - 4 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (5):
+**Step ancora da implementare** (4):
 - 4.2 MusicBrainz lookup - da fare (size M)
-- 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
 - 5.2 Export e purge - da fare (size M)
 - 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
@@ -1371,11 +1370,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V3, ADR-0008, issue #127).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Prossima story da implementare**: **4.3** — Artwork enrichment (priority `I`, vedi `docs/11-BACKLOG.md`).
+**Prossima story da implementare**: **5.1** — Privacy spec finale (priority `B`, vedi `docs/11-BACKLOG.md`).
 
-Sorgente: `docs/state/stories/4.3-artwork-enrichment.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
+Sorgente: `docs/state/stories/5.1-privacy-spec-finale.md`. Issue candidabile: filtra con `gh issue list --label agent-ready --state open` (vedi `docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti").
 
-Altre non-done e non bloccate in ordine di priorita backlog (id): 5.1, 5.2.
+Altre non-done e non bloccate in ordine di priorita backlog (id): 5.2.
 
 <!-- AGGREGATE-NEXT-STEP-END -->
 
@@ -2300,9 +2299,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
 - Sessioni migrate in state/sessions: **83** (merge: 82)
-- Stories migrate in state/stories: **28** (done: 25)
+- Stories migrate in state/stories: **28** (done: 26)
 - Ultima sessione migrata: **S106** - DEV-LOG stato merge: una regola, un gate, un writer
-- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.4
+- Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.3, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
 
@@ -2315,9 +2314,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V4, ADR-0008, issue #216).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-**Implementazione: 83%** - 25 story completate su 30 - effort pesato 86% - **mancano 5 step**
+**Implementazione: 87%** - 26 story completate su 30 - effort pesato 89% - **mancano 4 step**
 
-`█████████████████████████░░░░░` 83%
+`██████████████████████████░░░░` 87%
 
 | EPIC | Completate | Totale | % | Stato |
 |------|-----------|--------|---|-------|
@@ -2325,15 +2324,14 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | EPIC 1 - Import core | 6 | 6 | 100% | completo |
 | EPIC 2 - Analisi | 5 | 5 | 100% | completo |
 | EPIC 3 - UI/UX | 5 | 5 | 100% | completo |
-| EPIC 4 - Arricchimento | 2 | 4 | 50% | in corso |
+| EPIC 4 - Arricchimento | 3 | 4 | 75% | in corso |
 | EPIC 5 - Privacy e legale | 0 | 2 | 0% | da fare |
 | EPIC 6 - Manutenzione stack | 0 | 1 | 0% | da fare |
 
-**Distribuzione**: 25 done - 0 in corso - 5 da fare - 0 bloccate - 0 annullate
+**Distribuzione**: 26 done - 0 in corso - 4 da fare - 0 bloccate - 0 annullate
 
-**Step ancora da implementare** (5):
+**Step ancora da implementare** (4):
 - 4.2 MusicBrainz lookup - da fare (size M)
-- 4.3 Artwork enrichment - da fare (size M)
 - 5.1 Privacy spec finale - da fare (size M)
 - 5.2 Export e purge - da fare (size M)
 - 6.1 Upgrade toolchain e dipendenze a ultime major - da fare (size M)
@@ -35309,7 +35307,7 @@ Ogni story deve avere label GitHub:
 | 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
 | 3.5 - Anteprima del risultato in onboarding (modalità demo) | done | #322 | `4ceacc1f30df485ef1894d59059e39eeea32e2e2` | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
-| 4.3 - Artwork enrichment | todo | - | - | enrichment |
+| 4.3 - Artwork enrichment | done | - | - | ? |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `beaefba677f9dbaf0ec9891c3e70516015a1adcf` | enrichment |
 | 5.1 - Privacy spec finale | todo | - | - | privacy |
 | 5.2 - Export e purge | todo | - | - | privacy |
