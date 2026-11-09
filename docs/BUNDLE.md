@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-07 17:39
+> Data: 2026-11-09 17:28
 > Totale file: 203
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -26535,59 +26535,54 @@ Consegnato:
 ===== FILE: docs/state/stories/4.3-artwork-enrichment.md =====
 
 ---
-id: "4.3"
-title: "Artwork enrichment"
-phase: 2
-area: enrichment
-status: todo
-priority: I
-depends_on: []
-issue: 242
-spec_refs:
-  - docs/24-ARTWORK-ENRICHMENT.md
-  - docs/02-DATA-SCHEMA.md
-  - docs/05-ARCHITECTURE.md
-  - docs/07-UI-SPEC.md
+story: 4.3
+slug: artwork-enrichment
+title: Artwork enrichment
+status: done
+merged_commit: ""
+merged_date: ""
 ---
 
-## Descrizione
+# Story 4.3 — Artwork enrichment
 
-Le copertine degli album: il campo `artworkUrl` esiste già nello schema, la
-pipeline non le popola ancora. È l'**ancora visiva** del diario (P0 dal
-2026-11-02, `22-COMPETITIVE-POSITIONING.md` §7) e il moltiplicatore delle story
-vicine (colore dell'era, card condivisibile della 3.2, lettura del mood).
-
-La cascata reale è **iTunes → Cover Art Archive → placeholder gradient**
-(D-24.2: il branch Spotify è codice morto, il progetto non ha OAuth e gli
-export non contengono copertine), con l'obbligo CSP di `coverartarchive.org`.
-**Non dipende** dal lookup MusicBrainz (D-22.4: il vincolo `[DEP:4.2]` è stato
-rimosso).
-
-Spec: `docs/24-ARTWORK-ENRICHMENT.md` **v1.0 🟢 APPROVED** (ratificata dal
-project owner il 2026-11-02, Sessione 87).
-
-## Stato
-
-⬚ **TODO** — spec ratificata, issue canonica #242 aperta: **in attesa di claim**
-(ADR-0006). State file creato alla ratifica della spec (eccezione documentata in
-`docs/state/_index.md`) per alimentare il blocco `AGGREGATE-NEXT-STEP-*`.
-
-## Task
-
-- [ ] Da definire al claim, dalla spec `docs/24-ARTWORK-ENRICHMENT.md`
+**Status**: ✅ **DONE** — implementata nella Sessione 107 (issue #242, PR #XXX merged). La spec `docs/24-ARTWORK-ENRICHMENT.md` è **v1.0 🟢 APPROVED** (ratificata dal project owner al merge della PR #273, 2026-11-02). Consegnato: il modulo `packages/core/src/enrichment/artwork.ts` con la cascata **iTunes → Cover Art Archive → placeholder gradient deterministico**, il cursore `artwork.cursor` in `settings` per ricordare i tentativi falliti (D-24.3), il rate limiting (iTunes 20/min, Cover Art Archive 1 req/s), il rispetto del toggle `enrichMetadata` (zero uscite/zero scritture/zero letture cache quando spento, come `21§10.4`), la costante `COVER_ART_HOST` in `apps/web/src/security/hosts.ts` + `connect-src` in `csp.ts` + test CSP, l'aggiornamento di `MemoryCard` con `alt` + `loading="lazy"`, i fixture `fixtures/api-mocks/itunes/search-artwork.json` e `fixtures/api-mocks/coverartarchive/*`. **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) + **15** in `@ls/web` (CSP, i18n, MemoryCard). **Fuori perimetro, dichiarato**: la cache binaria delle immagini (D-24.6), il colore dominante dell'era (story separata), il lookup MusicBrainz (Story 4.2, P2) — il ramo Cover Art Archive è progettato per funzionare anche senza, l'OAuth Spotify (D-24.2). Dettagli e scelte: `docs/state/stories/4.3-artwork-enrichment.md`.
 
 ## Acceptance criteria
 
-- [ ] Elenco completo in `docs/11-BACKLOG.md` §"Story 4.3" (compilare al claim)
+- [x] `fetchArtworkUrl` esiste in `@ls/core/enrichment` ed è coperto da test (le 6 caselle della tabella spec)
+- [x] La cascata è **iTunes → Cover Art Archive → placeholder**, e il ramo Spotify **non** esiste (D-24.2 ratificata)
+- [x] Con `enrichMetadata = false`: **zero** richieste di rete, **zero** scritture
+- [x] `Track.artworkUrl` e `Album.artworkUrl` vengono popolati; l'import continua a scrivere `null` (l'arricchimento è un job separato)
+- [x] Il placeholder è **deterministico** e non richiede rete
+- [x] `coverartarchive.org` è in `connect-src` **sia** nella CSP applicata **sia** in `docs/12-DEVOPS.md` §2.1, e il test della CSP dimostra che non entra nessun altro host
+- [x] Il rate limit è rispettato: iTunes 20/min, Cover Art Archive 1 req/s
+- [x] `MemoryCard` renderizza l'artwork con `alt` e `loading="lazy"`, e il placeholder quando manca
+- [x] Il ramo Cover Art Archive è **opzionale**: senza MBID (Story 4.2 non fatta) il risultato è comunque un artwork (iTunes o placeholder)
 
-## Lesson learned
+## Task
 
-_(al termine dell'implementazione)_
+- [x] T24.1 — `packages/core/src/enrichment/artwork.ts`: resolver con cascata, placeholder deterministico, rispetto del toggle
+- [x] T24.2 — Costante `COVER_ART_HOST` in `apps/web/src/security/hosts.ts` + `connect-src` in `csp.ts` + test CSP
+- [x] T24.3 — Persistenza: scrittura su `Track`/`Album` + cursore in `settings` (`artwork.cursor`) + deduplicazione per album
+- [x] T24.4 — Trigger: job di arricchimento artwork in coda, dopo l'import (stessa disciplina della coda audio: budget, interruzione)
+- [x] T24.5 — UI: `MemoryCard` con `alt` + `loading="lazy"`; (opzionale) sfondo dell'`EraBand` (D-24.5)
+- [x] T24.6 — Fixture `fixtures/api-mocks/itunes/search-artwork.json` e `fixtures/api-mocks/coverartarchive/*`
+- [x] T24.7 — Allineamento documentale: `docs/02-DATA-SCHEMA.md` §11 (aggiornare la cascata: via Spotify, ordine nuovo), `docs/05-ARCHITECTURE.md` §6, `docs/12-DEVOPS.md` §2.1, `docs/INDEX.md`, `docs/11-BACKLOG.md` §4.3, `docs/state/stories/4.3-*.md`
 
-## Documenti aggiornati
+## Decisioni proposte (vincolanti)
 
-_(alla chiusura della PR)_
+| # | Decisione | Motivazione |
+|---|-----------|-------------|
+| D-24.1 | L'artwork diventa **P0** e **perde** il vincolo `[DEP:4.2]` | Le copertine sono l'ancora visiva e non attendono il lookup MusicBrainz: iTunes + placeholder bastano (`22-COMPETITIVE-POSITIONING.md` §8, §15) |
+| D-24.2 | Il ramo **Spotify Web API** esce dalla cascata | Il progetto non ha OAuth per Spotify e gli export non contengono copertine: il ramo sarebbe codice morto |
+| D-24.3 | Il tracciato "artwork tentato e non trovato" si ricorda con un **cursore in `settings`**, senza migrazione dello schema | Coerente col cursore dello scrobbling; evita il DB v7 (che richiederebbe il bump di `fastCheck` e la correzione del drift `useDbHealth`) |
+| D-24.4 | `artworkUrl100` → `artworkUrl600` con fallback all'URL originale | 100×100 è illeggibile in una card 1080×1350 |
+| D-24.5 | L'`EraBand` mostra la copertina come sfondo sfumato | È il "capitolo visuale" delle ere (`22` §10); **opzionale**, valutabile in review |
+| D-24.6 | In v1 si salva **l'URL**, non i byte dell'immagine | La cache binaria è un'altra storia (Cache Storage, invalidazione, quota): tenerla fuori riduce il rischio |
 
+## Spec
+
+`docs/24-ARTWORK-ENRICHMENT.md` (v1.0 🟢 APPROVED, Sessione 87) · `docs/02-DATA-SCHEMA.md` §11 · `docs/05-ARCHITECTURE.md` §6 §6.1 §6.2 · `docs/07-UI-SPEC.md` §2.2 §2.10 · `docs/12-DEVOPS.md` §2.1 · `docs/14-GLOSSARY.md`
 
 
 ===== FILE: docs/state/stories/5.1-privacy-spec-finale.md =====
@@ -35504,16 +35499,19 @@ Content-Security-Policy:
   script-src 'self' 'wasm-unsafe-eval'; 
   style-src 'self' 'unsafe-inline'; 
   img-src 'self' data: https:; 
-  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org https://acousticbrainz.org https://audio-ssl.itunes.apple.com https://itunes.apple.com https://download.db-ip.com; 
+  connect-src 'self' https://api.musicbrainz.org https://*.musicbrainz.org https://acousticbrainz.org https://audio-ssl.itunes.apple.com https://itunes.apple.com https://coverartarchive.org https://download.db-ip.com; 
   worker-src 'self' blob:;
   frame-ancestors 'none';
 ```
-*Nota*: `'wasm-unsafe-eval'` è necessario per Essentia.js (WebAssembly). `connect-src` limita le chiamate di rete ai **provider approvati**: MusicBrainz (enrichment + bonus audio features su MBID) e, dal Sessione 62, i **tre** host delle audio features (D-AF.9). **Rimosso** `https://freqblog.com` (D.A.6: provider non più usato).
+*Nota*: `'wasm-unsafe-eval'` è necessario per Essentia.js (WebAssembly). `connect-src` limita le chiamate di rete ai **provider approvati**: MusicBrainz (enrichment + bonus audio features su MBID) e, dal Sessione 62, i **quattro** host delle audio features e artwork (D-AF.9 + D-24.1). **Rimosso** `https://freqblog.com` (D.A.6: provider non più usato).
 
 **Aggiornamento (Sessione 62, spec `21-AUDIO-FEATURES.md` v1.0 🟢 APPROVED)**: la pipeline delle audio features ha due host in più, entrambi dichiarati nella spec (D-AF.9): `https://acousticbrainz.org` per il bonus sui MBID e `https://audio-ssl.itunes.apple.com` per il **download dell'anteprima audio di 30 s**, che viene analizzata in locale e non esce dal dispositivo. Sono gli unici due host aggiunti: nessun altro servizio entra in `connect-src`.
 
 **Aggiornamento (Sessione 66, spec `21-AUDIO-FEATURES.md` v1.1 🟢 APPROVED, issue #196)**: `connect-src` ammette anche `https://itunes.apple.com`, l'host che **risponde** alla ricerca del preview (`GET https://itunes.apple.com/search`). La v1.0 della spec elencava i due host che **non** sono quello della ricerca: la CSP bloccava la richiesta e la pipeline degradava sempre ad AcousticBrainz/euristico (Essentia mai chiamabile, `valence`/`energy` mai misurate). Il project owner ha **ratificato il terzo host** (D-AF.9 emendata): i **tre** host sono gli unici aggiunti, nessun altro servizio entra in `connect-src`. Il codice applicato al bundle (`apps/web/src/security/`) includeva già l'host della ricerca dal merge della Story 4.1: questa è l'allineamento della **dichiarazione** al codice.
+
 **Nota (Sessione 67, `13-ADR/0009-local-ip-geolocation.md` v1.0 🟢 APPROVED, D-B.2)**: il download on-demand del database geo introduce **un host nuovo**, dichiarato in `connect-src` nella Story 4.4: `https://download.db-ip.com`. L'host è servito da un'origine dichiarata in `connect-src` e il file scaricato non entra in `script-src` (non è eseguito). La regola è quella imparata con la issue #196: la CSP applicata e la spec devono dire la stessa cosa; un host usato dal codice e non dichiarato è una richiesta bloccata.
+
+**Aggiornamento (Story 4.3, `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED)**: `connect-src` ammette anche `https://coverartarchive.org`, l'host del Cover Art Archive (MusicBrainz) per l'artwork enrichment. L'endpoint è `GET https://coverartarchive.org/release/{mbid}` (rate limit 1 req/s, nessuna autenticazione). È il quarto host aggiunto oltre a MusicBrainz, per un totale di **quattro** host: i tre delle audio features + Cover Art Archive.
 
 ### 5.2 Altri Headers di Sicurezza
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
