@@ -75,7 +75,7 @@ export function MemoryCard({
       style={{ animationDelay: '200ms' }}
     >
       {artworkUrl ? (
-        <img className="memory-card__artwork" src={artworkUrl} alt={title} />
+        <img className="memory-card__artwork" src={artworkUrl} alt={title} loading="lazy" />
       ) : (
         <span className="memory-card__artwork memory-card__artwork--empty" aria-hidden="true" />
       )}

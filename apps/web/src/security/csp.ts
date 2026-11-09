@@ -19,7 +19,13 @@
  *   contiene dati dell'utente: è un file pubblico richiesto dall'utente.
  */
 
-import { ACOUSTICBRAINZ_HOST, DBIP_HOST, ITUNES_AUDIO_HOST, ITUNES_SEARCH_HOST } from './hosts';
+import {
+  ACOUSTICBRAINZ_HOST,
+  COVER_ART_HOST,
+  DBIP_HOST,
+  ITUNES_AUDIO_HOST,
+  ITUNES_SEARCH_HOST,
+} from './hosts';
 
 /** La policy dichiarata in `12-DEVOPS.md` §2.1 (v1.1). */
 export const CSP_DIRECTIVES = {
@@ -36,6 +42,9 @@ export const CSP_DIRECTIVES = {
     // L'host della **ricerca** iTunes: D-AF.1 impone la chiamata, D-AF.9
     // lo dichiara dal v1.1 della spec (ratifica dell'issue #196).
     ITUNES_SEARCH_HOST,
+    // L'host del Cover Art Archive (Story 4.3, `24-ARTWORK-ENRICHMENT.md`):
+    // endpoint `GET https://coverartarchive.org/release/{mbid}`.
+    COVER_ART_HOST,
     // L'host di download del database MMDB DB-IP Lite (Story 4.4,
     // `13-ADR/0009` D-B.2): dichiarato nella CSP applicata al bundle.
     DBIP_HOST,

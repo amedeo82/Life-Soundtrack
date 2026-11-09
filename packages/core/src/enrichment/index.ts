@@ -130,3 +130,24 @@ export {
   budgetDayKey,
   createEnrichmentQueue,
 } from './queue';
+
+export {
+  ARTWORK_CURSOR_KEY,
+  type ArtworkCursor,
+  type ArtworkDeps,
+  type ArtworkOutcome,
+  type ArtworkRequest,
+  type ArtworkSource,
+  COVER_ART_ENDPOINT,
+  EMPTY_ARTWORK_CURSOR,
+  ITUNES_ALBUM_ENDPOINT,
+  buildItunesArtworkUrl,
+  fetchArtworkUrl,
+  fetchCoverArtArchive,
+  fetchItunesArtwork,
+  generatePlaceholderGradient,
+  isExactArtworkMatch,
+  isTrackAttempted,
+  persistArtwork,
+  upgradeArtworkUrl,
+} from './artwork';
