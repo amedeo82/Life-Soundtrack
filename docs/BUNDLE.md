@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-09 18:00
+> Data: 2026-11-09 18:53
 > Totale file: 203
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -54827,15 +54827,24 @@ if (all.length !== naked.length) {
   ok('C5: nessuna keyword di chiusura extra (naked = totale)');
 }
 
-// --- C4: una branch docs/ tocca solo docs/ ----------------------------------
+// --- C4: una branch docs/ tocca solo docs/ (o file di documentazione root) ---
 if (branch.startsWith('docs/')) {
-  const fuori = files.filter((f) => !f.startsWith('docs/'));
+  const rootDocs = [
+    'README.md',
+    'CHANGELOG.md',
+    'LICENSE',
+    'CONTRIBUTING.md',
+    'CODE_OF_CONDUCT.md',
+    'SECURITY.md',
+    'GOVERNANCE.md',
+  ];
+  const fuori = files.filter((f) => !f.startsWith('docs/') && !rootDocs.includes(f));
   if (fuori.length) {
     fail(
-      `C4: la branch "${branch}" e' un doc-sync ma tocca ${fuori.length} file fuori da docs/: ${fuori.slice(0, 8).join(', ')}${fuori.length > 8 ? ' …' : ''}`,
+      `C4: la branch "${branch}" e' un doc-sync ma tocca ${fuori.length} file fuori da docs/ e non documentazione root: ${fuori.slice(0, 8).join(', ')}${fuori.length > 8 ? ' …' : ''}`,
     );
   } else {
-    ok(`C4: branch docs/ — tutti i ${files.length} file sono sotto docs/`);
+    ok(`C4: branch docs/ — tutti i ${files.length} file sono sotto docs/ o documentazione root`);
   }
 }
 
