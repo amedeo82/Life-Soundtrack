@@ -1,6 +1,6 @@
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.7 · Sessione 68 (2026-10-31)
+> Status: 🟢 APPROVED · Versione 1.8 · Sessione 107 (2026-11-09)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -626,27 +626,30 @@ L'aggiunta di `artworkUrl` su `Track` e `Album` (§3.3) non richiede nuovi indic
 
 Migrazione **non distruttiva** (MIG-1). Implementazione attesa nella Story 0.7 (Operations runbook + manutenzione) o in un mini-task di Story 0.2 se Dexie v2→v3 viene aperto subito.
 
+> **Nota (Sessione 107, issue #242)**: l'arricchimento artwork **non ha richiesto alcuna migrazione dello schema**. Il tracciato «artwork tentato e non trovato» sta in un **cursore in `settings`** (`artwork.cursor`), non in un campo `artworkResolvedAt` su Track/Album (D-24.3 della spec `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED). Lo schema Dexie corrente resta quello dichiarato in §6.
+
 ## 11. Artwork (copertina album/track): fonti e popolamento
 
-Il campo `artworkUrl` su Track/Album (§3.3) **non è popolato dall'import**: l'export GDPR delle piattaforme (es. Spotify) non contiene URL di copertina, e l'utente non ha un consenso esplicito per fetch remoti al momento dell'import. Il popolamento è demandato alla pipeline di enrichment (Fase 2), rispettando `PrivacySettings.enrichMetadata`.
+Il campo `artworkUrl` su Track/Album (§3.3) **non è popolato dall'import**: l'export GDPR delle piattaforme (es. Spotify) non contiene URL di copertina, e l'utente non ha un consenso esplicito per fetch remoti al momento dell'import. Il popolamento è demandato alla **pipeline di enrichment**, rispettando `PrivacySettings.enrichMetadata`.
 
-**Fonti in ordine di priorità** (cascata, come `05-ARCHITECTURE §6` per le audio features):
+**Fonti in ordine di priorità** (cascata ratificata in `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED, D-24.2):
 
 | # | Fonte | Quando | Note |
 |---|-------|--------|------|
-| 1 | **Spotify Web API** (`/v1/tracks/{id}` campo `album.images[0].url`) | Dopo import Spotify, se l'utente ha effettuato OAuth Dev Mode (Fase 2+, vedi D.A.11) | Richiede `PrivacySettings.enrichMetadata=true` + token utente |
-| 2 | **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`) | Quando il Track o l'Album ha `mbid` valorizzato (da ListenBrainz import o enrichment) | No chiave API richiesta, rate limit `1 req/s` |
-| 3 | **iTunes Search API** (`/search?term=...&entity=song`) | Fallback se Spotify non disponibile (es. utenti Apple/Last.fm-first) | No autenticazione, no rate limit stretto; ricerca per `name+artist` |
-| 4 | **Placeholder** (gradient + mood color) | Se tutte le fonti falliscono | Generato lato UI, non persistito |
+| 1 | **iTunes Search API** (`/search?term=...&entity=song`) | Sempre, per ogni brano senza artwork | No autenticazione, rate limit 20 req/min (intervallo 3 s); match esatto su titolo + artista; `artworkUrl100` → `artworkUrl600` (D-24.4) |
+| 2 | **MusicBrainz Cover Art Archive** (`/release/{mbid}`) | Solo se il Track o l'Album ha `mbid` valorizzato (da ListenBrainz import o enrichment) | No chiave API richiesta, rate limit `1 req/s`; 404 ⇒ `not_found`, 429 ⇒ nessun retry |
+| 3 | **Placeholder** (gradient deterministico + palette mood) | Se tutte le fonti falliscono | Generato **in locale** e reso come **data URI SVG**: nessuna rete, nessun host esterno, funziona offline (D-24.6: si salva l'URL, non i byte) |
+
+> **Il ramo Spotify Web API non esiste** (D-24.2): il progetto non ha infrastruttura OAuth per Spotify e gli export non contengono URL di copertina — il ramo sarebbe codice morto.
 
 **Regole di persistenza**:
-- `artworkUrl` è un URL HTTPS assoluto (no path relativi)
-- Se la copertina cambia su Spotify (es. album reissue), `artworkUrl` viene aggiornato al prossimo enrichment
-- L'arricchimento è **lazy**: popolato on-import + on-demand (schermata che richiede artwork) + scheduled idle (vedi `05-ARCHITECTURE §6.1`)
+- `artworkUrl` è un URL HTTPS assoluto (no path relativi) **oppure** il data URI del placeholder
+- L'arricchimento è un **job in coda dopo l'import** (stessa disciplina di budget e interruzione della coda audio, `05-ARCHITECTURE §6.1`): l'import continua a scrivere `null`
+- Il tracciato "artwork tentato e non trovato" si ricorda con un **cursore in `settings`** (`artwork.cursor`), **non** con una migrazione dello schema (D-24.3): un brano già cercato non viene interrogato di nuovo
 - **No logo piattaforma**: `artworkUrl` è solo artwork di copertina del brano/album; i loghi commerciali sono vietati (D.6.4)
-- **Cache**: nessuna tabella dedicata; l'URL è direttamente su Track/Album (è un singolo valore, no LRU)
+- **Cache**: nessuna tabella dedicata; l'URL è direttamente su Track/Album (è un singolo valore, no LRU); per gli album la deduplicazione avviene per `albumId`
 
-Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiunta in Sessione 13, vedi `11-BACKLOG §4`).
+**Stato**: **implementata** nella Story 4.3 (Sessione 107, issue #242, PR #326, merge `c277aba`). Dettaglio: `docs/state/stories/4.3-artwork-enrichment.md` · `docs/24-ARTWORK-ENRICHMENT.md` §"Contratti da costruire".
 
 ---
 
@@ -663,3 +666,4 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 57, issue #172)* |
 | 1.6 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **§3.8** — `scrobbleHubs` passa da `PlatformId[]` al **tipo dedicato** `ScrobbleHubId` (`'lastfm' \| 'listenbrainz'`), con la semantica del toggle (default `[]`, consenso per-hub indipendente dagli altri toggle, revoca che svuota la coda del hub, configurazione per-utente in `settings`); **§6.2 (nuova)** — tabella `scrobbleOutbox` nello schema Dexie **v5** (PK `hub\|eventKey`, indice per `hub`/`status`/`createdAt`/`nextAttemptAt`, payload senza segreti, write-ahead `in_flight`), con la garanzia di idempotenza per costruzione (G-SH.1) e il caso residuo dichiarato (doppio scrobble possibile, mai una perdita). Migrazione **non distruttiva** (MIG-1). Il tipo `ScrobblePayload` e il contratto `ScrobbleSink` sono in `05§4.2` (ADR-0011 🟢 v1.0) |
 | 1.7 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 — fondazione geo e contesto di ascolto** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): **§3.2** — tre campi derivati `city` / `citySource` / `cityConfidence` su `ListenEvent` (la città è una *stima* L2, non un fatto: la derivazione è la Story 4.4); **§3.8** — `PrivacySettings` con i toggle `retainCountry` (default **true**: il paese è derivato e non identificativo, decisione del project owner sull'issue #108), `retainCity` (default false), `retainDeviceType` (default true), `retainDeviceDetail` (default false: la stringa grezza del provider è identificante) e `deriveContext` (default true), con la semantica dichiarata che **il `country` è conservato indipendentemente da `retainIp`**; **§3.10 (nuova)** — `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS` (`home`, `work`, `commute`, `car`, `travel`, `away`, `unknown`), il verdetto utente (`status` + `userLabel`) e la soglia 0.5 (E19); **§6.3 (nuova)** — tabella `contexts` nello schema Dexie **v6** (tabella derivata, ricostruibile con `recompute()`, MIG-2) con migrazione non distruttiva che azzera i campi città sugli ascolti esistenti; **§7** — MIG-5: il ricalcolo del contesto è **esplicito** e non azzera i campi già persistiti (E20) |
+| 1.8 | Sessione 107 (2026-11-09, issue #242) | **Story 4.3 — artwork enrichment** (`24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED): **§11** riscritta sulla cascata **ratificata** — **iTunes → Cover Art Archive → placeholder** (D-24.2: il ramo **Spotify Web API non esiste**, perché il progetto non ha OAuth per Spotify e gli export non contengono URL di copertina); iTunes con match esatto e `artworkUrl100 → 600` (D-24.4), Cover Art Archive solo con `mbid` (404 ⇒ `not_found`, 429 ⇒ nessun retry), placeholder deterministico reso come **data URI SVG** (mai rete, D-24.6). Le regole di persistenza sono allineate al codice: l'arricchimento è un **job in coda dopo l'import** (l'import continua a scrivere `null`) e il tracciato dei tentativi falliti sta in un **cursore in `settings`** (`artwork.cursor`), **non** in una migrazione dello schema (D-24.3). **§10** — nota: l'arricchimento artwork **non** ha richiesto migrazioni (lo schema Dexie corrente resta quello di §6). Nessuna modifica a interfacce, regole DEDUP (§5) o schema Dexie (§6) |

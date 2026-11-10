@@ -217,6 +217,9 @@ $files = @(
     "docs/state/sessions/105-arbitraggio-claim-lock-worktree.md",
     # Sessione 106 (issue #324): DEV-LOG stato merge — una regola, un gate, un writer.
     "docs/state/sessions/106-devlog-merge-state.md",
+    # Sessione 107 (issue #242): la Story 4.3 — artwork enrichment (cascata
+    # iTunes -> Cover Art Archive -> placeholder, D-24.2/D-24.3).
+    "docs/state/sessions/107-artwork-enrichment.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
