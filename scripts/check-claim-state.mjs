@@ -167,24 +167,15 @@ if (all.length !== naked.length) {
   ok('C5: nessuna keyword di chiusura extra (naked = totale)');
 }
 
-// --- C4: una branch docs/ tocca solo docs/ (o file di documentazione root) ---
+// --- C4: una branch docs/ tocca solo docs/ ----------------------------------
 if (branch.startsWith('docs/')) {
-  const rootDocs = [
-    'README.md',
-    'CHANGELOG.md',
-    'LICENSE',
-    'CONTRIBUTING.md',
-    'CODE_OF_CONDUCT.md',
-    'SECURITY.md',
-    'GOVERNANCE.md',
-  ];
-  const fuori = files.filter((f) => !f.startsWith('docs/') && !rootDocs.includes(f));
+  const fuori = files.filter((f) => !f.startsWith('docs/'));
   if (fuori.length) {
     fail(
-      `C4: la branch "${branch}" e' un doc-sync ma tocca ${fuori.length} file fuori da docs/ e non documentazione root: ${fuori.slice(0, 8).join(', ')}${fuori.length > 8 ? ' …' : ''}`,
+      `C4: la branch "${branch}" e' un doc-sync ma tocca ${fuori.length} file fuori da docs/: ${fuori.slice(0, 8).join(', ')}${fuori.length > 8 ? ' …' : ''}`,
     );
   } else {
-    ok(`C4: branch docs/ — tutti i ${files.length} file sono sotto docs/ o documentazione root`);
+    ok(`C4: branch docs/ — tutti i ${files.length} file sono sotto docs/`);
   }
 }
 
