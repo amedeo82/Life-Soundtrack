@@ -160,6 +160,7 @@
 | 104 | Anteprima del risultato in onboarding: il diario di esempio (issue #270) | 🟢 | ✅ | #322 |
 | 105 | Arbitraggio atomico della selezione e lock di proprietà della worktree | 🟢 | ✅ | #321 |
 | 106 | DEV-LOG stato merge: una regola, un gate, un writer | 🟢 | ✅ | - |
+| 107 | Artwork enrichment: la cascata iTunes → Cover Art Archive → placeholder | 🟢 | ✅ | #326 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -199,9 +200,9 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **83** (merge: 82)
+- Sessioni migrate in state/sessions: **84** (merge: 83)
 - Stories migrate in state/stories: **28** (done: 26)
-- Ultima sessione migrata: **S106** - DEV-LOG stato merge: una regola, un gate, un writer
+- Ultima sessione migrata: **S107** - Artwork enrichment: la cascata iTunes → Cover Art Archive → placeholder
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.3, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -245,7 +246,9 @@
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente**: non ancora registrata (sezione `## Analisi di avanzamento` nel file di sessione).
+**Analisi della sessione corrente** (S107)
+
+Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi, collegati all'app dalla 2.5. Con questa sessione anche l'**EPIC 4** ha il suo pezzo visivo: le copertine sono popolate e il mood dell'era può guardarle. Restano **4.2** (lookup MusicBrainz, P2 — miglioramento incrementale, non prerequisito), **5.2/5.1** (export e purge: il gate per testare con dati personali reali) e **6.1** (upgrade stack, post-implementazione). Salute tecnica: gate locali verdi (lint, typecheck, test, build), nessun drift fra i blocchi aggregati e le sezioni legacy dei documenti toccati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

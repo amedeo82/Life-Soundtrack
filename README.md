@@ -90,7 +90,9 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente**: non ancora registrata (sezione `## Analisi di avanzamento` nel file di sessione).
+**Analisi della sessione corrente** (S107)
+
+Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi, collegati all'app dalla 2.5. Con questa sessione anche l'**EPIC 4** ha il suo pezzo visivo: le copertine sono popolate e il mood dell'era può guardarle. Restano **4.2** (lookup MusicBrainz, P2 — miglioramento incrementale, non prerequisito), **5.2/5.1** (export e purge: il gate per testare con dati personali reali) e **6.1** (upgrade stack, post-implementazione). Salute tecnica: gate locali verdi (lint, typecheck, test, build), nessun drift fra i blocchi aggregati e le sezioni legacy dei documenti toccati.
 
 <!-- AGGREGATE-PROGRESS-END -->
 

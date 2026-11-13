@@ -864,7 +864,7 @@ Ogni story deve avere label GitHub:
 | 3.4 - Nastro contesto (Timeline) | done | #232 | `bc959d3a932ab2d4210ae0f243b59f598d9cbc8d` | ui |
 | 3.5 - Anteprima del risultato in onboarding (modalità demo) | done | #322 | `4ceacc1f30df485ef1894d59059e39eeea32e2e2` | ui |
 | 4.1 - Pipeline audio features | done | #197 | `7458220` | enrichment |
-| 4.3 - Artwork enrichment | done | - | - | ? |
+| 4.3 - Artwork enrichment | done | #326 | `c277aba8bf4ce046e59ae318a4fdc280a01a4aac` | enrichment |
 | 4.4 - DB IP→città (geolocalizzazione locale) | done | #222 | `beaefba677f9dbaf0ec9891c3e70516015a1adcf` | enrichment |
 | 5.1 - Privacy spec finale | todo | - | - | privacy |
 | 5.2 - Export e purge | todo | - | - | privacy |
