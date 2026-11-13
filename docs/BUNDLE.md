@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-09 17:53
-> Totale file: 203
+> Data: 2026-11-10 15:23
+> Totale file: 204
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -1308,8 +1308,8 @@ Non ancora nell'app — la roadmap completa, con lo stato di ogni story, è in [
 - **Ricordi + Share** (EPIC 3, Story 3.2): feed dei ricordi, card 1080×1350, export statico di un capitolo, tagging manuale di ere e canzoni
 - **Esplora + Analisi** (EPIC 3, Story 3.3): ricerca sui propri dati, quadrante valence/energy, insight in prosa
 - **Anteprima in onboarding** (EPIC 3, Story 3.5): diario di esempio prima dell'import, prime righe della timeline dopo
-- **Artwork** (EPIC 4, Story 4.3): copertine degli album — il campo esiste già nello schema, la pipeline non le popola ancora
-- **Audio features** (EPIC 4, Story 4.1): la pipeline è implementata in `@ls/core` (cascata cache → Essentia.js → AcousticBrainz → euristico), ma il modulo Essentia non è ancora integrato nell'app
+- **Artwork** (EPIC 4, Story 4.3): ✅ **completato** — cascata iTunes → Cover Art Archive → placeholder deterministico, cursore tentativi, rate limit, toggle enrichMetadata
+- **Audio features** (EPIC 4, Story 4.1): ✅ **completato** — la pipeline è implementata in `@ls/core` (cascata cache → Essentia.js → AcousticBrainz → euristico)
 - **Lookup MusicBrainz** (EPIC 4, Story 4.2): MBID e generi (priorità bassa: non serve all'artwork)
 - **Privacy spec finale** (EPIC 5, Story 5.1): pagina in-app «Come trattiamo i tuoi dati»
 - **Export e purge** (EPIC 5, Story 5.2): export JSON/CSV del diario, cancellazione totale con doppia conferma
@@ -2114,16 +2114,16 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 |---|------|-------|-----------------|-------------|
 | 00 | [`00-VISION.md`](00-VISION.md) | 🟡 DRAFT | Sessione 9 | Visione, missione, target, principi (decisioni strategiche chiuse in S9) |
 | 01 | [`01-PLATFORMS.md`](01-PLATFORMS.md) | 🟡 DRAFT | Sessione 57 (v0.7) | Matrice piattaforme europee + campi dati — v0.7: rimandi al percorso di **scrittura** degli hub (§3.7-3.9, Story 1.5 ratificata) |
-| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 68 (v1.7) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter; v1.6: §3.8 `scrobbleHubs: ScrobbleHubId[]` + §6.2 tabella `scrobbleOutbox` (schema Dexie v5, Story 1.5); **v1.7 (Story 1.6)**: §3.2 i campi derivati `city*`, §3.8 i toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, §3.10 l'entità `ContextPeriod`, §6.3 la tabella `contexts` (schema Dexie v6) e §7 MIG-5 |
+| 02 | [`02-DATA-SCHEMA.md`](02-DATA-SCHEMA.md) | 🟢 APPROVED | Sessione 107 (v1.8) | Schema dati unificato (TypeScript + Dexie) — v1.2: `artworkUrl` su Track/Album (§11 cascata fonti); v1.4: §6.1 tabella `settings` (schema Dexie v4) + §3.1 i due campi additivi del contratto adapter; v1.6: §3.8 `scrobbleHubs: ScrobbleHubId[]` + §6.2 tabella `scrobbleOutbox` (schema Dexie v5, Story 1.5); **v1.7 (Story 1.6)**: §3.2 i campi derivati `city*`, §3.8 i toggle `retainCountry`/`retainCity`/`retainDeviceType`/`retainDeviceDetail`/`deriveContext`, §3.10 l'entità `ContextPeriod`, §6.3 la tabella `contexts` (schema Dexie v6) e §7 MIG-5; **v1.8 (Story 4.3)**: §11 riscritta sulla cascata ratificata **iTunes → Cover Art Archive → placeholder** (D-24.2: niente ramo Spotify) e §10 sulla scelta del cursore `artwork.cursor` al posto di una migrazione (D-24.3) |
 | 03 | [`03-ADAPTERS/`](03-ADAPTERS/) | 🟢 APPROVED | Sessione 57 | SPEC-TEMPLATE + Spotify + YouTube Music (🟢 v1.0) + Apple Music (🟢 v1.0, S42) + ListenBrainz (🟢 v1.2, S47/S57: token in scrittura, percorso incrementale) + Last.fm (🟢 v1.2, S50/S51/S57: percorso di scrittura, md5 D-SH.11, proxy D-SH.14) — **adapter implementati** in Sessione 52 (issue #155) |
 | 04 | [`04-ANALYSIS-ALGORITHMS.md`](04-ANALYSIS-ALGORITHMS.md) | 🟢 APPROVED | Sessione 59 (v1.0) | Algoritmi di analisi (mood, ere, eventi, ricordi) — **ratificata** (Sessione 59, issue #178): i trigger dei 5 tipi di ricordo sono specificati, il perimetro della tranche è dichiarato; la Story 2.4 è implementata (Sessione 61) e la **2.1 è implementata** (Sessione 63, issue #180) |
-| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 62 (v1.4) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢) |
+| 05 | [`05-ARCHITECTURE.md`](05-ARCHITECTURE.md) | 🟢 APPROVED | Sessione 107 (v1.6) | Architettura tecnica generale — §4.1 Sorgenti remote (ADR-0010); **§4.2 Contratto di scrittura `ScrobbleSink` (ADR-0011)**; §12.1 `rekey()` attivo (Story 1.4); **§6 Pipeline di arricchimento** allineata alla spec `21` (v1.0 🟢); **§6.3 Arricchimento artwork** (Story 4.3: cascata iTunes → Cover Art Archive → placeholder) |
 | 06 | [`06-UX-FLOWS-STATES.md`](06-UX-FLOWS-STATES.md) | 🟡 DRAFT | Sessione 104 (v0.7) | Flussi UX e stati per schermata — v0.7: §2.5 l'anteprima del reveal (righe reali + anno calcolato), §2.14 la demo mode (database separato, banner, uscita) |
 | 07 | [`07-UI-SPEC.md`](07-UI-SPEC.md) | 🟡 DRAFT | Sessione 104 (v0.4) | Specifiche UI componenti — v0.4: §2.10c il DemoBanner e il RevealPreview (Story 3.5) |
 | 08 | [`08-COPY-I18N.md`](08-COPY-I18N.md) | 🟡 DRAFT | Sessione 104 (v0.16) | Tutte le stringhe UI con chiavi i18n — v0.5: namespace `scrobble.*` (§2.16, i 15 codici della Story 1.5); v0.7: i template `memory.*` (§2.15) dichiarati **vincolanti** dalla ratifica di `04`; v0.8: namespace `enrichment.*` (§2.17, le 8 chiavi della Story 4.1); v0.9: namespace `timeline.context.*` (§2.12h) e i toggle geo in `settings.privacy.*` (ratifica di `19`); v0.12: §2.12h **materializzata** con le 36 chiavi `timeline.context.*` della Story 3.4 (la sezione era dichiarata dal changelog 0.9 ma non scritta); v0.16: le **12 chiavi** della Story 3.5 (`onboarding.demo.*`, `onboarding.reveal.preview.*`, `reveal.subtitle_one`/`_other`) |
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 104 (v1.3) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti; v1.3: §3.4 il fixture demo mode rigenerato (album e feature deterministiche, tre fasi musicali) |
-| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 104 (v1.6.37) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`); v1.6.37: **Story 3.5 implementata** (issue #270: anteprima e modalità demo in onboarding) |
+| 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 107 (v1.6.38) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`); v1.6.37: **Story 3.5 implementata** (issue #270: anteprima e modalità demo in onboarding); **v1.6.38: Story 4.3 completata** (issue #242, PR #326: la sezione legacy della 4.3 passa a ✅ DONE con i task e gli AC della spec `24`, la riga dell'EPIC 4 e la voce #16 della lista di priorità allineate) |
 | 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 99 (0001-0014) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; 0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0; **0012 protocollo agenti come contratto verificato APPROVED v1.0**, Sessione 79, issue #248; **0013 automazioni post-merge deterministiche APPROVED v1.0**, Sessione 90, issue #284; **0014 copertura di test offline degli script di protocollo 🟡 DRAFT**, Sessione 99, issue #304 — in attesa di ratifica del project owner) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
@@ -2134,7 +2134,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 21 | [`21-AUDIO-FEATURES.md`](21-AUDIO-FEATURES.md) | 🟢 APPROVED | Sessione 66 (v1.1) | **Pipeline audio features (Story 4.1)**: contratto `AudioFeatureProvider`, cascata cache → Essentia.js (WASM) → AcousticBrainz → euristico, mappatura dei campi `AudioFeatures` (misurata / derivata / stimata), normalizzazione DEAM [1,9] → [0,1], privacy e CSP, stoccaggio e invalidazione, costi reali misurati — **ratificata** (Sessione 62, issue #187, PR #190 `b1dd83e`): le 9 decisioni D-AF.1…D-AF.9 sono chiuse come proposte → issue di implementazione **#188** (`agent-ready`); **v1.1** (Sessione 66, issue #196): **D-AF.9 emendata**, la CSP ammette anche l'host della **ricerca** iTunes (senza il quale D-AF.1 non è applicabile) |
 | 22 | [`22-COMPETITIVE-POSITIONING.md`](22-COMPETITIVE-POSITIONING.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Posizionamento competitivo e priorità di prodotto**: i quattro differenziatori **verificati riga per riga contro il codice** (privacy locale 🟢 · multi-piattaforma 🟢 · retrospettiva 🟡 non ancora collegata all'app · analisi acustica 🟡 non ancora integrata), matrice dei competitor con lo stato reale, «cosa non siamo» (non siamo Last.fm), priorità ricalcolate (2.5 → 4.3 → 3.2 → 3.3 → 3.5 → 5.2 → 5.1 → 4.2 → 6.1) e decisioni proposte **D-22.1…D-22.7** |
 | 23 | [`23-ANALYSIS-PIPELINE.md`](23-ANALYSIS-PIPELINE.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Collegamento del pipeline di analisi all'app (Story 2.5, P0)**: i contratti reali di `AnalysisPipeline` / `runAnalysisPipeline`, la persistenza degli insight (`replace*` transazionali), i punti di innesto (`OnboardingRouter.handleImportAll`, `useHomeTimelineData`), lo stato vuoto `no-features`, il piano di test e le decisioni **D-23.1…D-23.6** |
-| 24 | [`24-ARTWORK-ENRICHMENT.md`](24-ARTWORK-ENRICHMENT.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Artwork enrichment (Story 4.3, P0)**: cascata iTunes → Cover Art Archive → placeholder deterministico, il ramo Spotify escluso (D-24.2), l'obbligo CSP (`coverartarchive.org`), il cursore in `settings` invece di una migrazione (D-24.3) e le decisioni **D-24.1…D-24.6** |
+| 24 | [`24-ARTWORK-ENRICHMENT.md`](24-ARTWORK-ENRICHMENT.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Artwork enrichment (Story 4.3, P0)**: cascata iTunes → Cover Art Archive → placeholder deterministico, il ramo Spotify escluso (D-24.2), l'obbligo CSP (`coverartarchive.org`), il cursore in `settings` invece di una migrazione (D-24.3) e le decisioni **D-24.1…D-24.6** — **implementata** (Sessione 107, issue #242, PR #326) |
 | 25 | [`25-MEMORIES-SHARE-EXPLORE.md`](25-MEMORIES-SHARE-EXPLORE.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Ricordi, condivisione, Esplora e Analisi (Stories 3.2 e 3.3, P0)**: il feed dei ricordi, la card 1080×1350 generata in locale (canvas senza taint), il `ShareSheet` con Web Share API e fallback, il tagging manuale in `Insight.userNote` (con il vincolo di **preservazione al ricalcolo**), il `QuadrantChart` e l'«insight in prosa»; decisioni **D-25.1…D-25.6** |
 | 26 | [`26-ONBOARDING-DEMO.md`](26-ONBOARDING-DEMO.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Anteprima e modalità demo in onboarding (Story 3.5, P0)**: il DB demo separato, il loader del fixture, l'estensione del generatore (`albums` + `features` deterministiche), il reveal con ≥3 righe reali e l'anno calcolato; decisioni **D-26.1…D-26.5** |
 | 27 | [`27-PRIVACY-DATA-SETTINGS.md`](27-PRIVACY-DATA-SETTINGS.md) | 🟢 APPROVED | Sessione 87 (v1.0) | **Privacy, export e purge (Stories 5.1 e 5.2, P1)**: la schermata Impostazioni (che **non esiste**), le quattro funzioni obbligatorie di `09§6.1` (3 su 4 mancanti), il montaggio della schermata About (**l'obbligo AGPL §13 oggi non è raggiungibile**), la doppia conferma e le 7 chiavi i18n assenti; decisioni **D-27.1…D-27.6** |
@@ -2149,7 +2149,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v3.3 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.41 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §58: Sessione 107, la Story 4.3 e la cascata artwork ratificata (issue #242); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 | [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, protezione di `main` (ruleset `main-protection`: check `quality`, squash, deploy key per il writer post-merge), primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
 
 ## Design & mockup
@@ -2352,8 +2352,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 > **Questa sezione è legacy ma NON è aggregata**: a differenza dei blocchi `<!-- AGGREGATE-* -->` sopra, nessun script la rigenera. È quindi **responsabilità dell'agente** allinearla nella stessa PR che cambia i fatti che dichiara (vedi `AGENTS.md` §"Chi può scrivere cosa nei file globali"). Non duplicare qui informazioni già presenti in un blocco aggregato: generi solo drift.
 
-- **Documenti APPROVED**: 11 documenti (`02` v1.7, `03-ADAPTERS/`, `04` v1.2, `05` v1.4, `10` v1.3, `11` v1.6.37, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 13 ADR in `13-ADR/` (0001-0003, 0005-0013; **0014** 🟡 DRAFT, Sessione 99, issue #304 — in attesa di ratifica)
-- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.7, `07` ora v0.4, `08` ora v0.16, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.32; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
+- **Documenti APPROVED**: 11 documenti (`02` v1.8, `03-ADAPTERS/`, `04` v1.2, `05` v1.6, `10` v1.3, `11` v1.6.38, `14` v1.1, `16-OPERATIONS`, `19` v1.0, `20` v1.0, `21` v1.2) + 13 ADR in `13-ADR/` (0001-0003, 0005-0013; **0014** 🟡 DRAFT, Sessione 99, issue #304 — in attesa di ratifica)
+- **Documenti DRAFT**: 10 (`00`, `01`, `06`, `07`, `08`, `09`, `12`, `15`, `17`, `18`) — il Boss ha deciso in S13 di non promuoverli (D.13.8); `06` ora v0.7, `07` ora v0.4, `08` ora v0.16, `09` ora v0.7, `12` ora v1.2, `17` ora v0.3, `18` ora v2.41; **`22`–`27` promossi a 🟢 APPROVED v1.0 nella Sessione 87** (ratifica del project owner al merge della PR #273): `22` (posizionamento competitivo) e `23`–`27` (pacchetto di specifiche implementabili delle 7 story rimanenti, D-23.1…D-27.6), ora **vincolanti** per gli agenti; **`19` promosso a 🟢 APPROVED v1.0** nella Sessione 67 (issue #201) e **uscito da questo elenco**, come l'**ADR-0009** (v1.0 🟢); `04` **promosso a 🟢 APPROVED v1.0** nella Sessione 59 (issue #178); `20` **promosso a 🟢 APPROVED v1.0** nella Sessione 57 (issue #172) e uscito da questo elenco; `21` **promosso a 🟢 APPROVED v1.0** nella Sessione 62 (issue #187) e uscito da questo elenco
 - **Documenti TODO**: 0
 - **Licenza**: **AGPL-3.0** (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201; l'obbligo del §13, offerta del sorgente agli utenti in rete, è il requisito aperto dell'issue **#202**)
 - **Business model**: Open-source puro, no monetizzazione
@@ -2371,7 +2371,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 - **Sessione 97** — implementazione **Story 3.2 «Ricordi + Share»** (issue #241, branch `feat/241-story-3-2---ricordi-share`, claim `kilo-HP-ELITEBOOK-6e15`): la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scroll, i `dismissed` esclusi dal feed ma **presenti** nel database, ordinamento per `Insight.confidence`), il foglio ⑫ **ShareSheet** (dialog accessibile con focus trap e stati `generating`/`ready`/`error`), la card **1080×1350** disegnata a mano su canvas e il **capitolo HTML autonomo** (export statico alternativo, nessuno script né stile esterno), le azioni di condivisione con **fallback** (Web Share API → download, clipboard → download) e il **tagging manuale** (nome e parole chiave dell'era, nota libera del ricordo) con la **conservazione dei campi dell'utente al ricalcolo** (`Insight.userNote` e `Insight.status` riportati dagli insight esistenti a quelli nuovi: senza, il nome di un'era sparisce al primo ricalcolo dell'analisi). **37 test** nuovi; i18n IT/EN per le nuove stringhe. Documenti allineati: `11-BACKLOG.md` v1.6.36, `06-UX-FLOWS-STATES.md` v0.5, `07-UI-SPEC.md` v0.2, `08-COPY-I18N.md` v0.14, `18-DEV-LOG.md` v2.30 (§53), `docs/state/stories/3.2-ricordi-share.md` e `docs/state/sessions/97-ricordi-share.md` (nuovi).
 - **Sessione 103** — implementazione **Story 3.3 «Esplora + Analisi»** (issue #240, branch `feat/240-story-3-3---esplora-analisi-schermate-9`, claim `kilo-hp-elitebook-d957`): la schermata ⑨ **Esplora** (ricerca sul **proprio** catalogo — artisti, brani, album, generi, mood — con **debounce di 300 ms**, risultati ordinati per `listenCount`, nessuna richiesta di rete) e la schermata ⑩ **Analisi** (il `QuadrantChart` valence/energy con un punto per mese, la **frase in prosa** che accompagna il grafico e gli **insight persistiti** — eventi e ricordi — con le tre azioni dell'utente). Il **deep-link interno** porta dal punto del quadrante alla Timeline (`AppSection` + `AppFocus`, senza router: D-25.1); il mood della settimana letto da `mood_week` è adesso **tradotto** nella shell. **20 test** nuovi; i18n IT/EN per le nuove stringhe (le chiavi già esistenti sono state usate, non duplicate). Documenti allineati: `11-BACKLOG.md` (sezione Story 3.3), `07-UI-SPEC.md` v0.3 (§2.8, §2.9), `08-COPY-I18N.md` v0.15 (§2.5, §2.6, §2.15), `18-DEV-LOG.md` v2.31 (§54), `docs/state/stories/3.3-esplora-analisi.md` e `docs/state/sessions/103-story-3-3-esplora-analisi.md`.
 - **Sessione 104** — implementazione **Story 3.5 «Anteprima e modalità demo in onboarding»** (issue #270, branch `feat/270-story-3-5---anteprima-e-modalita-demo-in`, claim `kilo-hp-elitebook-a320`): la CTA **«Scopri come funziona»** sul **primo passo** dell'onboarding apre il **diario di esempio** — il fixture `fixtures/demo-user.json` (rigenerato con **75 album** e **200 feature** deterministiche, tre fasi musicali su 366 giorni, `generatedAt` derivato dal seed) caricato in un **database separato** (`life-soundtrack-demo`): nessuna scrittura nel database dell'utente, e l'uscita lo cancella con un click. Lo schermo è la **stessa Home** degli altri utenti (nessun renderer parallelo), con un banner dichiarativo. Il **reveal** post-import mostra le prime righe della timeline **reale** (≥3) e l'anno **calcolato** dallo span dei dati. **19 test** nuovi (10 in `@ls/core`, 9 in `@ls/web`); i18n IT/EN per le 12 chiavi nuove. Documenti allineati: `11-BACKLOG.md` v1.6.37 (sezione Story 3.5), `06-UX-FLOWS-STATES.md` v0.7 (§2.5, §2.14), `07-UI-SPEC.md` v0.4 (§2.10c), `08-COPY-I18N.md` v0.16 (§2.1), `10-TESTING.md` v1.3 (§3.4), `18-DEV-LOG.md` v2.32 (§55), `docs/state/stories/3.5-anteprima-onboarding-demo.md` e `docs/state/sessions/104-story-3-5-anteprima-demo.md`.
-- **Prossimo passo tecnico** (aggiornato alla Sessione 104, issue #270): l'**EPIC 3** ha **chiuso il percorso end-to-end dell'app** — la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati), la **3.2** (Ricordi + Share, Sessione 97: schermata ⑪ e ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale), la **3.3** (Esplora + Analisi, Sessione 103: schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa) e la **3.5** (anteprima e modalità demo in onboarding, Sessione 104: il diario di esempio in un database separato e le prime righe della timeline reale nel reveal). Dietro: il **lookup MusicBrainz** (Story 4.2) e l'artwork (4.3, ora **P0**); la **5.1/5.2** (privacy, export e purge) è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
+- **Prossimo passo tecnico** (aggiornato alla Sessione 107, issue #242): l'**EPIC 3** ha **chiuso il percorso end-to-end dell'app** — la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77: schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app, scelta onboarding/app legata ai dati), la **3.2** (Ricordi + Share, Sessione 97: schermata ⑪ e ShareSheet ⑫, card 1080×1350, capitolo HTML autonomo, tagging manuale), la **3.3** (Esplora + Analisi, Sessione 103: schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa) e la **3.5** (anteprima e modalità demo in onboarding, Sessione 104: il diario di esempio in un database separato e le prime righe della timeline reale nel reveal). L'**artwork** (4.3) è **completata** (Sessione 107, issue #242, PR #326, merge `c277aba`): le copertine sono popolate con la cascata **iTunes → Cover Art Archive → placeholder**. Dietro: il **lookup MusicBrainz** (Story 4.2, P2 — la cascata funziona anche senza) e la **5.2/5.1** (privacy, export e purge), che è il gate per testare con dati personali reali. Fuori perimetro e dichiarato: il **pattern analyzer** (`04§4`) e la **session segmentation** (`04§2`).
 
 ---
 *Questo file viene aggiornato ad ogni sessione. Non modificarlo senza aggiornare anche `SESSIONS.md`.*
@@ -14110,8 +14110,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.31
-> Ultima modifica: 2026-11-05 - §54 Esplora + Analisi: la Story 3.3 (ricerca ⑨ sul catalogo con debounce 300 ms, mappa emotiva ⑩ con l'insight in prosa, deep-link interno alla Timeline) (Sessione 103)
+> Versione: 2.41
+> Ultima modifica: 2026-11-09 - §58 Artwork enrichment: la Story 4.3 (cascata iTunes → Cover Art Archive → placeholder, cursore `artwork.cursor` in `settings`, CSP con `coverartarchive.org`) (Sessione 107)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -15716,8 +15716,32 @@ La seconda lezione è sul confine del fail-closed: mismatch ed errore d'ambiente
 
 ---
 
+## 58. Story 4.3 — Artwork enrichment (Sessione 107)
+
+**Branch**: `feat/242-story-4-3---artwork-enrichment`
+**Issue di tracking**: **#242** (`status:done`, `area:enrichment`)
+**PR**: **#326**
+**Data**: 2026-11-09
+**Stato**: ✅ **MERGED** (PR #326, merge commit `c277aba`)
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 107-1 | P+L | La Story 4.3 era stata **implementata e mergata** (PR #326) senza che nessuno dei documenti che ne dichiarano lo stato venisse allineato: `docs/state/stories/4.3-*.md` aveva `merged_commit` e `merged_date` **vuoti**, il body citava «PR #XXX merged» e una **Sessione 107 che non esisteva**, la sezione legacy di `11-BACKLOG.md` diceva «👀 IN REVIEW — PR #326 aperta» e `02-DATA-SCHEMA.md` §11 descriveva ancora la cascata con **Spotify Web API** in testa | Il doc-sync della PR di implementazione aveva toccato solo i blocchi aggregati: le **sezioni legacy** dei file globali non hanno un generatore, e nessun gate ne verifica il contenuto (ADR-0008 riguarda i blocchi, non la prosa) | Chiusura del drift in una PR `docs:` dedicata (issue #330): frontmatter della story allineato al merge reale (`pr: 326`, `merged_commit`, `merged_date`), file di sessione `107-artwork-enrichment.md` creato e registrato in `scripts/generate-bundle.ps1` `$files`, sezioni legacy di `11-BACKLOG.md`, `02-DATA-SCHEMA.md` §11, `05-ARCHITECTURE.md` §6, `docs/INDEX.md` e `18-DEV-LOG.md` allineate | `docs/state/stories/4.3-artwork-enrichment.md` · `docs/11-BACKLOG.md` §4.3 · `docs/02-DATA-SCHEMA.md` §11 |
+| 107-2 | P | Il ramo **Spotify Web API** della cascata dell'artwork era **codice morto**: il progetto non ha OAuth per Spotify e gli export non contengono URL di copertina | La Story 4.3 era nata (Sessione 13) prima della specifica `24` e conservava il ramo dell'idea originale | **D-24.2 ratificata** dal project owner (Sessione 87): la cascata è **iTunes → Cover Art Archive → placeholder**, senza OAuth. La documentazione è allineata alla decisione (spec, `02§11`, `11§4.3`, story) | `docs/24-ARTWORK-ENRICHMENT.md` §"Cascata delle fonti" · `docs/02-DATA-SCHEMA.md` §11 |
+| 107-3 | P | Il «tentato e non trovato» doveva essere ricordato, e la prima idea era una **migrazione Dexie v7** con `artworkResolvedAt` su Track/Album: impose il bump di `fastCheck` (`db/health.ts`) e un drift preesistente in `useDbHealth` | Il bisogno reale è solo «non interrogare di nuovo un brano già cercato» | **D-24.3**: il tracciato sta in un **cursore in `settings`** (`artwork.cursor`), come già per lo scrobbling: nessuna migrazione, nessun bump di schema | `docs/24-ARTWORK-ENRICHMENT.md` §"Storage" · `docs/02-DATA-SCHEMA.md` §11 |
+| 107-4 | L | Il placeholder deve funzionare **offline** e senza host esterni: un'immagine generata in locale che richiedesse una rete avrebbe rotto la promessa local-first | Il placeholder è l'ultimo anello della cascata, ed è quello che l'utente vede quando i brani non hanno copertina | Placeholder **deterministico** (gradient derivato dall'hash del `trackId`, palette mood di `design/tokens.json`) reso come **data URI SVG**: zero rete, zero byte persistiti, stesso input → stesso output | `packages/core/src/enrichment/artwork.ts` · `docs/24-ARTWORK-ENRICHMENT.md` §"Contratti da costruire" |
+
+**Lesson learned**: la lezione è sul **dove finisce la responsabilità**. I blocchi aggregati hanno un writer e un gate; le sezioni legacy dei file globali non hanno nessuno dei due, e il drift che ne nasce è silenzioso: nessun check fallisce, la pipeline resta verde, e il lettore trova documenti che dichiarano una story «in review» mesi dopo il merge. L'unica difesa praticabile resta **allinearle nella stessa PR che cambia i fatti che dichiarano** — ed è una difesa organizzativa, non tecnica: va detta, e va ripetuta, perché nessun gate la farà mai rispettare da solo.
+
+La seconda lezione è sul **cascata delle fonti**: una fonte che il progetto non può usare (Spotify, senza OAuth) non è un ramo opzionale, è un ramo che produce codice morto e una documentazione che promette una capacità inesistente. Ogni ramo della cascata deve avere una risposta alla domanda «da dove arriva l'identificativo che questa fonte chiede?», e se la risposta è «non lo abbiamo», il ramo si cancella (D-24.2) invece di restare in attesa.
+
+**Verifica**: `node scripts/check-merge-state.mjs` → 0 falliti (frontmatter story + sessione + entry DEV-LOG confrontati con GitHub); `node scripts/check-readme-facts.mjs` → 0 falliti; `pwsh scripts/generate-bundle.ps1 -Check` → exit 0; `pwsh scripts/aggregate-state.ps1 -DryRun` → exit 0.
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
+| 2.41 | 2026-11-09 (issue #242) | **§58 Sessione 107 — Story 4.3 «Artwork enrichment»**: la story era **mergata** (PR #326, merge commit `c277aba`) senza che nessuno dei documenti che ne dichiarano lo stato fosse allineato — frontmatter della story con `merged_commit`/`merged_date` **vuoti**, body con «PR #XXX merged» e una **Sessione 107 inesistente**, sezione legacy di `11-BACKLOG.md` ancora «👀 IN REVIEW», `02-DATA-SCHEMA.md` §11 con la cascata Spotify-primo. Chiusura del drift: frontmatter story allineato al merge reale (`pr: 326`), `docs/state/sessions/107-artwork-enrichment.md` creato e registrato in `scripts/generate-bundle.ps1` `$files`, entry §58 con tabella P/F/L, sezioni legacy allineate (`11-BACKLOG.md` v1.6.38, `02-DATA-SCHEMA.md` v1.8 §11, `05-ARCHITECTURE.md` v1.6 §6, `docs/INDEX.md`). Decisioni ratificate richiamate: **D-24.2** (nessun ramo Spotify Web API: la cascata è iTunes → Cover Art Archive → placeholder), **D-24.3** (nessuna migrazione Dexie: il tracciato sta in un cursore `artwork.cursor` in `settings`), **D-24.4/D-24.6** (URL iTunes 600, si salva l'URL e non i byte) |
 | 2.40 | 2026-11-06 (issue #324) | **§57 Sessione 106 — DEV-LOG stato merge: una regola, un gate, un writer**: il DEV-LOG aveva **due fonti di verità** sullo stato di merge (frontmatter sessioni + riga `**Stato**:` entry); 34 entry dichiaravano `🟡 in corso` / `✅ fatto` per PR già mergiate. Fix: `apply-merge-state.mjs` normalizza la riga `**Stato**:` in forma canonica `✅ **MERGED** (PR #N, merge commit \`sha7\`)` per la sessione mergiata; `check-merge-state.mjs` guadagna il perimetro `docs/18-DEV-LOG.md` e verifica marker ⇔ stato reale + citazione PR+sha; `--repair-devlog` allinea 37 entry storiche. Correzione §38 (Issue #216): sessione 75 / PR #230 / sha `4e8cd4b`; riga changelog 2.26 corretta a "Sessione 75"; duplicato "2.26" per Issue #218 rinumerato a "2.27". `AGENTS.md` v1.50 (tabella regola ⟺ gate + DEV-LOG, checklist merge aggiornata); `docs/INDEX.md` v1.50; `docs/12-DEVOPS.md` gate catalog + riga 42; `docs/state/sessions/106-devlog-merge-state.md` nuovo. Test: 24/24 pass. |
 | 2.39 | 2026-11-05 (issue #319) | **§56 Sessione 105 — il protocollo ha due lock: l'issue e la worktree**: due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree** (doppio lavoro silenzioso, nessun errore). Causa: il path della worktree è **deterministico** (`ls-<N>-<slug>`) e il lock di ADR-0006 è **sull'issue**, non sul filesystem; `agent-claim.ps1` proseguiva sulla worktree «già presente» senza verificare **di chi** fosse, e nessun gate leggeva `agent-state.json`. Aggiunti: **secondo lock** (`scripts/check-worktree-ownership.mjs`: owner locale = claim vincente, mismatch → exit 1, errore d'ambiente → exit 2) con gate in `pre-commit` (INVARIANTE 4), nei gate locali di `agent-pr.ps1` e in CI (9 scenari); **arbitraggio `-Auto`** in `agent-claim.ps1` (ricalcolo dei candidati + verifica atomica del claim winner, nell'ordine del backlog) e **exit 6** (worktree di un altro agente) con procedura codificata per l'exit 3 (issue già in carico); **C6** di `check-claim-state.mjs` (l'`agent-id` dichiarato nel body della PR deve coincidere con il claimante); scrittura **atomica** di `agent-state.json`; deprecazione del flusso manuale `setup-worktree.ps1` + `gh issue edit`/`comment`. `AGENTS.md` v1.49 (2 righe nella tabella regola ⟺ gate, Fase 0 di arbitraggio, codici di uscita, session-start checklist a 7 check) |
 | 2.33 | 2026-11-01 (issue #248) | **§45 Sessione 79 — il protocollo agenti come contratto verificato**: `AGENTS.md` era l'unico artefatto di governance **senza gate** (0 controlli su 643 citazioni) ⇒ **ADR-0012** (8 regole vincolanti: 2 file e non una directory, anchor come API, una checklist un artifact, invarianti ADR-0008 bloccanti e testuali, claim atomico con riverifica deterministica e senza `jq`, separazione invariante/igiene nel `pre-commit`, `pwsh` 7 obbligatorio, cifre come puntatori). Chiusi **8 drift misurati** (D1 versione in `INDEX.md`, D2 `phase-post`, D3 exit 14, D4 `-Check`, D5 ordine worktree/claim, D6 cifre, D7 `jq` esterno, D8 checklist duplicata) + 2 difetti del flusso automatico (fallback PS 5.1 nel `pre-push` che poteva **scrivere mojibake in `docs/BUNDLE.md`**; `pre-commit` che bloccava i commit parziali e incentivava `--no-verify`). Test `test-pre-commit-clean-check.sh` esteso a 14 assert (6 scenari sul comportamento reale del hook). `AGENTS.md` v1.34, `.github/pull_request_template.md` completato (unico artifact), `.githooks/README.md` riscritto, `docs/13-ADR/0012-agent-protocol-contract.md` e `docs/state/sessions/79-protocollo-contratto-verificato.md` nuovi |
@@ -24777,6 +24801,66 @@ Risultato: **34 entry** dichiaravano `🟡 in corso` / `✅ fatto` / `🟡 in re
 **Worktree**: `ls-324-devlog-stato-merge`
 
 
+===== FILE: docs/state/sessions/107-artwork-enrichment.md =====
+
+---
+number: 107
+title: "Artwork enrichment: la cascata iTunes → Cover Art Archive → placeholder"
+date: 2026-11-09
+state: 🟢
+merged: true
+merged_commit: "c277aba8bf4ce046e59ae318a4fdc280a01a4aac"
+merged_date: "2026-11-09T17:53:23Z"
+branch: feat/242-story-4-3---artwork-enrichment
+pr: 326
+claim: kilo-HP-EliteBook-475468101
+---
+
+# Sessione 107 — Artwork enrichment (Story 4.3)
+
+**Issue di tracking**: **#242** (`status:done`, `area:enrichment`, `size:M`)
+**Branch**: `feat/242-story-4-3---artwork-enrichment`
+**PR**: **#326** — merged il 2026-11-09T17:53:23Z (merge commit `c277aba8bf4ce046e59ae318a4fdc280a01a4aac`)
+**Data**: 2026-11-09
+
+## Sintesi
+
+Implementazione della **Story 4.3** sulla spec `docs/24-ARTWORK-ENRICHMENT.md` (v1.0 🟢 APPROVED, Sessione 87).
+
+Consegnato:
+
+- `packages/core/src/enrichment/artwork.ts`: il resolver `fetchArtworkUrl` con la cascata **iTunes → Cover Art Archive → placeholder** (D-24.2: il ramo Spotify Web API **non esiste**), il placeholder deterministico (gradient SVG in data URI, mai rete) e il rispetto del toggle `enrichMetadata` (zero uscite, zero scritture, zero letture cache quando spento).
+- Persistenza: scrittura su `Track.artworkUrl` / `Album.artworkUrl` (deduplicazione per album) e **cursore in `settings`** (`artwork.cursor`) invece di una migrazione dello schema (D-24.3).
+- Rate limiting: iTunes 20/min (intervallo 3 s), Cover Art Archive 1 req/s.
+- Trigger: job di arricchimento in coda dopo l'import, con la stessa disciplina di budget e interruzione della coda audio.
+- CSP: costante `COVER_ART_HOST` in `apps/web/src/security/hosts.ts` + `connect-src` in `csp.ts` + test CSP (il quarto host dichiarato, `12§2.1`).
+- UI: `MemoryCard` con `alt` e `loading="lazy"`, placeholder quando `artworkUrl` è `null`.
+- Fixture: `fixtures/api-mocks/itunes/search-artwork.json` e `fixtures/api-mocks/coverartarchive/*`.
+- **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) + **15** in `@ls/web` (CSP, i18n, MemoryCard).
+
+Fuori perimetro e dichiarato: cache binaria delle immagini (D-24.6), colore dominante dell'era (story separata), lookup MusicBrainz (Story 4.2, P2 — il ramo Cover Art Archive è progettato per funzionare anche senza), OAuth Spotify (D-24.2).
+
+## Analisi di avanzamento
+
+Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi, collegati all'app dalla 2.5. Con questa sessione anche l'**EPIC 4** ha il suo pezzo visivo: le copertine sono popolate e il mood dell'era può guardarle. Restano **4.2** (lookup MusicBrainz, P2 — miglioramento incrementale, non prerequisito), **5.2/5.1** (export e purge: il gate per testare con dati personali reali) e **6.1** (upgrade stack, post-implementazione). Salute tecnica: gate locali verdi (lint, typecheck, test, build), nessun drift fra i blocchi aggregati e le sezioni legacy dei documenti toccati.
+
+## Documenti aggiornati
+
+- `docs/state/stories/4.3-artwork-enrichment.md` — frontmatter completo (`pr: 326`, `merged_commit`, `merged_date`) e stato ✅ DONE
+- `docs/state/sessions/107-artwork-enrichment.md` — questo file
+- `docs/02-DATA-SCHEMA.md` §11 — cascata allineata (iTunes → Cover Art Archive → placeholder), versione 1.8
+- `docs/05-ARCHITECTURE.md` §6 — sottosezione sull'arricchimento artwork, versione 1.6
+- `docs/11-BACKLOG.md` — sezione legacy Story 4.3 allineata a ✅ DONE, versione 1.6.38
+- `docs/18-DEV-LOG.md` — entry §58 + changelog 2.41
+- `docs/INDEX.md` — righe `02`, `05`, `11` e "Prossimo passo tecnico"
+- `docs/12-DEVOPS.md` §2.1 — host `coverartarchive.org` già dichiarato (PR #326)
+
+---
+
+**Claim**: `kilo-HP-EliteBook-475468101` (UTC 2026-11-09T16:18:38Z)
+
+
+
 ===== FILE: docs/state/stories/1.3-adapter-lastfm-listenbrainz.md =====
 
 ---
@@ -26535,15 +26619,29 @@ Consegnato:
 ---
 id: "4.3"
 slug: artwork-enrichment
-title: Artwork enrichment
+title: "Artwork enrichment"
+phase: 2
+area: enrichment
 status: done
-merged_commit: ""
-merged_date: ""
+priority: I
+depends_on: []
+issue: 242
+branch: "feat/242-story-4-3---artwork-enrichment"
+pr: 326
+merged_commit: c277aba8bf4ce046e59ae318a4fdc280a01a4aac
+merged_date: 2026-11-09
+claim: "kilo-HP-EliteBook-475468101"
+spec_refs:
+  - docs/24-ARTWORK-ENRICHMENT.md
+  - docs/02-DATA-SCHEMA.md
+  - docs/05-ARCHITECTURE.md
+  - docs/12-DEVOPS.md
+  - docs/07-UI-SPEC.md
 ---
 
 # Story 4.3 — Artwork enrichment
 
-**Status**: ✅ **DONE** — implementata nella Sessione 107 (issue #242, PR #XXX merged). La spec `docs/24-ARTWORK-ENRICHMENT.md` è **v1.0 🟢 APPROVED** (ratificata dal project owner al merge della PR #273, 2026-11-02). Consegnato: il modulo `packages/core/src/enrichment/artwork.ts` con la cascata **iTunes → Cover Art Archive → placeholder gradient deterministico**, il cursore `artwork.cursor` in `settings` per ricordare i tentativi falliti (D-24.3), il rate limiting (iTunes 20/min, Cover Art Archive 1 req/s), il rispetto del toggle `enrichMetadata` (zero uscite/zero scritture/zero letture cache quando spento, come `21§10.4`), la costante `COVER_ART_HOST` in `apps/web/src/security/hosts.ts` + `connect-src` in `csp.ts` + test CSP, l'aggiornamento di `MemoryCard` con `alt` + `loading="lazy"`, i fixture `fixtures/api-mocks/itunes/search-artwork.json` e `fixtures/api-mocks/coverartarchive/*`. **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) + **15** in `@ls/web` (CSP, i18n, MemoryCard). **Fuori perimetro, dichiarato**: la cache binaria delle immagini (D-24.6), il colore dominante dell'era (story separata), il lookup MusicBrainz (Story 4.2, P2) — il ramo Cover Art Archive è progettato per funzionare anche senza, l'OAuth Spotify (D-24.2). Dettagli e scelte: `docs/state/stories/4.3-artwork-enrichment.md`.
+**Status**: ✅ **DONE** — implementata nella Sessione 107 (issue #242, PR #326 merged, merge commit `c277aba`). La spec `docs/24-ARTWORK-ENRICHMENT.md` è **v1.0 🟢 APPROVED** (ratificata dal project owner al merge della PR #273, 2026-11-02). Consegnato: il modulo `packages/core/src/enrichment/artwork.ts` con la cascata **iTunes → Cover Art Archive → placeholder gradient deterministico**, il cursore `artwork.cursor` in `settings` per ricordare i tentativi falliti (D-24.3), il rate limiting (iTunes 20/min, Cover Art Archive 1 req/s), il rispetto del toggle `enrichMetadata` (zero uscite/zero scritture/zero letture cache quando spento, come `21§10.4`), la costante `COVER_ART_HOST` in `apps/web/src/security/hosts.ts` + `connect-src` in `csp.ts` + test CSP, l'aggiornamento di `MemoryCard` con `alt` + `loading="lazy"`, i fixture `fixtures/api-mocks/itunes/search-artwork.json` e `fixtures/api-mocks/coverartarchive/*`. **142 test** nuovi in `@ls/core` (unit, integrazione, property-based con PRNG seeded, scenari) + **15** in `@ls/web` (CSP, i18n, MemoryCard). **Fuori perimetro, dichiarato**: la cache binaria delle immagini (D-24.6), il colore dominante dell'era (story separata), il lookup MusicBrainz (Story 4.2, P2) — il ramo Cover Art Archive è progettato per funzionare anche senza, l'OAuth Spotify (D-24.2). Dettagli e scelte: `docs/state/stories/4.3-artwork-enrichment.md`.
 
 ## Acceptance criteria
 
@@ -26565,7 +26663,7 @@ merged_date: ""
 - [x] T24.4 — Trigger: job di arricchimento artwork in coda, dopo l'import (stessa disciplina della coda audio: budget, interruzione)
 - [x] T24.5 — UI: `MemoryCard` con `alt` + `loading="lazy"`; (opzionale) sfondo dell'`EraBand` (D-24.5)
 - [x] T24.6 — Fixture `fixtures/api-mocks/itunes/search-artwork.json` e `fixtures/api-mocks/coverartarchive/*`
-- [x] T24.7 — Allineamento documentale: `docs/02-DATA-SCHEMA.md` §11 (aggiornare la cascata: via Spotify, ordine nuovo), `docs/05-ARCHITECTURE.md` §6, `docs/12-DEVOPS.md` §2.1, `docs/INDEX.md`, `docs/11-BACKLOG.md` §4.3, `docs/state/stories/4.3-*.md`
+- [x] T24.7 — Allineamento documentale: `docs/02-DATA-SCHEMA.md` §11 (cascata iTunes → Cover Art Archive → placeholder), `docs/05-ARCHITECTURE.md` §6, `docs/12-DEVOPS.md` §2.1, `docs/INDEX.md`, `docs/11-BACKLOG.md` §4.3, `docs/state/stories/4.3-*.md`
 
 ## Decisioni proposte (vincolanti)
 
@@ -28556,7 +28654,7 @@ Specifica: `19-GEO-CONTEXT.md` v1.0 🟢 APPROVED §2, §7.1 · `13-ADR/0009-loc
 
 # 02 — Schema Dati Unificato (eseguibile)
 
-> Status: 🟢 APPROVED · Versione 1.7 · Sessione 68 (2026-10-31)
+> Status: 🟢 APPROVED · Versione 1.8 · Sessione 107 (2026-11-09)
 > Vincolante per: adapter (03), analisi (04), db (core/db), test (10)
 
 ---
@@ -29182,27 +29280,30 @@ L'aggiunta di `artworkUrl` su `Track` e `Album` (§3.3) non richiede nuovi indic
 
 Migrazione **non distruttiva** (MIG-1). Implementazione attesa nella Story 0.7 (Operations runbook + manutenzione) o in un mini-task di Story 0.2 se Dexie v2→v3 viene aperto subito.
 
+> **Nota (Sessione 107, issue #242)**: l'arricchimento artwork **non ha richiesto alcuna migrazione dello schema**. Il tracciato «artwork tentato e non trovato» sta in un **cursore in `settings`** (`artwork.cursor`), non in un campo `artworkResolvedAt` su Track/Album (D-24.3 della spec `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED). Lo schema Dexie corrente resta quello dichiarato in §6.
+
 ## 11. Artwork (copertina album/track): fonti e popolamento
 
-Il campo `artworkUrl` su Track/Album (§3.3) **non è popolato dall'import**: l'export GDPR delle piattaforme (es. Spotify) non contiene URL di copertina, e l'utente non ha un consenso esplicito per fetch remoti al momento dell'import. Il popolamento è demandato alla pipeline di enrichment (Fase 2), rispettando `PrivacySettings.enrichMetadata`.
+Il campo `artworkUrl` su Track/Album (§3.3) **non è popolato dall'import**: l'export GDPR delle piattaforme (es. Spotify) non contiene URL di copertina, e l'utente non ha un consenso esplicito per fetch remoti al momento dell'import. Il popolamento è demandato alla **pipeline di enrichment**, rispettando `PrivacySettings.enrichMetadata`.
 
-**Fonti in ordine di priorità** (cascata, come `05-ARCHITECTURE §6` per le audio features):
+**Fonti in ordine di priorità** (cascata ratificata in `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED, D-24.2):
 
 | # | Fonte | Quando | Note |
 |---|-------|--------|------|
-| 1 | **Spotify Web API** (`/v1/tracks/{id}` campo `album.images[0].url`) | Dopo import Spotify, se l'utente ha effettuato OAuth Dev Mode (Fase 2+, vedi D.A.11) | Richiede `PrivacySettings.enrichMetadata=true` + token utente |
-| 2 | **MusicBrainz Cover Art Archive** (`/release/{mbid}/cover-art`) | Quando il Track o l'Album ha `mbid` valorizzato (da ListenBrainz import o enrichment) | No chiave API richiesta, rate limit `1 req/s` |
-| 3 | **iTunes Search API** (`/search?term=...&entity=song`) | Fallback se Spotify non disponibile (es. utenti Apple/Last.fm-first) | No autenticazione, no rate limit stretto; ricerca per `name+artist` |
-| 4 | **Placeholder** (gradient + mood color) | Se tutte le fonti falliscono | Generato lato UI, non persistito |
+| 1 | **iTunes Search API** (`/search?term=...&entity=song`) | Sempre, per ogni brano senza artwork | No autenticazione, rate limit 20 req/min (intervallo 3 s); match esatto su titolo + artista; `artworkUrl100` → `artworkUrl600` (D-24.4) |
+| 2 | **MusicBrainz Cover Art Archive** (`/release/{mbid}`) | Solo se il Track o l'Album ha `mbid` valorizzato (da ListenBrainz import o enrichment) | No chiave API richiesta, rate limit `1 req/s`; 404 ⇒ `not_found`, 429 ⇒ nessun retry |
+| 3 | **Placeholder** (gradient deterministico + palette mood) | Se tutte le fonti falliscono | Generato **in locale** e reso come **data URI SVG**: nessuna rete, nessun host esterno, funziona offline (D-24.6: si salva l'URL, non i byte) |
+
+> **Il ramo Spotify Web API non esiste** (D-24.2): il progetto non ha infrastruttura OAuth per Spotify e gli export non contengono URL di copertina — il ramo sarebbe codice morto.
 
 **Regole di persistenza**:
-- `artworkUrl` è un URL HTTPS assoluto (no path relativi)
-- Se la copertina cambia su Spotify (es. album reissue), `artworkUrl` viene aggiornato al prossimo enrichment
-- L'arricchimento è **lazy**: popolato on-import + on-demand (schermata che richiede artwork) + scheduled idle (vedi `05-ARCHITECTURE §6.1`)
+- `artworkUrl` è un URL HTTPS assoluto (no path relativi) **oppure** il data URI del placeholder
+- L'arricchimento è un **job in coda dopo l'import** (stessa disciplina di budget e interruzione della coda audio, `05-ARCHITECTURE §6.1`): l'import continua a scrivere `null`
+- Il tracciato "artwork tentato e non trovato" si ricorda con un **cursore in `settings`** (`artwork.cursor`), **non** con una migrazione dello schema (D-24.3): un brano già cercato non viene interrogato di nuovo
 - **No logo piattaforma**: `artworkUrl` è solo artwork di copertina del brano/album; i loghi commerciali sono vietati (D.6.4)
-- **Cache**: nessuna tabella dedicata; l'URL è direttamente su Track/Album (è un singolo valore, no LRU)
+- **Cache**: nessuna tabella dedicata; l'URL è direttamente su Track/Album (è un singolo valore, no LRU); per gli album la deduplicazione avviene per `albumId`
 
-Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiunta in Sessione 13, vedi `11-BACKLOG §4`).
+**Stato**: **implementata** nella Story 4.3 (Sessione 107, issue #242, PR #326, merge `c277aba`). Dettaglio: `docs/state/stories/4.3-artwork-enrichment.md` · `docs/24-ARTWORK-ENRICHMENT.md` §"Contratti da costruire".
 
 ---
 
@@ -29219,6 +29320,7 @@ Task di implementazione previsti in **Story 4.3 — Artwork enrichment** (aggiun
 | 1.5 | Sessione 53 (2026-10-26, issue #160) | **§5**: nota sul job di promozione `rekey()` (Story 1.4): la `canonicalKey` `fuzzy:` è un'**ipotesi**, non un'identità — la promozione a `isrc:`/`mbid:` avviene quando l'enrichment scopre gli identificativi, e i duplicati (due varianti fuzzy dello stesso brano) vengono fusi **in una transazione** (MIG-1) con i riferimenti riorientati e i contatori ricalcolati da `recount()` (MIG-4). La priorità è DEDUP-1 (ISRC) su DEDUP-2 (MBID) e l'ISRC è normalizzato in maiuscole, per coincidere con la chiave che calcola la pipeline. *(Riga riportata nella tabella: nella Sessione 53 era stata appesa per errore in cima al file, fuori dalla tabella del changelog — riposizionata nella Sessione 57, issue #172)* |
 | 1.6 | Sessione 57 (2026-10-27, issue #172) | **Story 1.5 ratificata** (`20-SCROBBLING-HUB.md` v1.0 🟢 APPROVED): **§3.8** — `scrobbleHubs` passa da `PlatformId[]` al **tipo dedicato** `ScrobbleHubId` (`'lastfm' \| 'listenbrainz'`), con la semantica del toggle (default `[]`, consenso per-hub indipendente dagli altri toggle, revoca che svuota la coda del hub, configurazione per-utente in `settings`); **§6.2 (nuova)** — tabella `scrobbleOutbox` nello schema Dexie **v5** (PK `hub\|eventKey`, indice per `hub`/`status`/`createdAt`/`nextAttemptAt`, payload senza segreti, write-ahead `in_flight`), con la garanzia di idempotenza per costruzione (G-SH.1) e il caso residuo dichiarato (doppio scrobble possibile, mai una perdita). Migrazione **non distruttiva** (MIG-1). Il tipo `ScrobblePayload` e il contratto `ScrobbleSink` sono in `05§4.2` (ADR-0011 🟢 v1.0) |
 | 1.7 | Sessione 68 (2026-10-31, issue #205) | **Story 1.6 — fondazione geo e contesto di ascolto** (`19-GEO-CONTEXT.md` v1.0 🟢 APPROVED): **§3.2** — tre campi derivati `city` / `citySource` / `cityConfidence` su `ListenEvent` (la città è una *stima* L2, non un fatto: la derivazione è la Story 4.4); **§3.8** — `PrivacySettings` con i toggle `retainCountry` (default **true**: il paese è derivato e non identificativo, decisione del project owner sull'issue #108), `retainCity` (default false), `retainDeviceType` (default true), `retainDeviceDetail` (default false: la stringa grezza del provider è identificante) e `deriveContext` (default true), con la semantica dichiarata che **il `country` è conservato indipendentemente da `retainIp`**; **§3.10 (nuova)** — `ContextPeriod` con la tassonomia vincolante `CONTEXT_KINDS` (`home`, `work`, `commute`, `car`, `travel`, `away`, `unknown`), il verdetto utente (`status` + `userLabel`) e la soglia 0.5 (E19); **§6.3 (nuova)** — tabella `contexts` nello schema Dexie **v6** (tabella derivata, ricostruibile con `recompute()`, MIG-2) con migrazione non distruttiva che azzera i campi città sugli ascolti esistenti; **§7** — MIG-5: il ricalcolo del contesto è **esplicito** e non azzera i campi già persistiti (E20) |
+| 1.8 | Sessione 107 (2026-11-09, issue #242) | **Story 4.3 — artwork enrichment** (`24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED): **§11** riscritta sulla cascata **ratificata** — **iTunes → Cover Art Archive → placeholder** (D-24.2: il ramo **Spotify Web API non esiste**, perché il progetto non ha OAuth per Spotify e gli export non contengono URL di copertina); iTunes con match esatto e `artworkUrl100 → 600` (D-24.4), Cover Art Archive solo con `mbid` (404 ⇒ `not_found`, 429 ⇒ nessun retry), placeholder deterministico reso come **data URI SVG** (mai rete, D-24.6). Le regole di persistenza sono allineate al codice: l'arricchimento è un **job in coda dopo l'import** (l'import continua a scrivere `null`) e il tracciato dei tentativi falliti sta in un **cursore in `settings`** (`artwork.cursor`), **non** in una migrazione dello schema (D-24.3). **§10** — nota: l'arricchimento artwork **non** ha richiesto migrazioni (lo schema Dexie corrente resta quello di §6). Nessuna modifica a interfacce, regole DEDUP (§5) o schema Dexie (§6) |
 
 
 ===== FILE: docs/03-ADAPTERS/SPEC-TEMPLATE.md =====
@@ -31978,8 +32080,8 @@ appartengono a `04`.
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
-> Versione: 1.5
-> Ultima modifica: Sessione 65 (2026-10-30) — §6 Pipeline di arricchimento allineata all'emendamento della **D-A.6** (issue #193): il fallback mood-by-genre **non esiste** (`04§11.1`)
+> Versione: 1.6
+> Ultima modifica: Sessione 107 (2026-11-09) — §6.3 Arricchimento artwork: la pipeline ha due rami distinti (audio features e artwork) e il ramo artwork applica la cascata ratificata **iTunes → Cover Art Archive → placeholder** (D-24.2, D-24.3, D-24.4, D-24.6) (issue #242)
 > ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟢 APPROVED v1.0)
 
 ---
@@ -32278,6 +32380,34 @@ L'arricchimento **non blocca mai l'import**: se Essentia o AB falliscono, si cad
 - **Invalidazione**: bump del `schemaVersion` in `AudioFeatures` (vedi `02§3.4`) quando cambia la versione Essentia o il modello euristica; i record con `schemaVersion` vecchio vengono ricalcolati al prossimo trigger
 - **Disattivazione**: se `PrivacySettings.enrichMetadata === false`, la cache non viene letta né scritta; le analisi basate su valence/energy **non producono insight** (D-A.6, `04§11.1`: il fallback mood-by-genre non esiste)
 
+### 6.3 Arricchimento artwork
+
+La pipeline di arricchimento ha **due rami distinti**, che condividono la disciplina della coda (§6.1) ma non i dati:
+
+| Ramo | Dato | Specifica |
+|------|------|-----------|
+| **Audio features** | `AudioFeatures` (valence, energy, bpm, …) | `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) |
+| **Artwork** | `Track.artworkUrl` / `Album.artworkUrl` | `24-ARTWORK-ENRICHMENT.md` (v1.0 🟢 APPROVED) |
+
+Il resolver (`packages/core/src/enrichment/artwork.ts`) applica la cascata **iTunes → Cover Art Archive → placeholder**:
+
+1. **iTunes Search API** — match esatto su titolo + artista, `artworkUrl100 → 600` (D-24.4), rate limit 20 req/min
+2. **Cover Art Archive** — solo se esiste un `mbid` (copertura MusicBrainz), 1 req/s; 404 ⇒ `not_found`, 429 ⇒ nessun retry (il limiter governa)
+3. **Placeholder** — gradient deterministico derivato dall'hash del `trackId`, reso come **data URI SVG**: nessuna rete, nessun host esterno, funziona offline
+
+> Il ramo **Spotify Web API non esiste** (D-24.2): il progetto non ha OAuth per Spotify e gli export non contengono URL di copertina.
+
+Vincoli dichiarati:
+
+- **Toggle `enrichMetadata`**: è il **primo** check, prima di ogni accesso — con il toggle spento: zero uscite, zero scritture, zero letture della cache
+- **Cosa esce**: a iTunes nome del brano e dell'artista; al Cover Art Archive un MBID di release. **Mai** l'elenco degli ascolti, il catalogo, gli IP o le chiavi
+- **Cursore, non migrazione**: il tracciato «artwork tentato e non trovato» sta in `settings` (`artwork.cursor`), non in un campo sui record (D-24.3) ⇒ nessun bump dello schema Dexie
+- **Trigger**: job in coda dopo l'import, con lo stesso budget e la stessa interruzione della coda audio; l'import continua a scrivere `null`
+- **CSP**: `connect-src` ammette `https://coverartarchive.org` (quarto host dichiarato, `12§2.1`); `img-src` non è modificata
+- **Cache**: si salva l'URL (o il data URI), non i byte (D-24.6); per gli album la deduplicazione avviene per `albumId`
+
+La specifica completa (contratti, persistenza, privacy, CSP, test) è **`24-ARTWORK-ENRICHMENT.md` (v1.0 🟢 APPROVED)**; l'implementazione è la Story 4.3 (Sessione 107, issue #242, PR #326).
+
 ## 7. Analysis engine
 
 Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, EraDetector, EventDetector, MemoryEngine, PatternAnalyzer. Ogni algoritmo è specificato con formula, parametri e esempio input→output in `04-ANALYSIS-ALGORITHMS.md`. I risultati sono persistiti in `insights` con versionamento del parametro-set (`derivedVersion`) per ricalcolo coerente (MIG-3).
@@ -32548,6 +32678,7 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 | 1.3 | Sessione 56 (2026-10-27, issue #168) | **§4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)**: il contratto di `§4` descrive la sola **lettura** (import da file o da sorgente remota). La Story 1.5 chiede l'operazione opposta — **inviare** i propri ascolti ai hub — e i due insiemi non coincidono (non ogni piattaforma scrobbla; `maloja`/`subsonic`/`roon` sono client, non fonti). Aggiunta la sottosezione "Contratto di scrittura (`ScrobbleSink`)": l'interfaccia `ScrobbleSink` (con `hub`, `name`, `version`, `isConfigured()`, `submit()`), il tipo dedicato `ScrobbleHubId`, i tipi `ScrobblePayload` e `ScrobbleResult`, e la classe `ScrobbleError` con i sei codici (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`). Vincoli: il contratto è **separato** da quello di lettura ma ne riusa la forma (`PlatformAdapter` non cambia, nessun adapter esistente è toccato); il rate limiting è responsabilità del **sink** (Last.fm ~5 req/s, ListenBrainz 1 req/s con `X-RateLimit-*`); nessun segreto nel bundle e nessun server di backend (il proxy è dell'utente); `AbortSignal` per la cancellazione; `ScrobbleError` dedicato perché `recoverable` ha qui una semantica diversa ("si può ritentare lo stesso invio" e non "gli eventi validi sono persistiti"); `ScrobbleHubId` dedicato perché `scrobbleHubs` non è `PlatformId[]`; il payload è **chiuso per costruzione** (nessun campo per contesto, device o IP); l'idempotenza è locale e verificabile (chiave unica `hub|eventKey` sulla coda `scrobbleOutbox`, write-ahead). Il percorso incrementale ListenBrainz resta sul contratto di **lettura** (`parseRemote?()`) |
 | 1.4 | Sessione 62 (2026-10-28, issue #187) | **§6 Pipeline di arricchimento** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): la fonte del preview audio per Essentia.js è dichiarata (**iTunes Search API**, D-AF.1: i preview di Spotify non esistono più per le app nuove e quelli di Apple Music costano 99 $/anno); i classification head sono **DEAM** con normalizzazione [1,9] → [0,1] (D-AF.3); AcousticBrainz fornisce classi `mood_*` e **non** `valence`/`energy`, che sono quindi **derivati** (D-AF.8); il fallback euristico **non alimenta il mood tracker** (D-AF.4): il layer di analisi legge solo `source ∈ {essentia, acousticbrainz, manual}`. **§9**: il modulo `enrichment/` è annotato come porte + orchestratore puri (**no React**: `§9.2` vieta React nel core, e React Query resta nel web — D-AF.5). **§8**: la riga delle audio features rimanda alla spec |
 | 1.5 | Sessione 65 (2026-10-30, issue #193) | **§6 Pipeline di arricchimento** allineata all'emendamento della **D-A.6** ratificato dal project owner: il fallback **mood-by-genre non esiste**. Il punto 5 della cascata non dice più che "le analisi degradano a mood-by-genre" ma che le analisi basate su valence/energy **non producono insight** e che il mood tracker segnala la copertura mancante con un **warning aggregato per periodo** (`04§1.4`); la motivazione (la mappa genre→valence/energy non è ratificata in nessun documento: inventarla sarebbe il "segnale inventato" che la D-A.1 esclude) è dichiarata inline con il rimando a `04§11.1`. **§6.2**: la riga «Disattivazione» (toggle `enrichMetadata` spento) dice la stessa cosa — niente feature, niente insight — invece di citare il fallback inesistente. Il riferimento alla spec passa a `21-AUDIO-FEATURES.md` **v1.1**. Nessuna modifica alla pipeline del codice: il comportamento era già quello (D.63.4); la modifica è il **warning aggregato** |
+| 1.6 | Sessione 107 (2026-11-09, issue #242) | **§6.3 Arricchimento artwork (nuova)**: la pipeline di arricchimento ha **due rami distinti** — le audio features (`21-AUDIO-FEATURES.md` v1.1 🟢) e l'artwork (`24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED, Story 4.3, Sessione 107, PR #326). Il resolver `packages/core/src/enrichment/artwork.ts` applica la cascata **ratificata** **iTunes → Cover Art Archive → placeholder**: iTunes con match esatto e `artworkUrl100 → 600` (D-24.4, 20 req/min), Cover Art Archive solo con `mbid` (1 req/s, 404 ⇒ `not_found`, 429 ⇒ nessun retry), placeholder deterministico reso come **data URI SVG** (mai rete, funziona offline, D-24.6). Il ramo **Spotify Web API non esiste** (D-24.2: nessun OAuth, gli export non contengono URL di copertina). Il tracciato dei tentativi falliti sta in un **cursore in `settings`** (`artwork.cursor`), **non** in una migrazione dello schema (D-24.3); il trigger è un job in coda dopo l'import con la disciplina di §6.1 e l'import continua a scrivere `null`; la CSP ammette `https://coverartarchive.org` (quarto host, `12§2.1`). Nessuna modifica alla pipeline delle audio features |
 
 
 ===== FILE: docs/06-UX-FLOWS-STATES.md =====
@@ -34449,7 +34580,7 @@ Ogni bug fixato deve avere un test di regressione. Il test va aggiunto al fixtur
 
 # 11 — Backlog Strutturato
 
-> Status: 🟢 APPROVED · Versione 1.6.37 · Sessione 104 (2026-11-06, Story 3.5) · l'**EPIC 3** (UI) ha **chiuso il percorso end-to-end**: la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app), la **3.2** (Ricordi + Share, Sessione 97 — schermata ⑪ e ShareSheet ⑫, card 1080×1350 su canvas, capitolo HTML autonomo, tagging manuale), la **3.3** (Esplora + Analisi, Sessione 103 — schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa) e la **3.5** (anteprima e modalità demo in onboarding, Sessione 104 — il diario di esempio in un database separato e le prime righe della timeline reale nel reveal). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. Restano la **5.2/5.1** (export e purge, privacy) e l'**artwork** (4.3, ora **P0** e senza dipendenza dal lookup MusicBrainz 4.2). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`). Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
+> Status: 🟢 APPROVED · Versione 1.6.38 · Sessione 107 (2026-11-09, Story 4.3) · l'**EPIC 3** (UI) ha **chiuso il percorso end-to-end**: la **3.4** (nastro contesto, Sessione 76), la **3.1** (Home + Timeline, Sessione 77 — schermate ⑥ e ⑦, grafici SVG scritti a mano, prima navigazione dell'app), la **3.2** (Ricordi + Share, Sessione 97 — schermata ⑪ e ShareSheet ⑫, card 1080×1350 su canvas, capitolo HTML autonomo, tagging manuale), la **3.3** (Esplora + Analisi, Sessione 103 — schermate ⑨ e ⑩, la ricerca sul catalogo e la mappa emotiva con l'insight in prosa) e la **3.5** (anteprima e modalità demo in onboarding, Sessione 104 — il diario di esempio in un database separato e le prime righe della timeline reale nel reveal). L'app non è più solo onboarding: la scelta fra onboarding e app è legata ai **dati**. L'**artwork** (4.3) è **completata** (Sessione 107, issue #242, PR #326, merge `c277aba`): le copertine sono popolate con la cascata **iTunes → Cover Art Archive → placeholder**. Restano la **5.2/5.1** (export e purge, privacy), il **lookup MusicBrainz** (4.2, P2) e la **6.1** (upgrade stack, post-implementazione). Il buco rilevato il 2026-11-02 — i **motori di analisi dell'EPIC 2 scritti e testati in core ma mai eseguiti dall'app** — è **chiuso**: la **2.5** (collegamento del pipeline di analisi all'app) è **mergata in `main`** (issue #266, PR #295, merge `265fa50`). Fuori perimetro e dichiarato: la **session segmentation** (`04§2`) e il **pattern analyzer** (`04§4`)
 > Formato: Epic → Story → Task con acceptance criteria verificabili
 
 ---
@@ -35042,32 +35173,35 @@ Consegnato: il nastro (`apps/web/src/components/ContextRibbon.tsx`) con un segme
 
 ### Story 4.3 — Artwork enrichment `[PHASE-2]` `[AREA:enrichment]` `[PRI:I]` `[SIZE:M]`
 
-**Stato**: 👀 **IN REVIEW** — PR #326 aperta, in attesa di review
+**Stato**: ✅ **DONE** — implementata nella Sessione 107 (issue #242, PR #326 merged, merge commit `c277aba`, 2026-11-09). Il resolver `packages/core/src/enrichment/artwork.ts` applica la cascata con il rispetto del toggle `enrichMetadata`, il cursore `artwork.cursor` in `settings` ricorda i tentativi falliti (D-24.3) e il placeholder è un gradient deterministico reso come data URI (mai rete). Dettaglio: `docs/state/stories/4.3-artwork-enrichment.md` · `docs/state/sessions/107-artwork-enrichment.md`
 
 **Descrizione**: Popolamento di `Track.artworkUrl` e `Album.artworkUrl` (aggiunti in `02 v1.2` per chiusura M5 audit). Cascata di fonti: **iTunes Search API** (`/search?entity=album`, no auth, 20 req/min) → **MusicBrainz Cover Art Archive** (`/release/{mbid}`, no auth, rate limit 1 req/s) → **placeholder gradient** generato runtime deterministico. Il ramo Spotify Web API è **escluso** (D-24.2): il progetto non ha infrastruttura OAuth per Spotify e gli export non contengono URL di copertina.
 
 **Priorità 2026-11-02 (P0)**: le copertine sono l'**ancora visiva** del diario — senza, la timeline è un elenco di testo e l'app resta uno strumento tecnico invece di un oggetto emotivo. L'artwork è inoltre il **moltiplicatore** delle story vicine: il colore dominante dell'era, la card condivisibile (3.2) e la lettura visiva del mood (3.3) nascono tutti dalle copertine. La verifica del 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §4) ha confermato che **non esiste alcun artwork nel repository**: il campo esiste nello schema ma la pipeline di import scrive sempre `artworkUrl: null` (`packages/core/src/adapters/pipeline.ts`), e il componente `MemoryCard` ha solo lo slot vuoto.
 
-**Task**:
-- T4.3.1 — Modulo `enrichment/artwork.ts` con funzione `fetchArtworkUrl(track|album, deps)` che applica la cascata
-- T4.3.2 — Integrazione con `recount()` o job `enrichOnImport()` di Story 0.7 per popolamento batch post-import
-- T4.3.3 — Trigger on-demand: schermata che richiede artwork (`Home MemoryCard`, `Timeline EraBand`, `Esplora`) → fetch lazy se `artworkUrl === null`
-- T4.3.4 — Rispettare `PrivacySettings.enrichMetadata`: se `false`, **zero** richieste di rete, **zero** scritture, **zero** letture cache (come `21§10.4`)
-- T4.3.5 — Gestione errori: 404 (no artwork disponibile), 429 (rate limit MB), timeout → fallback a fonte successiva
-- T4.3.6 — Migrazione Dexie v2→v3 (`02 §10`): aggiunta campo nullable, non distruttiva
+**Task** (da `docs/24-ARTWORK-ENRICHMENT.md` §"Task", ratificati nella Sessione 87):
+- [x] T24.1 — `packages/core/src/enrichment/artwork.ts`: resolver con cascata, placeholder deterministico, rispetto del toggle
+- [x] T24.2 — Costante `COVER_ART_HOST` in `apps/web/src/security/hosts.ts` + `connect-src` in `csp.ts` + test CSP
+- [x] T24.3 — Persistenza: scrittura su `Track`/`Album` + cursore in `settings` (`artwork.cursor`) + deduplicazione per album
+- [x] T24.4 — Trigger: job di arricchimento artwork in coda, dopo l'import (stessa disciplina della coda audio: budget, interruzione)
+- [x] T24.5 — UI: `MemoryCard` con `alt` + `loading="lazy"`; (opzionale) sfondo dell'`EraBand` (D-24.5)
+- [x] T24.6 — Fixture `fixtures/api-mocks/itunes/search-artwork.json` e `fixtures/api-mocks/coverartarchive/*`
+- [x] T24.7 — Allineamento documentale: `docs/02-DATA-SCHEMA.md` §11 (cascata iTunes → Cover Art Archive → placeholder), `docs/05-ARCHITECTURE.md` §6, `docs/12-DEVOPS.md` §2.1, `docs/INDEX.md`, `docs/11-BACKLOG.md` §4.3, `docs/state/stories/4.3-*.md`
 
-**Acceptance criteria**:
-- [ ] Dato un Track con `spotify:track:<id>`, `fetchArtworkUrl()` ritorna URL Spotify valido (mock test)
-- [ ] Dato un Track con solo `mbid`, fallback a MB Cover Art Archive (mock test)
-- [ ] Dato un Track senza ID, fallback a iTunes Search (mock test)
-- [ ] Dato un Track senza match, ritorna placeholder gradient deterministico
-- [ ] Toggle `enrichMetadata=false` → Spotify API saltata; altre fonti tentate
-- [ ] Migrazione Dexie v2→v3 testata con dati pre-migrazione (10-TESTING §4.3)
-- [ ] Placeholder gradient generato coerente con Mood (vedi `15-DESIGN-SYSTEM` §3 palette mood)
+**Acceptance criteria** (da `docs/24-ARTWORK-ENRICHMENT.md` §"Acceptance criteria", v1.0 🟢 APPROVED):
+- [x] `fetchArtworkUrl` esiste in `@ls/core/enrichment` ed è coperto da test
+- [x] La cascata è **iTunes → Cover Art Archive → placeholder**, e il ramo Spotify **non** esiste (D-24.2 ratificata)
+- [x] Con `enrichMetadata = false`: **zero** richieste di rete, **zero** scritture
+- [x] `Track.artworkUrl` e `Album.artworkUrl` vengono popolati; l'import continua a scrivere `null` (l'arricchimento è un job separato)
+- [x] Il placeholder è **deterministico** e non richiede rete
+- [x] `coverartarchive.org` è in `connect-src` **sia** nella CSP applicata **sia** in `docs/12-DEVOPS.md` §2.1, e il test della CSP dimostra che non entra nessun altro host
+- [x] Il rate limit è rispettato: iTunes 20/min, Cover Art Archive 1 req/s
+- [x] `MemoryCard` renderizza l'artwork con `alt` e `loading="lazy"`, e il placeholder quando manca
+- [x] Il ramo Cover Art Archive è **opzionale**: senza MBID (Story 4.2 non fatta) il risultato è comunque un artwork (iTunes o placeholder)
 
 **Dipendenze**: **nessuna** — la cascata funziona senza `mbid`: iTunes Search e placeholder gradient coprono la maggior parte dei casi, MB Cover Art Archive si usa solo dove esiste un MBID e il placeholder gradient è il fallback finale. Il lookup MusicBrainz (Story 4.2) è un **miglioramento incrementale** del catalogo, non un prerequisito: il vincolo `[DEP:4.2]` è stato rimosso il 2026-11-02 (`22-COMPETITIVE-POSITIONING.md` §8 e §15, decisione D-22.4)
 **Spec**: **`docs/24-ARTWORK-ENRICHMENT.md`** (🟢 APPROVED v1.0, ratificata dal project owner il 2026-11-02) · `02-DATA-SCHEMA §11` · `05-ARCHITECTURE §6 §6.1 §6.2` · `07-UI-SPEC §2.2 §2.10`
-**Issue**: #242 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec)
+**Issue**: #242 (issue canonica della story — Sessione 86: corpo e checklist aggiornati con la spec) · chiusa con `status:done` al merge della PR #326 (`c277aba`, 2026-11-09)
 
 ---
 
@@ -35167,7 +35301,7 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 13. **1.6, 4.4, 3.4** geo e contesto di ascolto — **tranche chiusa** (Sessione 76, issue #231): dopo la ratifica di `19-GEO-CONTEXT.md` v1.0 🟢 e dell'ADR-0009 v1.0 🟢 (Sessione 67, issue #201) sono state completate la **1.6** (fondazione geo: delta su `02` v1.7, tabella `contexts`, classificatore L1 — Sessione 68, issue #205, PR #209, merge `68c27e5`), la **4.4** (DB MMDB on-demand + derivazione della città — issue #221) e la **3.4** (nastro contesto — Sessione 76, issue #231: il nastro e il dettaglio del periodo, con il namespace `timeline.context.*` materializzato). Il **perimetro L2 è opt-in** (`retainCity` default OFF) e **L0/L1 reggono da sole**: senza database c'è il paese, non la città. Il blocco NEXT-STEP del README indica ora la **3.1** (Home + Timeline): con il nastro pronto, la Timeline è il pezzo che manca per montarlo e per sbloccare il test end-to-end
 14. **2.2, 2.3** analisi avanzata — dopo la 2.1 (il backlog dichiara `[DEP:2.1]`): hanno ricevuto il loro state file nella Sessione 67 perché il blocco NEXT-STEP non poteva puntare a una story fuori ordine di priorità. La **2.2** (era detector) e la **2.3** (event detector) sono **entrambe completate** (Sessione 69 e Sessione 70): con la 2.3 l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi. Il blocco NEXT-STEP del README ricade quindi sulla tranche **geo** — **4.4** (DB IP→città, on-demand) e **3.4** (nastro contesto), entrambe con la specifica già ratificata
 15. **2.5** Collegamento del pipeline di analisi all'app — **completata** (issue #266, PR #295 merged `265fa50`, 2026-11-03): i motori di analisi (mood, ere, eventi, ricordi) erano scritti e testati in `packages/core/src/analysis/` ma **nessun codice in `apps/web` li eseguiva**: la Home leggeva gli insight che nessuno scriveva. Ora l'orchestratore `runAnalysisPipeline` gira in coda dopo l'import, persiste gli insight con `derivedVersion`, la Home e la Timeline li leggono dal DB, e l'utente senza feature acustiche vede il messaggio `no-features` invece di uno schermo vuoto. È il differenziatore narrativo del progetto ed è più economico dell'artwork (`22-COMPETITIVE-POSITIONING.md` §7, D-22.2). Dettagli: `docs/state/stories/2.5-analysis-pipeline-link.md`
-16. **4.3** Artwork enrichment — **P0**: l'ancora visiva del diario, e il moltiplicatore delle story vicine (colore dell'era, card condivisibile, lettura del mood). **Non dipende più dal lookup MusicBrainz** (D-22.4): Spotify Web API + iTunes Search + placeholder gradient bastano
+16. **4.3** Artwork enrichment — **completata** (Sessione 107, issue #242, PR #326 merged `c277aba`, 2026-11-09): l'ancora visiva del diario, e il moltiplicatore delle story vicine (colore dell'era, card condivisibile, lettura del mood). **Non dipende più dal lookup MusicBrainz** (D-22.4) e **non usa Spotify**: la cascata ratificata è **iTunes → Cover Art Archive → placeholder** (D-24.2), con il cursore `artwork.cursor` in `settings` al posto di una migrazione (D-24.3). Dettagli: `docs/state/stories/4.3-artwork-enrichment.md`
 17. **3.2, 3.3, 3.5** UI — la **3.1** (Home + Timeline) è **completata** (Sessione 77, issue #233), la **3.4** (nastro contesto) pure (Sessione 76, issue #231) e la **3.2** (Ricordi + Share) **completata** (Sessione 97, issue #241: il feed ⑪, il ShareSheet ⑫, la card 1080×1350 su canvas e il capitolo HTML autonomo — un **capitolo statico**, mai un dump del database — e il tagging manuale). Restano la **3.3** (Esplora + Analisi: insight **in prosa**, non un grafico in più) e la **3.5** (anteprima/demo in onboarding): le due chiudono il percorso end-to-end. La 3.3 consuma l'output della **2.5**
 18. **5.2, 5.1** privacy — nell'ordine **5.2 → 5.1**: export e purge sono l'atto di fiducia che rende vera la promessa della privacy (pulsanti **prominenti**, non nascosti in un menu), la pagina «Come trattiamo i tuoi dati» ne è la traduzione in linguaggio utente (D-22.7)
 19. **4.2** Lookup MusicBrainz — **P2**: utile per la precisione dei metadati, non per l'esperienza; non è più il prerequisito dell'artwork (D-22.4)
@@ -35186,13 +35320,15 @@ Quando un agente arriva sul repo, deve **tentare** le story in questo ordine di 
 | EPIC | Story | Stato | Note |
 |------|-------|-------|------|
 | 2-3 | 2.x analisi, 3.x UI | ⬚ TODO | dipendono da 0.2 ✅ · l'**EPIC 2** ha implementato 2.1 (mood), 2.2 (ere), 2.3 (eventi) e 2.4 (ricordi), e la **2.5** li ha **collegati all'app** (issue #266, PR #295, merge `265fa50`): l'orchestratore gira in coda dopo l'import e la Home/Timeline leggono gli insight dal DB · nell'**EPIC 3** sono completate la **3.4** (nastro contesto, Sessione 76, issue #231), la **3.1** (Home + Timeline, Sessione 77, issue #233) e la **3.2** (Ricordi + Share, Sessione 97, issue #241): l'app ha ora le sue prime tre schermate vere e il tagging manuale. Restano la **3.3** (Esplora + Analisi) e la **3.5** (anteprima/demo in onboarding, nuova, Sessione 85) |
-| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`): restano **4.3** (artwork, **P0** dal 2026-11-02 e **senza dipendenza** dal lookup MusicBrainz), **4.2** (lookup MusicBrainz, P2), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
+| 4 | 4.x enrichment (audio features, artwork, generi) | ⬚ TODO | dipende da 0.2 ✅ · **4.1 completata** (Sessione 64, issue #188, PR #197, merge `7458220`) e **4.3 completata** (Sessione 107, issue #242, PR #326, merge `c277aba`): restano **4.2** (lookup MusicBrainz, P2 — la cascata dell'artwork funziona anche senza MBID), i generi e la **4.4** (DB IP→città, specificata dalla ratifica dell'ADR-0009 nella Sessione 67) |
 | 1-3 | **1.6, 4.4, 3.4** geo e contesto di ascolto | ✅ **DONE** (tranche chiusa) | la specifica è **ratificata** (`19-GEO-CONTEXT.md` v1.0 🟢, `13-ADR/0009` v1.0 🟢, Sessione 67, issue #201): la **1.6** fonda lo schema e il classificatore L1 — **completata** (Sessione 68, issue #205, PR #209, merge `68c27e5`) — la **4.4** porta il DB MMDB on-demand e la derivazione della città (opt-in) — **completata** (issue #221) — la **3.4** disegna il nastro contesto — **completata** (Sessione 76, issue #231). L2 è il «condimento»: L0/L1 reggono da sole |
 | 5 | 5.x privacy | ⬚ TODO | — |
 | 6 | 6.1 Upgrade stack a ultime major | ⬚ SCHEDULED (post-impl) | D.10.2: solo a implementazione conclusa |
 
 **EPIC 0 — Fundamentals: 7/7 ✅** (0.1 scaffold · 0.2 schema DB · 0.3 adapter Spotify · 0.4 UI import · 0.5 PWA · 0.6 i18n · 0.7 operations runbook). **EPIC 1 — Import core: 5/5 ✅** (1.1 YouTube Music · 1.2 Apple Music · 1.3 Last.fm + ListenBrainz · 1.4 dedup promozione post-enrichment · 1.5 scrobbling hub). Dettaglio per story in `docs/state/stories/` e `docs/18-DEV-LOG.md`.
 
+> **Allineato al 2026-11-09** (Sessione 107, issue #242): la **4.3** (Artwork enrichment) è **completata** — la PR #326 è mergata in `main` (merge commit `c277aba`) e le sezioni legacy che ne dichiaravano lo stato sono allineate: `**Stato**:` da «👀 IN REVIEW» a **✅ DONE**, i **task** (T24.1…T24.7) e i **9 acceptance criteria** della spec ratificata sono spuntati, la riga dell'EPIC 4 della roadmap e la voce **#16** della lista di priorità sono allineate, e l'header del file passa a **v1.6.38**. I task e gli acceptance criteria precedenti (scritti quando la cascata prevedeva il ramo **Spotify** e una migrazione Dexie v2→v3) sono sostituiti da quelli della **spec** `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED: cascata **iTunes → Cover Art Archive → placeholder** (D-24.2), cursore `artwork.cursor` in `settings` invece di una migrazione (D-24.3).
+>
 > **Allineato al 2026-11-03** (Sessione 97, issue #241): la **3.2** (Ricordi + Share) è **implementata** — il feed ⑪, il ShareSheet ⑫, la card 1080×1350, il capitolo HTML autonomo e il tagging manuale (nome dell'era e nota sul ricordo), con la conservazione dei campi dell'utente al ricalcolo dell'analisi. La sezione Story 3.2 passa a **✅ DONE** e i suoi acceptance criteria sono spuntati; la riga della tabella «Stato di avanzamento» è allineata. La prossima story lavorabile è la **3.3** (Esplora + Analisi), poi **3.5**, **4.3**, **5.2**, **5.1**, **4.2**, **6.1**.
 >
 > **Allineato al 2026-11-03** (Sessione 94, doc-sync post-merge della PR #295): la **2.5** è **mergata in `main`** (issue #266, PR #295, merge `265fa50`) e le sue sezioni legacy sono allineate: `**Stato**:` da `⬚ TODO` a `✅ DONE`, i **7 acceptance criteria** spuntati, la riga della tabella «Stato di avanzamento» aggiornata e l'entry #15 della lista di priorità riscritta. Il **blocco NEXT-STEP del README** non indica più la 2.5: l'indicatore di avanzamento passa a **73%** (22 story su 30, effort 76%) e l'**EPIC 2** è **completo (5/5)**. La prossima story lavorabile era la **3.2** (Ricordi + Share), poi **3.3**, **3.5**, **4.3**, **5.2**, **5.1**, **4.2**, **6.1**.
@@ -35272,7 +35408,8 @@ Ogni story deve avere label GitHub:
 
 
 
-| 1.6.36 | Sessione 97 (2026-11-03, issue #241) | **Story 3.2 implementata** (Ricordi + Share): la schermata ⑪ **Ricordi** (feed a pagine di 10 con infinite scroll, `dismissed` esclusi dal feed ma **presenti** nel database, ordinamento per `Insight.confidence`) e il foglio ⑫ **ShareSheet** (dialog accessibile con focus trap e stati `generating`/`ready`/`error`); la card **1080×1350** disegnata a mano su canvas e il **capitolo HTML autonomo** (export statico alternativo: nessuno script, nessuno stile esterno); le azioni di condivisione con **fallback** (Web Share API → download, clipboard → download); il **tagging manuale** (nome e parole chiave dell'era, nota libera del ricordo) con la **conservazione dei campi dell'utente al ricalcolo** (`Insight.userNote` e `Insight.status` riportati dagli insight esistenti a quelli nuovi). **37 test** nuovi. Sezione Story 3.2: `**Stato**:` ✅ DONE e gli **8 AC** spuntati; la riga roadmap «2-3» allineata (l'EPIC 3 ha ora tre schermate); la lista di priorità aggiornata (il blocco NEXT-STEP ricade sulla **3.3**). Documenti allineati: `docs/06-UX-FLOWS-STATES.md` → **v0.5** (§2.11, §2.12), `docs/07-UI-SPEC.md` → **v0.2** (§2.2, §2.10, §2.10b), `docs/08-COPY-I18N.md` → **v0.14** (`memories.*`, `share.*`, `nav.memories`), `docs/18-DEV-LOG.md` → **v2.30** (§53); `docs/state/stories/3.2-ricordi-share.md` e `docs/state/sessions/97-ricordi-share.md` (nuovi) |
+| 1.6.37 | Sessione 104 (2026-11-06, issue #270) | **Story 3.5 implementata** (anteprima e modalità demo in onboarding): la CTA «Scopri come funziona» sul primo passo dell'onboarding apre il **diario di esempio** — il fixture `fixtures/demo-user.json` (75 album + 200 feature deterministiche) caricato in un **database separato** (`life-soundtrack-demo`), senza scritture nel database dell'utente e con uscita che lo cancella. La schermata è la **stessa Home** (nessun renderer parallelo) con un banner dichiarativo; il **reveal** post-import mostra le prime righe della timeline reale (≥3) e l'anno calcolato dal span dei dati. **19 test** nuovi (10 in `@ls/core`, 9 in `@ls/web`) e i18n IT/EN per le 12 chiavi nuove. Documenti allineati: `06-UX-FLOWS-STATES.md` v0.7, `07-UI-SPEC.md` v0.4, `08-COPY-I18N.md` v0.16, `10-TESTING.md` v1.3, `18-DEV-LOG.md` v2.32 (§55), `docs/state/stories/3.5-anteprima-onboarding-demo.md` e `docs/state/sessions/104-story-3-5-anteprima-demo.md`. *(Riga recuperata in questa sessione: l'header dichiarava v1.6.37 ma la riga di changelog mancava — drift chiuso insieme alla 1.6.38)* |
+| 1.6.38 | Sessione 107 (2026-11-09, issue #242) | **Story 4.3 completata** (Artwork enrichment, PR #326 merged `c277aba`): la sezione Story passa da «👀 IN REVIEW» a **✅ DONE**; i task (T24.1…T24.7) e i **9 acceptance criteria** sono quelli della **spec** `24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED e sono spuntati (i precedenti, scritti quando la cascata prevedeva il ramo **Spotify** e una migrazione Dexie v2→v3, sono superati: cascata **iTunes → Cover Art Archive → placeholder**, D-24.2; tracciato in `settings` con il cursore `artwork.cursor`, D-24.3). La voce **#16** della lista di priorità e la riga dell'EPIC 4 della roadmap sono allineate. Allineati anche: `docs/state/stories/4.3-artwork-enrichment.md` (frontmatter: `pr: 326`, `merged_commit`, `merged_date`), `docs/state/sessions/107-artwork-enrichment.md` (nuovo, registrato in `scripts/generate-bundle.ps1` `$files`), `docs/02-DATA-SCHEMA.md` v1.8 (§11), `docs/05-ARCHITECTURE.md` v1.6 (§6), `docs/18-DEV-LOG.md` v2.41 (§58), `docs/INDEX.md` (righe `02`, `05`, `11` e «Prossimo passo tecnico»). Il **blocco aggregato** `AGGREGATE-STORIES-*` non è stato toccato: lo scrive il writer post-merge |
 
 
 <!-- AGGREGATE-STORIES-START -->

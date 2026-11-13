@@ -1,8 +1,8 @@
 # 05 — Architettura Tecnica
 
 > Status: 🟢 APPROVED
-> Versione: 1.5
-> Ultima modifica: Sessione 65 (2026-10-30) — §6 Pipeline di arricchimento allineata all'emendamento della **D-A.6** (issue #193): il fallback mood-by-genre **non esiste** (`04§11.1`)
+> Versione: 1.6
+> Ultima modifica: Sessione 107 (2026-11-09) — §6.3 Arricchimento artwork: la pipeline ha due rami distinti (audio features e artwork) e il ramo artwork applica la cascata ratificata **iTunes → Cover Art Archive → placeholder** (D-24.2, D-24.3, D-24.4, D-24.6) (issue #242)
 > ADR collegati: 0001-pwa-first, 0002-local-first, 0003-adapter-pattern, 0005-sync-cloud (Fase 2), 0010-remote-source-adapter (🟢 APPROVED v1.0), 0011-scrobble-sink (🟢 APPROVED v1.0)
 
 ---
@@ -301,6 +301,34 @@ L'arricchimento **non blocca mai l'import**: se Essentia o AB falliscono, si cad
 - **Invalidazione**: bump del `schemaVersion` in `AudioFeatures` (vedi `02§3.4`) quando cambia la versione Essentia o il modello euristica; i record con `schemaVersion` vecchio vengono ricalcolati al prossimo trigger
 - **Disattivazione**: se `PrivacySettings.enrichMetadata === false`, la cache non viene letta né scritta; le analisi basate su valence/energy **non producono insight** (D-A.6, `04§11.1`: il fallback mood-by-genre non esiste)
 
+### 6.3 Arricchimento artwork
+
+La pipeline di arricchimento ha **due rami distinti**, che condividono la disciplina della coda (§6.1) ma non i dati:
+
+| Ramo | Dato | Specifica |
+|------|------|-----------|
+| **Audio features** | `AudioFeatures` (valence, energy, bpm, …) | `21-AUDIO-FEATURES.md` (v1.1 🟢 APPROVED) |
+| **Artwork** | `Track.artworkUrl` / `Album.artworkUrl` | `24-ARTWORK-ENRICHMENT.md` (v1.0 🟢 APPROVED) |
+
+Il resolver (`packages/core/src/enrichment/artwork.ts`) applica la cascata **iTunes → Cover Art Archive → placeholder**:
+
+1. **iTunes Search API** — match esatto su titolo + artista, `artworkUrl100 → 600` (D-24.4), rate limit 20 req/min
+2. **Cover Art Archive** — solo se esiste un `mbid` (copertura MusicBrainz), 1 req/s; 404 ⇒ `not_found`, 429 ⇒ nessun retry (il limiter governa)
+3. **Placeholder** — gradient deterministico derivato dall'hash del `trackId`, reso come **data URI SVG**: nessuna rete, nessun host esterno, funziona offline
+
+> Il ramo **Spotify Web API non esiste** (D-24.2): il progetto non ha OAuth per Spotify e gli export non contengono URL di copertina.
+
+Vincoli dichiarati:
+
+- **Toggle `enrichMetadata`**: è il **primo** check, prima di ogni accesso — con il toggle spento: zero uscite, zero scritture, zero letture della cache
+- **Cosa esce**: a iTunes nome del brano e dell'artista; al Cover Art Archive un MBID di release. **Mai** l'elenco degli ascolti, il catalogo, gli IP o le chiavi
+- **Cursore, non migrazione**: il tracciato «artwork tentato e non trovato» sta in `settings` (`artwork.cursor`), non in un campo sui record (D-24.3) ⇒ nessun bump dello schema Dexie
+- **Trigger**: job in coda dopo l'import, con lo stesso budget e la stessa interruzione della coda audio; l'import continua a scrivere `null`
+- **CSP**: `connect-src` ammette `https://coverartarchive.org` (quarto host dichiarato, `12§2.1`); `img-src` non è modificata
+- **Cache**: si salva l'URL (o il data URI), non i byte (D-24.6); per gli album la deduplicazione avviene per `albumId`
+
+La specifica completa (contratti, persistenza, privacy, CSP, test) è **`24-ARTWORK-ENRICHMENT.md` (v1.0 🟢 APPROVED)**; l'implementazione è la Story 4.3 (Sessione 107, issue #242, PR #326).
+
 ## 7. Analysis engine
 
 Esegue in **Web Worker** dedicato per non bloccare la UI. Moduli: MoodTracker, EraDetector, EventDetector, MemoryEngine, PatternAnalyzer. Ogni algoritmo è specificato con formula, parametri e esempio input→output in `04-ANALYSIS-ALGORITHMS.md`. I risultati sono persistiti in `insights` con versionamento del parametro-set (`derivedVersion`) per ricalcolo coerente (MIG-3).
@@ -571,3 +599,4 @@ Una migration che fallisce **non corrompe il DB**: la transazione Dexie fa rollb
 | 1.3 | Sessione 56 (2026-10-27, issue #168) | **§4.2 Contratto di scrittura (`ScrobbleSink`, ADR-0011)**: il contratto di `§4` descrive la sola **lettura** (import da file o da sorgente remota). La Story 1.5 chiede l'operazione opposta — **inviare** i propri ascolti ai hub — e i due insiemi non coincidono (non ogni piattaforma scrobbla; `maloja`/`subsonic`/`roon` sono client, non fonti). Aggiunta la sottosezione "Contratto di scrittura (`ScrobbleSink`)": l'interfaccia `ScrobbleSink` (con `hub`, `name`, `version`, `isConfigured()`, `submit()`), il tipo dedicato `ScrobbleHubId`, i tipi `ScrobblePayload` e `ScrobbleResult`, e la classe `ScrobbleError` con i sei codici (`HUB_UNCONFIGURED`, `AUTH_INVALID`, `RATE_LIMITED`, `SOURCE_UNREACHABLE`, `PAYLOAD_REJECTED`, `HUB_ERROR`). Vincoli: il contratto è **separato** da quello di lettura ma ne riusa la forma (`PlatformAdapter` non cambia, nessun adapter esistente è toccato); il rate limiting è responsabilità del **sink** (Last.fm ~5 req/s, ListenBrainz 1 req/s con `X-RateLimit-*`); nessun segreto nel bundle e nessun server di backend (il proxy è dell'utente); `AbortSignal` per la cancellazione; `ScrobbleError` dedicato perché `recoverable` ha qui una semantica diversa ("si può ritentare lo stesso invio" e non "gli eventi validi sono persistiti"); `ScrobbleHubId` dedicato perché `scrobbleHubs` non è `PlatformId[]`; il payload è **chiuso per costruzione** (nessun campo per contesto, device o IP); l'idempotenza è locale e verificabile (chiave unica `hub|eventKey` sulla coda `scrobbleOutbox`, write-ahead). Il percorso incrementale ListenBrainz resta sul contratto di **lettura** (`parseRemote?()`) |
 | 1.4 | Sessione 62 (2026-10-28, issue #187) | **§6 Pipeline di arricchimento** allineata alla spec `21-AUDIO-FEATURES.md` (v1.0 🟢 APPROVED): la fonte del preview audio per Essentia.js è dichiarata (**iTunes Search API**, D-AF.1: i preview di Spotify non esistono più per le app nuove e quelli di Apple Music costano 99 $/anno); i classification head sono **DEAM** con normalizzazione [1,9] → [0,1] (D-AF.3); AcousticBrainz fornisce classi `mood_*` e **non** `valence`/`energy`, che sono quindi **derivati** (D-AF.8); il fallback euristico **non alimenta il mood tracker** (D-AF.4): il layer di analisi legge solo `source ∈ {essentia, acousticbrainz, manual}`. **§9**: il modulo `enrichment/` è annotato come porte + orchestratore puri (**no React**: `§9.2` vieta React nel core, e React Query resta nel web — D-AF.5). **§8**: la riga delle audio features rimanda alla spec |
 | 1.5 | Sessione 65 (2026-10-30, issue #193) | **§6 Pipeline di arricchimento** allineata all'emendamento della **D-A.6** ratificato dal project owner: il fallback **mood-by-genre non esiste**. Il punto 5 della cascata non dice più che "le analisi degradano a mood-by-genre" ma che le analisi basate su valence/energy **non producono insight** e che il mood tracker segnala la copertura mancante con un **warning aggregato per periodo** (`04§1.4`); la motivazione (la mappa genre→valence/energy non è ratificata in nessun documento: inventarla sarebbe il "segnale inventato" che la D-A.1 esclude) è dichiarata inline con il rimando a `04§11.1`. **§6.2**: la riga «Disattivazione» (toggle `enrichMetadata` spento) dice la stessa cosa — niente feature, niente insight — invece di citare il fallback inesistente. Il riferimento alla spec passa a `21-AUDIO-FEATURES.md` **v1.1**. Nessuna modifica alla pipeline del codice: il comportamento era già quello (D.63.4); la modifica è il **warning aggregato** |
+| 1.6 | Sessione 107 (2026-11-09, issue #242) | **§6.3 Arricchimento artwork (nuova)**: la pipeline di arricchimento ha **due rami distinti** — le audio features (`21-AUDIO-FEATURES.md` v1.1 🟢) e l'artwork (`24-ARTWORK-ENRICHMENT.md` v1.0 🟢 APPROVED, Story 4.3, Sessione 107, PR #326). Il resolver `packages/core/src/enrichment/artwork.ts` applica la cascata **ratificata** **iTunes → Cover Art Archive → placeholder**: iTunes con match esatto e `artworkUrl100 → 600` (D-24.4, 20 req/min), Cover Art Archive solo con `mbid` (1 req/s, 404 ⇒ `not_found`, 429 ⇒ nessun retry), placeholder deterministico reso come **data URI SVG** (mai rete, funziona offline, D-24.6). Il ramo **Spotify Web API non esiste** (D-24.2: nessun OAuth, gli export non contengono URL di copertina). Il tracciato dei tentativi falliti sta in un **cursore in `settings`** (`artwork.cursor`), **non** in una migrazione dello schema (D-24.3); il trigger è un job in coda dopo l'import con la disciplina di §6.1 e l'import continua a scrivere `null`; la CSP ammette `https://coverartarchive.org` (quarto host, `12§2.1`). Nessuna modifica alla pipeline delle audio features |
