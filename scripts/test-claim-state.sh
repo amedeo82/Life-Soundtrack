@@ -32,11 +32,12 @@ FAIL=0
 # scenario <id> <descrizione> <expected exit> <pr json> <issue json> <comments json>
 scenario() {
   local id="$1" desc="$2" expected_exit="$3"
+  local pr_num="${7:-1}"
   printf '%s' "$4" > "$WORK/pr.json"
   printf '%s' "$5" > "$WORK/issue.json"
   printf '%s' "$6" > "$WORK/comments.json"
 
-  node "$GATE" --pr 1 --pr-json "$WORK/pr.json" --issue-json "$WORK/issue.json" \
+  node "$GATE" --pr "$pr_num" --pr-json "$WORK/pr.json" --issue-json "$WORK/issue.json" \
     --comments-json "$WORK/comments.json" > "$WORK/out.txt" 2>&1
   local actual_exit=$?
 
@@ -134,6 +135,17 @@ scenario "T13" "agent-id del body != agente del claim vincente" "1" \
 scenario "T14" "nessun agent-id nel body (warn, non fail)" "0" \
   '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
   "$ISSUE_OK" "$COMMENTS_OK"
+
+# T15: la keyword punta alla PR stessa
+scenario "T15" "self-reference alla PR" "1" \
+  '{"number":7,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK" "7"
+
+# T16: il numero referenziato esiste ma e' una pull request
+scenario "T16" "target della keyword e una pull request" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  '{"state":"OPEN","labels":[{"name":"status:in-review"}],"pull_request":{"url":"https://api.github.com/repos/amedeo82/Life-Soundtrack/pulls/7"}}' \
+  "$COMMENTS_OK"
 
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"

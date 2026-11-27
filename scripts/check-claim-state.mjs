@@ -144,6 +144,11 @@ if (branchMatch) {
 }
 
 if (issueNumber !== null) {
+  if (issueNumber === Number(prNumber)) {
+    fail(
+      `C1: la keyword di chiusura punta alla PR #${prNumber} stessa, non a un'issue reale`,
+    );
+  }
   if (naked.length !== 1) {
     fail(
       `C1: la keyword di chiusura deve comparire UNA volta come riga nuda nella branch ${branch} (trovate ${naked.length})`,
@@ -183,11 +188,14 @@ if (branch.startsWith('docs/')) {
 if (issueNumber !== null) {
   const issue = issueFile
     ? readJsonFile(issueFile, 'issue')
-    : ghJson(['issue', 'view', String(issueNumber), '--json', 'state,labels']);
+    : ghJson(['api', `repos/{owner}/{repo}/issues/${issueNumber}`]);
   const labels = (issue.labels || []).map((l) => l.name);
   const inReview = labels.includes('status:in-review');
   const inProgress = labels.includes('in-progress');
-  if (issue.state !== 'OPEN') {
+  const issueState = String(issue.state || '').toUpperCase();
+  if (issue.pull_request) {
+    fail(`C2: #${issueNumber} e' una pull request, non un'issue reale`);
+  } else if (issueState !== 'OPEN') {
     fail(`C2: l'issue #${issueNumber} non e' aperta (stato: ${issue.state})`);
   } else if (!inReview && !inProgress) {
     fail(
