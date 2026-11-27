@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-27 09:55
+> Data: 2026-11-27 10:00
 > Totale file: 206
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -9,15 +9,15 @@
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Il contenuto del bundle (sezioni FILE) e generato da `scripts/generate-bundle.ps1` separatamente.
 
-- Totale file: 203 (incluso 4 file aggregator-managed)
-- Dimensione totale: 2918.7 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
-- Ultima aggregazione: 2026-11-13 10:20
+- Totale file: 205 (incluso 4 file aggregator-managed)
+- Dimensione totale: 2931.1 KB (esclusi dal calcolo: README.md, docs/INDEX.md, docs/SESSIONS.md, docs/11-BACKLOG.md)
+- Ultima aggregazione: 2026-11-27 10:00
 - Generatori: 'scripts/aggregate-state.ps1' (V2) + 'scripts/generate-bundle.ps1' (content)
 
 | Categoria | File |
 |-----------|------|
-| docs/ | 133 |
-| scripts/ | 44 |
+| docs/ | 134 |
+| scripts/ | 45 |
 | fixtures/ | 15 |
 | .githooks/ | 4 |
 | .github/ | 4 |
@@ -1362,9 +1362,11 @@ Lo **stato globale** (fase corrente, story completate, roadmap, prossimo passo) 
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S107)
+**Analisi della sessione corrente** (S108)
 
-Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi, collegati all'app dalla 2.5. Con questa sessione anche l'**EPIC 4** ha il suo pezzo visivo: le copertine sono popolate e il mood dell'era può guardarle. Restano **4.2** (lookup MusicBrainz, P2 — miglioramento incrementale, non prerequisito), **5.2/5.1** (export e purge: il gate per testare con dati personali reali) e **6.1** (upgrade stack, post-implementazione). Salute tecnica: gate locali verdi (lint, typecheck, test, build), nessun drift fra i blocchi aggregati e le sezioni legacy dei documenti toccati.
+Il protocollo ora distingue formalmente tre casi: issue reale, pull request e self-reference. Il comportamento è verificato sia prima dell'apertura della PR sia dopo il merge, coprendo il caso scoperto sulla PR #330 e impedendo transizioni parziali su target non-issue.
+
+**Claim**: `kilo-HP-EliteBook-a7c9` (UTC 2026-11-13T10:19:44Z)
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -2265,6 +2267,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 105 | Arbitraggio atomico della selezione e lock di proprietà della worktree | 🟢 | ✅ | #321 |
 | 106 | DEV-LOG stato merge: una regola, un gate, un writer | 🟢 | ✅ | - |
 | 107 | Artwork enrichment: la cascata iTunes → Cover Art Archive → placeholder | 🟢 | ✅ | #326 |
+| 108 | Protocollo post-merge: rifiuto dei target non-issue | 🟢 | ✅ | #333 |
 
 > Per le sessioni 0-21 (legacy, pre ADR-0008), vedi `docs/SESSIONS.md` legacy fino alla migration V2.1.
 
@@ -2304,9 +2307,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 > Blocco auto-generato da `scripts/aggregate-state.ps1` (V2, ADR-0008, issue #52).
 > Rigenerare con `pwsh scripts/aggregate-state.ps1`. NON editare a mano.
 
-- Sessioni migrate in state/sessions: **84** (merge: 83)
+- Sessioni migrate in state/sessions: **85** (merge: 84)
 - Stories migrate in state/stories: **28** (done: 26)
-- Ultima sessione migrata: **S107** - Artwork enrichment: la cascata iTunes → Cover Art Archive → placeholder
+- Ultima sessione migrata: **S108** - Protocollo post-merge: rifiuto dei target non-issue
 - Stories done: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.3, 4.4
 
 > Per il dettaglio completo (incluse sessioni legacy 0-21), vedi sezione "Stato del progetto (legacy)" sotto questo blocco.
@@ -2350,9 +2353,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | Motore di analisi completo | EPIC 2 (5 story) | 5/5 - soddisfatto |
 | Test con dati personali reali | 5.2 | 0/1 - non ancora |
 
-**Analisi della sessione corrente** (S107)
+**Analisi della sessione corrente** (S108)
 
-Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha consegnato mood, ere, eventi e ricordi, collegati all'app dalla 2.5. Con questa sessione anche l'**EPIC 4** ha il suo pezzo visivo: le copertine sono popolate e il mood dell'era può guardarle. Restano **4.2** (lookup MusicBrainz, P2 — miglioramento incrementale, non prerequisito), **5.2/5.1** (export e purge: il gate per testare con dati personali reali) e **6.1** (upgrade stack, post-implementazione). Salute tecnica: gate locali verdi (lint, typecheck, test, build), nessun drift fra i blocchi aggregati e le sezioni legacy dei documenti toccati.
+Il protocollo ora distingue formalmente tre casi: issue reale, pull request e self-reference. Il comportamento è verificato sia prima dell'apertura della PR sia dopo il merge, coprendo il caso scoperto sulla PR #330 e impedendo transizioni parziali su target non-issue.
+
+**Claim**: `kilo-HP-EliteBook-a7c9` (UTC 2026-11-13T10:19:44Z)
 
 <!-- AGGREGATE-PROGRESS-END -->
 
@@ -13519,6 +13524,42 @@ Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha cons
 **Claim**: `kilo-HP-EliteBook-475468101` (UTC 2026-11-09T16:18:38Z)
 ```
 
+### Sessione 108 - Protocollo post-merge: rifiuto dei target non-issue
+
+- **Data**: 2026-11-13
+- **Stato**: 🟢
+- **Merged**: ✅ PR #333 (8593faee6025039ae1c3b0e987d0ff9f7148e57e, 2026-11-27T10:00:15Z)
+- **Claim**: `kilo-HP-EliteBook-a7c9`
+
+```
+
+# Sessione 108 — Protocollo post-merge: rifiuto dei target non-issue
+
+> **Issue di tracking**: #332
+> **Branch**: `fix/332-fix-protocol-rifiutare-self-reference-cl`
+
+## Sintesi
+
+Il workflow `auto-status-done` validava il numero estratto dalla keyword di chiusura solo come issue GitHub, senza distinguerlo dalla pull request corrente e senza verificare che il target fosse realmente un'issue. Una keyword come `Closes #330` nella PR #330 produceva quindi una transizione locale sul numero della PR stessa, mentre il fallimento remoto restava nascosto.
+
+La correzione rende il contratto esplicito e fail-closed: il gate pre-PR rifiuta il self-reference e un target che è una pull request; il workflow post-merge ripete la validazione prima di ogni mutazione, fallisce in modo osservabile e non applica `status:done` a target non validi.
+
+## Deliverable
+
+- `scripts/check-claim-state.mjs`: rifiuto del self-reference e dei target pull request.
+- `scripts/test-claim-state.sh`: scenari T15 e T16.
+- `.github/workflows/auto-status-done.yml`: preflight atomico dei target, mutazioni solo dopo validazione completa, errori fail-closed.
+- `scripts/test-auto-status-done.mjs`: test funzionale del workflow con self-reference, target pull request, issue reale ed errore di mutazione.
+- `.github/workflows/ci.yml`: test del workflow aggiunto al gate di protocollo.
+- `AGENTS.md` v1.51: regola, gate e comportamento post-merge espliciti.
+
+## Analisi di avanzamento
+
+Il protocollo ora distingue formalmente tre casi: issue reale, pull request e self-reference. Il comportamento è verificato sia prima dell'apertura della PR sia dopo il merge, coprendo il caso scoperto sulla PR #330 e impedendo transizioni parziali su target non-issue.
+
+**Claim**: `kilo-HP-EliteBook-a7c9` (UTC 2026-11-13T10:19:44Z)
+```
+
 <!-- AGGREGATE-SESSIONS-END -->
 
 
@@ -15813,7 +15854,7 @@ La seconda lezione è sul **cascata delle fonti**: una fonte che il progetto non
 **Branch**: `fix/332-fix-protocol-rifiutare-self-reference-cl`
 **Issue di tracking**: **#332**
 **Data**: 2026-11-13
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #333, merge commit `8593fae`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
@@ -24956,8 +24997,10 @@ Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha cons
 number: 108
 title: "Protocollo post-merge: rifiuto dei target non-issue"
 date: 2026-11-13
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "8593faee6025039ae1c3b0e987d0ff9f7148e57e"
+merged_date: "2026-11-27T10:00:15Z"
 branch: fix/332-fix-protocol-rifiutare-self-reference-cl
 pr: 333
 claim: kilo-HP-EliteBook-a7c9

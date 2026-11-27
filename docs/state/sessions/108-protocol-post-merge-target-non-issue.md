@@ -2,8 +2,10 @@
 number: 108
 title: "Protocollo post-merge: rifiuto dei target non-issue"
 date: 2026-11-13
-state: 🟡
-merged: false
+state: 🟢
+merged: true
+merged_commit: "8593faee6025039ae1c3b0e987d0ff9f7148e57e"
+merged_date: "2026-11-27T10:00:15Z"
 branch: fix/332-fix-protocol-rifiutare-self-reference-cl
 pr: 333
 claim: kilo-HP-EliteBook-a7c9

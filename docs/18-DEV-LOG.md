@@ -1869,7 +1869,7 @@ La seconda lezione è sul **cascata delle fonti**: una fonte che il progetto non
 **Branch**: `fix/332-fix-protocol-rifiutare-self-reference-cl`
 **Issue di tracking**: **#332**
 **Data**: 2026-11-13
-**Stato**: 🟡 in corso
+✅ **MERGED** (PR #333, merge commit `8593fae`
 
 | # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
 |---|------|---------|-------|-------------------|------|
