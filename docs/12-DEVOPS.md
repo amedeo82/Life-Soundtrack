@@ -1,6 +1,6 @@
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.7 · Sessione 78 (2026-10-31) · baseline PowerShell 7 (`pwsh`) + rimozione worktree long-path-safe
+> Status: 🟡 DRAFT · Versione 1.9 · Sessione 108 (2026-11-13) · baseline PowerShell 7 (`pwsh`) + rimozione worktree long-path-safe
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -892,14 +892,20 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 >
+> **Sessione 108 (issue #332)**: il gate «coerenza del claim» copre ora **16 scenari**
+> (`test-claim-state.sh`): il self-reference e i target pull request sono rifiutati. Il
+> workflow post-merge ha un test funzionale bloccante (`test-auto-status-done.mjs`) che
+> dimostra il comportamento fail-closed prima delle mutazioni. Le righe sono ora **45**
+> (44 gate + l'agregatore `quality`); il **numero di job non cambia** (15).
+>
 > **Sessione 105 (issue #319)**: il catalogo era indietro di **2 step** — i due step del gate
 > «coerenza del claim» (`check-claim-state.mjs` + `test-claim-state.sh`, Sessione 81) non
 > avevano una riga, e il nuovo step del gate «proprietà della worktree»
-> (`test-worktree-ownership.sh`, issue #319) si aggiunge a quelli. Ora le righe sono **44**
-> (43 gate + l'agregatore `quality`). Il **numero di job non cambia** (15): i tre step sono
-> dentro `gates-protocol`, che già gira su `pull_request`. Il gate di proprietà della worktree
-> è **locale** (pre-commit hook + `agent-pr.ps1`): in CI si esegue il suo **scenario negativo**,
-> che dimostra che fallisce quando deve (lesson 43-1: un gate che passa sempre non è un gate).
+> (`test-worktree-ownership.sh`, issue #319) si aggiunge a quelli. Le righe erano **44**
+> (43 gate + l'agregatore `quality`). I tre step sono dentro `gates-protocol`, che già gira
+> su `pull_request`. Il gate di proprietà della worktree è **locale** (pre-commit hook +
+> `agent-pr.ps1`): in CI si esegue il suo **scenario negativo**, che dimostra che fallisce
+> quando deve (lesson 43-1: un gate che passa sempre non è un gate).
 
 Il job `quality` è il **check aggregatore**: fallisce in modo esplicito se uno
 qualunque dei job paralleli è fallito, annullato o saltato. È il check che la branch
@@ -952,8 +958,9 @@ protection può interpretare un check saltato come successo.
 | 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
 | 42 | `gates-protocol` | `DEV-LOG stato merge` (`check-merge-state.mjs` perimetro `docs/18-DEV-LOG.md`) | solo PR | sì | **#324** |
 | 42 | `gates-protocol` | `Coerenza claim/issue/branch/PR` (`check-claim-state.mjs`) | solo PR | sì | **#256** |
-| 43 | `gates-protocol` | `Gate "coerenza del claim" fail-closed` (`test-claim-state.sh`, 14 scenari) | solo PR | sì | **#256** |
+| 43 | `gates-protocol` | `Gate "coerenza del claim" fail-closed` (`test-claim-state.sh`, 16 scenari) | solo PR | sì | **#256** |
 | 44 | `gates-protocol` | `Gate "proprieta' della worktree" fail-closed` (`test-worktree-ownership.sh`, 9 scenari) | solo PR | sì | **#319** |
+| 45 | `gates-protocol` | `Auto-statusdone rifiuta target non-issue` (`test-auto-status-done.mjs`, 4 scenari) | solo PR | sì | **#332** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -1596,3 +1603,4 @@ commit siano separati e che il commit del bundle contenga solo il bundle).
 | 1.6 | Sessione 75 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74): la numerazione delle sessioni è univoca (issue #105). |
 | 1.7 | Sessione 78 (2026-10-31) | **§9.8i rimozione worktree long-path-safe nella procedura post-merge** (nuova): `git worktree remove --force` cancellava la worktree senza il prefisso `\\?\`, quindi falliva con «Filename too long» / «Result too large» quando la worktree conteneva `node_modules` con path > MAX_PATH — e il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive. Fix su tre livelli: **L1** `git -c core.longpaths=true worktree remove --force` (la causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale è consentito solo su una directory che è davvero una worktree di questo repo (working copy principale e antenati mai toccati → exit 16) e `git status` fallito = WIP sconosciuto = stop (exit 10). Test: `test-post-merge.sh` **T10..T14** (47 assert in tutto), con lo **shim di `git`** che rende deterministico il caso del fallback. **§9.10**: il gate `gates-scripts` passa da 29 a 47 assert. |
 | 1.8 | Sessione 100 (2026-11-04, issue #306) | **§9.15 parita' fra i gate locali e i gate della CI** (nuova): `agent-pr.ps1` esegue i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) prima di aprire la PR; `setup-worktree.ps1` installa le dipendenze nella worktree (senza `node_modules` l'hook `commit-msg` saltava commitlint in silenzio); `post-merge.ps1` rimuove `node_modules` prima della worktree (L0) e gestisce il residuo post-«Result too large» (L4) |
+| 1.9 | Sessione 108 (2026-11-13, issue #332) | **§9.10 gate del protocollo post-merge**: il target della keyword di chiusura deve essere un'issue reale e distinta dalla PR stessa. `check-claim-state.mjs` rifiuta il self-reference e i target pull request; `test-claim-state.sh` passa da 14 a **16 scenari**; il nuovo `test-auto-status-done.mjs` esercita il workflow post-merge (4 scenari) ed e' bloccante in CI. Le righe del catalogo sono **45** (44 gate + aggregatore `quality`), i job restano **15** |

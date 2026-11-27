@@ -1,7 +1,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.50 — Sessione 106 (2026-11-06)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.51 — Sessione 108 (2026-11-13)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -40,6 +40,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
+| Il target della keyword di chiusura è un'**issue reale**, distinta dalla PR stessa: self-reference e target che sono pull request sono rifiutati | `check-claim-state.mjs` + `auto-status-done.yml` | issue #332 |
 | La **worktree** è proprietà del claimante: l'owner locale (`agent-state.json`) coincide con l'agente del claim **vincente** | `check-worktree-ownership.mjs` (hook `pre-commit` + `agent-pr.ps1`) | issue #319 (doppio lavoro silenzioso nella stessa directory) |
 | La PR dichiara l'`agent-id` del **claimante**, che coincide con l'agente del claim vincente | C6 di `check-claim-state.mjs` | issue #319 (PR attribuita a un agente diverso dal claimante) |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
@@ -293,7 +294,9 @@ Closes #42
 
 Non ripeterla **dentro backtick**, dentro una **casella di checklist**, o in una frase come "body PR include `Closes #N`": GitHub non la riconosce e l'issue resta `OPEN` dopo il merge, nonostante la checklist risulti spuntata. È successo con PR #91 (issue #90, merge `a778add`, 2026-10-21): la chiusura è stata fatta a mano con l'audit retroattivo qui sotto.
 
-**Attenzione anche in senso inverso**: se la keyword compare *altrove* (in una descrizione, in una citazione), `auto-status-done.yml` la interpreta come una chiusura anche per quell'altra issue e le applica `status:done` + un commento `release:` spurio (è successo con PR #93 → issue #90, chiusa a mano dopo aver rimosso il commento). Per **citare** la keyword senza attivarla, spezzala: `` `Closes` #N `` invece di `` `Closes #N` ``.
+**Attenzione anche in senso inverso**: se la keyword compare *altrove* (in una descrizione, in una citazione), `auto-status-done.yml` la interpreta come una chiusura anche per quell'altra issue e le applicа `status:done` + un commento `release:` spurio (è successo con PR #93 → issue #90, chiusa a mano dopo aver rimosso il commento). Per **citare** la keyword senza attivarla, spezzala: `` `Closes` #N `` invece di `` `Closes #N` ``.
+
+**Il target deve essere un'issue reale e distinta dalla PR stessa**: `Closes #<numero della PR>` non chiude un issue e non può valere come `release:`. `check-claim-state.mjs` rifiuta il self-reference e un target che è una pull request; `auto-status-done.yml` ripete il controllo prima di ogni mutazione e fallisce in modo osservabile, senza applicare `status:done` a un target non valido (issue #332).
 
 **Auto-check prima di aprire la PR** (deve restituire **esattamente una** riga):
 
@@ -1230,4 +1233,4 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.49 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.51 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*

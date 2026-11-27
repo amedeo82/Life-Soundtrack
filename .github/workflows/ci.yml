@@ -476,6 +476,9 @@ jobs:
       - name: Gate "coerenza del claim" fail-closed (issue #256)
         run: bash scripts/test-claim-state.sh
 
+      - name: Auto-statusdone rifiuta target non-issue (issue #332)
+        run: node scripts/test-auto-status-done.mjs
+
       # Issue #319: il lock di ADR-0006 e' sull'issue, non sulla directory di
       # lavoro: il path della worktree e' deterministico (`ls-<N>-<slug>`), quindi
       # due agenti sulla stessa story finiscono nella stessa cartella e il

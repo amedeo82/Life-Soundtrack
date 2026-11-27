@@ -220,6 +220,9 @@ $files = @(
     # Sessione 107 (issue #242): la Story 4.3 — artwork enrichment (cascata
     # iTunes -> Cover Art Archive -> placeholder, D-24.2/D-24.3).
     "docs/state/sessions/107-artwork-enrichment.md",
+    # Sessione 108 (issue #332): il protocollo post-merge rifiuta il
+    # self-reference e i target che sono pull request.
+    "docs/state/sessions/108-protocol-post-merge-target-non-issue.md",
     "docs/state/stories/1.3-adapter-lastfm-listenbrainz.md",
     "docs/state/stories/1.6-geo-foundation.md",
     "docs/state/stories/1.4-dedup-promotion.md",
@@ -485,6 +488,9 @@ $files = @(
     # (l'agent-id dichiarato nel body della PR deve coincidere con il claim
     # vincente — issue #319).
     "scripts/test-claim-state.sh",
+    # Test funzionale del workflow post-merge (issue #332): rifiuta il
+    # self-reference e i target pull request prima delle mutazioni.
+    "scripts/test-auto-status-done.mjs",
     # Gate "proprieta' della worktree" (Sessione 105 / issue #319): confronta
     # l'owner locale della worktree (`agent-state.json`) con l'agente del claim
     # VINCENTE. Il lock di ADR-0006 e' sull'issue, non sul filesystem: il path

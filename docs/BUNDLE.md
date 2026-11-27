@@ -1,8 +1,8 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-13 10:20
-> Totale file: 204
+> Data: 2026-11-27 09:55
+> Totale file: 206
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
 
@@ -32,7 +32,7 @@
 # 🤖 AGENTS.md — Protocollo per Agenti di Sviluppo
 
 > **Questo è il primo file che un agente deve leggere, prima di qualsiasi altro.**
-> **Versione 1.50 — Sessione 106 (2026-11-06)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
+> **Versione 1.51 — Sessione 108 (2026-11-13)** · decisione di struttura: [`docs/13-ADR/0013-post-merge-automation.md`](docs/13-ADR/0013-post-merge-automation.md)
 
 ---
 
@@ -71,6 +71,7 @@ Le regole che seguono sono **verificate automaticamente** (job `gates-protocol`,
 | La checklist PR vive **solo** in `.github/pull_request_template.md` | C6 | D8 |
 | I blocchi `AGGREGATE-*` **non** si toccano a mano (regola V1 di ADR-0008) | `check-aggregate-blocks.mjs` | ADR-0008 |
 | La PR è coerente con **branch, issue, keyword di chiusura, stato dell'issue e claim** (le 8 regole di ADR-0006 non sono solo prosa) | `check-claim-state.mjs` | ADR-0006 |
+| Il target della keyword di chiusura è un'**issue reale**, distinta dalla PR stessa: self-reference e target che sono pull request sono rifiutati | `check-claim-state.mjs` + `auto-status-done.yml` | issue #332 |
 | La **worktree** è proprietà del claimante: l'owner locale (`agent-state.json`) coincide con l'agente del claim **vincente** | `check-worktree-ownership.mjs` (hook `pre-commit` + `agent-pr.ps1`) | issue #319 (doppio lavoro silenzioso nella stessa directory) |
 | La PR dichiara l'`agent-id` del **claimante**, che coincide con l'agente del claim vincente | C6 di `check-claim-state.mjs` | issue #319 (PR attribuita a un agente diverso dal claimante) |
 | Una branch `docs/*` tocca **solo** file sotto `docs/` (un doc-sync non porta il codice di un altro task) | C4 di `check-claim-state.mjs` | leak PR #250 |
@@ -324,7 +325,9 @@ Closes #42
 
 Non ripeterla **dentro backtick**, dentro una **casella di checklist**, o in una frase come "body PR include `Closes #N`": GitHub non la riconosce e l'issue resta `OPEN` dopo il merge, nonostante la checklist risulti spuntata. È successo con PR #91 (issue #90, merge `a778add`, 2026-10-21): la chiusura è stata fatta a mano con l'audit retroattivo qui sotto.
 
-**Attenzione anche in senso inverso**: se la keyword compare *altrove* (in una descrizione, in una citazione), `auto-status-done.yml` la interpreta come una chiusura anche per quell'altra issue e le applica `status:done` + un commento `release:` spurio (è successo con PR #93 → issue #90, chiusa a mano dopo aver rimosso il commento). Per **citare** la keyword senza attivarla, spezzala: `` `Closes` #N `` invece di `` `Closes #N` ``.
+**Attenzione anche in senso inverso**: se la keyword compare *altrove* (in una descrizione, in una citazione), `auto-status-done.yml` la interpreta come una chiusura anche per quell'altra issue e le applicа `status:done` + un commento `release:` spurio (è successo con PR #93 → issue #90, chiusa a mano dopo aver rimosso il commento). Per **citare** la keyword senza attivarla, spezzala: `` `Closes` #N `` invece di `` `Closes #N` ``.
+
+**Il target deve essere un'issue reale e distinta dalla PR stessa**: `Closes #<numero della PR>` non chiude un issue e non può valere come `release:`. `check-claim-state.mjs` rifiuta il self-reference e un target che è una pull request; `auto-status-done.yml` ripete il controllo prima di ogni mutazione e fallisce in modo osservabile, senza applicare `status:done` a un target non valido (issue #332).
 
 **Auto-check prima di aprire la PR** (deve restituire **esattamente una** riga):
 
@@ -1261,7 +1264,7 @@ Il gate segnala tre classi di danno: **BOM UTF-8** in testa, **UTF-8 non valido*
 
 ---
 
-*Protocollo agenti v1.49 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
+*Protocollo agenti v1.51 — le sessioni che lo hanno modificato e le lezioni sono in `docs/18-DEV-LOG.md` (sezione «Changelog del protocollo»).*
 
 
 
@@ -2126,7 +2129,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | 09 | [`09-PRIVACY-SECURITY.md`](09-PRIVACY-SECURITY.md) | 🟡 DRAFT | Sessione 67 (v0.7) | Privacy spec, data flow, security — v0.5: percorso di scrobbling (§3.3 payload chiuso per costruzione, §4 inventario); v0.6: le righe dell'inventario per le **audio features** e le query di ricerca, i tre host reali (MusicBrainz, iTunes Search, AcousticBrainz) e l'anteprima audio elaborata in locale; v0.7: le righe di inventario di `city`/`ContextPeriod`/database geo e il data flow della derivazione della città (ratifica di `19`) |
 | 10 | [`10-TESTING.md`](10-TESTING.md) | 🟢 APPROVED | Sessione 104 (v1.3) | Strategia di testing — v1.1: §8, i mock delle API esterne sono i due provider reali (iTunes Search, AcousticBrainz), non i placeholder mai esistiti; v1.3: §3.4 il fixture demo mode rigenerato (album e feature deterministiche, tre fasi musicali) |
 | 11 | [`11-BACKLOG.md`](11-BACKLOG.md) | 🟢 APPROVED | Sessione 107 (v1.6.38) | Backlog strutturato (epic → story → task) — stato delle story completate nel blocco `AGGREGATE-STORIES-*` (ADR-0008); v1.6.0: tabella legacy allineata, fonte di verità unica; v1.6.9: Story 1.3 allineata all'issue di implementazione #155; v1.6.10: **Story 1.3 completata** (issue #155) e rimossa dalla tabella roadmap; v1.6.12: conteggio EPIC 1 allineato (`2/5` → `4/5`, issue #161); v1.6.13: **spec della Story 1.5** scritta in `20-SCROBBLING-HUB.md` (issue #164); v1.6.14: **ADR-0011** scritta (contratto di scrittura `ScrobbleSink`, issue #168); v1.6.15: ADR-0011 **ratificata** (🟢 APPROVED v1.0, PR #170); v1.6.16: **spec della Story 1.5 ratificata** (v1.0 🟢 APPROVED, issue #172) → issue di implementazione #173; v1.6.17: **Story 1.5 implementata** (issue #173, PR #176); v1.6.18: **spec dell'analisi ratificata** (`04` v1.0 🟢 APPROVED, issue #178) → #179 (Story 2.4) e #180 (Story 2.1, bloccata); v1.6.20: **Story 2.4 implementata** (issue #179, PR #185: i 5 tipi di ricordo, il feed per rilevanza, la `derivedVersion` calcolata dai parametri); v1.6.21: **Story 2.4 completata** (merge `40ad0b7`) e la catena dell'EPIC 2 dichiarata (4.1 → 2.1 → 2.2/2.3); v1.6.22: **spec dell'EPIC 4.1 ratificata** (`21` v1.0 🟢 APPROVED, issue #187) → #188 (Story 4.1, `agent-ready`); v1.6.23: **Story 2.1 implementata** (issue #180, PR #192: il mood di giorno, settimana e mese dalle audio features persistite); v1.6.24: **Story 2.1 completata** (merge `d018a26`); v1.6.25: **Story 4.1 implementata** (issue #188, PR #197: il pacchetto `packages/core/src/enrichment/` — cascata, provider, limiter, coda, stoccaggio, CSP e i18n); v1.6.26: **Story 4.1 completata** (merge `7458220`); v1.6.27: **ratifica del terzo host della CSP** (`21` v1.1 🟢 APPROVED, issue #196: D-AF.9 emendata, l'host della ricerca iTunes entra in `connect-src`); v1.6.37: **Story 3.5 implementata** (issue #270: anteprima e modalità demo in onboarding); **v1.6.38: Story 4.3 completata** (issue #242, PR #326: la sezione legacy della 4.3 passa a ✅ DONE con i task e gli AC della spec `24`, la riga dell'EPIC 4 e la voce #16 della lista di priorità allineate) |
-| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 67 (v1.2) | CI/CD, deploy, self-hosting — §9.8f gate "fatti del README" (issue #161); §9.10 elenco autorevole dei 18 step di `ci.yml`; §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
+| 12 | [`12-DEVOPS.md`](12-DEVOPS.md) | 🟡 DRAFT | Sessione 108 (v1.9) | CI/CD, deploy, self-hosting — §9.10 catalogo autorevole dei gate, incluso il test fail-closed del workflow post-merge (issue #332); §9.8f gate "fatti del README" (issue #161); §2.1 CSP con i **tre** host delle audio features (v1.1: anche l'host della ricerca iTunes, issue #196); §5.3 licenza **AGPL-3.0** e offerta del sorgente (§13, issue #202) |
 | 13 | [`13-ADR/`](13-ADR/) | 🟢 APPROVED | Sessione 99 (0001-0014) | Architecture Decision Records (0001-0003, 0005-0008 APPROVED; **0009 local IP geolocation APPROVED v1.0**; 0006 claim agenti, 0007 macchina a stati `status:*`, 0008 lazy-state aggregation, 0010 sorgenti remote nel contratto adapter APPROVED v1.0; 0011 contratto di scrittura negli hub `ScrobbleSink` APPROVED v1.0; **0012 protocollo agenti come contratto verificato APPROVED v1.0**, Sessione 79, issue #248; **0013 automazioni post-merge deterministiche APPROVED v1.0**, Sessione 90, issue #284; **0014 copertura di test offline degli script di protocollo 🟡 DRAFT**, Sessione 99, issue #304 — in attesa di ratifica del project owner) |
 | 14 | [`14-GLOSSARY.md`](14-GLOSSARY.md) | 🟢 APPROVED | Sessione 62 (v1.1) | Glossario di dominio — v1.1: la voce `Audio features` (misurata / derivata / stimata) |
 | 15 | [`15-DESIGN-SYSTEM.md`](15-DESIGN-SYSTEM.md) | 🟡 DRAFT | Sessione 9 | Design system completo |
@@ -2147,11 +2150,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 | [`state/`](state/_index.md) | 🟢 LIVE | **Sorgenti atomiche di stato** (sessioni + story) — unica fonte di verità per i blocchi aggregati (ADR-0008, Sessione 25) |
 | [`SESSIONS.md`](SESSIONS.md) | 🟢 LIVE | Log di tutte le sessioni (progettazione + implementazione) |
 | [`BUNDLE.md`](BUNDLE.md) | 🟢 SNAPSHOT | Snapshot completo del progetto per handoff AI |
-| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.50 | Protocollo per agenti — **v1.50 (Sessione 106, issue #324)**: il claim di ADR-0006 è un lock **sull'issue**, non sul filesystem — il path della worktree è deterministico (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finivano nella **stessa directory** e il codice del secondo finiva nel commit del primo (doppio lavoro silenzioso): ora il protocollo ha **due lock** (issue + worktree), con il gate `check-worktree-ownership.mjs` che confronta l'owner locale (`agent-state.json`) con l'agente del claim vincente (mismatch → exit 1 → abort nel pre-commit, blocco nei gate locali di `agent-pr.ps1`), l'arbitraggio `-Auto` di `agent-claim.ps1` (selezione atomica dei candidati, con procedura codificata per l'exit 3 «issue già in carico»), la dichiarazione dell'`agent-id` nel body della PR (C6 di `check-claim-state.mjs`: la PR deve essere del claimante) e il **7° check** della session-start checklist (F10); **v1.48 (Sessione 102, issue #311)**: `main` è protetta dalla ruleset GitHub `main-protection` (merge solo via PR, check `quality` verde e strict, history lineare → merge **squash**, niente force push né cancellazione) e il writer post-merge spinge con una **deploy key SSH** (`post-merge-writer`) perché il `GITHUB_TOKEN` non può bypassare una ruleset (GH013); `required_approving_review_count: 0` perché l'unico account GitHub è anche l'autore delle PR (l'auto-approvazione è vietata: con 1 il repository resterebbe congelato); **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
+| [`../AGENTS.md`](../AGENTS.md) | 🟢 v1.51 | Protocollo per agenti — **v1.51 (Sessione 108, issue #332)**: il target della keyword di chiusura deve essere un'issue reale e distinta dalla PR stessa — self-reference e target che sono pull request sono rifiutati da `check-claim-state.mjs` e da `auto-status-done.yml`, che fallisce prima di ogni mutazione; **v1.50 (Sessione 106, issue #324)**: il claim di ADR-0006 è un lock **sull'issue**, non sul filesystem — il path della worktree è deterministico (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finivano nella **stessa directory** e il codice del secondo finiva nel commit del primo (doppio lavoro silenzioso): ora il protocollo ha **due lock** (issue + worktree), con il gate `check-worktree-ownership.mjs` che confronta l'owner locale (`agent-state.json`) con l'agente del claim vincente (mismatch → exit 1 → abort nel pre-commit, blocco nei gate locali di `agent-pr.ps1`), l'arbitraggio `-Auto` di `agent-claim.ps1` (selezione atomica dei candidati, con procedura codificata per l'exit 3 «issue già in carico»), la dichiarazione dell'`agent-id` nel body della PR (C6 di `check-claim-state.mjs`: la PR deve essere del claimante) e il **7° check** della session-start checklist (F10); **v1.48 (Sessione 102, issue #311)**: `main` è protetta dalla ruleset GitHub `main-protection` (merge solo via PR, check `quality` verde e strict, history lineare → merge **squash**, niente force push né cancellazione) e il writer post-merge spinge con una **deploy key SSH** (`post-merge-writer`) perché il `GITHUB_TOKEN` non può bypassare una ruleset (GH013); `required_approving_review_count: 0` perché l'unico account GitHub è anche l'autore delle PR (l'auto-approvazione è vietata: con 1 il repository resterebbe congelato); **v1.47 (Sessione 101, issue #309)**: la regola «mai committare dati reali di ascolto» scende da L2 a L3 con un gate bloccante (`check-fixtures-privacy.mjs`, fail-closed, con scenario negativo `test-fixtures-privacy-gate.mjs`) e i workflow che scrivono su `main` o sulle issue saltano le PR da fork — con il repository pubblico chiunque può aprire una PR esterna; **v1.46 (Sessione 100, issue #306)**: i gate locali di `agent-pr.ps1` coprono i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) e la worktree nasce con le dipendenze installate, cos’ l’hook `commit-msg` smette di saltare commitlint in silenzio; **v1.45 (Sessione 98)**: il claim perduto non rimuove più la label `in-progress` (serve al vincitore, ADR-0006 regola 4 — `agent-claim.ps1` la rimuoveva nel ramo di yield, in contraddizione con la regola) e `-Stale` rende atomico il takeover di un claim scaduto (TTL 12 ore, verifica dell'ultima attività + `stale-release:`); **v1.44 (Sessione 96, issue #297)**: il writer post-merge e il gate `check-merge-state.mjs` coprono anche il perimetro `docs/state/stories/` — le story dichiarano `status: done` (non `state`/`merged`), e una story mergiata non puo piu restare `in-review` senza drift (il caso della Story 2.5); **v1.43 (Sessione 94, issue #292)**: il gate sul wiring degli hook non può più perdere un assert fallito (i contatori vivono su un file, non in variabili di shell) e le diagnostiche dichiarano lo stato reale; **v1.42 (Sessione 93, issue #290)**: gli hook del repository girano davvero — un solo hooks path (`.githooks`), nessun lifecycle script puo' sovrascrivere `core.hooksPath` — verificato dal gate `test-hook-wiring.sh`; **v1.41 (Sessione 92, issue #283)**: nessun workflow puo' referenziare una action che dichiara `using: 'node20'` (Node 20 rimosso dai runner il 2026-09-23), verificato dal gate fail-closed `validate-workflows.mjs` (mappa `NODE24_ACTIONS`); **v1.40 (Sessione 90, issue #284)**: le automazioni post-merge diventano deterministiche (writer unico, CI post-writer via `workflow_run`, gate merge-state non-racy, generatori portabili su ogni OS — [ADR-0013](13-ADR/0013-post-merge-automation.md)); **v1.39 (Sessione 87, issue #277)**: il gate **`check-encoding.mjs`** (UTF-8 senza BOM, niente mojibake) e la sezione **F9-ter** sulla scrittura dei file da shell 5.1; **v1.38 (Sessione 83, issue #259)**: il contratto senza la storia (1410 → 1091 righe, 77 anchor invariati; il changelog delle versioni e la storia passano in `docs/18-DEV-LOG.md`); **v1.37 (Sessione 82, issue #251)**: la catena post-merge si auto-ripara (concurrency group propri, advisory sul file di sessione assente, verifica finale); **v1.36 (Sessione 81, issue #256)**: il **claim** diventa verificabile (`agent-claim.ps1` atomico con riverifica deterministica, `agent-pr.ps1` che scrive `pr: N` nella sessione, gate `check-claim-state.mjs` bloccante); **v1.35 (Sessione 80, issue #252)**: il protocollo diventa un **contratto verificato** (2 gate bloccanti); **v1.34 (Sessione 79, issue #248)**: 8 drift chiusi + checklist PR = unico artifact, decisione di struttura [`ADR-0012`](13-ADR/0012-agent-protocol-contract.md). Storico: Sessione 54 (ownership del `README.md`, issue #161); Sessione 47 (i due writer di `main` serializzati ma non ordinati, issue #149); Sessione 38 (ownership *blocchi aggregati vs sezioni legacy*, keyword `Closes #N`); Sessione 35 (automazioni post-merge); Sessione 34 (determinismo aggregator); Sessione 33 (procedura canonica post-merge); Sessione 27 (worktree come default); Sessione 21 (catena doc-sync + GH Action); Sessione 19 (macchina a stati `status:*` [ADR-0007]); Sessione 18 (claim [ADR-0006]) |
 | [`../LICENSE`](../LICENSE) | 🟢 AGPL-3.0 | Licenza del progetto (D-AF.2, `21` §2.4 — ratificata dal project owner il 2026-10-30, issue #201) |
 | [`AUDIT-2026-10-15.md`](AUDIT-2026-10-15.md) | 🟢 LIVE | Audit completo di documentazione e decisioni |
 | [`17-DEV-NOTES.md`](17-DEV-NOTES.md) | 🟡 DRAFT v0.2 | Note di sviluppo: comandi, struttura monorepo, pitfalls toolchain consolidati |
-| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.41 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §58: Sessione 107, la Story 4.3 e la cascata artwork ratificata (issue #242); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
+| [`18-DEV-LOG.md`](18-DEV-LOG.md) | 🟡 DRAFT v2.42 | Diario cronologico per story: problemi, fix, lesson learned — **«Changelog del protocollo»** (la storia delle versioni di `AGENTS.md`, decisione D2); §59: Sessione 108, il rifiuto dei target non-issue nel protocollo post-merge (issue #332); §58: Sessione 107, la Story 4.3 e la cascata artwork ratificata (issue #242); §50: Sessione 84, la race sul push (retry con ri-sincronizzazione, issue #261); §49: Sessione 83, il contratto senza la storia (issue #259); §48: Sessione 82, la catena post-merge si auto-ripara (issue #251); §47: Sessione 81, il claim diventa verificabile (issue #256). **Sede della storia del protocollo** (decisione D2): il footer changelog di `AGENTS.md` confluisce qui |
 | [`CHECKLIST-PUBBLICAZIONE.md`](CHECKLIST-PUBBLICAZIONE.md) | 🟢 LIVE | Checklist operativa per il passaggio del repository da privato a pubblico (issue #309): ordine vincolante dei passi, protezione di `main` (ruleset `main-protection`: check `quality`, squash, deploy key per il writer post-merge), primo tag di release per l'offerta AGPL §13, metadata, cosa NON fare, verifica finale e rollback |
 
 ## Design & mockup
@@ -13945,7 +13948,15 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 > completo è qui (decisione D2 del project owner, Sessione 79: la storia del protocollo
 > ha una sede, e `AGENTS.md` resta il **contratto**).
 
-*Ultimo aggiornamento: v1.49 — **il protocollo ha due lock: l'issue e la worktree** (Sessione 105, issue #319). Due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree**: doppio lavoro silenzioso, nessun errore. La diagnosi ha mostrato due cause indipendenti, e la seconda è la più interessante. La prima è la **selezione non atomica**: l'agente legge i candidati, sceglie, poi reclama — in quella finestra un altro agente fa lo stesso, e il claim risolve il conflitto *dopo* (vince l'id più basso), quando il secondo ha già la worktree. La seconda è che **il lock di ADR-0006 è sull'issue, non sul filesystem**: il path della worktree è **deterministico** (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finiscono nella **stessa directory**; il secondo scrive sopra il primo e il codice del primo finisce nel commit del secondo. `agent-claim.ps1` proseguiva sulla worktree «già presente» (non verificava **di chi** fosse) e nessun gate leggeva `agent-state.json`. Ora:
+*Ultimo aggiornamento: v1.51 — **il target della keyword di chiusura deve essere un'issue reale, distinta dalla PR stessa** (Sessione 108, issue #332). La PR #330 aveva usato `Closes #330`: il numero della PR era stato trattato come un'issue, il workflow post-merge non aveva potuto applicare la transizione remota e l'errore era rimasto nascosto. Ora:
+- **Gate pre-PR**: `scripts/check-claim-state.mjs` rifiuta il self-reference e un target che è una pull request (`scripts/test-claim-state.sh`, scenari T15 e T16)
+- **Workflow post-merge fail-closed**: `auto-status-done.yml` valida **tutti** i target prima di qualsiasi mutazione; rifiuta self-reference, pull request e target non verificabili, e non applica `status:done` a un target non valido
+- **Test funzionale**: `scripts/test-auto-status-done.mjs` esercita il workflow con self-reference, target pull request, issue reale ed errore di mutazione; il test è bloccante in CI
+- `AGENTS.md` v1.51: la regola, il gate e il comportamento post-merge sono dichiarati nel contratto; la versione è allineata in `docs/INDEX.md`
+
+*Precedente v1.50 — **il gate del claim e il DEV-LOG hanno un solo writer** (Sessione 106, issue #324): il DEV-LOG aveva due fonti di verità sullo stato di merge; `apply-merge-state.mjs` normalizza la riga `**Stato**:` e `check-merge-state.mjs` verifica il perimetro completo.
+
+*Precedente v1.49 — **il protocollo ha due lock: l'issue e la worktree** (Sessione 105, issue #319). Due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree**: doppio lavoro silenzioso, nessun errore. La diagnosi ha mostrato due cause indipendenti, e la seconda è la più interessante. La prima è la **selezione non atomica**: l'agente legge i candidati, sceglie, poi reclama — in quella finestra un altro agente fa lo stesso, e il claim risolve il conflitto *dopo* (vince l'id più basso), quando il secondo ha già la worktree. La seconda è che **il lock di ADR-0006 è sull'issue, non sul filesystem**: il path della worktree è **deterministico** (`ls-<N>-<slug>`), quindi due agenti sulla stessa story finiscono nella **stessa directory**; il secondo scrive sopra il primo e il codice del primo finisce nel commit del secondo. `agent-claim.ps1` proseguiva sulla worktree «già presente» (non verificava **di chi** fosse) e nessun gate leggeva `agent-state.json`. Ora:
 - **Secondo lock: la proprietà della worktree.** `scripts/check-worktree-ownership.mjs` confronta l'owner locale (`agent-state.json`) con l'agente del claim **vincente**: mismatch → **exit 1** (blocco), errore d'ambiente (`gh` assente, API irraggiungibile) → **exit 2** (WARN). Un gate che blocca per una disconnessione non è un gate, e un gate che non blocca sul mismatch non è un gate
 - **Il gate gira in tre punti**: `pre-commit` (INVARIANTE 4 → abort sul mismatch), gate locali di `agent-pr.ps1` (mismatch → blocco) e **CI** (lo scenario negativo, 9 assert: un gate che passa sempre non è un gate)
 - **`agent-claim.ps1 -Auto`**: ricalcola i candidati e verifica il claim winner **subito prima** di procedere (la finestra TOCTOU della selezione si chiude); l'ordine è deterministico (`docs/11-BACKLOG.md` §"Priorità di lavorazione per agenti"), la verifica finale resta atomica
@@ -14168,8 +14179,8 @@ CC BY 4.0 quando la Story 4.4 lo introduce). L'inventario geo (`city`,
 # 18 — Diario di Sviluppo (problemi, fix, lesson learned)
 
 > Status: 🟡 DRAFT
-> Versione: 2.41
-> Ultima modifica: 2026-11-09 - §58 Artwork enrichment: la Story 4.3 (cascata iTunes → Cover Art Archive → placeholder, cursore `artwork.cursor` in `settings`, CSP con `coverartarchive.org`) (Sessione 107)
+> Versione: 2.42
+> Ultima modifica: 2026-11-13 - §59 Protocollo post-merge: rifiuto dei target non-issue (Sessione 108, issue #332)
 > Scopo: registro strutturato di **problemi incontrati, fix applicati e lesson learned**
 > durante l'implementazione, così che (a) lo stesso problema non si ripresenti, (b) gli
 > agenti futuri partano già avvertiti, (c) il Boss possa vedere a colpo d'occhio dove
@@ -15797,8 +15808,28 @@ La seconda lezione è sul **cascata delle fonti**: una fonte che il progetto non
 
 ---
 
+## 59. Issue #332 — Protocollo post-merge: rifiuto dei target non-issue (Sessione 108)
+
+**Branch**: `fix/332-fix-protocol-rifiutare-self-reference-cl`
+**Issue di tracking**: **#332**
+**Data**: 2026-11-13
+**Stato**: 🟡 in corso
+
+| # | Tipo | Sintomo | Causa | Fix / Prevenzione | Rif. |
+|---|------|---------|-------|-------------------|------|
+| 108-1 | P | La PR #330 usava `Closes #330`: il numero della PR era trattato come un'issue dal workflow post-merge, che non poteva applicare la transizione remota; l'errore era nascosto dietro un warning | La validazione del target controllava solo che il numero esistesse su GitHub, senza distinguere issue e pull request né verificare che coincidesse con la PR corrente | Il gate pre-PR rifiuta il self-reference e i target pull request; il workflow post-merge ripete il controllo prima di ogni mutazione e fallisce in modo osservabile | `scripts/check-claim-state.mjs` · `.github/workflows/auto-status-done.yml` |
+| 108-2 | P | Un errore durante l'applicazione delle label o del commento `release:` lasciava il workflow verde | Gli errori operativi erano convertiti in `core.warning`, quindi il job terminava con exit 0 | `core.setFailed` per ogni errore di mutazione; il fallimento è osservabile e il target non valido non viene mutato | `.github/workflows/auto-status-done.yml` |
+| 108-3 | L | Il workflow poteva validare e mutare target diversi in sequenza, lasciando transizioni parziali | La validazione e la mutazione erano interleavute per singolo target | Preflight di tutti i target prima della prima mutazione; `status:done` viene applicata prima della rimozione delle label obsolete | `.github/workflows/auto-status-done.yml` · `scripts/test-auto-status-done.mjs` |
+
+**Lesson learned**: una validazione che dimostra soltanto che un oggetto esiste non dimostra che sia il tipo di oggetto che il protocollo richiede. Issue e pull request condividono lo stesso namespace numerico e la stessa API: il numero da solo non può autorizzare una transizione di stato. Il target della keyword di chiusura è un contratto con tre casi espliciti — issue reale, pull request, self-reference — e le transizioni devono essere autorizzate solo dal primo.
+
+**Verifica**: `node scripts/test-auto-status-done.mjs` → 4 scenari, 0 falliti; `bash scripts/test-claim-state.sh` → 16 scenari, 0 falliti.
+
+---
+
 | Versione | Data | Modifiche |
 |----------|------|-----------|
+| 2.42 | 2026-11-13 (issue #332) | **§59 Sessione 108 — Protocollo post-merge: rifiuto dei target non-issue**: la PR #330 usava `Closes #330`; il numero della PR era trattato come un'issue e l'errore remoto era nascosto dietro un warning. `scripts/check-claim-state.mjs` rifiuta ora il self-reference e i target pull request (T15/T16); `auto-status-done.yml` valida tutti i target prima delle mutazioni, rifiuta target non verificabili e usa `core.setFailed` per ogni errore; `scripts/test-auto-status-done.mjs` copre self-reference, target PR, issue reale ed errore di mutazione ed è bloccante in CI. `AGENTS.md` v1.51, `docs/INDEX.md` allineata, `docs/state/sessions/108-protocol-post-merge-target-non-issue.md` creata |
 | 2.41 | 2026-11-09 (issue #242) | **§58 Sessione 107 — Story 4.3 «Artwork enrichment»**: la story era **mergata** (PR #326, merge commit `c277aba`) senza che nessuno dei documenti che ne dichiarano lo stato fosse allineato — frontmatter della story con `merged_commit`/`merged_date` **vuoti**, body con «PR #XXX merged» e una **Sessione 107 inesistente**, sezione legacy di `11-BACKLOG.md` ancora «👀 IN REVIEW», `02-DATA-SCHEMA.md` §11 con la cascata Spotify-primo. Chiusura del drift: frontmatter story allineato al merge reale (`pr: 326`), `docs/state/sessions/107-artwork-enrichment.md` creato e registrato in `scripts/generate-bundle.ps1` `$files`, entry §58 con tabella P/F/L, sezioni legacy allineate (`11-BACKLOG.md` v1.6.38, `02-DATA-SCHEMA.md` v1.8 §11, `05-ARCHITECTURE.md` v1.6 §6, `docs/INDEX.md`). Decisioni ratificate richiamate: **D-24.2** (nessun ramo Spotify Web API: la cascata è iTunes → Cover Art Archive → placeholder), **D-24.3** (nessuna migrazione Dexie: il tracciato sta in un cursore `artwork.cursor` in `settings`), **D-24.4/D-24.6** (URL iTunes 600, si salva l'URL e non i byte) |
 | 2.40 | 2026-11-06 (issue #324) | **§57 Sessione 106 — DEV-LOG stato merge: una regola, un gate, un writer**: il DEV-LOG aveva **due fonti di verità** sullo stato di merge (frontmatter sessioni + riga `**Stato**:` entry); 34 entry dichiaravano `🟡 in corso` / `✅ fatto` per PR già mergiate. Fix: `apply-merge-state.mjs` normalizza la riga `**Stato**:` in forma canonica `✅ **MERGED** (PR #N, merge commit \`sha7\`)` per la sessione mergiata; `check-merge-state.mjs` guadagna il perimetro `docs/18-DEV-LOG.md` e verifica marker ⇔ stato reale + citazione PR+sha; `--repair-devlog` allinea 37 entry storiche. Correzione §38 (Issue #216): sessione 75 / PR #230 / sha `4e8cd4b`; riga changelog 2.26 corretta a "Sessione 75"; duplicato "2.26" per Issue #218 rinumerato a "2.27". `AGENTS.md` v1.50 (tabella regola ⟺ gate + DEV-LOG, checklist merge aggiornata); `docs/INDEX.md` v1.50; `docs/12-DEVOPS.md` gate catalog + riga 42; `docs/state/sessions/106-devlog-merge-state.md` nuovo. Test: 24/24 pass. |
 | 2.39 | 2026-11-05 (issue #319) | **§56 Sessione 105 — il protocollo ha due lock: l'issue e la worktree**: due agenti hanno iniziato la **stessa issue (#240)** nella **stessa worktree** (doppio lavoro silenzioso, nessun errore). Causa: il path della worktree è **deterministico** (`ls-<N>-<slug>`) e il lock di ADR-0006 è **sull'issue**, non sul filesystem; `agent-claim.ps1` proseguiva sulla worktree «già presente» senza verificare **di chi** fosse, e nessun gate leggeva `agent-state.json`. Aggiunti: **secondo lock** (`scripts/check-worktree-ownership.mjs`: owner locale = claim vincente, mismatch → exit 1, errore d'ambiente → exit 2) con gate in `pre-commit` (INVARIANTE 4), nei gate locali di `agent-pr.ps1` e in CI (9 scenari); **arbitraggio `-Auto`** in `agent-claim.ps1` (ricalcolo dei candidati + verifica atomica del claim winner, nell'ordine del backlog) e **exit 6** (worktree di un altro agente) con procedura codificata per l'exit 3 (issue già in carico); **C6** di `check-claim-state.mjs` (l'`agent-id` dichiarato nel body della PR deve coincidere con il claimante); scrittura **atomica** di `agent-state.json`; deprecazione del flusso manuale `setup-worktree.ps1` + `gh issue edit`/`comment`. `AGENTS.md` v1.49 (2 righe nella tabella regola ⟺ gate, Fase 0 di arbitraggio, codici di uscita, session-start checklist a 7 check) |
@@ -24916,6 +24947,48 @@ Il percorso dell'app è completo end-to-end (EPIC 3: 5/5) e l'**EPIC 2** ha cons
 ---
 
 **Claim**: `kilo-HP-EliteBook-475468101` (UTC 2026-11-09T16:18:38Z)
+
+
+
+===== FILE: docs/state/sessions/108-protocol-post-merge-target-non-issue.md =====
+
+---
+number: 108
+title: "Protocollo post-merge: rifiuto dei target non-issue"
+date: 2026-11-13
+state: 🟡
+merged: false
+branch: fix/332-fix-protocol-rifiutare-self-reference-cl
+pr: 333
+claim: kilo-HP-EliteBook-a7c9
+tags: [devops, protocol, ci, testing]
+---
+
+# Sessione 108 — Protocollo post-merge: rifiuto dei target non-issue
+
+> **Issue di tracking**: #332
+> **Branch**: `fix/332-fix-protocol-rifiutare-self-reference-cl`
+
+## Sintesi
+
+Il workflow `auto-status-done` validava il numero estratto dalla keyword di chiusura solo come issue GitHub, senza distinguerlo dalla pull request corrente e senza verificare che il target fosse realmente un'issue. Una keyword come `Closes #330` nella PR #330 produceva quindi una transizione locale sul numero della PR stessa, mentre il fallimento remoto restava nascosto.
+
+La correzione rende il contratto esplicito e fail-closed: il gate pre-PR rifiuta il self-reference e un target che è una pull request; il workflow post-merge ripete la validazione prima di ogni mutazione, fallisce in modo osservabile e non applica `status:done` a target non validi.
+
+## Deliverable
+
+- `scripts/check-claim-state.mjs`: rifiuto del self-reference e dei target pull request.
+- `scripts/test-claim-state.sh`: scenari T15 e T16.
+- `.github/workflows/auto-status-done.yml`: preflight atomico dei target, mutazioni solo dopo validazione completa, errori fail-closed.
+- `scripts/test-auto-status-done.mjs`: test funzionale del workflow con self-reference, target pull request, issue reale ed errore di mutazione.
+- `.github/workflows/ci.yml`: test del workflow aggiunto al gate di protocollo.
+- `AGENTS.md` v1.51: regola, gate e comportamento post-merge espliciti.
+
+## Analisi di avanzamento
+
+Il protocollo ora distingue formalmente tre casi: issue reale, pull request e self-reference. Il comportamento è verificato sia prima dell'apertura della PR sia dopo il merge, coprendo il caso scoperto sulla PR #330 e impedendo transizioni parziali su target non-issue.
+
+**Claim**: `kilo-HP-EliteBook-a7c9` (UTC 2026-11-13T10:19:44Z)
 
 
 
@@ -35515,7 +35588,7 @@ Ogni story deve avere label GitHub:
 
 # 12 — DevOps, Deployment & Security
 
-> Status: 🟡 DRAFT · Versione 1.7 · Sessione 78 (2026-10-31) · baseline PowerShell 7 (`pwsh`) + rimozione worktree long-path-safe
+> Status: 🟡 DRAFT · Versione 1.9 · Sessione 108 (2026-11-13) · baseline PowerShell 7 (`pwsh`) + rimozione worktree long-path-safe
 > Vincolante per: configurazione CI/CD, Docker, hosting, security headers
 
 ---
@@ -36407,14 +36480,20 @@ bash scripts/test-workflow-permission-scopes.sh          # scenario negativo (ga
 > La tabella qui sotto è l'elenco autorevole dei gate, riorganizzati per job. §9.13 ha l'audit
 > temporale; **§9.14** ha le misure di prestazione prima/dopo.
 >
+> **Sessione 108 (issue #332)**: il gate «coerenza del claim» copre ora **16 scenari**
+> (`test-claim-state.sh`): il self-reference e i target pull request sono rifiutati. Il
+> workflow post-merge ha un test funzionale bloccante (`test-auto-status-done.mjs`) che
+> dimostra il comportamento fail-closed prima delle mutazioni. Le righe sono ora **45**
+> (44 gate + l'agregatore `quality`); il **numero di job non cambia** (15).
+>
 > **Sessione 105 (issue #319)**: il catalogo era indietro di **2 step** — i due step del gate
 > «coerenza del claim» (`check-claim-state.mjs` + `test-claim-state.sh`, Sessione 81) non
 > avevano una riga, e il nuovo step del gate «proprietà della worktree»
-> (`test-worktree-ownership.sh`, issue #319) si aggiunge a quelli. Ora le righe sono **44**
-> (43 gate + l'agregatore `quality`). Il **numero di job non cambia** (15): i tre step sono
-> dentro `gates-protocol`, che già gira su `pull_request`. Il gate di proprietà della worktree
-> è **locale** (pre-commit hook + `agent-pr.ps1`): in CI si esegue il suo **scenario negativo**,
-> che dimostra che fallisce quando deve (lesson 43-1: un gate che passa sempre non è un gate).
+> (`test-worktree-ownership.sh`, issue #319) si aggiunge a quelli. Le righe erano **44**
+> (43 gate + l'agregatore `quality`). I tre step sono dentro `gates-protocol`, che già gira
+> su `pull_request`. Il gate di proprietà della worktree è **locale** (pre-commit hook +
+> `agent-pr.ps1`): in CI si esegue il suo **scenario negativo**, che dimostra che fallisce
+> quando deve (lesson 43-1: un gate che passa sempre non è un gate).
 
 Il job `quality` è il **check aggregatore**: fallisce in modo esplicito se uno
 qualunque dei job paralleli è fallito, annullato o saltato. È il check che la branch
@@ -36467,8 +36546,9 @@ protection può interpretare un check saltato come successo.
 | 41 | `gates-docs` | `Gate "privacy dei fixture" fail-closed` (`test-fixtures-privacy-gate.mjs`, 6 scenari) | solo PR | sì | **#309** |
 | 42 | `gates-protocol` | `DEV-LOG stato merge` (`check-merge-state.mjs` perimetro `docs/18-DEV-LOG.md`) | solo PR | sì | **#324** |
 | 42 | `gates-protocol` | `Coerenza claim/issue/branch/PR` (`check-claim-state.mjs`) | solo PR | sì | **#256** |
-| 43 | `gates-protocol` | `Gate "coerenza del claim" fail-closed` (`test-claim-state.sh`, 14 scenari) | solo PR | sì | **#256** |
+| 43 | `gates-protocol` | `Gate "coerenza del claim" fail-closed` (`test-claim-state.sh`, 16 scenari) | solo PR | sì | **#256** |
 | 44 | `gates-protocol` | `Gate "proprieta' della worktree" fail-closed` (`test-worktree-ownership.sh`, 9 scenari) | solo PR | sì | **#319** |
+| 45 | `gates-protocol` | `Auto-statusdone rifiuta target non-issue` (`test-auto-status-done.mjs`, 4 scenari) | solo PR | sì | **#332** |
 
 > **Il gate "sintassi dei workflow"** (Sessione 88, issue #279) chiude una classe di fallimento
 > che il lint non copriva: uno step che dichiara `shell: pwsh` ma contiene **sintassi bash**
@@ -37111,6 +37191,7 @@ commit siano separati e che il commit del bundle contenga solo il bundle).
 | 1.6 | Sessione 75 (2026-10-31, issue #216) | **§9.8h indicatore di avanzamento automatico** (nuova): il blocco `AGGREGATE-PROGRESS-*` (in `README.md` e `docs/INDEX.md`) rende la percentuale di implementazione, il conteggio `X/Y`, gli step rimanenti, la tabella per EPIC, i **gate di testabilità** e l'analisi della sessione. Il denominatore è il **catalogo del backlog** (28 story), non i soli state file (20): il secondo calcolo darebbe 90% con 8 story mai scritte. Percentuale pesata per effort (S=1, M=2, L=3, XL=4). **Fail-closed**: uno state file che il backlog non dichiara ⇒ exit 2 con il path da riallineare, **prima** di scrivere qualsiasi blocco. Il blocco dipende dal backlog ⇒ `docs/11-BACKLOG.md` aggiunto ai `paths:` di `auto-state-aggregate.yml`, e il **sesto** sub-gate di `scripts/validate-workflows.mjs` confronta i `paths:` dichiarati con gli input del blocco (senza: l'indicatore resterebbe fermo con un denominatore vecchio, in silenzio). Test: `test-aggregate-determinism.sh` **T12/T12b/T13/T14** (numeri, analisi resa, fail-closed, idempotenza + scenario negativo sui trigger), 53 assert in tutto. Modalità read-only `pwsh scripts/aggregate-state.ps1 -Progress` (`pnpm run progress`). La sessione è stata rinumerata da 71 a **75** (nel frattempo `main` aveva preso la 71, la 72, la 73 e la 74): la numerazione delle sessioni è univoca (issue #105). |
 | 1.7 | Sessione 78 (2026-10-31) | **§9.8i rimozione worktree long-path-safe nella procedura post-merge** (nuova): `git worktree remove --force` cancellava la worktree senza il prefisso `\\?\`, quindi falliva con «Filename too long» / «Result too large» quando la worktree conteneva `node_modules` con path > MAX_PATH — e il rimedio manuale (`rd /s /q "\\?\"`) era finito nel DEV-LOG di **sette** sessioni consecutive. Fix su tre livelli: **L1** `git -c core.longpaths=true worktree remove --force` (la causa radice), **L2** `Remove-Item -Recurse -Force` (PowerShell 7 è long-path-aware e non segue le junction), **L3** `cmd /c rd /s /q "\\?\"` + `git worktree prune` (rete per Windows PowerShell 5.1). Guardie: il fallback manuale è consentito solo su una directory che è davvero una worktree di questo repo (working copy principale e antenati mai toccati → exit 16) e `git status` fallito = WIP sconosciuto = stop (exit 10). Test: `test-post-merge.sh` **T10..T14** (47 assert in tutto), con lo **shim di `git`** che rende deterministico il caso del fallback. **§9.10**: il gate `gates-scripts` passa da 29 a 47 assert. |
 | 1.8 | Sessione 100 (2026-11-04, issue #306) | **§9.15 parita' fra i gate locali e i gate della CI** (nuova): `agent-pr.ps1` esegue i gate che la CI esegue (Conventional Commits sul range + gate dei workflow) prima di aprire la PR; `setup-worktree.ps1` installa le dipendenze nella worktree (senza `node_modules` l'hook `commit-msg` saltava commitlint in silenzio); `post-merge.ps1` rimuove `node_modules` prima della worktree (L0) e gestisce il residuo post-«Result too large» (L4) |
+| 1.9 | Sessione 108 (2026-11-13, issue #332) | **§9.10 gate del protocollo post-merge**: il target della keyword di chiusura deve essere un'issue reale e distinta dalla PR stessa. `check-claim-state.mjs` rifiuta il self-reference e i target pull request; `test-claim-state.sh` passa da 14 a **16 scenari**; il nuovo `test-auto-status-done.mjs` esercita il workflow post-merge (4 scenari) ed e' bloccante in CI. Le righe del catalogo sono **45** (44 gate + aggregatore `quality`), i job restano **15** |
 
 
 
@@ -54999,6 +55080,11 @@ if (branchMatch) {
 }
 
 if (issueNumber !== null) {
+  if (issueNumber === Number(prNumber)) {
+    fail(
+      `C1: la keyword di chiusura punta alla PR #${prNumber} stessa, non a un'issue reale`,
+    );
+  }
   if (naked.length !== 1) {
     fail(
       `C1: la keyword di chiusura deve comparire UNA volta come riga nuda nella branch ${branch} (trovate ${naked.length})`,
@@ -55038,11 +55124,14 @@ if (branch.startsWith('docs/')) {
 if (issueNumber !== null) {
   const issue = issueFile
     ? readJsonFile(issueFile, 'issue')
-    : ghJson(['issue', 'view', String(issueNumber), '--json', 'state,labels']);
+    : ghJson(['api', `repos/{owner}/{repo}/issues/${issueNumber}`]);
   const labels = (issue.labels || []).map((l) => l.name);
   const inReview = labels.includes('status:in-review');
   const inProgress = labels.includes('in-progress');
-  if (issue.state !== 'OPEN') {
+  const issueState = String(issue.state || '').toUpperCase();
+  if (issue.pull_request) {
+    fail(`C2: #${issueNumber} e' una pull request, non un'issue reale`);
+  } else if (issueState !== 'OPEN') {
     fail(`C2: l'issue #${issueNumber} non e' aperta (stato: ${issue.state})`);
   } else if (!inReview && !inProgress) {
     fail(
@@ -55142,11 +55231,12 @@ FAIL=0
 # scenario <id> <descrizione> <expected exit> <pr json> <issue json> <comments json>
 scenario() {
   local id="$1" desc="$2" expected_exit="$3"
+  local pr_num="${7:-1}"
   printf '%s' "$4" > "$WORK/pr.json"
   printf '%s' "$5" > "$WORK/issue.json"
   printf '%s' "$6" > "$WORK/comments.json"
 
-  node "$GATE" --pr 1 --pr-json "$WORK/pr.json" --issue-json "$WORK/issue.json" \
+  node "$GATE" --pr "$pr_num" --pr-json "$WORK/pr.json" --issue-json "$WORK/issue.json" \
     --comments-json "$WORK/comments.json" > "$WORK/out.txt" 2>&1
   local actual_exit=$?
 
@@ -55245,6 +55335,17 @@ scenario "T14" "nessun agent-id nel body (warn, non fail)" "0" \
   '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
   "$ISSUE_OK" "$COMMENTS_OK"
 
+# T15: la keyword punta alla PR stessa
+scenario "T15" "self-reference alla PR" "1" \
+  '{"number":7,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  "$ISSUE_OK" "$COMMENTS_OK" "7"
+
+# T16: il numero referenziato esiste ma e' una pull request
+scenario "T16" "target della keyword e una pull request" "1" \
+  '{"number":1,"state":"OPEN","headRefName":"feat/7-coerenza","body":"'"$PR_BODY_OK"'","files":[{"path":"scripts/x.mjs"}]}' \
+  '{"state":"OPEN","labels":[{"name":"status:in-review"}],"pull_request":{"url":"https://api.github.com/repos/amedeo82/Life-Soundtrack/pulls/7"}}' \
+  "$COMMENTS_OK"
+
 echo "---"
 echo "Pass: $PASS   Fail: $FAIL"
 
@@ -55255,6 +55356,125 @@ else
   echo "FAILURES"
   exit 1
 fi
+
+
+
+===== FILE: scripts/test-auto-status-done.mjs =====
+
+#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import assert from 'node:assert/strict';
+
+const root = join(import.meta.dirname, '..');
+const workflow = readFileSync(join(root, '.github/workflows/auto-status-done.yml'), 'utf8');
+const lines = workflow.split('\n');
+const scriptStart = lines.findIndex((line) => /^\s*script:\s*\|\s*$/.test(line));
+assert.notEqual(scriptStart, -1);
+const baseIndent = lines[scriptStart].match(/^\s*/)[0].length;
+const body = [];
+for (let i = scriptStart + 1; i < lines.length; i++) {
+  const indent = lines[i].match(/^\s*/)[0].length;
+  if (lines[i].trim() && indent <= baseIndent) break;
+  body.push(lines[i].slice(baseIndent + 2));
+}
+const source = body.join('\n');
+const run = new Function('github', 'context', 'core', `return (async () => {\n${source}\n})();`);
+
+function harness({ prNumber, body, target, mutationError }) {
+  const state = { failures: [], added: [], removed: [], comments: [] };
+  const core = {
+    info() {},
+    warning() {},
+    setFailed(message) {
+      state.failures.push(message);
+    },
+  };
+  const context = {
+    repo: { owner: 'amedeo82', repo: 'Life-Soundtrack' },
+    payload: {
+      pull_request: {
+        number: prNumber,
+        body,
+        merge_commit_sha: 'abc123',
+        merged_at: '2026-11-13T10:19:44Z',
+      },
+    },
+  };
+  const github = {
+    paginate: async () => [{ id: 1, body: 'claim: kilo-test (UTC 2026-11-13T10:00:00Z)' }],
+    rest: {
+      issues: {
+        get: async () => ({ data: target }),
+        addLabels: async (input) => {
+          if (mutationError) throw mutationError;
+          state.added.push(input);
+        },
+        removeLabel: async (input) => {
+          state.removed.push(input);
+        },
+        createComment: async (input) => {
+          state.comments.push(input);
+        },
+        listComments: async () => [],
+      },
+    },
+  };
+  return { state, execute: () => run(github, context, core) };
+}
+
+{
+  const h = harness({
+    prNumber: 330,
+    body: 'Closes #330',
+    target: { number: 330, state: 'open' },
+  });
+  await h.execute();
+  assert.equal(h.state.failures.length, 1);
+  assert.match(h.state.failures[0], /pull request itself/);
+  assert.equal(h.state.added.length, 0);
+  assert.equal(h.state.removed.length, 0);
+}
+
+{
+  const h = harness({
+    prNumber: 331,
+    body: 'Closes #330',
+    target: { number: 330, state: 'open', pull_request: { url: 'https://api.github.com/pulls/330' } },
+  });
+  await h.execute();
+  assert.equal(h.state.failures.length, 1);
+  assert.match(h.state.failures[0], /is a pull request/);
+  assert.equal(h.state.added.length, 0);
+  assert.equal(h.state.removed.length, 0);
+}
+
+{
+  const h = harness({
+    prNumber: 331,
+    body: 'Closes #330',
+    target: { number: 330, state: 'open' },
+  });
+  await h.execute();
+  assert.equal(h.state.failures.length, 0);
+  assert.equal(h.state.added.length, 1);
+  assert.equal(h.state.removed.length, 3);
+  assert.equal(h.state.comments.length, 1);
+}
+
+{
+  const h = harness({
+    prNumber: 331,
+    body: 'Closes #330',
+    target: { number: 330, state: 'open' },
+    mutationError: new Error('permission denied'),
+  });
+  await h.execute();
+  assert.equal(h.state.failures.length, 1);
+  assert.match(h.state.failures[0], /permission denied/);
+}
+
+console.log('ALL PASS: auto-status-done rejects PR targets and fails closed');
 
 
 
@@ -56867,6 +57087,9 @@ jobs:
 
       - name: Gate "coerenza del claim" fail-closed (issue #256)
         run: bash scripts/test-claim-state.sh
+
+      - name: Auto-statusdone rifiuta target non-issue (issue #332)
+        run: node scripts/test-auto-status-done.mjs
 
       # Issue #319: il lock di ADR-0006 e' sull'issue, non sulla directory di
       # lavoro: il path della worktree e' deterministico (`ls-<N>-<slug>`), quindi
