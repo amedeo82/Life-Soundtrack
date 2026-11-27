@@ -1,7 +1,7 @@
 # BUNDLE CONTENUTO
 
 > Generato automaticamente da scripts/generate-bundle.ps1
-> Data: 2026-11-27 09:46
+> Data: 2026-11-27 09:55
 > Totale file: 206
 
 <!-- AGGREGATE-BUNDLE-INVENTORY-START -->
@@ -24959,7 +24959,7 @@ date: 2026-11-13
 state: 🟡
 merged: false
 branch: fix/332-fix-protocol-rifiutare-self-reference-cl
-pr: 0
+pr: 333
 claim: kilo-HP-EliteBook-a7c9
 tags: [devops, protocol, ci, testing]
 ---
